@@ -348,7 +348,15 @@ jobs:
           windows-compiler: mingw
           windows-environment: msys2
 
+      - name: Restore pinned native libraries
+        id: windows-native-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .native
+          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v1
+
       - name: Build pinned native libraries
+        if: steps.windows-native-cache.outputs.cache-hit != 'true'
         shell: msys2 {0}
         run: |
           set -euo pipefail
@@ -397,6 +405,13 @@ jobs:
           cmake --build "$runner_temp/flint-build" --parallel 2
           cmake --install "$runner_temp/flint-build"
 
+      - name: Save pinned native libraries
+        if: steps.windows-native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: .native
+          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v1
+
       - name: Expose native runtime
         shell: pwsh
         run: |
@@ -432,7 +447,12 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           Set-Location $env:GITHUB_WORKSPACE
           $Native = $env:NATIVE_PREFIX.Replace('\', '/')
-          $env:FLEXLINKFLAGS = "-L$Native/lib"
+          $Flint = "$Native/lib/libflint.a"
+          $Mpfr = "$Native/lib/libmpfr.a"
+          $Gmp = "$Native/lib/libgmp.a"
+          $env:FLEXLINKFLAGS = "-v -v -L$Native/lib -defaultlib $Flint -defaultlib $Mpfr -defaultlib $Gmp"
+          opam exec -- dune build src/native/centl_arb.cmxa
+          opam exec -- ocamlobjinfo .\_build\default\src\native\centl_arb.cmxa
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
           $Version = $Reported -replace '^centl ', ''
