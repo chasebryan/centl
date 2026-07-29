@@ -110,9 +110,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          tag_target=$(gh api \
+            "repos/$GITHUB_REPOSITORY/commits/$GITHUB_REF_NAME" --jq '.sha')
+          test "$tag_target" = "$GITHUB_SHA"
           gh release create "$GITHUB_REF_NAME" \
             dist/centl-linux-x86_64.tar.gz \
             dist/centl-linux-x86_64.tar.gz.sha256 \
             --generate-notes \
-            --title "CENTL ${{ steps.package.outputs.version }}" \
-            --verify-tag
+            --title "CENTL ${{ steps.package.outputs.version }}"
