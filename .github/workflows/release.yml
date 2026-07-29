@@ -410,7 +410,6 @@ jobs:
               throw "missing Windows static library: $ArchivePath"
             }
           }
-          "CENTL_LIBRARY_DIRECTORY=-L$Native/lib" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           "CENTL_FLINT_LIBRARY=-l:libflint.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           "CENTL_MPFR_LIBRARY=-l:libmpfr.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           "CENTL_GMP_LIBRARY=-l:libgmp.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
@@ -432,6 +431,8 @@ jobs:
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $true
           Set-Location $env:GITHUB_WORKSPACE
+          $Native = $env:NATIVE_PREFIX.Replace('\', '/')
+          $env:FLEXLINKFLAGS = "-L$Native/lib"
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
           $Version = $Reported -replace '^centl ', ''
