@@ -1,3 +1,5 @@
+#define CAML_NAME_SPACE
+
 #include <limits.h>
 
 #include <caml/alloc.h>
