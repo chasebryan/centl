@@ -32,6 +32,15 @@ Conditional symbolic results retain machine-readable conditions:
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
 `greater_than`, and `greater_or_equal`.
 
+A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
+`dyadic` is the canonical enclosure: each endpoint is its signed mantissa times
+two to `binary_exponent`. `decimal` is an outward-rounded view, and `precision`
+records the actual backend and working precision.
+
+```json
+{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}}}
+```
+
 Failures have stable codes and mathematical messages:
 
 ```json
@@ -39,8 +48,10 @@ Failures have stable codes and mathematical messages:
 ```
 
 Syntax errors also contain a zero-based byte `position`. Version 1 error codes
-are `syntax_error`, `division_by_zero`, `zero_denominator`, `invalid_request`,
-`undefined_power`, and `core_contract_violation`.
+include `syntax_error`, `division_by_zero`, `zero_denominator`,
+`invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
+`precision_limit`, `insufficient_precision`, `unsupported_approximation`,
+`backend_failure`, and `core_contract_violation`.
 
 Run persistent machine mode with:
 

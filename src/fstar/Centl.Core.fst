@@ -24,7 +24,7 @@ type expression =
   | Negate: expression -> expression
   | Binary: binary_operator -> expression -> expression -> expression
   | Power: expression -> exponent:int -> expression
-  | Function: name:string -> argument:expression -> expression
+  | Function: name:string -> arguments:list expression -> expression
   | Differentiate: expression -> variable:string -> expression
   | Substitute: expression -> variable:string -> replacement:expression -> expression
   | Derivative: expression -> variable:string -> expression
@@ -38,6 +38,34 @@ type rational = {
   numerator: int;
   denominator: int
 }
+
+type dyadic_enclosure = {
+  lower_mantissa: int;
+  upper_mantissa: int;
+  binary_exponent: int
+}
+
+let enclosure_invariant (value:dyadic_enclosure) : prop =
+  value.lower_mantissa <= value.upper_mantissa
+
+type enclosure_validation =
+  | ValidEnclosure: dyadic_enclosure -> enclosure_validation
+  | InvalidEnclosure
+
+let validate_enclosure
+    (lower_mantissa upper_mantissa binary_exponent:int)
+    (maximum_exponent:nat)
+  : Tot enclosure_validation
+=
+  if lower_mantissa <= upper_mantissa &&
+     binary_exponent >= -maximum_exponent &&
+     binary_exponent <= maximum_exponent
+  then ValidEnclosure {
+    lower_mantissa = lower_mantissa;
+    upper_mantissa = upper_mantissa;
+    binary_exponent = binary_exponent
+  }
+  else InvalidEnclosure
 
 let invariant (value:rational) : prop = value.denominator > 0
 
@@ -144,6 +172,22 @@ let make (numerator denominator:int)
     }) by (FStar.Tactics.Canon.canon ());
     result
     end
+
+type square_root_validation =
+  | ValidSquareRoot: rational -> square_root_validation
+  | InvalidSquareRoot
+
+let validate_square_root
+    (radicand_numerator radicand_denominator:int)
+    (root_numerator root_denominator:int)
+  : Tot square_root_validation
+=
+  if radicand_numerator >= 0 && radicand_denominator > 0 &&
+     root_numerator >= 0 && root_denominator > 0 &&
+     root_numerator * root_numerator * radicand_denominator =
+       radicand_numerator * root_denominator * root_denominator
+  then ValidSquareRoot (make root_numerator root_denominator)
+  else InvalidSquareRoot
 
 let negate (value:rational{invariant value})
   : Pure rational
@@ -314,9 +358,11 @@ let rec expression_is_total (term:expression) : Tot bool =
   | Binary _ left right ->
       expression_is_total left && expression_is_total right
   | Power base exponent -> exponent > 0 && expression_is_total base
-  | Function name argument ->
-      (name = "sin" || name = "cos" || name = "exp") &&
+  | Function name [argument] ->
+      (name = "sin" || name = "cos" || name = "exp" ||
+       name = "sinh" || name = "cosh" || name = "atan") &&
       expression_is_total argument
+  | Function _ _ -> false
   | Differentiate _ _ -> false
   | Substitute _ _ _ -> false
   | Derivative _ _ -> false
@@ -436,8 +482,8 @@ let rec substitute
       (substitute right variable replacement)
   | Power base exponent -> Power
       (substitute base variable replacement) exponent
-  | Function name argument -> Function name
-      (substitute argument variable replacement)
+  | Function name arguments -> Function name
+      (substitute_arguments arguments variable replacement)
   | Differentiate inner bound_variable ->
       if bound_variable = variable then term
       else Differentiate
@@ -457,6 +503,18 @@ let rec substitute
       (substitute left variable replacement)
       relation
       (substitute right variable replacement)
+
+and substitute_arguments
+    (arguments:list expression)
+    (variable:string)
+    (replacement:expression)
+  : Tot (list expression)
+=
+  match arguments with
+  | [] -> []
+  | argument :: rest ->
+      substitute argument variable replacement ::
+      substitute_arguments rest variable replacement
 
 let rec differentiate (term:expression) (variable:string) : Tot expression =
   match term with
@@ -483,23 +541,39 @@ let rec differentiate (term:expression) (variable:string) : Tot expression =
           (Literal exponent 1)
           (Power base (exponent - 1)))
         (differentiate base variable)
-  | Function name argument ->
+  | Function name [argument] ->
       let argument_derivative = differentiate argument variable in
       if name = "sin" then
-        Binary Multiply (Function "cos" argument) argument_derivative
+        Binary Multiply (Function "cos" [argument]) argument_derivative
       else if name = "cos" then
         Binary Multiply
-          (Negate (Function "sin" argument)) argument_derivative
+          (Negate (Function "sin" [argument])) argument_derivative
       else if name = "exp" then
-        Binary Multiply (Function "exp" argument) argument_derivative
+        Binary Multiply (Function "exp" [argument]) argument_derivative
       else if name = "log" then
         Binary Divide argument_derivative argument
       else if name = "sqrt" then
         Binary Divide argument_derivative
-          (Binary Multiply (Literal 2 1) (Function "sqrt" argument))
+          (Binary Multiply (Literal 2 1) (Function "sqrt" [argument]))
       else if name = "tan" then
-        Binary Divide argument_derivative (Power (Function "cos" argument) 2)
+        Binary Divide argument_derivative (Power (Function "cos" [argument]) 2)
+      else if name = "sinh" then
+        Binary Multiply (Function "cosh" [argument]) argument_derivative
+      else if name = "cosh" then
+        Binary Multiply (Function "sinh" [argument]) argument_derivative
+      else if name = "tanh" then
+        Binary Divide argument_derivative (Power (Function "cosh" [argument]) 2)
+      else if name = "asin" then
+        Binary Divide argument_derivative
+          (Function "sqrt" [Binary Subtract (Literal 1 1) (Power argument 2)])
+      else if name = "acos" then
+        Negate (Binary Divide argument_derivative
+          (Function "sqrt" [Binary Subtract (Literal 1 1) (Power argument 2)]))
+      else if name = "atan" then
+        Binary Divide argument_derivative
+          (Binary Add (Literal 1 1) (Power argument 2))
       else Derivative term variable
+  | Function _ _ -> Derivative term variable
   | Derivative _ _ -> Derivative term variable
   | Differentiate _ _ -> Derivative term variable
   | Substitute _ _ _ -> Derivative term variable
@@ -849,8 +923,8 @@ let rec simplify_assuming
       if exponent = 0 && condition_proves_nonzero simplified left relation right
       then Literal 1 1
       else Power simplified exponent
-  | Function name argument -> Function name
-      (simplify_assuming argument left relation right)
+  | Function name arguments -> Function name
+      (simplify_assuming_arguments arguments left relation right)
   | Differentiate inner variable -> Differentiate
       (simplify_assuming inner left relation right) variable
   | Substitute inner variable replacement -> Substitute
@@ -866,14 +940,183 @@ let rec simplify_assuming
       (simplify_assuming inner left relation right)
       nested_left nested_relation nested_right
 
-let rec resolve (term:expression) : Tot expression =
+and simplify_assuming_arguments
+    (arguments:list expression)
+    (left:expression)
+    (relation:relation)
+    (right:expression)
+  : Tot (list expression)
+=
+  match arguments with
+  | [] -> []
+  | argument :: rest ->
+      simplify_assuming argument left relation right ::
+      simplify_assuming_arguments rest left relation right
+
+let magnitude (value:int) : nat = if value < 0 then -value else value
+
+let rec factorial_loop (remaining accumulator:nat)
+  : Tot nat (decreases remaining)
+=
+  if remaining = 0 then accumulator
+  else factorial_loop (remaining - 1) (accumulator * remaining)
+
+let factorial_natural (value:nat) : Tot nat = factorial_loop value 1
+
+let rec choose_product
+    (next:nat)
+    (remaining:nat)
+    (divisor:pos)
+    (accumulator:nat)
+  : Tot nat (decreases remaining)
+=
+  if remaining = 0 then accumulator
+  else choose_product (next + 1) (remaining - 1) (divisor + 1)
+    (accumulator * next / divisor)
+
+let choose_natural (n k:nat) : Tot nat =
+  if k > n then 0
+  else
+    let selected = if k > n - k then n - k else k in
+    choose_product (n - selected + 1) selected 1 1
+
+let rec fibonacci_loop (remaining current next:nat)
+  : Tot nat (decreases remaining)
+=
+  if remaining = 0 then current
+  else fibonacci_loop (remaining - 1) next (current + next)
+
+let fibonacci_natural (value:nat) : Tot nat =
+  fibonacci_loop value 0 1
+
+let rec falling_product
+    (next:nat)
+    (remaining:nat{remaining <= next})
+    (accumulator:nat)
+  : Tot nat (decreases remaining)
+=
+  if remaining = 0 then accumulator
+  else falling_product (next - 1) (remaining - 1) (accumulator * next)
+
+let integer_literal (term:expression) : option int =
+  match term with
+  | Literal value 1 -> Some value
+  | Negate (Literal value 1) -> Some (-value)
+  | _ -> None
+
+let rewrite_function (name:string) (arguments:list expression) : expression =
+  match name, arguments with
+  | "sin", [Literal 0 1]
+  | "tan", [Literal 0 1]
+  | "sinh", [Literal 0 1]
+  | "tanh", [Literal 0 1]
+  | "atan", [Literal 0 1]
+  | "log", [Literal 1 1] -> Literal 0 1
+  | "cos", [Literal 0 1]
+  | "cosh", [Literal 0 1]
+  | "exp", [Literal 0 1] -> Literal 1 1
+  | "square_area", [side] -> Power side 2
+  | "rectangle_area", [width; height] -> Binary Multiply width height
+  | "rectangle_perimeter", [width; height] ->
+      Binary Multiply (Literal 2 1) (Binary Add width height)
+  | "triangle_area", [base; height] ->
+      Binary Divide (Binary Multiply base height) (Literal 2 1)
+  | "trapezoid_area", [left_base; right_base; height] ->
+      Binary Divide
+        (Binary Multiply (Binary Add left_base right_base) height)
+        (Literal 2 1)
+  | "hypot", [left; right] -> Function "sqrt"
+      [Binary Add (Power left 2) (Power right 2)]
+  | "distance", [x1; y1; x2; y2] -> Function "sqrt"
+      [Binary Add
+        (Power (Binary Subtract x2 x1) 2)
+        (Power (Binary Subtract y2 y1) 2)]
+  | "circle_area", [radius] ->
+      Binary Multiply (Symbol "pi") (Power radius 2)
+  | "circumference", [radius] ->
+      Binary Multiply (Literal 2 1)
+        (Binary Multiply (Symbol "pi") radius)
+  | "sphere_area", [radius] ->
+      Binary Multiply (Literal 4 1)
+        (Binary Multiply (Symbol "pi") (Power radius 2))
+  | "sphere_volume", [radius] ->
+      Binary Multiply (Literal 4 3)
+        (Binary Multiply (Symbol "pi") (Power radius 3))
+  | "cylinder_volume", [radius; height] ->
+      Binary Multiply
+        (Binary Multiply (Symbol "pi") (Power radius 2)) height
+  | "slope", [x1; y1; x2; y2] ->
+      Binary Divide (Binary Subtract y2 y1) (Binary Subtract x2 x1)
+  | "radians", [degrees] ->
+      Binary Multiply (Binary Divide degrees (Literal 180 1)) (Symbol "pi")
+  | "degrees", [Symbol "pi"] -> Literal 180 1
+  | "degrees", [radians] ->
+      Binary Divide (Binary Multiply radians (Literal 180 1)) (Symbol "pi")
+  | "gcd", [left; right] ->
+      begin match integer_literal left, integer_literal right with
+      | Some left_value, Some right_value ->
+          Literal (Gcd.gcd (magnitude left_value) (magnitude right_value)) 1
+      | _, _ -> Function name arguments
+      end
+  | "lcm", [left; right] ->
+      begin match integer_literal left, integer_literal right with
+      | Some left_value, Some right_value ->
+          let left_magnitude = magnitude left_value in
+          let right_magnitude = magnitude right_value in
+          if left_magnitude = 0 || right_magnitude = 0 then Literal 0 1
+          else
+            let divisor = Gcd.gcd left_magnitude right_magnitude in
+            if divisor = 0 then Function name arguments
+            else Literal ((left_magnitude / divisor) * right_magnitude) 1
+      | _, _ -> Function name arguments
+      end
+  | "factorial", [argument] ->
+      begin match integer_literal argument with
+      | Some value ->
+          if value >= 0 then Literal (factorial_natural value) 1
+          else Function name arguments
+      | None -> Function name arguments
+      end
+  | "choose", [n_argument; k_argument] ->
+      begin match integer_literal n_argument, integer_literal k_argument with
+      | Some n, Some k ->
+          if n >= 0 && k >= 0 then Literal (choose_natural n k) 1
+          else Function name arguments
+      | _, _ -> Function name arguments
+      end
+  | "permutations", [n_argument; k_argument] ->
+      begin match integer_literal n_argument, integer_literal k_argument with
+      | Some n, Some k ->
+          if n >= 0 && k >= 0 && k <= n then
+            Literal (falling_product n k 1) 1
+          else Function name arguments
+      | _, _ -> Function name arguments
+      end
+  | "fibonacci", [argument] ->
+      begin match integer_literal argument with
+      | Some value ->
+          if value >= 0 then Literal (fibonacci_natural value) 1
+          else Function name arguments
+      | None -> Function name arguments
+      end
+  | _, _ -> Function name arguments
+
+let rec resolve_arguments (arguments:list expression)
+  : Tot (list expression)
+=
+  match arguments with
+  | [] -> []
+  | argument :: rest -> resolve argument :: resolve_arguments rest
+
+and resolve (term:expression) : Tot expression =
   match term with
   | Literal _ _ -> term
   | Symbol _ -> term
   | Negate inner -> Negate (resolve inner)
   | Binary operator left right -> Binary operator (resolve left) (resolve right)
   | Power base exponent -> Power (resolve base) exponent
-  | Function name argument -> Function name (resolve argument)
+  | Function name arguments ->
+      rewrite_function name (resolve_arguments arguments)
   | Derivative inner variable -> Derivative (resolve inner) variable
   | Differentiate inner variable -> differentiate (resolve inner) variable
   | Substitute inner variable replacement -> substitute
@@ -889,7 +1132,27 @@ let rec resolve (term:expression) : Tot expression =
           resolved_left relation resolved_right)
         resolved_left relation resolved_right
 
-let rec evaluate (term:expression)
+type argument_evaluation =
+  | EvaluatedArguments: list expression -> argument_evaluation
+  | ArgumentEvaluationFailure: error -> argument_evaluation
+
+let rec evaluate_arguments (arguments:list expression)
+  : Tot argument_evaluation
+=
+  match arguments with
+  | [] -> EvaluatedArguments []
+  | argument :: rest ->
+      begin match evaluate argument with
+      | EvaluationFailure error -> ArgumentEvaluationFailure error
+      | Evaluated value ->
+          begin match evaluate_arguments rest with
+          | ArgumentEvaluationFailure error -> ArgumentEvaluationFailure error
+          | EvaluatedArguments values ->
+              EvaluatedArguments (expression_of_value value :: values)
+          end
+      end
+
+and evaluate (term:expression)
   : Tot (result:evaluation{evaluation_invariant result})
 =
   match term with
@@ -916,11 +1179,11 @@ let rec evaluate (term:expression)
       | EvaluationFailure error -> EvaluationFailure error
       | Evaluated value -> power_value value exponent
       end
-  | Function name argument ->
-      begin match evaluate argument with
-      | EvaluationFailure error -> EvaluationFailure error
-      | Evaluated value -> Evaluated (ExactSymbolic
-          (Function name (expression_of_value value)))
+  | Function name arguments ->
+      begin match evaluate_arguments arguments with
+      | ArgumentEvaluationFailure error -> EvaluationFailure error
+      | EvaluatedArguments values -> Evaluated (ExactSymbolic
+          (Function name values))
       end
   | Derivative inner variable ->
       begin match evaluate inner with

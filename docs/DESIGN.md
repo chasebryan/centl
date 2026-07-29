@@ -58,11 +58,16 @@ Proofs are shipped beside the executable definitions and erased during OCaml
 extraction. The extracted interface must accept and return simple, unrefined
 boundary types whose invariants are checked at entry.
 
-The first `0.1.0-dev` slice begins its verified boundary at the AST. Its small
+The initial slice begins its verified boundary at the AST. Its small
 OCaml parser converts source literals directly to arbitrary-precision integer
 pairs without passing through floating point. F* then evaluates and reduces the
 result. Until parsing and result construction move into F*, the parser and
 renderer remain explicit parts of the trusted boundary.
+
+The `0.4.0-dev` slice adds a native Arb boundary. The host walks the resolved
+AST, supplies exact rational inputs and a binary working precision, and receives
+exact dyadic lower and upper endpoints. The F* core checks endpoint ordering and
+the exponent budget before the host creates an outward-rounded decimal view.
 
 ### OCaml
 

@@ -1,7 +1,7 @@
 # Symbolic calculus
 
-CENTL 0.2 introduces the exact symbolic foundation for calculus. Names, integer
-powers, and unary mathematical functions are ordinary calculator expressions:
+CENTL's exact symbolic foundation makes names, integer powers, and mathematical
+functions ordinary calculator expressions:
 
 ```text
 x^2 + 2*x + 1
@@ -23,8 +23,9 @@ substitute(x^2 + 1, x = 3)
 ```
 
 The verified core currently knows exact derivative rules for integer powers,
-arithmetic, `sin`, `cos`, `tan`, `exp`, `log`, and `sqrt`. An unknown rule stays
-visible instead of being guessed:
+arithmetic, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`,
+`tanh`, `exp`, `log`, and `sqrt`. An unknown rule stays visible instead of being
+guessed:
 
 ```text
 diff(f(x), x)

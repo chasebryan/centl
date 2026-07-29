@@ -310,9 +310,26 @@ let parse source =
       in
       Ok (command, finish)
     else
-      let* argument, next = expression index in
-      let* (), finish = closing_paren next in
-      Ok (Centl_Core.Function (name, argument), finish)
+      let rec arguments values index =
+        match (current index).kind with
+        | Right_paren -> Ok (List.rev values, index + 1)
+        | _ ->
+            let* argument, next = expression index in
+            begin match (current next).kind with
+            | Comma -> arguments (argument :: values) (next + 1)
+            | Right_paren -> Ok (List.rev (argument :: values), next + 1)
+            | kind ->
+                Error
+                  {
+                    position = (current next).start;
+                    message =
+                      Printf.sprintf "expected ',' or ')', found %s"
+                        (token_name kind);
+                  }
+            end
+      in
+      let* arguments, finish = arguments [] index in
+      Ok (Centl_Core.Function (name, arguments), finish)
   and primary index =
     let token = current index in
     match token.kind with

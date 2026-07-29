@@ -22,6 +22,18 @@
   $ ../src/main.exe 'assuming(x / x, x != 0)'
   1 where x != 0
 
+  $ ../src/main.exe 'distance(0, 0, 3, 4)'
+  5
+
+  $ ../src/main.exe 'circle_area(3)'
+  9 * pi
+
+  $ ../src/main.exe 'choose(52, 5)'
+  2598960
+
+  $ ../src/main.exe 'approx(sqrt(2), 12)'
+  ≈ [1.41421356237, 1.41421356238]
+
   $ ../src/main.exe --color=always 'x + 1' | sed "s/$(printf '\033')/<ESC>/g"
   <ESC>[95mx<ESC>[0m<ESC>[93m + <ESC>[0m<ESC>[96m1<ESC>[0m
 

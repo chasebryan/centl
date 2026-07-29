@@ -12,6 +12,7 @@ first exact-calculator slice is verified and tested with these versions:
 | Dune | 3.24.1 |
 | Zarith | 1.14 |
 | Yojson | 2.2.2 |
+| FLINT / Arb | 3.0.1 |
 | Alcotest | 1.9.1 |
 | QCheck | 0.91 |
 
@@ -53,5 +54,5 @@ julia --version
 julia -e 'using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2)))'
 ```
 
-The exact F* verification and FLINT enclosure smoke tests will live in the
-repository once their source directories are created.
+`make test` verifies the F* core, builds the native FLINT/Arb binding, and runs
+exact, symbolic, rigorous-containment, CLI, JSON, and property tests.

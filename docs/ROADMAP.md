@@ -42,8 +42,12 @@ Exit condition: expressions such as `diff(x^3 + 2*x + 1, x)` and
 
 ## 3. Rigorous approximation
 
+Initial vertical slice implemented in `0.4.0-dev`.
+
 - Introduce the native binding with a deliberately small C interface.
 - Add Arb constants, square roots, and one transcendental operation.
+- Extend the same boundary to trigonometric, inverse-trigonometric, hyperbolic,
+  exponential, and logarithmic functions.
 - Transfer balls as exact dyadic components.
 - Validate backend representations in F*.
 - Implement precision escalation and explicit resource limits.
@@ -80,6 +84,8 @@ text or mistaking an approximation for an exact result.
   symbolic integration with explicit unevaluated results.
 - Add vector calculus, differential equations, transforms, probability, and
   statistics as bounded mathematical domains.
+- Grow exact geometry and concrete mathematics from the initial formula,
+  combinatorics, GCD/LCM, and Fibonacci primitives.
 - Evaluate number-theoretic operations through narrow backend modules.
 - Use Julia/Nemo to prototype and independently test each new domain.
 - Extend the exactness and approximation rules before extending syntax.
