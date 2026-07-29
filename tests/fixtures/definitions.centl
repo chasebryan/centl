@@ -1,0 +1,6 @@
+# Definitions are immutable and local to this script.
+r = 3
+circle_area(r)
+f(x) = x^2 + 1
+f(3)
+diff(f(x), x)
