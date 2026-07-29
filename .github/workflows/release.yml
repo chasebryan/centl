@@ -75,6 +75,9 @@ jobs:
       - name: Verify and package CENTL
         id: package
         run: |
+          SOURCE_DATE_EPOCH=$(git -C "$GITHUB_WORKSPACE" log -1 --format=%ct "$GITHUB_SHA")
+          test "$SOURCE_DATE_EPOCH" -gt 0
+          export SOURCE_DATE_EPOCH
           opam exec --switch=centl -- make test
           reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
           version=${reported#centl }
@@ -84,9 +87,6 @@ jobs:
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
           opam_prefix=$(opam var --switch=centl prefix)
           fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
-          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
-          test "$SOURCE_DATE_EPOCH" -gt 0
-          export SOURCE_DATE_EPOCH
           CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
           CENTL_FSTAR_LICENSE="$(dirname "$fstar")/../LICENSE" \
           CENTL_OCAML_LICENSE="$opam_prefix/.opam-switch/sources/ocaml-base-compiler.4.14.1/LICENSE" \
