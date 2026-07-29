@@ -409,6 +409,8 @@ jobs:
       - name: Install pinned OCaml tools
         shell: pwsh
         run: |
+          $env:Path = "$env:NATIVE_PREFIX\bin;C:\msys64\mingw64\bin;$env:Path"
+          Get-Command x86_64-w64-mingw32-pkgconf.exe -ErrorAction Stop | Out-Null
           opam install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
