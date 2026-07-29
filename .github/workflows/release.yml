@@ -141,7 +141,7 @@ jobs:
         run: |
           opam init --bare --disable-sandboxing
           opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
-          opam install --switch=centl \
+          opam install --switch=centl --assume-depexts \
             alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
             yojson.2.2.2 zarith.1.14
 
@@ -158,14 +158,19 @@ jobs:
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
           SOURCE_DATE_EPOCH=$(git show -s --format=%ct)
           export SOURCE_DATE_EPOCH
-          opam_prefix=$(opam var --switch=centl prefix)
+          license_sources="$RUNNER_TEMP/centl-opam-license-sources"
+          mkdir -p "$license_sources"
+          opam source --switch=centl --dir="$license_sources/ocaml" \
+            ocaml-base-compiler.4.14.1
+          opam source --switch=centl --dir="$license_sources/zarith" zarith.1.14
+          opam source --switch=centl --dir="$license_sources/yojson" yojson.2.2.2
           CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
           CENTL_GMP_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
           CENTL_MPFR_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
           CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
-          CENTL_OCAML_LICENSE="$opam_prefix/.opam-switch/sources/ocaml-base-compiler.4.14.1/LICENSE" \
-          CENTL_ZARITH_LICENSE="$opam_prefix/.opam-switch/sources/zarith.1.14/LICENSE" \
-          CENTL_YOJSON_LICENSE="$opam_prefix/.opam-switch/sources/yojson.2.2.2/LICENSE.md" \
+          CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
+          CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
+          CENTL_YOJSON_LICENSE="$license_sources/yojson/LICENSE.md" \
             scripts/package-release "$version"
           install_root=$(mktemp -d)
           sh install --archive "$PWD/dist/centl-linux-x86_64.tar.gz" \
@@ -257,7 +262,7 @@ jobs:
           DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
           C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
         run: |
-          opam install alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
+          opam install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
             yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
@@ -276,14 +281,18 @@ jobs:
           fi
           SOURCE_DATE_EPOCH=$(git show -s --format=%ct)
           export SOURCE_DATE_EPOCH
-          opam_prefix=$(opam var prefix)
+          license_sources="$RUNNER_TEMP/centl-opam-license-sources"
+          mkdir -p "$license_sources"
+          opam source --dir="$license_sources/ocaml" ocaml-base-compiler.4.14.1
+          opam source --dir="$license_sources/zarith" zarith.1.14
+          opam source --dir="$license_sources/yojson" yojson.2.2.2
           CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
           CENTL_GMP_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
           CENTL_MPFR_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
           CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
-          CENTL_OCAML_LICENSE="$opam_prefix/.opam-switch/sources/ocaml-base-compiler.4.14.1/LICENSE" \
-          CENTL_ZARITH_LICENSE="$opam_prefix/.opam-switch/sources/zarith.1.14/LICENSE" \
-          CENTL_YOJSON_LICENSE="$opam_prefix/.opam-switch/sources/yojson.2.2.2/LICENSE.md" \
+          CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
+          CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
+          CENTL_YOJSON_LICENSE="$license_sources/yojson/LICENSE.md" \
           TAR="$(brew --prefix gnu-tar)/bin/gtar" \
             scripts/package-release "$version"
           install_root=$(mktemp -d)
@@ -308,6 +317,7 @@ jobs:
       LIBRARY_PATH: ${{ github.workspace }}\.native\lib
       PKG_CONFIG_PATH: ${{ github.workspace }}\.native\lib\pkgconfig
       CENTL_RUNTIME_PATHS: ${{ github.workspace }}\.native\bin;C:\msys64\mingw64\bin
+      CFLAGS: -std=gnu17
 
     steps:
       - name: Check out source
@@ -397,7 +407,7 @@ jobs:
       - name: Install pinned OCaml tools
         shell: pwsh
         run: |
-          opam install alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
+          opam install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
         shell: pwsh
@@ -410,14 +420,21 @@ jobs:
             throw "tag $env:GITHUB_REF_NAME does not match CENTL $Version"
           }
           $env:SOURCE_DATE_EPOCH = (git show -s --format=%ct).Trim()
-          $OpamPrefix = (opam var prefix).Trim()
+          $LicenseSources = Join-Path $env:RUNNER_TEMP "centl-opam-license-sources"
+          New-Item -ItemType Directory -Path $LicenseSources -Force | Out-Null
+          $OcamlSource = Join-Path $LicenseSources "ocaml"
+          $ZarithSource = Join-Path $LicenseSources "zarith"
+          $YojsonSource = Join-Path $LicenseSources "yojson"
+          opam source --dir=$OcamlSource ocaml-base-compiler.4.14.1
+          opam source --dir=$ZarithSource zarith.1.14
+          opam source --dir=$YojsonSource yojson.2.2.2
           $env:CENTL_FLINT_LICENSE = Join-Path $env:RUNNER_TEMP "flint-$env:FLINT_VERSION\LICENSE"
           $env:CENTL_GMP_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYING.LESSERv3"
           $env:CENTL_MPFR_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING.LESSER"
           $env:CENTL_FSTAR_LICENSE = Join-Path $env:GITHUB_WORKSPACE "release-input\licenses\FSTAR"
-          $env:CENTL_OCAML_LICENSE = Join-Path $OpamPrefix ".opam-switch\sources\ocaml-base-compiler.4.14.1\LICENSE"
-          $env:CENTL_ZARITH_LICENSE = Join-Path $OpamPrefix ".opam-switch\sources\zarith.1.14\LICENSE"
-          $env:CENTL_YOJSON_LICENSE = Join-Path $OpamPrefix ".opam-switch\sources\yojson.2.2.2\LICENSE.md"
+          $env:CENTL_OCAML_LICENSE = Join-Path $OcamlSource "LICENSE"
+          $env:CENTL_ZARITH_LICENSE = Join-Path $ZarithSource "LICENSE"
+          $env:CENTL_YOJSON_LICENSE = Join-Path $YojsonSource "LICENSE.md"
           & .\scripts\package-release.ps1 $Version
           $InstallRoot = Join-Path $env:RUNNER_TEMP "centl-install-test"
           & .\install.ps1 -Archive .\dist\centl-windows-x86_64.zip `
