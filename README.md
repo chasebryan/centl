@@ -39,14 +39,15 @@ make test
 ≈ [0.49999999999999999999, 0.50000000000000000001]
 ```
 
-Run `./centl` for the calculator, `./centl --file path` for a script, or
-`./centl --json` for the machine protocol. Mathematical output is colored when
-written to a terminal; use `--color=always`, `--no-color`, or `NO_COLOR` to
-control it.
+Run `./centl` for the calculator, `./centl --syntax` for every implemented form,
+`./centl --file path` for a script, or `./centl --json` for the machine protocol.
+Mathematical output is colored when written to a terminal; use
+`--color=always`, `--no-color`, or `NO_COLOR` to control it.
 
 ## Design
 
 CENTL is in early development. See the [architecture](docs/DESIGN.md),
+[complete syntax sheet](docs/SYNTAX.md),
 [numerical contract](docs/NUMERICS.md),
 [calculus syntax](docs/CALCULUS.md),
 [algebra syntax](docs/ALGEBRA.md),

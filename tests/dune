@@ -1,5 +1,6 @@
 (test
  (name test_centl)
+ (deps ../docs/SYNTAX.md)
  (libraries centl_lib alcotest qcheck zarith yojson))
 
 (cram

@@ -9,6 +9,7 @@
   Centl_Gcd
   Centl_Core
   Centl_parser
+  Centl_syntax
   Centl_engine)
  (flags
   (:standard -w -8-27))

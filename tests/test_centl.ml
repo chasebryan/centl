@@ -330,6 +330,68 @@ let coloration () =
          \027[0m\027[95mx\027[0m\027[93m^\027[0m\027[96m2\027[0m"
         (Centl_engine.colored_text_of_value result)
 
+let contains text fragment =
+  let text_length = String.length text in
+  let fragment_length = String.length fragment in
+  let rec search offset =
+    if offset + fragment_length > text_length then false
+    else if String.sub text offset fragment_length = fragment then true
+    else search (offset + 1)
+  in
+  fragment_length = 0 || search 0
+
+let syntax_catalog () =
+  let entries =
+    Array.to_list Centl_syntax.sections
+    |> List.concat_map (fun (section : Centl_syntax.section) ->
+        Array.to_list section.entries)
+  in
+  Alcotest.(check bool) "substantial catalog" true (List.length entries >= 60);
+  let forms =
+    List.map (fun (entry : Centl_syntax.entry) -> entry.form) entries
+  in
+  let unique_forms = List.sort_uniq String.compare forms in
+  Alcotest.(check int)
+    "each form appears once" (List.length forms) (List.length unique_forms);
+  let sheet = Centl_syntax.plain_text () in
+  Alcotest.(check bool) "compact heading" true (contains sheet "CENTL syntax");
+  Alcotest.(check bool) "examples block" true (contains sheet "examples:");
+  Alcotest.(check bool) "no fixed-width table" false (contains sheet "| group");
+  Alcotest.(check bool)
+    "small output" true
+    (List.length (String.split_on_char '\n' sheet) <= 16);
+  let identifiers =
+    List.map Centl_syntax.identifier_of_form forms
+    |> List.sort_uniq String.compare
+  in
+  List.iter
+    (fun identifier ->
+      Alcotest.(check bool)
+        ("terminal sheet includes " ^ identifier)
+        true
+        (contains sheet identifier))
+    identifiers;
+  let channel = open_in "../docs/SYNTAX.md" in
+  let documentation =
+    Fun.protect
+      ~finally:(fun () -> close_in channel)
+      (fun () -> really_input_string channel (in_channel_length channel))
+  in
+  List.iter
+    (fun form ->
+      Alcotest.(check bool)
+        ("documentation includes " ^ form)
+        true
+        (contains documentation ("`" ^ form ^ "`")))
+    forms;
+  Array.iter
+    (fun (example : Centl_syntax.example) ->
+      Alcotest.(check string)
+        ("example result for " ^ example.calculation)
+        example.result
+        (value example.calculation))
+    Centl_syntax.examples
+
 let property_integer_addition () =
   let test =
     QCheck.Test.make ~count:1_000
@@ -483,5 +545,9 @@ let () =
           Alcotest.test_case "structured condition" `Quick
             conditional_json_protocol;
         ] );
-      ("presentation", [ Alcotest.test_case "coloration" `Quick coloration ]);
+      ( "presentation",
+        [
+          Alcotest.test_case "coloration" `Quick coloration;
+          Alcotest.test_case "syntax catalog" `Quick syntax_catalog;
+        ] );
     ]
