@@ -1,0 +1,26 @@
+LIBRARY dllcentl_arb_stubs.dll
+EXPORTS
+  centl_arb_of_fraction
+  centl_arb_pi
+  centl_arb_neg
+  centl_arb_abs
+  centl_arb_add
+  centl_arb_sub
+  centl_arb_mul
+  centl_arb_div
+  centl_arb_atan2
+  centl_arb_pow
+  centl_arb_sqrt
+  centl_arb_exp
+  centl_arb_log
+  centl_arb_sin
+  centl_arb_cos
+  centl_arb_tan
+  centl_arb_asin
+  centl_arb_acos
+  centl_arb_atan
+  centl_arb_sinh
+  centl_arb_cosh
+  centl_arb_tanh
+  centl_arb_endpoints
+  centl_arb_classification

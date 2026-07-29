@@ -62,7 +62,12 @@ if (-not $Objdump) {
 }
 
 $SearchDirectories = [System.Collections.Generic.List[string]]::new()
-$SearchDirectories.Add((Split-Path -Parent (Resolve-Path -LiteralPath $Binary)))
+$BinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $Binary)
+$SearchDirectories.Add($BinaryDirectory)
+$NativeStubDirectory = Join-Path $BinaryDirectory "native"
+if (Test-Path -LiteralPath $NativeStubDirectory -PathType Container) {
+    $SearchDirectories.Add((Resolve-Path -LiteralPath $NativeStubDirectory).Path)
+}
 if ($env:CENTL_RUNTIME_PATHS) {
     foreach ($Directory in $env:CENTL_RUNTIME_PATHS.Split([IO.Path]::PathSeparator)) {
         if ($Directory -and (Test-Path -LiteralPath $Directory -PathType Container)) {
