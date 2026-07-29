@@ -193,7 +193,7 @@ jobs:
             architecture: arm64
     env:
       MACOSX_DEPLOYMENT_TARGET: "13.0"
-      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
+      NATIVE_PREFIX: ${{ github.workspace }}/.native
 
     steps:
       - name: Check out source
@@ -252,20 +252,20 @@ jobs:
 
       - name: Install pinned OCaml tools
         env:
-          PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-          LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-          DYLD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-          C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+          PKG_CONFIG_PATH: ${{ github.workspace }}/.native/lib/pkgconfig
+          LIBRARY_PATH: ${{ github.workspace }}/.native/lib
+          DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
+          C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
         run: |
           opam install alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
             yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
         env:
-          PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-          LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-          DYLD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-          C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+          PKG_CONFIG_PATH: ${{ github.workspace }}/.native/lib/pkgconfig
+          LIBRARY_PATH: ${{ github.workspace }}/.native/lib
+          DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
+          C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
         run: |
           opam exec -- make native-test
           reported=$(opam exec -- _build/default/src/main.exe --version)
@@ -303,11 +303,11 @@ jobs:
     needs: verify
     runs-on: windows-2022
     env:
-      NATIVE_PREFIX: ${{ runner.temp }}\centl-native
-      C_INCLUDE_PATH: ${{ runner.temp }}\centl-native\include
-      LIBRARY_PATH: ${{ runner.temp }}\centl-native\lib
-      PKG_CONFIG_PATH: ${{ runner.temp }}\centl-native\lib\pkgconfig
-      CENTL_RUNTIME_PATHS: ${{ runner.temp }}\centl-native\bin;C:\msys64\mingw64\bin
+      NATIVE_PREFIX: ${{ github.workspace }}\.native
+      C_INCLUDE_PATH: ${{ github.workspace }}\.native\include
+      LIBRARY_PATH: ${{ github.workspace }}\.native\lib
+      PKG_CONFIG_PATH: ${{ github.workspace }}\.native\lib\pkgconfig
+      CENTL_RUNTIME_PATHS: ${{ github.workspace }}\.native\bin;C:\msys64\mingw64\bin
 
     steps:
       - name: Check out source
