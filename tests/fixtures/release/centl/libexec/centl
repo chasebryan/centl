@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ "${1:-}" = --version ]; then
+  printf 'centl 0.0.0-test\n'
+  exit 0
+fi
+printf 'centl fixture %s\n' "$*"

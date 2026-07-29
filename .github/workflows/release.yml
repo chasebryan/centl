@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  linux-x86_64:
+    runs-on: ubuntu-24.04
+    container: ubuntu:22.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      FSTAR_VERSION: "2026.07.05"
+      FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+      FLINT_VERSION: "3.0.1"
+      FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+      FLINT_PREFIX: /opt/centl-flint
+      OPAMROOT: /opt/centl-opam
+      OPAMYES: "1"
+      PKG_CONFIG_PATH: /opt/centl-flint/lib/pkgconfig
+      LIBRARY_PATH: /opt/centl-flint/lib
+      LD_LIBRARY_PATH: /opt/centl-flint/lib
+      C_INCLUDE_PATH: /opt/centl-flint/include
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install build prerequisites
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl gh git libgmp-dev libmpfr-dev \
+            libzstd1 m4 opam patch pkg-config unzip
+
+      - name: Install pinned F*
+        run: |
+          archive="$RUNNER_TEMP/fstar.tar.gz"
+          curl --fail --silent --show-error --location \
+            "https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz" \
+            --output "$archive"
+          printf '%s  %s\n' "$FSTAR_SHA256" "$archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/fstar"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/fstar"
+          fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
+          test -n "$fstar"
+          printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
+
+      - name: Build pinned FLINT
+        run: |
+          archive="$RUNNER_TEMP/flint.tar.gz"
+          curl --fail --silent --show-error --location \
+            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
+            --output "$archive"
+          printf '%s  %s\n' "$FLINT_SHA256" "$archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
+          ./configure --prefix="$FLINT_PREFIX"
+          make --jobs=2
+          make install
+
+      - name: Install pinned OCaml tools
+        run: |
+          opam init --bare --disable-sandboxing
+          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
+          opam install --switch=centl \
+            alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
+            yojson.2.2.2 zarith.1.14
+
+      - name: Verify and package CENTL
+        id: package
+        run: |
+          opam exec --switch=centl -- make test
+          reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
+          version=${reported#centl }
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            test "v$version" = "$GITHUB_REF_NAME"
+          fi
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          opam_prefix=$(opam var --switch=centl prefix)
+          fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) \
+          CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
+          CENTL_FSTAR_LICENSE="$(dirname "$fstar")/../LICENSE" \
+          CENTL_OCAML_LICENSE="$opam_prefix/.opam-switch/sources/ocaml-base-compiler.4.14.1/LICENSE" \
+          CENTL_ZARITH_LICENSE="$opam_prefix/.opam-switch/sources/zarith.1.14/LICENSE" \
+          CENTL_YOJSON_LICENSE="$opam_prefix/.opam-switch/sources/yojson.2.2.2/LICENSE.md" \
+            scripts/package-release "$version"
+
+      - name: Preserve release artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: centl-${{ steps.package.outputs.version }}-linux-x86_64
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish tagged release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/centl-linux-x86_64.tar.gz \
+            dist/centl-linux-x86_64.tar.gz.sha256 \
+            --generate-notes \
+            --title "CENTL ${{ steps.package.outputs.version }}" \
+            --verify-tag

@@ -1,0 +1,181 @@
+#!/bin/sh
+set -eu
+
+repository="chasebryan/centl"
+release_version="latest"
+archive_path=""
+prefix=${CENTL_PREFIX:-}
+
+usage() {
+  cat <<'EOF'
+Install a prebuilt CENTL release.
+
+Usage: ./install [--version VERSION] [--prefix PATH] [--archive PATH]
+
+  --version VERSION  install a specific release (default: latest)
+  --prefix PATH       install below PATH (default: ~/.local)
+  --archive PATH      install and verify a local release archive
+  --help              show this help
+EOF
+}
+
+fail() {
+  printf 'centl install: %s\n' "$1" >&2
+  exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --version)
+      [ "$#" -ge 2 ] || fail "--version needs a value"
+      release_version=$2
+      shift 2
+      ;;
+    --prefix)
+      [ "$#" -ge 2 ] || fail "--prefix needs a path"
+      prefix=$2
+      shift 2
+      ;;
+    --archive)
+      [ "$#" -ge 2 ] || fail "--archive needs a path"
+      archive_path=$2
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+[ -n "$prefix" ] || {
+  [ -n "${HOME:-}" ] || fail "HOME is not set; use --prefix PATH"
+  prefix="$HOME/.local"
+}
+[ -n "$prefix" ] || fail "the installation prefix cannot be empty"
+case "$prefix" in
+  /*) ;;
+  *) prefix="$(pwd)/$prefix" ;;
+esac
+
+case $(uname -s) in
+  Linux) platform=linux ;;
+  *) fail "prebuilt releases currently support Linux only" ;;
+esac
+
+case $(uname -m) in
+  x86_64|amd64) architecture=x86_64 ;;
+  *) fail "prebuilt releases currently support x86_64 only" ;;
+esac
+
+asset="centl-${platform}-${architecture}.tar.gz"
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-install.XXXXXXXX")
+staging=""
+cleanup() {
+  rm -rf "$temporary"
+  if [ -n "$staging" ] && [ -d "$staging" ]; then
+    rm -rf "$staging"
+  fi
+}
+trap cleanup EXIT HUP INT TERM
+
+archive="$temporary/$asset"
+checksum="$temporary/$asset.sha256"
+
+if [ -n "$archive_path" ]; then
+  [ -f "$archive_path" ] || fail "archive not found: $archive_path"
+  [ -f "$archive_path.sha256" ] ||
+    fail "checksum not found: $archive_path.sha256"
+  cp "$archive_path" "$archive"
+  cp "$archive_path.sha256" "$checksum"
+else
+  case "$release_version" in
+    latest) release_path=latest/download ;;
+    v*) release_path="download/$release_version" ;;
+    *) release_path="download/v$release_version" ;;
+  esac
+  base_url="https://github.com/$repository/releases/$release_path"
+  command -v curl >/dev/null 2>&1 || fail "curl is required to download CENTL"
+  printf 'Downloading CENTL %s for %s-%s...\n' \
+    "$release_version" "$platform" "$architecture"
+  curl --fail --silent --show-error --location \
+    "$base_url/$asset" --output "$archive"
+  curl --fail --silent --show-error --location \
+    "$base_url/$asset.sha256" --output "$checksum"
+fi
+
+expected=$(awk 'NR == 1 { print $1 }' "$checksum")
+case "$expected" in
+  *[!0-9a-fA-F]*|'') fail "the release checksum is malformed" ;;
+esac
+[ "${#expected}" -eq 64 ] || fail "the release checksum is malformed"
+expected=$(printf '%s' "$expected" | tr 'A-F' 'a-f')
+
+if command -v sha256sum >/dev/null 2>&1; then
+  actual=$(sha256sum "$archive" | awk '{ print $1 }')
+elif command -v shasum >/dev/null 2>&1; then
+  actual=$(shasum -a 256 "$archive" | awk '{ print $1 }')
+else
+  fail "sha256sum or shasum is required to verify CENTL"
+fi
+[ "$actual" = "$expected" ] || fail "release checksum verification failed"
+
+extracted="$temporary/extracted"
+mkdir "$extracted"
+tar -tzf "$archive" | while IFS= read -r member; do
+  case "$member" in
+    /*|../*|*/../*|*/..) fail "the release archive contains an unsafe path" ;;
+    centl|centl/*) ;;
+    *) fail "the release archive has an unexpected layout" ;;
+  esac
+done
+tar --no-same-owner --no-same-permissions -xzf "$archive" -C "$extracted"
+package="$extracted/centl"
+[ -x "$package/bin/centl" ] || fail "the release contains no CENTL launcher"
+[ -x "$package/libexec/centl" ] || fail "the release contains no CENTL executable"
+[ -f "$package/VERSION" ] || fail "the release contains no version metadata"
+
+version=$(sed -n '1p' "$package/VERSION")
+case "$version" in
+  ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the release version is invalid" ;;
+esac
+if [ "$release_version" != latest ]; then
+  requested=${release_version#v}
+  [ "$version" = "$requested" ] ||
+    fail "requested $requested but the archive contains $version"
+fi
+
+versions="$prefix/share/centl/versions"
+target="$versions/$version"
+bin_directory="$prefix/bin"
+command_path="$bin_directory/centl"
+
+if [ -e "$command_path" ] && [ ! -L "$command_path" ]; then
+  fail "$command_path already exists and is not a symbolic link"
+fi
+
+mkdir -p "$versions" "$bin_directory"
+if [ -e "$target" ]; then
+  fail "CENTL $version is already installed at $target"
+fi
+
+# Copy onto the destination filesystem, validate there, then activate with one
+# rename. An interrupted copy cannot become the active CENTL installation.
+staging=$(mktemp -d "$versions/.centl-$version.XXXXXXXX")
+cp -R "$package/." "$staging/"
+if ! runtime_version=$("$staging/bin/centl" --version 2>&1); then
+  fail "the CENTL executable cannot run on this system: $runtime_version"
+fi
+[ "$runtime_version" = "centl $version" ] ||
+  fail "the executable reports '$runtime_version', expected 'centl $version'"
+mv -T "$staging" "$target"
+staging=""
+ln -sfn "$target/bin/centl" "$command_path"
+
+printf 'Installed CENTL %s at %s\n' "$version" "$target"
+printf 'Command: %s\n' "$command_path"
+case ":${PATH:-}:" in
+  *":$bin_directory:"*) ;;
+  *) printf 'Add %s to PATH to run centl anywhere.\n' "$bin_directory" ;;
+esac

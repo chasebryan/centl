@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+launcher=$0
+while [ -L "$launcher" ]; do
+  launcher_directory=$(dirname -- "$launcher")
+  link=$(readlink "$launcher")
+  case "$link" in
+    /*) launcher=$link ;;
+    *) launcher="$launcher_directory/$link" ;;
+  esac
+done
+
+bin_directory=$(CDPATH= cd -- "$(dirname -- "$launcher")" && pwd)
+release_root=$(CDPATH= cd -- "$bin_directory/.." && pwd)
+library_directory="$release_root/lib"
+
+if [ -n "${LD_LIBRARY_PATH:-}" ]; then
+  LD_LIBRARY_PATH="$library_directory:$LD_LIBRARY_PATH"
+else
+  LD_LIBRARY_PATH="$library_directory"
+fi
+export LD_LIBRARY_PATH
+
+exec "$release_root/libexec/centl" "$@"

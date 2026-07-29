@@ -1,0 +1,142 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+version=${1:-}
+output_directory=${2:-"$project_root/dist"}
+binary=${CENTL_BINARY:-"$project_root/_build/default/src/main.exe"}
+
+fail() {
+  printf 'centl package: %s\n' "$1" >&2
+  exit 1
+}
+
+[ -n "$version" ] || fail "usage: scripts/package-release VERSION [OUTPUT_DIR]"
+version=${version#v}
+case "$version" in
+  ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid version: $version" ;;
+esac
+[ "$(uname -s)" = Linux ] || fail "release packaging currently supports Linux only"
+case $(uname -m) in
+  x86_64|amd64) architecture=x86_64 ;;
+  *) fail "release packaging currently supports x86_64 only" ;;
+esac
+[ -x "$binary" ] || fail "build CENTL before packaging: make build"
+
+reported_version=$("$binary" --version)
+[ "$reported_version" = "centl $version" ] ||
+  fail "binary reports '$reported_version', expected 'centl $version'"
+
+dependency_path() {
+  dependency=$1
+  path=$(ldd "$2" | awk -v dependency="$dependency" \
+    '$1 == dependency && $2 == "=>" { print $3; exit }')
+  [ -n "$path" ] && [ -f "$path" ] || fail "missing runtime library: $dependency"
+  printf '%s\n' "$path"
+}
+
+copy_license() {
+  destination=$1
+  shift
+  for source in "$@"; do
+    if [ -f "$source" ]; then
+      cp "$source" "$destination"
+      return
+    fi
+  done
+  fail "could not locate $destination"
+}
+
+if [ -n "${OPAM_SWITCH_PREFIX:-}" ]; then
+  opam_prefix=$OPAM_SWITCH_PREFIX
+elif command -v opam >/dev/null 2>&1; then
+  opam_prefix=$(opam var --switch="${CENTL_OPAM_SWITCH:-centl}" prefix)
+else
+  opam_prefix=""
+fi
+
+if command -v fstar.exe >/dev/null 2>&1; then
+  fstar_executable=$(readlink -f "$(command -v fstar.exe)")
+  fstar_license_default=$(dirname "$fstar_executable")/../LICENSE
+else
+  fstar_license_default=""
+fi
+
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-package.XXXXXXXX")
+cleanup() {
+  rm -rf "$temporary"
+}
+trap cleanup EXIT HUP INT TERM
+
+package="$temporary/centl"
+mkdir -p "$package/bin" "$package/lib" "$package/libexec" \
+  "$package/licenses"
+cp "$project_root/scripts/release-launcher" "$package/bin/centl"
+cp "$binary" "$package/libexec/centl"
+chmod 755 "$package/bin/centl" "$package/libexec/centl"
+if command -v strip >/dev/null 2>&1; then
+  strip "$package/libexec/centl"
+fi
+
+flint=$(dependency_path libflint.so.18 "$binary")
+gmp=$(dependency_path libgmp.so.10 "$binary")
+mpfr=$(dependency_path libmpfr.so.6 "$flint")
+cp -L "$flint" "$package/lib/libflint.so.18"
+cp -L "$gmp" "$package/lib/libgmp.so.10"
+cp -L "$mpfr" "$package/lib/libmpfr.so.6"
+
+cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
+copy_license "$package/licenses/FLINT" \
+  "${CENTL_FLINT_LICENSE:-}" /usr/share/doc/libflint18t64/copyright \
+  /usr/share/doc/libflint18/copyright /usr/share/doc/libflint-dev/copyright
+copy_license "$package/licenses/GMP" \
+  /usr/share/doc/libgmp10/copyright /usr/share/doc/libgmp-dev/copyright
+copy_license "$package/licenses/MPFR" \
+  /usr/share/doc/libmpfr6/copyright /usr/share/doc/libmpfr-dev/copyright
+copy_license "$package/licenses/FSTAR" \
+  "${CENTL_FSTAR_LICENSE:-}" "$fstar_license_default"
+copy_license "$package/licenses/OCAML" \
+  "${CENTL_OCAML_LICENSE:-}" \
+  "$opam_prefix/.opam-switch/sources/ocaml-base-compiler.4.14.1/LICENSE" \
+  /usr/share/doc/ocaml/copyright /usr/share/doc/ocaml-base/copyright
+copy_license "$package/licenses/ZARITH" \
+  "${CENTL_ZARITH_LICENSE:-}" \
+  "$opam_prefix/.opam-switch/sources/zarith.1.14/LICENSE" \
+  "$opam_prefix/doc/zarith/LICENSE"
+copy_license "$package/licenses/YOJSON" \
+  "${CENTL_YOJSON_LICENSE:-}" \
+  "$opam_prefix/.opam-switch/sources/yojson.2.2.2/LICENSE.md" \
+  "$opam_prefix/doc/yojson/LICENSE.md"
+
+cat > "$package/THIRD-PARTY-NOTICES" <<'EOF'
+CENTL includes or links components from F*, OCaml, Zarith, Yojson, FLINT, GMP,
+and MPFR. Their complete license notices are shipped in the licenses directory.
+Build-time-only test and compiler dependencies are not included in this archive.
+EOF
+
+printf '%s\n' "$version" > "$package/VERSION"
+cat > "$package/README" <<EOF
+CENTL $version for Linux x86_64
+
+Run bin/centl. The bundled native libraries are loaded only for CENTL.
+This build requires glibc 2.35 or newer.
+License notices are in the licenses directory.
+EOF
+
+# Normalize modes so the same inputs produce the same archive even when
+# builders use different umasks or source-file permissions.
+find "$package" -type d -exec chmod 755 {} +
+find "$package" -type f -exec chmod 644 {} +
+chmod 755 "$package/bin/centl" "$package/libexec/centl"
+
+LD_LIBRARY_PATH="$package/lib" "$package/libexec/centl" '0.1 + 0.2' \
+  | grep -qx '3/10' || fail "packaged executable failed its smoke test"
+
+mkdir -p "$output_directory"
+asset="centl-linux-$architecture.tar.gz"
+archive="$output_directory/$asset"
+epoch=${SOURCE_DATE_EPOCH:-0}
+tar --sort=name --mtime="@$epoch" --owner=0 --group=0 --numeric-owner \
+  -czf "$archive" -C "$temporary" centl
+(cd "$output_directory" && sha256sum "$asset" > "$asset.sha256")
+printf '%s\n' "$archive"
