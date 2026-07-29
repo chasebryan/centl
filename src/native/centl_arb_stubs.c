@@ -8,6 +8,10 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
+#if defined(_WIN32) && !defined(FLINT_DLL)
+#define FLINT_DLL __declspec(dllimport)
+#endif
+
 #include <flint/arb.h>
 #include <flint/fmpq.h>
 #include <flint/fmpz.h>
