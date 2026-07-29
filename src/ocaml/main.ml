@@ -1,12 +1,15 @@
 type mode = Human | Json
+type color_mode = Auto | Always | Never
 
 type command = {
   mode : mode;
+  color : color_mode;
   file : string option;
   expression_parts : string list;
 }
 
-let usage = "Usage: centl [--json] [--file PATH] [EXPRESSION]"
+let usage =
+  "Usage: centl [--json] [--color=auto|always|never] [--file PATH] [EXPRESSION]"
 
 let print_help () =
   print_endline "CENTL — a calculator first, a language when needed.";
@@ -17,7 +20,14 @@ let print_help () =
   print_endline "  centl --file sums.centl evaluate a line-oriented script";
   print_endline "  centl --json '1/3'      emit a versioned JSON result";
   print_endline "  centl --json            read JSON requests from stdin";
+  print_endline "  centl --color=always    color mathematical output";
   print_endline "  centl                   start the calculator"
+
+let parse_color_mode = function
+  | "auto" -> Ok Auto
+  | "always" -> Ok Always
+  | "never" -> Ok Never
+  | value -> Error ("unknown color mode " ^ value)
 
 let parse_arguments arguments =
   let rec loop command = function
@@ -27,9 +37,17 @@ let parse_arguments arguments =
         print_help ();
         exit 0
     | "--version" :: _ ->
-        print_endline "centl 0.1.0-dev";
+        print_endline "centl 0.2.0-dev";
         exit 0
     | "--json" :: rest -> loop { command with mode = Json } rest
+    | "--color" :: rest -> loop { command with color = Always } rest
+    | "--no-color" :: rest -> loop { command with color = Never } rest
+    | option :: rest when String.starts_with ~prefix:"--color=" option ->
+        let value = String.sub option 8 (String.length option - 8) in
+        begin match parse_color_mode value with
+        | Ok color -> loop { command with color } rest
+        | Error _ as error -> error
+        end
     | "--file" :: path :: rest ->
         begin match command.file with
         | None -> loop { command with file = Some path } rest
@@ -50,20 +68,27 @@ let parse_arguments arguments =
           { command with expression_parts = part :: command.expression_parts }
           rest
   in
-  loop { mode = Human; file = None; expression_parts = [] } arguments
+  loop
+    { mode = Human; color = Auto; file = None; expression_parts = [] }
+    arguments
 
 let print_json json =
   Yojson.Safe.to_channel stdout json;
   output_char stdout '\n';
   flush stdout
 
-let evaluate_human source =
+let ansi code text = Printf.sprintf "\027[%sm%s\027[0m" code text
+
+let evaluate_human ~color source =
   match Centl_engine.evaluate source with
   | Ok value ->
-      print_endline (Centl_engine.text_of_value value);
+      print_endline
+        (if color then Centl_engine.colored_text_of_value value
+         else Centl_engine.text_of_value value);
       true
   | Error error ->
-      prerr_endline ("error: " ^ Centl_engine.error_text error);
+      let message = "error: " ^ Centl_engine.error_text error in
+      prerr_endline (if color then ansi "91" message else message);
       false
 
 let evaluate_json source =
@@ -71,23 +96,23 @@ let evaluate_json source =
   print_json (Centl_engine.json_of_evaluation result);
   Result.is_ok result
 
-let evaluate mode source =
+let evaluate ~color mode source =
   match mode with
-  | Human -> evaluate_human source
+  | Human -> evaluate_human ~color source
   | Json -> evaluate_json source
 
 let meaningful_line line =
   let line = String.trim line in
   if line = "" || line.[0] = '#' then None else Some line
 
-let run_channel mode name channel =
+let run_channel ~color mode name channel =
   let rec lines number =
     match input_line channel with
     | line ->
         begin match meaningful_line line with
         | None -> lines (number + 1)
         | Some expression ->
-            if evaluate mode expression then lines (number + 1)
+            if evaluate ~color mode expression then lines (number + 1)
             else begin
               prerr_endline (Printf.sprintf "in %s, line %d" name number);
               false
@@ -97,17 +122,17 @@ let run_channel mode name channel =
   in
   lines 1
 
-let run_file mode path =
+let run_file ~color mode path =
   let channel = open_in path in
   Fun.protect
     ~finally:(fun () -> close_in channel)
-    (fun () -> run_channel mode path channel)
+    (fun () -> run_channel ~color mode path channel)
 
-let repl () =
-  print_endline "CENTL 0.1.0-dev — exact arithmetic";
+let repl ~color () =
+  print_endline "CENTL 0.2.0-dev — exact arithmetic and symbolic calculus";
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
-    print_string "centl> ";
+    print_string (if color then ansi "94" "centl> " else "centl> ");
     flush stdout;
     match read_line () with
     | exception End_of_file -> print_newline ()
@@ -117,10 +142,11 @@ let repl () =
         | ":quit" | ":q" -> ()
         | ":help" ->
             print_endline
-              "Enter an exact expression using +, -, *, /, and parentheses.";
+              "Enter exact arithmetic, symbolic expressions, diff(...), or \
+               substitute(...).";
             loop ()
         | expression ->
-            ignore (evaluate_human expression);
+            ignore (evaluate_human ~color expression);
             loop ()
         end
   in
@@ -157,6 +183,15 @@ let () =
       prerr_endline usage;
       exit 2
   | Ok command ->
+      let color =
+        match (command.mode, command.color) with
+        | Json, _ | Human, Never -> false
+        | Human, Always -> true
+        | Human, Auto ->
+            Unix.isatty Unix.stdout
+            && Option.is_none (Sys.getenv_opt "NO_COLOR")
+            && Sys.getenv_opt "TERM" <> Some "dumb"
+      in
       let expression = String.concat " " command.expression_parts in
       let ok =
         match (command.file, expression, command.mode) with
@@ -164,17 +199,17 @@ let () =
             prerr_endline "centl: use either --file or an expression, not both";
             false
         | Some path, _, mode ->
-            begin try run_file mode path
+            begin try run_file ~color mode path
             with Sys_error message ->
               prerr_endline ("centl: " ^ message);
               false
             end
         | None, expression, mode when expression <> "" ->
-            evaluate mode expression
+            evaluate ~color mode expression
         | None, _, Json -> run_json_stream ()
         | None, _, Human when Unix.isatty Unix.stdin ->
-            repl ();
+            repl ~color ();
             true
-        | None, _, Human -> run_channel Human "standard input" stdin
+        | None, _, Human -> run_channel ~color Human "standard input" stdin
       in
       if not ok then exit 2

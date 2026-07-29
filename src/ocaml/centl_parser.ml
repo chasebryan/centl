@@ -2,10 +2,14 @@ type error = { position : int; message : string }
 
 type token_kind =
   | Number of (Z.t * Z.t)
+  | Identifier of string
   | Plus
   | Minus
   | Star
   | Slash
+  | Caret
+  | Comma
+  | Equals
   | Left_paren
   | Right_paren
   | End
@@ -16,10 +20,14 @@ let is_digit character = character >= '0' && character <= '9'
 
 let token_name = function
   | Number _ -> "a number"
+  | Identifier name -> Printf.sprintf "identifier %S" name
   | Plus -> "'+'"
   | Minus -> "'-'"
   | Star -> "'*'"
   | Slash -> "'/'"
+  | Caret -> "'^'"
+  | Comma -> "','"
+  | Equals -> "'='"
   | Left_paren -> "'('"
   | Right_paren -> "')'"
   | End -> "the end of the expression"
@@ -38,10 +46,23 @@ let decimal_value source start integer_end fraction_start finish =
   let denominator = Z.pow (Z.of_int 10) (String.length fraction_digits) in
   (numerator, denominator)
 
+let is_identifier_start character =
+  (character >= 'a' && character <= 'z')
+  || (character >= 'A' && character <= 'Z')
+  || character = '_'
+
+let is_identifier_continue character =
+  is_identifier_start character || is_digit character
+
 let lex source =
   let length = String.length source in
   let rec digits offset =
     if offset < length && is_digit source.[offset] then digits (offset + 1)
+    else offset
+  in
+  let rec identifier offset =
+    if offset < length && is_identifier_continue source.[offset] then
+      identifier (offset + 1)
     else offset
   in
   let rec loop offset tokens =
@@ -54,6 +75,9 @@ let lex source =
       | '-' -> loop (offset + 1) ({ kind = Minus; start = offset } :: tokens)
       | '*' -> loop (offset + 1) ({ kind = Star; start = offset } :: tokens)
       | '/' -> loop (offset + 1) ({ kind = Slash; start = offset } :: tokens)
+      | '^' -> loop (offset + 1) ({ kind = Caret; start = offset } :: tokens)
+      | ',' -> loop (offset + 1) ({ kind = Comma; start = offset } :: tokens)
+      | '=' -> loop (offset + 1) ({ kind = Equals; start = offset } :: tokens)
       | '(' ->
           loop (offset + 1) ({ kind = Left_paren; start = offset } :: tokens)
       | ')' ->
@@ -80,6 +104,10 @@ let lex source =
             decimal_value source offset offset (Some fraction_start) finish
           in
           loop finish ({ kind = Number value; start = offset } :: tokens)
+      | character when is_identifier_start character ->
+          let finish = identifier (offset + 1) in
+          let name = String.sub source offset (finish - offset) in
+          loop finish ({ kind = Identifier name; start = offset } :: tokens)
       | character ->
           Error
             {
@@ -126,12 +154,121 @@ let parse source =
     | Minus ->
         let* inner, next = unary (index + 1) in
         Ok (Centl_Core.Negate inner, next)
-    | _ -> primary index
+    | _ -> power index
+  and power index =
+    let* base, next = primary index in
+    match (current next).kind with
+    | Caret ->
+        let* exponent, finish = integer_exponent (next + 1) in
+        Ok (Centl_Core.Power (base, exponent), finish)
+    | _ -> Ok (base, next)
+  and integer_exponent index =
+    let sign, index =
+      match (current index).kind with
+      | Plus -> (Z.one, index + 1)
+      | Minus -> (Z.minus_one, index + 1)
+      | _ -> (Z.one, index)
+    in
+    match (current index).kind with
+    | Number (numerator, denominator) when Z.equal denominator Z.one ->
+        Ok (Z.mul sign numerator, index + 1)
+    | Left_paren ->
+        let* exponent, next = integer_exponent (index + 1) in
+        let closing = current next in
+        if closing.kind = Right_paren then Ok (Z.mul sign exponent, next + 1)
+        else
+          Error
+            {
+              position = closing.start;
+              message =
+                Printf.sprintf "expected ')', found %s"
+                  (token_name closing.kind);
+            }
+    | token ->
+        Error
+          {
+            position = (current index).start;
+            message =
+              Printf.sprintf "expected an integer exponent, found %s"
+                (token_name token);
+          }
+  and closing_paren index =
+    let closing = current index in
+    if closing.kind = Right_paren then Ok ((), index + 1)
+    else
+      Error
+        {
+          position = closing.start;
+          message =
+            Printf.sprintf "expected ')', found %s" (token_name closing.kind);
+        }
+  and comma index =
+    let separator = current index in
+    if separator.kind = Comma then Ok (index + 1)
+    else
+      Error
+        {
+          position = separator.start;
+          message =
+            Printf.sprintf "expected ',', found %s" (token_name separator.kind);
+        }
+  and function_call name index =
+    if name = "diff" then
+      let* inner, next = expression index in
+      let* next = comma next in
+      begin match (current next).kind with
+      | Identifier variable ->
+          let* (), finish = closing_paren (next + 1) in
+          Ok (Centl_Core.Differentiate (inner, variable), finish)
+      | kind ->
+          Error
+            {
+              position = (current next).start;
+              message =
+                Printf.sprintf "expected a differentiation variable, found %s"
+                  (token_name kind);
+            }
+      end
+    else if name = "substitute" then
+      let* inner, next = expression index in
+      let* next = comma next in
+      begin match (current next).kind with
+      | Identifier variable ->
+          let equals = current (next + 1) in
+          if equals.kind <> Equals then
+            Error
+              {
+                position = equals.start;
+                message =
+                  Printf.sprintf "expected '=', found %s"
+                    (token_name equals.kind);
+              }
+          else
+            let* replacement, next = expression (next + 2) in
+            let* (), finish = closing_paren next in
+            Ok (Centl_Core.Substitute (inner, variable, replacement), finish)
+      | kind ->
+          Error
+            {
+              position = (current next).start;
+              message =
+                Printf.sprintf "expected a substitution variable, found %s"
+                  (token_name kind);
+            }
+      end
+    else
+      let* argument, next = expression index in
+      let* (), finish = closing_paren next in
+      Ok (Centl_Core.Function (name, argument), finish)
   and primary index =
     let token = current index in
     match token.kind with
     | Number (numerator, denominator) ->
         Ok (Centl_Core.Literal (numerator, denominator), index + 1)
+    | Identifier name ->
+        if (current (index + 1)).kind = Left_paren then
+          function_call name (index + 2)
+        else Ok (Centl_Core.Symbol name, index + 1)
     | Left_paren ->
         let* inner, next = expression (index + 1) in
         let closing = current next in

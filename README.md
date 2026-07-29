@@ -25,19 +25,24 @@ rigor to program.
 ```sh
 make test
 ./centl '0.1 + 0.2'
+./centl 'diff(x^3 + 2*x + 1, x)'
 ```
 
 ```text
 3/10
+3 * x^2 + 2
 ```
 
 Run `./centl` for the calculator, `./centl --file path` for a script, or
-`./centl --json` for the machine protocol.
+`./centl --json` for the machine protocol. Mathematical output is colored when
+written to a terminal; use `--color=always`, `--no-color`, or `NO_COLOR` to
+control it.
 
 ## Design
 
 CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [numerical contract](docs/NUMERICS.md),
+[calculus syntax](docs/CALCULUS.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
 

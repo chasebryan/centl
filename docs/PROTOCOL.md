@@ -16,6 +16,13 @@ A successful exact rational response is:
 Integers use `kind: "integer"` and a decimal-string `value`. All integers are
 strings so clients cannot lose precision through their JSON number type.
 
+An exact symbolic result uses canonical plain text and never contains terminal
+color codes:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"}}
+```
+
 Failures have stable codes and mathematical messages:
 
 ```json
@@ -24,7 +31,7 @@ Failures have stable codes and mathematical messages:
 
 Syntax errors also contain a zero-based byte `position`. Version 1 error codes
 are `syntax_error`, `division_by_zero`, `zero_denominator`, `invalid_request`,
-and `core_contract_violation`.
+`undefined_power`, and `core_contract_violation`.
 
 Run persistent machine mode with:
 

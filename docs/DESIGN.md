@@ -71,6 +71,7 @@ OCaml is the application and extraction host. It owns:
 - file and script loading;
 - time, memory, and precision budgets;
 - JSON request and response transport;
+- terminal-aware semantic coloration and plain-text fallback;
 - coordination between the extracted core and numerical backend;
 - native application packaging.
 
@@ -142,6 +143,11 @@ The machine interface uses versioned JSON over standard input and output. It
 returns structured exact values, enclosure endpoints, precision metadata,
 stable error codes, and explanatory messages. Pretty terminal output is never
 parsed by machine clients.
+
+Terminal coloration is derived from typed result fragments: numbers, symbols,
+functions, operators, and punctuation. ANSI codes are never stored in values or
+emitted by the JSON interface, and color does not alter evaluation or canonical
+plain text.
 
 The same protocol may later be transported over JSON-RPC, MCP, or a local
 service without changing the evaluator.
