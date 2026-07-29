@@ -402,6 +402,18 @@ jobs:
         run: |
           $env:NATIVE_PREFIX + "\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\msys64\mingw64\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+          $Native = $env:NATIVE_PREFIX.Replace('\', '/')
+          $Libraries = @{
+            CENTL_FLINT_LIBRARY = "$Native/lib/libflint.a"
+            CENTL_MPFR_LIBRARY = "$Native/lib/libmpfr.a"
+            CENTL_GMP_LIBRARY = "$Native/lib/libgmp.a"
+          }
+          foreach ($Entry in $Libraries.GetEnumerator()) {
+            if (-not (Test-Path -LiteralPath $Entry.Value -PathType Leaf)) {
+              throw "missing Windows static library: $($Entry.Value)"
+            }
+            "$($Entry.Key)=$($Entry.Value)" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          }
           $Opam = (Get-Command opam.exe -ErrorAction Stop).Source
           "OPAM_EXE=$Opam" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
 
