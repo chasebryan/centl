@@ -34,6 +34,20 @@
   $ ../src/main.exe 'approx(sqrt(2), 12)'
   ≈ [1.41421356237, 1.41421356238]
 
+  $ ../src/main.exe --syntax | sed -n '1,4p'
+  CENTL syntax
+  values: integer decimal fraction variable () pi e tau
+  arithmetic: + - * / ^
+  symbolic math: f(...) diff substitute simplify expand factor assuming = != < <= > >=
+
+  $ ../src/main.exe --help | sed -n '1p;3p;5,8p'
+  CENTL — exact mathematics, directly.
+  Usage: centl [--json] [--syntax] [--color=auto|always|never] [--file PATH] [EXPRESSION]
+    centl EXPRESSION   calculate
+    centl              open the calculator
+    --file PATH        run a script
+    --syntax           list mathematical identifiers
+
   $ ../src/main.exe --color=always 'x + 1' | sed "s/$(printf '\033')/<ESC>/g"
   <ESC>[95mx<ESC>[0m<ESC>[93m + <ESC>[0m<ESC>[96m1<ESC>[0m
 

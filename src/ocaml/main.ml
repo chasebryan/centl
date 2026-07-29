@@ -9,20 +9,26 @@ type command = {
 }
 
 let usage =
-  "Usage: centl [--json] [--color=auto|always|never] [--file PATH] [EXPRESSION]"
+  "Usage: centl [--json] [--syntax] [--color=auto|always|never] [--file PATH] \
+   [EXPRESSION]"
 
 let print_help () =
-  print_endline "CENTL — a calculator first, a language when needed.";
+  print_endline "CENTL — exact mathematics, directly.";
   print_endline "";
   print_endline usage;
   print_endline "";
-  print_endline "  centl '0.1 + 0.2'       evaluate an expression";
-  print_endline "  centl --file sums.centl evaluate a line-oriented script";
-  print_endline "  centl --json '1/3'      emit a versioned JSON result";
-  print_endline "  centl --json            read JSON requests from stdin";
-  print_endline "  centl 'factor(x^2-1)'    perform exact symbolic algebra";
-  print_endline "  centl --color=always    color mathematical output";
-  print_endline "  centl                   start the calculator"
+  print_endline "  centl EXPRESSION   calculate";
+  print_endline "  centl              open the calculator";
+  print_endline "  --file PATH        run a script";
+  print_endline "  --syntax           list mathematical identifiers";
+  print_endline "  --json [EXPR]      use the JSON interface";
+  print_endline "  --color=MODE       auto, always, or never";
+  print_endline "  --version          show the version"
+
+let print_repl_help () =
+  print_endline "Enter mathematics directly, then press return.";
+  print_endline ":syntax  list mathematical identifiers";
+  print_endline ":quit    leave the calculator"
 
 let parse_color_mode = function
   | "auto" -> Ok Auto
@@ -39,6 +45,9 @@ let parse_arguments arguments =
         exit 0
     | "--version" :: _ ->
         print_endline "centl 0.4.0-dev";
+        exit 0
+    | "--syntax" :: _ ->
+        Centl_syntax.print stdout;
         exit 0
     | "--json" :: rest -> loop { command with mode = Json } rest
     | "--color" :: rest -> loop { command with color = Always } rest
@@ -143,9 +152,10 @@ let repl ~color () =
         | "" -> loop ()
         | ":quit" | ":q" -> ()
         | ":help" ->
-            print_endline
-              "Use ordinary expressions directly; wrap one in approx(expr, \
-               digits) for a rigorous real enclosure.";
+            print_repl_help ();
+            loop ()
+        | ":syntax" ->
+            Centl_syntax.print stdout;
             loop ()
         | expression ->
             ignore (evaluate_human ~color expression);
