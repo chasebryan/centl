@@ -15,11 +15,23 @@ bin_directory=$(CDPATH= cd -- "$(dirname -- "$launcher")" && pwd)
 release_root=$(CDPATH= cd -- "$bin_directory/.." && pwd)
 library_directory="$release_root/lib"
 
-if [ -n "${LD_LIBRARY_PATH:-}" ]; then
-  LD_LIBRARY_PATH="$library_directory:$LD_LIBRARY_PATH"
-else
-  LD_LIBRARY_PATH="$library_directory"
-fi
-export LD_LIBRARY_PATH
+case $(uname -s) in
+  Darwin)
+    if [ -n "${DYLD_LIBRARY_PATH:-}" ]; then
+      DYLD_LIBRARY_PATH="$library_directory:$DYLD_LIBRARY_PATH"
+    else
+      DYLD_LIBRARY_PATH="$library_directory"
+    fi
+    export DYLD_LIBRARY_PATH
+    ;;
+  *)
+    if [ -n "${LD_LIBRARY_PATH:-}" ]; then
+      LD_LIBRARY_PATH="$library_directory:$LD_LIBRARY_PATH"
+    else
+      LD_LIBRARY_PATH="$library_directory"
+    fi
+    export LD_LIBRARY_PATH
+    ;;
+esac
 
 exec "$release_root/libexec/centl" "$@"

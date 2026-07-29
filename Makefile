@@ -8,11 +8,11 @@ DUNE ?= $(shell \
 FSTAR_GCD := src/fstar/Centl.Gcd.fst
 FSTAR_CORE := src/fstar/Centl.Core.fst
 FSTAR_CACHE := _build/fstar
-GENERATED := src/generated/Centl_Core.ml
+GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
-.PHONY: all verify extract build test release clean
+.PHONY: all verify extract native-build native-test build test release clean
 
 all: build
 
@@ -31,13 +31,19 @@ extract: verify
 	$(FSTAR) $(FSTAR_COMMON) \
 		--codegen OCaml --extract Centl.Core \
 		--odir src/generated $(FSTAR_CORE)
-	test -f $(GENERATED)
+	@for generated in $(GENERATED); do test -f "$$generated"; done
 
-build: extract
+native-build:
+	@for generated in $(GENERATED); do test -f "$$generated"; done
 	$(DUNE) build
 
-test: extract
+native-test:
+	@for generated in $(GENERATED); do test -f "$$generated"; done
 	$(DUNE) runtest
+
+build: extract native-build
+
+test: extract native-test
 
 release: build
 	test -n "$(VERSION)"

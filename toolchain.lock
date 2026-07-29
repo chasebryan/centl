@@ -11,6 +11,8 @@ dune = "3.24.1"
 zarith = "1.14"
 yojson = "2.2.2"
 flint = "3.0.1"
+gmp = "6.3.0"
+mpfr = "4.2.2"
 
 [test]
 alcotest = "1.9.1"
