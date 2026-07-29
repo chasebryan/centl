@@ -21,6 +21,7 @@ env:
   MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
   FLINT_VERSION: "3.0.1"
   FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  SOURCE_DATE_EPOCH: "315532800"
 
 jobs:
   verify:
@@ -157,8 +158,6 @@ jobs:
             test "v$version" = "$GITHUB_REF_NAME"
           fi
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
-          SOURCE_DATE_EPOCH=$(git -C "$GITHUB_WORKSPACE" show -s --format=%ct)
-          export SOURCE_DATE_EPOCH
           license_sources="$RUNNER_TEMP/centl-opam-license-sources"
           mkdir -p "$license_sources"
           opam source --switch=centl --dir="$license_sources/ocaml" \
@@ -281,8 +280,6 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             test "v$version" = "$GITHUB_REF_NAME"
           fi
-          SOURCE_DATE_EPOCH=$(git -C "$GITHUB_WORKSPACE" show -s --format=%ct)
-          export SOURCE_DATE_EPOCH
           license_sources="$RUNNER_TEMP/centl-opam-license-sources"
           mkdir -p "$license_sources"
           opam source --dir="$license_sources/ocaml" ocaml-base-compiler.4.14.1
@@ -424,7 +421,6 @@ jobs:
           if ($env:GITHUB_REF_TYPE -eq "tag" -and "v$Version" -ne $env:GITHUB_REF_NAME) {
             throw "tag $env:GITHUB_REF_NAME does not match CENTL $Version"
           }
-          $env:SOURCE_DATE_EPOCH = (git -C $env:GITHUB_WORKSPACE show -s --format=%ct).Trim()
           $LicenseSources = Join-Path $env:RUNNER_TEMP "centl-opam-license-sources"
           New-Item -ItemType Directory -Path $LicenseSources -Force | Out-Null
           $OcamlSource = Join-Path $LicenseSources "ocaml"
