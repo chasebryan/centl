@@ -49,7 +49,7 @@ make test
 Maintainers build the same archive locally with:
 
 ```sh
-make release VERSION=0.6.0-dev
+make release VERSION=0.6.0
 ```
 
 Tagged `v*` commits run the release workflow on Ubuntu 22.04, verify pinned F*
