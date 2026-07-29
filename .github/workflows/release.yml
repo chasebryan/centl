@@ -402,13 +402,17 @@ jobs:
         run: |
           $env:NATIVE_PREFIX + "\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\msys64\mingw64\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+          $Opam = (Get-Command opam.exe -ErrorAction Stop).Source
+          "OPAM_EXE=$Opam" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install pinned OCaml tools
         shell: msys2 {0}
         run: |
           set -euo pipefail
           command -v x86_64-w64-mingw32-pkgconf
-          opam install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
+          opam_exe=$(cygpath -u "$OPAM_EXE")
+          test -x "$opam_exe"
+          "$opam_exe" install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
         shell: pwsh
