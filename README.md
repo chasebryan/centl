@@ -27,6 +27,7 @@ make test
 ./centl '0.1 + 0.2'
 ./centl 'diff(x^3 + 2*x + 1, x)'
 ./centl 'factor(x^2 - 1)'
+./centl 'solve(x^2 - 5*x + 6 = 0, x)'
 ./centl 'distance(0, 0, 3, 4)'
 ./centl 'approx(sin(pi / 6), 20)'
 ```
@@ -35,6 +36,7 @@ make test
 3/10
 3 * x^2 + 2
 (x - 1) * (x + 1)
+x in {2, 3}
 5
 ≈ [0.49999999999999999999, 0.50000000000000000001]
 ```

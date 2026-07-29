@@ -116,6 +116,7 @@ CENTL has no general-purpose semantic `float` value.
 ExactInteger
 ExactRational
 ExactSymbolic
+ExactSolutionSet
 RealEnclosure
 ComplexEnclosure
 Indeterminate

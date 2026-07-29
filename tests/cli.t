@@ -19,6 +19,18 @@
   $ ../src/main.exe 'factor(x^2 - 1)'
   (x - 1) * (x + 1)
 
+  $ ../src/main.exe 'solve(2*x + 3 = 11, x)'
+  x = 4
+
+  $ ../src/main.exe 'solve(x^2 - 5*x + 6 = 0, x)'
+  x in {2, 3}
+
+  $ ../src/main.exe 'solve(x^2 + 1 = 0, x)'
+  no solutions
+
+  $ ../src/main.exe 'solve(x^2 = 2, x)'
+  unresolved: solve(x^2 = 2, x)
+
   $ ../src/main.exe 'assuming(x / x, x != 0)'
   1 where x != 0
 
@@ -35,13 +47,13 @@
   ≈ [1.41421356237, 1.41421356238]
 
   $ ../src/main.exe --version
-  centl 0.5.0-dev
+  centl 0.6.0-dev
 
   $ ../src/main.exe --syntax | sed -n '1,4p'
   CENTL syntax
   values: integer decimal fraction variable () pi e tau
   arithmetic: + - * / ^
-  symbolic math: f(...) name= f(...)= diff substitute simplify expand factor assuming = != < <= > >=
+  symbolic math: f(...) name= f(...)= solve diff substitute simplify expand factor assuming = != < <= > >=
 
   $ ../src/main.exe --help | sed -n '1p;3p;5,8p'
   CENTL — exact mathematics, directly.
@@ -62,6 +74,9 @@
 
   $ ../src/main.exe --json 'assuming(x / x, x != 0)'
   {"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]}}
+
+  $ ../src/main.exe --json 'solve(x^2 - 1 = 0, x)'
+  {"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"}}
 
   $ printf '{"version":1,"expression":"2 * (3 + 4)"}\n' | ../src/main.exe --json
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"14","text":"14"}}

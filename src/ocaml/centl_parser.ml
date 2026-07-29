@@ -247,7 +247,36 @@ let parse source =
                 (token_name kind);
           }
   and function_call name index =
-    if name = "diff" then
+    if name = "solve" then
+      let* left, next = expression index in
+      let equals = current next in
+      if equals.kind <> Equals then
+        Error
+          {
+            position = equals.start;
+            message =
+              Printf.sprintf "expected '=', found %s" (token_name equals.kind);
+          }
+      else
+        let* right, next = expression (next + 1) in
+        let* next = comma next in
+        begin match (current next).kind with
+        | Identifier variable ->
+            let* (), finish = closing_paren (next + 1) in
+            Ok
+              ( Centl_Core.Function
+                  ("solve", [ left; right; Centl_Core.Symbol variable ]),
+                finish )
+        | kind ->
+            Error
+              {
+                position = (current next).start;
+                message =
+                  Printf.sprintf "expected a solution variable, found %s"
+                    (token_name kind);
+              }
+        end
+    else if name = "diff" then
       let* inner, next = expression index in
       let* next = comma next in
       begin match (current next).kind with

@@ -18,6 +18,7 @@ enclosure.
 ### Symbolic math
 
 `f(x, ...)` `name = expression` `f(x, ...) = expression`
+`solve(left = right, variable)`
 `diff(expression, variable)`
 `substitute(expression, variable = value)` `simplify(expression)`
 `expand(expression)` `factor(expression)` `assuming(expression, condition)`
@@ -64,3 +65,5 @@ rigorous       approx(sqrt(2), 12)               -> ≈ [1.41421356237, 1.414213
 Inside the calculator, type `:syntax` for the catalog or `:help` for usage.
 Definitions are immutable and last for the current calculator session or
 script. Approximate a definition when using it: `approx(f(2), 20)`.
+`solve` currently handles exact linear equations and quadratics with rational
+roots. Other equations return an explicit unresolved result.

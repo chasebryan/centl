@@ -34,6 +34,8 @@ render exactly from both the REPL and machine interface.
 - Derive plain, colored, and machine output from the same result tree.
 - Add canonical exact univariate polynomials, bounded expansion, initial
   factoring, and explicit local assumptions.
+- Solve exact linear equations and rational-root quadratics with explicit
+  finite, empty, universal, and unresolved results.
 - Extend verification from totality and rational invariants to semantic
   differentiation theorems.
 
