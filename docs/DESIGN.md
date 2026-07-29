@@ -56,6 +56,12 @@ Proofs are shipped beside the executable definitions and erased during OCaml
 extraction. The extracted interface must accept and return simple, unrefined
 boundary types whose invariants are checked at entry.
 
+The first `0.1.0-dev` slice begins its verified boundary at the AST. Its small
+OCaml parser converts source literals directly to arbitrary-precision integer
+pairs without passing through floating point. F* then evaluates and reduces the
+result. Until parsing and result construction move into F*, the parser and
+renderer remain explicit parts of the trusted boundary.
+
 ### OCaml
 
 OCaml is the application and extraction host. It owns:

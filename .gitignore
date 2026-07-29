@@ -1,0 +1,5 @@
+_build/
+*.checked
+*.hints
+src/generated/*.ml
+src/generated/*.mli

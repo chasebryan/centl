@@ -1,0 +1,16 @@
+schema = 1
+
+[verification]
+fstar = "2026.07.05"
+fstar_commit = "2173bc4316a51f01754f10bf94f697aba083c2e0"
+z3 = "4.13.3"
+
+[runtime]
+ocaml = "4.14.1"
+dune = "3.24.1"
+zarith = "1.14"
+yojson = "2.2.2"
+
+[test]
+alcotest = "1.9.1"
+qcheck = "0.91"
