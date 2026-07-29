@@ -8,11 +8,25 @@ type real_enclosure = {
   working_bits : int;
 }
 
+type equation_status =
+  | Finite_solutions of (Z.t * Z.t) list
+  | No_solutions
+  | All_values
+  | Unresolved
+
+type equation_result = {
+  variable : string;
+  left : Centl_Core.expression;
+  right : Centl_Core.expression;
+  status : equation_status;
+}
+
 type exact_value =
   | Integer of Z.t
   | Rational of Z.t * Z.t
   | Symbolic of Centl_Core.expression
   | Real_enclosure of real_enclosure
+  | Equation_result of equation_result
 
 type token_style =
   | Number
@@ -388,6 +402,100 @@ let approximation_request = function
            "use approx(expression) or approx(expression, digits)")
   | _ -> None
 
+let rational_pair_from_core value =
+  match value_from_core value.Centl_Core.numerator value.denominator with
+  | Ok (Integer numerator) -> Ok (numerator, Z.one)
+  | Ok (Rational (numerator, denominator)) -> Ok (numerator, denominator)
+  | Ok _ -> assert false
+  | Error _ as error -> error
+
+let compare_rational_pairs (left_numerator, left_denominator)
+    (right_numerator, right_denominator) =
+  Z.compare
+    (Z.mul left_numerator right_denominator)
+    (Z.mul right_numerator left_denominator)
+
+let equation_result variable left right status =
+  Ok (Equation_result { variable; left; right; status })
+
+let complete_quadratic variable left right leading linear discriminant =
+  match
+    exact_square_root discriminant.Centl_Core.numerator discriminant.denominator
+  with
+  | None -> equation_result variable left right Unresolved
+  | Some root ->
+      begin match
+        Centl_Core.complete_rational_quadratic leading linear discriminant root
+      with
+      | Centl_Core.TwoEquationSolutions (first, second) ->
+          let ( let* ) result next = Result.bind result next in
+          let* first = rational_pair_from_core first in
+          let* second = rational_pair_from_core second in
+          let solutions =
+            List.sort_uniq compare_rational_pairs [ first; second ]
+          in
+          equation_result variable left right (Finite_solutions solutions)
+      | _ ->
+          failure "core_contract_violation"
+            "the verified core rejected a validated quadratic root"
+      end
+
+let solve_equation left right variable =
+  let ( let* ) result next = Result.bind result next in
+  if List.mem variable [ "pi"; "e"; "tau" ] then
+    failure "invalid_solution_variable"
+      (variable ^ " is a constant, not a solution variable")
+  else
+    let* _ = evaluate_exact left in
+    let* _ = evaluate_exact right in
+    match Centl_Core.solve_equation left right variable with
+    | Centl_Core.NoEquationSolutions ->
+        equation_result variable left right No_solutions
+    | Centl_Core.AllEquationValues ->
+        equation_result variable left right All_values
+    | Centl_Core.OneEquationSolution solution ->
+        let* solution = rational_pair_from_core solution in
+        equation_result variable left right (Finite_solutions [ solution ])
+    | Centl_Core.TwoEquationSolutions (first, second) ->
+        let* first = rational_pair_from_core first in
+        let* second = rational_pair_from_core second in
+        equation_result variable left right
+          (Finite_solutions
+             (List.sort_uniq compare_rational_pairs [ first; second ]))
+    | Centl_Core.RationalQuadratic (leading, linear, discriminant) ->
+        complete_quadratic variable left right leading linear discriminant
+    | Centl_Core.UnresolvedEquation ->
+        equation_result variable left right Unresolved
+
+let solution_request = function
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      Some (solve_equation left right variable)
+  | Centl_Core.Function ("solve", _) ->
+      Some (failure "invalid_arguments" "use solve(left = right, variable)")
+  | _ -> None
+
+let rec contains_solution = function
+  | Centl_Core.Function ("solve", _) -> true
+  | Centl_Core.Literal _ | Centl_Core.Symbol _ -> false
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Differentiate (inner, _)
+  | Centl_Core.Derivative (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      contains_solution inner
+  | Centl_Core.Binary (_, left, right) ->
+      contains_solution left || contains_solution right
+  | Centl_Core.Function (_, arguments) ->
+      List.exists contains_solution arguments
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      contains_solution inner || contains_solution replacement
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      contains_solution inner || contains_solution left
+      || contains_solution right
+
 let syntax_error (parse_error : Centl_parser.error) =
   Error
     {
@@ -398,10 +506,17 @@ let syntax_error (parse_error : Centl_parser.error) =
 
 let evaluate_expression expression =
   let expression = Centl_Core.resolve expression in
-  match approximation_request expression with
-  | Some (Ok (inner, digits)) -> approximate inner digits
-  | Some (Error _ as error) -> error
-  | None -> evaluate_exact expression
+  match solution_request expression with
+  | Some result -> result
+  | None when contains_solution expression ->
+      failure "solution_set_not_expression"
+        "solve(...) returns a solution set and must be evaluated on its own"
+  | None ->
+      begin match approximation_request expression with
+      | Some (Ok (inner, digits)) -> approximate inner digits
+      | Some (Error _ as error) -> error
+      | None -> evaluate_exact expression
+      end
 
 let evaluate source =
   match Centl_parser.parse source with
@@ -413,6 +528,7 @@ let reserved_names =
     "pi";
     "e";
     "tau";
+    "solve";
     "diff";
     "substitute";
     "assuming";
@@ -485,6 +601,13 @@ let rec expand_expression session bound expression =
   | Centl_Core.Power (base, exponent) ->
       let* base = expand_expression session bound base in
       Ok (Centl_Core.Power (base, exponent))
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      let* left = expand_expression session (variable :: bound) left in
+      let* right = expand_expression session (variable :: bound) right in
+      Ok
+        (Centl_Core.Function
+           ("solve", [ left; right; Centl_Core.Symbol variable ]))
   | Centl_Core.Function (name, arguments) ->
       let* arguments = expand_arguments session bound arguments in
       if List.mem name bound then Ok (Centl_Core.Function (name, arguments))
@@ -604,7 +727,7 @@ let expression_of_exact_value = function
   | Rational (numerator, denominator) ->
       Centl_Core.Literal (numerator, denominator)
   | Symbolic expression -> expression
-  | Real_enclosure _ -> assert false
+  | Real_enclosure _ | Equation_result _ -> assert false
 
 let validate_definition_name session name =
   if List.mem name reserved_names then
@@ -648,6 +771,9 @@ let prepare_definition session bound name expression =
     | Real_enclosure _ ->
         session_failure "exact_definition_required"
           "definitions must be exact; use approx(...) when evaluating them"
+    | Equation_result _ ->
+        session_failure "expression_definition_required"
+          "solution sets cannot be stored in definitions yet"
     | value -> Ok (value, expression_of_exact_value value)
 
 let evaluate_in_session session source =
@@ -776,6 +902,47 @@ and call_fragments name arguments =
   |> append (arguments_fragments arguments)
   |> append (fragment Punctuation ")")
 
+let solution_fragments (numerator, denominator) =
+  literal_fragments numerator denominator
+
+let rec solution_list_fragments = function
+  | [] -> []
+  | [ solution ] -> solution_fragments solution
+  | solution :: rest ->
+      solution_fragments solution
+      |> append (fragment Punctuation ", ")
+      |> append (solution_list_fragments rest)
+
+let equation_call_fragments result =
+  fragment Function_name "solve"
+  |> append (fragment Punctuation "(")
+  |> append (expression_fragments result.left)
+  |> append (fragment Operator " = ")
+  |> append (expression_fragments result.right)
+  |> append (fragment Punctuation ", ")
+  |> append (fragment Symbol_name result.variable)
+  |> append (fragment Punctuation ")")
+
+let equation_result_fragments result =
+  match result.status with
+  | Finite_solutions [ solution ] ->
+      fragment Symbol_name result.variable
+      |> append (fragment Operator " = ")
+      |> append (solution_fragments solution)
+  | Finite_solutions solutions ->
+      fragment Symbol_name result.variable
+      |> append (fragment Operator " in ")
+      |> append (fragment Punctuation "{")
+      |> append (solution_list_fragments solutions)
+      |> append (fragment Punctuation "}")
+  | No_solutions -> fragment Punctuation "no solutions"
+  | All_values ->
+      fragment Punctuation "all values of "
+      |> append (fragment Symbol_name result.variable)
+  | Unresolved ->
+      fragment Punctuation "unresolved: "
+      |> append (equation_call_fragments result)
+
 let fragments_of_value = function
   | Integer value -> fragment Number (Z.to_string value)
   | Rational (numerator, denominator) -> literal_fragments numerator denominator
@@ -791,6 +958,7 @@ let fragments_of_value = function
         |> append (fragment Punctuation ", ")
         |> append (fragment Number enclosure.upper_decimal)
         |> append (fragment Punctuation "]")
+  | Equation_result result -> equation_result_fragments result
 
 let text_of_fragments fragments = fragments |> List.map snd |> String.concat ""
 let text_of_value value = value |> fragments_of_value |> text_of_fragments
@@ -929,6 +1097,41 @@ let json_of_value = function
                 ("backend", `String "flint-arb");
                 ("rigorous", `Bool true);
               ] );
+        ]
+  | Equation_result result ->
+      let rational_json (numerator, denominator) =
+        let text =
+          if Z.equal denominator Z.one then Z.to_string numerator
+          else Z.to_string numerator ^ "/" ^ Z.to_string denominator
+        in
+        `Assoc
+          [
+            ("numerator", `String (Z.to_string numerator));
+            ("denominator", `String (Z.to_string denominator));
+            ("text", `String text);
+          ]
+      in
+      let status, solutions, resolved =
+        match result.status with
+        | Finite_solutions solutions ->
+            ("finite", List.map rational_json solutions, true)
+        | No_solutions -> ("none", [], true)
+        | All_values -> ("all", [], true)
+        | Unresolved -> ("unresolved", [], false)
+      in
+      let left = expression_fragments result.left |> text_of_fragments in
+      let right = expression_fragments result.right |> text_of_fragments in
+      `Assoc
+        [
+          ("kind", `String "solution_set");
+          ("exact", `Bool true);
+          ("resolved", `Bool resolved);
+          ("status", `String status);
+          ("variable", `String result.variable);
+          ("solutions", `List solutions);
+          ( "equation",
+            `Assoc [ ("left", `String left); ("right", `String right) ] );
+          ("text", `String (text_of_value (Equation_result result)));
         ]
 
 let json_of_evaluation = function

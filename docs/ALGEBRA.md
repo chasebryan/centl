@@ -39,3 +39,21 @@ x / x where x >= 0
 Conditions are preserved in human output and emitted structurally in JSON.
 They are local to the expression; persistent session assumptions are not yet
 implemented.
+
+## Equations
+
+Use ordinary equality inside `solve`:
+
+```text
+solve(2*x + 3 = 11, x)
+x = 4
+
+solve(x^2 - 5*x + 6 = 0, x)
+x in {2, 3}
+```
+
+CENTL classifies exact univariate polynomials in its verified core. This first
+slice solves linear equations and quadratics whose real roots are rational. It
+also distinguishes no solutions from all values. A quadratic with irrational
+roots, a higher-degree equation, or a non-polynomial equation is reported as
+`unresolved` instead of guessed or silently approximated.

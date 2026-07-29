@@ -87,6 +87,37 @@ let algebra_examples () =
     "bounded expansion" "(x + 1)^65"
     (value "expand((x + 1)^65)")
 
+let equation_examples () =
+  Alcotest.(check string)
+    "linear equation" "x = 4"
+    (value "solve(2*x + 3 = 11, x)");
+  Alcotest.(check string)
+    "terms on both sides" "x = 4"
+    (value "solve(3*x + 2 = x + 10, x)");
+  Alcotest.(check string)
+    "rational coefficients" "x = 1"
+    (value "solve(x/3 + 1/2 = 5/6, x)");
+  Alcotest.(check string)
+    "two rational roots" "x in {1/2, 2}"
+    (value "solve(2*x^2 - 5*x + 2 = 0, x)");
+  Alcotest.(check string)
+    "repeated root" "x = 3"
+    (value "solve((x - 3)^2 = 0, x)");
+  Alcotest.(check string)
+    "no real solutions" "no solutions"
+    (value "solve(x^2 + 1 = 0, x)");
+  Alcotest.(check string)
+    "identity" "all values of x"
+    (value "solve(x + 1 = x + 1, x)");
+  Alcotest.(check string)
+    "false constant equation" "no solutions" (value "solve(1 = 2, x)");
+  Alcotest.(check string)
+    "irrational roots remain explicit" "unresolved: solve(x^2 = 2, x)"
+    (value "solve(x^2 = 2, x)");
+  Alcotest.(check string)
+    "higher degree remains explicit" "unresolved: solve(x^3 = 1, x)"
+    (value "solve(x^3 = 1, x)")
+
 let assumption_examples () =
   Alcotest.(check string)
     "safe cancellation" "1 where x != 0"
@@ -228,7 +259,22 @@ let failures () =
   Alcotest.(check string)
     "zero to negative power" "division_by_zero" (error_code "0^-1");
   Alcotest.(check string)
-    "zero to zero power" "undefined_power" (error_code "0^0")
+    "zero to zero power" "undefined_power" (error_code "0^0");
+  Alcotest.(check string)
+    "division by zero in equation" "division_by_zero"
+    (error_code "solve(x / 0 = 1, x)");
+  Alcotest.(check string)
+    "missing equation equality" "syntax_error"
+    (error_code "solve(x + 1, x)");
+  Alcotest.(check string)
+    "missing solution variable" "syntax_error"
+    (error_code "solve(x = 1, 2)");
+  Alcotest.(check string)
+    "constant as solution variable" "invalid_solution_variable"
+    (error_code "solve(pi = 3, pi)");
+  Alcotest.(check string)
+    "solution set used as a number" "solution_set_not_expression"
+    (error_code "solve(x = 1, x) + 2")
 
 let json_protocol () =
   let request = `Assoc [ ("version", `Int 1); ("expression", `String "2/4") ] in
@@ -329,6 +375,41 @@ let conditional_json_protocol () =
       end
   | _ -> Alcotest.fail "response was not a JSON object"
 
+let equation_json_protocol () =
+  match
+    Centl_engine.evaluate_request
+      (`Assoc
+         [
+           ("version", `Int 1); ("expression", `String "solve(x^2 - 1 = 0, x)");
+         ])
+  with
+  | `Assoc fields ->
+      begin match List.assoc_opt "value" fields with
+      | Some (`Assoc value_fields) ->
+          Alcotest.(check (option string))
+            "solution-set kind" (Some "solution_set")
+            (match List.assoc_opt "kind" value_fields with
+            | Some (`String value) -> Some value
+            | _ -> None);
+          Alcotest.(check (option string))
+            "finite status" (Some "finite")
+            (match List.assoc_opt "status" value_fields with
+            | Some (`String value) -> Some value
+            | _ -> None);
+          Alcotest.(check (option bool))
+            "resolved result" (Some true)
+            (match List.assoc_opt "resolved" value_fields with
+            | Some (`Bool value) -> Some value
+            | _ -> None);
+          Alcotest.(check (option int))
+            "two solutions" (Some 2)
+            (match List.assoc_opt "solutions" value_fields with
+            | Some (`List values) -> Some (List.length values)
+            | _ -> None)
+      | _ -> Alcotest.fail "response contained no solution set"
+      end
+  | _ -> Alcotest.fail "response was not a JSON object"
+
 let coloration () =
   match Centl_engine.evaluate "diff(x^3, x)" with
   | Error error -> Alcotest.fail (Centl_engine.error_text error)
@@ -382,6 +463,9 @@ let definition_examples () =
   Alcotest.(check string)
     "function parameter shadows a value" "16"
     (session_text bound "square(4)");
+  Alcotest.(check string)
+    "solution variable shadows a value" "x in {-2, 2}"
+    (session_text bound "solve(x^2 = 4, x)");
   let captured = Centl_engine.create_session () in
   ignore (session_text captured "a = 2");
   Alcotest.(check string)
@@ -420,6 +504,9 @@ let definition_failures () =
   Alcotest.(check string)
     "approximate definition" "exact_definition_required"
     (error "a = approx(pi, 20)");
+  Alcotest.(check string)
+    "solution-set definition" "expression_definition_required"
+    (error "roots = solve(x^2 = 1, x)");
   let arity = Centl_engine.create_session () in
   ignore (session_text arity "f(x) = x^2");
   Alcotest.(check string)
@@ -592,6 +679,39 @@ let property_coefficient_collection () =
   in
   QCheck.Test.check_exn test
 
+let property_linear_solving () =
+  let coefficient = QCheck.make QCheck.Gen.(oneof [ 1 -- 100; -100 -- -1 ]) in
+  let small = QCheck.make QCheck.Gen.(-100 -- 100) in
+  let input = QCheck.triple coefficient small small in
+  let test =
+    QCheck.Test.make ~count:1_000 input (fun (a, b, root) ->
+        let right = (a * root) + b in
+        let source =
+          Printf.sprintf "solve((%d)*x + (%d) = (%d), x)" a b right
+        in
+        value source = Printf.sprintf "x = %d" root)
+  in
+  QCheck.Test.check_exn test
+
+let property_quadratic_solving () =
+  let coefficient = QCheck.make QCheck.Gen.(oneof [ 1 -- 20; -20 -- -1 ]) in
+  let root = QCheck.make QCheck.Gen.(-30 -- 30) in
+  let input = QCheck.triple coefficient root root in
+  let test =
+    QCheck.Test.make ~count:1_000 input (fun (a, first, second) ->
+        let source =
+          Printf.sprintf "solve((%d) * (x - (%d)) * (x - (%d)) = 0, x)" a first
+            second
+        in
+        let expected =
+          if first = second then Printf.sprintf "x = %d" first
+          else
+            Printf.sprintf "x in {%d, %d}" (min first second) (max first second)
+        in
+        value source = expected)
+  in
+  QCheck.Test.check_exn test
+
 let () =
   Alcotest.run "centl"
     [
@@ -620,6 +740,14 @@ let () =
             property_binomial_expansion;
           Alcotest.test_case "coefficient collection property" `Quick
             property_coefficient_collection;
+        ] );
+      ( "equation solving",
+        [
+          Alcotest.test_case "exact classifications" `Quick equation_examples;
+          Alcotest.test_case "linear root property" `Quick
+            property_linear_solving;
+          Alcotest.test_case "quadratic root property" `Quick
+            property_quadratic_solving;
         ] );
       ( "definitions",
         [
@@ -650,6 +778,8 @@ let () =
           Alcotest.test_case "rigorous enclosure" `Quick enclosure_json_protocol;
           Alcotest.test_case "structured condition" `Quick
             conditional_json_protocol;
+          Alcotest.test_case "structured solution set" `Quick
+            equation_json_protocol;
         ] );
       ( "presentation",
         [

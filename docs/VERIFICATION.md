@@ -28,6 +28,13 @@ assumption simplifier are also total F* definitions. Generated expansion,
 collection, and cubic-derivative identities are checked after exact
 substitution against independently computed integer results.
 
+Exact equation classification is also in F*. The core reduces both sides to a
+univariate rational polynomial, distinguishes constant, linear, quadratic, and
+unsupported cases, and computes linear and repeated quadratic roots exactly.
+For a positive quadratic discriminant, the host proposes an integer square-root
+candidate; the core checks the exact square identity before computing both
+rational roots.
+
 Exact rational powers use verified exponentiation by squaring rather than a
 linear recursive multiplication chain.
 

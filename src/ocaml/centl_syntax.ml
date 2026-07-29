@@ -40,6 +40,7 @@ let sections =
           entry "f(x, ...)" "symbolic function call";
           entry "name = expression" "immutable value definition";
           entry "f(x, ...) = expression" "immutable function definition";
+          entry "solve(left = right, variable)" "solve an equation exactly";
           entry "diff(expression, variable)" "differentiate";
           entry "substitute(expression, variable = value)" "substitute a value";
           entry "simplify(expression)" "collect and simplify";

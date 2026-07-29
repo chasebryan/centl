@@ -32,6 +32,17 @@ Conditional symbolic results retain machine-readable conditions:
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
 `greater_than`, and `greater_or_equal`.
 
+Equation solving returns a structured solution set. Rational parts remain
+decimal strings so clients cannot lose precision:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"}}
+```
+
+`status` is `finite`, `none`, `all`, or `unresolved`. An unresolved result is a
+successful, explicit classification with `resolved: false`; it is never an
+approximate solution.
+
 A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 `dyadic` is the canonical enclosure: each endpoint is its signed mantissa times
 two to `binary_exponent`. `decimal` is an outward-rounded view, and `precision`
@@ -51,7 +62,8 @@ Syntax errors also contain a zero-based byte `position`. Version 1 error codes
 include `syntax_error`, `division_by_zero`, `zero_denominator`,
 `invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
 `precision_limit`, `insufficient_precision`, `unsupported_approximation`,
-`backend_failure`, and `core_contract_violation`.
+`invalid_solution_variable`, `solution_set_not_expression`, `backend_failure`,
+and `core_contract_violation`.
 
 Run persistent machine mode with:
 

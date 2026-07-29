@@ -722,6 +722,100 @@ let rec polynomial_of (term:expression) (variable:string)
   | Factor inner -> polynomial_of inner variable
   | Assuming _ _ _ _ -> None
 
+type equation_classification =
+  | NoEquationSolutions
+  | AllEquationValues
+  | OneEquationSolution: rational -> equation_classification
+  | TwoEquationSolutions: rational -> rational -> equation_classification
+  | RationalQuadratic:
+      leading:rational -> linear:rational -> discriminant:rational ->
+      equation_classification
+  | UnresolvedEquation
+
+let classify_constant_equation
+    (constant:coefficient)
+  : equation_classification
+=
+  if constant.numerator = 0 then AllEquationValues else NoEquationSolutions
+
+let solve_linear_equation
+    (constant linear:coefficient)
+  : equation_classification
+=
+  if linear.numerator = 0 then classify_constant_equation constant
+  else
+    match divide (negate constant) linear with
+    | Success root -> OneEquationSolution root
+    | Failure _ -> UnresolvedEquation
+
+let classify_quadratic_equation
+    (constant linear leading:coefficient)
+  : equation_classification
+=
+  if leading.numerator = 0 then solve_linear_equation constant linear
+  else
+    let four = make 4 1 in
+    let discriminant = subtract
+      (multiply linear linear)
+      (multiply four (multiply leading constant)) in
+    if discriminant.numerator < 0 then NoEquationSolutions
+    else if discriminant.numerator = 0 then
+      let denominator = multiply (make 2 1) leading in
+      match divide (negate linear) denominator with
+      | Success root -> OneEquationSolution root
+      | Failure _ -> UnresolvedEquation
+    else RationalQuadratic leading linear discriminant
+
+let classify_polynomial_equation
+    (coefficients:polynomial)
+  : equation_classification
+=
+  match coefficients with
+  | [] -> AllEquationValues
+  | constant :: tail ->
+      if polynomial_tail_is_zero tail then classify_constant_equation constant
+      else
+        match tail with
+        | [] -> classify_constant_equation constant
+        | linear :: quadratic_tail ->
+            if polynomial_tail_is_zero quadratic_tail then
+              solve_linear_equation constant linear
+            else
+              match quadratic_tail with
+              | [] -> solve_linear_equation constant linear
+              | leading :: higher ->
+                  if polynomial_tail_is_zero higher then
+                    classify_quadratic_equation constant linear leading
+                  else UnresolvedEquation
+
+let solve_equation
+    (left right:expression)
+    (variable:string)
+  : equation_classification
+=
+  match polynomial_of (Binary Subtract left right) variable with
+  | None -> UnresolvedEquation
+  | Some coefficients -> classify_polynomial_equation coefficients
+
+let complete_rational_quadratic
+    (leading linear discriminant root:rational)
+  : equation_classification
+=
+  if leading.denominator <= 0 || linear.denominator <= 0 ||
+     discriminant.denominator <= 0 || root.denominator <= 0 ||
+     leading.numerator = 0 || discriminant.numerator <= 0 ||
+     root.numerator < 0 ||
+     root.numerator * root.numerator * discriminant.denominator <>
+       discriminant.numerator * root.denominator * root.denominator
+  then UnresolvedEquation
+  else
+    let denominator = multiply (make 2 1) leading in
+    let negative_linear = negate linear in
+    match divide (subtract negative_linear root) denominator,
+          divide (add negative_linear root) denominator with
+    | Success first, Success second -> TwoEquationSolutions first second
+    | _, _ -> UnresolvedEquation
+
 type signed_term =
   | PositiveTerm: expression -> signed_term
   | NegativeTerm: expression -> signed_term
