@@ -1,5 +1,9 @@
 #define CAML_NAME_SPACE
 
+#if defined(_WIN32) && !defined(CAMLDLLIMPORT)
+#define CAMLDLLIMPORT __declspec(dllimport)
+#endif
+
 #include <limits.h>
 
 #include <caml/alloc.h>
