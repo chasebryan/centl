@@ -20,6 +20,11 @@ rigor to program.
 - Advanced capabilities appear gradually without changing the basic language.
 - Error messages explain the mathematics, not compiler internals.
 
+## Design
+
+CENTL is currently in the design phase. See the [architecture](docs/DESIGN.md),
+[numerical contract](docs/NUMERICS.md), and [roadmap](docs/ROADMAP.md).
+
 ## License
 
 `SPDX-License-Identifier: AGPL-3.0-or-later`

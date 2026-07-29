@@ -1,0 +1,101 @@
+# Numerical contract
+
+## Exact values
+
+Integer literals denote unbounded integers. A finite decimal literal denotes an
+exact rational with a power-of-ten denominator. Fractions are normalized to a
+positive denominator and relatively prime numerator and denominator.
+
+For example:
+
+```text
+0.1        = 1/10
+1.2300     = 123/100
+0.1 + 0.2  = 3/10
+```
+
+Trailing zeros may be retained as presentation provenance without changing the
+mathematical value.
+
+An operation on exact inputs remains exact whenever its mathematical result is
+represented by the exact domain. Approximation never occurs merely because an
+exact computation is expensive.
+
+## Symbolic exact values
+
+Some values outside the rationals can remain exact through a symbolic backend,
+including algebraic numbers and recognized constants. A symbolic result is
+reported as exact only when the backend establishes the required property.
+Failure to establish a property yields unknown, not a guessed answer.
+
+## Enclosures
+
+An approximate real result denotes a set containing the mathematical result.
+The fundamental backend contract is inclusion:
+
+```text
+mathematical value is contained in returned enclosure
+```
+
+Internally, backend balls are transferred as exact dyadic components. The core
+checks sign, radius, exponent, finiteness, and size constraints before use.
+
+Operations on enclosures preserve inclusion. If dependency growth or an
+algorithmic limitation produces an enclosure too wide to satisfy the request,
+CENTL increases precision or reports the unresolved enclosure.
+
+## Precision requests
+
+Users request a property of the result, not merely a working precision. Typical
+requests include:
+
+- at least `n` justified significant decimal digits;
+- an absolute enclosure width below a threshold;
+- a relative enclosure width below a threshold;
+- an explicit outward-rounded decimal interval.
+
+The evaluator selects an initial binary precision, checks the resulting
+enclosure, and retries with higher precision within configured limits.
+
+## Rendering
+
+Exact values are rendered exactly. Enclosures may be rendered as a midpoint and
+radius, lower and upper endpoints, or a decimal prefix followed by explicit
+uncertainty.
+
+An unqualified decimal digit may be printed only when every value in the full
+enclosure has that digit in the chosen rounding interpretation. Otherwise CENTL
+must expose the uncertainty or request more precision.
+
+The renderer must not infer accuracy from the number of digits present in a
+backend string.
+
+## Comparisons and domains
+
+Comparisons over exact values are two-valued when decidable. Comparisons over
+enclosures are three-valued:
+
+```text
+certainly true
+certainly false
+unknown at this precision
+```
+
+Domain errors distinguish certainly invalid inputs from enclosures containing
+both valid and invalid points. Increasing precision may resolve the latter.
+
+## Failures
+
+Numerical failure is data, not fabricated output. Structured outcomes include:
+
+- invalid syntax;
+- mathematical domain error;
+- unknown comparison;
+- insufficient precision;
+- resource limit reached;
+- unsupported exact operation;
+- backend failure;
+- violated backend contract.
+
+Every failure identifies the expression and mathematical condition involved
+without exposing irrelevant compiler internals.
