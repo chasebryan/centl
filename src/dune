@@ -1,0 +1,16 @@
+(include_subdirs unqualified)
+
+(library
+ (name centl_lib)
+ (wrapped false)
+ (modules Prims Centl_Gcd Centl_Core Centl_parser Centl_engine)
+ (flags
+  (:standard -w -8-27))
+ (libraries zarith yojson))
+
+(executable
+ (name main)
+ (public_name centl)
+ (package centl)
+ (modules Main)
+ (libraries centl_lib unix yojson))

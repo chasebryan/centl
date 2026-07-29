@@ -20,10 +20,26 @@ rigor to program.
 - Advanced capabilities appear gradually without changing the basic language.
 - Error messages explain the mathematics, not compiler internals.
 
+## Try it
+
+```sh
+make test
+./centl '0.1 + 0.2'
+```
+
+```text
+3/10
+```
+
+Run `./centl` for the calculator, `./centl --file path` for a script, or
+`./centl --json` for the machine protocol.
+
 ## Design
 
-CENTL is currently in the design phase. See the [architecture](docs/DESIGN.md),
-[numerical contract](docs/NUMERICS.md), and [roadmap](docs/ROADMAP.md).
+CENTL is in early development. See the [architecture](docs/DESIGN.md),
+[numerical contract](docs/NUMERICS.md),
+[verification boundary](docs/VERIFICATION.md),
+[machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
 
 ## License
 

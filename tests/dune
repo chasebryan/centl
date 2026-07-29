@@ -1,0 +1,6 @@
+(test
+ (name test_centl)
+ (libraries centl_lib alcotest qcheck zarith yojson))
+
+(cram
+ (deps ../src/main.exe fixtures/exact.centl))

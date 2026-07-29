@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+if [ ! -f "$project_root/src/generated/Centl_Core.ml" ]; then
+  make -s -C "$project_root" build
+fi
+
+exec dune exec --root "$project_root" centl -- "$@"

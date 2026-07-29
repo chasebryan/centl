@@ -1,7 +1,19 @@
 # Toolchain
 
 CENTL uses separate production, verification, and numerical-laboratory tools.
-Exact version pins belong in build configuration as implementation begins.
+The canonical pins are recorded in [`toolchain.lock`](../toolchain.lock). The
+first exact-calculator slice is verified and tested with these versions:
+
+| Tool | Version |
+| --- | --- |
+| F* | 2026.07.05 (`2173bc4`) |
+| Z3 | 4.13.3 |
+| OCaml | 4.14.1 |
+| Dune | 3.24.1 |
+| Zarith | 1.14 |
+| Yojson | 2.2.2 |
+| Alcotest | 1.9.1 |
+| QCheck | 0.91 |
 
 ## Production and verification
 
