@@ -372,3 +372,56 @@ let parse source =
             Printf.sprintf "expected an operator, found %s"
               (token_name trailing.kind);
         }
+
+type statement =
+  | Evaluate of Centl_Core.expression
+  | Define_value of string * Centl_Core.expression
+  | Define_function of string * string list * Centl_Core.expression
+
+let parse_statement source =
+  let ( let* ) result next = Result.bind result next in
+  let* tokens = lex source in
+  let current index = tokens.(index) in
+  let parse_right_hand_side offset make_statement =
+    let source_length = String.length source in
+    match parse (String.sub source offset (source_length - offset)) with
+    | Ok expression -> Ok (make_statement expression)
+    | Error error -> Error { error with position = error.position + offset }
+  in
+  let value_definition name =
+    let offset = (current 2).start in
+    parse_right_hand_side offset (fun expression ->
+        Define_value (name, expression))
+  in
+  let function_definition name parameters right_hand_side =
+    let offset = (current right_hand_side).start in
+    parse_right_hand_side offset (fun expression ->
+        Define_function (name, parameters, expression))
+  in
+  let rec parameters index collected =
+    match (current index).kind with
+    | Identifier parameter ->
+        begin match (current (index + 1)).kind with
+        | Comma -> parameters (index + 2) (parameter :: collected)
+        | Right_paren -> Some (List.rev (parameter :: collected), index + 2)
+        | _ -> None
+        end
+    | _ -> None
+  in
+  if Array.length tokens < 2 then
+    Result.map (fun expression -> Evaluate expression) (parse source)
+  else
+    match ((current 0).kind, (current 1).kind) with
+    | Identifier name, Equals -> value_definition name
+    | Identifier name, Left_paren ->
+        let header =
+          match (current 2).kind with
+          | Right_paren -> Some ([], 3)
+          | _ -> parameters 2 []
+        in
+        begin match header with
+        | Some (parameters, next) when (current next).kind = Equals ->
+            function_definition name parameters (next + 1)
+        | _ -> Result.map (fun expression -> Evaluate expression) (parse source)
+        end
+    | _ -> Result.map (fun expression -> Evaluate expression) (parse source)

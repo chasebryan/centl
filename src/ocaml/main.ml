@@ -44,7 +44,7 @@ let parse_arguments arguments =
         print_help ();
         exit 0
     | "--version" :: _ ->
-        print_endline "centl 0.4.0-dev";
+        print_endline "centl 0.5.0-dev";
         exit 0
     | "--syntax" :: _ ->
         Centl_syntax.print stdout;
@@ -89,12 +89,12 @@ let print_json json =
 
 let ansi code text = Printf.sprintf "\027[%sm%s\027[0m" code text
 
-let evaluate_human ~color source =
-  match Centl_engine.evaluate source with
-  | Ok value ->
+let evaluate_human_in_session ~color session source =
+  match Centl_engine.evaluate_in_session session source with
+  | Ok result ->
       print_endline
-        (if color then Centl_engine.colored_text_of_value value
-         else Centl_engine.text_of_value value);
+        (if color then Centl_engine.colored_text_of_session_result result
+         else Centl_engine.text_of_session_result result);
       true
   | Error error ->
       let message = "error: " ^ Centl_engine.error_text error in
@@ -106,23 +106,24 @@ let evaluate_json source =
   print_json (Centl_engine.json_of_evaluation result);
   Result.is_ok result
 
-let evaluate ~color mode source =
-  match mode with
-  | Human -> evaluate_human ~color source
-  | Json -> evaluate_json source
-
 let meaningful_line line =
   let line = String.trim line in
   if line = "" || line.[0] = '#' then None else Some line
 
 let run_channel ~color mode name channel =
+  let session = Centl_engine.create_session () in
   let rec lines number =
     match input_line channel with
     | line ->
         begin match meaningful_line line with
         | None -> lines (number + 1)
         | Some expression ->
-            if evaluate ~color mode expression then lines (number + 1)
+            let succeeded =
+              match mode with
+              | Human -> evaluate_human_in_session ~color session expression
+              | Json -> evaluate_json expression
+            in
+            if succeeded then lines (number + 1)
             else begin
               prerr_endline (Printf.sprintf "in %s, line %d" name number);
               false
@@ -139,8 +140,9 @@ let run_file ~color mode path =
     (fun () -> run_channel ~color mode path channel)
 
 let repl ~color () =
+  let session = Centl_engine.create_session () in
   print_endline
-    "CENTL 0.4.0-dev — exact mathematics and rigorous real enclosures";
+    "CENTL 0.5.0-dev — exact mathematics and rigorous real enclosures";
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
     print_string (if color then ansi "94" "centl> " else "centl> ");
@@ -158,7 +160,7 @@ let repl ~color () =
             Centl_syntax.print stdout;
             loop ()
         | expression ->
-            ignore (evaluate_human ~color expression);
+            ignore (evaluate_human_in_session ~color session expression);
             loop ()
         end
   in
@@ -216,8 +218,12 @@ let () =
               prerr_endline ("centl: " ^ message);
               false
             end
-        | None, expression, mode when expression <> "" ->
-            evaluate ~color mode expression
+        | None, expression, Human when expression <> "" ->
+            evaluate_human_in_session ~color
+              (Centl_engine.create_session ())
+              expression
+        | None, expression, Json when expression <> "" ->
+            evaluate_json expression
         | None, _, Json -> run_json_stream ()
         | None, _, Human when Unix.isatty Unix.stdin ->
             repl ~color ();
