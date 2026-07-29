@@ -34,11 +34,14 @@
   $ ../src/main.exe 'approx(sqrt(2), 12)'
   ≈ [1.41421356237, 1.41421356238]
 
+  $ ../src/main.exe --version
+  centl 0.5.0-dev
+
   $ ../src/main.exe --syntax | sed -n '1,4p'
   CENTL syntax
   values: integer decimal fraction variable () pi e tau
   arithmetic: + - * / ^
-  symbolic math: f(...) diff substitute simplify expand factor assuming = != < <= > >=
+  symbolic math: f(...) name= f(...)= diff substitute simplify expand factor assuming = != < <= > >=
 
   $ ../src/main.exe --help | sed -n '1p;3p;5,8p'
   CENTL — exact mathematics, directly.
@@ -67,9 +70,27 @@
   3/10
   1/2
 
+  $ printf 'r = 3\ncircle_area(r)\nf(x) = x^2 + 1\nf(3)\ndiff(f(x), x)\n' | ../src/main.exe
+  r = 3
+  9 * pi
+  f(x) = x^2 + 1
+  10
+  2 * x
+
   $ ../src/main.exe --file fixtures/exact.centl
   3/10
   1/2
+
+  $ ../src/main.exe --file fixtures/definitions.centl
+  r = 3
+  9 * pi
+  f(x) = x^2 + 1
+  10
+  2 * x
+
+  $ ../src/main.exe 'pi = 3'
+  error: pi is built in and cannot be redefined
+  [2]
 
   $ ../src/main.exe '1 / 0'
   error: division by zero

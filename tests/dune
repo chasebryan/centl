@@ -4,4 +4,4 @@
  (libraries centl_lib alcotest qcheck zarith yojson))
 
 (cram
- (deps ../src/main.exe fixtures/exact.centl))
+ (deps ../src/main.exe fixtures/definitions.centl fixtures/exact.centl))

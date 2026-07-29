@@ -148,7 +148,9 @@ or unknown. Unknown is never silently treated as false.
 ## Human and machine interfaces
 
 The human interface is calculator-first. A script is a saved sequence of the
-same expressions accepted by the REPL.
+same expressions and immutable definitions accepted by the REPL. Definition
+state belongs to one calculator session or script and never crosses into the
+stateless JSON protocol.
 
 The machine interface uses versioned JSON over standard input and output. It
 returns structured exact values, enclosure endpoints, precision metadata,

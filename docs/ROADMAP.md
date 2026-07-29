@@ -58,6 +58,8 @@ such as `sqrt(2)` and `sin(2016.1)`, or explains precisely why it cannot.
 
 ## 4. Calculator language
 
+Initial immutable value and function definitions implemented in `0.5.0-dev`.
+
 - Add reusable definitions, user functions, and saved scripts gradually.
 - Add completion, history, multiline input, and mathematical diagnostics.
 - Preserve calculator behavior for every expression accepted in a script.

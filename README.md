@@ -12,7 +12,7 @@ rigor to program.
 ## Principles
 
 - Typing an expression produces an answer immediately.
-- A script is simply a saved sequence of calculator expressions.
+- A script is simply a saved sequence of calculator expressions and definitions.
 - Ordinary mathematics requires no imports, boilerplate, entry points, or type
   declarations.
 - Integers, decimals, and fractions are exact by default.
@@ -43,6 +43,9 @@ Run `./centl` for the calculator, `./centl --syntax` for every implemented form,
 `./centl --file path` for a script, or `./centl --json` for the machine protocol.
 Mathematical output is colored when written to a terminal; use
 `--color=always`, `--no-color`, or `NO_COLOR` to control it.
+
+Calculator sessions and scripts remember immutable definitions written as
+`r = 3` or `f(x) = x^2 + 1`.
 
 ## Design
 
