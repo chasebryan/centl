@@ -30,6 +30,13 @@ visible instead of being guessed:
 diff(f(x), x)
 ```
 
+Attach a domain condition without hiding it:
+
+```text
+assuming(diff(log(x), x), x > 0)
+1 / x where x > 0
+```
+
 Colored terminal output distinguishes numbers (cyan), names (magenta),
 functions (blue), operators (yellow), and grouping (muted). Pipes and JSON stay
 plain; `--color=always`, `--no-color`, and `NO_COLOR` control terminal output.

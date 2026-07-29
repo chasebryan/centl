@@ -16,6 +16,15 @@ total and extract with no admits. Semantic correctness theorems for the
 differentiation rules are the next proof milestone. Until then, generated
 polynomial identities are checked independently after exact substitution.
 
+Exact polynomial addition, negation, subtraction, scaling, multiplication,
+bounded powers, coefficient collection, rendering, and the conservative
+assumption simplifier are also total F* definitions. Generated expansion,
+collection, and cubic-derivative identities are checked after exact
+substitution against independently computed integer results.
+
+Exact rational powers use verified exponentiation by squaring rather than a
+linear recursive multiplication chain.
+
 Verification runs with no admitted SMT queries:
 
 ```sh

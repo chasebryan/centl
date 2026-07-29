@@ -10,6 +10,18 @@
   $ ../src/main.exe 'substitute(x^2 + 1, x = 3)'
   10
 
+  $ ../src/main.exe 'simplify(2*x + 3*x)'
+  5 * x
+
+  $ ../src/main.exe 'expand((x + 1)^3)'
+  x^3 + 3 * x^2 + 3 * x + 1
+
+  $ ../src/main.exe 'factor(x^2 - 1)'
+  (x - 1) * (x + 1)
+
+  $ ../src/main.exe 'assuming(x / x, x != 0)'
+  1 where x != 0
+
   $ ../src/main.exe --color=always 'x + 1' | sed "s/$(printf '\033')/<ESC>/g"
   <ESC>[95mx<ESC>[0m<ESC>[93m + <ESC>[0m<ESC>[96m1<ESC>[0m
 
@@ -18,6 +30,9 @@
 
   $ ../src/main.exe --json 'diff(sin(x), x)'
   {"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"cos(x)","text":"cos(x)"}}
+
+  $ ../src/main.exe --json 'assuming(x / x, x != 0)'
+  {"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]}}
 
   $ printf '{"version":1,"expression":"2 * (3 + 4)"}\n' | ../src/main.exe --json
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"14","text":"14"}}

@@ -10,6 +10,14 @@ type binary_operator =
   | Multiply
   | Divide
 
+type relation =
+  | Equal
+  | NotEqual
+  | LessThan
+  | LessOrEqual
+  | GreaterThan
+  | GreaterOrEqual
+
 type expression =
   | Literal: numerator:int -> denominator:int -> expression
   | Symbol: name:string -> expression
@@ -20,6 +28,11 @@ type expression =
   | Differentiate: expression -> variable:string -> expression
   | Substitute: expression -> variable:string -> replacement:expression -> expression
   | Derivative: expression -> variable:string -> expression
+  | Simplify: expression -> expression
+  | Expand: expression -> expression
+  | Factor: expression -> expression
+  | Assuming:
+      expression -> left:expression -> relation -> right:expression -> expression
 
 type rational = {
   numerator: int;
@@ -195,6 +208,9 @@ let rec power_natural
       (decreases exponent)
 =
   if exponent = 0 then make 1 1
+  else if exponent % 2 = 0 then
+    let half = power_natural value (exponent / 2) in
+    multiply half half
   else multiply value (power_natural value (exponent - 1))
 
 type error =
@@ -304,6 +320,10 @@ let rec expression_is_total (term:expression) : Tot bool =
   | Differentiate _ _ -> false
   | Substitute _ _ _ -> false
   | Derivative _ _ -> false
+  | Simplify inner -> expression_is_total inner
+  | Expand inner -> expression_is_total inner
+  | Factor inner -> expression_is_total inner
+  | Assuming _ _ _ _ -> false
 
 let value_is_total (result:value) : bool =
   match result with
@@ -429,6 +449,14 @@ let rec substitute
   | Derivative inner bound_variable ->
       if bound_variable = variable then term
       else Derivative (substitute inner variable replacement) bound_variable
+  | Simplify inner -> Simplify (substitute inner variable replacement)
+  | Expand inner -> Expand (substitute inner variable replacement)
+  | Factor inner -> Factor (substitute inner variable replacement)
+  | Assuming inner left relation right -> Assuming
+      (substitute inner variable replacement)
+      (substitute left variable replacement)
+      relation
+      (substitute right variable replacement)
 
 let rec differentiate (term:expression) (variable:string) : Tot expression =
   match term with
@@ -475,6 +503,368 @@ let rec differentiate (term:expression) (variable:string) : Tot expression =
   | Derivative _ _ -> Derivative term variable
   | Differentiate _ _ -> Derivative term variable
   | Substitute _ _ _ -> Derivative term variable
+  | Simplify inner -> differentiate inner variable
+  | Expand inner -> differentiate inner variable
+  | Factor inner -> differentiate inner variable
+  | Assuming inner left relation right -> Assuming
+      (differentiate inner variable) left relation right
+
+type coefficient = value:rational{invariant value}
+type polynomial = list coefficient
+
+type variable_scan =
+  | NoVariable
+  | OneVariable: string -> variable_scan
+  | NotUnivariate
+
+let maximum_expansion_exponent : nat = 64
+
+let merge_variable_scan (left right:variable_scan) : variable_scan =
+  match left, right with
+  | NotUnivariate, _ -> NotUnivariate
+  | _, NotUnivariate -> NotUnivariate
+  | NoVariable, result -> result
+  | result, NoVariable -> result
+  | OneVariable left_name, OneVariable right_name ->
+      if left_name = right_name then left else NotUnivariate
+
+let rec scan_polynomial_variable (term:expression) : Tot variable_scan =
+  match term with
+  | Literal _ _ -> NoVariable
+  | Symbol name -> OneVariable name
+  | Negate inner -> scan_polynomial_variable inner
+  | Binary Add left right
+  | Binary Subtract left right
+  | Binary Multiply left right -> merge_variable_scan
+      (scan_polynomial_variable left) (scan_polynomial_variable right)
+  | Binary Divide left right ->
+      begin match scan_polynomial_variable right with
+      | NoVariable -> scan_polynomial_variable left
+      | _ -> NotUnivariate
+      end
+  | Power base exponent ->
+      if exponent > 0 && exponent <= maximum_expansion_exponent then
+        scan_polynomial_variable base
+      else NotUnivariate
+  | Function _ _ -> NotUnivariate
+  | Differentiate _ _ -> NotUnivariate
+  | Substitute _ _ _ -> NotUnivariate
+  | Derivative _ _ -> NotUnivariate
+  | Simplify inner -> scan_polynomial_variable inner
+  | Expand inner -> scan_polynomial_variable inner
+  | Factor inner -> scan_polynomial_variable inner
+  | Assuming _ _ _ _ -> NotUnivariate
+
+let rec polynomial_add (left right:polynomial) : Tot polynomial =
+  match left, right with
+  | [], result -> result
+  | result, [] -> result
+  | left_head :: left_tail, right_head :: right_tail ->
+      add left_head right_head :: polynomial_add left_tail right_tail
+
+let rec polynomial_negate (value:polynomial) : Tot polynomial =
+  match value with
+  | [] -> []
+  | head :: tail -> negate head :: polynomial_negate tail
+
+let polynomial_subtract (left right:polynomial) : Tot polynomial =
+  polynomial_add left (polynomial_negate right)
+
+let rec polynomial_scale (factor:coefficient) (value:polynomial)
+  : Tot polynomial
+=
+  match value with
+  | [] -> []
+  | head :: tail -> multiply factor head :: polynomial_scale factor tail
+
+let rec polynomial_multiply (left right:polynomial) : Tot polynomial =
+  match left with
+  | [] -> []
+  | head :: tail -> polynomial_add
+      (polynomial_scale head right)
+      (make 0 1 :: polynomial_multiply tail right)
+
+let rec polynomial_power (base:polynomial) (exponent:nat) : Tot polynomial =
+  if exponent = 0 then [make 1 1]
+  else polynomial_multiply base (polynomial_power base (exponent - 1))
+
+let rec polynomial_tail_is_zero (value:polynomial) : Tot bool =
+  match value with
+  | [] -> true
+  | head :: tail -> head.numerator = 0 && polynomial_tail_is_zero tail
+
+let polynomial_constant (value:polynomial) : option coefficient =
+  match value with
+  | [] -> Some (make 0 1)
+  | head :: tail ->
+      if polynomial_tail_is_zero tail then Some head else None
+
+let polynomial_divide_constant (numerator denominator:polynomial)
+  : option polynomial
+=
+  match polynomial_constant denominator with
+  | Some value ->
+      if value.numerator = 0 then None
+      else Some (polynomial_scale (make value.denominator value.numerator) numerator)
+  | None -> None
+
+let rec polynomial_of (term:expression) (variable:string)
+  : Tot (option polynomial)
+=
+  match term with
+  | Literal numerator denominator ->
+      if denominator = 0 then None else Some [make numerator denominator]
+  | Symbol name ->
+      if name = variable then Some [make 0 1; make 1 1] else None
+  | Negate inner ->
+      begin match polynomial_of inner variable with
+      | None -> None
+      | Some value -> Some (polynomial_negate value)
+      end
+  | Binary operator left right ->
+      begin match polynomial_of left variable, polynomial_of right variable with
+      | Some left_value, Some right_value ->
+          begin match operator with
+          | Add -> Some (polynomial_add left_value right_value)
+          | Subtract -> Some (polynomial_subtract left_value right_value)
+          | Multiply -> Some (polynomial_multiply left_value right_value)
+          | Divide -> polynomial_divide_constant left_value right_value
+          end
+      | _, _ -> None
+      end
+  | Power base exponent ->
+      if exponent > 0 && exponent <= maximum_expansion_exponent then
+        begin match polynomial_of base variable with
+        | None -> None
+        | Some value -> Some (polynomial_power value exponent)
+        end
+      else None
+  | Function _ _ -> None
+  | Differentiate _ _ -> None
+  | Substitute _ _ _ -> None
+  | Derivative _ _ -> None
+  | Simplify inner -> polynomial_of inner variable
+  | Expand inner -> polynomial_of inner variable
+  | Factor inner -> polynomial_of inner variable
+  | Assuming _ _ _ _ -> None
+
+type signed_term =
+  | PositiveTerm: expression -> signed_term
+  | NegativeTerm: expression -> signed_term
+
+let coefficient_is_one (value:coefficient) : bool =
+  value.numerator = 1 && value.denominator = 1
+
+let coefficient_is_integer (value:coefficient) (integer:int) : bool =
+  value.numerator = integer && value.denominator = 1
+
+let polynomial_term
+    (value:coefficient)
+    (variable:string)
+    (degree:nat)
+  : Tot (option signed_term)
+=
+  if value.numerator = 0 then None
+  else
+    let negative = value.numerator < 0 in
+    let magnitude = if negative then negate value else value in
+    let term =
+      if degree = 0 then Literal magnitude.numerator magnitude.denominator
+      else
+        let variable_term =
+          if degree = 1 then Symbol variable else Power (Symbol variable) degree
+        in
+        if coefficient_is_one magnitude then variable_term
+        else Binary Multiply
+          (Literal magnitude.numerator magnitude.denominator) variable_term
+    in
+    if negative then Some (NegativeTerm term) else Some (PositiveTerm term)
+
+let add_polynomial_term
+    (higher:option expression)
+    (current:option signed_term)
+  : option expression
+=
+  match higher, current with
+  | None, None -> None
+  | Some expression, None -> Some expression
+  | None, Some (PositiveTerm expression) -> Some expression
+  | None, Some (NegativeTerm expression) -> Some (Negate expression)
+  | Some expression, Some (PositiveTerm current) ->
+      Some (Binary Add expression current)
+  | Some expression, Some (NegativeTerm current) ->
+      Some (Binary Subtract expression current)
+
+let rec polynomial_expression_from
+    (coefficients:polynomial)
+    (variable:string)
+    (degree:nat)
+  : Tot (option expression)
+=
+  match coefficients with
+  | [] -> None
+  | head :: tail ->
+      let higher = polynomial_expression_from tail variable (degree + 1) in
+      add_polynomial_term higher (polynomial_term head variable degree)
+
+let polynomial_expression (coefficients:polynomial) (variable:string)
+  : expression
+=
+  match polynomial_expression_from coefficients variable 0 with
+  | None -> Literal 0 1
+  | Some expression -> expression
+
+let canonicalize_polynomial (term:expression) : expression =
+  match scan_polynomial_variable term with
+  | NoVariable -> term
+  | NotUnivariate -> term
+  | OneVariable variable ->
+      begin match polynomial_of term variable with
+      | None -> term
+      | Some coefficients -> polynomial_expression coefficients variable
+      end
+
+let square_base (term:expression) : option expression =
+  match term with
+  | Power base exponent ->
+      if exponent > 0 && exponent % 2 = 0 then
+        if exponent = 2 then Some base else Some (Power base (exponent / 2))
+      else None
+  | Literal numerator denominator ->
+      if numerator = 1 && denominator = 1 then Some term else None
+  | _ -> None
+
+let difference_of_squares (term:expression) : option expression =
+  match term with
+  | Binary Subtract left right ->
+      begin match square_base left, square_base right with
+      | Some left_base, Some right_base -> Some (Binary Multiply
+          (Binary Subtract left_base right_base)
+          (Binary Add left_base right_base))
+      | _, _ -> None
+      end
+  | _ -> None
+
+let rec drop_zero_coefficients (coefficients:polynomial)
+  : Tot (nat & polynomial)
+=
+  match coefficients with
+  | [] -> (0, [])
+  | head :: tail ->
+      if head.numerator = 0 then
+        let degree, remainder = drop_zero_coefficients tail in
+        (degree + 1, remainder)
+      else (0, coefficients)
+
+let factor_polynomial
+    (canonical:expression)
+    (variable:string)
+    (coefficients:polynomial)
+  : expression
+=
+  match coefficients with
+  | constant :: linear :: quadratic :: [] ->
+      if coefficient_is_integer constant (-1) &&
+         coefficient_is_integer linear 0 &&
+         coefficient_is_integer quadratic 1 then
+        Binary Multiply
+          (Binary Subtract (Symbol variable) (Literal 1 1))
+          (Binary Add (Symbol variable) (Literal 1 1))
+      else if coefficient_is_integer constant 1 &&
+              coefficient_is_integer linear 2 &&
+              coefficient_is_integer quadratic 1 then
+        Power (Binary Add (Symbol variable) (Literal 1 1)) 2
+      else if coefficient_is_integer constant 1 &&
+              coefficient_is_integer linear (-2) &&
+              coefficient_is_integer quadratic 1 then
+        Power (Binary Subtract (Symbol variable) (Literal 1 1)) 2
+      else
+        let degree, remainder = drop_zero_coefficients coefficients in
+        if degree = 0 || (degree > 0 && remainder = []) then canonical
+        else Binary Multiply
+          (if degree = 1 then Symbol variable else Power (Symbol variable) degree)
+          (polynomial_expression remainder variable)
+  | _ ->
+      let degree, remainder = drop_zero_coefficients coefficients in
+      if degree = 0 || (degree > 0 && remainder = []) then canonical
+      else Binary Multiply
+        (if degree = 1 then Symbol variable else Power (Symbol variable) degree)
+        (polynomial_expression remainder variable)
+
+let factor_expression (term:expression) : expression =
+  let canonical = canonicalize_polynomial term in
+  match difference_of_squares canonical with
+  | Some factored -> factored
+  | None ->
+      begin match scan_polynomial_variable canonical with
+      | OneVariable variable ->
+          begin match polynomial_of canonical variable with
+          | Some coefficients -> factor_polynomial canonical variable coefficients
+          | None -> canonical
+          end
+      | _ -> canonical
+      end
+
+let is_zero_literal (term:expression) : bool =
+  match term with
+  | Literal numerator denominator -> numerator = 0 && denominator <> 0
+  | _ -> false
+
+let condition_proves_nonzero
+    (term left:expression)
+    (relation:relation)
+    (right:expression)
+  : bool
+=
+  let strict =
+    relation = NotEqual || relation = LessThan || relation = GreaterThan
+  in
+  strict &&
+    ((term = left && is_zero_literal right) ||
+     (term = right && is_zero_literal left))
+
+let rec simplify_assuming
+    (term left:expression)
+    (relation:relation)
+    (right:expression)
+  : Tot expression
+=
+  match term with
+  | Literal _ _ -> term
+  | Symbol _ -> term
+  | Negate inner -> Negate (simplify_assuming inner left relation right)
+  | Binary operator inner_left inner_right ->
+      let simplified_left = simplify_assuming inner_left left relation right in
+      let simplified_right = simplify_assuming inner_right left relation right in
+      begin match operator with
+      | Divide ->
+          if simplified_left = simplified_right &&
+             condition_proves_nonzero simplified_right left relation right then
+            Literal 1 1
+          else Binary Divide simplified_left simplified_right
+      | _ -> Binary operator simplified_left simplified_right
+      end
+  | Power base exponent ->
+      let simplified = simplify_assuming base left relation right in
+      if exponent = 0 && condition_proves_nonzero simplified left relation right
+      then Literal 1 1
+      else Power simplified exponent
+  | Function name argument -> Function name
+      (simplify_assuming argument left relation right)
+  | Differentiate inner variable -> Differentiate
+      (simplify_assuming inner left relation right) variable
+  | Substitute inner variable replacement -> Substitute
+      (simplify_assuming inner left relation right)
+      variable
+      (simplify_assuming replacement left relation right)
+  | Derivative inner variable -> Derivative
+      (simplify_assuming inner left relation right) variable
+  | Simplify inner -> Simplify (simplify_assuming inner left relation right)
+  | Expand inner -> Expand (simplify_assuming inner left relation right)
+  | Factor inner -> Factor (simplify_assuming inner left relation right)
+  | Assuming inner nested_left nested_relation nested_right -> Assuming
+      (simplify_assuming inner left relation right)
+      nested_left nested_relation nested_right
 
 let rec resolve (term:expression) : Tot expression =
   match term with
@@ -488,6 +878,16 @@ let rec resolve (term:expression) : Tot expression =
   | Differentiate inner variable -> differentiate (resolve inner) variable
   | Substitute inner variable replacement -> substitute
       (resolve inner) variable (resolve replacement)
+  | Simplify inner -> canonicalize_polynomial (resolve inner)
+  | Expand inner -> canonicalize_polynomial (resolve inner)
+  | Factor inner -> factor_expression (resolve inner)
+  | Assuming inner left relation right ->
+      let resolved_left = resolve left in
+      let resolved_right = resolve right in
+      Assuming
+        (simplify_assuming (resolve inner)
+          resolved_left relation resolved_right)
+        resolved_left relation resolved_right
 
 let rec evaluate (term:expression)
   : Tot (result:evaluation{evaluation_invariant result})
@@ -545,5 +945,26 @@ let rec evaluate (term:expression)
                 (expression_of_value inner_value)
                 variable
                 (expression_of_value replacement_value)))
+          end
+      end
+  | Simplify inner -> evaluate inner
+  | Expand inner -> evaluate inner
+  | Factor inner -> evaluate inner
+  | Assuming inner left relation right ->
+      begin match evaluate inner with
+      | EvaluationFailure error -> EvaluationFailure error
+      | Evaluated inner_value ->
+          begin match evaluate left with
+          | EvaluationFailure error -> EvaluationFailure error
+          | Evaluated left_value ->
+              begin match evaluate right with
+              | EvaluationFailure error -> EvaluationFailure error
+              | Evaluated right_value -> Evaluated (ExactSymbolic
+                  (Assuming
+                    (expression_of_value inner_value)
+                    (expression_of_value left_value)
+                    relation
+                    (expression_of_value right_value)))
+              end
           end
       end
