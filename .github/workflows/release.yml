@@ -148,6 +148,7 @@ jobs:
       - name: Test, package, and install CENTL
         id: package
         run: |
+          cd "$GITHUB_WORKSPACE"
           opam exec --switch=centl -- make native-test
           reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
           version=${reported#centl }
@@ -156,7 +157,7 @@ jobs:
             test "v$version" = "$GITHUB_REF_NAME"
           fi
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
-          SOURCE_DATE_EPOCH=$(git show -s --format=%ct)
+          SOURCE_DATE_EPOCH=$(git -C "$GITHUB_WORKSPACE" show -s --format=%ct)
           export SOURCE_DATE_EPOCH
           license_sources="$RUNNER_TEMP/centl-opam-license-sources"
           mkdir -p "$license_sources"
@@ -272,6 +273,7 @@ jobs:
           DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
           C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
         run: |
+          cd "$GITHUB_WORKSPACE"
           opam exec -- make native-test
           reported=$(opam exec -- _build/default/src/main.exe --version)
           version=${reported#centl }
@@ -279,7 +281,7 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = tag ]; then
             test "v$version" = "$GITHUB_REF_NAME"
           fi
-          SOURCE_DATE_EPOCH=$(git show -s --format=%ct)
+          SOURCE_DATE_EPOCH=$(git -C "$GITHUB_WORKSPACE" show -s --format=%ct)
           export SOURCE_DATE_EPOCH
           license_sources="$RUNNER_TEMP/centl-opam-license-sources"
           mkdir -p "$license_sources"
@@ -412,6 +414,7 @@ jobs:
       - name: Test, package, and install CENTL
         shell: pwsh
         run: |
+          Set-Location $env:GITHUB_WORKSPACE
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
           $Version = $Reported -replace '^centl ', ''
@@ -419,7 +422,7 @@ jobs:
           if ($env:GITHUB_REF_TYPE -eq "tag" -and "v$Version" -ne $env:GITHUB_REF_NAME) {
             throw "tag $env:GITHUB_REF_NAME does not match CENTL $Version"
           }
-          $env:SOURCE_DATE_EPOCH = (git show -s --format=%ct).Trim()
+          $env:SOURCE_DATE_EPOCH = (git -C $env:GITHUB_WORKSPACE show -s --format=%ct).Trim()
           $LicenseSources = Join-Path $env:RUNNER_TEMP "centl-opam-license-sources"
           New-Item -ItemType Directory -Path $LicenseSources -Force | Out-Null
           $OcamlSource = Join-Path $LicenseSources "ocaml"
