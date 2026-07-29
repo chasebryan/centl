@@ -11,6 +11,12 @@ The current F* core proves:
 - division by zero is a structured result; and
 - every successful evaluator result satisfies the rational invariant.
 
+The core also validates native real enclosures before use: the lower endpoint
+must not exceed the upper endpoint, and the shared binary exponent must remain
+within the configured boundary. Exact rational square-root candidates are
+computed by the host but accepted only after the F* core checks, by direct
+integer equality, that the candidate squares to the radicand.
+
 The F* symbolic evaluator, substitution pass, and differentiation pass are
 total and extract with no admits. Semantic correctness theorems for the
 differentiation rules are the next proof milestone. Until then, generated
@@ -36,9 +42,10 @@ maps F* integers directly to Zarith arbitrary-precision integers.
 
 The current trusted application boundary still includes the handwritten OCaml
 lexer/parser, terminal and JSON code, Zarith, the F*/OCaml extraction process,
-the OCaml compiler, and Z3. Tests attack that boundary with golden CLI cases and
-thousands of generated fraction operations checked against Zarith's independent
-rational implementation.
+the OCaml compiler, Z3, the narrow C shim, FLINT/Arb, MPFR, and GMP. Tests attack
+that boundary with golden CLI cases, direct enclosure-containment checks, and
+thousands of generated exact identities checked against independent Zarith
+computations.
 
 The host validates that every core result is reduced and has a positive
 denominator before rendering it. It never repairs or silently approximates a

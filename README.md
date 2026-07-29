@@ -27,12 +27,16 @@ make test
 ./centl '0.1 + 0.2'
 ./centl 'diff(x^3 + 2*x + 1, x)'
 ./centl 'factor(x^2 - 1)'
+./centl 'distance(0, 0, 3, 4)'
+./centl 'approx(sin(pi / 6), 20)'
 ```
 
 ```text
 3/10
 3 * x^2 + 2
 (x - 1) * (x + 1)
+5
+≈ [0.49999999999999999999, 0.50000000000000000001]
 ```
 
 Run `./centl` for the calculator, `./centl --file path` for a script, or
@@ -46,6 +50,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [numerical contract](docs/NUMERICS.md),
 [calculus syntax](docs/CALCULUS.md),
 [algebra syntax](docs/ALGEBRA.md),
+[mathematical functions](docs/MATHEMATICS.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
 

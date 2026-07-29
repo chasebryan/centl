@@ -66,6 +66,12 @@ requests include:
 The evaluator selects an initial binary precision, checks the resulting
 enclosure, and retries with higher precision within configured limits.
 
+The current calculator syntax is `approx(expression)` for 20 significant digits
+or `approx(expression, digits)` for an explicit request from 1 through 1000.
+Working precision starts above the decimal target with a guard margin and may
+double up to 16,384 bits. These are resource limits, not claims that every
+request can be resolved.
+
 ## Rendering
 
 Exact values are rendered exactly. Enclosures may be rendered as a midpoint and
@@ -78,6 +84,13 @@ must expose the uncertainty or request more precision.
 
 The renderer must not infer accuracy from the number of digits present in a
 backend string.
+
+The native backend does not provide CENTL's displayed decimal. It returns exact
+integer endpoints and a shared binary exponent. CENTL converts those dyadics to
+rationals and rounds the lower endpoint down and the upper endpoint up at the
+requested significant-decimal scale. Success requires the exact dyadic width to
+be no more than half one unit at that scale; reaching the working-precision
+ceiling without satisfying that test is `insufficient_precision`.
 
 ## Comparisons and domains
 

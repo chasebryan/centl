@@ -86,6 +86,125 @@ let assumption_examples () =
     "insufficient assumption" "x / x where x >= 0"
     (value "assuming(x / x, x >= 0)")
 
+let geometry_examples () =
+  Alcotest.(check string)
+    "Pythagorean distance" "5"
+    (value "distance(0, 0, 3, 4)");
+  Alcotest.(check string) "rational square root" "2/3" (value "sqrt(4/9)");
+  Alcotest.(check string)
+    "rectangle area" "42"
+    (value "rectangle_area(12, 7/2)");
+  Alcotest.(check string) "triangle area" "15" (value "triangle_area(10, 3)");
+  Alcotest.(check string)
+    "trapezoid area" "16"
+    (value "trapezoid_area(3, 5, 4)");
+  Alcotest.(check string) "circle area" "9 * pi" (value "circle_area(3)");
+  Alcotest.(check string) "sphere volume" "36 * pi" (value "sphere_volume(3)");
+  Alcotest.(check string) "slope" "1/2" (value "slope(0, 0, 4, 2)");
+  Alcotest.(check string) "degrees to radians" "pi" (value "radians(180)");
+  Alcotest.(check string) "radians to degrees" "180" (value "degrees(pi)")
+
+let concrete_math_examples () =
+  Alcotest.(check string) "greatest common divisor" "6" (value "gcd(-48, 18)");
+  Alcotest.(check string) "least common multiple" "42" (value "lcm(-21, 6)");
+  Alcotest.(check string)
+    "factorial" "2432902008176640000" (value "factorial(20)");
+  Alcotest.(check string)
+    "binomial coefficient" "2598960" (value "choose(52, 5)");
+  Alcotest.(check string) "permutations" "720" (value "permutations(10, 3)");
+  Alcotest.(check string)
+    "Fibonacci" "354224848179261915075" (value "fibonacci(100)")
+
+let enclosure source =
+  match Centl_engine.evaluate source with
+  | Ok (Centl_engine.Real_enclosure result) -> result
+  | Ok result ->
+      Alcotest.failf "expected a real enclosure, received %s"
+        (Centl_engine.text_of_value result)
+  | Error error -> Alcotest.fail (Centl_engine.error_text error)
+
+let rational_of_enclosure_endpoint mantissa exponent =
+  if exponent >= 0 then Q.mul_2exp (Q.of_bigint mantissa) exponent
+  else Q.div_2exp (Q.of_bigint mantissa) (-exponent)
+
+let rigorous_approximation () =
+  let square_root = enclosure "approx(sqrt(2), 20)" in
+  let lower =
+    rational_of_enclosure_endpoint square_root.lower_mantissa
+      square_root.binary_exponent
+  in
+  let upper =
+    rational_of_enclosure_endpoint square_root.upper_mantissa
+      square_root.binary_exponent
+  in
+  let two = Q.of_int 2 in
+  Alcotest.(check bool)
+    "sqrt lower bound" true
+    (Q.compare (Q.mul lower lower) two <= 0);
+  Alcotest.(check bool)
+    "sqrt upper bound" true
+    (Q.compare (Q.mul upper upper) two >= 0);
+  Alcotest.(check int)
+    "requested significant digits" 20 square_root.requested_digits;
+  let sine = enclosure "approx(sin(pi / 6), 20)" in
+  let sine_lower =
+    rational_of_enclosure_endpoint sine.lower_mantissa sine.binary_exponent
+  in
+  let sine_upper =
+    rational_of_enclosure_endpoint sine.upper_mantissa sine.binary_exponent
+  in
+  let half = Q.make Z.one (Z.of_int 2) in
+  Alcotest.(check bool)
+    "sin(pi/6) lower containment" true
+    (Q.compare sine_lower half <= 0);
+  Alcotest.(check bool)
+    "sin(pi/6) upper containment" true
+    (Q.compare sine_upper half >= 0)
+
+let enclosure_contains (enclosure : Centl_engine.real_enclosure) expected =
+  let lower =
+    rational_of_enclosure_endpoint enclosure.lower_mantissa
+      enclosure.binary_exponent
+  in
+  let upper =
+    rational_of_enclosure_endpoint enclosure.upper_mantissa
+      enclosure.binary_exponent
+  in
+  Q.compare lower expected <= 0 && Q.compare expected upper <= 0
+
+let elementary_function_smoke () =
+  [
+    "approx(exp(1), 20)";
+    "approx(log(2), 20)";
+    "approx(tan(1/4), 20)";
+    "approx(asin(1/2), 20)";
+    "approx(acos(1/2), 20)";
+    "approx(atan(1), 20)";
+    "approx(atan2(1, -1), 20)";
+    "approx(sinh(1), 20)";
+    "approx(cosh(1), 20)";
+    "approx(tanh(1), 20)";
+    "approx(abs(-3/2), 20)";
+  ]
+  |> List.iter (fun source -> ignore (enclosure source));
+  Alcotest.(check bool)
+    "trigonometric identity contains one" true
+    (enclosure_contains (enclosure "approx(sin(1)^2 + cos(1)^2, 25)") Q.one);
+  Alcotest.(check bool)
+    "log-exp identity contains one" true
+    (enclosure_contains (enclosure "approx(log(exp(1)), 25)") Q.one)
+
+let approximation_failures () =
+  Alcotest.(check string)
+    "negative square root" "domain_error"
+    (error_code "approx(sqrt(-1), 20)");
+  Alcotest.(check string)
+    "precision budget" "precision_limit"
+    (error_code "approx(pi, 1001)");
+  Alcotest.(check string)
+    "unresolved variable" "unsupported_approximation"
+    (error_code "approx(x, 20)")
+
 let failures () =
   Alcotest.(check string)
     "division by zero" "division_by_zero" (error_code "1 / (2 - 2)");
@@ -129,6 +248,48 @@ let symbolic_json_protocol () =
             | Some (`String value) -> Some value
             | _ -> None)
       | _ -> Alcotest.fail "response contained no symbolic value"
+      end
+  | _ -> Alcotest.fail "response was not a JSON object"
+
+let enclosure_json_protocol () =
+  match
+    Centl_engine.evaluate_request
+      (`Assoc [ ("version", `Int 1); ("expression", `String "approx(pi, 25)") ])
+  with
+  | `Assoc fields ->
+      begin match List.assoc_opt "value" fields with
+      | Some (`Assoc value_fields) ->
+          Alcotest.(check (option string))
+            "enclosure kind" (Some "real_enclosure")
+            (match List.assoc_opt "kind" value_fields with
+            | Some (`String value) -> Some value
+            | _ -> None);
+          Alcotest.(check (option bool))
+            "approximate classification" (Some false)
+            (match List.assoc_opt "exact" value_fields with
+            | Some (`Bool value) -> Some value
+            | _ -> None);
+          begin match List.assoc_opt "precision" value_fields with
+          | Some (`Assoc precision) ->
+              Alcotest.(check (option bool))
+                "rigorous backend" (Some true)
+                (match List.assoc_opt "rigorous" precision with
+                | Some (`Bool value) -> Some value
+                | _ -> None)
+          | _ -> Alcotest.fail "response contained no precision metadata"
+          end;
+          begin match List.assoc_opt "decimal" value_fields with
+          | Some (`Assoc decimal) ->
+              Alcotest.(check (option int))
+                "certified digits" (Some 25)
+                (match
+                   List.assoc_opt "certified_significant_digits" decimal
+                 with
+                | Some (`Int value) -> Some value
+                | _ -> None)
+          | _ -> Alcotest.fail "response contained no decimal metadata"
+          end
+      | _ -> Alcotest.fail "response contained no enclosure"
       end
   | _ -> Alcotest.fail "response was not a JSON object"
 
@@ -301,11 +462,24 @@ let () =
         [
           Alcotest.test_case "domain-aware examples" `Quick assumption_examples;
         ] );
+      ( "geometry",
+        [ Alcotest.test_case "exact formulas" `Quick geometry_examples ] );
+      ( "concrete mathematics",
+        [ Alcotest.test_case "exact primitives" `Quick concrete_math_examples ]
+      );
+      ( "rigorous approximation",
+        [
+          Alcotest.test_case "Arb containment" `Quick rigorous_approximation;
+          Alcotest.test_case "elementary function smoke" `Quick
+            elementary_function_smoke;
+          Alcotest.test_case "structured failures" `Quick approximation_failures;
+        ] );
       ("errors", [ Alcotest.test_case "structured failures" `Quick failures ]);
       ( "machine interface",
         [
           Alcotest.test_case "versioned request" `Quick json_protocol;
           Alcotest.test_case "symbolic result" `Quick symbolic_json_protocol;
+          Alcotest.test_case "rigorous enclosure" `Quick enclosure_json_protocol;
           Alcotest.test_case "structured condition" `Quick
             conditional_json_protocol;
         ] );

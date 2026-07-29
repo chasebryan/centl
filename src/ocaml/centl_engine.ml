@@ -1,7 +1,18 @@
+type real_enclosure = {
+  lower_mantissa : Z.t;
+  upper_mantissa : Z.t;
+  binary_exponent : int;
+  lower_decimal : string;
+  upper_decimal : string;
+  requested_digits : int;
+  working_bits : int;
+}
+
 type exact_value =
   | Integer of Z.t
   | Rational of Z.t * Z.t
   | Symbolic of Centl_Core.expression
+  | Real_enclosure of real_enclosure
 
 type token_style =
   | Number
@@ -32,6 +43,333 @@ let value_from_core numerator denominator =
   else if Z.equal denominator Z.one then Ok (Integer numerator)
   else Ok (Rational (numerator, denominator))
 
+let failure code message = Error { code; message; position = None }
+
+let exact_square_root numerator denominator =
+  if Z.sign numerator < 0 || Z.sign denominator <= 0 then None
+  else
+    let root_numerator = Z.sqrt numerator in
+    let root_denominator = Z.sqrt denominator in
+    match
+      Centl_Core.validate_square_root numerator denominator root_numerator
+        root_denominator
+    with
+    | Centl_Core.InvalidSquareRoot -> None
+    | Centl_Core.ValidSquareRoot root -> Some root
+
+let evaluate_exact expression =
+  match Centl_Core.evaluate expression with
+  | Centl_Core.Evaluated (Centl_Core.ExactRational value) ->
+      value_from_core value.numerator value.denominator
+  | Centl_Core.Evaluated
+      (Centl_Core.ExactSymbolic
+         (Centl_Core.Function
+            ("sqrt", [ Centl_Core.Literal (numerator, denominator) ]) as
+          expression)) ->
+      begin match exact_square_root numerator denominator with
+      | Some root -> value_from_core root.numerator root.denominator
+      | None -> Ok (Symbolic expression)
+      end
+  | Centl_Core.Evaluated (Centl_Core.ExactSymbolic expression) ->
+      Ok (Symbolic expression)
+  | Centl_Core.EvaluationFailure Centl_Core.ZeroDenominator ->
+      failure "zero_denominator" "a literal denominator cannot be zero"
+  | Centl_Core.EvaluationFailure Centl_Core.DivisionByZero ->
+      failure "division_by_zero" "division by zero"
+  | Centl_Core.EvaluationFailure Centl_Core.UndefinedPower ->
+      failure "undefined_power" "0^0 is undefined"
+
+type native_failure =
+  | Domain_error of string
+  | Uncertain_domain of string
+  | Unsupported of string
+  | Backend_failure of string
+
+let ensure_finite value =
+  if Centl_arb.is_finite value then Ok value
+  else Error (Uncertain_domain "the enclosure is not finite at this precision")
+
+let unary_domain name operation argument precision =
+  match name with
+  | "sqrt" ->
+      if Centl_arb.is_negative argument then
+        Error (Domain_error "sqrt is undefined for negative real values")
+      else if not (Centl_arb.is_nonnegative argument) then
+        Error
+          (Uncertain_domain
+             "could not prove that sqrt's argument is nonnegative")
+      else ensure_finite (operation argument precision)
+  | "log" ->
+      if Centl_arb.is_nonpositive argument then
+        Error (Domain_error "log is defined only for positive real values")
+      else if not (Centl_arb.is_positive argument) then
+        Error
+          (Uncertain_domain "could not prove that log's argument is positive")
+      else ensure_finite (operation argument precision)
+  | "asin" | "acos" ->
+      let one = Centl_arb.of_fraction "1" "1" precision in
+      let above_lower = Centl_arb.add argument one precision in
+      let below_upper = Centl_arb.sub one argument precision in
+      if Centl_arb.is_negative above_lower || Centl_arb.is_negative below_upper
+      then
+        Error (Domain_error (name ^ " requires an argument between -1 and 1"))
+      else if
+        not
+          (Centl_arb.is_nonnegative above_lower
+          && Centl_arb.is_nonnegative below_upper)
+      then
+        Error
+          (Uncertain_domain
+             ("could not prove that " ^ name ^ "'s argument is between -1 and 1"))
+      else ensure_finite (operation argument precision)
+  | _ -> ensure_finite (operation argument precision)
+
+let rec native_value expression precision =
+  let ( let* ) result next = Result.bind result next in
+  match expression with
+  | Centl_Core.Literal (numerator, denominator) ->
+      if Z.equal denominator Z.zero then
+        Error (Domain_error "a literal denominator cannot be zero")
+      else
+        Ok
+          (Centl_arb.of_fraction (Z.to_string numerator)
+             (Z.to_string denominator) precision)
+  | Centl_Core.Symbol "pi" -> Ok (Centl_arb.pi precision)
+  | Centl_Core.Symbol "e" ->
+      Ok (Centl_arb.exp (Centl_arb.of_fraction "1" "1" precision) precision)
+  | Centl_Core.Symbol "tau" ->
+      let two = Centl_arb.of_fraction "2" "1" precision in
+      Ok (Centl_arb.mul two (Centl_arb.pi precision) precision)
+  | Centl_Core.Symbol name ->
+      Error
+        (Unsupported
+           (Printf.sprintf "cannot approximate the unresolved symbol %s" name))
+  | Centl_Core.Negate inner ->
+      let* value = native_value inner precision in
+      Ok (Centl_arb.neg value)
+  | Centl_Core.Binary (operator, left, right) ->
+      let* left_value = native_value left precision in
+      let* right_value = native_value right precision in
+      begin match operator with
+      | Centl_Core.Add ->
+          ensure_finite (Centl_arb.add left_value right_value precision)
+      | Centl_Core.Subtract ->
+          ensure_finite (Centl_arb.sub left_value right_value precision)
+      | Centl_Core.Multiply ->
+          ensure_finite (Centl_arb.mul left_value right_value precision)
+      | Centl_Core.Divide ->
+          if Centl_arb.is_zero right_value then
+            Error (Domain_error "division by zero")
+          else if not (Centl_arb.is_nonzero right_value) then
+            Error
+              (Uncertain_domain "could not prove that the divisor excludes zero")
+          else ensure_finite (Centl_arb.div left_value right_value precision)
+      end
+  | Centl_Core.Power (base, exponent) ->
+      if (not (Z.fits_int exponent)) || Z.gt (Z.abs exponent) (Z.of_int 100_000)
+      then
+        Error
+          (Unsupported "the integer exponent exceeds the approximation limit")
+      else
+        let* base_value = native_value base precision in
+        let exponent = Z.to_int exponent in
+        if exponent < 0 && Centl_arb.is_zero base_value then
+          Error (Domain_error "zero cannot be raised to a negative power")
+        else if exponent < 0 && not (Centl_arb.is_nonzero base_value) then
+          Error
+            (Uncertain_domain
+               "could not prove that the base of a negative power excludes zero")
+        else ensure_finite (Centl_arb.pow base_value exponent precision)
+  | Centl_Core.Function ("abs", [ argument ]) ->
+      let* value = native_value argument precision in
+      Ok (Centl_arb.abs value)
+  | Centl_Core.Function (name, [ argument ]) ->
+      let* value = native_value argument precision in
+      begin match name with
+      | "sqrt" -> unary_domain name Centl_arb.sqrt value precision
+      | "exp" -> unary_domain name Centl_arb.exp value precision
+      | "log" -> unary_domain name Centl_arb.log value precision
+      | "sin" -> unary_domain name Centl_arb.sin value precision
+      | "cos" -> unary_domain name Centl_arb.cos value precision
+      | "tan" -> unary_domain name Centl_arb.tan value precision
+      | "asin" -> unary_domain name Centl_arb.asin value precision
+      | "acos" -> unary_domain name Centl_arb.acos value precision
+      | "atan" -> unary_domain name Centl_arb.atan value precision
+      | "sinh" -> unary_domain name Centl_arb.sinh value precision
+      | "cosh" -> unary_domain name Centl_arb.cosh value precision
+      | "tanh" -> unary_domain name Centl_arb.tanh value precision
+      | _ -> Error (Unsupported ("cannot rigorously approximate " ^ name))
+      end
+  | Centl_Core.Function ("atan2", [ y; x ]) ->
+      let* y_value = native_value y precision in
+      let* x_value = native_value x precision in
+      if Centl_arb.is_zero y_value && Centl_arb.is_zero x_value then
+        Error (Domain_error "atan2(0, 0) is undefined")
+      else ensure_finite (Centl_arb.atan2 y_value x_value precision)
+  | Centl_Core.Function (name, _) ->
+      Error
+        (Unsupported
+           (Printf.sprintf "%s has unsupported arguments for approximation" name))
+  | Centl_Core.Assuming (inner, _, _, _) -> native_value inner precision
+  | Centl_Core.Differentiate _ | Centl_Core.Substitute _
+  | Centl_Core.Derivative _ | Centl_Core.Simplify _ | Centl_Core.Expand _
+  | Centl_Core.Factor _ ->
+      Error
+        (Unsupported "this unresolved symbolic operation cannot be approximated")
+
+let power_of_ten exponent = Z.pow (Z.of_int 10) exponent
+
+let rational_power_of_ten exponent =
+  if exponent >= 0 then Q.of_bigint (power_of_ten exponent)
+  else Q.make Z.one (power_of_ten (-exponent))
+
+let rational_of_dyadic mantissa exponent =
+  if exponent >= 0 then Q.mul_2exp (Q.of_bigint mantissa) exponent
+  else Q.div_2exp (Q.of_bigint mantissa) (-exponent)
+
+let decimal_digits value = String.length (Z.to_string (Z.abs value))
+
+let decimal_order value =
+  if Q.sign value = 0 then 0
+  else
+    let value = Q.abs value in
+    let estimate =
+      decimal_digits (Q.num value) - decimal_digits (Q.den value)
+    in
+    let rec adjust order =
+      if Q.compare value (rational_power_of_ten order) < 0 then
+        adjust (order - 1)
+      else if Q.compare value (rational_power_of_ten (order + 1)) >= 0 then
+        adjust (order + 1)
+      else order
+    in
+    adjust estimate
+
+let scaled_integer ~upper value places =
+  let scaled =
+    if places >= 0 then Q.mul value (rational_power_of_ten places)
+    else Q.div value (rational_power_of_ten (-places))
+  in
+  if upper then Z.cdiv (Q.num scaled) (Q.den scaled)
+  else Z.fdiv (Q.num scaled) (Q.den scaled)
+
+let decimal_of_scaled value places =
+  if places < 0 then Z.to_string value ^ String.make (-places) '0'
+  else if places = 0 then Z.to_string value
+  else
+    let negative = Z.sign value < 0 in
+    let digits = Z.to_string (Z.abs value) in
+    let padded =
+      if String.length digits <= places then
+        String.make (places + 1 - String.length digits) '0' ^ digits
+      else digits
+    in
+    let split = String.length padded - places in
+    (if negative then "-" else "")
+    ^ String.sub padded 0 split ^ "."
+    ^ String.sub padded split places
+
+let decimal_interval lower upper digits =
+  let magnitude =
+    let lower = Q.abs lower in
+    let upper = Q.abs upper in
+    if Q.compare lower upper >= 0 then lower else upper
+  in
+  let places = digits - 1 - decimal_order magnitude in
+  let lower_scaled = scaled_integer ~upper:false lower places in
+  let upper_scaled = scaled_integer ~upper:true upper places in
+  let resolution = Q.div (rational_power_of_ten (-places)) (Q.of_int 2) in
+  ( decimal_of_scaled lower_scaled places,
+    decimal_of_scaled upper_scaled places,
+    Q.compare (Q.sub upper lower) resolution <= 0 )
+
+let enclosure_of_ball ball requested_digits working_bits =
+  if not (Centl_arb.is_finite ball) then
+    Error (Uncertain_domain "the backend returned a non-finite enclosure")
+  else
+    let lower_text, upper_text, exponent_text = Centl_arb.endpoints ball in
+    let lower_mantissa = Z.of_string lower_text in
+    let upper_mantissa = Z.of_string upper_text in
+    let exponent = Z.of_string exponent_text in
+    begin match
+      Centl_Core.validate_enclosure lower_mantissa upper_mantissa exponent
+        (Z.of_int 1_000_000)
+    with
+    | Centl_Core.InvalidEnclosure ->
+        Error
+          (Backend_failure "the backend returned an invalid dyadic enclosure")
+    | Centl_Core.ValidEnclosure enclosure ->
+        if not (Z.fits_int enclosure.binary_exponent) then
+          Error
+            (Backend_failure "the backend exponent is outside the host range")
+        else
+          let binary_exponent = Z.to_int enclosure.binary_exponent in
+          let lower = rational_of_dyadic lower_mantissa binary_exponent in
+          let upper = rational_of_dyadic upper_mantissa binary_exponent in
+          let lower_decimal, upper_decimal, resolved =
+            decimal_interval lower upper requested_digits
+          in
+          Ok
+            ( Real_enclosure
+                {
+                  lower_mantissa;
+                  upper_mantissa;
+                  binary_exponent;
+                  lower_decimal;
+                  upper_decimal;
+                  requested_digits;
+                  working_bits;
+                },
+              resolved )
+    end
+
+let approximate expression requested_digits =
+  if requested_digits < 1 || requested_digits > 1_000 then
+    failure "precision_limit" "approximation digits must be between 1 and 1000"
+  else
+    let target_bits = 64 + (((requested_digits * 3_322) + 999) / 1_000) in
+    let rec attempt working_bits =
+      match native_value expression working_bits with
+      | Error (Domain_error message) -> failure "domain_error" message
+      | Error (Unsupported message) ->
+          failure "unsupported_approximation" message
+      | Error (Backend_failure message) -> failure "backend_failure" message
+      | Error (Uncertain_domain message) ->
+          if working_bits >= 16_384 then
+            failure "insufficient_precision" message
+          else attempt (min 16_384 (working_bits * 2))
+      | Ok ball ->
+          begin match enclosure_of_ball ball requested_digits working_bits with
+          | Error (Backend_failure message) -> failure "backend_failure" message
+          | Error (Uncertain_domain message) ->
+              if working_bits >= 16_384 then
+                failure "insufficient_precision" message
+              else attempt (min 16_384 (working_bits * 2))
+          | Error (Domain_error message) -> failure "domain_error" message
+          | Error (Unsupported message) ->
+              failure "unsupported_approximation" message
+          | Ok (value, true) -> Ok value
+          | Ok (_, false) when working_bits >= 16_384 ->
+              failure "insufficient_precision"
+                "the enclosure did not reach the requested significant digits"
+          | Ok (_, false) -> attempt (min 16_384 (working_bits * 2))
+          end
+    in
+    attempt target_bits
+
+let approximation_request = function
+  | Centl_Core.Function ("approx", [ expression ]) -> Some (Ok (expression, 20))
+  | Centl_Core.Function
+      ("approx", [ expression; Centl_Core.Literal (digits, denominator) ])
+    when Z.equal denominator Z.one ->
+      if Z.fits_int digits then Some (Ok (expression, Z.to_int digits))
+      else Some (failure "precision_limit" "approximation digits are too large")
+  | Centl_Core.Function ("approx", _) ->
+      Some
+        (failure "invalid_arguments"
+           "use approx(expression) or approx(expression, digits)")
+  | _ -> None
+
 let evaluate source =
   match Centl_parser.parse source with
   | Error parse_error ->
@@ -42,32 +380,11 @@ let evaluate source =
           position = Some parse_error.position;
         }
   | Ok expression ->
-      begin match Centl_Core.evaluate (Centl_Core.resolve expression) with
-      | Centl_Core.Evaluated (Centl_Core.ExactRational value) ->
-          value_from_core value.numerator value.denominator
-      | Centl_Core.Evaluated (Centl_Core.ExactSymbolic expression) ->
-          Ok (Symbolic expression)
-      | Centl_Core.EvaluationFailure Centl_Core.ZeroDenominator ->
-          Error
-            {
-              code = "zero_denominator";
-              message = "a literal denominator cannot be zero";
-              position = None;
-            }
-      | Centl_Core.EvaluationFailure Centl_Core.DivisionByZero ->
-          Error
-            {
-              code = "division_by_zero";
-              message = "division by zero";
-              position = None;
-            }
-      | Centl_Core.EvaluationFailure Centl_Core.UndefinedPower ->
-          Error
-            {
-              code = "undefined_power";
-              message = "0^0 is undefined";
-              position = None;
-            }
+      let expression = Centl_Core.resolve expression in
+      begin match approximation_request expression with
+      | Some (Ok (inner, digits)) -> approximate inner digits
+      | Some (Error _ as error) -> error
+      | None -> evaluate_exact expression
       end
 
 let fragment style text = [ (style, text) ]
@@ -130,8 +447,7 @@ let rec expression_fragments ?(parent_precedence = -1) expression =
           expression_fragments ~parent_precedence:3 base
           |> append (fragment Operator "^")
           |> append (fragment Number (Z.to_string exponent)) )
-    | Centl_Core.Function (name, argument) ->
-        (4, call_fragments name [ argument ])
+    | Centl_Core.Function (name, arguments) -> (4, call_fragments name arguments)
     | Centl_Core.Differentiate (inner, variable)
     | Centl_Core.Derivative (inner, variable) ->
         (4, call_fragments "diff" [ inner; Centl_Core.Symbol variable ])
@@ -179,6 +495,17 @@ let fragments_of_value = function
   | Integer value -> fragment Number (Z.to_string value)
   | Rational (numerator, denominator) -> literal_fragments numerator denominator
   | Symbolic expression -> expression_fragments expression
+  | Real_enclosure enclosure ->
+      let prefix = fragment Operator "≈ " in
+      if enclosure.lower_decimal = enclosure.upper_decimal then
+        prefix |> append (fragment Number enclosure.lower_decimal)
+      else
+        prefix
+        |> append (fragment Punctuation "[")
+        |> append (fragment Number enclosure.lower_decimal)
+        |> append (fragment Punctuation ", ")
+        |> append (fragment Number enclosure.upper_decimal)
+        |> append (fragment Punctuation "]")
 
 let text_of_fragments fragments = fragments |> List.map snd |> String.concat ""
 let text_of_value value = value |> fragments_of_value |> text_of_fragments
@@ -263,6 +590,38 @@ let json_of_value = function
         | conditions -> fields @ [ ("conditions", `List conditions) ]
       in
       `Assoc fields
+  | Real_enclosure enclosure ->
+      let text = text_of_value (Real_enclosure enclosure) in
+      `Assoc
+        [
+          ("kind", `String "real_enclosure");
+          ("exact", `Bool false);
+          ("text", `String text);
+          ( "dyadic",
+            `Assoc
+              [
+                ( "lower_mantissa",
+                  `String (Z.to_string enclosure.lower_mantissa) );
+                ( "upper_mantissa",
+                  `String (Z.to_string enclosure.upper_mantissa) );
+                ("binary_exponent", `Int enclosure.binary_exponent);
+              ] );
+          ( "decimal",
+            `Assoc
+              [
+                ("lower", `String enclosure.lower_decimal);
+                ("upper", `String enclosure.upper_decimal);
+                ("requested_significant_digits", `Int enclosure.requested_digits);
+                ("certified_significant_digits", `Int enclosure.requested_digits);
+              ] );
+          ( "precision",
+            `Assoc
+              [
+                ("working_bits", `Int enclosure.working_bits);
+                ("backend", `String "flint-arb");
+                ("rigorous", `Bool true);
+              ] );
+        ]
 
 let json_of_evaluation = function
   | Ok value ->

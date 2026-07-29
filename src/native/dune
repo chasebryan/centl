@@ -1,0 +1,12 @@
+(include_subdirs no)
+
+(library
+ (name centl_arb)
+ (wrapped false)
+ (modules Centl_arb)
+ (foreign_stubs
+  (language c)
+  (names centl_arb_stubs)
+  (flags
+   (:standard -Wall -Wextra -Werror)))
+ (c_library_flags -lflint -lmpfr -lgmp))

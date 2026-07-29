@@ -38,7 +38,7 @@ let parse_arguments arguments =
         print_help ();
         exit 0
     | "--version" :: _ ->
-        print_endline "centl 0.3.0-dev";
+        print_endline "centl 0.4.0-dev";
         exit 0
     | "--json" :: rest -> loop { command with mode = Json } rest
     | "--color" :: rest -> loop { command with color = Always } rest
@@ -131,7 +131,7 @@ let run_file ~color mode path =
 
 let repl ~color () =
   print_endline
-    "CENTL 0.3.0-dev — exact arithmetic, symbolic calculus, and algebra";
+    "CENTL 0.4.0-dev — exact mathematics and rigorous real enclosures";
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
     print_string (if color then ansi "94" "centl> " else "centl> ");
@@ -144,8 +144,8 @@ let repl ~color () =
         | ":quit" | ":q" -> ()
         | ":help" ->
             print_endline
-              "Use diff, substitute, simplify, expand, factor, or assuming \
-               directly.";
+              "Use ordinary expressions directly; wrap one in approx(expr, \
+               digits) for a rigorous real enclosure.";
             loop ()
         | expression ->
             ignore (evaluate_human ~color expression);

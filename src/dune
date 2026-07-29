@@ -12,7 +12,7 @@
   Centl_engine)
  (flags
   (:standard -w -8-27))
- (libraries zarith yojson))
+ (libraries centl_arb zarith yojson))
 
 (executable
  (name main)
