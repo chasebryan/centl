@@ -2,9 +2,28 @@
 set -eu
 
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+binary="$project_root/_build/default/src/main.exe"
 
-if [ ! -f "$project_root/src/generated/Centl_Core.ml" ]; then
-  make -s -C "$project_root" build
+if [ -x "$binary" ]; then
+  exec "$binary" "$@"
 fi
 
-exec dune exec --root "$project_root" centl -- "$@"
+if command -v fstar.exe >/dev/null 2>&1; then
+  fstar=$(command -v fstar.exe)
+elif [ -n "${HOME:-}" ] && [ -x "$HOME/.local/bin/fstar.exe" ]; then
+  fstar="$HOME/.local/bin/fstar.exe"
+else
+  echo "centl: F* was not found; run 'make build' in the configured development shell" >&2
+  exit 127
+fi
+
+if command -v dune >/dev/null 2>&1; then
+  FSTAR="$fstar" make -s -C "$project_root" build
+elif command -v opam >/dev/null 2>&1; then
+  FSTAR="$fstar" opam exec --switch=centl -- make -s -C "$project_root" build
+else
+  echo "centl: Dune and OPAM were not found; activate the CENTL toolchain first" >&2
+  exit 127
+fi
+
+exec "$binary" "$@"
