@@ -34,6 +34,10 @@ Activate it in a shell with:
 eval "$(opam env --switch=centl)"
 ```
 
+The Makefile also enters this switch automatically when `dune` is not already
+on `PATH`, so `make build` and `make test` work in an ordinary shell after the
+switch has been installed.
+
 ## Numerical laboratory
 
 - Julia installed through Juliaup.

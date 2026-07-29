@@ -1,4 +1,10 @@
 FSTAR ?= fstar.exe
+OPAM_SWITCH ?= centl
+DUNE ?= $(shell \
+	if command -v dune >/dev/null 2>&1; then command -v dune; \
+	elif command -v opam >/dev/null 2>&1; then \
+		printf '%s' 'opam exec --switch=$(OPAM_SWITCH) -- dune'; \
+	else printf '%s' dune; fi)
 FSTAR_GCD := src/fstar/Centl.Gcd.fst
 FSTAR_CORE := src/fstar/Centl.Core.fst
 FSTAR_CACHE := _build/fstar
@@ -28,11 +34,11 @@ extract: verify
 	test -f $(GENERATED)
 
 build: extract
-	dune build
+	$(DUNE) build
 
 test: extract
-	dune runtest
+	$(DUNE) runtest
 
 clean:
-	dune clean
+	$(DUNE) clean
 	rm -f src/generated/*.ml src/generated/*.mli
