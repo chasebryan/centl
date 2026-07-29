@@ -47,7 +47,7 @@
   ≈ [1.41421356237, 1.41421356238]
 
   $ ../src/main.exe --version
-  centl 0.6.0-dev
+  centl 0.6.0
 
   $ ../src/main.exe --syntax | sed -n '1,4p'
   CENTL syntax

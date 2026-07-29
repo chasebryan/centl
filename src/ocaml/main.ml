@@ -1,6 +1,8 @@
 type mode = Human | Json
 type color_mode = Auto | Always | Never
 
+let version = "0.6.0"
+
 type command = {
   mode : mode;
   color : color_mode;
@@ -44,7 +46,7 @@ let parse_arguments arguments =
         print_help ();
         exit 0
     | "--version" :: _ ->
-        print_endline "centl 0.6.0-dev";
+        print_endline ("centl " ^ version);
         exit 0
     | "--syntax" :: _ ->
         Centl_syntax.print stdout;
@@ -142,7 +144,8 @@ let run_file ~color mode path =
 let repl ~color () =
   let session = Centl_engine.create_session () in
   print_endline
-    "CENTL 0.6.0-dev — exact mathematics and rigorous real enclosures";
+    (Printf.sprintf
+       "CENTL %s — exact mathematics and rigorous real enclosures" version);
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
     print_string (if color then ansi "94" "centl> " else "centl> ");

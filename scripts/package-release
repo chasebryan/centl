@@ -74,9 +74,6 @@ mkdir -p "$package/bin" "$package/lib" "$package/libexec" \
 cp "$project_root/scripts/release-launcher" "$package/bin/centl"
 cp "$binary" "$package/libexec/centl"
 chmod 755 "$package/bin/centl" "$package/libexec/centl"
-if command -v strip >/dev/null 2>&1; then
-  strip "$package/libexec/centl"
-fi
 
 flint=$(dependency_path libflint.so.18 "$binary")
 gmp=$(dependency_path libgmp.so.10 "$binary")
@@ -84,6 +81,12 @@ mpfr=$(dependency_path libmpfr.so.6 "$flint")
 cp -L "$flint" "$package/lib/libflint.so.18"
 cp -L "$gmp" "$package/lib/libgmp.so.10"
 cp -L "$mpfr" "$package/lib/libmpfr.so.6"
+if command -v strip >/dev/null 2>&1; then
+  strip --strip-unneeded "$package/libexec/centl" \
+    "$package/lib/libflint.so.18" \
+    "$package/lib/libgmp.so.10" \
+    "$package/lib/libmpfr.so.6"
+fi
 
 cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
 copy_license "$package/licenses/FLINT" \
@@ -136,6 +139,9 @@ mkdir -p "$output_directory"
 asset="centl-linux-$architecture.tar.gz"
 archive="$output_directory/$asset"
 epoch=${SOURCE_DATE_EPOCH:-0}
+case "$epoch" in
+  *[!0-9]*|'') fail "SOURCE_DATE_EPOCH must be a non-negative integer" ;;
+esac
 tar --sort=name --mtime="@$epoch" --owner=0 --group=0 --numeric-owner \
   -czf "$archive" -C "$temporary" centl
 (cd "$output_directory" && sha256sum "$asset" > "$asset.sha256")
