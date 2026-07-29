@@ -10,6 +10,18 @@ let error_code source =
         (Centl_engine.text_of_value result)
   | Error error -> error.code
 
+let session_text session source =
+  match Centl_engine.evaluate_in_session session source with
+  | Ok result -> Centl_engine.text_of_session_result result
+  | Error error -> Alcotest.fail (Centl_engine.error_text error)
+
+let session_error_code session source =
+  match Centl_engine.evaluate_in_session session source with
+  | Ok result ->
+      Alcotest.failf "expected an error, received %s"
+        (Centl_engine.text_of_session_result result)
+  | Error error -> error.code
+
 let exact_examples () =
   Alcotest.(check string) "finite decimals" "3/10" (value "0.1 + 0.2");
   Alcotest.(check string) "fractions" "1/2" (value "1/3 + 1/6");
@@ -330,6 +342,94 @@ let coloration () =
          \027[0m\027[95mx\027[0m\027[93m^\027[0m\027[96m2\027[0m"
         (Centl_engine.colored_text_of_value result)
 
+let definition_examples () =
+  let session = Centl_engine.create_session () in
+  Alcotest.(check string)
+    "define a value" "r = 3"
+    (session_text session "r = 3");
+  Alcotest.(check string)
+    "use a value" "9 * pi"
+    (session_text session "circle_area(r)");
+  Alcotest.(check string)
+    "define a function" "f(x) = x^2 + 1"
+    (session_text session "f(x) = x^2 + 1");
+  Alcotest.(check string) "call a function" "10" (session_text session "f(3)");
+  Alcotest.(check string)
+    "differentiate a function" "2 * x"
+    (session_text session "diff(f(x), x)");
+  let multivariate = Centl_engine.create_session () in
+  ignore (session_text multivariate "difference(x, y) = x - y");
+  Alcotest.(check string)
+    "simultaneous substitution" "y - x"
+    (session_text multivariate "difference(y, x)");
+  let nested = Centl_engine.create_session () in
+  ignore (session_text nested "shift(x) = x + 1");
+  Alcotest.(check string)
+    "compose definitions" "square_shift(x) = (x + 1)^2"
+    (session_text nested "square_shift(x) = shift(x)^2");
+  Alcotest.(check string)
+    "call composed definition" "16"
+    (session_text nested "square_shift(3)");
+  let bound = Centl_engine.create_session () in
+  ignore (session_text bound "x = 3");
+  Alcotest.(check string)
+    "calculus variable shadows a value" "2 * x"
+    (session_text bound "diff(x^2, x)");
+  Alcotest.(check string)
+    "substitution variable shadows a value" "9"
+    (session_text bound "substitute(x^2, x = 3)");
+  ignore (session_text bound "square(x) = x^2");
+  Alcotest.(check string)
+    "function parameter shadows a value" "16"
+    (session_text bound "square(4)");
+  let captured = Centl_engine.create_session () in
+  ignore (session_text captured "a = 2");
+  Alcotest.(check string)
+    "definitions use prior values" "b = 5"
+    (session_text captured "b = a + 3");
+  Alcotest.(check string) "resolved definition" "5" (session_text captured "b");
+  let exact = Centl_engine.create_session () in
+  ignore (session_text exact "angle = pi / 6");
+  Alcotest.(check bool)
+    "definitions can be approximated when used" true
+    (match Centl_engine.evaluate_in_session exact "approx(sin(angle), 20)" with
+    | Ok (Centl_engine.Session_value (Centl_engine.Real_enclosure _)) -> true
+    | _ -> false)
+
+let definition_failures () =
+  let immutable = Centl_engine.create_session () in
+  ignore (session_text immutable "r = 3");
+  Alcotest.(check string)
+    "immutable names" "immutable_definition"
+    (session_error_code immutable "r = 4");
+  Alcotest.(check string)
+    "failed redefinition changes nothing" "3"
+    (session_text immutable "r");
+  let error source =
+    session_error_code (Centl_engine.create_session ()) source
+  in
+  Alcotest.(check string) "reserved name" "reserved_name" (error "pi = 3");
+  Alcotest.(check string)
+    "empty parameters" "invalid_definition" (error "f() = 3");
+  Alcotest.(check string)
+    "duplicate parameters" "invalid_definition" (error "f(x, x) = x");
+  Alcotest.(check string)
+    "self-referencing value" "recursive_definition" (error "a = a + 1");
+  Alcotest.(check string)
+    "self-referencing function" "recursive_definition" (error "f(x) = f(x) + 1");
+  Alcotest.(check string)
+    "approximate definition" "exact_definition_required"
+    (error "a = approx(pi, 20)");
+  let arity = Centl_engine.create_session () in
+  ignore (session_text arity "f(x) = x^2");
+  Alcotest.(check string)
+    "wrong arity" "invalid_arguments"
+    (session_error_code arity "f(1, 2)");
+  let isolated = Centl_engine.create_session () in
+  Alcotest.(check string)
+    "sessions are isolated" "r"
+    (session_text isolated "r")
+
 let contains text fragment =
   let text_length = String.length text in
   let fragment_length = String.length fragment in
@@ -386,10 +486,11 @@ let syntax_catalog () =
     forms;
   Array.iter
     (fun (example : Centl_syntax.example) ->
+      let session = Centl_engine.create_session () in
       Alcotest.(check string)
         ("example result for " ^ example.calculation)
         example.result
-        (value example.calculation))
+        (session_text session example.calculation))
     Centl_syntax.examples
 
 let property_integer_addition () =
@@ -519,6 +620,11 @@ let () =
             property_binomial_expansion;
           Alcotest.test_case "coefficient collection property" `Quick
             property_coefficient_collection;
+        ] );
+      ( "definitions",
+        [
+          Alcotest.test_case "values and functions" `Quick definition_examples;
+          Alcotest.test_case "immutable failures" `Quick definition_failures;
         ] );
       ( "assumptions",
         [

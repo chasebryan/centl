@@ -17,7 +17,8 @@ enclosure.
 
 ### Symbolic math
 
-`f(x, ...)` `diff(expression, variable)`
+`f(x, ...)` `name = expression` `f(x, ...) = expression`
+`diff(expression, variable)`
 `substitute(expression, variable = value)` `simplify(expression)`
 `expand(expression)` `factor(expression)` `assuming(expression, condition)`
 `=  !=  <  <=  >  >=`
@@ -55,9 +56,11 @@ enclosure.
 ```text
 exact          0.1 + 0.2                         -> 3/10
 calculus       diff(x^3 + 2*x + 1, x)            -> 3 * x^2 + 2
-algebra        factor(x^2 - 1)                   -> (x - 1) * (x + 1)
+definition     f(x) = x^2 + 1                    -> f(x) = x^2 + 1
 geometry       circle_area(3)                    -> 9 * pi
 rigorous       approx(sqrt(2), 12)               -> ≈ [1.41421356237, 1.41421356238]
 ```
 
 Inside the calculator, type `:syntax` for the catalog or `:help` for usage.
+Definitions are immutable and last for the current calculator session or
+script. Approximate a definition when using it: `approx(f(2), 20)`.

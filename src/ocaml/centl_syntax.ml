@@ -38,6 +38,8 @@ let sections =
       entries =
         [|
           entry "f(x, ...)" "symbolic function call";
+          entry "name = expression" "immutable value definition";
+          entry "f(x, ...) = expression" "immutable function definition";
           entry "diff(expression, variable)" "differentiate";
           entry "substitute(expression, variable = value)" "substitute a value";
           entry "simplify(expression)" "collect and simplify";
@@ -124,9 +126,9 @@ let examples =
       result = "3 * x^2 + 2";
     };
     {
-      kind = "algebra";
-      calculation = "factor(x^2 - 1)";
-      result = "(x - 1) * (x + 1)";
+      kind = "definition";
+      calculation = "f(x) = x^2 + 1";
+      result = "f(x) = x^2 + 1";
     };
     { kind = "geometry"; calculation = "circle_area(3)"; result = "9 * pi" };
     {
@@ -148,6 +150,8 @@ let identifier_of_form = function
   | "a / b" -> "/"
   | "x^n" -> "^"
   | "f(x, ...)" -> "f(...)"
+  | "name = expression" -> "name="
+  | "f(x, ...) = expression" -> "f(...)="
   | "=  !=  <  <=  >  >=" -> "= != < <= > >="
   | "# comment" -> "#"
   | form ->

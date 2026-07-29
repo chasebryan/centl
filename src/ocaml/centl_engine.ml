@@ -25,6 +25,24 @@ type fragment = token_style * string
 type error = { code : string; message : string; position : int option }
 type evaluation = (exact_value, error) result
 
+type function_binding = {
+  parameters : string list;
+  body : Centl_Core.expression;
+}
+
+type binding =
+  | Bound_value of Centl_Core.expression
+  | Bound_function of function_binding
+
+type session = { mutable bindings : (string * binding) list }
+
+type session_result =
+  | Session_value of exact_value
+  | Defined_value of string * exact_value
+  | Defined_function of string * string list * Centl_Core.expression
+
+type session_evaluation = (session_result, error) result
+
 let value_from_core numerator denominator =
   if Z.sign denominator <= 0 then
     Error
@@ -370,22 +388,289 @@ let approximation_request = function
            "use approx(expression) or approx(expression, digits)")
   | _ -> None
 
+let syntax_error (parse_error : Centl_parser.error) =
+  Error
+    {
+      code = "syntax_error";
+      message = parse_error.message;
+      position = Some parse_error.position;
+    }
+
+let evaluate_expression expression =
+  let expression = Centl_Core.resolve expression in
+  match approximation_request expression with
+  | Some (Ok (inner, digits)) -> approximate inner digits
+  | Some (Error _ as error) -> error
+  | None -> evaluate_exact expression
+
 let evaluate source =
   match Centl_parser.parse source with
-  | Error parse_error ->
-      Error
-        {
-          code = "syntax_error";
-          message = parse_error.message;
-          position = Some parse_error.position;
-        }
-  | Ok expression ->
-      let expression = Centl_Core.resolve expression in
-      begin match approximation_request expression with
-      | Some (Ok (inner, digits)) -> approximate inner digits
-      | Some (Error _ as error) -> error
-      | None -> evaluate_exact expression
-      end
+  | Error parse_error -> syntax_error parse_error
+  | Ok expression -> evaluate_expression expression
+
+let reserved_names =
+  [
+    "pi";
+    "e";
+    "tau";
+    "diff";
+    "substitute";
+    "assuming";
+    "simplify";
+    "expand";
+    "factor";
+    "approx";
+    "sqrt";
+    "abs";
+    "exp";
+    "log";
+    "sin";
+    "cos";
+    "tan";
+    "asin";
+    "acos";
+    "atan";
+    "atan2";
+    "sinh";
+    "cosh";
+    "tanh";
+    "radians";
+    "degrees";
+    "square_area";
+    "rectangle_area";
+    "rectangle_perimeter";
+    "triangle_area";
+    "trapezoid_area";
+    "circle_area";
+    "circumference";
+    "sphere_area";
+    "sphere_volume";
+    "cylinder_volume";
+    "hypot";
+    "distance";
+    "slope";
+    "gcd";
+    "lcm";
+    "factorial";
+    "choose";
+    "permutations";
+    "fibonacci";
+  ]
+
+let create_session () = { bindings = [] }
+let lookup session name = List.assoc_opt name session.bindings
+let session_failure code message = Error { code; message; position = None }
+
+let rec expand_expression session bound expression =
+  let ( let* ) result next = Result.bind result next in
+  match expression with
+  | Centl_Core.Literal _ -> Ok expression
+  | Centl_Core.Symbol name ->
+      if List.mem name bound then Ok expression
+      else
+        begin match lookup session name with
+        | None -> Ok expression
+        | Some (Bound_value value) -> Ok value
+        | Some (Bound_function _) ->
+            session_failure "invalid_arguments"
+              (name ^ " is a function; call it with parentheses")
+        end
+  | Centl_Core.Negate inner ->
+      let* inner = expand_expression session bound inner in
+      Ok (Centl_Core.Negate inner)
+  | Centl_Core.Binary (operator, left, right) ->
+      let* left = expand_expression session bound left in
+      let* right = expand_expression session bound right in
+      Ok (Centl_Core.Binary (operator, left, right))
+  | Centl_Core.Power (base, exponent) ->
+      let* base = expand_expression session bound base in
+      Ok (Centl_Core.Power (base, exponent))
+  | Centl_Core.Function (name, arguments) ->
+      let* arguments = expand_arguments session bound arguments in
+      if List.mem name bound then Ok (Centl_Core.Function (name, arguments))
+      else
+        begin match lookup session name with
+        | None -> Ok (Centl_Core.Function (name, arguments))
+        | Some (Bound_value _) ->
+            session_failure "invalid_arguments"
+              (name ^ " is a value, not a function")
+        | Some (Bound_function definition) ->
+            let expected = List.length definition.parameters in
+            let received = List.length arguments in
+            if expected <> received then
+              session_failure "invalid_arguments"
+                (Printf.sprintf "%s expects %d %s, received %d" name expected
+                   (if expected = 1 then "argument" else "arguments")
+                   received)
+            else
+              Ok (instantiate definition.parameters arguments definition.body)
+        end
+  | Centl_Core.Differentiate (inner, variable) ->
+      let* inner = expand_expression session (variable :: bound) inner in
+      Ok (Centl_Core.Differentiate (inner, variable))
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      let* inner = expand_expression session (variable :: bound) inner in
+      let* replacement = expand_expression session bound replacement in
+      Ok (Centl_Core.Substitute (inner, variable, replacement))
+  | Centl_Core.Derivative (inner, variable) ->
+      let* inner = expand_expression session (variable :: bound) inner in
+      Ok (Centl_Core.Derivative (inner, variable))
+  | Centl_Core.Simplify inner ->
+      let* inner = expand_expression session bound inner in
+      Ok (Centl_Core.Simplify inner)
+  | Centl_Core.Expand inner ->
+      let* inner = expand_expression session bound inner in
+      Ok (Centl_Core.Expand inner)
+  | Centl_Core.Factor inner ->
+      let* inner = expand_expression session bound inner in
+      Ok (Centl_Core.Factor inner)
+  | Centl_Core.Assuming (inner, left, relation, right) ->
+      let* inner = expand_expression session bound inner in
+      let* left = expand_expression session bound left in
+      let* right = expand_expression session bound right in
+      Ok (Centl_Core.Assuming (inner, left, relation, right))
+
+and expand_arguments session bound arguments =
+  let ( let* ) result next = Result.bind result next in
+  match arguments with
+  | [] -> Ok []
+  | argument :: rest ->
+      let* argument = expand_expression session bound argument in
+      let* rest = expand_arguments session bound rest in
+      Ok (argument :: rest)
+
+and instantiate parameters arguments body =
+  let markers =
+    List.mapi
+      (fun index _ -> Printf.sprintf "$centl_argument_%d" index)
+      parameters
+  in
+  let marked =
+    List.fold_left2
+      (fun expression parameter marker ->
+        Centl_Core.substitute expression parameter (Centl_Core.Symbol marker))
+      body parameters markers
+  in
+  List.fold_left2
+    (fun expression marker argument ->
+      Centl_Core.substitute expression marker argument)
+    marked markers arguments
+
+let rec contains_approximation = function
+  | Centl_Core.Function ("approx", _) -> true
+  | Centl_Core.Literal _ | Centl_Core.Symbol _ -> false
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Differentiate (inner, _)
+  | Centl_Core.Derivative (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      contains_approximation inner
+  | Centl_Core.Binary (_, left, right) ->
+      contains_approximation left || contains_approximation right
+  | Centl_Core.Function (_, arguments) ->
+      List.exists contains_approximation arguments
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      contains_approximation inner || contains_approximation replacement
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      contains_approximation inner
+      || contains_approximation left
+      || contains_approximation right
+
+let rec references_name name = function
+  | Centl_Core.Symbol symbol -> symbol = name
+  | Centl_Core.Function (function_name, arguments) ->
+      function_name = name || List.exists (references_name name) arguments
+  | Centl_Core.Literal _ -> false
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Differentiate (inner, _)
+  | Centl_Core.Derivative (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      references_name name inner
+  | Centl_Core.Binary (_, left, right) ->
+      references_name name left || references_name name right
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      references_name name inner || references_name name replacement
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      references_name name inner || references_name name left
+      || references_name name right
+
+let expression_of_exact_value = function
+  | Integer value -> Centl_Core.Literal (value, Z.one)
+  | Rational (numerator, denominator) ->
+      Centl_Core.Literal (numerator, denominator)
+  | Symbolic expression -> expression
+  | Real_enclosure _ -> assert false
+
+let validate_definition_name session name =
+  if List.mem name reserved_names then
+    session_failure "reserved_name"
+      (name ^ " is built in and cannot be redefined")
+  else if Option.is_some (lookup session name) then
+    session_failure "immutable_definition"
+      (name ^ " is already defined; definitions are immutable")
+  else Ok ()
+
+let validate_parameters name parameters =
+  if parameters = [] then
+    session_failure "invalid_definition"
+      "a function definition needs at least one parameter"
+  else if List.mem name parameters then
+    session_failure "invalid_definition"
+      "a function cannot use its own name as a parameter"
+  else if
+    List.exists (fun parameter -> List.mem parameter reserved_names) parameters
+  then
+    session_failure "reserved_name"
+      "function parameters cannot use built-in names"
+  else
+    let unique = List.sort_uniq String.compare parameters in
+    if List.length unique <> List.length parameters then
+      session_failure "invalid_definition" "function parameters must be unique"
+    else Ok ()
+
+let prepare_definition session bound name expression =
+  let ( let* ) result next = Result.bind result next in
+  let* expression = expand_expression session bound expression in
+  if references_name name expression then
+    session_failure "recursive_definition"
+      (name ^ " cannot be defined in terms of itself")
+  else if contains_approximation expression then
+    session_failure "exact_definition_required"
+      "definitions must be exact; use approx(...) when evaluating them"
+  else
+    let* value = evaluate_expression expression in
+    match value with
+    | Real_enclosure _ ->
+        session_failure "exact_definition_required"
+          "definitions must be exact; use approx(...) when evaluating them"
+    | value -> Ok (value, expression_of_exact_value value)
+
+let evaluate_in_session session source =
+  let ( let* ) result next = Result.bind result next in
+  match Centl_parser.parse_statement source with
+  | Error parse_error -> syntax_error parse_error
+  | Ok (Centl_parser.Evaluate expression) ->
+      let* expression = expand_expression session [] expression in
+      Result.map
+        (fun value -> Session_value value)
+        (evaluate_expression expression)
+  | Ok (Centl_parser.Define_value (name, expression)) ->
+      let* () = validate_definition_name session name in
+      let* value, expression = prepare_definition session [] name expression in
+      session.bindings <- (name, Bound_value expression) :: session.bindings;
+      Ok (Defined_value (name, value))
+  | Ok (Centl_parser.Define_function (name, parameters, body)) ->
+      let* () = validate_definition_name session name in
+      let* () = validate_parameters name parameters in
+      let* _, body = prepare_definition session parameters name body in
+      session.bindings <-
+        (name, Bound_function { parameters; body }) :: session.bindings;
+      Ok (Defined_function (name, parameters, body))
 
 let fragment style text = [ (style, text) ]
 let append right left = List.append left right
@@ -517,11 +802,34 @@ let ansi_code = function
   | Operator -> "93"
   | Punctuation -> "2;37"
 
-let colored_text_of_value value =
-  fragments_of_value value
+let colored_text_of_fragments fragments =
+  fragments
   |> List.map (fun (style, text) ->
       Printf.sprintf "\027[%sm%s\027[0m" (ansi_code style) text)
   |> String.concat ""
+
+let colored_text_of_value value =
+  fragments_of_value value |> colored_text_of_fragments
+
+let fragments_of_session_result = function
+  | Session_value value -> fragments_of_value value
+  | Defined_value (name, value) ->
+      fragment Symbol_name name
+      |> append (fragment Operator " = ")
+      |> append (fragments_of_value value)
+  | Defined_function (name, parameters, body) ->
+      let arguments =
+        List.map (fun name -> Centl_Core.Symbol name) parameters
+      in
+      call_fragments name arguments
+      |> append (fragment Operator " = ")
+      |> append (expression_fragments body)
+
+let text_of_session_result result =
+  result |> fragments_of_session_result |> text_of_fragments
+
+let colored_text_of_session_result result =
+  result |> fragments_of_session_result |> colored_text_of_fragments
 
 let error_text error =
   match error.position with
