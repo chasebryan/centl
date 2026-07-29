@@ -60,3 +60,8 @@ julia -e 'using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2))
 
 `make test` verifies the F* core, builds the native FLINT/Arb binding, and runs
 exact, symbolic, rigorous-containment, CLI, JSON, and property tests.
+
+`make release VERSION=x.y.z` builds a Linux x86_64 archive containing the
+executable and its private FLINT, GMP, and MPFR runtime libraries. Release
+automation builds against glibc 2.35 in Ubuntu 22.04; F* and FLINT downloads are
+accepted only when they match the checksums pinned in the workflow.

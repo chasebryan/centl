@@ -103,6 +103,10 @@ machine schema, and differential test suite.
 - Add algebraic-identity, monotonicity, containment, and metamorphic tests.
 - Compare difficult cases against independent Julia/Nemo evaluations.
 - Produce reproducible native release bundles and dependency notices.
+- Publish native Linux, macOS, and Windows packages, with x86_64 and Arm targets
+  where their upstream numerical dependencies support them.
+- Test every package on a clean native runner against the same language and
+  numerical conformance suite.
 - Audit resource exhaustion, cancellation, and hostile machine requests.
 
 Exit condition: the release process reproduces verified binaries and publishes

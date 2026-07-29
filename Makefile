@@ -12,7 +12,7 @@ GENERATED := src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
-.PHONY: all verify extract build test clean
+.PHONY: all verify extract build test release clean
 
 all: build
 
@@ -38,6 +38,10 @@ build: extract
 
 test: extract
 	$(DUNE) runtest
+
+release: build
+	test -n "$(VERSION)"
+	scripts/package-release "$(VERSION)"
 
 clean:
 	$(DUNE) clean

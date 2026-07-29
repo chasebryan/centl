@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+launcher=$0
+while [ -L "$launcher" ]; do
+  launcher_directory=$(dirname -- "$launcher")
+  link=$(readlink "$launcher")
+  case "$link" in
+    /*) launcher=$link ;;
+    *) launcher="$launcher_directory/$link" ;;
+  esac
+done
+
+bin_directory=$(CDPATH= cd -- "$(dirname -- "$launcher")" && pwd)
+exec "$bin_directory/../libexec/centl" "$@"

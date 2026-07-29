@@ -22,6 +22,17 @@ rigor to program.
 
 ## Try it
 
+Install a prebuilt Linux x86_64 release without a compiler toolchain:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
+less install
+sh install
+centl 'solve(x^2 - 5*x + 6 = 0, x)'
+```
+
+From a source checkout with the development toolchain installed:
+
 ```sh
 make test
 ./centl '0.1 + 0.2'
@@ -57,6 +68,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [calculus syntax](docs/CALCULUS.md),
 [algebra syntax](docs/ALGEBRA.md),
 [mathematical functions](docs/MATHEMATICS.md),
+[installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
 
