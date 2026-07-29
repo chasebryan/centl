@@ -367,7 +367,7 @@ jobs:
           tar -xf "$runner_temp/gmp.tar.xz" -C "$runner_temp"
           cd "$runner_temp/gmp-${GMP_VERSION}"
           ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
-            --disable-static --enable-shared
+            --enable-static --disable-shared
           make -j2
           make install
 
@@ -378,7 +378,7 @@ jobs:
           tar -xf "$runner_temp/mpfr.tar.xz" -C "$runner_temp"
           cd "$runner_temp/mpfr-${MPFR_VERSION}"
           ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
-            --with-gmp="$native_prefix" --disable-static --enable-shared
+            --with-gmp="$native_prefix" --enable-static --disable-shared
           make -j2
           make install
 
@@ -393,7 +393,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$native_prefix" \
               -DCMAKE_PREFIX_PATH="$native_prefix" \
-              -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF
+              -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
           cmake --build "$runner_temp/flint-build" --parallel 2
           cmake --install "$runner_temp/flint-build"
 
