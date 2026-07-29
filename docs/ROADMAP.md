@@ -25,7 +25,20 @@ test on the development machine.
 Exit condition: expressions such as `0.1 + 0.2` and `1/3 + 1/6` evaluate and
 render exactly from both the REPL and machine interface.
 
-## 2. Rigorous approximation
+## 2. Symbolic calculus foundation
+
+- Add names, integer powers, and unary mathematical functions.
+- Preserve exact symbolic expressions beside exact rational values.
+- Add exact substitution and differentiation rules.
+- Simplify neutral arithmetic while retaining unresolved formal derivatives.
+- Derive plain, colored, and machine output from the same result tree.
+- Extend verification from totality and rational invariants to semantic
+  differentiation theorems.
+
+Exit condition: expressions such as `diff(x^3 + 2*x + 1, x)` and
+`substitute(x^2 + 1, x = 3)` return exact results through both interfaces.
+
+## 3. Rigorous approximation
 
 - Introduce the native binding with a deliberately small C interface.
 - Add Arb constants, square roots, and one transcendental operation.
@@ -37,9 +50,9 @@ render exactly from both the REPL and machine interface.
 Exit condition: CENTL either returns the requested justified digits for values
 such as `sqrt(2)` and `sin(2016.1)`, or explains precisely why it cannot.
 
-## 3. Calculator language
+## 4. Calculator language
 
-- Add names, reusable definitions, functions, and saved scripts gradually.
+- Add reusable definitions, user functions, and saved scripts gradually.
 - Add completion, history, multiline input, and mathematical diagnostics.
 - Preserve calculator behavior for every expression accepted in a script.
 - Add exact symbolic evaluation through Calcium where it improves the result.
@@ -47,7 +60,7 @@ such as `sqrt(2)` and `sin(2016.1)`, or explains precisely why it cannot.
 Exit condition: useful numerical scripts require no imports, entry point, or
 type declarations, while errors remain mathematical and local.
 
-## 4. Machine tool
+## 5. Machine tool
 
 - Stabilize a versioned JSON schema.
 - Add batch and persistent-process modes.
@@ -58,9 +71,13 @@ type declarations, while errors remain mathematical and local.
 Exit condition: an AI system can call CENTL repeatedly without parsing terminal
 text or mistaking an approximation for an exact result.
 
-## 5. Mathematical breadth
+## 6. Mathematical breadth
 
 - Add complex enclosures, algebraic numbers, polynomials, and matrices.
+- Add limits, sequences, series, rigorous definite integration, and partial
+  symbolic integration with explicit unevaluated results.
+- Add vector calculus, differential equations, transforms, probability, and
+  statistics as bounded mathematical domains.
 - Evaluate number-theoretic operations through narrow backend modules.
 - Use Julia/Nemo to prototype and independently test each new domain.
 - Extend the exactness and approximation rules before extending syntax.
@@ -68,7 +85,7 @@ text or mistaking an approximation for an exact result.
 Exit condition: every new domain has a documented value model, trust boundary,
 machine schema, and differential test suite.
 
-## 6. Hardening and release
+## 7. Hardening and release
 
 - Fuzz source parsing and native boundaries.
 - Add algebraic-identity, monotonicity, containment, and metamorphic tests.

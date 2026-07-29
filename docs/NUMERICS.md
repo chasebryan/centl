@@ -28,6 +28,11 @@ including algebraic numbers and recognized constants. A symbolic result is
 reported as exact only when the backend establishes the required property.
 Failure to establish a property yields unknown, not a guessed answer.
 
+Formal expressions and derivatives can also remain exact without being reduced
+to a closed form. Exactness means the expression is preserved symbolically; it
+does not claim that the expression is canonical, elementary, or numerically
+approximated.
+
 ## Enclosures
 
 An approximate real result denotes a set containing the mathematical result.

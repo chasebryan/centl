@@ -7,8 +7,14 @@ The current F* core proves:
 - normalization preserves the represented mathematical value;
 - addition, subtraction, multiplication, negation, and successful division
   implement their exact rational semantics;
+- exact rational powers preserve rational invariants;
 - division by zero is a structured result; and
 - every successful evaluator result satisfies the rational invariant.
+
+The F* symbolic evaluator, substitution pass, and differentiation pass are
+total and extract with no admits. Semantic correctness theorems for the
+differentiation rules are the next proof milestone. Until then, generated
+polynomial identities are checked independently after exact substitution.
 
 Verification runs with no admitted SMT queries:
 
