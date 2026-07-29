@@ -46,7 +46,45 @@ let symbolic_examples () =
   Alcotest.(check string)
     "domain-preserving zero product" "0 * 1 / x" (value "0 * (1 / x)");
   Alcotest.(check string) "integer power" "1024" (value "2^10");
+  Alcotest.(check string)
+    "large integer power" "1267650600228229401496703205376" (value "2^100");
   Alcotest.(check string) "negative integer power" "1/8" (value "2^-3")
+
+let algebra_examples () =
+  Alcotest.(check string)
+    "collect coefficients" "5 * x"
+    (value "simplify(2*x + 3*x)");
+  Alcotest.(check string)
+    "exact rational coefficients" "5/6 * x"
+    (value "simplify(1/2*x + 1/3*x)");
+  Alcotest.(check string)
+    "expand binomial" "x^3 + 3 * x^2 + 3 * x + 1"
+    (value "expand((x + 1)^3)");
+  Alcotest.(check string)
+    "difference of squares" "(x - 1) * (x + 1)" (value "factor(x^2 - 1)");
+  Alcotest.(check string)
+    "higher difference of squares" "(x^2 - 1) * (x^2 + 1)"
+    (value "factor(x^4 - 1)");
+  Alcotest.(check string)
+    "multivariate difference of squares" "(x - y) * (x + y)"
+    (value "factor(x^2 - y^2)");
+  Alcotest.(check string)
+    "common monomial" "x^2 * (x + 1)"
+    (value "factor(x^3 + x^2)");
+  Alcotest.(check string)
+    "bounded expansion" "(x + 1)^65"
+    (value "expand((x + 1)^65)")
+
+let assumption_examples () =
+  Alcotest.(check string)
+    "safe cancellation" "1 where x != 0"
+    (value "assuming(x / x, x != 0)");
+  Alcotest.(check string)
+    "strict positivity" "1 / x where x > 0"
+    (value "assuming(diff(log(x), x), x > 0)");
+  Alcotest.(check string)
+    "insufficient assumption" "x / x where x >= 0"
+    (value "assuming(x / x, x >= 0)")
 
 let failures () =
   Alcotest.(check string)
@@ -91,6 +129,30 @@ let symbolic_json_protocol () =
             | Some (`String value) -> Some value
             | _ -> None)
       | _ -> Alcotest.fail "response contained no symbolic value"
+      end
+  | _ -> Alcotest.fail "response was not a JSON object"
+
+let conditional_json_protocol () =
+  match
+    Centl_engine.evaluate_request
+      (`Assoc
+         [
+           ("version", `Int 1); ("expression", `String "assuming(x/x, x != 0)");
+         ])
+  with
+  | `Assoc fields ->
+      begin match List.assoc_opt "value" fields with
+      | Some (`Assoc value_fields) ->
+          begin match List.assoc_opt "conditions" value_fields with
+          | Some (`List [ `Assoc condition ]) ->
+              Alcotest.(check (option string))
+                "condition relation" (Some "not_equal")
+                (match List.assoc_opt "relation" condition with
+                | Some (`String value) -> Some value
+                | _ -> None)
+          | _ -> Alcotest.fail "response contained no structured condition"
+          end
+      | _ -> Alcotest.fail "response contained no conditional value"
       end
   | _ -> Alcotest.fail "response was not a JSON object"
 
@@ -163,6 +225,49 @@ let property_quadratic_derivative () =
   in
   QCheck.Test.check_exn test
 
+let property_cubic_derivative () =
+  let small = QCheck.make QCheck.Gen.(-25 -- 25) in
+  let input = QCheck.pair (QCheck.quad small small small small) small in
+  let test =
+    QCheck.Test.make ~count:1_000 input (fun ((a, b, c, d), x) ->
+        let source =
+          Printf.sprintf
+            "substitute(simplify(diff((%d)*x^3 + (%d)*x^2 + (%d)*x + (%d), \
+             x)), x = (%d))"
+            a b c d x
+        in
+        let expected = (3 * a * x * x) + (2 * b * x) + c in
+        value source = (Z.of_int expected |> Z.to_string))
+  in
+  QCheck.Test.check_exn test
+
+let property_binomial_expansion () =
+  let small = QCheck.make QCheck.Gen.(-10 -- 10) in
+  let exponent = QCheck.make QCheck.Gen.(1 -- 6) in
+  let input = QCheck.quad small small small exponent in
+  let test =
+    QCheck.Test.make ~count:1_000 input (fun (a, b, x, exponent) ->
+        let source =
+          Printf.sprintf "substitute(expand(((%d)*x + (%d))^%d), x = (%d))" a b
+            exponent x
+        in
+        let expected = Z.pow (Z.of_int ((a * x) + b)) exponent |> Z.to_string in
+        value source = expected)
+  in
+  QCheck.Test.check_exn test
+
+let property_coefficient_collection () =
+  let small = QCheck.make QCheck.Gen.(-100 -- 100) in
+  let input = QCheck.triple small small small in
+  let test =
+    QCheck.Test.make ~count:1_000 input (fun (a, b, x) ->
+        let source =
+          Printf.sprintf "substitute(simplify((%d)*x + (%d)*x), x = (%d))" a b x
+        in
+        value source = (Z.of_int ((a + b) * x) |> Z.to_string))
+  in
+  QCheck.Test.check_exn test
+
 let () =
   Alcotest.run "centl"
     [
@@ -181,12 +286,28 @@ let () =
           Alcotest.test_case "examples" `Quick symbolic_examples;
           Alcotest.test_case "quadratic derivative property" `Quick
             property_quadratic_derivative;
+          Alcotest.test_case "cubic derivative property" `Quick
+            property_cubic_derivative;
+        ] );
+      ( "symbolic algebra",
+        [
+          Alcotest.test_case "examples" `Quick algebra_examples;
+          Alcotest.test_case "binomial expansion property" `Quick
+            property_binomial_expansion;
+          Alcotest.test_case "coefficient collection property" `Quick
+            property_coefficient_collection;
+        ] );
+      ( "assumptions",
+        [
+          Alcotest.test_case "domain-aware examples" `Quick assumption_examples;
         ] );
       ("errors", [ Alcotest.test_case "structured failures" `Quick failures ]);
       ( "machine interface",
         [
           Alcotest.test_case "versioned request" `Quick json_protocol;
           Alcotest.test_case "symbolic result" `Quick symbolic_json_protocol;
+          Alcotest.test_case "structured condition" `Quick
+            conditional_json_protocol;
         ] );
       ("presentation", [ Alcotest.test_case "coloration" `Quick coloration ]);
     ]

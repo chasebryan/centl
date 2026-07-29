@@ -23,6 +23,15 @@ color codes:
 {"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"}}
 ```
 
+Conditional symbolic results retain machine-readable conditions:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]}}
+```
+
+Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
+`greater_than`, and `greater_or_equal`.
+
 Failures have stable codes and mathematical messages:
 
 ```json

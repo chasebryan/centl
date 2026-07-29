@@ -26,11 +26,13 @@ rigor to program.
 make test
 ./centl '0.1 + 0.2'
 ./centl 'diff(x^3 + 2*x + 1, x)'
+./centl 'factor(x^2 - 1)'
 ```
 
 ```text
 3/10
 3 * x^2 + 2
+(x - 1) * (x + 1)
 ```
 
 Run `./centl` for the calculator, `./centl --file path` for a script, or
@@ -43,6 +45,7 @@ control it.
 CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [numerical contract](docs/NUMERICS.md),
 [calculus syntax](docs/CALCULUS.md),
+[algebra syntax](docs/ALGEBRA.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
 

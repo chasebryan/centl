@@ -33,6 +33,10 @@ to a closed form. Exactness means the expression is preserved symbolically; it
 does not claim that the expression is canonical, elementary, or numerically
 approximated.
 
+Polynomial canonicalization uses exact rational coefficient lists. A requested
+transformation outside its documented domain remains symbolic and unchanged;
+unsupported algebra is never interpreted as a successful factorization.
+
 ## Enclosures
 
 An approximate real result denotes a set containing the mathematical result.
@@ -88,6 +92,11 @@ unknown at this precision
 
 Domain errors distinguish certainly invalid inputs from enclosures containing
 both valid and invalid points. Increasing precision may resolve the latter.
+
+Local assumptions can justify otherwise conditional symbolic identities. For
+example, cancellation in `x/x` requires a condition establishing `x != 0`.
+CENTL retains that condition in the result instead of silently widening the
+domain of the simplified expression.
 
 ## Failures
 

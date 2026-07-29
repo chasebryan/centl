@@ -4,6 +4,7 @@ type nat = int
 type pos = int
 type nonrec bool = bool
 type string = Stdlib.String.t
+type 'a list = 'a Stdlib.List.t
 
 let int_zero = Z.zero
 let int_one = Z.one

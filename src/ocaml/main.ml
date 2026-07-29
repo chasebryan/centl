@@ -20,6 +20,7 @@ let print_help () =
   print_endline "  centl --file sums.centl evaluate a line-oriented script";
   print_endline "  centl --json '1/3'      emit a versioned JSON result";
   print_endline "  centl --json            read JSON requests from stdin";
+  print_endline "  centl 'factor(x^2-1)'    perform exact symbolic algebra";
   print_endline "  centl --color=always    color mathematical output";
   print_endline "  centl                   start the calculator"
 
@@ -37,7 +38,7 @@ let parse_arguments arguments =
         print_help ();
         exit 0
     | "--version" :: _ ->
-        print_endline "centl 0.2.0-dev";
+        print_endline "centl 0.3.0-dev";
         exit 0
     | "--json" :: rest -> loop { command with mode = Json } rest
     | "--color" :: rest -> loop { command with color = Always } rest
@@ -129,7 +130,8 @@ let run_file ~color mode path =
     (fun () -> run_channel ~color mode path channel)
 
 let repl ~color () =
-  print_endline "CENTL 0.2.0-dev — exact arithmetic and symbolic calculus";
+  print_endline
+    "CENTL 0.3.0-dev — exact arithmetic, symbolic calculus, and algebra";
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
     print_string (if color then ansi "94" "centl> " else "centl> ");
@@ -142,8 +144,8 @@ let repl ~color () =
         | ":quit" | ":q" -> ()
         | ":help" ->
             print_endline
-              "Enter exact arithmetic, symbolic expressions, diff(...), or \
-               substitute(...).";
+              "Use diff, substitute, simplify, expand, factor, or assuming \
+               directly.";
             loop ()
         | expression ->
             ignore (evaluate_human ~color expression);

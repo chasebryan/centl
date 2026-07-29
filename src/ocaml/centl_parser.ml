@@ -10,6 +10,11 @@ type token_kind =
   | Caret
   | Comma
   | Equals
+  | Not_equals
+  | Less
+  | Less_equal
+  | Greater
+  | Greater_equal
   | Left_paren
   | Right_paren
   | End
@@ -28,6 +33,11 @@ let token_name = function
   | Caret -> "'^'"
   | Comma -> "','"
   | Equals -> "'='"
+  | Not_equals -> "'!='"
+  | Less -> "'<'"
+  | Less_equal -> "'<='"
+  | Greater -> "'>'"
+  | Greater_equal -> "'>='"
   | Left_paren -> "'('"
   | Right_paren -> "')'"
   | End -> "the end of the expression"
@@ -78,6 +88,14 @@ let lex source =
       | '^' -> loop (offset + 1) ({ kind = Caret; start = offset } :: tokens)
       | ',' -> loop (offset + 1) ({ kind = Comma; start = offset } :: tokens)
       | '=' -> loop (offset + 1) ({ kind = Equals; start = offset } :: tokens)
+      | '!' when offset + 1 < length && source.[offset + 1] = '=' ->
+          loop (offset + 2) ({ kind = Not_equals; start = offset } :: tokens)
+      | '<' when offset + 1 < length && source.[offset + 1] = '=' ->
+          loop (offset + 2) ({ kind = Less_equal; start = offset } :: tokens)
+      | '<' -> loop (offset + 1) ({ kind = Less; start = offset } :: tokens)
+      | '>' when offset + 1 < length && source.[offset + 1] = '=' ->
+          loop (offset + 2) ({ kind = Greater_equal; start = offset } :: tokens)
+      | '>' -> loop (offset + 1) ({ kind = Greater; start = offset } :: tokens)
       | '(' ->
           loop (offset + 1) ({ kind = Left_paren; start = offset } :: tokens)
       | ')' ->
@@ -212,6 +230,22 @@ let parse source =
           message =
             Printf.sprintf "expected ',', found %s" (token_name separator.kind);
         }
+  and relation index =
+    match (current index).kind with
+    | Equals -> Ok (Centl_Core.Equal, index + 1)
+    | Not_equals -> Ok (Centl_Core.NotEqual, index + 1)
+    | Less -> Ok (Centl_Core.LessThan, index + 1)
+    | Less_equal -> Ok (Centl_Core.LessOrEqual, index + 1)
+    | Greater -> Ok (Centl_Core.GreaterThan, index + 1)
+    | Greater_equal -> Ok (Centl_Core.GreaterOrEqual, index + 1)
+    | kind ->
+        Error
+          {
+            position = (current index).start;
+            message =
+              Printf.sprintf "expected a mathematical relation, found %s"
+                (token_name kind);
+          }
   and function_call name index =
     if name = "diff" then
       let* inner, next = expression index in
@@ -256,6 +290,25 @@ let parse source =
                   (token_name kind);
             }
       end
+    else if name = "assuming" then
+      let* inner, next = expression index in
+      let* next = comma next in
+      let* left, next = expression next in
+      let* relation, next = relation next in
+      let* right, next = expression next in
+      let* (), finish = closing_paren next in
+      Ok (Centl_Core.Assuming (inner, left, relation, right), finish)
+    else if name = "simplify" || name = "expand" || name = "factor" then
+      let* argument, next = expression index in
+      let* (), finish = closing_paren next in
+      let command =
+        match name with
+        | "simplify" -> Centl_Core.Simplify argument
+        | "expand" -> Centl_Core.Expand argument
+        | "factor" -> Centl_Core.Factor argument
+        | _ -> assert false
+      in
+      Ok (command, finish)
     else
       let* argument, next = expression index in
       let* (), finish = closing_paren next in

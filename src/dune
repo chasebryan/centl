@@ -3,7 +3,13 @@
 (library
  (name centl_lib)
  (wrapped false)
- (modules Prims Centl_Gcd Centl_Core Centl_parser Centl_engine)
+ (modules
+  Prims
+  FStar_Pervasives_Native
+  Centl_Gcd
+  Centl_Core
+  Centl_parser
+  Centl_engine)
  (flags
   (:standard -w -8-27))
  (libraries zarith yojson))

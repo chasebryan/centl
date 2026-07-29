@@ -25,13 +25,15 @@ test on the development machine.
 Exit condition: expressions such as `0.1 + 0.2` and `1/3 + 1/6` evaluate and
 render exactly from both the REPL and machine interface.
 
-## 2. Symbolic calculus foundation
+## 2. Symbolic calculus and algebra foundation
 
 - Add names, integer powers, and unary mathematical functions.
 - Preserve exact symbolic expressions beside exact rational values.
 - Add exact substitution and differentiation rules.
 - Simplify neutral arithmetic while retaining unresolved formal derivatives.
 - Derive plain, colored, and machine output from the same result tree.
+- Add canonical exact univariate polynomials, bounded expansion, initial
+  factoring, and explicit local assumptions.
 - Extend verification from totality and rational invariants to semantic
   differentiation theorems.
 

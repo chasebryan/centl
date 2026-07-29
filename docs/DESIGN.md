@@ -47,6 +47,8 @@ The F* core defines what CENTL means. It owns:
 - the typed AST and value classifications;
 - exact integer, decimal, and rational semantics;
 - transitions from exact computation to approximation;
+- exact univariate polynomial normalization and bounded expansion;
+- local mathematical conditions used to justify symbolic simplification;
 - precision requests and retry decisions;
 - validation of values returned across the numerical boundary;
 - human and machine result construction;
@@ -116,6 +118,10 @@ Indeterminate
 
 Every result also carries provenance sufficient to explain whether it was
 computed exactly, enclosed numerically, or left unresolved.
+
+Conditions attached with `assuming` remain part of the symbolic result. A
+simplifier may use a condition only for a rule it establishes directly, and the
+condition remains visible in both human and machine output.
 
 Approximate real values cross the backend boundary as exact dyadic data: signed
 integer mantissas, binary exponents, and a nonnegative radius. Decimal strings

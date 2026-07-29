@@ -94,6 +94,14 @@ let operator_text = function
   | Centl_Core.Multiply -> "*"
   | Centl_Core.Divide -> "/"
 
+let relation_text = function
+  | Centl_Core.Equal -> "="
+  | Centl_Core.NotEqual -> "!="
+  | Centl_Core.LessThan -> "<"
+  | Centl_Core.LessOrEqual -> "<="
+  | Centl_Core.GreaterThan -> ">"
+  | Centl_Core.GreaterOrEqual -> ">="
+
 let rec expression_fragments ?(parent_precedence = -1) expression =
   let precedence, fragments =
     match expression with
@@ -140,6 +148,16 @@ let rec expression_fragments ?(parent_precedence = -1) expression =
           |> append (fragment Punctuation ", ")
           |> append assignment
           |> append (fragment Punctuation ")") )
+    | Centl_Core.Simplify inner -> (4, call_fragments "simplify" [ inner ])
+    | Centl_Core.Expand inner -> (4, call_fragments "expand" [ inner ])
+    | Centl_Core.Factor inner -> (4, call_fragments "factor" [ inner ])
+    | Centl_Core.Assuming (inner, left, relation, right) ->
+        ( -1,
+          expression_fragments ~parent_precedence:0 inner
+          |> append (fragment Punctuation " where ")
+          |> append (expression_fragments left)
+          |> append (fragment Operator (" " ^ relation_text relation ^ " "))
+          |> append (expression_fragments right) )
   in
   if precedence < parent_precedence then surround fragments else fragments
 
@@ -184,6 +202,31 @@ let error_text error =
   | Some position ->
       Printf.sprintf "%s at column %d" error.message (position + 1)
 
+let relation_code = function
+  | Centl_Core.Equal -> "equal"
+  | Centl_Core.NotEqual -> "not_equal"
+  | Centl_Core.LessThan -> "less_than"
+  | Centl_Core.LessOrEqual -> "less_or_equal"
+  | Centl_Core.GreaterThan -> "greater_than"
+  | Centl_Core.GreaterOrEqual -> "greater_or_equal"
+
+let json_of_condition left relation right =
+  let left_text = expression_fragments left |> text_of_fragments in
+  let right_text = expression_fragments right |> text_of_fragments in
+  `Assoc
+    [
+      ("left", `String left_text);
+      ("relation", `String (relation_code relation));
+      ("right", `String right_text);
+      ( "text",
+        `String (left_text ^ " " ^ relation_text relation ^ " " ^ right_text) );
+    ]
+
+let rec conditions_of_expression = function
+  | Centl_Core.Assuming (inner, left, relation, right) ->
+      json_of_condition left relation right :: conditions_of_expression inner
+  | _ -> []
+
 let json_of_value = function
   | Integer value ->
       `Assoc
@@ -205,13 +248,21 @@ let json_of_value = function
         ]
   | Symbolic expression ->
       let text = expression_fragments expression |> text_of_fragments in
-      `Assoc
+      let fields =
         [
           ("kind", `String "symbolic");
           ("exact", `Bool true);
           ("expression", `String text);
           ("text", `String text);
         ]
+      in
+      let conditions = conditions_of_expression expression in
+      let fields =
+        match conditions with
+        | [] -> fields
+        | conditions -> fields @ [ ("conditions", `List conditions) ]
+      in
+      `Assoc fields
 
 let json_of_evaluation = function
   | Ok value ->
