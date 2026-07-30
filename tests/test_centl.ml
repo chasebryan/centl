@@ -558,7 +558,7 @@ let syntax_catalog () =
         true
         (contains sheet identifier))
     identifiers;
-  let channel = open_in "../docs/SYNTAX.md" in
+  let channel = open_in_bin "../docs/SYNTAX.md" in
   let documentation =
     Fun.protect
       ~finally:(fun () -> close_in channel)
