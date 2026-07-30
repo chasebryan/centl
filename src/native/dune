@@ -1,14 +1,42 @@
 (include_subdirs no)
 
+(foreign_library
+ (archive_name centl_arb_runtime)
+ (language c)
+ (names centl_arb_stubs)
+ (flags
+  (:standard -Wall -Wextra -Werror))
+ (c_library_flags
+  %{env:CENTL_FLINT_LIBRARY=-lflint}
+  %{env:CENTL_MPFR_LIBRARY=-lmpfr}
+  %{env:CENTL_GMP_LIBRARY=-lgmp}
+  -lpthread
+  -lm))
+
+(rule
+ (enabled_if (= %{os_type} Unix))
+ (targets libcentl_arb_link.a)
+ (deps libcentl_arb_runtime.a)
+ (action (copy %{deps} %{targets})))
+
+(rule
+ (enabled_if (= %{os_type} Win32))
+ (targets libcentl_arb_link.a dllcentl_arb_link.dll)
+ (deps dllcentl_arb_runtime.dll centl_arb_stubs.def)
+ (action
+  (progn
+   (copy dllcentl_arb_runtime.dll dllcentl_arb_link.dll)
+   (run
+    %{env:DLLTOOL=dlltool}
+    --input-def centl_arb_stubs.def
+    --dllname dllcentl_arb_link.dll
+    --output-lib libcentl_arb_link.a))))
+
 (library
  (name centl_arb)
  (wrapped false)
  (modules Centl_arb)
- (foreign_stubs
-  (language c)
-  (names centl_arb_stubs)
-  (flags
-   (:standard -Wall -Wextra -Werror)))
+ (foreign_archives centl_arb_link)
  (c_library_flags
   %{env:CENTL_FLINT_LIBRARY=-lflint}
   %{env:CENTL_MPFR_LIBRARY=-lmpfr}

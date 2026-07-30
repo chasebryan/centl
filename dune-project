@@ -1,4 +1,4 @@
-(lang dune 3.12)
+(lang dune 3.23)
 (name centl)
 (generate_opam_files false)
 

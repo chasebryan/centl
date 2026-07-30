@@ -448,15 +448,7 @@ jobs:
           Set-Location $env:GITHUB_WORKSPACE
           $Native = $env:NATIVE_PREFIX.Replace('\', '/')
           $env:FLEXLINKFLAGS = "-L$Native/lib"
-          opam exec -- dune build src/native/dllcentl_arb_stubs.dll
           $StubDirectory = Join-Path $env:GITHUB_WORKSPACE "_build\default\src\native"
-          $StubImportLibrary = Join-Path $StubDirectory "libcentl_arb_stubs.dll.a"
-          $DllTool = (Get-Command dlltool.exe -ErrorAction Stop).Source
-          & $DllTool --input-def .\src\native\centl_arb_stubs.def `
-            --dllname dllcentl_arb_stubs.dll --output-lib $StubImportLibrary
-          if (-not (Test-Path -LiteralPath $StubImportLibrary -PathType Leaf)) {
-            throw "failed to create the CENTL stub import library"
-          }
           $env:PATH = "$StubDirectory;$env:PATH"
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
