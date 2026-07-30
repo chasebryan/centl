@@ -140,6 +140,7 @@ Build-time-only test and compiler dependencies are not included in this archive.
 CENTL $Version for Windows x86_64
 
 Run centl.exe. Required native libraries are included beside the executable.
+Use centl.exe --serve for stateful JSON Lines or --mcp for a local MCP server.
 License notices are in the licenses directory.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8

@@ -10,7 +10,10 @@
   Centl_Core
   Centl_parser
   Centl_syntax
-  Centl_engine)
+  Centl_engine
+  Centl_version
+  Centl_protocol
+  Centl_mcp)
  (flags
   (:standard -w -8-27))
  (libraries centl_arb zarith yojson))

@@ -210,6 +210,7 @@ cat > "$package/README" <<EOF
 CENTL $version for $platform_name $architecture
 
 Run bin/centl. The bundled native libraries are loaded only for CENTL.
+Use bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
 License notices are in the licenses directory.
 EOF
 

@@ -47,7 +47,7 @@
   ≈ [1.41421356237, 1.41421356238]
 
   $ ../src/main.exe --version
-  centl 0.7.0
+  centl 0.8.0
 
   $ ../src/main.exe --syntax | sed -n '1,4p'
   CENTL syntax
@@ -55,13 +55,16 @@
   arithmetic: + - * / ^
   symbolic math: f(...) name= f(...)= solve diff substitute simplify expand factor assuming = != < <= > >=
 
-  $ ../src/main.exe --help | sed -n '1p;3p;5,8p'
+  $ ../src/main.exe --help | sed -n '1p;3p;5,11p'
   CENTL — exact mathematics, directly.
-  Usage: centl [--json] [--syntax] [--color=auto|always|never] [--file PATH] [EXPRESSION]
+  Usage: centl [--json|--serve|--mcp] [--syntax] [--color=auto|always|never] [--file PATH] [EXPRESSION]
     centl EXPRESSION   calculate
     centl              open the calculator
     --file PATH        run a script
     --syntax           list mathematical identifiers
+    --json [EXPR]      use the JSON interface
+    --serve            persistent stateful JSON Lines
+    --mcp              MCP server over standard I/O
 
   $ ../src/main.exe --color=always 'x + 1' | sed "s/$(printf '\033')/<ESC>/g"
   <ESC>[95mx<ESC>[0m<ESC>[93m + <ESC>[0m<ESC>[96m1<ESC>[0m
@@ -80,6 +83,18 @@
 
   $ printf '{"version":1,"expression":"2 * (3 + 4)"}\n' | ../src/main.exe --json
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"14","text":"14"}}
+
+  $ printf '%s\n' '{"version":1,"id":"a","expression":"r = 3"}' '{"version":1,"id":"b","expression":"circle_area(r)"}' '{"version":1,"id":"c","op":"reset"}' | ../src/main.exe --serve
+  {"version":1,"id":"a","ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"value","name":"r","value":{"kind":"integer","exact":true,"value":"3","text":"3"},"text":"r = 3"},"session":{"definitions":1,"requests":1}}
+  {"version":1,"id":"b","ok":true,"value":{"kind":"symbolic","exact":true,"expression":"9 * pi","text":"9 * pi"},"session":{"definitions":1,"requests":2}}
+  {"version":1,"id":"c","ok":true,"reset":true,"session":{"definitions":0,"requests":3}}
+
+  $ printf '{"version":1,"id":"limit","expression":"approx(pi, 20)","limits":{"max_precision_digits":10}}\n' | ../src/main.exe --serve
+  {"version":1,"id":"limit","ok":false,"error":{"code":"precision_limit","message":"approximation digits must be between 1 and 10"},"session":{"definitions":0,"requests":1}}
+
+  $ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' | ../src/main.exe --mcp
+  {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"centl","title":"CENTL exact mathematics","version":"0.8.0"},"instructions":"Use centl_calculate for exact, symbolic, or rigorously enclosed mathematics. Definitions persist until centl_reset or process exit."}}
+  {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"3/10"}],"structuredContent":{"version":1,"ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"session":{"definitions":0,"requests":3}},"isError":false}}
 
   $ printf '# exact sums\n0.1 + 0.2\n1/3 + 1/6\n' | ../src/main.exe
   3/10
