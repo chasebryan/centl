@@ -21,16 +21,14 @@
 
 (rule
  (enabled_if (= %{os_type} Win32))
- (targets libcentl_arb_link.a dllcentl_arb_link.dll)
+ (targets libcentl_arb_link.a)
  (deps dllcentl_arb_runtime.dll centl_arb_stubs.def)
  (action
-  (progn
-   (copy dllcentl_arb_runtime.dll dllcentl_arb_link.dll)
-   (run
-    %{env:DLLTOOL=dlltool}
-    --input-def centl_arb_stubs.def
-    --dllname dllcentl_arb_link.dll
-    --output-lib libcentl_arb_link.a))))
+  (run
+   %{env:DLLTOOL=dlltool}
+   --input-def centl_arb_stubs.def
+   --dllname dllcentl_arb_runtime.dll
+   --output-lib libcentl_arb_link.a)))
 
 (library
  (name centl_arb)

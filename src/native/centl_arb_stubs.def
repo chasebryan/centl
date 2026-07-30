@@ -1,4 +1,4 @@
-LIBRARY dllcentl_arb_stubs.dll
+LIBRARY dllcentl_arb_runtime.dll
 EXPORTS
   centl_arb_of_fraction
   centl_arb_pi
