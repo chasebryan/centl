@@ -425,9 +425,17 @@ jobs:
               throw "missing Windows static library: $ArchivePath"
             }
           }
-          "CENTL_FLINT_LIBRARY=-l:libflint.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "CENTL_MPFR_LIBRARY=-l:libmpfr.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "CENTL_GMP_LIBRARY=-l:libgmp.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          $Linker = (Get-Command x86_64-w64-mingw32-ld.exe -ErrorAction Stop).Source
+          $MathObject = "$Native/lib/centl_math.o"
+          & $Linker -r -o $MathObject --whole-archive `
+            "$Native/lib/libflint.a" "$Native/lib/libmpfr.a" "$Native/lib/libgmp.a" `
+            --no-whole-archive
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $MathObject -PathType Leaf)) {
+            throw "could not combine the Windows math archives"
+          }
+          "CENTL_FLINT_LIBRARY=$MathObject" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "CENTL_MPFR_LIBRARY=-lm" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          "CENTL_GMP_LIBRARY=-lm" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           $Opam = (Get-Command opam.exe -ErrorAction Stop).Source
           "OPAM_EXE=$Opam" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -448,16 +456,12 @@ jobs:
           Set-Location $env:GITHUB_WORKSPACE
           $Native = $env:NATIVE_PREFIX.Replace('\', '/')
           $env:FLEXLINKFLAGS = "-L$Native/lib"
-          $StubDirectory = Join-Path $env:GITHUB_WORKSPACE "_build\default\src\native"
-          $env:PATH = "$StubDirectory;$env:PATH"
           opam exec -- dune build src/main.exe tests/test_centl.exe
           $Objdump = (Get-Command objdump.exe -ErrorAction Stop).Source
-          Write-Output "CENTL stub DLL exports and dependencies:"
-          & $Objdump -p (Join-Path $StubDirectory "dllcentl_arb_runtime.dll") |
-            Select-String -Pattern "centl_arb|DLL Name"
-          Write-Output "CENTL executable imports and dependencies:"
-          & $Objdump -p .\_build\default\src\main.exe |
-            Select-String -Pattern "centl_arb|DLL Name"
+          $Imports = (& $Objdump -p .\_build\default\src\main.exe | Out-String)
+          if ($Imports -match 'dllcentl_arb') {
+            throw "CENTL Windows executable unexpectedly depends on a native stub DLL"
+          }
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
           $Version = $Reported -replace '^centl ', ''
