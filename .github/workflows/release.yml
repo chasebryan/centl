@@ -450,6 +450,14 @@ jobs:
           $env:FLEXLINKFLAGS = "-L$Native/lib"
           $StubDirectory = Join-Path $env:GITHUB_WORKSPACE "_build\default\src\native"
           $env:PATH = "$StubDirectory;$env:PATH"
+          opam exec -- dune build src/main.exe tests/test_centl.exe
+          $Objdump = (Get-Command objdump.exe -ErrorAction Stop).Source
+          Write-Output "CENTL stub DLL exports and dependencies:"
+          & $Objdump -p (Join-Path $StubDirectory "dllcentl_arb_link.dll") |
+            Select-String -Pattern "centl_arb|DLL Name"
+          Write-Output "CENTL executable imports and dependencies:"
+          & $Objdump -p .\_build\default\src\main.exe |
+            Select-String -Pattern "centl_arb|DLL Name"
           opam exec -- dune runtest
           $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
           $Version = $Reported -replace '^centl ', ''
