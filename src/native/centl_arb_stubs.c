@@ -12,10 +12,23 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
+#include <gmp.h>
 #include <flint/arb.h>
 #include <flint/fmpq.h>
 #include <flint/fmpz.h>
 #include <flint/flint.h>
+
+/* FlexDLL scans Windows static archives once. Seed GMP symbols that are only
+   discovered after it extracts the FLINT conversion objects. */
+#if defined(_WIN32) && defined(__GNUC__)
+typedef int (*centl_mpz_set_str_fn)(mpz_ptr, const char *, int);
+typedef double (*centl_mpz_get_d_fn)(mpz_srcptr);
+typedef void (*centl_mpz_set_d_fn)(mpz_ptr, double);
+
+static centl_mpz_set_str_fn const centl_mpz_set_str_root __attribute__((used)) = mpz_set_str;
+static centl_mpz_get_d_fn const centl_mpz_get_d_root __attribute__((used)) = mpz_get_d;
+static centl_mpz_set_d_fn const centl_mpz_set_d_root __attribute__((used)) = mpz_set_d;
+#endif
 
 #if defined(_WIN32)
 #define CENTL_PRIM CAMLprim __declspec(dllexport)
