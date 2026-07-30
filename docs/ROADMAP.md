@@ -72,11 +72,14 @@ type declarations, while errors remain mathematical and local.
 
 ## 5. Machine tool
 
-- Stabilize a versioned JSON schema.
-- Add batch and persistent-process modes.
-- Make determinism, precision budgets, and resource limits explicit.
-- Provide exact, enclosure, provenance, and error result schemas.
-- Add an MCP or equivalent adapter without coupling it to the evaluator.
+Initial persistent JSON Lines and stdio MCP slice implemented in `0.8.0`.
+
+- Preserve the versioned exact, enclosure, solution, definition, and error
+  schemas.
+- Keep request identifiers, session state, reset, capability discovery, and
+  deterministic limits stable.
+- Extend provenance and cancellation without changing mathematical semantics.
+- Keep MCP as a thin adapter over the same evaluator and result objects.
 
 Exit condition: an AI system can call CENTL repeatedly without parsing terminal
 text or mistaking an approximation for an exact result.

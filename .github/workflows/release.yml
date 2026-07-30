@@ -176,6 +176,19 @@ jobs:
           sh install --archive "$PWD/dist/centl-linux-x86_64.tar.gz" \
             --prefix "$install_root"
           "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
+          printf '%s\n' \
+            '{"version":1,"expression":"r = 3"}' \
+            '{"version":1,"expression":"circle_area(r)"}' \
+            | "$install_root/bin/centl" --serve \
+            > "$RUNNER_TEMP/centl-serve.jsonl"
+          grep -q '"text":"9 \* pi"' "$RUNNER_TEMP/centl-serve.jsonl"
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' \
+            | "$install_root/bin/centl" --mcp \
+            > "$RUNNER_TEMP/centl-mcp.jsonl"
+          grep -q '"text":"3/10"' "$RUNNER_TEMP/centl-mcp.jsonl"
 
       - name: Preserve Linux release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -298,6 +311,21 @@ jobs:
           sh install --archive "$PWD/dist/centl-macos-${{ matrix.architecture }}.tar.gz" \
             --prefix "$install_root"
           "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
+          printf '%s\n' \
+            '{"version":1,"expression":"r = 3"}' \
+            '{"version":1,"expression":"circle_area(r)"}' \
+            | "$install_root/bin/centl" --serve \
+            > "$RUNNER_TEMP/centl-serve-${{ matrix.architecture }}.jsonl"
+          grep -q '"text":"9 \* pi"' \
+            "$RUNNER_TEMP/centl-serve-${{ matrix.architecture }}.jsonl"
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' \
+            | "$install_root/bin/centl" --mcp \
+            > "$RUNNER_TEMP/centl-mcp-${{ matrix.architecture }}.jsonl"
+          grep -q '"text":"3/10"' \
+            "$RUNNER_TEMP/centl-mcp-${{ matrix.architecture }}.jsonl"
 
       - name: Preserve macOS release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -497,6 +525,23 @@ jobs:
             -Prefix $InstallRoot -NoPath
           $Smoke = (& "$InstallRoot\bin\centl.cmd" '0.1 + 0.2' | Out-String).Trim()
           if ($Smoke -ne "3/10") { throw "installed CENTL smoke test failed: $Smoke" }
+          $ServeInput = @(
+            '{"version":1,"expression":"r = 3"}',
+            '{"version":1,"expression":"circle_area(r)"}'
+          ) -join "`n"
+          $ServeOutput = ($ServeInput | & "$InstallRoot\bin\centl.cmd" --serve | Out-String)
+          if (-not $ServeOutput.Contains('"text":"9 * pi"')) {
+            throw "installed CENTL serve smoke test failed: $ServeOutput"
+          }
+          $McpInput = @(
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}',
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}',
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}'
+          ) -join "`n"
+          $McpOutput = ($McpInput | & "$InstallRoot\bin\centl.cmd" --mcp | Out-String)
+          if (-not $McpOutput.Contains('"text":"3/10"')) {
+            throw "installed CENTL MCP smoke test failed: $McpOutput"
+          }
 
       - name: Preserve Windows release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

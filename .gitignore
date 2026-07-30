@@ -1,5 +1,6 @@
 _build/
 dist/
+compile_commands.json
 *.checked
 *.hints
 src/generated/*.ml

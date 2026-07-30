@@ -150,8 +150,8 @@ or unknown. Unknown is never silently treated as false.
 
 The human interface is calculator-first. A script is a saved sequence of the
 same expressions and immutable definitions accepted by the REPL. Definition
-state belongs to one calculator session or script and never crosses into the
-stateless JSON protocol.
+state belongs to one calculator, script, stateful JSON Lines process, or MCP
+process. The one-shot and legacy streaming `--json` forms remain stateless.
 
 The machine interface uses versioned JSON over standard input and output. It
 returns structured exact values, enclosure endpoints, precision metadata,
@@ -163,8 +163,9 @@ functions, operators, and punctuation. ANSI codes are never stored in values or
 emitted by the JSON interface, and color does not alter evaluation or canonical
 plain text.
 
-The same protocol may later be transported over JSON-RPC, MCP, or a local
-service without changing the evaluator.
+The MCP adapter maps JSON-RPC tool calls onto the same stateful request engine.
+It does not parse human output or create another evaluation path. A future
+local service can use the same boundary.
 
 ## Trust boundary
 

@@ -274,7 +274,15 @@ let failures () =
     (error_code "solve(pi = 3, pi)");
   Alcotest.(check string)
     "solution set used as a number" "solution_set_not_expression"
-    (error_code "solve(x = 1, x) + 2")
+    (error_code "solve(x = 1, x) + 2");
+  Alcotest.(check string)
+    "oversized exact power" "resource_limit" (error_code "2^1000000");
+  Alcotest.(check string)
+    "oversized sequence" "resource_limit"
+    (error_code "fibonacci(100001)");
+  Alcotest.(check string)
+    "computed oversized sequence index" "resource_limit"
+    (error_code "fibonacci(50000 + 50001)")
 
 let json_protocol () =
   let request = `Assoc [ ("version", `Int 1); ("expression", `String "2/4") ] in
@@ -409,6 +417,249 @@ let equation_json_protocol () =
       | _ -> Alcotest.fail "response contained no solution set"
       end
   | _ -> Alcotest.fail "response was not a JSON object"
+
+let json_member name = function
+  | `Assoc fields ->
+      begin match List.assoc_opt name fields with
+      | Some value -> value
+      | None -> Alcotest.failf "JSON object contained no %s field" name
+      end
+  | _ -> Alcotest.fail "expected a JSON object"
+
+let json_string name json =
+  match json_member name json with
+  | `String value -> value
+  | _ -> Alcotest.failf "JSON field %s was not a string" name
+
+let json_int name json =
+  match json_member name json with
+  | `Int value -> value
+  | _ -> Alcotest.failf "JSON field %s was not an integer" name
+
+let json_bool name json =
+  match json_member name json with
+  | `Bool value -> value
+  | _ -> Alcotest.failf "JSON field %s was not a Boolean" name
+
+let protocol_error_code json = json |> json_member "error" |> json_string "code"
+let protocol_value_text json = json |> json_member "value" |> json_string "text"
+
+let persistent_json_protocol () =
+  let state = Centl_protocol.create () in
+  let request json = Centl_protocol.handle_line state json in
+  let defined =
+    request {|{"version":1,"id":"define-r","expression":"r = 3"}|}
+  in
+  Alcotest.(check string) "request id" "define-r" (json_string "id" defined);
+  Alcotest.(check string)
+    "definition result" "definition"
+    (defined |> json_member "value" |> json_string "kind");
+  Alcotest.(check int)
+    "one definition" 1
+    (defined |> json_member "session" |> json_int "definitions");
+  let area = request {|{"version":1,"id":2,"expression":"circle_area(r)"}|} in
+  Alcotest.(check string)
+    "stateful calculation" "9 * pi" (protocol_value_text area);
+  Alcotest.(check int) "integer id" 2 (json_int "id" area);
+  let reset = request {|{"version":1,"id":3,"op":"reset"}|} in
+  Alcotest.(check bool) "reset succeeds" true (json_bool "reset" reset);
+  Alcotest.(check int)
+    "definitions cleared" 0
+    (reset |> json_member "session" |> json_int "definitions");
+  let isolated = request {|{"version":1,"id":4,"expression":"r"}|} in
+  Alcotest.(check string)
+    "reset forgets values" "r"
+    (protocol_value_text isolated)
+
+let machine_resource_limits () =
+  let state = Centl_protocol.create () in
+  let request fields = Centl_protocol.handle_json state (`Assoc fields) in
+  let evaluate expression limits =
+    request
+      [
+        ("version", `Int 1);
+        ("expression", `String expression);
+        ("limits", `Assoc limits);
+      ]
+  in
+  Alcotest.(check string)
+    "precision digits" "precision_limit"
+    (evaluate "approx(pi, 20)" [ ("max_precision_digits", `Int 10) ]
+    |> protocol_error_code);
+  Alcotest.(check string)
+    "source bytes" "resource_limit"
+    (evaluate "100" [ ("max_source_bytes", `Int 2) ] |> protocol_error_code);
+  Alcotest.(check string)
+    "expression nodes" "resource_limit"
+    (evaluate "1 + 1" [ ("max_expression_nodes", `Int 1) ]
+    |> protocol_error_code);
+  ignore
+    (request [ ("version", `Int 1); ("expression", `String "f(x) = x + x") ]);
+  Alcotest.(check string)
+    "session expansion nodes" "resource_limit"
+    (evaluate "f(f(f(1)))" [ ("max_expression_nodes", `Int 10) ]
+    |> protocol_error_code);
+  Alcotest.(check string)
+    "exact result bits" "resource_limit"
+    (evaluate "2^100" [ ("max_exact_bits", `Int 100) ] |> protocol_error_code);
+  Alcotest.(check string)
+    "integer iterations" "resource_limit"
+    (evaluate "fibonacci(101)" [ ("max_integer_iterations", `Int 100) ]
+    |> protocol_error_code);
+  ignore (evaluate "a = 1" [ ("max_bindings", `Int 1) ]);
+  Alcotest.(check string)
+    "session definitions" "resource_limit"
+    (evaluate "b = 2" [ ("max_bindings", `Int 1) ] |> protocol_error_code);
+  Alcotest.(check string)
+    "limits cannot raise ceilings" "invalid_request"
+    (evaluate "1" [ ("max_precision_digits", `Int 1_001) ]
+    |> protocol_error_code);
+  let small_server =
+    {
+      Centl_protocol.default_server_limits with
+      max_requests = 1;
+      max_request_bytes = 8;
+    }
+  in
+  let bounded = Centl_protocol.create ~limits:small_server () in
+  ignore (Centl_protocol.handle_line bounded {|{"bad":1}|});
+  let exhausted =
+    Centl_protocol.handle_line bounded {|{"version":1,"id":2,"op":"ping"}|}
+  in
+  Alcotest.(check string)
+    "process request ceiling" "resource_limit"
+    (protocol_error_code exhausted);
+  Alcotest.(check int) "limit echoes request id" 2 (json_int "id" exhausted)
+
+let machine_describe () =
+  let state = Centl_protocol.create () in
+  let response =
+    Centl_protocol.handle_json state
+      (`Assoc [ ("version", `Int 1); ("op", `String "describe") ])
+  in
+  let capabilities = json_member "capabilities" response in
+  Alcotest.(check string)
+    "transport" "jsonl"
+    (json_string "transport" capabilities);
+  Alcotest.(check bool) "stateful" true (json_bool "stateful" capabilities);
+  let limits = json_member "limits" capabilities in
+  Alcotest.(check int)
+    "request bytes" 65_536
+    (json_int "max_request_bytes" limits);
+  Alcotest.(check int)
+    "precision digits" 1_000
+    (json_int "max_precision_digits" limits);
+  Alcotest.(check int)
+    "exact result bits" 1_000_000
+    (json_int "max_exact_bits" limits);
+  Alcotest.(check int)
+    "integer iterations" 100_000
+    (json_int "max_integer_iterations" limits)
+
+let mcp_request state json =
+  match Centl_mcp.handle_json state (Yojson.Safe.from_string json) with
+  | Some response -> response
+  | None -> Alcotest.fail "MCP request produced no response"
+
+let mcp_error_code json = json |> json_member "error" |> json_int "code"
+
+let mcp_structured_content json =
+  json |> json_member "result" |> json_member "structuredContent"
+
+let mcp_protocol () =
+  let state = Centl_mcp.create () in
+  let before =
+    mcp_request state {|{"jsonrpc":"2.0","id":0,"method":"tools/list"}|}
+  in
+  Alcotest.(check int) "lifecycle enforced" (-32002) (mcp_error_code before);
+  let initialized =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}|}
+  in
+  Alcotest.(check string)
+    "protocol version" "2025-11-25"
+    (initialized |> json_member "result" |> json_string "protocolVersion");
+  Alcotest.(check bool)
+    "initialized notification has no response" true
+    (Centl_mcp.handle_json state
+       (Yojson.Safe.from_string
+          {|{"jsonrpc":"2.0","method":"notifications/initialized"}|})
+    = None);
+  let listed =
+    mcp_request state {|{"jsonrpc":"2.0","id":2,"method":"tools/list"}|}
+  in
+  let names =
+    match listed |> json_member "result" |> json_member "tools" with
+    | `List tools -> List.map (json_string "name") tools
+    | _ -> Alcotest.fail "MCP tools was not a list"
+  in
+  Alcotest.(check (list string))
+    "deterministic tools"
+    [ "centl_calculate"; "centl_reset" ]
+    names;
+  let define =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"r = 3"}}}|}
+  in
+  Alcotest.(check string)
+    "MCP definition" "r = 3"
+    (define |> mcp_structured_content |> protocol_value_text);
+  let area =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"circle_area(r)"}}}|}
+  in
+  Alcotest.(check string)
+    "MCP session state" "9 * pi"
+    (area |> mcp_structured_content |> protocol_value_text);
+  let failure =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"1 / 0"}}}|}
+  in
+  Alcotest.(check bool)
+    "math failure is a tool error" true
+    (failure |> json_member "result" |> json_bool "isError");
+  Alcotest.(check string)
+    "structured math error" "division_by_zero"
+    (failure |> mcp_structured_content |> protocol_error_code);
+  let reset =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"centl_reset","arguments":{}}}|}
+  in
+  Alcotest.(check bool)
+    "MCP reset" false
+    (reset |> json_member "result" |> json_bool "isError")
+
+let mcp_failures () =
+  let state = Centl_mcp.create () in
+  let parse =
+    match Centl_mcp.handle_line state "{" with
+    | Some response -> response
+    | None -> Alcotest.fail "invalid JSON produced no response"
+  in
+  Alcotest.(check int) "parse error" (-32700) (mcp_error_code parse);
+  let initialize =
+    {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}|}
+  in
+  ignore (mcp_request state initialize);
+  ignore
+    (Centl_mcp.handle_json state
+       (Yojson.Safe.from_string
+          {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}));
+  let unknown =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"unknown","arguments":{}}}|}
+  in
+  Alcotest.(check int) "unknown tool" (-32602) (mcp_error_code unknown);
+  let one_request =
+    { Centl_protocol.default_server_limits with max_requests = 1 }
+  in
+  let bounded = Centl_mcp.create ~limits:one_request () in
+  ignore (Centl_mcp.handle_line bounded initialize);
+  Alcotest.(check bool)
+    "limited notifications have no response" true
+    (Centl_mcp.handle_line bounded
+       {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}
+    = None)
 
 let coloration () =
   match Centl_engine.evaluate "diff(x^3, x)" with
@@ -780,6 +1031,12 @@ let () =
             conditional_json_protocol;
           Alcotest.test_case "structured solution set" `Quick
             equation_json_protocol;
+          Alcotest.test_case "persistent sessions and request ids" `Quick
+            persistent_json_protocol;
+          Alcotest.test_case "resource limits" `Quick machine_resource_limits;
+          Alcotest.test_case "capability description" `Quick machine_describe;
+          Alcotest.test_case "MCP lifecycle and tools" `Quick mcp_protocol;
+          Alcotest.test_case "MCP failures" `Quick mcp_failures;
         ] );
       ( "presentation",
         [

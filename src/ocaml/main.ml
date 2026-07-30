@@ -1,7 +1,7 @@
-type mode = Human | Json
+type mode = Human | Json | Serve | Mcp
 type color_mode = Auto | Always | Never
 
-let version = "0.7.0"
+let version = Centl_version.value
 
 type command = {
   mode : mode;
@@ -11,8 +11,8 @@ type command = {
 }
 
 let usage =
-  "Usage: centl [--json] [--syntax] [--color=auto|always|never] [--file PATH] \
-   [EXPRESSION]"
+  "Usage: centl [--json|--serve|--mcp] [--syntax] [--color=auto|always|never] \
+   [--file PATH] [EXPRESSION]"
 
 let print_help () =
   print_endline "CENTL — exact mathematics, directly.";
@@ -24,6 +24,8 @@ let print_help () =
   print_endline "  --file PATH        run a script";
   print_endline "  --syntax           list mathematical identifiers";
   print_endline "  --json [EXPR]      use the JSON interface";
+  print_endline "  --serve            persistent stateful JSON Lines";
+  print_endline "  --mcp              MCP server over standard I/O";
   print_endline "  --color=MODE       auto, always, or never";
   print_endline "  --version          show the version"
 
@@ -38,6 +40,11 @@ let parse_color_mode = function
   | "never" -> Ok Never
   | value -> Error ("unknown color mode " ^ value)
 
+let select_mode command mode name =
+  match command.mode with
+  | Human -> Ok { command with mode }
+  | _ -> Error ("use only one of --json, --serve, or --mcp; found " ^ name)
+
 let parse_arguments arguments =
   let rec loop command = function
     | [] ->
@@ -51,7 +58,21 @@ let parse_arguments arguments =
     | "--syntax" :: _ ->
         Centl_syntax.print stdout;
         exit 0
-    | "--json" :: rest -> loop { command with mode = Json } rest
+    | "--json" :: rest ->
+        begin match select_mode command Json "--json" with
+        | Ok command -> loop command rest
+        | Error _ as error -> error
+        end
+    | "--serve" :: rest ->
+        begin match select_mode command Serve "--serve" with
+        | Ok command -> loop command rest
+        | Error _ as error -> error
+        end
+    | "--mcp" :: rest ->
+        begin match select_mode command Mcp "--mcp" with
+        | Ok command -> loop command rest
+        | Error _ as error -> error
+        end
     | "--color" :: rest -> loop { command with color = Always } rest
     | "--no-color" :: rest -> loop { command with color = Never } rest
     | option :: rest when String.starts_with ~prefix:"--color=" option ->
@@ -124,6 +145,7 @@ let run_channel ~color mode name channel =
               match mode with
               | Human -> evaluate_human_in_session ~color session expression
               | Json -> evaluate_json expression
+              | Serve | Mcp -> assert false
             in
             if succeeded then lines (number + 1)
             else begin
@@ -144,8 +166,8 @@ let run_file ~color mode path =
 let repl ~color () =
   let session = Centl_engine.create_session () in
   print_endline
-    (Printf.sprintf
-       "CENTL %s — exact mathematics and rigorous real enclosures" version);
+    (Printf.sprintf "CENTL %s — exact mathematics and rigorous real enclosures"
+       version);
   print_endline "Type :help for help or :quit to leave.";
   let rec loop () =
     print_string (if color then ansi "94" "centl> " else "centl> ");
@@ -192,6 +214,45 @@ let run_json_stream () =
   in
   lines true
 
+let run_serve () =
+  let state = Centl_protocol.create () in
+  let rec loop () =
+    match
+      Centl_protocol.read_line stdin
+        (Centl_protocol.limits state).max_request_bytes
+    with
+    | Centl_protocol.End -> true
+    | Centl_protocol.Line line ->
+        Centl_protocol.handle_line state line |> print_json;
+        loop ()
+    | Centl_protocol.Oversized ->
+        Centl_protocol.oversized_line state |> print_json;
+        loop ()
+  in
+  loop ()
+
+let run_mcp () =
+  let state = Centl_mcp.create () in
+  let protocol = Centl_mcp.protocol_state state in
+  let print_response = function
+    | None -> ()
+    | Some response -> print_json response
+  in
+  let rec loop () =
+    match
+      Centl_protocol.read_line stdin
+        (Centl_protocol.limits protocol).max_request_bytes
+    with
+    | Centl_protocol.End -> true
+    | Centl_protocol.Line line ->
+        Centl_mcp.handle_line state line |> print_response;
+        loop ()
+    | Centl_protocol.Oversized ->
+        Centl_mcp.oversized_line state |> print_response;
+        loop ()
+  in
+  loop ()
+
 let () =
   let arguments = Array.to_list Sys.argv |> List.tl in
   match parse_arguments arguments with
@@ -202,7 +263,7 @@ let () =
   | Ok command ->
       let color =
         match (command.mode, command.color) with
-        | Json, _ | Human, Never -> false
+        | (Json | Serve | Mcp), _ | Human, Never -> false
         | Human, Always -> true
         | Human, Auto ->
             Unix.isatty Unix.stdout
@@ -212,6 +273,12 @@ let () =
       let expression = String.concat " " command.expression_parts in
       let ok =
         match (command.file, expression, command.mode) with
+        | Some _, _, (Serve | Mcp) ->
+            prerr_endline "centl: --serve and --mcp do not accept --file";
+            false
+        | None, expression, (Serve | Mcp) when expression <> "" ->
+            prerr_endline "centl: --serve and --mcp do not accept an expression";
+            false
         | Some _, expression, _ when expression <> "" ->
             prerr_endline "centl: use either --file or an expression, not both";
             false
@@ -228,6 +295,8 @@ let () =
         | None, expression, Json when expression <> "" ->
             evaluate_json expression
         | None, _, Json -> run_json_stream ()
+        | None, _, Serve -> run_serve ()
+        | None, _, Mcp -> run_mcp ()
         | None, _, Human when Unix.isatty Unix.stdin ->
             repl ~color ();
             true

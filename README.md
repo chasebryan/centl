@@ -63,8 +63,9 @@ x in {2, 3}
 ```
 
 Run `./centl` for the calculator, `./centl --syntax` for every implemented form,
-`./centl --file path` for a script, or `./centl --json` for the machine protocol.
-Mathematical output is colored when written to a terminal; use
+`./centl --file path` for a script, `./centl --serve` for persistent JSON Lines,
+or `./centl --mcp` as a local AI tool. Mathematical output is colored when
+written to a terminal; use
 `--color=always`, `--no-color`, or `NO_COLOR` to control it.
 
 Calculator sessions and scripts remember immutable definitions written as
@@ -80,7 +81,8 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [mathematical functions](docs/MATHEMATICS.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
-[machine protocol](docs/PROTOCOL.md), and [roadmap](docs/ROADMAP.md).
+[machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
+[roadmap](docs/ROADMAP.md).
 
 ## License
 
