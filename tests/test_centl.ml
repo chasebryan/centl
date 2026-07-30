@@ -500,6 +500,9 @@ let machine_resource_limits () =
     (evaluate "f(f(f(1)))" [ ("max_expression_nodes", `Int 10) ]
     |> protocol_error_code);
   Alcotest.(check string)
+    "symbolic expansion work" "resource_limit"
+    (evaluate "expand(((x + 1)^64)^64)" [] |> protocol_error_code);
+  Alcotest.(check string)
     "exact result bits" "resource_limit"
     (evaluate "2^100" [ ("max_exact_bits", `Int 100) ] |> protocol_error_code);
   Alcotest.(check string)
@@ -650,6 +653,20 @@ let mcp_failures () =
       {|{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"unknown","arguments":{}}}|}
   in
   Alcotest.(check int) "unknown tool" (-32602) (mcp_error_code unknown);
+  let malformed_limits =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"1 + 1","limits":"unbounded"}}}|}
+  in
+  Alcotest.(check int)
+    "malformed limits" (-32602)
+    (mcp_error_code malformed_limits);
+  let excessive_limit =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"1 + 1","limits":{"max_expression_nodes":100001}}}}|}
+  in
+  Alcotest.(check int)
+    "excessive limit" (-32602)
+    (mcp_error_code excessive_limit);
   let one_request =
     { Centl_protocol.default_server_limits with max_requests = 1 }
   in

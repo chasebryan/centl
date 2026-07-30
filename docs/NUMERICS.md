@@ -72,10 +72,11 @@ Working precision starts above the decimal target with a guard margin and may
 double up to 16,384 bits. These are resource limits, not claims that every
 request can be resolved.
 
-Machine evaluation also bounds source bytes, expanded expression nodes,
-estimated exact-result bits, integer iterations, and session definitions before
-entering expensive exact operations. `centl --serve` reports the active
-ceilings through `describe` and accepts lower per-request limits.
+Machine evaluation also bounds source bytes, expanded and resolved expression
+nodes, symbolic-transformation work, estimated exact-result bits, integer
+iterations, and session definitions before entering expensive operations.
+`centl --serve` reports the active ceilings through `describe` and accepts lower
+per-request limits.
 
 ## Rendering
 

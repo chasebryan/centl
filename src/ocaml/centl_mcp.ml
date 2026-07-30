@@ -243,8 +243,12 @@ let calculate state id arguments =
         | None -> fields
         | Some limits -> fields @ [ ("limits", limits) ]
       in
-      Centl_protocol.handle_json state.protocol (`Assoc fields)
-      |> tool_result |> jsonrpc_result id
+      begin match Centl_protocol.request_limits state.protocol fields with
+      | Error message -> jsonrpc_error id (-32602) message
+      | Ok _ ->
+          Centl_protocol.handle_json state.protocol (`Assoc fields)
+          |> tool_result |> jsonrpc_result id
+      end
   | None, _ -> jsonrpc_error id (-32602) "centl_calculate requires expression"
 
 let reset state id arguments =

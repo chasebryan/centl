@@ -562,6 +562,40 @@ let rec expression_node_count = function
       + expression_node_count left
       + expression_node_count right
 
+let bounded_sum limit left right =
+  if left > limit || right > limit - left then limit + 1 else left + right
+
+let rec substituted_node_count limit replacements expression =
+  let add left right = bounded_sum limit left right in
+  let children base expressions =
+    List.fold_left
+      (fun total expression ->
+        add total (substituted_node_count limit replacements expression))
+      base expressions
+  in
+  match expression with
+  | Centl_Core.Literal _ -> 1
+  | Centl_Core.Symbol name ->
+      Option.value (List.assoc_opt name replacements) ~default:1
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      add 1 (substituted_node_count limit replacements inner)
+  | Centl_Core.Differentiate (inner, variable)
+  | Centl_Core.Derivative (inner, variable) ->
+      add 1
+        (substituted_node_count limit
+           (List.remove_assoc variable replacements)
+           inner)
+  | Centl_Core.Binary (_, left, right) -> children 1 [ left; right ]
+  | Centl_Core.Function (_, arguments) -> children 1 arguments
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      children 1 [ inner; replacement ]
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      children 1 [ inner; left; right ]
+
 let bits_of_integer value =
   if Z.equal value Z.zero then 1 else Z.numbits (Z.abs value)
 
@@ -691,11 +725,314 @@ let check_source_limit limits source =
     failure "resource_limit" "the expression exceeds the source-byte limit"
   else Ok ()
 
+type polynomial_profile = {
+  polynomial_variable : string option;
+  degree : Z.t;
+  work : Z.t;
+  coefficient_bits : Z.t;
+}
+
+let merge_polynomial_variable left right =
+  match (left, right) with
+  | None, variable | variable, None -> Some variable
+  | Some left, Some right when left = right -> Some (Some left)
+  | Some _, Some _ -> None
+
+let rec polynomial_profile expression =
+  let combine operator left right =
+    match (polynomial_profile left, polynomial_profile right) with
+    | Some left, Some right ->
+        begin match
+          merge_polynomial_variable left.polynomial_variable
+            right.polynomial_variable
+        with
+        | None -> None
+        | Some variable -> operator variable left right
+        end
+    | _ -> None
+  in
+  match expression with
+  | Centl_Core.Literal (numerator, denominator) ->
+      if Z.equal denominator Z.zero then None
+      else
+        Some
+          {
+            polynomial_variable = None;
+            degree = Z.zero;
+            work = Z.one;
+            coefficient_bits =
+              Z.of_int (bits_of_integer numerator + bits_of_integer denominator);
+          }
+  | Centl_Core.Symbol variable ->
+      Some
+        {
+          polynomial_variable = Some variable;
+          degree = Z.one;
+          work = Z.one;
+          coefficient_bits = Z.one;
+        }
+  | Centl_Core.Negate inner ->
+      Option.map
+        (fun profile ->
+          {
+            profile with
+            work = Z.add profile.work (Z.add profile.degree Z.one);
+          })
+        (polynomial_profile inner)
+  | Centl_Core.Binary ((Centl_Core.Add | Centl_Core.Subtract), left, right) ->
+      combine
+        (fun variable left right ->
+          let degree = Z.max left.degree right.degree in
+          Some
+            {
+              polynomial_variable = variable;
+              degree;
+              work = Z.add (Z.add left.work right.work) (Z.add degree Z.one);
+              coefficient_bits =
+                Z.add Z.one (Z.max left.coefficient_bits right.coefficient_bits);
+            })
+        left right
+  | Centl_Core.Binary (Centl_Core.Multiply, left, right) ->
+      combine
+        (fun variable left right ->
+          let degree = Z.add left.degree right.degree in
+          let operations =
+            Z.mul (Z.add left.degree Z.one) (Z.add right.degree Z.one)
+          in
+          let convolution_bits =
+            Z.of_int
+              (bits_of_integer (Z.add (Z.min left.degree right.degree) Z.one))
+          in
+          Some
+            {
+              polynomial_variable = variable;
+              degree;
+              work = Z.add operations (Z.add left.work right.work);
+              coefficient_bits =
+                Z.add convolution_bits
+                  (Z.add left.coefficient_bits right.coefficient_bits);
+            })
+        left right
+  | Centl_Core.Binary (Centl_Core.Divide, left, right) ->
+      begin match (polynomial_profile left, polynomial_profile right) with
+      | Some left, Some right when Option.is_none right.polynomial_variable ->
+          Some
+            {
+              polynomial_variable = left.polynomial_variable;
+              degree = left.degree;
+              work =
+                Z.add (Z.add left.work right.work) (Z.add left.degree Z.one);
+              coefficient_bits =
+                Z.add left.coefficient_bits right.coefficient_bits;
+            }
+      | _ -> None
+      end
+  | Centl_Core.Power (base, exponent)
+    when Z.gt exponent Z.zero && Z.leq exponent (Z.of_int 64) ->
+      begin match polynomial_profile base with
+      | None -> None
+      | Some base ->
+          let degree = Z.mul base.degree exponent in
+          let triangular =
+            Z.divexact (Z.mul exponent (Z.sub exponent Z.one)) (Z.of_int 2)
+          in
+          let operations =
+            Z.mul (Z.add base.degree Z.one)
+              (Z.add exponent (Z.mul base.degree triangular))
+          in
+          let degree_bits =
+            Z.of_int (bits_of_integer (Z.add base.degree Z.one))
+          in
+          Some
+            {
+              polynomial_variable = base.polynomial_variable;
+              degree;
+              work = Z.add base.work operations;
+              coefficient_bits =
+                Z.mul exponent
+                  (Z.add Z.one (Z.add base.coefficient_bits degree_bits));
+            }
+      end
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      polynomial_profile inner
+  | Centl_Core.Power _ | Centl_Core.Function _ | Centl_Core.Differentiate _
+  | Centl_Core.Substitute _ | Centl_Core.Derivative _ | Centl_Core.Assuming _ ->
+      None
+
+let check_polynomial_transformation limits expression =
+  match polynomial_profile expression with
+  | Some { polynomial_variable = Some _; degree; work; coefficient_bits } ->
+      let output_nodes =
+        if Z.equal degree Z.zero then Z.one else Z.mul (Z.of_int 5) degree
+      in
+      if Z.gt output_nodes (Z.of_int limits.max_expression_nodes) then
+        failure "resource_limit"
+          "the symbolic transformation exceeds the expression-node limit"
+      else if Z.gt work (Z.of_int limits.max_expression_nodes) then
+        failure "resource_limit"
+          "the symbolic transformation exceeds the work limit"
+      else if Z.gt coefficient_bits (Z.of_int limits.max_exact_bits) then
+        failure "resource_limit"
+          "the symbolic transformation exceeds the exact-coefficient bit limit"
+      else Ok ()
+  | _ -> Ok ()
+
+let rec differentiated_node_count limit expression variable =
+  let sum values = List.fold_left (bounded_sum limit) 0 values in
+  let nodes expression = expression_node_count expression in
+  match expression with
+  | Centl_Core.Literal _ -> 1
+  | Centl_Core.Symbol _ -> 1
+  | Centl_Core.Negate inner ->
+      sum [ 1; differentiated_node_count limit inner variable ]
+  | Centl_Core.Binary ((Centl_Core.Add | Centl_Core.Subtract), left, right) ->
+      sum
+        [
+          1;
+          differentiated_node_count limit left variable;
+          differentiated_node_count limit right variable;
+        ]
+  | Centl_Core.Binary (Centl_Core.Multiply, left, right) ->
+      sum
+        [
+          3;
+          differentiated_node_count limit left variable;
+          differentiated_node_count limit right variable;
+          nodes left;
+          nodes right;
+        ]
+  | Centl_Core.Binary (Centl_Core.Divide, left, right) ->
+      sum
+        [
+          5;
+          differentiated_node_count limit left variable;
+          differentiated_node_count limit right variable;
+          nodes left;
+          2 * nodes right;
+        ]
+  | Centl_Core.Power (base, exponent) ->
+      if Z.equal exponent Z.zero then 1
+      else if Z.equal exponent Z.one then
+        differentiated_node_count limit base variable
+      else sum [ 4; nodes base; differentiated_node_count limit base variable ]
+  | Centl_Core.Function (name, [ argument ])
+    when List.mem name
+           [
+             "sin";
+             "cos";
+             "exp";
+             "log";
+             "sqrt";
+             "tan";
+             "sinh";
+             "cosh";
+             "tanh";
+             "asin";
+             "acos";
+             "atan";
+           ] ->
+      sum
+        [
+          6;
+          2 * nodes argument;
+          differentiated_node_count limit argument variable;
+        ]
+  | Centl_Core.Function _ | Centl_Core.Derivative _ | Centl_Core.Differentiate _
+  | Centl_Core.Substitute _ ->
+      sum [ 1; nodes expression ]
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      differentiated_node_count limit inner variable
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      sum
+        [
+          1;
+          differentiated_node_count limit inner variable;
+          nodes left;
+          nodes right;
+        ]
+
+let resolve_with_limits limits expression =
+  let ( let* ) result next = Result.bind result next in
+  let checked expression =
+    let* () = check_expression_limit limits expression in
+    Ok expression
+  in
+  let rec resolve expression =
+    match expression with
+    | Centl_Core.Literal _ | Centl_Core.Symbol _ -> Ok expression
+    | Centl_Core.Negate inner ->
+        let* inner = resolve inner in
+        checked (Centl_Core.Negate inner)
+    | Centl_Core.Binary (operator, left, right) ->
+        let* left = resolve left in
+        let* right = resolve right in
+        checked (Centl_Core.Binary (operator, left, right))
+    | Centl_Core.Power (base, exponent) ->
+        let* base = resolve base in
+        checked (Centl_Core.Power (base, exponent))
+    | Centl_Core.Function (name, arguments) ->
+        let* arguments = resolve_arguments arguments in
+        checked (Centl_Core.rewrite_function name arguments)
+    | Centl_Core.Derivative (inner, variable) ->
+        let* inner = resolve inner in
+        checked (Centl_Core.Derivative (inner, variable))
+    | Centl_Core.Differentiate (inner, variable) ->
+        let* inner = resolve inner in
+        let nodes =
+          differentiated_node_count limits.max_expression_nodes inner variable
+        in
+        if nodes > limits.max_expression_nodes then
+          failure "resource_limit"
+            "the derivative exceeds the expression-node limit"
+        else checked (Centl_Core.differentiate inner variable)
+    | Centl_Core.Substitute (inner, variable, replacement) ->
+        let* inner = resolve inner in
+        let* replacement = resolve replacement in
+        let nodes =
+          substituted_node_count limits.max_expression_nodes
+            [ (variable, expression_node_count replacement) ]
+            inner
+        in
+        if nodes > limits.max_expression_nodes then
+          failure "resource_limit"
+            "the substitution exceeds the expression-node limit"
+        else checked (Centl_Core.substitute inner variable replacement)
+    | Centl_Core.Simplify inner | Centl_Core.Expand inner ->
+        let* inner = resolve inner in
+        let* () = check_polynomial_transformation limits inner in
+        checked (Centl_Core.canonicalize_polynomial inner)
+    | Centl_Core.Factor inner ->
+        let* inner = resolve inner in
+        let* () = check_polynomial_transformation limits inner in
+        checked (Centl_Core.factor_expression inner)
+    | Centl_Core.Assuming (inner, left, relation, right) ->
+        let* left = resolve left in
+        let* right = resolve right in
+        let* inner = resolve inner in
+        checked
+          (Centl_Core.Assuming
+             ( Centl_Core.simplify_assuming inner left relation right,
+               left,
+               relation,
+               right ))
+  and resolve_arguments = function
+    | [] -> Ok []
+    | argument :: rest ->
+        let* argument = resolve argument in
+        let* rest = resolve_arguments rest in
+        Ok (argument :: rest)
+  in
+  resolve expression
+
 let evaluate_expression_with_limits limits expression =
   let ( let* ) result next = Result.bind result next in
   let* () = check_expression_limit limits expression in
   let* () = check_computation_limit limits expression in
-  let expression = Centl_Core.resolve expression in
+  let* expression = resolve_with_limits limits expression in
   let* () = check_expression_limit limits expression in
   let* () = check_computation_limit limits expression in
   match solution_request expression with
@@ -794,40 +1131,6 @@ let instantiate parameters arguments body =
     (fun expression marker argument ->
       Centl_Core.substitute expression marker argument)
     marked markers arguments
-
-let bounded_sum limit left right =
-  if left > limit || right > limit - left then limit + 1 else left + right
-
-let rec substituted_node_count limit replacements expression =
-  let add left right = bounded_sum limit left right in
-  let children base expressions =
-    List.fold_left
-      (fun total expression ->
-        add total (substituted_node_count limit replacements expression))
-      base expressions
-  in
-  match expression with
-  | Centl_Core.Literal _ -> 1
-  | Centl_Core.Symbol name ->
-      Option.value (List.assoc_opt name replacements) ~default:1
-  | Centl_Core.Negate inner
-  | Centl_Core.Power (inner, _)
-  | Centl_Core.Simplify inner
-  | Centl_Core.Expand inner
-  | Centl_Core.Factor inner ->
-      add 1 (substituted_node_count limit replacements inner)
-  | Centl_Core.Differentiate (inner, variable)
-  | Centl_Core.Derivative (inner, variable) ->
-      add 1
-        (substituted_node_count limit
-           (List.remove_assoc variable replacements)
-           inner)
-  | Centl_Core.Binary (_, left, right) -> children 1 [ left; right ]
-  | Centl_Core.Function (_, arguments) -> children 1 arguments
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      children 1 [ inner; replacement ]
-  | Centl_Core.Assuming (inner, left, _, right) ->
-      children 1 [ inner; left; right ]
 
 let expansion_limit_failure () =
   session_failure "resource_limit"

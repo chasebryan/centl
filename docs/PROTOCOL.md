@@ -57,7 +57,8 @@ The server has deterministic ceilings:
 - 65,536 bytes per JSON request
 - 10,000 requests per process
 - 32,768 source bytes per expression
-- 100,000 expression nodes during and after session expansion
+- 100,000 expression nodes during session expansion and resolution; the same
+  ceiling bounds estimated symbolic-transformation work before it begins
 - 1,000,000 estimated bits per exact result
 - 100,000 integer iterations for concrete-mathematics operations
 - 1,024 immutable definitions per session
