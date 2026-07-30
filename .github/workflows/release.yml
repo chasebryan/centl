@@ -355,6 +355,29 @@ jobs:
           path: .native
           key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v2
 
+      - name: Restore pinned native sources
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          runner_temp=$(cygpath -u "$RUNNER_TEMP")
+          curl --fail --silent --show-error --location \
+            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
+            --output "$runner_temp/gmp.tar.xz"
+          printf '%s  %s\n' "$GMP_SHA256" "$runner_temp/gmp.tar.xz" | sha256sum --check
+          tar -xf "$runner_temp/gmp.tar.xz" -C "$runner_temp"
+
+          curl --fail --silent --show-error --location \
+            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
+            --output "$runner_temp/mpfr.tar.xz"
+          printf '%s  %s\n' "$MPFR_SHA256" "$runner_temp/mpfr.tar.xz" | sha256sum --check
+          tar -xf "$runner_temp/mpfr.tar.xz" -C "$runner_temp"
+
+          curl --fail --silent --show-error --location \
+            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
+            --output "$runner_temp/flint.tar.gz"
+          printf '%s  %s\n' "$FLINT_SHA256" "$runner_temp/flint.tar.gz" | sha256sum --check
+          tar -xzf "$runner_temp/flint.tar.gz" -C "$runner_temp"
+
       - name: Build pinned native libraries
         if: steps.windows-native-cache.outputs.cache-hit != 'true'
         shell: msys2 {0}
@@ -368,33 +391,18 @@ jobs:
           export LIBRARY_PATH="$native_prefix/lib"
           export PKG_CONFIG_PATH="$native_prefix/lib/pkgconfig"
 
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
-            --output "$runner_temp/gmp.tar.xz"
-          printf '%s  %s\n' "$GMP_SHA256" "$runner_temp/gmp.tar.xz" | sha256sum --check
-          tar -xf "$runner_temp/gmp.tar.xz" -C "$runner_temp"
           cd "$runner_temp/gmp-${GMP_VERSION}"
           ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
             --enable-static --disable-shared
           make -j2
           make install
 
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
-            --output "$runner_temp/mpfr.tar.xz"
-          printf '%s  %s\n' "$MPFR_SHA256" "$runner_temp/mpfr.tar.xz" | sha256sum --check
-          tar -xf "$runner_temp/mpfr.tar.xz" -C "$runner_temp"
           cd "$runner_temp/mpfr-${MPFR_VERSION}"
           ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
             --with-gmp="$native_prefix" --enable-static --disable-shared
           make -j2
           make install
 
-          curl --fail --silent --show-error --location \
-            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
-            --output "$runner_temp/flint.tar.gz"
-          printf '%s  %s\n' "$FLINT_SHA256" "$runner_temp/flint.tar.gz" | sha256sum --check
-          tar -xzf "$runner_temp/flint.tar.gz" -C "$runner_temp"
           GMPDIR="$native_prefix" MPFRDIR="$native_prefix" \
             cmake -S "$runner_temp/flint-${FLINT_VERSION}" \
               -B "$runner_temp/flint-build" -G Ninja \
