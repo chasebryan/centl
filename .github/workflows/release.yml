@@ -425,7 +425,10 @@ jobs:
               throw "missing Windows static library: $ArchivePath"
             }
           }
-          $Linker = (Get-Command x86_64-w64-mingw32-ld.exe -ErrorAction Stop).Source
+          $Linker = "C:\msys64\mingw64\bin\ld.exe"
+          if (-not (Test-Path -LiteralPath $Linker -PathType Leaf)) {
+            throw "missing Windows native linker: $Linker"
+          }
           $MathObject = "$Native/lib/centl_math.o"
           & $Linker -r -o $MathObject --whole-archive `
             "$Native/lib/libflint.a" "$Native/lib/libmpfr.a" "$Native/lib/libgmp.a" `
