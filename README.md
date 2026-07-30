@@ -22,12 +22,22 @@ rigor to program.
 
 ## Try it
 
-Install a prebuilt Linux x86_64 release without a compiler toolchain:
+Install a native Linux or macOS release without a compiler toolchain:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
 less install
 sh install
+centl 'solve(x^2 - 5*x + 6 = 0, x)'
+```
+
+On Windows PowerShell:
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/chasebryan/centl/main/install.ps1 -OutFile install.ps1
+Get-Content .\install.ps1
+Unblock-File .\install.ps1
+.\install.ps1
 centl 'solve(x^2 - 5*x + 6 = 0, x)'
 ```
 

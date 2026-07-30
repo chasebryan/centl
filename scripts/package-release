@@ -5,6 +5,7 @@ project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 version=${1:-}
 output_directory=${2:-"$project_root/dist"}
 binary=${CENTL_BINARY:-"$project_root/_build/default/src/main.exe"}
+tar_command=${TAR:-tar}
 
 fail() {
   printf 'centl package: %s\n' "$1" >&2
@@ -16,22 +17,55 @@ version=${version#v}
 case "$version" in
   ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid version: $version" ;;
 esac
-[ "$(uname -s)" = Linux ] || fail "release packaging currently supports Linux only"
+
+case $(uname -s) in
+  Linux)
+    platform=linux
+    platform_name=Linux
+    ;;
+  Darwin)
+    platform=macos
+    platform_name=macOS
+    ;;
+  *) fail "release packaging supports Linux and macOS; use package-release.ps1 on Windows" ;;
+esac
+
 case $(uname -m) in
   x86_64|amd64) architecture=x86_64 ;;
-  *) fail "release packaging currently supports x86_64 only" ;;
+  arm64|aarch64) architecture=arm64 ;;
+  *) fail "unsupported release architecture: $(uname -m)" ;;
 esac
-[ -x "$binary" ] || fail "build CENTL before packaging: make build"
+[ "$platform" != linux ] || [ "$architecture" = x86_64 ] ||
+  fail "Linux release packaging currently supports x86_64 only"
 
+[ -x "$binary" ] || fail "build CENTL before packaging: make build"
 reported_version=$("$binary" --version)
 [ "$reported_version" = "centl $version" ] ||
   fail "binary reports '$reported_version', expected 'centl $version'"
 
-dependency_path() {
-  dependency=$1
-  path=$(ldd "$2" | awk -v dependency="$dependency" \
-    '$1 == dependency && $2 == "=>" { print $3; exit }')
-  [ -n "$path" ] && [ -f "$path" ] || fail "missing runtime library: $dependency"
+linux_dependency_path() {
+  pattern=$1
+  object=$2
+  path=$(ldd "$object" | awk -v pattern="$pattern" \
+    '$1 ~ pattern && $2 == "=>" { print $3; exit }')
+  [ -n "$path" ] && [ -f "$path" ] || fail "missing runtime library matching: $pattern"
+  printf '%s\n' "$path"
+}
+
+macos_dependency_path() {
+  pattern=$1
+  shift
+  path=""
+  for object in "$@"; do
+    path=$(otool -L "$object" | awk -v pattern="$pattern" \
+      'NR > 1 && $1 ~ pattern { print $1; exit }')
+    [ -z "$path" ] || break
+  done
+  case "$path" in
+    /*) [ -f "$path" ] || fail "missing runtime library: $path" ;;
+    '') fail "missing runtime library matching: $pattern" ;;
+    *) fail "runtime library does not have an absolute build path: $path" ;;
+  esac
   printf '%s\n' "$path"
 }
 
@@ -47,6 +81,16 @@ copy_license() {
   fail "could not locate $destination"
 }
 
+rewrite_macos_reference() {
+  object=$1
+  old=$2
+  new=$3
+  if otool -L "$object" | awk -v expected="$old" \
+    'NR > 1 && $1 == expected { found = 1 } END { exit !found }'; then
+    install_name_tool -change "$old" "$new" "$object"
+  fi
+}
+
 if [ -n "${OPAM_SWITCH_PREFIX:-}" ]; then
   opam_prefix=$OPAM_SWITCH_PREFIX
 elif command -v opam >/dev/null 2>&1; then
@@ -56,8 +100,17 @@ else
 fi
 
 if command -v fstar.exe >/dev/null 2>&1; then
-  fstar_executable=$(readlink -f "$(command -v fstar.exe)")
-  fstar_license_default=$(dirname "$fstar_executable")/../LICENSE
+  fstar_executable=$(command -v fstar.exe)
+  while [ -L "$fstar_executable" ]; do
+    link_directory=$(dirname -- "$fstar_executable")
+    link_target=$(readlink "$fstar_executable")
+    case "$link_target" in
+      /*) fstar_executable=$link_target ;;
+      *) fstar_executable="$link_directory/$link_target" ;;
+    esac
+  done
+  fstar_directory=$(CDPATH= cd -- "$(dirname -- "$fstar_executable")" && pwd)
+  fstar_license_default="$fstar_directory/../LICENSE"
 else
   fstar_license_default=""
 fi
@@ -75,17 +128,50 @@ cp "$project_root/scripts/release-launcher" "$package/bin/centl"
 cp "$binary" "$package/libexec/centl"
 chmod 755 "$package/bin/centl" "$package/libexec/centl"
 
-flint=$(dependency_path libflint.so.18 "$binary")
-gmp=$(dependency_path libgmp.so.10 "$binary")
-mpfr=$(dependency_path libmpfr.so.6 "$flint")
-cp -L "$flint" "$package/lib/libflint.so.18"
-cp -L "$gmp" "$package/lib/libgmp.so.10"
-cp -L "$mpfr" "$package/lib/libmpfr.so.6"
-if command -v strip >/dev/null 2>&1; then
-  strip --strip-unneeded "$package/libexec/centl" \
-    "$package/lib/libflint.so.18" \
-    "$package/lib/libgmp.so.10" \
-    "$package/lib/libmpfr.so.6"
+if [ "$platform" = linux ]; then
+  flint=$(linux_dependency_path '^libflint\.so' "$binary")
+  gmp=$(linux_dependency_path '^libgmp\.so' "$binary")
+  mpfr=$(linux_dependency_path '^libmpfr\.so' "$flint")
+else
+  flint=$(macos_dependency_path '/libflint(\.[0-9]+)*\.dylib$' "$binary")
+  gmp=$(macos_dependency_path '/libgmp(\.[0-9]+)*\.dylib$' "$binary" "$flint")
+  mpfr=$(macos_dependency_path '/libmpfr(\.[0-9]+)*\.dylib$' "$binary" "$flint")
+fi
+
+flint_name=$(basename "$flint")
+gmp_name=$(basename "$gmp")
+mpfr_name=$(basename "$mpfr")
+cp -L "$flint" "$package/lib/$flint_name"
+cp -L "$gmp" "$package/lib/$gmp_name"
+cp -L "$mpfr" "$package/lib/$mpfr_name"
+
+if [ "$platform" = linux ]; then
+  if command -v strip >/dev/null 2>&1; then
+    strip --strip-unneeded "$package/libexec/centl" \
+      "$package/lib/$flint_name" "$package/lib/$gmp_name" \
+      "$package/lib/$mpfr_name"
+  fi
+else
+  for object in "$package/lib/$flint_name" "$package/lib/$gmp_name" \
+    "$package/lib/$mpfr_name"; do
+    rewrite_macos_reference "$object" "$flint" "@loader_path/$flint_name"
+    rewrite_macos_reference "$object" "$gmp" "@loader_path/$gmp_name"
+    rewrite_macos_reference "$object" "$mpfr" "@loader_path/$mpfr_name"
+  done
+  rewrite_macos_reference "$package/libexec/centl" "$flint" \
+    "@loader_path/../lib/$flint_name"
+  rewrite_macos_reference "$package/libexec/centl" "$gmp" \
+    "@loader_path/../lib/$gmp_name"
+  rewrite_macos_reference "$package/libexec/centl" "$mpfr" \
+    "@loader_path/../lib/$mpfr_name"
+  install_name_tool -id "@rpath/$flint_name" "$package/lib/$flint_name"
+  install_name_tool -id "@rpath/$gmp_name" "$package/lib/$gmp_name"
+  install_name_tool -id "@rpath/$mpfr_name" "$package/lib/$mpfr_name"
+  for object in "$package/lib/$flint_name" "$package/lib/$gmp_name" \
+    "$package/lib/$mpfr_name"; do
+    codesign --force --sign - "$object"
+  done
+  codesign --force --sign - "$package/libexec/centl"
 fi
 
 cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
@@ -93,9 +179,11 @@ copy_license "$package/licenses/FLINT" \
   "${CENTL_FLINT_LICENSE:-}" /usr/share/doc/libflint18t64/copyright \
   /usr/share/doc/libflint18/copyright /usr/share/doc/libflint-dev/copyright
 copy_license "$package/licenses/GMP" \
-  /usr/share/doc/libgmp10/copyright /usr/share/doc/libgmp-dev/copyright
+  "${CENTL_GMP_LICENSE:-}" /usr/share/doc/libgmp10/copyright \
+  /usr/share/doc/libgmp-dev/copyright
 copy_license "$package/licenses/MPFR" \
-  /usr/share/doc/libmpfr6/copyright /usr/share/doc/libmpfr-dev/copyright
+  "${CENTL_MPFR_LICENSE:-}" /usr/share/doc/libmpfr6/copyright \
+  /usr/share/doc/libmpfr-dev/copyright
 copy_license "$package/licenses/FSTAR" \
   "${CENTL_FSTAR_LICENSE:-}" "$fstar_license_default"
 copy_license "$package/licenses/OCAML" \
@@ -119,30 +207,32 @@ EOF
 
 printf '%s\n' "$version" > "$package/VERSION"
 cat > "$package/README" <<EOF
-CENTL $version for Linux x86_64
+CENTL $version for $platform_name $architecture
 
 Run bin/centl. The bundled native libraries are loaded only for CENTL.
-This build requires glibc 2.35 or newer.
 License notices are in the licenses directory.
 EOF
 
-# Normalize modes so the same inputs produce the same archive even when
-# builders use different umasks or source-file permissions.
 find "$package" -type d -exec chmod 755 {} +
 find "$package" -type f -exec chmod 644 {} +
 chmod 755 "$package/bin/centl" "$package/libexec/centl"
 
-LD_LIBRARY_PATH="$package/lib" "$package/libexec/centl" '0.1 + 0.2' \
-  | grep -qx '3/10' || fail "packaged executable failed its smoke test"
+"$package/bin/centl" '0.1 + 0.2' | grep -qx '3/10' ||
+  fail "packaged executable failed its smoke test"
 
 mkdir -p "$output_directory"
-asset="centl-linux-$architecture.tar.gz"
+asset="centl-$platform-$architecture.tar.gz"
 archive="$output_directory/$asset"
 epoch=${SOURCE_DATE_EPOCH:-0}
 case "$epoch" in
   *[!0-9]*|'') fail "SOURCE_DATE_EPOCH must be a non-negative integer" ;;
 esac
-tar --sort=name --mtime="@$epoch" --owner=0 --group=0 --numeric-owner \
-  -czf "$archive" -C "$temporary" centl
-(cd "$output_directory" && sha256sum "$asset" > "$asset.sha256")
+"$tar_command" --sort=name --mtime="@$epoch" --owner=0 --group=0 \
+  --numeric-owner -czf "$archive" -C "$temporary" centl
+if command -v sha256sum >/dev/null 2>&1; then
+  (cd "$output_directory" && sha256sum "$asset" > "$asset.sha256")
+else
+  digest=$(shasum -a 256 "$archive" | awk '{ print $1 }')
+  printf '%s  %s\n' "$digest" "$asset" > "$archive.sha256"
+fi
 printf '%s\n' "$archive"

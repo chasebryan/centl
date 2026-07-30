@@ -9,4 +9,9 @@
   (names centl_arb_stubs)
   (flags
    (:standard -Wall -Wextra -Werror)))
- (c_library_flags -lflint -lmpfr -lgmp))
+ (c_library_flags
+  %{env:CENTL_FLINT_LIBRARY=-lflint}
+  %{env:CENTL_MPFR_LIBRARY=-lmpfr}
+  %{env:CENTL_GMP_LIBRARY=-lgmp}
+  -lpthread
+  -lm))

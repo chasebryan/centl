@@ -61,13 +61,18 @@ esac
 
 case $(uname -s) in
   Linux) platform=linux ;;
-  *) fail "prebuilt releases currently support Linux only" ;;
+  Darwin) platform=macos ;;
+  *) fail "prebuilt releases support Linux and macOS; use install.ps1 on Windows" ;;
 esac
 
 case $(uname -m) in
   x86_64|amd64) architecture=x86_64 ;;
-  *) fail "prebuilt releases currently support x86_64 only" ;;
+  arm64|aarch64) architecture=arm64 ;;
+  *) fail "prebuilt releases do not support this architecture: $(uname -m)" ;;
 esac
+
+[ "$platform" != linux ] || [ "$architecture" = x86_64 ] ||
+  fail "Linux prebuilt releases currently support x86_64 only"
 
 asset="centl-${platform}-${architecture}.tar.gz"
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-install.XXXXXXXX")
@@ -130,7 +135,7 @@ tar -tzf "$archive" | while IFS= read -r member; do
     *) fail "the release archive has an unexpected layout" ;;
   esac
 done
-tar --no-same-owner --no-same-permissions -xzf "$archive" -C "$extracted"
+tar -xzf "$archive" -C "$extracted"
 package="$extracted/centl"
 [ -x "$package/bin/centl" ] || fail "the release contains no CENTL launcher"
 [ -x "$package/libexec/centl" ] || fail "the release contains no CENTL executable"
@@ -169,7 +174,7 @@ if ! runtime_version=$("$staging/bin/centl" --version 2>&1); then
 fi
 [ "$runtime_version" = "centl $version" ] ||
   fail "the executable reports '$runtime_version', expected 'centl $version'"
-mv -T "$staging" "$target"
+mv "$staging" "$target"
 staging=""
 ln -sfn "$target/bin/centl" "$command_path"
 

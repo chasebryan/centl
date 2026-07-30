@@ -13,6 +13,8 @@ first exact-calculator slice is verified and tested with these versions:
 | Zarith | 1.14 |
 | Yojson | 2.2.2 |
 | FLINT / Arb | 3.0.1 |
+| GMP | 6.3.0 |
+| MPFR | 4.2.2 |
 | Alcotest | 1.9.1 |
 | QCheck | 0.91 |
 
@@ -61,7 +63,11 @@ julia -e 'using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2))
 `make test` verifies the F* core, builds the native FLINT/Arb binding, and runs
 exact, symbolic, rigorous-containment, CLI, JSON, and property tests.
 
-`make release VERSION=x.y.z` builds a Linux x86_64 archive containing the
-executable and its private FLINT, GMP, and MPFR runtime libraries. Release
-automation builds against glibc 2.35 in Ubuntu 22.04; F* and FLINT downloads are
-accepted only when they match the checksums pinned in the workflow.
+`make release VERSION=x.y.z` builds a Linux or macOS archive containing the
+executable and its private FLINT, GMP, and MPFR runtime libraries. On Windows,
+use `scripts/package-release.ps1 x.y.z`.
+
+Release automation verifies and extracts the F* core once, then runs native
+builds and installed-package tests on Linux x86_64, macOS x86_64, macOS arm64,
+and Windows x86_64. F*, GMP, MPFR, and FLINT source archives are accepted only
+when they match the checksums pinned in the workflow.

@@ -1,3 +1,9 @@
+#define CAML_NAME_SPACE
+
+#if defined(_WIN32) && !defined(CAMLDLLIMPORT)
+#define CAMLDLLIMPORT __declspec(dllimport)
+#endif
+
 #include <limits.h>
 
 #include <caml/alloc.h>
@@ -6,10 +12,29 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 
+#include <gmp.h>
 #include <flint/arb.h>
 #include <flint/fmpq.h>
 #include <flint/fmpz.h>
 #include <flint/flint.h>
+
+/* FlexDLL scans Windows static archives once. Seed GMP symbols that are only
+   discovered after it extracts the FLINT conversion objects. */
+#if defined(_WIN32) && defined(__GNUC__)
+typedef int (*centl_mpz_set_str_fn)(mpz_ptr, const char *, int);
+typedef double (*centl_mpz_get_d_fn)(mpz_srcptr);
+typedef void (*centl_mpz_set_d_fn)(mpz_ptr, double);
+
+static centl_mpz_set_str_fn const centl_mpz_set_str_root __attribute__((used)) = mpz_set_str;
+static centl_mpz_get_d_fn const centl_mpz_get_d_root __attribute__((used)) = mpz_get_d;
+static centl_mpz_set_d_fn const centl_mpz_set_d_root __attribute__((used)) = mpz_set_d;
+#endif
+
+#if defined(_WIN32)
+#define CENTL_PRIM CAMLprim __declspec(dllexport)
+#else
+#define CENTL_PRIM CAMLprim
+#endif
 
 #define Arb_val(value) ((arb_struct *)Data_custom_val(value))
 
@@ -36,8 +61,8 @@ static value centl_alloc_arb(void)
     return result;
 }
 
-CAMLprim value centl_arb_of_fraction(value numerator_value, value denominator_value,
-                                     value precision_value)
+CENTL_PRIM value centl_arb_of_fraction(value numerator_value, value denominator_value,
+                                       value precision_value)
 {
     CAMLparam3(numerator_value, denominator_value, precision_value);
     CAMLlocal1(result);
@@ -65,7 +90,7 @@ CAMLprim value centl_arb_of_fraction(value numerator_value, value denominator_va
     CAMLreturn(result);
 }
 
-CAMLprim value centl_arb_pi(value precision_value)
+CENTL_PRIM value centl_arb_pi(value precision_value)
 {
     CAMLparam1(precision_value);
     CAMLlocal1(result);
@@ -74,7 +99,7 @@ CAMLprim value centl_arb_pi(value precision_value)
     CAMLreturn(result);
 }
 
-CAMLprim value centl_arb_neg(value input_value)
+CENTL_PRIM value centl_arb_neg(value input_value)
 {
     CAMLparam1(input_value);
     CAMLlocal1(result);
@@ -83,7 +108,7 @@ CAMLprim value centl_arb_neg(value input_value)
     CAMLreturn(result);
 }
 
-CAMLprim value centl_arb_abs(value input_value)
+CENTL_PRIM value centl_arb_abs(value input_value)
 {
     CAMLparam1(input_value);
     CAMLlocal1(result);
@@ -93,7 +118,7 @@ CAMLprim value centl_arb_abs(value input_value)
 }
 
 #define CENTL_ARB_BINARY(name, operation)                                      \
-    CAMLprim value name(value left_value, value right_value, value precision_value) \
+    CENTL_PRIM value name(value left_value, value right_value, value precision_value) \
     {                                                                          \
         CAMLparam3(left_value, right_value, precision_value);                   \
         CAMLlocal1(result);                                                     \
@@ -109,8 +134,8 @@ CENTL_ARB_BINARY(centl_arb_mul, arb_mul)
 CENTL_ARB_BINARY(centl_arb_div, arb_div)
 CENTL_ARB_BINARY(centl_arb_atan2, arb_atan2)
 
-CAMLprim value centl_arb_pow(value base_value, value exponent_value,
-                             value precision_value)
+CENTL_PRIM value centl_arb_pow(value base_value, value exponent_value,
+                               value precision_value)
 {
     CAMLparam3(base_value, exponent_value, precision_value);
     CAMLlocal1(result);
@@ -133,7 +158,7 @@ CAMLprim value centl_arb_pow(value base_value, value exponent_value,
 }
 
 #define CENTL_ARB_UNARY(name, operation)                                      \
-    CAMLprim value name(value input_value, value precision_value)              \
+    CENTL_PRIM value name(value input_value, value precision_value)            \
     {                                                                          \
         CAMLparam2(input_value, precision_value);                              \
         CAMLlocal1(result);                                                     \
@@ -156,7 +181,7 @@ CENTL_ARB_UNARY(centl_arb_sinh, arb_sinh)
 CENTL_ARB_UNARY(centl_arb_cosh, arb_cosh)
 CENTL_ARB_UNARY(centl_arb_tanh, arb_tanh)
 
-CAMLprim value centl_arb_endpoints(value input_value)
+CENTL_PRIM value centl_arb_endpoints(value input_value)
 {
     CAMLparam1(input_value);
     CAMLlocal4(result, lower_value, upper_value, exponent_value);
@@ -190,7 +215,7 @@ CAMLprim value centl_arb_endpoints(value input_value)
     CAMLreturn(result);
 }
 
-CAMLprim value centl_arb_classification(value input_value)
+CENTL_PRIM value centl_arb_classification(value input_value)
 {
     CAMLparam1(input_value);
     int result = 0;

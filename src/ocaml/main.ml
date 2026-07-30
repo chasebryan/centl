@@ -1,7 +1,7 @@
 type mode = Human | Json
 type color_mode = Auto | Always | Never
 
-let version = "0.6.0"
+let version = "0.7.0"
 
 type command = {
   mode : mode;
