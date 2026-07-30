@@ -430,11 +430,28 @@ jobs:
             throw "missing Windows native linker: $Linker"
           }
           $MathObject = "$Native/lib/centl_math.o"
-          & $Linker -r -o $MathObject --whole-archive `
-            "$Native/lib/libflint.a" "$Native/lib/libmpfr.a" "$Native/lib/libgmp.a" `
-            --no-whole-archive
-          if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $MathObject -PathType Leaf)) {
-            throw "could not combine the Windows math archives"
+          $Roots = @(
+            "_fmpz_clear_mpz", "arb_abs", "arb_acos", "arb_add", "arb_asin",
+            "arb_atan", "arb_atan2", "arb_clear", "arb_const_pi", "arb_cos",
+            "arb_cosh", "arb_div", "arb_exp", "arb_fmpz_div_fmpz",
+            "arb_get_interval_fmpz_2exp", "arb_is_finite", "arb_is_negative",
+            "arb_is_nonnegative", "arb_is_nonpositive", "arb_is_nonzero",
+            "arb_is_positive", "arb_log", "arb_mul", "arb_neg", "arb_one",
+            "arb_pow_ui", "arb_sin", "arb_sinh", "arb_sqrt", "arb_sub",
+            "arb_tan", "arb_tanh", "flint_free", "fmpq_set_fmpz_frac",
+            "fmpz_get_str", "fmpz_set_str"
+          )
+          $LinkArguments = @("-r", "--oformat", "pe-x86-64", "-o", $MathObject)
+          foreach ($Root in $Roots) { $LinkArguments += @("-u", $Root) }
+          $LinkArguments += @(
+            "--start-group", "$Native/lib/libflint.a", "$Native/lib/libmpfr.a",
+            "$Native/lib/libgmp.a", "--end-group"
+          )
+          $LinkOutput = (& $Linker @LinkArguments 2>&1 | Out-String).Trim()
+          $LinkExit = $LASTEXITCODE
+          if ($LinkOutput) { Write-Output $LinkOutput }
+          if ($LinkExit -ne 0 -or -not (Test-Path -LiteralPath $MathObject -PathType Leaf)) {
+            throw "could not partially link the Windows math archives (exit $LinkExit)"
           }
           "CENTL_FLINT_LIBRARY=$MathObject" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           "CENTL_MPFR_LIBRARY=-lm" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
