@@ -91,12 +91,15 @@ let rec expression_render_bytes limit = function
            (integer_render_bytes denominator))
   | Centl_Core.Symbol name -> bounded_add limit 16 (String.length name)
   | Centl_Core.Negate inner
-  | Centl_Core.Differentiate (inner, _)
-  | Centl_Core.Derivative (inner, _)
   | Centl_Core.Simplify inner
   | Centl_Core.Expand inner
   | Centl_Core.Factor inner ->
       bounded_add limit 16 (expression_render_bytes limit inner)
+  | Centl_Core.Differentiate (inner, variable)
+  | Centl_Core.Derivative (inner, variable) ->
+      bounded_add limit 16
+        (bounded_add limit (String.length variable)
+           (expression_render_bytes limit inner))
   | Centl_Core.Power (inner, exponent) ->
       bounded_add limit 16
         (bounded_add limit

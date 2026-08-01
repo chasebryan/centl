@@ -631,9 +631,21 @@ let rec substituted_node_count limit replacements expression =
            (add
               (substituted_node_count limit replacements lower)
               (substituted_node_count limit replacements upper)))
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      let scoped = List.remove_assoc variable replacements in
+      add 2
+        (add
+           (substituted_node_count limit scoped left)
+           (substituted_node_count limit scoped right))
   | Centl_Core.Function (_, arguments) -> children 1 arguments
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      children 1 [ inner; replacement ]
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      add 1
+        (add
+           (substituted_node_count limit
+              (List.remove_assoc variable replacements)
+              inner)
+           (substituted_node_count limit replacements replacement))
   | Centl_Core.Assuming (inner, left, _, right) ->
       children 1 [ inner; left; right ]
 
@@ -1717,21 +1729,28 @@ let rec references_name name = function
       function_name = name
       || (variable <> name && references_name name body)
       || references_name name lower || references_name name upper
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      name = "solve"
+      || variable <> name
+         && (references_name name left || references_name name right)
   | Centl_Core.Function (function_name, arguments) ->
       function_name = name || List.exists (references_name name) arguments
   | Centl_Core.Literal _ -> false
   | Centl_Core.Negate inner
   | Centl_Core.Power (inner, _)
-  | Centl_Core.Differentiate (inner, _)
-  | Centl_Core.Derivative (inner, _)
   | Centl_Core.Simplify inner
   | Centl_Core.Expand inner
   | Centl_Core.Factor inner ->
       references_name name inner
+  | Centl_Core.Differentiate (inner, variable)
+  | Centl_Core.Derivative (inner, variable) ->
+      variable <> name && references_name name inner
   | Centl_Core.Binary (_, left, right) ->
       references_name name left || references_name name right
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      references_name name inner || references_name name replacement
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      (variable <> name && references_name name inner)
+      || references_name name replacement
   | Centl_Core.Assuming (inner, left, _, right) ->
       references_name name inner || references_name name left
       || references_name name right

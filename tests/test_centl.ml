@@ -951,6 +951,63 @@ let definition_examples () =
     | Ok (Centl_engine.Session_value (Centl_engine.Real_enclosure _)) -> true
     | _ -> false)
 
+let binder_scope_examples () =
+  let deferred = Centl_engine.create_session () in
+  ignore
+    (session_text deferred
+       "substituted(x) = sum(substitute(x^2, x = 3), k = 1, 2)");
+  Alcotest.(check string)
+    "substitution binder shadows a function parameter" "18"
+    (session_text deferred "substituted(4)");
+  ignore
+    (session_text deferred "differentiated(y) = sum(diff(x*y, x), k = 1, 2)");
+  Alcotest.(check string)
+    "differentiation avoids argument capture" "x + x"
+    (session_text deferred "differentiated(x)");
+  Alcotest.(check string)
+    "solution binder shadows an outer substitution" "x in {-2, 2}"
+    (value "substitute(solve(x^2 = 4, x), x = 3)");
+  let capture_avoiding_solution =
+    Centl_Core.substitute
+      (Centl_Core.Function
+         ( "solve",
+           [
+             Centl_Core.Binary
+               (Centl_Core.Add, Centl_Core.Symbol "y", Centl_Core.Symbol "x");
+             Centl_Core.Literal (Z.one, Z.one);
+             Centl_Core.Symbol "x";
+           ] ))
+      "y" (Centl_Core.Symbol "x")
+  in
+  begin match capture_avoiding_solution with
+  | Centl_Core.Function
+      ( "solve",
+        [
+          Centl_Core.Binary
+            ( Centl_Core.Add,
+              Centl_Core.Symbol free_variable,
+              Centl_Core.Symbol renamed_occurrence );
+          Centl_Core.Literal (one, denominator);
+          Centl_Core.Symbol renamed_binder;
+        ] ) ->
+      Alcotest.(check string) "replacement remains free" "x" free_variable;
+      Alcotest.(check bool)
+        "solution variable is alpha-renamed" true (renamed_binder <> "x");
+      Alcotest.(check string)
+        "bound occurrences use the renamed solution variable" renamed_binder
+        renamed_occurrence;
+      Alcotest.(check bool)
+        "equation right side is preserved" true
+        (Z.equal one Z.one && Z.equal denominator Z.one)
+  | _ -> Alcotest.fail "expected a capture-avoiding solve expression"
+  end;
+  Alcotest.(check string)
+    "solution binder is not a recursive definition reference"
+    "expression_definition_required"
+    (session_error_code
+       (Centl_engine.create_session ())
+       "x = solve(x^2 = 4, x)")
+
 let definition_failures () =
   let immutable = Centl_engine.create_session () in
   ignore (session_text immutable "r = 3");
@@ -1223,6 +1280,7 @@ let () =
       ( "definitions",
         [
           Alcotest.test_case "values and functions" `Quick definition_examples;
+          Alcotest.test_case "lexical binder scope" `Quick binder_scope_examples;
           Alcotest.test_case "immutable failures" `Quick definition_failures;
         ] );
       ( "assumptions",

@@ -55,6 +55,15 @@
   $ ../src/main.exe 'substitute(sum(k*x, k = 1, 4), x = 3)'
   30
 
+  $ ../src/main.exe 'substitute(sum(x, k = 1, 3), x = k)'
+  k + k + k
+
+  $ ../src/main.exe 'substitute(sum(x + k, k = 1, 2), x = k)'
+  k + 1 + k + 2
+
+  $ ../src/main.exe 'substitute(substitute(sum(x, k = 1, 3), x = k), k = 4)'
+  12
+
   $ ../src/main.exe 'sum(k^100, k = 1, 0)'
   0
 
@@ -67,6 +76,9 @@
 
   $ printf '%s\n' 'triangular(n) = sum(k, k = 1, n)' 'triangular(10)' | ../src/main.exe | tail -n 1
   55
+
+  $ printf '%s\n' 'repeat(x) = sum(x, k = 1, 3)' 'repeat(k)' | ../src/main.exe | tail -n 1
+  k + k + k
 
   $ ../src/main.exe 'approx(sqrt(2), 12)'
   ≈ [1.41421356237, 1.41421356238]

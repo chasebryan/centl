@@ -113,6 +113,21 @@ let left_deep_expression_is_bounded () =
       Alcotest.failf "large exact sum failed with %s: %s" error.code
         error.message
 
+let repeated_derivative_binder_respects_result_limit () =
+  let binder = String.make 500 'v' in
+  let source = Printf.sprintf "sum(diff(foo(k), %s), k = 1, 100)" binder in
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_result_bytes = 1_000 }
+  in
+  match Centl_engine.evaluate_with_limits limits source with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "long derivative binder failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf "long derivative binder bypassed the byte limit: %s"
+        (Centl_engine.text_of_value value)
+
 let rational_of_dyadic mantissa exponent =
   if exponent >= 0 then Q.mul_2exp (Q.of_bigint mantissa) exponent
   else Q.div_2exp (Q.of_bigint mantissa) (-exponent)
@@ -468,6 +483,8 @@ let () =
           Alcotest.test_case "malformed corpus" `Quick malformed_parser_corpus;
           Alcotest.test_case "hostile left-deep expression" `Quick
             left_deep_expression_is_bounded;
+          Alcotest.test_case "repeated derivative binder byte limit" `Quick
+            repeated_derivative_binder_respects_result_limit;
         ] );
       ( "native enclosure boundary",
         [

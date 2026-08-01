@@ -33,9 +33,23 @@ independently. `polynomial_differentiation_is_semantic` proves that evaluating
 the production differentiator's output returns that tangent at every integer
 point. A checked cubic witness demonstrates that this domain is inhabited.
 
-Substitution treats the iterator variable in four-argument `sum` and `product`
-forms as a lexical binder: a matching substitution does not enter the body or
-replace the binder, but it still substitutes both bounds.
+Substitution is simultaneous: one replacement is never rewritten by another
+replacement from the same operation. It is also capture-avoiding across every
+expression-level binder. The iterator variable in four-argument `sum` and
+`product` forms scopes only the body, so a matching substitution does not enter
+the body or replace the binder, while both bounds still receive substitutions.
+The variable in `substitute(inner, variable = replacement)` scopes only
+`inner`; the replacement remains outside that scope. Differentiation and
+residual-derivative variables scope their inner expressions, and a `solve`
+variable scopes both equation sides.
+
+When a replacement contains a free occurrence of a binder name, the core
+alpha-renames that binder before entering its scope. Fresh names use ordinary
+parser identifier syntax and are checked against the scoped term, substitution
+names, and replacement expressions. A structurally bounded suffix search skips
+preoccupied candidates, allowing an alpha-renamed symbolic definition to
+survive rendering and parsing without capture. Checked F* witnesses cover both
+the direct iteration-capture case and an already occupied initial candidate.
 
 Exact polynomial addition, negation, subtraction, scaling, multiplication,
 bounded powers, coefficient collection, rendering, and the conservative

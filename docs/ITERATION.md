@@ -28,6 +28,16 @@ iterator itself. This makes
 `substitute(sum(k*x, k = 1, 4), x = 3)` equal to `30`, while substituting for
 `k` leaves `sum(k, k = 1, 4)` unchanged before evaluation.
 
+Substitution is simultaneous and capture-avoiding. In particular, a free name
+in a replacement remains free if it matches an iterator name. For example,
+`substitute(sum(x, k = 1, 3), x = k)` produces three free occurrences of `k`;
+it does not turn them into the iteration values `1`, `2`, and `3`. CENTL
+alpha-renames the iterator when necessary, choosing a parser-valid internal
+name that is absent from the body and every replacement. The bounded fresh-name
+search also skips an already occupied internal-looking name, so stored symbolic
+definitions remain unambiguous and can be parsed again. Both bounds stay
+outside the renamed iterator's scope.
+
 An empty range is well-defined: if `lower > upper`, `sum` returns `0` and
 `product` returns `1`. Iteration never switches to floating-point arithmetic.
 Wrap the completed expression in `approx(...)` only when its exact result needs

@@ -651,92 +651,418 @@ let power_value
       if exponent = 1 then Evaluated base
       else Evaluated (ExactSymbolic (Power expression exponent))
 
-let rec substitute
+type substitution_binding = {
+  substitution_name: string;
+  substitution_value: expression
+}
+
+let rec substitution_expression_size (term:expression)
+  : Tot nat (decreases term)
+=
+  match term with
+  | Literal _ _
+  | Symbol _ -> 1
+  | Negate inner
+  | Power inner _
+  | Differentiate inner _
+  | Derivative inner _
+  | Simplify inner
+  | Expand inner
+  | Factor inner -> 1 + substitution_expression_size inner
+  | Binary _ left right ->
+      1 + substitution_expression_size left + substitution_expression_size right
+  | Function _ arguments -> 1 + substitution_arguments_size arguments
+  | Substitute inner _ replacement ->
+      1 + substitution_expression_size inner +
+      substitution_expression_size replacement
+  | Assuming inner left _ right ->
+      1 + substitution_expression_size inner +
+      substitution_expression_size left + substitution_expression_size right
+
+and substitution_arguments_size (arguments:list expression)
+  : Tot nat (decreases arguments)
+=
+  match arguments with
+  | [] -> 0
+  | argument :: rest ->
+      1 + substitution_expression_size argument +
+      substitution_arguments_size rest
+
+(** This is deliberately conservative: bound occurrences also count as a
+    mention.  That may trigger an unnecessary alpha-renaming, but it can never
+    permit capture. *)
+let rec expression_mentions_symbol
     (term:expression)
-    (variable:string)
-    (replacement:expression)
-  : Tot expression (decreases term)
+    (name:string)
+  : Tot bool (decreases term)
+=
+  match term with
+  | Literal _ _ -> false
+  | Symbol symbol -> symbol = name
+  | Negate inner
+  | Power inner _
+  | Simplify inner
+  | Expand inner
+  | Factor inner -> expression_mentions_symbol inner name
+  | Binary _ left right ->
+      expression_mentions_symbol left name ||
+      expression_mentions_symbol right name
+  | Function _ arguments -> expressions_mention_symbol arguments name
+  | Differentiate inner variable
+  | Derivative inner variable ->
+      variable = name || expression_mentions_symbol inner name
+  | Substitute inner variable replacement ->
+      variable = name ||
+      expression_mentions_symbol inner name ||
+      expression_mentions_symbol replacement name
+  | Assuming inner left _ right ->
+      expression_mentions_symbol inner name ||
+      expression_mentions_symbol left name ||
+      expression_mentions_symbol right name
+
+and expressions_mention_symbol
+    (expressions:list expression)
+    (name:string)
+  : Tot bool (decreases expressions)
+=
+  match expressions with
+  | [] -> false
+  | expression :: rest ->
+      expression_mentions_symbol expression name ||
+      expressions_mention_symbol rest name
+
+let rec lookup_substitution
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot (option expression) (decreases substitutions)
+=
+  match substitutions with
+  | [] -> None
+  | substitution :: rest ->
+      if substitution.substitution_name = name
+      then Some substitution.substitution_value
+      else lookup_substitution name rest
+
+let rec remove_substitution
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot (list substitution_binding) (decreases substitutions)
+=
+  match substitutions with
+  | [] -> []
+  | substitution :: rest ->
+      if substitution.substitution_name = name
+      then remove_substitution name rest
+      else substitution :: remove_substitution name rest
+
+let rec substitutions_mention
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot bool (decreases substitutions)
+=
+  match substitutions with
+  | [] -> false
+  | substitution :: rest ->
+      expression_mentions_symbol substitution.substitution_value name ||
+      substitutions_mention name rest
+
+let rec substitution_bindings_size
+    (substitutions:list substitution_binding)
+  : Tot nat (decreases substitutions)
+=
+  match substitutions with
+  | [] -> 0
+  | substitution :: rest ->
+      1 + substitution_expression_size substitution.substitution_value +
+      substitution_bindings_size rest
+
+let rec substitutions_use_name
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot bool (decreases substitutions)
+=
+  match substitutions with
+  | [] -> false
+  | substitution :: rest ->
+      substitution.substitution_name = name ||
+      expression_mentions_symbol substitution.substitution_value name ||
+      substitutions_use_name name rest
+
+let rec find_fresh_bound_name
+    (term:expression)
+    (substitutions:list substitution_binding)
+    (candidate:string)
+    (fuel:nat)
+  : Tot string (decreases fuel)
+=
+  if not (expression_mentions_symbol term candidate) &&
+     not (substitutions_use_name candidate substitutions)
+  then candidate
+  else if fuel = 0 then candidate ^ "_"
+  else find_fresh_bound_name term substitutions (candidate ^ "_") (fuel - 1)
+
+(** Fresh binders remain valid source identifiers if they survive in a
+    symbolic result.  The suffix search is bounded by the number of identifiers
+    available to collide with distinct candidates. *)
+let fresh_bound_name
+    (term:expression)
+    (substitutions:list substitution_binding)
+    (binder:string)
+  : Tot string
+=
+  find_fresh_bound_name term substitutions ("_centl_bound_" ^ binder)
+    (substitution_expression_size term +
+     substitution_bindings_size substitutions)
+
+(** Simultaneous substitution prevents a replacement from being rewritten by
+    another substitution.  At an iteration binder, substitutions for that
+    binder leave the body but still enter both bounds.  If another replacement
+    mentions the binder, the binder is alpha-renamed before substitutions enter
+    its body, preserving the replacement's free variables. *)
+let rec substitute_many
+    (term:expression)
+    (substitutions:list substitution_binding)
+  : Tot expression (decreases (substitution_expression_size term))
 =
   match term with
   | Literal _ _ -> term
-  | Symbol name -> if name = variable then replacement else term
-  | Negate inner -> Negate (substitute inner variable replacement)
+  | Symbol name ->
+      begin match lookup_substitution name substitutions with
+      | Some replacement -> replacement
+      | None -> term
+      end
+  | Negate inner -> Negate (substitute_many inner substitutions)
   | Binary operator left right -> Binary operator
-      (substitute left variable replacement)
-      (substitute right variable replacement)
+      (substitute_many left substitutions)
+      (substitute_many right substitutions)
   | Power base exponent -> Power
-      (substitute base variable replacement) exponent
+      (substitute_many base substitutions) exponent
   | Function name arguments ->
       if name = "sum" || name = "product" then
-        begin match arguments with
-        | _ :: Symbol binder :: _ :: _ :: [] ->
-            if binder = variable then Function name
-              (substitute_iteration_bounds arguments variable replacement)
-            else Function name
-              (substitute_arguments arguments variable replacement)
-        | _ -> Function name
-            (substitute_arguments arguments variable replacement)
-        end
+        Function name
+          (substitute_iteration_arguments arguments substitutions)
+      else if name = "solve" then Function name
+        (substitute_solve_arguments arguments substitutions)
       else Function name
-        (substitute_arguments arguments variable replacement)
+        (substitute_many_arguments arguments substitutions)
   | Differentiate inner bound_variable ->
-      if bound_variable = variable then term
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Differentiate
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
       else Differentiate
-        (substitute inner variable replacement) bound_variable
-  | Substitute inner bound_variable inner_replacement -> Substitute
-      (substitute inner variable replacement)
-      bound_variable
-      (substitute inner_replacement variable replacement)
+        (substitute_many inner inner_substitutions) bound_variable
+  | Substitute inner bound_variable inner_replacement ->
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Substitute
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
+          (substitute_many inner_replacement substitutions)
+      else Substitute
+        (substitute_many inner inner_substitutions)
+        bound_variable
+        (substitute_many inner_replacement substitutions)
   | Derivative inner bound_variable ->
-      if bound_variable = variable then term
-      else Derivative (substitute inner variable replacement) bound_variable
-  | Simplify inner -> Simplify (substitute inner variable replacement)
-  | Expand inner -> Expand (substitute inner variable replacement)
-  | Factor inner -> Factor (substitute inner variable replacement)
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Derivative
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
+      else Derivative
+        (substitute_many inner inner_substitutions) bound_variable
+  | Simplify inner -> Simplify (substitute_many inner substitutions)
+  | Expand inner -> Expand (substitute_many inner substitutions)
+  | Factor inner -> Factor (substitute_many inner substitutions)
   | Assuming inner left relation right -> Assuming
-      (substitute inner variable replacement)
-      (substitute left variable replacement)
+      (substitute_many inner substitutions)
+      (substitute_many left substitutions)
       relation
-      (substitute right variable replacement)
+      (substitute_many right substitutions)
 
-and substitute_arguments
+and substitute_many_arguments
     (arguments:list expression)
-    (variable:string)
-    (replacement:expression)
-  : Tot (list expression) (decreases arguments)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
 =
   match arguments with
   | [] -> []
   | argument :: rest ->
-      substitute argument variable replacement ::
-      substitute_arguments rest variable replacement
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
 
-and substitute_iteration_bounds
+and substitute_iteration_arguments
     (arguments:list expression)
-    (variable:string)
-    (replacement:expression)
-  : Tot (list expression) (decreases arguments)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
 =
   match arguments with
-  | body :: binder :: bounds ->
-      body :: binder :: substitute_arguments bounds variable replacement
-  | _ -> arguments
+  | body :: Symbol binder :: lower :: upper :: [] ->
+      let body_substitutions =
+        remove_substitution binder substitutions in
+      begin match body_substitutions with
+      | [] ->
+        [ body;
+          Symbol binder;
+          substitute_many lower substitutions;
+          substitute_many upper substitutions ]
+      | _ ->
+          if substitutions_mention binder body_substitutions then
+            let fresh = fresh_bound_name body body_substitutions binder in
+            [ substitute_many body
+                ({ substitution_name = binder;
+                   substitution_value = Symbol fresh } :: body_substitutions);
+              Symbol fresh;
+              substitute_many lower substitutions;
+              substitute_many upper substitutions ]
+          else
+            [ substitute_many body body_substitutions;
+              Symbol binder;
+              substitute_many lower substitutions;
+              substitute_many upper substitutions ]
+      end
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
+and substitute_solve_arguments
+    (arguments:list expression)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
+=
+  match arguments with
+  | left :: right :: Symbol binder :: [] ->
+      let equation_substitutions =
+        remove_substitution binder substitutions in
+      if substitutions_mention binder equation_substitutions then
+        let equation = Function "solve" [left; right] in
+        let fresh =
+          fresh_bound_name equation equation_substitutions binder in
+        [ substitute_many left
+            ({ substitution_name = binder;
+               substitution_value = Symbol fresh } :: equation_substitutions);
+          substitute_many right
+            ({ substitution_name = binder;
+               substitution_value = Symbol fresh } :: equation_substitutions);
+          Symbol fresh ]
+      else
+        [ substitute_many left equation_substitutions;
+          substitute_many right equation_substitutions;
+          Symbol binder ]
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
+let substitute
+    (term:expression)
+    (variable:string)
+    (replacement:expression)
+  : Tot expression
+=
+  substitute_many term
+    [{ substitution_name = variable; substitution_value = replacement }]
+
+let substitution_respects_iteration_binder_fact
+    (body lower upper replacement:expression)
+    (binder:string)
+  : prop
+=
+  let substitutions =
+    [{ substitution_name = binder;
+       substitution_value = replacement }] in
+  substitute_iteration_arguments
+      [body; Symbol binder; lower; upper] substitutions =
+    [ body;
+      Symbol binder;
+      substitute_many lower substitutions;
+      substitute_many upper substitutions ]
 
 let substitution_respects_iteration_binder
-    (name:string{name = "sum" || name = "product"})
     (body lower upper replacement:expression)
     (binder:string)
   : Lemma
       (ensures
-        substitute
-          (Function name [body; Symbol binder; lower; upper])
-          binder replacement =
-        Function name
-          [ body;
-            Symbol binder;
-            substitute lower binder replacement;
-            substitute upper binder replacement ])
-= ()
+        substitution_respects_iteration_binder_fact
+          body lower upper replacement binder)
+= assert_norm
+    (substitution_respects_iteration_binder_fact
+      body lower upper replacement binder)
+
+let substitution_avoids_iteration_capture_fact : prop =
+  substitute
+    (Function "sum"
+      [ Symbol "x"; Symbol "k"; Literal 1 1; Literal 3 1 ])
+    "x" (Symbol "k") =
+  Function "sum"
+    [ Symbol "k";
+      Symbol "_centl_bound_k";
+      Literal 1 1;
+      Literal 3 1 ]
+
+let substitution_avoids_iteration_capture ()
+  : Lemma (ensures substitution_avoids_iteration_capture_fact)
+= assert_norm substitution_avoids_iteration_capture_fact
+
+let substitution_fresh_name_avoids_collision_fact : prop =
+  substitute
+    (Function "sum"
+      [ Binary Add (Symbol "x") (Symbol "_centl_bound_k");
+        Symbol "k";
+        Literal 1 1;
+        Literal 1 1 ])
+    "x" (Symbol "k") =
+  Function "sum"
+    [ Binary Add (Symbol "k") (Symbol "_centl_bound_k");
+      Symbol "_centl_bound_k_";
+      Literal 1 1;
+      Literal 1 1 ]
+
+let substitution_fresh_name_avoids_collision ()
+  : Lemma (ensures substitution_fresh_name_avoids_collision_fact)
+= assert_norm substitution_fresh_name_avoids_collision_fact
+
+let substitution_respects_solution_binder_fact : prop =
+  substitute
+    (Function "solve"
+      [ Symbol "k"; Literal 1 1; Symbol "k" ])
+    "k" (Literal 2 1) =
+  Function "solve"
+    [ Symbol "k"; Literal 1 1; Symbol "k" ]
+
+let substitution_respects_solution_binder ()
+  : Lemma (ensures substitution_respects_solution_binder_fact)
+= assert_norm substitution_respects_solution_binder_fact
+
+let substitution_avoids_solution_capture_fact : prop =
+  substitute
+    (Function "solve"
+      [ Binary Add (Symbol "x") (Symbol "k");
+        Literal 0 1;
+        Symbol "k" ])
+    "x" (Symbol "k") =
+  Function "solve"
+    [ Binary Add (Symbol "k") (Symbol "_centl_bound_k");
+      Literal 0 1;
+      Symbol "_centl_bound_k" ]
+
+let substitution_avoids_solution_capture ()
+  : Lemma (ensures substitution_avoids_solution_capture_fact)
+= assert_norm substitution_avoids_solution_capture_fact
 
 let rec differentiate (term:expression) (variable:string) : Tot expression =
   match term with
@@ -911,7 +1237,10 @@ let rec polynomial_derivative_has_tangent_semantics
       polynomial_derivative_has_tangent_semantics left point;
       polynomial_derivative_has_tangent_semantics right point
   | PolynomialPower base exponent ->
-      polynomial_derivative_has_tangent_semantics base point
+      polynomial_derivative_has_tangent_semantics base point;
+      if exponent = 0 then ()
+      else if exponent = 1 then ()
+      else ()
 
 let rec embed_polynomial_model
     (term:polynomial_model)

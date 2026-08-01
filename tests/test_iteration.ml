@@ -150,7 +150,52 @@ let nested_and_substitution () =
     (engine_text "substitute(sum(k, k = 1, 3), k = 100)");
   Alcotest.(check string)
     "substitution reaches a free same-name bound" "6"
-    (engine_text "substitute(sum(k, k = 1, k), k = 3)")
+    (engine_text "substitute(sum(k, k = 1, k), k = 3)");
+  Alcotest.(check string)
+    "substitution avoids capturing a free replacement" "k + k + k"
+    (engine_text "substitute(sum(x, k = 1, 3), x = k)");
+  Alcotest.(check string)
+    "renamed iterator still supplies bound occurrences" "k + 1 + k + 2"
+    (engine_text "substitute(sum(x + k, k = 1, 2), x = k)");
+  Alcotest.(check string)
+    "a free replacement remains available to later substitution" "12"
+    (engine_text "substitute(substitute(sum(x, k = 1, 3), x = k), k = 4)")
+
+let capture_avoiding_substitution_structure () =
+  let source =
+    Centl_Core.Function
+      ( "sum",
+        [
+          Centl_Core.Binary
+            (Centl_Core.Add, Centl_Core.Symbol "x", Centl_Core.Symbol "k");
+          Centl_Core.Symbol "k";
+          Centl_Core.Literal (Z.one, Z.one);
+          Centl_Core.Literal (Z.of_int 2, Z.one);
+        ] )
+  in
+  match Centl_Core.substitute source "x" (Centl_Core.Symbol "k") with
+  | Centl_Core.Function
+      ( "sum",
+        [
+          Centl_Core.Binary
+            ( Centl_Core.Add,
+              Centl_Core.Symbol free_replacement,
+              Centl_Core.Symbol bound_occurrence );
+          Centl_Core.Symbol binder;
+          Centl_Core.Literal (lower, lower_denominator);
+          Centl_Core.Literal (upper, upper_denominator);
+        ] ) ->
+      Alcotest.(check string) "replacement remains free" "k" free_replacement;
+      Alcotest.(check bool) "binder is fresh" true (binder <> "k");
+      Alcotest.(check string)
+        "bound occurrence follows renamed binder" binder bound_occurrence;
+      Alcotest.(check bool)
+        "bounds remain unchanged" true
+        (Z.equal lower Z.one
+        && Z.equal lower_denominator Z.one
+        && Z.equal upper (Z.of_int 2)
+        && Z.equal upper_denominator Z.one)
+  | _ -> fail "capture-avoiding substitution returned an unexpected AST"
 
 let session_scoping () =
   let session = Centl_engine.create_session () in
@@ -174,6 +219,11 @@ let session_scoping () =
   Alcotest.(check string)
     "finite iteration in a user function" "55"
     (session_text session "triangular(10)");
+  let capture_session = Centl_engine.create_session () in
+  ignore (session_text capture_session "repeat(x) = sum(x, k = 1, 3)");
+  Alcotest.(check string)
+    "function argument remains free beneath an iterator" "k + k + k"
+    (session_text capture_session "repeat(k)");
   Alcotest.(check string)
     "a same-name iterator is not a recursive reference" "k = 6"
     (session_text (Centl_engine.create_session ()) "k = sum(k, k = 1, 3)");
@@ -428,6 +478,8 @@ let () =
           Alcotest.test_case "engine exact examples" `Quick engine_examples;
           Alcotest.test_case "nested and substitution semantics" `Quick
             nested_and_substitution;
+          Alcotest.test_case "capture-avoiding substitution structure" `Quick
+            capture_avoiding_substitution_structure;
           Alcotest.test_case "session scoping" `Quick session_scoping;
           Alcotest.test_case "bounded failures" `Quick bounded_failures;
           Alcotest.test_case "engine resource limits" `Quick

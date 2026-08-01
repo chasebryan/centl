@@ -17,3 +17,5 @@ let ( mod ) = Z.erem
 let ( ~- ) = Z.neg
 let ( > ) = Z.gt
 let ( >= ) = Z.geq
+let op_Negation = not
+let strcat = ( ^ )
