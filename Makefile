@@ -1,4 +1,5 @@
 FSTAR ?= fstar.exe
+JULIA ?= julia
 OPAM_SWITCH ?= centl
 DUNE ?= $(shell \
 	if command -v dune >/dev/null 2>&1; then command -v dune; \
@@ -12,9 +13,20 @@ GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
-.PHONY: all verify extract native-build native-test build test release clean
+.PHONY: all format fmt lint quality verify extract native-build native-test \
+	adversarial-test fuzz-test differential-test build test release clean
 
 all: build
+
+format:
+	$(DUNE) build @fmt
+
+fmt: format
+
+lint:
+	$(DUNE) build @check @lint
+
+quality: format lint
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
@@ -40,6 +52,15 @@ native-build:
 native-test:
 	@for generated in $(GENERATED); do test -f "$$generated"; done
 	$(DUNE) runtest
+
+adversarial-test:
+	@for generated in $(GENERATED); do test -f "$$generated"; done
+	$(DUNE) exec tests/test_adversarial.exe
+
+fuzz-test: adversarial-test
+
+differential-test: build
+	$(JULIA) --project=lab/julia lab/julia/differential.jl
 
 build: extract native-build
 

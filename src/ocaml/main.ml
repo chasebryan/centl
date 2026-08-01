@@ -110,6 +110,166 @@ let print_json json =
   output_char stdout '\n';
   flush stdout
 
+type queued_input =
+  | Line_input of string
+  | Oversized_input
+  | Queue_overflow_input of string option
+
+type queued_request = {
+  input : queued_input;
+  bytes : int;
+  request_id : Yojson.Safe.t option;
+  cancellation : bool Atomic.t;
+}
+
+type request_queue = {
+  mutex : Mutex.t;
+  ready : Condition.t;
+  capacity : int;
+  max_pending_bytes : int;
+  pending : queued_request Queue.t;
+  mutable pending_bytes : int;
+  mutable active : queued_request option;
+  mutable closed : bool;
+  mutable reader_error : exn option;
+}
+
+let create_request_queue ~capacity ~max_pending_bytes =
+  {
+    mutex = Mutex.create ();
+    ready = Condition.create ();
+    capacity = max 1 capacity;
+    max_pending_bytes = max 1 max_pending_bytes;
+    pending = Queue.create ();
+    pending_bytes = 0;
+    active = None;
+    closed = false;
+    reader_error = None;
+  }
+
+let pending_byte_capacity max_request_bytes =
+  if max_request_bytes > max_int / 256 then max_int else max_request_bytes * 256
+
+let with_queue_lock queue action =
+  Mutex.lock queue.mutex;
+  Fun.protect ~finally:(fun () -> Mutex.unlock queue.mutex) action
+
+let same_request_id left right = left = right
+
+let request_matches target request =
+  match request.request_id with
+  | Some id -> same_request_id id target
+  | None -> false
+
+let cancel_request request = Atomic.set request.cancellation true
+
+let enqueue queue ?target request =
+  with_queue_lock queue (fun () ->
+      Option.iter
+        (fun target ->
+          Option.iter
+            (fun active ->
+              if request_matches target active then cancel_request active)
+            queue.active;
+          Queue.iter
+            (fun pending ->
+              if request_matches target pending then cancel_request pending)
+            queue.pending)
+        target;
+      if queue.closed then false
+      else if
+        Queue.length queue.pending >= queue.capacity
+        || request.bytes > queue.max_pending_bytes - queue.pending_bytes
+      then begin
+        Option.iter cancel_request queue.active;
+        Queue.iter cancel_request queue.pending;
+        let line =
+          match request.input with
+          | Line_input line -> Some line
+          | Oversized_input | Queue_overflow_input _ -> None
+        in
+        Queue.add
+          {
+            request with
+            input = Queue_overflow_input line;
+            bytes = 0;
+            cancellation = Atomic.make false;
+          }
+          queue.pending;
+        queue.closed <- true;
+        queue.reader_error <-
+          Some (Failure "the pending machine-request queue reached its limit");
+        Condition.broadcast queue.ready;
+        false
+      end
+      else begin
+        Queue.add request queue.pending;
+        queue.pending_bytes <- queue.pending_bytes + request.bytes;
+        Condition.signal queue.ready;
+        true
+      end)
+
+let close_request_queue queue reader_error =
+  with_queue_lock queue (fun () ->
+      queue.closed <- true;
+      queue.reader_error <- reader_error;
+      Condition.broadcast queue.ready)
+
+let take_request queue =
+  with_queue_lock queue (fun () ->
+      while Queue.is_empty queue.pending && not queue.closed do
+        Condition.wait queue.ready queue.mutex
+      done;
+      if Queue.is_empty queue.pending then None
+      else
+        let request = Queue.take queue.pending in
+        queue.pending_bytes <- queue.pending_bytes - request.bytes;
+        queue.active <- Some request;
+        Some request)
+
+let complete_request queue =
+  with_queue_lock queue (fun () -> queue.active <- None)
+
+let cancellation_callback request =
+  let checks = ref 0 in
+  fun () ->
+    incr checks;
+    if !checks = 1 || !checks mod 64 = 0 then Thread.yield ();
+    Atomic.get request.cancellation
+
+let queued_request ~bytes input request_id =
+  { input; bytes; request_id; cancellation = Atomic.make false }
+
+let start_machine_reader ~max_bytes ~classify_id ~classify_cancellation queue =
+  Thread.create
+    (fun () ->
+      let rec loop () =
+        match Centl_protocol.read_line stdin max_bytes with
+        | Centl_protocol.End -> close_request_queue queue None
+        | Centl_protocol.Oversized ->
+            if
+              enqueue queue
+                (queued_request ~bytes:max_bytes Oversized_input None)
+            then loop ()
+        | Centl_protocol.Line line ->
+            let json =
+              try Some (Yojson.Safe.from_string line)
+              with Yojson.Json_error _ -> None
+            in
+            let request_id = Option.bind json classify_id in
+            let target = Option.bind json classify_cancellation in
+            if
+              enqueue queue ?target
+                (queued_request ~bytes:(String.length line) (Line_input line)
+                   request_id)
+            then loop ()
+      in
+      try loop () with error -> close_request_queue queue (Some error))
+    ()
+
+let reader_succeeded queue =
+  with_queue_lock queue (fun () -> Option.is_none queue.reader_error)
+
 let ansi code text = Printf.sprintf "\027[%sm%s\027[0m" code text
 
 let evaluate_human_in_session ~color session source =
@@ -216,42 +376,78 @@ let run_json_stream () =
 
 let run_serve () =
   let state = Centl_protocol.create () in
+  let limits = Centl_protocol.limits state in
+  let queue =
+    create_request_queue ~capacity:limits.max_requests
+      ~max_pending_bytes:(pending_byte_capacity limits.max_request_bytes)
+  in
+  let reader =
+    start_machine_reader
+      ~max_bytes:(Centl_protocol.limits state).max_request_bytes
+      ~classify_id:Centl_protocol.cancellable_request_id
+      ~classify_cancellation:Centl_protocol.cancellation_target_of_json queue
+  in
   let rec loop () =
-    match
-      Centl_protocol.read_line stdin
-        (Centl_protocol.limits state).max_request_bytes
-    with
-    | Centl_protocol.End -> true
-    | Centl_protocol.Line line ->
-        Centl_protocol.handle_line state line |> print_json;
-        loop ()
-    | Centl_protocol.Oversized ->
-        Centl_protocol.oversized_line state |> print_json;
+    match take_request queue with
+    | None -> ()
+    | Some request ->
+        let response =
+          match request.input with
+          | Line_input line ->
+              Centl_protocol.handle_line
+                ~cancelled:(cancellation_callback request)
+                state line
+          | Oversized_input -> Centl_protocol.oversized_line state
+          | Queue_overflow_input line ->
+              Centl_protocol.queue_overflow state line
+        in
+        complete_request queue;
+        print_json response;
         loop ()
   in
-  loop ()
+  loop ();
+  Thread.join reader;
+  reader_succeeded queue
 
 let run_mcp () =
   let state = Centl_mcp.create () in
   let protocol = Centl_mcp.protocol_state state in
+  let limits = Centl_protocol.limits protocol in
+  let queue =
+    create_request_queue ~capacity:limits.max_requests
+      ~max_pending_bytes:(pending_byte_capacity limits.max_request_bytes)
+  in
+  let reader =
+    start_machine_reader
+      ~max_bytes:(Centl_protocol.limits protocol).max_request_bytes
+      ~classify_id:Centl_mcp.cancellable_request_id
+      ~classify_cancellation:Centl_mcp.cancellation_target_of_json queue
+  in
   let print_response = function
     | None -> ()
     | Some response -> print_json response
   in
   let rec loop () =
-    match
-      Centl_protocol.read_line stdin
-        (Centl_protocol.limits protocol).max_request_bytes
-    with
-    | Centl_protocol.End -> true
-    | Centl_protocol.Line line ->
-        Centl_mcp.handle_line state line |> print_response;
-        loop ()
-    | Centl_protocol.Oversized ->
-        Centl_mcp.oversized_line state |> print_response;
+    match take_request queue with
+    | None -> ()
+    | Some request ->
+        let response =
+          match request.input with
+          | Line_input line ->
+              Centl_mcp.handle_line
+                ~cancelled:(cancellation_callback request)
+                state line
+          | Oversized_input -> Centl_mcp.oversized_line state
+          | Queue_overflow_input line -> Centl_mcp.queue_overflow line
+        in
+        complete_request queue;
+        if not (Centl_mcp.cancelled_response response) then
+          print_response response;
         loop ()
   in
-  loop ()
+  loop ();
+  Thread.join reader;
+  reader_succeeded queue
 
 let () =
   let arguments = Array.to_list Sys.argv |> List.tl in

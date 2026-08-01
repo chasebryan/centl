@@ -67,6 +67,190 @@ let validate_enclosure
   }
   else InvalidEnclosure
 
+(** A decimal enclosure stores integer coefficients at a shared decimal
+    place.  For example, [{ lower_scaled = 141; upper_scaled = 142;
+    decimal_places = 2 }] denotes the closed interval [1.41, 1.42]. *)
+type decimal_enclosure = {
+  lower_scaled: int;
+  upper_scaled: int;
+  decimal_places: int
+}
+
+let decimal_enclosure_invariant (value:decimal_enclosure) : prop =
+  value.lower_scaled <= value.upper_scaled
+
+(** [positive_power base exponent] is kept in the verified core instead of
+    relying on host-sized shifts or floating-point powers.  Exponentiation by
+    squaring keeps the extracted call stack logarithmic in [exponent]. *)
+let rec positive_power (base:pos) (exponent:nat)
+  : Tot pos (decreases exponent)
+=
+  if exponent = 0 then 1
+  else if exponent % 2 = 0 then
+    let half = positive_power base (exponent / 2) in
+    half * half
+  else base * positive_power base (exponent - 1)
+
+type positive_fraction = {
+  fraction_numerator: int;
+  fraction_denominator: pos
+}
+
+(** Exact value of [mantissa * 2^binary_exponent * 10^decimal_places].
+    Keeping this as an integer fraction lets the rounding proof use only
+    exact integer inequalities. *)
+let scaled_dyadic_fraction
+    (mantissa binary_exponent decimal_places:int)
+  : Tot positive_fraction
+=
+  let binary_numerator =
+    if binary_exponent >= 0 then positive_power 2 binary_exponent else 1
+  in
+  let binary_denominator =
+    if binary_exponent >= 0 then 1 else positive_power 2 (-binary_exponent)
+  in
+  let decimal_numerator =
+    if decimal_places >= 0 then positive_power 10 decimal_places else 1
+  in
+  let decimal_denominator =
+    if decimal_places >= 0 then 1 else positive_power 10 (-decimal_places)
+  in
+  {
+    fraction_numerator = mantissa * binary_numerator * decimal_numerator;
+    fraction_denominator = binary_denominator * decimal_denominator
+  }
+
+let floor_fraction (value:positive_fraction) : int =
+  value.fraction_numerator / value.fraction_denominator
+
+let ceiling_fraction (value:positive_fraction) : int =
+  -((-value.fraction_numerator) / value.fraction_denominator)
+
+let floor_fraction_is_outward (value:positive_fraction)
+  : Lemma
+      (ensures
+        floor_fraction value * value.fraction_denominator <=
+        value.fraction_numerator)
+=
+  Math.division_propriety value.fraction_numerator value.fraction_denominator
+
+let ceiling_fraction_is_outward (value:positive_fraction)
+  : Lemma
+      (ensures
+        value.fraction_numerator <=
+        ceiling_fraction value * value.fraction_denominator)
+=
+  Math.division_propriety
+    (-value.fraction_numerator) value.fraction_denominator
+
+(** This predicate is the exact containment contract used by decimal
+    rendering.  Both comparisons are made after scaling the dyadic endpoints
+    by [10^decimal_places], so it is equivalent to comparing the represented
+    real endpoints without introducing a real-number or floating-point axiom. *)
+let decimal_contains_dyadic
+    (source:dyadic_enclosure)
+    (rounded:decimal_enclosure)
+  : prop
+=
+  let lower = scaled_dyadic_fraction
+    source.lower_mantissa source.binary_exponent rounded.decimal_places in
+  let upper = scaled_dyadic_fraction
+    source.upper_mantissa source.binary_exponent rounded.decimal_places in
+  rounded.lower_scaled * lower.fraction_denominator <=
+    lower.fraction_numerator /\
+  upper.fraction_numerator <=
+    rounded.upper_scaled * upper.fraction_denominator
+
+let outward_round_dyadic
+    (source:dyadic_enclosure{enclosure_invariant source})
+    (decimal_places:int)
+  : Pure decimal_enclosure
+      (requires True)
+      (ensures fun rounded ->
+        decimal_enclosure_invariant rounded /\
+        rounded.decimal_places = decimal_places /\
+        decimal_contains_dyadic source rounded)
+=
+  let lower = scaled_dyadic_fraction
+    source.lower_mantissa source.binary_exponent decimal_places in
+  let upper = scaled_dyadic_fraction
+    source.upper_mantissa source.binary_exponent decimal_places in
+  let lower_scaled = floor_fraction lower in
+  let upper_scaled = ceiling_fraction upper in
+  floor_fraction_is_outward lower;
+  ceiling_fraction_is_outward upper;
+  Math.lemma_div_le
+    lower.fraction_numerator upper.fraction_numerator
+    lower.fraction_denominator;
+  Math.division_propriety
+    (-upper.fraction_numerator) upper.fraction_denominator;
+  {
+    lower_scaled = lower_scaled;
+    upper_scaled = upper_scaled;
+    decimal_places = decimal_places
+  }
+
+type decimal_rounding_validation =
+  | RoundedDecimalEnclosure: decimal_enclosure -> decimal_rounding_validation
+  | InvalidDecimalRounding
+
+let decimal_rounding_postcondition
+    (lower_mantissa upper_mantissa binary_exponent:int)
+    (decimal_places:int)
+    (rounded:decimal_rounding_validation)
+  : prop
+=
+  match rounded with
+  | InvalidDecimalRounding -> True
+  | RoundedDecimalEnclosure decimal ->
+      let source = {
+        lower_mantissa = lower_mantissa;
+        upper_mantissa = upper_mantissa;
+        binary_exponent = binary_exponent
+      } in
+      enclosure_invariant source /\
+      decimal_enclosure_invariant decimal /\
+      decimal.decimal_places = decimal_places /\
+      decimal_contains_dyadic source decimal
+
+(** Bounded, host-callable entry point.  It both validates the native dyadic
+    enclosure and computes its exact outward decimal rounding. *)
+let round_enclosure_outward
+    (lower_mantissa upper_mantissa binary_exponent:int)
+    (maximum_exponent:nat)
+    (decimal_places:int)
+    (maximum_decimal_places:nat)
+  : Tot (rounded:decimal_rounding_validation{
+      decimal_rounding_postcondition
+        lower_mantissa upper_mantissa binary_exponent decimal_places rounded})
+=
+  if lower_mantissa <= upper_mantissa &&
+     binary_exponent >= -maximum_exponent &&
+     binary_exponent <= maximum_exponent &&
+     decimal_places >= -maximum_decimal_places &&
+     decimal_places <= maximum_decimal_places
+  then
+    let source = {
+      lower_mantissa = lower_mantissa;
+      upper_mantissa = upper_mantissa;
+      binary_exponent = binary_exponent
+    } in
+    RoundedDecimalEnclosure (outward_round_dyadic source decimal_places)
+  else InvalidDecimalRounding
+
+(** Concrete negative-endpoint witness: [-3/2, -1] rounds outward to the
+    integer decimal interval [-2, -1]. *)
+let negative_dyadic_rounding_example ()
+  : Lemma
+      (ensures
+        round_enclosure_outward (-3) (-2) (-1) 10 0 10 =
+        RoundedDecimalEnclosure {
+          lower_scaled = -2;
+          upper_scaled = -1;
+          decimal_places = 0
+        })
+= ()
+
 let invariant (value:rational) : prop = value.denominator > 0
 
 let equivalent (left right:rational) : prop =
@@ -471,7 +655,7 @@ let rec substitute
     (term:expression)
     (variable:string)
     (replacement:expression)
-  : Tot expression
+  : Tot expression (decreases term)
 =
   match term with
   | Literal _ _ -> term
@@ -482,8 +666,19 @@ let rec substitute
       (substitute right variable replacement)
   | Power base exponent -> Power
       (substitute base variable replacement) exponent
-  | Function name arguments -> Function name
-      (substitute_arguments arguments variable replacement)
+  | Function name arguments ->
+      if name = "sum" || name = "product" then
+        begin match arguments with
+        | _ :: Symbol binder :: _ :: _ :: [] ->
+            if binder = variable then Function name
+              (substitute_iteration_bounds arguments variable replacement)
+            else Function name
+              (substitute_arguments arguments variable replacement)
+        | _ -> Function name
+            (substitute_arguments arguments variable replacement)
+        end
+      else Function name
+        (substitute_arguments arguments variable replacement)
   | Differentiate inner bound_variable ->
       if bound_variable = variable then term
       else Differentiate
@@ -508,13 +703,40 @@ and substitute_arguments
     (arguments:list expression)
     (variable:string)
     (replacement:expression)
-  : Tot (list expression)
+  : Tot (list expression) (decreases arguments)
 =
   match arguments with
   | [] -> []
   | argument :: rest ->
       substitute argument variable replacement ::
       substitute_arguments rest variable replacement
+
+and substitute_iteration_bounds
+    (arguments:list expression)
+    (variable:string)
+    (replacement:expression)
+  : Tot (list expression) (decreases arguments)
+=
+  match arguments with
+  | body :: binder :: bounds ->
+      body :: binder :: substitute_arguments bounds variable replacement
+  | _ -> arguments
+
+let substitution_respects_iteration_binder
+    (name:string{name = "sum" || name = "product"})
+    (body lower upper replacement:expression)
+    (binder:string)
+  : Lemma
+      (ensures
+        substitute
+          (Function name [body; Symbol binder; lower; upper])
+          binder replacement =
+        Function name
+          [ body;
+            Symbol binder;
+            substitute lower binder replacement;
+            substitute upper binder replacement ])
+= ()
 
 let rec differentiate (term:expression) (variable:string) : Tot expression =
   match term with
@@ -582,6 +804,269 @@ let rec differentiate (term:expression) (variable:string) : Tot expression =
   | Factor inner -> differentiate inner variable
   | Assuming inner left relation right -> Assuming
       (differentiate inner variable) left relation right
+
+(** The semantic differentiation domain is deliberately smaller than the
+    surface expression language.  It contains exactly univariate integer
+    polynomials built from constants, the distinguished variable, ring
+    operations, and natural powers.  This makes unsupported calculus syntax
+    explicit rather than hiding domain hypotheses in a theorem precondition. *)
+type polynomial_model =
+  | PolynomialConstant: int -> polynomial_model
+  | PolynomialVariable
+  | PolynomialNegate: polynomial_model -> polynomial_model
+  | PolynomialAdd: polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialSubtract:
+      polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialMultiply:
+      polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialPower: polynomial_model -> nat -> polynomial_model
+
+let rec integer_power (base:int) (exponent:nat)
+  : Tot int (decreases exponent)
+=
+  if exponent = 0 then 1
+  else base * integer_power base (exponent - 1)
+
+(** Ordinary evaluation of a polynomial at an integer point. *)
+let rec polynomial_model_value (term:polynomial_model) (point:int)
+  : Tot int (decreases term)
+=
+  match term with
+  | PolynomialConstant value -> value
+  | PolynomialVariable -> point
+  | PolynomialNegate inner -> -polynomial_model_value inner point
+  | PolynomialAdd left right ->
+      polynomial_model_value left point + polynomial_model_value right point
+  | PolynomialSubtract left right ->
+      polynomial_model_value left point - polynomial_model_value right point
+  | PolynomialMultiply left right ->
+      polynomial_model_value left point * polynomial_model_value right point
+  | PolynomialPower base exponent ->
+      integer_power (polynomial_model_value base point) exponent
+
+(** Independent dual-number/tangent evaluation.  Its first-order component is
+    the mathematical formal derivative semantics for this polynomial domain. *)
+let rec polynomial_model_tangent (term:polynomial_model) (point:int)
+  : Tot int (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> 0
+  | PolynomialVariable -> 1
+  | PolynomialNegate inner -> -polynomial_model_tangent inner point
+  | PolynomialAdd left right ->
+      polynomial_model_tangent left point + polynomial_model_tangent right point
+  | PolynomialSubtract left right ->
+      polynomial_model_tangent left point - polynomial_model_tangent right point
+  | PolynomialMultiply left right ->
+      polynomial_model_tangent left point * polynomial_model_value right point +
+      polynomial_model_value left point * polynomial_model_tangent right point
+  | PolynomialPower base exponent ->
+      if exponent = 0 then 0
+      else
+        exponent *
+        integer_power (polynomial_model_value base point) (exponent - 1) *
+        polynomial_model_tangent base point
+
+let rec polynomial_model_derivative (term:polynomial_model)
+  : Tot polynomial_model (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> PolynomialConstant 0
+  | PolynomialVariable -> PolynomialConstant 1
+  | PolynomialNegate inner ->
+      PolynomialNegate (polynomial_model_derivative inner)
+  | PolynomialAdd left right -> PolynomialAdd
+      (polynomial_model_derivative left) (polynomial_model_derivative right)
+  | PolynomialSubtract left right -> PolynomialSubtract
+      (polynomial_model_derivative left) (polynomial_model_derivative right)
+  | PolynomialMultiply left right -> PolynomialAdd
+      (PolynomialMultiply (polynomial_model_derivative left) right)
+      (PolynomialMultiply left (polynomial_model_derivative right))
+  | PolynomialPower base exponent ->
+      if exponent = 0 then PolynomialConstant 0
+      else if exponent = 1 then polynomial_model_derivative base
+      else PolynomialMultiply
+        (PolynomialMultiply
+          (PolynomialConstant exponent)
+          (PolynomialPower base (exponent - 1)))
+        (polynomial_model_derivative base)
+
+let rec polynomial_derivative_has_tangent_semantics
+    (term:polynomial_model)
+    (point:int)
+  : Lemma
+      (ensures
+        polynomial_model_value (polynomial_model_derivative term) point =
+        polynomial_model_tangent term point)
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      polynomial_derivative_has_tangent_semantics inner point
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      polynomial_derivative_has_tangent_semantics left point;
+      polynomial_derivative_has_tangent_semantics right point
+  | PolynomialPower base exponent ->
+      polynomial_derivative_has_tangent_semantics base point
+
+let rec embed_polynomial_model
+    (term:polynomial_model)
+    (variable:string)
+  : Tot expression (decreases term)
+=
+  match term with
+  | PolynomialConstant value -> Literal value 1
+  | PolynomialVariable -> Symbol variable
+  | PolynomialNegate inner -> Negate (embed_polynomial_model inner variable)
+  | PolynomialAdd left right -> Binary Add
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialSubtract left right -> Binary Subtract
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialMultiply left right -> Binary Multiply
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialPower base exponent ->
+      Power (embed_polynomial_model base variable) exponent
+
+(** The production symbolic differentiator agrees syntactically with the
+    independently defined derivative on every expression in the model. *)
+let rec differentiate_embedded_polynomial
+    (term:polynomial_model)
+    (variable:string)
+  : Lemma
+      (ensures
+        differentiate (embed_polynomial_model term variable) variable =
+        embed_polynomial_model (polynomial_model_derivative term) variable)
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      differentiate_embedded_polynomial inner variable
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      differentiate_embedded_polynomial left variable;
+      differentiate_embedded_polynomial right variable
+  | PolynomialPower base exponent ->
+      differentiate_embedded_polynomial base variable
+
+(** Executable ordinary semantics for the supported subset of surface
+    expressions.  [None] makes every unsupported construct explicit. *)
+let rec evaluate_integer_polynomial
+    (term:expression)
+    (variable:string)
+    (point:int)
+  : Tot (option int) (decreases term)
+=
+  match term with
+  | Literal numerator denominator ->
+      if denominator = 1 then Some numerator else None
+  | Symbol name -> if name = variable then Some point else None
+  | Negate inner ->
+      begin match evaluate_integer_polynomial inner variable point with
+      | Some value -> Some (-value)
+      | None -> None
+      end
+  | Binary operator left right ->
+      begin match evaluate_integer_polynomial left variable point,
+                  evaluate_integer_polynomial right variable point with
+      | Some left_value, Some right_value ->
+          begin match operator with
+          | Add -> Some (left_value + right_value)
+          | Subtract -> Some (left_value - right_value)
+          | Multiply -> Some (left_value * right_value)
+          | Divide -> None
+          end
+      | _, _ -> None
+      end
+  | Power base exponent ->
+      if exponent < 0 then None
+      else
+        begin match evaluate_integer_polynomial base variable point with
+        | Some value -> Some (integer_power value exponent)
+        | None -> None
+        end
+  | Function _ _ -> None
+  | Differentiate _ _ -> None
+  | Substitute _ _ _ -> None
+  | Derivative _ _ -> None
+  | Simplify _ -> None
+  | Expand _ -> None
+  | Factor _ -> None
+  | Assuming _ _ _ _ -> None
+
+let rec evaluate_embedded_polynomial
+    (term:polynomial_model)
+    (variable:string)
+    (point:int)
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (embed_polynomial_model term variable) variable point =
+        Some (polynomial_model_value term point))
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      evaluate_embedded_polynomial inner variable point
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      evaluate_embedded_polynomial left variable point;
+      evaluate_embedded_polynomial right variable point
+  | PolynomialPower base exponent ->
+      evaluate_embedded_polynomial base variable point
+
+(** Main semantic correctness theorem.  It relates the actual [differentiate]
+    implementation, ordinary expression evaluation, and the independently
+    computed tangent for all modeled polynomials and all integer points. *)
+let polynomial_differentiation_is_semantic
+    (term:polynomial_model)
+    (variable:string)
+    (point:int)
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (differentiate (embed_polynomial_model term variable) variable)
+          variable point =
+        Some (polynomial_model_tangent term point))
+=
+  differentiate_embedded_polynomial term variable;
+  evaluate_embedded_polynomial
+    (polynomial_model_derivative term) variable point;
+  polynomial_derivative_has_tangent_semantics term point
+
+(** A concrete witness keeps the theorem's supported domain visibly
+    inhabited: d/dx(x^3 + 2*x) at x=2 is 14. *)
+let cubic_differentiation_example ()
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (differentiate
+            (embed_polynomial_model
+              (PolynomialAdd
+                (PolynomialPower PolynomialVariable 3)
+                (PolynomialMultiply
+                  (PolynomialConstant 2) PolynomialVariable))
+              "x")
+            "x")
+          "x" 2 = Some 14)
+=
+  polynomial_differentiation_is_semantic
+    (PolynomialAdd
+      (PolynomialPower PolynomialVariable 3)
+      (PolynomialMultiply (PolynomialConstant 2) PolynomialVariable))
+    "x" 2
 
 type coefficient = value:rational{invariant value}
 type polynomial = list coefficient
@@ -995,7 +1480,7 @@ let rec simplify_assuming
     (term left:expression)
     (relation:relation)
     (right:expression)
-  : Tot expression
+  : Tot expression (decreases term)
 =
   match term with
   | Literal _ _ -> term
@@ -1039,7 +1524,7 @@ and simplify_assuming_arguments
     (left:expression)
     (relation:relation)
     (right:expression)
-  : Tot (list expression)
+  : Tot (list expression) (decreases arguments)
 =
   match arguments with
   | [] -> []

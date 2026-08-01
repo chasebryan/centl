@@ -65,8 +65,18 @@ choose(n, k)           permutations(n, k)
 ```
 
 Finite sums, products, recurrences, sequences, and generating functions are
-the next concrete-mathematics layer. They will use calculator syntax and the
-same exact-first value model rather than a separate subsystem.
+the concrete-mathematics layer. The first bounded iteration slice provides:
+
+```text
+sum(expression, variable = lower, upper)
+product(expression, variable = lower, upper)
+```
+
+Both bounds are inclusive exact integers. Empty sums are `0`, empty products
+are `1`, and every term is combined exactly within the active machine resource
+limits. See [exact finite iteration](ITERATION.md). Recurrences, sequences, and
+generating functions remain the next extensions; they will use calculator
+syntax and the same exact-first value model rather than a separate subsystem.
 
 ## Current limits
 

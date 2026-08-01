@@ -1,26 +1,29 @@
 (include_subdirs unqualified)
 
 (library
+ (name centl_verified)
+ (wrapped false)
+ (modules Prims FStar_Pervasives_Native Centl_Gcd Centl_Core)
+ (flags
+  (:standard -w -8-27))
+ (libraries zarith))
+
+(library
  (name centl_lib)
  (wrapped false)
  (modules
-  Prims
-  FStar_Pervasives_Native
-  Centl_Gcd
-  Centl_Core
   Centl_parser
+  Centl_iteration
   Centl_syntax
   Centl_engine
   Centl_version
   Centl_protocol
   Centl_mcp)
- (flags
-  (:standard -w -8-27))
- (libraries centl_arb zarith yojson))
+ (libraries centl_verified centl_arb zarith yojson))
 
 (executable
  (name main)
  (public_name centl)
  (package centl)
  (modules Main)
- (libraries centl_lib unix yojson))
+ (libraries centl_lib threads unix yojson))

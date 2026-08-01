@@ -17,6 +17,8 @@ first exact-calculator slice is verified and tested with these versions:
 | MPFR | 4.2.2 |
 | Alcotest | 1.9.1 |
 | QCheck | 0.91 |
+| Julia | 1.12.6 |
+| Nemo | 0.56.1 |
 
 ## Production and verification
 
@@ -59,6 +61,17 @@ pkg-config --modversion flint
 julia --version
 julia -e 'using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2)))'
 ```
+
+The checked-in laboratory environment and independent exact differential suite
+run with:
+
+```sh
+julia --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
+make differential-test
+```
+
+The laboratory has its own pinned manifest and is intentionally not part of the
+shipped executable's dependency graph.
 
 `make test` verifies the F* core, builds the native FLINT/Arb binding, and runs
 exact, symbolic, rigorous-containment, CLI, JSON, and property tests.

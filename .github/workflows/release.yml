@@ -143,13 +143,14 @@ jobs:
           opam init --bare --disable-sandboxing
           opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
           opam install --switch=centl --assume-depexts \
-            alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
+            alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
             yojson.2.2.2 zarith.1.14
 
       - name: Test, package, and install CENTL
         id: package
         run: |
           cd "$GITHUB_WORKSPACE"
+          opam exec --switch=centl -- make quality
           opam exec --switch=centl -- make native-test
           reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
           version=${reported#centl }

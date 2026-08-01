@@ -110,6 +110,9 @@ let sections =
           entry "choose(n, k)" "binomial coefficient";
           entry "permutations(n, k)" "ordered selections";
           entry "fibonacci(n)" "nth Fibonacci number";
+          entry "sum(expression, variable = lower, upper)" "exact finite sum";
+          entry "product(expression, variable = lower, upper)"
+            "exact finite product";
         |];
     };
     {
