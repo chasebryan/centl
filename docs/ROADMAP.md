@@ -78,7 +78,9 @@ Initial persistent JSON Lines and stdio MCP slice implemented in `0.8.0`.
   schemas.
 - Keep request identifiers, session state, reset, capability discovery, and
   deterministic limits stable.
-- Extend provenance and cancellation without changing mathematical semantics.
+- Structured provenance and request-scoped cooperative cancellation are
+  implemented without changing mathematical semantics; retain them as new
+  result kinds and backends are added.
 - Keep MCP as a thin adapter over the same evaluator and result objects.
 
 Exit condition: an AI system can call CENTL repeatedly without parsing terminal
@@ -86,9 +88,13 @@ text or mistaking an approximation for an exact result.
 
 ## 6. Mathematical breadth
 
+- Exact bounded `sum(expression, variable = lower, upper)` and
+  `product(expression, variable = lower, upper)` are implemented with lexical
+  iterator scope, nested request-wide limits, and cooperative cancellation.
 - Add complex enclosures, algebraic numbers, polynomials, and matrices.
-- Add limits, sequences, series, rigorous definite integration, and partial
-  symbolic integration with explicit unevaluated results.
+- Add recurrences, sequences, generating functions, limits, series, rigorous
+  definite integration, and partial symbolic integration with explicit
+  unevaluated results.
 - Add vector calculus, differential equations, transforms, probability, and
   statistics as bounded mathematical domains.
 - Grow exact geometry and concrete mathematics from the initial formula,

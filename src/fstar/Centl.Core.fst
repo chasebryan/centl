@@ -67,6 +67,190 @@ let validate_enclosure
   }
   else InvalidEnclosure
 
+(** A decimal enclosure stores integer coefficients at a shared decimal
+    place.  For example, [{ lower_scaled = 141; upper_scaled = 142;
+    decimal_places = 2 }] denotes the closed interval [1.41, 1.42]. *)
+type decimal_enclosure = {
+  lower_scaled: int;
+  upper_scaled: int;
+  decimal_places: int
+}
+
+let decimal_enclosure_invariant (value:decimal_enclosure) : prop =
+  value.lower_scaled <= value.upper_scaled
+
+(** [positive_power base exponent] is kept in the verified core instead of
+    relying on host-sized shifts or floating-point powers.  Exponentiation by
+    squaring keeps the extracted call stack logarithmic in [exponent]. *)
+let rec positive_power (base:pos) (exponent:nat)
+  : Tot pos (decreases exponent)
+=
+  if exponent = 0 then 1
+  else if exponent % 2 = 0 then
+    let half = positive_power base (exponent / 2) in
+    half * half
+  else base * positive_power base (exponent - 1)
+
+type positive_fraction = {
+  fraction_numerator: int;
+  fraction_denominator: pos
+}
+
+(** Exact value of [mantissa * 2^binary_exponent * 10^decimal_places].
+    Keeping this as an integer fraction lets the rounding proof use only
+    exact integer inequalities. *)
+let scaled_dyadic_fraction
+    (mantissa binary_exponent decimal_places:int)
+  : Tot positive_fraction
+=
+  let binary_numerator =
+    if binary_exponent >= 0 then positive_power 2 binary_exponent else 1
+  in
+  let binary_denominator =
+    if binary_exponent >= 0 then 1 else positive_power 2 (-binary_exponent)
+  in
+  let decimal_numerator =
+    if decimal_places >= 0 then positive_power 10 decimal_places else 1
+  in
+  let decimal_denominator =
+    if decimal_places >= 0 then 1 else positive_power 10 (-decimal_places)
+  in
+  {
+    fraction_numerator = mantissa * binary_numerator * decimal_numerator;
+    fraction_denominator = binary_denominator * decimal_denominator
+  }
+
+let floor_fraction (value:positive_fraction) : int =
+  value.fraction_numerator / value.fraction_denominator
+
+let ceiling_fraction (value:positive_fraction) : int =
+  -((-value.fraction_numerator) / value.fraction_denominator)
+
+let floor_fraction_is_outward (value:positive_fraction)
+  : Lemma
+      (ensures
+        floor_fraction value * value.fraction_denominator <=
+        value.fraction_numerator)
+=
+  Math.division_propriety value.fraction_numerator value.fraction_denominator
+
+let ceiling_fraction_is_outward (value:positive_fraction)
+  : Lemma
+      (ensures
+        value.fraction_numerator <=
+        ceiling_fraction value * value.fraction_denominator)
+=
+  Math.division_propriety
+    (-value.fraction_numerator) value.fraction_denominator
+
+(** This predicate is the exact containment contract used by decimal
+    rendering.  Both comparisons are made after scaling the dyadic endpoints
+    by [10^decimal_places], so it is equivalent to comparing the represented
+    real endpoints without introducing a real-number or floating-point axiom. *)
+let decimal_contains_dyadic
+    (source:dyadic_enclosure)
+    (rounded:decimal_enclosure)
+  : prop
+=
+  let lower = scaled_dyadic_fraction
+    source.lower_mantissa source.binary_exponent rounded.decimal_places in
+  let upper = scaled_dyadic_fraction
+    source.upper_mantissa source.binary_exponent rounded.decimal_places in
+  rounded.lower_scaled * lower.fraction_denominator <=
+    lower.fraction_numerator /\
+  upper.fraction_numerator <=
+    rounded.upper_scaled * upper.fraction_denominator
+
+let outward_round_dyadic
+    (source:dyadic_enclosure{enclosure_invariant source})
+    (decimal_places:int)
+  : Pure decimal_enclosure
+      (requires True)
+      (ensures fun rounded ->
+        decimal_enclosure_invariant rounded /\
+        rounded.decimal_places = decimal_places /\
+        decimal_contains_dyadic source rounded)
+=
+  let lower = scaled_dyadic_fraction
+    source.lower_mantissa source.binary_exponent decimal_places in
+  let upper = scaled_dyadic_fraction
+    source.upper_mantissa source.binary_exponent decimal_places in
+  let lower_scaled = floor_fraction lower in
+  let upper_scaled = ceiling_fraction upper in
+  floor_fraction_is_outward lower;
+  ceiling_fraction_is_outward upper;
+  Math.lemma_div_le
+    lower.fraction_numerator upper.fraction_numerator
+    lower.fraction_denominator;
+  Math.division_propriety
+    (-upper.fraction_numerator) upper.fraction_denominator;
+  {
+    lower_scaled = lower_scaled;
+    upper_scaled = upper_scaled;
+    decimal_places = decimal_places
+  }
+
+type decimal_rounding_validation =
+  | RoundedDecimalEnclosure: decimal_enclosure -> decimal_rounding_validation
+  | InvalidDecimalRounding
+
+let decimal_rounding_postcondition
+    (lower_mantissa upper_mantissa binary_exponent:int)
+    (decimal_places:int)
+    (rounded:decimal_rounding_validation)
+  : prop
+=
+  match rounded with
+  | InvalidDecimalRounding -> True
+  | RoundedDecimalEnclosure decimal ->
+      let source = {
+        lower_mantissa = lower_mantissa;
+        upper_mantissa = upper_mantissa;
+        binary_exponent = binary_exponent
+      } in
+      enclosure_invariant source /\
+      decimal_enclosure_invariant decimal /\
+      decimal.decimal_places = decimal_places /\
+      decimal_contains_dyadic source decimal
+
+(** Bounded, host-callable entry point.  It both validates the native dyadic
+    enclosure and computes its exact outward decimal rounding. *)
+let round_enclosure_outward
+    (lower_mantissa upper_mantissa binary_exponent:int)
+    (maximum_exponent:nat)
+    (decimal_places:int)
+    (maximum_decimal_places:nat)
+  : Tot (rounded:decimal_rounding_validation{
+      decimal_rounding_postcondition
+        lower_mantissa upper_mantissa binary_exponent decimal_places rounded})
+=
+  if lower_mantissa <= upper_mantissa &&
+     binary_exponent >= -maximum_exponent &&
+     binary_exponent <= maximum_exponent &&
+     decimal_places >= -maximum_decimal_places &&
+     decimal_places <= maximum_decimal_places
+  then
+    let source = {
+      lower_mantissa = lower_mantissa;
+      upper_mantissa = upper_mantissa;
+      binary_exponent = binary_exponent
+    } in
+    RoundedDecimalEnclosure (outward_round_dyadic source decimal_places)
+  else InvalidDecimalRounding
+
+(** Concrete negative-endpoint witness: [-3/2, -1] rounds outward to the
+    integer decimal interval [-2, -1]. *)
+let negative_dyadic_rounding_example ()
+  : Lemma
+      (ensures
+        round_enclosure_outward (-3) (-2) (-1) 10 0 10 =
+        RoundedDecimalEnclosure {
+          lower_scaled = -2;
+          upper_scaled = -1;
+          decimal_places = 0
+        })
+= ()
+
 let invariant (value:rational) : prop = value.denominator > 0
 
 let equivalent (left right:rational) : prop =
@@ -467,54 +651,418 @@ let power_value
       if exponent = 1 then Evaluated base
       else Evaluated (ExactSymbolic (Power expression exponent))
 
-let rec substitute
+type substitution_binding = {
+  substitution_name: string;
+  substitution_value: expression
+}
+
+let rec substitution_expression_size (term:expression)
+  : Tot nat (decreases term)
+=
+  match term with
+  | Literal _ _
+  | Symbol _ -> 1
+  | Negate inner
+  | Power inner _
+  | Differentiate inner _
+  | Derivative inner _
+  | Simplify inner
+  | Expand inner
+  | Factor inner -> 1 + substitution_expression_size inner
+  | Binary _ left right ->
+      1 + substitution_expression_size left + substitution_expression_size right
+  | Function _ arguments -> 1 + substitution_arguments_size arguments
+  | Substitute inner _ replacement ->
+      1 + substitution_expression_size inner +
+      substitution_expression_size replacement
+  | Assuming inner left _ right ->
+      1 + substitution_expression_size inner +
+      substitution_expression_size left + substitution_expression_size right
+
+and substitution_arguments_size (arguments:list expression)
+  : Tot nat (decreases arguments)
+=
+  match arguments with
+  | [] -> 0
+  | argument :: rest ->
+      1 + substitution_expression_size argument +
+      substitution_arguments_size rest
+
+(** This is deliberately conservative: bound occurrences also count as a
+    mention.  That may trigger an unnecessary alpha-renaming, but it can never
+    permit capture. *)
+let rec expression_mentions_symbol
+    (term:expression)
+    (name:string)
+  : Tot bool (decreases term)
+=
+  match term with
+  | Literal _ _ -> false
+  | Symbol symbol -> symbol = name
+  | Negate inner
+  | Power inner _
+  | Simplify inner
+  | Expand inner
+  | Factor inner -> expression_mentions_symbol inner name
+  | Binary _ left right ->
+      expression_mentions_symbol left name ||
+      expression_mentions_symbol right name
+  | Function _ arguments -> expressions_mention_symbol arguments name
+  | Differentiate inner variable
+  | Derivative inner variable ->
+      variable = name || expression_mentions_symbol inner name
+  | Substitute inner variable replacement ->
+      variable = name ||
+      expression_mentions_symbol inner name ||
+      expression_mentions_symbol replacement name
+  | Assuming inner left _ right ->
+      expression_mentions_symbol inner name ||
+      expression_mentions_symbol left name ||
+      expression_mentions_symbol right name
+
+and expressions_mention_symbol
+    (expressions:list expression)
+    (name:string)
+  : Tot bool (decreases expressions)
+=
+  match expressions with
+  | [] -> false
+  | expression :: rest ->
+      expression_mentions_symbol expression name ||
+      expressions_mention_symbol rest name
+
+let rec lookup_substitution
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot (option expression) (decreases substitutions)
+=
+  match substitutions with
+  | [] -> None
+  | substitution :: rest ->
+      if substitution.substitution_name = name
+      then Some substitution.substitution_value
+      else lookup_substitution name rest
+
+let rec remove_substitution
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot (list substitution_binding) (decreases substitutions)
+=
+  match substitutions with
+  | [] -> []
+  | substitution :: rest ->
+      if substitution.substitution_name = name
+      then remove_substitution name rest
+      else substitution :: remove_substitution name rest
+
+let rec substitutions_mention
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot bool (decreases substitutions)
+=
+  match substitutions with
+  | [] -> false
+  | substitution :: rest ->
+      expression_mentions_symbol substitution.substitution_value name ||
+      substitutions_mention name rest
+
+let rec substitution_bindings_size
+    (substitutions:list substitution_binding)
+  : Tot nat (decreases substitutions)
+=
+  match substitutions with
+  | [] -> 0
+  | substitution :: rest ->
+      1 + substitution_expression_size substitution.substitution_value +
+      substitution_bindings_size rest
+
+let rec substitutions_use_name
+    (name:string)
+    (substitutions:list substitution_binding)
+  : Tot bool (decreases substitutions)
+=
+  match substitutions with
+  | [] -> false
+  | substitution :: rest ->
+      substitution.substitution_name = name ||
+      expression_mentions_symbol substitution.substitution_value name ||
+      substitutions_use_name name rest
+
+let rec find_fresh_bound_name
+    (term:expression)
+    (substitutions:list substitution_binding)
+    (candidate:string)
+    (fuel:nat)
+  : Tot string (decreases fuel)
+=
+  if not (expression_mentions_symbol term candidate) &&
+     not (substitutions_use_name candidate substitutions)
+  then candidate
+  else if fuel = 0 then candidate ^ "_"
+  else find_fresh_bound_name term substitutions (candidate ^ "_") (fuel - 1)
+
+(** Fresh binders remain valid source identifiers if they survive in a
+    symbolic result.  The suffix search is bounded by the number of identifiers
+    available to collide with distinct candidates. *)
+let fresh_bound_name
+    (term:expression)
+    (substitutions:list substitution_binding)
+    (binder:string)
+  : Tot string
+=
+  find_fresh_bound_name term substitutions ("_centl_bound_" ^ binder)
+    (substitution_expression_size term +
+     substitution_bindings_size substitutions)
+
+(** Simultaneous substitution prevents a replacement from being rewritten by
+    another substitution.  At an iteration binder, substitutions for that
+    binder leave the body but still enter both bounds.  If another replacement
+    mentions the binder, the binder is alpha-renamed before substitutions enter
+    its body, preserving the replacement's free variables. *)
+let rec substitute_many
+    (term:expression)
+    (substitutions:list substitution_binding)
+  : Tot expression (decreases (substitution_expression_size term))
+=
+  match term with
+  | Literal _ _ -> term
+  | Symbol name ->
+      begin match lookup_substitution name substitutions with
+      | Some replacement -> replacement
+      | None -> term
+      end
+  | Negate inner -> Negate (substitute_many inner substitutions)
+  | Binary operator left right -> Binary operator
+      (substitute_many left substitutions)
+      (substitute_many right substitutions)
+  | Power base exponent -> Power
+      (substitute_many base substitutions) exponent
+  | Function name arguments ->
+      if name = "sum" || name = "product" then
+        Function name
+          (substitute_iteration_arguments arguments substitutions)
+      else if name = "solve" then Function name
+        (substitute_solve_arguments arguments substitutions)
+      else Function name
+        (substitute_many_arguments arguments substitutions)
+  | Differentiate inner bound_variable ->
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Differentiate
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
+      else Differentiate
+        (substitute_many inner inner_substitutions) bound_variable
+  | Substitute inner bound_variable inner_replacement ->
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Substitute
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
+          (substitute_many inner_replacement substitutions)
+      else Substitute
+        (substitute_many inner inner_substitutions)
+        bound_variable
+        (substitute_many inner_replacement substitutions)
+  | Derivative inner bound_variable ->
+      let inner_substitutions =
+        remove_substitution bound_variable substitutions in
+      if substitutions_mention bound_variable inner_substitutions then
+        let fresh = fresh_bound_name inner inner_substitutions bound_variable in
+        Derivative
+          (substitute_many inner
+            ({ substitution_name = bound_variable;
+               substitution_value = Symbol fresh } :: inner_substitutions))
+          fresh
+      else Derivative
+        (substitute_many inner inner_substitutions) bound_variable
+  | Simplify inner -> Simplify (substitute_many inner substitutions)
+  | Expand inner -> Expand (substitute_many inner substitutions)
+  | Factor inner -> Factor (substitute_many inner substitutions)
+  | Assuming inner left relation right -> Assuming
+      (substitute_many inner substitutions)
+      (substitute_many left substitutions)
+      relation
+      (substitute_many right substitutions)
+
+and substitute_many_arguments
+    (arguments:list expression)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
+=
+  match arguments with
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
+and substitute_iteration_arguments
+    (arguments:list expression)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
+=
+  match arguments with
+  | body :: Symbol binder :: lower :: upper :: [] ->
+      let body_substitutions =
+        remove_substitution binder substitutions in
+      begin match body_substitutions with
+      | [] ->
+        [ body;
+          Symbol binder;
+          substitute_many lower substitutions;
+          substitute_many upper substitutions ]
+      | _ ->
+          if substitutions_mention binder body_substitutions then
+            let fresh = fresh_bound_name body body_substitutions binder in
+            [ substitute_many body
+                ({ substitution_name = binder;
+                   substitution_value = Symbol fresh } :: body_substitutions);
+              Symbol fresh;
+              substitute_many lower substitutions;
+              substitute_many upper substitutions ]
+          else
+            [ substitute_many body body_substitutions;
+              Symbol binder;
+              substitute_many lower substitutions;
+              substitute_many upper substitutions ]
+      end
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
+and substitute_solve_arguments
+    (arguments:list expression)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
+=
+  match arguments with
+  | left :: right :: Symbol binder :: [] ->
+      let equation_substitutions =
+        remove_substitution binder substitutions in
+      if substitutions_mention binder equation_substitutions then
+        let equation = Function "solve" [left; right] in
+        let fresh =
+          fresh_bound_name equation equation_substitutions binder in
+        [ substitute_many left
+            ({ substitution_name = binder;
+               substitution_value = Symbol fresh } :: equation_substitutions);
+          substitute_many right
+            ({ substitution_name = binder;
+               substitution_value = Symbol fresh } :: equation_substitutions);
+          Symbol fresh ]
+      else
+        [ substitute_many left equation_substitutions;
+          substitute_many right equation_substitutions;
+          Symbol binder ]
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
+let substitute
     (term:expression)
     (variable:string)
     (replacement:expression)
   : Tot expression
 =
-  match term with
-  | Literal _ _ -> term
-  | Symbol name -> if name = variable then replacement else term
-  | Negate inner -> Negate (substitute inner variable replacement)
-  | Binary operator left right -> Binary operator
-      (substitute left variable replacement)
-      (substitute right variable replacement)
-  | Power base exponent -> Power
-      (substitute base variable replacement) exponent
-  | Function name arguments -> Function name
-      (substitute_arguments arguments variable replacement)
-  | Differentiate inner bound_variable ->
-      if bound_variable = variable then term
-      else Differentiate
-        (substitute inner variable replacement) bound_variable
-  | Substitute inner bound_variable inner_replacement -> Substitute
-      (substitute inner variable replacement)
-      bound_variable
-      (substitute inner_replacement variable replacement)
-  | Derivative inner bound_variable ->
-      if bound_variable = variable then term
-      else Derivative (substitute inner variable replacement) bound_variable
-  | Simplify inner -> Simplify (substitute inner variable replacement)
-  | Expand inner -> Expand (substitute inner variable replacement)
-  | Factor inner -> Factor (substitute inner variable replacement)
-  | Assuming inner left relation right -> Assuming
-      (substitute inner variable replacement)
-      (substitute left variable replacement)
-      relation
-      (substitute right variable replacement)
+  substitute_many term
+    [{ substitution_name = variable; substitution_value = replacement }]
 
-and substitute_arguments
-    (arguments:list expression)
-    (variable:string)
-    (replacement:expression)
-  : Tot (list expression)
+let substitution_respects_iteration_binder_fact
+    (body lower upper replacement:expression)
+    (binder:string)
+  : prop
 =
-  match arguments with
-  | [] -> []
-  | argument :: rest ->
-      substitute argument variable replacement ::
-      substitute_arguments rest variable replacement
+  let substitutions =
+    [{ substitution_name = binder;
+       substitution_value = replacement }] in
+  substitute_iteration_arguments
+      [body; Symbol binder; lower; upper] substitutions =
+    [ body;
+      Symbol binder;
+      substitute_many lower substitutions;
+      substitute_many upper substitutions ]
+
+let substitution_respects_iteration_binder
+    (body lower upper replacement:expression)
+    (binder:string)
+  : Lemma
+      (ensures
+        substitution_respects_iteration_binder_fact
+          body lower upper replacement binder)
+= assert_norm
+    (substitution_respects_iteration_binder_fact
+      body lower upper replacement binder)
+
+let substitution_avoids_iteration_capture_fact : prop =
+  substitute
+    (Function "sum"
+      [ Symbol "x"; Symbol "k"; Literal 1 1; Literal 3 1 ])
+    "x" (Symbol "k") =
+  Function "sum"
+    [ Symbol "k";
+      Symbol "_centl_bound_k";
+      Literal 1 1;
+      Literal 3 1 ]
+
+let substitution_avoids_iteration_capture ()
+  : Lemma (ensures substitution_avoids_iteration_capture_fact)
+= assert_norm substitution_avoids_iteration_capture_fact
+
+let substitution_fresh_name_avoids_collision_fact : prop =
+  substitute
+    (Function "sum"
+      [ Binary Add (Symbol "x") (Symbol "_centl_bound_k");
+        Symbol "k";
+        Literal 1 1;
+        Literal 1 1 ])
+    "x" (Symbol "k") =
+  Function "sum"
+    [ Binary Add (Symbol "k") (Symbol "_centl_bound_k");
+      Symbol "_centl_bound_k_";
+      Literal 1 1;
+      Literal 1 1 ]
+
+let substitution_fresh_name_avoids_collision ()
+  : Lemma (ensures substitution_fresh_name_avoids_collision_fact)
+= assert_norm substitution_fresh_name_avoids_collision_fact
+
+let substitution_respects_solution_binder_fact : prop =
+  substitute
+    (Function "solve"
+      [ Symbol "k"; Literal 1 1; Symbol "k" ])
+    "k" (Literal 2 1) =
+  Function "solve"
+    [ Symbol "k"; Literal 1 1; Symbol "k" ]
+
+let substitution_respects_solution_binder ()
+  : Lemma (ensures substitution_respects_solution_binder_fact)
+= assert_norm substitution_respects_solution_binder_fact
+
+let substitution_avoids_solution_capture_fact : prop =
+  substitute
+    (Function "solve"
+      [ Binary Add (Symbol "x") (Symbol "k");
+        Literal 0 1;
+        Symbol "k" ])
+    "x" (Symbol "k") =
+  Function "solve"
+    [ Binary Add (Symbol "k") (Symbol "_centl_bound_k");
+      Literal 0 1;
+      Symbol "_centl_bound_k" ]
+
+let substitution_avoids_solution_capture ()
+  : Lemma (ensures substitution_avoids_solution_capture_fact)
+= assert_norm substitution_avoids_solution_capture_fact
 
 let rec differentiate (term:expression) (variable:string) : Tot expression =
   match term with
@@ -582,6 +1130,272 @@ let rec differentiate (term:expression) (variable:string) : Tot expression =
   | Factor inner -> differentiate inner variable
   | Assuming inner left relation right -> Assuming
       (differentiate inner variable) left relation right
+
+(** The semantic differentiation domain is deliberately smaller than the
+    surface expression language.  It contains exactly univariate integer
+    polynomials built from constants, the distinguished variable, ring
+    operations, and natural powers.  This makes unsupported calculus syntax
+    explicit rather than hiding domain hypotheses in a theorem precondition. *)
+type polynomial_model =
+  | PolynomialConstant: int -> polynomial_model
+  | PolynomialVariable
+  | PolynomialNegate: polynomial_model -> polynomial_model
+  | PolynomialAdd: polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialSubtract:
+      polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialMultiply:
+      polynomial_model -> polynomial_model -> polynomial_model
+  | PolynomialPower: polynomial_model -> nat -> polynomial_model
+
+let rec integer_power (base:int) (exponent:nat)
+  : Tot int (decreases exponent)
+=
+  if exponent = 0 then 1
+  else base * integer_power base (exponent - 1)
+
+(** Ordinary evaluation of a polynomial at an integer point. *)
+let rec polynomial_model_value (term:polynomial_model) (point:int)
+  : Tot int (decreases term)
+=
+  match term with
+  | PolynomialConstant value -> value
+  | PolynomialVariable -> point
+  | PolynomialNegate inner -> -polynomial_model_value inner point
+  | PolynomialAdd left right ->
+      polynomial_model_value left point + polynomial_model_value right point
+  | PolynomialSubtract left right ->
+      polynomial_model_value left point - polynomial_model_value right point
+  | PolynomialMultiply left right ->
+      polynomial_model_value left point * polynomial_model_value right point
+  | PolynomialPower base exponent ->
+      integer_power (polynomial_model_value base point) exponent
+
+(** Independent dual-number/tangent evaluation.  Its first-order component is
+    the mathematical formal derivative semantics for this polynomial domain. *)
+let rec polynomial_model_tangent (term:polynomial_model) (point:int)
+  : Tot int (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> 0
+  | PolynomialVariable -> 1
+  | PolynomialNegate inner -> -polynomial_model_tangent inner point
+  | PolynomialAdd left right ->
+      polynomial_model_tangent left point + polynomial_model_tangent right point
+  | PolynomialSubtract left right ->
+      polynomial_model_tangent left point - polynomial_model_tangent right point
+  | PolynomialMultiply left right ->
+      polynomial_model_tangent left point * polynomial_model_value right point +
+      polynomial_model_value left point * polynomial_model_tangent right point
+  | PolynomialPower base exponent ->
+      if exponent = 0 then 0
+      else
+        exponent *
+        integer_power (polynomial_model_value base point) (exponent - 1) *
+        polynomial_model_tangent base point
+
+let rec polynomial_model_derivative (term:polynomial_model)
+  : Tot polynomial_model (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> PolynomialConstant 0
+  | PolynomialVariable -> PolynomialConstant 1
+  | PolynomialNegate inner ->
+      PolynomialNegate (polynomial_model_derivative inner)
+  | PolynomialAdd left right -> PolynomialAdd
+      (polynomial_model_derivative left) (polynomial_model_derivative right)
+  | PolynomialSubtract left right -> PolynomialSubtract
+      (polynomial_model_derivative left) (polynomial_model_derivative right)
+  | PolynomialMultiply left right -> PolynomialAdd
+      (PolynomialMultiply (polynomial_model_derivative left) right)
+      (PolynomialMultiply left (polynomial_model_derivative right))
+  | PolynomialPower base exponent ->
+      if exponent = 0 then PolynomialConstant 0
+      else if exponent = 1 then polynomial_model_derivative base
+      else PolynomialMultiply
+        (PolynomialMultiply
+          (PolynomialConstant exponent)
+          (PolynomialPower base (exponent - 1)))
+        (polynomial_model_derivative base)
+
+let rec polynomial_derivative_has_tangent_semantics
+    (term:polynomial_model)
+    (point:int)
+  : Lemma
+      (ensures
+        polynomial_model_value (polynomial_model_derivative term) point =
+        polynomial_model_tangent term point)
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      polynomial_derivative_has_tangent_semantics inner point
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      polynomial_derivative_has_tangent_semantics left point;
+      polynomial_derivative_has_tangent_semantics right point
+  | PolynomialPower base exponent ->
+      polynomial_derivative_has_tangent_semantics base point;
+      if exponent = 0 then ()
+      else if exponent = 1 then ()
+      else ()
+
+let rec embed_polynomial_model
+    (term:polynomial_model)
+    (variable:string)
+  : Tot expression (decreases term)
+=
+  match term with
+  | PolynomialConstant value -> Literal value 1
+  | PolynomialVariable -> Symbol variable
+  | PolynomialNegate inner -> Negate (embed_polynomial_model inner variable)
+  | PolynomialAdd left right -> Binary Add
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialSubtract left right -> Binary Subtract
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialMultiply left right -> Binary Multiply
+      (embed_polynomial_model left variable)
+      (embed_polynomial_model right variable)
+  | PolynomialPower base exponent ->
+      Power (embed_polynomial_model base variable) exponent
+
+(** The production symbolic differentiator agrees syntactically with the
+    independently defined derivative on every expression in the model. *)
+let rec differentiate_embedded_polynomial
+    (term:polynomial_model)
+    (variable:string)
+  : Lemma
+      (ensures
+        differentiate (embed_polynomial_model term variable) variable =
+        embed_polynomial_model (polynomial_model_derivative term) variable)
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      differentiate_embedded_polynomial inner variable
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      differentiate_embedded_polynomial left variable;
+      differentiate_embedded_polynomial right variable
+  | PolynomialPower base exponent ->
+      differentiate_embedded_polynomial base variable
+
+(** Executable ordinary semantics for the supported subset of surface
+    expressions.  [None] makes every unsupported construct explicit. *)
+let rec evaluate_integer_polynomial
+    (term:expression)
+    (variable:string)
+    (point:int)
+  : Tot (option int) (decreases term)
+=
+  match term with
+  | Literal numerator denominator ->
+      if denominator = 1 then Some numerator else None
+  | Symbol name -> if name = variable then Some point else None
+  | Negate inner ->
+      begin match evaluate_integer_polynomial inner variable point with
+      | Some value -> Some (-value)
+      | None -> None
+      end
+  | Binary operator left right ->
+      begin match evaluate_integer_polynomial left variable point,
+                  evaluate_integer_polynomial right variable point with
+      | Some left_value, Some right_value ->
+          begin match operator with
+          | Add -> Some (left_value + right_value)
+          | Subtract -> Some (left_value - right_value)
+          | Multiply -> Some (left_value * right_value)
+          | Divide -> None
+          end
+      | _, _ -> None
+      end
+  | Power base exponent ->
+      if exponent < 0 then None
+      else
+        begin match evaluate_integer_polynomial base variable point with
+        | Some value -> Some (integer_power value exponent)
+        | None -> None
+        end
+  | Function _ _ -> None
+  | Differentiate _ _ -> None
+  | Substitute _ _ _ -> None
+  | Derivative _ _ -> None
+  | Simplify _ -> None
+  | Expand _ -> None
+  | Factor _ -> None
+  | Assuming _ _ _ _ -> None
+
+let rec evaluate_embedded_polynomial
+    (term:polynomial_model)
+    (variable:string)
+    (point:int)
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (embed_polynomial_model term variable) variable point =
+        Some (polynomial_model_value term point))
+      (decreases term)
+=
+  match term with
+  | PolynomialConstant _ -> ()
+  | PolynomialVariable -> ()
+  | PolynomialNegate inner ->
+      evaluate_embedded_polynomial inner variable point
+  | PolynomialAdd left right
+  | PolynomialSubtract left right
+  | PolynomialMultiply left right ->
+      evaluate_embedded_polynomial left variable point;
+      evaluate_embedded_polynomial right variable point
+  | PolynomialPower base exponent ->
+      evaluate_embedded_polynomial base variable point
+
+(** Main semantic correctness theorem.  It relates the actual [differentiate]
+    implementation, ordinary expression evaluation, and the independently
+    computed tangent for all modeled polynomials and all integer points. *)
+let polynomial_differentiation_is_semantic
+    (term:polynomial_model)
+    (variable:string)
+    (point:int)
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (differentiate (embed_polynomial_model term variable) variable)
+          variable point =
+        Some (polynomial_model_tangent term point))
+=
+  differentiate_embedded_polynomial term variable;
+  evaluate_embedded_polynomial
+    (polynomial_model_derivative term) variable point;
+  polynomial_derivative_has_tangent_semantics term point
+
+(** A concrete witness keeps the theorem's supported domain visibly
+    inhabited: d/dx(x^3 + 2*x) at x=2 is 14. *)
+let cubic_differentiation_example ()
+  : Lemma
+      (ensures
+        evaluate_integer_polynomial
+          (differentiate
+            (embed_polynomial_model
+              (PolynomialAdd
+                (PolynomialPower PolynomialVariable 3)
+                (PolynomialMultiply
+                  (PolynomialConstant 2) PolynomialVariable))
+              "x")
+            "x")
+          "x" 2 = Some 14)
+=
+  polynomial_differentiation_is_semantic
+    (PolynomialAdd
+      (PolynomialPower PolynomialVariable 3)
+      (PolynomialMultiply (PolynomialConstant 2) PolynomialVariable))
+    "x" 2
 
 type coefficient = value:rational{invariant value}
 type polynomial = list coefficient
@@ -995,7 +1809,7 @@ let rec simplify_assuming
     (term left:expression)
     (relation:relation)
     (right:expression)
-  : Tot expression
+  : Tot expression (decreases term)
 =
   match term with
   | Literal _ _ -> term
@@ -1039,7 +1853,7 @@ and simplify_assuming_arguments
     (left:expression)
     (relation:relation)
     (right:expression)
-  : Tot (list expression)
+  : Tot (list expression) (decreases arguments)
 =
   match arguments with
   | [] -> []

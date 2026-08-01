@@ -48,7 +48,12 @@ type binding =
   | Bound_value of Centl_Core.expression
   | Bound_function of function_binding
 
-type session = { mutable bindings : (string * binding) list }
+type session = {
+  mutable bindings : (string * binding) list;
+  mutable retained_nodes : int;
+  mutable retained_bits : int;
+  mutable retained_bytes : int;
+}
 
 type session_result =
   | Session_value of exact_value
@@ -62,6 +67,7 @@ type evaluation_limits = {
   max_expression_nodes : int;
   max_exact_bits : int;
   max_integer_iterations : int;
+  max_result_bytes : int;
   max_bindings : int;
   max_precision_digits : int;
   max_working_bits : int;
@@ -73,6 +79,7 @@ let default_evaluation_limits =
     max_expression_nodes = 100_000;
     max_exact_bits = 1_000_000;
     max_integer_iterations = 100_000;
+    max_result_bytes = 1_048_576;
     max_bindings = 1_024;
     max_precision_digits = 1_000;
     max_working_bits = 16_384;
@@ -97,6 +104,11 @@ let value_from_core numerator denominator =
   else Ok (Rational (numerator, denominator))
 
 let failure code message = Error { code; message; position = None }
+let never_cancelled () = false
+
+let check_cancelled cancelled =
+  if cancelled () then failure "cancelled" "the request was cancelled"
+  else Ok ()
 
 let exact_square_root numerator denominator =
   if Z.sign numerator < 0 || Z.sign denominator <= 0 then None
@@ -136,6 +148,7 @@ type native_failure =
   | Domain_error of string
   | Uncertain_domain of string
   | Unsupported of string
+  | Resource_limit_failure of string
   | Backend_failure of string
 
 let ensure_finite value =
@@ -298,14 +311,6 @@ let decimal_order value =
     in
     adjust estimate
 
-let scaled_integer ~upper value places =
-  let scaled =
-    if places >= 0 then Q.mul value (rational_power_of_ten places)
-    else Q.div value (rational_power_of_ten (-places))
-  in
-  if upper then Z.cdiv (Q.num scaled) (Q.den scaled)
-  else Z.fdiv (Q.num scaled) (Q.den scaled)
-
 let decimal_of_scaled value places =
   if places < 0 then Z.to_string value ^ String.make (-places) '0'
   else if places = 0 then Z.to_string value
@@ -322,19 +327,31 @@ let decimal_of_scaled value places =
     ^ String.sub padded 0 split ^ "."
     ^ String.sub padded split places
 
-let decimal_interval lower upper digits =
+let decimal_interval_of_dyadic lower_mantissa upper_mantissa binary_exponent
+    digits =
   let magnitude =
-    let lower = Q.abs lower in
-    let upper = Q.abs upper in
+    let lower = Q.abs (rational_of_dyadic lower_mantissa binary_exponent) in
+    let upper = Q.abs (rational_of_dyadic upper_mantissa binary_exponent) in
     if Q.compare lower upper >= 0 then lower else upper
   in
   let places = digits - 1 - decimal_order magnitude in
-  let lower_scaled = scaled_integer ~upper:false lower places in
-  let upper_scaled = scaled_integer ~upper:true upper places in
-  let resolution = Q.div (rational_power_of_ten (-places)) (Q.of_int 2) in
-  ( decimal_of_scaled lower_scaled places,
-    decimal_of_scaled upper_scaled places,
-    Q.compare (Q.sub upper lower) resolution <= 0 )
+  match
+    Centl_Core.round_enclosure_outward lower_mantissa upper_mantissa
+      (Z.of_int binary_exponent) (Z.of_int 1_000_000) (Z.of_int places)
+      (Z.of_int 4_096)
+  with
+  | Centl_Core.InvalidDecimalRounding ->
+      Error
+        (Resource_limit_failure
+           "the decimal enclosure exceeds the verified rendering scale limit")
+  | Centl_Core.RoundedDecimalEnclosure rounded ->
+      let lower = rational_of_dyadic lower_mantissa binary_exponent in
+      let upper = rational_of_dyadic upper_mantissa binary_exponent in
+      let resolution = Q.div (rational_power_of_ten (-places)) (Q.of_int 2) in
+      Ok
+        ( decimal_of_scaled rounded.lower_scaled places,
+          decimal_of_scaled rounded.upper_scaled places,
+          Q.compare (Q.sub upper lower) resolution <= 0 )
 
 let enclosure_of_ball ball requested_digits working_bits =
   if not (Centl_arb.is_finite ball) then
@@ -357,26 +374,30 @@ let enclosure_of_ball ball requested_digits working_bits =
             (Backend_failure "the backend exponent is outside the host range")
         else
           let binary_exponent = Z.to_int enclosure.binary_exponent in
-          let lower = rational_of_dyadic lower_mantissa binary_exponent in
-          let upper = rational_of_dyadic upper_mantissa binary_exponent in
-          let lower_decimal, upper_decimal, resolved =
-            decimal_interval lower upper requested_digits
-          in
-          Ok
-            ( Real_enclosure
-                {
-                  lower_mantissa;
-                  upper_mantissa;
-                  binary_exponent;
-                  lower_decimal;
-                  upper_decimal;
-                  requested_digits;
-                  working_bits;
-                },
-              resolved )
+          begin match
+            decimal_interval_of_dyadic lower_mantissa upper_mantissa
+              binary_exponent requested_digits
+          with
+          | Error _ as error -> error
+          | Ok (lower_decimal, upper_decimal, resolved) ->
+              Ok
+                ( Real_enclosure
+                    {
+                      lower_mantissa;
+                      upper_mantissa;
+                      binary_exponent;
+                      lower_decimal;
+                      upper_decimal;
+                      requested_digits;
+                      working_bits;
+                    },
+                  resolved )
+          end
     end
 
-let approximate_with_limits limits expression requested_digits =
+let approximate_with_limits ?(cancelled = never_cancelled) limits expression
+    requested_digits =
+  let ( let* ) result next = Result.bind result next in
   let digit_limit = min 1_000 limits.max_precision_digits in
   let working_limit = min 16_384 limits.max_working_bits in
   if requested_digits < 1 || requested_digits > digit_limit then
@@ -390,15 +411,20 @@ let approximate_with_limits limits expression requested_digits =
         "the requested digits exceed the working-precision limit"
     else
       let rec attempt working_bits =
+        let* () = check_cancelled cancelled in
         let retry message =
           if working_bits >= working_limit then
             failure "insufficient_precision" message
           else attempt (min working_limit (working_bits * 2))
         in
-        match native_value expression working_bits with
+        let native_result = native_value expression working_bits in
+        let* () = check_cancelled cancelled in
+        match native_result with
         | Error (Domain_error message) -> failure "domain_error" message
         | Error (Unsupported message) ->
             failure "unsupported_approximation" message
+        | Error (Resource_limit_failure message) ->
+            failure "resource_limit" message
         | Error (Backend_failure message) -> failure "backend_failure" message
         | Error (Uncertain_domain message) -> retry message
         | Ok ball ->
@@ -411,6 +437,8 @@ let approximate_with_limits limits expression requested_digits =
             | Error (Domain_error message) -> failure "domain_error" message
             | Error (Unsupported message) ->
                 failure "unsupported_approximation" message
+            | Error (Resource_limit_failure message) ->
+                failure "resource_limit" message
             | Ok (value, true) -> Ok value
             | Ok (_, false) ->
                 retry
@@ -590,9 +618,34 @@ let rec substituted_node_count limit replacements expression =
            (List.remove_assoc variable replacements)
            inner)
   | Centl_Core.Binary (_, left, right) -> children 1 [ left; right ]
+  | Centl_Core.Function
+      (("sum" | "product"), [ body; Centl_Core.Symbol variable; lower; upper ])
+    ->
+      let body_nodes =
+        substituted_node_count limit
+          (List.remove_assoc variable replacements)
+          body
+      in
+      add 2
+        (add body_nodes
+           (add
+              (substituted_node_count limit replacements lower)
+              (substituted_node_count limit replacements upper)))
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      let scoped = List.remove_assoc variable replacements in
+      add 2
+        (add
+           (substituted_node_count limit scoped left)
+           (substituted_node_count limit scoped right))
   | Centl_Core.Function (_, arguments) -> children 1 arguments
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      children 1 [ inner; replacement ]
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      add 1
+        (add
+           (substituted_node_count limit
+              (List.remove_assoc variable replacements)
+              inner)
+           (substituted_node_count limit replacements replacement))
   | Centl_Core.Assuming (inner, left, _, right) ->
       children 1 [ inner; left; right ]
 
@@ -606,61 +659,91 @@ let natural_value expression =
       Some value.numerator
   | _ -> None
 
-let rec estimated_exact_bits = function
-  | Centl_Core.Literal (numerator, denominator) ->
-      Some (Z.of_int (bits_of_integer numerator + bits_of_integer denominator))
-  | Centl_Core.Symbol _ -> None
-  | Centl_Core.Negate inner
-  | Centl_Core.Differentiate (inner, _)
-  | Centl_Core.Derivative (inner, _)
-  | Centl_Core.Simplify inner
-  | Centl_Core.Expand inner
-  | Centl_Core.Factor inner ->
-      estimated_exact_bits inner
-  | Centl_Core.Power (base, exponent) ->
-      Option.map
-        (fun bits -> Z.mul bits (Z.max Z.one (Z.abs exponent)))
-        (estimated_exact_bits base)
-  | Centl_Core.Binary (_, left, right) ->
-      begin match (estimated_exact_bits left, estimated_exact_bits right) with
-      | Some left, Some right -> Some (Z.add Z.one (Z.add left right))
-      | _ -> None
-      end
-  | Centl_Core.Function ("factorial", [ argument ]) ->
-      begin match natural_value argument with
-      | Some value -> Some (Z.mul value (Z.of_int (bits_of_integer value)))
-      | None -> None
-      end
-  | Centl_Core.Function ("fibonacci", [ argument ]) ->
-      Option.map (fun value -> Z.add value Z.one) (natural_value argument)
-  | Centl_Core.Function ("choose", [ n_argument; k_argument ]) ->
-      begin match (natural_value n_argument, natural_value k_argument) with
-      | Some n, Some _ -> Some (Z.add n Z.one)
-      | _ -> None
-      end
-  | Centl_Core.Function ("permutations", [ n_argument; k_argument ]) ->
-      begin match (natural_value n_argument, natural_value k_argument) with
-      | Some n, Some k -> Some (Z.mul k (Z.of_int (bits_of_integer n)))
-      | _ -> None
-      end
-  | Centl_Core.Function (_, arguments) ->
-      let rec sum total = function
-        | [] -> Some total
-        | argument :: rest ->
-            begin match estimated_exact_bits argument with
-            | Some bits -> sum (Z.add total bits) rest
-            | None -> None
-            end
-      in
-      sum Z.one arguments
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      begin match
-        (estimated_exact_bits inner, estimated_exact_bits replacement)
-      with
-      | Some inner, Some replacement -> Some (Z.add inner replacement)
-      | _ -> None
-      end
-  | Centl_Core.Assuming (inner, _, _, _) -> estimated_exact_bits inner
+let estimated_exact_bits_with_limits ~cancelled limits expression =
+  let ( let* ) result next = Result.bind result next in
+  let checked = function
+    | Some bits when Z.gt bits (Z.of_int limits.max_exact_bits) ->
+        failure "resource_limit" "the exact result exceeds the bit limit"
+    | bits -> Ok bits
+  in
+  let add_optional left right =
+    match (left, right) with
+    | Some left, Some right -> Some (Z.add left right)
+    | _ -> None
+  in
+  let rec estimate expression =
+    let* () = check_cancelled cancelled in
+    let* bits =
+      match expression with
+      | Centl_Core.Literal (numerator, denominator) ->
+          Ok
+            (Some
+               (Z.of_int
+                  (bits_of_integer numerator + bits_of_integer denominator)))
+      | Centl_Core.Symbol _ -> Ok None
+      | Centl_Core.Negate inner
+      | Centl_Core.Differentiate (inner, _)
+      | Centl_Core.Derivative (inner, _)
+      | Centl_Core.Simplify inner
+      | Centl_Core.Expand inner
+      | Centl_Core.Factor inner ->
+          estimate inner
+      | Centl_Core.Power (base, exponent) ->
+          let* base = estimate base in
+          Ok
+            (Option.map
+               (fun bits -> Z.mul bits (Z.max Z.one (Z.abs exponent)))
+               base)
+      | Centl_Core.Binary (_, left, right) ->
+          let* left = estimate left in
+          let* right = estimate right in
+          Ok (Option.map (Z.add Z.one) (add_optional left right))
+      | Centl_Core.Function ("factorial", [ argument ]) ->
+          let* _ = estimate argument in
+          Ok
+            (Option.map
+               (fun value -> Z.mul value (Z.of_int (bits_of_integer value)))
+               (natural_value argument))
+      | Centl_Core.Function ("fibonacci", [ argument ]) ->
+          let* _ = estimate argument in
+          Ok
+            (Option.map
+               (fun value -> Z.add value Z.one)
+               (natural_value argument))
+      | Centl_Core.Function ("choose", [ n_argument; k_argument ]) ->
+          let* _ = estimate n_argument in
+          let* _ = estimate k_argument in
+          Ok
+            (match (natural_value n_argument, natural_value k_argument) with
+            | Some n, Some _ -> Some (Z.add n Z.one)
+            | _ -> None)
+      | Centl_Core.Function ("permutations", [ n_argument; k_argument ]) ->
+          let* _ = estimate n_argument in
+          let* _ = estimate k_argument in
+          Ok
+            (match (natural_value n_argument, natural_value k_argument) with
+            | Some n, Some k -> Some (Z.mul k (Z.of_int (bits_of_integer n)))
+            | _ -> None)
+      | Centl_Core.Function (_, arguments) ->
+          estimate_arguments (Some Z.one) arguments
+      | Centl_Core.Substitute (inner, _, replacement) ->
+          let* inner = estimate inner in
+          let* replacement = estimate replacement in
+          Ok (add_optional inner replacement)
+      | Centl_Core.Assuming (inner, left, _, right) ->
+          let* inner = estimate inner in
+          let* _ = estimate left in
+          let* _ = estimate right in
+          Ok inner
+    in
+    checked bits
+  and estimate_arguments total = function
+    | [] -> Ok total
+    | argument :: rest ->
+        let* bits = estimate argument in
+        estimate_arguments (add_optional total bits) rest
+  in
+  estimate expression
 
 let concrete_iterations = function
   | Centl_Core.Function (("factorial" | "fibonacci"), [ argument ]) ->
@@ -677,32 +760,36 @@ let concrete_iterations = function
       end
   | _ -> None
 
-let rec check_computation_limit limits expression =
+let check_computation_limit ?(cancelled = never_cancelled) limits expression =
   let ( let* ) result next = Result.bind result next in
-  let rec check_list = function
-    | [] -> Ok ()
-    | expression :: rest ->
-        let* () = check_computation_limit limits expression in
-        check_list rest
-  in
-  let children =
-    match expression with
-    | Centl_Core.Literal _ | Centl_Core.Symbol _ -> []
-    | Centl_Core.Negate inner
-    | Centl_Core.Power (inner, _)
-    | Centl_Core.Differentiate (inner, _)
-    | Centl_Core.Derivative (inner, _)
-    | Centl_Core.Simplify inner
-    | Centl_Core.Expand inner
-    | Centl_Core.Factor inner ->
-        [ inner ]
-    | Centl_Core.Binary (_, left, right) -> [ left; right ]
-    | Centl_Core.Function (_, arguments) -> arguments
-    | Centl_Core.Substitute (inner, _, replacement) -> [ inner; replacement ]
-    | Centl_Core.Assuming (inner, left, _, right) -> [ inner; left; right ]
-  in
-  let* () = check_list children in
-  let* () =
+  let rec check_iterations expression =
+    let* () = check_cancelled cancelled in
+    let rec check_list = function
+      | [] -> Ok ()
+      | expression :: rest ->
+          let* () = check_iterations expression in
+          check_list rest
+    in
+    let children =
+      match expression with
+      | Centl_Core.Literal _ | Centl_Core.Symbol _ -> []
+      | Centl_Core.Negate inner
+      | Centl_Core.Power (inner, _)
+      | Centl_Core.Differentiate (inner, _)
+      | Centl_Core.Derivative (inner, _)
+      | Centl_Core.Simplify inner
+      | Centl_Core.Expand inner
+      | Centl_Core.Factor inner ->
+          [ inner ]
+      | Centl_Core.Binary (_, left, right) -> [ left; right ]
+      | Centl_Core.Function
+          (("sum" | "product"), [ _; Centl_Core.Symbol _; lower; upper ]) ->
+          [ lower; upper ]
+      | Centl_Core.Function (_, arguments) -> arguments
+      | Centl_Core.Substitute (inner, _, replacement) -> [ inner; replacement ]
+      | Centl_Core.Assuming (inner, left, _, right) -> [ inner; left; right ]
+    in
+    let* () = check_list children in
     match concrete_iterations expression with
     | Some iterations
       when Z.gt iterations (Z.of_int limits.max_integer_iterations) ->
@@ -710,10 +797,8 @@ let rec check_computation_limit limits expression =
           "the exact operation exceeds the integer-iteration limit"
     | _ -> Ok ()
   in
-  match estimated_exact_bits expression with
-  | Some bits when Z.gt bits (Z.of_int limits.max_exact_bits) ->
-      failure "resource_limit" "the exact result exceeds the bit limit"
-  | _ -> Ok ()
+  let* _ = estimated_exact_bits_with_limits ~cancelled limits expression in
+  check_iterations expression
 
 let check_expression_limit limits expression =
   if expression_node_count expression > limits.max_expression_nodes then
@@ -724,6 +809,99 @@ let check_source_limit limits source =
   if String.length source > limits.max_source_bytes then
     failure "resource_limit" "the expression exceeds the source-byte limit"
   else Ok ()
+
+let result_render_bytes limit value =
+  let add left right = bounded_sum limit left right in
+  let integer value = String.length (Z.to_string value) in
+  let expression = Centl_iteration.expression_render_bytes limit in
+  let rational numerator denominator =
+    add (integer numerator) (integer denominator)
+  in
+  match value with
+  | Integer value -> add 64 (integer value)
+  | Rational (numerator, denominator) -> add 64 (rational numerator denominator)
+  | Symbolic value -> add 64 (expression value)
+  | Real_enclosure enclosure ->
+      add 256
+        (add
+           (add
+              (integer enclosure.lower_mantissa)
+              (integer enclosure.upper_mantissa))
+           (add
+              (String.length enclosure.lower_decimal)
+              (String.length enclosure.upper_decimal)))
+  | Equation_result equation ->
+      let solutions =
+        match equation.status with
+        | Finite_solutions values ->
+            List.fold_left
+              (fun total (numerator, denominator) ->
+                add total (rational numerator denominator))
+              0 values
+        | No_solutions | All_values | Unresolved -> 0
+      in
+      add 256
+        (add
+           (String.length equation.variable)
+           (add (expression equation.left)
+              (add (expression equation.right) solutions)))
+
+let check_result_limit limits value =
+  if result_render_bytes limits.max_result_bytes value > limits.max_result_bytes
+  then failure "resource_limit" "the result exceeds the byte limit"
+  else Ok ()
+
+let reserved_names =
+  [
+    "pi";
+    "e";
+    "tau";
+    "solve";
+    "diff";
+    "substitute";
+    "assuming";
+    "simplify";
+    "expand";
+    "factor";
+    "approx";
+    "sum";
+    "product";
+    "sqrt";
+    "abs";
+    "exp";
+    "log";
+    "sin";
+    "cos";
+    "tan";
+    "asin";
+    "acos";
+    "atan";
+    "atan2";
+    "sinh";
+    "cosh";
+    "tanh";
+    "radians";
+    "degrees";
+    "square_area";
+    "rectangle_area";
+    "rectangle_perimeter";
+    "triangle_area";
+    "trapezoid_area";
+    "circle_area";
+    "circumference";
+    "sphere_area";
+    "sphere_volume";
+    "cylinder_volume";
+    "hypot";
+    "distance";
+    "slope";
+    "gcd";
+    "lcm";
+    "factorial";
+    "choose";
+    "permutations";
+    "fibonacci";
+  ]
 
 type polynomial_profile = {
   polynomial_variable : string option;
@@ -955,165 +1133,362 @@ let rec differentiated_node_count limit expression variable =
           nodes right;
         ]
 
-let resolve_with_limits limits expression =
+let rec contains_named_function predicate = function
+  | Centl_Core.Function (name, arguments) ->
+      predicate name
+      || List.exists (contains_named_function predicate) arguments
+  | Centl_Core.Literal _ | Centl_Core.Symbol _ -> false
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Differentiate (inner, _)
+  | Centl_Core.Derivative (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      contains_named_function predicate inner
+  | Centl_Core.Binary (_, left, right) ->
+      contains_named_function predicate left
+      || contains_named_function predicate right
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      contains_named_function predicate inner
+      || contains_named_function predicate replacement
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      contains_named_function predicate inner
+      || contains_named_function predicate left
+      || contains_named_function predicate right
+
+let contains_iteration =
+  contains_named_function (fun name -> name = "sum" || name = "product")
+
+let engine_failure_of_core = function
+  | Centl_Core.ZeroDenominator ->
+      failure "zero_denominator" "a literal denominator cannot be zero"
+  | Centl_Core.DivisionByZero -> failure "division_by_zero" "division by zero"
+  | Centl_Core.UndefinedPower -> failure "undefined_power" "0^0 is undefined"
+
+let engine_failure_of_iteration = function
+  | Centl_iteration.Invalid_bound message -> failure "invalid_arguments" message
+  | Centl_iteration.Resource_limit message -> failure "resource_limit" message
+  | Centl_iteration.Cancelled -> failure "cancelled" "the request was cancelled"
+  | Centl_iteration.Term_error (code, message) -> failure code message
+  | Centl_iteration.Core_error error -> engine_failure_of_core error
+
+let iteration_value_of_exact = function
+  | Integer value -> Ok (Centl_Core.ExactRational (Centl_Core.make value Z.one))
+  | Rational (numerator, denominator) ->
+      Ok (Centl_Core.ExactRational (Centl_Core.make numerator denominator))
+  | Symbolic expression -> Ok (Centl_Core.ExactSymbolic expression)
+  | Real_enclosure _ ->
+      Error
+        (Centl_iteration.Term_error
+           ( "exact_iteration_required",
+             "finite iteration terms must remain exact" ))
+  | Equation_result _ ->
+      Error
+        (Centl_iteration.Term_error
+           ( "expression_required",
+             "finite iteration terms cannot return solution sets" ))
+
+let resolve_with_limits ?(cancelled = never_cancelled) limits expression =
   let ( let* ) result next = Result.bind result next in
-  let checked expression =
-    let* () = check_expression_limit limits expression in
-    Ok expression
+  let remaining_iterations = ref limits.max_integer_iterations in
+  let maximum_iteration_work =
+    if limits.max_integer_iterations > max_int / 64 then max_int
+    else limits.max_integer_iterations * 64
+  in
+  let remaining_iteration_work = ref maximum_iteration_work in
+  let consume_integer_work amount =
+    if amount < 0 || amount > !remaining_iterations then false
+    else begin
+      remaining_iterations := !remaining_iterations - amount;
+      true
+    end
+  in
+  let consume_integer_work_z amount =
+    Z.sign amount >= 0
+    && Z.fits_int amount
+    && consume_integer_work (Z.to_int amount)
+  in
+  let consume_iteration_work amount =
+    if amount < 0 || amount > !remaining_iteration_work then false
+    else begin
+      remaining_iteration_work := !remaining_iteration_work - amount;
+      true
+    end
+  in
+  let checked expression nodes =
+    let* () = check_cancelled cancelled in
+    if nodes > limits.max_expression_nodes then
+      failure "resource_limit" "the expression exceeds the node limit"
+    else Ok (expression, nodes)
+  in
+  let add_nodes left right =
+    bounded_sum limits.max_expression_nodes left right
+  in
+  let expanding_function = function
+    | "square_area" | "rectangle_area" | "rectangle_perimeter" | "triangle_area"
+    | "trapezoid_area" | "hypot" | "distance" | "circle_area" | "circumference"
+    | "sphere_area" | "sphere_volume" | "cylinder_volume" | "slope" | "radians"
+    | "degrees" ->
+        true
+    | _ -> false
   in
   let rec resolve expression =
+    let* () = check_cancelled cancelled in
     match expression with
-    | Centl_Core.Literal _ | Centl_Core.Symbol _ -> Ok expression
+    | Centl_Core.Literal _ | Centl_Core.Symbol _ -> Ok (expression, 1)
     | Centl_Core.Negate inner ->
-        let* inner = resolve inner in
-        checked (Centl_Core.Negate inner)
+        let* inner, nodes = resolve inner in
+        checked (Centl_Core.Negate inner) (add_nodes 1 nodes)
     | Centl_Core.Binary (operator, left, right) ->
-        let* left = resolve left in
-        let* right = resolve right in
-        checked (Centl_Core.Binary (operator, left, right))
+        let* left, left_nodes = resolve left in
+        let* right, right_nodes = resolve right in
+        checked
+          (Centl_Core.Binary (operator, left, right))
+          (add_nodes 1 (add_nodes left_nodes right_nodes))
     | Centl_Core.Power (base, exponent) ->
-        let* base = resolve base in
-        checked (Centl_Core.Power (base, exponent))
+        let* base, nodes = resolve base in
+        checked (Centl_Core.Power (base, exponent)) (add_nodes 1 nodes)
+    | Centl_Core.Function
+        ( (("sum" | "product") as name),
+          [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
+        if List.mem variable reserved_names then
+          failure "reserved_name"
+            (variable ^ " is built in and cannot be an iteration variable")
+        else
+          let* lower = resolve_iteration_bound "lower" lower in
+          let* upper = resolve_iteration_bound "upper" upper in
+          let kind =
+            if name = "sum" then Centl_iteration.Sum
+            else Centl_iteration.Product
+          in
+          let iteration_limits =
+            Centl_iteration.
+              {
+                max_iterations = limits.max_integer_iterations;
+                max_work = maximum_iteration_work;
+                max_exact_bits = limits.max_exact_bits;
+                max_expression_nodes = limits.max_expression_nodes;
+                max_result_bytes = limits.max_result_bytes;
+              }
+          in
+          let evaluate_term term =
+            match resolve term with
+            | Error error ->
+                Error (Centl_iteration.Term_error (error.code, error.message))
+            | Ok (term, _) ->
+                if
+                  contains_named_function
+                    (fun function_name ->
+                      function_name = "approx" || function_name = "solve")
+                    term
+                then
+                  Error
+                    (Centl_iteration.Term_error
+                       ( "exact_iteration_required",
+                         "finite iteration terms must be exact expressions" ))
+                else
+                  begin match evaluate_exact term with
+                  | Error error ->
+                      Error
+                        (Centl_iteration.Term_error (error.code, error.message))
+                  | Ok value -> iteration_value_of_exact value
+                  end
+          in
+          begin match
+            Centl_iteration.evaluate ~cancelled ~evaluate_term
+              ~consume:consume_integer_work ~consume_work:consume_iteration_work
+              iteration_limits kind body variable lower upper
+          with
+          | Ok value ->
+              let expression = Centl_Core.expression_of_value value in
+              checked expression (expression_node_count expression)
+          | Error error -> engine_failure_of_iteration error
+          end
+    | Centl_Core.Function (("sum" | "product"), _) ->
+        failure "invalid_arguments"
+          "use sum(expression, variable = lower, upper) or product(expression, \
+           variable = lower, upper)"
     | Centl_Core.Function (name, arguments) ->
-        let* arguments = resolve_arguments arguments in
-        checked (Centl_Core.rewrite_function name arguments)
+        let* arguments, argument_nodes = resolve_arguments arguments in
+        let call = Centl_Core.Function (name, arguments) in
+        let* () =
+          match concrete_iterations call with
+          | Some amount when not (consume_integer_work_z amount) ->
+              failure "resource_limit"
+                "exact operations exceed the request-wide integer-iteration \
+                 limit"
+          | _ -> Ok ()
+        in
+        let rewritten = Centl_Core.rewrite_function name arguments in
+        let nodes =
+          if expanding_function name then expression_node_count rewritten
+          else add_nodes 1 argument_nodes
+        in
+        checked rewritten nodes
     | Centl_Core.Derivative (inner, variable) ->
-        let* inner = resolve inner in
-        checked (Centl_Core.Derivative (inner, variable))
+        let* inner, nodes = resolve inner in
+        checked (Centl_Core.Derivative (inner, variable)) (add_nodes 1 nodes)
     | Centl_Core.Differentiate (inner, variable) ->
-        let* inner = resolve inner in
+        let* inner, _ = resolve inner in
         let nodes =
           differentiated_node_count limits.max_expression_nodes inner variable
         in
         if nodes > limits.max_expression_nodes then
           failure "resource_limit"
             "the derivative exceeds the expression-node limit"
-        else checked (Centl_Core.differentiate inner variable)
+        else checked (Centl_Core.differentiate inner variable) nodes
     | Centl_Core.Substitute (inner, variable, replacement) ->
-        let* inner = resolve inner in
-        let* replacement = resolve replacement in
-        let nodes =
-          substituted_node_count limits.max_expression_nodes
-            [ (variable, expression_node_count replacement) ]
-            inner
-        in
-        if nodes > limits.max_expression_nodes then
-          failure "resource_limit"
-            "the substitution exceeds the expression-node limit"
-        else checked (Centl_Core.substitute inner variable replacement)
+        let* replacement, replacement_nodes = resolve replacement in
+        if contains_iteration inner then
+          let nodes =
+            substituted_node_count limits.max_expression_nodes
+              [ (variable, replacement_nodes) ]
+              inner
+          in
+          if nodes > limits.max_expression_nodes then
+            failure "resource_limit"
+              "the substitution exceeds the expression-node limit"
+          else resolve (Centl_Core.substitute inner variable replacement)
+        else
+          let* inner, _ = resolve inner in
+          let nodes =
+            substituted_node_count limits.max_expression_nodes
+              [ (variable, replacement_nodes) ]
+              inner
+          in
+          if nodes > limits.max_expression_nodes then
+            failure "resource_limit"
+              "the substitution exceeds the expression-node limit"
+          else checked (Centl_Core.substitute inner variable replacement) nodes
     | Centl_Core.Simplify inner | Centl_Core.Expand inner ->
-        let* inner = resolve inner in
+        let* inner, _ = resolve inner in
         let* () = check_polynomial_transformation limits inner in
-        checked (Centl_Core.canonicalize_polynomial inner)
+        let transformed = Centl_Core.canonicalize_polynomial inner in
+        checked transformed (expression_node_count transformed)
     | Centl_Core.Factor inner ->
-        let* inner = resolve inner in
+        let* inner, _ = resolve inner in
         let* () = check_polynomial_transformation limits inner in
-        checked (Centl_Core.factor_expression inner)
+        let transformed = Centl_Core.factor_expression inner in
+        checked transformed (expression_node_count transformed)
     | Centl_Core.Assuming (inner, left, relation, right) ->
-        let* left = resolve left in
-        let* right = resolve right in
-        let* inner = resolve inner in
+        let* left, left_nodes = resolve left in
+        let* right, right_nodes = resolve right in
+        let* inner, inner_nodes = resolve inner in
         checked
           (Centl_Core.Assuming
              ( Centl_Core.simplify_assuming inner left relation right,
                left,
                relation,
                right ))
+          (add_nodes 1
+             (add_nodes inner_nodes (add_nodes left_nodes right_nodes)))
   and resolve_arguments = function
-    | [] -> Ok []
+    | [] -> Ok ([], 0)
     | argument :: rest ->
-        let* argument = resolve argument in
-        let* rest = resolve_arguments rest in
-        Ok (argument :: rest)
+        let* argument, argument_nodes = resolve argument in
+        let* rest, rest_nodes = resolve_arguments rest in
+        Ok (argument :: rest, add_nodes argument_nodes rest_nodes)
+  and resolve_iteration_bound label expression =
+    let* expression, _ = resolve expression in
+    match evaluate_exact expression with
+    | Ok (Integer value) -> Ok (Centl_Core.Literal (value, Z.one))
+    | Ok _ ->
+        failure "invalid_arguments"
+          (Printf.sprintf
+             "the %s finite-iteration bound must be an exact integer" label)
+    | Error _ as error -> error
   in
-  resolve expression
+  let* expression, _ = resolve expression in
+  Ok expression
 
-let evaluate_expression_with_limits limits expression =
+let evaluate_expression_with_limits ?(cancelled = never_cancelled) limits
+    expression =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   let* () = check_expression_limit limits expression in
-  let* () = check_computation_limit limits expression in
-  let* expression = resolve_with_limits limits expression in
+  let* () = check_computation_limit ~cancelled limits expression in
+  let* expression = resolve_with_limits ~cancelled limits expression in
   let* () = check_expression_limit limits expression in
-  let* () = check_computation_limit limits expression in
-  match solution_request expression with
-  | Some result -> result
-  | None when contains_solution expression ->
-      failure "solution_set_not_expression"
-        "solve(...) returns a solution set and must be evaluated on its own"
-  | None ->
-      begin match approximation_request expression with
-      | Some (Ok (inner, digits)) -> approximate_with_limits limits inner digits
-      | Some (Error _ as error) -> error
-      | None -> evaluate_exact expression
-      end
+  let* () = check_computation_limit ~cancelled limits expression in
+  let result =
+    match solution_request expression with
+    | Some result -> result
+    | None when contains_solution expression ->
+        failure "solution_set_not_expression"
+          "solve(...) returns a solution set and must be evaluated on its own"
+    | None ->
+        begin match approximation_request expression with
+        | Some (Ok (inner, digits)) ->
+            approximate_with_limits ~cancelled limits inner digits
+        | Some (Error _ as error) -> error
+        | None -> evaluate_exact expression
+        end
+  in
+  let* value = result in
+  let* () = check_result_limit limits value in
+  let* () = check_cancelled cancelled in
+  Ok value
 
 let evaluate_expression expression =
   evaluate_expression_with_limits default_evaluation_limits expression
 
-let evaluate_with_limits limits source =
+let evaluate_with_limits ?(cancelled = never_cancelled) limits source =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   let* () = check_source_limit limits source in
   match Centl_parser.parse source with
   | Error parse_error -> syntax_error parse_error
-  | Ok expression -> evaluate_expression_with_limits limits expression
+  | Ok expression ->
+      let* () = check_cancelled cancelled in
+      evaluate_expression_with_limits ~cancelled limits expression
 
 let evaluate source = evaluate_with_limits default_evaluation_limits source
 
-let reserved_names =
-  [
-    "pi";
-    "e";
-    "tau";
-    "solve";
-    "diff";
-    "substitute";
-    "assuming";
-    "simplify";
-    "expand";
-    "factor";
-    "approx";
-    "sqrt";
-    "abs";
-    "exp";
-    "log";
-    "sin";
-    "cos";
-    "tan";
-    "asin";
-    "acos";
-    "atan";
-    "atan2";
-    "sinh";
-    "cosh";
-    "tanh";
-    "radians";
-    "degrees";
-    "square_area";
-    "rectangle_area";
-    "rectangle_perimeter";
-    "triangle_area";
-    "trapezoid_area";
-    "circle_area";
-    "circumference";
-    "sphere_area";
-    "sphere_volume";
-    "cylinder_volume";
-    "hypot";
-    "distance";
-    "slope";
-    "gcd";
-    "lcm";
-    "factorial";
-    "choose";
-    "permutations";
-    "fibonacci";
-  ]
+let create_session () =
+  { bindings = []; retained_nodes = 0; retained_bits = 0; retained_bytes = 0 }
 
-let create_session () = { bindings = [] }
-let reset_session session = session.bindings <- []
+let reset_session session =
+  session.bindings <- [];
+  session.retained_nodes <- 0;
+  session.retained_bits <- 0;
+  session.retained_bytes <- 0
+
 let session_binding_count session = List.length session.bindings
 let lookup session name = List.assoc_opt name session.bindings
 let session_failure code message = Error { code; message; position = None }
+
+type retention_cost = { nodes : int; bits : int; bytes : int }
+
+let check_session_retention limits session ~metadata_bytes expression =
+  let nodes = expression_node_count expression in
+  let bits =
+    Centl_iteration.expression_exact_bits limits.max_exact_bits expression
+  in
+  let bytes =
+    bounded_sum limits.max_result_bytes (64 + metadata_bytes)
+      (Centl_iteration.expression_render_bytes limits.max_result_bytes
+         expression)
+  in
+  let exceeds current added maximum =
+    current > maximum || added > maximum - current
+  in
+  if exceeds session.retained_nodes nodes limits.max_expression_nodes then
+    session_failure "resource_limit"
+      "the session exceeds the aggregate retained-node limit"
+  else if exceeds session.retained_bits bits limits.max_exact_bits then
+    session_failure "resource_limit"
+      "the session exceeds the aggregate retained exact-bit limit"
+  else if exceeds session.retained_bytes bytes limits.max_result_bytes then
+    session_failure "resource_limit"
+      "the session exceeds the aggregate retained-byte limit"
+  else Ok { nodes; bits; bytes }
+
+let retain_binding session name binding cost =
+  session.bindings <- (name, binding) :: session.bindings;
+  session.retained_nodes <- session.retained_nodes + cost.nodes;
+  session.retained_bits <- session.retained_bits + cost.bits;
+  session.retained_bytes <- session.retained_bytes + cost.bytes
 
 let instantiate parameters arguments body =
   let markers =
@@ -1136,8 +1511,10 @@ let expansion_limit_failure () =
   session_failure "resource_limit"
     "the expression exceeds the node limit during session expansion"
 
-let rec expand_expression limit session bound expression =
+let rec expand_expression ?(cancelled = never_cancelled) limit session bound
+    expression =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   if limit < 1 then expansion_limit_failure ()
   else
     match expression with
@@ -1156,28 +1533,56 @@ let rec expand_expression limit session bound expression =
                 (name ^ " is a function; call it with parentheses")
           end
     | Centl_Core.Negate inner ->
-        let* inner, nodes = expand_expression (limit - 1) session bound inner in
+        let* inner, nodes =
+          expand_expression ~cancelled (limit - 1) session bound inner
+        in
         Ok (Centl_Core.Negate inner, nodes + 1)
     | Centl_Core.Binary (operator, left, right) ->
         let* left, left_nodes =
-          expand_expression (limit - 1) session bound left
+          expand_expression ~cancelled (limit - 1) session bound left
         in
         let* right, right_nodes =
-          expand_expression (limit - 1 - left_nodes) session bound right
+          expand_expression ~cancelled
+            (limit - 1 - left_nodes)
+            session bound right
         in
         Ok
           ( Centl_Core.Binary (operator, left, right),
             left_nodes + right_nodes + 1 )
     | Centl_Core.Power (base, exponent) ->
-        let* base, nodes = expand_expression (limit - 1) session bound base in
+        let* base, nodes =
+          expand_expression ~cancelled (limit - 1) session bound base
+        in
         Ok (Centl_Core.Power (base, exponent), nodes + 1)
+    | Centl_Core.Function
+        ( (("sum" | "product") as name),
+          [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
+        let* body, body_nodes =
+          expand_expression ~cancelled (limit - 2) session (variable :: bound)
+            body
+        in
+        let* lower, lower_nodes =
+          expand_expression ~cancelled
+            (limit - 2 - body_nodes)
+            session bound lower
+        in
+        let* upper, upper_nodes =
+          expand_expression ~cancelled
+            (limit - 2 - body_nodes - lower_nodes)
+            session bound upper
+        in
+        Ok
+          ( Centl_Core.Function
+              (name, [ body; Centl_Core.Symbol variable; lower; upper ]),
+            body_nodes + lower_nodes + upper_nodes + 2 )
     | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
       ->
         let* left, left_nodes =
-          expand_expression (limit - 2) session (variable :: bound) left
+          expand_expression ~cancelled (limit - 2) session (variable :: bound)
+            left
         in
         let* right, right_nodes =
-          expand_expression
+          expand_expression ~cancelled
             (limit - 2 - left_nodes)
             session (variable :: bound) right
         in
@@ -1187,7 +1592,7 @@ let rec expand_expression limit session bound expression =
             left_nodes + right_nodes + 2 )
     | Centl_Core.Function (name, arguments) ->
         let* arguments, argument_nodes =
-          expand_arguments (limit - 1) session bound arguments
+          expand_arguments ~cancelled (limit - 1) session bound arguments
         in
         if List.mem name bound then
           Ok (Centl_Core.Function (name, arguments), argument_nodes + 1)
@@ -1223,42 +1628,55 @@ let rec expand_expression limit session bound expression =
           end
     | Centl_Core.Differentiate (inner, variable) ->
         let* inner, nodes =
-          expand_expression (limit - 1) session (variable :: bound) inner
+          expand_expression ~cancelled (limit - 1) session (variable :: bound)
+            inner
         in
         Ok (Centl_Core.Differentiate (inner, variable), nodes + 1)
     | Centl_Core.Substitute (inner, variable, replacement) ->
         let* inner, inner_nodes =
-          expand_expression (limit - 1) session (variable :: bound) inner
+          expand_expression ~cancelled (limit - 1) session (variable :: bound)
+            inner
         in
         let* replacement, replacement_nodes =
-          expand_expression (limit - 1 - inner_nodes) session bound replacement
+          expand_expression ~cancelled
+            (limit - 1 - inner_nodes)
+            session bound replacement
         in
         Ok
           ( Centl_Core.Substitute (inner, variable, replacement),
             inner_nodes + replacement_nodes + 1 )
     | Centl_Core.Derivative (inner, variable) ->
         let* inner, nodes =
-          expand_expression (limit - 1) session (variable :: bound) inner
+          expand_expression ~cancelled (limit - 1) session (variable :: bound)
+            inner
         in
         Ok (Centl_Core.Derivative (inner, variable), nodes + 1)
     | Centl_Core.Simplify inner ->
-        let* inner, nodes = expand_expression (limit - 1) session bound inner in
+        let* inner, nodes =
+          expand_expression ~cancelled (limit - 1) session bound inner
+        in
         Ok (Centl_Core.Simplify inner, nodes + 1)
     | Centl_Core.Expand inner ->
-        let* inner, nodes = expand_expression (limit - 1) session bound inner in
+        let* inner, nodes =
+          expand_expression ~cancelled (limit - 1) session bound inner
+        in
         Ok (Centl_Core.Expand inner, nodes + 1)
     | Centl_Core.Factor inner ->
-        let* inner, nodes = expand_expression (limit - 1) session bound inner in
+        let* inner, nodes =
+          expand_expression ~cancelled (limit - 1) session bound inner
+        in
         Ok (Centl_Core.Factor inner, nodes + 1)
     | Centl_Core.Assuming (inner, left, relation, right) ->
         let* inner, inner_nodes =
-          expand_expression (limit - 1) session bound inner
+          expand_expression ~cancelled (limit - 1) session bound inner
         in
         let* left, left_nodes =
-          expand_expression (limit - 1 - inner_nodes) session bound left
+          expand_expression ~cancelled
+            (limit - 1 - inner_nodes)
+            session bound left
         in
         let* right, right_nodes =
-          expand_expression
+          expand_expression ~cancelled
             (limit - 1 - inner_nodes - left_nodes)
             session bound right
         in
@@ -1266,16 +1684,18 @@ let rec expand_expression limit session bound expression =
           ( Centl_Core.Assuming (inner, left, relation, right),
             inner_nodes + left_nodes + right_nodes + 1 )
 
-and expand_arguments limit session bound arguments =
+and expand_arguments ?(cancelled = never_cancelled) limit session bound
+    arguments =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   match arguments with
   | [] -> Ok ([], 0)
   | argument :: rest ->
       let* argument, argument_nodes =
-        expand_expression limit session bound argument
+        expand_expression ~cancelled limit session bound argument
       in
       let* rest, rest_nodes =
-        expand_arguments (limit - argument_nodes) session bound rest
+        expand_arguments ~cancelled (limit - argument_nodes) session bound rest
       in
       Ok (argument :: rest, argument_nodes + rest_nodes)
 
@@ -1303,21 +1723,34 @@ let rec contains_approximation = function
 
 let rec references_name name = function
   | Centl_Core.Symbol symbol -> symbol = name
+  | Centl_Core.Function
+      (function_name, [ body; Centl_Core.Symbol variable; lower; upper ])
+    when function_name = "sum" || function_name = "product" ->
+      function_name = name
+      || (variable <> name && references_name name body)
+      || references_name name lower || references_name name upper
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      name = "solve"
+      || variable <> name
+         && (references_name name left || references_name name right)
   | Centl_Core.Function (function_name, arguments) ->
       function_name = name || List.exists (references_name name) arguments
   | Centl_Core.Literal _ -> false
   | Centl_Core.Negate inner
   | Centl_Core.Power (inner, _)
-  | Centl_Core.Differentiate (inner, _)
-  | Centl_Core.Derivative (inner, _)
   | Centl_Core.Simplify inner
   | Centl_Core.Expand inner
   | Centl_Core.Factor inner ->
       references_name name inner
+  | Centl_Core.Differentiate (inner, variable)
+  | Centl_Core.Derivative (inner, variable) ->
+      variable <> name && references_name name inner
   | Centl_Core.Binary (_, left, right) ->
       references_name name left || references_name name right
-  | Centl_Core.Substitute (inner, _, replacement) ->
-      references_name name inner || references_name name replacement
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      (variable <> name && references_name name inner)
+      || references_name name replacement
   | Centl_Core.Assuming (inner, left, _, right) ->
       references_name name inner || references_name name left
       || references_name name right
@@ -1356,10 +1789,13 @@ let validate_parameters name parameters =
       session_failure "invalid_definition" "function parameters must be unique"
     else Ok ()
 
-let prepare_definition limits session bound name expression =
+let prepare_definition ?(cancelled = never_cancelled) limits session bound name
+    expression =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   let* expression, _ =
-    expand_expression limits.max_expression_nodes session bound expression
+    expand_expression ~cancelled limits.max_expression_nodes session bound
+      expression
   in
   if references_name name expression then
     session_failure "recursive_definition"
@@ -1367,8 +1803,19 @@ let prepare_definition limits session bound name expression =
   else if contains_approximation expression then
     session_failure "exact_definition_required"
       "definitions must be exact; use approx(...) when evaluating them"
+  else if bound <> [] && contains_iteration expression then
+    if
+      contains_named_function
+        (fun function_name -> function_name = "solve")
+        expression
+    then
+      session_failure "expression_definition_required"
+        "solution sets cannot be stored in definitions yet"
+    else
+      let* () = check_result_limit limits (Symbolic expression) in
+      Ok (Symbolic expression, expression)
   else
-    let* value = evaluate_expression_with_limits limits expression in
+    let* value = evaluate_expression_with_limits ~cancelled limits expression in
     match value with
     | Real_enclosure _ ->
         session_failure "exact_definition_required"
@@ -1378,18 +1825,23 @@ let prepare_definition limits session bound name expression =
           "solution sets cannot be stored in definitions yet"
     | value -> Ok (value, expression_of_exact_value value)
 
-let evaluate_in_session_with_limits limits session source =
+let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
+    session source =
   let ( let* ) result next = Result.bind result next in
+  let* () = check_cancelled cancelled in
   let* () = check_source_limit limits source in
-  match Centl_parser.parse_statement source with
+  let parsed = Centl_parser.parse_statement source in
+  let* () = check_cancelled cancelled in
+  match parsed with
   | Error parse_error -> syntax_error parse_error
   | Ok (Centl_parser.Evaluate expression) ->
       let* expression, _ =
-        expand_expression limits.max_expression_nodes session [] expression
+        expand_expression ~cancelled limits.max_expression_nodes session []
+          expression
       in
       Result.map
         (fun value -> Session_value value)
-        (evaluate_expression_with_limits limits expression)
+        (evaluate_expression_with_limits ~cancelled limits expression)
   | Ok (Centl_parser.Define_value (name, expression)) ->
       let* () = validate_definition_name session name in
       let* () =
@@ -1399,9 +1851,14 @@ let evaluate_in_session_with_limits limits session source =
         else Ok ()
       in
       let* value, expression =
-        prepare_definition limits session [] name expression
+        prepare_definition ~cancelled limits session [] name expression
       in
-      session.bindings <- (name, Bound_value expression) :: session.bindings;
+      let* retention =
+        check_session_retention limits session
+          ~metadata_bytes:(String.length name) expression
+      in
+      let* () = check_cancelled cancelled in
+      retain_binding session name (Bound_value expression) retention;
       Ok (Defined_value (name, value))
   | Ok (Centl_parser.Define_function (name, parameters, body)) ->
       let* () = validate_definition_name session name in
@@ -1412,9 +1869,21 @@ let evaluate_in_session_with_limits limits session source =
             "the session has reached its definition limit"
         else Ok ()
       in
-      let* _, body = prepare_definition limits session parameters name body in
-      session.bindings <-
-        (name, Bound_function { parameters; body }) :: session.bindings;
+      let* _, body =
+        prepare_definition ~cancelled limits session parameters name body
+      in
+      let metadata_bytes =
+        List.fold_left
+          (fun total parameter -> total + String.length parameter)
+          (String.length name) parameters
+      in
+      let* retention =
+        check_session_retention limits session ~metadata_bytes body
+      in
+      let* () = check_cancelled cancelled in
+      retain_binding session name
+        (Bound_function { parameters; body })
+        retention;
       Ok (Defined_function (name, parameters, body))
 
 let evaluate_in_session session source =
@@ -1480,6 +1949,23 @@ let rec expression_fragments ?(parent_precedence = -1) expression =
           expression_fragments ~parent_precedence:3 base
           |> append (fragment Operator "^")
           |> append (fragment Number (Z.to_string exponent)) )
+    | Centl_Core.Function
+        ( (("sum" | "product") as name),
+          [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
+        let assignment =
+          fragment Symbol_name variable
+          |> append (fragment Operator " = ")
+          |> append (expression_fragments lower)
+        in
+        ( 4,
+          fragment Function_name name
+          |> append (fragment Punctuation "(")
+          |> append (expression_fragments body)
+          |> append (fragment Punctuation ", ")
+          |> append assignment
+          |> append (fragment Punctuation ", ")
+          |> append (expression_fragments upper)
+          |> append (fragment Punctuation ")") )
     | Centl_Core.Function (name, arguments) -> (4, call_fragments name arguments)
     | Centl_Core.Differentiate (inner, variable)
     | Centl_Core.Derivative (inner, variable) ->
@@ -1652,6 +2138,51 @@ let rec conditions_of_expression = function
       json_of_condition left relation right :: conditions_of_expression inner
   | _ -> []
 
+let json_of_provenance ~classification ~method_ ~backend =
+  `Assoc
+    [
+      ("schema", `Int 1);
+      ( "producer",
+        `Assoc
+          [
+            ("name", `String "centl"); ("version", `String Centl_version.value);
+          ] );
+      ("classification", `String classification);
+      ("method", `String method_);
+      ("backend", `String backend);
+    ]
+
+let provenance_of_value = function
+  | Integer _ | Rational _ ->
+      json_of_provenance ~classification:"exact" ~method_:"rational_evaluation"
+        ~backend:"centl-core"
+  | Symbolic _ ->
+      json_of_provenance ~classification:"exact_symbolic"
+        ~method_:"symbolic_evaluation" ~backend:"centl-core"
+  | Real_enclosure _ ->
+      json_of_provenance ~classification:"rigorous_enclosure"
+        ~method_:"interval_evaluation" ~backend:"flint-arb"
+  | Equation_result { status = Unresolved; _ } ->
+      json_of_provenance ~classification:"unresolved"
+        ~method_:"equation_solving" ~backend:"centl-exact"
+  | Equation_result _ ->
+      json_of_provenance ~classification:"exact_solution_set"
+        ~method_:"equation_solving" ~backend:"centl-exact"
+
+let provenance_of_session_result = function
+  | Session_value value -> provenance_of_value value
+  | Defined_value _ | Defined_function _ ->
+      json_of_provenance ~classification:"exact_definition"
+        ~method_:"session_binding" ~backend:"centl-session"
+
+let provenance_of_error error =
+  if error.code = "cancelled" then
+    json_of_provenance ~classification:"cancelled"
+      ~method_:"cooperative_cancellation" ~backend:"centl-runtime"
+  else
+    json_of_provenance ~classification:"failure" ~method_:"evaluation"
+      ~backend:"centl-runtime"
+
 let json_of_value = function
   | Integer value ->
       `Assoc
@@ -1789,7 +2320,10 @@ let json_of_evaluation = function
   | Ok value ->
       `Assoc
         [
-          ("version", `Int 1); ("ok", `Bool true); ("value", json_of_value value);
+          ("version", `Int 1);
+          ("ok", `Bool true);
+          ("value", json_of_value value);
+          ("provenance", provenance_of_value value);
         ]
   | Error error ->
       let fields =
@@ -1801,7 +2335,12 @@ let json_of_evaluation = function
         | Some position -> ("position", `Int position) :: fields
       in
       `Assoc
-        [ ("version", `Int 1); ("ok", `Bool false); ("error", `Assoc fields) ]
+        [
+          ("version", `Int 1);
+          ("ok", `Bool false);
+          ("error", `Assoc fields);
+          ("provenance", provenance_of_error error);
+        ]
 
 let json_of_session_evaluation = function
   | Ok result ->
@@ -1810,6 +2349,7 @@ let json_of_session_evaluation = function
           ("version", `Int 1);
           ("ok", `Bool true);
           ("value", json_of_session_result result);
+          ("provenance", provenance_of_session_result result);
         ]
   | Error error -> json_of_evaluation (Error error)
 

@@ -1,18 +1,27 @@
 (test
  (name test_centl)
+ (modules test_centl)
  (deps ../docs/SYNTAX.md)
  (libraries centl_lib alcotest qcheck zarith yojson))
 
+(test
+ (name test_adversarial)
+ (modules test_adversarial)
+ (libraries centl_lib alcotest qcheck zarith yojson))
+
+(test
+ (name test_iteration)
+ (modules test_iteration)
+ (libraries centl_lib alcotest zarith))
+
 (cram
  (applies_to cli)
- (deps
-  ../src/main.exe
-  fixtures/definitions.centl
-  fixtures/exact.centl))
+ (deps ../src/main.exe fixtures/definitions.centl fixtures/exact.centl))
 
 (cram
  (applies_to installer)
- (enabled_if (= %{os_type} Unix))
+ (enabled_if
+  (= %{os_type} Unix))
  (deps
   ../install
   (source_tree fixtures/release)))

@@ -26,6 +26,10 @@ let limits state = state.limits
 let json_error code message =
   Centl_engine.json_of_evaluation (Error { code; message; position = None })
 
+let control_provenance method_ =
+  Centl_engine.json_of_provenance ~classification:"control" ~method_
+    ~backend:"centl-protocol"
+
 let rec insert_after_version id = function
   | [] -> [ ("id", id) ]
   | (("version", _) as version) :: rest -> version :: ("id", id) :: rest
@@ -54,13 +58,23 @@ let with_session state = function
           ])
   | json -> json
 
-let response state ?id json = json |> with_id id |> with_session state
+let with_provenance provenance = function
+  | `Assoc fields when Option.is_none (List.assoc_opt "provenance" fields) ->
+      `Assoc (fields @ [ ("provenance", provenance) ])
+  | json -> json
+
+let response state ?id ?(provenance = control_provenance "protocol_operation")
+    json =
+  json |> with_id id |> with_provenance provenance |> with_session state
 
 let invalid state ?id message =
   response state ?id (json_error "invalid_request" message)
 
 let resource_failure state ?id message =
   response state ?id (json_error "resource_limit" message)
+
+let cancelled state ?id () =
+  response state ?id (json_error "cancelled" "the request was cancelled")
 
 let admit state =
   if state.requests >= state.limits.max_requests then false
@@ -74,6 +88,39 @@ let request_id fields =
   | None -> Ok None
   | Some ((`String _ | `Int _ | `Intlit _) as id) -> Ok (Some id)
   | Some _ -> Error "id must be a string or integer"
+
+let cancellation_target fields =
+  match List.assoc_opt "target" fields with
+  | Some ((`String _ | `Int _ | `Intlit _) as target) -> Ok target
+  | None -> Error "cancel requires a target request id"
+  | Some _ -> Error "cancel target must be a string or integer"
+
+let operation fields =
+  match List.assoc_opt "op" fields with
+  | None -> Ok "evaluate"
+  | Some (`String operation) -> Ok operation
+  | Some _ -> Error "op must be a string"
+
+let cancellable_request_id = function
+  | `Assoc fields ->
+      begin match
+        (List.assoc_opt "version" fields, operation fields, request_id fields)
+      with
+      | Some (`Int 1), Ok "evaluate", Ok (Some id) -> Some id
+      | _ -> None
+      end
+  | _ -> None
+
+let cancellation_target_of_json = function
+  | `Assoc fields ->
+      begin match
+        (List.assoc_opt "version" fields, operation fields, request_id fields)
+      with
+      | Some (`Int 1), Ok "cancel", Ok _ ->
+          Result.to_option (cancellation_target fields)
+      | _ -> None
+      end
+  | _ -> None
 
 let bounded_int fields name ~minimum ~maximum ~default =
   match List.assoc_opt name fields with
@@ -95,6 +142,7 @@ let request_limits state fields =
           "max_expression_nodes";
           "max_exact_bits";
           "max_integer_iterations";
+          "max_result_bytes";
           "max_bindings";
           "max_precision_digits";
           "max_working_bits";
@@ -125,6 +173,11 @@ let request_limits state fields =
               ~maximum:ceiling.max_integer_iterations
               ~default:ceiling.max_integer_iterations
           in
+          let* max_result_bytes =
+            bounded_int requested "max_result_bytes" ~minimum:1
+              ~maximum:ceiling.max_result_bytes
+              ~default:ceiling.max_result_bytes
+          in
           let* max_bindings =
             bounded_int requested "max_bindings" ~minimum:0
               ~maximum:ceiling.max_bindings ~default:ceiling.max_bindings
@@ -145,6 +198,7 @@ let request_limits state fields =
               max_expression_nodes;
               max_exact_bits;
               max_integer_iterations;
+              max_result_bytes;
               max_bindings;
               max_precision_digits;
               max_working_bits;
@@ -152,18 +206,13 @@ let request_limits state fields =
       end
   | Some _ -> Error "limits must be an object"
 
-let operation fields =
-  match List.assoc_opt "op" fields with
-  | None -> Ok "evaluate"
-  | Some (`String operation) -> Ok operation
-  | Some _ -> Error "op must be a string"
-
 let session_result state id evaluation =
   Centl_engine.json_of_session_evaluation evaluation |> response state ?id
 
 let describe state id =
   let evaluation = state.limits.evaluation in
   response state ?id
+    ~provenance:(control_provenance "describe")
     (`Assoc
        [
          ("version", `Int 1);
@@ -177,7 +226,14 @@ let describe state id =
                  `List
                    (List.map
                       (fun operation -> `String operation)
-                      [ "evaluate"; "reset"; "describe"; "ping" ]) );
+                      [ "evaluate"; "cancel"; "reset"; "describe"; "ping" ]) );
+               ( "cancellation",
+                 `Assoc
+                   [
+                     ("request_scoped", `Bool true);
+                     ("cooperative", `Bool true);
+                     ("queued_requests", `Bool true);
+                   ] );
                ( "limits",
                  `Assoc
                    [
@@ -189,6 +245,7 @@ let describe state id =
                      ("max_exact_bits", `Int evaluation.max_exact_bits);
                      ( "max_integer_iterations",
                        `Int evaluation.max_integer_iterations );
+                     ("max_result_bytes", `Int evaluation.max_result_bytes);
                      ("max_bindings", `Int evaluation.max_bindings);
                      ( "max_precision_digits",
                        `Int evaluation.max_precision_digits );
@@ -197,11 +254,11 @@ let describe state id =
              ] );
        ])
 
-let evaluate state id fields =
+let evaluate ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match (List.assoc_opt "expression" fields, request_limits state fields) with
   | Some (`String expression), Ok limits ->
-      Centl_engine.evaluate_in_session_with_limits limits state.session
-        expression
+      Centl_engine.evaluate_in_session_with_limits ~cancelled limits
+        state.session expression
       |> session_result state id
   | Some (`String _), Error message -> invalid state ?id message
   | None, _ -> invalid state ?id "missing expression"
@@ -213,14 +270,30 @@ let reset state id fields =
   else begin
     Centl_engine.reset_session state.session;
     response state ?id
+      ~provenance:(control_provenance "reset")
       (`Assoc [ ("version", `Int 1); ("ok", `Bool true); ("reset", `Bool true) ])
   end
 
+let cancel state id fields =
+  match cancellation_target fields with
+  | Error message -> invalid state ?id message
+  | Ok target ->
+      response state ?id
+        ~provenance:(control_provenance "cancel")
+        (`Assoc
+           [
+             ("version", `Int 1);
+             ("ok", `Bool true);
+             ( "cancellation",
+               `Assoc [ ("target", target); ("status", `String "requested") ] );
+           ])
+
 let ping state id =
   response state ?id
+    ~provenance:(control_provenance "ping")
     (`Assoc [ ("version", `Int 1); ("ok", `Bool true); ("pong", `Bool true) ])
 
-let handle_json state = function
+let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> invalid state message
@@ -229,7 +302,8 @@ let handle_json state = function
           | Some (`Int 1) ->
               begin match operation fields with
               | Error message -> invalid state ?id message
-              | Ok "evaluate" -> evaluate state id fields
+              | Ok "evaluate" -> evaluate ~cancelled state id fields
+              | Ok "cancel" -> cancel state id fields
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id
               | Ok "ping" -> ping state id
@@ -241,30 +315,57 @@ let handle_json state = function
       end
   | _ -> invalid state "request must be a JSON object"
 
-let handle_line state line =
-  if admit state then
-    try Yojson.Safe.from_string line |> handle_json state
-    with Yojson.Json_error message ->
-      invalid state ("invalid JSON: " ^ message)
-  else
-    let id =
-      try
-        match Yojson.Safe.from_string line with
+let handle_line ?(cancelled = Centl_engine.never_cancelled) state line =
+  try
+    let json = Yojson.Safe.from_string line in
+    if Option.is_some (cancellation_target_of_json json) then
+      handle_json ~cancelled state json
+    else if admit state then handle_json ~cancelled state json
+    else
+      let id =
+        match json with
         | `Assoc fields ->
             begin match request_id fields with Ok id -> id | Error _ -> None
             end
         | _ -> None
-      with Yojson.Json_error _ -> None
-    in
-    resource_failure state ?id "the process has reached its request limit"
+      in
+      resource_failure state ?id "the process has reached its request limit"
+  with Yojson.Json_error message ->
+    if admit state then invalid state ("invalid JSON: " ^ message)
+    else resource_failure state "the process has reached its request limit"
 
 let oversized_line state =
   if not (admit state) then
     resource_failure state "the process has reached its request limit"
   else resource_failure state "the request exceeds the byte limit"
 
+let queue_overflow state line =
+  let id =
+    match line with
+    | None -> None
+    | Some line ->
+        begin try
+          match Yojson.Safe.from_string line with
+          | `Assoc fields ->
+              begin match request_id fields with Ok id -> id | Error _ -> None
+              end
+          | _ -> None
+        with Yojson.Json_error _ -> None
+        end
+  in
+  resource_failure state ?id "the pending request queue reached its limit"
+
 let ok = function
   | `Assoc fields -> List.assoc_opt "ok" fields = Some (`Bool true)
+  | _ -> false
+
+let cancelled_response = function
+  | `Assoc fields ->
+      begin match List.assoc_opt "error" fields with
+      | Some (`Assoc error) ->
+          List.assoc_opt "code" error = Some (`String "cancelled")
+      | _ -> false
+      end
   | _ -> false
 
 let text = function

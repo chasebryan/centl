@@ -167,6 +167,22 @@ The MCP adapter maps JSON-RPC tool calls onto the same stateful request engine.
 It does not parse human output or create another evaluation path. A future
 local service can use the same boundary.
 
+Persistent stdio uses one FIFO evaluator so definitions and resets remain
+deterministic. A separate bounded input reader may only mark cancellation tokens
+for identified active or queued evaluations; it never evaluates expressions or
+mutates session bindings. The evaluator observes those tokens at cooperative
+checkpoints and immediately before committing a definition. MCP cancellation
+responses are suppressed as required by the protocol, while JSON Lines returns
+a structured `cancelled` error for the target request. Pending input is bounded
+by both the 10,000-request process ceiling and a 16 MiB byte ceiling; terminal
+queue overload cancels cancellable work and drains an ordered overload marker
+instead of retaining an unbounded stream.
+
+Persistent definitions are also bounded in aggregate, not merely by binding
+count. A commit preflights the session's retained expression nodes, exact-value
+bits, and symbol/render bytes against the active ceilings, then rechecks
+cancellation before mutating the session.
+
 ## Trust boundary
 
 F* can prove properties of CENTL's own executable core, but it cannot prove an

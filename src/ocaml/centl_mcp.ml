@@ -35,6 +35,51 @@ let request_id fields =
   | Some _ -> Error "id must be a string or integer"
   | None -> Ok None
 
+let cancellable_request_id = function
+  | `Assoc fields ->
+      begin match
+        ( List.assoc_opt "jsonrpc" fields,
+          List.assoc_opt "id" fields,
+          List.assoc_opt "method" fields,
+          List.assoc_opt "params" fields )
+      with
+      | ( Some (`String "2.0"),
+          Some ((`String _ | `Int _ | `Intlit _) as id),
+          Some (`String "tools/call"),
+          Some (`Assoc parameters) ) ->
+          begin match List.assoc_opt "name" parameters with
+          | Some (`String "centl_calculate") -> Some id
+          | _ -> None
+          end
+      | _ -> None
+      end
+  | _ -> None
+
+let cancellation_target_of_json = function
+  | `Assoc fields ->
+      begin match
+        ( List.assoc_opt "jsonrpc" fields,
+          List.assoc_opt "id" fields,
+          List.assoc_opt "method" fields,
+          List.assoc_opt "params" fields )
+      with
+      | ( Some (`String "2.0"),
+          None,
+          Some (`String "notifications/cancelled"),
+          Some (`Assoc parameters) ) ->
+          begin match
+            ( List.assoc_opt "requestId" parameters,
+              List.assoc_opt "reason" parameters )
+          with
+          | ( Some ((`String _ | `Int _ | `Intlit _) as id),
+              (None | Some (`String _)) ) ->
+              Some id
+          | _ -> None
+          end
+      | _ -> None
+      end
+  | _ -> None
+
 let tool_output_schema =
   `Assoc
     [
@@ -47,8 +92,16 @@ let tool_output_schema =
             ("value", `Assoc [ ("type", `String "object") ]);
             ("error", `Assoc [ ("type", `String "object") ]);
             ("session", `Assoc [ ("type", `String "object") ]);
+            ("provenance", `Assoc [ ("type", `String "object") ]);
           ] );
-      ("required", `List [ `String "version"; `String "ok"; `String "session" ]);
+      ( "required",
+        `List
+          [
+            `String "version";
+            `String "ok";
+            `String "session";
+            `String "provenance";
+          ] );
       ("additionalProperties", `Bool true);
     ]
 
@@ -83,6 +136,9 @@ let limits_schema =
               integer 1 limits.max_integer_iterations
                 "Maximum iterations for factorial, combinatorics, or sequences."
             );
+            ( "max_result_bytes",
+              integer 1 limits.max_result_bytes
+                "Maximum rendered result bytes and retained session text." );
             ( "max_bindings",
               integer 0 limits.max_bindings
                 "Maximum immutable definitions in this session." );
@@ -225,7 +281,19 @@ let tool_result protocol_response =
       ("isError", `Bool (not succeeded));
     ]
 
-let calculate state id arguments =
+let cancelled_response = function
+  | Some (`Assoc fields) ->
+      begin match List.assoc_opt "result" fields with
+      | Some (`Assoc result) ->
+          begin match List.assoc_opt "structuredContent" result with
+          | Some structured -> Centl_protocol.cancelled_response structured
+          | None -> false
+          end
+      | _ -> false
+      end
+  | _ -> false
+
+let calculate ?(cancelled = Centl_engine.never_cancelled) state id arguments =
   let unknown =
     List.find_opt
       (fun (name, _) -> not (List.mem name [ "expression"; "limits" ]))
@@ -246,7 +314,7 @@ let calculate state id arguments =
       begin match Centl_protocol.request_limits state.protocol fields with
       | Error message -> jsonrpc_error id (-32602) message
       | Ok _ ->
-          Centl_protocol.handle_json state.protocol (`Assoc fields)
+          Centl_protocol.handle_json ~cancelled state.protocol (`Assoc fields)
           |> tool_result |> jsonrpc_result id
       end
   | None, _ -> jsonrpc_error id (-32602) "centl_calculate requires expression"
@@ -259,14 +327,14 @@ let reset state id arguments =
       (`Assoc [ ("version", `Int 1); ("op", `String "reset") ])
     |> tool_result |> jsonrpc_result id
 
-let call_tool state id fields =
+let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match List.assoc_opt "params" fields with
   | Some (`Assoc parameters) ->
       begin match
         (List.assoc_opt "name" parameters, List.assoc_opt "arguments" parameters)
       with
       | Some (`String "centl_calculate"), Some (`Assoc arguments) ->
-          calculate state id arguments
+          calculate ~cancelled state id arguments
       | Some (`String "centl_calculate"), None ->
           jsonrpc_error id (-32602) "centl_calculate requires arguments"
       | Some (`String "centl_reset"), Some (`Assoc arguments) ->
@@ -278,7 +346,8 @@ let call_tool state id fields =
       end
   | _ -> jsonrpc_error id (-32602) "tools/call requires params"
 
-let handle_request state id method_name fields =
+let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
+    method_name fields =
   match method_name with
   | "initialize" -> initialize state id fields
   | "ping" -> jsonrpc_result id (`Assoc [])
@@ -287,16 +356,17 @@ let handle_request state id method_name fields =
   | "tools/list" ->
       jsonrpc_result id
         (`Assoc [ ("tools", `List [ calculate_tool; reset_tool ]) ])
-  | "tools/call" -> call_tool state id fields
+  | "tools/call" -> call_tool ~cancelled state id fields
   | _ -> jsonrpc_error id (-32601) ("method not found: " ^ method_name)
 
 let handle_notification state method_name =
   match method_name with
   | "notifications/initialized" when Option.is_some state.negotiated ->
       state.initialized <- true
+  | "notifications/cancelled" -> ()
   | _ -> ()
 
-let handle_json state = function
+let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
   | `Assoc fields ->
       begin match
         (List.assoc_opt "jsonrpc" fields, List.assoc_opt "method" fields)
@@ -304,7 +374,8 @@ let handle_json state = function
       | Some (`String "2.0"), Some (`String method_name) ->
           begin match request_id fields with
           | Error message -> Some (jsonrpc_error `Null (-32600) message)
-          | Ok (Some id) -> Some (handle_request state id method_name fields)
+          | Ok (Some id) ->
+              Some (handle_request ~cancelled state id method_name fields)
           | Ok None ->
               handle_notification state method_name;
               None
@@ -313,14 +384,15 @@ let handle_json state = function
       end
   | _ -> Some (jsonrpc_error `Null (-32600) "invalid JSON-RPC request")
 
-let handle_line state line =
-  if Centl_protocol.admit state.protocol then
-    try Yojson.Safe.from_string line |> handle_json state
-    with Yojson.Json_error _ ->
-      Some (jsonrpc_error `Null (-32700) "parse error")
-  else
-    try
-      match Yojson.Safe.from_string line with
+let handle_line ?(cancelled = Centl_engine.never_cancelled) state line =
+  try
+    let json = Yojson.Safe.from_string line in
+    if Option.is_some (cancellation_target_of_json json) then
+      handle_json ~cancelled state json
+    else if Centl_protocol.admit state.protocol then
+      handle_json ~cancelled state json
+    else
+      match json with
       | `Assoc fields ->
           begin match request_id fields with
           | Ok None -> None
@@ -331,9 +403,36 @@ let handle_line state line =
           | Error message -> Some (jsonrpc_error `Null (-32600) message)
           end
       | _ -> Some (jsonrpc_error `Null (-32600) "invalid JSON-RPC request")
-    with Yojson.Json_error _ ->
+  with Yojson.Json_error _ ->
+    if Centl_protocol.admit state.protocol then
       Some (jsonrpc_error `Null (-32700) "parse error")
+    else
+      Some
+        (jsonrpc_error `Null (-32000)
+           "the process has reached its request limit")
 
 let oversized_line state =
   ignore (Centl_protocol.admit state.protocol);
   Some (jsonrpc_error `Null (-32600) "the request exceeds the byte limit")
+
+let queue_overflow = function
+  | None ->
+      Some
+        (jsonrpc_error `Null (-32000)
+           "the pending request queue reached its limit")
+  | Some line ->
+      begin try
+        match Yojson.Safe.from_string line with
+        | `Assoc fields ->
+            begin match request_id fields with
+            | Ok (Some id) ->
+                Some
+                  (jsonrpc_error id (-32000)
+                     "the pending request queue reached its limit")
+            | Ok None -> None
+            | Error message -> Some (jsonrpc_error `Null (-32600) message)
+            end
+        | _ -> Some (jsonrpc_error `Null (-32600) "invalid JSON-RPC request")
+      with Yojson.Json_error _ ->
+        Some (jsonrpc_error `Null (-32700) "parse error")
+      end

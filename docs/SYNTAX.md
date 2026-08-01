@@ -48,6 +48,11 @@ enclosure.
 `gcd(a, b)` `lcm(a, b)` `factorial(n)` `choose(n, k)`
 `permutations(n, k)` `fibonacci(n)`
 
+### Finite iteration
+
+`sum(expression, variable = lower, upper)`
+`product(expression, variable = lower, upper)`
+
 ### Scripts
 
 `# comment`

@@ -509,6 +509,13 @@ let machine_resource_limits () =
     "integer iterations" "resource_limit"
     (evaluate "fibonacci(101)" [ ("max_integer_iterations", `Int 100) ]
     |> protocol_error_code);
+  let long_symbol = String.make 500 'x' in
+  Alcotest.(check string)
+    "rendered result bytes" "resource_limit"
+    (evaluate
+       (Printf.sprintf "sum(%s, k = 1, 100)" long_symbol)
+       [ ("max_result_bytes", `Int 1_000) ]
+    |> protocol_error_code);
   ignore (evaluate "a = 1" [ ("max_bindings", `Int 1) ]);
   Alcotest.(check string)
     "session definitions" "resource_limit"
@@ -517,6 +524,20 @@ let machine_resource_limits () =
     "limits cannot raise ceilings" "invalid_request"
     (evaluate "1" [ ("max_precision_digits", `Int 1_001) ]
     |> protocol_error_code);
+  let retained = Centl_protocol.create () in
+  let retained_definition name symbol =
+    Centl_protocol.handle_json retained
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("expression", `String (name ^ " = " ^ symbol));
+           ("limits", `Assoc [ ("max_result_bytes", `Int 300) ]);
+         ])
+  in
+  ignore (retained_definition "first" (String.make 100 'u'));
+  Alcotest.(check string)
+    "aggregate session retention" "resource_limit"
+    (retained_definition "second" (String.make 100 'v') |> protocol_error_code);
   let small_server =
     {
       Centl_protocol.default_server_limits with
@@ -545,6 +566,13 @@ let machine_describe () =
     "transport" "jsonl"
     (json_string "transport" capabilities);
   Alcotest.(check bool) "stateful" true (json_bool "stateful" capabilities);
+  let cancellation = json_member "cancellation" capabilities in
+  Alcotest.(check bool)
+    "request-scoped cancellation" true
+    (json_bool "request_scoped" cancellation);
+  Alcotest.(check bool)
+    "cooperative cancellation" true
+    (json_bool "cooperative" cancellation);
   let limits = json_member "limits" capabilities in
   Alcotest.(check int)
     "request bytes" 65_536
@@ -557,7 +585,127 @@ let machine_describe () =
     (json_int "max_exact_bits" limits);
   Alcotest.(check int)
     "integer iterations" 100_000
-    (json_int "max_integer_iterations" limits)
+    (json_int "max_integer_iterations" limits);
+  Alcotest.(check int)
+    "result bytes" 1_048_576
+    (json_int "max_result_bytes" limits)
+
+let provenance_classification json =
+  json |> json_member "provenance" |> json_string "classification"
+
+let machine_provenance () =
+  let evaluate source =
+    Centl_engine.evaluate source |> Centl_engine.json_of_evaluation
+  in
+  let check source expected =
+    Alcotest.(check string)
+      source expected
+      (evaluate source |> provenance_classification)
+  in
+  check "42" "exact";
+  check "1/2" "exact";
+  check "x + 1" "exact_symbolic";
+  check "approx(pi, 8)" "rigorous_enclosure";
+  check "solve(x^2 - 1 = 0, x)" "exact_solution_set";
+  check "solve(x^2 = 2, x)" "unresolved";
+  check "1 / 0" "failure";
+  let producer =
+    evaluate "42" |> json_member "provenance" |> json_member "producer"
+  in
+  Alcotest.(check string) "producer" "centl" (json_string "name" producer);
+  Alcotest.(check string)
+    "producer version" Centl_version.value
+    (json_string "version" producer);
+  let state = Centl_protocol.create () in
+  let definition =
+    Centl_protocol.handle_json state
+      (`Assoc [ ("version", `Int 1); ("expression", `String "a = 1") ])
+  in
+  Alcotest.(check string)
+    "definition provenance" "exact_definition"
+    (provenance_classification definition);
+  let ping =
+    Centl_protocol.handle_json state
+      (`Assoc [ ("version", `Int 1); ("op", `String "ping") ])
+  in
+  Alcotest.(check string)
+    "control provenance" "control"
+    (provenance_classification ping)
+
+let machine_cancellation () =
+  let evaluation =
+    Yojson.Safe.from_string
+      {|{"version":1,"id":"job-1","expression":"expand((x + 1)^20)"}|}
+  in
+  begin match Centl_protocol.cancellable_request_id evaluation with
+  | Some (`String id) ->
+      Alcotest.(check string) "cancellable request id" "job-1" id
+  | _ -> Alcotest.fail "evaluation request was not classified as cancellable"
+  end;
+  let cancellation =
+    Yojson.Safe.from_string
+      {|{"version":1,"id":"stop-1","op":"cancel","target":"job-1"}|}
+  in
+  begin match Centl_protocol.cancellation_target_of_json cancellation with
+  | Some (`String id) -> Alcotest.(check string) "cancel target" "job-1" id
+  | _ -> Alcotest.fail "cancel request target was not recognized"
+  end;
+  let invalid_cancellation_id =
+    Yojson.Safe.from_string
+      {|{"version":1,"id":{},"op":"cancel","target":"job-1"}|}
+  in
+  Alcotest.(check bool)
+    "invalid cancellation request is not actionable" true
+    (Centl_protocol.cancellation_target_of_json invalid_cancellation_id = None);
+  let state = Centl_protocol.create () in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 3
+  in
+  let response = Centl_protocol.handle_json ~cancelled state evaluation in
+  Alcotest.(check string)
+    "cooperative error" "cancelled"
+    (protocol_error_code response);
+  Alcotest.(check string)
+    "cancellation provenance" "cancelled"
+    (provenance_classification response);
+  Alcotest.(check bool) "multiple checkpoints" true (!checks >= 3);
+  let definition =
+    Centl_protocol.handle_json
+      ~cancelled:(fun () -> true)
+      state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "define-cancelled");
+           ("expression", `String "never_committed = 1");
+         ])
+  in
+  Alcotest.(check string)
+    "cancelled definition" "cancelled"
+    (protocol_error_code definition);
+  Alcotest.(check int)
+    "cancelled definition is not committed" 0
+    (Centl_engine.session_binding_count (Centl_protocol.session state));
+  let acknowledgement = Centl_protocol.handle_json state cancellation in
+  Alcotest.(check string)
+    "cancellation acknowledged" "requested"
+    (acknowledgement |> json_member "cancellation" |> json_string "status");
+  let one_request =
+    { Centl_protocol.default_server_limits with max_requests = 1 }
+  in
+  let bounded = Centl_protocol.create ~limits:one_request () in
+  ignore
+    (Centl_protocol.handle_line bounded
+       {|{"version":1,"id":"first","op":"ping"}|});
+  let late_cancellation =
+    Centl_protocol.handle_line bounded
+      {|{"version":1,"id":"stop-late","op":"cancel","target":"first"}|}
+  in
+  Alcotest.(check bool)
+    "valid cancellation bypasses request admission" true
+    (Centl_protocol.ok late_cancellation)
 
 let mcp_request state json =
   match Centl_mcp.handle_json state (Yojson.Safe.from_string json) with
@@ -678,6 +826,61 @@ let mcp_failures () =
        {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}
     = None)
 
+let mcp_cancellation () =
+  let state = Centl_mcp.create () in
+  ignore
+    (mcp_request state
+       {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}|});
+  ignore
+    (Centl_mcp.handle_json state
+       (Yojson.Safe.from_string
+          {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}));
+  let call =
+    Yojson.Safe.from_string
+      {|{"jsonrpc":"2.0","id":"tool-7","method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"expand((x + 1)^20)"}}}|}
+  in
+  begin match Centl_mcp.cancellable_request_id call with
+  | Some (`String id) -> Alcotest.(check string) "MCP request id" "tool-7" id
+  | _ -> Alcotest.fail "MCP tool call was not classified as cancellable"
+  end;
+  let notification =
+    Yojson.Safe.from_string
+      {|{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":"tool-7","reason":"test"}}|}
+  in
+  begin match Centl_mcp.cancellation_target_of_json notification with
+  | Some (`String id) -> Alcotest.(check string) "MCP cancel target" "tool-7" id
+  | _ -> Alcotest.fail "MCP cancellation target was not recognized"
+  end;
+  let response =
+    match Centl_mcp.handle_json ~cancelled:(fun () -> true) state call with
+    | Some response -> response
+    | None -> Alcotest.fail "cancelled MCP call produced no internal result"
+  in
+  let structured = mcp_structured_content response in
+  Alcotest.(check string)
+    "MCP cooperative error" "cancelled"
+    (protocol_error_code structured);
+  Alcotest.(check bool)
+    "MCP cancellation is a tool error" true
+    (response |> json_member "result" |> json_bool "isError");
+  Alcotest.(check bool)
+    "MCP notification has no response" true
+    (Centl_mcp.handle_json state notification = None);
+  let malformed =
+    Yojson.Safe.from_string
+      {|{"jsonrpc":"2.0","id":99,"method":"notifications/cancelled","params":{"requestId":"tool-7","reason":7}}|}
+  in
+  Alcotest.(check bool)
+    "malformed MCP cancellation is not actionable" true
+    (Centl_mcp.cancellation_target_of_json malformed = None);
+  begin match Centl_mcp.handle_json state malformed with
+  | Some response ->
+      Alcotest.(check int)
+        "notification method with an id is a request" (-32601)
+        (mcp_error_code response)
+  | None -> Alcotest.fail "an MCP request with an id must receive a response"
+  end
+
 let coloration () =
   match Centl_engine.evaluate "diff(x^3, x)" with
   | Error error -> Alcotest.fail (Centl_engine.error_text error)
@@ -747,6 +950,63 @@ let definition_examples () =
     (match Centl_engine.evaluate_in_session exact "approx(sin(angle), 20)" with
     | Ok (Centl_engine.Session_value (Centl_engine.Real_enclosure _)) -> true
     | _ -> false)
+
+let binder_scope_examples () =
+  let deferred = Centl_engine.create_session () in
+  ignore
+    (session_text deferred
+       "substituted(x) = sum(substitute(x^2, x = 3), k = 1, 2)");
+  Alcotest.(check string)
+    "substitution binder shadows a function parameter" "18"
+    (session_text deferred "substituted(4)");
+  ignore
+    (session_text deferred "differentiated(y) = sum(diff(x*y, x), k = 1, 2)");
+  Alcotest.(check string)
+    "differentiation avoids argument capture" "x + x"
+    (session_text deferred "differentiated(x)");
+  Alcotest.(check string)
+    "solution binder shadows an outer substitution" "x in {-2, 2}"
+    (value "substitute(solve(x^2 = 4, x), x = 3)");
+  let capture_avoiding_solution =
+    Centl_Core.substitute
+      (Centl_Core.Function
+         ( "solve",
+           [
+             Centl_Core.Binary
+               (Centl_Core.Add, Centl_Core.Symbol "y", Centl_Core.Symbol "x");
+             Centl_Core.Literal (Z.one, Z.one);
+             Centl_Core.Symbol "x";
+           ] ))
+      "y" (Centl_Core.Symbol "x")
+  in
+  begin match capture_avoiding_solution with
+  | Centl_Core.Function
+      ( "solve",
+        [
+          Centl_Core.Binary
+            ( Centl_Core.Add,
+              Centl_Core.Symbol free_variable,
+              Centl_Core.Symbol renamed_occurrence );
+          Centl_Core.Literal (one, denominator);
+          Centl_Core.Symbol renamed_binder;
+        ] ) ->
+      Alcotest.(check string) "replacement remains free" "x" free_variable;
+      Alcotest.(check bool)
+        "solution variable is alpha-renamed" true (renamed_binder <> "x");
+      Alcotest.(check string)
+        "bound occurrences use the renamed solution variable" renamed_binder
+        renamed_occurrence;
+      Alcotest.(check bool)
+        "equation right side is preserved" true
+        (Z.equal one Z.one && Z.equal denominator Z.one)
+  | _ -> Alcotest.fail "expected a capture-avoiding solve expression"
+  end;
+  Alcotest.(check string)
+    "solution binder is not a recursive definition reference"
+    "expression_definition_required"
+    (session_error_code
+       (Centl_engine.create_session ())
+       "x = solve(x^2 = 4, x)")
 
 let definition_failures () =
   let immutable = Centl_engine.create_session () in
@@ -1020,6 +1280,7 @@ let () =
       ( "definitions",
         [
           Alcotest.test_case "values and functions" `Quick definition_examples;
+          Alcotest.test_case "lexical binder scope" `Quick binder_scope_examples;
           Alcotest.test_case "immutable failures" `Quick definition_failures;
         ] );
       ( "assumptions",
@@ -1052,8 +1313,12 @@ let () =
             persistent_json_protocol;
           Alcotest.test_case "resource limits" `Quick machine_resource_limits;
           Alcotest.test_case "capability description" `Quick machine_describe;
+          Alcotest.test_case "structured provenance" `Quick machine_provenance;
+          Alcotest.test_case "cooperative cancellation" `Quick
+            machine_cancellation;
           Alcotest.test_case "MCP lifecycle and tools" `Quick mcp_protocol;
           Alcotest.test_case "MCP failures" `Quick mcp_failures;
+          Alcotest.test_case "MCP cancellation" `Quick mcp_cancellation;
         ] );
       ( "presentation",
         [

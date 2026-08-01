@@ -17,3 +17,8 @@ mpfr = "4.2.2"
 [test]
 alcotest = "1.9.1"
 qcheck = "0.91"
+
+[laboratory]
+julia = "1.12.6"
+nemo = "0.56.1"
+json3 = "1.14.3"

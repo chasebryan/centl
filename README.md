@@ -49,6 +49,7 @@ make test
 ./centl 'diff(x^3 + 2*x + 1, x)'
 ./centl 'factor(x^2 - 1)'
 ./centl 'solve(x^2 - 5*x + 6 = 0, x)'
+./centl 'sum(k^2, k = 1, 100)'
 ./centl 'distance(0, 0, 3, 4)'
 ./centl 'approx(sin(pi / 6), 20)'
 ```
@@ -58,6 +59,7 @@ make test
 3 * x^2 + 2
 (x - 1) * (x + 1)
 x in {2, 3}
+338350
 5
 ≈ [0.49999999999999999999, 0.50000000000000000001]
 ```
@@ -79,6 +81,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [calculus syntax](docs/CALCULUS.md),
 [algebra syntax](docs/ALGEBRA.md),
 [mathematical functions](docs/MATHEMATICS.md),
+[exact finite iteration](docs/ITERATION.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
