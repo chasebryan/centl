@@ -7,6 +7,30 @@
   $ ../src/main.exe 'diff(x^3 + 2*x + 1, x)'
   3 * x^2 + 2
 
+  $ ../src/main.exe 'integrate(3*x^2 + 2*x + 1, x)'
+  x^3 + x^2 + x
+
+  $ ../src/main.exe 'integrate(x^2, x = 0, 3)'
+  9
+
+  $ ../src/main.exe 'integrate(x^2, x = 0, 1/2)'
+  1/24
+
+  $ ../src/main.exe 'integrate(x^2, x = 3, 0)'
+  -9
+
+  $ ../src/main.exe 'diff(integrate(3*x^2 + 2*x + 1, x), x)'
+  3 * x^2 + 2 * x + 1
+
+  $ ../src/main.exe 'integrate(sin(x), x)'
+  integrate(sin(x), x)
+
+  $ ../src/main.exe 'integrate(1/x, x)'
+  integrate(1 / x, x)
+
+  $ ../src/main.exe 'integrate(x^2, x = 0, a)'
+  integrate(x^2, x = 0, a)
+
   $ ../src/main.exe 'substitute(x^2 + 1, x = 3)'
   10
 
@@ -80,6 +104,15 @@
   $ printf '%s\n' 'repeat(x) = sum(x, k = 1, 3)' 'repeat(k)' | ../src/main.exe | tail -n 1
   k + k + k
 
+  $ printf '%s\n' 'x = 4' 'integrate(x, x = 0, x)' | ../src/main.exe | tail -n 1
+  8
+
+  $ printf '%s\n' 'integrated_scale(scale) = integrate(scale*x, x = 0, 1)' 'integrated_scale(6)' | ../src/main.exe | tail -n 1
+  3
+
+  $ printf '%s\n' 'held(value) = integrate(value, x)' 'held(x)' | ../src/main.exe | tail -n 1
+  integrate(x, _centl_bound_x)
+
   $ ../src/main.exe 'approx(sqrt(2), 12)'
   ≈ [1.41421356237, 1.41421356238]
 
@@ -90,7 +123,7 @@
   CENTL syntax
   values: integer decimal fraction variable () pi e tau
   arithmetic: + - * / ^
-  symbolic math: f(...) name= f(...)= solve diff substitute simplify expand factor assuming = != < <= > >=
+  symbolic math: f(...) name= f(...)= solve diff integrate substitute simplify expand factor assuming = != < <= > >=
 
   $ ../src/main.exe --help | sed -n '1p;3p;5,11p'
   CENTL — exact mathematics, directly.
@@ -108,6 +141,9 @@
 
   $ ../src/main.exe --json '1 / 8'
   {"version":1,"ok":true,"value":{"kind":"rational","exact":true,"numerator":"1","denominator":"8","text":"1/8"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.8.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
+
+  $ ../src/main.exe --json 'integrate(x^2, x = 0, 1)'
+  {"version":1,"ok":true,"value":{"kind":"rational","exact":true,"numerator":"1","denominator":"3","text":"1/3"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.8.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
 
   $ ../src/main.exe --json 'sum(k, k = 1, 10)'
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"55","text":"55"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.8.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
@@ -184,6 +220,18 @@
 
   $ ../src/main.exe 'sum(k, k, 1, 3)'
   error: expected '=', found ',' at column 9
+  [2]
+
+  $ ../src/main.exe 'integrate(x^2, 3)'
+  error: expected an integration variable, found a number at column 16
+  [2]
+
+  $ ../src/main.exe 'integrate(x^2, x, 0, 1)'
+  error: expected ')' or '=', found ',' at column 17
+  [2]
+
+  $ ../src/main.exe 'integrate(x^2, x = 0)'
+  error: expected ',', found ')' at column 21
   [2]
 
   $ ../src/main.exe 'sum = 3'

@@ -37,6 +37,29 @@ Polynomial canonicalization uses exact rational coefficient lists. A requested
 transformation outside its documented domain remains symbolic and unchanged;
 unsupported algebra is never interpreted as a successful factorization.
 
+The unreleased polynomial-integration slice uses the same coefficient model.
+For an accepted polynomial
+
+```text
+p(x) = c0 + c1*x + ... + cn*x^n
+```
+
+with exact rational coefficients, `integrate(p, x)` returns the canonical
+zero-constant antiderivative whose coefficient of `x^(k+1)` is `ck/(k+1)`.
+`integrate(p, x = a, b)` evaluates that exact polynomial at rational `a` and
+`b` and returns the exact difference. No rounding or numerical quadrature is
+involved. The accepted expression syntax uses positive powers no larger than
+64. In particular, explicit zero powers remain residual rather than erasing a
+possible `0^0` error. A divisor must be established as constant by the bounded
+host profile before verified coefficient conversion runs; algebraic
+cancellation is not used to bypass that preflight. An integrand or bound
+outside this domain remains an explicit `integrate(...)` expression.
+
+Polynomial integration is checked against the active expression-node,
+symbolic-work, exact-bit, and result-byte limits. Exceeding a budget is a
+structured resource failure; being outside the mathematical domain instead
+produces the visible residual expression.
+
 ## Enclosures
 
 An approximate real result denotes a set containing the mathematical result.
@@ -132,3 +155,6 @@ Numerical failure is data, not fabricated output. Structured outcomes include:
 
 Every failure identifies the expression and mathematical condition involved
 without exposing irrelevant compiler internals.
+
+These integration semantics describe `0.9.0` **UNRELEASED** preparation. The
+runtime, tag, installers, and published release remain `0.8.0`.

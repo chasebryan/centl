@@ -619,8 +619,8 @@ let rec substituted_node_count limit replacements expression =
            inner)
   | Centl_Core.Binary (_, left, right) -> children 1 [ left; right ]
   | Centl_Core.Function
-      (("sum" | "product"), [ body; Centl_Core.Symbol variable; lower; upper ])
-    ->
+      ( ("sum" | "product" | "integrate"),
+        [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
       let body_nodes =
         substituted_node_count limit
           (List.remove_assoc variable replacements)
@@ -631,6 +631,11 @@ let rec substituted_node_count limit replacements expression =
            (add
               (substituted_node_count limit replacements lower)
               (substituted_node_count limit replacements upper)))
+  | Centl_Core.Function ("integrate", [ body; Centl_Core.Symbol variable ]) ->
+      add 2
+        (substituted_node_count limit
+           (List.remove_assoc variable replacements)
+           body)
   | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
     ->
       let scoped = List.remove_assoc variable replacements in
@@ -864,6 +869,7 @@ let reserved_names =
     "expand";
     "factor";
     "approx";
+    "integrate";
     "sum";
     "product";
     "sqrt";
@@ -967,7 +973,7 @@ let rec polynomial_profile expression =
               degree;
               work = Z.add (Z.add left.work right.work) (Z.add degree Z.one);
               coefficient_bits =
-                Z.add Z.one (Z.max left.coefficient_bits right.coefficient_bits);
+                Z.add Z.one (Z.add left.coefficient_bits right.coefficient_bits);
             })
         left right
   | Centl_Core.Binary (Centl_Core.Multiply, left, right) ->
@@ -1056,6 +1062,42 @@ let check_polynomial_transformation limits expression =
           "the symbolic transformation exceeds the exact-coefficient bit limit"
       else Ok ()
   | _ -> Ok ()
+
+let check_polynomial_integration limits variable expression endpoints =
+  match polynomial_profile expression with
+  | Some { polynomial_variable; degree; work; coefficient_bits }
+    when Option.fold ~none:true ~some:(( = ) variable) polynomial_variable ->
+      let terms = Z.add degree (Z.of_int 2) in
+      let degree_bits =
+        Z.of_int (bits_of_integer (Z.max Z.one (Z.add degree Z.one)))
+      in
+      let endpoint_bits =
+        List.fold_left
+          (fun maximum (endpoint : Centl_Core.rational) ->
+            Z.max maximum
+              (Z.of_int
+                 (bits_of_integer endpoint.numerator
+                 + bits_of_integer endpoint.denominator)))
+          Z.zero endpoints
+      in
+      let output_nodes = Z.mul (Z.of_int 6) terms in
+      let integration_work = Z.add work (Z.mul terms terms) in
+      let result_bits =
+        Z.mul terms
+          (Z.add (Z.of_int 4)
+             (Z.add coefficient_bits (Z.add degree_bits endpoint_bits)))
+      in
+      if Z.gt output_nodes (Z.of_int limits.max_expression_nodes) then
+        failure "resource_limit"
+          "the polynomial integral exceeds the expression-node limit"
+      else if Z.gt integration_work (Z.of_int limits.max_expression_nodes) then
+        failure "resource_limit"
+          "the polynomial integral exceeds the symbolic work limit"
+      else if Z.gt result_bits (Z.of_int limits.max_exact_bits) then
+        failure "resource_limit"
+          "the polynomial integral exceeds the exact-coefficient bit limit"
+      else Ok true
+  | _ -> Ok false
 
 let rec differentiated_node_count limit expression variable =
   let sum values = List.fold_left (bounded_sum limit) 0 values in
@@ -1157,8 +1199,9 @@ let rec contains_named_function predicate = function
       || contains_named_function predicate left
       || contains_named_function predicate right
 
-let contains_iteration =
-  contains_named_function (fun name -> name = "sum" || name = "product")
+let contains_deferred_evaluation =
+  contains_named_function (fun name ->
+      name = "sum" || name = "product" || name = "integrate")
 
 let engine_failure_of_core = function
   | Centl_Core.ZeroDenominator ->
@@ -1249,6 +1292,96 @@ let resolve_with_limits ?(cancelled = never_cancelled) limits expression =
     | Centl_Core.Power (base, exponent) ->
         let* base, nodes = resolve base in
         checked (Centl_Core.Power (base, exponent)) (add_nodes 1 nodes)
+    | Centl_Core.Function ("integrate", [ body; Centl_Core.Symbol variable ]) ->
+        if List.mem variable reserved_names then
+          failure "reserved_name"
+            (variable ^ " is built in and cannot be an integration variable")
+        else
+          let* body, body_nodes = resolve body in
+          let* integrable =
+            check_polynomial_integration limits variable body []
+          in
+          if not integrable then
+            checked
+              (Centl_Core.Function
+                 ("integrate", [ body; Centl_Core.Symbol variable ]))
+              (add_nodes 2 body_nodes)
+          else
+            let* () = check_cancelled cancelled in
+            let integrated = Centl_Core.integrate_polynomial body variable in
+            let* () = check_cancelled cancelled in
+            begin match integrated with
+            | Some expression ->
+                checked expression (expression_node_count expression)
+            | None ->
+                checked
+                  (Centl_Core.Function
+                     ("integrate", [ body; Centl_Core.Symbol variable ]))
+                  (add_nodes 2 body_nodes)
+            end
+    | Centl_Core.Function
+        ("integrate", [ body; Centl_Core.Symbol variable; lower; upper ]) ->
+        if List.mem variable reserved_names then
+          failure "reserved_name"
+            (variable ^ " is built in and cannot be an integration variable")
+        else
+          let* lower, lower_value = resolve_integral_bound lower in
+          let* upper, upper_value = resolve_integral_bound upper in
+          let* body, body_nodes = resolve body in
+          begin match (lower_value, upper_value) with
+          | Some lower_value, Some upper_value ->
+              let* integrable =
+                check_polynomial_integration limits variable body
+                  [ lower_value; upper_value ]
+              in
+              if not integrable then
+                checked
+                  (Centl_Core.Function
+                     ( "integrate",
+                       [ body; Centl_Core.Symbol variable; lower; upper ] ))
+                  (add_nodes 2
+                     (add_nodes body_nodes
+                        (add_nodes
+                           (expression_node_count lower)
+                           (expression_node_count upper))))
+              else
+                let* () = check_cancelled cancelled in
+                let integrated =
+                  Centl_Core.definite_integral_polynomial body variable
+                    lower_value upper_value
+                in
+                let* () = check_cancelled cancelled in
+                begin match integrated with
+                | Some value ->
+                    checked
+                      (Centl_Core.Literal (value.numerator, value.denominator))
+                      1
+                | None ->
+                    checked
+                      (Centl_Core.Function
+                         ( "integrate",
+                           [ body; Centl_Core.Symbol variable; lower; upper ] ))
+                      (add_nodes 2
+                         (add_nodes body_nodes
+                            (add_nodes
+                               (expression_node_count lower)
+                               (expression_node_count upper))))
+                end
+          | _ ->
+              checked
+                (Centl_Core.Function
+                   ( "integrate",
+                     [ body; Centl_Core.Symbol variable; lower; upper ] ))
+                (add_nodes 2
+                   (add_nodes body_nodes
+                      (add_nodes
+                         (expression_node_count lower)
+                         (expression_node_count upper))))
+          end
+    | Centl_Core.Function ("integrate", _) ->
+        failure "invalid_arguments"
+          "use integrate(expression, variable) or integrate(expression, \
+           variable = lower, upper)"
     | Centl_Core.Function
         ( (("sum" | "product") as name),
           [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
@@ -1340,7 +1473,7 @@ let resolve_with_limits ?(cancelled = never_cancelled) limits expression =
         else checked (Centl_Core.differentiate inner variable) nodes
     | Centl_Core.Substitute (inner, variable, replacement) ->
         let* replacement, replacement_nodes = resolve replacement in
-        if contains_iteration inner then
+        if contains_deferred_evaluation inner then
           let nodes =
             substituted_node_count limits.max_expression_nodes
               [ (variable, replacement_nodes) ]
@@ -1397,6 +1530,15 @@ let resolve_with_limits ?(cancelled = never_cancelled) limits expression =
         failure "invalid_arguments"
           (Printf.sprintf
              "the %s finite-iteration bound must be an exact integer" label)
+    | Error _ as error -> error
+  and resolve_integral_bound expression =
+    let* expression, _ = resolve expression in
+    match evaluate_exact expression with
+    | Ok (Integer value) -> Ok (expression, Some (Centl_Core.make value Z.one))
+    | Ok (Rational (numerator, denominator)) ->
+        Ok (expression, Some (Centl_Core.make numerator denominator))
+    | Ok (Symbolic _) -> Ok (expression, None)
+    | Ok (Real_enclosure _ | Equation_result _) -> Ok (expression, None)
     | Error _ as error -> error
   in
   let* expression, _ = resolve expression in
@@ -1555,7 +1697,7 @@ let rec expand_expression ?(cancelled = never_cancelled) limit session bound
         in
         Ok (Centl_Core.Power (base, exponent), nodes + 1)
     | Centl_Core.Function
-        ( (("sum" | "product") as name),
+        ( (("sum" | "product" | "integrate") as name),
           [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
         let* body, body_nodes =
           expand_expression ~cancelled (limit - 2) session (variable :: bound)
@@ -1575,6 +1717,15 @@ let rec expand_expression ?(cancelled = never_cancelled) limit session bound
           ( Centl_Core.Function
               (name, [ body; Centl_Core.Symbol variable; lower; upper ]),
             body_nodes + lower_nodes + upper_nodes + 2 )
+    | Centl_Core.Function ("integrate", [ body; Centl_Core.Symbol variable ]) ->
+        let* body, body_nodes =
+          expand_expression ~cancelled (limit - 2) session (variable :: bound)
+            body
+        in
+        Ok
+          ( Centl_Core.Function
+              ("integrate", [ body; Centl_Core.Symbol variable ]),
+            body_nodes + 2 )
     | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
       ->
         let* left, left_nodes =
@@ -1725,10 +1876,13 @@ let rec references_name name = function
   | Centl_Core.Symbol symbol -> symbol = name
   | Centl_Core.Function
       (function_name, [ body; Centl_Core.Symbol variable; lower; upper ])
-    when function_name = "sum" || function_name = "product" ->
+    when function_name = "sum" || function_name = "product"
+         || function_name = "integrate" ->
       function_name = name
       || (variable <> name && references_name name body)
       || references_name name lower || references_name name upper
+  | Centl_Core.Function ("integrate", [ body; Centl_Core.Symbol variable ]) ->
+      name = "integrate" || (variable <> name && references_name name body)
   | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
     ->
       name = "solve"
@@ -1803,7 +1957,7 @@ let prepare_definition ?(cancelled = never_cancelled) limits session bound name
   else if contains_approximation expression then
     session_failure "exact_definition_required"
       "definitions must be exact; use approx(...) when evaluating them"
-  else if bound <> [] && contains_iteration expression then
+  else if bound <> [] && contains_deferred_evaluation expression then
     if
       contains_named_function
         (fun function_name -> function_name = "solve")
@@ -1950,7 +2104,7 @@ let rec expression_fragments ?(parent_precedence = -1) expression =
           |> append (fragment Operator "^")
           |> append (fragment Number (Z.to_string exponent)) )
     | Centl_Core.Function
-        ( (("sum" | "product") as name),
+        ( (("sum" | "product" | "integrate") as name),
           [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
         let assignment =
           fragment Symbol_name variable

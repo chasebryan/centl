@@ -20,6 +20,8 @@ enclosure.
 `f(x, ...)` `name = expression` `f(x, ...) = expression`
 `solve(left = right, variable)`
 `diff(expression, variable)`
+`integrate(expression, variable)`
+`integrate(expression, variable = lower, upper)`
 `substitute(expression, variable = value)` `simplify(expression)`
 `expand(expression)` `factor(expression)` `assuming(expression, condition)`
 `=  !=  <  <=  >  >=`
@@ -62,6 +64,7 @@ enclosure.
 ```text
 exact          0.1 + 0.2                         -> 3/10
 calculus       diff(x^3 + 2*x + 1, x)            -> 3 * x^2 + 2
+integration    integrate(x^2, x = 0, 1)          -> 1/3
 definition     f(x) = x^2 + 1                    -> f(x) = x^2 + 1
 geometry       circle_area(3)                    -> 9 * pi
 rigorous       approx(sqrt(2), 12)               -> ≈ [1.41421356237, 1.41421356238]
@@ -72,3 +75,11 @@ Definitions are immutable and last for the current calculator session or
 script. Approximate a definition when using it: `approx(f(2), 20)`.
 `solve` currently handles exact linear equations and quadratics with rational
 roots. Other equations return an explicit unresolved result.
+
+The integration forms are `0.9.0` **UNRELEASED** preparation; the runtime,
+tag, and published release remain `0.8.0`. They accept rational-coefficient
+univariate polynomials with positive powers no larger than 64. Explicit zero
+powers remain residual to preserve the possible `0^0` error. `integrate(p, x)`
+selects the zero-constant antiderivative, while `integrate(p, x = a, b)`
+requires exact rational bounds. Unsupported integrals stay visible as
+`integrate(...)` expressions.

@@ -6,6 +6,8 @@ using JSON3
 
 const repository_root = normpath(joinpath(@__DIR__, "..", ".."))
 const centl = get(ENV, "CENTL_BIN", joinpath(repository_root, "centl"))
+const rational_polynomial_ring, rational_polynomial_variable =
+    polynomial_ring(QQ, "x")
 
 function centl_exact(expression::String)
     command = Cmd([centl, "--json", expression])
@@ -61,6 +63,45 @@ function linear_product(lower::Int, upper::Int, offset::Int)
     return total
 end
 
+function rational_source(value)
+    "(" * exact_text(QQ(value)) * ")"
+end
+
+function polynomial_source(coefficients)
+    terms = String[]
+    for (offset, coefficient) in enumerate(coefficients)
+        iszero(coefficient) && continue
+        degree = offset - 1
+        coefficient_text = rational_source(coefficient)
+        term = if degree == 0
+            coefficient_text
+        elseif degree == 1
+            coefficient_text * "*x"
+        else
+            coefficient_text * "*x^" * string(degree)
+        end
+        push!(terms, term)
+    end
+    isempty(terms) ? "0" : join(terms, " + ")
+end
+
+function polynomial_integral_between(coefficients, lower, upper)
+    polynomial = zero(rational_polynomial_ring)
+    for (offset, coefficient) in enumerate(coefficients)
+        polynomial += coefficient * rational_polynomial_variable^(offset - 1)
+    end
+    antiderivative = integral(polynomial)
+    evaluate(antiderivative, upper) - evaluate(antiderivative, lower)
+end
+
+function check_polynomial_integral(coefficients, lower, upper)
+    expression =
+        "integrate(" * polynomial_source(coefficients) * ", x = " *
+        rational_source(lower) * ", " * rational_source(upper) * ")"
+    expected = polynomial_integral_between(coefficients, lower, upper)
+    check_exact(expression, expected)
+end
+
 function run_differential_suite()
     check_exact("0.1 + 0.2", QQ(3, 10))
     check_exact("choose(52, 5)", QQ(binomial(ZZ(52), ZZ(5))))
@@ -95,6 +136,35 @@ function run_differential_suite()
         telescoping *= QQ(value + 1, value)
     end
     check_exact("product((k + 1)/k, k = 1, 30)", telescoping)
+
+    deterministic_integrals = [
+        ([QQ(1), QQ(2), QQ(3)], QQ(0), QQ(3)),
+        ([QQ(1, 2), QQ(-3, 4), QQ(2, 5)], QQ(-2, 3), QQ(5, 4)),
+        ([QQ(-7, 3), QQ(0), QQ(5, 2), QQ(-1, 6)], QQ(4, 3), QQ(-3, 2)),
+    ]
+    for (coefficients, lower, upper) in deterministic_integrals
+        check_polynomial_integral(coefficients, lower, upper)
+    end
+
+    integration_random = MersenneTwister(0x1A7E6A1)
+    for _ in 1:60
+        degree = rand(integration_random, 0:6)
+        coefficients = [
+            QQ(
+                rand(integration_random, -12:12),
+                rand(integration_random, 1:9),
+            ) for _ in 0:degree
+        ]
+        lower = QQ(
+            rand(integration_random, -10:10),
+            rand(integration_random, 1:6),
+        )
+        upper = QQ(
+            rand(integration_random, -10:10),
+            rand(integration_random, 1:6),
+        )
+        check_polynomial_integral(coefficients, lower, upper)
+    end
 
     random = MersenneTwister(0xCE71)
     for _ in 1:40

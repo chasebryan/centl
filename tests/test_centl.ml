@@ -62,6 +62,123 @@ let symbolic_examples () =
     "large integer power" "1267650600228229401496703205376" (value "2^100");
   Alcotest.(check string) "negative integer power" "1/8" (value "2^-3")
 
+let integration_examples () =
+  Alcotest.(check string)
+    "canonical cubic antiderivative" "x^3 + x^2 + x"
+    (value "integrate(3*x^2 + 2*x + 1, x)");
+  Alcotest.(check string)
+    "rational coefficients" "1/8 * x^4 - 3/8 * x^2 + 5 * x"
+    (value "integrate(1/2*x^3 - 3/4*x + 5, x)");
+  Alcotest.(check string)
+    "constant antiderivative" "6 * x" (value "integrate(6, x)");
+  Alcotest.(check string)
+    "integer definite bounds" "9"
+    (value "integrate(x^2, x = 0, 3)");
+  Alcotest.(check string)
+    "rational definite bounds" "1/24"
+    (value "integrate(x^2, x = 0, 1/2)");
+  Alcotest.(check string)
+    "reversed definite bounds" "-9"
+    (value "integrate(x^2, x = 3, 0)");
+  Alcotest.(check string)
+    "derivative round trip" "3 * x^2 + 2 * x + 1"
+    (value "diff(integrate(3*x^2 + 2*x + 1, x), x)")
+
+let integration_residuals_and_failures () =
+  Alcotest.(check string)
+    "transcendental integral remains visible" "integrate(sin(x), x)"
+    (value "integrate(sin(x), x)");
+  Alcotest.(check string)
+    "non-polynomial integral remains visible" "integrate(1 / x, x)"
+    (value "integrate(1/x, x)");
+  Alcotest.(check string)
+    "explicit zero power preserves its undefined point" "integrate(x^0, x)"
+    (value "integrate(x^0, x)");
+  Alcotest.(check string)
+    "symbolic bound remains visible" "integrate(x^2, x = 0, a)"
+    (value "integrate(x^2, x = 0, a)");
+  [
+    "integrate(x^2)";
+    "integrate(x^2, 3)";
+    "integrate(x^2, x, 0, 1)";
+    "integrate(x^2, x = 0)";
+    "integrate(x^2, x = 0,)";
+  ]
+  |> List.iter (fun source ->
+      Alcotest.(check string)
+        ("malformed form: " ^ source)
+        "syntax_error" (error_code source))
+
+let integration_binder_scope () =
+  let scoped = Centl_engine.create_session () in
+  ignore (session_text scoped "x = 4");
+  Alcotest.(check string)
+    "integrand binder shadows a session value" "1/3 * x^3"
+    (session_text scoped "integrate(x^2, x)");
+  Alcotest.(check string)
+    "definite upper bound uses surrounding scope" "8"
+    (session_text scoped "integrate(x, x = 0, x)");
+  let functions = Centl_engine.create_session () in
+  ignore
+    (session_text functions
+       "integrated_scale(scale) = integrate(scale*x, x = 0, 1)");
+  Alcotest.(check string)
+    "function arguments enter a deferred integral" "3"
+    (session_text functions "integrated_scale(6)");
+  ignore (session_text functions "held(value) = integrate(value, x)");
+  begin match Centl_engine.evaluate_in_session functions "held(x)" with
+  | Ok
+      (Centl_engine.Session_value
+         (Centl_engine.Symbolic
+            (Centl_Core.Function
+               ( "integrate",
+                 [ Centl_Core.Symbol free_name; Centl_Core.Symbol bound_name ]
+               )))) ->
+      Alcotest.(check string) "replacement remains free" "x" free_name;
+      Alcotest.(check bool)
+        "integration binder is alpha-renamed" true (bound_name <> "x")
+  | Ok result ->
+      Alcotest.failf
+        "expected a residual capture-avoiding integral, received %s"
+        (Centl_engine.text_of_session_result result)
+  | Error error -> Alcotest.fail (Centl_engine.error_text error)
+  end
+
+let integration_limits_and_cancellation () =
+  let limited =
+    { Centl_engine.default_evaluation_limits with max_expression_nodes = 20 }
+  in
+  begin match
+    Centl_engine.evaluate_with_limits limited "integrate((x + 1)^8, x)"
+  with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "integration limit returned %s instead: %s" error.code
+        error.message
+  | Ok result ->
+      Alcotest.failf "integration bypassed its node budget: %s"
+        (Centl_engine.text_of_value result)
+  end;
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 3
+  in
+  begin match
+    Centl_engine.evaluate_with_limits ~cancelled
+      Centl_engine.default_evaluation_limits "integrate((x + 1)^16, x)"
+  with
+  | Error { code = "cancelled"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "cancelled integration returned %s instead: %s" error.code
+        error.message
+  | Ok result ->
+      Alcotest.failf "cancelled integration completed: %s"
+        (Centl_engine.text_of_value result)
+  end;
+  Alcotest.(check bool)
+    "integration has repeated cancellation checks" true (!checks >= 3)
+
 let algebra_examples () =
   Alcotest.(check string)
     "collect coefficients" "5 * x"
@@ -443,6 +560,34 @@ let json_bool name json =
 
 let protocol_error_code json = json |> json_member "error" |> json_string "code"
 let protocol_value_text json = json |> json_member "value" |> json_string "text"
+
+let integration_json_protocol () =
+  let response =
+    Centl_engine.evaluate_request
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("expression", `String "integrate(x^2, x = 0, 1)");
+         ])
+  in
+  Alcotest.(check bool)
+    "integration request succeeds" true (json_bool "ok" response);
+  let result = json_member "value" response in
+  Alcotest.(check string)
+    "existing rational kind" "rational"
+    (json_string "kind" result);
+  Alcotest.(check bool)
+    "definite integral is exact" true (json_bool "exact" result);
+  Alcotest.(check string)
+    "rational numerator" "1"
+    (json_string "numerator" result);
+  Alcotest.(check string)
+    "rational denominator" "3"
+    (json_string "denominator" result);
+  Alcotest.(check string) "rational text" "1/3" (json_string "text" result);
+  Alcotest.(check string)
+    "ordinary exact provenance" "exact"
+    (response |> json_member "provenance" |> json_string "classification")
 
 let persistent_json_protocol () =
   let state = Centl_protocol.create () in
@@ -1261,6 +1406,17 @@ let () =
           Alcotest.test_case "cubic derivative property" `Quick
             property_cubic_derivative;
         ] );
+      ( "exact polynomial integration",
+        [
+          Alcotest.test_case "canonical and definite examples" `Quick
+            integration_examples;
+          Alcotest.test_case "residual and malformed forms" `Quick
+            integration_residuals_and_failures;
+          Alcotest.test_case "lexical binder scope" `Quick
+            integration_binder_scope;
+          Alcotest.test_case "limits and cancellation" `Quick
+            integration_limits_and_cancellation;
+        ] );
       ( "symbolic algebra",
         [
           Alcotest.test_case "examples" `Quick algebra_examples;
@@ -1304,6 +1460,8 @@ let () =
         [
           Alcotest.test_case "versioned request" `Quick json_protocol;
           Alcotest.test_case "symbolic result" `Quick symbolic_json_protocol;
+          Alcotest.test_case "integration keeps rational schema" `Quick
+            integration_json_protocol;
           Alcotest.test_case "rigorous enclosure" `Quick enclosure_json_protocol;
           Alcotest.test_case "structured condition" `Quick
             conditional_json_protocol;

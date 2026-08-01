@@ -9,6 +9,10 @@ default, explicit about approximation, and never prints an unjustified digit.
 You should not need to become a programmer to calculate or abandon mathematical
 rigor to program.
 
+The source tree is preparing `0.9.0` as an **UNRELEASED** version with exact
+polynomial integration. The runtime version, Git tag, installers, and published
+release remain `0.8.0` until a release is deliberately cut.
+
 ## Principles
 
 - Typing an expression produces an answer immediately.
@@ -47,6 +51,8 @@ From a source checkout with the development toolchain installed:
 make test
 ./centl '0.1 + 0.2'
 ./centl 'diff(x^3 + 2*x + 1, x)'
+./centl 'integrate(3*x^2 + 2*x + 1, x)'
+./centl 'integrate(x^2, x = 0, 1)'
 ./centl 'factor(x^2 - 1)'
 ./centl 'solve(x^2 - 5*x + 6 = 0, x)'
 ./centl 'sum(k^2, k = 1, 100)'
@@ -57,6 +63,8 @@ make test
 ```text
 3/10
 3 * x^2 + 2
+x^3 + x^2 + x
+1/3
 (x - 1) * (x + 1)
 x in {2, 3}
 338350
@@ -85,7 +93,8 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
-[roadmap](docs/ROADMAP.md).
+[roadmap](docs/ROADMAP.md). Unreleased work is summarized in the
+[changelog](CHANGELOG.md).
 
 ## License
 

@@ -29,6 +29,24 @@ The exact constants are `pi`, `e`, and `tau`. Trigonometric expressions remain
 symbolic until approximation is requested. Differentiation understands the
 one-argument functions above except `abs`.
 
+## Exact polynomial integration
+
+The `0.9.0` **UNRELEASED** source candidate integrates exact
+rational-coefficient univariate polynomials:
+
+```text
+integrate(3*x^2 + 2*x + 1, x) = x^3 + x^2 + x
+integrate(x^2, x = 0, 1)      = 1/3
+```
+
+The two-argument form chooses the canonical antiderivative with integration
+constant zero. The bounded form requires exact rational bounds and returns the
+exact difference between endpoint values. Unsupported integrands, including
+transcendental and multivariate cases, remain visible as `integrate(...)`
+instead of being approximated. Accepted polynomial powers are positive and at
+most 64. Explicit zero powers also remain visible so CENTL does not erase the
+undefined `0^0` point. See [symbolic calculus](CALCULUS.md).
+
 ## Geometry
 
 The initial geometry vocabulary is deliberately direct:
@@ -83,6 +101,10 @@ syntax and the same exact-first value model rather than a separate subsystem.
 - Approximation supports real arithmetic, integer powers, the constants above,
   and the listed elementary functions.
 - Unresolved variables cannot be approximated until they are substituted.
-- Complex values, units, geometric objects, limits, series, and integration are
-  planned but are not silently simulated by the current evaluator.
+- Complex values, units, geometric objects, limits, series, and integration
+  outside the exact univariate-polynomial domain are planned but are not
+  silently simulated by the source-candidate evaluator.
 - A failed domain proof or exhausted precision budget is a structured error.
+
+The runtime version, Git tag, installers, and published release remain `0.8.0`;
+the integration forms above describe `0.9.0` preparation only.

@@ -3,6 +3,14 @@
 Each phase ends in a usable vertical slice. Later phases may refine syntax but
 must preserve the numerical contract.
 
+## Current release preparation
+
+`0.9.0` is **UNRELEASED** preparation. Its first selected slice adds canonical
+zero-constant antiderivatives for rational-coefficient univariate polynomials
+and exact rational-bound definite integration. Unsupported integrals remain
+visible. The runtime version, Git tag, installers, and published release remain
+`0.8.0` until the release is deliberately cut.
+
 ## 0. Foundation
 
 - Record the architecture, numerical contract, and trust boundary.
@@ -91,10 +99,14 @@ text or mistaking an approximation for an exact result.
 - Exact bounded `sum(expression, variable = lower, upper)` and
   `product(expression, variable = lower, upper)` are implemented with lexical
   iterator scope, nested request-wide limits, and cooperative cancellation.
+- Exact `integrate(p, x)` and `integrate(p, x = a, b)` for
+  rational-coefficient univariate polynomials are in `0.9.0` preparation; the
+  indefinite form chooses integration constant zero and unsupported cases stay
+  explicit.
 - Add complex enclosures, algebraic numbers, polynomials, and matrices.
 - Add recurrences, sequences, generating functions, limits, series, rigorous
-  definite integration, and partial symbolic integration with explicit
-  unevaluated results.
+  integration outside the exact polynomial domain, and broader partial
+  symbolic integration with explicit unevaluated results.
 - Add vector calculus, differential equations, transforms, probability, and
   statistics as bounded mathematical domains.
 - Grow exact geometry and concrete mathematics from the initial formula,

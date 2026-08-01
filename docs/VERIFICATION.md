@@ -11,7 +11,10 @@ The current F* core proves:
 - division by zero is a structured result; and
 - every successful evaluator result satisfies the rational invariant;
 - symbolic differentiation agrees with independently defined tangent
-  semantics for the supported univariate integer-polynomial domain; and
+  semantics for the supported univariate integer-polynomial domain;
+- exact rational-coefficient polynomial integration constructs zero-constant
+  coefficient lists, and independently defined coefficient differentiation
+  recovers the source coefficients up to exact rational equivalence; and
 - dyadic intervals are rounded outward to exact decimal scales.
 
 The core also validates native real enclosures before use: the lower endpoint
@@ -24,10 +27,11 @@ values. Exact rational square-root candidates are computed by the host but
 accepted only after the F* core checks, by direct integer equality, that the
 candidate squares to the radicand.
 
-The F* symbolic evaluator, substitution pass, and differentiation pass are
-total and extract with no admits. Differentiation correctness is stated over a
-separate polynomial model containing integer constants, one distinguished
-variable, negation, addition, subtraction, multiplication, and natural powers.
+The F* symbolic evaluator, substitution pass, differentiation pass, and exact
+polynomial-integration helpers are total and extract with no admits.
+Differentiation correctness is stated over a separate polynomial model
+containing integer constants, one distinguished variable, negation, addition,
+subtraction, multiplication, and natural powers.
 Ordinary evaluation and dual-number tangent evaluation are defined
 independently. `polynomial_differentiation_is_semantic` proves that evaluating
 the production differentiator's output returns that tangent at every integer
@@ -38,7 +42,9 @@ replacement from the same operation. It is also capture-avoiding across every
 expression-level binder. The iterator variable in four-argument `sum` and
 `product` forms scopes only the body, so a matching substitution does not enter
 the body or replace the binder, while both bounds still receive substitutions.
-The variable in `substitute(inner, variable = replacement)` scopes only
+The integration variable similarly scopes only its integrand; definite
+integration bounds remain outside that scope. The variable in
+`substitute(inner, variable = replacement)` scopes only
 `inner`; the replacement remains outside that scope. Differentiation and
 residual-derivative variables scope their inner expressions, and a `solve`
 variable scopes both equation sides.
@@ -56,6 +62,18 @@ bounded powers, coefficient collection, rendering, and the conservative
 assumption simplifier are also total F* definitions. Generated expansion,
 collection, and cubic-derivative identities are checked after exact
 substitution against independently computed integer results.
+
+The `0.9.0` integration preparation extends that exact polynomial model with
+coefficient-wise antiderivatives. Each coefficient division is exact rational
+arithmetic, and the chosen constant term is zero.
+`polynomial_derivative_of_antiderivative_correct` proves the coefficient-list
+round trip up to exact rational equivalence; the public expression path is
+covered by concrete F* witnesses and native regression tests, not by a stronger
+production-differentiator equivalence theorem. Definite integration at exact
+rational bounds evaluates the same coefficient list twice with Horner's method
+and subtracts, without introducing a numerical backend. Inputs outside the
+accepted univariate polynomial domain remain explicit `integrate(...)`
+expressions.
 
 Exact equation classification is also in F*. The core reduces both sides to a
 univariate rational polynomial, distinguishes constant, linear, quadratic, and
@@ -86,3 +104,6 @@ computations.
 The host validates that every core result is reduced and has a positive
 denominator before rendering it. It never repairs or silently approximates a
 core result.
+
+This section records `0.9.0` **UNRELEASED** preparation only. The runtime,
+tag, installers, and published release remain `0.8.0`.

@@ -327,6 +327,45 @@ let parse source =
       let* right, next = expression next in
       let* (), finish = closing_paren next in
       Ok (Centl_Core.Assuming (inner, left, relation, right), finish)
+    else if name = "integrate" then
+      let* body, next = expression index in
+      let* next = comma next in
+      begin match (current next).kind with
+      | Identifier variable ->
+          begin match (current (next + 1)).kind with
+          | Right_paren ->
+              Ok
+                ( Centl_Core.Function
+                    ("integrate", [ body; Centl_Core.Symbol variable ]),
+                  next + 2 )
+          | Equals ->
+              let* lower, next = expression (next + 2) in
+              let* next = comma next in
+              let* upper, next = expression next in
+              let* (), finish = closing_paren next in
+              Ok
+                ( Centl_Core.Function
+                    ( "integrate",
+                      [ body; Centl_Core.Symbol variable; lower; upper ] ),
+                  finish )
+          | kind ->
+              Error
+                {
+                  position = (current (next + 1)).start;
+                  message =
+                    Printf.sprintf "expected ')' or '=', found %s"
+                      (token_name kind);
+                }
+          end
+      | kind ->
+          Error
+            {
+              position = (current next).start;
+              message =
+                Printf.sprintf "expected an integration variable, found %s"
+                  (token_name kind);
+            }
+      end
     else if name = "sum" || name = "product" then
       let* body, next = expression index in
       let* next = comma next in
