@@ -9,9 +9,8 @@ default, explicit about approximation, and never prints an unjustified digit.
 You should not need to become a programmer to calculate or abandon mathematical
 rigor to program.
 
-The source tree is preparing `0.9.0` as an **UNRELEASED** version with exact
-polynomial integration. The runtime version, Git tag, installers, and published
-release remain `0.8.0` until a release is deliberately cut.
+CENTL 0.9.0 adds exact finite sums and products, exact polynomial integration,
+and stronger verified resource and substitution boundaries.
 
 ## Principles
 
@@ -93,7 +92,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
 [machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
-[roadmap](docs/ROADMAP.md). Unreleased work is summarized in the
+[roadmap](docs/ROADMAP.md). Release history is summarized in the
 [changelog](CHANGELOG.md).
 
 ## License

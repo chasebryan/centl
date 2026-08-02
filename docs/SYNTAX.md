@@ -76,10 +76,8 @@ script. Approximate a definition when using it: `approx(f(2), 20)`.
 `solve` currently handles exact linear equations and quadratics with rational
 roots. Other equations return an explicit unresolved result.
 
-The integration forms are `0.9.0` **UNRELEASED** preparation; the runtime,
-tag, and published release remain `0.8.0`. They accept rational-coefficient
-univariate polynomials with positive powers no larger than 64. Explicit zero
-powers remain residual to preserve the possible `0^0` error. `integrate(p, x)`
-selects the zero-constant antiderivative, while `integrate(p, x = a, b)`
-requires exact rational bounds. Unsupported integrals stay visible as
-`integrate(...)` expressions.
+The integration forms accept rational-coefficient univariate polynomials with
+positive powers no larger than 64. Explicit zero powers remain residual to
+preserve the possible `0^0` error. `integrate(p, x)` selects the zero-constant
+antiderivative, while `integrate(p, x = a, b)` requires exact rational bounds.
+Unsupported integrals stay visible as `integrate(...)` expressions.

@@ -63,9 +63,9 @@ assumption simplifier are also total F* definitions. Generated expansion,
 collection, and cubic-derivative identities are checked after exact
 substitution against independently computed integer results.
 
-The `0.9.0` integration preparation extends that exact polynomial model with
-coefficient-wise antiderivatives. Each coefficient division is exact rational
-arithmetic, and the chosen constant term is zero.
+CENTL 0.9.0 extends that exact polynomial model with coefficient-wise
+antiderivatives. Each coefficient division is exact rational arithmetic, and
+the chosen constant term is zero.
 `polynomial_derivative_of_antiderivative_correct` proves the coefficient-list
 round trip up to exact rational equivalence; the public expression path is
 covered by concrete F* witnesses and native regression tests, not by a stronger
@@ -104,6 +104,3 @@ computations.
 The host validates that every core result is reduced and has a positive
 denominator before rendering it. It never repairs or silently approximates a
 core result.
-
-This section records `0.9.0` **UNRELEASED** preparation only. The runtime,
-tag, installers, and published release remain `0.8.0`.
