@@ -17,8 +17,7 @@ diff(x^3 + 2*x + 1, x)
 
 ## Exact polynomial integration
 
-The `0.9.0` source candidate adds two exact forms. This work is
-**UNRELEASED**; the runtime, tag, and published release remain `0.8.0`.
+CENTL 0.9.0 adds two exact integration forms.
 
 `integrate(p, x)` returns the canonical antiderivative whose integration
 constant is zero:
@@ -40,9 +39,9 @@ integrate(x^2, x = 0, 1)
 1/3
 ```
 
-In the source candidate, both forms accept rational-coefficient univariate
-polynomials in the named variable, using the same positive-power expansion
-domain as the algebra engine (powers from 1 through 64). An explicit zero power
+Both forms accept rational-coefficient univariate polynomials in the named
+variable, using the same positive-power expansion domain as the algebra engine
+(powers from 1 through 64). An explicit zero power
 such as `x^0` stays residual: reducing it to `1` would erase CENTL's definedness
 distinction at `x = 0`, where `0^0` is an error. Write a constant directly when
 that constant is the intended integrand. Divisors must also be visibly constant

@@ -3,13 +3,11 @@
 Each phase ends in a usable vertical slice. Later phases may refine syntax but
 must preserve the numerical contract.
 
-## Current release preparation
+## Current release
 
-`0.9.0` is **UNRELEASED** preparation. Its first selected slice adds canonical
-zero-constant antiderivatives for rational-coefficient univariate polynomials
-and exact rational-bound definite integration. Unsupported integrals remain
-visible. The runtime version, Git tag, installers, and published release remain
-`0.8.0` until the release is deliberately cut.
+`0.9.0` adds exact bounded sums and products, canonical zero-constant
+antiderivatives for rational-coefficient univariate polynomials, and exact
+rational-bound definite integration. Unsupported integrals remain visible.
 
 ## 0. Foundation
 
@@ -100,7 +98,7 @@ text or mistaking an approximation for an exact result.
   `product(expression, variable = lower, upper)` are implemented with lexical
   iterator scope, nested request-wide limits, and cooperative cancellation.
 - Exact `integrate(p, x)` and `integrate(p, x = a, b)` for
-  rational-coefficient univariate polynomials are in `0.9.0` preparation; the
+  rational-coefficient univariate polynomials are implemented in `0.9.0`; the
   indefinite form chooses integration constant zero and unsupported cases stay
   explicit.
 - Add complex enclosures, algebraic numbers, polynomials, and matrices.

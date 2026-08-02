@@ -31,8 +31,7 @@ one-argument functions above except `abs`.
 
 ## Exact polynomial integration
 
-The `0.9.0` **UNRELEASED** source candidate integrates exact
-rational-coefficient univariate polynomials:
+CENTL 0.9.0 integrates exact rational-coefficient univariate polynomials:
 
 ```text
 integrate(3*x^2 + 2*x + 1, x) = x^3 + x^2 + x
@@ -103,8 +102,5 @@ syntax and the same exact-first value model rather than a separate subsystem.
 - Unresolved variables cannot be approximated until they are substituted.
 - Complex values, units, geometric objects, limits, series, and integration
   outside the exact univariate-polynomial domain are planned but are not
-  silently simulated by the source-candidate evaluator.
+  silently simulated by the evaluator.
 - A failed domain proof or exhausted precision budget is a structured error.
-
-The runtime version, Git tag, installers, and published release remain `0.8.0`;
-the integration forms above describe `0.9.0` preparation only.

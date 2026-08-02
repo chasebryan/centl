@@ -37,8 +37,8 @@ Polynomial canonicalization uses exact rational coefficient lists. A requested
 transformation outside its documented domain remains symbolic and unchanged;
 unsupported algebra is never interpreted as a successful factorization.
 
-The unreleased polynomial-integration slice uses the same coefficient model.
-For an accepted polynomial
+The polynomial-integration slice uses the same coefficient model. For an
+accepted polynomial
 
 ```text
 p(x) = c0 + c1*x + ... + cn*x^n
@@ -155,6 +155,3 @@ Numerical failure is data, not fabricated output. Structured outcomes include:
 
 Every failure identifies the expression and mathematical condition involved
 without exposing irrelevant compiler internals.
-
-These integration semantics describe `0.9.0` **UNRELEASED** preparation. The
-runtime, tag, installers, and published release remain `0.8.0`.
