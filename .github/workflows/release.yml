@@ -189,12 +189,14 @@ jobs:
           sh install --archive "$PWD/dist/centl-linux-x86_64.tar.gz" \
             --prefix "$install_root"
           "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
+          installed_launcher=$(readlink -f "$install_root/bin/centl")
+          installed_release_root=$(CDPATH= cd -- "$(dirname -- "$installed_launcher")/.." && pwd)
           qemu-x86_64 -cpu core2duo \
-            -E "LD_LIBRARY_PATH=$install_root/lib" \
-            "$install_root/libexec/centl" '0.1 + 0.2' | grep -qx '3/10'
+            -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
+            "$installed_release_root/libexec/centl" '0.1 + 0.2' | grep -qx '3/10'
           qemu-x86_64 -cpu core2duo \
-            -E "LD_LIBRARY_PATH=$install_root/lib" \
-            "$install_root/libexec/centl" 'approx(sqrt(2), 12)' \
+            -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
+            "$installed_release_root/libexec/centl" 'approx(sqrt(2), 12)' \
             | grep -Fqx '≈ [1.41421356237, 1.41421356238]'
           printf '%s\n' \
             '{"version":1,"expression":"r = 3"}' \
