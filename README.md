@@ -9,8 +9,8 @@ default, explicit about approximation, and never prints an unjustified digit.
 You should not need to become a programmer to calculate or abandon mathematical
 rigor to program.
 
-CENTL 0.9.0 adds exact finite sums and products, exact polynomial integration,
-and stronger verified resource and substitution boundaries.
+The CENTL 0.9 series adds exact finite sums and products, exact polynomial
+integration, and stronger verified resource and substitution boundaries.
 
 ## Principles
 

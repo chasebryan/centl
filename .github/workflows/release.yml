@@ -85,6 +85,7 @@ jobs:
       LIBRARY_PATH: /opt/centl-native/lib
       LD_LIBRARY_PATH: /opt/centl-native/lib
       C_INCLUDE_PATH: /opt/centl-native/include
+      PORTABLE_X86_CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic
     outputs:
       version: ${{ steps.package.outputs.version }}
 
@@ -102,7 +103,7 @@ jobs:
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            build-essential ca-certificates curl git m4 opam patch pkg-config xz-utils
+            build-essential ca-certificates curl git m4 opam patch pkg-config qemu-user xz-utils
 
       - name: Build pinned native libraries
         run: |
@@ -112,7 +113,15 @@ jobs:
           printf '%s  %s\n' "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz" | sha256sum --check
           tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --disable-static --enable-shared
+          baseline_build=$(sh ./configfsf.guess)
+          case "$baseline_build" in
+            x86_64-*-linux-gnu) ;;
+            *) printf 'unexpected GMP package build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
+          esac
+          ABI=64 CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+            --build="$baseline_build" --prefix="$NATIVE_PREFIX" \
+            --disable-static --enable-shared --enable-fat
+          grep -qx '#define WANT_FAT_BINARY 1' config.h
           make --jobs=2
           make install
 
@@ -122,7 +131,8 @@ jobs:
           printf '%s  %s\n' "$MPFR_SHA256" "$RUNNER_TEMP/mpfr.tar.xz" | sha256sum --check
           tar -xf "$RUNNER_TEMP/mpfr.tar.xz" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/mpfr-${MPFR_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
             --disable-static --enable-shared
           make --jobs=2
           make install
@@ -133,7 +143,8 @@ jobs:
           printf '%s  %s\n' "$FLINT_SHA256" "$RUNNER_TEMP/flint.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/flint.tar.gz" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
             --with-mpfr="$NATIVE_PREFIX"
           make --jobs=2
           make install
@@ -150,6 +161,7 @@ jobs:
         id: package
         run: |
           cd "$GITHUB_WORKSPACE"
+          export CFLAGS="$PORTABLE_X86_CFLAGS"
           opam exec --switch=centl -- make quality
           opam exec --switch=centl -- make native-test
           reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
@@ -177,6 +189,13 @@ jobs:
           sh install --archive "$PWD/dist/centl-linux-x86_64.tar.gz" \
             --prefix "$install_root"
           "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
+          qemu-x86_64 -cpu core2duo \
+            -E "LD_LIBRARY_PATH=$install_root/lib" \
+            "$install_root/libexec/centl" '0.1 + 0.2' | grep -qx '3/10'
+          qemu-x86_64 -cpu core2duo \
+            -E "LD_LIBRARY_PATH=$install_root/lib" \
+            "$install_root/libexec/centl" 'approx(sqrt(2), 12)' \
+            | grep -Fqx '≈ [1.41421356237, 1.41421356238]'
           printf '%s\n' \
             '{"version":1,"expression":"r = 3"}' \
             '{"version":1,"expression":"circle_area(r)"}' \
@@ -213,6 +232,7 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET: "13.0"
       NATIVE_PREFIX: ${{ github.workspace }}/.native
+      PORTABLE_X86_CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic
 
     steps:
       - name: Check out source
@@ -243,7 +263,19 @@ jobs:
           printf '%s  %s\n' "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz" | shasum -a 256 --check
           tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --disable-static --enable-shared
+          if [ "${{ matrix.architecture }}" = x86_64 ]; then
+            export CFLAGS="$PORTABLE_X86_CFLAGS"
+            baseline_build=$(sh ./configfsf.guess)
+            case "$baseline_build" in
+              x86_64-apple-darwin*) ;;
+              *) printf 'unexpected GMP package build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
+            esac
+            ABI=64 ./configure --build="$baseline_build" \
+              --prefix="$NATIVE_PREFIX" --disable-static --enable-shared --enable-fat
+            grep -qx '#define WANT_FAT_BINARY 1' config.h
+          else
+            ./configure --prefix="$NATIVE_PREFIX" --disable-static --enable-shared
+          fi
           make -j2
           make install
 
@@ -287,6 +319,9 @@ jobs:
           C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
         run: |
           cd "$GITHUB_WORKSPACE"
+          if [ "${{ matrix.architecture }}" = x86_64 ]; then
+            export CFLAGS="$PORTABLE_X86_CFLAGS"
+          fi
           opam exec -- make native-test
           reported=$(opam exec -- _build/default/src/main.exe --version)
           version=${reported#centl }
