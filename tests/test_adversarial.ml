@@ -128,6 +128,156 @@ let repeated_derivative_binder_respects_result_limit () =
       Alcotest.failf "long derivative binder bypassed the byte limit: %s"
         (Centl_engine.text_of_value value)
 
+let polynomial_integral_output_is_preflighted () =
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_expression_nodes = 128 }
+  in
+  match Centl_engine.evaluate_with_limits limits "integrate(x^64, x)" with
+  | Error { code = "resource_limit"; message; _ } ->
+      Alcotest.(check string)
+        "integration-specific output estimate"
+        "the polynomial integral exceeds the expression-node limit" message
+  | Error error ->
+      Alcotest.failf "high-degree integral failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf "high-degree integral bypassed output preflight: %s"
+        (Centl_engine.text_of_value value)
+
+let polynomial_integral_exact_bits_are_preflighted () =
+  let large_coefficient = String.make 400 '9' in
+  let source = Printf.sprintf "integrate(%s*x^64, x)" large_coefficient in
+  let limits =
+    {
+      Centl_engine.default_evaluation_limits with
+      max_expression_nodes = 20_000;
+      max_exact_bits = 1_000;
+    }
+  in
+  match Centl_engine.evaluate_with_limits limits source with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "large-coefficient integral failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf "large-coefficient integral bypassed bit preflight: %s"
+        (Centl_engine.text_of_value value)
+
+let polynomial_integral_coprime_denominators_are_preflighted () =
+  let denominators =
+    [
+      1009;
+      1013;
+      1019;
+      1021;
+      1031;
+      1033;
+      1039;
+      1049;
+      1051;
+      1061;
+      1063;
+      1069;
+      1087;
+      1091;
+      1093;
+    ]
+  in
+  let terms =
+    List.map (fun denominator -> Printf.sprintf "x/%d" denominator) denominators
+  in
+  let source =
+    Printf.sprintf "integrate(%s, x = 0, 1)" (String.concat "+" terms)
+  in
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_exact_bits = 110 }
+  in
+  match Centl_engine.evaluate_with_limits limits source with
+  | Error { code = "resource_limit"; message; _ } ->
+      Alcotest.(check string)
+        "coprime denominator growth is rejected before coefficient conversion"
+        "the polynomial integral exceeds the exact-coefficient bit limit"
+        message
+  | Error error ->
+      Alcotest.failf "coprime-denominator integral failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf "coprime-denominator integral bypassed bit preflight: %s"
+        (Centl_engine.text_of_value value)
+
+let polynomial_integral_requires_a_bounded_profile () =
+  let source = "integrate((x + 1)^8 / (x - x + 1), x = 0, 1)" in
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_expression_nodes = 20 }
+  in
+  match Centl_engine.evaluate_with_limits limits source with
+  | Ok value ->
+      Alcotest.(check string)
+        "an unprofiled denominator stays residual instead of entering the core"
+        source
+        (Centl_engine.text_of_value value)
+  | Error error ->
+      Alcotest.failf "unprofiled integral failed with %s: %s" error.code
+        error.message
+
+let unsupported_integral_respects_result_limit () =
+  let within_limit_symbol = String.make 800 'u' in
+  let within_limit_source =
+    Printf.sprintf "integrate(f(%s), x)" within_limit_symbol
+  in
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_result_bytes = 1_024 }
+  in
+  begin match Centl_engine.evaluate_with_limits limits within_limit_source with
+  | Ok value ->
+      let rendered = Centl_engine.text_of_value value in
+      Alcotest.(check string)
+        "unsupported integral remains explicit" within_limit_source rendered;
+      Alcotest.(check bool)
+        "residual stays within the requested byte limit" true
+        (String.length rendered <= limits.max_result_bytes)
+  | Error error ->
+      Alcotest.failf "bounded unsupported integral failed with %s: %s"
+        error.code error.message
+  end;
+  let oversized_symbol = String.make 2_048 'v' in
+  let oversized_source =
+    Printf.sprintf "integrate(f(%s), x)" oversized_symbol
+  in
+  match Centl_engine.evaluate_with_limits limits oversized_source with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "oversized residual failed with %s instead: %s" error.code
+        error.message
+  | Ok value ->
+      Alcotest.failf "unsupported integral bypassed the result-byte limit: %s"
+        (Centl_engine.text_of_value value)
+
+let integral_cancellation_precedes_extraction () =
+  let cancellation_checks = ref 0 in
+  let cancelled () =
+    incr cancellation_checks;
+    !cancellation_checks = 3
+  in
+  let expression =
+    Centl_Core.Function
+      ("integrate", [ Centl_Core.Symbol "x"; Centl_Core.Symbol "x" ])
+  in
+  match
+    Centl_engine.resolve_with_limits ~cancelled
+      Centl_engine.default_evaluation_limits expression
+  with
+  | Error { code = "cancelled"; _ } ->
+      Alcotest.(check int)
+        "top-level, body, then pre-extraction checkpoint" 3 !cancellation_checks
+  | Error error ->
+      Alcotest.failf "pre-integration cancellation failed with %s: %s"
+        error.code error.message
+  | Ok expression ->
+      Alcotest.failf "integral ignored the pre-extraction cancellation: %s"
+        (Centl_engine.expression_fragments expression
+        |> Centl_engine.text_of_fragments)
+
 let rational_of_dyadic mantissa exponent =
   if exponent >= 0 then Q.mul_2exp (Q.of_bigint mantissa) exponent
   else Q.div_2exp (Q.of_bigint mantissa) (-exponent)
@@ -498,6 +648,21 @@ let () =
             malformed_native_fractions;
           Alcotest.test_case "reversed endpoint property" `Quick
             enclosure_validator_rejects_reversed_bounds;
+        ] );
+      ( "integration boundary",
+        [
+          Alcotest.test_case "high-degree output preflight" `Quick
+            polynomial_integral_output_is_preflighted;
+          Alcotest.test_case "exact-coefficient bit preflight" `Quick
+            polynomial_integral_exact_bits_are_preflighted;
+          Alcotest.test_case "coprime-denominator bit preflight" `Quick
+            polynomial_integral_coprime_denominators_are_preflighted;
+          Alcotest.test_case "bounded profile required" `Quick
+            polynomial_integral_requires_a_bounded_profile;
+          Alcotest.test_case "unsupported residual byte limit" `Quick
+            unsupported_integral_respects_result_limit;
+          Alcotest.test_case "cancellation before extraction" `Quick
+            integral_cancellation_precedes_extraction;
         ] );
       ( "JSONL",
         [

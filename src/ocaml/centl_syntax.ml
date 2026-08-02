@@ -42,6 +42,10 @@ let sections =
           entry "f(x, ...) = expression" "immutable function definition";
           entry "solve(left = right, variable)" "solve an equation exactly";
           entry "diff(expression, variable)" "differentiate";
+          entry "integrate(expression, variable)"
+            "exact polynomial antiderivative";
+          entry "integrate(expression, variable = lower, upper)"
+            "exact polynomial definite integral";
           entry "substitute(expression, variable = value)" "substitute a value";
           entry "simplify(expression)" "collect and simplify";
           entry "expand(expression)" "expand a polynomial";

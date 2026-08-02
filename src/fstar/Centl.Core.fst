@@ -838,7 +838,7 @@ let rec substitute_many
   | Power base exponent -> Power
       (substitute_many base substitutions) exponent
   | Function name arguments ->
-      if name = "sum" || name = "product" then
+      if name = "sum" || name = "product" || name = "integrate" then
         Function name
           (substitute_iteration_arguments arguments substitutions)
       else if name = "solve" then Function name
@@ -910,6 +910,22 @@ and substitute_iteration_arguments
   : Tot (list expression) (decreases (substitution_arguments_size arguments))
 =
   match arguments with
+  | body :: Symbol binder :: [] ->
+      let body_substitutions =
+        remove_substitution binder substitutions in
+      begin match body_substitutions with
+      | [] -> [ body; Symbol binder ]
+      | _ ->
+          if substitutions_mention binder body_substitutions then
+            let fresh = fresh_bound_name body body_substitutions binder in
+            [ substitute_many body
+                ({ substitution_name = binder;
+                   substitution_value = Symbol fresh } :: body_substitutions);
+              Symbol fresh ]
+          else
+            [ substitute_many body body_substitutions;
+              Symbol binder ]
+      end
   | body :: Symbol binder :: lower :: upper :: [] ->
       let body_substitutions =
         remove_substitution binder substitutions in
@@ -1017,6 +1033,42 @@ let substitution_avoids_iteration_capture_fact : prop =
 let substitution_avoids_iteration_capture ()
   : Lemma (ensures substitution_avoids_iteration_capture_fact)
 = assert_norm substitution_avoids_iteration_capture_fact
+
+let substitution_respects_indefinite_integral_binder_fact : prop =
+  substitute
+    (Function "integrate" [ Symbol "x"; Symbol "x" ])
+    "x" (Literal 2 1) =
+  Function "integrate" [ Symbol "x"; Symbol "x" ]
+
+let substitution_respects_indefinite_integral_binder ()
+  : Lemma
+      (ensures substitution_respects_indefinite_integral_binder_fact)
+= assert_norm substitution_respects_indefinite_integral_binder_fact
+
+let substitution_avoids_indefinite_integral_capture_fact : prop =
+  substitute
+    (Function "integrate" [ Symbol "y"; Symbol "x" ])
+    "y" (Symbol "x") =
+  Function "integrate"
+    [ Symbol "x"; Symbol "_centl_bound_x" ]
+
+let substitution_avoids_indefinite_integral_capture ()
+  : Lemma
+      (ensures substitution_avoids_indefinite_integral_capture_fact)
+= assert_norm substitution_avoids_indefinite_integral_capture_fact
+
+let substitution_respects_definite_integral_scope_fact : prop =
+  substitute
+    (Function "integrate"
+      [ Symbol "x"; Symbol "x"; Symbol "x"; Symbol "upper" ])
+    "x" (Literal 2 1) =
+  Function "integrate"
+    [ Symbol "x"; Symbol "x"; Literal 2 1; Symbol "upper" ]
+
+let substitution_respects_definite_integral_scope ()
+  : Lemma
+      (ensures substitution_respects_definite_integral_scope_fact)
+= assert_norm substitution_respects_definite_integral_scope_fact
 
 let substitution_fresh_name_avoids_collision_fact : prop =
   substitute
@@ -1696,6 +1748,286 @@ let polynomial_expression (coefficients:polynomial) (variable:string)
   | None -> Literal 0 1
   | Some expression -> expression
 
+(** Exact division of one polynomial coefficient by its positive target
+    degree.  The result is normalized by [make], while the postcondition keeps
+    the coefficient-level antiderivative meaning independent of that chosen
+    representation. *)
+let antiderivative_coefficient
+    (value:coefficient)
+    (degree:pos)
+  : Tot (result:coefficient{
+      equivalent result {
+        numerator = value.numerator;
+        denominator = value.denominator * degree
+      }})
+=
+  make value.numerator (value.denominator * degree)
+
+let rec antiderivative_tail_relation
+    (source integrated:polynomial)
+    (degree:pos)
+  : prop
+=
+  match source, integrated with
+  | [], [] -> True
+  | source_head :: source_tail, integrated_head :: integrated_tail ->
+      equivalent integrated_head {
+        numerator = source_head.numerator;
+        denominator = source_head.denominator * degree
+      } /\
+      antiderivative_tail_relation
+        source_tail integrated_tail (degree + 1)
+  | _, _ -> False
+
+let rec polynomial_antiderivative_tail
+    (coefficients:polynomial)
+    (degree:pos)
+  : Tot (result:polynomial{
+      antiderivative_tail_relation coefficients result degree})
+      (decreases coefficients)
+=
+  match coefficients with
+  | [] -> []
+  | coefficient :: rest ->
+      antiderivative_coefficient coefficient degree ::
+      polynomial_antiderivative_tail rest (degree + 1)
+
+let polynomial_antiderivative_relation
+    (source integrated:polynomial)
+  : prop
+=
+  match integrated with
+  | constant :: tail ->
+      equivalent constant { numerator = 0; denominator = 1 } /\
+      antiderivative_tail_relation source tail 1
+  | [] -> False
+
+(** Coefficients are stored from degree zero upward.  The canonical
+    antiderivative chooses zero as its integration constant and divides the
+    coefficient of x^n by n+1. *)
+let polynomial_antiderivative_coefficients
+    (coefficients:polynomial)
+  : Tot (result:polynomial{
+      polynomial_antiderivative_relation coefficients result})
+=
+  make 0 1 :: polynomial_antiderivative_tail coefficients 1
+
+let polynomial_antiderivative_coefficients_correct
+    (coefficients:polynomial)
+  : Lemma
+      (ensures
+        polynomial_antiderivative_relation coefficients
+          (polynomial_antiderivative_coefficients coefficients))
+= ()
+
+let derivative_coefficient
+    (value:coefficient)
+    (degree:pos)
+  : Tot coefficient
+=
+  {
+    numerator = value.numerator * degree;
+    denominator = value.denominator
+  }
+
+let rec polynomial_derivative_tail
+    (coefficients:polynomial)
+    (degree:pos)
+  : Tot polynomial (decreases coefficients)
+=
+  match coefficients with
+  | [] -> []
+  | coefficient :: rest ->
+      derivative_coefficient coefficient degree ::
+      polynomial_derivative_tail rest (degree + 1)
+
+(** Independent coefficient differentiation: discard the constant and
+    multiply each remaining coefficient by its source degree. *)
+let polynomial_derivative_coefficients
+    (coefficients:polynomial)
+  : Tot polynomial
+=
+  match coefficients with
+  | [] -> []
+  | _constant :: higher -> polynomial_derivative_tail higher 1
+
+let rec polynomial_coefficients_equivalent
+    (left right:polynomial)
+  : prop
+=
+  match left, right with
+  | [], [] -> True
+  | left_head :: left_tail, right_head :: right_tail ->
+      equivalent left_head right_head /\
+      polynomial_coefficients_equivalent left_tail right_tail
+  | _, _ -> False
+
+let rec polynomial_derivative_antiderivative_tail_correct
+    (coefficients:polynomial)
+    (degree:pos)
+  : Lemma
+      (ensures
+        polynomial_coefficients_equivalent
+          (polynomial_derivative_tail
+            (polynomial_antiderivative_tail coefficients degree)
+            degree)
+          coefficients)
+      (decreases coefficients)
+=
+  match coefficients with
+  | [] -> ()
+  | coefficient :: rest ->
+      let integrated = antiderivative_coefficient coefficient degree in
+      assert (equivalent integrated {
+        numerator = coefficient.numerator;
+        denominator = coefficient.denominator * degree
+      });
+      assert (equivalent
+        (derivative_coefficient integrated degree)
+        coefficient)
+        by (FStar.Tactics.Canon.canon ());
+      polynomial_derivative_antiderivative_tail_correct
+        rest (degree + 1)
+
+(** Formal differentiation of the generated zero-constant antiderivative
+    recovers every source coefficient up to exact rational equivalence. *)
+let polynomial_derivative_of_antiderivative_correct
+    (coefficients:polynomial)
+  : Lemma
+      (ensures
+        polynomial_coefficients_equivalent
+          (polynomial_derivative_coefficients
+            (polynomial_antiderivative_coefficients coefficients))
+          coefficients)
+=
+  polynomial_derivative_antiderivative_tail_correct coefficients 1
+
+(** Horner evaluation of ascending coefficients:
+    [a0; a1; ...] is evaluated as a0 + x * (a1 + x * ...). *)
+let rec polynomial_evaluate_horner
+    (coefficients:polynomial)
+    (point:coefficient)
+  : Tot coefficient (decreases coefficients)
+=
+  match coefficients with
+  | [] -> make 0 1
+  | constant :: higher ->
+      add constant
+        (multiply point (polynomial_evaluate_horner higher point))
+
+let polynomial_evaluate_horner_step
+    (constant:coefficient)
+    (higher:polynomial)
+    (point:coefficient)
+  : Lemma
+      (ensures
+        polynomial_evaluate_horner (constant :: higher) point =
+        add constant
+          (multiply point (polynomial_evaluate_horner higher point)))
+= ()
+
+let polynomial_definite_integral_coefficients
+    (coefficients:polynomial)
+    (lower upper:coefficient)
+  : Tot coefficient
+=
+  let antiderivative =
+    polynomial_antiderivative_coefficients coefficients in
+  subtract
+    (polynomial_evaluate_horner antiderivative upper)
+    (polynomial_evaluate_horner antiderivative lower)
+
+(** Public canonical antiderivative entry point.  [None] means that [term]
+    is outside the rational-coefficient univariate polynomial domain. *)
+let integrate_polynomial
+    (term:expression)
+    (variable:string)
+  : Tot (option expression)
+=
+  match polynomial_of term variable with
+  | None -> None
+  | Some coefficients -> Some
+      (polynomial_expression
+        (polynomial_antiderivative_coefficients coefficients)
+        variable)
+
+(** Public exact definite-integral entry point.  Host-supplied rationals are
+    validated and normalized before Horner evaluation.  Unsupported
+    integrands or malformed rational boundaries return [None], allowing the
+    host to preserve the original integral symbolically. *)
+let definite_integral_polynomial
+    (term:expression)
+    (variable:string)
+    (lower upper:rational)
+  : Tot (result:option rational{
+      match result with
+      | None -> True
+      | Some value -> invariant value})
+=
+  if lower.denominator <= 0 || upper.denominator <= 0 then None
+  else
+    match polynomial_of term variable with
+    | None -> None
+    | Some coefficients ->
+        let normalized_lower = make lower.numerator lower.denominator in
+        let normalized_upper = make upper.numerator upper.denominator in
+        Some (polynomial_definite_integral_coefficients
+          coefficients normalized_lower normalized_upper)
+
+let polynomial_antiderivative_example_fact : prop =
+  integrate_polynomial
+    (Binary Add
+      (Binary Add
+        (Binary Multiply (Literal 3 1) (Power (Symbol "x") 2))
+        (Binary Multiply (Literal 2 1) (Symbol "x")))
+      (Literal 1 1))
+    "x" =
+  Some
+    (Binary Add
+      (Binary Add (Power (Symbol "x") 3) (Power (Symbol "x") 2))
+      (Symbol "x"))
+
+let polynomial_antiderivative_example ()
+  : Lemma (ensures polynomial_antiderivative_example_fact)
+= assert_norm polynomial_antiderivative_example_fact
+
+let polynomial_horner_example_fact : prop =
+  polynomial_evaluate_horner
+    [ make 1 1; make 2 1; make 3 1 ]
+    (make 2 1) =
+  make 17 1
+
+let polynomial_horner_example ()
+  : Lemma (ensures polynomial_horner_example_fact)
+= assert_norm polynomial_horner_example_fact
+
+let polynomial_derivative_antiderivative_example_fact : prop =
+  polynomial_derivative_coefficients
+    (polynomial_antiderivative_coefficients
+      [ make 1 1; make 2 1; make 3 1 ]) =
+  [ make 1 1; make 2 1; make 3 1 ]
+
+let polynomial_derivative_antiderivative_example ()
+  : Lemma
+      (ensures polynomial_derivative_antiderivative_example_fact)
+= assert_norm polynomial_derivative_antiderivative_example_fact
+
+let polynomial_definite_integral_example_fact : prop =
+  definite_integral_polynomial
+    (Binary Add
+      (Binary Add
+        (Binary Multiply (Literal 3 1) (Power (Symbol "x") 2))
+        (Binary Multiply (Literal 2 1) (Symbol "x")))
+      (Literal 1 1))
+    "x"
+    { numerator = -1; denominator = 1 }
+    { numerator = 2; denominator = 1 } =
+  Some (make 15 1)
+
+let polynomial_definite_integral_example ()
+  : Lemma (ensures polynomial_definite_integral_example_fact)
+= assert_norm polynomial_definite_integral_example_fact
+
 let canonicalize_polynomial (term:expression) : expression =
   match scan_polynomial_variable term with
   | NoVariable -> term
@@ -1960,6 +2292,23 @@ let rewrite_function (name:string) (arguments:list expression) : expression =
   | "degrees", [Symbol "pi"] -> Literal 180 1
   | "degrees", [radians] ->
       Binary Divide (Binary Multiply radians (Literal 180 1)) (Symbol "pi")
+  | "integrate", [body; Symbol variable] ->
+      begin match integrate_polynomial body variable with
+      | Some antiderivative -> antiderivative
+      | None -> Function name arguments
+      end
+  | "integrate",
+      [ body;
+        Symbol variable;
+        Literal lower_numerator lower_denominator;
+        Literal upper_numerator upper_denominator ] ->
+      begin match definite_integral_polynomial body variable
+          { numerator = lower_numerator; denominator = lower_denominator }
+          { numerator = upper_numerator; denominator = upper_denominator }
+      with
+      | Some value -> Literal value.numerator value.denominator
+      | None -> Function name arguments
+      end
   | "gcd", [left; right] ->
       begin match integer_literal left, integer_literal right with
       | Some left_value, Some right_value ->
