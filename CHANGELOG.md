@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.1 — 2026-08-02
+
+### Fixed
+
+- Linux and macOS x86_64 release libraries now target baseline x86-64 and use
+  GMP runtime CPU dispatch instead of inheriting the hosted runner's ISA.
+- Native release CI executes the packaged Linux binary under an emulated Core 2
+  CPU for both exact GMP arithmetic and rigorous MPFR approximation.
+
+The x86_64 native libraries attached to `0.9.0` were tuned for their CI runner
+CPU and can exit with an illegal-instruction fault on older x86_64 processors.
+Source builds, Windows, and macOS arm64 artifacts are unaffected; use `0.9.1`
+for portable Linux and macOS x86_64 packages.
+
 ## 0.9.0 — 2026-08-02
 
 ### Added

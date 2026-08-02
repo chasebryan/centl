@@ -38,7 +38,7 @@ Successful and failed responses report the current definition and request
 counts:
 
 ```json
-{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
 ```
 
 Definitions use the same calculator syntax and remain immutable:
@@ -48,7 +48,7 @@ Definitions use the same calculator syntax and remain immutable:
 ```
 
 ```json
-{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
+{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
 ```
 
 ## Limits
@@ -114,7 +114,7 @@ that has a string or integer `id`:
 The acknowledgement is ordered with normal session traffic:
 
 ```json
-{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
 ```
 
 Input is read independently from evaluation, so the cancellation signal can
@@ -168,13 +168,13 @@ type.
 An exact symbolic result uses canonical plain text:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Conditional symbolic results retain machine-readable conditions:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
@@ -184,7 +184,7 @@ Equation solving returns a structured solution set. Rational parts remain
 decimal strings:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
 ```
 
 `status` is `finite`, `none`, `all`, or `unresolved`. An unresolved result is a
@@ -195,7 +195,7 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 `precision` records actual backend work:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
+{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
 ```
 
 ## Errors
@@ -203,7 +203,7 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 Failures have stable codes and mathematical messages:
 
 ```json
-{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
 ```
 
 Syntax errors also contain a zero-based byte `position`. Version 1 error codes

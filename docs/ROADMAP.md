@@ -5,9 +5,9 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.9.0` adds exact bounded sums and products, canonical zero-constant
-antiderivatives for rational-coefficient univariate polynomials, and exact
-rational-bound definite integration. Unsupported integrals remain visible.
+`0.9.1` retains the `0.9.0` exact bounded sums, products, and polynomial
+integration surface while making the x86_64 native packages portable across
+baseline processors. Unsupported integrals remain visible.
 
 ## 0. Foundation
 

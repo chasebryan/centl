@@ -13,9 +13,11 @@ sh install
 
 The installer detects Linux x86_64, macOS x86_64, or macOS arm64; verifies the
 archive's SHA-256 checksum; and installs below `~/.local` without `sudo`.
+The x86_64 packages target the baseline x86-64 ISA and select optimized GMP
+routines at runtime when the processor supports them.
 
 ```sh
-sh install --version 0.9.0
+sh install --version 0.9.1
 sh install --prefix "$HOME/software"
 ```
 
@@ -34,7 +36,7 @@ installs below `%LOCALAPPDATA%\Programs\CENTL`, and adds its command directory
 to the user's PATH. Open a new terminal after the first installation.
 
 ```powershell
-.\install.ps1 -Version 0.9.0
+.\install.ps1 -Version 0.9.1
 .\install.ps1 -Prefix "$HOME\Software\CENTL" -NoPath
 ```
 
@@ -76,9 +78,9 @@ make test
 Maintainers package an already-tested native build with:
 
 ```sh
-make release VERSION=0.9.0
+make release VERSION=0.9.1
 ```
 
 ```powershell
-.\scripts\package-release.ps1 0.9.0
+.\scripts\package-release.ps1 0.9.1
 ```
