@@ -17,6 +17,7 @@ first exact-calculator slice is verified and tested with these versions:
 | MPFR | 4.2.2 |
 | Alcotest | 1.9.1 |
 | QCheck | 0.91 |
+| OCamlFormat | 0.29.0 |
 | Julia | 1.12.6 |
 | Nemo | 0.56.1 |
 
@@ -26,6 +27,7 @@ first exact-calculator slice is verified and tested with these versions:
 - The Z3 version bundled with the selected F* release.
 - OCaml 4.14 and OPAM for extraction and the application host.
 - Dune for OCaml builds.
+- OCamlFormat for enforced source formatting.
 - Zarith for extracted unbounded integers.
 - FLINT 3, including Arb and Calcium, with GMP and MPFR.
 - A C compiler and GNU Make for native bindings.
@@ -57,6 +59,7 @@ fstar.exe --version
 "$(fstar.exe --locate_z3 4.13.3)" --version
 ocamlopt -version
 dune --version
+ocamlformat --version
 pkg-config --modversion flint
 julia --version
 julia -e 'using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2)))'
@@ -83,4 +86,5 @@ use `scripts/package-release.ps1 x.y.z`.
 Release automation verifies and extracts the F* core once, then runs native
 builds and installed-package tests on Linux x86_64, macOS x86_64, macOS arm64,
 and Windows x86_64. F*, GMP, MPFR, and FLINT source archives are accepted only
-when they match the checksums pinned in the workflow.
+when they match the canonical pins in `toolchain.lock` and the synchronized
+workflow checksums.

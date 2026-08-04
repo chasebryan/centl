@@ -34,9 +34,23 @@ object as `centl --serve`. Definitions persist across tool calls in one server
 process. The server has no network listener, reads no credentials, and accesses
 no files on behalf of a tool call.
 
-Exact finite `sum` and `product` expressions use this same tool and return the
-ordinary exact integer, rational, or symbolic value schema. Nested iterations
-share the call's `max_integer_iterations` budget.
+Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use this
+same tool. Sums and products return the ordinary exact integer, rational, or
+symbolic value schema. Sequences and recurrences return a structured exact
+`sequence` value whose ordered `items` use those scalar schemas:
+
+```json
+{"jsonrpc":"2.0","id":"squares","method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"sequence(k^2, k = 1, 3)"}}}
+```
+
+The tool's text content is `[1, 4, 9]`; its
+`structuredContent.value` has `kind: "sequence"`, `exact: true`, `length: 3`,
+and the three exact integer items. Its provenance is classified
+`exact_sequence` with method `finite_iteration` and backend `centl-iteration`.
+The identical shape is documented in
+[the machine protocol](PROTOCOL.md#exact-sequences). Nested bounded operations
+share the call's `max_integer_iterations`, expression-work, exact-bit,
+expression-node, and result-byte budgets.
 
 Every calculation result contains human-readable `content` and the complete
 CENTL protocol response in `structuredContent`. Mathematical failures such as
@@ -58,7 +72,7 @@ an outstanding `tools/call` by its JSON-RPC request ID:
 The input reader marks an active or queued tool call immediately while the
 stateful evaluator continues to process calculations and definitions in FIFO
 order. Cancellation is cooperative at parser, session-expansion,
-finite-iteration term boundaries, symbolic-transformation,
+bounded-iteration term boundaries, symbolic-transformation,
 approximation-retry, and pre-commit checkpoints. A native backend call already
 in progress completes before the next checkpoint.
 A definition whose evaluation observes cancellation is not committed. A signal

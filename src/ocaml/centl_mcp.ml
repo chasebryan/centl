@@ -131,14 +131,16 @@ let limits_schema =
                 "Maximum expression nodes after session expansion." );
             ( "max_exact_bits",
               integer 1 limits.max_exact_bits
-                "Maximum estimated bits in an exact result." );
+                "Maximum aggregate exact-result bits, checked before and after \
+                 evaluation." );
             ( "max_integer_iterations",
               integer 1 limits.max_integer_iterations
                 "Maximum iterations for factorial, combinatorics, or sequences."
             );
             ( "max_result_bytes",
               integer 1 limits.max_result_bytes
-                "Maximum rendered result bytes and retained session text." );
+                "Maximum serialized mathematical-value bytes and retained \
+                 session-value bytes." );
             ( "max_bindings",
               integer 0 limits.max_bindings
                 "Maximum immutable definitions in this session." );

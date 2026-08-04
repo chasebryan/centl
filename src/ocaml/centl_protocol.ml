@@ -122,89 +122,9 @@ let cancellation_target_of_json = function
       end
   | _ -> None
 
-let bounded_int fields name ~minimum ~maximum ~default =
-  match List.assoc_opt name fields with
-  | None -> Ok default
-  | Some (`Int value) when value >= minimum && value <= maximum -> Ok value
-  | Some _ ->
-      Error
-        (Printf.sprintf "limits.%s must be an integer between %d and %d" name
-           minimum maximum)
-
 let request_limits state fields =
-  let ( let* ) result next = Result.bind result next in
-  match List.assoc_opt "limits" fields with
-  | None -> Ok state.limits.evaluation
-  | Some (`Assoc requested) ->
-      let allowed =
-        [
-          "max_source_bytes";
-          "max_expression_nodes";
-          "max_exact_bits";
-          "max_integer_iterations";
-          "max_result_bytes";
-          "max_bindings";
-          "max_precision_digits";
-          "max_working_bits";
-        ]
-      in
-      begin match
-        List.find_opt (fun (name, _) -> not (List.mem name allowed)) requested
-      with
-      | Some (name, _) -> Error ("unknown limit " ^ name)
-      | None ->
-          let ceiling = state.limits.evaluation in
-          let* max_source_bytes =
-            bounded_int requested "max_source_bytes" ~minimum:1
-              ~maximum:ceiling.max_source_bytes
-              ~default:ceiling.max_source_bytes
-          in
-          let* max_expression_nodes =
-            bounded_int requested "max_expression_nodes" ~minimum:1
-              ~maximum:ceiling.max_expression_nodes
-              ~default:ceiling.max_expression_nodes
-          in
-          let* max_exact_bits =
-            bounded_int requested "max_exact_bits" ~minimum:1
-              ~maximum:ceiling.max_exact_bits ~default:ceiling.max_exact_bits
-          in
-          let* max_integer_iterations =
-            bounded_int requested "max_integer_iterations" ~minimum:1
-              ~maximum:ceiling.max_integer_iterations
-              ~default:ceiling.max_integer_iterations
-          in
-          let* max_result_bytes =
-            bounded_int requested "max_result_bytes" ~minimum:1
-              ~maximum:ceiling.max_result_bytes
-              ~default:ceiling.max_result_bytes
-          in
-          let* max_bindings =
-            bounded_int requested "max_bindings" ~minimum:0
-              ~maximum:ceiling.max_bindings ~default:ceiling.max_bindings
-          in
-          let* max_precision_digits =
-            bounded_int requested "max_precision_digits" ~minimum:1
-              ~maximum:ceiling.max_precision_digits
-              ~default:ceiling.max_precision_digits
-          in
-          let* max_working_bits =
-            bounded_int requested "max_working_bits" ~minimum:64
-              ~maximum:ceiling.max_working_bits
-              ~default:ceiling.max_working_bits
-          in
-          Ok
-            {
-              Centl_engine.max_source_bytes;
-              max_expression_nodes;
-              max_exact_bits;
-              max_integer_iterations;
-              max_result_bytes;
-              max_bindings;
-              max_precision_digits;
-              max_working_bits;
-            }
-      end
-  | Some _ -> Error "limits must be an object"
+  Centl_engine.requested_evaluation_limits ~ceiling:state.limits.evaluation
+    fields
 
 let session_result state id evaluation =
   Centl_engine.json_of_session_evaluation evaluation |> response state ?id

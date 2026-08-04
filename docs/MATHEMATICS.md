@@ -11,7 +11,10 @@ approx(sqrt(2), 20)          ≈ [1.4142135623730950488, 1.4142135623730950489]
 `approx(expression)` requests 20 significant decimal digits.
 `approx(expression, digits)` requests between 1 and 1000. The result is an
 outward-rounded interval containing the mathematical value, not a point
-estimate disguised as an exact answer.
+estimate disguised as an exact answer. Because an enclosure is not an exact
+scalar, `approx(...)` must be the outermost evaluation request; embedding it in
+exact arithmetic, conditions, or symbolic transformations returns
+`approximation_not_expression`.
 
 ## Trigonometry and elementary functions
 
@@ -81,19 +84,24 @@ factorial(n)           fibonacci(n)
 choose(n, k)           permutations(n, k)
 ```
 
-Finite sums, products, recurrences, sequences, and generating functions are
-the concrete-mathematics layer. The first bounded iteration slice provides:
+Finite sums, products, recurrences, sequences, and generating functions form
+the concrete-mathematics layer. The implemented bounded exact forms are:
 
 ```text
 sum(expression, variable = lower, upper)
 product(expression, variable = lower, upper)
+sequence(expression, variable = lower, upper)
+recurrence(initial, previous = step, index = lower, upper)
 ```
 
-Both bounds are inclusive exact integers. Empty sums are `0`, empty products
-are `1`, and every term is combined exactly within the active machine resource
-limits. See [exact finite iteration](ITERATION.md). Recurrences, sequences, and
-generating functions remain the next extensions; they will use calculator
-syntax and the same exact-first value model rather than a separate subsystem.
+Bounds are inclusive exact integers. Empty sums are `0`, empty products are
+`1`, and empty sequences and recurrences are `[]`. A recurrence's initial value
+occupies its lower index, and its step receives the preceding exact value and
+each later index. Sequence elements and recurrence terms remain exact scalar
+values within the active machine resource limits. See
+[exact finite iteration and sequences](ITERATION.md). Generating functions
+remain a later extension and will use the same exact-first value model rather
+than a separate subsystem.
 
 ## Current limits
 

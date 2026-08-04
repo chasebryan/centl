@@ -366,7 +366,7 @@ let parse source =
                   (token_name kind);
             }
       end
-    else if name = "sum" || name = "product" then
+    else if name = "sum" || name = "product" || name = "sequence" then
       let* body, next = expression index in
       let* next = comma next in
       begin match (current next).kind with
@@ -395,6 +395,69 @@ let parse source =
               position = (current next).start;
               message =
                 Printf.sprintf "expected an iteration variable, found %s"
+                  (token_name kind);
+            }
+      end
+    else if name = "recurrence" then
+      let* initial, next = expression index in
+      let* next = comma next in
+      begin match (current next).kind with
+      | Identifier previous ->
+          let equals = current (next + 1) in
+          if equals.kind <> Equals then
+            Error
+              {
+                position = equals.start;
+                message =
+                  Printf.sprintf "expected '=', found %s"
+                    (token_name equals.kind);
+              }
+          else
+            let* step, next = expression (next + 2) in
+            let* next = comma next in
+            begin match (current next).kind with
+            | Identifier variable ->
+                let equals = current (next + 1) in
+                if equals.kind <> Equals then
+                  Error
+                    {
+                      position = equals.start;
+                      message =
+                        Printf.sprintf "expected '=', found %s"
+                          (token_name equals.kind);
+                    }
+                else
+                  let* lower, next = expression (next + 2) in
+                  let* next = comma next in
+                  let* upper, next = expression next in
+                  let* (), finish = closing_paren next in
+                  Ok
+                    ( Centl_Core.Function
+                        ( "recurrence",
+                          [
+                            initial;
+                            step;
+                            Centl_Core.Symbol previous;
+                            Centl_Core.Symbol variable;
+                            lower;
+                            upper;
+                          ] ),
+                      finish )
+            | kind ->
+                Error
+                  {
+                    position = (current next).start;
+                    message =
+                      Printf.sprintf "expected a recurrence index, found %s"
+                        (token_name kind);
+                  }
+            end
+      | kind ->
+          Error
+            {
+              position = (current next).start;
+              message =
+                Printf.sprintf "expected a recurrence value name, found %s"
                   (token_name kind);
             }
       end

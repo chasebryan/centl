@@ -117,6 +117,10 @@ let sections =
           entry "sum(expression, variable = lower, upper)" "exact finite sum";
           entry "product(expression, variable = lower, upper)"
             "exact finite product";
+          entry "sequence(expression, variable = lower, upper)"
+            "bounded exact sequence";
+          entry "recurrence(initial, previous = step, index = lower, upper)"
+            "bounded first-order exact recurrence";
         |];
     };
     {
@@ -124,6 +128,24 @@ let sections =
       entries = [| entry "# comment" "ignored line in a script" |];
     };
   |]
+
+let completion_names =
+  let add_candidate names candidate =
+    if candidate = "f" || List.mem candidate names then names
+    else candidate :: names
+  in
+  let add_entry names item =
+    match String.index_opt item.form '(' with
+    | Some index when index > 0 ->
+        add_candidate names (String.sub item.form 0 index)
+    | _ when item.form = "pi" || item.form = "e" || item.form = "tau" ->
+        add_candidate names item.form
+    | _ -> names
+  in
+  Array.fold_left
+    (fun names section -> Array.fold_left add_entry names section.entries)
+    [] sections
+  |> List.sort String.compare
 
 let examples =
   [|
