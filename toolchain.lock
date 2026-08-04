@@ -3,6 +3,7 @@ schema = 1
 [verification]
 fstar = "2026.07.05"
 fstar_commit = "2173bc4316a51f01754f10bf94f697aba083c2e0"
+fstar_sha256 = "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
 z3 = "4.13.3"
 
 [runtime]
@@ -17,6 +18,9 @@ mpfr = "4.2.2"
 [test]
 alcotest = "1.9.1"
 qcheck = "0.91"
+
+[development]
+ocamlformat = "0.29.0"
 
 [laboratory]
 julia = "1.12.6"

@@ -1,5 +1,6 @@
 FSTAR ?= fstar.exe
 JULIA ?= julia
+OPAM ?= opam
 OPAM_SWITCH ?= centl
 DUNE ?= $(shell \
 	if command -v dune >/dev/null 2>&1; then command -v dune; \
@@ -13,7 +14,7 @@ GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
-.PHONY: all format fmt lint quality verify extract native-build native-test \
+.PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
 	adversarial-test fuzz-test differential-test build test release clean
 
 all: build
@@ -21,10 +22,15 @@ all: build
 format:
 	$(DUNE) build @fmt
 
+format-fix:
+	$(DUNE) fmt
+
 fmt: format
 
 lint:
-	$(DUNE) build @check @lint
+	$(DUNE) build @check
+	$(OPAM) lint centl.opam
+	scripts/check-toolchain-pins
 
 quality: format lint
 
@@ -72,4 +78,3 @@ release: build
 
 clean:
 	$(DUNE) clean
-	rm -f src/generated/*.ml src/generated/*.mli

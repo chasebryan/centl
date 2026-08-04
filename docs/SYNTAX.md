@@ -50,10 +50,12 @@ enclosure.
 `gcd(a, b)` `lcm(a, b)` `factorial(n)` `choose(n, k)`
 `permutations(n, k)` `fibonacci(n)`
 
-### Finite iteration
+### Finite iteration and sequences
 
 `sum(expression, variable = lower, upper)`
 `product(expression, variable = lower, upper)`
+`sequence(expression, variable = lower, upper)`
+`recurrence(initial, previous = step, index = lower, upper)`
 
 ### Scripts
 
@@ -66,6 +68,8 @@ exact          0.1 + 0.2                         -> 3/10
 calculus       diff(x^3 + 2*x + 1, x)            -> 3 * x^2 + 2
 integration    integrate(x^2, x = 0, 1)          -> 1/3
 definition     f(x) = x^2 + 1                    -> f(x) = x^2 + 1
+sequence       sequence(k^2, k = 1, 4)           -> [1, 4, 9, 16]
+recurrence     recurrence(1, a = a*n, n = 0, 4)  -> [1, 1, 2, 6, 24]
 geometry       circle_area(3)                    -> 9 * pi
 rigorous       approx(sqrt(2), 12)               -> ≈ [1.41421356237, 1.41421356238]
 ```
@@ -81,3 +85,18 @@ positive powers no larger than 64. Explicit zero powers remain residual to
 preserve the possible `0^0` error. `integrate(p, x)` selects the zero-constant
 antiderivative, while `integrate(p, x = a, b)` requires exact rational bounds.
 Unsupported integrals stay visible as `integrate(...)` expressions.
+
+Finite sequence bounds are inclusive exact integers. A sequence index scopes
+only its element expression. In a recurrence, `initial` is the term at the
+lower index; `previous` and `index` scope only `step`, which is evaluated for
+each later index. A lower bound greater than the upper bound produces `[]`
+without evaluating the element, initial value, or step. Sequence elements and
+recurrence terms must be scalar exact values, and the resulting sequence is not
+a scalar operand. See [exact finite iteration and sequences](ITERATION.md).
+
+Statements may span lines without a continuation marker while parentheses are
+open or an operator still needs a right-hand operand. The calculator shows
+`....>` for continuation lines;
+standard input and `--file` scripts use the same rule. Interactive terminals
+offer Tab completion and process-local history through Up/Down, `:history`, and
+`:clear-history`.

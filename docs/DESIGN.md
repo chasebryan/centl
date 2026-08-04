@@ -116,6 +116,7 @@ CENTL has no general-purpose semantic `float` value.
 ExactInteger
 ExactRational
 ExactSymbolic
+ExactSequence
 ExactSolutionSet
 RealEnclosure
 ComplexEnclosure
@@ -124,6 +125,11 @@ Indeterminate
 
 Every result also carries provenance sufficient to explain whether it was
 computed exactly, enclosed numerically, or left unresolved.
+
+An exact sequence is a bounded ordered collection of exact scalar integers,
+rationals, or symbolic values. It is a result value rather than a scalar
+expression: arithmetic and approximation do not implicitly map across it, and
+nested sequences are not part of the current value model.
 
 Conditions attached with `assuming` remain part of the symbolic result. A
 simplifier may use a condition only for a rule it establishes directly, and the
@@ -152,6 +158,14 @@ The human interface is calculator-first. A script is a saved sequence of the
 same expressions and immutable definitions accepted by the REPL. Definition
 state belongs to one calculator, script, stateful JSON Lines process, or MCP
 process. The one-shot and legacy streaming `--json` forms remain stateless.
+
+The calculator, piped human input, and files share syntax-aware statement
+assembly, so an incomplete expression may continue on following lines without
+a separate continuation grammar. Interactive terminals add completion from the
+syntax catalog and current session definitions plus a bounded process-local
+history. Human parse diagnostics retain source name, line, column, and a caret
+excerpt; machine syntax errors continue to expose the stable zero-based byte
+position.
 
 The machine interface uses versioned JSON over standard input and output. It
 returns structured exact values, enclosure endpoints, precision metadata,

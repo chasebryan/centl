@@ -2,19 +2,24 @@ name: Native releases
 
 on:
   workflow_dispatch:
-  pull_request:
   push:
     branches:
       - main
     tags:
       - "v*"
 
+concurrency:
+  group: native-release-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' && github.ref_type != 'tag' }}
+
 permissions:
   contents: read
 
 env:
   FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
   FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
   GMP_VERSION: "6.3.0"
   GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
   MPFR_VERSION: "4.2.2"
@@ -52,11 +57,17 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP/fstar"
           fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
           test -n "$fstar"
+          "$fstar" --version | grep -F "commit=${FSTAR_COMMIT}"
+          z3=$("$fstar" --locate_z3 "$Z3_VERSION")
+          "$z3" --version | grep -F "Z3 version ${Z3_VERSION}"
           printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
 
       - name: Verify and extract OCaml
         run: |
           make extract
+          git ls-files --error-unmatch \
+            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
+          git diff --exit-code -- src/generated
           mkdir -p release-input/licenses
           fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
           cp "$(dirname "$fstar")/../LICENSE" release-input/licenses/FSTAR
@@ -193,7 +204,8 @@ jobs:
           installed_release_root=$(CDPATH= cd -- "$(dirname -- "$installed_launcher")/.." && pwd)
           qemu-x86_64 -cpu core2duo \
             -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
-            "$installed_release_root/libexec/centl" '0.1 + 0.2' | grep -qx '3/10'
+            "$installed_release_root/libexec/centl" '2^256' \
+            | grep -qx '115792089237316195423570985008687907853269984665640564039457584007913129639936'
           qemu-x86_64 -cpu core2duo \
             -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
             "$installed_release_root/libexec/centl" 'approx(sqrt(2), 12)' \

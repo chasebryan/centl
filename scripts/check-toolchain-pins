@@ -1,0 +1,154 @@
+#!/bin/sh
+set -eu
+
+repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$repository_root"
+
+lock_value() {
+  awk -v wanted_section="$1" -v wanted_key="$2" '
+    $0 == "[" wanted_section "]" { in_section = 1; next }
+    /^\[/ { in_section = 0 }
+    in_section && $1 == wanted_key && $2 == "=" {
+      gsub(/^"|"$/, "", $3)
+      print $3
+      found = 1
+      exit
+    }
+    END { if (!found) exit 1 }
+  ' toolchain.lock
+}
+
+require_text() {
+  file=$1
+  expected=$2
+  description=$3
+  if ! grep -Fq -- "$expected" "$file"; then
+    printf '%s is not synchronized with toolchain.lock: %s\n' \
+      "$file" "$description" >&2
+    exit 1
+  fi
+}
+
+require_opam_pin() {
+  package=$1
+  version=$2
+  require_text centl.opam \
+    "\"$package\" {= \"$version\"}" \
+    "$package must be pinned to $version"
+}
+
+require_unique_workflow_pin() {
+  file=$1
+  package=$2
+  version=$3
+  pins=$(grep -Eo "${package}\.[0-9][0-9A-Za-z.+_~-]*" "$file" \
+    | sort -u || true)
+  if [ "$pins" != "$package.$version" ]; then
+    printf '%s has inconsistent %s pins; expected only %s.%s, found: %s\n' \
+      "$file" "$package" "$package" "$version" "${pins:-none}" >&2
+    exit 1
+  fi
+}
+
+ocaml=$(lock_value runtime ocaml)
+dune=$(lock_value runtime dune)
+zarith=$(lock_value runtime zarith)
+yojson=$(lock_value runtime yojson)
+flint=$(lock_value runtime flint)
+gmp=$(lock_value runtime gmp)
+mpfr=$(lock_value runtime mpfr)
+alcotest=$(lock_value test alcotest)
+qcheck=$(lock_value test qcheck)
+ocamlformat=$(lock_value development ocamlformat)
+fstar=$(lock_value verification fstar)
+fstar_commit=$(lock_value verification fstar_commit)
+fstar_sha256=$(lock_value verification fstar_sha256)
+z3=$(lock_value verification z3)
+julia=$(lock_value laboratory julia)
+nemo=$(lock_value laboratory nemo)
+json3=$(lock_value laboratory json3)
+
+require_opam_pin ocaml "$ocaml"
+require_opam_pin dune "$dune"
+require_opam_pin zarith "$zarith"
+require_opam_pin yojson "$yojson"
+require_opam_pin ocamlformat "$ocamlformat"
+require_text centl.opam \
+  "\"alcotest\" {with-test & = \"$alcotest\"}" \
+  "alcotest must be pinned to $alcotest"
+require_text centl.opam \
+  "\"qcheck\" {with-test & = \"$qcheck\"}" \
+  "qcheck must be pinned to $qcheck"
+
+require_text .ocamlformat "version=$ocamlformat" \
+  "OCamlFormat must be pinned to $ocamlformat"
+require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
+  "OCamlFormat must be documented as $ocamlformat"
+require_text .github/workflows/ci.yml "FSTAR_VERSION: \"$fstar\"" \
+  "F* must be pinned to $fstar"
+require_text .github/workflows/release.yml "FSTAR_VERSION: \"$fstar\"" \
+  "F* must be pinned to $fstar"
+for workflow in .github/workflows/ci.yml .github/workflows/release.yml; do
+  require_text "$workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
+    "F* commit must be pinned to $fstar_commit"
+  require_text "$workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
+    "F* archive checksum must be pinned to $fstar_sha256"
+  require_text "$workflow" "Z3_VERSION: \"$z3\"" \
+    "Z3 must be pinned to $z3"
+done
+fstar_commit_short=$(printf '%.7s' "$fstar_commit")
+require_text docs/TOOLCHAIN.md "| F* | $fstar (\`$fstar_commit_short\`) |" \
+  "F* release and commit must be documented"
+require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
+  "Z3 must be documented as $z3"
+require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
+  "the contributor F* checksum must match $fstar_sha256"
+require_text .github/workflows/ci.yml "version: \"$julia\"" \
+  "Julia must be pinned to $julia"
+
+require_unique_workflow_pin .github/workflows/ci.yml ocaml-base-compiler "$ocaml"
+for pin in \
+  "ocaml-base-compiler:$ocaml" \
+  "dune:$dune" \
+  "zarith:$zarith" \
+  "yojson:$yojson" \
+  "alcotest:$alcotest" \
+  "qcheck:$qcheck" \
+  "ocamlformat:$ocamlformat"; do
+  package=${pin%%:*}
+  version=${pin#*:}
+  require_unique_workflow_pin .github/workflows/release.yml "$package" "$version"
+done
+
+for pair in "GMP:$gmp" "MPFR:$mpfr" "FLINT:$flint"; do
+  variable=${pair%%:*}
+  version=${pair#*:}
+  require_text .github/workflows/release.yml \
+    "${variable}_VERSION: \"$version\"" \
+    "$variable must be pinned to $version"
+done
+
+manifest_version() {
+  awk -v wanted="$1" '
+    $0 == "[[deps." wanted "]]" { in_package = 1; next }
+    /^\[\[deps\./ { in_package = 0 }
+    in_package && $1 == "version" && $2 == "=" {
+      gsub(/^"|"$/, "", $3)
+      print $3
+      found = 1
+      exit
+    }
+    END { if (!found) exit 1 }
+  ' lab/julia/Manifest.toml
+}
+
+[ "$(manifest_version Nemo)" = "$nemo" ] || {
+  printf '%s\n' 'lab/julia/Manifest.toml has the wrong Nemo pin' >&2
+  exit 1
+}
+[ "$(manifest_version JSON3)" = "$json3" ] || {
+  printf '%s\n' 'lab/julia/Manifest.toml has the wrong JSON3 pin' >&2
+  exit 1
+}
+
+printf '%s\n' 'Toolchain manifests and workflows are synchronized.'

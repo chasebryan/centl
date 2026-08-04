@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.10.0 — UNRELEASED
+
+This is preparation only. The runtime version, Git tag, installers, protocol
+producer version, and published release remain `0.9.1`.
+
+### Added
+
+- `sequence(expression, variable = lower, upper)` produces an exact finite
+  sequence over inclusive integer bounds, with lexical index scope and a
+  defined empty result.
+- `recurrence(initial, previous = step, index = lower, upper)` produces an
+  exact first-order bounded recurrence. The initial value occupies the lower
+  index and every later term receives the previous exact value and its current
+  index.
+- Exact sequences have a structured protocol value, provenance, and identical
+  behavior through one-shot JSON, persistent JSON Lines, and MCP.
+- Human input supports syntax-aware multiline statements in the calculator,
+  standard-input scripts, and `--file` scripts. Human syntax diagnostics now
+  include source locations and a caret excerpt.
+- Interactive terminals provide built-in and session-name completion plus a
+  bounded in-memory history with `:history` and `:clear-history` commands.
+- A pinned opam manifest, contributor bootstrap, honest formatting and lint
+  gates, and a focused pull-request verification workflow make the development
+  path reproducible.
+
+### Changed
+
+- Exact rendering now uses an explicit traversal stack and bounded buffer
+  construction, including cancellation-aware size preflight, so deeply nested
+  symbolic results do not depend on the OCaml call stack.
+- Sequences and recurrences share the existing request-wide iteration, exact
+  bit, symbolic node, serialized-value byte, work, and cancellation limits.
+  Aggregate retained sequence elements are checked before a result is returned
+  or a definition is committed.
+- Empty finite ranges defer session-function expansion as well as evaluation.
+  Exact-bit budgets use rational numerator/denominator profiles and validate
+  the actual exact payload before output; sequence and enclosure results cannot
+  cross scalar-only iteration or symbolic-transformation boundaries.
+- Pull requests run the pinned Linux verification, native, quality, and seeded
+  Julia/Nemo differential path. Full native packaging remains on `main`, tags,
+  and manual runs, and superseded branch runs are cancelled.
+
+Machine protocol version 1 remains unchanged. Consumers that exhaustively
+match value kinds must accept the new exact `sequence` kind. `sequence` and
+`recurrence` are reserved built-in names.
+
 ## 0.9.1 — 2026-08-02
 
 ### Fixed

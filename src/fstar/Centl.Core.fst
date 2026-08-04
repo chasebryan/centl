@@ -838,9 +838,12 @@ let rec substitute_many
   | Power base exponent -> Power
       (substitute_many base substitutions) exponent
   | Function name arguments ->
-      if name = "sum" || name = "product" || name = "integrate" then
+      if name = "sum" || name = "product" || name = "integrate" ||
+         name = "sequence" then
         Function name
           (substitute_iteration_arguments arguments substitutions)
+      else if name = "recurrence" then Function name
+        (substitute_recurrence_arguments arguments substitutions)
       else if name = "solve" then Function name
         (substitute_solve_arguments arguments substitutions)
       else Function name
@@ -955,6 +958,49 @@ and substitute_iteration_arguments
       substitute_many argument substitutions ::
       substitute_many_arguments rest substitutions
 
+and substitute_recurrence_arguments
+    (arguments:list expression)
+    (substitutions:list substitution_binding)
+  : Tot (list expression) (decreases (substitution_arguments_size arguments))
+=
+  match arguments with
+  | initial :: step :: Symbol original_previous :: Symbol original_variable ::
+      lower :: upper :: [] ->
+      let step_substitutions =
+        remove_substitution original_variable
+          (remove_substitution original_previous substitutions) in
+      let previous =
+        if substitutions_mention original_previous step_substitutions then
+          let scope = Function "recurrence" [step; Symbol original_variable] in
+          fresh_bound_name scope step_substitutions original_previous
+        else original_previous in
+      let variable =
+        if substitutions_mention original_variable step_substitutions then
+          let scope = Function "recurrence" [step; Symbol previous] in
+          fresh_bound_name scope step_substitutions original_variable
+        else original_variable in
+      let renamed_variable_substitutions =
+        if variable = original_variable then step_substitutions
+        else
+          { substitution_name = original_variable;
+            substitution_value = Symbol variable } :: step_substitutions in
+      let scoped_substitutions =
+        if previous = original_previous then renamed_variable_substitutions
+        else
+          { substitution_name = original_previous;
+            substitution_value = Symbol previous } ::
+          renamed_variable_substitutions in
+      [ substitute_many initial substitutions;
+        substitute_many step scoped_substitutions;
+        Symbol previous;
+        Symbol variable;
+        substitute_many lower substitutions;
+        substitute_many upper substitutions ]
+  | [] -> []
+  | argument :: rest ->
+      substitute_many argument substitutions ::
+      substitute_many_arguments rest substitutions
+
 and substitute_solve_arguments
     (arguments:list expression)
     (substitutions:list substitution_binding)
@@ -1033,6 +1079,52 @@ let substitution_avoids_iteration_capture_fact : prop =
 let substitution_avoids_iteration_capture ()
   : Lemma (ensures substitution_avoids_iteration_capture_fact)
 = assert_norm substitution_avoids_iteration_capture_fact
+
+let substitution_avoids_sequence_capture_fact : prop =
+  substitute
+    (Function "sequence"
+      [ Binary Add (Symbol "x") (Symbol "k");
+        Symbol "k";
+        Literal 1 1;
+        Literal 2 1 ])
+    "x" (Symbol "k") =
+  Function "sequence"
+    [ Binary Add (Symbol "k") (Symbol "_centl_bound_k");
+      Symbol "_centl_bound_k";
+      Literal 1 1;
+      Literal 2 1 ]
+
+let substitution_avoids_sequence_capture ()
+  : Lemma (ensures substitution_avoids_sequence_capture_fact)
+= assert_norm substitution_avoids_sequence_capture_fact
+
+let substitution_avoids_recurrence_capture_fact : prop =
+  substitute
+    (Function "recurrence"
+      [ Symbol "x";
+        Binary Add
+          (Binary Add (Symbol "a") (Symbol "x"))
+          (Symbol "n");
+        Symbol "a";
+        Symbol "n";
+        Symbol "x";
+        Literal 2 1 ])
+    "x" (Binary Add (Symbol "a") (Symbol "n")) =
+  Function "recurrence"
+    [ Binary Add (Symbol "a") (Symbol "n");
+      Binary Add
+        (Binary Add
+          (Symbol "_centl_bound_a")
+          (Binary Add (Symbol "a") (Symbol "n")))
+        (Symbol "_centl_bound_n");
+      Symbol "_centl_bound_a";
+      Symbol "_centl_bound_n";
+      Binary Add (Symbol "a") (Symbol "n");
+      Literal 2 1 ]
+
+let substitution_avoids_recurrence_capture ()
+  : Lemma (ensures substitution_avoids_recurrence_capture_fact)
+= assert_norm substitution_avoids_recurrence_capture_fact
 
 let substitution_respects_indefinite_integral_binder_fact : prop =
   substitute

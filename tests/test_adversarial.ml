@@ -113,6 +113,125 @@ let left_deep_expression_is_bounded () =
       Alcotest.failf "large exact sum failed with %s: %s" error.code
         error.message
 
+let left_nested_sum operator_count =
+  let rec build remaining expression =
+    if remaining = 0 then expression
+    else
+      build (remaining - 1)
+        (Centl_Core.Binary (Centl_Core.Add, expression, Centl_Core.Symbol "x"))
+  in
+  build operator_count (Centl_Core.Symbol "x")
+
+let nested_negations depth =
+  let rec build remaining expression =
+    if remaining = 0 then expression
+    else build (remaining - 1) (Centl_Core.Negate expression)
+  in
+  build depth (Centl_Core.Symbol "x")
+
+let renderer_preserves_semantic_fragments () =
+  let expression =
+    Centl_Core.Binary
+      ( Centl_Core.Multiply,
+        Centl_Core.Binary
+          ( Centl_Core.Add,
+            Centl_Core.Symbol "x",
+            Centl_Core.Literal (Z.one, Z.of_int 2) ),
+        Centl_Core.Negate (Centl_Core.Power (Centl_Core.Symbol "y", Z.of_int 3))
+      )
+  in
+  let fragment_label = function
+    | Centl_engine.Number -> "number"
+    | Centl_engine.Symbol_name -> "symbol"
+    | Centl_engine.Function_name -> "function"
+    | Centl_engine.Operator -> "operator"
+    | Centl_engine.Punctuation -> "punctuation"
+  in
+  let encoded =
+    Centl_engine.expression_fragments expression
+    |> List.map (fun (style, text) -> fragment_label style ^ ":" ^ text)
+  in
+  Alcotest.(check (list string))
+    "fragment order, boundaries, and styles"
+    [
+      "punctuation:(";
+      "symbol:x";
+      "operator: + ";
+      "number:1";
+      "operator:/";
+      "number:2";
+      "punctuation:)";
+      "operator: * ";
+      "operator:-";
+      "symbol:y";
+      "operator:^";
+      "number:3";
+    ]
+    encoded;
+  Alcotest.(check string)
+    "plain rendering" "(x + 1/2) * -y^3"
+    (Centl_engine.expression_fragments expression
+    |> Centl_engine.text_of_fragments);
+  Alcotest.(check string)
+    "session rendering" "f(x, y) = (x + 1/2) * -y^3"
+    (Centl_engine.text_of_session_result
+       (Centl_engine.Defined_function ("f", [ "x"; "y" ], expression)))
+
+let allocated_bytes render value =
+  Gc.full_major ();
+  let before = Gc.allocated_bytes () in
+  ignore (Sys.opaque_identity (render value));
+  Gc.allocated_bytes () -. before
+
+let renderer_allocation_scales_linearly () =
+  let small = left_nested_sum 500 in
+  let large = left_nested_sum 2_000 in
+  let render expression = Centl_engine.expression_fragments expression in
+  let small_bytes = allocated_bytes render small in
+  let large_bytes = allocated_bytes render large in
+  Alcotest.(check bool)
+    "four times as many operators allocate less than eight times as much" true
+    (large_bytes < 8. *. small_bytes);
+  let session expression =
+    Centl_engine.fragments_of_session_result
+      (Centl_engine.Defined_function ("f", [ "x" ], expression))
+  in
+  let small_session_bytes = allocated_bytes session small in
+  let large_session_bytes = allocated_bytes session large in
+  Alcotest.(check bool)
+    "session rendering has the same linear allocation bound" true
+    (large_session_bytes < 8. *. small_session_bytes)
+
+let renderer_handles_near_limit_depth () =
+  let depth = 75_000 in
+  let fragments = nested_negations depth |> Centl_engine.expression_fragments in
+  Alcotest.(check int)
+    "one fragment per operator plus the symbol" (depth + 1)
+    (List.length fragments);
+  let rendered = Centl_engine.text_of_fragments fragments in
+  Alcotest.(check int)
+    "one byte per operator plus the symbol" (depth + 1) (String.length rendered);
+  Alcotest.(check char) "deep rendering ends at its leaf" 'x' rendered.[depth]
+
+let renderer_preflight_is_cancellable () =
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks = 257
+  in
+  let value = Centl_engine.Symbolic (nested_negations 10_000) in
+  match
+    Centl_engine.check_result_limit ~cancelled
+      Centl_engine.default_evaluation_limits value
+  with
+  | Error { code = "cancelled"; _ } ->
+      Alcotest.(check int)
+        "render-byte traversal checks cancellation at every node" 257 !checks
+  | Error error ->
+      Alcotest.failf "render preflight failed with %s instead: %s" error.code
+        error.message
+  | Ok () -> Alcotest.fail "render preflight ignored cooperative cancellation"
+
 let repeated_derivative_binder_respects_result_limit () =
   let binder = String.make 500 'v' in
   let source = Printf.sprintf "sum(diff(foo(k), %s), k = 1, 100)" binder in
@@ -221,7 +340,7 @@ let polynomial_integral_requires_a_bounded_profile () =
         error.message
 
 let unsupported_integral_respects_result_limit () =
-  let within_limit_symbol = String.make 800 'u' in
+  let within_limit_symbol = String.make 300 'u' in
   let within_limit_source =
     Printf.sprintf "integrate(f(%s), x)" within_limit_symbol
   in
@@ -233,9 +352,12 @@ let unsupported_integral_respects_result_limit () =
       let rendered = Centl_engine.text_of_value value in
       Alcotest.(check string)
         "unsupported integral remains explicit" within_limit_source rendered;
+      let structured =
+        Centl_engine.json_of_value value |> Yojson.Safe.to_string
+      in
       Alcotest.(check bool)
-        "residual stays within the requested byte limit" true
-        (String.length rendered <= limits.max_result_bytes)
+        "structured residual stays within the requested byte limit" true
+        (String.length structured <= limits.max_result_bytes)
   | Error error ->
       Alcotest.failf "bounded unsupported integral failed with %s: %s"
         error.code error.message
@@ -633,6 +755,14 @@ let () =
           Alcotest.test_case "malformed corpus" `Quick malformed_parser_corpus;
           Alcotest.test_case "hostile left-deep expression" `Quick
             left_deep_expression_is_bounded;
+          Alcotest.test_case "semantic fragment preservation" `Quick
+            renderer_preserves_semantic_fragments;
+          Alcotest.test_case "linear renderer allocation" `Quick
+            renderer_allocation_scales_linearly;
+          Alcotest.test_case "near-limit renderer depth" `Quick
+            renderer_handles_near_limit_depth;
+          Alcotest.test_case "cancellable renderer preflight" `Quick
+            renderer_preflight_is_cancellable;
           Alcotest.test_case "repeated derivative binder byte limit" `Quick
             repeated_derivative_binder_respects_result_limit;
         ] );

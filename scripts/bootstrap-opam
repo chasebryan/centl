@@ -1,0 +1,48 @@
+#!/bin/sh
+set -eu
+
+repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$repository_root"
+
+lock_value() {
+  awk -v wanted_section="$1" -v wanted_key="$2" '
+    $0 == "[" wanted_section "]" { in_section = 1; next }
+    /^\[/ { in_section = 0 }
+    in_section && $1 == wanted_key && $2 == "=" {
+      gsub(/^"|"$/, "", $3)
+      print $3
+      found = 1
+      exit
+    }
+    END { if (!found) exit 1 }
+  ' toolchain.lock
+}
+
+command -v opam >/dev/null 2>&1 || {
+  printf '%s\n' 'opam is required; install opam 2.1 or newer first.' >&2
+  exit 1
+}
+
+if ! opam switch list --short >/dev/null 2>&1; then
+  opam init --bare
+fi
+
+ocaml_version=$(lock_value runtime ocaml)
+switch_name=${CENTL_OPAM_SWITCH:-centl}
+
+if ! opam switch list --short | grep -Fqx "$switch_name"; then
+  opam switch create "$switch_name" "ocaml-base-compiler.$ocaml_version" --jobs=2
+fi
+
+installed_ocaml=$(opam exec --switch="$switch_name" -- ocamlc -version)
+if [ "$installed_ocaml" != "$ocaml_version" ]; then
+  printf 'switch %s has OCaml %s; CENTL requires %s\n' \
+    "$switch_name" "$installed_ocaml" "$ocaml_version" >&2
+  exit 1
+fi
+
+opam install --switch="$switch_name" . --deps-only --with-test \
+  --assume-depexts
+
+printf '\nCENTL OCaml dependencies are ready in switch %s.\n' "$switch_name"
+printf 'Activate it with: eval "$(opam env --switch=%s)"\n' "$switch_name"
