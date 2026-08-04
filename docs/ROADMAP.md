@@ -9,6 +9,16 @@ must preserve the numerical contract.
 integration surface while making the x86_64 native packages portable across
 baseline processors. Unsupported integrals remain visible.
 
+## Current development
+
+The source tree is preparing `0.10.0`; the published runtime and protocol
+producer version remain `0.9.1` until a release is intentionally cut. The
+development slice adds exact finite sequences and first-order bounded
+recurrences, multiline human input, source-context diagnostics, interactive
+completion and process-local history, a stack-safe renderer, and focused
+pull-request validation. Protocol version 1 remains stable while gaining the
+exact `sequence` value kind.
+
 ## 0. Foundation
 
 - Record the architecture, numerical contract, and trust boundary.
@@ -69,7 +79,10 @@ such as `sqrt(2)` and `sin(2016.1)`, or explains precisely why it cannot.
 Initial immutable value and function definitions implemented in `0.5.0-dev`.
 
 - Add reusable definitions, user functions, and saved scripts gradually.
-- Add completion, history, multiline input, and mathematical diagnostics.
+- Interactive completion, bounded process-local history, syntax-aware
+  multiline input, and source-context mathematical diagnostics are implemented
+  in the current development tree. Durable history across calculator processes
+  remains follow-up work.
 - Preserve calculator behavior for every expression accepted in a script.
 - Add exact symbolic evaluation through Calcium where it improves the result.
 
@@ -101,10 +114,14 @@ text or mistaking an approximation for an exact result.
   rational-coefficient univariate polynomials are implemented in `0.9.0`; the
   indefinite form chooses integration constant zero and unsupported cases stay
   explicit.
+- Exact bounded `sequence(expression, variable = lower, upper)` and first-order
+  `recurrence(initial, previous = step, index = lower, upper)` are implemented
+  in the current development tree with lexical scope, structured exact sequence
+  values, aggregate result limits, and cooperative cancellation.
 - Add complex enclosures, algebraic numbers, polynomials, and matrices.
-- Add recurrences, sequences, generating functions, limits, series, rigorous
-  integration outside the exact polynomial domain, and broader partial
-  symbolic integration with explicit unevaluated results.
+- Add generating functions, limits, series, rigorous integration outside the
+  exact polynomial domain, and broader partial symbolic integration with
+  explicit unevaluated results.
 - Add vector calculus, differential equations, transforms, probability, and
   statistics as bounded mathematical domains.
 - Grow exact geometry and concrete mathematics from the initial formula,
@@ -118,6 +135,13 @@ machine schema, and differential test suite.
 
 ## 7. Hardening and release
 
+- Pull-request verification now runs the pinned F*, OCaml, native, quality, and
+  seeded Julia/Nemo path without invoking all-platform packaging. Full package
+  jobs remain on `main`, tags, and manual runs, and the x86_64 release smoke
+  exercises large exact GMP arithmetic under an emulated Core 2 CPU.
+- Exact and symbolic rendering now uses an explicit traversal stack, iterative
+  size preflight, bounded buffers, and adversarial depth, allocation, and
+  cancellation tests.
 - Fuzz source parsing and native boundaries.
 - Add algebraic-identity, monotonicity, containment, and metamorphic tests.
 - Compare difficult cases against independent Julia/Nemo evaluations.

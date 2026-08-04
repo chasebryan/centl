@@ -44,6 +44,88 @@ let rec expression_nodes = function
 let bounded_add limit left right =
   if left > limit || right > limit - left then limit + 1 else left + right
 
+let rec substituted_expression_nodes limit replacements expression =
+  let add left right = bounded_add limit left right in
+  let children base expressions =
+    List.fold_left
+      (fun total expression ->
+        add total (substituted_expression_nodes limit replacements expression))
+      base expressions
+  in
+  match expression with
+  | Centl_Core.Literal _ -> 1
+  | Centl_Core.Symbol name ->
+      Option.value (List.assoc_opt name replacements) ~default:1
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      add 1 (substituted_expression_nodes limit replacements inner)
+  | Centl_Core.Differentiate (inner, variable)
+  | Centl_Core.Derivative (inner, variable) ->
+      add 1
+        (substituted_expression_nodes limit
+           (List.remove_assoc variable replacements)
+           inner)
+  | Centl_Core.Binary (_, left, right) -> children 1 [ left; right ]
+  | Centl_Core.Function
+      ( ("sum" | "product" | "integrate" | "sequence"),
+        [ body; Centl_Core.Symbol variable; lower; upper ] ) ->
+      let body_nodes =
+        substituted_expression_nodes limit
+          (List.remove_assoc variable replacements)
+          body
+      in
+      add 2
+        (add body_nodes
+           (add
+              (substituted_expression_nodes limit replacements lower)
+              (substituted_expression_nodes limit replacements upper)))
+  | Centl_Core.Function
+      ( "recurrence",
+        [
+          initial;
+          step;
+          Centl_Core.Symbol previous;
+          Centl_Core.Symbol variable;
+          lower;
+          upper;
+        ] ) ->
+      let scoped =
+        replacements |> List.remove_assoc previous |> List.remove_assoc variable
+      in
+      add 3
+        (add
+           (substituted_expression_nodes limit replacements initial)
+           (add
+              (substituted_expression_nodes limit scoped step)
+              (add
+                 (substituted_expression_nodes limit replacements lower)
+                 (substituted_expression_nodes limit replacements upper))))
+  | Centl_Core.Function ("integrate", [ body; Centl_Core.Symbol variable ]) ->
+      add 2
+        (substituted_expression_nodes limit
+           (List.remove_assoc variable replacements)
+           body)
+  | Centl_Core.Function ("solve", [ left; right; Centl_Core.Symbol variable ])
+    ->
+      let scoped = List.remove_assoc variable replacements in
+      add 2
+        (add
+           (substituted_expression_nodes limit scoped left)
+           (substituted_expression_nodes limit scoped right))
+  | Centl_Core.Function (_, arguments) -> children 1 arguments
+  | Centl_Core.Substitute (inner, variable, replacement) ->
+      add 1
+        (add
+           (substituted_expression_nodes limit
+              (List.remove_assoc variable replacements)
+              inner)
+           (substituted_expression_nodes limit replacements replacement))
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      children 1 [ inner; left; right ]
+
 let rec expression_exact_bits limit = function
   | Centl_Core.Literal (numerator, denominator) ->
       bounded_add limit
@@ -205,7 +287,20 @@ let combine kind left right =
   | Centl_Core.Evaluated value -> Ok value
   | Centl_Core.EvaluationFailure error -> Error (Core_error error)
 
-type partial = { value : Centl_Core.value; nodes : int; bytes : int }
+type partial = {
+  value : Centl_Core.value;
+  nodes : int;
+  bits : int;
+  bytes : int;
+}
+
+let value_exact_bits limit = function
+  | Centl_Core.ExactRational value ->
+      bounded_add limit
+        (bits_of_integer value.Centl_Core.numerator)
+        (bits_of_integer value.denominator)
+  | Centl_Core.ExactSymbolic expression ->
+      expression_exact_bits limit expression
 
 let partial_of_value limits value =
   let ( let* ) result next = Result.bind result next in
@@ -215,8 +310,9 @@ let partial_of_value limits value =
     | Centl_Core.ExactRational _ -> 1
     | Centl_Core.ExactSymbolic expression -> expression_nodes expression
   in
+  let bits = value_exact_bits limits.max_exact_bits value in
   let bytes = value_render_bytes limits.max_result_bytes value in
-  Ok { value; nodes; bytes }
+  Ok { value; nodes; bits; bytes }
 
 let retained_nodes limit bins =
   List.fold_left
@@ -232,6 +328,20 @@ let check_retained_nodes limits bins =
     Error
       (Resource_limit
          "the finite iteration exceeds the aggregate retained-node limit")
+  else Ok ()
+
+let check_retained_bits limits bins =
+  let bits =
+    List.fold_left
+      (fun total -> function
+        | None -> total
+        | Some partial -> bounded_add limits.max_exact_bits total partial.bits)
+      0 bins
+  in
+  if bits > limits.max_exact_bits then
+    Error
+      (Resource_limit
+         "the finite iteration exceeds the aggregate exact-value bit limit")
   else Ok ()
 
 let check_retained_bytes limits bins =
@@ -285,6 +395,7 @@ let evaluate ?(cancelled = fun () -> false) ?(evaluate_term = evaluate_core)
   let insert_checked partial bins =
     let* bins = insert partial bins in
     let* () = check_retained_nodes limits bins in
+    let* () = check_retained_bits limits bins in
     let* () = check_retained_bytes limits bins in
     Ok bins
   in
@@ -350,3 +461,167 @@ let evaluate ?(cancelled = fun () -> false) ?(evaluate_term = evaluate_core)
           collect (Z.succ current) (remaining - 1) bins
       in
       collect lower (Z.to_int count) []
+
+let collect_range ?(cancelled = fun () -> false)
+    ?(evaluate_term = evaluate_core) ?(consume = fun _ -> true) ?consume_work
+    limits lower upper make_term =
+  let ( let* ) result next = Result.bind result next in
+  let remaining_work = ref limits.max_work in
+  let local_consume_work amount =
+    if amount < 0 || amount > !remaining_work then false
+    else begin
+      remaining_work := !remaining_work - amount;
+      true
+    end
+  in
+  let consume_work = Option.value consume_work ~default:local_consume_work in
+  let work_failure () =
+    Error
+      (Resource_limit
+         "finite-sequence evaluation exceeds the request-wide work limit")
+  in
+  let add = bounded_add limits.max_result_bytes in
+  let scale factor bytes =
+    let rec multiply total remaining =
+      if remaining = 0 then total else multiply (add total bytes) (remaining - 1)
+    in
+    multiply 0 factor
+  in
+  let rec condition_bytes total = function
+    | Centl_Core.Assuming (inner, left, _, right) ->
+        condition_bytes
+          (add total
+             (add 14
+                (scale 2
+                   (add
+                      (expression_render_bytes limits.max_result_bytes left)
+                      (expression_render_bytes limits.max_result_bytes right)))))
+          inner
+    | _ -> total
+  in
+  let sequence_item_bytes = function
+    | Centl_Core.ExactRational value ->
+        if Z.equal value.denominator Z.one then
+          add 56 (scale 3 (integer_render_bytes value.numerator))
+        else
+          add 80
+            (scale 3
+               (add
+                  (integer_render_bytes value.numerator)
+                  (integer_render_bytes value.denominator)))
+    | Centl_Core.ExactSymbolic expression ->
+        let bytes =
+          expression_render_bytes limits.max_result_bytes expression
+        in
+        add 16 (add (scale 3 bytes) (condition_bytes 0 expression))
+  in
+  let check_aggregate nodes bits bytes =
+    if nodes > limits.max_expression_nodes then
+      Error
+        (Resource_limit
+           "the finite sequence exceeds the aggregate expression-node limit")
+    else if bits > limits.max_exact_bits then
+      Error
+        (Resource_limit
+           "the finite sequence exceeds the aggregate exact-value bit limit")
+    else if bytes > limits.max_result_bytes then
+      Error
+        (Resource_limit
+           "the finite sequence exceeds the aggregate result-byte limit")
+    else Ok ()
+  in
+  if cancelled () then Error Cancelled
+  else
+    let* lower = integer_bound "lower" lower in
+    let* upper = integer_bound "upper" upper in
+    let count =
+      if Z.gt lower upper then Z.zero else Z.add Z.one (Z.sub upper lower)
+    in
+    if Z.gt count (Z.of_int limits.max_iterations) then
+      Error
+        (Resource_limit
+           "the finite sequence exceeds the integer-iteration limit")
+    else if not (Z.fits_int count) then
+      Error
+        (Resource_limit
+           "the finite sequence range is outside the host iteration limit")
+    else if not (consume (Z.to_int count)) then
+      Error
+        (Resource_limit
+           "nested finite sequences exceed the request-wide integer-iteration \
+            limit")
+    else
+      let rec loop current remaining previous reversed nodes bits bytes =
+        if cancelled () then Error Cancelled
+        else if remaining = 0 then Ok (List.rev reversed)
+        else
+          let* term_nodes, construct_term = make_term current previous in
+          let* () =
+            if term_nodes > limits.max_expression_nodes then
+              Error
+                (Resource_limit
+                   "a finite-sequence term exceeds the expression-node limit")
+            else if consume_work term_nodes then Ok ()
+            else work_failure ()
+          in
+          let term = construct_term () in
+          let* value = evaluate_term term in
+          let* partial = partial_of_value limits value in
+          let nodes =
+            bounded_add limits.max_expression_nodes nodes partial.nodes
+          in
+          let bits = bounded_add limits.max_exact_bits bits partial.bits in
+          let bytes =
+            bounded_add limits.max_result_bytes bytes
+              (sequence_item_bytes partial.value)
+          in
+          let* () = check_aggregate nodes bits bytes in
+          if not (consume_work partial.nodes) then work_failure ()
+          else
+            loop (Z.succ current) (remaining - 1) (Some partial)
+              (value :: reversed) nodes bits bytes
+      in
+      loop lower (Z.to_int count) None [] 0 0 66
+
+let collect ?cancelled ?evaluate_term ?consume ?consume_work limits body
+    variable lower upper =
+  collect_range ?cancelled ?evaluate_term ?consume ?consume_work limits lower
+    upper (fun current _ ->
+      let nodes =
+        substituted_expression_nodes limits.max_expression_nodes
+          [ (variable, 1) ]
+          body
+      in
+      Ok
+        ( nodes,
+          fun () ->
+            Centl_Core.substitute body variable
+              (Centl_Core.Literal (current, Z.one)) ))
+
+let recurrence ?cancelled ?evaluate_term ?consume ?consume_work limits initial
+    step previous variable lower upper =
+  collect_range ?cancelled ?evaluate_term ?consume ?consume_work limits lower
+    upper (fun current prior ->
+      match prior with
+      | None -> Ok (expression_nodes initial, fun () -> initial)
+      | Some prior ->
+          let replacements = [ (previous, prior.nodes); (variable, 1) ] in
+          let nodes =
+            substituted_expression_nodes limits.max_expression_nodes
+              replacements step
+          in
+          Ok
+            ( nodes,
+              fun () ->
+                Centl_Core.substitute_many step
+                  [
+                    {
+                      Centl_Core.substitution_name = previous;
+                      substitution_value =
+                        Centl_Core.expression_of_value prior.value;
+                    };
+                    {
+                      Centl_Core.substitution_name = variable;
+                      substitution_value = Centl_Core.Literal (current, Z.one);
+                    };
+                  ] ))

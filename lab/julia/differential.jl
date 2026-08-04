@@ -9,14 +9,10 @@ const centl = get(ENV, "CENTL_BIN", joinpath(repository_root, "centl"))
 const rational_polynomial_ring, rational_polynomial_variable =
     polynomial_ring(QQ, "x")
 
-function centl_exact(expression::String)
-    command = Cmd([centl, "--json", expression])
-    response = JSON3.read(read(command, String))
-    response.ok || error(
-        "CENTL rejected differential expression $(expression): " *
-        String(response.error.code) * ": " * String(response.error.message),
+function exact_json_value(value, expression::String)
+    Bool(value.exact) || error(
+        "CENTL returned an inexact sequence item for $(expression)",
     )
-    value = response.value
     kind = String(value.kind)
     if kind == "integer"
         return QQ(parse(BigInt, String(value.value)))
@@ -27,6 +23,38 @@ function centl_exact(expression::String)
         )
     end
     error("CENTL returned non-rational kind $(kind) for $(expression)")
+end
+
+function centl_response(expression::String)
+    command = Cmd([centl, "--json", expression])
+    response = JSON3.read(read(command, String))
+    response.ok || error(
+        "CENTL rejected differential expression $(expression): " *
+        String(response.error.code) * ": " * String(response.error.message),
+    )
+    return response
+end
+
+function centl_exact(expression::String)
+    response = centl_response(expression)
+    return exact_json_value(response.value, expression)
+end
+
+function centl_exact_sequence(expression::String)
+    response = centl_response(expression)
+    value = response.value
+    kind = String(value.kind)
+    kind == "sequence" || error(
+        "CENTL returned non-sequence kind $(kind) for $(expression)",
+    )
+    Bool(value.exact) || error(
+        "CENTL returned an inexact sequence for $(expression)",
+    )
+    items = [exact_json_value(item, expression) for item in value.items]
+    Int(value.length) == length(items) || error(
+        "CENTL returned inconsistent sequence length for $(expression)",
+    )
+    return items
 end
 
 function exact_text(value)
@@ -44,6 +72,17 @@ function check_exact(expression::String, expected)
         "  expression: " * expression * "\n" *
         "  expected:   " * exact_text(expected) * "\n" *
         "  actual:     " * exact_text(actual),
+    )
+end
+
+function check_exact_sequence(expression::String, expected)
+    expected = [QQ(value) for value in expected]
+    actual = centl_exact_sequence(expression)
+    actual == expected || error(
+        "CENTL sequence differential mismatch\n" *
+        "  expression: " * expression * "\n" *
+        "  expected:   [" * join(exact_text.(expected), ", ") * "]\n" *
+        "  actual:     [" * join(exact_text.(actual), ", ") * "]",
     )
 end
 
@@ -136,6 +175,42 @@ function run_differential_suite()
         telescoping *= QQ(value + 1, value)
     end
     check_exact("product((k + 1)/k, k = 1, 30)", telescoping)
+
+    check_exact_sequence(
+        "sequence(k^3 - 2*k, k = -3, 4)",
+        [QQ(value)^3 - 2 * QQ(value) for value in -3:4],
+    )
+    check_exact_sequence(
+        "sequence((2*k + 1)/(k + 2), k = 0, 8)",
+        [QQ(2 * value + 1, value + 2) for value in 0:8],
+    )
+    check_exact_sequence("sequence(1/0, k = 1, 0)", [])
+
+    factorials = [QQ(1)]
+    current = QQ(1)
+    for index in 1:12
+        current *= QQ(index)
+        push!(factorials, current)
+    end
+    check_exact_sequence(
+        "recurrence(1, a = a*k, k = 0, 12)",
+        factorials,
+    )
+
+    affine_recurrence = [QQ(1, 3)]
+    current = QQ(1, 3)
+    for index in -1:7
+        current = (3 * current + QQ(index)) / 2
+        push!(affine_recurrence, current)
+    end
+    check_exact_sequence(
+        "recurrence(1/3, a = (3*a + k)/2, k = -2, 7)",
+        affine_recurrence,
+    )
+    check_exact_sequence(
+        "recurrence(1/0, a = a, k = 1, 0)",
+        [],
+    )
 
     deterministic_integrals = [
         ([QQ(1), QQ(2), QQ(3)], QQ(0), QQ(3)),

@@ -656,7 +656,7 @@ let machine_resource_limits () =
     |> protocol_error_code);
   let long_symbol = String.make 500 'x' in
   Alcotest.(check string)
-    "rendered result bytes" "resource_limit"
+    "serialized value bytes" "resource_limit"
     (evaluate
        (Printf.sprintf "sum(%s, k = 1, 100)" long_symbol)
        [ ("max_result_bytes", `Int 1_000) ]

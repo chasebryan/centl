@@ -24,7 +24,9 @@ An evaluation request is:
 ```
 
 `id` is optional, may be a string or integer, and is echoed unchanged. `op`
-defaults to `evaluate`. The operations are:
+defaults to `evaluate`. Stateless `--json` accepts evaluation requests (with or
+without an explicit `op: "evaluate"`); the persistent `--serve` mode also
+provides the control operations below:
 
 ```json
 {"version":1,"id":1,"op":"evaluate","expression":"r = 3"}
@@ -60,10 +62,13 @@ The server has deterministic ceilings:
 - 32,768 source bytes per expression
 - 100,000 expression nodes during session expansion and resolution; the same
   ceiling bounds estimated symbolic-transformation work before it begins
-- 1,000,000 estimated bits per exact result
+- 1,000,000 aggregate bits per exact result, enforced by conservative
+  preflight profiles and an actual-result check before output
 - 100,000 request-wide integer iterations for concrete-mathematics operations;
-  nested finite sums and products draw from the same aggregate budget
-- 1,048,576 rendered result bytes and retained session-text bytes
+  nested sums, products, sequences, and recurrences draw from the same
+  aggregate budget
+- 1,048,576 serialized mathematical-value bytes, including repeated structured
+  fields such as `text`, plus retained session-value bytes
 - 1,024 immutable definitions per session
 - 1,000 requested significant digits
 - 16,384 Arb working bits
@@ -81,6 +86,13 @@ ceiling:
 {"version":1,"expression":"sum(k^2, k = 1, 100)","limits":{"max_integer_iterations":100}}
 ```
 
+The same field bounds the number of elements retained by a sequence or
+recurrence, including a recurrence's initial lower-index element:
+
+```json
+{"version":1,"expression":"recurrence(1, a = a*n, n = 0, 20)","limits":{"max_integer_iterations":21}}
+```
+
 Available fields are `max_source_bytes`, `max_expression_nodes`,
 `max_exact_bits`, `max_integer_iterations`, `max_result_bytes`, `max_bindings`,
 `max_precision_digits`, and `max_working_bits`. `describe` returns the active
@@ -89,15 +101,20 @@ process ceilings. Exhaustion is a normal structured failure with code
 
 Finite iteration additionally derives a traversal ceiling of 64 node-work
 units per allowed integer iteration. This bounds repeated substitution,
-evaluation, and balanced reduction even when every individual term fits the
-node ceiling. Live partial reductions collectively remain under
-`max_expression_nodes`.
+evaluation, retained sequence values, and balanced reduction even when every
+individual term fits the node ceiling. Live partial reductions and the
+aggregate elements of a sequence remain under their applicable expression,
+exact-bit, and result-byte ceilings.
 
 The session applies the node, exact-bit, and result-byte ceilings in aggregate
 before every immutable definition commit. Filling binding slots therefore
 cannot multiply the per-expression retention allowance. Result-byte estimation
-includes symbol and function-name text and runs before human or JSON rendering,
-so iteration cannot amplify a long identifier into an oversized response.
+includes symbol and function-name text, structured value fields, sequence
+items, condition text, and definition names, parameters, and bodies, and runs
+before human or JSON rendering. Transport
+metadata such as provenance, session counters, JSON-RPC wrappers, and echoed
+request IDs is not charged to `max_result_bytes`; it remains bounded by the
+separate per-request input and process limits.
 
 These limits are deterministic work bounds, not elapsed-time promises. A
 caller should still impose its own process timeout.
@@ -152,12 +169,12 @@ immediate fallback for a caller whose external deadline expires.
 
 Every mathematical success, unresolved result, definition, failure, and
 protocol control result has top-level structured `provenance`. `classification`
-distinguishes `exact`, `exact_symbolic`, `exact_solution_set`,
-`rigorous_enclosure`, `unresolved`, `exact_definition`, `failure`, `cancelled`,
-and `control`. `method` describes how CENTL produced the result, while `backend`
-identifies the responsible evaluation boundary. `producer` records the CENTL
-version and `schema` versions the provenance object independently of protocol
-version 1.
+distinguishes `exact`, `exact_symbolic`, `exact_sequence`,
+`exact_solution_set`, `rigorous_enclosure`, `unresolved`, `exact_definition`,
+`failure`, `cancelled`, and `control`. `method` describes how CENTL produced the
+result, while `backend` identifies the responsible evaluation boundary.
+`producer` records the CENTL version and `schema` versions the provenance
+object independently of protocol version 1.
 
 ## Values
 
@@ -179,6 +196,21 @@ Conditional symbolic results retain machine-readable conditions:
 
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
 `greater_than`, and `greater_or_equal`.
+
+### Exact sequences
+
+`sequence(...)` and `recurrence(...)` return `kind: "sequence"`. `items` keeps
+the ordered scalar values using the existing integer, rational, and symbolic
+schemas, and `length` is a JSON integer bounded by the active iteration limit:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
+```
+
+Empty ranges have `length: 0`, `items: []`, and `text: "[]"`. Nested sequence
+items and approximate or solution-set items are not accepted. Immutable value
+definitions may retain a sequence, and user functions may return one, but a
+sequence cannot be consumed where a scalar expression is required.
 
 Equation solving returns a structured solution set. Rational parts remain
 decimal strings:
@@ -211,8 +243,12 @@ include `syntax_error`, `division_by_zero`, `zero_denominator`,
 `invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
 `precision_limit`, `insufficient_precision`, `resource_limit`,
 `unsupported_approximation`, `invalid_solution_variable`,
-`solution_set_not_expression`, `backend_failure`, and
+`solution_set_not_expression`, `approximation_not_expression`,
+`backend_failure`, and
 `core_contract_violation`. Cooperative cancellation uses `cancelled`.
 Finite-iteration bounds that are not exact integers use `invalid_arguments`;
 malformed iteration syntax uses `syntax_error`; and exhausted range,
-aggregate-iteration, expression-node, or exact-bit budgets use `resource_limit`.
+aggregate-iteration, expression-node, exact-bit, work, or result-byte budgets
+use `resource_limit`. A non-scalar or inexact sequence term uses
+`exact_sequence_required`, while trying to consume a completed sequence as a
+scalar uses `sequence_not_expression`.

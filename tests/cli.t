@@ -160,6 +160,18 @@
   $ printf '{"version":1,"expression":"2 * (3 + 4)"}\n' | ../src/main.exe --json
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"14","text":"14"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
 
+  $ printf '{"version":1,"id":"one-shot","op":"evaluate","expression":"1 + 1"}\n' | ../src/main.exe --json
+  {"version":1,"id":"one-shot","ok":true,"value":{"kind":"integer","exact":true,"value":"2","text":"2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
+
+  $ { awk 'BEGIN { for (i = 0; i < 65537; i++) printf "x"; print "" }'; printf '{"version":1,"expression":"1 + 1"}\n'; } | ../src/main.exe --json
+  {"version":1,"ok":false,"error":{"code":"resource_limit","message":"the request exceeds the byte limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+  {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"2","text":"2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
+  [2]
+
+  $ printf '{"version":1,"expression":"sequence(k, k = 1, 4)","limits":{"max_integer_iterations":3}}\n' | ../src/main.exe --json
+  {"version":1,"ok":false,"error":{"code":"resource_limit","message":"the finite sequence exceeds the integer-iteration limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+  [2]
+
   $ printf '%s\n' '{"version":1,"id":"a","expression":"r = 3"}' '{"version":1,"id":"b","expression":"circle_area(r)"}' '{"version":1,"id":"c","op":"reset"}' | ../src/main.exe --serve
   {"version":1,"id":"a","ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"value","name":"r","value":{"kind":"integer","exact":true,"value":"3","text":"3"},"text":"r = 3"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
   {"version":1,"id":"b","ok":true,"value":{"kind":"symbolic","exact":true,"expression":"9 * pi","text":"9 * pi"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"},"session":{"definitions":1,"requests":2}}
@@ -176,6 +188,9 @@
 
   $ printf '{"version":1,"id":"limit-sum","expression":"sum(k, k = 1, 4)","limits":{"max_integer_iterations":3}}\n' | ../src/main.exe --serve
   {"version":1,"id":"limit-sum","ok":false,"error":{"code":"resource_limit","message":"the finite iteration exceeds the integer-iteration limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
+
+  $ printf '%s\n' '{"version":1,"id":"d","expression":"d = 2^40"}' '{"version":1,"id":"bits","expression":"1/(d*d) + 1/3","limits":{"max_exact_bits":100}}' | ../src/main.exe --serve | tail -n 1
+  {"version":1,"id":"bits","ok":false,"error":{"code":"resource_limit","message":"the exact result exceeds the bit limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":1,"requests":2}}
 
   $ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' | ../src/main.exe --mcp
   {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"centl","title":"CENTL exact mathematics","version":"0.9.1"},"instructions":"Use centl_calculate for exact, symbolic, or rigorously enclosed mathematics. Definitions persist until centl_reset or process exit."}}
@@ -194,6 +209,45 @@
   f(x) = x^2 + 1
   10
   2 * x
+
+  $ printf '%s\n' 'sum(' '  k^2,' '  k = 1,' '  4)' | ../src/main.exe
+  30
+
+  $ printf '%s\n' 'f(x) =' '  x^2 + 1' 'f(4)' | ../src/main.exe
+  f(x) = x^2 + 1
+  17
+
+  $ printf '%s\n' '# multiline script' 'product(' '  k,' '  k = 1,' '  5)' > multiline.centl
+  $ ../src/main.exe --file multiline.centl
+  120
+
+  $ printf '%s\n' '# heading' '' 'sum(' '  k,' '  k,' > bad-multiline.centl
+  $ ../src/main.exe --file bad-multiline.centl
+  bad-multiline.centl:5:4: error: expected '=', found ','
+  5 |   k,
+    |    ^
+  [2]
+
+  $ printf '%s\n' 'sum(' '  k,' '  k,' '  3)' | ../src/main.exe
+  standard input:3:4: error: expected '=', found ','
+  3 |   k,
+    |    ^
+  [2]
+
+  $ printf '1 +\n' | ../src/main.exe
+  standard input:1:4: error: expected a number or '(', found the end of the expression
+  1 | 1 +
+    |    ^
+  [2]
+
+  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; awk 'BEGIN { for (i = 0; i < 30000; i++) printf " " }'; printf '12\033[D\177\n:quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null | tr '\r' '\n' | grep -x '2' | tail -n 1; else echo 2; fi
+  2
+
+  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; awk 'BEGIN { for (i = 0; i < 32768; i++) printf " " }'; printf '1\n:quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null | tr '\r' '\n' | grep 'error: the expression exceeds the source-byte limit' | tail -n 1; else echo 'error: the expression exceeds the source-byte limit'; fi
+  error: the expression exceeds the source-byte limit
+
+  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; printf '\033'; sleep 0.1; printf '\033['; sleep 0.1; printf ':quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null >/dev/null && echo raw-escape-ok; else echo raw-escape-ok; fi
+  raw-escape-ok
 
   $ ../src/main.exe --file fixtures/exact.centl
   3/10
@@ -216,22 +270,32 @@
 
   $ ../src/main.exe '1 +'
   error: expected a number or '(', found the end of the expression at column 4
+  1 | 1 +
+    |    ^
   [2]
 
   $ ../src/main.exe 'sum(k, k, 1, 3)'
   error: expected '=', found ',' at column 9
+  1 | sum(k, k, 1, 3)
+    |         ^
   [2]
 
   $ ../src/main.exe 'integrate(x^2, 3)'
   error: expected an integration variable, found a number at column 16
+  1 | integrate(x^2, 3)
+    |                ^
   [2]
 
   $ ../src/main.exe 'integrate(x^2, x, 0, 1)'
   error: expected ')' or '=', found ',' at column 17
+  1 | integrate(x^2, x, 0, 1)
+    |                 ^
   [2]
 
   $ ../src/main.exe 'integrate(x^2, x = 0)'
   error: expected ',', found ')' at column 21
+  1 | integrate(x^2, x = 0)
+    |                     ^
   [2]
 
   $ ../src/main.exe 'sum = 3'

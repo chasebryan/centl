@@ -1,0 +1,29 @@
+opam-version: "2.0"
+synopsis: "An exact-first calculator and numerical language"
+description: """
+CENTL is a calculator-first numerical language. It evaluates ordinary
+mathematical expressions exactly by default and makes every approximation
+explicit.
+"""
+maintainer: "chasebryan@users.noreply.github.com"
+authors: "Chase Bryan"
+license: "AGPL-3.0-or-later"
+homepage: "https://github.com/chasebryan/centl"
+bug-reports: "https://github.com/chasebryan/centl/issues"
+dev-repo: "git+https://github.com/chasebryan/centl.git"
+depends: [
+  "ocaml" {= "4.14.1"}
+  "dune" {= "3.24.1"}
+  "zarith" {= "1.14"}
+  "yojson" {= "2.2.2"}
+  "conf-flint" {= "1"}
+  "conf-gmp" {= "5"}
+  "conf-mpfr" {= "3"}
+  "alcotest" {with-test & = "1.9.1"}
+  "qcheck" {with-test & = "0.91"}
+  "ocamlformat" {= "0.29.0"}
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs "@install"]
+]
+run-test: ["dune" "runtest" "-p" name "-j" jobs]

@@ -14,6 +14,11 @@
  (modules test_iteration)
  (libraries centl_lib alcotest zarith))
 
+(test
+ (name test_sequence)
+ (modules test_sequence)
+ (libraries centl_lib alcotest zarith yojson))
+
 (cram
  (applies_to cli)
  (deps ../src/main.exe fixtures/definitions.centl fixtures/exact.centl))
