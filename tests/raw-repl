@@ -35,8 +35,8 @@ trap cleanup EXIT HUP INT TERM
 mkfifo "$input"
 exec 3<>"$input"
 session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
-timeout -k 2s 15s script -qefc "$session_command" "$output" \
-  <&3 3<&- >/dev/null &
+timeout -k 2s 15s script -qefc "$session_command" /dev/null \
+  <&3 3<&- >"$output" &
 session_pid=$!
 
 ready=0
