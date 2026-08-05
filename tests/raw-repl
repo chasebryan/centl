@@ -9,6 +9,9 @@ fail() {
 binary=${1:-}
 case_name=${2:-}
 [ -x "$binary" ] || fail "calculator is not executable: $binary"
+case "$binary" in
+  *"'"*) fail "calculator path contains an unsupported single quote: $binary" ;;
+esac
 case "$case_name" in
   edit|limit|partial-escape) ;;
   *) fail "usage: raw-repl BINARY {edit|limit|partial-escape}" ;;
@@ -31,8 +34,9 @@ trap cleanup EXIT HUP INT TERM
 
 mkfifo "$input"
 exec 3<>"$input"
-timeout -k 2s 15s script -qef "$output" -- \
-  "$binary" --color=never --no-history <&3 3<&- >/dev/null &
+session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
+timeout -k 2s 15s script -qefc "$session_command" "$output" \
+  <&3 3<&- >/dev/null &
 session_pid=$!
 
 ready=0
