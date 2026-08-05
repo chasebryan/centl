@@ -249,13 +249,13 @@
     |    ^
   [2]
 
-  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; awk 'BEGIN { for (i = 0; i < 30000; i++) printf " " }'; printf '12\033[D\177\n:quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null | tr '\r' '\n' | grep -x '2' | tail -n 1; else echo 2; fi
+  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe edit; else echo 2; fi
   2
 
-  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; awk 'BEGIN { for (i = 0; i < 32768; i++) printf " " }'; printf '1\n:quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null | tr '\r' '\n' | grep 'error: the expression exceeds the source-byte limit' | tail -n 1; else echo 'error: the expression exceeds the source-byte limit'; fi
+  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe limit; else echo 'error: the expression exceeds the source-byte limit'; fi
   error: the expression exceeds the source-byte limit
 
-  $ if command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then { sleep 0.2; printf '\033'; sleep 0.1; printf '\033['; sleep 0.1; printf ':quit\n'; } | script -qfec '../src/main.exe --color=never' /dev/null >/dev/null && echo raw-escape-ok; else echo raw-escape-ok; fi
+  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe partial-escape; else echo raw-escape-ok; fi
   raw-escape-ok
 
   $ ../src/main.exe --file fixtures/exact.centl

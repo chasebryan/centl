@@ -37,7 +37,11 @@
 
 (cram
  (applies_to cli)
- (deps ../src/main.exe fixtures/definitions.centl fixtures/exact.centl))
+ (deps
+  ../src/main.exe
+  fixtures/definitions.centl
+  fixtures/exact.centl
+  raw-repl))
 
 (cram
  (applies_to installer)
