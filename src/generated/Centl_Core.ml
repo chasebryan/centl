@@ -1440,11 +1440,74 @@ let rec polynomial_of (term : expression) (variable : Prims.string) :
   | Expand inner -> polynomial_of inner variable
   | Factor inner -> polynomial_of inner variable
   | Assuming (uu___, uu___1, uu___2, uu___3) -> FStar_Pervasives_Native.None
+type integer_square_classification =
+  | ExactIntegerSquare of Prims.int 
+  | StrictIntegerSquareFloor of Prims.int 
+  | InvalidIntegerSquareFloor 
+let uu___is_ExactIntegerSquare (projectee : integer_square_classification) :
+  Prims.bool=
+  match projectee with | ExactIntegerSquare root -> true | uu___ -> false
+let __proj__ExactIntegerSquare__item__root
+  (projectee : integer_square_classification) : Prims.int=
+  match projectee with | ExactIntegerSquare root -> root
+let uu___is_StrictIntegerSquareFloor
+  (projectee : integer_square_classification) : Prims.bool=
+  match projectee with
+  | StrictIntegerSquareFloor root -> true
+  | uu___ -> false
+let __proj__StrictIntegerSquareFloor__item__root
+  (projectee : integer_square_classification) : Prims.int=
+  match projectee with | StrictIntegerSquareFloor root -> root
+let uu___is_InvalidIntegerSquareFloor
+  (projectee : integer_square_classification) : Prims.bool=
+  match projectee with | InvalidIntegerSquareFloor -> true | uu___ -> false
+let validate_integer_square_floor (value1 : Prims.int) (root : Prims.int) :
+  integer_square_classification=
+  if
+    (((value1 >= Prims.int_zero) && (root >= Prims.int_zero)) &&
+       ((root * root) <= value1))
+      && (value1 < ((root + Prims.int_one) * (root + Prims.int_one)))
+  then
+    (if (root * root) = value1
+     then ExactIntegerSquare root
+     else StrictIntegerSquareFloor root)
+  else InvalidIntegerSquareFloor
+type quadratic_branch =
+  | Lower 
+  | Upper 
+let uu___is_Lower (projectee : quadratic_branch) : Prims.bool=
+  match projectee with | Lower -> true | uu___ -> false
+let uu___is_Upper (projectee : quadratic_branch) : Prims.bool=
+  match projectee with | Upper -> true | uu___ -> false
+type real_quadratic =
+  {
+  center: rational ;
+  radicand: rational ;
+  branch: quadratic_branch }
+let __proj__Mkreal_quadratic__item__center (projectee : real_quadratic) :
+  rational= match projectee with | { center; radicand; branch;_} -> center
+let __proj__Mkreal_quadratic__item__radicand (projectee : real_quadratic) :
+  rational= match projectee with | { center; radicand; branch;_} -> radicand
+let __proj__Mkreal_quadratic__item__branch (projectee : real_quadratic) :
+  quadratic_branch=
+  match projectee with | { center; radicand; branch;_} -> branch
+type equation_solution =
+  | RationalSolution of rational 
+  | RealQuadraticSolution of real_quadratic 
+let uu___is_RationalSolution (projectee : equation_solution) : Prims.bool=
+  match projectee with | RationalSolution _0 -> true | uu___ -> false
+let __proj__RationalSolution__item___0 (projectee : equation_solution) :
+  rational= match projectee with | RationalSolution _0 -> _0
+let uu___is_RealQuadraticSolution (projectee : equation_solution) :
+  Prims.bool=
+  match projectee with | RealQuadraticSolution _0 -> true | uu___ -> false
+let __proj__RealQuadraticSolution__item___0 (projectee : equation_solution) :
+  real_quadratic= match projectee with | RealQuadraticSolution _0 -> _0
 type equation_classification =
   | NoEquationSolutions 
   | AllEquationValues 
-  | OneEquationSolution of rational 
-  | TwoEquationSolutions of rational * rational 
+  | OneEquationSolution of equation_solution 
+  | TwoEquationSolutions of equation_solution * equation_solution 
   | RationalQuadratic of rational * rational * rational 
   | UnresolvedEquation 
 let uu___is_NoEquationSolutions (projectee : equation_classification) :
@@ -1457,7 +1520,7 @@ let uu___is_OneEquationSolution (projectee : equation_classification) :
   Prims.bool=
   match projectee with | OneEquationSolution _0 -> true | uu___ -> false
 let __proj__OneEquationSolution__item___0
-  (projectee : equation_classification) : rational=
+  (projectee : equation_classification) : equation_solution=
   match projectee with | OneEquationSolution _0 -> _0
 let uu___is_TwoEquationSolutions (projectee : equation_classification) :
   Prims.bool=
@@ -1465,10 +1528,10 @@ let uu___is_TwoEquationSolutions (projectee : equation_classification) :
   | TwoEquationSolutions (_0, _1) -> true
   | uu___ -> false
 let __proj__TwoEquationSolutions__item___0
-  (projectee : equation_classification) : rational=
+  (projectee : equation_classification) : equation_solution=
   match projectee with | TwoEquationSolutions (_0, _1) -> _0
 let __proj__TwoEquationSolutions__item___1
-  (projectee : equation_classification) : rational=
+  (projectee : equation_classification) : equation_solution=
   match projectee with | TwoEquationSolutions (_0, _1) -> _1
 let uu___is_RationalQuadratic (projectee : equation_classification) :
   Prims.bool=
@@ -1501,7 +1564,7 @@ let solve_linear_equation (constant : coefficient) (linear : coefficient) :
   then classify_constant_equation constant
   else
     (match divide (negate constant) linear with
-     | Success root -> OneEquationSolution root
+     | Success root -> OneEquationSolution (RationalSolution root)
      | Failure uu___ -> UnresolvedEquation)
 let classify_quadratic_equation (constant : coefficient)
   (linear : coefficient) (leading : coefficient) : equation_classification=
@@ -1520,7 +1583,7 @@ let classify_quadratic_equation (constant : coefficient)
          (let denominator =
             multiply (make (Prims.of_int 2) Prims.int_one) leading in
           match divide (negate linear) denominator with
-          | Success root -> OneEquationSolution root
+          | Success root -> OneEquationSolution (RationalSolution root)
           | Failure uu___ -> UnresolvedEquation)
        else RationalQuadratic (leading, linear, discriminant))
 let classify_polynomial_equation (coefficients : polynomial) :
@@ -1549,29 +1612,58 @@ let solve_equation (left : expression) (right : expression)
   | FStar_Pervasives_Native.None -> UnresolvedEquation
   | FStar_Pervasives_Native.Some coefficients ->
       classify_polynomial_equation coefficients
-let complete_rational_quadratic (leading : rational) (linear : rational)
-  (discriminant : rational) (root : rational) : equation_classification=
+let integer_magnitude (value1 : Prims.int) : Prims.nat=
+  if value1 < Prims.int_zero then - value1 else value1
+let canonical_rational (value1 : rational) : Prims.bool=
+  (value1.denominator > Prims.int_zero) &&
+    ((Centl_Gcd.gcd (integer_magnitude value1.numerator) value1.denominator)
+       = Prims.int_one)
+let complete_real_quadratic (leading : rational) (linear : rational)
+  (discriminant : rational) (numerator_floor : Prims.int)
+  (denominator_floor : Prims.int) : equation_classification=
   if
     (((((((leading.denominator <= Prims.int_zero) ||
             (linear.denominator <= Prims.int_zero))
            || (discriminant.denominator <= Prims.int_zero))
-          || (root.denominator <= Prims.int_zero))
-         || (leading.numerator = Prims.int_zero))
-        || (discriminant.numerator <= Prims.int_zero))
-       || (root.numerator < Prims.int_zero))
-      ||
-      (((root.numerator * root.numerator) * discriminant.denominator) <>
-         ((discriminant.numerator * root.denominator) * root.denominator))
+          || (leading.numerator = Prims.int_zero))
+         || (discriminant.numerator <= Prims.int_zero))
+        || (Prims.op_Negation (canonical_rational leading)))
+       || (Prims.op_Negation (canonical_rational linear)))
+      || (Prims.op_Negation (canonical_rational discriminant))
   then UnresolvedEquation
   else
-    (let denominator = multiply (make (Prims.of_int 2) Prims.int_one) leading in
-     let negative_linear = negate linear in
-     match ((divide (subtract negative_linear root) denominator),
-             (divide (add negative_linear root) denominator))
+    (match ((validate_integer_square_floor discriminant.numerator
+               numerator_floor),
+             (validate_integer_square_floor discriminant.denominator
+                denominator_floor))
      with
-     | (Success first, Success second) ->
-         TwoEquationSolutions (first, second)
-     | (uu___, uu___1) -> UnresolvedEquation)
+     | (InvalidIntegerSquareFloor, uu___) -> UnresolvedEquation
+     | (uu___, InvalidIntegerSquareFloor) -> UnresolvedEquation
+     | (ExactIntegerSquare root_numerator, ExactIntegerSquare
+        root_denominator) ->
+         let root = make root_numerator root_denominator in
+         let denominator =
+           multiply (make (Prims.of_int 2) Prims.int_one) leading in
+         let negative_linear = negate linear in
+         (match ((divide (subtract negative_linear root) denominator),
+                  (divide (add negative_linear root) denominator))
+          with
+          | (Success first, Success second) ->
+              TwoEquationSolutions
+                ((RationalSolution first), (RationalSolution second))
+          | (uu___, uu___1) -> UnresolvedEquation)
+     | (uu___, uu___1) ->
+         let two_leading =
+           multiply (make (Prims.of_int 2) Prims.int_one) leading in
+         let four_leading_squared = multiply two_leading two_leading in
+         (match ((divide (negate linear) two_leading),
+                  (divide discriminant four_leading_squared))
+          with
+          | (Success center, Success radicand) ->
+              TwoEquationSolutions
+                ((RealQuadraticSolution { center; radicand; branch = Lower }),
+                  (RealQuadraticSolution { center; radicand; branch = Upper }))
+          | (uu___2, uu___3) -> UnresolvedEquation))
 type signed_term =
   | PositiveTerm of expression 
   | NegativeTerm of expression 

@@ -71,6 +71,11 @@ jobs:
           git diff --exit-code -- src/generated
           opam exec -- make quality native-test
 
+      - name: Exercise deterministic fuzzing, sanitizers, and performance budgets
+        env:
+          CENTL_SANITIZER_REQUIRED: "1"
+        run: opam exec -- make hardening-test
+
       - name: Set up pinned Julia
         uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2
         with:

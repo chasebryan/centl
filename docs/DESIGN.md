@@ -16,13 +16,14 @@ terminal / script / JSON
           |
           v
       OCaml host
-  I/O, REPL, limits, protocol
+ parser, I/O, sessions, limits,
+ protocols, rendering, precision
           |
           v
   extracted F* core
- parser, AST, exact semantics,
- precision policy, validation,
- rendering and proofs
+ AST, exact semantics and
+ transformations, validation,
+ proof-backed algorithms
           |
           v
    narrow OCaml/C boundary
@@ -43,26 +44,25 @@ runtime dependency of the shipped `centl` executable.
 
 The F* core defines what CENTL means. It owns:
 
-- lexical and syntactic structures;
 - the typed AST and value classifications;
 - exact integer, decimal, and rational semantics;
-- transitions from exact computation to approximation;
 - exact univariate polynomial normalization and bounded expansion;
+- exact equation classification and witness-validated real-quadratic
+  completion;
 - local mathematical conditions used to justify symbolic simplification;
-- precision requests and retry decisions;
 - validation of values returned across the numerical boundary;
-- human and machine result construction;
-- decimal rendering and its correctness properties.
+- exact outward conversion of validated dyadic bounds to a decimal scale; and
+- stated semantic and representation properties of those definitions.
 
 Proofs are shipped beside the executable definitions and erased during OCaml
 extraction. The extracted interface must accept and return simple, unrefined
 boundary types whose invariants are checked at entry.
 
-The initial slice begins its verified boundary at the AST. Its small
-OCaml parser converts source literals directly to arbitrary-precision integer
-pairs without passing through floating point. F* then evaluates and reduces the
-result. Until parsing and result construction move into F*, the parser and
-renderer remain explicit parts of the trusted boundary.
+The current verified boundary begins at the AST. The handwritten OCaml parser
+converts source literals directly to arbitrary-precision integer pairs without
+passing through floating point, then F* evaluates and reduces the result. The
+parser, host result union, renderers, and protocol serializers remain explicit
+parts of the trusted boundary.
 
 The `0.4.0-dev` slice adds a native Arb boundary. The host walks the resolved
 AST, supplies exact rational inputs and a binary working precision, and receives
@@ -74,15 +74,22 @@ the exponent budget before the host creates an outward-rounded decimal view.
 OCaml is the application and extraction host. It owns:
 
 - the executable entry point;
+- parsing, statement assembly, and source-location metadata;
 - terminal input, history, completion, and cancellation;
 - file and script loading;
-- time, memory, and precision budgets;
-- JSON request and response transport;
+- resource budgets plus approximation precision requests and retries;
+- the host result union, JSON schemas, and request/response transport;
 - terminal-aware semantic coloration and plain-text fallback;
 - coordination between the extracted core and numerical backend;
 - native application packaging.
 
-OCaml must not independently redefine CENTL arithmetic or rendering semantics.
+OCaml must not independently redefine CENTL arithmetic. Human text, color,
+JSON, and MCP are derived from the same typed host result, while canonical
+mathematical structures come from the extracted core. For a positive quadratic
+discriminant, OCaml may compute arbitrary-precision integer floor-square-root
+candidates after enforcing the exact-bit budget. The extracted core validates
+the consecutive-square inequalities and derives the solution representation;
+OCaml only validates and presents the returned boundary value.
 
 ### FLINT, Arb, and Calcium
 
@@ -126,6 +133,14 @@ Indeterminate
 Every result also carries provenance sufficient to explain whether it was
 computed exactly, enclosed numerically, or left unresolved.
 
+An exact solution set contains a typed solution union. Rational solutions keep
+their normalized numerator and denominator. A nonsquare positive quadratic
+discriminant produces two equation-local `RealQuadratic` values with a shared
+reduced `center` and positive reduced `radicand`, distinguished as lower and
+upper branches. They denote `center - sqrt(radicand)` and
+`center + sqrt(radicand)`. This is not yet a general algebraic-number scalar
+type, so it cannot silently enter ordinary arithmetic or definitions.
+
 An exact sequence is a bounded ordered collection of exact scalar integers,
 rationals, or symbolic values. It is a result value rather than a scalar
 expression: arithmetic and approximation do not implicitly map across it, and
@@ -162,10 +177,11 @@ process. The one-shot and legacy streaming `--json` forms remain stateless.
 The calculator, piped human input, and files share syntax-aware statement
 assembly, so an incomplete expression may continue on following lines without
 a separate continuation grammar. Interactive terminals add completion from the
-syntax catalog and current session definitions plus a bounded process-local
-history. Human parse diagnostics retain source name, line, column, and a caret
-excerpt; machine syntax errors continue to expose the stable zero-based byte
-position.
+syntax catalog and current session definitions plus private, bounded history
+that locked updates merge across calculator processes before atomic
+replacement. Human syntax and runtime mathematical diagnostics retain source
+name, line, column, and a caret excerpt; machine errors expose the stable
+zero-based byte position when a source location applies.
 
 The machine interface uses versioned JSON over standard input and output. It
 returns structured exact values, enclosure endpoints, precision metadata,
@@ -181,6 +197,11 @@ The MCP adapter maps JSON-RPC tool calls onto the same stateful request engine.
 It does not parse human output or create another evaluation path. A future
 local service can use the same boundary.
 
+MCP tool discovery publishes closed discriminated output schemas for this same
+result union, including rational and real-quadratic solution members. Schema
+trees are built lazily only when `tools/list` is requested, keeping ordinary
+human and JSON startup independent of MCP-only metadata allocation.
+
 Persistent stdio uses one FIFO evaluator so definitions and resets remain
 deterministic. A separate bounded input reader may only mark cancellation tokens
 for identified active or queued evaluations; it never evaluates expressions or
@@ -188,9 +209,12 @@ mutates session bindings. The evaluator observes those tokens at cooperative
 checkpoints and immediately before committing a definition. MCP cancellation
 responses are suppressed as required by the protocol, while JSON Lines returns
 a structured `cancelled` error for the target request. Pending input is bounded
-by both the 10,000-request process ceiling and a 16 MiB byte ceiling; terminal
-queue overload cancels cancellable work and drains an ordered overload marker
-instead of retaining an unbounded stream.
+by both the 10,000-request process ceiling and a 16 MiB byte ceiling. One valid
+cancellation may occupy a separately accounted emergency slot when ordinary
+input has filled either ceiling, so saturation cannot prevent it from marking
+its target; the per-request byte limit still bounds that slot. Terminal queue
+overload cancels cancellable work and drains one ordered overload marker instead
+of retaining an unbounded stream.
 
 Persistent definitions are also bounded in aggregate, not merely by binding
 count. A commit preflights the session's retained expression nodes, exact-value

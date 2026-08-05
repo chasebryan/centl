@@ -10,6 +10,20 @@ let error_code source =
         (Centl_engine.text_of_value result)
   | Error error -> error.code
 
+let evaluation_error source =
+  match Centl_engine.evaluate source with
+  | Ok result ->
+      Alcotest.failf "expected an error, received %s"
+        (Centl_engine.text_of_value result)
+  | Error error -> error
+
+let session_evaluation_error session source =
+  match Centl_engine.evaluate_in_session session source with
+  | Ok result ->
+      Alcotest.failf "expected an error, received %s"
+        (Centl_engine.text_of_session_result result)
+  | Error error -> error
+
 let session_text session source =
   match Centl_engine.evaluate_in_session session source with
   | Ok result -> Centl_engine.text_of_session_result result
@@ -229,8 +243,20 @@ let equation_examples () =
   Alcotest.(check string)
     "false constant equation" "no solutions" (value "solve(1 = 2, x)");
   Alcotest.(check string)
-    "irrational roots remain explicit" "unresolved: solve(x^2 = 2, x)"
+    "exact irrational roots" "x in {-sqrt(2), sqrt(2)}"
     (value "solve(x^2 = 2, x)");
+  Alcotest.(check string)
+    "scaled equation has the same canonical roots" "x in {-sqrt(2), sqrt(2)}"
+    (value "solve(2*x^2 = 4, x)");
+  Alcotest.(check string)
+    "negative scaling has the same canonical roots" "x in {-sqrt(2), sqrt(2)}"
+    (value "solve(-3*x^2 = -6, x)");
+  Alcotest.(check string)
+    "translated irrational roots" "x in {-1/2 - sqrt(3/4), -1/2 + sqrt(3/4)}"
+    (value "solve(4*x^2 + 4*x - 2 = 0, x)");
+  Alcotest.(check string)
+    "rational radicand" "x in {-sqrt(2/3), sqrt(2/3)}"
+    (value "solve(x^2 = 2/3, x)");
   Alcotest.(check string)
     "higher degree remains explicit" "unresolved: solve(x^3 = 1, x)"
     (value "solve(x^3 = 1, x)")
@@ -401,6 +427,113 @@ let failures () =
     "computed oversized sequence index" "resource_limit"
     (error_code "fibonacci(50000 + 50001)")
 
+let runtime_source_positions () =
+  let nested = evaluation_error "10 + 20 / (3 - 3)" in
+  Alcotest.(check string) "nested error code" "division_by_zero" nested.code;
+  Alcotest.(check (option int))
+    "smallest failing arithmetic subtree" (Some 5) nested.position;
+  let multiline = evaluation_error "approx(\n  sqrt(-1), 20)" in
+  Alcotest.(check string) "domain error code" "domain_error" multiline.code;
+  Alcotest.(check (option int))
+    "multiline byte offset" (Some 10) multiline.position;
+  let response =
+    Centl_engine.json_of_evaluation (Centl_engine.evaluate "4 + 1 / (2 - 2)")
+  in
+  let machine_position =
+    match response with
+    | `Assoc fields ->
+        begin match List.assoc_opt "error" fields with
+        | Some (`Assoc error) ->
+            begin match List.assoc_opt "position" error with
+            | Some (`Int position) -> position
+            | _ -> Alcotest.fail "machine error contained no integer position"
+            end
+        | _ -> Alcotest.fail "machine response contained no error object"
+        end
+    | _ -> Alcotest.fail "machine response was not an object"
+  in
+  Alcotest.(check int)
+    "machine position is the zero-based byte offset" 4 machine_position
+
+let session_runtime_source_positions () =
+  let session = Centl_engine.create_session () in
+  ignore (session_text session "f(x) = 1 / x");
+  let call_error = session_evaluation_error session "100 + f(0)" in
+  Alcotest.(check string)
+    "stored body failure" "division_by_zero" call_error.code;
+  Alcotest.(check (option int))
+    "stored body is blamed on this source's call site" (Some 6)
+    call_error.position;
+  ignore (session_text session "identity(x) = x");
+  let argument_error = session_evaluation_error session "identity(1 / 0)" in
+  Alcotest.(check (option int))
+    "failing caller argument remains more specific than call site" (Some 9)
+    argument_error.position;
+  let definition_error =
+    session_evaluation_error (Centl_engine.create_session ()) "bad(x) = 1 / 0"
+  in
+  Alcotest.(check (option int))
+    "definition-time failure uses the original RHS offset" (Some 9)
+    definition_error.position;
+  ignore (session_text session "root(x) = sqrt(x)");
+  let approximate_call =
+    session_evaluation_error session "approx(root(-1), 20)"
+  in
+  Alcotest.(check (option int))
+    "stored approximation body is blamed on its call" (Some 7)
+    approximate_call.position;
+  let statement_error source =
+    session_evaluation_error (Centl_engine.create_session ()) source
+  in
+  let check_statement_error label source expected_code expected_position =
+    let error = statement_error source in
+    Alcotest.(check string) (label ^ " code") expected_code error.code;
+    Alcotest.(check (option int))
+      (label ^ " position") (Some expected_position) error.position
+  in
+  check_statement_error "reserved definition name" "  pi = 3" "reserved_name" 2;
+  check_statement_error "reserved function name" "sum = 3" "reserved_name" 0;
+  check_statement_error "empty parameter list" "f() = 3" "invalid_definition" 2;
+  check_statement_error "self-named parameter" "f(x, f) = x"
+    "invalid_definition" 5;
+  check_statement_error "reserved parameter" "f(x, pi) = x" "reserved_name" 5;
+  check_statement_error "duplicate parameter" "f(x, y, x) = x"
+    "invalid_definition" 8;
+  let immutable = Centl_engine.create_session () in
+  ignore (session_text immutable "rate = 1");
+  let immutable_error = session_evaluation_error immutable "  rate = 2" in
+  Alcotest.(check (option int))
+    "immutable definition name" (Some 2) immutable_error.position;
+  let one_binding =
+    { Centl_engine.default_evaluation_limits with max_bindings = 1 }
+  in
+  let bounded = Centl_engine.create_session () in
+  ignore
+    (Centl_engine.evaluate_in_session_with_limits one_binding bounded "a = 1");
+  begin match
+    Centl_engine.evaluate_in_session_with_limits one_binding bounded "  b = 2"
+  with
+  | Error { code = "resource_limit"; position; _ } ->
+      Alcotest.(check (option int))
+        "binding-limit definition name" (Some 2) position
+  | Error error ->
+      Alcotest.failf "binding limit returned %s instead: %s" error.code
+        error.message
+  | Ok _ -> Alcotest.fail "binding limit accepted another definition"
+  end
+
+let session_diagnostic_origin_scaling () =
+  let session = Centl_engine.create_session () in
+  ignore (session_text session "identity(x) = x");
+  let depth = 1_000 in
+  let source =
+    String.concat "" (List.init depth (Fun.const "identity("))
+    ^ "0" ^ String.make depth ')'
+  in
+  Alcotest.(check string)
+    "near-limit nested calls retain linear provenance bookkeeping" "0"
+    (session_text session source)
+
 let json_protocol () =
   let request = `Assoc [ ("version", `Int 1); ("expression", `String "2/4") ] in
   match Centl_engine.evaluate_request request with
@@ -558,6 +691,159 @@ let json_bool name json =
   | `Bool value -> value
   | _ -> Alcotest.failf "JSON field %s was not a Boolean" name
 
+let schema_accepts schema value =
+  let definitions =
+    match schema with
+    | `Assoc fields ->
+        begin match List.assoc_opt "$defs" fields with
+        | Some (`Assoc definitions) -> definitions
+        | _ -> []
+        end
+    | _ -> []
+  in
+  let integer_string ~positive = function
+    | `String value ->
+        let length = String.length value in
+        let start =
+          if (not positive) && length > 0 && value.[0] = '-' then 1 else 0
+        in
+        length > start
+        && ((not positive) || (value.[0] >= '1' && value.[0] <= '9'))
+        &&
+        let rec digits index =
+          index = length
+          || (value.[index] >= '0' && value.[index] <= '9')
+             && digits (index + 1)
+        in
+        digits start
+    | _ -> false
+  in
+  let rec accepts candidate value =
+    match candidate with
+    | `Assoc fields ->
+        let reference_ok =
+          match List.assoc_opt "$ref" fields with
+          | None -> true
+          | Some (`String reference) ->
+              let prefix = "#/$defs/" in
+              if
+                String.length reference <= String.length prefix
+                || String.sub reference 0 (String.length prefix) <> prefix
+              then false
+              else
+                let name =
+                  String.sub reference (String.length prefix)
+                    (String.length reference - String.length prefix)
+                in
+                begin match List.assoc_opt name definitions with
+                | Some definition -> accepts definition value
+                | None -> false
+                end
+          | Some _ -> false
+        in
+        let type_ok =
+          match List.assoc_opt "type" fields with
+          | None -> true
+          | Some (`String "object") ->
+              begin match value with `Assoc _ -> true | _ -> false
+              end
+          | Some (`String "array") ->
+              begin match value with `List _ -> true | _ -> false
+              end
+          | Some (`String "string") ->
+              begin match value with `String _ -> true | _ -> false
+              end
+          | Some (`String "integer") ->
+              begin match value with `Int _ | `Intlit _ -> true | _ -> false
+              end
+          | Some (`String "boolean") ->
+              begin match value with `Bool _ -> true | _ -> false
+              end
+          | Some _ -> false
+        in
+        let const_ok =
+          match List.assoc_opt "const" fields with
+          | None -> true
+          | Some expected -> expected = value
+        in
+        let enum_ok =
+          match List.assoc_opt "enum" fields with
+          | None -> true
+          | Some (`List choices) -> List.exists (( = ) value) choices
+          | Some _ -> false
+        in
+        let minimum_ok =
+          match (List.assoc_opt "minimum" fields, value) with
+          | None, _ -> true
+          | Some (`Int minimum), `Int actual -> actual >= minimum
+          | Some (`Int minimum), `Intlit actual ->
+              Z.compare (Z.of_string actual) (Z.of_int minimum) >= 0
+          | Some _, _ -> false
+        in
+        let pattern_ok =
+          match List.assoc_opt "pattern" fields with
+          | None -> true
+          | Some (`String "^-?[0-9]+$") -> integer_string ~positive:false value
+          | Some (`String "^[1-9][0-9]*$") ->
+              integer_string ~positive:true value
+          | Some _ -> false
+        in
+        let required_ok =
+          match (List.assoc_opt "required" fields, value) with
+          | None, _ -> true
+          | Some (`List required), `Assoc actual ->
+              List.for_all
+                (function
+                  | `String name -> Option.is_some (List.assoc_opt name actual)
+                  | _ -> false)
+                required
+          | Some _, _ -> false
+        in
+        let properties_ok =
+          match (List.assoc_opt "properties" fields, value) with
+          | None, _ -> true
+          | Some (`Assoc properties), `Assoc actual ->
+              List.for_all
+                (fun (name, actual_value) ->
+                  match List.assoc_opt name properties with
+                  | Some property -> accepts property actual_value
+                  | None ->
+                      List.assoc_opt "additionalProperties" fields
+                      <> Some (`Bool false))
+                actual
+          | Some (`Assoc _), _ -> true
+          | Some _, _ -> false
+        in
+        let items_ok =
+          match (List.assoc_opt "items" fields, value) with
+          | None, _ -> true
+          | Some item_schema, `List items ->
+              List.for_all (accepts item_schema) items
+          | Some _, _ -> true
+        in
+        let one_of_ok =
+          match List.assoc_opt "oneOf" fields with
+          | None -> true
+          | Some (`List choices) ->
+              List.fold_left
+                (fun matches choice ->
+                  if accepts choice value then matches + 1 else matches)
+                0 choices
+              = 1
+          | Some _ -> false
+        in
+        let not_ok =
+          match List.assoc_opt "not" fields with
+          | None -> true
+          | Some rejected -> not (accepts rejected value)
+        in
+        reference_ok && type_ok && const_ok && enum_ok && minimum_ok
+        && pattern_ok && required_ok && properties_ok && items_ok && one_of_ok
+        && not_ok
+    | _ -> false
+  in
+  accepts schema value
+
 let protocol_error_code json = json |> json_member "error" |> json_string "code"
 let protocol_value_text json = json |> json_member "value" |> json_string "text"
 
@@ -588,6 +874,72 @@ let integration_json_protocol () =
   Alcotest.(check string)
     "ordinary exact provenance" "exact"
     (response |> json_member "provenance" |> json_string "classification")
+
+let real_quadratic_json_protocol () =
+  let evaluate expression =
+    Centl_engine.evaluate_request
+      (`Assoc [ ("version", `Int 1); ("expression", `String expression) ])
+  in
+  let solutions response =
+    match response |> json_member "value" |> json_member "solutions" with
+    | `List solutions -> solutions
+    | _ -> Alcotest.fail "quadratic solutions were not a JSON array"
+  in
+  let response = evaluate "solve(x^2 = 2, x)" in
+  let lower, upper =
+    match solutions response with
+    | [ lower; upper ] -> (lower, upper)
+    | _ -> Alcotest.fail "quadratic equation did not return two solutions"
+  in
+  let check_solution label branch text solution =
+    Alcotest.(check string)
+      (label ^ " kind") "real_quadratic"
+      (json_string "kind" solution);
+    Alcotest.(check bool) (label ^ " exact") true (json_bool "exact" solution);
+    Alcotest.(check string)
+      (label ^ " branch") branch
+      (json_string "branch" solution);
+    Alcotest.(check string) (label ^ " text") text (json_string "text" solution);
+    let center = json_member "center" solution in
+    let radicand = json_member "radicand" solution in
+    Alcotest.(check string)
+      (label ^ " center numerator")
+      "0"
+      (json_string "numerator" center);
+    Alcotest.(check string)
+      (label ^ " center denominator")
+      "1"
+      (json_string "denominator" center);
+    Alcotest.(check string)
+      (label ^ " radicand numerator")
+      "2"
+      (json_string "numerator" radicand);
+    Alcotest.(check string)
+      (label ^ " radicand denominator")
+      "1"
+      (json_string "denominator" radicand)
+  in
+  check_solution "lower" "lower" "-sqrt(2)" lower;
+  check_solution "upper" "upper" "sqrt(2)" upper;
+  Alcotest.(check (list string))
+    "scaling-invariant algebraic solutions"
+    (solutions response |> List.map Yojson.Safe.to_string)
+    (solutions (evaluate "solve(2*x^2 = 4, x)")
+    |> List.map Yojson.Safe.to_string);
+  let provenance = json_member "provenance" response in
+  Alcotest.(check string)
+    "quadratic provenance method" "verified_quadratic_solving"
+    (json_string "method" provenance);
+  Alcotest.(check string)
+    "quadratic provenance backend" "centl-core"
+    (json_string "backend" provenance);
+  begin match solutions (evaluate "solve(x^2 - 1 = 0, x)") with
+  | `Assoc first :: _ ->
+      Alcotest.(check bool)
+        "rational solution schema remains untagged" true
+        (List.assoc_opt "kind" first = None)
+  | _ -> Alcotest.fail "rational equation returned no object solution"
+  end
 
 let persistent_json_protocol () =
   let state = Centl_protocol.create () in
@@ -650,6 +1002,10 @@ let machine_resource_limits () =
   Alcotest.(check string)
     "exact result bits" "resource_limit"
     (evaluate "2^100" [ ("max_exact_bits", `Int 100) ] |> protocol_error_code);
+  Alcotest.(check string)
+    "quadratic square-witness bits" "resource_limit"
+    (evaluate "solve(x^2 = 257, x)" [ ("max_exact_bits", `Int 8) ]
+    |> protocol_error_code);
   Alcotest.(check string)
     "integer iterations" "resource_limit"
     (evaluate "fibonacci(101)" [ ("max_integer_iterations", `Int 100) ]
@@ -752,7 +1108,7 @@ let machine_provenance () =
   check "x + 1" "exact_symbolic";
   check "approx(pi, 8)" "rigorous_enclosure";
   check "solve(x^2 - 1 = 0, x)" "exact_solution_set";
-  check "solve(x^2 = 2, x)" "unresolved";
+  check "solve(x^2 = 2, x)" "exact_solution_set";
   check "1 / 0" "failure";
   let producer =
     evaluate "42" |> json_member "provenance" |> json_member "producer"
@@ -861,6 +1217,106 @@ let mcp_error_code json = json |> json_member "error" |> json_int "code"
 
 let mcp_structured_content json =
   json |> json_member "result" |> json_member "structuredContent"
+
+let mcp_schema_laziness () =
+  Alcotest.(check bool)
+    "calculate schema starts lazy" false
+    (Lazy.is_val Centl_mcp.tool_output_schema);
+  Alcotest.(check bool)
+    "reset schema starts lazy" false
+    (Lazy.is_val Centl_mcp.reset_output_schema);
+  let state = Centl_mcp.create () in
+  ignore
+    (mcp_request state
+       {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"lazy-test","version":"1"}}}|});
+  ignore
+    (Centl_mcp.handle_json state
+       (Yojson.Safe.from_string
+          {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}));
+  ignore
+    (mcp_request state
+       {|{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"1 + 1"}}}|});
+  Alcotest.(check bool)
+    "ordinary calculation does not force calculate schema" false
+    (Lazy.is_val Centl_mcp.tool_output_schema);
+  Alcotest.(check bool)
+    "ordinary calculation does not force reset schema" false
+    (Lazy.is_val Centl_mcp.reset_output_schema);
+  ignore (mcp_request state {|{"jsonrpc":"2.0","id":3,"method":"tools/list"}|});
+  Alcotest.(check bool)
+    "tool discovery forces calculate schema" true
+    (Lazy.is_val Centl_mcp.tool_output_schema);
+  Alcotest.(check bool)
+    "tool discovery forces reset schema" true
+    (Lazy.is_val Centl_mcp.reset_output_schema)
+
+let mcp_output_schemas () =
+  let calculate_schema = Lazy.force Centl_mcp.tool_output_schema in
+  let reset_schema = Lazy.force Centl_mcp.reset_output_schema in
+  Alcotest.(check bool)
+    "calculate descriptor uses calculate schema" true
+    (json_member "outputSchema" (Centl_mcp.calculate_tool ()) = calculate_schema);
+  Alcotest.(check bool)
+    "reset descriptor uses self-contained reset schema" true
+    (json_member "outputSchema" (Centl_mcp.reset_tool ()) = reset_schema);
+  let initialized_state () =
+    let state = Centl_mcp.create () in
+    ignore
+      (mcp_request state
+         {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"schema-test","version":"1"}}}|});
+    ignore
+      (Centl_mcp.handle_json state
+         (Yojson.Safe.from_string
+            {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}));
+    state
+  in
+  let calculate expression =
+    let state = initialized_state () in
+    let request =
+      `Assoc
+        [
+          ("jsonrpc", `String "2.0");
+          ("id", `String "schema");
+          ("method", `String "tools/call");
+          ( "params",
+            `Assoc
+              [
+                ("name", `String "centl_calculate");
+                ("arguments", `Assoc [ ("expression", `String expression) ]);
+              ] );
+        ]
+    in
+    match Centl_mcp.handle_json state request with
+    | Some response -> mcp_structured_content response
+    | None -> Alcotest.fail "schema test calculation returned no response"
+  in
+  [
+    ("integer", "1");
+    ("rational", "1/2");
+    ("symbolic", "x + 1");
+    ("conditional symbolic", "assuming(x / x, x != 0)");
+    ("sequence", "sequence(k, k = 1, 3)");
+    ("real enclosure", "approx(pi, 8)");
+    ("rational solution set", "solve(x^2 - 1 = 0, x)");
+    ("real-quadratic solution set", "solve(x^2 = 2, x)");
+    ("value definition", "a = 1");
+    ("function definition", "f(x) = x + 1");
+    ("structured error", "1 / 0");
+  ]
+  |> List.iter (fun (label, expression) ->
+      Alcotest.(check bool)
+        (label ^ " conforms to calculate outputSchema")
+        true
+        (schema_accepts calculate_schema (calculate expression)));
+  let reset_state = initialized_state () in
+  let reset_response =
+    mcp_request reset_state
+      {|{"jsonrpc":"2.0","id":"reset-schema","method":"tools/call","params":{"name":"centl_reset","arguments":{}}}|}
+    |> mcp_structured_content
+  in
+  Alcotest.(check bool)
+    "reset response conforms to reset outputSchema" true
+    (schema_accepts reset_schema reset_response)
 
 let mcp_protocol () =
   let state = Centl_mcp.create () in
@@ -1385,6 +1841,22 @@ let property_quadratic_solving () =
   in
   QCheck.Test.check_exn test
 
+let property_real_quadratic_scaling () =
+  let scale = QCheck.make QCheck.Gen.(oneof [ 1 -- 50; -50 -- -1 ]) in
+  let nonsquare =
+    QCheck.make QCheck.Gen.(oneof_list [ 2; 3; 5; 6; 7; 8; 10 ])
+  in
+  let test =
+    QCheck.Test.make ~count:500 (QCheck.pair scale nonsquare)
+      (fun (scale, radicand) ->
+        let source =
+          Printf.sprintf "solve((%d)*x^2 = (%d), x)" scale (scale * radicand)
+        in
+        value source
+        = Printf.sprintf "x in {-sqrt(%d), sqrt(%d)}" radicand radicand)
+  in
+  QCheck.Test.check_exn test
+
 let () =
   Alcotest.run "centl"
     [
@@ -1432,6 +1904,8 @@ let () =
             property_linear_solving;
           Alcotest.test_case "quadratic root property" `Quick
             property_quadratic_solving;
+          Alcotest.test_case "real-quadratic scaling property" `Quick
+            property_real_quadratic_scaling;
         ] );
       ( "definitions",
         [
@@ -1455,7 +1929,16 @@ let () =
             elementary_function_smoke;
           Alcotest.test_case "structured failures" `Quick approximation_failures;
         ] );
-      ("errors", [ Alcotest.test_case "structured failures" `Quick failures ]);
+      ( "errors",
+        [
+          Alcotest.test_case "structured failures" `Quick failures;
+          Alcotest.test_case "runtime source positions" `Quick
+            runtime_source_positions;
+          Alcotest.test_case "session source positions" `Quick
+            session_runtime_source_positions;
+          Alcotest.test_case "session diagnostic scaling" `Quick
+            session_diagnostic_origin_scaling;
+        ] );
       ( "machine interface",
         [
           Alcotest.test_case "versioned request" `Quick json_protocol;
@@ -1467,6 +1950,8 @@ let () =
             conditional_json_protocol;
           Alcotest.test_case "structured solution set" `Quick
             equation_json_protocol;
+          Alcotest.test_case "exact real-quadratic solution set" `Quick
+            real_quadratic_json_protocol;
           Alcotest.test_case "persistent sessions and request ids" `Quick
             persistent_json_protocol;
           Alcotest.test_case "resource limits" `Quick machine_resource_limits;
@@ -1474,7 +1959,9 @@ let () =
           Alcotest.test_case "structured provenance" `Quick machine_provenance;
           Alcotest.test_case "cooperative cancellation" `Quick
             machine_cancellation;
+          Alcotest.test_case "MCP schema laziness" `Quick mcp_schema_laziness;
           Alcotest.test_case "MCP lifecycle and tools" `Quick mcp_protocol;
+          Alcotest.test_case "MCP output schemas" `Quick mcp_output_schemas;
           Alcotest.test_case "MCP failures" `Quick mcp_failures;
           Alcotest.test_case "MCP cancellation" `Quick mcp_cancellation;
         ] );

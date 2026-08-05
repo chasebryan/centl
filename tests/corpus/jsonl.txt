@@ -1,0 +1,17 @@
+# JSON Lines protocol seeds.
+{}
+null
+[]
+{"version":1,"op":"ping"}
+{"version":1,"op":"describe"}
+{"version":1,"op":"reset","id":"reset"}
+{"version":1,"id":"definition","expression":"radius = 3"}
+{"version":1,"id":1,"expression":"1/3 + 1/6"}
+{"version":1,"id":2,"expression":"approx(pi, 20)"}
+{"version":1,"id":3,"expression":"sum(k, k = 1, 10)","limits":{"max_integer_iterations":100}}
+{"version":1,"id":4,"op":"cancel","target":3}
+{"version":0,"expression":"1"}
+{"version":"1","expression":[]}
+{"version":1,"expression":"1","limits":{"unknown":1}}
+{"version":1
+not-json

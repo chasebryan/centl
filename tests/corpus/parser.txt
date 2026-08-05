@@ -1,0 +1,20 @@
+# One expression or statement seed per line. The runner applies deterministic
+# byte-level insertion, deletion, replacement, reversal, and truncation.
+0
+0.1 + 0.2
+1 / (2 - 2)
+(x + 1)^128
+f(x, y) = x^2 + y/3
+sum(k^2, k = 1, 100)
+product((k + 1)/k, k = 1, 10)
+sequence(k^2, k = -3, 3)
+recurrence(1, previous + index, previous, index = 1, 8)
+integrate((x + 1)^8, x = 0, 1)
+solve(x^2 - 5*x + 6 = 0, x)
+approx(sin(pi / 7), 30)
+assuming(x / x, x != 0)
+substitute(sum(k*x, k = 1, 4), x = 3)
+((((((((((((1))))))))))))
+1 +
+f(,)
+1e999999

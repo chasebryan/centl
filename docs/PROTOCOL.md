@@ -40,7 +40,7 @@ Successful and failed responses report the current definition and request
 counts:
 
 ```json
-{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
 ```
 
 Definitions use the same calculator syntax and remain immutable:
@@ -50,7 +50,7 @@ Definitions use the same calculator syntax and remain immutable:
 ```
 
 ```json
-{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
+{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
 ```
 
 ## Limits
@@ -131,7 +131,7 @@ that has a string or integer `id`:
 The acknowledgement is ordered with normal session traffic:
 
 ```json
-{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
 ```
 
 Input is read independently from evaluation, so the cancellation signal can
@@ -148,16 +148,23 @@ available after `max_requests` is reached and do not increment the request
 counter. Malformed cancellation objects have no side effect and follow ordinary
 admission and validation.
 
-The reader retains at most `max_requests` pending inputs and at most 16 MiB of
-their source bytes. The byte ceiling is derived as 256 times the 65,536-byte
-per-request ceiling, so small valid bursts can still reach the advertised
-10,000-request process limit. If a producer exceeds either queue ceiling before
-the evaluator can drain it, CENTL cancels active and queued cancellable
+The reader retains at most `max_requests` ordinary pending inputs and at most
+16 MiB of their source bytes. The byte ceiling is derived as 256 times the
+65,536-byte per-request ceiling, so small valid bursts can still reach the
+advertised 10,000-request process limit. If ordinary count or bytes are already
+full, one valid cancellation operation may occupy a separately accounted
+emergency slot; its own input remains bounded by the 65,536-byte request limit.
+There is never more than one pending emergency slot.
+
+If a producer exceeds a queue ceiling without qualifying for that slot, or
+while the slot is occupied, CENTL cancels active and queued cancellable
 evaluations, appends one ordered `resource_limit` response for the overflowing
 input, stops reading, drains the bounded queue, and exits with a failure status.
-This terminal overload policy prevents both unbounded memory growth and a
-saturated queue from starving cancellation. Clients should use normal pipe
-backpressure instead of sending unbounded large-request bursts.
+Thus even the terminal state retains at most the ordinary queue, one emergency
+cancellation, and one zero-byte-accounted overload marker. This policy prevents
+both unbounded memory growth and a saturated queue from starving cancellation.
+Clients should use normal pipe backpressure instead of sending unbounded
+large-request bursts.
 
 Cancellation is best effort at explicit evaluator checkpoints: source parsing,
 session expansion, symbolic traversal and transformation, approximation retry,
@@ -185,13 +192,13 @@ type.
 An exact symbolic result uses canonical plain text:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Conditional symbolic results retain machine-readable conditions:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
@@ -204,7 +211,7 @@ the ordered scalar values using the existing integer, rational, and symbolic
 schemas, and `length` is a JSON integer bounded by the active iteration limit:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
+{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
 ```
 
 Empty ranges have `length: 0`, `items: []`, and `text: "[]"`. Nested sequence
@@ -216,18 +223,34 @@ Equation solving returns a structured solution set. Rational parts remain
 decimal strings:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
 ```
 
 `status` is `finite`, `none`, `all`, or `unresolved`. An unresolved result is a
 successful explicit classification with `resolved: false`.
+
+Finite rational solutions retain the protocol's original untagged
+`numerator`/`denominator`/`text` object. A real quadratic with a positive
+nonsquare discriminant uses a tagged exact solution object instead:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"kind":"real_quadratic","exact":true,"branch":"lower","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"-sqrt(2)"},{"kind":"real_quadratic","exact":true,"branch":"upper","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"sqrt(2)"}],"equation":{"left":"x^2","right":"2"},"text":"x in {-sqrt(2), sqrt(2)}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_solution_set","method":"verified_quadratic_solving","backend":"centl-core"}}
+```
+
+`branch` is `lower` for `center - sqrt(radicand)` and `upper` for
+`center + sqrt(radicand)`. Both rational components are reduced with positive
+denominators. The representation comes from `-b/(2a)` and
+`discriminant/(4a^2)`, so multiplying an equation by a nonzero rational leaves
+the structured roots unchanged. These objects are exact equation solutions,
+not general scalar values; use `approx(...)` separately when a decimal
+enclosure is required.
 
 A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 `dyadic` contains exact endpoints, `decimal` is an outward-rounded view, and
 `precision` records actual backend work:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
+{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
 ```
 
 ## Errors
@@ -235,11 +258,13 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 Failures have stable codes and mathematical messages:
 
 ```json
-{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.9.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
 ```
 
-Syntax errors also contain a zero-based byte `position`. Version 1 error codes
-include `syntax_error`, `division_by_zero`, `zero_denominator`,
+Syntax errors and runtime mathematical failures that can be localized to source
+also contain a zero-based byte `position`; request/session-wide failures omit it
+when no single source expression is responsible. Version 1 error codes include
+`syntax_error`, `division_by_zero`, `zero_denominator`,
 `invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
 `precision_limit`, `insufficient_precision`, `resource_limit`,
 `unsupported_approximation`, `invalid_solution_variable`,

@@ -1680,11 +1680,67 @@ let rec polynomial_of (term:expression) (variable:string)
   | Factor inner -> polynomial_of inner variable
   | Assuming _ _ _ _ -> None
 
+(** The host uses its arbitrary-precision integer square-root routine only to
+    propose a floor witness.  This checked classification is the semantic
+    boundary: an exact result or a strict gap between consecutive squares is
+    accepted only after the corresponding integer inequalities hold. *)
+type integer_square_classification =
+  | ExactIntegerSquare: root:int -> integer_square_classification
+  | StrictIntegerSquareFloor: root:int -> integer_square_classification
+  | InvalidIntegerSquareFloor
+
+let integer_square_classification_valid
+    (value:int)
+    (classification:integer_square_classification)
+  : prop
+=
+  match classification with
+  | ExactIntegerSquare root ->
+      value >= 0 /\ root >= 0 /\ root * root = value
+  | StrictIntegerSquareFloor root ->
+      value >= 0 /\ root >= 0 /\
+      root * root < value /\ value < (root + 1) * (root + 1)
+  | InvalidIntegerSquareFloor -> True
+
+let validate_integer_square_floor
+    (value root:int)
+  : Tot (classification:integer_square_classification{
+      integer_square_classification_valid value classification})
+=
+  if value >= 0 && root >= 0 &&
+     root * root <= value &&
+     value < (root + 1) * (root + 1)
+  then
+    if root * root = value
+    then ExactIntegerSquare root
+    else StrictIntegerSquareFloor root
+  else InvalidIntegerSquareFloor
+
+type quadratic_branch =
+  | Lower
+  | Upper
+
+(** Canonical representation of a conjugate pair of irrational real
+    quadratic roots.  [center - sqrt(radicand)] is [Lower] and
+    [center + sqrt(radicand)] is [Upper].  [complete_real_quadratic] derives
+    both normalized rationals from the quadratic formula, making the
+    representation invariant under nonzero rational scaling of an equation. *)
+type real_quadratic = {
+  center: rational;
+  radicand: rational;
+  branch: quadratic_branch
+}
+
+type equation_solution =
+  | RationalSolution: rational -> equation_solution
+  | RealQuadraticSolution: real_quadratic -> equation_solution
+
 type equation_classification =
   | NoEquationSolutions
   | AllEquationValues
-  | OneEquationSolution: rational -> equation_classification
-  | TwoEquationSolutions: rational -> rational -> equation_classification
+  | OneEquationSolution: equation_solution -> equation_classification
+  | TwoEquationSolutions:
+      equation_solution -> equation_solution -> equation_classification
   | RationalQuadratic:
       leading:rational -> linear:rational -> discriminant:rational ->
       equation_classification
@@ -1703,7 +1759,7 @@ let solve_linear_equation
   if linear.numerator = 0 then classify_constant_equation constant
   else
     match divide (negate constant) linear with
-    | Success root -> OneEquationSolution root
+    | Success root -> OneEquationSolution (RationalSolution root)
     | Failure _ -> UnresolvedEquation
 
 let classify_quadratic_equation
@@ -1720,7 +1776,7 @@ let classify_quadratic_equation
     else if discriminant.numerator = 0 then
       let denominator = multiply (make 2 1) leading in
       match divide (negate linear) denominator with
-      | Success root -> OneEquationSolution root
+      | Success root -> OneEquationSolution (RationalSolution root)
       | Failure _ -> UnresolvedEquation
     else RationalQuadratic leading linear discriminant
 
@@ -1755,24 +1811,128 @@ let solve_equation
   | None -> UnresolvedEquation
   | Some coefficients -> classify_polynomial_equation coefficients
 
-let complete_rational_quadratic
-    (leading linear discriminant root:rational)
+let integer_magnitude (value:int) : nat =
+  if value < 0 then -value else value
+
+let canonical_rational (value:rational) : bool =
+  value.denominator > 0 &&
+  Gcd.gcd (integer_magnitude value.numerator) value.denominator = 1
+
+(** Completes a positive-discriminant quadratic after validating host-supplied
+    floor-square-root witnesses for the normalized discriminant numerator and
+    denominator.  Exact witnesses retain the rational-root path.  Otherwise,
+    the two roots are represented canonically as
+
+      center = -b / (2a)
+      radicand = discriminant / (4a^2)
+
+    Invalid or noncanonical boundary values remain unresolved. *)
+let complete_real_quadratic
+    (leading linear discriminant:rational)
+    (numerator_floor denominator_floor:int)
   : equation_classification
 =
   if leading.denominator <= 0 || linear.denominator <= 0 ||
-     discriminant.denominator <= 0 || root.denominator <= 0 ||
+     discriminant.denominator <= 0 ||
      leading.numerator = 0 || discriminant.numerator <= 0 ||
-     root.numerator < 0 ||
-     root.numerator * root.numerator * discriminant.denominator <>
-       discriminant.numerator * root.denominator * root.denominator
+     not (canonical_rational leading) ||
+     not (canonical_rational linear) ||
+     not (canonical_rational discriminant)
   then UnresolvedEquation
   else
-    let denominator = multiply (make 2 1) leading in
-    let negative_linear = negate linear in
-    match divide (subtract negative_linear root) denominator,
-          divide (add negative_linear root) denominator with
-    | Success first, Success second -> TwoEquationSolutions first second
-    | _, _ -> UnresolvedEquation
+    match validate_integer_square_floor
+            discriminant.numerator numerator_floor,
+          validate_integer_square_floor
+            discriminant.denominator denominator_floor with
+    | InvalidIntegerSquareFloor, _
+    | _, InvalidIntegerSquareFloor -> UnresolvedEquation
+    | ExactIntegerSquare root_numerator,
+      ExactIntegerSquare root_denominator ->
+        let root = make root_numerator root_denominator in
+        let denominator = multiply (make 2 1) leading in
+        let negative_linear = negate linear in
+        begin match divide (subtract negative_linear root) denominator,
+                    divide (add negative_linear root) denominator with
+        | Success first, Success second ->
+            TwoEquationSolutions
+              (RationalSolution first) (RationalSolution second)
+        | _, _ -> UnresolvedEquation
+        end
+    | _, _ ->
+        let two_leading = multiply (make 2 1) leading in
+        let four_leading_squared = multiply two_leading two_leading in
+        begin match divide (negate linear) two_leading,
+                    divide discriminant four_leading_squared with
+        | Success center, Success radicand ->
+            TwoEquationSolutions
+              (RealQuadraticSolution {
+                center = center;
+                radicand = radicand;
+                branch = Lower
+              })
+              (RealQuadraticSolution {
+                center = center;
+                radicand = radicand;
+                branch = Upper
+              })
+        | _, _ -> UnresolvedEquation
+        end
+
+let real_quadratic_completion_example_fact : prop =
+  complete_real_quadratic (make 1 1) (make 0 1) (make 8 1) 2 1 =
+    TwoEquationSolutions
+      (RealQuadraticSolution {
+        center = make 0 1;
+        radicand = make 2 1;
+        branch = Lower
+      })
+      (RealQuadraticSolution {
+        center = make 0 1;
+        radicand = make 2 1;
+        branch = Upper
+      })
+
+let real_quadratic_completion_example ()
+  : Lemma (ensures real_quadratic_completion_example_fact)
+= assert_norm real_quadratic_completion_example_fact
+
+let scaled_real_quadratic_completion_example_fact : prop =
+  complete_real_quadratic (make 2 1) (make 0 1) (make 32 1) 5 1 =
+    TwoEquationSolutions
+      (RealQuadraticSolution {
+        center = make 0 1;
+        radicand = make 2 1;
+        branch = Lower
+      })
+      (RealQuadraticSolution {
+        center = make 0 1;
+        radicand = make 2 1;
+        branch = Upper
+      })
+
+let scaled_real_quadratic_completion_example ()
+  : Lemma (ensures scaled_real_quadratic_completion_example_fact)
+= assert_norm scaled_real_quadratic_completion_example_fact
+
+let rational_quadratic_completion_example_fact : prop =
+  complete_real_quadratic (make 1 1) (make 0 1) (make 4 1) 2 1 =
+    TwoEquationSolutions
+      (RationalSolution (make (-1) 1))
+      (RationalSolution (make 1 1))
+
+let rational_quadratic_completion_example ()
+  : Lemma (ensures rational_quadratic_completion_example_fact)
+= assert_norm rational_quadratic_completion_example_fact
+
+let invalid_quadratic_witness_example_fact : prop =
+  complete_real_quadratic (make 1 1) (make 0 1) (make 8 1) 3 1 =
+    UnresolvedEquation
+
+let invalid_quadratic_witness_example ()
+  : Lemma (ensures invalid_quadratic_witness_example_fact)
+= assert_norm invalid_quadratic_witness_example_fact
+
+#restart-solver
 
 type signed_term =
   | PositiveTerm: expression -> signed_term

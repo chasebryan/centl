@@ -15,7 +15,8 @@ FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
 .PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
-	adversarial-test fuzz-test differential-test build test release clean
+	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
+	hardening-test differential-test build test release clean
 
 all: build
 
@@ -64,6 +65,21 @@ adversarial-test:
 	$(DUNE) exec tests/test_adversarial.exe
 
 fuzz-test: adversarial-test
+	@for generated in $(GENERATED); do test -f "$$generated"; done
+	$(DUNE) exec tests/hardening/fuzz_corpus.exe
+
+metamorphic-test:
+	@for generated in $(GENERATED); do test -f "$$generated"; done
+	$(DUNE) exec tests/hardening/metamorphic.exe
+
+sanitizer-test:
+	scripts/native-sanitizer
+
+performance-test: native-build
+	CENTL_BIN="$(CURDIR)/_build/default/src/main.exe" \
+		$(DUNE) exec tests/hardening/performance_smoke.exe
+
+hardening-test: fuzz-test metamorphic-test sanitizer-test performance-test
 
 differential-test: build
 	$(JULIA) --project=lab/julia lab/julia/differential.jl

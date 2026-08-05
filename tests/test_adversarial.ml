@@ -400,6 +400,70 @@ let integral_cancellation_precedes_extraction () =
         (Centl_engine.expression_fragments expression
         |> Centl_engine.text_of_fragments)
 
+let quadratic_witnesses_respect_exact_bit_limit () =
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_exact_bits = 256 }
+  in
+  let leading = Centl_Core.make Z.one Z.one in
+  let linear = Centl_Core.make Z.zero Z.one in
+  let oversized_discriminant =
+    Centl_Core.make (Z.add (Z.shift_left Z.one 512) (Z.of_int 3)) Z.one
+  in
+  let left = Centl_Core.Symbol "x" in
+  let right = Centl_Core.Literal (Z.zero, Z.one) in
+  match
+    Centl_engine.complete_quadratic ~cancelled:Centl_engine.never_cancelled
+      limits "x" left right leading linear oversized_discriminant
+  with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "oversized discriminant witness failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf
+        "oversized discriminant witness bypassed the exact-bit limit: %s"
+        (Centl_engine.text_of_value value)
+
+let quadratic_witness_computation_is_cancellable () =
+  let cancellation_checks = ref 0 in
+  let cancelled () =
+    incr cancellation_checks;
+    !cancellation_checks = 2
+  in
+  let leading = Centl_Core.make Z.one Z.one in
+  let linear = Centl_Core.make Z.zero Z.one in
+  let discriminant = Centl_Core.make (Z.of_int 8) Z.one in
+  let left = Centl_Core.Symbol "x" in
+  let right = Centl_Core.Literal (Z.zero, Z.one) in
+  match
+    Centl_engine.complete_quadratic ~cancelled
+      Centl_engine.default_evaluation_limits "x" left right leading linear
+      discriminant
+  with
+  | Error { code = "cancelled"; _ } ->
+      Alcotest.(check int)
+        "completion checks before and between integer square roots" 2
+        !cancellation_checks
+  | Error error ->
+      Alcotest.failf "cancelled quadratic failed with %s instead: %s" error.code
+        error.message
+  | Ok value ->
+      Alcotest.failf "quadratic completion ignored cancellation: %s"
+        (Centl_engine.text_of_value value)
+
+let algebraic_solution_respects_result_byte_limit () =
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_result_bytes = 300 }
+  in
+  match Centl_engine.evaluate_with_limits limits "solve(x^2 = 2, x)" with
+  | Error { code = "resource_limit"; _ } -> ()
+  | Error error ->
+      Alcotest.failf "bounded algebraic output failed with %s instead: %s"
+        error.code error.message
+  | Ok value ->
+      Alcotest.failf "algebraic solution bypassed the result-byte limit: %s"
+        (Centl_engine.text_of_value value)
+
 let rational_of_dyadic mantissa exponent =
   if exponent >= 0 then Q.mul_2exp (Q.of_bigint mantissa) exponent
   else Q.div_2exp (Q.of_bigint mantissa) (-exponent)
@@ -532,6 +596,131 @@ let enclosure_validator_rejects_reversed_bounds () =
       | Centl_Core.InvalidEnclosure -> true
       | Centl_Core.ValidEnclosure _ -> false)
   |> check_property
+
+let deeply_nested_core_failure_is_localized () =
+  let depth = 1_500 in
+  let prefix = "1 + (" in
+  let source =
+    String.concat "" (List.init depth (Fun.const prefix))
+    ^ "1 / 0" ^ String.make depth ')'
+  in
+  match Centl_engine.evaluate source with
+  | Error { code = "division_by_zero"; position; _ } ->
+      Alcotest.(check (option int))
+        "deepest verified failing subtree"
+        (Some (depth * String.length prefix))
+        position
+  | Error error ->
+      Alcotest.failf "deep core failure returned %s instead: %s" error.code
+        error.message
+  | Ok value ->
+      Alcotest.failf "deep division by zero unexpectedly succeeded: %s"
+        (Centl_engine.text_of_value value)
+
+let deeply_nested_native_failure_is_localized () =
+  let depth = 1_000 in
+  let prefix = "1 + (" in
+  let source =
+    "approx("
+    ^ String.concat "" (List.init depth (Fun.const prefix))
+    ^ "sqrt(-1)"
+    ^ String.make (depth + 1) ')'
+  in
+  match Centl_engine.evaluate source with
+  | Error { code = "domain_error"; position; _ } ->
+      Alcotest.(check (option int))
+        "actual failing native call"
+        (Some (String.length "approx(" + (depth * String.length prefix)))
+        position
+  | Error error ->
+      Alcotest.failf "deep native failure returned %s instead: %s" error.code
+        error.message
+  | Ok value ->
+      Alcotest.failf "deep native domain error unexpectedly succeeded: %s"
+        (Centl_engine.text_of_value value)
+
+let diagnostic_traversals_are_single_pass_and_cancellable () =
+  let depth = 500 in
+  let one = Centl_Core.Literal (Z.one, Z.one) in
+  let zero = Centl_Core.Literal (Z.zero, Z.one) in
+  let core_leaf = Centl_Core.Binary (Centl_Core.Divide, one, zero) in
+  let native_leaf = Centl_Core.Function ("sqrt", [ Centl_Core.Negate one ]) in
+  let rec nest remaining expression =
+    if remaining = 0 then expression
+    else
+      nest (remaining - 1) (Centl_Core.Binary (Centl_Core.Add, one, expression))
+  in
+  let core_expression = nest depth core_leaf in
+  let core_checks = ref 0 in
+  let core_error : Centl_engine.error =
+    { code = "division_by_zero"; message = "division by zero"; position = None }
+  in
+  begin match
+    Centl_engine.diagnostic_blame
+      ~cancelled:(fun () ->
+        incr core_checks;
+        false)
+      core_expression core_error
+  with
+  | Centl_engine.Blame_expression blamed ->
+      Alcotest.(check bool)
+        "core blame is the original failing node" true (blamed == core_leaf);
+      Alcotest.(check int)
+        "core nodes are traced exactly once"
+        ((2 * depth) + 4)
+        !core_checks
+  | Centl_engine.Blame_cancelled ->
+      Alcotest.fail "non-cancelled core diagnostic was cancelled"
+  end;
+  let core_cancel_checks = ref 0 in
+  begin match
+    Centl_engine.diagnostic_blame
+      ~cancelled:(fun () ->
+        incr core_cancel_checks;
+        !core_cancel_checks >= 41)
+      core_expression core_error
+  with
+  | Centl_engine.Blame_cancelled ->
+      Alcotest.(check int)
+        "core localization stops at its cancellation checkpoint" 41
+        !core_cancel_checks
+  | Centl_engine.Blame_expression _ ->
+      Alcotest.fail "core localization ignored cooperative cancellation"
+  end;
+  let native_expression = nest depth native_leaf in
+  let native_checks = ref 0 in
+  begin match
+    Centl_engine.native_value
+      ~cancelled:(fun () ->
+        incr native_checks;
+        false)
+      native_expression 128
+  with
+  | Error (Centl_engine.Domain_error _, blamed) ->
+      Alcotest.(check bool)
+        "native blame comes from the original backend traversal" true
+        (blamed == native_leaf);
+      Alcotest.(check int)
+        "native nodes are visited exactly once"
+        ((2 * depth) + 3)
+        !native_checks
+  | Error _ -> Alcotest.fail "native traversal returned the wrong failure"
+  | Ok _ -> Alcotest.fail "negative square root unexpectedly succeeded"
+  end;
+  let native_cancel_checks = ref 0 in
+  match
+    Centl_engine.native_value
+      ~cancelled:(fun () ->
+        incr native_cancel_checks;
+        !native_cancel_checks >= 41)
+      native_expression 128
+  with
+  | Error (Centl_engine.Cancelled_failure, _) ->
+      Alcotest.(check int)
+        "native traversal stops at its cancellation checkpoint" 41
+        !native_cancel_checks
+  | Error _ -> Alcotest.fail "cancelled native traversal returned another error"
+  | Ok _ -> Alcotest.fail "native traversal ignored cooperative cancellation"
 
 let protocol_line_totality_property () =
   QCheck.Test.make ~name:"JSONL handler is total over bounded byte strings"
@@ -779,6 +968,15 @@ let () =
           Alcotest.test_case "reversed endpoint property" `Quick
             enclosure_validator_rejects_reversed_bounds;
         ] );
+      ( "diagnostic localization",
+        [
+          Alcotest.test_case "deep core failure" `Quick
+            deeply_nested_core_failure_is_localized;
+          Alcotest.test_case "deep native failure" `Quick
+            deeply_nested_native_failure_is_localized;
+          Alcotest.test_case "single pass and cancellable" `Quick
+            diagnostic_traversals_are_single_pass_and_cancellable;
+        ] );
       ( "integration boundary",
         [
           Alcotest.test_case "high-degree output preflight" `Quick
@@ -793,6 +991,15 @@ let () =
             unsupported_integral_respects_result_limit;
           Alcotest.test_case "cancellation before extraction" `Quick
             integral_cancellation_precedes_extraction;
+        ] );
+      ( "quadratic boundary",
+        [
+          Alcotest.test_case "exact-bit witness preflight" `Quick
+            quadratic_witnesses_respect_exact_bit_limit;
+          Alcotest.test_case "cancellable square witnesses" `Quick
+            quadratic_witness_computation_is_cancellable;
+          Alcotest.test_case "algebraic result-byte limit" `Quick
+            algebraic_solution_respects_result_byte_limit;
         ] );
       ( "JSONL",
         [

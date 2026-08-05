@@ -175,15 +175,18 @@ else
 fi
 
 cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
-copy_license "$package/licenses/FLINT" \
-  "${CENTL_FLINT_LICENSE:-}" /usr/share/doc/libflint18t64/copyright \
-  /usr/share/doc/libflint18/copyright /usr/share/doc/libflint-dev/copyright
-copy_license "$package/licenses/GMP" \
-  "${CENTL_GMP_LICENSE:-}" /usr/share/doc/libgmp10/copyright \
-  /usr/share/doc/libgmp-dev/copyright
-copy_license "$package/licenses/MPFR" \
-  "${CENTL_MPFR_LICENSE:-}" /usr/share/doc/libmpfr6/copyright \
-  /usr/share/doc/libmpfr-dev/copyright
+copy_license "$package/licenses/FLINT-LGPL-2.1-or-later" \
+  "${CENTL_FLINT_LICENSE:-}" /usr/share/common-licenses/LGPL-2.1
+copy_license "$package/licenses/GMP-LGPL-3.0-or-later" \
+  "${CENTL_GMP_LGPL_LICENSE:-${CENTL_GMP_LICENSE:-}}" \
+  /usr/share/common-licenses/LGPL-3
+copy_license "$package/licenses/GMP-GPL-3.0" \
+  "${CENTL_GMP_GPL3_LICENSE:-}" /usr/share/common-licenses/GPL-3
+copy_license "$package/licenses/MPFR-LGPL-3.0-or-later" \
+  "${CENTL_MPFR_LGPL_LICENSE:-${CENTL_MPFR_LICENSE:-}}" \
+  /usr/share/common-licenses/LGPL-3
+copy_license "$package/licenses/MPFR-GPL-3.0" \
+  "${CENTL_MPFR_GPL3_LICENSE:-}" /usr/share/common-licenses/GPL-3
 copy_license "$package/licenses/FSTAR" \
   "${CENTL_FSTAR_LICENSE:-}" "$fstar_license_default"
 copy_license "$package/licenses/OCAML" \
@@ -201,8 +204,29 @@ copy_license "$package/licenses/YOJSON" \
 
 cat > "$package/THIRD-PARTY-NOTICES" <<'EOF'
 CENTL includes or links components from F*, OCaml, Zarith, Yojson, FLINT, GMP,
-and MPFR. Their complete license notices are shipped in the licenses directory.
-Build-time-only test and compiler dependencies are not included in this archive.
+and MPFR. Complete license texts are shipped in the licenses directory. Exact
+native-library source and relinking references are in COMPONENT-SOURCES.
+Build-time-only test dependencies are not included in this archive.
+EOF
+
+cat > "$package/COMPONENT-SOURCES" <<EOF
+CENTL $version corresponding application source and relinking build scripts:
+https://github.com/chasebryan/centl/tree/v$version
+
+Exact native-library sources used by the release workflow:
+FLINT 3.0.1
+  https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.gz
+  sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
+GMP 6.3.0
+  https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+  sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
+MPFR 4.2.2
+  https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
+  sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+
+The Windows executable statically links these native libraries. The matching
+CENTL source and build scripts above are the Corresponding Application Code
+needed to rebuild and relink it with compatible modified libraries.
 EOF
 
 printf '%s\n' "$version" > "$package/VERSION"
@@ -211,7 +235,8 @@ CENTL $version for $platform_name $architecture
 
 Run bin/centl. The bundled native libraries are loaded only for CENTL.
 Use bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
-License notices are in the licenses directory.
+License texts are in licenses; source and relinking references are in
+COMPONENT-SOURCES.
 EOF
 
 find "$package" -type d -exec chmod 755 {} +

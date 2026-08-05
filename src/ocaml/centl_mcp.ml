@@ -80,30 +80,432 @@ let cancellation_target_of_json = function
       end
   | _ -> None
 
-let tool_output_schema =
+let string_schema = `Assoc [ ("type", `String "string") ]
+let integer_schema = `Assoc [ ("type", `String "integer") ]
+
+let nonnegative_integer_schema =
+  `Assoc [ ("type", `String "integer"); ("minimum", `Int 0) ]
+
+let boolean_schema = `Assoc [ ("type", `String "boolean") ]
+
+let integer_string_schema =
+  `Assoc [ ("type", `String "string"); ("pattern", `String "^-?[0-9]+$") ]
+
+let positive_integer_string_schema =
+  `Assoc [ ("type", `String "string"); ("pattern", `String "^[1-9][0-9]*$") ]
+
+let schema_ref name = `Assoc [ ("$ref", `String ("#/$defs/" ^ name)) ]
+
+let strict_object properties required =
   `Assoc
     [
       ("type", `String "object");
-      ( "properties",
-        `Assoc
-          [
-            ("version", `Assoc [ ("type", `String "integer") ]);
-            ("ok", `Assoc [ ("type", `String "boolean") ]);
-            ("value", `Assoc [ ("type", `String "object") ]);
-            ("error", `Assoc [ ("type", `String "object") ]);
-            ("session", `Assoc [ ("type", `String "object") ]);
-            ("provenance", `Assoc [ ("type", `String "object") ]);
-          ] );
-      ( "required",
-        `List
-          [
-            `String "version";
-            `String "ok";
-            `String "session";
-            `String "provenance";
-          ] );
-      ("additionalProperties", `Bool true);
+      ("additionalProperties", `Bool false);
+      ("properties", `Assoc properties);
+      ("required", `List (List.map (fun name -> `String name) required));
     ]
+
+let const_string value = `Assoc [ ("const", `String value) ]
+let const_bool value = `Assoc [ ("const", `Bool value) ]
+let const_int value = `Assoc [ ("const", `Int value) ]
+
+let enum_string values =
+  `Assoc
+    [
+      ("type", `String "string");
+      ("enum", `List (List.map (fun value -> `String value) values));
+    ]
+
+let tool_output_schema =
+  lazy
+    (let rational_components =
+       strict_object
+         [
+           ("numerator", integer_string_schema);
+           ("denominator", positive_integer_string_schema);
+         ]
+         [ "numerator"; "denominator" ]
+     in
+     let rational_solution =
+       strict_object
+         [
+           ("numerator", integer_string_schema);
+           ("denominator", positive_integer_string_schema);
+           ("text", string_schema);
+         ]
+         [ "numerator"; "denominator"; "text" ]
+     in
+     let real_quadratic_solution =
+       strict_object
+         [
+           ("kind", const_string "real_quadratic");
+           ("exact", const_bool true);
+           ("branch", enum_string [ "lower"; "upper" ]);
+           ("center", schema_ref "rational_components");
+           ("radicand", schema_ref "rational_components");
+           ("text", string_schema);
+         ]
+         [ "kind"; "exact"; "branch"; "center"; "radicand"; "text" ]
+     in
+     let condition =
+       strict_object
+         [
+           ("left", string_schema);
+           ( "relation",
+             enum_string
+               [
+                 "equal";
+                 "not_equal";
+                 "less_than";
+                 "less_or_equal";
+                 "greater_than";
+                 "greater_or_equal";
+               ] );
+           ("right", string_schema);
+           ("text", string_schema);
+         ]
+         [ "left"; "relation"; "right"; "text" ]
+     in
+     let integer_value =
+       strict_object
+         [
+           ("kind", const_string "integer");
+           ("exact", const_bool true);
+           ("value", integer_string_schema);
+           ("text", string_schema);
+         ]
+         [ "kind"; "exact"; "value"; "text" ]
+     in
+     let rational_value =
+       strict_object
+         [
+           ("kind", const_string "rational");
+           ("exact", const_bool true);
+           ("numerator", integer_string_schema);
+           ("denominator", positive_integer_string_schema);
+           ("text", string_schema);
+         ]
+         [ "kind"; "exact"; "numerator"; "denominator"; "text" ]
+     in
+     let symbolic_value =
+       strict_object
+         [
+           ("kind", const_string "symbolic");
+           ("exact", const_bool true);
+           ("expression", string_schema);
+           ("text", string_schema);
+           ( "conditions",
+             `Assoc
+               [ ("type", `String "array"); ("items", schema_ref "condition") ]
+           );
+         ]
+         [ "kind"; "exact"; "expression"; "text" ]
+     in
+     let sequence_value =
+       strict_object
+         [
+           ("kind", const_string "sequence");
+           ("exact", const_bool true);
+           ("length", nonnegative_integer_schema);
+           ( "items",
+             `Assoc
+               [
+                 ("type", `String "array");
+                 ( "items",
+                   `Assoc
+                     [
+                       ( "oneOf",
+                         `List
+                           [
+                             schema_ref "integer_value";
+                             schema_ref "rational_value";
+                             schema_ref "symbolic_value";
+                           ] );
+                     ] );
+               ] );
+           ("text", string_schema);
+         ]
+         [ "kind"; "exact"; "length"; "items"; "text" ]
+     in
+     let real_enclosure =
+       let dyadic =
+         strict_object
+           [
+             ("lower_mantissa", integer_string_schema);
+             ("upper_mantissa", integer_string_schema);
+             ("binary_exponent", integer_schema);
+           ]
+           [ "lower_mantissa"; "upper_mantissa"; "binary_exponent" ]
+       in
+       let decimal =
+         strict_object
+           [
+             ("lower", string_schema);
+             ("upper", string_schema);
+             ("requested_significant_digits", integer_schema);
+             ("certified_significant_digits", integer_schema);
+           ]
+           [
+             "lower";
+             "upper";
+             "requested_significant_digits";
+             "certified_significant_digits";
+           ]
+       in
+       let precision =
+         strict_object
+           [
+             ("working_bits", integer_schema);
+             ("backend", const_string "flint-arb");
+             ("rigorous", const_bool true);
+           ]
+           [ "working_bits"; "backend"; "rigorous" ]
+       in
+       strict_object
+         [
+           ("kind", const_string "real_enclosure");
+           ("exact", const_bool false);
+           ("text", string_schema);
+           ("dyadic", dyadic);
+           ("decimal", decimal);
+           ("precision", precision);
+         ]
+         [ "kind"; "exact"; "text"; "dyadic"; "decimal"; "precision" ]
+     in
+     let solution_set =
+       let equation =
+         strict_object
+           [ ("left", string_schema); ("right", string_schema) ]
+           [ "left"; "right" ]
+       in
+       strict_object
+         [
+           ("kind", const_string "solution_set");
+           ("exact", const_bool true);
+           ("resolved", boolean_schema);
+           ("status", enum_string [ "finite"; "none"; "all"; "unresolved" ]);
+           ("variable", string_schema);
+           ( "solutions",
+             `Assoc
+               [
+                 ("type", `String "array");
+                 ( "items",
+                   `Assoc
+                     [
+                       ( "oneOf",
+                         `List
+                           [
+                             schema_ref "rational_solution";
+                             schema_ref "real_quadratic_solution";
+                           ] );
+                     ] );
+               ] );
+           ("equation", equation);
+           ("text", string_schema);
+         ]
+         [
+           "kind";
+           "exact";
+           "resolved";
+           "status";
+           "variable";
+           "solutions";
+           "equation";
+           "text";
+         ]
+     in
+     let value_definition =
+       strict_object
+         [
+           ("kind", const_string "definition");
+           ("exact", const_bool true);
+           ("definition_kind", const_string "value");
+           ("name", string_schema);
+           ("value", schema_ref "mathematical_value");
+           ("text", string_schema);
+         ]
+         [ "kind"; "exact"; "definition_kind"; "name"; "value"; "text" ]
+     in
+     let function_definition =
+       strict_object
+         [
+           ("kind", const_string "definition");
+           ("exact", const_bool true);
+           ("definition_kind", const_string "function");
+           ("name", string_schema);
+           ( "parameters",
+             `Assoc [ ("type", `String "array"); ("items", string_schema) ] );
+           ("expression", string_schema);
+           ("text", string_schema);
+         ]
+         [
+           "kind";
+           "exact";
+           "definition_kind";
+           "name";
+           "parameters";
+           "expression";
+           "text";
+         ]
+     in
+     let mathematical_value =
+       `Assoc
+         [
+           ( "oneOf",
+             `List
+               [
+                 schema_ref "integer_value";
+                 schema_ref "rational_value";
+                 schema_ref "symbolic_value";
+                 schema_ref "sequence_value";
+                 schema_ref "real_enclosure";
+                 schema_ref "solution_set";
+               ] );
+         ]
+     in
+     let result_value =
+       `Assoc
+         [
+           ( "oneOf",
+             `List
+               [
+                 schema_ref "mathematical_value";
+                 schema_ref "value_definition";
+                 schema_ref "function_definition";
+               ] );
+         ]
+     in
+     let error =
+       strict_object
+         [
+           ("code", string_schema);
+           ("message", string_schema);
+           ("position", nonnegative_integer_schema);
+         ]
+         [ "code"; "message" ]
+     in
+     let session =
+       strict_object
+         [
+           ("definitions", nonnegative_integer_schema);
+           ("requests", nonnegative_integer_schema);
+         ]
+         [ "definitions"; "requests" ]
+     in
+     let provenance =
+       let producer =
+         strict_object
+           [ ("name", const_string "centl"); ("version", string_schema) ]
+           [ "name"; "version" ]
+       in
+       strict_object
+         [
+           ("schema", const_int 1);
+           ("producer", producer);
+           ("classification", string_schema);
+           ("method", string_schema);
+           ("backend", string_schema);
+         ]
+         [ "schema"; "producer"; "classification"; "method"; "backend" ]
+     in
+     let definitions =
+       `Assoc
+         [
+           ("rational_components", rational_components);
+           ("rational_solution", rational_solution);
+           ("real_quadratic_solution", real_quadratic_solution);
+           ("condition", condition);
+           ("integer_value", integer_value);
+           ("rational_value", rational_value);
+           ("symbolic_value", symbolic_value);
+           ("sequence_value", sequence_value);
+           ("real_enclosure", real_enclosure);
+           ("solution_set", solution_set);
+           ("value_definition", value_definition);
+           ("function_definition", function_definition);
+           ("mathematical_value", mathematical_value);
+           ("result_value", result_value);
+           ("error", error);
+           ("session", session);
+           ("provenance", provenance);
+         ]
+     in
+     `Assoc
+       [
+         ("$defs", definitions);
+         ("type", `String "object");
+         ("additionalProperties", `Bool false);
+         ( "properties",
+           `Assoc
+             [
+               ("version", const_int 1);
+               ("ok", boolean_schema);
+               ("value", schema_ref "result_value");
+               ("error", schema_ref "error");
+               ("session", schema_ref "session");
+               ("provenance", schema_ref "provenance");
+             ] );
+         ( "required",
+           `List
+             [
+               `String "version";
+               `String "ok";
+               `String "session";
+               `String "provenance";
+             ] );
+         ( "oneOf",
+           `List
+             [
+               `Assoc
+                 [
+                   ("properties", `Assoc [ ("ok", const_bool true) ]);
+                   ("required", `List [ `String "value" ]);
+                   ("not", `Assoc [ ("required", `List [ `String "error" ]) ]);
+                 ];
+               `Assoc
+                 [
+                   ("properties", `Assoc [ ("ok", const_bool false) ]);
+                   ("required", `List [ `String "error" ]);
+                   ("not", `Assoc [ ("required", `List [ `String "value" ]) ]);
+                 ];
+             ] );
+       ])
+
+let reset_output_schema =
+  lazy
+    (let session =
+       strict_object
+         [
+           ("definitions", nonnegative_integer_schema);
+           ("requests", nonnegative_integer_schema);
+         ]
+         [ "definitions"; "requests" ]
+     in
+     let producer =
+       strict_object
+         [ ("name", const_string "centl"); ("version", string_schema) ]
+         [ "name"; "version" ]
+     in
+     let provenance =
+       strict_object
+         [
+           ("schema", const_int 1);
+           ("producer", producer);
+           ("classification", const_string "control");
+           ("method", const_string "reset");
+           ("backend", const_string "centl-protocol");
+         ]
+         [ "schema"; "producer"; "classification"; "method"; "backend" ]
+     in
+     strict_object
+       [
+         ("version", const_int 1);
+         ("ok", const_bool true);
+         ("reset", const_bool true);
+         ("session", session);
+         ("provenance", provenance);
+       ]
+       [ "version"; "ok"; "reset"; "session"; "provenance" ])
 
 let limits_schema =
   let integer minimum maximum description =
@@ -153,7 +555,7 @@ let limits_schema =
           ] );
     ]
 
-let calculate_tool =
+let calculate_tool () =
   `Assoc
     [
       ("name", `String "centl_calculate");
@@ -161,7 +563,8 @@ let calculate_tool =
       ( "description",
         `String
           "Evaluate exact mathematics or define an immutable session value or \
-           function. Approximation is rigorous and explicit." );
+           function. Quadratic equations return certified exact rational or \
+           real-quadratic solutions; approximation is rigorous and explicit." );
       ( "inputSchema",
         `Assoc
           [
@@ -181,7 +584,7 @@ let calculate_tool =
                 ] );
             ("required", `List [ `String "expression" ]);
           ] );
-      ("outputSchema", tool_output_schema);
+      ("outputSchema", Lazy.force tool_output_schema);
       ( "annotations",
         `Assoc
           [
@@ -192,7 +595,7 @@ let calculate_tool =
           ] );
     ]
 
-let reset_tool =
+let reset_tool () =
   `Assoc
     [
       ("name", `String "centl_reset");
@@ -205,7 +608,7 @@ let reset_tool =
             ("properties", `Assoc []);
             ("additionalProperties", `Bool false);
           ] );
-      ("outputSchema", tool_output_schema);
+      ("outputSchema", Lazy.force reset_output_schema);
       ( "annotations",
         `Assoc
           [
@@ -357,7 +760,7 @@ let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
       jsonrpc_error id (-32002) "CENTL is not initialized"
   | "tools/list" ->
       jsonrpc_result id
-        (`Assoc [ ("tools", `List [ calculate_tool; reset_tool ]) ])
+        (`Assoc [ ("tools", `List [ calculate_tool (); reset_tool () ]) ])
   | "tools/call" -> call_tool ~cancelled state id fields
   | _ -> jsonrpc_error id (-32601) ("method not found: " ^ method_name)
 

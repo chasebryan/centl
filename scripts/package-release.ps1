@@ -88,6 +88,7 @@ try {
     $Pending = [System.Collections.Generic.Queue[string]]::new()
     $Pending.Enqueue($PackagedBinary)
     $Visited = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $BundledRuntimeDlls = [System.Collections.Generic.List[string]]::new()
     $SystemDirectory = [Environment]::GetFolderPath([Environment+SpecialFolder]::System)
 
     while ($Pending.Count -gt 0) {
@@ -113,35 +114,84 @@ try {
             $Destination = Join-Path $Package $Dll
             if (-not (Test-Path -LiteralPath $Destination)) {
                 Copy-Item -LiteralPath $Resolved -Destination $Destination
+                $BundledRuntimeDlls.Add($Dll)
                 $Pending.Enqueue($Destination)
             }
         }
     }
 
+    $UnsupportedRuntimeDlls = @($BundledRuntimeDlls | Where-Object {
+        $_ -ine "libwinpthread-1.dll"
+    })
+    if ($UnsupportedRuntimeDlls.Count -gt 0) {
+        throw "centl package: no license mapping for bundled runtime libraries: $($UnsupportedRuntimeDlls -join ', ')"
+    }
+
     Copy-Item -LiteralPath (Join-Path $ProjectRoot "LICENSE") `
         -Destination (Join-Path $Licenses "CENTL-AGPL-3.0-or-later")
-    Copy-License (Join-Path $Licenses "FLINT") @($env:CENTL_FLINT_LICENSE)
-    Copy-License (Join-Path $Licenses "GMP") @($env:CENTL_GMP_LICENSE)
-    Copy-License (Join-Path $Licenses "MPFR") @($env:CENTL_MPFR_LICENSE)
+    Copy-License (Join-Path $Licenses "FLINT-LGPL-2.1-or-later") @($env:CENTL_FLINT_LICENSE)
+    Copy-License (Join-Path $Licenses "GMP-LGPL-3.0-or-later") @(
+        $env:CENTL_GMP_LGPL_LICENSE, $env:CENTL_GMP_LICENSE)
+    Copy-License (Join-Path $Licenses "GMP-GPL-3.0") @($env:CENTL_GMP_GPL3_LICENSE)
+    Copy-License (Join-Path $Licenses "MPFR-LGPL-3.0-or-later") @(
+        $env:CENTL_MPFR_LGPL_LICENSE, $env:CENTL_MPFR_LICENSE)
+    Copy-License (Join-Path $Licenses "MPFR-GPL-3.0") @($env:CENTL_MPFR_GPL3_LICENSE)
     Copy-License (Join-Path $Licenses "FSTAR") @($env:CENTL_FSTAR_LICENSE)
     Copy-License (Join-Path $Licenses "OCAML") @($env:CENTL_OCAML_LICENSE)
     Copy-License (Join-Path $Licenses "ZARITH") @($env:CENTL_ZARITH_LICENSE)
     Copy-License (Join-Path $Licenses "YOJSON") @($env:CENTL_YOJSON_LICENSE)
+    if ($BundledRuntimeDlls -icontains "libwinpthread-1.dll") {
+        Copy-License (Join-Path $Licenses "WINPTHREADS") @(
+            $env:CENTL_WINPTHREADS_LICENSE,
+            "C:\msys64\mingw64\share\licenses\libwinpthread\COPYING")
+    }
 
+    $WinpthreadsNotice = if ($BundledRuntimeDlls -icontains "libwinpthread-1.dll") {
+        " The Windows package also includes winpthreads."
+    } else { "" }
     $ThirdPartyNotices = @"
 CENTL includes or links components from F*, OCaml, Zarith, Yojson, FLINT, GMP,
-and MPFR. Their complete license notices are shipped in the licenses directory.
-Build-time-only test and compiler dependencies are not included in this archive.
+and MPFR.$WinpthreadsNotice Complete license texts are shipped in the licenses
+directory. Pinned math-library source and relinking references, plus the
+bundled winpthreads upstream source reference, are in COMPONENT-SOURCES.txt.
+Build-time-only test dependencies are not included in this archive.
 "@
     $ThirdPartyNotices.TrimStart() | Set-Content `
         -LiteralPath (Join-Path $Package "THIRD-PARTY-NOTICES") -Encoding UTF8
+    $ComponentSources = @"
+CENTL $Version corresponding application source and relinking build scripts:
+https://github.com/chasebryan/centl/tree/v$Version
+
+Exact native-library sources used by the release workflow:
+FLINT 3.0.1
+  https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.gz
+  sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
+GMP 6.3.0
+  https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+  sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
+MPFR 4.2.2
+  https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
+  sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+Bundled runtime-library upstream source (not version-pinned by the current
+rolling MSYS2 toolchain):
+winpthreads (when bundled as libwinpthread-1.dll)
+  https://github.com/mingw-w64/mingw-w64/tree/master/mingw-w64-libraries/winpthreads
+
+The Windows executable statically links FLINT, GMP, and MPFR. The matching
+CENTL source and build scripts above are the Corresponding Application Code
+needed to rebuild and relink it with compatible modified libraries.
+winpthreads is dynamically bundled as libwinpthread-1.dll when required.
+"@
+    $ComponentSources.TrimStart() | Set-Content `
+        -LiteralPath (Join-Path $Package "COMPONENT-SOURCES.txt") -Encoding UTF8
     $Version | Set-Content -LiteralPath (Join-Path $Package "VERSION") -Encoding ASCII
     $Readme = @"
 CENTL $Version for Windows x86_64
 
 Run centl.exe. Required native libraries are included beside the executable.
 Use centl.exe --serve for stateful JSON Lines or --mcp for a local MCP server.
-License notices are in the licenses directory.
+License texts are in licenses; source and relinking references are in
+COMPONENT-SOURCES.txt.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8
 

@@ -1,0 +1,47 @@
+(executable
+ (name fuzz_corpus)
+ (modules fuzz_corpus)
+ (libraries centl_lib zarith yojson))
+
+(executable
+ (name performance_smoke)
+ (modules performance_smoke)
+ (libraries centl_lib unix yojson))
+
+(executable
+ (name metamorphic)
+ (modules metamorphic)
+ (libraries centl_lib zarith yojson))
+
+(library
+ (name native_sanitizer_support)
+ (modules native_sanitizer_support)
+ (enabled_if
+  (= %{env:CENTL_SANITIZERS=disabled} enabled))
+ (foreign_stubs
+  (language c)
+  (names native_sanitizer_stubs)
+  (include_dirs ../../src/native)
+  (flags
+   (:standard
+    -Wall
+    -Wextra
+    -Werror
+    -fsanitize=address,undefined
+    -fno-omit-frame-pointer)))
+ (c_library_flags
+  -fsanitize=address,undefined
+  -lflint
+  -lmpfr
+  -lgmp
+  -lpthread
+  -lm))
+
+(executable
+ (name native_sanitizer)
+ (modules native_sanitizer)
+ (enabled_if
+  (= %{env:CENTL_SANITIZERS=disabled} enabled))
+ (link_flags
+  (:standard -cclib -fsanitize=address,undefined))
+ (libraries native_sanitizer_support zarith))
