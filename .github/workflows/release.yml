@@ -37,14 +37,19 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
 
     steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install verification prerequisites
+      - name: Install checkout and verification prerequisites
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            ca-certificates curl libzstd1 make tar
+            ca-certificates curl git libzstd1 make tar
+
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Require a Git worktree
+        run: |
+          git rev-parse --is-inside-work-tree | grep -Fqx true
+          git ls-files --error-unmatch .github/workflows/release.yml
 
       - name: Install pinned F*
         run: |
@@ -168,6 +173,27 @@ jobs:
             alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
             yojson.2.2.2 zarith.1.14
 
+      - name: Set up pinned Julia
+        uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2
+        with:
+          version: "1.12.6"
+
+      - name: Instantiate pinned Nemo environment
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: "0"
+        run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Run hardening and independent differential publication gates
+        env:
+          CENTL_SANITIZER_REQUIRED: "1"
+          JULIA_NUM_THREADS: "1"
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          export CFLAGS="$PORTABLE_X86_CFLAGS"
+          opam exec --switch=centl -- make hardening-test
+          CENTL_BIN="$GITHUB_WORKSPACE/_build/default/src/main.exe" \
+            julia --startup-file=no --project=lab/julia lab/julia/differential.jl
+
       - name: Test, package, and install CENTL
         id: package
         run: |
@@ -189,8 +215,10 @@ jobs:
           opam source --switch=centl --dir="$license_sources/zarith" zarith.1.14
           opam source --switch=centl --dir="$license_sources/yojson" yojson.2.2.2
           CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
-          CENTL_GMP_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
-          CENTL_MPFR_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
+          CENTL_GMP_LGPL_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
+          CENTL_GMP_GPL3_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYINGv3" \
+          CENTL_MPFR_LGPL_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
+          CENTL_MPFR_GPL3_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING" \
           CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
           CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
           CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
@@ -349,8 +377,10 @@ jobs:
           opam source --dir="$license_sources/zarith" zarith.1.14
           opam source --dir="$license_sources/yojson" yojson.2.2.2
           CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
-          CENTL_GMP_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
-          CENTL_MPFR_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
+          CENTL_GMP_LGPL_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
+          CENTL_GMP_GPL3_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYINGv3" \
+          CENTL_MPFR_LGPL_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
+          CENTL_MPFR_GPL3_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING" \
           CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
           CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
           CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
@@ -394,7 +424,7 @@ jobs:
       LIBRARY_PATH: ${{ github.workspace }}\.native\lib
       PKG_CONFIG_PATH: ${{ github.workspace }}\.native\lib\pkgconfig
       CENTL_RUNTIME_PATHS: ${{ github.workspace }}\.native\bin;C:\msys64\mingw64\bin
-      CFLAGS: -std=gnu17
+      CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic -std=gnu17
 
     steps:
       - name: Check out source
@@ -431,7 +461,7 @@ jobs:
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .native
-          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v2
+          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v3
 
       - name: Restore pinned native sources
         shell: msys2 {0}
@@ -497,7 +527,7 @@ jobs:
         uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .native
-          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v2
+          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v3
 
       - name: Expose native runtime
         shell: pwsh
@@ -563,13 +593,25 @@ jobs:
           opam source --dir=$ZarithSource zarith.1.14
           opam source --dir=$YojsonSource yojson.2.2.2
           $env:CENTL_FLINT_LICENSE = Join-Path $env:RUNNER_TEMP "flint-$env:FLINT_VERSION\LICENSE"
-          $env:CENTL_GMP_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYING.LESSERv3"
-          $env:CENTL_MPFR_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING.LESSER"
+          $env:CENTL_GMP_LGPL_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYING.LESSERv3"
+          $env:CENTL_GMP_GPL3_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYINGv3"
+          $env:CENTL_MPFR_LGPL_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING.LESSER"
+          $env:CENTL_MPFR_GPL3_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING"
+          $env:CENTL_WINPTHREADS_LICENSE = "C:\msys64\mingw64\share\licenses\libwinpthread\COPYING"
           $env:CENTL_FSTAR_LICENSE = Join-Path $env:GITHUB_WORKSPACE "release-input\licenses\FSTAR"
           $env:CENTL_OCAML_LICENSE = Join-Path $OcamlSource "LICENSE"
           $env:CENTL_ZARITH_LICENSE = Join-Path $ZarithSource "LICENSE"
           $env:CENTL_YOJSON_LICENSE = Join-Path $YojsonSource "LICENSE.md"
           & .\scripts\package-release.ps1 $Version
+          $ReproDirectory = Join-Path $env:RUNNER_TEMP "centl-windows-package-repro"
+          & .\scripts\package-release.ps1 $Version $ReproDirectory
+          $PrimaryArchive = Join-Path $env:GITHUB_WORKSPACE "dist\centl-windows-x86_64.zip"
+          $ReproArchive = Join-Path $ReproDirectory "centl-windows-x86_64.zip"
+          $PrimaryDigest = (Get-FileHash -LiteralPath $PrimaryArchive -Algorithm SHA256).Hash
+          $ReproDigest = (Get-FileHash -LiteralPath $ReproArchive -Algorithm SHA256).Hash
+          if ($PrimaryDigest -ne $ReproDigest) {
+            throw "Windows packaging is not reproducible within one release run"
+          }
           $InstallRoot = Join-Path $env:RUNNER_TEMP "centl-install-test"
           & .\install.ps1 -Archive .\dist\centl-windows-x86_64.zip `
             -Prefix $InstallRoot -NoPath
@@ -627,6 +669,7 @@ jobs:
             centl-windows-x86_64.zip; do
             test -s "dist/$asset"
             test -s "dist/$asset.sha256"
+            (cd dist && sha256sum --check "$asset.sha256")
           done
           test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 8
 

@@ -38,6 +38,40 @@ static centl_mpz_set_d_fn const centl_mpz_set_d_root __attribute__((used)) = mpz
 
 #define Arb_val(value) ((arb_struct *)Data_custom_val(value))
 
+/* Mirror the engine's upper work/exponent ceilings and require a positive Arb
+   precision. Keeping the checks at the C boundary makes direct use of the
+   low-level OCaml module fail safely instead of handing nonsensical sizes to
+   FLINT. */
+#define CENTL_MIN_PRECISION 2L
+#define CENTL_MAX_PRECISION 16384L
+#define CENTL_MAX_EXPONENT 100000L
+
+static long centl_precision(value precision_value)
+{
+    long precision = Long_val(precision_value);
+    if (precision < CENTL_MIN_PRECISION || precision > CENTL_MAX_PRECISION) {
+        caml_invalid_argument("CENTL Arb precision");
+    }
+    return precision;
+}
+
+static int centl_is_decimal_integer(value text_value)
+{
+    const char *text = String_val(text_value);
+    mlsize_t length = caml_string_length(text_value);
+    mlsize_t index = 0;
+
+    if (length == 0) return 0;
+    if (text[0] == '-') {
+        if (length == 1) return 0;
+        index = 1;
+    }
+    for (; index < length; ++index) {
+        if (text[index] < '0' || text[index] > '9') return 0;
+    }
+    return 1;
+}
+
 static void centl_arb_finalize(value wrapped)
 {
     arb_clear(Arb_val(wrapped));
@@ -69,11 +103,14 @@ CENTL_PRIM value centl_arb_of_fraction(value numerator_value, value denominator_
     fmpz_t numerator;
     fmpz_t denominator;
     fmpq_t fraction;
+    long precision = centl_precision(precision_value);
 
     fmpz_init(numerator);
     fmpz_init(denominator);
     fmpq_init(fraction);
-    if (fmpz_set_str(numerator, String_val(numerator_value), 10) != 0 ||
+    if (!centl_is_decimal_integer(numerator_value) ||
+        !centl_is_decimal_integer(denominator_value) ||
+        fmpz_set_str(numerator, String_val(numerator_value), 10) != 0 ||
         fmpz_set_str(denominator, String_val(denominator_value), 10) != 0 ||
         fmpz_is_zero(denominator)) {
         fmpq_clear(fraction);
@@ -83,7 +120,7 @@ CENTL_PRIM value centl_arb_of_fraction(value numerator_value, value denominator_
     }
     fmpq_set_fmpz_frac(fraction, numerator, denominator);
     result = centl_alloc_arb();
-    arb_set_fmpq(Arb_val(result), fraction, Long_val(precision_value));
+    arb_set_fmpq(Arb_val(result), fraction, precision);
     fmpq_clear(fraction);
     fmpz_clear(denominator);
     fmpz_clear(numerator);
@@ -94,8 +131,9 @@ CENTL_PRIM value centl_arb_pi(value precision_value)
 {
     CAMLparam1(precision_value);
     CAMLlocal1(result);
+    long precision = centl_precision(precision_value);
     result = centl_alloc_arb();
-    arb_const_pi(Arb_val(result), Long_val(precision_value));
+    arb_const_pi(Arb_val(result), precision);
     CAMLreturn(result);
 }
 
@@ -122,9 +160,10 @@ CENTL_PRIM value centl_arb_abs(value input_value)
     {                                                                          \
         CAMLparam3(left_value, right_value, precision_value);                   \
         CAMLlocal1(result);                                                     \
+        long precision = centl_precision(precision_value);                      \
         result = centl_alloc_arb();                                             \
         operation(Arb_val(result), Arb_val(left_value), Arb_val(right_value),   \
-                  Long_val(precision_value));                                   \
+                  precision);                                                   \
         CAMLreturn(result);                                                     \
     }
 
@@ -140,18 +179,21 @@ CENTL_PRIM value centl_arb_pow(value base_value, value exponent_value,
     CAMLparam3(base_value, exponent_value, precision_value);
     CAMLlocal1(result);
     long exponent = Long_val(exponent_value);
+    long precision = centl_precision(precision_value);
+    if (exponent < -CENTL_MAX_EXPONENT || exponent > CENTL_MAX_EXPONENT) {
+        caml_invalid_argument("CENTL Arb exponent");
+    }
     result = centl_alloc_arb();
     if (exponent >= 0) {
         arb_pow_ui(Arb_val(result), Arb_val(base_value), (ulong)exponent,
-                   Long_val(precision_value));
+                   precision);
     } else {
         arb_t temporary;
         arb_init(temporary);
         arb_pow_ui(temporary, Arb_val(base_value), (ulong)(-exponent),
-                   Long_val(precision_value));
+                   precision);
         arb_one(Arb_val(result));
-        arb_div(Arb_val(result), Arb_val(result), temporary,
-                Long_val(precision_value));
+        arb_div(Arb_val(result), Arb_val(result), temporary, precision);
         arb_clear(temporary);
     }
     CAMLreturn(result);
@@ -162,9 +204,9 @@ CENTL_PRIM value centl_arb_pow(value base_value, value exponent_value,
     {                                                                          \
         CAMLparam2(input_value, precision_value);                              \
         CAMLlocal1(result);                                                     \
+        long precision = centl_precision(precision_value);                      \
         result = centl_alloc_arb();                                             \
-        operation(Arb_val(result), Arb_val(input_value),                       \
-                  Long_val(precision_value));                                   \
+        operation(Arb_val(result), Arb_val(input_value), precision);            \
         CAMLreturn(result);                                                     \
     }
 

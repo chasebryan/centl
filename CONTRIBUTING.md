@@ -5,6 +5,11 @@ native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is
 optional for ordinary development but required before merging mathematical
 changes.
 
+If any part of that stack is unfamiliar, start with the
+[manual contributor onboarding](docs/ONBOARDING.md). It provides a staged OCaml,
+F*, rigorous-numerics, protocol, testing, and source-code curriculum with
+readiness exercises.
+
 The canonical versions are recorded in [`toolchain.lock`](toolchain.lock). The
 checked-in [`centl.opam`](centl.opam) manifest gives opam exact constraints for
 the OCaml compiler, build tools, test libraries, and formatter.

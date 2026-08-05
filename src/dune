@@ -15,11 +15,13 @@
   Centl_parser
   Centl_iteration
   Centl_syntax
+  Centl_history
   Centl_engine
   Centl_version
   Centl_protocol
+  Centl_request_queue
   Centl_mcp)
- (libraries centl_verified centl_arb zarith yojson))
+ (libraries centl_verified centl_arb zarith threads unix yojson))
 
 (executable
  (name main)

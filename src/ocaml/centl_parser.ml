@@ -1,5 +1,22 @@
 type error = { position : int; message : string }
 
+(* Source locations deliberately live beside the verified expression tree.  The
+   extracted F* AST remains the semantic boundary; these spans are host-only
+   diagnostic metadata and therefore cannot affect evaluation. *)
+type source_span = { start : int; finish : int }
+
+type located_expression = {
+  expression : Centl_Core.expression;
+  spans : (Centl_Core.expression * source_span) list;
+}
+
+module Expression_spans = Hashtbl.Make (struct
+  type t = Centl_Core.expression
+
+  let equal = ( == )
+  let hash expression = Hashtbl.hash_param 16 32 expression
+end)
+
 type token_kind =
   | Number of (Z.t * Z.t)
   | Identifier of string
@@ -135,10 +152,26 @@ let lex source =
   in
   loop 0 []
 
-let parse source =
+let parse_located source =
   let ( let* ) result next = Result.bind result next in
   let* tokens = lex source in
   let current index = tokens.(index) in
+  let spans = ref [] in
+  let span_index = Expression_spans.create (Array.length tokens) in
+  let locate_at start finish expression =
+    let span = { start; finish = (current finish).start } in
+    spans := (expression, span) :: !spans;
+    Expression_spans.replace span_index expression span;
+    expression
+  in
+  let locate start finish expression =
+    locate_at (current start).start finish expression
+  in
+  let span_start expression =
+    match Expression_spans.find_opt span_index expression with
+    | Some span -> span.start
+    | None -> 0
+  in
   let rec expression index = additive index
   and additive index =
     let* left, index = multiplicative index in
@@ -146,10 +179,18 @@ let parse source =
       match (current index).kind with
       | Plus ->
           let* right, next = multiplicative (index + 1) in
-          continue (Centl_Core.Binary (Centl_Core.Add, left, right)) next
+          let combined =
+            locate_at (span_start left) next
+              (Centl_Core.Binary (Centl_Core.Add, left, right))
+          in
+          continue combined next
       | Minus ->
           let* right, next = multiplicative (index + 1) in
-          continue (Centl_Core.Binary (Centl_Core.Subtract, left, right)) next
+          let combined =
+            locate_at (span_start left) next
+              (Centl_Core.Binary (Centl_Core.Subtract, left, right))
+          in
+          continue combined next
       | _ -> Ok (left, index)
     in
     continue left index
@@ -159,10 +200,18 @@ let parse source =
       match (current index).kind with
       | Star ->
           let* right, next = unary (index + 1) in
-          continue (Centl_Core.Binary (Centl_Core.Multiply, left, right)) next
+          let combined =
+            locate_at (span_start left) next
+              (Centl_Core.Binary (Centl_Core.Multiply, left, right))
+          in
+          continue combined next
       | Slash ->
           let* right, next = unary (index + 1) in
-          continue (Centl_Core.Binary (Centl_Core.Divide, left, right)) next
+          let combined =
+            locate_at (span_start left) next
+              (Centl_Core.Binary (Centl_Core.Divide, left, right))
+          in
+          continue combined next
       | _ -> Ok (left, index)
     in
     continue left index
@@ -171,14 +220,17 @@ let parse source =
     | Plus -> unary (index + 1)
     | Minus ->
         let* inner, next = unary (index + 1) in
-        Ok (Centl_Core.Negate inner, next)
+        Ok (locate index next (Centl_Core.Negate inner), next)
     | _ -> power index
   and power index =
     let* base, next = primary index in
     match (current next).kind with
     | Caret ->
         let* exponent, finish = integer_exponent (next + 1) in
-        Ok (Centl_Core.Power (base, exponent), finish)
+        Ok
+          ( locate_at (span_start base) finish
+              (Centl_Core.Power (base, exponent)),
+            finish )
     | _ -> Ok (base, next)
   and integer_exponent index =
     let sign, index =
@@ -246,7 +298,8 @@ let parse source =
               Printf.sprintf "expected a mathematical relation, found %s"
                 (token_name kind);
           }
-  and function_call name index =
+  and function_call name call_start index =
+    let called finish expression = locate call_start finish expression in
     if name = "solve" then
       let* left, next = expression index in
       let equals = current next in
@@ -264,8 +317,9 @@ let parse source =
         | Identifier variable ->
             let* (), finish = closing_paren (next + 1) in
             Ok
-              ( Centl_Core.Function
-                  ("solve", [ left; right; Centl_Core.Symbol variable ]),
+              ( called finish
+                  (Centl_Core.Function
+                     ("solve", [ left; right; Centl_Core.Symbol variable ])),
                 finish )
         | kind ->
             Error
@@ -282,7 +336,7 @@ let parse source =
       begin match (current next).kind with
       | Identifier variable ->
           let* (), finish = closing_paren (next + 1) in
-          Ok (Centl_Core.Differentiate (inner, variable), finish)
+          Ok (called finish (Centl_Core.Differentiate (inner, variable)), finish)
       | kind ->
           Error
             {
@@ -309,7 +363,10 @@ let parse source =
           else
             let* replacement, next = expression (next + 2) in
             let* (), finish = closing_paren next in
-            Ok (Centl_Core.Substitute (inner, variable, replacement), finish)
+            Ok
+              ( called finish
+                  (Centl_Core.Substitute (inner, variable, replacement)),
+                finish )
       | kind ->
           Error
             {
@@ -326,7 +383,9 @@ let parse source =
       let* relation, next = relation next in
       let* right, next = expression next in
       let* (), finish = closing_paren next in
-      Ok (Centl_Core.Assuming (inner, left, relation, right), finish)
+      Ok
+        ( called finish (Centl_Core.Assuming (inner, left, relation, right)),
+          finish )
     else if name = "integrate" then
       let* body, next = expression index in
       let* next = comma next in
@@ -334,19 +393,22 @@ let parse source =
       | Identifier variable ->
           begin match (current (next + 1)).kind with
           | Right_paren ->
+              let finish = next + 2 in
               Ok
-                ( Centl_Core.Function
-                    ("integrate", [ body; Centl_Core.Symbol variable ]),
-                  next + 2 )
+                ( called finish
+                    (Centl_Core.Function
+                       ("integrate", [ body; Centl_Core.Symbol variable ])),
+                  finish )
           | Equals ->
               let* lower, next = expression (next + 2) in
               let* next = comma next in
               let* upper, next = expression next in
               let* (), finish = closing_paren next in
               Ok
-                ( Centl_Core.Function
-                    ( "integrate",
-                      [ body; Centl_Core.Symbol variable; lower; upper ] ),
+                ( called finish
+                    (Centl_Core.Function
+                       ( "integrate",
+                         [ body; Centl_Core.Symbol variable; lower; upper ] )),
                   finish )
           | kind ->
               Error
@@ -386,8 +448,9 @@ let parse source =
             let* upper, next = expression next in
             let* (), finish = closing_paren next in
             Ok
-              ( Centl_Core.Function
-                  (name, [ body; Centl_Core.Symbol variable; lower; upper ]),
+              ( called finish
+                  (Centl_Core.Function
+                     (name, [ body; Centl_Core.Symbol variable; lower; upper ])),
                 finish )
       | kind ->
           Error
@@ -432,16 +495,17 @@ let parse source =
                   let* upper, next = expression next in
                   let* (), finish = closing_paren next in
                   Ok
-                    ( Centl_Core.Function
-                        ( "recurrence",
-                          [
-                            initial;
-                            step;
-                            Centl_Core.Symbol previous;
-                            Centl_Core.Symbol variable;
-                            lower;
-                            upper;
-                          ] ),
+                    ( called finish
+                        (Centl_Core.Function
+                           ( "recurrence",
+                             [
+                               initial;
+                               step;
+                               Centl_Core.Symbol previous;
+                               Centl_Core.Symbol variable;
+                               lower;
+                               upper;
+                             ] )),
                       finish )
             | kind ->
                 Error
@@ -471,7 +535,7 @@ let parse source =
         | "factor" -> Centl_Core.Factor argument
         | _ -> assert false
       in
-      Ok (command, finish)
+      Ok (called finish command, finish)
     else
       let rec arguments values index =
         match (current index).kind with
@@ -492,16 +556,21 @@ let parse source =
             end
       in
       let* arguments, finish = arguments [] index in
-      Ok (Centl_Core.Function (name, arguments), finish)
+      Ok (called finish (Centl_Core.Function (name, arguments)), finish)
   and primary index =
     let token = current index in
     match token.kind with
     | Number (numerator, denominator) ->
-        Ok (Centl_Core.Literal (numerator, denominator), index + 1)
+        let finish = index + 1 in
+        Ok
+          ( locate index finish (Centl_Core.Literal (numerator, denominator)),
+            finish )
     | Identifier name ->
         if (current (index + 1)).kind = Left_paren then
-          function_call name (index + 2)
-        else Ok (Centl_Core.Symbol name, index + 1)
+          function_call name index (index + 2)
+        else
+          let finish = index + 1 in
+          Ok (locate index finish (Centl_Core.Symbol name), finish)
     | Left_paren ->
         let* inner, next = expression (index + 1) in
         let closing = current next in
@@ -526,7 +595,7 @@ let parse source =
   let* result, next = expression 0 in
   let trailing = current next in
   match trailing.kind with
-  | End -> Ok result
+  | End -> Ok { expression = result; spans = List.rev !spans }
   | _ ->
       Error
         {
@@ -536,43 +605,106 @@ let parse source =
               (token_name trailing.kind);
         }
 
+let parse source =
+  Result.map (fun located -> located.expression) (parse_located source)
+
 type statement =
   | Evaluate of Centl_Core.expression
   | Define_value of string * Centl_Core.expression
   | Define_function of string * string list * Centl_Core.expression
 
-let parse_statement source =
+type located_statement = {
+  statement : statement;
+  statement_spans : (Centl_Core.expression * source_span) list;
+  definition_name_span : source_span option;
+  parameter_spans : (string * source_span) list;
+  parameter_list_span : source_span option;
+}
+
+let parse_statement_located source =
   let ( let* ) result next = Result.bind result next in
   let* tokens = lex source in
   let current index = tokens.(index) in
-  let parse_right_hand_side offset make_statement =
+  let parse_right_hand_side ?definition_name_span ?(parameter_spans = [])
+      ?parameter_list_span offset make_statement =
     let source_length = String.length source in
-    match parse (String.sub source offset (source_length - offset)) with
-    | Ok expression -> Ok (make_statement expression)
+    match parse_located (String.sub source offset (source_length - offset)) with
+    | Ok located ->
+        let statement_spans =
+          List.map
+            (fun (expression, (span : source_span)) ->
+              ( expression,
+                { start = span.start + offset; finish = span.finish + offset }
+              ))
+            located.spans
+        in
+        Ok
+          {
+            statement = make_statement located.expression;
+            statement_spans;
+            definition_name_span;
+            parameter_spans;
+            parameter_list_span;
+          }
     | Error error -> Error { error with position = error.position + offset }
   in
   let value_definition name =
     let offset = (current 2).start in
-    parse_right_hand_side offset (fun expression ->
+    let definition_name_span =
+      {
+        start = (current 0).start;
+        finish = (current 0).start + String.length name;
+      }
+    in
+    parse_right_hand_side ~definition_name_span offset (fun expression ->
         Define_value (name, expression))
   in
-  let function_definition name parameters right_hand_side =
+  let function_definition name parameter_spans right_hand_side =
     let offset = (current right_hand_side).start in
-    parse_right_hand_side offset (fun expression ->
+    let definition_name_span =
+      {
+        start = (current 0).start;
+        finish = (current 0).start + String.length name;
+      }
+    in
+    let closing_paren = current (right_hand_side - 2) in
+    let parameter_list_span =
+      { start = (current 1).start; finish = closing_paren.start + 1 }
+    in
+    let parameters = List.map fst parameter_spans in
+    parse_right_hand_side ~definition_name_span ~parameter_spans
+      ~parameter_list_span offset (fun expression ->
         Define_function (name, parameters, expression))
   in
   let rec parameters index collected =
     match (current index).kind with
     | Identifier parameter ->
+        let parameter_span =
+          {
+            start = (current index).start;
+            finish = (current index).start + String.length parameter;
+          }
+        in
         begin match (current (index + 1)).kind with
-        | Comma -> parameters (index + 2) (parameter :: collected)
-        | Right_paren -> Some (List.rev (parameter :: collected), index + 2)
+        | Comma ->
+            parameters (index + 2) ((parameter, parameter_span) :: collected)
+        | Right_paren ->
+            Some (List.rev ((parameter, parameter_span) :: collected), index + 2)
         | _ -> None
         end
     | _ -> None
   in
   if Array.length tokens < 2 then
-    Result.map (fun expression -> Evaluate expression) (parse source)
+    Result.map
+      (fun located ->
+        {
+          statement = Evaluate located.expression;
+          statement_spans = located.spans;
+          definition_name_span = None;
+          parameter_spans = [];
+          parameter_list_span = None;
+        })
+      (parse_located source)
   else
     match ((current 0).kind, (current 1).kind) with
     | Identifier name, Equals -> value_definition name
@@ -585,6 +717,29 @@ let parse_statement source =
         begin match header with
         | Some (parameters, next) when (current next).kind = Equals ->
             function_definition name parameters (next + 1)
-        | _ -> Result.map (fun expression -> Evaluate expression) (parse source)
+        | _ ->
+            Result.map
+              (fun located ->
+                {
+                  statement = Evaluate located.expression;
+                  statement_spans = located.spans;
+                  definition_name_span = None;
+                  parameter_spans = [];
+                  parameter_list_span = None;
+                })
+              (parse_located source)
         end
-    | _ -> Result.map (fun expression -> Evaluate expression) (parse source)
+    | _ ->
+        Result.map
+          (fun located ->
+            {
+              statement = Evaluate located.expression;
+              statement_spans = located.spans;
+              definition_name_span = None;
+              parameter_spans = [];
+              parameter_list_span = None;
+            })
+          (parse_located source)
+
+let parse_statement source =
+  Result.map (fun located -> located.statement) (parse_statement_located source)

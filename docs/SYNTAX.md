@@ -67,6 +67,7 @@ enclosure.
 exact          0.1 + 0.2                         -> 3/10
 calculus       diff(x^3 + 2*x + 1, x)            -> 3 * x^2 + 2
 integration    integrate(x^2, x = 0, 1)          -> 1/3
+equation       solve(x^2 = 2, x)                  -> x in {-sqrt(2), sqrt(2)}
 definition     f(x) = x^2 + 1                    -> f(x) = x^2 + 1
 sequence       sequence(k^2, k = 1, 4)           -> [1, 4, 9, 16]
 recurrence     recurrence(1, a = a*n, n = 0, 4)  -> [1, 1, 2, 6, 24]
@@ -77,8 +78,11 @@ rigorous       approx(sqrt(2), 12)               -> ≈ [1.41421356237, 1.414213
 Inside the calculator, type `:syntax` for the catalog or `:help` for usage.
 Definitions are immutable and last for the current calculator session or
 script. Approximate a definition when using it: `approx(f(2), 20)`.
-`solve` currently handles exact linear equations and quadratics with rational
-roots. Other equations return an explicit unresolved result.
+`solve` handles exact linear equations and real quadratics with rational
+coefficients. Positive nonsquare discriminants return a canonical exact pair
+`center - sqrt(radicand)` and `center + sqrt(radicand)`; CENTL does not turn
+these roots into decimal approximations. Higher-degree and otherwise
+unsupported equations return an explicit unresolved result.
 
 The integration forms accept rational-coefficient univariate polynomials with
 positive powers no larger than 64. Explicit zero powers remain residual to
@@ -98,5 +102,46 @@ Statements may span lines without a continuation marker while parentheses are
 open or an operator still needs a right-hand operand. The calculator shows
 `....>` for continuation lines;
 standard input and `--file` scripts use the same rule. Interactive terminals
-offer Tab completion and process-local history through Up/Down, `:history`, and
-`:clear-history`.
+offer Tab completion and bounded durable history through Up/Down, `:history`,
+and `:clear-history`.
+
+### Interactive history
+
+Interactive history is loaded when the calculator starts and each accepted
+entry is saved immediately. It contains calculator input only; definitions and
+evaluation state still last only for the current session. `:clear-history`
+clears both the current editor history and the saved file.
+
+The version-1 JSON history file is stored at:
+
+- Unix: `$XDG_STATE_HOME/centl/history.json` when `XDG_STATE_HOME` is a
+  nonempty absolute path, otherwise `$HOME/.local/state/centl/history.json`.
+- Windows: `%LOCALAPPDATA%\centl\history.json`, falling back to
+  `%APPDATA%\centl\history.json` and then
+  `%USERPROFILE%\AppData\Local\centl\history.json` when needed.
+
+CENTL keeps at most 1,000 entries, 1,048,576 serialized bytes, and 32,768 bytes
+per entry. Oldest entries are discarded first. Blank, adjacent duplicate,
+oversized, and terminal-control entries are not retained.
+
+On Unix, CENTL creates its state directory with mode `0700` and its history and
+lock files with mode `0600`. Windows relies on the current account's operating
+system access controls because OCaml's Unix-compatible file modes cannot
+express Windows ACLs. Writes re-read and merge the current disk state under a
+cross-process lock, fsync a private temporary file, and atomically replace the
+history file; CENTL's Windows reads permit that replacement while they are
+open. This prevents concurrent writers from replacing one another's additions.
+A running editor keeps its startup snapshot; entries from another process
+become available after the next launch. A clear and concurrent adds are ordered
+by the same lock, and stale in-memory snapshots are never written back
+wholesale.
+
+Use `--no-history` for one invocation, set `CENTL_NO_HISTORY` to any value, or
+set `CENTL_HISTORY` to `0`, `false`, `no`, or `off` to disable disk reads and
+writes. Up/Down and `:history` continue to work in memory for that process.
+
+Version 1 is CENTL's first on-disk history format, so there is no legacy file
+to migrate or plaintext format to import. Malformed files and files with an
+unknown version are ignored safely. The next saved entry replaces such a file
+with a valid version-1 file; CENTL never guesses at or executes unknown history
+content.

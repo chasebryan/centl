@@ -15,4 +15,7 @@ Set `CENTL_BIN` to exercise a packaged executable instead of the repository
 launcher. The suite reads CENTL's structured JSON numerators and denominators,
 then compares them with independently computed Nemo integers and rationals. It
 covers finite sums and products, empty ranges, rational telescoping products,
-and seeded generated cases.
+exact sequences and recurrences, polynomial integrals, and exact real-quadratic
+solution components. Quadratic cases independently check the normalized center
+and radicand, both Vieta identities, and invariance under nonzero equation
+scaling across deterministic and seeded generated cases.

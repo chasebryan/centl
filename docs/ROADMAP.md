@@ -5,19 +5,13 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.9.1` retains the `0.9.0` exact bounded sums, products, and polynomial
-integration surface while making the x86_64 native packages portable across
-baseline processors. Unsupported integrals remain visible.
-
-## Current development
-
-The source tree is preparing `0.10.0`; the published runtime and protocol
-producer version remain `0.9.1` until a release is intentionally cut. The
-development slice adds exact finite sequences and first-order bounded
-recurrences, multiline human input, source-context diagnostics, interactive
-completion and process-local history, a stack-safe renderer, and focused
-pull-request validation. Protocol version 1 remains stable while gaining the
-exact `sequence` value kind.
+`0.10.0` adds exact finite sequences and first-order bounded recurrences,
+verified exact real-quadratic solution pairs, syntax-aware multiline human
+input, source-context syntax and runtime diagnostics, interactive completion and
+bounded durable cross-process history, a stack-safe renderer, and deterministic
+hardening and performance gates. Protocol version 1 remains stable while
+gaining the exact `sequence` value kind and a new tagged member of solution-set
+arrays.
 
 ## 0. Foundation
 
@@ -50,8 +44,10 @@ render exactly from both the REPL and machine interface.
 - Derive plain, colored, and machine output from the same result tree.
 - Add canonical exact univariate polynomials, bounded expansion, initial
   factoring, and explicit local assumptions.
-- Solve exact linear equations and rational-root quadratics with explicit
-  finite, empty, universal, and unresolved results.
+- Solve exact linear equations and real quadratics with explicit finite,
+  empty, universal, and unresolved results. Rational roots retain their stable
+  representation; positive nonsquare discriminants use verified canonical
+  real-quadratic pairs.
 - Extend verification from totality and rational invariants to semantic
   differentiation theorems.
 
@@ -79,10 +75,10 @@ such as `sqrt(2)` and `sin(2016.1)`, or explains precisely why it cannot.
 Initial immutable value and function definitions implemented in `0.5.0-dev`.
 
 - Add reusable definitions, user functions, and saved scripts gradually.
-- Interactive completion, bounded process-local history, syntax-aware
-  multiline input, and source-context mathematical diagnostics are implemented
-  in the current development tree. Durable history across calculator processes
-  remains follow-up work.
+- Interactive completion, bounded durable history with locked cross-process
+  merge and atomic replacement, syntax-aware multiline input, and source
+  context for syntax and runtime mathematical diagnostics are implemented in
+  `0.10.0`.
 - Preserve calculator behavior for every expression accepted in a script.
 - Add exact symbolic evaluation through Calcium where it improves the result.
 
@@ -116,9 +112,11 @@ text or mistaking an approximation for an exact result.
   explicit.
 - Exact bounded `sequence(expression, variable = lower, upper)` and first-order
   `recurrence(initial, previous = step, index = lower, upper)` are implemented
-  in the current development tree with lexical scope, structured exact sequence
-  values, aggregate result limits, and cooperative cancellation.
-- Add complex enclosures, algebraic numbers, polynomials, and matrices.
+  in `0.10.0` with lexical scope, structured exact sequence values, aggregate
+  result limits, and cooperative cancellation.
+- The exact real-quadratic equation-solution slice is implemented; add general
+  algebraic-number scalar expressions, complex enclosures, polynomials, and
+  matrices.
 - Add generating functions, limits, series, rigorous integration outside the
   exact polynomial domain, and broader partial symbolic integration with
   explicit unevaluated results.
@@ -142,15 +140,20 @@ machine schema, and differential test suite.
 - Exact and symbolic rendering now uses an explicit traversal stack, iterative
   size preflight, bounded buffers, and adversarial depth, allocation, and
   cancellation tests.
-- Fuzz source parsing and native boundaries.
-- Add algebraic-identity, monotonicity, containment, and metamorphic tests.
+- Deterministic mutation corpora now fuzz compatibility and located parsers,
+  JSON Lines, MCP, and native Arb boundaries; coverage-guided fuzzing remains a
+  future extension.
+- Exact-rational interval containment, refinement, transcendental-identity, and
+  cross-surface metamorphic tests are implemented.
 - Compare difficult cases against independent Julia/Nemo evaluations.
 - Produce reproducible native release bundles and dependency notices.
 - Publish native Linux, macOS, and Windows packages, with x86_64 and Arm targets
   where their upstream numerical dependencies support them.
 - Test every package on a clean native runner against the same language and
   numerical conformance suite.
-- Audit resource exhaustion, cancellation, and hostile machine requests.
+- Request queues, native precision/exponent inputs, algebraic completion,
+  resource exhaustion, cancellation, and hostile machine requests have focused
+  adversarial coverage; continue auditing as new domains are added.
 
 Exit condition: the release process reproduces verified binaries and publishes
 the exact toolchain, numerical backend, and remaining trust assumptions.

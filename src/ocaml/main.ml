@@ -6,13 +6,14 @@ let version = Centl_version.value
 type command = {
   mode : mode;
   color : color_mode;
+  persistent_history : bool;
   file : string option;
   expression_parts : string list;
 }
 
 let usage =
-  "Usage: centl [--json|--serve|--mcp] [--syntax] [--color=auto|always|never] \
-   [--file PATH] [EXPRESSION]"
+  "Usage: centl [--json|--serve|--mcp] [--syntax] [--no-history] \
+   [--color=auto|always|never] [--file PATH] [EXPRESSION]"
 
 let print_help () =
   print_endline "CENTL — exact mathematics, directly.";
@@ -26,6 +27,7 @@ let print_help () =
   print_endline "  --json [EXPR]      use the JSON interface";
   print_endline "  --serve            persistent stateful JSON Lines";
   print_endline "  --mcp              MCP server over standard I/O";
+  print_endline "  --no-history       do not load or save durable history";
   print_endline "  --color=MODE       auto, always, or never";
   print_endline "  --version          show the version"
 
@@ -33,9 +35,9 @@ let print_repl_help () =
   print_endline "Enter mathematics directly, then press return.";
   print_endline "Incomplete statements continue on the next line.";
   print_endline
-    "Use Tab to complete names and Up/Down to browse session history.";
-  print_endline ":history        show history kept for this session";
-  print_endline ":clear-history  clear session history";
+    "Use Tab to complete names and Up/Down to browse calculator history.";
+  print_endline ":history        show calculator history";
+  print_endline ":clear-history  clear calculator history";
   print_endline ":syntax         list mathematical identifiers";
   print_endline ":quit           leave the calculator"
 
@@ -78,6 +80,8 @@ let parse_arguments arguments =
         | Ok command -> loop command rest
         | Error _ as error -> error
         end
+    | "--no-history" :: rest ->
+        loop { command with persistent_history = false } rest
     | "--color" :: rest -> loop { command with color = Always } rest
     | "--no-color" :: rest -> loop { command with color = Never } rest
     | option :: rest when String.starts_with ~prefix:"--color=" option ->
@@ -107,173 +111,19 @@ let parse_arguments arguments =
           rest
   in
   loop
-    { mode = Human; color = Auto; file = None; expression_parts = [] }
+    {
+      mode = Human;
+      color = Auto;
+      persistent_history = true;
+      file = None;
+      expression_parts = [];
+    }
     arguments
 
 let print_json json =
   Yojson.Safe.to_channel stdout json;
   output_char stdout '\n';
   flush stdout
-
-type queued_input =
-  | Line_input of string
-  | Oversized_input
-  | Queue_overflow_input of string option
-
-type queued_request = {
-  input : queued_input;
-  bytes : int;
-  request_id : Yojson.Safe.t option;
-  cancellation : bool Atomic.t;
-}
-
-type request_queue = {
-  mutex : Mutex.t;
-  ready : Condition.t;
-  capacity : int;
-  max_pending_bytes : int;
-  pending : queued_request Queue.t;
-  mutable pending_bytes : int;
-  mutable active : queued_request option;
-  mutable closed : bool;
-  mutable reader_error : exn option;
-}
-
-let create_request_queue ~capacity ~max_pending_bytes =
-  {
-    mutex = Mutex.create ();
-    ready = Condition.create ();
-    capacity = max 1 capacity;
-    max_pending_bytes = max 1 max_pending_bytes;
-    pending = Queue.create ();
-    pending_bytes = 0;
-    active = None;
-    closed = false;
-    reader_error = None;
-  }
-
-let pending_byte_capacity max_request_bytes =
-  if max_request_bytes > max_int / 256 then max_int else max_request_bytes * 256
-
-let with_queue_lock queue action =
-  Mutex.lock queue.mutex;
-  Fun.protect ~finally:(fun () -> Mutex.unlock queue.mutex) action
-
-let same_request_id left right = left = right
-
-let request_matches target request =
-  match request.request_id with
-  | Some id -> same_request_id id target
-  | None -> false
-
-let cancel_request request = Atomic.set request.cancellation true
-
-let enqueue queue ?target request =
-  with_queue_lock queue (fun () ->
-      Option.iter
-        (fun target ->
-          Option.iter
-            (fun active ->
-              if request_matches target active then cancel_request active)
-            queue.active;
-          Queue.iter
-            (fun pending ->
-              if request_matches target pending then cancel_request pending)
-            queue.pending)
-        target;
-      if queue.closed then false
-      else if
-        Queue.length queue.pending >= queue.capacity
-        || request.bytes > queue.max_pending_bytes - queue.pending_bytes
-      then begin
-        Option.iter cancel_request queue.active;
-        Queue.iter cancel_request queue.pending;
-        let line =
-          match request.input with
-          | Line_input line -> Some line
-          | Oversized_input | Queue_overflow_input _ -> None
-        in
-        Queue.add
-          {
-            request with
-            input = Queue_overflow_input line;
-            bytes = 0;
-            cancellation = Atomic.make false;
-          }
-          queue.pending;
-        queue.closed <- true;
-        queue.reader_error <-
-          Some (Failure "the pending machine-request queue reached its limit");
-        Condition.broadcast queue.ready;
-        false
-      end
-      else begin
-        Queue.add request queue.pending;
-        queue.pending_bytes <- queue.pending_bytes + request.bytes;
-        Condition.signal queue.ready;
-        true
-      end)
-
-let close_request_queue queue reader_error =
-  with_queue_lock queue (fun () ->
-      queue.closed <- true;
-      queue.reader_error <- reader_error;
-      Condition.broadcast queue.ready)
-
-let take_request queue =
-  with_queue_lock queue (fun () ->
-      while Queue.is_empty queue.pending && not queue.closed do
-        Condition.wait queue.ready queue.mutex
-      done;
-      if Queue.is_empty queue.pending then None
-      else
-        let request = Queue.take queue.pending in
-        queue.pending_bytes <- queue.pending_bytes - request.bytes;
-        queue.active <- Some request;
-        Some request)
-
-let complete_request queue =
-  with_queue_lock queue (fun () -> queue.active <- None)
-
-let cancellation_callback request =
-  let checks = ref 0 in
-  fun () ->
-    incr checks;
-    if !checks = 1 || !checks mod 64 = 0 then Thread.yield ();
-    Atomic.get request.cancellation
-
-let queued_request ~bytes input request_id =
-  { input; bytes; request_id; cancellation = Atomic.make false }
-
-let start_machine_reader ~max_bytes ~classify_id ~classify_cancellation queue =
-  Thread.create
-    (fun () ->
-      let rec loop () =
-        match Centl_protocol.read_line stdin max_bytes with
-        | Centl_protocol.End -> close_request_queue queue None
-        | Centl_protocol.Oversized ->
-            if
-              enqueue queue
-                (queued_request ~bytes:max_bytes Oversized_input None)
-            then loop ()
-        | Centl_protocol.Line line ->
-            let json =
-              try Some (Yojson.Safe.from_string line)
-              with Yojson.Json_error _ -> None
-            in
-            let request_id = Option.bind json classify_id in
-            let target = Option.bind json classify_cancellation in
-            if
-              enqueue queue ?target
-                (queued_request ~bytes:(String.length line) (Line_input line)
-                   request_id)
-            then loop ()
-      in
-      try loop () with error -> close_request_queue queue (Some error))
-    ()
-
-let reader_succeeded queue =
-  with_queue_lock queue (fun () -> Option.is_none queue.reader_error)
 
 let ansi code text = Printf.sprintf "\027[%sm%s\027[0m" code text
 
@@ -495,25 +345,6 @@ let run_file ~color mode path =
     ~finally:(fun () -> close_in channel)
     (fun () -> run_channel ~color mode path channel)
 
-type history = { mutable newest_first : string list }
-
-let create_history () = { newest_first = [] }
-
-let rec take count values =
-  if count <= 0 then []
-  else
-    match values with
-    | [] -> []
-    | value :: rest -> value :: take (count - 1) rest
-
-let add_history history line =
-  if String.length line <= max_source_bytes && String.trim line <> "" then
-    match history.newest_first with
-    | previous :: _ when previous = line -> ()
-    | _ -> history.newest_first <- take 1_000 (line :: history.newest_first)
-
-let history_in_order history = List.rev history.newest_first
-
 type edited_line =
   | Submitted of string
   | Input_limit_exceeded
@@ -712,7 +543,7 @@ let read_raw_line ~prompt ~history ~candidates ~max_bytes
       let line = create_editor_buffer max_bytes in
       let cursor = ref 0 in
       let overflowed = ref false in
-      let entries = Array.of_list (history_in_order history) in
+      let entries = Array.of_list (Centl_history.entries history) in
       let history_index = ref (Array.length entries) in
       let draft = ref "" in
       let input_byte = Bytes.create 1 in
@@ -991,14 +822,14 @@ let read_repl_input ~color session history =
         begin match finish_statement builder with
         | None -> Repl_end
         | Some (source, _) ->
-            add_history history (history_entry_of_source source);
+            Centl_history.add history (history_entry_of_source source);
             Repl_final_statement source
         end
     | Submitted line ->
         let trimmed = String.trim line in
         if builder_is_empty builder && String.starts_with ~prefix:":" trimmed
         then begin
-          add_history history trimmed;
+          Centl_history.add history trimmed;
           Repl_command trimmed
         end
         else
@@ -1009,23 +840,27 @@ let read_repl_input ~color session history =
           with
           | Ignored | Incomplete -> read ()
           | Statement (source, _) ->
-              add_history history (history_entry_of_source source);
+              Centl_history.add history (history_entry_of_source source);
               Repl_statement source
           end
   in
   read ()
 
 let print_history history =
-  match history_in_order history with
+  match Centl_history.entries history with
   | [] -> print_endline "(history is empty)"
   | entries ->
       List.iteri
         (fun index entry -> Printf.printf "%4d  %s\n" (index + 1) entry)
         entries
 
-let repl ~color () =
+let repl ~color ~persistent_history () =
   let session = Centl_engine.create_session () in
-  let history = create_history () in
+  let persistent =
+    persistent_history
+    && not (Centl_history.environment_disables_persistence ())
+  in
+  let history = Centl_history.create ~persistent () in
   print_endline
     (Printf.sprintf "CENTL %s — exact mathematics and rigorous real enclosures"
        version);
@@ -1053,8 +888,8 @@ let repl ~color () =
         print_history history;
         loop ()
     | Repl_command ":clear-history" ->
-        history.newest_first <- [];
-        print_endline "Session history cleared.";
+        Centl_history.clear history;
+        print_endline "History cleared.";
         loop ()
     | Repl_command command ->
         prerr_endline ("unknown command " ^ command ^ "; type :help for help");
@@ -1094,24 +929,25 @@ let run_json_stream () =
   lines true
 
 let run_serve () =
+  let open Centl_request_queue in
   let state = Centl_protocol.create () in
   let limits = Centl_protocol.limits state in
   let queue =
-    create_request_queue ~capacity:limits.max_requests
+    create ~capacity:limits.max_requests
       ~max_pending_bytes:(pending_byte_capacity limits.max_request_bytes)
   in
   let reader =
-    start_machine_reader
+    start_reader ~channel:stdin
       ~max_bytes:(Centl_protocol.limits state).max_request_bytes
       ~classify_id:Centl_protocol.cancellable_request_id
       ~classify_cancellation:Centl_protocol.cancellation_target_of_json queue
   in
   let rec loop () =
-    match take_request queue with
+    match take queue with
     | None -> ()
     | Some request ->
         let response =
-          match request.input with
+          match input request with
           | Line_input line ->
               Centl_protocol.handle_line
                 ~cancelled:(cancellation_callback request)
@@ -1120,7 +956,7 @@ let run_serve () =
           | Queue_overflow_input line ->
               Centl_protocol.queue_overflow state line
         in
-        complete_request queue;
+        complete queue;
         print_json response;
         loop ()
   in
@@ -1129,15 +965,16 @@ let run_serve () =
   reader_succeeded queue
 
 let run_mcp () =
+  let open Centl_request_queue in
   let state = Centl_mcp.create () in
   let protocol = Centl_mcp.protocol_state state in
   let limits = Centl_protocol.limits protocol in
   let queue =
-    create_request_queue ~capacity:limits.max_requests
+    create ~capacity:limits.max_requests
       ~max_pending_bytes:(pending_byte_capacity limits.max_request_bytes)
   in
   let reader =
-    start_machine_reader
+    start_reader ~channel:stdin
       ~max_bytes:(Centl_protocol.limits protocol).max_request_bytes
       ~classify_id:Centl_mcp.cancellable_request_id
       ~classify_cancellation:Centl_mcp.cancellation_target_of_json queue
@@ -1147,11 +984,11 @@ let run_mcp () =
     | Some response -> print_json response
   in
   let rec loop () =
-    match take_request queue with
+    match take queue with
     | None -> ()
     | Some request ->
         let response =
-          match request.input with
+          match input request with
           | Line_input line ->
               Centl_mcp.handle_line
                 ~cancelled:(cancellation_callback request)
@@ -1159,7 +996,7 @@ let run_mcp () =
           | Oversized_input -> Centl_mcp.oversized_line state
           | Queue_overflow_input line -> Centl_mcp.queue_overflow line
         in
-        complete_request queue;
+        complete queue;
         if not (Centl_mcp.cancelled_response response) then
           print_response response;
         loop ()
@@ -1213,7 +1050,7 @@ let () =
         | None, _, Serve -> run_serve ()
         | None, _, Mcp -> run_mcp ()
         | None, _, Human when Unix.isatty Unix.stdin ->
-            repl ~color ();
+            repl ~color ~persistent_history:command.persistent_history ();
             true
         | None, _, Human -> run_channel ~color Human "standard input" stdin
       in

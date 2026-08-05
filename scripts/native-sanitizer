@@ -1,0 +1,63 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+project_dir=$(CDPATH= cd -- "$script_dir/.." && pwd)
+cd "$project_dir"
+
+required=${CENTL_SANITIZER_REQUIRED:-0}
+compiler=${CC:-cc}
+opam_switch=${OPAM_SWITCH:-centl}
+probe_dir=$(mktemp -d "${TMPDIR:-/tmp}/centl-sanitizer-probe.XXXXXX")
+probe_binary="$probe_dir/probe"
+build_dir=$(mktemp -d "${TMPDIR:-/tmp}/centl-sanitizer-build.XXXXXX")
+
+run_dune() {
+  if command -v dune >/dev/null 2>&1; then
+    dune "$@"
+  elif command -v opam >/dev/null 2>&1; then
+    opam exec --switch="$opam_switch" -- dune "$@"
+  else
+    echo "centl sanitizer: dune is not available" >&2
+    return 127
+  fi
+}
+
+cleanup() {
+  run_dune clean --build-dir "$build_dir" >/dev/null 2>&1 || true
+  rm -f "$probe_binary"
+  rmdir "$probe_dir" 2>/dev/null || true
+  rmdir "$build_dir" 2>/dev/null || true
+}
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+if ! "$compiler" -fsanitize=address,undefined -fno-omit-frame-pointer \
+  tests/hardening/sanitizer_probe.c -o "$probe_binary" >/dev/null 2>&1
+then
+  if [ "$required" = 1 ]; then
+    echo "centl sanitizer: $compiler does not support ASan+UBSan" >&2
+    exit 1
+  fi
+  echo "centl sanitizer: skipped (ASan+UBSan unavailable from $compiler)"
+  exit 0
+fi
+
+export CENTL_SANITIZERS=enabled
+export ASAN_OPTIONS=${ASAN_OPTIONS:-abort_on_error=1:detect_leaks=0:halt_on_error=1}
+export UBSAN_OPTIONS=${UBSAN_OPTIONS:-halt_on_error=1:print_stacktrace=1}
+
+if ! run_dune build --build-dir "$build_dir" \
+  tests/hardening/native_sanitizer.exe
+then
+  if [ "$required" = 1 ]; then
+    echo "centl sanitizer: the instrumented target could not be built" >&2
+    exit 1
+  fi
+  echo "centl sanitizer: skipped (instrumented OCaml linking unavailable)"
+  exit 0
+fi
+
+"$build_dir/default/tests/hardening/native_sanitizer.exe"

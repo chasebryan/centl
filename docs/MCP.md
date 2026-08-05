@@ -60,6 +60,15 @@ unknown methods, unknown tools, and invalid arguments are protocol errors.
 exact symbolic, a rigorous enclosure, an exact or unresolved solution set, a
 definition, a failure, or a cancellation, and records its method and backend.
 
+`centl_calculate` advertises a closed, discriminated `outputSchema` for every
+mathematical value, definition, and error shape. Its solution-set branch
+accepts the existing rational solution object and the exact
+`real_quadratic` object documented in
+[the machine protocol](PROTOCOL.md#values). `centl_reset` advertises a separate
+self-contained control-response schema. The schemas are constructed only for
+`tools/list`, so ordinary calculator and JSON startup do not allocate MCP-only
+schema trees.
+
 ## Cancellation
 
 The stdio adapter implements MCP `notifications/cancelled`. A client can cancel
@@ -85,12 +94,15 @@ are outstanding. Clients should retain an external timeout and terminate the
 process if they require immediate interruption.
 
 Valid cancellation notifications bypass the process request-admission counter.
-The reader keeps at most 10,000 pending inputs and 16 MiB of pending source
-bytes. Exceeding either ceiling is terminal: CENTL marks active and queued tool
-evaluations cancelled, drains the bounded queue, emits one ordered overload
-error when the overflowing input is a request, and exits with failure status.
-This keeps cancellation reachable through ordinary small request bursts while
-preventing an unbounded stdio backlog.
+The reader keeps at most 10,000 ordinary pending inputs and 16 MiB of their
+source bytes. When either budget is full, one valid cancellation notification
+may use a separately accounted emergency slot, still bounded by the per-request
+input limit; there is no second emergency slot. Further overload is terminal:
+CENTL marks active and queued tool evaluations cancelled, drains the ordinary
+queue plus any emergency notification, emits one ordered overload error when
+the overflowing input is a request, and exits with failure status. This keeps
+cancellation reachable at saturation while preventing an unbounded stdio
+backlog.
 
 The adapter implements `initialize`, `notifications/initialized`,
 `notifications/cancelled`, `ping`, `tools/list`, and `tools/call`. End of input

@@ -23,9 +23,11 @@ exact computation is expensive.
 
 ## Symbolic exact values
 
-Some values outside the rationals can remain exact through a symbolic backend,
-including algebraic numbers and recognized constants. A symbolic result is
-reported as exact only when the backend establishes the required property.
+Named constants and formal expressions outside the rationals can remain exact
+without being numerically evaluated. Real quadratics returned by `solve` use a
+verified equation-local `center ± sqrt(radicand)` representation; CENTL does
+not yet expose a general algebraic-number scalar backend. A result is reported
+as exact only when its representation establishes the required property.
 Failure to establish a property yields unknown, not a guessed answer.
 
 Formal expressions and derivatives can also remain exact without being reduced

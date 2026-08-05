@@ -19,6 +19,22 @@
  (modules test_sequence)
  (libraries centl_lib alcotest zarith yojson))
 
+(test
+ (name test_history)
+ (modules test_history)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_request_queue)
+ (modules test_request_queue)
+ (deps ../src/main.exe)
+ (libraries centl_lib alcotest threads unix yojson)
+ (action
+  (setenv
+   CENTL_TEST_EXECUTABLE
+   %{dep:../src/main.exe}
+   (run %{test}))))
+
 (cram
  (applies_to cli)
  (deps ../src/main.exe fixtures/definitions.centl fixtures/exact.centl))

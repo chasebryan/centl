@@ -91,9 +91,14 @@ expressions.
 Exact equation classification is also in F*. The core reduces both sides to a
 univariate rational polynomial, distinguishes constant, linear, quadratic, and
 unsupported cases, and computes linear and repeated quadratic roots exactly.
-For a positive quadratic discriminant, the host proposes an integer square-root
-candidate; the core checks the exact square identity before computing both
-rational roots.
+For a positive quadratic discriminant, the host proposes floor-square-root
+witnesses for its normalized numerator and denominator. The core proves each
+witness is either exact or lies strictly between consecutive squares. Two
+exact witnesses retain the rational-root path; otherwise the core derives the
+canonical exact pair `-b/(2a) ± sqrt(discriminant/(4a^2))`. Invalid witnesses
+or noncanonical boundary rationals are rejected rather than repaired by the
+host. Concrete F* examples cover irrational completion, equation-scaling
+invariance, rational fallback, and invalid-witness rejection.
 
 Exact rational powers use verified exponentiation by squaring rather than a
 linear recursive multiplication chain.
@@ -122,3 +127,37 @@ scaling, cancellation, and agreement among plain, colored, JSON, and MCP views.
 The host validates that every core result is reduced and has a positive
 denominator before rendering it. It never repairs or silently approximates a
 core result.
+
+## Runtime hardening
+
+`make fuzz-test` retains the generated adversarial/property suite and then runs
+a committed, deterministic mutation corpus. Selected byte positions in parser,
+JSONL, MCP, and native rational seeds receive boundary-byte insertions,
+deletions, replacements, reversals, duplication, and truncation. The harness
+requires total compatibility, located-expression, and located-statement parser
+diagnostics with bounded byte spans; serializable protocol envelopes; explicit
+MCP notification handling; finite ordered Arb enclosures; and safe rejection of
+malformed native integers. Definition and multiline seeds cover statement
+locations, while a compact corpus directive expands to a 32,000-digit integer
+near the default source-size boundary. This corpus is reproducible in CI; it
+complements rather than replaces randomized or coverage-guided fuzzing.
+
+`make metamorphic-test` generates a platform-stable stream of seeded rationals
+and checks all native intervals with exact Zarith rational comparisons. It
+requires higher-precision enclosures to refine lower-precision enclosures,
+checks that `sqrt(q)^2` and `exp(log(q))` contain the exact positive rational,
+and checks overlapping enclosures for odd/even transcendental symmetries. A
+second pass requires plain, JSON, MCP text content, and MCP structured content
+to agree exactly for the same rational expressions. No binary or decimal
+floating-point comparison is part of the oracle.
+
+`make sanitizer-test` recompiles the production Arb C shim in an isolated build
+directory with AddressSanitizer and UndefinedBehaviorSanitizer, then stresses
+allocation, finalization, endpoint extraction, every arithmetic/transcendental
+primitive, malformed integer strings, and precision/exponent limits. It skips
+cleanly when the platform compiler lacks both sanitizers. Linux CI sets
+`CENTL_SANITIZER_REQUIRED=1`, so an unavailable or failing sanitizer is an
+error there. The ordinary native library remains unsanitized and portable.
+
+`make performance-test` provides the separate conservative regression budgets
+and methodology documented in [PERFORMANCE.md](PERFORMANCE.md).

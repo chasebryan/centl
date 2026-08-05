@@ -55,8 +55,11 @@ dune=$(lock_value runtime dune)
 zarith=$(lock_value runtime zarith)
 yojson=$(lock_value runtime yojson)
 flint=$(lock_value runtime flint)
+flint_sha256=$(lock_value runtime flint_sha256)
 gmp=$(lock_value runtime gmp)
+gmp_sha256=$(lock_value runtime gmp_sha256)
 mpfr=$(lock_value runtime mpfr)
+mpfr_sha256=$(lock_value runtime mpfr_sha256)
 alcotest=$(lock_value test alcotest)
 qcheck=$(lock_value test qcheck)
 ocamlformat=$(lock_value development ocamlformat)
@@ -105,6 +108,8 @@ require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
 require_text .github/workflows/ci.yml "version: \"$julia\"" \
   "Julia must be pinned to $julia"
+require_text .github/workflows/release.yml "version: \"$julia\"" \
+  "release Julia must be pinned to $julia"
 
 require_unique_workflow_pin .github/workflows/ci.yml ocaml-base-compiler "$ocaml"
 for pin in \
@@ -120,12 +125,35 @@ for pin in \
   require_unique_workflow_pin .github/workflows/release.yml "$package" "$version"
 done
 
-for pair in "GMP:$gmp" "MPFR:$mpfr" "FLINT:$flint"; do
-  variable=${pair%%:*}
-  version=${pair#*:}
+for pin in \
+  "GMP:$gmp:$gmp_sha256" \
+  "MPFR:$mpfr:$mpfr_sha256" \
+  "FLINT:$flint:$flint_sha256"; do
+  variable=${pin%%:*}
+  remainder=${pin#*:}
+  version=${remainder%%:*}
+  checksum=${remainder#*:}
   require_text .github/workflows/release.yml \
     "${variable}_VERSION: \"$version\"" \
     "$variable must be pinned to $version"
+  require_text .github/workflows/release.yml \
+    "${variable}_SHA256: \"$checksum\"" \
+    "$variable checksum must be pinned to $checksum"
+done
+
+for package_script in scripts/package-release scripts/package-release.ps1; do
+  require_text "$package_script" "FLINT $flint" \
+    "FLINT source references must use $flint"
+  require_text "$package_script" "GMP $gmp" \
+    "GMP source references must use $gmp"
+  require_text "$package_script" "MPFR $mpfr" \
+    "MPFR source references must use $mpfr"
+  require_text "$package_script" "sha256 $flint_sha256" \
+    "FLINT source checksum must use $flint_sha256"
+  require_text "$package_script" "sha256 $gmp_sha256" \
+    "GMP source checksum must use $gmp_sha256"
+  require_text "$package_script" "sha256 $mpfr_sha256" \
+    "MPFR source checksum must use $mpfr_sha256"
 done
 
 manifest_version() {

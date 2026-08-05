@@ -1,9 +1,6 @@
 # Changelog
 
-## 0.10.0 — UNRELEASED
-
-This is preparation only. The runtime version, Git tag, installers, protocol
-producer version, and published release remain `0.9.1`.
+## 0.10.0 — 2026-08-04
 
 ### Added
 
@@ -16,11 +13,21 @@ producer version, and published release remain `0.9.1`.
   index.
 - Exact sequences have a structured protocol value, provenance, and identical
   behavior through one-shot JSON, persistent JSON Lines, and MCP.
+- Real quadratic equations with positive nonsquare discriminants now return
+  verified exact conjugate roots as canonical `center ± sqrt(radicand)` pairs,
+  including structured branch, center, and radicand fields.
 - Human input supports syntax-aware multiline statements in the calculator,
-  standard-input scripts, and `--file` scripts. Human syntax diagnostics now
-  include source locations and a caret excerpt.
-- Interactive terminals provide built-in and session-name completion plus a
-  bounded in-memory history with `:history` and `:clear-history` commands.
+  standard-input scripts, and `--file` scripts. Syntax and runtime mathematical
+  diagnostics now retain source locations; human output includes a caret
+  excerpt and machine errors expose a stable zero-based byte position.
+- Interactive terminals provide built-in and session-name completion plus
+  private, versioned, bounded history shared safely across calculator
+  processes. `:history`, `:clear-history`, `--no-history`, and environment
+  opt-outs make persistence explicit and controllable.
+- Deterministic parser/protocol/native mutation corpora, exact-rational
+  metamorphic checks, ASan/UBSan coverage of the production Arb shim, and
+  conservative startup/evaluation performance budgets provide reproducible
+  hardening gates.
 - A pinned opam manifest, contributor bootstrap, honest formatting and lint
   gates, and a focused pull-request verification workflow make the development
   path reproducible.
@@ -41,9 +48,24 @@ producer version, and published release remain `0.9.1`.
 - Pull requests run the pinned Linux verification, native, quality, and seeded
   Julia/Nemo differential path. Full native packaging remains on `main`, tags,
   and manual runs, and superseded branch runs are cancelled.
+- Quadratic completion validates host-supplied integer square-root floor
+  witnesses in F*, preserves the existing rational-root representation, and
+  applies exact-bit, result-byte, and cooperative-cancellation boundaries.
+- MCP calculation and reset responses now advertise separate closed output
+  schemas; calculation schemas discriminate every value, definition, error,
+  rational solution, and exact real-quadratic solution shape and are allocated
+  only during tool discovery.
+- Persistent JSON Lines and MCP input use an extracted, directly tested FIFO
+  queue with exact count/byte accounting and one separately bounded emergency
+  cancellation slot, so ordinary saturation cannot prevent a valid
+  cancellation from reaching its target.
+- Native release verification installs Git and its runtime prerequisites before
+  checkout and asserts that verification runs inside the expected worktree.
 
 Machine protocol version 1 remains unchanged. Consumers that exhaustively
-match value kinds must accept the new exact `sequence` kind. `sequence` and
+match value kinds must accept the new exact `sequence` kind. Consumers that
+inspect `solution_set.solutions` must also accept tagged `real_quadratic`
+members alongside the unchanged rational member shape. `sequence` and
 `recurrence` are reserved built-in names.
 
 ## 0.9.1 — 2026-08-02

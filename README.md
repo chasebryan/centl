@@ -9,11 +9,10 @@ default, explicit about approximation, and never prints an unjustified digit.
 You should not need to become a programmer to calculate or abandon mathematical
 rigor to program.
 
-The published CENTL 0.9 series adds exact finite sums and products, exact
-polynomial integration, and stronger verified resource and substitution
-boundaries. The current source tree is preparing 0.10.0 with exact finite
-sequences and first-order recurrences plus a more capable calculator input
-experience.
+CENTL 0.10.0 adds exact finite sequences and first-order recurrences, verified
+exact roots for real quadratics, a more capable calculator input experience,
+durable cross-process history, local runtime diagnostics, stack-safe exact
+rendering, and deterministic hardening and performance gates.
 
 ## Principles
 
@@ -57,6 +56,7 @@ make test
 ./centl 'integrate(x^2, x = 0, 1)'
 ./centl 'factor(x^2 - 1)'
 ./centl 'solve(x^2 - 5*x + 6 = 0, x)'
+./centl 'solve(x^2 = 2, x)'
 ./centl 'sum(k^2, k = 1, 100)'
 ./centl 'sequence(k^2, k = 1, 5)'
 ./centl 'recurrence(1, a = a*n, n = 0, 5)'
@@ -71,6 +71,7 @@ x^3 + x^2 + x
 1/3
 (x - 1) * (x + 1)
 x in {2, 3}
+x in {-sqrt(2), sqrt(2)}
 338350
 [1, 4, 9, 16, 25]
 [1, 1, 2, 6, 24, 120]
@@ -89,15 +90,28 @@ Calculator sessions and scripts remember immutable definitions written as
 
 In an interactive terminal, incomplete statements continue at a `....>`
 prompt. Tab completes built-in and session-defined names, Up/Down browse the
-current process's history, and `:history` or `:clear-history` inspect or clear
-that bounded in-memory history. Standard-input and `--file` scripts use the
-same multiline statement rules. Human syntax errors identify the source line
-and column and show a caret at the failing byte.
+bounded history saved across calculator processes, and `:history` or
+`:clear-history` inspect or durably clear it. Standard-input and `--file`
+scripts use the same multiline statement rules. Human syntax errors identify
+the source line and column and show a caret at the failing byte.
+
+History is stored as private, versioned state at
+`$XDG_STATE_HOME/centl/history.json` on Unix, falling back to
+`$HOME/.local/state/centl/history.json`, and at
+`%LOCALAPPDATA%\centl\history.json` on Windows. It is capped at 1,000 entries
+and 1 MiB, and concurrent calculator processes merge additions under a lock
+before an atomic replacement. Use
+`--no-history`, set `CENTL_NO_HISTORY`, or set `CENTL_HISTORY=off` to retain
+Up/Down history only for the current process. The
+[syntax guide](docs/SYNTAX.md#interactive-history) documents paths, privacy,
+concurrency, limits, and the disk-format policy.
 
 ## Developer quickstart
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for system prerequisites, the pinned F*
-setup, and the reproducible opam bootstrap. Once those are installed:
+New to OCaml, F*, or rigorous numerics? Follow the complete
+[manual contributor onboarding](docs/ONBOARDING.md). See
+[CONTRIBUTING.md](CONTRIBUTING.md) for system prerequisites, the pinned F* setup,
+and the reproducible opam bootstrap. Once those are installed:
 
 ```sh
 scripts/bootstrap-opam
@@ -108,6 +122,7 @@ make test
 ## Design
 
 CENTL is in early development. See the [architecture](docs/DESIGN.md),
+[near-term product design path](docs/DESIGN_PATH.md),
 [complete syntax sheet](docs/SYNTAX.md),
 [numerical contract](docs/NUMERICS.md),
 [calculus syntax](docs/CALCULUS.md),
@@ -116,6 +131,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [exact finite iteration and sequences](docs/ITERATION.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
+[performance contract](docs/PERFORMANCE.md),
 [machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
 [roadmap](docs/ROADMAP.md). Release history is summarized in the
 [changelog](CHANGELOG.md).

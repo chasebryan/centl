@@ -57,6 +57,56 @@ function centl_exact_sequence(expression::String)
     return items
 end
 
+function rational_components(value)
+    return QQ(
+        parse(BigInt, String(value.numerator)),
+        parse(BigInt, String(value.denominator)),
+    )
+end
+
+function centl_real_quadratic(expression::String)
+    response = centl_response(expression)
+    value = response.value
+    String(value.kind) == "solution_set" || error(
+        "CENTL returned a non-solution value for $(expression)",
+    )
+    Bool(value.exact) && Bool(value.resolved) || error(
+        "CENTL did not return an exact resolved solution for $(expression)",
+    )
+    String(value.status) == "finite" || error(
+        "CENTL returned a non-finite solution for $(expression)",
+    )
+    length(value.solutions) == 2 || error(
+        "CENTL returned the wrong real-quadratic arity for $(expression)",
+    )
+    lower, upper = value.solutions
+    for (solution, branch) in ((lower, "lower"), (upper, "upper"))
+        String(solution.kind) == "real_quadratic" || error(
+            "CENTL returned a non-quadratic solution for $(expression)",
+        )
+        Bool(solution.exact) || error(
+            "CENTL returned an inexact quadratic solution for $(expression)",
+        )
+        String(solution.branch) == branch || error(
+            "CENTL returned quadratic branches out of order for $(expression)",
+        )
+    end
+    lower_center = rational_components(lower.center)
+    upper_center = rational_components(upper.center)
+    lower_radicand = rational_components(lower.radicand)
+    upper_radicand = rational_components(upper.radicand)
+    lower_center == upper_center || error(
+        "CENTL returned nonconjugate centers for $(expression)",
+    )
+    lower_radicand == upper_radicand || error(
+        "CENTL returned nonconjugate radicands for $(expression)",
+    )
+    lower_radicand > 0 || error(
+        "CENTL returned a nonpositive exact radicand for $(expression)",
+    )
+    return lower_center, lower_radicand
+end
+
 function exact_text(value)
     numerator_text = string(numerator(value))
     denominator_value = denominator(value)
@@ -141,6 +191,51 @@ function check_polynomial_integral(coefficients, lower, upper)
     check_exact(expression, expected)
 end
 
+function quadratic_source(a::Int, b::Int, c::Int)
+    return "solve(($(a))*x^2 + ($(b))*x + ($(c)) = 0, x)"
+end
+
+function check_real_quadratic(a::Int, b::Int, c::Int; scale::Int = 1)
+    a != 0 || error("quadratic differential case has zero leading coefficient")
+    scale != 0 || error("quadratic differential case has zero scale")
+    discriminant = b * b - 4 * a * c
+    discriminant > 0 || error(
+        "quadratic differential case has nonpositive discriminant",
+    )
+    root_floor = isqrt(BigInt(discriminant))
+    root_floor * root_floor != discriminant || error(
+        "quadratic differential case has a rational root",
+    )
+
+    center, radicand = centl_real_quadratic(quadratic_source(a, b, c))
+    expected_center = QQ(ZZ(-b), ZZ(2 * a))
+    expected_radicand = QQ(ZZ(discriminant), ZZ(4 * a * a))
+    center == expected_center || error(
+        "CENTL quadratic-center mismatch for $(quadratic_source(a, b, c))\n" *
+        "  expected: $(exact_text(expected_center))\n" *
+        "  actual:   $(exact_text(center))",
+    )
+    radicand == expected_radicand || error(
+        "CENTL quadratic-radicand mismatch for $(quadratic_source(a, b, c))\n" *
+        "  expected: $(exact_text(expected_radicand))\n" *
+        "  actual:   $(exact_text(radicand))",
+    )
+
+    2 * center == QQ(ZZ(-b), ZZ(a)) || error(
+        "CENTL quadratic solution pair violates the Vieta sum",
+    )
+    center^2 - radicand == QQ(ZZ(c), ZZ(a)) || error(
+        "CENTL quadratic solution pair violates the Vieta product",
+    )
+
+    scaled_center, scaled_radicand = centl_real_quadratic(
+        quadratic_source(scale * a, scale * b, scale * c),
+    )
+    scaled_center == center && scaled_radicand == radicand || error(
+        "CENTL quadratic representation changed under nonzero scaling",
+    )
+end
+
 function run_differential_suite()
     check_exact("0.1 + 0.2", QQ(3, 10))
     check_exact("choose(52, 5)", QQ(binomial(ZZ(52), ZZ(5))))
@@ -219,6 +314,28 @@ function run_differential_suite()
     ]
     for (coefficients, lower, upper) in deterministic_integrals
         check_polynomial_integral(coefficients, lower, upper)
+    end
+
+    for (a, b, c, scale) in
+        [(1, 0, -2, 2), (4, 4, -2, -3), (-3, 5, 7, 5), (6, -7, -4, -2)]
+        check_real_quadratic(a, b, c; scale = scale)
+    end
+
+    quadratic_random = MersenneTwister(0xA19E8A)
+    quadratic_cases = 0
+    while quadratic_cases < 60
+        a = rand(quadratic_random, vcat(-12:-1, 1:12))
+        b = rand(quadratic_random, -20:20)
+        c = rand(quadratic_random, -20:20)
+        discriminant = b * b - 4 * a * c
+        if discriminant > 0
+            root_floor = isqrt(BigInt(discriminant))
+            if root_floor * root_floor != discriminant
+                scale = rand(quadratic_random, vcat(-8:-1, 1:8))
+                check_real_quadratic(a, b, c; scale = scale)
+                quadratic_cases += 1
+            end
+        end
     end
 
     integration_random = MersenneTwister(0x1A7E6A1)

@@ -50,10 +50,16 @@ x = 4
 
 solve(x^2 - 5*x + 6 = 0, x)
 x in {2, 3}
+
+solve(x^2 = 2, x)
+x in {-sqrt(2), sqrt(2)}
 ```
 
-CENTL classifies exact univariate polynomials in its verified core. This first
-slice solves linear equations and quadratics whose real roots are rational. It
-also distinguishes no solutions from all values. A quadratic with irrational
-roots, a higher-degree equation, or a non-polynomial equation is reported as
-`unresolved` instead of guessed or silently approximated.
+CENTL classifies exact univariate polynomials in its verified core. It solves
+linear equations and real quadratics with rational coefficients, including a
+canonical exact `center ± sqrt(radicand)` pair for a positive nonsquare
+discriminant. The pair is invariant under nonzero rational scaling of the
+equation. CENTL also distinguishes no solutions from all values. A
+higher-degree or non-polynomial equation is reported as `unresolved` instead
+of guessed or silently approximated. Real-quadratic values are currently local
+to solution sets rather than general scalar expressions.
