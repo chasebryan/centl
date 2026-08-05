@@ -48,6 +48,7 @@ jobs:
 
       - name: Require a Git worktree
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git rev-parse --is-inside-work-tree | grep -Fqx true
           git ls-files --error-unmatch .github/workflows/release.yml
 

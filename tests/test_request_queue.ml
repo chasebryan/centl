@@ -219,7 +219,7 @@ let close_wakes_a_waiter () =
     if (Queue_test.snapshot queue).waiting = 1 then ()
     else if attempts = 0 then Alcotest.fail "take did not block on the queue"
     else begin
-      Thread.yield ();
+      Thread.delay 0.001;
       wait_until_blocked (attempts - 1)
     end
   in
