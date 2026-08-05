@@ -37,7 +37,9 @@ let path_selection () =
   in
   Alcotest.(check (option string))
     "relative XDG path falls back"
-    (Some (history_path "/home/me/.local/state"))
+    (Some
+       (history_path
+          (Filename.concat (Filename.concat "/home/me" ".local") "state")))
     (Centl_history.state_path ~win32:false fallback_environment);
   let windows_environment =
     environment [ ("LOCALAPPDATA", "C:\\Users\\me\\Local") ]
