@@ -74,19 +74,41 @@ jobs:
       - name: Publish CENTL 0.10.0
         if: steps.request.outputs.requested == 'true'
         run: |
-          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            printf '%s already exists; leaving it unchanged.\n' "$RELEASE_TAG"
-            exit 0
-          fi
-
           current_tag=$(
             gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" \
               --jq '.object.sha' 2>/dev/null || true
           )
+
+          release_exists=false
+          asset_count=0
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            release_exists=true
+            asset_count=$(gh release view "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --json assets --jq '.assets | length')
+          fi
+
+          if [ "$current_tag" = "$RELEASE_SHA" ] && \
+             [ "$release_exists" = true ] && \
+             [ "$asset_count" -eq 8 ]; then
+            printf '%s already points to %s with the complete asset set.\n' \
+              "$RELEASE_TAG" "$RELEASE_SHA"
+            exit 0
+          fi
+
           if [ -n "$current_tag" ] && [ "$current_tag" != "$RELEASE_SHA" ]; then
             test "$current_tag" = "$STALE_TAG_SHA"
+          fi
+
+          if [ "$release_exists" = true ]; then
+            test "$current_tag" = "$STALE_TAG_SHA"
+            gh release delete "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes
+            current_tag=""
+          elif [ -n "$current_tag" ] && [ "$current_tag" != "$RELEASE_SHA" ]; then
             gh api --method DELETE \
               "repos/$GITHUB_REPOSITORY/git/refs/tags/$RELEASE_TAG"
+            current_tag=""
           fi
 
           gh release create "$RELEASE_TAG" dist/* \
@@ -94,3 +116,13 @@ jobs:
             --target "$RELEASE_SHA" \
             --generate-notes \
             --title "CENTL $RELEASE_VERSION"
+
+          published_tag=$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" \
+              --jq '.object.sha'
+          )
+          published_assets=$(gh release view "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json assets --jq '.assets | length')
+          test "$published_tag" = "$RELEASE_SHA"
+          test "$published_assets" -eq 8
