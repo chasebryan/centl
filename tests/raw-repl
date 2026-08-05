@@ -1,0 +1,97 @@
+#!/bin/sh
+set -eu
+
+fail() {
+  printf 'raw REPL test: %s\n' "$1" >&2
+  exit 1
+}
+
+binary=${1:-}
+case_name=${2:-}
+[ -x "$binary" ] || fail "calculator is not executable: $binary"
+case "$binary" in
+  *"'"*) fail "calculator path contains an unsupported single quote: $binary" ;;
+esac
+case "$case_name" in
+  edit|limit|partial-escape) ;;
+  *) fail "usage: raw-repl BINARY {edit|limit|partial-escape}" ;;
+esac
+
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-raw-repl.XXXXXXXX")
+input=$temporary/input
+output=$temporary/output
+session_pid=""
+
+cleanup() {
+  exec 3>&- 2>/dev/null || :
+  if [ -n "$session_pid" ] && kill -0 "$session_pid" 2>/dev/null; then
+    kill "$session_pid" 2>/dev/null || :
+    wait "$session_pid" 2>/dev/null || :
+  fi
+  rm -rf "$temporary"
+}
+trap cleanup EXIT HUP INT TERM
+
+mkfifo "$input"
+exec 3<>"$input"
+session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
+timeout -k 2s 15s script -qefc "$session_command" "$output" \
+  <&3 3<&- >/dev/null &
+session_pid=$!
+
+ready=0
+while kill -0 "$session_pid" 2>/dev/null; do
+  if grep -Fq 'centl> ' "$output" 2>/dev/null; then
+    ready=1
+    break
+  fi
+  sleep 0.05
+done
+[ "$ready" -eq 1 ] || fail "calculator exited before its prompt"
+
+case "$case_name" in
+  edit)
+    awk 'BEGIN { for (i = 0; i < 30000; i++) printf " " }' >&3
+    printf '12\033[D\177\n:quit\n' >&3
+    ;;
+  limit)
+    awk 'BEGIN { for (i = 0; i < 32768; i++) printf " " }' >&3
+    printf '1\n:quit\n' >&3
+    ;;
+  partial-escape)
+    printf '\033' >&3
+    sleep 0.1
+    printf '\033[' >&3
+    sleep 0.1
+    printf ':quit\n' >&3
+    ;;
+esac
+exec 3>&-
+
+set +e
+wait "$session_pid"
+status=$?
+set -e
+session_pid=""
+[ "$status" -eq 0 ] || fail "calculator session exited with status $status"
+
+case "$case_name" in
+  edit)
+    result=$(tr '\r' '\n' <"$output" | grep -x '2' | tail -n 1)
+    [ "$result" = 2 ] || fail "edited expression did not evaluate to 2"
+    printf '%s\n' "$result"
+    ;;
+  limit)
+    result=$(
+      tr '\r' '\n' <"$output" \
+        | grep 'error: the expression exceeds the source-byte limit' \
+        | tail -n 1
+    )
+    [ "$result" = 'error: the expression exceeds the source-byte limit' ] \
+      || fail "source-byte limit was not reported"
+    printf '%s\n' "$result"
+    ;;
+  partial-escape)
+    printf '%s\n' raw-escape-ok
+    ;;
+esac
