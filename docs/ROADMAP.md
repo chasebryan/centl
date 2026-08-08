@@ -5,13 +5,12 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.10.0` adds exact finite sequences and first-order bounded recurrences,
-verified exact real-quadratic solution pairs, syntax-aware multiline human
-input, source-context syntax and runtime diagnostics, interactive completion and
-bounded durable cross-process history, a stack-safe renderer, and deterministic
-hardening and performance gates. Protocol version 1 remains stable while
-gaining the exact `sequence` value kind and a new tagged member of solution-set
-arrays.
+`0.11.0` makes CENTL safe for automated callers to interpret. Transformation
+resolution is explicit across human and machine surfaces; read-only computation
+is separate from definition mutation; closed MCP schemas, supported-domain
+discovery, dependency-bearing session inspection, syntax-catalog help,
+structured error recovery metadata, and an agent evaluation corpus are shipped.
+Protocol version 1 remains stable with documented compatibility operations.
 
 ## 0. Foundation
 
@@ -88,6 +87,10 @@ type declarations, while errors remain mathematical and local.
 ## 5. Machine tool
 
 Initial persistent JSON Lines and stdio MCP slice implemented in `0.8.0`.
+
+The agent-safe read-only compute surface, explicit definition tool, exact
+schemas, domain discovery, session inspection, focused help, and structured
+error metadata are implemented in `0.11.0`.
 
 - Preserve the versioned exact, enclosure, solution, definition, and error
   schemas.
