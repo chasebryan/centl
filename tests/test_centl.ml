@@ -1379,16 +1379,22 @@ let agent_tool_corpus () =
               | Some (`Bool value) -> value
               | _ -> false
             in
+            let fields =
+              [
+                ("version", `Int 1);
+                ("op", `String op);
+                ("expression", `String expression);
+              ]
+            in
+            let fields =
+              match member_opt "limits" case with
+              | Some limits -> fields @ [ ("limits", limits) ]
+              | None -> fields
+            in
             let response =
               Centl_protocol.handle_json
                 ~cancelled:(fun () -> cancelled)
-                (Centl_protocol.create ())
-                (`Assoc
-                   [
-                     ("version", `Int 1);
-                     ("op", `String op);
-                     ("expression", `String expression);
-                   ])
+                (Centl_protocol.create ()) (`Assoc fields)
             in
             begin match member_opt "expected_error" case with
             | Some (`String expected) ->
