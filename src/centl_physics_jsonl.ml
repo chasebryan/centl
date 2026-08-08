@@ -68,6 +68,7 @@ let capabilities_result limits =
             "constant";
             "simulate_particle";
             "elastic_collision_1d";
+            "elastic_collision_3d_at_contact";
           ] );
       ( "force_models",
         strings
