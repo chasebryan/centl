@@ -1,5 +1,6 @@
 let string_schema = `Assoc [ ("type", `String "string") ]
 let boolean_schema = `Assoc [ ("type", `String "boolean") ]
+
 let nonnegative_integer_schema =
   `Assoc [ ("type", `String "integer"); ("minimum", `Int 0) ]
 
@@ -186,7 +187,16 @@ let simulation_schema =
       ("text", string_schema);
       ("trajectory", array_of particle_schema);
     ]
-    [ "kind"; "integrator"; "steps"; "dt"; "initial"; "final"; "diagnostics"; "text" ]
+    [
+      "kind";
+      "integrator";
+      "steps";
+      "dt";
+      "initial";
+      "final";
+      "diagnostics";
+      "text";
+    ]
 
 let collision_schema =
   strict_object
@@ -215,7 +225,14 @@ let collision_schema =
       ("exact", const_bool true);
       ("text", string_schema);
     ]
-    [ "kind"; "velocity1_final"; "velocity2_final"; "invariants"; "exact"; "text" ]
+    [
+      "kind";
+      "velocity1_final";
+      "velocity2_final";
+      "invariants";
+      "exact";
+      "text";
+    ]
 
 let provenance_schema =
   strict_object
