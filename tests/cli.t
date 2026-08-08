@@ -362,8 +362,8 @@
   $ ../src/main.exe verify --left 'x/2 + x/2' --relation equal --right 'x' --variable x:rational --json | python3 -c 'import sys,json; v=json.load(sys.stdin)["verification"]; print(v["verdict"], v["evidence"]["reason"], v["assurance"]["class"])'
   unknown polynomial_certificate_not_admitted none
 
-  $ ../src/main.exe --build-info | python3 -c 'import sys; d=dict(line.rstrip().split("=",1) for line in sys.stdin); print(d["semantic_version"], d["commit"], len(d["generated_core_hash"]), d["receipt_schema"], d["protocol_version"])'
-  0.12.0-rc.1 unknown 64 1 1
+  $ ../src/main.exe --build-info | python3 -c 'import sys; d=dict(line.rstrip().split("=",1) for line in sys.stdin); c=d["commit"]; valid=c == "unknown" or (len(c) in (40, 64) and all(x in "0123456789abcdef" for x in c)); print(d["semantic_version"], valid, len(d["generated_core_hash"]), d["receipt_schema"], d["protocol_version"])'
+  0.12.0-rc.1 True 64 1 1
 
   $ ../src/main.exe verify --left '0.1 + 0.2' --relation equal --right '3/10' --receipt verify-receipt.json >/dev/null
   $ python3 -c 'import json,stat; o=json.load(open("verify-receipt.json")); print(o["kind"], o["verification"]["verdict"], o["resolved_claim"]["left"], o["session"]["revision"], len(o["build"]["generated_core_hash"]), oct(stat.S_IMODE(__import__("os").stat("verify-receipt.json").st_mode)))'
