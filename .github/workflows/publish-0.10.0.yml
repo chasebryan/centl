@@ -75,8 +75,8 @@ jobs:
         if: steps.request.outputs.requested == 'true'
         run: |
           current_tag=$(
-            gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" \
-              --jq '.object.sha' 2>/dev/null || true
+            gh api "repos/$GITHUB_REPOSITORY/commits/$RELEASE_TAG" \
+              --jq '.sha' 2>/dev/null || true
           )
 
           release_exists=false
