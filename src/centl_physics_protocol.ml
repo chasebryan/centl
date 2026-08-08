@@ -26,8 +26,9 @@ let provenance method_ =
       ("schema", `Int 1);
       ( "producer",
         `Assoc
-          [ ("name", `String "centl"); ("version", `String Centl_version.value) ]
-      );
+          [
+            ("name", `String "centl"); ("version", `String Centl_version.value);
+          ] );
       ("classification", `String "physics");
       ("method", `String method_);
       ("backend", `String "centl-physics");
@@ -103,7 +104,8 @@ let check_fields allowed fields =
 
 let parse_q label text =
   try Ok (Q.of_string text)
-  with Invalid_argument _ | Failure _ -> Error ("invalid " ^ label ^ ": " ^ text)
+  with Invalid_argument _ | Failure _ ->
+    Error ("invalid " ^ label ^ ": " ^ text)
 
 let dimension_json dimension =
   `Assoc
@@ -132,7 +134,8 @@ let quantity_json_as quantity unit_symbol =
 
 let vector_json_as vector unit_symbol =
   let unit_def = unit_exn unit_symbol in
-  require_dimension ~context:("render vector in " ^ unit_symbol)
+  require_dimension
+    ~context:("render vector in " ^ unit_symbol)
     ~expected:unit_def.unit_dimension vector.vector_dimension;
   let component value = Q.to_string (Q.div value unit_def.scale_to_si) in
   `Assoc
@@ -144,7 +147,8 @@ let vector_json_as vector unit_symbol =
       ("z", `String (component vector.z));
       ("unit", `String unit_symbol);
       ("dimension", dimension_json vector.vector_dimension);
-      ("text", `String (vector_to_string_as vector unit_symbol ^ " " ^ unit_symbol));
+      ( "text",
+        `String (vector_to_string_as vector unit_symbol ^ " " ^ unit_symbol) );
     ]
 
 let particle_json particle =
@@ -162,7 +166,9 @@ let quantity_input label = function
       begin match check_fields [ "value"; "unit" ] fields with
       | Error _ as error -> error
       | Ok () ->
-          begin match (string_field "value" fields, string_field "unit" fields) with
+          begin match
+            (string_field "value" fields, string_field "unit" fields)
+          with
           | Ok value, Ok unit_symbol ->
               begin match parse_q (label ^ " value") value with
               | Error _ as error -> error
@@ -197,21 +203,24 @@ let vector_input label = function
                   begin try Ok (vector3 ~unit_symbol x y z)
                   with Physics_error message -> Error message
                   end
-              | Error message, _, _
-              | _, Error message, _
-              | _, _, Error message -> Error message
+              | Error message, _, _ | _, Error message, _ | _, _, Error message
+                ->
+                  Error message
               end
           | Error message, _, _, _
           | _, Error message, _, _
           | _, _, Error message, _
-          | _, _, _, Error message -> Error message
+          | _, _, _, Error message ->
+              Error message
           end
       end
   | _ -> Error (label ^ " must be an object")
 
 let particle_input = function
   | `Assoc fields ->
-      begin match check_fields [ "id"; "mass"; "position"; "velocity" ] fields with
+      begin match
+        check_fields [ "id"; "mass"; "position"; "velocity" ] fields
+      with
       | Error _ as error -> error
       | Ok () ->
           let id =
@@ -236,9 +245,9 @@ let particle_input = function
                   begin try Ok (particle ~id ~mass ~position ~velocity)
                   with Physics_error message -> Error message
                   end
-              | Error message, _, _
-              | _, Error message, _
-              | _, _, Error message -> Error message
+              | Error message, _, _ | _, Error message, _ | _, _, Error message
+                ->
+                  Error message
               end
           | Error message, _, _, _ -> Error message
           | _, None, _, _ -> Error "missing particle mass"
@@ -253,7 +262,10 @@ let force_input = function
       begin match string_field "kind" fields with
       | Error message -> Error message
       | Ok "constant_force" ->
-          begin match (check_fields [ "kind"; "vector" ] fields, List.assoc_opt "vector" fields) with
+          begin match
+            ( check_fields [ "kind"; "vector" ] fields,
+              List.assoc_opt "vector" fields )
+          with
           | Error message, _ -> Error message
           | Ok (), None -> Error "constant_force requires vector"
           | Ok (), Some json ->
@@ -310,7 +322,9 @@ let force_input = function
           | Error message, _ -> Error message
           | Ok (), None -> Error "linear_drag requires coefficient"
           | Ok (), Some coefficient ->
-              begin match quantity_input "linear drag coefficient" coefficient with
+              begin match
+                quantity_input "linear drag coefficient" coefficient
+              with
               | Error _ as error -> error
               | Ok coefficient ->
                   begin try Ok (linear_drag coefficient)
