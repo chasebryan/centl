@@ -48,7 +48,10 @@ let cancellable_request_id = function
           Some (`String "tools/call"),
           Some (`Assoc parameters) ) ->
           begin match List.assoc_opt "name" parameters with
-          | Some (`String "centl_calculate") -> Some id
+          | Some (`String name)
+            when List.mem name
+                   [ "centl_compute"; "centl_define"; "centl_calculate" ] ->
+              Some id
           | _ -> None
           end
       | _ -> None
@@ -492,6 +495,40 @@ let tool_output_schema =
              ] );
        ])
 
+let replace_association name value fields =
+  List.map
+    (fun ((field_name, _) as field) ->
+      if field_name = name then (name, value) else field)
+    fields
+
+let restrict_result_value result_value =
+  match Lazy.force tool_output_schema with
+  | `Assoc fields ->
+      let definitions =
+        match List.assoc_opt "$defs" fields with
+        | Some (`Assoc definitions) ->
+            `Assoc (replace_association "result_value" result_value definitions)
+        | _ -> assert false
+      in
+      `Assoc (replace_association "$defs" definitions fields)
+  | _ -> assert false
+
+let compute_output_schema =
+  lazy (restrict_result_value (schema_ref "mathematical_value"))
+
+let define_output_schema =
+  lazy
+    (restrict_result_value
+       (`Assoc
+          [
+            ( "oneOf",
+              `List
+                [
+                  schema_ref "value_definition";
+                  schema_ref "function_definition";
+                ] );
+          ]))
+
 let reset_output_schema =
   lazy
     (let session =
@@ -616,6 +653,73 @@ let calculate_tool () =
           ] );
     ]
 
+let compute_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_compute");
+      ("title", `String "Compute with CENTL");
+      ( "description",
+        `String
+          "Read-only exact, symbolic, or rigorously enclosed mathematical \
+           computation. Rejects definitions and reports explicit \
+           transformation resolution." );
+      ( "inputSchema",
+        strict_object
+          [
+            ( "expression",
+              `Assoc
+                [
+                  ("type", `String "string");
+                  ( "description",
+                    `String "A CENTL expression, not a definition." );
+                ] );
+            ("limits", limits_schema);
+          ]
+          [ "expression" ] );
+      ("outputSchema", Lazy.force compute_output_schema);
+      ( "annotations",
+        `Assoc
+          [
+            ("readOnlyHint", `Bool true);
+            ("destructiveHint", `Bool false);
+            ("idempotentHint", `Bool true);
+            ("openWorldHint", `Bool false);
+          ] );
+    ]
+
+let define_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_define");
+      ("title", `String "Define immutable CENTL state");
+      ( "description",
+        `String
+          "Create one immutable session value or function definition. Rejects \
+           ordinary expressions." );
+      ( "inputSchema",
+        strict_object
+          [
+            ( "definition",
+              `Assoc
+                [
+                  ("type", `String "string");
+                  ( "description",
+                    `String "A CENTL immutable value or function definition." );
+                ] );
+            ("limits", limits_schema);
+          ]
+          [ "definition" ] );
+      ("outputSchema", Lazy.force define_output_schema);
+      ( "annotations",
+        `Assoc
+          [
+            ("readOnlyHint", `Bool false);
+            ("destructiveHint", `Bool false);
+            ("idempotentHint", `Bool false);
+            ("openWorldHint", `Bool false);
+          ] );
+    ]
+
 let reset_tool () =
   `Assoc
     [
@@ -679,9 +783,11 @@ let initialize state id fields =
                        ] );
                    ( "instructions",
                      `String
-                       "Use centl_calculate for exact, symbolic, or rigorously \
-                        enclosed mathematics. Definitions persist until \
-                        centl_reset or process exit." );
+                       "Use read-only centl_compute for mathematics and \
+                        centl_define for immutable session definitions. \
+                        centl_calculate remains available for compatibility. \
+                        Definitions persist until centl_reset or process exit."
+                   );
                  ])
         | _ ->
             jsonrpc_error id (-32602)
@@ -719,18 +825,23 @@ let cancelled_response = function
       end
   | _ -> false
 
-let calculate ?(cancelled = Centl_engine.never_cancelled) state id arguments =
+let evaluate_tool ?(cancelled = Centl_engine.never_cancelled) ~tool_name
+    ~operation ~argument_name state id arguments =
   let unknown =
     List.find_opt
-      (fun (name, _) -> not (List.mem name [ "expression"; "limits" ]))
+      (fun (name, _) -> not (List.mem name [ argument_name; "limits" ]))
       arguments
   in
-  match (unknown, List.assoc_opt "expression" arguments) with
+  match (unknown, List.assoc_opt argument_name arguments) with
   | Some (name, _), _ ->
-      jsonrpc_error id (-32602) ("unknown centl_calculate argument " ^ name)
+      jsonrpc_error id (-32602) ("unknown " ^ tool_name ^ " argument " ^ name)
   | None, Some (`String expression) ->
       let fields =
         [ ("version", `Int 1); ("expression", `String expression) ]
+      in
+      let fields =
+        if operation = "evaluate" then fields
+        else fields @ [ ("op", `String operation) ]
       in
       let fields =
         match List.assoc_opt "limits" arguments with
@@ -743,7 +854,20 @@ let calculate ?(cancelled = Centl_engine.never_cancelled) state id arguments =
           Centl_protocol.handle_json ~cancelled state.protocol (`Assoc fields)
           |> tool_result |> jsonrpc_result id
       end
-  | None, _ -> jsonrpc_error id (-32602) "centl_calculate requires expression"
+  | None, _ ->
+      jsonrpc_error id (-32602) (tool_name ^ " requires " ^ argument_name)
+
+let calculate ?cancelled state id arguments =
+  evaluate_tool ?cancelled ~tool_name:"centl_calculate" ~operation:"evaluate"
+    ~argument_name:"expression" state id arguments
+
+let compute ?cancelled state id arguments =
+  evaluate_tool ?cancelled ~tool_name:"centl_compute" ~operation:"compute"
+    ~argument_name:"expression" state id arguments
+
+let define ?cancelled state id arguments =
+  evaluate_tool ?cancelled ~tool_name:"centl_define" ~operation:"define"
+    ~argument_name:"definition" state id arguments
 
 let reset state id arguments =
   if arguments <> [] then
@@ -759,6 +883,14 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
       begin match
         (List.assoc_opt "name" parameters, List.assoc_opt "arguments" parameters)
       with
+      | Some (`String "centl_compute"), Some (`Assoc arguments) ->
+          compute ~cancelled state id arguments
+      | Some (`String "centl_compute"), None ->
+          jsonrpc_error id (-32602) "centl_compute requires arguments"
+      | Some (`String "centl_define"), Some (`Assoc arguments) ->
+          define ~cancelled state id arguments
+      | Some (`String "centl_define"), None ->
+          jsonrpc_error id (-32602) "centl_define requires arguments"
       | Some (`String "centl_calculate"), Some (`Assoc arguments) ->
           calculate ~cancelled state id arguments
       | Some (`String "centl_calculate"), None ->
@@ -781,7 +913,17 @@ let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
       jsonrpc_error id (-32002) "CENTL is not initialized"
   | "tools/list" ->
       jsonrpc_result id
-        (`Assoc [ ("tools", `List [ calculate_tool (); reset_tool () ]) ])
+        (`Assoc
+           [
+             ( "tools",
+               `List
+                 [
+                   compute_tool ();
+                   define_tool ();
+                   calculate_tool ();
+                   reset_tool ();
+                 ] );
+           ])
   | "tools/call" -> call_tool ~cancelled state id fields
   | _ -> jsonrpc_error id (-32601) ("method not found: " ^ method_name)
 

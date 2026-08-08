@@ -24,18 +24,23 @@ Configure an MCP client with the equivalent of:
 }
 ```
 
-CENTL exposes two tools in deterministic order:
+CENTL exposes four tools in deterministic order:
 
-- `centl_calculate` evaluates an expression or immutable definition.
+- `centl_compute` performs read-only mathematical evaluation and rejects
+  definitions.
+- `centl_define` creates one immutable value or function definition.
+- `centl_calculate` retains the earlier combined behavior for compatibility.
 - `centl_reset` forgets definitions held by the current process.
 
-`centl_calculate` requires `expression` and accepts the same optional `limits`
-object as `centl --serve`. Definitions persist across tool calls in one server
-process. The server has no network listener, reads no credentials, and accesses
-no files on behalf of a tool call.
+`centl_compute` requires `expression`; `centl_define` requires `definition`;
+both accept the same optional `limits` object as `centl --serve`. Compute may
+read definitions but cannot mutate them, and its MCP annotations accurately
+mark it read-only, non-destructive, idempotent, and closed-world. Definitions
+persist across tool calls in one server process. The server has no network
+listener, reads no credentials, and accesses no files on behalf of a tool call.
 
-Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use this
-same tool. Sums and products return the ordinary exact integer, rational, or
+Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use
+`centl_compute`. Sums and products return the ordinary exact integer, rational, or
 symbolic value schema. Sequences and recurrences return a structured exact
 `sequence` value whose ordered `items` use those scalar schemas:
 
@@ -65,8 +70,10 @@ completion from symbolic text.
 exact symbolic, a rigorous enclosure, an exact or unresolved solution set, a
 definition, a failure, or a cancellation, and records its method and backend.
 
-`centl_calculate` advertises a closed, discriminated `outputSchema` for every
-mathematical value, definition, and error shape. Its solution-set branch
+Each calculation tool advertises a closed, discriminated `outputSchema`.
+`centl_compute` permits only mathematical values or errors; `centl_define`
+permits only definitions or errors; the compatibility tool permits either. The
+solution-set branch
 accepts the existing rational solution object and the exact
 `real_quadratic` object documented in
 [the machine protocol](PROTOCOL.md#values). `centl_reset` advertises a separate

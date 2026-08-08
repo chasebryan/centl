@@ -1221,6 +1221,62 @@ let transformation_resolution_metadata () =
   | Error error -> Alcotest.fail (Centl_engine.error_text error)
   end
 
+let machine_compute_and_define () =
+  let state = Centl_protocol.create () in
+  let request op expression =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String op);
+           ("expression", `String expression);
+         ])
+  in
+  let rejected_definition = request "compute" "r = 3" in
+  Alcotest.(check string)
+    "compute rejects definitions" "definition_not_allowed"
+    (protocol_error_code rejected_definition);
+  Alcotest.(check int)
+    "rejected compute does not mutate" 0
+    (Centl_engine.session_binding_count (Centl_protocol.session state));
+  let rejected_expression = request "define" "1 + 1" in
+  Alcotest.(check string)
+    "define rejects expressions" "definition_required"
+    (protocol_error_code rejected_expression);
+  ignore (request "define" "r = 3");
+  Alcotest.(check int)
+    "define mutates explicitly" 1
+    (Centl_engine.session_binding_count (Centl_protocol.session state));
+  Alcotest.(check string)
+    "compute reads session state" "9"
+    (request "compute" "r^2" |> protocol_value_text);
+  ignore (request "evaluate" "legacy = 4");
+  Alcotest.(check int)
+    "legacy evaluate retains compatibility" 2
+    (Centl_engine.session_binding_count (Centl_protocol.session state));
+  let description =
+    Centl_protocol.handle_json state
+      (`Assoc [ ("version", `Int 1); ("op", `String "describe") ])
+  in
+  let operations =
+    match
+      description |> json_member "capabilities" |> json_member "operations"
+    with
+    | `List values ->
+        List.map
+          (function
+            | `String value -> value
+            | _ -> Alcotest.fail "operation was not a string")
+          values
+    | _ -> Alcotest.fail "operations was not a list"
+  in
+  Alcotest.(check bool)
+    "capabilities advertise compute" true
+    (List.mem "compute" operations);
+  Alcotest.(check bool)
+    "capabilities advertise define" true
+    (List.mem "define" operations)
+
 let machine_cancellation () =
   let evaluation =
     Yojson.Safe.from_string
@@ -1340,10 +1396,18 @@ let mcp_schema_laziness () =
 
 let mcp_output_schemas () =
   let calculate_schema = Lazy.force Centl_mcp.tool_output_schema in
+  let compute_schema = Lazy.force Centl_mcp.compute_output_schema in
+  let define_schema = Lazy.force Centl_mcp.define_output_schema in
   let reset_schema = Lazy.force Centl_mcp.reset_output_schema in
   Alcotest.(check bool)
     "calculate descriptor uses calculate schema" true
     (json_member "outputSchema" (Centl_mcp.calculate_tool ()) = calculate_schema);
+  Alcotest.(check bool)
+    "compute descriptor uses read-only schema" true
+    (json_member "outputSchema" (Centl_mcp.compute_tool ()) = compute_schema);
+  Alcotest.(check bool)
+    "define descriptor uses definition schema" true
+    (json_member "outputSchema" (Centl_mcp.define_tool ()) = define_schema);
   Alcotest.(check bool)
     "reset descriptor uses self-contained reset schema" true
     (json_member "outputSchema" (Centl_mcp.reset_tool ()) = reset_schema);
@@ -1396,6 +1460,18 @@ let mcp_output_schemas () =
         (label ^ " conforms to calculate outputSchema")
         true
         (schema_accepts calculate_schema (calculate expression)));
+  Alcotest.(check bool)
+    "compute schema accepts mathematical values" true
+    (schema_accepts compute_schema (calculate "1 + 1"));
+  Alcotest.(check bool)
+    "compute schema rejects definition values" false
+    (schema_accepts compute_schema (calculate "schema_value = 1"));
+  Alcotest.(check bool)
+    "define schema accepts definitions" true
+    (schema_accepts define_schema (calculate "schema_function(x) = x + 1"));
+  Alcotest.(check bool)
+    "define schema rejects mathematical values" false
+    (schema_accepts define_schema (calculate "1 + 1"));
   let reset_state = initialized_state () in
   let reset_response =
     mcp_request reset_state
@@ -1435,18 +1511,44 @@ let mcp_protocol () =
   in
   Alcotest.(check (list string))
     "deterministic tools"
-    [ "centl_calculate"; "centl_reset" ]
+    [ "centl_compute"; "centl_define"; "centl_calculate"; "centl_reset" ]
     names;
+  let tools =
+    match listed |> json_member "result" |> json_member "tools" with
+    | `List tools -> tools
+    | _ -> Alcotest.fail "MCP tools was not a list"
+  in
+  let tool name =
+    match
+      List.find_opt (fun candidate -> json_string "name" candidate = name) tools
+    with
+    | Some descriptor -> descriptor
+    | None -> Alcotest.failf "MCP tool %s was not listed" name
+  in
+  let compute_annotations = tool "centl_compute" |> json_member "annotations" in
+  Alcotest.(check bool)
+    "compute is read-only" true
+    (json_bool "readOnlyHint" compute_annotations);
+  Alcotest.(check bool)
+    "compute is idempotent" true
+    (json_bool "idempotentHint" compute_annotations);
+  let rejected =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":"read-only","method":"tools/call","params":{"name":"centl_compute","arguments":{"expression":"blocked = 1"}}}|}
+  in
+  Alcotest.(check string)
+    "MCP compute rejects definitions" "definition_not_allowed"
+    (rejected |> mcp_structured_content |> protocol_error_code);
   let define =
     mcp_request state
-      {|{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"r = 3"}}}|}
+      {|{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"centl_define","arguments":{"definition":"r = 3"}}}|}
   in
   Alcotest.(check string)
     "MCP definition" "r = 3"
     (define |> mcp_structured_content |> protocol_value_text);
   let area =
     mcp_request state
-      {|{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"circle_area(r)"}}}|}
+      {|{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"centl_compute","arguments":{"expression":"circle_area(r)"}}}|}
   in
   Alcotest.(check string)
     "MCP session state" "9 * pi"
@@ -2047,6 +2149,8 @@ let () =
           Alcotest.test_case "structured provenance" `Quick machine_provenance;
           Alcotest.test_case "transformation resolution metadata" `Quick
             transformation_resolution_metadata;
+          Alcotest.test_case "read-only compute and explicit define" `Quick
+            machine_compute_and_define;
           Alcotest.test_case "cooperative cancellation" `Quick
             machine_cancellation;
           Alcotest.test_case "MCP schema laziness" `Quick mcp_schema_laziness;

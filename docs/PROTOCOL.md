@@ -24,17 +24,26 @@ An evaluation request is:
 ```
 
 `id` is optional, may be a string or integer, and is echoed unchanged. `op`
-defaults to `evaluate`. Stateless `--json` accepts evaluation requests (with or
-without an explicit `op: "evaluate"`); the persistent `--serve` mode also
-provides the control operations below:
+defaults to the compatibility operation `evaluate`. Stateless `--json` accepts
+evaluation requests (with or without an explicit `op: "evaluate"`); the
+persistent `--serve` mode separates read-only computation from mutation and
+also provides the control operations below:
 
 ```json
-{"version":1,"id":1,"op":"evaluate","expression":"r = 3"}
-{"version":1,"id":2,"op":"reset"}
-{"version":1,"id":3,"op":"describe"}
-{"version":1,"id":4,"op":"ping"}
+{"version":1,"id":1,"op":"compute","expression":"1 + 1"}
+{"version":1,"id":2,"op":"define","expression":"r = 3"}
+{"version":1,"id":3,"op":"evaluate","expression":"legacy = 4"}
+{"version":1,"id":4,"op":"reset"}
+{"version":1,"id":5,"op":"describe"}
+{"version":1,"id":6,"op":"ping"}
 {"version":1,"id":"stop-17","op":"cancel","target":"job-17"}
 ```
+
+`compute` accepts expressions, may read existing definitions, and never mutates
+the session; a definition returns `definition_not_allowed`. `define` accepts
+only an immutable value or function definition; an ordinary expression returns
+`definition_required`. `evaluate` retains the earlier combined behavior for
+existing clients. New automated callers should use `compute` and `define`.
 
 Successful and failed responses report the current definition and request
 counts:
@@ -299,6 +308,7 @@ when no single source expression is responsible. Version 1 error codes include
 `precision_limit`, `insufficient_precision`, `resource_limit`,
 `unsupported_approximation`, `invalid_solution_variable`,
 `solution_set_not_expression`, `approximation_not_expression`,
+`definition_not_allowed`, `definition_required`,
 `backend_failure`, and
 `core_contract_violation`. Cooperative cancellation uses `cancelled`.
 Finite-iteration bounds that are not exact integers use `invalid_arguments`;

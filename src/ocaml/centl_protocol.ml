@@ -106,7 +106,9 @@ let cancellable_request_id = function
       begin match
         (List.assoc_opt "version" fields, operation fields, request_id fields)
       with
-      | Some (`Int 1), Ok "evaluate", Ok (Some id) -> Some id
+      | Some (`Int 1), Ok operation, Ok (Some id)
+        when List.mem operation [ "evaluate"; "compute"; "define" ] ->
+          Some id
       | _ -> None
       end
   | _ -> None
@@ -147,7 +149,15 @@ let describe state id =
                  `List
                    (List.map
                       (fun operation -> `String operation)
-                      [ "evaluate"; "cancel"; "reset"; "describe"; "ping" ]) );
+                      [
+                        "compute";
+                        "define";
+                        "evaluate";
+                        "cancel";
+                        "reset";
+                        "describe";
+                        "ping";
+                      ]) );
                ( "cancellation",
                  `Assoc
                    [
@@ -175,11 +185,12 @@ let describe state id =
              ] );
        ])
 
-let evaluate ?(cancelled = Centl_engine.never_cancelled) state id fields =
+let evaluate ?(cancelled = Centl_engine.never_cancelled)
+    ?(intent = Centl_engine.Evaluate_or_define) state id fields =
   match (List.assoc_opt "expression" fields, request_limits state fields) with
   | Some (`String expression), Ok limits ->
-      Centl_engine.evaluate_in_session_outcome_with_limits ~cancelled limits
-        state.session expression
+      Centl_engine.evaluate_in_session_outcome_with_limits ~cancelled ~intent
+        limits state.session expression
       |> session_result state id
   | Some (`String _), Error message -> invalid state ?id message
   | None, _ -> invalid state ?id "missing expression"
@@ -224,6 +235,12 @@ let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
               begin match operation fields with
               | Error message -> invalid state ?id message
               | Ok "evaluate" -> evaluate ~cancelled state id fields
+              | Ok "compute" ->
+                  evaluate ~cancelled ~intent:Centl_engine.Compute_only state id
+                    fields
+              | Ok "define" ->
+                  evaluate ~cancelled ~intent:Centl_engine.Define_only state id
+                    fields
               | Ok "cancel" -> cancel state id fields
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id

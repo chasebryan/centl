@@ -33,6 +33,8 @@ rendering, and deterministic hardening and performance gates.
   they do not masquerade as completed work.
 - Conditions and domain obligations are retained instead of silently discarded.
 - The calculator, scripts, JSON, and MCP expose the same typed semantics.
+- Automated callers can use a read-only compute operation that rejects all
+  session mutation; definitions use a separate explicit operation.
 - Every unqualified printed digit is justified by an exact value or the full
   returned enclosure.
 

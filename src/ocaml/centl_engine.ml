@@ -213,6 +213,7 @@ type session_outcome = {
 }
 
 type detailed_session_evaluation = (session_outcome, error) result
+type session_intent = Evaluate_or_define | Compute_only | Define_only
 
 type evaluation_limits = {
   max_source_bytes : int;
@@ -3470,7 +3471,7 @@ let prepare_definition ?(cancelled = never_cancelled) ~origins limits session
     | value -> Ok (value, expression_of_exact_value value)
 
 let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
-    limits session source =
+    ?(intent = Evaluate_or_define) limits session source =
   let ( let* ) result next = Result.bind result next in
   let* () = check_cancelled cancelled in
   let* () = check_source_limit limits source in
@@ -3490,6 +3491,18 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
         Option.map
           (fun (span : Centl_parser.source_span) -> span.finish - 1)
           located.parameter_list_span
+      in
+      let* () =
+        match (intent, located.statement) with
+        | Compute_only, Centl_parser.Define_value _
+        | Compute_only, Centl_parser.Define_function _ ->
+            session_failure ?position:definition_name_position
+              "definition_not_allowed"
+              "compute accepts expressions only and cannot define session state"
+        | Define_only, Centl_parser.Evaluate _ ->
+            session_failure ~position:0 "definition_required"
+              "define requires an immutable value or function definition"
+        | _ -> Ok ()
       in
       let result =
         match located.statement with
@@ -3587,6 +3600,16 @@ let evaluate_in_session session source =
 let evaluate_in_session_detailed session source =
   evaluate_in_session_outcome_with_limits default_evaluation_limits session
     source
+
+let compute_in_session_outcome_with_limits ?(cancelled = never_cancelled) limits
+    session source =
+  evaluate_in_session_outcome_with_limits ~cancelled ~intent:Compute_only limits
+    session source
+
+let define_in_session_outcome_with_limits ?(cancelled = never_cancelled) limits
+    session source =
+  evaluate_in_session_outcome_with_limits ~cancelled ~intent:Define_only limits
+    session source
 
 let fragment style text = [ (style, text) ]
 let append right left = List.rev_append (List.rev left) right
