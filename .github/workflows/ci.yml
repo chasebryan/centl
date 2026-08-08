@@ -73,14 +73,6 @@ jobs:
           git diff --exit-code -- src/generated
           opam exec -- make quality native-test
 
-      - name: Preserve regenerated Core extraction for repair
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: regenerated-centl-core
-          path: src/generated/Centl_Core.ml
-          if-no-files-found: error
-
       - name: Exercise deterministic fuzzing, sanitizers, and performance budgets
         env:
           CENTL_SANITIZER_REQUIRED: "1"
