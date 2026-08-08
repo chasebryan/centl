@@ -237,22 +237,35 @@ let add_associative
   FStar.Math.Lemmas.distributivity_add_left
     second_right_term third_term first.denominator;
   FStar.Math.Lemmas.paren_mul_left
-    first.numerator second.denominator third.denominator;
-  FStar.Math.Lemmas.paren_mul_left
+    second.numerator first.denominator third.denominator;
+  FStar.Math.Lemmas.paren_mul_right
     second.numerator first.denominator third.denominator;
   FStar.Math.Lemmas.swap_mul first.denominator third.denominator;
+  FStar.Math.Lemmas.paren_mul_left
+    second.numerator third.denominator first.denominator;
+  FStar.Math.Lemmas.paren_mul_right
+    second.numerator third.denominator first.denominator;
   assert (
     term_second =
-    (second.numerator * third.denominator) * first.denominator)
-    by (FStar.Tactics.Canon.canon ());
+    (second.numerator * third.denominator) * first.denominator);
   FStar.Math.Lemmas.swap_mul first.denominator second.denominator;
+  FStar.Math.Lemmas.paren_mul_right
+    third.numerator first.denominator second.denominator;
+  FStar.Math.Lemmas.paren_mul_left
+    third.numerator second.denominator first.denominator;
+  FStar.Math.Lemmas.paren_mul_right
+    third.numerator second.denominator first.denominator;
   assert (
     term_third =
-    (third.numerator * second.denominator) * first.denominator)
-    by (FStar.Tactics.Canon.canon ());
+    (third.numerator * second.denominator) * first.denominator);
   assert (raw_right.numerator = term_first + term_second + term_third);
   FStar.Math.Lemmas.paren_mul_left
     first.denominator second.denominator third.denominator;
+  FStar.Math.Lemmas.paren_mul_right
+    first.denominator second.denominator third.denominator;
+  assert (
+    (first.denominator * second.denominator) * third.denominator =
+    first.denominator * (second.denominator * third.denominator));
   assert (raw_left.denominator = raw_right.denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left = raw_right);
