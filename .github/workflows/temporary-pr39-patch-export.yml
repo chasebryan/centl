@@ -22,98 +22,72 @@ jobs:
 
           main = Path("src/ocaml/main.ml")
           source = main.read_text()
-          old_parser = '''    let parts =
-              trimmed |> String.split_on_char '|' |> List.map String.trim
-              |> List.filter (( <> ) "")
-            in
-            begin match parts with
-          '''
-          new_parser = '''    let parts =
-              trimmed |> String.split_on_char '|' |> List.map String.trim
-            in
-            if List.exists (( = ) "") parts then
-              failwith
-                ("line " ^ string_of_int line_number
-               ^ ": contract fields must not be empty")
-            else
-              begin match parts with
-          '''
-          if old_parser not in source:
-              raise SystemExit("parser source pattern not found")
-          source = source.replace(old_parser, new_parser, 1)
 
-          old_reader = '''      let rec loop line_number total_bytes acc =
-                match Centl_protocol.read_line channel max_bytes with
-                | Centl_protocol.Line line ->
-                    let total_bytes = total_bytes + String.length line + 1 in
-                    if total_bytes > max_bytes then
-                      failwith
-                        (Printf.sprintf "contract exceeds the %d-byte source limit"
-                           max_bytes);
-                    let acc =
-                      match parse_check_line line_number line with
-                      | None -> acc
-                      | Some assertion -> assertion :: acc
-                    in
-                    loop (line_number + 1) total_bytes acc
-                | Centl_protocol.Oversized ->
-                    failwith
-                      (Printf.sprintf "line %d exceeds the %d-byte source limit"
-                         line_number max_bytes)
-                | Centl_protocol.End -> List.rev acc
-              in
-              loop 1 0 [])
-          '''
-          new_reader = '''      let rec loop line_number acc =
-                match Centl_protocol.read_line channel max_bytes with
-                | Centl_protocol.Line line ->
-                    let acc =
-                      match parse_check_line line_number line with
-                      | None -> acc
-                      | Some assertion -> assertion :: acc
-                    in
-                    loop (line_number + 1) acc
-                | Centl_protocol.Oversized ->
-                    failwith
-                      (Printf.sprintf "line %d exceeds the %d-byte source limit"
-                         line_number max_bytes)
-                | Centl_protocol.End -> List.rev acc
-              in
-              loop 1 [])
-          '''
-          if old_reader not in source:
-              raise SystemExit("reader source pattern not found")
-          source = source.replace(old_reader, new_reader, 1)
+          filter_line = '      |> List.filter (( <> ) "")\n'
+          if source.count(filter_line) < 1:
+              raise SystemExit("empty-field filter line not found")
+          source = source.replace(filter_line, "", 1)
+
+          parser_join = "    in\n    begin match parts with\n"
+          parser_guard = (
+              "    in\n"
+              "    if List.exists (( = ) \"\") parts then\n"
+              "      failwith\n"
+              "        (\"line \" ^ string_of_int line_number\n"
+              "       ^ \": contract fields must not be empty\")\n"
+              "    else\n"
+              "      begin match parts with\n"
+          )
+          if parser_join not in source:
+              raise SystemExit("parser join not found")
+          source = source.replace(parser_join, parser_guard, 1)
+
+          source = source.replace(
+              "      let rec loop line_number total_bytes acc =\n",
+              "      let rec loop line_number acc =\n",
+              1,
+          )
+          byte_block = (
+              "            let total_bytes = total_bytes + String.length line + 1 in\n"
+              "            if total_bytes > max_bytes then\n"
+              "              failwith\n"
+              "                (Printf.sprintf \"contract exceeds the %d-byte source limit\"\n"
+              "                   max_bytes);\n"
+          )
+          if byte_block not in source:
+              raise SystemExit("synthetic byte-count block not found")
+          source = source.replace(byte_block, "", 1)
+          source = source.replace(
+              "            loop (line_number + 1) total_bytes acc\n",
+              "            loop (line_number + 1) acc\n",
+              1,
+          )
+          source = source.replace("      loop 1 0 [])\n", "      loop 1 [])\n", 1)
           main.write_text(source)
 
           cli = Path("tests/cli.t")
           tests = cli.read_text()
-          anchor = '''  $ printf '%s\\n' 'define | x = 1' > definition-only-contract.centl
-            $ ../src/main.exe check definition-only-contract.centl; echo $?
-            centl: no assertions in definition-only-contract.centl
-            2
-
-          '''
-          inserted = '''  $ printf '%s\\n' 'define | x = 1' > definition-only-contract.centl
-            $ ../src/main.exe check definition-only-contract.centl; echo $?
-            centl: no assertions in definition-only-contract.centl
-            2
-
-            $ printf '%s\\n' '| equal | 1 | 1' > empty-field-contract.centl
-            $ ../src/main.exe check empty-field-contract.centl; echo $?
-            centl: line 1: contract fields must not be empty
-            2
-
-            $ python3 -c 'from pathlib import Path; p=Path("exact-limit-contract.centl"); prefix=b"equal | 1 | 1\\n#"; p.write_bytes(prefix + b"x" * (32768 - len(prefix))); print(p.stat().st_size)'
-            32768
-            $ ../src/main.exe check exact-limit-contract.centl; echo $?
-            line 1: verified
-            0
-
-          '''
+          anchor = (
+              "  $ printf '%s\\\\n' 'define | x = 1' > definition-only-contract.centl\n"
+              "  $ ../src/main.exe check definition-only-contract.centl; echo $?\n"
+              "  centl: no assertions in definition-only-contract.centl\n"
+              "  2\n\n"
+          )
+          addition = (
+              anchor
+              + "  $ printf '%s\\\\n' '| equal | 1 | 1' > empty-field-contract.centl\n"
+              + "  $ ../src/main.exe check empty-field-contract.centl; echo $?\n"
+              + "  centl: line 1: contract fields must not be empty\n"
+              + "  2\n\n"
+              + "  $ python3 -c 'from pathlib import Path; p=Path(\"exact-limit-contract.centl\"); prefix=b\"equal | 1 | 1\\\\n#\"; p.write_bytes(prefix + b\"x\" * (32768 - len(prefix))); print(p.stat().st_size)'\n"
+              + "  32768\n"
+              + "  $ ../src/main.exe check exact-limit-contract.centl; echo $?\n"
+              + "  line 1: verified\n"
+              + "  0\n\n"
+          )
           if anchor not in tests:
               raise SystemExit("cli test insertion anchor not found")
-          cli.write_text(tests.replace(anchor, inserted, 1))
+          cli.write_text(tests.replace(anchor, addition, 1))
 
       - name: Export patched files
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
