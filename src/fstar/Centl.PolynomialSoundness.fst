@@ -105,10 +105,33 @@ let add_respects_equivalent
   assert (
     left_b.numerator * right_b.denominator =
     right_b.numerator * left_b.denominator);
+  let left_a_cross = left_a.numerator * right_a.denominator in
+  let right_a_cross = right_a.numerator * left_a.denominator in
+  let left_b_cross = left_b.numerator * right_b.denominator in
+  let right_b_cross = right_b.numerator * left_b.denominator in
+  assert (left_a_cross = right_a_cross);
+  assert (left_b_cross = right_b_cross);
   assert (
     raw_left.numerator * raw_right.denominator =
-    raw_right.numerator * raw_left.denominator)
+    left_a_cross * (left_b.denominator * right_b.denominator) +
+    left_b_cross * (left_a.denominator * right_a.denominator))
     by (FStar.Tactics.Canon.canon ());
+  assert (
+    raw_right.numerator * raw_left.denominator =
+    right_a_cross * (right_b.denominator * left_b.denominator) +
+    right_b_cross * (right_a.denominator * left_a.denominator))
+    by (FStar.Tactics.Canon.canon ());
+  assert (
+    left_a_cross * (left_b.denominator * right_b.denominator) =
+    right_a_cross * (right_b.denominator * left_b.denominator))
+    by (FStar.Tactics.Canon.canon ());
+  assert (
+    left_b_cross * (left_a.denominator * right_a.denominator) =
+    right_b_cross * (right_a.denominator * left_a.denominator))
+    by (FStar.Tactics.Canon.canon ());
+  assert (
+    raw_left.numerator * raw_right.denominator =
+    raw_right.numerator * raw_left.denominator);
   assert (C.equivalent raw_left raw_right);
   equivalent_transitive left_result raw_left raw_right;
   equivalent_symmetric right_result raw_right;
@@ -147,10 +170,24 @@ let multiply_respects_equivalent
   assert (
     left_b.numerator * right_b.denominator =
     right_b.numerator * left_b.denominator);
+  let left_a_cross = left_a.numerator * right_a.denominator in
+  let right_a_cross = right_a.numerator * left_a.denominator in
+  let left_b_cross = left_b.numerator * right_b.denominator in
+  let right_b_cross = right_b.numerator * left_b.denominator in
+  assert (left_a_cross = right_a_cross);
+  assert (left_b_cross = right_b_cross);
   assert (
     raw_left.numerator * raw_right.denominator =
-    raw_right.numerator * raw_left.denominator)
+    left_a_cross * left_b_cross)
     by (FStar.Tactics.Canon.canon ());
+  assert (
+    raw_right.numerator * raw_left.denominator =
+    right_a_cross * right_b_cross)
+    by (FStar.Tactics.Canon.canon ());
+  assert (left_a_cross * left_b_cross = right_a_cross * right_b_cross);
+  assert (
+    raw_left.numerator * raw_right.denominator =
+    raw_right.numerator * raw_left.denominator);
   assert (C.equivalent raw_left raw_right);
   equivalent_transitive left_result raw_left raw_right;
   equivalent_symmetric right_result raw_right;
