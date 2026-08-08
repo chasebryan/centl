@@ -16,6 +16,11 @@ let bool name json =
   | `Bool value -> value
   | _ -> Alcotest.fail ("expected boolean field " ^ name)
 
+let int name json =
+  match assoc name json with
+  | `Int value -> value
+  | _ -> Alcotest.fail ("expected integer field " ^ name)
+
 let response = function
   | Some response -> response
   | None -> Alcotest.fail "expected MCP response"
@@ -83,14 +88,20 @@ let particle () =
       ("velocity", vector "1" "0" "0" "m/s");
     ]
 
+let metadata () =
+  `Assoc [ ("progressToken", `String "physics-progress") ]
+
 let test_tool_discovery () =
   let state = Centl_mcp.create () in
   initialize state;
-  let first_page = request state 2 "tools/list" (`Assoc []) in
+  let first_page =
+    request state 2 "tools/list" (`Assoc [ ("_meta", metadata ()) ])
+  in
   let cursor = string "nextCursor" (assoc "result" first_page) in
   Alcotest.(check string) "physics page cursor" "centl-physics-v1" cursor;
   let listed =
-    request state 3 "tools/list" (`Assoc [ ("cursor", `String cursor) ])
+    request state 3 "tools/list"
+      (`Assoc [ ("cursor", `String cursor); ("_meta", metadata ()) ])
   in
   let tools =
     match assoc "tools" (assoc "result" listed) with
@@ -197,6 +208,28 @@ let test_unsupported_force_is_tool_error () =
   Alcotest.(check string)
     "error code" "invalid_physics_request" (string "code" error)
 
+let test_strict_physics_arguments () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let invalid cases =
+    List.iteri
+      (fun index extra ->
+        let response =
+          tool_call state (10 + index) "centl_physics"
+            [ ("action", `String "capabilities"); extra ]
+        in
+        let error = assoc "error" response in
+        Alcotest.(check int)
+          "invalid argument error" (-32602) (int "code" error))
+      cases
+  in
+  invalid
+    [
+      ("id", `String "protocol-id");
+      ("version", `Int 1);
+      ("symbol", `String "c");
+    ]
+
 let test_math_tool_still_delegates () =
   let state = Centl_mcp.create () in
   initialize state;
@@ -219,6 +252,8 @@ let () =
           Alcotest.test_case "gravity simulation" `Quick test_gravity_simulation;
           Alcotest.test_case "unsupported force" `Quick
             test_unsupported_force_is_tool_error;
+          Alcotest.test_case "strict arguments" `Quick
+            test_strict_physics_arguments;
           Alcotest.test_case "math delegation" `Quick
             test_math_tool_still_delegates;
         ] );
