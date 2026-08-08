@@ -1,5 +1,6 @@
 let string_schema = `Assoc [ ("type", `String "string") ]
 let boolean_schema = `Assoc [ ("type", `String "boolean") ]
+
 let nonnegative_integer_schema =
   `Assoc [ ("type", `String "integer"); ("minimum", `Int 0) ]
 
@@ -13,8 +14,6 @@ let strict_object properties required =
     ]
 
 let const_string value = `Assoc [ ("const", `String value) ]
-let const_bool value = `Assoc [ ("const", `Bool value) ]
-let const_int value = `Assoc [ ("const", `Int value) ]
 let one_of schemas = `Assoc [ ("oneOf", `List schemas) ]
 let array_of item = `Assoc [ ("type", `String "array"); ("items", item) ]
 
@@ -115,3 +114,41 @@ let input_schema =
         ]
         [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ];
     ]
+
+let read_only_annotations =
+  `Assoc
+    [
+      ("readOnlyHint", `Bool true);
+      ("destructiveHint", `Bool false);
+      ("idempotentHint", `Bool true);
+      ("openWorldHint", `Bool false);
+    ]
+
+let tool () =
+  `Assoc
+    [
+      ("name", `String "centl_physics");
+      ("title", `String "Compute with CENTL Physics");
+      ( "description",
+        `String
+          "Use CENTL's deterministic exact-rational particle mechanics. \
+           Discover physics capabilities and units, convert compatible units, \
+           inspect exact physical constants, simulate a dimension-checked \
+           particle with supported force models, or solve an ideal exact 1D \
+           elastic collision." );
+      ("inputSchema", input_schema);
+      ("outputSchema", Lazy.force Centl_physics_mcp_output.output_schema);
+      ("annotations", read_only_annotations);
+    ]
+
+let ok = function
+  | `Assoc fields -> List.assoc_opt "ok" fields = Some (`Bool true)
+  | _ -> false
+
+let call state arguments =
+  if not (Centl_physics_server.admit state) then
+    Centl_physics_protocol.failure ~method_:"request" "resource_limit"
+      "the physics process has reached its request limit"
+  else
+    Centl_physics_server.handle_json state
+      (`Assoc (("version", `Int 1) :: arguments))
