@@ -22,6 +22,7 @@
   Centl_protocol
   Centl_request_queue
   Centl_physics
+  Centl_physics_collision
   Centl_physics_protocol
   Centl_physics_jsonl
   Centl_physics_server
