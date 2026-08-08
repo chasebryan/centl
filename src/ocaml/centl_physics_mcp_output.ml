@@ -234,6 +234,49 @@ let collision_schema =
       "text";
     ]
 
+let collision_3d_schema =
+  strict_object
+    [
+      ("kind", const_string "elastic_collision_3d_at_contact");
+      ( "status",
+        one_of
+          [ const_string "resolved"; const_string "separating_or_stationary" ] );
+      ( "contact_assumption",
+        const_string "caller_supplied_distinct_centers" );
+      ("particle1_final", particle_schema);
+      ("particle2_final", particle_schema);
+      ( "invariants",
+        strict_object
+          [
+            ("momentum", boolean_schema);
+            ("kinetic_energy", boolean_schema);
+            ("initial_momentum", vector_schema);
+            ("final_momentum", vector_schema);
+            ("initial_kinetic_energy", quantity_schema);
+            ("final_kinetic_energy", quantity_schema);
+          ]
+          [
+            "momentum";
+            "kinetic_energy";
+            "initial_momentum";
+            "final_momentum";
+            "initial_kinetic_energy";
+            "final_kinetic_energy";
+          ] );
+      ("exact", const_bool true);
+      ("text", string_schema);
+    ]
+    [
+      "kind";
+      "status";
+      "contact_assumption";
+      "particle1_final";
+      "particle2_final";
+      "invariants";
+      "exact";
+      "text";
+    ]
+
 let provenance_schema =
   strict_object
     [
@@ -264,6 +307,7 @@ let output_schema =
                  constant_schema;
                  simulation_schema;
                  collision_schema;
+                 collision_3d_schema;
                ] );
            ("provenance", provenance_schema);
          ]
