@@ -129,12 +129,10 @@ let multiply_associative
   assert (C.equivalent right_mid raw_right);
   P.equivalent_transitive right_result right_mid raw_right;
 
-  FStar.Math.Lemmas.paren_mul_left
-    first.numerator second.numerator third.numerator;
-  FStar.Math.Lemmas.paren_mul_left
-    first.denominator second.denominator third.denominator;
-  assert (left_numerator = right_numerator);
-  assert (left_denominator = right_denominator);
+  assert (left_numerator = right_numerator)
+    by (FStar.Tactics.Canon.canon ());
+  assert (left_denominator = right_denominator)
+    by (FStar.Tactics.Canon.canon ());
   assert_norm (raw_left.numerator = left_numerator);
   assert_norm (raw_right.numerator = right_numerator);
   assert_norm (raw_left.denominator = left_denominator);
