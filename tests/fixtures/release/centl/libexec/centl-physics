@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ "${1:-}" = convert ] && [ "${2:-}" = 100 ] && [ "${3:-}" = cm ] && [ "${4:-}" = m ]; then
+  printf '1\n'
+  exit 0
+fi
+printf 'centl physics fixture %s\n' "$*"
