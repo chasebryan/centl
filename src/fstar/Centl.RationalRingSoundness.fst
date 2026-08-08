@@ -135,8 +135,20 @@ let multiply_associative
 
   assert (left_numerator = right_numerator)
     by (FStar.Tactics.Canon.canon ());
-  assert (left_denominator = right_denominator)
+  let first_denominator_int : int = first.denominator in
+  let second_denominator_int : int = second.denominator in
+  let third_denominator_int : int = third.denominator in
+  let left_denominator_int : int =
+    (first_denominator_int * second_denominator_int) *
+    third_denominator_int in
+  let right_denominator_int : int =
+    first_denominator_int *
+    (second_denominator_int * third_denominator_int) in
+  assert (left_denominator_int = right_denominator_int)
     by (FStar.Tactics.Canon.canon ());
+  assert_norm (left_denominator = left_denominator_int);
+  assert_norm (right_denominator = right_denominator_int);
+  assert (left_denominator = right_denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left.denominator = raw_right.denominator);
   assert (raw_left = raw_right);
