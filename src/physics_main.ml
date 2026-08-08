@@ -2,17 +2,23 @@ open Centl_physics
 
 let usage () =
   Printf.eprintf
-    "Usage:\n  centl-physics units\n  centl-physics convert VALUE FROM_UNIT TO_UNIT\n  centl-physics constant SYMBOL\n  centl-physics gravity MASS_KG X,Y,Z_M VX,VY,VZ_MPS GX,GY,GZ_MPS2 DT_S STEPS\n";
+    "Usage:\n\
+    \  centl-physics units\n\
+    \  centl-physics convert VALUE FROM_UNIT TO_UNIT\n\
+    \  centl-physics constant SYMBOL\n\
+    \  centl-physics gravity MASS_KG X,Y,Z_M VX,VY,VZ_MPS GX,GY,GZ_MPS2 DT_S \
+     STEPS\n";
   exit 2
 
 let parse_q label text =
   try Q.of_string text
-  with (Invalid_argument _ | Failure _) ->
+  with Invalid_argument _ | Failure _ ->
     raise (Physics_error (Printf.sprintf "invalid %s rational: %s" label text))
 
 let parse_int label text =
   try int_of_string text
-  with Failure _ -> raise (Physics_error (Printf.sprintf "invalid %s integer: %s" label text))
+  with Failure _ ->
+    raise (Physics_error (Printf.sprintf "invalid %s integer: %s" label text))
 
 let parse_triplet label text =
   match String.split_on_char ',' text with
@@ -20,7 +26,8 @@ let parse_triplet label text =
   | _ ->
       raise
         (Physics_error
-           (Printf.sprintf "%s must contain exactly three comma-separated values" label))
+           (Printf.sprintf
+              "%s must contain exactly three comma-separated values" label))
 
 let print_unit unit_def =
   Printf.printf "%s\t%s\tscale=%s\tdimension=%s\n" unit_def.symbol unit_def.name
@@ -41,12 +48,14 @@ let command_constant symbol =
   Printf.printf "provenance=%s\n" c.provenance;
   Printf.printf "exact=%s\n" (if c.exact_value then "true" else "false")
 
-let command_gravity mass_text position_text velocity_text gravity_text dt_text steps_text =
+let command_gravity mass_text position_text velocity_text gravity_text dt_text
+    steps_text =
   let px, py, pz = parse_triplet "position" position_text in
   let vx, vy, vz = parse_triplet "velocity" velocity_text in
   let gx, gy, gz = parse_triplet "gravity" gravity_text in
   let body =
-    particle ~id:"body" ~mass:(quantity (parse_q "mass" mass_text) "kg")
+    particle ~id:"body"
+      ~mass:(quantity (parse_q "mass" mass_text) "kg")
       ~position:(vector3 ~unit_symbol:"m" px py pz)
       ~velocity:(vector3 ~unit_symbol:"m/s" vx vy vz)
   in
