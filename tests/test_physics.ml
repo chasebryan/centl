@@ -23,12 +23,14 @@ let test_vectors () =
   let b = vector3 ~unit_symbol:"m" (q "4") (q "5") (q "6") in
   let dot = vector_dot a b in
   check_q "dot product" (q "32") dot.si_value;
-  Alcotest.(check string) "dot dimension" "m^2"
+  Alcotest.(check string)
+    "dot dimension" "m^2"
     (dimension_to_string dot.quantity_dimension)
 
 let test_exact_gravity_simulation () =
   let body =
-    particle ~id:"test" ~mass:(quantity (q "2") "kg")
+    particle ~id:"test"
+      ~mass:(quantity (q "2") "kg")
       ~position:(vector3 ~unit_symbol:"m" Q.zero Q.zero (q "10"))
       ~velocity:(vector3 ~unit_symbol:"m/s" Q.one Q.zero Q.zero)
   in
@@ -38,7 +40,8 @@ let test_exact_gravity_simulation () =
   let trajectory =
     simulate ~steps:10 ~dt:(quantity (q "1/10") "s") ~forces:[ gravity ] body
   in
-  Alcotest.(check int) "trajectory includes initial state" 11 (List.length trajectory);
+  Alcotest.(check int)
+    "trajectory includes initial state" 11 (List.length trajectory);
   let final = final_state trajectory in
   check_q "x after one second" Q.one final.position.x;
   check_q "z after symplectic steps" (q "9/2") final.position.z;
@@ -47,27 +50,33 @@ let test_exact_gravity_simulation () =
 
 let test_force_models_and_energy () =
   let body =
-    particle ~id:"energy" ~mass:(quantity (q "2") "kg")
+    particle ~id:"energy"
+      ~mass:(quantity (q "2") "kg")
       ~position:(vector3 ~unit_symbol:"m" (q "3") Q.zero Q.zero)
       ~velocity:(vector3 ~unit_symbol:"m/s" (q "3") (q "4") Q.zero)
   in
   check_q "kinetic energy" (q "25") (convert (kinetic_energy body) "J");
   let spring =
-    hooke_force ~anchor:(vector3 ~unit_symbol:"m" Q.zero Q.zero Q.zero)
+    hooke_force
+      ~anchor:(vector3 ~unit_symbol:"m" Q.zero Q.zero Q.zero)
       ~stiffness:(quantity (q "2") "N/m")
   in
   let force = spring body in
   check_q "spring force x" (q "-6") force.x;
   check_q "spring potential" (q "9")
     (convert
-       (spring_potential ~anchor:(vector3 ~unit_symbol:"m" Q.zero Q.zero Q.zero)
-          ~stiffness:(quantity (q "2") "N/m") body)
+       (spring_potential
+          ~anchor:(vector3 ~unit_symbol:"m" Q.zero Q.zero Q.zero)
+          ~stiffness:(quantity (q "2") "N/m")
+          body)
        "J")
 
 let test_elastic_collision () =
   let v1, v2 =
-    elastic_collision_1d ~mass1:(quantity (q "2") "kg")
-      ~velocity1:(quantity (q "3") "m/s") ~mass2:(quantity Q.one "kg")
+    elastic_collision_1d
+      ~mass1:(quantity (q "2") "kg")
+      ~velocity1:(quantity (q "3") "m/s")
+      ~mass2:(quantity Q.one "kg")
       ~velocity2:(quantity (q "-1") "m/s")
   in
   check_q "v1 final" (q "1/3") (convert v1 "m/s");
@@ -87,7 +96,8 @@ let test_elastic_collision () =
 
 let test_constants () =
   let c = constant "c" in
-  check_q "speed of light exact" (q "299792458") (convert c.constant_value "m/s");
+  check_q "speed of light exact" (q "299792458")
+    (convert c.constant_value "m/s");
   Alcotest.(check bool) "constant exact" true c.exact_value
 
 let () =
@@ -95,10 +105,13 @@ let () =
     [
       ( "physics",
         [
-          Alcotest.test_case "units and dimensions" `Quick test_units_and_dimensions;
+          Alcotest.test_case "units and dimensions" `Quick
+            test_units_and_dimensions;
           Alcotest.test_case "vectors" `Quick test_vectors;
-          Alcotest.test_case "exact gravity simulation" `Quick test_exact_gravity_simulation;
-          Alcotest.test_case "force models and energy" `Quick test_force_models_and_energy;
+          Alcotest.test_case "exact gravity simulation" `Quick
+            test_exact_gravity_simulation;
+          Alcotest.test_case "force models and energy" `Quick
+            test_force_models_and_energy;
           Alcotest.test_case "elastic collision" `Quick test_elastic_collision;
           Alcotest.test_case "constants" `Quick test_constants;
         ] );
