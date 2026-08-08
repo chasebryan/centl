@@ -42,10 +42,11 @@ jobs:
               raise SystemExit("parser join not found")
           source = source.replace(parser_join, parser_guard, 1)
 
+          reader_head = "      let rec loop line_number total_bytes acc =\n"
+          if reader_head not in source:
+              raise SystemExit("reader loop head not found")
           source = source.replace(
-              "      let rec loop line_number total_bytes acc =\n",
-              "      let rec loop line_number acc =\n",
-              1,
+              reader_head, "      let rec loop line_number acc =\n", 1
           )
           byte_block = (
               "            let total_bytes = total_bytes + String.length line + 1 in\n"
@@ -67,27 +68,18 @@ jobs:
 
           cli = Path("tests/cli.t")
           tests = cli.read_text()
-          anchor = (
-              "  $ printf '%s\\\\n' 'define | x = 1' > definition-only-contract.centl\n"
-              "  $ ../src/main.exe check definition-only-contract.centl; echo $?\n"
-              "  centl: no assertions in definition-only-contract.centl\n"
+          regressions = (
+              "\n  $ printf '%s\\n' '| equal | 1 | 1' > empty-field-contract.centl\n"
+              "  $ ../src/main.exe check empty-field-contract.centl; echo $?\n"
+              "  centl: line 1: contract fields must not be empty\n"
               "  2\n\n"
+              "  $ python3 -c 'from pathlib import Path; p=Path(\"exact-limit-contract.centl\"); prefix=b\"equal | 1 | 1\\n#\"; p.write_bytes(prefix + b\"x\" * (32768 - len(prefix))); print(p.stat().st_size)'\n"
+              "  32768\n"
+              "  $ ../src/main.exe check exact-limit-contract.centl; echo $?\n"
+              "  line 1: verified\n"
+              "  0\n"
           )
-          addition = (
-              anchor
-              + "  $ printf '%s\\\\n' '| equal | 1 | 1' > empty-field-contract.centl\n"
-              + "  $ ../src/main.exe check empty-field-contract.centl; echo $?\n"
-              + "  centl: line 1: contract fields must not be empty\n"
-              + "  2\n\n"
-              + "  $ python3 -c 'from pathlib import Path; p=Path(\"exact-limit-contract.centl\"); prefix=b\"equal | 1 | 1\\\\n#\"; p.write_bytes(prefix + b\"x\" * (32768 - len(prefix))); print(p.stat().st_size)'\n"
-              + "  32768\n"
-              + "  $ ../src/main.exe check exact-limit-contract.centl; echo $?\n"
-              + "  line 1: verified\n"
-              + "  0\n\n"
-          )
-          if anchor not in tests:
-              raise SystemExit("cli test insertion anchor not found")
-          cli.write_text(tests.replace(anchor, addition, 1))
+          cli.write_text(tests.rstrip() + regressions + "\n")
 
       - name: Export patched files
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
