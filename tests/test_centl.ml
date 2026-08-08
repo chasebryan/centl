@@ -1709,6 +1709,25 @@ let closed_claim_verification () =
     "refutation uses witness assurance" "witness_checked"
     (poly_refuted |> json_member "verification" |> json_member "assurance"
    |> json_string "class");
+  let bounded_normalization =
+    verify
+      ~limits:(`Assoc [ ("max_expression_nodes", `Int 20) ])
+      [
+        ("left", `String "(x+1)^8");
+        ("relation", `String "equal");
+        ("right", `String "x^8");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check bool)
+    "polynomial normalization respects work limit" true
+    (is_error bounded_normalization);
+  Alcotest.(check string)
+    "polynomial work limit is operational" "resource_limit"
+    (error_code bounded_normalization);
   Alcotest.(check bool)
     "refutation includes counterexample binding" true
     (match

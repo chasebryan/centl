@@ -230,11 +230,51 @@ needed to rebuild and relink it with compatible modified libraries.
 EOF
 
 printf '%s\n' "$version" > "$package/VERSION"
+
+# Build identity manifest for release audit. Omit a commit unless release
+# automation supplied an immutable source identifier.
+build_commit=${CENTL_BUILD_COMMIT:-${SOURCE_COMMIT:-${GITHUB_SHA:-}}}
+if command -v sha256sum >/dev/null 2>&1; then
+  generated_core_hash=$(
+    cat "$project_root/src/generated/Centl_Core.ml" \
+      "$project_root/src/generated/Centl_Gcd.ml" | sha256sum | awk '{ print $1 }'
+  )
+elif command -v shasum >/dev/null 2>&1; then
+  generated_core_hash=$(
+    cat "$project_root/src/generated/Centl_Core.ml" \
+      "$project_root/src/generated/Centl_Gcd.ml" | shasum -a 256 | awk '{ print $1 }'
+  )
+else
+  fail "need sha256sum or shasum to stamp generated-core hash"
+fi
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+{
+  printf '{\n'
+  printf '  "schema": 1,\n'
+  printf '  "kind": "centl_build_manifest",\n'
+  printf '  "semantic_version": "%s",\n' "$(json_escape "$version")"
+  printf '  "platform": "%s",\n' "$(json_escape "$platform")"
+  printf '  "architecture": "%s",\n' "$(json_escape "$architecture")"
+  if [ -n "$build_commit" ]; then
+    printf '  "commit": "%s",\n' "$(json_escape "$build_commit")"
+  fi
+  printf '  "generated_core_hash": "%s",\n' "$(json_escape "$generated_core_hash")"
+  printf '  "receipt_schema": 1,\n'
+  printf '  "protocol_version": 1\n'
+  printf '}\n'
+} > "$package/BUILD_MANIFEST.json"
+
 cat > "$package/README" <<EOF
 CENTL $version for $platform_name $architecture
 
 Run bin/centl. The bundled native libraries are loaded only for CENTL.
 Use bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
+Use bin/centl check FILE to enforce math contracts and --receipt to retain
+an audit record. BUILD_MANIFEST.json records the package build identity.
 License texts are in licenses; source and relinking references are in
 COMPONENT-SOURCES.
 EOF

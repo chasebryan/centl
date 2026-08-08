@@ -1353,9 +1353,33 @@ let run_check arguments =
   | Ok (path, as_json) ->
       begin try
         let lines = read_check_file path in
-        if lines = [] then begin
-          prerr_endline ("centl: no assertions in " ^ path);
-          exit 2
+        if
+          not
+            (List.exists
+               (function Check_assert _ -> true | Check_define _ -> false)
+               lines)
+        then begin
+          let validation_session = Centl_engine.create_session () in
+          let rec validate_definitions = function
+            | [] ->
+                prerr_endline ("centl: no assertions in " ^ path);
+                exit 2
+            | Check_assert _ :: rest -> validate_definitions rest
+            | Check_define { line_number; definition } :: rest ->
+                begin match
+                  Centl_engine.evaluate_in_session_outcome_with_limits
+                    ~intent:Centl_engine.Define_only
+                    Centl_engine.default_evaluation_limits validation_session
+                    definition
+                with
+                | Ok _ -> validate_definitions rest
+                | Error error ->
+                    Printf.printf "line %d: ERROR %s\n" line_number
+                      (Centl_engine.error_text error);
+                    exit 2
+                end
+          in
+          validate_definitions lines
         end;
         let session = Centl_engine.create_session () in
         let failures = ref 0 in

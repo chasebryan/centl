@@ -185,6 +185,43 @@ winpthreads is dynamically bundled as libwinpthread-1.dll when required.
     $ComponentSources.TrimStart() | Set-Content `
         -LiteralPath (Join-Path $Package "COMPONENT-SOURCES.txt") -Encoding UTF8
     $Version | Set-Content -LiteralPath (Join-Path $Package "VERSION") -Encoding ASCII
+
+    $CoreFiles = @(
+        (Join-Path $ProjectRoot "src\generated\Centl_Core.ml"),
+        (Join-Path $ProjectRoot "src\generated\Centl_Gcd.ml")
+    )
+    $Hasher = [System.Security.Cryptography.SHA256]::Create()
+    $Stream = New-Object System.IO.MemoryStream
+    try {
+        foreach ($CoreFile in $CoreFiles) {
+            $Bytes = [System.IO.File]::ReadAllBytes($CoreFile)
+            $Stream.Write($Bytes, 0, $Bytes.Length)
+        }
+        $Stream.Position = 0
+        $HashBytes = $Hasher.ComputeHash($Stream)
+        $GeneratedCoreHash = ([System.BitConverter]::ToString($HashBytes) -replace "-", "").ToLowerInvariant()
+    }
+    finally {
+        $Stream.Dispose()
+        $Hasher.Dispose()
+    }
+    $BuildCommit = $env:CENTL_BUILD_COMMIT
+    if (-not $BuildCommit) { $BuildCommit = $env:SOURCE_COMMIT }
+    if (-not $BuildCommit) { $BuildCommit = $env:GITHUB_SHA }
+    $ManifestPath = Join-Path $Package "BUILD_MANIFEST.json"
+    $Manifest = [ordered]@{
+        schema               = 1
+        kind                 = "centl_build_manifest"
+        semantic_version     = $Version
+        platform             = "windows"
+        architecture         = "x86_64"
+        generated_core_hash  = $GeneratedCoreHash
+        receipt_schema       = 1
+        protocol_version     = 1
+    }
+    if ($BuildCommit) { $Manifest.commit = $BuildCommit }
+    ($Manifest | ConvertTo-Json -Depth 4) + "`n" |
+        Set-Content -LiteralPath $ManifestPath -Encoding UTF8
     $Readme = @"
 CENTL $Version for Windows x86_64
 
