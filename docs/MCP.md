@@ -68,7 +68,12 @@ share the call's `max_integer_iterations`, expression-work, exact-bit,
 expression-node, and result-byte budgets.
 
 Every calculation result contains human-readable `content` and the complete
-CENTL protocol response in `structuredContent`. Mathematical failures such as
+CENTL protocol response in `structuredContent`. For residual, unsupported,
+unchanged-proved, and indeterminate outcomes, the text content appends the same
+`resolution:` annotation used by the human calculator so agents that only read
+tool text cannot treat incomplete work as success. Mathematical tool errors
+include the stable message and, when known, a recovery `suggestion` line.
+`structuredContent` remains authoritative. Mathematical failures such as
 division by zero are MCP tool errors with `isError: true`; malformed JSON-RPC,
 unknown methods, unknown tools, and invalid arguments are protocol errors.
 Machine errors include retryability, structured source ranges, named limit

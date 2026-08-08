@@ -20,8 +20,14 @@
 - Machine errors include retryability, structured source ranges, named limit
   details, and recovery suggestions when known.
 - An executable agent-tool corpus covers correct calls, supported-domain
-  selection, residual recognition, read-only rejection, cancellation, and an
-  unresolved equation.
+  selection, residual recognition, read-only rejection, cancellation, limit
+  failures, exact sequences, substitution, define-only validation, and
+  unresolved equations.
+- MCP tool text content now mirrors human residual annotations and includes
+  recovery suggestions on mathematical tool errors, while structured content
+  remains the canonical machine result.
+- End-to-end CLI coverage exercises `compute`/`define`/`session`/`help` and
+  residual classification on human, JSON Lines, and MCP surfaces.
 
 ### Changed
 

@@ -6,4 +6,4 @@
 
 (package
  (name centl)
- (synopsis "An exact-first calculator and numerical language"))
+ (synopsis "A deterministic, exact-first mathematical evaluation kernel"))

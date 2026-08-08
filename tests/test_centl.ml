@@ -1556,6 +1556,37 @@ let mcp_schema_laziness () =
     "tool discovery forces reset schema" true
     (Lazy.is_val Centl_mcp.reset_output_schema)
 
+let mcp_text_matches_human_resolution () =
+  let expression = "factor(x^2 + 1)" in
+  let human =
+    match
+      Centl_engine.evaluate_in_session_detailed
+        (Centl_engine.create_session ())
+        expression
+    with
+    | Ok outcome -> Centl_engine.text_of_session_outcome outcome
+    | Error error -> Alcotest.fail (Centl_engine.error_text error)
+  in
+  let state = Centl_mcp.create () in
+  ignore
+    (mcp_request state
+       {|{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"residual-text","version":"1"}}}|});
+  ignore
+    (Centl_mcp.handle_json state
+       (Yojson.Safe.from_string
+          {|{"jsonrpc":"2.0","method":"notifications/initialized"}|}));
+  let response =
+    mcp_request state
+      {|{"jsonrpc":"2.0","id":"residual","method":"tools/call","params":{"name":"centl_compute","arguments":{"expression":"factor(x^2 + 1)"}}}|}
+  in
+  let text =
+    match response |> json_member "result" |> json_member "content" with
+    | `List (`Assoc content :: _) -> json_string "text" (`Assoc content)
+    | _ -> Alcotest.fail "MCP content missing"
+  in
+  Alcotest.(check string)
+    "MCP text content matches human residual annotation" human text
+
 let mcp_output_schemas () =
   let calculate_schema = Lazy.force Centl_mcp.tool_output_schema in
   let compute_schema = Lazy.force Centl_mcp.compute_output_schema in
@@ -2365,6 +2396,8 @@ let () =
             machine_error_metadata;
           Alcotest.test_case "agent tool evaluation corpus" `Quick
             agent_tool_corpus;
+          Alcotest.test_case "MCP residual text matches human" `Quick
+            mcp_text_matches_human_resolution;
           Alcotest.test_case "cooperative cancellation" `Quick
             machine_cancellation;
           Alcotest.test_case "MCP schema laziness" `Quick mcp_schema_laziness;
