@@ -2,6 +2,31 @@ include Centl_mcp_base
 
 let physics_cursor = "centl-physics-v1"
 
+let physics_cancellable_request_id = function
+  | `Assoc fields ->
+      begin match
+        ( List.assoc_opt "jsonrpc" fields,
+          List.assoc_opt "id" fields,
+          List.assoc_opt "method" fields,
+          List.assoc_opt "params" fields )
+      with
+      | ( Some (`String "2.0"),
+          Some ((`String _ | `Int _ | `Intlit _) as id),
+          Some (`String "tools/call"),
+          Some (`Assoc parameters) ) ->
+          begin match List.assoc_opt "name" parameters with
+          | Some (`String "centl_physics") -> Some id
+          | _ -> None
+          end
+      | _ -> None
+      end
+  | _ -> None
+
+let cancellable_request_id json =
+  match Centl_mcp_base.cancellable_request_id json with
+  | Some _ as id -> id
+  | None -> physics_cancellable_request_id json
+
 let replace_field name value fields =
   if List.mem_assoc name fields then
     List.map
@@ -73,9 +98,9 @@ let physics_tool_result response =
       ("isError", `Bool (not (Centl_physics_mcp.ok response)));
     ]
 
-let physics id arguments =
+let physics ?(cancelled = Centl_engine.never_cancelled) id arguments =
   let physics_state = Centl_physics_protocol.create () in
-  Centl_physics_mcp.call physics_state arguments
+  Centl_physics_mcp.call ~cancelled physics_state arguments
   |> physics_tool_result |> jsonrpc_result id
 
 let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
@@ -86,7 +111,7 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
       with
       | Some (`String "centl_physics"), Some (`Assoc arguments) ->
           begin match Centl_physics_mcp.validate_arguments arguments with
-          | Ok () -> physics id arguments
+          | Ok () -> physics ~cancelled id arguments
           | Error message -> jsonrpc_error id (-32602) message
           end
       | Some (`String "centl_physics"), None ->
