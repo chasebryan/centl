@@ -39,11 +39,8 @@ let initialize state =
             ("protocolVersion", `String "2025-11-25");
             ("capabilities", `Assoc []);
             ( "clientInfo",
-              `Assoc
-                [
-                  ("name", `String "physics-test");
-                  ("version", `String "1");
-                ] );
+              `Assoc [ ("name", `String "physics-test"); ("version", `String "1") ]
+            );
           ]));
   match
     Centl_mcp.handle_json state
@@ -54,15 +51,12 @@ let initialize state =
          ])
   with
   | None -> ()
-  | Some _ -> Alcotest.fail "initialized notification must not return a response"
+  | Some _ ->
+      Alcotest.fail "initialized notification must not return a response"
 
 let tool_call state id name arguments =
   request state id "tools/call"
-    (`Assoc
-       [
-         ("name", `String name);
-         ("arguments", `Assoc arguments);
-       ])
+    (`Assoc [ ("name", `String name); ("arguments", `Assoc arguments) ])
 
 let structured response = assoc "structuredContent" (assoc "result" response)
 let tool_is_error response = bool "isError" (assoc "result" response)
@@ -111,17 +105,21 @@ let test_tool_discovery () =
   | Some tool ->
       let annotations = assoc "annotations" tool in
       Alcotest.(check bool) "read only" true (bool "readOnlyHint" annotations);
-      Alcotest.(check bool) "idempotent" true (bool "idempotentHint" annotations);
+      Alcotest.(check bool)
+        "idempotent" true
+        (bool "idempotentHint" annotations);
       begin match assoc "inputSchema" tool with
       | `Assoc fields ->
           Alcotest.(check bool)
-            "closed action variants" true (List.mem_assoc "oneOf" fields)
+            "closed action variants" true
+            (List.mem_assoc "oneOf" fields)
       | _ -> Alcotest.fail "physics input schema must be an object"
       end;
       begin match assoc "outputSchema" tool with
       | `Assoc fields ->
           Alcotest.(check bool)
-            "closed output variants" true (List.mem_assoc "oneOf" fields)
+            "closed output variants" true
+            (List.mem_assoc "oneOf" fields)
       | _ -> Alcotest.fail "physics output schema must be an object"
       end
 
@@ -197,8 +195,7 @@ let test_math_tool_still_delegates () =
   let state = Centl_mcp.create () in
   initialize state;
   let response =
-    tool_call state 2 "centl_compute"
-      [ ("expression", `String "0.1 + 0.2") ]
+    tool_call state 2 "centl_compute" [ ("expression", `String "0.1 + 0.2") ]
   in
   Alcotest.(check bool) "math tool success" false (tool_is_error response);
   let protocol = structured response in
@@ -216,6 +213,7 @@ let () =
           Alcotest.test_case "gravity simulation" `Quick test_gravity_simulation;
           Alcotest.test_case "unsupported force" `Quick
             test_unsupported_force_is_tool_error;
-          Alcotest.test_case "math delegation" `Quick test_math_tool_still_delegates;
+          Alcotest.test_case "math delegation" `Quick
+            test_math_tool_still_delegates;
         ] );
     ]
