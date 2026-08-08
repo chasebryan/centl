@@ -31,9 +31,9 @@ jobs:
         run: opam install ocamlformat.0.29.0 dune.3.24.1
 
       - name: Apply repository formatter
-        run: opam exec -- dune fmt src/ocaml/main.ml
+        run: opam exec -- dune fmt
 
-      - name: Commit formatter output only
+      - name: Commit parser formatter output only
         run: |
           git config user.name "CENTL validation automation"
           git config user.email "actions@users.noreply.github.com"
