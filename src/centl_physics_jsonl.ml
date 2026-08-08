@@ -44,7 +44,8 @@ let units_result () =
       ("kind", `String "physics_units");
       ("units", `List (List.map unit_json unit_catalog));
       ( "text",
-        `String (Printf.sprintf "%d physics units" (List.length unit_catalog)) );
+        `String (Printf.sprintf "%d physics units" (List.length unit_catalog))
+      );
     ]
 
 let capabilities_result limits =
@@ -69,8 +70,10 @@ let capabilities_result limits =
       );
       ("integrators", strings [ "symplectic_euler" ]);
       ( "constants",
-        strings (List.map (fun constant -> constant.constant_symbol) physical_constants)
-      );
+        strings
+          (List.map
+             (fun constant -> constant.constant_symbol)
+             physical_constants) );
       ( "limits",
         `Assoc
           [
@@ -81,7 +84,8 @@ let capabilities_result limits =
           ] );
       ( "text",
         `String
-          "Exact-rational, dimension-safe particle mechanics with typed JSON requests and results." );
+          "Exact-rational, dimension-safe particle mechanics with typed JSON \
+           requests and results." );
     ]
 
 let convert_result fields =
@@ -117,9 +121,8 @@ let convert_result fields =
               with Physics_error message -> Error message
               end
           end
-      | Error message, _, _
-      | _, Error message, _
-      | _, _, Error message -> Error message
+      | Error message, _, _ | _, Error message, _ | _, _, Error message ->
+          Error message
       end
 
 let constant_result fields =
@@ -138,14 +141,15 @@ let constant_result fields =
                    ("symbol", `String constant.constant_symbol);
                    ("name", `String constant.constant_name);
                    ( "value",
-                     quantity_json_as constant.constant_value constant.display_unit );
+                     quantity_json_as constant.constant_value
+                       constant.display_unit );
                    ("provenance", `String constant.provenance);
                    ("exact", `Bool constant.exact_value);
                    ( "text",
                      `String
                        (constant.constant_symbol ^ "="
-                      ^ quantity_to_string_as constant.constant_value
-                          constant.display_unit) );
+                       ^ quantity_to_string_as constant.constant_value
+                           constant.display_unit) );
                  ])
           with Physics_error message -> Error message
           end
@@ -237,15 +241,15 @@ let simulation_result limits fields =
                   in
                   let result_fields =
                     if include_trajectory then
-                      result_fields @ [ ("trajectory", trajectory_json trajectory) ]
+                      result_fields
+                      @ [ ("trajectory", trajectory_json trajectory) ]
                     else result_fields
                   in
                   Ok (`Assoc result_fields)
                 with Physics_error message -> Error message
                 end
-            | Error message, _, _
-            | _, Error message, _
-            | _, _, Error message -> Error message
+            | Error message, _, _ | _, Error message, _ | _, _, Error message ->
+                Error message
             end
       | None, _, _, _, _ -> Error "missing particle"
       | _, None, _, _, _ -> Error "missing forces"
