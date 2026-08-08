@@ -96,7 +96,9 @@ let multiply_associative
     (first.numerator * second.numerator) * third.numerator in
   let left_denominator =
     (first.denominator * second.denominator) * third.denominator in
-  let raw_left : C.rational = {
+  let raw_left : value:C.rational{
+      value.numerator = left_numerator /\
+      value.denominator = left_denominator} = {
     numerator = left_numerator;
     denominator = left_denominator
   } in
@@ -121,7 +123,9 @@ let multiply_associative
     first.numerator * (second.numerator * third.numerator) in
   let right_denominator =
     first.denominator * (second.denominator * third.denominator) in
-  let raw_right : C.rational = {
+  let raw_right : value:C.rational{
+      value.numerator = right_numerator /\
+      value.denominator = right_denominator} = {
     numerator = right_numerator;
     denominator = right_denominator
   } in
@@ -133,10 +137,6 @@ let multiply_associative
     by (FStar.Tactics.Canon.canon ());
   assert (left_denominator = right_denominator)
     by (FStar.Tactics.Canon.canon ());
-  assert_norm (raw_left.numerator = left_numerator);
-  assert_norm (raw_right.numerator = right_numerator);
-  assert_norm (raw_left.denominator = left_denominator);
-  assert_norm (raw_right.denominator = right_denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left.denominator = raw_right.denominator);
   assert (raw_left = raw_right);
