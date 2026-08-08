@@ -31,7 +31,14 @@ jobs:
         run: opam install ocamlformat.0.29.0 dune.3.24.1
 
       - name: Apply repository formatter
-        run: opam exec -- dune fmt
+        run: |
+          set +e
+          opam exec -- dune fmt
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] && git diff --quiet -- src/ocaml/main.ml; then
+            exit "$status"
+          fi
 
       - name: Commit parser formatter output only
         run: |
