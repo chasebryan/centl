@@ -92,11 +92,13 @@ let multiply_associative
   let left_result = C.multiply first_second third in
   let left_mid = C.multiply raw_first_second third in
   assert (C.equivalent left_result left_mid);
+  let left_numerator =
+    (first.numerator * second.numerator) * third.numerator in
+  let left_denominator =
+    (first.denominator * second.denominator) * third.denominator in
   let raw_left : C.rational = {
-    numerator =
-      (first.numerator * second.numerator) * third.numerator;
-    denominator =
-      (first.denominator * second.denominator) * third.denominator
+    numerator = left_numerator;
+    denominator = left_denominator
   } in
   assert (C.invariant raw_left);
   assert (C.equivalent left_mid raw_left);
@@ -115,11 +117,13 @@ let multiply_associative
   let right_result = C.multiply first second_third in
   let right_mid = C.multiply first raw_second_third in
   assert (C.equivalent right_result right_mid);
+  let right_numerator =
+    first.numerator * (second.numerator * third.numerator) in
+  let right_denominator =
+    first.denominator * (second.denominator * third.denominator) in
   let raw_right : C.rational = {
-    numerator =
-      first.numerator * (second.numerator * third.numerator);
-    denominator =
-      first.denominator * (second.denominator * third.denominator)
+    numerator = right_numerator;
+    denominator = right_denominator
   } in
   assert (C.invariant raw_right);
   assert (C.equivalent right_mid raw_right);
@@ -129,6 +133,12 @@ let multiply_associative
     first.numerator second.numerator third.numerator;
   FStar.Math.Lemmas.paren_mul_left
     first.denominator second.denominator third.denominator;
+  assert (left_numerator = right_numerator);
+  assert (left_denominator = right_denominator);
+  assert (raw_left.numerator = left_numerator);
+  assert (raw_right.numerator = right_numerator);
+  assert (raw_left.denominator = left_denominator);
+  assert (raw_right.denominator = right_denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left.denominator = raw_right.denominator);
   assert (raw_left = raw_right);
