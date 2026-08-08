@@ -1,6 +1,7 @@
 module Centl.PolynomialSoundness
 
 module C = Centl.Core
+module Math = FStar.Math.Lemmas
 
 (** Proof-only support for the 0.12 univariate rational polynomial assurance
     boundary.  This module is verified but not extracted into runtime code. *)
@@ -27,11 +28,18 @@ let equivalent_transitive
       (ensures C.equivalent left right)
 =
   assert (middle.denominator > 0);
-  assert (middle.denominator <> 0);
   assert (
     left.numerator * middle.denominator * right.denominator =
     right.numerator * middle.denominator * left.denominator)
     by (FStar.Tactics.Canon.canon ());
+  assert (
+    (left.numerator * right.denominator) * middle.denominator =
+    (right.numerator * left.denominator) * middle.denominator)
+    by (FStar.Tactics.Canon.canon ());
+  Math.lemma_cancel_mul
+    (left.numerator * right.denominator)
+    (right.numerator * left.denominator)
+    middle.denominator;
   assert (C.equivalent left right)
 
 let negate_respects_equivalent
