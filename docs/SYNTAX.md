@@ -82,13 +82,19 @@ script. Approximate a definition when using it: `approx(f(2), 20)`.
 coefficients. Positive nonsquare discriminants return a canonical exact pair
 `center - sqrt(radicand)` and `center + sqrt(radicand)`; CENTL does not turn
 these roots into decimal approximations. Higher-degree and otherwise
-unsupported equations return an explicit unresolved result.
+unsupported equations return an explicit unresolved value plus an
+`unsupported` resolution label and reason.
 
 The integration forms accept rational-coefficient univariate polynomials with
 positive powers no larger than 64. Explicit zero powers remain residual to
 preserve the possible `0^0` error. `integrate(p, x)` selects the zero-constant
 antiderivative, while `integrate(p, x = a, b)` requires exact rational bounds.
-Unsupported integrals stay visible as `integrate(...)` expressions.
+Unsupported integrals stay visible as `integrate(...)` expressions and carry
+an `unsupported` resolution label. `simplify`, `expand`, and `factor` similarly
+report when an input is outside their documented polynomial domains. If
+`simplify` or `expand` proves that an expression is already in its requested
+form, the result is labeled `unchanged_proved`; an unchanged value is never
+presented as if a transformation silently succeeded.
 
 Finite sequence bounds are inclusive exact integers. A sequence index scopes
 only its element expression. In a recurrence, `initial` is the term at the

@@ -127,7 +127,8 @@ let request_limits state fields =
     fields
 
 let session_result state id evaluation =
-  Centl_engine.json_of_session_evaluation evaluation |> response state ?id
+  Centl_engine.json_of_detailed_session_evaluation evaluation
+  |> response state ?id
 
 let describe state id =
   let evaluation = state.limits.evaluation in
@@ -177,7 +178,7 @@ let describe state id =
 let evaluate ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match (List.assoc_opt "expression" fields, request_limits state fields) with
   | Some (`String expression), Ok limits ->
-      Centl_engine.evaluate_in_session_with_limits ~cancelled limits
+      Centl_engine.evaluate_in_session_outcome_with_limits ~cancelled limits
         state.session expression
       |> session_result state id
   | Some (`String _), Error message -> invalid state ?id message

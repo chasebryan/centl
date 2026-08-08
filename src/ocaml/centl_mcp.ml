@@ -408,6 +408,25 @@ let tool_output_schema =
          ]
          [ "schema"; "producer"; "classification"; "method"; "backend" ]
      in
+     let resolution =
+       strict_object
+         [
+           ( "status",
+             enum_string
+               [
+                 "computed";
+                 "transformed";
+                 "unchanged_proved";
+                 "residual";
+                 "unsupported";
+                 "indeterminate";
+               ] );
+           ("operation", string_schema);
+           ("reason", string_schema);
+           ("supported_domain", string_schema);
+         ]
+         [ "status" ]
+     in
      let definitions =
        `Assoc
          [
@@ -428,6 +447,7 @@ let tool_output_schema =
            ("error", error);
            ("session", session);
            ("provenance", provenance);
+           ("resolution", resolution);
          ]
      in
      `Assoc
@@ -444,6 +464,7 @@ let tool_output_schema =
                ("error", schema_ref "error");
                ("session", schema_ref "session");
                ("provenance", schema_ref "provenance");
+               ("resolution", schema_ref "resolution");
              ] );
          ( "required",
            `List
@@ -459,7 +480,7 @@ let tool_output_schema =
                `Assoc
                  [
                    ("properties", `Assoc [ ("ok", const_bool true) ]);
-                   ("required", `List [ `String "value" ]);
+                   ("required", `List [ `String "value"; `String "resolution" ]);
                    ("not", `Assoc [ ("required", `List [ `String "error" ]) ]);
                  ];
                `Assoc

@@ -53,6 +53,81 @@ type fragment = token_style * string
 type error = { code : string; message : string; position : int option }
 type evaluation = (exact_value, error) result
 
+type resolution_status =
+  | Computed
+  | Transformed
+  | Unchanged_proved
+  | Residual
+  | Unsupported
+  | Indeterminate
+
+type transformation_resolution = {
+  status : resolution_status;
+  operation : string option;
+  reason : string option;
+  supported_domain : string option;
+}
+
+type evaluation_outcome = {
+  value : exact_value;
+  resolution : transformation_resolution;
+}
+
+type detailed_evaluation = (evaluation_outcome, error) result
+
+let computed_resolution =
+  {
+    status = Computed;
+    operation = None;
+    reason = None;
+    supported_domain = None;
+  }
+
+let resolution_rank = function
+  | Computed -> 0
+  | Transformed -> 1
+  | Unchanged_proved -> 2
+  | Residual -> 3
+  | Unsupported -> 4
+  | Indeterminate -> 5
+
+let record_resolution current candidate =
+  if resolution_rank candidate.status >= resolution_rank current.status then
+    candidate
+  else current
+
+let transformed operation supported_domain =
+  {
+    status = Transformed;
+    operation = Some operation;
+    reason = None;
+    supported_domain = Some supported_domain;
+  }
+
+let unchanged_proved operation reason supported_domain =
+  {
+    status = Unchanged_proved;
+    operation = Some operation;
+    reason = Some reason;
+    supported_domain = Some supported_domain;
+  }
+
+let residual operation reason supported_domain =
+  {
+    status = Residual;
+    operation = Some operation;
+    reason = Some reason;
+    supported_domain = Some supported_domain;
+  }
+
+let unsupported operation reason supported_domain =
+  {
+    status = Unsupported;
+    operation = Some operation;
+    reason = Some reason;
+    supported_domain = Some supported_domain;
+  }
+
 (* Diagnostic origins are intentionally separate from [Centl_Core.expression].
    The verified AST and all verified operations stay untouched; the host keeps
    only the byte at which each parsed or generated subtree should be blamed. *)
@@ -131,6 +206,13 @@ type session_result =
   | Defined_function of string * string list * Centl_Core.expression
 
 type session_evaluation = (session_result, error) result
+
+type session_outcome = {
+  result : session_result;
+  resolution : transformation_resolution;
+}
+
+type detailed_session_evaluation = (session_outcome, error) result
 
 type evaluation_limits = {
   max_source_bytes : int;
@@ -1943,6 +2025,44 @@ let contains_deferred_evaluation =
       name = "sum" || name = "product" || name = "integrate"
       || name = "sequence" || name = "recurrence")
 
+let rec contains_residual_derivative = function
+  | Centl_Core.Derivative _ -> true
+  | Centl_Core.Literal _ | Centl_Core.Symbol _ -> false
+  | Centl_Core.Negate inner
+  | Centl_Core.Power (inner, _)
+  | Centl_Core.Differentiate (inner, _)
+  | Centl_Core.Simplify inner
+  | Centl_Core.Expand inner
+  | Centl_Core.Factor inner ->
+      contains_residual_derivative inner
+  | Centl_Core.Binary (_, left, right) ->
+      contains_residual_derivative left || contains_residual_derivative right
+  | Centl_Core.Function (_, arguments) ->
+      List.exists contains_residual_derivative arguments
+  | Centl_Core.Substitute (inner, _, replacement) ->
+      contains_residual_derivative inner
+      || contains_residual_derivative replacement
+  | Centl_Core.Assuming (inner, left, _, right) ->
+      contains_residual_derivative inner
+      || contains_residual_derivative left
+      || contains_residual_derivative right
+
+let polynomial_domain =
+  "bounded univariate rational polynomials with constant rational division"
+
+let factor_domain =
+  "difference-of-squares and rational-root univariate polynomials"
+
+let differentiation_domain =
+  "the documented exact symbolic differentiation rules"
+
+let integration_domain =
+  "rational-coefficient univariate polynomials with exact rational bounds"
+
+let equation_domain =
+  "linear and real quadratic equations with rational coefficients"
+
+let substitution_domain = "capture-avoiding exact scalar expressions"
 let internal_sequence_name = "$centl_sequence"
 
 let engine_failure_of_core = function
@@ -2160,8 +2280,8 @@ let iteration_value_of_exact = function
 
 let resolve_with_limits ?(cancelled = never_cancelled)
     ?(prepare_iteration_term = fun term -> Ok term)
-    ?(position_of = fun _ -> None) ?(remember_position = fun _ _ -> ()) limits
-    expression =
+    ?(position_of = fun _ -> None) ?(remember_position = fun _ _ -> ())
+    ?(observe_resolution = fun _ -> ()) limits expression =
   let ( let* ) result next = Result.bind result next in
   let remaining_iterations = ref limits.max_integer_iterations in
   let maximum_iteration_work =
@@ -2358,19 +2478,27 @@ let resolve_with_limits ?(cancelled = never_cancelled)
           let* integrable =
             check_polynomial_integration limits variable body []
           in
-          if not integrable then
+          if not integrable then begin
+            observe_resolution
+              (unsupported "integrate" "non_polynomial_integrand"
+                 integration_domain);
             checked
               (Centl_Core.Function
                  ("integrate", [ body; Centl_Core.Symbol variable ]))
               (add_nodes 2 body_nodes)
+          end
           else
             let* () = check_cancelled cancelled in
             let integrated = Centl_Core.integrate_polynomial body variable in
             let* () = check_cancelled cancelled in
             begin match integrated with
             | Some expression ->
+                observe_resolution (transformed "integrate" integration_domain);
                 checked expression (expression_node_count expression)
             | None ->
+                observe_resolution
+                  (residual "integrate" "integration_remained_residual"
+                     integration_domain);
                 checked
                   (Centl_Core.Function
                      ("integrate", [ body; Centl_Core.Symbol variable ]))
@@ -2391,7 +2519,10 @@ let resolve_with_limits ?(cancelled = never_cancelled)
                 check_polynomial_integration limits variable body
                   [ lower_value; upper_value ]
               in
-              if not integrable then
+              if not integrable then begin
+                observe_resolution
+                  (unsupported "integrate" "non_polynomial_integrand"
+                     integration_domain);
                 checked
                   (Centl_Core.Function
                      ( "integrate",
@@ -2401,6 +2532,7 @@ let resolve_with_limits ?(cancelled = never_cancelled)
                         (add_nodes
                            (expression_node_count lower)
                            (expression_node_count upper))))
+              end
               else
                 let* () = check_cancelled cancelled in
                 let integrated =
@@ -2410,10 +2542,15 @@ let resolve_with_limits ?(cancelled = never_cancelled)
                 let* () = check_cancelled cancelled in
                 begin match integrated with
                 | Some value ->
+                    observe_resolution
+                      (transformed "integrate" integration_domain);
                     checked
                       (Centl_Core.Literal (value.numerator, value.denominator))
                       1
                 | None ->
+                    observe_resolution
+                      (residual "integrate" "integration_remained_residual"
+                         integration_domain);
                     checked
                       (Centl_Core.Function
                          ( "integrate",
@@ -2425,6 +2562,9 @@ let resolve_with_limits ?(cancelled = never_cancelled)
                                (expression_node_count upper))))
                 end
           | _ ->
+              observe_resolution
+                (unsupported "integrate" "non_rational_bounds"
+                   integration_domain);
               checked
                 (Centl_Core.Function
                    ( "integrate",
@@ -2512,7 +2652,14 @@ let resolve_with_limits ?(cancelled = never_cancelled)
         if nodes > limits.max_expression_nodes then
           failure "resource_limit"
             "the derivative exceeds the expression-node limit"
-        else checked (Centl_Core.differentiate inner variable) nodes
+        else
+          let differentiated = Centl_Core.differentiate inner variable in
+          observe_resolution
+            (if contains_residual_derivative differentiated then
+               unsupported "diff" "unsupported_derivative_rule"
+                 differentiation_domain
+             else transformed "diff" differentiation_domain);
+          checked differentiated nodes
     | Centl_Core.Substitute (inner, variable, replacement) ->
         let* replacement, replacement_nodes = resolve replacement in
         if contains_deferred_evaluation inner then
@@ -2524,7 +2671,10 @@ let resolve_with_limits ?(cancelled = never_cancelled)
           if nodes > limits.max_expression_nodes then
             failure "resource_limit"
               "the substitution exceeds the expression-node limit"
-          else resolve (Centl_Core.substitute inner variable replacement)
+          else begin
+            observe_resolution (transformed "substitute" substitution_domain);
+            resolve (Centl_Core.substitute inner variable replacement)
+          end
         else
           let* inner, _ = resolve inner in
           let nodes =
@@ -2535,23 +2685,58 @@ let resolve_with_limits ?(cancelled = never_cancelled)
           if nodes > limits.max_expression_nodes then
             failure "resource_limit"
               "the substitution exceeds the expression-node limit"
-          else checked (Centl_Core.substitute inner variable replacement) nodes
-    | Centl_Core.Simplify inner | Centl_Core.Expand inner ->
+          else begin
+            observe_resolution (transformed "substitute" substitution_domain);
+            checked (Centl_Core.substitute inner variable replacement) nodes
+          end
+    | Centl_Core.Simplify inner ->
         let* inner, _ = resolve inner in
         let* () = check_scalar_transformation inner in
         let* () = check_polynomial_transformation limits inner in
-        let transformed = Centl_Core.canonicalize_polynomial inner in
-        checked transformed (expression_node_count transformed)
+        let simplified = Centl_Core.canonicalize_polynomial inner in
+        observe_resolution
+          (match polynomial_profile inner with
+          | Some _ when simplified = inner ->
+              unchanged_proved "simplify" "polynomial_normal_form"
+                polynomial_domain
+          | Some _ -> transformed "simplify" polynomial_domain
+          | None ->
+              unsupported "simplify" "non_polynomial_expression"
+                polynomial_domain);
+        checked simplified (expression_node_count simplified)
+    | Centl_Core.Expand inner ->
+        let* inner, _ = resolve inner in
+        let* () = check_scalar_transformation inner in
+        let* () = check_polynomial_transformation limits inner in
+        let expanded = Centl_Core.canonicalize_polynomial inner in
+        observe_resolution
+          (match polynomial_profile inner with
+          | Some _ when expanded = inner ->
+              unchanged_proved "expand" "polynomial_normal_form"
+                polynomial_domain
+          | Some _ -> transformed "expand" polynomial_domain
+          | None ->
+              unsupported "expand" "non_polynomial_expression" polynomial_domain);
+        checked expanded (expression_node_count expanded)
     | Centl_Core.Factor inner ->
         let* inner, _ = resolve inner in
         let* () = check_scalar_transformation inner in
         let* () = check_polynomial_transformation limits inner in
-        let transformed = Centl_Core.factor_expression inner in
-        checked transformed (expression_node_count transformed)
+        let factored = Centl_Core.factor_expression inner in
+        observe_resolution
+          (match polynomial_profile inner with
+          | Some _ when factored = inner ->
+              unsupported "factor" "no_supported_factorization" factor_domain
+          | Some _ -> transformed "factor" factor_domain
+          | None ->
+              unsupported "factor" "non_polynomial_expression" factor_domain);
+        checked factored (expression_node_count factored)
     | Centl_Core.Assuming (inner, left, relation, right) ->
         let* left, left_nodes = resolve left in
         let* right, right_nodes = resolve right in
         let* inner, inner_nodes = resolve inner in
+        observe_resolution
+          (transformed "assuming" "exact expressions with retained conditions");
         checked
           (Centl_Core.Assuming
              ( Centl_Core.simplify_assuming inner left relation right,
@@ -2617,17 +2802,21 @@ let resolve_with_limits ?(cancelled = never_cancelled)
   let* expression, _ = resolve expression in
   Ok expression
 
-let evaluate_expression_with_limits ?(cancelled = never_cancelled)
+let evaluate_expression_outcome_with_limits ?(cancelled = never_cancelled)
     ?prepare_iteration_term ?(position_of = fun _ -> None)
     ?(remember_position = fun _ _ -> ()) limits expression =
   let ( let* ) result next = Result.bind result next in
+  let resolution = ref computed_resolution in
+  let observe_resolution candidate =
+    resolution := record_resolution !resolution candidate
+  in
   let* () = check_cancelled cancelled in
   let* () = check_expression_limit limits expression in
   let* () = validate_deferred_binders expression in
   let* () = check_computation_limit ~cancelled limits expression in
   let* expression =
     resolve_with_limits ~cancelled ?prepare_iteration_term ~position_of
-      ~remember_position limits expression
+      ~remember_position ~observe_resolution limits expression
   in
   let* () = check_expression_limit limits expression in
   let* () = check_computation_limit ~cancelled limits expression in
@@ -2679,15 +2868,30 @@ let evaluate_expression_with_limits ?(cancelled = never_cancelled)
         end
   in
   let* value = result in
+  begin match value with
+  | Equation_result { status = Unresolved; _ } ->
+      observe_resolution
+        (unsupported "solve" "unsupported_equation_degree_or_domain"
+           equation_domain)
+  | Equation_result _ ->
+      observe_resolution (transformed "solve" equation_domain)
+  | _ -> ()
+  end;
   let* () = check_exact_result_bits ~cancelled limits value in
   let* () = check_result_limit ~cancelled limits value in
   let* () = check_cancelled cancelled in
-  Ok value
+  Ok { value; resolution = !resolution }
+
+let evaluate_expression_with_limits ?(cancelled = never_cancelled)
+    ?prepare_iteration_term ?position_of ?remember_position limits expression =
+  evaluate_expression_outcome_with_limits ~cancelled ?prepare_iteration_term
+    ?position_of ?remember_position limits expression
+  |> Result.map (fun outcome -> outcome.value)
 
 let evaluate_expression expression =
   evaluate_expression_with_limits default_evaluation_limits expression
 
-let evaluate_with_limits ?(cancelled = never_cancelled) limits source =
+let evaluate_outcome_with_limits ?(cancelled = never_cancelled) limits source =
   let ( let* ) result next = Result.bind result next in
   let* () = check_cancelled cancelled in
   let* () = check_source_limit limits source in
@@ -2698,11 +2902,18 @@ let evaluate_with_limits ?(cancelled = never_cancelled) limits source =
       let origins = diagnostic_origins_of_spans located.spans in
       let position_of = origin_of origins in
       let* () = check_cancelled cancelled in
-      evaluate_expression_with_limits ~cancelled ~position_of
+      evaluate_expression_outcome_with_limits ~cancelled ~position_of
         ~remember_position:(remember_origin origins) limits expression
       |> attach_diagnostic_origin ~cancelled origins expression
 
+let evaluate_with_limits ?(cancelled = never_cancelled) limits source =
+  evaluate_outcome_with_limits ~cancelled limits source
+  |> Result.map (fun outcome -> outcome.value)
+
 let evaluate source = evaluate_with_limits default_evaluation_limits source
+
+let evaluate_detailed source =
+  evaluate_outcome_with_limits default_evaluation_limits source
 
 let create_session () =
   { bindings = []; retained_nodes = 0; retained_bits = 0; retained_bytes = 0 }
@@ -3258,8 +3469,8 @@ let prepare_definition ?(cancelled = never_cancelled) ~origins limits session
           "solution sets cannot be stored in definitions yet"
     | value -> Ok (value, expression_of_exact_value value)
 
-let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
-    session source =
+let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
+    limits session source =
   let ( let* ) result next = Result.bind result next in
   let* () = check_cancelled cancelled in
   let* () = check_source_limit limits source in
@@ -3287,14 +3498,18 @@ let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
               expand_expression ~cancelled ~defer_iterations:true ~origins
                 limits.max_expression_nodes session [] expression
             in
-            evaluate_expression_with_limits ~cancelled ~position_of
+            evaluate_expression_outcome_with_limits ~cancelled ~position_of
               ~remember_position:(remember_origin origins)
               ~prepare_iteration_term:
                 (prepare_session_iteration_term ~cancelled ~origins limits
                    session)
               limits expression
             |> attach_diagnostic_origin ~cancelled origins expression
-            |> Result.map (fun value -> Session_value value)
+            |> Result.map (fun outcome ->
+                {
+                  result = Session_value outcome.value;
+                  resolution = outcome.resolution;
+                })
         | Centl_parser.Define_value (name, expression) ->
             let* () =
               validate_definition_name ?position:definition_name_position
@@ -3320,7 +3535,7 @@ let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
             in
             let* () = check_cancelled cancelled in
             retain_binding session name (Bound_value expression) retention;
-            Ok result
+            Ok { result; resolution = computed_resolution }
         | Centl_parser.Define_function (name, parameters, body) ->
             let* () =
               validate_definition_name ?position:definition_name_position
@@ -3357,12 +3572,21 @@ let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
             retain_binding session name
               (Bound_function { parameters; body })
               retention;
-            Ok result
+            Ok { result; resolution = computed_resolution }
       in
       result
 
+let evaluate_in_session_with_limits ?(cancelled = never_cancelled) limits
+    session source =
+  evaluate_in_session_outcome_with_limits ~cancelled limits session source
+  |> Result.map (fun outcome -> outcome.result)
+
 let evaluate_in_session session source =
   evaluate_in_session_with_limits default_evaluation_limits session source
+
+let evaluate_in_session_detailed session source =
+  evaluate_in_session_outcome_with_limits default_evaluation_limits session
+    source
 
 let fragment style text = [ (style, text) ]
 let append right left = List.rev_append (List.rev left) right
@@ -3742,6 +3966,50 @@ let text_of_session_result result =
 let colored_text_of_session_result result =
   result |> fragments_of_session_result |> colored_text_of_fragments
 
+let resolution_status_code = function
+  | Computed -> "computed"
+  | Transformed -> "transformed"
+  | Unchanged_proved -> "unchanged_proved"
+  | Residual -> "residual"
+  | Unsupported -> "unsupported"
+  | Indeterminate -> "indeterminate"
+
+let resolution_annotation resolution =
+  match resolution.status with
+  | Computed | Transformed -> None
+  | Unchanged_proved | Residual | Unsupported | Indeterminate ->
+      let details =
+        List.filter_map Fun.id
+          [
+            Option.map
+              (fun operation -> "operation=" ^ operation)
+              resolution.operation;
+            Option.map (fun reason -> "reason=" ^ reason) resolution.reason;
+            Option.map
+              (fun domain -> "supported_domain=" ^ domain)
+              resolution.supported_domain;
+          ]
+      in
+      Some
+        (Printf.sprintf "resolution: %s%s"
+           (resolution_status_code resolution.status)
+           (match details with
+           | [] -> ""
+           | details -> " (" ^ String.concat "; " details ^ ")"))
+
+let text_of_session_outcome outcome =
+  match resolution_annotation outcome.resolution with
+  | None -> text_of_session_result outcome.result
+  | Some annotation -> text_of_session_result outcome.result ^ "\n" ^ annotation
+
+let colored_text_of_session_outcome outcome =
+  match resolution_annotation outcome.resolution with
+  | None -> colored_text_of_session_result outcome.result
+  | Some annotation ->
+      colored_text_of_session_result outcome.result
+      ^ "\n"
+      ^ colored_text_of_fragments [ (Punctuation, annotation) ]
+
 let error_text error =
   match error.position with
   | None -> error.message
@@ -3786,6 +4054,27 @@ let json_of_provenance ~classification ~method_ ~backend =
       ("method", `String method_);
       ("backend", `String backend);
     ]
+
+let json_of_resolution resolution =
+  let fields =
+    [ ("status", `String (resolution_status_code resolution.status)) ]
+  in
+  let fields =
+    match resolution.operation with
+    | None -> fields
+    | Some operation -> fields @ [ ("operation", `String operation) ]
+  in
+  let fields =
+    match resolution.reason with
+    | None -> fields
+    | Some reason -> fields @ [ ("reason", `String reason) ]
+  in
+  let fields =
+    match resolution.supported_domain with
+    | None -> fields
+    | Some domain -> fields @ [ ("supported_domain", `String domain) ]
+  in
+  `Assoc fields
 
 let provenance_of_value = function
   | Integer _ | Rational _ ->
@@ -4029,6 +4318,18 @@ let json_of_evaluation = function
           ("provenance", provenance_of_error error);
         ]
 
+let json_of_detailed_evaluation = function
+  | Ok outcome ->
+      `Assoc
+        [
+          ("version", `Int 1);
+          ("ok", `Bool true);
+          ("value", json_of_value outcome.value);
+          ("resolution", json_of_resolution outcome.resolution);
+          ("provenance", provenance_of_value outcome.value);
+        ]
+  | Error error -> json_of_evaluation (Error error)
+
 let json_of_session_evaluation = function
   | Ok result ->
       `Assoc
@@ -4037,6 +4338,18 @@ let json_of_session_evaluation = function
           ("ok", `Bool true);
           ("value", json_of_session_result result);
           ("provenance", provenance_of_session_result result);
+        ]
+  | Error error -> json_of_evaluation (Error error)
+
+let json_of_detailed_session_evaluation = function
+  | Ok outcome ->
+      `Assoc
+        [
+          ("version", `Int 1);
+          ("ok", `Bool true);
+          ("value", json_of_session_result outcome.result);
+          ("resolution", json_of_resolution outcome.resolution);
+          ("provenance", provenance_of_session_result outcome.result);
         ]
   | Error error -> json_of_evaluation (Error error)
 
@@ -4096,8 +4409,8 @@ let evaluate_request json =
                       with
                       | Ok limits ->
                           respond
-                            (json_of_evaluation
-                               (evaluate_with_limits limits expression))
+                            (json_of_detailed_evaluation
+                               (evaluate_outcome_with_limits limits expression))
                       | Error message -> respond (invalid_request message)
                       end
                   | Some (`Int version), _ when version <> 1 ->

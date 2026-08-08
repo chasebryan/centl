@@ -56,6 +56,11 @@ Every calculation result contains human-readable `content` and the complete
 CENTL protocol response in `structuredContent`. Mathematical failures such as
 division by zero are MCP tool errors with `isError: true`; malformed JSON-RPC,
 unknown methods, unknown tools, and invalid arguments are protocol errors.
+Every successful calculation also has `structuredContent.resolution`, which
+states whether the request was computed, transformed, proved already in form,
+left residual, unsupported, or indeterminate. Non-complete results identify the
+operation, stable reason, and supported domain, so an agent never has to infer
+completion from symbolic text.
 `structuredContent.provenance` classifies every mathematical result as exact,
 exact symbolic, a rigorous enclosure, an exact or unresolved solution set, a
 definition, a failure, or a cancellation, and records its method and backend.

@@ -1133,6 +1133,94 @@ let machine_provenance () =
     "control provenance" "control"
     (provenance_classification ping)
 
+let transformation_resolution_metadata () =
+  let evaluate source =
+    Centl_engine.evaluate_detailed source
+    |> Centl_engine.json_of_detailed_evaluation
+  in
+  let resolution source = evaluate source |> json_member "resolution" in
+  let check ?operation ?reason source expected_status =
+    let metadata = resolution source in
+    Alcotest.(check string)
+      (source ^ " resolution status")
+      expected_status
+      (json_string "status" metadata);
+    Option.iter
+      (fun expected ->
+        Alcotest.(check string)
+          (source ^ " operation") expected
+          (json_string "operation" metadata))
+      operation;
+    Option.iter
+      (fun expected ->
+        Alcotest.(check string)
+          (source ^ " reason") expected
+          (json_string "reason" metadata))
+      reason;
+    if expected_status <> "computed" then
+      Alcotest.(check bool)
+        (source ^ " supported domain is documented")
+        true
+        (match json_member "supported_domain" metadata with
+        | `String domain -> String.length domain > 0
+        | _ -> false)
+  in
+  check "1 + 1" "computed";
+  [
+    ("diff(x^3, x)", "diff");
+    ("integrate(x^2, x)", "integrate");
+    ("simplify(x + 0)", "simplify");
+    ("expand((x + 1)^2)", "expand");
+    ("factor(x^2 - 1)", "factor");
+    ("substitute(x + y, x = 2)", "substitute");
+    ("solve(x^2 - 1 = 0, x)", "solve");
+  ]
+  |> List.iter (fun (source, operation) ->
+      check ~operation source "transformed");
+  [ ("simplify(x)", "simplify"); ("expand(x^2 + 2*x + 1)", "expand") ]
+  |> List.iter (fun (source, operation) ->
+      check ~operation ~reason:"polynomial_normal_form" source
+        "unchanged_proved");
+  [
+    ("diff(foo(x), x)", "diff", "unsupported_derivative_rule");
+    ("integrate(sin(x), x)", "integrate", "non_polynomial_integrand");
+    ("integrate(x^2, x = 0, a)", "integrate", "non_rational_bounds");
+    ("simplify(sin(x))", "simplify", "non_polynomial_expression");
+    ("expand(sin(x))", "expand", "non_polynomial_expression");
+    ("factor(x^2 + 1)", "factor", "no_supported_factorization");
+    ("factor(sin(x))", "factor", "non_polynomial_expression");
+    ("solve(x^3 = 1, x)", "solve", "unsupported_equation_degree_or_domain");
+  ]
+  |> List.iter (fun (source, operation, reason) ->
+      check ~operation ~reason source "unsupported");
+  let state = Centl_protocol.create () in
+  let persistent =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [ ("version", `Int 1); ("expression", `String "integrate(sin(x), x)") ])
+  in
+  Alcotest.(check string)
+    "persistent protocol carries resolution" "unsupported"
+    (persistent |> json_member "resolution" |> json_string "status");
+  let human =
+    Centl_engine.evaluate_in_session_detailed
+      (Centl_engine.create_session ())
+      "factor(x^2 + 1)"
+  in
+  begin match human with
+  | Ok outcome ->
+      let annotation =
+        outcome |> Centl_engine.text_of_session_outcome
+        |> String.split_on_char '\n' |> List.rev |> List.hd
+      in
+      let prefix = "resolution: unsupported" in
+      Alcotest.(check bool)
+        "human output labels an unsupported transformation" true
+        (String.length annotation >= String.length prefix
+        && String.sub annotation 0 (String.length prefix) = prefix)
+  | Error error -> Alcotest.fail (Centl_engine.error_text error)
+  end
+
 let machine_cancellation () =
   let evaluation =
     Yojson.Safe.from_string
@@ -1957,6 +2045,8 @@ let () =
           Alcotest.test_case "resource limits" `Quick machine_resource_limits;
           Alcotest.test_case "capability description" `Quick machine_describe;
           Alcotest.test_case "structured provenance" `Quick machine_provenance;
+          Alcotest.test_case "transformation resolution metadata" `Quick
+            transformation_resolution_metadata;
           Alcotest.test_case "cooperative cancellation" `Quick
             machine_cancellation;
           Alcotest.test_case "MCP schema laziness" `Quick mcp_schema_laziness;
