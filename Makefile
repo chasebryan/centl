@@ -10,9 +10,10 @@ DUNE ?= $(shell \
 FSTAR_GCD := src/fstar/Centl.Gcd.fst
 FSTAR_CORE := src/fstar/Centl.Core.fst
 FSTAR_PHYSICS := src/fstar/Centl.Physics.fst
+FSTAR_PHYSICS_SIM := src/fstar/Centl.PhysicsSimulation.fst
 FSTAR_CACHE := _build/fstar
 GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
-	src/generated/Centl_Physics.ml
+	src/generated/Centl_Physics.ml src/generated/Centl_PhysicsSimulation.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
 
@@ -45,6 +46,8 @@ verify:
 		--cache_checked_modules --report_assumes error $(FSTAR_CORE)
 	$(FSTAR) $(FSTAR_COMMON) \
 		--cache_checked_modules --report_assumes error $(FSTAR_PHYSICS)
+	$(FSTAR) $(FSTAR_COMMON) \
+		--cache_checked_modules --report_assumes error $(FSTAR_PHYSICS_SIM)
 
 extract: verify
 	mkdir -p src/generated
@@ -57,6 +60,9 @@ extract: verify
 	$(FSTAR) $(FSTAR_COMMON) \
 		--codegen OCaml --extract Centl.Physics \
 		--odir src/generated $(FSTAR_PHYSICS)
+	$(FSTAR) $(FSTAR_COMMON) \
+		--codegen OCaml --extract Centl.PhysicsSimulation \
+		--odir src/generated $(FSTAR_PHYSICS_SIM)
 	@for generated in $(GENERATED); do test -f "$$generated"; done
 
 native-build:
