@@ -10,6 +10,7 @@ DUNE ?= $(shell \
 FSTAR_GCD := src/fstar/Centl.Gcd.fst
 FSTAR_CORE := src/fstar/Centl.Core.fst
 FSTAR_POLY_SOUNDNESS := src/fstar/Centl.PolynomialSoundness.fst
+FSTAR_POLY_HORNER := src/fstar/Centl.PolynomialHornerSoundness.fst
 FSTAR_CACHE := _build/fstar
 GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
@@ -44,6 +45,8 @@ verify:
 		--cache_checked_modules --report_assumes error $(FSTAR_CORE)
 	$(FSTAR) $(FSTAR_COMMON) \
 		--cache_checked_modules --report_assumes error $(FSTAR_POLY_SOUNDNESS)
+	$(FSTAR) $(FSTAR_COMMON) \
+		--cache_checked_modules --report_assumes error $(FSTAR_POLY_HORNER)
 
 extract: verify
 	mkdir -p src/generated
