@@ -88,8 +88,7 @@ let test_tool_discovery () =
   initialize state;
   let first_page = request state 2 "tools/list" (`Assoc []) in
   let cursor = string "nextCursor" (assoc "result" first_page) in
-  Alcotest.(check string)
-    "physics page cursor" "centl-physics-v1" cursor;
+  Alcotest.(check string) "physics page cursor" "centl-physics-v1" cursor;
   let listed =
     request state 3 "tools/list" (`Assoc [ ("cursor", `String cursor) ])
   in
