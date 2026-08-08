@@ -94,7 +94,9 @@ let multiply_associative
   assert (C.equivalent left_result left_mid);
   let left_numerator =
     (first.numerator * second.numerator) * third.numerator in
-  let left_denominator =
+  let left_denominator : value:pos{
+      value =
+        (first.denominator * second.denominator) * third.denominator} =
     (first.denominator * second.denominator) * third.denominator in
   let raw_left : value:C.rational{
       value.numerator = left_numerator /\
@@ -121,8 +123,12 @@ let multiply_associative
   assert (C.equivalent right_result right_mid);
   let right_numerator =
     first.numerator * (second.numerator * third.numerator) in
-  let right_denominator =
-    first.denominator * (second.denominator * third.denominator) in
+  let right_denominator : value:pos{
+      value =
+        first.denominator *
+        (second.denominator * third.denominator)} =
+    first.denominator *
+    (second.denominator * third.denominator) in
   let raw_right : value:C.rational{
       value.numerator = right_numerator /\
       value.denominator = right_denominator} = {
@@ -135,19 +141,11 @@ let multiply_associative
 
   assert (left_numerator = right_numerator)
     by (FStar.Tactics.Canon.canon ());
-  let first_denominator_int : int = first.denominator in
-  let second_denominator_int : int = second.denominator in
-  let third_denominator_int : int = third.denominator in
-  let left_denominator_int : int =
-    (first_denominator_int * second_denominator_int) *
-    third_denominator_int in
-  let right_denominator_int : int =
-    first_denominator_int *
-    (second_denominator_int * third_denominator_int) in
-  assert (left_denominator_int = right_denominator_int)
-    by (FStar.Tactics.Canon.canon ());
-  assert_norm (left_denominator = left_denominator_int);
-  assert_norm (right_denominator = right_denominator_int);
+  FStar.Math.Lemmas.paren_mul_left
+    first.denominator second.denominator third.denominator;
+  assert (
+    (first.denominator * second.denominator) * third.denominator =
+    first.denominator * (second.denominator * third.denominator));
   assert (left_denominator = right_denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left.denominator = raw_right.denominator);
