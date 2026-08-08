@@ -1,5 +1,7 @@
 include Centl_mcp_base
 
+let physics_cursor = "centl-physics-v1"
+
 let replace_field name value fields =
   if List.mem_assoc name fields then
     List.map
@@ -8,24 +10,41 @@ let replace_field name value fields =
       fields
   else fields @ [ (name, value) ]
 
-let append_physics_tool = function
+let add_physics_cursor = function
   | `Assoc response_fields as response ->
       begin match List.assoc_opt "result" response_fields with
       | Some (`Assoc result_fields) ->
-          begin match List.assoc_opt "tools" result_fields with
-          | Some (`List tools) ->
-              let result_fields =
-                replace_field "tools"
-                  (`List (tools @ [ Centl_physics_mcp.tool () ]))
-                  result_fields
-              in
-              `Assoc
-                (replace_field "result" (`Assoc result_fields) response_fields)
-          | _ -> response
-          end
+          let result_fields =
+            replace_field "nextCursor" (`String physics_cursor) result_fields
+          in
+          `Assoc
+            (replace_field "result" (`Assoc result_fields) response_fields)
       | _ -> response
       end
   | response -> response
+
+let tools_list_cursor fields =
+  match List.assoc_opt "params" fields with
+  | None -> Ok None
+  | Some (`Assoc []) -> Ok None
+  | Some (`Assoc [ ("cursor", `String cursor) ]) -> Ok (Some cursor)
+  | Some (`Assoc [ ("cursor", _) ]) ->
+      Error "tools/list cursor must be a string"
+  | Some (`Assoc _) -> Error "tools/list accepts only cursor"
+  | Some _ -> Error "tools/list params must be an object"
+
+let physics_tools_page id =
+  jsonrpc_result id
+    (`Assoc [ ("tools", `List [ Centl_physics_mcp.tool () ]) ])
+
+let tools_list ?(cancelled = Centl_engine.never_cancelled) state id fields =
+  match tools_list_cursor fields with
+  | Error message -> jsonrpc_error id (-32602) message
+  | Ok None ->
+      Centl_mcp_base.handle_request ~cancelled state id "tools/list" fields
+      |> add_physics_cursor
+  | Ok (Some cursor) when cursor = physics_cursor -> physics_tools_page id
+  | Ok (Some _) -> jsonrpc_error id (-32602) "unknown tools/list cursor"
 
 let physics_tool_result response =
   `Assoc
@@ -71,9 +90,7 @@ let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
       Centl_mcp_base.handle_request ~cancelled state id method_name fields
   | _ when not state.initialized ->
       Centl_mcp_base.handle_request ~cancelled state id method_name fields
-  | "tools/list" ->
-      Centl_mcp_base.handle_request ~cancelled state id method_name fields
-      |> append_physics_tool
+  | "tools/list" -> tools_list ~cancelled state id fields
   | "tools/call" -> call_tool ~cancelled state id fields
   | _ -> Centl_mcp_base.handle_request ~cancelled state id method_name fields
 
