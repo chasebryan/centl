@@ -44,7 +44,7 @@ let collision_3d_result fields =
                        ("kind", `String "elastic_collision_3d_at_contact");
                        ("status", `String status);
                        ( "contact_assumption",
-                         `String "caller_supplied_distinct_centers" );
+                         `String "caller_supplied_contact_with_distinct_centers" );
                        ("particle1_final", particle_json result.particle1);
                        ("particle2_final", particle_json result.particle2);
                        ( "invariants",
