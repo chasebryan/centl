@@ -50,6 +50,16 @@
  (modules test_physics_mcp)
  (libraries centl_lib alcotest zarith yojson))
 
+(test
+ (name test_physics_runtime)
+ (modules test_physics_runtime)
+ (libraries centl_lib alcotest zarith))
+
+(test
+ (name test_physics_mcp_cancellation)
+ (modules test_physics_mcp_cancellation)
+ (libraries centl_lib alcotest zarith yojson))
+
 (cram
  (applies_to cli)
  (deps
