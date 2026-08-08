@@ -42,6 +42,29 @@ let equivalent_transitive
     middle.denominator;
   assert (C.equivalent left right)
 
+(** Keep ordinary equality substitution separate from the nonlinear rational
+    algebra below.  These lemmas need only congruence, not ring reasoning. *)
+let multiply_int_right_respects_equality
+    (left right multiplier:int)
+  : Lemma
+      (requires left = right)
+      (ensures left * multiplier = right * multiplier)
+= ()
+
+let add_int_respects_pairwise_equality
+    (left_a right_a left_b right_b:int)
+  : Lemma
+      (requires left_a = right_a /\ left_b = right_b)
+      (ensures left_a + left_b = right_a + right_b)
+= ()
+
+let multiply_int_respects_pairwise_equality
+    (left_a right_a left_b right_b:int)
+  : Lemma
+      (requires left_a = right_a /\ left_b = right_b)
+      (ensures left_a * left_b = right_a * right_b)
+= ()
+
 let negate_respects_equivalent
     (left right:C.rational{C.invariant left /\ C.invariant right})
   : Lemma
@@ -125,11 +148,15 @@ let add_respects_equivalent
     right_numerator * left_denominator =
     right_a_cross * a_multiplier + right_b_cross * b_multiplier)
     by (FStar.Tactics.Canon.canon ());
-  assert (left_a_cross * a_multiplier = right_a_cross * a_multiplier);
-  assert (left_b_cross * b_multiplier = right_b_cross * b_multiplier);
-  assert (
-    left_a_cross * a_multiplier + left_b_cross * b_multiplier =
-    right_a_cross * a_multiplier + right_b_cross * b_multiplier);
+  multiply_int_right_respects_equality
+    left_a_cross right_a_cross a_multiplier;
+  multiply_int_right_respects_equality
+    left_b_cross right_b_cross b_multiplier;
+  add_int_respects_pairwise_equality
+    (left_a_cross * a_multiplier)
+    (right_a_cross * a_multiplier)
+    (left_b_cross * b_multiplier)
+    (right_b_cross * b_multiplier);
   assert (left_numerator * right_denominator =
     right_numerator * left_denominator);
   assert (raw_left.numerator = left_numerator);
@@ -190,7 +217,8 @@ let multiply_respects_equivalent
   assert (
     right_numerator * left_denominator = right_a_cross * right_b_cross)
     by (FStar.Tactics.Canon.canon ());
-  assert (left_a_cross * left_b_cross = right_a_cross * right_b_cross);
+  multiply_int_respects_pairwise_equality
+    left_a_cross right_a_cross left_b_cross right_b_cross;
   assert (left_numerator * right_denominator =
     right_numerator * left_denominator);
   assert (raw_left.numerator = left_numerator);
