@@ -109,10 +109,10 @@ let test_gravity_simulation () =
   in
   Alcotest.(check bool) "success" true (bool "ok" response);
   let physics = assoc "physics" response in
+  Alcotest.(check string) "kind" "particle_simulation" (string "kind" physics);
   Alcotest.(check string)
-    "kind" "particle_simulation" (string "kind" physics);
-  Alcotest.(check string)
-    "integrator" "symplectic_euler" (string "integrator" physics);
+    "integrator" "symplectic_euler"
+    (string "integrator" physics);
   let final = assoc "final" physics in
   let position = assoc "position" final in
   let velocity = assoc "velocity" final in
@@ -121,7 +121,8 @@ let test_gravity_simulation () =
   Alcotest.(check string) "vx" "1" (string "x" velocity);
   Alcotest.(check string) "vz" "-10" (string "z" velocity);
   match assoc "trajectory" physics with
-  | `List states -> Alcotest.(check int) "trajectory states" 11 (List.length states)
+  | `List states ->
+      Alcotest.(check int) "trajectory states" 11 (List.length states)
   | _ -> Alcotest.fail "trajectory must be an array"
 
 let test_collision_invariants () =
@@ -185,7 +186,8 @@ let () =
           Alcotest.test_case "exact conversion" `Quick test_exact_conversion;
           Alcotest.test_case "dimension failure" `Quick test_dimension_failure;
           Alcotest.test_case "gravity simulation" `Quick test_gravity_simulation;
-          Alcotest.test_case "collision invariants" `Quick test_collision_invariants;
+          Alcotest.test_case "collision invariants" `Quick
+            test_collision_invariants;
           Alcotest.test_case "unsupported force" `Quick test_unsupported_force;
           Alcotest.test_case "trajectory limit" `Quick test_trajectory_limit;
         ] );
