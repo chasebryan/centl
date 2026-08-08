@@ -40,6 +40,11 @@
  (modules test_physics)
  (libraries centl_lib alcotest zarith))
 
+(test
+ (name test_physics_protocol)
+ (modules test_physics_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
 (cram
  (applies_to cli)
  (deps

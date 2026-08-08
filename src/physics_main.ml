@@ -7,7 +7,8 @@ let usage () =
     \  centl-physics convert VALUE FROM_UNIT TO_UNIT\n\
     \  centl-physics constant SYMBOL\n\
     \  centl-physics gravity MASS_KG X,Y,Z_M VX,VY,VZ_MPS GX,GY,GZ_MPS2 DT_S \
-     STEPS\n";
+     STEPS\n\
+    \  centl-physics --serve\n";
   exit 2
 
 let parse_q label text =
@@ -69,6 +70,19 @@ let command_gravity mass_text position_text velocity_text gravity_text dt_text
   Printf.printf "position=%s m\n" (vector_to_string_as final.position "m");
   Printf.printf "velocity=%s m/s\n" (vector_to_string_as final.velocity "m/s")
 
+let command_serve () =
+  let state = Centl_physics_protocol.create () in
+  let rec loop () =
+    match input_line stdin with
+    | line ->
+        let response = Centl_physics_server.handle_line state line in
+        Yojson.Safe.to_string response |> print_endline;
+        flush stdout;
+        loop ()
+    | exception End_of_file -> ()
+  in
+  loop ()
+
 let () =
   try
     match Array.to_list Sys.argv with
@@ -78,6 +92,7 @@ let () =
     | [ _; "constant"; symbol ] -> command_constant symbol
     | [ _; "gravity"; mass; position; velocity; gravity; dt; steps ] ->
         command_gravity mass position velocity gravity dt steps
+    | [ _; "--serve" ] -> command_serve ()
     | _ -> usage ()
   with Physics_error message ->
     Printf.eprintf "centl-physics: %s\n" message;
