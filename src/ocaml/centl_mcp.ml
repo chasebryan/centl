@@ -17,8 +17,7 @@ let add_physics_cursor = function
           let result_fields =
             replace_field "nextCursor" (`String physics_cursor) result_fields
           in
-          `Assoc
-            (replace_field "result" (`Assoc result_fields) response_fields)
+          `Assoc (replace_field "result" (`Assoc result_fields) response_fields)
       | _ -> response
       end
   | response -> response
@@ -34,8 +33,7 @@ let tools_list_cursor fields =
   | Some _ -> Error "tools/list params must be an object"
 
 let physics_tools_page id =
-  jsonrpc_result id
-    (`Assoc [ ("tools", `List [ Centl_physics_mcp.tool () ]) ])
+  jsonrpc_result id (`Assoc [ ("tools", `List [ Centl_physics_mcp.tool () ]) ])
 
 let tools_list ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match tools_list_cursor fields with
