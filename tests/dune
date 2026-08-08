@@ -45,6 +45,12 @@
   raw-repl))
 
 (cram
+ (applies_to executeme)
+ (deps
+  ../executeme
+  ../src/main.exe))
+
+(cram
  (applies_to installer)
  (enabled_if
   (= %{os_type} Unix))
