@@ -143,11 +143,11 @@ let add_respects_equivalent
   assert (
     left_numerator * right_denominator =
     left_a_cross * a_multiplier + left_b_cross * b_multiplier)
-    by (FStar.Tactics.Canon.canon ());
+    by (FStar.Tactics.norm [zeta]; FStar.Tactics.Canon.canon ());
   assert (
     right_numerator * left_denominator =
     right_a_cross * a_multiplier + right_b_cross * b_multiplier)
-    by (FStar.Tactics.Canon.canon ());
+    by (FStar.Tactics.norm [zeta]; FStar.Tactics.Canon.canon ());
   multiply_int_right_respects_equality
     left_a_cross right_a_cross a_multiplier;
   multiply_int_right_respects_equality
@@ -213,10 +213,10 @@ let multiply_respects_equivalent
   assert (left_b_cross = right_b_cross);
   assert (
     left_numerator * right_denominator = left_a_cross * left_b_cross)
-    by (FStar.Tactics.Canon.canon ());
+    by (FStar.Tactics.norm [zeta]; FStar.Tactics.Canon.canon ());
   assert (
     right_numerator * left_denominator = right_a_cross * right_b_cross)
-    by (FStar.Tactics.Canon.canon ());
+    by (FStar.Tactics.norm [zeta]; FStar.Tactics.Canon.canon ());
   multiply_int_respects_pairwise_equality
     left_a_cross right_a_cross left_b_cross right_b_cross;
   assert (left_numerator * right_denominator =
