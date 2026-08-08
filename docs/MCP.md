@@ -24,8 +24,8 @@ Configure an MCP client with the equivalent of:
 }
 ```
 
-CENTL exposes these tools in deterministic order (v0.11.0 ships seven without
-`centl_verify`; this draft adds `centl_verify` as an eighth unreleased tool):
+CENTL exposes these tools in deterministic order. v0.11.0 ships seven tools;
+the post-0.11.0 development path adds `centl_verify` and `centl_physics`:
 
 - `centl_compute` performs read-only mathematical evaluation and rejects
   definitions.
@@ -37,14 +37,20 @@ CENTL exposes these tools in deterministic order (v0.11.0 ships seven without
   `refuted` with an exact witness; polynomial identities stay `unknown`
   pending a completed F* soundness theorem. Free-form assumptions and
   multi-variable claims return `unknown`.
-- `centl_capabilities` returns supported domains, resolution statuses, limits,
-  and cancellation behavior.
+- `centl_capabilities` returns supported mathematical domains, resolution
+  statuses, limits, and cancellation behavior.
 - `centl_session` inspects definitions and their direct dependencies without
   mutation.
 - `centl_help` searches focused help generated from the canonical syntax
   catalog.
-- `centl_calculate` retains the earlier combined behavior for compatibility.
+- `centl_calculate` retains the earlier combined mathematical behavior for
+  compatibility.
 - `centl_reset` forgets definitions held by the current process.
+- `centl_physics` exposes deterministic exact-rational particle mechanics:
+  physics capability and unit discovery, exact compatible-unit conversion,
+  exact physical constants, dimension-checked particle simulation with the
+  currently implemented force models, and exact ideal one-dimensional elastic
+  collision response.
 
 `centl_compute` requires `expression`; `centl_define` requires `definition`;
 both accept the same optional `limits` object as `centl --serve`. Compute may
@@ -53,9 +59,74 @@ mark it read-only, non-destructive, idempotent, and closed-world. Definitions
 persist across tool calls in one server process. The server has no network
 listener, reads no credentials, and accesses no files on behalf of a tool call.
 
-The capability, session-inspection, and help tools are also read-only,
+The capability, session-inspection, help, and physics tools are read-only,
 idempotent, and closed-world. Their output schemas are closed and exact rather
 than free-form text contracts.
+
+## Physics tool
+
+`centl_physics` is a thin adapter over the same version-1 physics request/result
+model documented in [PHYSICS_PROTOCOL.md](PHYSICS_PROTOCOL.md). MCP does not
+implement a second physics evaluator.
+
+The tool accepts one of six discriminated actions:
+
+- `capabilities`
+- `units`
+- `convert`
+- `constant`
+- `simulate_particle`
+- `elastic_collision_1d`
+
+Physical numeric inputs are strings so arbitrary-precision integers, finite
+decimals, and fractions cross the JSON boundary without host-number rounding.
+For example, a time step is represented as:
+
+```json
+{"value":"1/10","unit":"s"}
+```
+
+A gravity simulation can be called through MCP as:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "fall",
+  "method": "tools/call",
+  "params": {
+    "name": "centl_physics",
+    "arguments": {
+      "action": "simulate_particle",
+      "particle": {
+        "id": "body",
+        "mass": {"value":"2","unit":"kg"},
+        "position": {"x":"0","y":"0","z":"10","unit":"m"},
+        "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+      },
+      "forces": [
+        {
+          "kind": "uniform_gravity",
+          "acceleration": {"x":"0","y":"0","z":"-10","unit":"m/s^2"}
+        }
+      ],
+      "dt": {"value":"1/10","unit":"s"},
+      "steps": 10
+    }
+  }
+}
+```
+
+The authoritative `structuredContent` identifies the integrator as
+`symplectic_euler` and returns typed initial/final states plus exact momentum
+and kinetic-energy diagnostics. Unsupported force models and incompatible
+physical dimensions return structured tool errors rather than being silently
+reinterpreted.
+
+The current physics MCP action is stateless with respect to simulated physical
+worlds: every call supplies the complete initial particle state and force model.
+It inherits the ordinary MCP process request-admission limit and retains the
+physics protocol's 100,000-step simulation ceiling and 4,096-step full
+trajectory-output ceiling.
 
 Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use
 `centl_compute`. Sums and products return the ordinary exact integer, rational, or
@@ -75,31 +146,37 @@ The identical shape is documented in
 share the call's `max_integer_iterations`, expression-work, exact-bit,
 expression-node, and result-byte budgets.
 
-Every calculation result contains human-readable `content` and the complete
-CENTL protocol response in `structuredContent`. For residual, unsupported,
-unchanged-proved, and indeterminate outcomes, the text content appends the same
+Every tool result contains human-readable `content` and the complete typed
+response in `structuredContent`. For residual, unsupported, unchanged-proved,
+and indeterminate mathematical outcomes, the text content appends the same
 `resolution:` annotation used by the human calculator so agents that only read
 tool text cannot treat incomplete work as success. Mathematical tool errors
 include the stable message and, when known, a recovery `suggestion` line.
 `structuredContent` remains authoritative. Mathematical failures such as
 division by zero are MCP tool errors with `isError: true`; malformed JSON-RPC,
 unknown methods, unknown tools, and invalid arguments are protocol errors.
-Machine errors include retryability, structured source ranges, named limit
-details, and recovery suggestions when known.
-Every successful calculation also has `structuredContent.resolution`, which
-states whether the request was computed, transformed, proved already in form,
-left residual, unsupported, or indeterminate. Non-complete results identify the
-operation, stable reason, and supported domain, so an agent never has to infer
-completion from symbolic text.
+Physics request failures such as a dimension mismatch or unsupported force
+model also return `isError: true` with the physics response preserved in
+`structuredContent`.
+
+Every successful mathematical calculation also has
+`structuredContent.resolution`, which states whether the request was computed,
+transformed, proved already in form, left residual, unsupported, or
+indeterminate. Non-complete results identify the operation, stable reason, and
+supported domain, so an agent never has to infer completion from symbolic text.
 `structuredContent.provenance` classifies every mathematical result as exact,
 exact symbolic, a rigorous enclosure, an exact or unresolved solution set, a
 definition, a failure, or a cancellation, and records its method and backend.
+Physics results carry their own physics provenance with the deterministic
+`centl-physics` backend.
 
 Each calculation tool advertises a closed, discriminated `outputSchema`.
 `centl_compute` permits only mathematical values or errors; `centl_define`
-permits only definitions or errors; the compatibility tool permits either. The
-solution-set branch
-accepts the existing rational solution object and the exact
+permits only definitions or errors; the compatibility tool permits either.
+`centl_physics` likewise advertises closed success variants for capability
+metadata, units, conversions, constants, particle simulations, and collisions,
+plus a closed structured failure variant. The solution-set branch for
+mathematics accepts the existing rational solution object and the exact
 `real_quadratic` object documented in
 [the machine protocol](PROTOCOL.md#values). `centl_reset` advertises a separate
 self-contained control-response schema. The schemas are constructed only for
@@ -109,37 +186,45 @@ schema trees.
 ## Cancellation
 
 The stdio adapter implements MCP `notifications/cancelled`. A client can cancel
-an outstanding `tools/call` by its JSON-RPC request ID:
+an outstanding cancellable mathematical `tools/call` by its JSON-RPC request
+ID:
 
 ```json
 {"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":"tool-7","reason":"User stopped the calculation"}}
 ```
 
-The input reader marks an active or queued tool call immediately while the
-stateful evaluator continues to process calculations and definitions in FIFO
-order. Cancellation is cooperative at parser, session-expansion,
-bounded-iteration term boundaries, symbolic-transformation,
+The input reader marks an active or queued cancellable mathematical tool call
+immediately while the stateful evaluator continues to process calculations and
+definitions in FIFO order. Cancellation is cooperative at parser,
+session-expansion, bounded-iteration term boundaries, symbolic-transformation,
 approximation-retry, and pre-commit checkpoints. A native backend call already
 in progress completes before the next checkpoint.
 A definition whose evaluation observes cancellation is not committed. A signal
 that races with an already completed call may have no effect.
 
+`centl_physics` is bounded by the physics machine ceilings but is not yet a
+cooperative MCP cancellation target. This is an explicit current boundary, not
+an implication that physics simulation is unbounded. Clients that require an
+immediate physics interruption should retain an external timeout and terminate
+the process if necessary. Cooperative physics cancellation is a future
+hardening item.
+
 As required by MCP, a cancellation notification has no response and CENTL does
-not emit the cancelled tool call's response. Unknown, completed, and malformed
-cancellation targets are ignored. Request IDs must remain unique while calls
-are outstanding. Clients should retain an external timeout and terminate the
-process if they require immediate interruption.
+not emit the cancelled mathematical tool call's response. Unknown, completed,
+and malformed cancellation targets are ignored. Request IDs must remain unique
+while calls are outstanding. Clients should retain an external timeout and
+terminate the process if they require immediate interruption.
 
 Valid cancellation notifications bypass the process request-admission counter.
 The reader keeps at most 10,000 ordinary pending inputs and 16 MiB of their
 source bytes. When either budget is full, one valid cancellation notification
 may use a separately accounted emergency slot, still bounded by the per-request
 input limit; there is no second emergency slot. Further overload is terminal:
-CENTL marks active and queued tool evaluations cancelled, drains the ordinary
-queue plus any emergency notification, emits one ordered overload error when
-the overflowing input is a request, and exits with failure status. This keeps
-cancellation reachable at saturation while preventing an unbounded stdio
-backlog.
+CENTL marks active and queued cancellable tool evaluations cancelled, drains the
+ordinary queue plus any emergency notification, emits one ordered overload
+error when the overflowing input is a request, and exits with failure status.
+This keeps cancellation reachable at saturation while preventing an unbounded
+stdio backlog.
 
 The adapter implements `initialize`, `notifications/initialized`,
 `notifications/cancelled`, `ping`, `tools/list`, and `tools/call`. End of input
