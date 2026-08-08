@@ -21,11 +21,14 @@
   Centl_verify
   Centl_protocol
   Centl_request_queue
-  Centl_mcp
   Centl_physics
   Centl_physics_protocol
   Centl_physics_jsonl
-  Centl_physics_server)
+  Centl_physics_server
+  Centl_physics_mcp_output
+  Centl_physics_mcp
+  Centl_mcp_base
+  Centl_mcp)
  (libraries centl_verified centl_arb zarith threads unix yojson))
 
 (executable
