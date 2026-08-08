@@ -398,6 +398,11 @@
   line 1: ERROR expected a number or '(', found the end of the expression at column 9
   2
 
+  $ printf '%s\n' 'define | x = 1' > definition-only-contract.centl
+  $ ../src/main.exe check definition-only-contract.centl; echo $?
+  centl: no assertions in definition-only-contract.centl
+  2
+
   $ printf '%s\n' 'equal | factorial(100001) | 1' > resource-contract.centl
   $ ../src/main.exe check resource-contract.centl; echo $?
   line 1: ERROR the exact result exceeds the bit limit at column 1

@@ -591,6 +591,260 @@ let polynomial_is_zero coefficients =
     (fun coefficient -> Z.equal coefficient.Centl_Core.numerator Z.zero)
     coefficients
 
+type polynomial_budget = {
+  cancelled : unit -> bool;
+  max_work : int;
+  max_exact_bits : int;
+  mutable work : int;
+}
+
+exception Polynomial_normalization_error of verification_error
+
+let polynomial_normalization_error code message =
+  Polynomial_normalization_error { Centl_engine.code; message; position = None }
+
+let spend_polynomial_work budget amount =
+  if budget.cancelled () then
+    raise
+      (polynomial_normalization_error "cancelled" "the request was cancelled")
+  else if amount > budget.max_work - budget.work then
+    raise
+      (polynomial_normalization_error "resource_limit"
+         "polynomial normalization exceeds the expression-work limit")
+  else budget.work <- budget.work + amount
+
+let integer_bits value =
+  if Z.equal value Z.zero then 1 else Z.numbits (Z.abs value)
+
+let check_polynomial_coefficient budget coefficient =
+  let bits =
+    integer_bits coefficient.Centl_Core.numerator
+    + integer_bits coefficient.Centl_Core.denominator
+  in
+  if bits > budget.max_exact_bits then
+    raise
+      (polynomial_normalization_error "resource_limit"
+         "polynomial normalization exceeds the exact-coefficient bit limit")
+
+let check_polynomial_size budget coefficients =
+  let total_bits = ref 0 in
+  List.iter
+    (fun coefficient ->
+      if budget.cancelled () then
+        raise
+          (polynomial_normalization_error "cancelled"
+             "the request was cancelled");
+      check_polynomial_coefficient budget coefficient;
+      let bits =
+        integer_bits coefficient.Centl_Core.numerator
+        + integer_bits coefficient.Centl_Core.denominator
+      in
+      if bits > budget.max_exact_bits - !total_bits then
+        raise
+          (polynomial_normalization_error "resource_limit"
+             "polynomial normalization exceeds the aggregate exact-bit limit");
+      total_bits := !total_bits + bits)
+    coefficients
+
+let polynomial_add_bounded budget left right =
+  let rec add left right =
+    match (left, right) with
+    | [], result | result, [] -> result
+    | left_head :: left_tail, right_head :: right_tail ->
+        spend_polynomial_work budget 1;
+        let coefficient = Centl_Core.add left_head right_head in
+        check_polynomial_coefficient budget coefficient;
+        coefficient :: add left_tail right_tail
+  in
+  let result = add left right in
+  check_polynomial_size budget result;
+  result
+
+let polynomial_negate_bounded budget coefficients =
+  let result =
+    List.map
+      (fun coefficient ->
+        spend_polynomial_work budget 1;
+        let coefficient = Centl_Core.negate coefficient in
+        check_polynomial_coefficient budget coefficient;
+        coefficient)
+      coefficients
+  in
+  check_polynomial_size budget result;
+  result
+
+let polynomial_scale_bounded budget factor coefficients =
+  let result =
+    List.map
+      (fun coefficient ->
+        spend_polynomial_work budget 1;
+        let coefficient = Centl_Core.multiply factor coefficient in
+        check_polynomial_coefficient budget coefficient;
+        coefficient)
+      coefficients
+  in
+  check_polynomial_size budget result;
+  result
+
+let polynomial_multiply_bounded budget left right =
+  match (left, right) with
+  | [], _ | _, [] -> []
+  | _ ->
+      let left = Array.of_list left in
+      let right = Array.of_list right in
+      let result_length = Array.length left + Array.length right - 1 in
+      if result_length > budget.max_work then
+        raise
+          (polynomial_normalization_error "resource_limit"
+             "polynomial normalization exceeds the expression-node limit");
+      let result = Array.make result_length (Centl_Core.make Z.zero Z.one) in
+      Array.iteri
+        (fun left_degree left_coefficient ->
+          Array.iteri
+            (fun right_degree right_coefficient ->
+              spend_polynomial_work budget 1;
+              let degree = left_degree + right_degree in
+              let coefficient =
+                Centl_Core.add result.(degree)
+                  (Centl_Core.multiply left_coefficient right_coefficient)
+              in
+              check_polynomial_coefficient budget coefficient;
+              result.(degree) <- coefficient)
+            right)
+        left;
+      let result = Array.to_list result in
+      check_polynomial_size budget result;
+      result
+
+let rec polynomial_power_bounded budget base exponent =
+  if exponent = 0 then [ Centl_Core.make Z.one Z.one ]
+  else
+    polynomial_multiply_bounded budget base
+      (polynomial_power_bounded budget base (exponent - 1))
+
+let polynomial_constant_bounded coefficients =
+  match coefficients with
+  | [] -> Some (Centl_Core.make Z.zero Z.one)
+  | head :: tail ->
+      if
+        List.for_all
+          (fun coefficient -> Z.equal coefficient.Centl_Core.numerator Z.zero)
+          tail
+      then Some head
+      else None
+
+let polynomial_of_bounded ~cancelled limits expression variable =
+  let budget =
+    {
+      cancelled;
+      max_work = limits.Centl_engine.max_expression_nodes;
+      max_exact_bits = limits.max_exact_bits;
+      work = 0;
+    }
+  in
+  let rec normalize = function
+    | Centl_Core.Literal (numerator, denominator) ->
+        spend_polynomial_work budget 1;
+        if Z.equal denominator Z.zero then None
+        else Some [ Centl_Core.make numerator denominator ]
+    | Centl_Core.Symbol name ->
+        spend_polynomial_work budget 1;
+        if name = variable then
+          Some [ Centl_Core.make Z.zero Z.one; Centl_Core.make Z.one Z.one ]
+        else None
+    | Centl_Core.Negate inner ->
+        Option.map (polynomial_negate_bounded budget) (normalize inner)
+    | Centl_Core.Binary (operator, left, right) ->
+        begin match (normalize left, normalize right) with
+        | Some left, Some right ->
+            begin match operator with
+            | Centl_Core.Add -> Some (polynomial_add_bounded budget left right)
+            | Centl_Core.Subtract ->
+                Some
+                  (polynomial_add_bounded budget left
+                     (polynomial_negate_bounded budget right))
+            | Centl_Core.Multiply ->
+                Some (polynomial_multiply_bounded budget left right)
+            | Centl_Core.Divide ->
+                begin match polynomial_constant_bounded right with
+                | Some denominator
+                  when not (Z.equal denominator.Centl_Core.numerator Z.zero) ->
+                    Some
+                      (polynomial_scale_bounded budget
+                         (Centl_Core.make denominator.denominator
+                            denominator.numerator)
+                         left)
+                | Some _ | None -> None
+                end
+            end
+        | None, _ | _, None -> None
+        end
+    | Centl_Core.Power (base, exponent)
+      when Z.gt exponent Z.zero && Z.leq exponent (Z.of_int 64) ->
+        Option.map
+          (fun base -> polynomial_power_bounded budget base (Z.to_int exponent))
+          (normalize base)
+    | Centl_Core.Simplify inner
+    | Centl_Core.Expand inner
+    | Centl_Core.Factor inner ->
+        normalize inner
+    | Centl_Core.Power _ | Centl_Core.Function _ | Centl_Core.Differentiate _
+    | Centl_Core.Substitute _ | Centl_Core.Derivative _ | Centl_Core.Assuming _
+      ->
+        spend_polynomial_work budget 1;
+        None
+  in
+  let polynomial_expression coefficients =
+    let coefficients = Array.of_list coefficients in
+    let higher = ref None in
+    for degree = Array.length coefficients - 1 downto 0 do
+      spend_polynomial_work budget 1;
+      let coefficient = coefficients.(degree) in
+      if not (Z.equal coefficient.Centl_Core.numerator Z.zero) then begin
+        let negative = Z.sign coefficient.numerator < 0 in
+        let magnitude =
+          if negative then Centl_Core.negate coefficient else coefficient
+        in
+        let term =
+          if degree = 0 then
+            Centl_Core.Literal (magnitude.numerator, magnitude.denominator)
+          else
+            let variable_term =
+              if degree = 1 then Centl_Core.Symbol variable
+              else Centl_Core.Power (Centl_Core.Symbol variable, Z.of_int degree)
+            in
+            if
+              Z.equal magnitude.numerator Z.one
+              && Z.equal magnitude.denominator Z.one
+            then variable_term
+            else
+              Centl_Core.Binary
+                ( Centl_Core.Multiply,
+                  Centl_Core.Literal (magnitude.numerator, magnitude.denominator),
+                  variable_term )
+        in
+        higher :=
+          begin match (!higher, negative) with
+          | None, false -> Some term
+          | None, true -> Some (Centl_Core.Negate term)
+          | Some expression, false ->
+              Some (Centl_Core.Binary (Centl_Core.Add, expression, term))
+          | Some expression, true ->
+              Some (Centl_Core.Binary (Centl_Core.Subtract, expression, term))
+          end
+      end
+    done;
+    Option.value !higher ~default:(Centl_Core.Literal (Z.zero, Z.one))
+  in
+  try
+    match normalize expression with
+    | None -> Ok None
+    | Some coefficients ->
+        check_polynomial_size budget coefficients;
+        let normalized = polynomial_expression coefficients in
+        Ok (Some (coefficients, normalized))
+  with Polynomial_normalization_error error -> Error error
+
 let witness_candidates =
   let integers =
     [
@@ -750,17 +1004,17 @@ let verify_univariate_polynomial ~(claim : claim) ~cancelled limits variable
               Centl_Core.Binary
                 (Centl_Core.Subtract, left_expression, right_expression)
             in
-            begin match Centl_Core.polynomial_of difference variable.name with
-            | None ->
+            begin match
+              polynomial_of_bounded ~cancelled limits difference variable.name
+            with
+            | Error error -> Error error
+            | Ok None ->
                 Ok
                   (unknown_quantified ~claim
                      ~reason:"not_univariate_rational_polynomial"
                      ~left:(Some (side_value_of_exact left_value))
                      ~right:(Some (side_value_of_exact right_value)))
-            | Some coefficients ->
-                let normalized =
-                  Centl_Core.polynomial_expression coefficients variable.name
-                in
+            | Ok (Some (coefficients, normalized)) ->
                 let normalized_text = text_of_expression normalized in
                 let zero = polynomial_is_zero coefficients in
                 begin match (claim.relation, zero) with
