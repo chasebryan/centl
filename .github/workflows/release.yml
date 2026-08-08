@@ -556,6 +556,7 @@ jobs:
         run: |
           $env:NATIVE_PREFIX + "\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\msys64\mingw64\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+          "C:\msys64\usr\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
           $Native = $env:NATIVE_PREFIX.Replace('\', '/')
           $Archives = @("libflint.a", "libmpfr.a", "libgmp.a")
           foreach ($Archive in $Archives) {
