@@ -189,27 +189,28 @@ let state_dimensions_preserved (state:particle_state_1d) : Tot bool =
   P.quantity_has_dimension state.state_position P.length_dimension &&
   P.quantity_has_dimension state.state_velocity P.velocity_dimension
 
+let uniform_acceleration_example_fact : prop =
+  velocity_verlet_step
+    {
+      state_time = P.quantity_of_unit (P.scalar 0 1) P.second;
+      state_mass = P.quantity_of_unit (P.scalar 2 1) P.kilogram;
+      state_position = P.quantity_of_unit (P.scalar 0 1) P.meter;
+      state_velocity =
+        P.quantity_of_unit (P.scalar 3 1) P.meter_per_second
+    }
+    (UniformAcceleration
+      (P.quantity_of_unit (P.scalar (-4) 1)
+        P.meter_per_second_squared))
+    (P.quantity_of_unit (P.scalar 1 1) P.second)
+  =
+  StepOk {
+    state_time = P.quantity_of_unit (P.scalar 1 1) P.second;
+    state_mass = P.quantity_of_unit (P.scalar 2 1) P.kilogram;
+    state_position = P.quantity_of_unit (P.scalar 1 1) P.meter;
+    state_velocity =
+      P.quantity_of_unit (P.scalar (-1) 1) P.meter_per_second
+  }
+
 let uniform_acceleration_example ()
-  : Lemma
-      (ensures
-        velocity_verlet_step
-          {
-            state_time = P.quantity_of_unit (P.scalar 0 1) P.second;
-            state_mass = P.quantity_of_unit (P.scalar 2 1) P.kilogram;
-            state_position = P.quantity_of_unit (P.scalar 0 1) P.meter;
-            state_velocity =
-              P.quantity_of_unit (P.scalar 3 1) P.meter_per_second
-          }
-          (UniformAcceleration
-            (P.quantity_of_unit (P.scalar (-4) 1)
-              P.meter_per_second_squared))
-          (P.quantity_of_unit (P.scalar 1 1) P.second)
-        =
-        StepOk {
-          state_time = P.quantity_of_unit (P.scalar 1 1) P.second;
-          state_mass = P.quantity_of_unit (P.scalar 2 1) P.kilogram;
-          state_position = P.quantity_of_unit (P.scalar 1 1) P.meter;
-          state_velocity =
-            P.quantity_of_unit (P.scalar (-1) 1) P.meter_per_second
-        })
-= ()
+  : Lemma (ensures uniform_acceleration_example_fact)
+= assert_norm uniform_acceleration_example_fact
