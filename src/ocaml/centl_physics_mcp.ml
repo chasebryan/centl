@@ -155,8 +155,9 @@ let action_fields = function
   | "simulate_particle" ->
       Some
         ( [ "action"; "particle"; "forces"; "dt"; "steps" ],
-          [ "action"; "particle"; "forces"; "dt"; "steps"; "include_trajectory" ]
-        )
+          [
+            "action"; "particle"; "forces"; "dt"; "steps"; "include_trajectory";
+          ] )
   | "elastic_collision_1d" ->
       Some
         ( [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ],
@@ -178,7 +179,9 @@ let validate_arguments arguments =
           | Some (name, _) -> Error ("unknown centl_physics argument " ^ name)
           | None ->
               begin match
-                List.find_opt (fun name -> not (List.mem_assoc name arguments)) required
+                List.find_opt
+                  (fun name -> not (List.mem_assoc name arguments))
+                  required
               with
               | Some name -> Error ("centl_physics requires " ^ name)
               | None -> Ok ()
