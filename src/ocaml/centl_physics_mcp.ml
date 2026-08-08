@@ -145,6 +145,48 @@ let ok = function
   | `Assoc fields -> List.assoc_opt "ok" fields = Some (`Bool true)
   | _ -> false
 
+let action_fields = function
+  | "capabilities" | "units" -> Some ([ "action" ], [ "action" ])
+  | "convert" ->
+      Some
+        ( [ "action"; "value"; "from_unit"; "to_unit" ],
+          [ "action"; "value"; "from_unit"; "to_unit" ] )
+  | "constant" -> Some ([ "action"; "symbol" ], [ "action"; "symbol" ])
+  | "simulate_particle" ->
+      Some
+        ( [ "action"; "particle"; "forces"; "dt"; "steps" ],
+          [ "action"; "particle"; "forces"; "dt"; "steps"; "include_trajectory" ]
+        )
+  | "elastic_collision_1d" ->
+      Some
+        ( [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ],
+          [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ] )
+  | _ -> None
+
+let validate_arguments arguments =
+  match List.assoc_opt "action" arguments with
+  | None -> Error "centl_physics requires action"
+  | Some (`String action) ->
+      begin match action_fields action with
+      | None -> Error ("unknown centl_physics action " ^ action)
+      | Some (required, allowed) ->
+          begin match
+            List.find_opt
+              (fun (name, _) -> not (List.mem name allowed))
+              arguments
+          with
+          | Some (name, _) -> Error ("unknown centl_physics argument " ^ name)
+          | None ->
+              begin match
+                List.find_opt (fun name -> not (List.mem_assoc name arguments)) required
+              with
+              | Some name -> Error ("centl_physics requires " ^ name)
+              | None -> Ok ()
+              end
+          end
+      end
+  | Some _ -> Error "centl_physics action must be a string"
+
 let call state arguments =
   if not (Centl_physics_server.admit state) then
     Centl_physics_protocol.failure ~method_:"request" "resource_limit"
