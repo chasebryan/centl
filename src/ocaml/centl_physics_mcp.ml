@@ -113,6 +113,13 @@ let input_schema =
           ("velocity2", quantity_input_schema);
         ]
         [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ];
+      strict_object
+        [
+          ("action", const_string "elastic_collision_3d_at_contact");
+          ("particle1", particle_input_schema);
+          ("particle2", particle_input_schema);
+        ]
+        [ "action"; "particle1"; "particle2" ];
     ]
 
 let read_only_annotations =
@@ -134,8 +141,8 @@ let tool () =
           "Use CENTL's deterministic exact-rational particle mechanics. \
            Discover physics capabilities and units, convert compatible units, \
            inspect exact physical constants, simulate a dimension-checked \
-           particle with supported force models, or solve an ideal exact 1D \
-           elastic collision." );
+           particle with supported force models, or solve ideal exact elastic \
+           collisions in 1D and at a caller-supplied 3D contact." );
       ("inputSchema", input_schema);
       ("outputSchema", Lazy.force Centl_physics_mcp_output.output_schema);
       ("annotations", read_only_annotations);
@@ -162,6 +169,10 @@ let action_fields = function
       Some
         ( [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ],
           [ "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ] )
+  | "elastic_collision_3d_at_contact" ->
+      Some
+        ( [ "action"; "particle1"; "particle2" ],
+          [ "action"; "particle1"; "particle2" ] )
   | _ -> None
 
 let validate_arguments arguments =
