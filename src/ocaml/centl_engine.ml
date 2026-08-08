@@ -201,6 +201,7 @@ type binding =
 
 type session = {
   mutable bindings : (string * binding) list;
+  mutable revision : int;
   mutable retained_nodes : int;
   mutable retained_bits : int;
   mutable retained_bytes : int;
@@ -2944,15 +2945,23 @@ let evaluate_detailed source =
   evaluate_outcome_with_limits default_evaluation_limits source
 
 let create_session () =
-  { bindings = []; retained_nodes = 0; retained_bits = 0; retained_bytes = 0 }
+  {
+    bindings = [];
+    revision = 0;
+    retained_nodes = 0;
+    retained_bits = 0;
+    retained_bytes = 0;
+  }
 
 let reset_session session =
   session.bindings <- [];
+  session.revision <- session.revision + 1;
   session.retained_nodes <- 0;
   session.retained_bits <- 0;
   session.retained_bytes <- 0
 
 let session_binding_count session = List.length session.bindings
+let session_revision session = session.revision
 let lookup session name = List.assoc_opt name session.bindings
 let session_failure ?position code message = Error { code; message; position }
 
@@ -2998,6 +3007,7 @@ let metadata_bytes_with_names limit base names =
 
 let retain_binding session name binding cost =
   session.bindings <- (name, binding) :: session.bindings;
+  session.revision <- session.revision + 1;
   session.retained_nodes <- session.retained_nodes + cost.nodes;
   session.retained_bits <- session.retained_bits + cost.bits;
   session.retained_bytes <- session.retained_bytes + cost.bytes
@@ -4399,6 +4409,22 @@ let json_of_session_definitions session =
           ]
   in
   `List (List.rev_map binding session.bindings)
+
+let json_of_session_dependencies session names =
+  let wanted name = List.mem name names in
+  match json_of_session_definitions session with
+  | `List definitions ->
+      `List
+        (List.filter
+           (function
+             | `Assoc fields ->
+                 begin match List.assoc_opt "name" fields with
+                 | Some (`String name) -> wanted name
+                 | _ -> false
+                 end
+             | _ -> false)
+           definitions)
+  | _ -> assert false
 
 let error_retryable code =
   List.mem code

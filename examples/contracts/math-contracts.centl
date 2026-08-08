@@ -10,6 +10,9 @@ less_or_equal | 2 | 2
 greater_than | 3 | 2
 greater_or_equal | 9/16 | (3/4)^2
 
+# F*-backed universal equality in the admitted polynomial fragment
+equal | (x + 1)^2 | x^2 + 2*x + 1 | x:rational
+
 # Session definitions are private to this check process
 define | r = 3
 equal | r^2 | 9

@@ -57,7 +57,7 @@ Successful and failed responses report the current definition and request
 counts:
 
 ```json
-{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
 ```
 
 Definitions use the same calculator syntax and remain immutable:
@@ -67,7 +67,7 @@ Definitions use the same calculator syntax and remain immutable:
 ```
 
 ```json
-{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
+{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
 ```
 
 ## Limits
@@ -148,7 +148,7 @@ that has a string or integer `id`:
 The acknowledgement is ordered with normal session traffic:
 
 ```json
-{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
 ```
 
 Input is read independently from evaluation, so the cancellation signal can
@@ -220,7 +220,7 @@ Transformation results also identify `operation` and `supported_domain`.
 Non-complete and unchanged results include a stable `reason` code. For example:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"integrate(sin(x), x)","text":"integrate(sin(x), x)"},"resolution":{"status":"unsupported","operation":"integrate","reason":"non_polynomial_integrand","supported_domain":"rational-coefficient univariate polynomials with exact rational bounds"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"integrate(sin(x), x)","text":"integrate(sin(x), x)"},"resolution":{"status":"unsupported","operation":"integrate","reason":"non_polynomial_integrand","supported_domain":"rational-coefficient univariate polynomials with exact rational bounds"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 This is a successful exact symbolic value, but not a completed integration.
@@ -239,13 +239,13 @@ type.
 An exact symbolic result uses canonical plain text:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"resolution":{"status":"transformed","operation":"diff","supported_domain":"the documented exact symbolic differentiation rules"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"resolution":{"status":"transformed","operation":"diff","supported_domain":"the documented exact symbolic differentiation rules"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Conditional symbolic results retain machine-readable conditions:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"resolution":{"status":"transformed","operation":"assuming","supported_domain":"exact expressions with retained conditions"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"resolution":{"status":"transformed","operation":"assuming","supported_domain":"exact expressions with retained conditions"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
@@ -258,7 +258,7 @@ the ordered scalar values using the existing integer, rational, and symbolic
 schemas, and `length` is a JSON integer bounded by the active iteration limit:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
+{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
 ```
 
 Empty ranges have `length: 0`, `items: []`, and `text: "[]"`. Nested sequence
@@ -270,7 +270,7 @@ Equation solving returns a structured solution set. Rational parts remain
 decimal strings:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
 ```
 
 `status` is `finite`, `none`, `all`, or `unresolved`. An unresolved result is a
@@ -281,7 +281,7 @@ Finite rational solutions retain the protocol's original untagged
 nonsquare discriminant uses a tagged exact solution object instead:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"kind":"real_quadratic","exact":true,"branch":"lower","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"-sqrt(2)"},{"kind":"real_quadratic","exact":true,"branch":"upper","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"sqrt(2)"}],"equation":{"left":"x^2","right":"2"},"text":"x in {-sqrt(2), sqrt(2)}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_solution_set","method":"verified_quadratic_solving","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"kind":"real_quadratic","exact":true,"branch":"lower","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"-sqrt(2)"},{"kind":"real_quadratic","exact":true,"branch":"upper","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"sqrt(2)"}],"equation":{"left":"x^2","right":"2"},"text":"x in {-sqrt(2), sqrt(2)}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"exact_solution_set","method":"verified_quadratic_solving","backend":"centl-core"}}
 ```
 
 `branch` is `lower` for `center - sqrt(radicand)` and `upper` for
@@ -297,7 +297,7 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 `precision` records actual backend work:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
+{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
 ```
 
 ## Errors
@@ -305,7 +305,7 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 Failures have stable codes and mathematical messages:
 
 ```json
-{"version":1,"ok":false,"error":{"suggestion":"Change the input or retain an explicit nonzero domain condition.","code":"division_by_zero","message":"division by zero","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+{"version":1,"ok":false,"error":{"suggestion":"Change the input or retain an explicit nonzero domain condition.","code":"division_by_zero","message":"division by zero","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
 ```
 
 Syntax errors and runtime mathematical failures that can be localized to source
@@ -333,9 +333,8 @@ scalar uses `sequence_not_expression`.
 
 ## Claim verification
 
-Read-only structured claim checking is available on the development path and
-will ship with the math-contracts release. Protocol version remains 1; the
-`verify` operation is additive.
+Read-only structured claim checking ships in the 0.12.0 release candidate.
+Protocol version remains 1; the `verify` operation is additive.
 
 A protocol request names both sides and one of six relations:
 
@@ -347,7 +346,7 @@ A decisive exact result is explicit about its scope, method, assurance, values,
 and the transformation resolution of each side:
 
 ```json
-{"version":1,"id":9,"ok":true,"verification":{"schema":1,"verdict":"verified","scope":"closed_exact_rational","method":"closed_rational_comparison","claim":{"left":"0.1 + 0.2","relation":"equal","right":"3/10","variables":[],"assumptions":[]},"evidence":{"left":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"right":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"comparison":"equal","left_resolution":{"status":"computed"},"right_resolution":{"status":"computed"}},"assurance":{"class":"exact_algorithm"},"producer":{"name":"centl","version":"0.11.0"}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"verification","method":"claim_verification","backend":"centl-verify"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":9,"ok":true,"verification":{"schema":1,"verdict":"verified","scope":"closed_exact_rational","method":"closed_rational_comparison","claim":{"left":"0.1 + 0.2","relation":"equal","right":"3/10","variables":[],"assumptions":[]},"evidence":{"left":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"right":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"comparison":"equal","left_resolution":{"status":"computed"},"right_resolution":{"status":"computed"}},"assurance":{"class":"exact_algorithm"},"producer":{"name":"centl","version":"0.12.0-rc.1"}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.12.0-rc.1"},"classification":"verification","method":"claim_verification","backend":"centl-verify"},"session":{"definitions":0,"requests":1}}
 ```
 
 `relation` is `equal`, `not_equal`, `less_than`, `less_or_equal`,
@@ -361,16 +360,17 @@ The decisive scopes in this initial slice are:
 | --- | --- |
 | `closed_exact_rational` | Both sides reduce to exact integers or rationals; all six relations are decided. |
 | `closed_real_enclosure` | Disjoint rigorous enclosures decide order, inequalities, and non-equality. |
-| `univariate_rational_polynomial` | One quantified rational variable. False equalities are `refuted` only with an exact rational counterexample (`witness_checked`). Zero-difference identities stay `unknown` with reason `polynomial_soundness_theorem_pending` until F* soundness is fully proved. |
+| `univariate_rational_polynomial` | One quantified rational variable. False equalities are `refuted` only with an exact rational counterexample (`witness_checked`). Zero-difference identities in the F*-admitted fragment are `verified` with `verified_core` assurance and the named soundness theorem. |
 
 Real equality is not inferred from enclosures. Overlapping enclosures,
-free-form assumptions, multi-variable claims, quantified order, unproved
-polynomial identities, and unquantified free symbols return `unknown` with a
+free-form assumptions, multi-variable claims, quantified order, polynomial
+forms outside the F* admission function, and unquantified free symbols return `unknown` with a
 stable reason. Invalid mathematical inputs return the `invalid` verdict.
 Cancellation, resource or precision exhaustion, insufficient precision, and
 backend failures remain protocol errors with `ok: false`; they are never
-converted to `unknown`. Polynomial identities must not report `verified_core`
-or a decisive `verified` verdict while the F* lemma remains unfinished.
+converted to `unknown`. A polynomial identity reports `verified_core` only
+when `Centl.PolynomialSoundness.classify_polynomial_identity` admits it and
+returns `VerifiedPolynomialIdentity`; host normalization alone is never decisive.
 Counterexample refutations report `witness_checked`; closed exact rational
 comparisons report `exact_algorithm`; enclosure order reports
 `certified_enclosure`.
@@ -381,6 +381,13 @@ decimal bounds. Claims that read immutable session definitions report those
 dependencies in their evidence. Verification does not add, replace, or remove
 session bindings.
 
+`centl verify ... --receipt FILE` writes one bounded replayable receipt.
+`centl check FILE --receipt FILE` writes a collection containing one receipt
+per assertion. Each receipt records the resolved claim, verdict evidence,
+active limits, exact transitive session definitions, session revision,
+protocol/receipt schema, and stamped build identity. Serialization is capped
+at 1,048,576 bytes and the destination is replaced atomically.
+
 Unlike ordinary evaluation's mathematical-value limit, verification applies
 `max_result_bytes` to the complete protocol response, including the echoed
 claim, evidence, provenance, and session counters.
@@ -388,8 +395,8 @@ claim, evidence, provenance, and session counters.
 The same operation is exposed as MCP tool `centl_verify` and through:
 
 ```sh
-centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
-centl check path/to/contracts.centl
+centl verify --left '0.1 + 0.2' --relation equal --right '3/10' --receipt claim.json
+centl check path/to/contracts.centl --receipt contracts.json
 ```
 
 `centl verify` exits 0 for `verified`, 1 for `refuted`, `unknown`, or

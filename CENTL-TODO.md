@@ -31,13 +31,17 @@ This is a working checklist. Product sequencing and release themes live in
 ## Math contracts (0.12.0 path)
 
 - [x] Structured verify / check / assert surfaces.
-- [ ] Discharge every F* zero-difference soundness obligation before enabling
+- [x] Discharge every F* zero-difference soundness obligation before enabling
   `verified_core` polynomial equality.
-- [ ] Finish bounded, replayable receipts with resolved session dependencies.
-- [ ] Validate release `BUILD_MANIFEST.json` identity across every platform.
-- [ ] Validate and publish the reusable `centl-check` GitHub Action and passing
+- [x] Finish bounded, replayable receipts with resolved session dependencies.
+- [x] Add release `BUILD_MANIFEST.json` identity validation across every
+  platform.
+- [ ] Run the all-platform RC workflow and confirm all four manifests pass the
+  cross-platform identity gate.
+- [x] Validate the reusable `centl-check` GitHub Action and passing
   example contracts.
-- [ ] Publish 0.12.0 with stamped release identity and conformance CI gate.
+- [ ] Publish the final 0.12.0 tag after RC validation with stamped release
+  identity and the conformance CI gate.
 - [ ] Pilot three external contract repositories.
 
 Keep this file limited to actionable near-term work; remove or check items when

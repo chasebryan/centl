@@ -26,6 +26,9 @@ env:
   MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
   FLINT_VERSION: "3.0.1"
   FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  OCAML_VERSION: "4.14.1"
+  CENTL_VERIFICATION_COMMAND: "make verify"
+  CENTL_VERIFICATION_RESULT: "passed"
   SOURCE_DATE_EPOCH: "315532800"
 
 jobs:
@@ -74,7 +77,8 @@ jobs:
         run: |
           make extract
           git ls-files --error-unmatch \
-            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
+            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
+            src/generated/Centl_PolynomialSoundness.ml
           git diff --exit-code -- src/generated
           mkdir -p release-input/licenses
           fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
@@ -87,6 +91,7 @@ jobs:
           path: |
             src/generated/Centl_Gcd.ml
             src/generated/Centl_Core.ml
+            src/generated/Centl_PolynomialSoundness.ml
             release-input/licenses/FSTAR
           if-no-files-found: error
 
@@ -256,6 +261,14 @@ jobs:
             | "$install_root/bin/centl" --mcp \
             > "$RUNNER_TEMP/centl-mcp.jsonl"
           grep -q '"text":"3/10"' "$RUNNER_TEMP/centl-mcp.jsonl"
+
+      - name: Validate reusable contract action
+        uses: ./.github/actions/centl-check
+        with:
+          path: examples/contracts/math-contracts.centl
+          receipt: release-input/centl-check-receipt.json
+          centl-bin: _build/default/src/main.exe
+          upload-receipt: "false"
 
       - name: Preserve Linux release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -670,6 +683,8 @@ jobs:
           merge-multiple: true
 
       - name: Validate release set
+        env:
+          VERSION: ${{ needs.linux-x86_64.outputs.version }}
         run: |
           for asset in \
             centl-linux-x86_64.tar.gz \
@@ -681,6 +696,59 @@ jobs:
             (cd dist && sha256sum --check "$asset.sha256")
           done
           test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 8
+          python3 - <<'PY'
+          import io
+          import json
+          import os
+          import pathlib
+          import tarfile
+          import zipfile
+
+          root = pathlib.Path("dist")
+          archives = sorted(root.glob("centl-*.tar.gz")) + sorted(root.glob("centl-*.zip"))
+          manifests = []
+          for archive in archives:
+              if archive.suffix == ".zip":
+                  with zipfile.ZipFile(archive) as package:
+                      data = package.read("centl/BUILD_MANIFEST.json")
+              else:
+                  with tarfile.open(archive, "r:gz") as package:
+                      member = package.extractfile("centl/BUILD_MANIFEST.json")
+                      if member is None:
+                          raise SystemExit(f"missing manifest in {archive}")
+                      data = member.read()
+              manifests.append((archive.name, json.loads(data)))
+
+          expected_targets = {
+              ("linux", "x86_64"),
+              ("macos", "x86_64"),
+              ("macos", "arm64"),
+              ("windows", "x86_64"),
+          }
+          targets = {(m["platform"], m["architecture"]) for _, m in manifests}
+          if targets != expected_targets:
+              raise SystemExit(f"unexpected manifest targets: {sorted(targets)}")
+
+          common_fields = (
+              "semantic_version", "commit", "generated_core_hash",
+              "verification", "toolchain", "receipt_schema", "protocol_version",
+          )
+          reference = manifests[0][1]
+          for name, manifest in manifests:
+              if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
+                  raise SystemExit(f"invalid manifest schema in {name}")
+              if manifest.get("semantic_version") != os.environ["VERSION"]:
+                  raise SystemExit(f"version mismatch in {name}")
+              if manifest.get("commit") != os.environ["GITHUB_SHA"]:
+                  raise SystemExit(f"commit mismatch in {name}")
+              if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
+                  raise SystemExit(f"verification attestation mismatch in {name}")
+              if len(manifest.get("generated_core_hash", "")) != 64:
+                  raise SystemExit(f"invalid generated-core hash in {name}")
+              for field in common_fields:
+                  if manifest.get(field) != reference.get(field):
+                      raise SystemExit(f"cross-platform {field} mismatch in {name}")
+          PY
 
       - name: Preserve complete release set
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -697,5 +765,5 @@ jobs:
         run: |
           test "v$VERSION" = "$GITHUB_REF_NAME"
           gh release create "$GITHUB_REF_NAME" dist/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --generate-notes --title "CENTL $VERSION"
+            --repo "$GITHUB_REPOSITORY" --generate-notes \
+            --title "CENTL $VERSION — Math Contracts"

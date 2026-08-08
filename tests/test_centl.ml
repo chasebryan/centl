@@ -1633,18 +1633,19 @@ let closed_claim_verification () =
       ]
   in
   Alcotest.(check string)
-    "quantified rational polynomial identity is unknown pending theorem"
-    "unknown" (verdict quantified);
+    "quantified rational polynomial identity is verified" "verified"
+    (verdict quantified);
   Alcotest.(check string)
     "polynomial scope" "univariate_rational_polynomial" (scope quantified);
   Alcotest.(check string)
-    "pending theorem keeps assurance none" "none"
+    "polynomial theorem has verified-core assurance" "verified_core"
     (quantified |> json_member "verification" |> json_member "assurance"
    |> json_string "class");
   Alcotest.(check string)
-    "pending theorem reason is explicit" "polynomial_soundness_theorem_pending"
-    (quantified |> json_member "verification" |> json_member "evidence"
-   |> json_string "reason");
+    "polynomial theorem is named"
+    "Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound"
+    (quantified |> json_member "verification" |> json_member "assurance"
+   |> json_string "theorem");
   let poly_identity =
     verify
       [
@@ -1658,8 +1659,7 @@ let closed_claim_verification () =
       ]
   in
   Alcotest.(check string)
-    "expanded square identity is unknown pending theorem" "unknown"
-    (verdict poly_identity);
+    "expanded square identity is verified" "verified" (verdict poly_identity);
   Alcotest.(check bool)
     "normalized difference is present" true
     (match

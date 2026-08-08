@@ -15,6 +15,9 @@ The current F* core proves:
 - exact rational-coefficient polynomial integration constructs zero-constant
   coefficient lists, and independently defined coefficient differentiation
   recovers the source coefficients up to exact rational equivalence; and
+- rational-polynomial collection preserves denotation for the admitted
+  univariate fragment, so a zero collected difference implies equality at
+  every rational point; and
 - dyadic intervals are rounded outward to exact decimal scales.
 
 The core also validates native real enclosures before use: the lower endpoint
@@ -76,6 +79,15 @@ assumption simplifier are also total F* definitions. Generated expansion,
 collection, and cubic-derivative identities are checked after exact
 substitution against independently computed integer results.
 
+`Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound` is the
+semantic theorem used by the verification API. Its executable admission
+function covers rational literals, one selected variable, negation, addition,
+subtraction, multiplication, bounded positive powers, and transparent
+`simplify`/`expand`/`factor` wrappers. It rejects unsupported syntax, including
+an unreduced symbolic `Divide` node. The OCaml verifier requires both its
+bounded normalizer to obtain zero and the extracted F* classifier to return
+`VerifiedPolynomialIdentity`; disagreement is `unknown`, never verification.
+
 CENTL 0.9.0 extends that exact polynomial model with coefficient-wise
 antiderivatives. Each coefficient division is exact rational arithmetic, and
 the chosen constant term is zero.
@@ -113,6 +125,8 @@ F* extracts the verified definitions to OCaml. A small local extraction runtime
 maps F* integers directly to Zarith arbitrary-precision integers. The generated
 OCaml snapshot is versioned so ordinary opam/Dune package builds do not need F*;
 verification CI regenerates it with the pinned verifier and rejects any diff.
+The release identity hashes `Centl_Core.ml`, `Centl_Gcd.ml`, and
+`Centl_PolynomialSoundness.ml` in that order.
 
 The current trusted application boundary still includes the handwritten OCaml
 lexer/parser, exact finite-iteration driver and sequence container, terminal
