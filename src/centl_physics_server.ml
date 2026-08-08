@@ -5,15 +5,7 @@ open Centl_physics_jsonl
 let collision_result fields =
   match
     check_fields
-      [
-        "version";
-        "id";
-        "action";
-        "mass1";
-        "velocity1";
-        "mass2";
-        "velocity2";
-      ]
+      [ "version"; "id"; "action"; "mass1"; "velocity1"; "mass2"; "velocity2" ]
       fields
   with
   | Error _ as error -> error
@@ -37,11 +29,13 @@ let collision_result fields =
                   elastic_collision_1d ~mass1 ~velocity1 ~mass2 ~velocity2
                 in
                 let initial_momentum =
-                  quantity_add (quantity_mul mass1 velocity1)
+                  quantity_add
+                    (quantity_mul mass1 velocity1)
                     (quantity_mul mass2 velocity2)
                 in
                 let final_momentum =
-                  quantity_add (quantity_mul mass1 v1_final)
+                  quantity_add
+                    (quantity_mul mass1 v1_final)
                     (quantity_mul mass2 v2_final)
                 in
                 let half = Q.of_string "1/2" in
@@ -50,7 +44,8 @@ let collision_result fields =
                   |> quantity_scale half
                 in
                 let initial_ke =
-                  quantity_add (kinetic mass1 velocity1) (kinetic mass2 velocity2)
+                  quantity_add (kinetic mass1 velocity1)
+                    (kinetic mass2 velocity2)
                 in
                 let final_ke =
                   quantity_add (kinetic mass1 v1_final) (kinetic mass2 v2_final)
@@ -69,30 +64,35 @@ let collision_result fields =
                                  (Q.equal initial_momentum.si_value
                                     final_momentum.si_value) );
                              ( "kinetic_energy",
-                               `Bool (Q.equal initial_ke.si_value final_ke.si_value)
+                               `Bool
+                                 (Q.equal initial_ke.si_value final_ke.si_value)
                              );
                              ( "initial_momentum",
-                               exact_quantity_json_si initial_momentum "kg*m/s" );
+                               exact_quantity_json_si initial_momentum "kg*m/s"
+                             );
                              ( "final_momentum",
                                exact_quantity_json_si final_momentum "kg*m/s" );
                              ( "initial_kinetic_energy",
                                quantity_json_as initial_ke "J" );
-                             ("final_kinetic_energy", quantity_json_as final_ke "J");
+                             ( "final_kinetic_energy",
+                               quantity_json_as final_ke "J" );
                            ] );
                        ("exact", `Bool true);
                        ( "text",
                          `String
-                           ("v1=" ^ Q.to_string (convert v1_final "m/s")
-                          ^ " m/s; v2="
-                          ^ Q.to_string (convert v2_final "m/s")
-                          ^ " m/s") );
+                           ("v1="
+                           ^ Q.to_string (convert v1_final "m/s")
+                           ^ " m/s; v2="
+                           ^ Q.to_string (convert v2_final "m/s")
+                           ^ " m/s") );
                      ])
               with Physics_error message -> Error message
               end
           | Error message, _, _, _
           | _, Error message, _, _
           | _, _, Error message, _
-          | _, _, _, Error message -> Error message
+          | _, _, _, Error message ->
+              Error message
           end
       | None, _, _, _ -> Error "missing mass1"
       | _, None, _, _ -> Error "missing velocity1"
