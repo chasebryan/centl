@@ -32,7 +32,7 @@ jobs:
   verify:
     name: Verify F* source
     runs-on: ubuntu-24.04
-    container: ubuntu:22.04
+    container: ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
     env:
       DEBIAN_FRONTEND: noninteractive
 
@@ -45,6 +45,8 @@ jobs:
 
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Require a Git worktree
         run: |
@@ -92,7 +94,7 @@ jobs:
     name: Linux x86_64
     needs: verify
     runs-on: ubuntu-24.04
-    container: ubuntu:22.04
+    container: ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
     env:
       DEBIAN_FRONTEND: noninteractive
       NATIVE_PREFIX: /opt/centl-native
@@ -109,6 +111,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Restore verified OCaml
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0
@@ -280,6 +284,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Restore verified OCaml
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0
@@ -430,6 +436,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Restore verified OCaml
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0

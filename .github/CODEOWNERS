@@ -1,0 +1,11 @@
+# Security-critical repository automation and policy.
+/.github/ @chasebryan
+/SECURITY.md @chasebryan
+
+# Verified semantics, native memory-safety boundary, and release inputs.
+/src/fstar/ @chasebryan
+/src/native/ @chasebryan
+/install @chasebryan
+/install.ps1 @chasebryan
+/scripts/ @chasebryan
+/toolchain.lock @chasebryan
