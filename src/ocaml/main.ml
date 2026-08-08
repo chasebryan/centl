@@ -1260,44 +1260,43 @@ type check_line =
     }
 
 let parse_check_line line_number line =
-let trimmed = String.trim line in
-if trimmed = "" || String.starts_with ~prefix:"#" trimmed then None
-else
-  let parts = trimmed |> String.split_on_char '|' |> List.map String.trim in
-  if List.exists (( = ) "") parts then
-    failwith
-      ("line " ^ string_of_int line_number
-     ^ ": contract fields must not be empty")
+  let trimmed = String.trim line in
+  if trimmed = "" || String.starts_with ~prefix:"#" trimmed then None
   else
-    begin match parts with
-    | [ "define"; definition ] ->
-        Some (Check_define { line_number; definition })
-    | [ relation; left; right ] ->
-        Some
-          (Check_assert
-             { line_number; left; relation; right; variable = None })
-    | [ relation; left; right; variable ] ->
-        begin match parse_variable_spec variable with
-        | Ok variable ->
-            Some
-              (Check_assert
-                 {
-                   line_number;
-                   left;
-                   relation;
-                   right;
-                   variable = Some variable;
-                 })
-        | Error message ->
-            failwith
-              ("line " ^ string_of_int line_number ^ ": " ^ message)
-        end
-    | _ ->
-        failwith
-          ("line " ^ string_of_int line_number
-         ^ ": expected define | DEF or RELATION | LEFT | RIGHT [| \
-            VAR[:rational]]")
-    end
+    let parts = trimmed |> String.split_on_char '|' |> List.map String.trim in
+    if List.exists (( = ) "") parts then
+      failwith
+        ("line " ^ string_of_int line_number
+       ^ ": contract fields must not be empty")
+    else
+      begin match parts with
+      | [ "define"; definition ] ->
+          Some (Check_define { line_number; definition })
+      | [ relation; left; right ] ->
+          Some
+            (Check_assert
+               { line_number; left; relation; right; variable = None })
+      | [ relation; left; right; variable ] ->
+          begin match parse_variable_spec variable with
+          | Ok variable ->
+              Some
+                (Check_assert
+                   {
+                     line_number;
+                     left;
+                     relation;
+                     right;
+                     variable = Some variable;
+                   })
+          | Error message ->
+              failwith ("line " ^ string_of_int line_number ^ ": " ^ message)
+          end
+      | _ ->
+          failwith
+            ("line " ^ string_of_int line_number
+           ^ ": expected define | DEF or RELATION | LEFT | RIGHT [| \
+              VAR[:rational]]")
+      end
 
 let read_check_file path =
   let max_bytes = Centl_engine.default_evaluation_limits.max_source_bytes in
