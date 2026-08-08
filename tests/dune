@@ -61,6 +61,11 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_physics_collision_mcp)
+ (modules test_physics_collision_mcp)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
  (name test_physics_runtime)
  (modules test_physics_runtime)
  (libraries centl_lib alcotest zarith))
