@@ -1039,6 +1039,32 @@ let machine_resource_limits () =
   Alcotest.(check string)
     "aggregate session retention" "resource_limit"
     (retained_definition "second" (String.make 100 'v') |> protocol_error_code);
+  let dependency_retention = Centl_protocol.create () in
+  let dependency_limits = `Assoc [ ("max_result_bytes", `Int 500) ] in
+  let define_dependency expression =
+    Centl_protocol.handle_json dependency_retention
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("expression", `String expression);
+           ("limits", dependency_limits);
+         ])
+  in
+  let dependency_names =
+    [
+      "dependency_alpha_000000000000";
+      "dependency_beta_0000000000000";
+      "dependency_gamma_000000000000";
+      "dependency_delta_000000000000";
+    ]
+  in
+  List.iter
+    (fun name -> ignore (define_dependency (name ^ " = 1")))
+    dependency_names;
+  Alcotest.(check string)
+    "dependency metadata retention" "resource_limit"
+    (define_dependency ("combined = " ^ String.concat " + " dependency_names)
+    |> protocol_error_code);
   let small_server =
     {
       Centl_protocol.default_server_limits with
@@ -1169,7 +1195,9 @@ let transformation_resolution_metadata () =
   [
     ("diff(x^3, x)", "diff");
     ("integrate(x^2, x)", "integrate");
+    ("simplify(1 + 1)", "simplify");
     ("simplify(x + 0)", "simplify");
+    ("expand(1 + 1)", "expand");
     ("expand((x + 1)^2)", "expand");
     ("factor(x^2 - 1)", "factor");
     ("substitute(x + y, x = 2)", "substitute");
@@ -1181,6 +1209,8 @@ let transformation_resolution_metadata () =
   |> List.iter (fun (source, operation) ->
       check ~operation ~reason:"polynomial_normal_form" source
         "unchanged_proved");
+  check ~operation:"factor" ~reason:"supported_factorization_form"
+    "factor((x + 1)^2)" "unchanged_proved";
   [
     ("diff(foo(x), x)", "diff", "unsupported_derivative_rule");
     ("integrate(sin(x), x)", "integrate", "non_polynomial_integrand");
@@ -1188,6 +1218,7 @@ let transformation_resolution_metadata () =
     ("simplify(sin(x))", "simplify", "non_polynomial_expression");
     ("expand(sin(x))", "expand", "non_polynomial_expression");
     ("factor(x^2 + 1)", "factor", "no_supported_factorization");
+    ("factor(x^2 - 3*x + 2)", "factor", "no_supported_factorization");
     ("factor(sin(x))", "factor", "non_polynomial_expression");
     ("solve(x^3 = 1, x)", "solve", "unsupported_equation_degree_or_domain");
   ]

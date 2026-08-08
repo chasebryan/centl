@@ -2058,7 +2058,8 @@ let polynomial_domain =
   "bounded univariate rational polynomials with constant rational division"
 
 let factor_domain =
-  "difference-of-squares and rational-root univariate polynomials"
+  "symbolic even-power differences of squares, unit (x +/- 1)^2 quadratics, \
+   and common variable-power factors in univariate rational polynomials"
 
 let differentiation_domain =
   "the documented exact symbolic differentiation rules"
@@ -2703,6 +2704,13 @@ let resolve_with_limits ?(cancelled = never_cancelled)
         let simplified = Centl_Core.canonicalize_polynomial inner in
         observe_resolution
           (match polynomial_profile inner with
+          | Some { polynomial_variable = None; _ } when simplified = inner ->
+              begin match inner with
+              | Centl_Core.Literal _ ->
+                  unchanged_proved "simplify" "polynomial_normal_form"
+                    polynomial_domain
+              | _ -> transformed "simplify" polynomial_domain
+              end
           | Some _ when simplified = inner ->
               unchanged_proved "simplify" "polynomial_normal_form"
                 polynomial_domain
@@ -2718,6 +2726,13 @@ let resolve_with_limits ?(cancelled = never_cancelled)
         let expanded = Centl_Core.canonicalize_polynomial inner in
         observe_resolution
           (match polynomial_profile inner with
+          | Some { polynomial_variable = None; _ } when expanded = inner ->
+              begin match inner with
+              | Centl_Core.Literal _ ->
+                  unchanged_proved "expand" "polynomial_normal_form"
+                    polynomial_domain
+              | _ -> transformed "expand" polynomial_domain
+              end
           | Some _ when expanded = inner ->
               unchanged_proved "expand" "polynomial_normal_form"
                 polynomial_domain
@@ -2729,12 +2744,17 @@ let resolve_with_limits ?(cancelled = never_cancelled)
         let* inner, _ = resolve inner in
         let* () = check_scalar_transformation inner in
         let* () = check_polynomial_transformation limits inner in
+        let canonical = Centl_Core.canonicalize_polynomial inner in
         let factored = Centl_Core.factor_expression inner in
         observe_resolution
           (match polynomial_profile inner with
-          | Some _ when factored = inner ->
+          | _ when factored <> canonical ->
+              if factored = inner then
+                unchanged_proved "factor" "supported_factorization_form"
+                  factor_domain
+              else transformed "factor" factor_domain
+          | Some _ ->
               unsupported "factor" "no_supported_factorization" factor_domain
-          | Some _ -> transformed "factor" factor_domain
           | None ->
               unsupported "factor" "non_polynomial_expression" factor_domain);
         checked factored (expression_node_count factored)
@@ -2969,6 +2989,11 @@ let check_session_retention ?(cancelled = never_cancelled) ?value limits session
     session_failure "resource_limit"
       "the session exceeds the aggregate retained-byte limit"
   else Ok { nodes; bits; bytes }
+
+let metadata_bytes_with_names limit base names =
+  List.fold_left
+    (fun total name -> bounded_sum limit total (String.length name + 3))
+    base names
 
 let retain_binding session name binding cost =
   session.bindings <- (name, binding) :: session.bindings;
@@ -3557,9 +3582,13 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
             in
             let result = Defined_value (name, value) in
             let* () = check_session_result_limit ~cancelled limits result in
+            let metadata_bytes =
+              metadata_bytes_with_names limits.max_result_bytes
+                (String.length name) dependencies
+            in
             let* retention =
               check_session_retention ~cancelled ~value limits session
-                ~metadata_bytes:(String.length name) expression
+                ~metadata_bytes expression
             in
             let* () = check_cancelled cancelled in
             retain_binding session name
@@ -3593,9 +3622,10 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
             let result = Defined_function (name, parameters, body) in
             let* () = check_session_result_limit ~cancelled limits result in
             let metadata_bytes =
-              List.fold_left
-                (fun total parameter -> total + String.length parameter)
-                (String.length name) parameters
+              metadata_bytes_with_names limits.max_result_bytes
+                (metadata_bytes_with_names limits.max_result_bytes
+                   (String.length name) parameters)
+                dependencies
             in
             let* retention =
               check_session_retention ~cancelled limits session ~metadata_bytes
