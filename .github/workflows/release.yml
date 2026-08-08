@@ -129,7 +129,7 @@ jobs:
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            build-essential ca-certificates curl git m4 opam patch pkg-config qemu-user xz-utils
+            build-essential ca-certificates curl git m4 opam patch pkg-config python3 qemu-user xz-utils
 
       - name: Build pinned native libraries
         run: |
