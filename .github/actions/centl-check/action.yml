@@ -1,0 +1,98 @@
+name: CENTL check contracts
+description: >
+  Run centl check on a math contract file. Fails when any assertion is
+  refuted, unknown, or invalid, or when an operational error occurs.
+  Optionally uploads a receipt artifact for audit.
+
+inputs:
+  path:
+    description: Path to the .centl contract file
+    required: true
+  receipt:
+    description: Optional path for a JSON check receipt
+    required: false
+    default: ""
+  centl-bin:
+    description: >
+      Path to a centl executable. When empty, uses centl from PATH, then
+      ./centl, then _build/default/src/main.exe.
+    required: false
+    default: ""
+  working-directory:
+    description: Working directory for the check command
+    required: false
+    default: ${{ github.workspace }}
+  upload-receipt:
+    description: Upload the receipt as a workflow artifact when receipt is set
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve centl executable
+      id: resolve
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        CENTL_CHECK_BIN: ${{ inputs.centl-bin }}
+      run: |
+        set -euo pipefail
+        bin=$CENTL_CHECK_BIN
+        if [ -z "$bin" ]; then
+          if command -v centl >/dev/null 2>&1; then
+            bin=$(command -v centl)
+          elif [ -x ./centl ]; then
+            bin=./centl
+          elif [ -x _build/default/src/main.exe ]; then
+            bin=_build/default/src/main.exe
+          else
+            echo "centl-check: no centl executable found (set centl-bin or install centl on PATH)" >&2
+            exit 2
+          fi
+        fi
+        if [ ! -x "$bin" ] && ! command -v "$bin" >/dev/null 2>&1; then
+          echo "centl-check: executable not found: $bin" >&2
+          exit 2
+        fi
+        echo "bin=$bin" >> "$GITHUB_OUTPUT"
+        "$bin" --version
+        if "$bin" --build-info >/dev/null 2>&1; then
+          "$bin" --build-info
+        fi
+
+    - name: Check math contracts
+      id: check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        CENTL_CHECK_BIN: ${{ steps.resolve.outputs.bin }}
+        CENTL_CHECK_PATH: ${{ inputs.path }}
+        CENTL_CHECK_RECEIPT: ${{ inputs.receipt }}
+      run: |
+        set -euo pipefail
+        bin=$CENTL_CHECK_BIN
+        path=$CENTL_CHECK_PATH
+        receipt=$CENTL_CHECK_RECEIPT
+        if [ ! -f "$path" ]; then
+          echo "centl-check: contract file not found: $path" >&2
+          exit 2
+        fi
+        if [ -n "$receipt" ]; then
+          mkdir -p "$(dirname -- "$receipt")"
+          "$bin" check "$path" --receipt "$receipt"
+          echo "receipt=$receipt" >> "$GITHUB_OUTPUT"
+        else
+          "$bin" check "$path"
+        fi
+
+    - name: Upload receipt artifact
+      if: >
+        always() &&
+        inputs.receipt != '' &&
+        inputs.upload-receipt == 'true'
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: centl-check-receipt
+        path: ${{ inputs.working-directory }}/${{ inputs.receipt }}
+        if-no-files-found: warn

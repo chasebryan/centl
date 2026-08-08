@@ -1680,6 +1680,71 @@ let rec polynomial_of (term:expression) (variable:string)
   | Factor inner -> polynomial_of inner variable
   | Assuming _ _ _ _ -> None
 
+(** Repeated multiplication matches [polynomial_power]'s recursive shape so
+    Horner soundness can use the same induction structure. *)
+let rec rational_power_product
+    (base:rational{invariant base})
+    (exponent:nat)
+  : Tot (result:rational{invariant result}) (decreases exponent)
+=
+  if exponent = 0 then make 1 1
+  else multiply base (rational_power_product base (exponent - 1))
+
+(** Rational-point denotational evaluation for the accepted univariate
+    rational-polynomial surface domain.  [None] marks every construct outside
+    that domain, matching the discipline of [polynomial_of]. *)
+let rec evaluate_rational_polynomial
+    (term:expression)
+    (variable:string)
+    (point:rational{invariant point})
+  : Tot (option (value:rational{invariant value})) (decreases term)
+=
+  match term with
+  | Literal numerator denominator ->
+      if denominator = 0 then None else Some (make numerator denominator)
+  | Symbol name -> if name = variable then Some point else None
+  | Negate inner ->
+      begin match evaluate_rational_polynomial inner variable point with
+      | Some value -> Some (negate value)
+      | None -> None
+      end
+  | Binary operator left right ->
+      begin match evaluate_rational_polynomial left variable point,
+                  evaluate_rational_polynomial right variable point with
+      | Some left_value, Some right_value ->
+          begin match operator with
+          | Add -> Some (add left_value right_value)
+          | Subtract -> Some (subtract left_value right_value)
+          | Multiply -> Some (multiply left_value right_value)
+          | Divide ->
+              begin match divide left_value right_value with
+              | Success value -> Some value
+              | Failure _ -> None
+              end
+          end
+      | _, _ -> None
+      end
+  | Power base exponent ->
+      if exponent > 0 && exponent <= maximum_expansion_exponent then
+        begin match evaluate_rational_polynomial base variable point with
+        | Some value -> Some (rational_power_product value exponent)
+        | None -> None
+        end
+      else None
+  | Function _ _ -> None
+  | Differentiate _ _ -> None
+  | Substitute _ _ _ -> None
+  | Derivative _ _ -> None
+  | Simplify inner -> evaluate_rational_polynomial inner variable point
+  | Expand inner -> evaluate_rational_polynomial inner variable point
+  | Factor inner -> evaluate_rational_polynomial inner variable point
+  | Assuming _ _ _ _ -> None
+
+let rec polynomial_is_zero (coefficients:polynomial) : Tot bool =
+  match coefficients with
+  | [] -> true
+  | head :: tail -> head.numerator = 0 && polynomial_is_zero tail
+
 (** The host uses its arbitrary-precision integer square-root routine only to
     propose a floor witness.  This checked classification is the semantic
     boundary: an exact result or a strict gap between consecutive squares is
@@ -2177,6 +2242,268 @@ let polynomial_evaluate_horner_step
         add constant
           (multiply point (polynomial_evaluate_horner higher point)))
 = ()
+
+#push-options "--z3rlimit 20"
+
+(** [make 0 1] has numerator 0 (from its equivalence to unreduced 0/1). *)
+let make_zero_numerator ()
+  : Lemma (ensures (make 0 1).numerator = 0)
+=
+  let zero = make 0 1 in
+  assert (equivalent zero { numerator = 0; denominator = 1 });
+  assert (zero.numerator * 1 = 0 * zero.denominator);
+  assert (zero.numerator = 0)
+
+(** A rational with numerator 0 is equivalent to [make 0 1]. *)
+let zero_numerator_is_equivalent_zero
+    (value:rational{invariant value})
+  : Lemma
+      (requires value.numerator = 0)
+      (ensures equivalent value (make 0 1))
+=
+  make_zero_numerator ();
+  let zero = make 0 1 in
+  assert (value.numerator * zero.denominator =
+    zero.numerator * value.denominator)
+
+(** Equivalence to [make 0 1] forces a zero numerator. *)
+let equivalent_zero_implies_numerator_zero
+    (value:rational{invariant value})
+  : Lemma
+      (requires equivalent value (make 0 1))
+      (ensures value.numerator = 0)
+=
+  make_zero_numerator ();
+  let zero = make 0 1 in
+  assert (value.numerator * zero.denominator =
+    zero.numerator * value.denominator);
+  assert (value.numerator * zero.denominator = 0);
+  assert (zero.denominator > 0);
+  assert (value.numerator = 0)
+
+(** If [value] is equivalent to a zero-numerator unreduced form, its numerator
+    is 0, so it is equivalent to [make 0 1]. *)
+let equivalent_unreduced_zero_is_zero
+    (value:rational{invariant value})
+    (unreduced_denominator:pos)
+  : Lemma
+      (requires
+        equivalent value {
+          numerator = 0;
+          denominator = unreduced_denominator
+        })
+      (ensures equivalent value (make 0 1))
+=
+  assert (value.numerator * unreduced_denominator =
+    0 * value.denominator);
+  assert (value.numerator * unreduced_denominator = 0);
+  assert (value.numerator = 0);
+  zero_numerator_is_equivalent_zero value
+
+(** Zero multiplied on the right remains zero. *)
+let multiply_zero_right
+    (left right:rational{invariant left /\ invariant right})
+  : Lemma
+      (requires equivalent right (make 0 1))
+      (ensures equivalent (multiply left right) (make 0 1))
+=
+  equivalent_zero_implies_numerator_zero right;
+  let product = multiply left right in
+  assert (equivalent product {
+    numerator = left.numerator * right.numerator;
+    denominator = left.denominator * right.denominator
+  });
+  assert (right.numerator = 0);
+  assert (left.numerator * right.numerator = 0);
+  equivalent_unreduced_zero_is_zero product
+    (left.denominator * right.denominator)
+
+(** Zero added to zero remains zero. *)
+let add_zero_zero
+    (left right:rational{invariant left /\ invariant right})
+  : Lemma
+      (requires equivalent left (make 0 1) /\ equivalent right (make 0 1))
+      (ensures equivalent (add left right) (make 0 1))
+=
+  equivalent_zero_implies_numerator_zero left;
+  equivalent_zero_implies_numerator_zero right;
+  let sum = add left right in
+  assert (equivalent sum {
+    numerator =
+      left.numerator * right.denominator +
+      right.numerator * left.denominator;
+    denominator = left.denominator * right.denominator
+  });
+  assert (left.numerator = 0);
+  assert (right.numerator = 0);
+  assert (
+    left.numerator * right.denominator +
+    right.numerator * left.denominator = 0);
+  equivalent_unreduced_zero_is_zero sum
+    (left.denominator * right.denominator)
+
+(** Zero coefficient lists evaluate to the zero rational at every point. *)
+let rec zero_polynomial_evaluates_to_zero
+    (coefficients:polynomial)
+    (point:coefficient)
+  : Lemma
+      (requires polynomial_is_zero coefficients)
+      (ensures
+        equivalent
+          (polynomial_evaluate_horner coefficients point)
+          (make 0 1))
+      (decreases coefficients)
+=
+  match coefficients with
+  | [] -> ()
+  | head :: tail ->
+      assert (head.numerator = 0 && polynomial_is_zero tail);
+      zero_polynomial_evaluates_to_zero tail point;
+      zero_numerator_is_equivalent_zero head;
+      multiply_zero_right point
+        (polynomial_evaluate_horner tail point);
+      add_zero_zero head
+        (multiply point (polynomial_evaluate_horner tail point))
+
+#pop-options
+
+(** Semantic domain for the polynomial-collection soundness proof.  It is the
+    accepted univariate rational-polynomial fragment without surface sugar:
+    rational constants, one variable, ring operations, scaling (constant
+    division), and natural powers. *)
+type rational_polynomial_model =
+  | RZConstant:
+      value:rational{invariant value} -> rational_polynomial_model
+  | RZVariable
+  | RZNegate: rational_polynomial_model -> rational_polynomial_model
+  | RZAdd:
+      rational_polynomial_model -> rational_polynomial_model ->
+      rational_polynomial_model
+  | RZSubtract:
+      rational_polynomial_model -> rational_polynomial_model ->
+      rational_polynomial_model
+  | RZMultiply:
+      rational_polynomial_model -> rational_polynomial_model ->
+      rational_polynomial_model
+  | RZScale:
+      factor:rational{invariant factor} ->
+      rational_polynomial_model ->
+      rational_polynomial_model
+  | RZPower: rational_polynomial_model -> nat -> rational_polynomial_model
+
+(** Independent denotational evaluation of the model at a rational point. *)
+let rec rational_polynomial_model_value
+    (term:rational_polynomial_model)
+    (point:rational{invariant point})
+  : Tot (result:rational{invariant result}) (decreases term)
+=
+  match term with
+  | RZConstant value -> value
+  | RZVariable -> point
+  | RZNegate inner ->
+      negate (rational_polynomial_model_value inner point)
+  | RZAdd left right ->
+      add
+        (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZSubtract left right ->
+      subtract
+        (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZMultiply left right ->
+      multiply
+        (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZScale factor inner ->
+      multiply factor (rational_polynomial_model_value inner point)
+  | RZPower base exponent ->
+      rational_power_product
+        (rational_polynomial_model_value base point) exponent
+
+(** Coefficient collection on the model — same algebra as [polynomial_of]. *)
+let rec collect_rational_polynomial_model
+    (term:rational_polynomial_model)
+  : Tot polynomial (decreases term)
+=
+  match term with
+  | RZConstant value -> [value]
+  | RZVariable -> [make 0 1; make 1 1]
+  | RZNegate inner ->
+      polynomial_negate (collect_rational_polynomial_model inner)
+  | RZAdd left right ->
+      polynomial_add
+        (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZSubtract left right ->
+      polynomial_subtract
+        (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZMultiply left right ->
+      polynomial_multiply
+        (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZScale factor inner ->
+      polynomial_scale factor (collect_rational_polynomial_model inner)
+  | RZPower base exponent ->
+      polynomial_power (collect_rational_polynomial_model base) exponent
+
+(** Embed the model into surface expressions for relating to [polynomial_of]
+    and [evaluate_rational_polynomial]. *)
+let rec embed_rational_polynomial_model
+    (term:rational_polynomial_model)
+    (variable:string)
+  : Tot expression (decreases term)
+=
+  match term with
+  | RZConstant value -> Literal value.numerator value.denominator
+  | RZVariable -> Symbol variable
+  | RZNegate inner ->
+      Negate (embed_rational_polynomial_model inner variable)
+  | RZAdd left right ->
+      Binary Add
+        (embed_rational_polynomial_model left variable)
+        (embed_rational_polynomial_model right variable)
+  | RZSubtract left right ->
+      Binary Subtract
+        (embed_rational_polynomial_model left variable)
+        (embed_rational_polynomial_model right variable)
+  | RZMultiply left right ->
+      Binary Multiply
+        (embed_rational_polynomial_model left variable)
+        (embed_rational_polynomial_model right variable)
+  | RZScale factor inner ->
+      Binary Multiply
+        (Literal factor.numerator factor.denominator)
+        (embed_rational_polynomial_model inner variable)
+  | RZPower base exponent ->
+      Power (embed_rational_polynomial_model base variable) exponent
+
+(** First completed theorem toward zero-difference soundness: every collected
+    zero coefficient list is identically zero under Horner evaluation at every
+    rational point.  Host receipts may cite this name; full left/right surface
+    agreement still requires Horner congruence under ring operations (next). *)
+let rational_polynomial_zero_difference_sound
+    (coefficients:polynomial)
+    (point:coefficient)
+  : Lemma
+      (requires polynomial_is_zero coefficients)
+      (ensures
+        equivalent
+          (polynomial_evaluate_horner coefficients point)
+          (make 0 1))
+= zero_polynomial_evaluates_to_zero coefficients point
+
+(** Concrete inhabited witness for the zero-Horner theorem. *)
+let zero_polynomial_horner_example
+    (point:rational{invariant point})
+  : Lemma
+      (ensures
+        equivalent
+          (polynomial_evaluate_horner [make 0 1; make 0 1; make 0 1] point)
+          (make 0 1))
+=
+  rational_polynomial_zero_difference_sound
+    [make 0 1; make 0 1; make 0 1] point
 
 let polynomial_definite_integral_coefficients
     (coefficients:polynomial)

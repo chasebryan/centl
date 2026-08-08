@@ -1,6 +1,6 @@
 # CENTL product design path
 
-Status: `0.11.0` agent-safe foundation shipped; `0.12.0` contracts are next.
+Status: `0.11.0` agent-safe foundation shipped; `0.12.0-rc.1` contracts candidate prepared.
 
 This document turns CENTL's existing exactness, verification, numerical, and
 machine-interface work into an ordered product path. It does not replace the
@@ -317,20 +317,19 @@ CENTL already collects and canonicalizes bounded univariate rational
 polynomials. Verification computes the exact polynomial difference and tests
 whether every coefficient is zero.
 
-Before this path returns `verified` with `verified_core`, the F* core must add a
-semantic preservation theorem:
+This path returns `verified` with `verified_core` only after the extracted F*
+classifier admits the expression and applies the semantic preservation theorem:
 
 > If polynomial collection of `left - right` returns the zero coefficient
 > list for variable `x`, then both expressions evaluate to equal rational
 > values for every rational `x` in the accepted expression domain.
 
-The proof should define rational-point denotational evaluation and establish
-soundness through constants, the selected variable, negation, addition,
-subtraction, multiplication, exact constant division, and bounded natural
-powers.
-
-Until that theorem is present, normalization may be exposed as diagnostic
-evidence but must not be marketed as a formal universal proof.
+`Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound` defines
+rational-point denotational evaluation and establishes soundness through
+constants, the selected variable, negation, addition, subtraction,
+multiplication, and bounded positive natural powers. Constant arithmetic may
+arrive as evaluated rational literals. An unreduced symbolic `Divide` node is
+not admitted and remains `unknown` even when host normalization reaches zero.
 
 ### Exact refutation
 
@@ -594,14 +593,14 @@ must not accidentally double every configured ceiling.
 
 ### Proof obligation
 
-Add the rational-polynomial zero-difference semantic theorem before enabling a
-universal polynomial `verified` verdict with `verified_core` assurance. The
-generated core snapshot, verification documentation, and theorem identifier in
-receipts must update together.
+The rational-polynomial zero-difference semantic theorem is implemented in
+`src/fstar/Centl.PolynomialSoundness.fst`. The generated core snapshot,
+verification documentation, and theorem identifier in receipts update
+together; the release workflow rejects extraction drift.
 
 ### Build identity
 
-Release artifacts gain a bounded machine-readable build manifest containing:
+Release artifacts carry a bounded machine-readable build manifest containing:
 
 - source commit;
 - generated-core hash;
@@ -610,9 +609,9 @@ Release artifacts gain a bounded machine-readable build manifest containing:
 - target platform; and
 - receipt-schema versions supported by the binary.
 
-The manifest is shipped beside the executable and addressable through
-capability discovery. Receipts reference its build identifier rather than
-copying unbounded build metadata into every result.
+The manifest is shipped beside the executable. `centl --build-info` exposes
+the corresponding bounded identity, and receipts copy only its version,
+optional commit, and extracted-core hash.
 
 ### Likely implementation sites
 
@@ -677,20 +676,19 @@ whose status cannot be confused with mathematical completion.
 
 Objective: make mathematical claims enforceable in repositories.
 
-Status: **verification draft advancing toward 0.12.0** (not versioned).
+Status: **0.12.0-rc.1 prepared for candidate validation**.
 
 In this tree: closed exact rational comparison; certified enclosure
 order/inequality with dyadic evidence; univariate rational polynomial
 counterexample refutation (`witness_checked`); calculator `assert` grammar;
 sequential side evaluation; operational errors stay errors; closed request
 schemas; response-byte enforcement; `verify` / `centl_verify` / `centl verify`
-/ `centl check`; and passing plus deliberately pending contract examples.
-Polynomial identities that normalize to zero difference remain `unknown`
-(`polynomial_soundness_theorem_pending`) because the draft F* lemma still has
-unproved obligations and is not landed assurance. Free-form assumptions and
-multi-variable claims return `unknown`. Still open for 0.12.0: the completed
-F* `verified_core` polynomial theorem, bounded replayable receipts, validated
-release identity, and a published CI action.
+/ `centl check`; the F* `verified_core` polynomial theorem; bounded replayable
+receipts; stamped and cross-platform-validated release identity; a reusable
+CI action; and passing plus deliberately pending contract examples. Free-form
+assumptions, symbolic division outside the admitted proof syntax, and
+multi-variable claims return `unknown`. Final publication and external pilots
+remain after candidate validation.
 
 Required work:
 

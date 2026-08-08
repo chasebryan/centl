@@ -6,9 +6,9 @@
    - closed_exact_rational: exact integer/rational comparisons
    - closed_real_enclosure: strict order/inequality from disjoint enclosures
    - univariate_rational_polynomial: one rational variable; false equalities
-     via exact rational counterexamples (witness_checked). Zero-difference
-     identities remain unknown (polynomial_soundness_theorem_pending) until
-     the F* soundness lemma is fully proved.
+     via exact rational counterexamples (witness_checked), and zero-difference
+     identities only when the extracted F* classifier admits the expression
+     and applies the named semantic soundness theorem.
 
    Free-form assumptions and multi-variable claims return unknown. *)
 
@@ -33,6 +33,7 @@ type claim = {
 type verdict = Verified | Refuted | Unknown | Invalid
 
 type assurance_class =
+  | Verified_core
   | Exact_algorithm
   | Certified_enclosure
   | Witness_checked
@@ -136,6 +137,7 @@ let verdict_name = function
   | Invalid -> "invalid"
 
 let assurance_class_name = function
+  | Verified_core -> "verified_core"
   | Exact_algorithm -> "exact_algorithm"
   | Certified_enclosure -> "certified_enclosure"
   | Witness_checked -> "witness_checked"
@@ -1019,26 +1021,55 @@ let verify_univariate_polynomial ~(claim : claim) ~cancelled limits variable
                 let zero = polynomial_is_zero coefficients in
                 begin match (claim.relation, zero) with
                 | Equal, true ->
-                    (* Normalization is evidence, but the draft F* soundness
-                       theorem still has unproved obligations. *)
-                    Ok
-                      (make_verification ~verdict:Unknown
-                         ~scope:univariate_poly_scope
-                         ~method_:univariate_poly_method ~claim
-                         ~evidence:
-                           {
-                             left = Some (side_value_of_exact left_value);
-                             right = Some (side_value_of_exact right_value);
-                             comparison = Some "equal";
-                             reason =
-                               Some "polynomial_soundness_theorem_pending";
-                             normalized_difference = Some normalized_text;
-                             counterexample = None;
-                             dependencies = [];
-                             left_resolution = None;
-                             right_resolution = None;
-                           }
-                         ~assurance:{ class_ = None_; theorem = None })
+                    begin match
+                      Centl_PolynomialSoundness.classify_polynomial_identity
+                        left_expression right_expression variable.name
+                    with
+                    | Centl_PolynomialSoundness.VerifiedPolynomialIdentity ->
+                        Ok
+                          (make_verification ~verdict:Verified
+                             ~scope:univariate_poly_scope
+                             ~method_:univariate_poly_method ~claim
+                             ~evidence:
+                               {
+                                 left = Some (side_value_of_exact left_value);
+                                 right = Some (side_value_of_exact right_value);
+                                 comparison = Some "equal";
+                                 reason = None;
+                                 normalized_difference = Some normalized_text;
+                                 counterexample = None;
+                                 dependencies = [];
+                                 left_resolution = None;
+                                 right_resolution = None;
+                               }
+                             ~assurance:
+                               {
+                                 class_ = Verified_core;
+                                 theorem =
+                                   Some
+                                     "Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound";
+                               })
+                    | Centl_PolynomialSoundness.NonzeroPolynomialIdentity
+                    | Centl_PolynomialSoundness.UnsupportedPolynomialIdentity ->
+                        Ok
+                          (make_verification ~verdict:Unknown
+                             ~scope:univariate_poly_scope
+                             ~method_:univariate_poly_method ~claim
+                             ~evidence:
+                               {
+                                 left = Some (side_value_of_exact left_value);
+                                 right = Some (side_value_of_exact right_value);
+                                 comparison = Some "equal";
+                                 reason =
+                                   Some "polynomial_certificate_not_admitted";
+                                 normalized_difference = Some normalized_text;
+                                 counterexample = None;
+                                 dependencies = [];
+                                 left_resolution = None;
+                                 right_resolution = None;
+                               }
+                             ~assurance:{ class_ = None_; theorem = None })
+                    end
                 | Not_equal, true ->
                     (* Identically equal polynomials refute universal disequality. *)
                     begin match

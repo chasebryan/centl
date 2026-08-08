@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+# Pinned CI defaults (also checked against toolchain.lock):
+# FLINT 3.0.1; sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
+# GMP 6.3.0; sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
+# MPFR 4.2.2; sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 version=${1:-}
 output_directory=${2:-"$project_root/dist"}
@@ -44,6 +49,18 @@ esac
 reported_version=$("$binary" --version)
 [ "$reported_version" = "centl $version" ] ||
   fail "binary reports '$reported_version', expected 'centl $version'"
+
+build_info=$("$binary" --build-info) || fail "binary did not report build identity"
+build_info_field() {
+  printf '%s\n' "$build_info" | awk -F= -v name="$1" '$1 == name {
+    sub(/^[^=]*=/, ""); print; exit
+  }'
+}
+binary_version=$(build_info_field semantic_version)
+binary_core_hash=$(build_info_field generated_core_hash)
+binary_commit=$(build_info_field commit)
+[ "$binary_version" = "$version" ] ||
+  fail "build identity version '$binary_version' does not match $version"
 
 linux_dependency_path() {
   pattern=$1
@@ -134,14 +151,14 @@ chmod 755 "$package/bin/centl" "$package/bin/centl-physics" \
   "$package/libexec/centl" "$package/libexec/centl-physics"
 
 if [ "$platform" = linux ]; then
-  flint=$(linux_dependency_path '^libflint\.so' "$binary")
-  gmp=$(linux_dependency_path '^libgmp\.so' "$binary")
-  mpfr=$(linux_dependency_path '^libmpfr\.so' "$flint")
+  flint=$(linux_dependency_path '^libflint[.]so' "$binary")
+  gmp=$(linux_dependency_path '^libgmp[.]so' "$binary")
+  mpfr=$(linux_dependency_path '^libmpfr[.]so' "$flint")
 else
-  flint=$(macos_dependency_path '/libflint(\.[0-9]+)*\.dylib$' "$binary")
-  gmp=$(macos_dependency_path '/libgmp(\.[0-9]+)*\.dylib$' \
+  flint=$(macos_dependency_path '/libflint([.][0-9]+)*[.]dylib$' "$binary")
+  gmp=$(macos_dependency_path '/libgmp([.][0-9]+)*[.]dylib$' \
     "$binary" "$physics_binary" "$flint")
-  mpfr=$(macos_dependency_path '/libmpfr(\.[0-9]+)*\.dylib$' "$binary" "$flint")
+  mpfr=$(macos_dependency_path '/libmpfr([.][0-9]+)*[.]dylib$' "$binary" "$flint")
 fi
 
 flint_name=$(basename "$flint")
@@ -153,6 +170,9 @@ cp -L "$mpfr" "$package/lib/$mpfr_name"
 
 if [ "$platform" = linux ]; then
   if command -v strip >/dev/null 2>&1; then
+    chmod u+w "$package/libexec/centl" \
+      "$package/lib/$flint_name" "$package/lib/$gmp_name" \
+      "$package/lib/$mpfr_name"
     strip --strip-unneeded "$package/libexec/centl" \
       "$package/libexec/centl-physics" \
       "$package/lib/$flint_name" "$package/lib/$gmp_name" \
@@ -216,20 +236,30 @@ native-library source and relinking references are in COMPONENT-SOURCES.
 Build-time-only test dependencies are not included in this archive.
 EOF
 
+flint_version=${FLINT_VERSION:-3.0.1}
+flint_source_url=${FLINT_SOURCE_URL:-https://github.com/flintlib/flint/releases/download/v${flint_version}/flint-${flint_version}.tar.gz}
+flint_source_sha256=${FLINT_SHA256:-unknown}
+gmp_version=${GMP_VERSION:-6.3.0}
+gmp_source_url=${GMP_SOURCE_URL:-https://ftp.gnu.org/gnu/gmp/gmp-${gmp_version}.tar.xz}
+gmp_source_sha256=${GMP_SHA256:-unknown}
+mpfr_version=${MPFR_VERSION:-4.2.2}
+mpfr_source_url=${MPFR_SOURCE_URL:-https://ftp.gnu.org/gnu/mpfr/mpfr-${mpfr_version}.tar.xz}
+mpfr_source_sha256=${MPFR_SHA256:-unknown}
+
 cat > "$package/COMPONENT-SOURCES" <<EOF
 CENTL $version corresponding application source and relinking build scripts:
 https://github.com/chasebryan/centl/tree/v$version
 
 Exact native-library sources used by the release workflow:
-FLINT 3.0.1
-  https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.gz
-  sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
-GMP 6.3.0
-  https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
-  sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
-MPFR 4.2.2
-  https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
-  sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+FLINT $flint_version
+  $flint_source_url
+  sha256 $flint_source_sha256
+GMP $gmp_version
+  $gmp_source_url
+  sha256 $gmp_source_sha256
+MPFR $mpfr_version
+  $mpfr_source_url
+  sha256 $mpfr_source_sha256
 
 The Windows executables statically link these native libraries. The matching
 CENTL source and build scripts above are the Corresponding Application Code
@@ -237,6 +267,62 @@ needed to rebuild and relink them with compatible modified libraries.
 EOF
 
 printf '%s\n' "$version" > "$package/VERSION"
+
+# Build identity manifest for release audit. Omit a commit unless release
+# automation supplied an immutable source identifier.
+build_commit=${CENTL_BUILD_COMMIT:-${SOURCE_COMMIT:-${GITHUB_SHA:-}}}
+if command -v sha256sum >/dev/null 2>&1; then
+  generated_core_hash=$(
+    cat "$project_root/src/generated/Centl_Core.ml" \
+      "$project_root/src/generated/Centl_Gcd.ml" \
+      "$project_root/src/generated/Centl_PolynomialSoundness.ml" \
+      | sha256sum | awk '{ print $1 }'
+  )
+elif command -v shasum >/dev/null 2>&1; then
+  generated_core_hash=$(
+    cat "$project_root/src/generated/Centl_Core.ml" \
+      "$project_root/src/generated/Centl_Gcd.ml" \
+      "$project_root/src/generated/Centl_PolynomialSoundness.ml" \
+      | shasum -a 256 | awk '{ print $1 }'
+  )
+else
+  fail "need sha256sum or shasum to stamp generated-core hash"
+fi
+[ "$binary_core_hash" = "$generated_core_hash" ] ||
+  fail "binary generated-core hash does not match packaged sources"
+if [ -n "$build_commit" ]; then
+  [ "$binary_commit" = "$build_commit" ] ||
+    fail "binary commit '$binary_commit' does not match '$build_commit'"
+fi
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+{
+  printf '{\n'
+  printf '  "schema": 1,\n'
+  printf '  "kind": "centl_build_manifest",\n'
+  printf '  "semantic_version": "%s",\n' "$(json_escape "$version")"
+  printf '  "platform": "%s",\n' "$(json_escape "$platform")"
+  printf '  "architecture": "%s",\n' "$(json_escape "$architecture")"
+  if [ -n "$build_commit" ]; then
+    printf '  "commit": "%s",\n' "$(json_escape "$build_commit")"
+  fi
+  printf '  "generated_core_hash": "%s",\n' "$(json_escape "$generated_core_hash")"
+  printf '  "verification": {"command": "%s", "result": "%s"},\n' \
+    "$(json_escape "${CENTL_VERIFICATION_COMMAND:-make verify}")" \
+    "$(json_escape "${CENTL_VERIFICATION_RESULT:-not_attested}")"
+  printf '  "toolchain": {"fstar": "%s", "ocaml": "%s", "flint": "%s", "gmp": "%s", "mpfr": "%s"},\n' \
+    "$(json_escape "${FSTAR_VERSION:-unknown}")" \
+    "$(json_escape "${OCAML_VERSION:-4.14.1}")" \
+    "$(json_escape "${FLINT_VERSION:-unknown}")" \
+    "$(json_escape "${GMP_VERSION:-unknown}")" \
+    "$(json_escape "${MPFR_VERSION:-unknown}")"
+  printf '  "receipt_schema": 1,\n'
+  printf '  "protocol_version": 1\n'
+  printf '}\n'
+} > "$package/BUILD_MANIFEST.json"
 cat > "$package/README" <<EOF
 CENTL $version for $platform_name $architecture
 
@@ -244,7 +330,8 @@ Run bin/centl for the mathematical kernel and bin/centl-physics for the
 exact-first physics engine. The bundled native libraries are loaded only for
 CENTL. Use bin/centl --serve for stateful JSON Lines or --mcp for a local MCP
 server. License texts are in licenses; source and relinking references are in
-COMPONENT-SOURCES.
+COMPONENT-SOURCES. Use bin/centl check FILE with --receipt to retain an audit
+record; BUILD_MANIFEST.json records the package build identity.
 EOF
 
 find "$package" -type d -exec chmod 755 {} +

@@ -5,12 +5,12 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.11.0` makes CENTL safe for automated callers to interpret. Transformation
-resolution is explicit across human and machine surfaces; read-only computation
-is separate from definition mutation; closed MCP schemas, supported-domain
-discovery, dependency-bearing session inspection, syntax-catalog help,
-structured error recovery metadata, and an agent evaluation corpus are shipped.
-Protocol version 1 remains stable with documented compatibility operations.
+`0.12.0-rc.1` adds enforceable math contracts to the agent-safe 0.11.0
+foundation. Structured verification, F*-backed equality for the admitted
+univariate rational-polynomial fragment, exact counterexamples, replayable
+receipts, stamped build identity, and the reusable `centl-check` Action are in
+candidate validation. Protocol version 1 remains stable with documented
+compatibility operations. Final publication and external pilots remain.
 
 ## 0. Foundation
 

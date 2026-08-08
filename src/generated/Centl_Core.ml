@@ -1440,6 +1440,72 @@ let rec polynomial_of (term : expression) (variable : Prims.string) :
   | Expand inner -> polynomial_of inner variable
   | Factor inner -> polynomial_of inner variable
   | Assuming (uu___, uu___1, uu___2, uu___3) -> FStar_Pervasives_Native.None
+let rec rational_power_product (base : rational) (exponent : Prims.nat) :
+  rational=
+  if exponent = Prims.int_zero
+  then make Prims.int_one Prims.int_one
+  else multiply base (rational_power_product base (exponent - Prims.int_one))
+let rec evaluate_rational_polynomial (term : expression)
+  (variable : Prims.string) (point : rational) :
+  rational FStar_Pervasives_Native.option=
+  match term with
+  | Literal (numerator, denominator) ->
+      if denominator = Prims.int_zero
+      then FStar_Pervasives_Native.None
+      else FStar_Pervasives_Native.Some (make numerator denominator)
+  | Symbol name ->
+      if name = variable
+      then FStar_Pervasives_Native.Some point
+      else FStar_Pervasives_Native.None
+  | Negate inner ->
+      (match evaluate_rational_polynomial inner variable point with
+       | FStar_Pervasives_Native.Some value1 ->
+           FStar_Pervasives_Native.Some (negate value1)
+       | FStar_Pervasives_Native.None -> FStar_Pervasives_Native.None)
+  | Binary (operator, left, right) ->
+      (match ((evaluate_rational_polynomial left variable point),
+               (evaluate_rational_polynomial right variable point))
+       with
+       | (FStar_Pervasives_Native.Some left_value,
+          FStar_Pervasives_Native.Some right_value) ->
+           (match operator with
+            | Add ->
+                FStar_Pervasives_Native.Some (add left_value right_value)
+            | Subtract ->
+                FStar_Pervasives_Native.Some
+                  (subtract left_value right_value)
+            | Multiply ->
+                FStar_Pervasives_Native.Some
+                  (multiply left_value right_value)
+            | Divide ->
+                (match divide left_value right_value with
+                 | Success value1 -> FStar_Pervasives_Native.Some value1
+                 | Failure uu___ -> FStar_Pervasives_Native.None))
+       | (uu___, uu___1) -> FStar_Pervasives_Native.None)
+  | Power (base, exponent) ->
+      if
+        (exponent > Prims.int_zero) &&
+          (exponent <= maximum_expansion_exponent)
+      then
+        (match evaluate_rational_polynomial base variable point with
+         | FStar_Pervasives_Native.Some value1 ->
+             FStar_Pervasives_Native.Some
+               (rational_power_product value1 exponent)
+         | FStar_Pervasives_Native.None -> FStar_Pervasives_Native.None)
+      else FStar_Pervasives_Native.None
+  | Function (uu___, uu___1) -> FStar_Pervasives_Native.None
+  | Differentiate (uu___, uu___1) -> FStar_Pervasives_Native.None
+  | Substitute (uu___, uu___1, uu___2) -> FStar_Pervasives_Native.None
+  | Derivative (uu___, uu___1) -> FStar_Pervasives_Native.None
+  | Simplify inner -> evaluate_rational_polynomial inner variable point
+  | Expand inner -> evaluate_rational_polynomial inner variable point
+  | Factor inner -> evaluate_rational_polynomial inner variable point
+  | Assuming (uu___, uu___1, uu___2, uu___3) -> FStar_Pervasives_Native.None
+let rec polynomial_is_zero (coefficients : polynomial) : Prims.bool=
+  match coefficients with
+  | [] -> true
+  | head::tail ->
+      (head.numerator = Prims.int_zero) && (polynomial_is_zero tail)
 type integer_square_classification =
   | ExactIntegerSquare of Prims.int 
   | StrictIntegerSquareFloor of Prims.int 
@@ -1771,6 +1837,121 @@ let rec polynomial_evaluate_horner (coefficients : polynomial)
   | [] -> make Prims.int_zero Prims.int_one
   | constant::higher ->
       add constant (multiply point (polynomial_evaluate_horner higher point))
+type rational_polynomial_model =
+  | RZConstant of rational 
+  | RZVariable 
+  | RZNegate of rational_polynomial_model 
+  | RZAdd of rational_polynomial_model * rational_polynomial_model 
+  | RZSubtract of rational_polynomial_model * rational_polynomial_model 
+  | RZMultiply of rational_polynomial_model * rational_polynomial_model 
+  | RZScale of rational * rational_polynomial_model 
+  | RZPower of rational_polynomial_model * Prims.nat 
+let uu___is_RZConstant (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZConstant value1 -> true | uu___ -> false
+let __proj__RZConstant__item__value (projectee : rational_polynomial_model) :
+  rational= match projectee with | RZConstant value1 -> value1
+let uu___is_RZVariable (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZVariable -> true | uu___ -> false
+let uu___is_RZNegate (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZNegate _0 -> true | uu___ -> false
+let __proj__RZNegate__item___0 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZNegate _0 -> _0
+let uu___is_RZAdd (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZAdd (_0, _1) -> true | uu___ -> false
+let __proj__RZAdd__item___0 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZAdd (_0, _1) -> _0
+let __proj__RZAdd__item___1 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZAdd (_0, _1) -> _1
+let uu___is_RZSubtract (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZSubtract (_0, _1) -> true | uu___ -> false
+let __proj__RZSubtract__item___0 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZSubtract (_0, _1) -> _0
+let __proj__RZSubtract__item___1 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZSubtract (_0, _1) -> _1
+let uu___is_RZMultiply (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZMultiply (_0, _1) -> true | uu___ -> false
+let __proj__RZMultiply__item___0 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZMultiply (_0, _1) -> _0
+let __proj__RZMultiply__item___1 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZMultiply (_0, _1) -> _1
+let uu___is_RZScale (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZScale (factor, _1) -> true | uu___ -> false
+let __proj__RZScale__item__factor (projectee : rational_polynomial_model) :
+  rational= match projectee with | RZScale (factor, _1) -> factor
+let __proj__RZScale__item___1 (projectee : rational_polynomial_model) :
+  rational_polynomial_model=
+  match projectee with | RZScale (factor, _1) -> _1
+let uu___is_RZPower (projectee : rational_polynomial_model) : Prims.bool=
+  match projectee with | RZPower (_0, _1) -> true | uu___ -> false
+let __proj__RZPower__item___0 (projectee : rational_polynomial_model) :
+  rational_polynomial_model= match projectee with | RZPower (_0, _1) -> _0
+let __proj__RZPower__item___1 (projectee : rational_polynomial_model) :
+  Prims.nat= match projectee with | RZPower (_0, _1) -> _1
+let rec rational_polynomial_model_value (term : rational_polynomial_model)
+  (point : rational) : rational=
+  match term with
+  | RZConstant value1 -> value1
+  | RZVariable -> point
+  | RZNegate inner -> negate (rational_polynomial_model_value inner point)
+  | RZAdd (left, right) ->
+      add (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZSubtract (left, right) ->
+      subtract (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZMultiply (left, right) ->
+      multiply (rational_polynomial_model_value left point)
+        (rational_polynomial_model_value right point)
+  | RZScale (factor, inner) ->
+      multiply factor (rational_polynomial_model_value inner point)
+  | RZPower (base, exponent) ->
+      rational_power_product (rational_polynomial_model_value base point)
+        exponent
+let rec collect_rational_polynomial_model (term : rational_polynomial_model)
+  : polynomial=
+  match term with
+  | RZConstant value1 -> [value1]
+  | RZVariable ->
+      [make Prims.int_zero Prims.int_one; make Prims.int_one Prims.int_one]
+  | RZNegate inner ->
+      polynomial_negate (collect_rational_polynomial_model inner)
+  | RZAdd (left, right) ->
+      polynomial_add (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZSubtract (left, right) ->
+      polynomial_subtract (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZMultiply (left, right) ->
+      polynomial_multiply (collect_rational_polynomial_model left)
+        (collect_rational_polynomial_model right)
+  | RZScale (factor, inner) ->
+      polynomial_scale factor (collect_rational_polynomial_model inner)
+  | RZPower (base, exponent) ->
+      polynomial_power (collect_rational_polynomial_model base) exponent
+let rec embed_rational_polynomial_model (term : rational_polynomial_model)
+  (variable : Prims.string) : expression=
+  match term with
+  | RZConstant value1 -> Literal ((value1.numerator), (value1.denominator))
+  | RZVariable -> Symbol variable
+  | RZNegate inner -> Negate (embed_rational_polynomial_model inner variable)
+  | RZAdd (left, right) ->
+      Binary
+        (Add, (embed_rational_polynomial_model left variable),
+          (embed_rational_polynomial_model right variable))
+  | RZSubtract (left, right) ->
+      Binary
+        (Subtract, (embed_rational_polynomial_model left variable),
+          (embed_rational_polynomial_model right variable))
+  | RZMultiply (left, right) ->
+      Binary
+        (Multiply, (embed_rational_polynomial_model left variable),
+          (embed_rational_polynomial_model right variable))
+  | RZScale (factor, inner) ->
+      Binary
+        (Multiply, (Literal ((factor.numerator), (factor.denominator))),
+          (embed_rational_polynomial_model inner variable))
+  | RZPower (base, exponent) ->
+      Power ((embed_rational_polynomial_model base variable), exponent)
 let polynomial_definite_integral_coefficients (coefficients : polynomial)
   (lower : coefficient) (upper : coefficient) : coefficient=
   let antiderivative = polynomial_antiderivative_coefficients coefficients in

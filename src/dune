@@ -1,9 +1,30 @@
 (include_subdirs unqualified)
 
+(rule
+ (target centl_build.ml)
+ (deps
+  (universe)
+  ../scripts/write-build-identity
+  generated/Centl_Core.ml
+  generated/Centl_Gcd.ml
+  generated/Centl_PolynomialSoundness.ml)
+ (action
+  (run
+   %{dep:../scripts/write-build-identity}
+   %{target}
+   %{dep:generated/Centl_Core.ml}
+   %{dep:generated/Centl_Gcd.ml}
+   %{dep:generated/Centl_PolynomialSoundness.ml})))
+
 (library
  (name centl_verified)
  (wrapped false)
- (modules Prims FStar_Pervasives_Native Centl_Gcd Centl_Core)
+ (modules
+  Prims
+  FStar_Pervasives_Native
+  Centl_Gcd
+  Centl_Core
+  Centl_PolynomialSoundness)
  (flags
   (:standard -w -8-27))
  (libraries zarith))
@@ -18,7 +39,9 @@
   Centl_history
   Centl_engine
   Centl_version
+  Centl_build
   Centl_verify
+  Centl_receipt
   Centl_protocol
   Centl_request_queue
   Centl_physics
