@@ -765,5 +765,5 @@ jobs:
         run: |
           test "v$VERSION" = "$GITHUB_REF_NAME"
           gh release create "$GITHUB_REF_NAME" dist/* \
-            --repo "$GITHUB_REPOSITORY" \
-            --generate-notes --title "CENTL $VERSION"
+            --repo "$GITHUB_REPOSITORY" --generate-notes \
+            --title "CENTL $VERSION — Math Contracts"
