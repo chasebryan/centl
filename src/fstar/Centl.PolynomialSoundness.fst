@@ -50,16 +50,23 @@ let negate_respects_equivalent
 =
   let left_result = C.negate left in
   let right_result = C.negate right in
-  assert (C.equivalent left_result {
+  let raw_left : C.rational = {
     numerator = -left.numerator;
     denominator = left.denominator
-  });
-  assert (C.equivalent right_result {
+  } in
+  let raw_right : C.rational = {
     numerator = -right.numerator;
     denominator = right.denominator
-  });
-  assert (C.equivalent left_result right_result)
-    by (FStar.Tactics.Canon.canon ())
+  } in
+  assert (C.invariant raw_left);
+  assert (C.invariant raw_right);
+  assert (C.equivalent left_result raw_left);
+  assert (C.equivalent right_result raw_right);
+  assert (C.equivalent raw_left raw_right)
+    by (FStar.Tactics.Canon.canon ());
+  equivalent_transitive left_result raw_left raw_right;
+  equivalent_symmetric right_result raw_right;
+  equivalent_transitive left_result raw_right right_result
 
 let add_respects_equivalent
     (left_a left_b right_a right_b:C.rational{
@@ -76,20 +83,27 @@ let add_respects_equivalent
 =
   let left_result = C.add left_a left_b in
   let right_result = C.add right_a right_b in
-  assert (C.equivalent left_result {
+  let raw_left : C.rational = {
     numerator =
       left_a.numerator * left_b.denominator +
       left_b.numerator * left_a.denominator;
     denominator = left_a.denominator * left_b.denominator
-  });
-  assert (C.equivalent right_result {
+  } in
+  let raw_right : C.rational = {
     numerator =
       right_a.numerator * right_b.denominator +
       right_b.numerator * right_a.denominator;
     denominator = right_a.denominator * right_b.denominator
-  });
-  assert (C.equivalent left_result right_result)
-    by (FStar.Tactics.Canon.canon ())
+  } in
+  assert (C.invariant raw_left);
+  assert (C.invariant raw_right);
+  assert (C.equivalent left_result raw_left);
+  assert (C.equivalent right_result raw_right);
+  assert (C.equivalent raw_left raw_right)
+    by (FStar.Tactics.Canon.canon ());
+  equivalent_transitive left_result raw_left raw_right;
+  equivalent_symmetric right_result raw_right;
+  equivalent_transitive left_result raw_right right_result
 
 let multiply_respects_equivalent
     (left_a left_b right_a right_b:C.rational{
@@ -106,15 +120,22 @@ let multiply_respects_equivalent
 =
   let left_result = C.multiply left_a left_b in
   let right_result = C.multiply right_a right_b in
-  assert (C.equivalent left_result {
+  let raw_left : C.rational = {
     numerator = left_a.numerator * left_b.numerator;
     denominator = left_a.denominator * left_b.denominator
-  });
-  assert (C.equivalent right_result {
+  } in
+  let raw_right : C.rational = {
     numerator = right_a.numerator * right_b.numerator;
     denominator = right_a.denominator * right_b.denominator
-  });
-  assert (C.equivalent left_result right_result)
-    by (FStar.Tactics.Canon.canon ())
+  } in
+  assert (C.invariant raw_left);
+  assert (C.invariant raw_right);
+  assert (C.equivalent left_result raw_left);
+  assert (C.equivalent right_result raw_right);
+  assert (C.equivalent raw_left raw_right)
+    by (FStar.Tactics.Canon.canon ());
+  equivalent_transitive left_result raw_left raw_right;
+  equivalent_symmetric right_result raw_right;
+  equivalent_transitive left_result raw_right right_result
 
 #pop-options
