@@ -59,7 +59,12 @@ enclosure.
 
 ### Scripts
 
-`# comment`
+`assert(left relation right)` `# comment`
+
+`assert(...)` checks a claim without adding a session definition. It exits
+successfully only for a `verified` verdict; `refuted`, `unknown`, and `invalid`
+claims are unsuccessful. A quantified rational form is also accepted:
+`assert(left relation right, for_all = x, domain = rational)`.
 
 ## Example calculation forms
 

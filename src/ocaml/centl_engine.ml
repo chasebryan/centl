@@ -1615,6 +1615,7 @@ let reserved_names =
     "pi";
     "e";
     "tau";
+    "assert";
     "solve";
     "diff";
     "substitute";
@@ -3545,6 +3546,10 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
       in
       let result =
         match located.statement with
+        | Centl_parser.Assert _ ->
+            session_failure "assert_host_only"
+              "assert(...) claims are checked by the calculator host; use the \
+               assert form interactively, or the verify protocol operation"
         | Centl_parser.Evaluate expression ->
             let* expression, _ =
               expand_expression ~cancelled ~defer_iterations:true ~origins

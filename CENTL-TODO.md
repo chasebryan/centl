@@ -24,9 +24,21 @@ This is a working checklist. Product sequencing and release themes live in
 - [x] Give parse diagnostics precise file or input line, column, and caret
   context.
 - [x] Add bounded exact sequences and recurrence evaluation.
-- [ ] Persist interactive history across calculator processes.
+- [x] Persist interactive history across calculator processes.
 - [ ] Carry source spans through evaluation so runtime mathematical failures can
   point back to their originating subexpression.
+
+## Math contracts (0.12.0 path)
+
+- [x] Structured verify / check / assert surfaces.
+- [ ] Discharge every F* zero-difference soundness obligation before enabling
+  `verified_core` polynomial equality.
+- [ ] Finish bounded, replayable receipts with resolved session dependencies.
+- [ ] Validate release `BUILD_MANIFEST.json` identity across every platform.
+- [ ] Validate and publish the reusable `centl-check` GitHub Action and passing
+  example contracts.
+- [ ] Publish 0.12.0 with stamped release identity and conformance CI gate.
+- [ ] Pilot three external contract repositories.
 
 Keep this file limited to actionable near-term work; remove or check items when
 the implementation lands instead of duplicating completed CI or setup tasks.

@@ -1,5 +1,40 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Claim verification foundation (not a released version):
+  - Protocol `op: "verify"` and MCP `centl_verify` check structured claims.
+  - CLI `centl verify --left/--relation/--right [--variable name:rational]
+    [--json]` and `centl check FILE [--json]`.
+  - Calculator grammar `assert(left rel right)` and quantified
+    `assert(left rel right, for_all = x, domain = rational)`, host-checked
+    outside the engine (assert exits follow verify: 0/1/2).
+  - Decisive scopes: closed exact rational comparison and certified enclosure
+    order/inequality. Univariate rational polynomial identities normalize to
+    zero difference but stay `unknown` with reason
+    `polynomial_soundness_theorem_pending`; the F* soundness theorem is not
+    complete and must not be advertised as landed assurance.
+  - False polynomial equalities are `refuted` only with an exactly rechecked
+    rational counterexample (`witness_checked`).
+  - Enclosure evidence includes exact dyadic endpoints plus decimal bounds;
+    polynomial evidence may include `normalized_difference` and
+    `counterexample`.
+  - Verdicts: `verified`, `refuted`, `unknown`, `invalid`. Operational failures
+    (cancellation, resource/precision limits, backend failures) remain errors.
+  - Free-form assumptions, multi-variable claims, quantified order, and
+    unproved polynomial identities return `unknown`.
+  - Session definitions may be read; verification never mutates session state.
+  - Passing and deliberately pending example contracts live under
+    `examples/contracts/`.
+  - `describe` advertises verification scopes, verdicts, and assurance classes.
+
+### Notes
+
+- v0.11.0 remains the released package; MCP tool discovery for v0.11.0 exposes
+  seven tools. The unreleased `centl_verify` tool is additive draft work.
+
 ## 0.11.0 — 2026-08-08
 
 ### Added
