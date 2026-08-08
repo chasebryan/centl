@@ -156,3 +156,176 @@ let particle_json particle =
       ("position", vector_json_as particle.position "m");
       ("velocity", vector_json_as particle.velocity "m/s");
     ]
+
+let quantity_input label = function
+  | `Assoc fields ->
+      begin match check_fields [ "value"; "unit" ] fields with
+      | Error _ as error -> error
+      | Ok () ->
+          begin match (string_field "value" fields, string_field "unit" fields) with
+          | Ok value, Ok unit_symbol ->
+              begin match parse_q (label ^ " value") value with
+              | Error _ as error -> error
+              | Ok value ->
+                  begin try Ok (quantity value unit_symbol)
+                  with Physics_error message -> Error message
+                  end
+              end
+          | Error message, _ | _, Error message -> Error message
+          end
+      end
+  | _ -> Error (label ^ " must be an object")
+
+let vector_input label = function
+  | `Assoc fields ->
+      begin match check_fields [ "x"; "y"; "z"; "unit" ] fields with
+      | Error _ as error -> error
+      | Ok () ->
+          begin match
+            ( string_field "x" fields,
+              string_field "y" fields,
+              string_field "z" fields,
+              string_field "unit" fields )
+          with
+          | Ok x, Ok y, Ok z, Ok unit_symbol ->
+              begin match
+                ( parse_q (label ^ " x") x,
+                  parse_q (label ^ " y") y,
+                  parse_q (label ^ " z") z )
+              with
+              | Ok x, Ok y, Ok z ->
+                  begin try Ok (vector3 ~unit_symbol x y z)
+                  with Physics_error message -> Error message
+                  end
+              | Error message, _, _
+              | _, Error message, _
+              | _, _, Error message -> Error message
+              end
+          | Error message, _, _, _
+          | _, Error message, _, _
+          | _, _, Error message, _
+          | _, _, _, Error message -> Error message
+          end
+      end
+  | _ -> Error (label ^ " must be an object")
+
+let particle_input = function
+  | `Assoc fields ->
+      begin match check_fields [ "id"; "mass"; "position"; "velocity" ] fields with
+      | Error _ as error -> error
+      | Ok () ->
+          let id =
+            match List.assoc_opt "id" fields with
+            | None -> Ok "body"
+            | Some (`String id) -> Ok id
+            | Some _ -> Error "particle id must be a string"
+          in
+          begin match
+            ( id,
+              List.assoc_opt "mass" fields,
+              List.assoc_opt "position" fields,
+              List.assoc_opt "velocity" fields )
+          with
+          | Ok id, Some mass, Some position, Some velocity ->
+              begin match
+                ( quantity_input "particle mass" mass,
+                  vector_input "particle position" position,
+                  vector_input "particle velocity" velocity )
+              with
+              | Ok mass, Ok position, Ok velocity ->
+                  begin try Ok (particle ~id ~mass ~position ~velocity)
+                  with Physics_error message -> Error message
+                  end
+              | Error message, _, _
+              | _, Error message, _
+              | _, _, Error message -> Error message
+              end
+          | Error message, _, _, _ -> Error message
+          | _, None, _, _ -> Error "missing particle mass"
+          | _, _, None, _ -> Error "missing particle position"
+          | _, _, _, None -> Error "missing particle velocity"
+          end
+      end
+  | _ -> Error "particle must be an object"
+
+let force_input = function
+  | `Assoc fields ->
+      begin match string_field "kind" fields with
+      | Error message -> Error message
+      | Ok "constant_force" ->
+          begin match (check_fields [ "kind"; "vector" ] fields, List.assoc_opt "vector" fields) with
+          | Error message, _ -> Error message
+          | Ok (), None -> Error "constant_force requires vector"
+          | Ok (), Some json ->
+              begin match vector_input "constant force" json with
+              | Error _ as error -> error
+              | Ok vector ->
+                  begin try Ok (constant_force vector)
+                  with Physics_error message -> Error message
+                  end
+              end
+          end
+      | Ok "uniform_gravity" ->
+          begin match
+            ( check_fields [ "kind"; "acceleration" ] fields,
+              List.assoc_opt "acceleration" fields )
+          with
+          | Error message, _ -> Error message
+          | Ok (), None -> Error "uniform_gravity requires acceleration"
+          | Ok (), Some json ->
+              begin match vector_input "gravity acceleration" json with
+              | Error _ as error -> error
+              | Ok vector ->
+                  begin try Ok (uniform_gravity vector)
+                  with Physics_error message -> Error message
+                  end
+              end
+          end
+      | Ok "hooke_spring" ->
+          begin match
+            ( check_fields [ "kind"; "anchor"; "stiffness" ] fields,
+              List.assoc_opt "anchor" fields,
+              List.assoc_opt "stiffness" fields )
+          with
+          | Error message, _, _ -> Error message
+          | Ok (), None, _ -> Error "hooke_spring requires anchor"
+          | Ok (), _, None -> Error "hooke_spring requires stiffness"
+          | Ok (), Some anchor, Some stiffness ->
+              begin match
+                ( vector_input "spring anchor" anchor,
+                  quantity_input "spring stiffness" stiffness )
+              with
+              | Ok anchor, Ok stiffness ->
+                  begin try Ok (hooke_force ~anchor ~stiffness)
+                  with Physics_error message -> Error message
+                  end
+              | Error message, _ | _, Error message -> Error message
+              end
+          end
+      | Ok "linear_drag" ->
+          begin match
+            ( check_fields [ "kind"; "coefficient" ] fields,
+              List.assoc_opt "coefficient" fields )
+          with
+          | Error message, _ -> Error message
+          | Ok (), None -> Error "linear_drag requires coefficient"
+          | Ok (), Some coefficient ->
+              begin match quantity_input "linear drag coefficient" coefficient with
+              | Error _ as error -> error
+              | Ok coefficient ->
+                  begin try Ok (linear_drag coefficient)
+                  with Physics_error message -> Error message
+                  end
+              end
+          end
+      | Ok kind -> Error ("unsupported force model: " ^ kind)
+      end
+  | _ -> Error "force must be an object"
+
+let rec force_list acc = function
+  | [] -> Ok (List.rev acc)
+  | force :: rest ->
+      begin match force_input force with
+      | Ok force -> force_list (force :: acc) rest
+      | Error _ as error -> error
+      end
