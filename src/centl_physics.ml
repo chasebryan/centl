@@ -124,7 +124,9 @@ let unit_catalog =
   ]
 
 let unit_of_symbol symbol =
-  List.find_opt (fun unit_def -> String.equal unit_def.symbol symbol) unit_catalog
+  List.find_opt
+    (fun unit_def -> String.equal unit_def.symbol symbol)
+    unit_catalog
 
 let unit_exn symbol =
   match unit_of_symbol symbol with
@@ -136,11 +138,13 @@ let require_dimension ~context ~expected actual =
     raise
       (Physics_error
          (Printf.sprintf "%s: expected dimension %s but got %s" context
-            (dimension_to_string expected) (dimension_to_string actual)))
+            (dimension_to_string expected)
+            (dimension_to_string actual)))
 
 type quantity = { si_value : Q.t; quantity_dimension : dimension }
 
-let quantity_of_si si_value quantity_dimension = { si_value; quantity_dimension }
+let quantity_of_si si_value quantity_dimension =
+  { si_value; quantity_dimension }
 
 let quantity value unit_symbol =
   let unit_def = unit_exn unit_symbol in
@@ -148,7 +152,8 @@ let quantity value unit_symbol =
 
 let convert quantity unit_symbol =
   let unit_def = unit_exn unit_symbol in
-  require_dimension ~context:("convert to " ^ unit_symbol)
+  require_dimension
+    ~context:("convert to " ^ unit_symbol)
     ~expected:unit_def.unit_dimension quantity.quantity_dimension;
   Q.div quantity.si_value unit_def.scale_to_si
 
@@ -158,31 +163,31 @@ let quantity_add a b =
   quantity_of_si (Q.add a.si_value b.si_value) a.quantity_dimension
 
 let quantity_sub a b =
-  require_dimension ~context:"quantity subtraction" ~expected:a.quantity_dimension
-    b.quantity_dimension;
+  require_dimension ~context:"quantity subtraction"
+    ~expected:a.quantity_dimension b.quantity_dimension;
   quantity_of_si (Q.sub a.si_value b.si_value) a.quantity_dimension
 
 let quantity_mul a b =
-  quantity_of_si (Q.mul a.si_value b.si_value)
+  quantity_of_si
+    (Q.mul a.si_value b.si_value)
     (dim_mul a.quantity_dimension b.quantity_dimension)
 
 let quantity_div a b =
-  if Q.equal b.si_value Q.zero then raise (Physics_error "division by zero quantity");
-  quantity_of_si (Q.div a.si_value b.si_value)
+  if Q.equal b.si_value Q.zero then
+    raise (Physics_error "division by zero quantity");
+  quantity_of_si
+    (Q.div a.si_value b.si_value)
     (dim_div a.quantity_dimension b.quantity_dimension)
 
-let quantity_scale factor q = quantity_of_si (Q.mul factor q.si_value) q.quantity_dimension
+let quantity_scale factor q =
+  quantity_of_si (Q.mul factor q.si_value) q.quantity_dimension
+
 let quantity_neg q = quantity_scale Q.minus_one q
 
 let quantity_to_string_as q unit_symbol =
   Printf.sprintf "%s %s" (Q.to_string (convert q unit_symbol)) unit_symbol
 
-type vector3 = {
-  x : Q.t;
-  y : Q.t;
-  z : Q.t;
-  vector_dimension : dimension;
-}
+type vector3 = { x : Q.t; y : Q.t; z : Q.t; vector_dimension : dimension }
 
 let vector_of_si ~dimension x y z = { x; y; z; vector_dimension = dimension }
 
@@ -196,28 +201,33 @@ let vector3 ~unit_symbol x y z =
 let zero_vector dimension = vector_of_si ~dimension Q.zero Q.zero Q.zero
 
 let vector_add a b =
-  require_dimension ~context:"vector addition" ~expected:a.vector_dimension b.vector_dimension;
+  require_dimension ~context:"vector addition" ~expected:a.vector_dimension
+    b.vector_dimension;
   vector_of_si ~dimension:a.vector_dimension (Q.add a.x b.x) (Q.add a.y b.y)
     (Q.add a.z b.z)
 
 let vector_sub a b =
-  require_dimension ~context:"vector subtraction" ~expected:a.vector_dimension b.vector_dimension;
+  require_dimension ~context:"vector subtraction" ~expected:a.vector_dimension
+    b.vector_dimension;
   vector_of_si ~dimension:a.vector_dimension (Q.sub a.x b.x) (Q.sub a.y b.y)
     (Q.sub a.z b.z)
 
 let vector_scale factor v =
-  vector_of_si ~dimension:v.vector_dimension (Q.mul factor v.x) (Q.mul factor v.y)
-    (Q.mul factor v.z)
+  vector_of_si ~dimension:v.vector_dimension (Q.mul factor v.x)
+    (Q.mul factor v.y) (Q.mul factor v.z)
 
 let vector_neg v = vector_scale Q.minus_one v
 
 let vector_times_quantity v q =
-  vector_of_si ~dimension:(dim_mul v.vector_dimension q.quantity_dimension)
+  vector_of_si
+    ~dimension:(dim_mul v.vector_dimension q.quantity_dimension)
     (Q.mul v.x q.si_value) (Q.mul v.y q.si_value) (Q.mul v.z q.si_value)
 
 let vector_div_quantity v q =
-  if Q.equal q.si_value Q.zero then raise (Physics_error "vector division by zero quantity");
-  vector_of_si ~dimension:(dim_div v.vector_dimension q.quantity_dimension)
+  if Q.equal q.si_value Q.zero then
+    raise (Physics_error "vector division by zero quantity");
+  vector_of_si
+    ~dimension:(dim_div v.vector_dimension q.quantity_dimension)
     (Q.div v.x q.si_value) (Q.div v.y q.si_value) (Q.div v.z q.si_value)
 
 let vector_dot a b =
@@ -226,7 +236,8 @@ let vector_dot a b =
     (dim_mul a.vector_dimension b.vector_dimension)
 
 let vector_cross a b =
-  vector_of_si ~dimension:(dim_mul a.vector_dimension b.vector_dimension)
+  vector_of_si
+    ~dimension:(dim_mul a.vector_dimension b.vector_dimension)
     (Q.sub (Q.mul a.y b.z) (Q.mul a.z b.y))
     (Q.sub (Q.mul a.z b.x) (Q.mul a.x b.z))
     (Q.sub (Q.mul a.x b.y) (Q.mul a.y b.x))
@@ -235,7 +246,8 @@ let vector_norm_squared v = vector_dot v v
 
 let vector_to_string_as v unit_symbol =
   let unit_def = unit_exn unit_symbol in
-  require_dimension ~context:("render vector in " ^ unit_symbol)
+  require_dimension
+    ~context:("render vector in " ^ unit_symbol)
     ~expected:unit_def.unit_dimension v.vector_dimension;
   let scale component = Q.to_string (Q.div component unit_def.scale_to_si) in
   Printf.sprintf "%s,%s,%s" (scale v.x) (scale v.y) (scale v.z)
@@ -292,11 +304,14 @@ type particle = {
 }
 
 let particle ~id ~mass ~position ~velocity =
-  require_dimension ~context:"particle mass" ~expected:dim_mass mass.quantity_dimension;
+  require_dimension ~context:"particle mass" ~expected:dim_mass
+    mass.quantity_dimension;
   if Q.compare mass.si_value Q.zero <= 0 then
     raise (Physics_error "particle mass must be positive");
-  require_dimension ~context:"particle position" ~expected:dim_length position.vector_dimension;
-  require_dimension ~context:"particle velocity" ~expected:dim_velocity velocity.vector_dimension;
+  require_dimension ~context:"particle position" ~expected:dim_length
+    position.vector_dimension;
+  require_dimension ~context:"particle velocity" ~expected:dim_velocity
+    velocity.vector_dimension;
   { id; mass; position; velocity }
 
 type force_model = particle -> vector3
@@ -313,15 +328,18 @@ let uniform_gravity acceleration =
   require_dimension ~context:"uniform gravity" ~expected:dim_acceleration
     acceleration.vector_dimension;
   fun particle ->
-    vector_times_quantity acceleration particle.mass |> require_force "gravity force"
+    vector_times_quantity acceleration particle.mass
+    |> require_force "gravity force"
 
 let hooke_force ~anchor ~stiffness =
-  require_dimension ~context:"spring anchor" ~expected:dim_length anchor.vector_dimension;
+  require_dimension ~context:"spring anchor" ~expected:dim_length
+    anchor.vector_dimension;
   require_dimension ~context:"spring stiffness" ~expected:dim_spring_constant
     stiffness.quantity_dimension;
   fun particle ->
     let displacement = vector_sub particle.position anchor in
-    vector_times_quantity displacement stiffness |> vector_neg
+    vector_times_quantity displacement stiffness
+    |> vector_neg
     |> require_force "spring force"
 
 let linear_drag coefficient =
@@ -330,7 +348,8 @@ let linear_drag coefficient =
   if Q.compare coefficient.si_value Q.zero < 0 then
     raise (Physics_error "linear drag coefficient must be non-negative");
   fun particle ->
-    vector_times_quantity particle.velocity coefficient |> vector_neg
+    vector_times_quantity particle.velocity coefficient
+    |> vector_neg
     |> require_force "linear drag force"
 
 let net_force force_models particle =
@@ -342,7 +361,8 @@ let acceleration force_models particle =
   vector_div_quantity (net_force force_models particle) particle.mass
 
 let step_symplectic_euler ~dt ~forces particle =
-  require_dimension ~context:"time step" ~expected:dim_time dt.quantity_dimension;
+  require_dimension ~context:"time step" ~expected:dim_time
+    dt.quantity_dimension;
   if Q.compare dt.si_value Q.zero <= 0 then
     raise (Physics_error "time step must be positive");
   let a = acceleration forces particle in
@@ -355,9 +375,11 @@ let step_symplectic_euler ~dt ~forces particle =
   { particle with position; velocity }
 
 let simulate ~steps ~dt ~forces initial =
-  if steps < 0 then raise (Physics_error "simulation steps must be non-negative");
+  if steps < 0 then
+    raise (Physics_error "simulation steps must be non-negative");
   if steps > 1_000_000 then
-    raise (Physics_error "simulation steps exceed the 1000000-step safety limit");
+    raise
+      (Physics_error "simulation steps exceed the 1000000-step safety limit");
   let rec loop remaining state acc =
     if remaining = 0 then List.rev (state :: acc)
     else
@@ -380,16 +402,17 @@ let kinetic_energy particle =
 let uniform_gravity_potential ~acceleration ~reference particle =
   require_dimension ~context:"uniform gravity potential acceleration"
     ~expected:dim_acceleration acceleration.vector_dimension;
-  require_dimension ~context:"uniform gravity potential reference" ~expected:dim_length
-    reference.vector_dimension;
+  require_dimension ~context:"uniform gravity potential reference"
+    ~expected:dim_length reference.vector_dimension;
   let displacement = vector_sub particle.position reference in
-  quantity_mul particle.mass (vector_dot acceleration displacement) |> quantity_neg
+  quantity_mul particle.mass (vector_dot acceleration displacement)
+  |> quantity_neg
 
 let spring_potential ~anchor ~stiffness particle =
   require_dimension ~context:"spring potential anchor" ~expected:dim_length
     anchor.vector_dimension;
-  require_dimension ~context:"spring potential stiffness" ~expected:dim_spring_constant
-    stiffness.quantity_dimension;
+  require_dimension ~context:"spring potential stiffness"
+    ~expected:dim_spring_constant stiffness.quantity_dimension;
   let displacement = vector_sub particle.position anchor in
   quantity_mul stiffness (vector_norm_squared displacement)
   |> quantity_scale (Q.of_string "1/2")
@@ -402,20 +425,23 @@ type invariant_report = {
 }
 
 let compare_invariant ~initial ~final =
-  require_dimension ~context:"invariant comparison" ~expected:initial.quantity_dimension
-    final.quantity_dimension;
+  require_dimension ~context:"invariant comparison"
+    ~expected:initial.quantity_dimension final.quantity_dimension;
   let delta = quantity_sub final initial in
   { conserved = Q.equal delta.si_value Q.zero; initial; final; delta }
 
 let elastic_collision_1d ~mass1 ~velocity1 ~mass2 ~velocity2 =
-  require_dimension ~context:"collision mass1" ~expected:dim_mass mass1.quantity_dimension;
-  require_dimension ~context:"collision mass2" ~expected:dim_mass mass2.quantity_dimension;
+  require_dimension ~context:"collision mass1" ~expected:dim_mass
+    mass1.quantity_dimension;
+  require_dimension ~context:"collision mass2" ~expected:dim_mass
+    mass2.quantity_dimension;
   require_dimension ~context:"collision velocity1" ~expected:dim_velocity
     velocity1.quantity_dimension;
   require_dimension ~context:"collision velocity2" ~expected:dim_velocity
     velocity2.quantity_dimension;
-  if Q.compare mass1.si_value Q.zero <= 0 || Q.compare mass2.si_value Q.zero <= 0 then
-    raise (Physics_error "collision masses must be positive");
+  if
+    Q.compare mass1.si_value Q.zero <= 0 || Q.compare mass2.si_value Q.zero <= 0
+  then raise (Physics_error "collision masses must be positive");
   let m1 = mass1.si_value in
   let m2 = mass2.si_value in
   let v1 = velocity1.si_value in
