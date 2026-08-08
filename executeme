@@ -35,8 +35,9 @@ case "$seed_input" in
   ''|*[!0-9]*) fail "CENTL_STRESS_SEED must be a non-negative integer" ;;
 esac
 
-rng_state=$((seed_input % 2147483646 + 1))
-seed=$rng_state
+seed=$seed_input
+rng_state=$((seed_input % 2147483647))
+[ "$rng_state" -gt 0 ] || rng_state=1
 
 rand_between() {
   rb_lo=$1
@@ -149,9 +150,9 @@ while [ "$iteration" -le "$rounds" ]; do
   # Finite sums, combinatorics, and integer recurrences.
   claim equal "sum(j, j = 1, $n)" "($n*($n+1)/2)"
   claim equal "sum(j^2, j = 1, $n)" "($n*($n+1)*(2*$n+1)/6)"
-  claim equal "factorial($p + 1)" "(($p+1) * factorial($p))"
+  claim equal "factorial($((p + 1)))" "($((p + 1)) * factorial($p))"
   claim equal "choose($n, $k) + choose($n, $((k + 1)))" "choose($((n + 1)), $((k + 1)))"
-  claim equal "fibonacci($q + 2)" "fibonacci($q + 1) + fibonacci($q)"
+  claim equal "fibonacci($((q + 2)))" "fibonacci($((q + 1))) + fibonacci($q)"
 
   # Calculus: compare production differentiation/integration with independent formulas.
   claim equal \
