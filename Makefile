@@ -9,6 +9,7 @@ DUNE ?= $(shell \
 	else printf '%s' dune; fi)
 FSTAR_GCD := src/fstar/Centl.Gcd.fst
 FSTAR_CORE := src/fstar/Centl.Core.fst
+FSTAR_POLYNOMIAL_SOUNDNESS := src/fstar/Centl.PolynomialSoundness.fst
 FSTAR_CACHE := _build/fstar
 GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
@@ -41,6 +42,8 @@ verify:
 		--cache_checked_modules --report_assumes error $(FSTAR_GCD)
 	$(FSTAR) $(FSTAR_COMMON) \
 		--cache_checked_modules --report_assumes error $(FSTAR_CORE)
+	$(FSTAR) $(FSTAR_COMMON) \
+		--cache_checked_modules --report_assumes error $(FSTAR_POLYNOMIAL_SOUNDNESS)
 
 extract: verify
 	mkdir -p src/generated
@@ -87,10 +90,3 @@ differential-test: build
 build: extract native-build
 
 test: extract native-test
-
-release: build
-	test -n "$(VERSION)"
-	scripts/package-release "$(VERSION)"
-
-clean:
-	$(DUNE) clean
