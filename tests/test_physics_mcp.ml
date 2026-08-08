@@ -88,8 +88,7 @@ let particle () =
       ("velocity", vector "1" "0" "0" "m/s");
     ]
 
-let metadata () =
-  `Assoc [ ("progressToken", `String "physics-progress") ]
+let metadata () = `Assoc [ ("progressToken", `String "physics-progress") ]
 
 let test_tool_discovery () =
   let state = Centl_mcp.create () in
@@ -225,9 +224,7 @@ let test_strict_physics_arguments () =
   in
   invalid
     [
-      ("id", `String "protocol-id");
-      ("version", `Int 1);
-      ("symbol", `String "c");
+      ("id", `String "protocol-id"); ("version", `Int 1); ("symbol", `String "c");
     ]
 
 let test_math_tool_still_delegates () =
