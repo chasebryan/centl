@@ -86,24 +86,13 @@ let particle () =
 let test_tool_discovery () =
   let state = Centl_mcp.create () in
   initialize state;
-  let first_page = request state 2 "tools/list" (`Assoc []) in
-  let first_result = assoc "result" first_page in
-  let first_tools =
-    match assoc "tools" first_result with
+  let listed = request state 2 "tools/list" (`Assoc []) in
+  let tools =
+    match assoc "tools" (assoc "result" listed) with
     | `List tools -> tools
     | _ -> Alcotest.fail "tools must be an array"
   in
-  Alcotest.(check int) "compatibility page size" 8 (List.length first_tools);
-  let cursor = string "nextCursor" first_result in
-  let second_page =
-    request state 3 "tools/list" (`Assoc [ ("cursor", `String cursor) ])
-  in
-  let tools =
-    match assoc "tools" (assoc "result" second_page) with
-    | `List tools -> tools
-    | _ -> Alcotest.fail "second tools page must be an array"
-  in
-  Alcotest.(check int) "physics page size" 1 (List.length tools);
+  Alcotest.(check int) "unified tool count" 9 (List.length tools);
   let physics =
     List.find_opt
       (fun tool ->
@@ -114,7 +103,7 @@ let test_tool_discovery () =
       tools
   in
   match physics with
-  | None -> Alcotest.fail "centl_physics missing from paginated tools/list"
+  | None -> Alcotest.fail "centl_physics missing from tools/list"
   | Some tool ->
       let annotations = assoc "annotations" tool in
       Alcotest.(check bool) "read only" true (bool "readOnlyHint" annotations);
