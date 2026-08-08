@@ -16,3 +16,9 @@
   $ ../src/physics_main.exe convert 1 m s 2>&1
   centl-physics: convert to s: expected dimension s but got m
   [1]
+
+  $ printf '%s\n' '{"version":1,"id":"convert","action":"convert","value":"100","from_unit":"cm","to_unit":"m"}' | ../src/physics_main.exe --serve | grep -o '"result":"1"'
+  "result":"1"
+
+  $ printf '%s\n' '{"version":1,"action":"capabilities"}' | ../src/physics_main.exe --serve | grep -o '"kind":"physics_capabilities"'
+  "kind":"physics_capabilities"
