@@ -39,7 +39,8 @@ let initialize state =
             ("protocolVersion", `String "2025-11-25");
             ("capabilities", `Assoc []);
             ( "clientInfo",
-              `Assoc [ ("name", `String "physics-test"); ("version", `String "1") ]
+              `Assoc
+                [ ("name", `String "physics-test"); ("version", `String "1") ]
             );
           ]));
   match
