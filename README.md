@@ -104,6 +104,32 @@ or `./centl --mcp` as a local AI tool. Mathematical output is colored when
 written to a terminal; use
 `--color=always`, `--no-color`, or `NO_COLOR` to control it.
 
+## Physics engine
+
+The development path now includes an experimental exact-first particle physics
+engine. It is implemented as the `Centl_physics` library module and the
+`centl-physics` executable. Rational inputs remain arbitrary-precision
+rationals through unit conversion, force evaluation, collision formulas, and
+fixed-step state evolution; incompatible physical dimensions fail explicitly.
+
+After a source build:
+
+```sh
+dune exec centl-physics -- convert 100 cm m
+dune exec centl-physics -- constant c
+dune exec centl-physics -- gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10
+```
+
+Native packages built from this development path install `centl-physics`
+alongside `centl`. The initial engine implements seven-base SI dimensional
+analysis, exact unit conversion, dimension-safe 3D vectors, particle state,
+constant force, uniform gravity, Hooke springs, linear drag, symplectic-Euler
+time evolution, energy and momentum diagnostics, and exact ideal 1D elastic
+collision response. It does not yet claim rigid-body contact simulation,
+adaptive integration, continuum/fluid solvers, or rigorous truncation-error
+enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) for the exact contract and
+current boundary.
+
 Calculator sessions and scripts remember immutable definitions written as
 `r = 3` or `f(x) = x^2 + 1`.
 
@@ -148,6 +174,7 @@ CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [algebra syntax](docs/ALGEBRA.md),
 [mathematical functions](docs/MATHEMATICS.md),
 [exact finite iteration and sequences](docs/ITERATION.md),
+[physics engine contract](docs/PHYSICS.md),
 [installation and binary releases](docs/INSTALL.md),
 [verification boundary](docs/VERIFICATION.md),
 [performance contract](docs/PERFORMANCE.md),
