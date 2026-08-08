@@ -126,7 +126,9 @@ The current physics MCP action is stateless with respect to simulated physical
 worlds: every call supplies the complete initial particle state and force model.
 It inherits the ordinary MCP process request-admission limit and retains the
 physics protocol's 100,000-step simulation ceiling and 4,096-step full
-trajectory-output ceiling.
+trajectory-output ceiling. When `include_trajectory` is false, the executor
+retains only the current particle state and final result rather than allocating
+a state list proportional to the requested step count.
 
 Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use
 `centl_compute`. Sums and products return the ordinary exact integer, rational, or
@@ -186,34 +188,37 @@ schema trees.
 ## Cancellation
 
 The stdio adapter implements MCP `notifications/cancelled`. A client can cancel
-an outstanding cancellable mathematical `tools/call` by its JSON-RPC request
-ID:
+an outstanding cancellable mathematical or physics `tools/call` by its
+JSON-RPC request ID:
 
 ```json
 {"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":"tool-7","reason":"User stopped the calculation"}}
 ```
 
-The input reader marks an active or queued cancellable mathematical tool call
-immediately while the stateful evaluator continues to process calculations and
-definitions in FIFO order. Cancellation is cooperative at parser,
-session-expansion, bounded-iteration term boundaries, symbolic-transformation,
+The input reader marks an active or queued cancellable tool call immediately
+while the stateful evaluator continues to process accepted requests in FIFO
+order. Mathematical cancellation is cooperative at parser, session-expansion,
+bounded-iteration term boundaries, symbolic-transformation,
 approximation-retry, and pre-commit checkpoints. A native backend call already
-in progress completes before the next checkpoint.
-A definition whose evaluation observes cancellation is not committed. A signal
-that races with an already completed call may have no effect.
+in progress completes before the next checkpoint. A definition whose
+evaluation observes cancellation is not committed.
 
-`centl_physics` is bounded by the physics machine ceilings but is not yet a
-cooperative MCP cancellation target. This is an explicit current boundary, not
-an implication that physics simulation is unbounded. Clients that require an
-immediate physics interruption should retain an external timeout and terminate
-the process if necessary. Cooperative physics cancellation is a future
-hardening item.
+Every physics action has an admission-time cancellation checkpoint, so a queued
+request that was cancelled before execution does not run. Physics particle
+simulation additionally checks cancellation at deterministic integration-step
+boundaries. A symplectic-Euler step already in progress completes before the
+next cancellation checkpoint. Conversion, constant lookup, capability queries,
+unit listing, and exact one-dimensional collision calls are short bounded
+operations and do not contain internal cancellation checkpoints after
+admission. A signal that races with an already completed call may have no
+effect.
 
 As required by MCP, a cancellation notification has no response and CENTL does
-not emit the cancelled mathematical tool call's response. Unknown, completed,
-and malformed cancellation targets are ignored. Request IDs must remain unique
-while calls are outstanding. Clients should retain an external timeout and
-terminate the process if they require immediate interruption.
+not emit the cancelled tool call's response. Unknown, completed, and malformed
+cancellation targets are ignored. Request IDs must remain unique while calls
+are outstanding. Clients should retain an external timeout and terminate the
+process if they require interruption inside a single non-cooperative native or
+exact operation.
 
 Valid cancellation notifications bypass the process request-admission counter.
 The reader keeps at most 10,000 ordinary pending inputs and 16 MiB of their
