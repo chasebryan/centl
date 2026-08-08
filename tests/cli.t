@@ -270,13 +270,13 @@
     |    ^
   [2]
 
-  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe edit; else echo 2; fi
+  $ if [ "${OS:-}" != Windows_NT ] && command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe edit; else echo 2; fi
   2
 
-  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe limit; else echo 'error: the expression exceeds the source-byte limit'; fi
+  $ if [ "${OS:-}" != Windows_NT ] && command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe limit; else echo 'error: the expression exceeds the source-byte limit'; fi
   error: the expression exceeds the source-byte limit
 
-  $ if command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe partial-escape; else echo raw-escape-ok; fi
+  $ if [ "${OS:-}" != Windows_NT ] && command -v timeout >/dev/null 2>&1 && command -v script >/dev/null 2>&1 && script -V 2>/dev/null | grep -qi util-linux; then sh raw-repl ../src/main.exe partial-escape; else echo raw-escape-ok; fi
   raw-escape-ok
 
   $ ../src/main.exe --file fixtures/exact.centl
@@ -366,8 +366,8 @@
   0.12.0-rc.1 True 64 1 1
 
   $ ../src/main.exe verify --left '0.1 + 0.2' --relation equal --right '3/10' --receipt verify-receipt.json >/dev/null
-  $ python3 -c 'import json,stat; o=json.load(open("verify-receipt.json")); print(o["kind"], o["verification"]["verdict"], o["resolved_claim"]["left"], o["session"]["revision"], len(o["build"]["generated_core_hash"]), oct(stat.S_IMODE(__import__("os").stat("verify-receipt.json").st_mode)))'
-  centl_verification_receipt verified 3/10 0 64 0o600
+  $ python3 -c 'import json,os,stat; o=json.load(open("verify-receipt.json")); mode=stat.S_IMODE(os.stat("verify-receipt.json").st_mode); private=mode == (0o666 if os.name == "nt" else 0o600); print(o["kind"], o["verification"]["verdict"], o["resolved_claim"]["left"], o["session"]["revision"], len(o["build"]["generated_core_hash"]), private)'
+  centl_verification_receipt verified 3/10 0 64 True
 
   $ ../src/main.exe verify --left '(x+1)^2' --relation equal --right 'x^2+2*x' --variable x:rational; echo $?
   verdict: refuted (univariate_rational_polynomial via exact_rational_counterexample); counterexample={x=0}

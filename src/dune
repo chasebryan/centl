@@ -10,7 +10,7 @@
   generated/Centl_PolynomialSoundness.ml)
  (action
   (run
-   sh
+   %{env:CENTL_BUILD_IDENTITY_SHELL=sh}
    %{dep:../scripts/write-build-identity}
    %{target}
    %{dep:generated/Centl_Core.ml}
