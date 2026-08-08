@@ -46,9 +46,7 @@
 
 (cram
  (applies_to executeme)
- (deps
-  ../executeme
-  ../src/main.exe))
+ (deps ../executeme ../src/main.exe))
 
 (cram
  (applies_to installer)
