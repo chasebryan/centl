@@ -388,23 +388,76 @@ let cancelled_response = function
       end
   | _ -> false
 
-let text = function
+let string_field name = function
   | `Assoc fields ->
-      begin match List.assoc_opt "value" fields with
-      | Some (`Assoc value) ->
-          begin match List.assoc_opt "text" value with
-          | Some (`String text) -> text
-          | _ -> Yojson.Safe.to_string (`Assoc fields)
+      begin match List.assoc_opt name fields with
+      | Some (`String value) -> Some value
+      | _ -> None
+      end
+  | _ -> None
+
+let resolution_text_annotation = function
+  | `Assoc fields ->
+      begin match List.assoc_opt "resolution" fields with
+      | Some (`Assoc resolution) ->
+          begin match List.assoc_opt "status" resolution with
+          | Some
+              (`String
+                 (( "unchanged_proved" | "residual" | "unsupported"
+                  | "indeterminate" ) as status)) ->
+              let details =
+                List.filter_map Fun.id
+                  [
+                    Option.map
+                      (fun operation -> "operation=" ^ operation)
+                      (string_field "operation" (`Assoc resolution));
+                    Option.map
+                      (fun reason -> "reason=" ^ reason)
+                      (string_field "reason" (`Assoc resolution));
+                    Option.map
+                      (fun domain -> "supported_domain=" ^ domain)
+                      (string_field "supported_domain" (`Assoc resolution));
+                  ]
+              in
+              Some
+                (Printf.sprintf "resolution: %s%s" status
+                   (match details with
+                   | [] -> ""
+                   | details -> " (" ^ String.concat "; " details ^ ")"))
+          | _ -> None
           end
-      | _ ->
-          begin match List.assoc_opt "error" fields with
-          | Some (`Assoc error) ->
-              begin match List.assoc_opt "message" error with
-              | Some (`String message) -> message
-              | _ -> Yojson.Safe.to_string (`Assoc fields)
-              end
-          | _ -> Yojson.Safe.to_string (`Assoc fields)
-          end
+      | _ -> None
+      end
+  | _ -> None
+
+let text = function
+  | `Assoc fields as response ->
+      let body =
+        begin match List.assoc_opt "value" fields with
+        | Some (`Assoc value) ->
+            begin match List.assoc_opt "text" value with
+            | Some (`String text) -> text
+            | _ -> Yojson.Safe.to_string response
+            end
+        | _ ->
+            begin match List.assoc_opt "error" fields with
+            | Some (`Assoc error) ->
+                begin match List.assoc_opt "message" error with
+                | Some (`String message) ->
+                    begin match List.assoc_opt "suggestion" error with
+                    | Some (`String suggestion) ->
+                        message ^ "\nsuggestion: " ^ suggestion
+                    | _ -> message
+                    end
+                | _ -> Yojson.Safe.to_string response
+                end
+            | _ -> Yojson.Safe.to_string response
+            end
+        end
+      in
+      begin match resolution_text_annotation response with
+      | None -> body
+      | Some annotation -> body ^ "\n" ^ annotation
       end
   | json -> Yojson.Safe.to_string json
 
