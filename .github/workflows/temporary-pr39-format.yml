@@ -1,0 +1,77 @@
+name: Temporary PR39 formatter applier
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'codex/claim-verification-foundation'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: codex/claim-verification-foundation
+          persist-credentials: true
+          fetch-depth: 1
+
+      - name: Apply formatter-proven layout
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path("src/ocaml/main.ml")
+          source = path.read_text()
+          start = source.index("let parse_check_line line_number line =\n")
+          end = source.index("\nlet read_check_file path =\n", start)
+          replacement = '''let parse_check_line line_number line =
+  let trimmed = String.trim line in
+  if trimmed = "" || String.starts_with ~prefix:"#" trimmed then None
+  else
+    let parts = trimmed |> String.split_on_char '|' |> List.map String.trim in
+    if List.exists (( = ) "") parts then
+      failwith
+        ("line " ^ string_of_int line_number
+       ^ ": contract fields must not be empty")
+    else
+      begin match parts with
+      | [ "define"; definition ] ->
+          Some (Check_define { line_number; definition })
+      | [ relation; left; right ] ->
+          Some
+            (Check_assert
+               { line_number; left; relation; right; variable = None })
+      | [ relation; left; right; variable ] ->
+          begin match parse_variable_spec variable with
+          | Ok variable ->
+              Some
+                (Check_assert
+                   {
+                     line_number;
+                     left;
+                     relation;
+                     right;
+                     variable = Some variable;
+                   })
+          | Error message ->
+              failwith ("line " ^ string_of_int line_number ^ ": " ^ message)
+          end
+      | _ ->
+          failwith
+            ("line " ^ string_of_int line_number
+           ^ ": expected define | DEF or RELATION | LEFT | RIGHT [| \\
+              VAR[:rational]]")
+      end
+'''
+          path.write_text(source[:start] + replacement + source[end:])
+
+      - name: Commit formatting-only fix
+        run: |
+          git config user.name "CENTL validation automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/ocaml/main.ml
+          git diff --cached --check
+          git commit -m "Format contract parser review fixes"
+          git push origin HEAD:codex/claim-verification-foundation
