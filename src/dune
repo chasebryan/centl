@@ -21,7 +21,8 @@
   Centl_verify
   Centl_protocol
   Centl_request_queue
-  Centl_mcp)
+  Centl_mcp
+  Centl_physics)
  (libraries centl_verified centl_arb zarith threads unix yojson))
 
 (executable
@@ -30,3 +31,10 @@
  (package centl)
  (modules Main)
  (libraries centl_lib threads unix yojson))
+
+(executable
+ (name physics_main)
+ (public_name centl-physics)
+ (package centl)
+ (modules Physics_main)
+ (libraries centl_lib zarith))

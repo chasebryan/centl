@@ -6,7 +6,9 @@ param(
     [Parameter(Position = 1)]
     [string] $OutputDirectory = (Join-Path (Split-Path -Parent $PSScriptRoot) "dist"),
 
-    [string] $Binary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\main.exe")
+    [string] $Binary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\main.exe"),
+
+    [string] $PhysicsBinary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\physics_main.exe")
 )
 
 Set-StrictMode -Version Latest
@@ -22,6 +24,9 @@ if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -
 }
 if (-not (Test-Path -LiteralPath $Binary -PathType Leaf)) {
     throw "centl package: build CENTL before packaging: $Binary"
+}
+if (-not (Test-Path -LiteralPath $PhysicsBinary -PathType Leaf)) {
+    throw "centl package: build CENTL Physics before packaging: $PhysicsBinary"
 }
 
 $ReportedVersion = (& $Binary --version | Out-String).Trim()
@@ -63,7 +68,11 @@ if (-not $Objdump) {
 
 $SearchDirectories = [System.Collections.Generic.List[string]]::new()
 $BinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $Binary)
+$PhysicsBinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $PhysicsBinary)
 $SearchDirectories.Add($BinaryDirectory)
+if ($PhysicsBinaryDirectory -ne $BinaryDirectory) {
+    $SearchDirectories.Add($PhysicsBinaryDirectory)
+}
 $NativeStubDirectory = Join-Path $BinaryDirectory "native"
 if (Test-Path -LiteralPath $NativeStubDirectory -PathType Container) {
     $SearchDirectories.Add((Resolve-Path -LiteralPath $NativeStubDirectory).Path)
@@ -83,10 +92,13 @@ New-Item -ItemType Directory -Path $Licenses -Force | Out-Null
 
 try {
     $PackagedBinary = Join-Path $Package "centl.exe"
+    $PackagedPhysicsBinary = Join-Path $Package "centl-physics.exe"
     Copy-Item -LiteralPath $Binary -Destination $PackagedBinary
+    Copy-Item -LiteralPath $PhysicsBinary -Destination $PackagedPhysicsBinary
 
     $Pending = [System.Collections.Generic.Queue[string]]::new()
     $Pending.Enqueue($PackagedBinary)
+    $Pending.Enqueue($PackagedPhysicsBinary)
     $Visited = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     $BundledRuntimeDlls = [System.Collections.Generic.List[string]]::new()
     $SystemDirectory = [Environment]::GetFolderPath([Environment+SpecialFolder]::System)
@@ -177,9 +189,9 @@ rolling MSYS2 toolchain):
 winpthreads (when bundled as libwinpthread-1.dll)
   https://github.com/mingw-w64/mingw-w64/tree/master/mingw-w64-libraries/winpthreads
 
-The Windows executable statically links FLINT, GMP, and MPFR. The matching
+The Windows executables statically link FLINT, GMP, and MPFR. The matching
 CENTL source and build scripts above are the Corresponding Application Code
-needed to rebuild and relink it with compatible modified libraries.
+needed to rebuild and relink them with compatible modified libraries.
 winpthreads is dynamically bundled as libwinpthread-1.dll when required.
 "@
     $ComponentSources.TrimStart() | Set-Content `
@@ -188,16 +200,21 @@ winpthreads is dynamically bundled as libwinpthread-1.dll when required.
     $Readme = @"
 CENTL $Version for Windows x86_64
 
-Run centl.exe. Required native libraries are included beside the executable.
-Use centl.exe --serve for stateful JSON Lines or --mcp for a local MCP server.
-License texts are in licenses; source and relinking references are in
-COMPONENT-SOURCES.txt.
+Run centl.exe for the mathematical kernel and centl-physics.exe for the
+exact-first physics engine. Required native libraries are included beside the
+executables. Use centl.exe --serve for stateful JSON Lines or --mcp for a local
+MCP server. License texts are in licenses; source and relinking references are
+in COMPONENT-SOURCES.txt.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8
 
     $Smoke = (& $PackagedBinary '0.1 + 0.2' | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or $Smoke -ne "3/10") {
         throw "centl package: packaged executable failed its smoke test: $Smoke"
+    }
+    $PhysicsSmoke = (& $PackagedPhysicsBinary convert 100 cm m | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $PhysicsSmoke -ne "1") {
+        throw "centl package: packaged physics executable failed its smoke test: $PhysicsSmoke"
     }
 
     $EpochText = if ($env:SOURCE_DATE_EPOCH) { $env:SOURCE_DATE_EPOCH } else { "315532800" }
