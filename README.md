@@ -1,6 +1,6 @@
 # centl
 
-> Check the numbers before they merge.
+> change the world.
 
 CENTL is a deterministic, exact-first mathematical evaluation kernel with a
 calculator, a small expression language, and script, JSON, and MCP interfaces.

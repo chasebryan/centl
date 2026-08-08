@@ -27,7 +27,7 @@ The short positioning is:
 
 The operational promise is:
 
-> Check the numbers before they merge.
+> change the world.
 
 This direction is more valuable than competing on the number of supported
 calculator functions. It turns a calculation into a durable repository
