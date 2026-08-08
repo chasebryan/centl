@@ -1254,6 +1254,48 @@ let machine_compute_and_define () =
   Alcotest.(check int)
     "legacy evaluate retains compatibility" 2
     (Centl_engine.session_binding_count (Centl_protocol.session state));
+  ignore (request "define" "square = r^2");
+  let inspection =
+    Centl_protocol.handle_json state
+      (`Assoc [ ("version", `Int 1); ("op", `String "session") ])
+  in
+  let square =
+    match json_member "definitions" inspection with
+    | `List definitions ->
+        begin match
+          List.find_opt
+            (fun definition -> json_string "name" definition = "square")
+            definitions
+        with
+        | Some definition -> definition
+        | None -> Alcotest.fail "session inspection omitted square"
+        end
+    | _ -> Alcotest.fail "session definitions was not a list"
+  in
+  Alcotest.(check (list string))
+    "session inspection exposes dependencies" [ "r" ]
+    (match json_member "dependencies" square with
+    | `List dependencies ->
+        List.map
+          (function
+            | `String dependency -> dependency
+            | _ -> Alcotest.fail "dependency was not a string")
+          dependencies
+    | _ -> Alcotest.fail "dependencies was not a list");
+  let focused_help =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "help");
+           ("query", `String "factor");
+         ])
+  in
+  Alcotest.(check bool)
+    "focused help comes from syntax catalog" true
+    (match focused_help |> json_member "help" |> json_member "entries" with
+    | `List (_ :: _) -> true
+    | _ -> false);
   let description =
     Centl_protocol.handle_json state
       (`Assoc [ ("version", `Int 1); ("op", `String "describe") ])
@@ -1275,7 +1317,121 @@ let machine_compute_and_define () =
     (List.mem "compute" operations);
   Alcotest.(check bool)
     "capabilities advertise define" true
-    (List.mem "define" operations)
+    (List.mem "define" operations);
+  Alcotest.(check bool)
+    "capabilities publish mathematical domains" true
+    (match
+       description |> json_member "capabilities"
+       |> json_member "mathematical_domains"
+     with
+    | `List domains ->
+        List.exists
+          (fun domain -> json_string "operation" domain = "factor")
+          domains
+    | _ -> false)
+
+let machine_error_metadata () =
+  let syntax =
+    Centl_engine.evaluate_detailed "1 +"
+    |> Centl_engine.json_of_detailed_evaluation |> json_member "error"
+  in
+  Alcotest.(check bool)
+    "syntax errors are not retryable unchanged" false
+    (json_bool "retryable" syntax);
+  Alcotest.(check bool)
+    "syntax errors include a suggestion" true
+    (String.length (json_string "suggestion" syntax) > 0);
+  let range = json_member "range" syntax in
+  Alcotest.(check int) "source range start" 3 (json_int "start" range);
+  Alcotest.(check int) "source range end" 3 (json_int "end" range);
+  let limits =
+    { Centl_engine.default_evaluation_limits with max_exact_bits = 1 }
+  in
+  let limited =
+    Centl_engine.evaluate_outcome_with_limits limits "4"
+    |> Centl_engine.json_of_detailed_evaluation |> json_member "error"
+  in
+  Alcotest.(check bool)
+    "limit failures can be retried with changed limits" true
+    (json_bool "retryable" limited);
+  Alcotest.(check string)
+    "limit detail names the exhausted budget" "max_exact_bits"
+    (limited |> json_member "details" |> json_string "limit")
+
+let agent_tool_corpus () =
+  let member_opt name = function
+    | `Assoc fields -> List.assoc_opt name fields
+    | _ -> None
+  in
+  let channel = open_in "corpus/agent_tools.jsonl" in
+  Fun.protect
+    ~finally:(fun () -> close_in channel)
+    (fun () ->
+      let rec cases line_number =
+        match input_line channel with
+        | line ->
+            let case = Yojson.Safe.from_string line in
+            let name = json_string "name" case in
+            let op = json_string "op" case in
+            let expression = json_string "expression" case in
+            let cancelled =
+              match member_opt "cancelled" case with
+              | Some (`Bool value) -> value
+              | _ -> false
+            in
+            let response =
+              Centl_protocol.handle_json
+                ~cancelled:(fun () -> cancelled)
+                (Centl_protocol.create ())
+                (`Assoc
+                   [
+                     ("version", `Int 1);
+                     ("op", `String op);
+                     ("expression", `String expression);
+                   ])
+            in
+            begin match member_opt "expected_error" case with
+            | Some (`String expected) ->
+                Alcotest.(check string)
+                  (name ^ " error") expected
+                  (protocol_error_code response)
+            | _ ->
+                let resolution = json_member "resolution" response in
+                Alcotest.(check string)
+                  (name ^ " resolution")
+                  (json_string "expected_resolution" case)
+                  (json_string "status" resolution);
+                Option.iter
+                  (fun expected ->
+                    Alcotest.(check string)
+                      (name ^ " operation") expected
+                      (json_string "operation" resolution))
+                  (match member_opt "expected_operation" case with
+                  | Some (`String value) -> Some value
+                  | _ -> None);
+                Option.iter
+                  (fun expected ->
+                    Alcotest.(check string)
+                      (name ^ " reason") expected
+                      (json_string "reason" resolution))
+                  (match member_opt "expected_reason" case with
+                  | Some (`String value) -> Some value
+                  | _ -> None);
+                Option.iter
+                  (fun expected ->
+                    Alcotest.(check string)
+                      (name ^ " value status") expected
+                      (response |> json_member "value" |> json_string "status"))
+                  (match member_opt "expected_value_status" case with
+                  | Some (`String value) -> Some value
+                  | _ -> None)
+            end;
+            cases (line_number + 1)
+        | exception End_of_file -> ()
+        | exception Yojson.Json_error message ->
+            Alcotest.failf "agent corpus line %d: %s" line_number message
+      in
+      cases 1)
 
 let machine_cancellation () =
   let evaluation =
@@ -1398,6 +1554,9 @@ let mcp_output_schemas () =
   let calculate_schema = Lazy.force Centl_mcp.tool_output_schema in
   let compute_schema = Lazy.force Centl_mcp.compute_output_schema in
   let define_schema = Lazy.force Centl_mcp.define_output_schema in
+  let capabilities_schema = Lazy.force Centl_mcp.capabilities_output_schema in
+  let session_schema = Lazy.force Centl_mcp.session_output_schema in
+  let help_schema = Lazy.force Centl_mcp.help_output_schema in
   let reset_schema = Lazy.force Centl_mcp.reset_output_schema in
   Alcotest.(check bool)
     "calculate descriptor uses calculate schema" true
@@ -1408,6 +1567,16 @@ let mcp_output_schemas () =
   Alcotest.(check bool)
     "define descriptor uses definition schema" true
     (json_member "outputSchema" (Centl_mcp.define_tool ()) = define_schema);
+  Alcotest.(check bool)
+    "capabilities descriptor uses exact schema" true
+    (json_member "outputSchema" (Centl_mcp.capabilities_tool ())
+    = capabilities_schema);
+  Alcotest.(check bool)
+    "session descriptor uses exact schema" true
+    (json_member "outputSchema" (Centl_mcp.session_tool ()) = session_schema);
+  Alcotest.(check bool)
+    "help descriptor uses exact schema" true
+    (json_member "outputSchema" (Centl_mcp.help_tool ()) = help_schema);
   Alcotest.(check bool)
     "reset descriptor uses self-contained reset schema" true
     (json_member "outputSchema" (Centl_mcp.reset_tool ()) = reset_schema);
@@ -1472,6 +1641,33 @@ let mcp_output_schemas () =
   Alcotest.(check bool)
     "define schema rejects mathematical values" false
     (schema_accepts define_schema (calculate "1 + 1"));
+  let control name arguments =
+    let state = initialized_state () in
+    let request =
+      `Assoc
+        [
+          ("jsonrpc", `String "2.0");
+          ("id", `String "control-schema");
+          ("method", `String "tools/call");
+          ( "params",
+            `Assoc [ ("name", `String name); ("arguments", `Assoc arguments) ]
+          );
+        ]
+    in
+    match Centl_mcp.handle_json state request with
+    | Some response -> mcp_structured_content response
+    | None -> Alcotest.fail "schema control tool returned no response"
+  in
+  Alcotest.(check bool)
+    "capabilities response conforms to schema" true
+    (schema_accepts capabilities_schema (control "centl_capabilities" []));
+  Alcotest.(check bool)
+    "session response conforms to schema" true
+    (schema_accepts session_schema (control "centl_session" []));
+  Alcotest.(check bool)
+    "help response conforms to schema" true
+    (schema_accepts help_schema
+       (control "centl_help" [ ("query", `String "solve") ]));
   let reset_state = initialized_state () in
   let reset_response =
     mcp_request reset_state
@@ -1511,7 +1707,15 @@ let mcp_protocol () =
   in
   Alcotest.(check (list string))
     "deterministic tools"
-    [ "centl_compute"; "centl_define"; "centl_calculate"; "centl_reset" ]
+    [
+      "centl_compute";
+      "centl_define";
+      "centl_capabilities";
+      "centl_session";
+      "centl_help";
+      "centl_calculate";
+      "centl_reset";
+    ]
     names;
   let tools =
     match listed |> json_member "result" |> json_member "tools" with
@@ -2151,6 +2355,10 @@ let () =
             transformation_resolution_metadata;
           Alcotest.test_case "read-only compute and explicit define" `Quick
             machine_compute_and_define;
+          Alcotest.test_case "structured error metadata" `Quick
+            machine_error_metadata;
+          Alcotest.test_case "agent tool evaluation corpus" `Quick
+            agent_tool_corpus;
           Alcotest.test_case "cooperative cancellation" `Quick
             machine_cancellation;
           Alcotest.test_case "MCP schema laziness" `Quick mcp_schema_laziness;

@@ -132,6 +132,43 @@ let session_result state id evaluation =
   Centl_engine.json_of_detailed_session_evaluation evaluation
   |> response state ?id
 
+let mathematical_domains =
+  let domain operation supported_domain examples =
+    `Assoc
+      [
+        ("operation", `String operation);
+        ("supported_domain", `String supported_domain);
+        ("examples", `List (List.map (fun value -> `String value) examples));
+      ]
+  in
+  `List
+    [
+      domain "diff" Centl_engine.differentiation_domain
+        [ "diff(x^3, x)"; "diff(sin(x), x)" ];
+      domain "integrate" Centl_engine.integration_domain
+        [ "integrate(x^2, x)"; "integrate(x^2, x = 0, 1)" ];
+      domain "simplify" Centl_engine.polynomial_domain [ "simplify(2*x + 3*x)" ];
+      domain "expand" Centl_engine.polynomial_domain [ "expand((x + 1)^3)" ];
+      domain "factor" Centl_engine.factor_domain [ "factor(x^2 - 1)" ];
+      domain "solve" Centl_engine.equation_domain
+        [ "solve(2*x + 3 = 11, x)"; "solve(x^2 = 2, x)" ];
+      domain "substitute" Centl_engine.substitution_domain
+        [ "substitute(x^2 + 1, x = 3)" ];
+    ]
+
+let resolution_statuses =
+  `List
+    (List.map
+       (fun status -> `String status)
+       [
+         "computed";
+         "transformed";
+         "unchanged_proved";
+         "residual";
+         "unsupported";
+         "indeterminate";
+       ])
+
 let describe state id =
   let evaluation = state.limits.evaluation in
   response state ?id
@@ -156,8 +193,12 @@ let describe state id =
                         "cancel";
                         "reset";
                         "describe";
+                        "session";
+                        "help";
                         "ping";
                       ]) );
+               ("resolution_statuses", resolution_statuses);
+               ("mathematical_domains", mathematical_domains);
                ( "cancellation",
                  `Assoc
                    [
@@ -184,6 +225,45 @@ let describe state id =
                    ] );
              ] );
        ])
+
+let inspect_session state id fields =
+  if Option.is_some (List.assoc_opt "expression" fields) then
+    invalid state ?id "session does not accept an expression"
+  else
+    response state ?id
+      ~provenance:(control_provenance "session_inspection")
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("ok", `Bool true);
+           ( "definitions",
+             Centl_engine.json_of_session_definitions state.session );
+         ])
+
+let help state id fields =
+  if Option.is_some (List.assoc_opt "expression" fields) then
+    invalid state ?id "help does not accept an expression"
+  else
+    match List.assoc_opt "query" fields with
+    | None ->
+        response state ?id
+          ~provenance:(control_provenance "syntax_help")
+          (`Assoc
+             [
+               ("version", `Int 1);
+               ("ok", `Bool true);
+               ("help", Centl_syntax.json_help ());
+             ])
+    | Some (`String query) ->
+        response state ?id
+          ~provenance:(control_provenance "syntax_help")
+          (`Assoc
+             [
+               ("version", `Int 1);
+               ("ok", `Bool true);
+               ("help", Centl_syntax.json_help ~query ());
+             ])
+    | Some _ -> invalid state ?id "help query must be a string"
 
 let evaluate ?(cancelled = Centl_engine.never_cancelled)
     ?(intent = Centl_engine.Evaluate_or_define) state id fields =
@@ -244,6 +324,8 @@ let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
               | Ok "cancel" -> cancel state id fields
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id
+              | Ok "session" -> inspect_session state id fields
+              | Ok "help" -> help state id fields
               | Ok "ping" -> ping state id
               | Ok name -> invalid state ?id ("unknown operation " ^ name)
               end

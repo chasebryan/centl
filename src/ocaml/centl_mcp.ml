@@ -379,13 +379,30 @@ let tool_output_schema =
          ]
      in
      let error =
+       let range =
+         strict_object
+           [
+             ("start", nonnegative_integer_schema);
+             ("end", nonnegative_integer_schema);
+           ]
+           [ "start"; "end" ]
+       in
+       let details =
+         strict_object
+           [ ("category", const_string "limit"); ("limit", string_schema) ]
+           [ "category"; "limit" ]
+       in
        strict_object
          [
            ("code", string_schema);
            ("message", string_schema);
            ("position", nonnegative_integer_schema);
+           ("range", range);
+           ("retryable", boolean_schema);
+           ("suggestion", string_schema);
+           ("details", details);
          ]
-         [ "code"; "message" ]
+         [ "code"; "message"; "retryable" ]
      in
      let session =
        strict_object
@@ -528,6 +545,176 @@ let define_output_schema =
                   schema_ref "function_definition";
                 ] );
           ]))
+
+let protocol_session_schema =
+  strict_object
+    [
+      ("definitions", nonnegative_integer_schema);
+      ("requests", nonnegative_integer_schema);
+    ]
+    [ "definitions"; "requests" ]
+
+let control_provenance_schema method_ =
+  strict_object
+    [
+      ("schema", const_int 1);
+      ( "producer",
+        strict_object
+          [ ("name", const_string "centl"); ("version", string_schema) ]
+          [ "name"; "version" ] );
+      ("classification", const_string "control");
+      ("method", const_string method_);
+      ("backend", const_string "centl-protocol");
+    ]
+    [ "schema"; "producer"; "classification"; "method"; "backend" ]
+
+let capabilities_output_schema =
+  lazy
+    (let string_array =
+       `Assoc [ ("type", `String "array"); ("items", string_schema) ]
+     in
+     let domain =
+       strict_object
+         [
+           ("operation", string_schema);
+           ("supported_domain", string_schema);
+           ("examples", string_array);
+         ]
+         [ "operation"; "supported_domain"; "examples" ]
+     in
+     let cancellation =
+       strict_object
+         [
+           ("request_scoped", boolean_schema);
+           ("cooperative", boolean_schema);
+           ("queued_requests", boolean_schema);
+         ]
+         [ "request_scoped"; "cooperative"; "queued_requests" ]
+     in
+     let limits =
+       strict_object
+         [
+           ("max_request_bytes", nonnegative_integer_schema);
+           ("max_requests", nonnegative_integer_schema);
+           ("max_source_bytes", nonnegative_integer_schema);
+           ("max_expression_nodes", nonnegative_integer_schema);
+           ("max_exact_bits", nonnegative_integer_schema);
+           ("max_integer_iterations", nonnegative_integer_schema);
+           ("max_result_bytes", nonnegative_integer_schema);
+           ("max_bindings", nonnegative_integer_schema);
+           ("max_precision_digits", nonnegative_integer_schema);
+           ("max_working_bits", nonnegative_integer_schema);
+         ]
+         [
+           "max_request_bytes";
+           "max_requests";
+           "max_source_bytes";
+           "max_expression_nodes";
+           "max_exact_bits";
+           "max_integer_iterations";
+           "max_result_bytes";
+           "max_bindings";
+           "max_precision_digits";
+           "max_working_bits";
+         ]
+     in
+     let capabilities =
+       strict_object
+         [
+           ("transport", const_string "jsonl");
+           ("stateful", const_bool true);
+           ("operations", string_array);
+           ("resolution_statuses", string_array);
+           ( "mathematical_domains",
+             `Assoc [ ("type", `String "array"); ("items", domain) ] );
+           ("cancellation", cancellation);
+           ("limits", limits);
+         ]
+         [
+           "transport";
+           "stateful";
+           "operations";
+           "resolution_statuses";
+           "mathematical_domains";
+           "cancellation";
+           "limits";
+         ]
+     in
+     strict_object
+       [
+         ("version", const_int 1);
+         ("ok", const_bool true);
+         ("capabilities", capabilities);
+         ("provenance", control_provenance_schema "describe");
+         ("session", protocol_session_schema);
+       ]
+       [ "version"; "ok"; "capabilities"; "provenance"; "session" ])
+
+let session_output_schema =
+  lazy
+    (let string_array =
+       `Assoc [ ("type", `String "array"); ("items", string_schema) ]
+     in
+     let definition =
+       strict_object
+         [
+           ("kind", enum_string [ "value"; "function" ]);
+           ("name", string_schema);
+           ("parameters", string_array);
+           ("expression", string_schema);
+           ("dependencies", string_array);
+         ]
+         [ "kind"; "name"; "expression"; "dependencies" ]
+     in
+     strict_object
+       [
+         ("version", const_int 1);
+         ("ok", const_bool true);
+         ( "definitions",
+           `Assoc [ ("type", `String "array"); ("items", definition) ] );
+         ("provenance", control_provenance_schema "session_inspection");
+         ("session", protocol_session_schema);
+       ]
+       [ "version"; "ok"; "definitions"; "provenance"; "session" ])
+
+let help_output_schema =
+  lazy
+    (let entry =
+       strict_object
+         [
+           ("section", string_schema);
+           ("form", string_schema);
+           ("meaning", string_schema);
+         ]
+         [ "section"; "form"; "meaning" ]
+     in
+     let example =
+       strict_object
+         [
+           ("kind", string_schema);
+           ("calculation", string_schema);
+           ("result", string_schema);
+         ]
+         [ "kind"; "calculation"; "result" ]
+     in
+     let help =
+       strict_object
+         [
+           ("query", string_schema);
+           ("entries", `Assoc [ ("type", `String "array"); ("items", entry) ]);
+           ("examples", `Assoc [ ("type", `String "array"); ("items", example) ]);
+         ]
+         [ "entries"; "examples" ]
+     in
+     strict_object
+       [
+         ("version", const_int 1);
+         ("ok", const_bool true);
+         ("help", help);
+         ("provenance", control_provenance_schema "syntax_help");
+         ("session", protocol_session_schema);
+       ]
+       [ "version"; "ok"; "help"; "provenance"; "session" ])
 
 let reset_output_schema =
   lazy
@@ -720,6 +907,68 @@ let define_tool () =
           ] );
     ]
 
+let read_only_annotations =
+  `Assoc
+    [
+      ("readOnlyHint", `Bool true);
+      ("destructiveHint", `Bool false);
+      ("idempotentHint", `Bool true);
+      ("openWorldHint", `Bool false);
+    ]
+
+let capabilities_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_capabilities");
+      ("title", `String "Describe CENTL capabilities");
+      ( "description",
+        `String
+          "Return supported mathematical domains, resolution statuses, \
+           operations, cancellation behavior, and hard limits." );
+      ("inputSchema", strict_object [] []);
+      ("outputSchema", Lazy.force capabilities_output_schema);
+      ("annotations", read_only_annotations);
+    ]
+
+let session_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_session");
+      ("title", `String "Inspect CENTL session");
+      ( "description",
+        `String
+          "Return immutable session definitions and their direct dependencies \
+           without mutating state." );
+      ("inputSchema", strict_object [] []);
+      ("outputSchema", Lazy.force session_output_schema);
+      ("annotations", read_only_annotations);
+    ]
+
+let help_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_help");
+      ("title", `String "Get focused CENTL syntax help");
+      ( "description",
+        `String
+          "Search CENTL's canonical syntax catalog by operation, form, or \
+           meaning." );
+      ( "inputSchema",
+        strict_object
+          [
+            ( "query",
+              `Assoc
+                [
+                  ("type", `String "string");
+                  ( "description",
+                    `String "Optional syntax or operation search text." );
+                ] );
+          ]
+          [] );
+      ("outputSchema", Lazy.force help_output_schema);
+      ("annotations", read_only_annotations);
+    ]
+
 let reset_tool () =
   `Assoc
     [
@@ -869,6 +1118,32 @@ let define ?cancelled state id arguments =
   evaluate_tool ?cancelled ~tool_name:"centl_define" ~operation:"define"
     ~argument_name:"definition" state id arguments
 
+let protocol_control state id operation fields =
+  Centl_protocol.handle_json state.protocol
+    (`Assoc (("version", `Int 1) :: ("op", `String operation) :: fields))
+  |> tool_result |> jsonrpc_result id
+
+let capabilities state id arguments =
+  if arguments <> [] then
+    jsonrpc_error id (-32602) "centl_capabilities accepts no arguments"
+  else protocol_control state id "describe" []
+
+let inspect_session state id arguments =
+  if arguments <> [] then
+    jsonrpc_error id (-32602) "centl_session accepts no arguments"
+  else protocol_control state id "session" []
+
+let help state id arguments =
+  let unknown = List.find_opt (fun (name, _) -> name <> "query") arguments in
+  match (unknown, List.assoc_opt "query" arguments) with
+  | Some (name, _), _ ->
+      jsonrpc_error id (-32602) ("unknown centl_help argument " ^ name)
+  | None, None -> protocol_control state id "help" []
+  | None, Some (`String query) ->
+      protocol_control state id "help" [ ("query", `String query) ]
+  | None, Some _ ->
+      jsonrpc_error id (-32602) "centl_help query must be a string"
+
 let reset state id arguments =
   if arguments <> [] then
     jsonrpc_error id (-32602) "centl_reset accepts no arguments"
@@ -891,6 +1166,15 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
           define ~cancelled state id arguments
       | Some (`String "centl_define"), None ->
           jsonrpc_error id (-32602) "centl_define requires arguments"
+      | Some (`String "centl_capabilities"), Some (`Assoc arguments) ->
+          capabilities state id arguments
+      | Some (`String "centl_capabilities"), None -> capabilities state id []
+      | Some (`String "centl_session"), Some (`Assoc arguments) ->
+          inspect_session state id arguments
+      | Some (`String "centl_session"), None -> inspect_session state id []
+      | Some (`String "centl_help"), Some (`Assoc arguments) ->
+          help state id arguments
+      | Some (`String "centl_help"), None -> help state id []
       | Some (`String "centl_calculate"), Some (`Assoc arguments) ->
           calculate ~cancelled state id arguments
       | Some (`String "centl_calculate"), None ->
@@ -920,6 +1204,9 @@ let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
                  [
                    compute_tool ();
                    define_tool ();
+                   capabilities_tool ();
+                   session_tool ();
+                   help_tool ();
                    calculate_tool ();
                    reset_tool ();
                  ] );

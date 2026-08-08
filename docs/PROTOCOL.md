@@ -35,7 +35,9 @@ also provides the control operations below:
 {"version":1,"id":3,"op":"evaluate","expression":"legacy = 4"}
 {"version":1,"id":4,"op":"reset"}
 {"version":1,"id":5,"op":"describe"}
-{"version":1,"id":6,"op":"ping"}
+{"version":1,"id":6,"op":"session"}
+{"version":1,"id":7,"op":"help","query":"factor"}
+{"version":1,"id":8,"op":"ping"}
 {"version":1,"id":"stop-17","op":"cancel","target":"job-17"}
 ```
 
@@ -44,6 +46,12 @@ the session; a definition returns `definition_not_allowed`. `define` accepts
 only an immutable value or function definition; an ordinary expression returns
 `definition_required`. `evaluate` retains the earlier combined behavior for
 existing clients. New automated callers should use `compute` and `define`.
+
+`describe` publishes resolution statuses, supported mathematical domains with
+examples, cancellation behavior, and active limits. `session` returns every
+immutable definition in creation order with its canonical expression and
+direct definition dependencies. `help` searches the canonical syntax catalog;
+its optional `query` matches section names, forms, meanings, and examples.
 
 Successful and failed responses report the current definition and request
 counts:
@@ -297,12 +305,17 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 Failures have stable codes and mathematical messages:
 
 ```json
-{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+{"version":1,"ok":false,"error":{"suggestion":"Change the input or retain an explicit nonzero domain condition.","code":"division_by_zero","message":"division by zero","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
 ```
 
 Syntax errors and runtime mathematical failures that can be localized to source
-also contain a zero-based byte `position`; request/session-wide failures omit it
-when no single source expression is responsible. Version 1 error codes include
+also contain a legacy zero-based byte `position` and a structured zero-width
+`range` with `start` and `end` byte offsets. Request/session-wide failures omit
+both when no single source expression is responsible. Every error states
+whether it is `retryable`; a `suggestion` is included when CENTL knows a useful
+recovery. Limit failures additionally carry `details.category: "limit"` and the
+specific configurable `details.limit` name when it can be identified. Version
+1 error codes include
 `syntax_error`, `division_by_zero`, `zero_denominator`,
 `invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
 `precision_limit`, `insufficient_precision`, `resource_limit`,

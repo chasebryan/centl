@@ -24,11 +24,17 @@ Configure an MCP client with the equivalent of:
 }
 ```
 
-CENTL exposes four tools in deterministic order:
+CENTL exposes seven tools in deterministic order:
 
 - `centl_compute` performs read-only mathematical evaluation and rejects
   definitions.
 - `centl_define` creates one immutable value or function definition.
+- `centl_capabilities` returns supported domains, resolution statuses, limits,
+  and cancellation behavior.
+- `centl_session` inspects definitions and their direct dependencies without
+  mutation.
+- `centl_help` searches focused help generated from the canonical syntax
+  catalog.
 - `centl_calculate` retains the earlier combined behavior for compatibility.
 - `centl_reset` forgets definitions held by the current process.
 
@@ -39,13 +45,17 @@ mark it read-only, non-destructive, idempotent, and closed-world. Definitions
 persist across tool calls in one server process. The server has no network
 listener, reads no credentials, and accesses no files on behalf of a tool call.
 
+The capability, session-inspection, and help tools are also read-only,
+idempotent, and closed-world. Their output schemas are closed and exact rather
+than free-form text contracts.
+
 Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use
 `centl_compute`. Sums and products return the ordinary exact integer, rational, or
 symbolic value schema. Sequences and recurrences return a structured exact
 `sequence` value whose ordered `items` use those scalar schemas:
 
 ```json
-{"jsonrpc":"2.0","id":"squares","method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"sequence(k^2, k = 1, 3)"}}}
+{"jsonrpc":"2.0","id":"squares","method":"tools/call","params":{"name":"centl_compute","arguments":{"expression":"sequence(k^2, k = 1, 3)"}}}
 ```
 
 The tool's text content is `[1, 4, 9]`; its
@@ -61,6 +71,8 @@ Every calculation result contains human-readable `content` and the complete
 CENTL protocol response in `structuredContent`. Mathematical failures such as
 division by zero are MCP tool errors with `isError: true`; malformed JSON-RPC,
 unknown methods, unknown tools, and invalid arguments are protocol errors.
+Machine errors include retryability, structured source ranges, named limit
+details, and recovery suggestions when known.
 Every successful calculation also has `structuredContent.resolution`, which
 states whether the request was computed, transformed, proved already in form,
 left residual, unsupported, or indeterminate. Non-complete results identify the

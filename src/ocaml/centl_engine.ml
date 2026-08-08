@@ -184,13 +184,19 @@ let remember_generated_tree origins position root =
   in
   remember [ root ]
 
+type value_binding = {
+  expression : Centl_Core.expression;
+  dependencies : string list;
+}
+
 type function_binding = {
   parameters : string list;
   body : Centl_Core.expression;
+  dependencies : string list;
 }
 
 type binding =
-  | Bound_value of Centl_Core.expression
+  | Bound_value of value_binding
   | Bound_function of function_binding
 
 type session = {
@@ -3024,14 +3030,14 @@ and expand_expression_unlocated ~cancelled ~defer_iterations ~origins limit
           begin match lookup session name with
           | None -> Ok (expression, 1)
           | Some (Bound_value value) ->
-              let nodes = expression_node_count value in
+              let nodes = expression_node_count value.expression in
               if nodes > limit then expansion_limit_failure ()
               else begin
                 Option.iter
                   (fun position ->
-                    remember_generated_tree origins position value)
+                    remember_generated_tree origins position value.expression)
                   (origin_of origins expression);
-                Ok (value, nodes)
+                Ok (value.expression, nodes)
               end
           | Some (Bound_function _) ->
               session_failure "invalid_arguments"
@@ -3366,6 +3372,14 @@ let rec references_name name = function
       references_name name inner || references_name name left
       || references_name name right
 
+let definition_dependencies session parameters expression =
+  session.bindings
+  |> List.filter_map (fun (name, _) ->
+      if List.mem name parameters || not (references_name name expression) then
+        None
+      else Some name)
+  |> List.sort_uniq String.compare
+
 let expression_of_exact_value = function
   | Integer value -> Centl_Core.Literal (value, Z.one)
   | Rational (numerator, denominator) ->
@@ -3524,6 +3538,7 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
                   resolution = outcome.resolution;
                 })
         | Centl_parser.Define_value (name, expression) ->
+            let dependencies = definition_dependencies session [] expression in
             let* () =
               validate_definition_name ?position:definition_name_position
                 session name
@@ -3547,9 +3562,14 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
                 ~metadata_bytes:(String.length name) expression
             in
             let* () = check_cancelled cancelled in
-            retain_binding session name (Bound_value expression) retention;
+            retain_binding session name
+              (Bound_value { expression; dependencies })
+              retention;
             Ok { result; resolution = computed_resolution }
         | Centl_parser.Define_function (name, parameters, body) ->
+            let dependencies =
+              definition_dependencies session parameters body
+            in
             let* () =
               validate_definition_name ?position:definition_name_position
                 session name
@@ -3583,7 +3603,7 @@ let evaluate_in_session_outcome_with_limits ?(cancelled = never_cancelled)
             in
             let* () = check_cancelled cancelled in
             retain_binding session name
-              (Bound_function { parameters; body })
+              (Bound_function { parameters; body; dependencies })
               retention;
             Ok { result; resolution = computed_resolution }
       in
@@ -4315,6 +4335,130 @@ let json_of_session_result = function
                  expression) );
         ]
 
+let json_of_session_definitions session =
+  let json_dependencies dependencies =
+    `List (List.map (fun name -> `String name) dependencies)
+  in
+  let binding (name, binding) =
+    match binding with
+    | Bound_value { expression; dependencies } ->
+        `Assoc
+          [
+            ("kind", `String "value");
+            ("name", `String name);
+            ( "expression",
+              `String (expression_fragments expression |> text_of_fragments) );
+            ("dependencies", json_dependencies dependencies);
+          ]
+    | Bound_function { parameters; body; dependencies } ->
+        `Assoc
+          [
+            ("kind", `String "function");
+            ("name", `String name);
+            ( "parameters",
+              `List (List.map (fun parameter -> `String parameter) parameters)
+            );
+            ( "expression",
+              `String (expression_fragments body |> text_of_fragments) );
+            ("dependencies", json_dependencies dependencies);
+          ]
+  in
+  `List (List.rev_map binding session.bindings)
+
+let error_retryable code =
+  List.mem code
+    [
+      "cancelled";
+      "resource_limit";
+      "precision_limit";
+      "insufficient_precision";
+      "backend_failure";
+    ]
+
+let error_suggestion code =
+  match code with
+  | "syntax_error" ->
+      Some "Check the expression against centl_help or --syntax."
+  | "division_by_zero" | "zero_denominator" ->
+      Some "Change the input or retain an explicit nonzero domain condition."
+  | "resource_limit" ->
+      Some "Reduce the request or retry with a larger permitted request limit."
+  | "precision_limit" | "insufficient_precision" ->
+      Some
+        "Request fewer digits or retry with a larger permitted precision limit."
+  | "definition_not_allowed" ->
+      Some "Use the explicit define operation for session definitions."
+  | "definition_required" ->
+      Some "Provide an immutable value or function definition."
+  | "cancelled" -> Some "Retry the request if the result is still needed."
+  | _ -> None
+
+let contains_message text fragment =
+  let text_length = String.length text in
+  let fragment_length = String.length fragment in
+  let rec search index =
+    index + fragment_length <= text_length
+    && (String.sub text index fragment_length = fragment || search (index + 1))
+  in
+  fragment_length = 0 || search 0
+
+let limit_name_of_message message =
+  let candidates =
+    [
+      ("request exceeds the byte", "max_request_bytes");
+      ("process has reached its request", "max_requests");
+      ("pending request queue", "pending_request_queue");
+      ("source exceeds", "max_source_bytes");
+      ("node limit", "max_expression_nodes");
+      ("retained-node", "max_expression_nodes");
+      ("bit limit", "max_exact_bits");
+      ("exact-bit", "max_exact_bits");
+      ("integer-iteration", "max_integer_iterations");
+      ("iteration limit", "max_integer_iterations");
+      ("retained-byte", "max_result_bytes");
+      ("result exceeds the byte", "max_result_bytes");
+      ("definition limit", "max_bindings");
+      ("working precision", "max_working_bits");
+      ("approximation digits", "max_precision_digits");
+      ("precision", "max_precision_digits");
+    ]
+  in
+  List.find_map
+    (fun (fragment, limit) ->
+      if contains_message message fragment then Some limit else None)
+    candidates
+
+let json_of_error error =
+  let fields =
+    [
+      ("code", `String error.code);
+      ("message", `String error.message);
+      ("retryable", `Bool (error_retryable error.code));
+    ]
+  in
+  let fields =
+    match error.position with
+    | None -> fields
+    | Some position ->
+        ("position", `Int position)
+        :: ("range", `Assoc [ ("start", `Int position); ("end", `Int position) ])
+        :: fields
+  in
+  let fields =
+    match error_suggestion error.code with
+    | None -> fields
+    | Some suggestion -> ("suggestion", `String suggestion) :: fields
+  in
+  let fields =
+    match limit_name_of_message error.message with
+    | None -> fields
+    | Some limit ->
+        ( "details",
+          `Assoc [ ("category", `String "limit"); ("limit", `String limit) ] )
+        :: fields
+  in
+  `Assoc fields
+
 let json_of_evaluation = function
   | Ok value ->
       `Assoc
@@ -4325,19 +4469,11 @@ let json_of_evaluation = function
           ("provenance", provenance_of_value value);
         ]
   | Error error ->
-      let fields =
-        [ ("code", `String error.code); ("message", `String error.message) ]
-      in
-      let fields =
-        match error.position with
-        | None -> fields
-        | Some position -> ("position", `Int position) :: fields
-      in
       `Assoc
         [
           ("version", `Int 1);
           ("ok", `Bool false);
-          ("error", `Assoc fields);
+          ("error", json_of_error error);
           ("provenance", provenance_of_error error);
         ]
 

@@ -171,12 +171,12 @@
   {"version":1,"id":"one-shot","ok":true,"value":{"kind":"integer","exact":true,"value":"2","text":"2"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
 
   $ { awk 'BEGIN { for (i = 0; i < 65537; i++) printf "x"; print "" }'; printf '{"version":1,"expression":"1 + 1"}\n'; } | ../src/main.exe --json
-  {"version":1,"ok":false,"error":{"code":"resource_limit","message":"the request exceeds the byte limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+  {"version":1,"ok":false,"error":{"details":{"category":"limit","limit":"max_request_bytes"},"suggestion":"Reduce the request or retry with a larger permitted request limit.","code":"resource_limit","message":"the request exceeds the byte limit","retryable":true},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
   {"version":1,"ok":true,"value":{"kind":"integer","exact":true,"value":"2","text":"2"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"}}
   [2]
 
   $ printf '{"version":1,"expression":"sequence(k, k = 1, 4)","limits":{"max_integer_iterations":3}}\n' | ../src/main.exe --json
-  {"version":1,"ok":false,"error":{"position":0,"code":"resource_limit","message":"the finite sequence exceeds the integer-iteration limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+  {"version":1,"ok":false,"error":{"details":{"category":"limit","limit":"max_integer_iterations"},"suggestion":"Reduce the request or retry with a larger permitted request limit.","position":0,"range":{"start":0,"end":0},"code":"resource_limit","message":"the finite sequence exceeds the integer-iteration limit","retryable":true},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
   [2]
 
   $ printf '%s\n' '{"version":1,"id":"a","expression":"r = 3"}' '{"version":1,"id":"b","expression":"circle_area(r)"}' '{"version":1,"id":"c","op":"reset"}' | ../src/main.exe --serve
@@ -185,24 +185,24 @@
   {"version":1,"id":"c","ok":true,"reset":true,"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"control","method":"reset","backend":"centl-protocol"},"session":{"definitions":0,"requests":3}}
 
   $ printf '%s\n' '{"version":1,"id":"name","expression":"pi = 3"}' '{"version":1,"id":"parameter","expression":"f(x, x) = x"}' '{"version":1,"id":"empty","expression":"g() = 1"}' | ../src/main.exe --serve
-  {"version":1,"id":"name","ok":false,"error":{"position":0,"code":"reserved_name","message":"pi is built in and cannot be redefined"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
-  {"version":1,"id":"parameter","ok":false,"error":{"position":5,"code":"invalid_definition","message":"function parameters must be unique"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":2}}
-  {"version":1,"id":"empty","ok":false,"error":{"position":2,"code":"invalid_definition","message":"a function definition needs at least one parameter"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":3}}
+  {"version":1,"id":"name","ok":false,"error":{"position":0,"range":{"start":0,"end":0},"code":"reserved_name","message":"pi is built in and cannot be redefined","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
+  {"version":1,"id":"parameter","ok":false,"error":{"position":5,"range":{"start":5,"end":5},"code":"invalid_definition","message":"function parameters must be unique","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":2}}
+  {"version":1,"id":"empty","ok":false,"error":{"position":2,"range":{"start":2,"end":2},"code":"invalid_definition","message":"a function definition needs at least one parameter","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":3}}
 
   $ seq 1 300 | sed 's/.*/{"version":1,"op":"ping"}/' | ../src/main.exe --serve | wc -l | tr -d ' '
   300
 
   $ printf '{"version":1,"id":"limit","expression":"approx(pi, 20)","limits":{"max_precision_digits":10}}\n' | ../src/main.exe --serve
-  {"version":1,"id":"limit","ok":false,"error":{"position":0,"code":"precision_limit","message":"approximation digits must be between 1 and 10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
+  {"version":1,"id":"limit","ok":false,"error":{"details":{"category":"limit","limit":"max_precision_digits"},"suggestion":"Request fewer digits or retry with a larger permitted precision limit.","position":0,"range":{"start":0,"end":0},"code":"precision_limit","message":"approximation digits must be between 1 and 10","retryable":true},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
 
   $ printf '%s\n' '{"version":1,"id":"n","expression":"n = 6"}' '{"version":1,"id":"factorial","expression":"product(k, k = 1, n)"}' | ../src/main.exe --serve | tail -n 1
   {"version":1,"id":"factorial","ok":true,"value":{"kind":"integer","exact":true,"value":"720","text":"720"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":1,"requests":2}}
 
   $ printf '{"version":1,"id":"limit-sum","expression":"sum(k, k = 1, 4)","limits":{"max_integer_iterations":3}}\n' | ../src/main.exe --serve
-  {"version":1,"id":"limit-sum","ok":false,"error":{"position":0,"code":"resource_limit","message":"the finite iteration exceeds the integer-iteration limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
+  {"version":1,"id":"limit-sum","ok":false,"error":{"details":{"category":"limit","limit":"max_integer_iterations"},"suggestion":"Reduce the request or retry with a larger permitted request limit.","position":0,"range":{"start":0,"end":0},"code":"resource_limit","message":"the finite iteration exceeds the integer-iteration limit","retryable":true},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":0,"requests":1}}
 
   $ printf '%s\n' '{"version":1,"id":"d","expression":"d = 2^40"}' '{"version":1,"id":"bits","expression":"1/(d*d) + 1/3","limits":{"max_exact_bits":100}}' | ../src/main.exe --serve | tail -n 1
-  {"version":1,"id":"bits","ok":false,"error":{"position":0,"code":"resource_limit","message":"the exact result exceeds the bit limit"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":1,"requests":2}}
+  {"version":1,"id":"bits","ok":false,"error":{"details":{"category":"limit","limit":"max_exact_bits"},"suggestion":"Reduce the request or retry with a larger permitted request limit.","position":0,"range":{"start":0,"end":0},"code":"resource_limit","message":"the exact result exceeds the bit limit","retryable":true},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"},"session":{"definitions":1,"requests":2}}
 
   $ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' | ../src/main.exe --mcp
   {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"centl","title":"CENTL exact mathematics","version":"0.10.0"},"instructions":"Use read-only centl_compute for mathematics and centl_define for immutable session definitions. centl_calculate remains available for compatibility. Definitions persist until centl_reset or process exit."}}
@@ -321,5 +321,5 @@
   [2]
 
   $ printf '{"version":2,"expression":"1 + 1"}\n' | ../src/main.exe --json
-  {"version":1,"ok":false,"error":{"code":"invalid_request","message":"unsupported protocol version"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+  {"version":1,"ok":false,"error":{"code":"invalid_request","message":"unsupported protocol version","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
   [2]

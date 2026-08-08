@@ -1,0 +1,8 @@
+{"name":"exact-compute","op":"compute","expression":"0.1 + 0.2","expected_resolution":"computed"}
+{"name":"completed-transform","op":"compute","expression":"diff(x^3, x)","expected_resolution":"transformed","expected_operation":"diff"}
+{"name":"residual-recognition","op":"compute","expression":"integrate(sin(x), x)","expected_resolution":"unsupported","expected_operation":"integrate","expected_reason":"non_polynomial_integrand"}
+{"name":"supported-domain-selection","op":"compute","expression":"factor(x^2 - 1)","expected_resolution":"transformed","expected_operation":"factor"}
+{"name":"proved-unchanged","op":"compute","expression":"simplify(x)","expected_resolution":"unchanged_proved","expected_reason":"polynomial_normal_form"}
+{"name":"unknown-equation","op":"compute","expression":"solve(x^3 = 1, x)","expected_resolution":"unsupported","expected_operation":"solve","expected_value_status":"unresolved"}
+{"name":"read-only-rejection","op":"compute","expression":"state = 1","expected_error":"definition_not_allowed"}
+{"name":"cooperative-cancellation","op":"compute","expression":"expand((x + 1)^20)","cancelled":true,"expected_error":"cancelled"}
