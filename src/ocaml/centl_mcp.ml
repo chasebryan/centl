@@ -25,11 +25,24 @@ let add_physics_cursor = function
 let tools_list_cursor fields =
   match List.assoc_opt "params" fields with
   | None -> Ok None
-  | Some (`Assoc []) -> Ok None
-  | Some (`Assoc [ ("cursor", `String cursor) ]) -> Ok (Some cursor)
-  | Some (`Assoc [ ("cursor", _) ]) ->
-      Error "tools/list cursor must be a string"
-  | Some (`Assoc _) -> Error "tools/list accepts only cursor"
+  | Some (`Assoc parameters) ->
+      begin match
+        List.find_opt
+          (fun (name, _) -> not (List.mem name [ "cursor"; "_meta" ]))
+          parameters
+      with
+      | Some (name, _) -> Error ("unknown tools/list parameter " ^ name)
+      | None ->
+          begin match List.assoc_opt "_meta" parameters with
+          | Some (`Assoc _) | None ->
+              begin match List.assoc_opt "cursor" parameters with
+              | None -> Ok None
+              | Some (`String cursor) -> Ok (Some cursor)
+              | Some _ -> Error "tools/list cursor must be a string"
+              end
+          | Some _ -> Error "tools/list _meta must be an object"
+          end
+      end
   | Some _ -> Error "tools/list params must be an object"
 
 let physics_tools_page id =
@@ -72,7 +85,10 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
         (List.assoc_opt "name" parameters, List.assoc_opt "arguments" parameters)
       with
       | Some (`String "centl_physics"), Some (`Assoc arguments) ->
-          physics id arguments
+          begin match Centl_physics_mcp.validate_arguments arguments with
+          | Ok () -> physics id arguments
+          | Error message -> jsonrpc_error id (-32602) message
+          end
       | Some (`String "centl_physics"), None ->
           jsonrpc_error id (-32602) "centl_physics requires arguments"
       | Some (`String "centl_physics"), Some _ ->
