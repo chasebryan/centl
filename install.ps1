@@ -84,10 +84,12 @@ try {
     Expand-Archive -LiteralPath $DownloadedArchive -DestinationPath $Extracted
     $Package = Join-Path $Extracted "centl"
     $PackageBinary = Join-Path $Package "centl.exe"
+    $PackagePhysicsBinary = Join-Path $Package "centl-physics.exe"
     $VersionFile = Join-Path $Package "VERSION"
     if (-not (Test-Path -LiteralPath $PackageBinary -PathType Leaf)) {
         throw "centl install: the release contains no CENTL executable"
     }
+    $PhysicsAvailable = Test-Path -LiteralPath $PackagePhysicsBinary -PathType Leaf
     if (-not (Test-Path -LiteralPath $VersionFile -PathType Leaf)) {
         throw "centl install: the release contains no version metadata"
     }
@@ -107,10 +109,17 @@ try {
     $Target = Join-Path $VersionsDirectory $PackageVersion
     $BinDirectory = Join-Path $Prefix "bin"
     $CommandPath = Join-Path $BinDirectory "centl.cmd"
+    $PhysicsCommandPath = Join-Path $BinDirectory "centl-physics.cmd"
     if (Test-Path -LiteralPath $CommandPath -PathType Leaf) {
         $FirstLine = Get-Content -LiteralPath $CommandPath -TotalCount 1
         if ($FirstLine -ne "@rem CENTL launcher") {
             throw "centl install: $CommandPath already exists and is not a CENTL launcher"
+        }
+    }
+    if ($PhysicsAvailable -and (Test-Path -LiteralPath $PhysicsCommandPath -PathType Leaf)) {
+        $PhysicsFirstLine = Get-Content -LiteralPath $PhysicsCommandPath -TotalCount 1
+        if ($PhysicsFirstLine -ne "@rem CENTL launcher") {
+            throw "centl install: $PhysicsCommandPath already exists and is not a CENTL launcher"
         }
     }
     if (Test-Path -LiteralPath $Target) {
@@ -128,6 +137,13 @@ try {
     if ($LASTEXITCODE -ne 0 -or $RuntimeVersion -ne "centl $PackageVersion") {
         throw "centl install: executable reports '$RuntimeVersion', expected 'centl $PackageVersion'"
     }
+    if ($PhysicsAvailable) {
+        $StagedPhysicsBinary = Join-Path $Staging "centl-physics.exe"
+        $PhysicsSmoke = (& $StagedPhysicsBinary convert 100 cm m | Out-String).Trim()
+        if ($LASTEXITCODE -ne 0 -or $PhysicsSmoke -ne "1") {
+            throw "centl install: CENTL Physics executable failed its unit-conversion smoke test: $PhysicsSmoke"
+        }
+    }
     Move-Item -LiteralPath $Staging -Destination $Target
     $Staging = $null
 
@@ -139,6 +155,17 @@ try {
 "@
     $Launcher.TrimStart() | Set-Content -LiteralPath $LauncherTemporary -Encoding ASCII
     Move-Item -LiteralPath $LauncherTemporary -Destination $CommandPath -Force
+
+    if ($PhysicsAvailable) {
+        $PhysicsLauncherTemporary = "$PhysicsCommandPath.new"
+        $PhysicsLauncher = @"
+@rem CENTL launcher
+@echo off
+"%~dp0..\versions\$PackageVersion\centl-physics.exe" %*
+"@
+        $PhysicsLauncher.TrimStart() | Set-Content -LiteralPath $PhysicsLauncherTemporary -Encoding ASCII
+        Move-Item -LiteralPath $PhysicsLauncherTemporary -Destination $PhysicsCommandPath -Force
+    }
 
     if (-not $NoPath) {
         $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -152,6 +179,9 @@ try {
 
     Write-Host "Installed CENTL $PackageVersion at $Target"
     Write-Host "Command: $CommandPath"
+    if ($PhysicsAvailable) {
+        Write-Host "Physics command: $PhysicsCommandPath"
+    }
 }
 finally {
     if ($Staging -and (Test-Path -LiteralPath $Staging)) {
