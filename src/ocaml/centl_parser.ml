@@ -612,6 +612,12 @@ type statement =
   | Evaluate of Centl_Core.expression
   | Define_value of string * Centl_Core.expression
   | Define_function of string * string list * Centl_Core.expression
+  | Assert of {
+      left_source : string;
+      relation : string;
+      right_source : string;
+      variable : string option;
+    }
 
 type located_statement = {
   statement : statement;
@@ -694,6 +700,147 @@ let parse_statement_located source =
         end
     | _ -> None
   in
+  let relation_token_name = function
+    | Equals -> Ok "equal"
+    | Not_equals -> Ok "not_equal"
+    | Less -> Ok "less_than"
+    | Less_equal -> Ok "less_or_equal"
+    | Greater -> Ok "greater_than"
+    | Greater_equal -> Ok "greater_or_equal"
+    | kind ->
+        Error
+          {
+            position = 0;
+            message =
+              Printf.sprintf "expected a claim relation, found %s"
+                (token_name kind);
+          }
+  in
+  let parse_assert () =
+    let ( let* ) result next = Result.bind result next in
+    if
+      not
+        ((current 0).kind = Identifier "assert" && (current 1).kind = Left_paren)
+    then Error { position = (current 0).start; message = "expected assert(" }
+    else
+      let content_start = 2 in
+      let rec find_relation index depth =
+        if index >= Array.length tokens then None
+        else
+          match (current index).kind with
+          | Left_paren -> find_relation (index + 1) (depth + 1)
+          | Right_paren -> find_relation (index + 1) (max 0 (depth - 1))
+          | (Equals | Not_equals | Less | Less_equal | Greater | Greater_equal)
+            as kind
+            when depth = 0 ->
+              Some (index, kind)
+          | _ -> find_relation (index + 1) depth
+      in
+      begin match find_relation content_start 0 with
+      | None ->
+          Error
+            {
+              position = (current 1).start;
+              message = "assert requires a comparison such as left = right";
+            }
+      | Some (relation_index, relation_kind) ->
+          let* relation = relation_token_name relation_kind in
+          let left_start = (current content_start).start in
+          let left_finish = (current relation_index).start in
+          let right_start = (current (relation_index + 1)).start in
+          let rec scan index depth =
+            if index >= Array.length tokens then
+              Error
+                {
+                  position = right_start;
+                  message = "assert is missing a closing ')'";
+                }
+            else
+              match (current index).kind with
+              | Left_paren -> scan (index + 1) (depth + 1)
+              | Right_paren when depth = 0 -> Ok (index, index, None)
+              | Right_paren -> scan (index + 1) (depth - 1)
+              | Comma when depth = 0 ->
+                  (* right ends at this comma; quantification follows. *)
+                  let next = index + 1 in
+                  if next + 7 >= Array.length tokens then
+                    Error
+                      {
+                        position = (current index).start;
+                        message =
+                          "expected 'for_all = name, domain = rational)'";
+                      }
+                  else
+                    begin match
+                      ( (current next).kind,
+                        (current (next + 1)).kind,
+                        (current (next + 2)).kind,
+                        (current (next + 3)).kind,
+                        (current (next + 4)).kind,
+                        (current (next + 5)).kind,
+                        (current (next + 6)).kind,
+                        (current (next + 7)).kind )
+                    with
+                    | ( Identifier "for_all",
+                        Equals,
+                        Identifier variable,
+                        Comma,
+                        Identifier "domain",
+                        Equals,
+                        Identifier "rational",
+                        Right_paren ) ->
+                        Ok (index, next + 7, Some variable)
+                    | _ ->
+                        Error
+                          {
+                            position = (current next).start;
+                            message =
+                              "expected 'for_all = name, domain = rational)'";
+                          }
+                    end
+              | _ -> scan (index + 1) depth
+          in
+          let* right_end, close_index, variable = scan (relation_index + 1) 0 in
+          let right_finish = (current right_end).start in
+          let left_source =
+            String.sub source left_start (left_finish - left_start)
+            |> String.trim
+          in
+          let right_source =
+            String.sub source right_start (right_finish - right_start)
+            |> String.trim
+          in
+          if left_source = "" || right_source = "" then
+            Error
+              {
+                position = left_start;
+                message = "assert comparison sides must be non-empty";
+              }
+          else
+            let rec trailing index =
+              if index >= Array.length tokens then Ok ()
+              else
+                match (current index).kind with
+                | End -> Ok ()
+                | _ ->
+                    Error
+                      {
+                        position = (current index).start;
+                        message = "unexpected trailing tokens after assert(...)";
+                      }
+            in
+            let* () = trailing (close_index + 1) in
+            Ok
+              {
+                statement =
+                  Assert { left_source; relation; right_source; variable };
+                statement_spans = [];
+                definition_name_span = None;
+                parameter_spans = [];
+                parameter_list_span = None;
+              }
+      end
+  in
   if Array.length tokens < 2 then
     Result.map
       (fun located ->
@@ -705,6 +852,9 @@ let parse_statement_located source =
           parameter_list_span = None;
         })
       (parse_located source)
+  else if
+    (current 0).kind = Identifier "assert" && (current 1).kind = Left_paren
+  then parse_assert ()
   else
     match ((current 0).kind, (current 1).kind) with
     | Identifier name, Equals -> value_definition name

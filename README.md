@@ -11,8 +11,10 @@ manufacturing certainty.
 CENTL 0.11.0 is the agent-safe calculation foundation for the
 [accepted product direction](docs/DESIGN_PATH.md): a mathematical contract
 checker for code and automated workflows—a type checker for mathematical
-claims. General claim verification and evidence receipts remain future work;
-this release makes the underlying compute surface safe to interpret.
+claims. This release makes the compute surface safe to interpret. Draft claim
+verification (`centl verify`, `centl check`, MCP `centl_verify`) is under
+review on the development path; proof-backed polynomial identity verdicts and
+replayable receipts remain gated for 0.12.0 math contracts.
 
 CENTL 0.11.0 reports whether every requested transformation completed, proved
 an input unchanged, remained residual, or was unsupported. It separates
@@ -74,6 +76,11 @@ make test
 ./centl 'recurrence(1, a = a*n, n = 0, 5)'
 ./centl 'distance(0, 0, 3, 4)'
 ./centl 'approx(sin(pi / 6), 20)'
+./centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
+./centl verify --left 'sqrt(2)' --relation less_than --right '2'
+./centl verify --left '(x+1)^2' --relation equal --right 'x^2+2*x+1' \
+  --variable x:rational
+./centl check examples/contracts/math-contracts.centl
 ```
 
 ```text

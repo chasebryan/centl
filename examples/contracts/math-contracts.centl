@@ -1,0 +1,21 @@
+# Example math contracts for CENTL check.
+# Every assertion here is expected to verify under the shipped scopes.
+# Run: centl check examples/contracts/math-contracts.centl
+
+# Closed exact rationals
+equal | 0.1 + 0.2 | 3/10
+not_equal | 1 | 2
+less_than | 7/8 | 0.9
+less_or_equal | 2 | 2
+greater_than | 3 | 2
+greater_or_equal | 9/16 | (3/4)^2
+
+# Session definitions are private to this check process
+define | r = 3
+equal | r^2 | 9
+define | f(x) = x^2 + 1
+equal | f(2) | 5
+
+# Certified enclosure order (not real equality)
+less_than | sqrt(2) | 2
+greater_than | pi | 3

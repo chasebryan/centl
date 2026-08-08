@@ -1404,23 +1404,33 @@ let agent_tool_corpus () =
             let case = Yojson.Safe.from_string line in
             let name = json_string "name" case in
             let op = json_string "op" case in
-            let expression = json_string "expression" case in
             let cancelled =
               match member_opt "cancelled" case with
               | Some (`Bool value) -> value
               | _ -> false
             in
-            let fields =
+            let fields = [ ("version", `Int 1); ("op", `String op) ] in
+            let reserved =
               [
-                ("version", `Int 1);
-                ("op", `String op);
-                ("expression", `String expression);
+                "name";
+                "op";
+                "cancelled";
+                "expected_error";
+                "expected_resolution";
+                "expected_operation";
+                "expected_reason";
+                "expected_value_status";
+                "expected_verdict";
               ]
             in
             let fields =
-              match member_opt "limits" case with
-              | Some limits -> fields @ [ ("limits", limits) ]
-              | None -> fields
+              match case with
+              | `Assoc case_fields ->
+                  fields
+                  @ List.filter
+                      (fun (name, _) -> not (List.mem name reserved))
+                      case_fields
+              | _ -> fields
             in
             let response =
               Centl_protocol.handle_json
@@ -1433,35 +1443,44 @@ let agent_tool_corpus () =
                   (name ^ " error") expected
                   (protocol_error_code response)
             | _ ->
-                let resolution = json_member "resolution" response in
-                Alcotest.(check string)
-                  (name ^ " resolution")
-                  (json_string "expected_resolution" case)
-                  (json_string "status" resolution);
-                Option.iter
-                  (fun expected ->
+                begin match member_opt "expected_verdict" case with
+                | Some (`String expected) ->
                     Alcotest.(check string)
-                      (name ^ " operation") expected
-                      (json_string "operation" resolution))
-                  (match member_opt "expected_operation" case with
-                  | Some (`String value) -> Some value
-                  | _ -> None);
-                Option.iter
-                  (fun expected ->
+                      (name ^ " verdict") expected
+                      (response |> json_member "verification"
+                     |> json_string "verdict")
+                | _ ->
+                    let resolution = json_member "resolution" response in
                     Alcotest.(check string)
-                      (name ^ " reason") expected
-                      (json_string "reason" resolution))
-                  (match member_opt "expected_reason" case with
-                  | Some (`String value) -> Some value
-                  | _ -> None);
-                Option.iter
-                  (fun expected ->
-                    Alcotest.(check string)
-                      (name ^ " value status") expected
-                      (response |> json_member "value" |> json_string "status"))
-                  (match member_opt "expected_value_status" case with
-                  | Some (`String value) -> Some value
-                  | _ -> None)
+                      (name ^ " resolution")
+                      (json_string "expected_resolution" case)
+                      (json_string "status" resolution);
+                    Option.iter
+                      (fun expected ->
+                        Alcotest.(check string)
+                          (name ^ " operation") expected
+                          (json_string "operation" resolution))
+                      (match member_opt "expected_operation" case with
+                      | Some (`String value) -> Some value
+                      | _ -> None);
+                    Option.iter
+                      (fun expected ->
+                        Alcotest.(check string)
+                          (name ^ " reason") expected
+                          (json_string "reason" resolution))
+                      (match member_opt "expected_reason" case with
+                      | Some (`String value) -> Some value
+                      | _ -> None);
+                    Option.iter
+                      (fun expected ->
+                        Alcotest.(check string)
+                          (name ^ " value status") expected
+                          (response |> json_member "value"
+                         |> json_string "status"))
+                      (match member_opt "expected_value_status" case with
+                      | Some (`String value) -> Some value
+                      | _ -> None)
+                end
             end;
             cases (line_number + 1)
         | exception End_of_file -> ()
@@ -1469,6 +1488,582 @@ let agent_tool_corpus () =
             Alcotest.failf "agent corpus line %d: %s" line_number message
       in
       cases 1)
+
+let closed_claim_verification () =
+  let verify ?limits fields =
+    let body = ("version", `Int 1) :: ("op", `String "verify") :: fields in
+    let body =
+      match limits with
+      | None -> body
+      | Some limits -> body @ [ ("limits", limits) ]
+    in
+    Centl_protocol.handle_json (Centl_protocol.create ()) (`Assoc body)
+  in
+  let verdict response =
+    response |> json_member "verification" |> json_string "verdict"
+  in
+  let scope response =
+    response |> json_member "verification" |> json_string "scope"
+  in
+  let is_error response = json_member "ok" response = `Bool false in
+  let error_code response =
+    response |> json_member "error" |> json_string "code"
+  in
+  (* six exact rational relations *)
+  [
+    ("equal", "2", "2", "verified");
+    ("not_equal", "2", "3", "verified");
+    ("less_than", "2", "3", "verified");
+    ("less_or_equal", "2", "2", "verified");
+    ("greater_than", "3", "2", "verified");
+    ("greater_or_equal", "3", "3", "verified");
+  ]
+  |> List.iter (fun (relation, left, right, expected) ->
+      let response =
+        verify
+          [
+            ("left", `String left);
+            ("relation", `String relation);
+            ("right", `String right);
+          ]
+      in
+      Alcotest.(check string)
+        (relation ^ " exact relation")
+        expected (verdict response));
+  let equal_claim =
+    verify
+      [
+        ("left", `String "0.1 + 0.2");
+        ("relation", `String "equal");
+        ("right", `String "3/10");
+      ]
+  in
+  Alcotest.(check string)
+    "0.1+0.2=3/10 verified" "verified" (verdict equal_claim);
+  Alcotest.(check string)
+    "assurance is exact algorithm" "exact_algorithm"
+    (equal_claim |> json_member "verification" |> json_member "assurance"
+   |> json_string "class");
+  let refuted =
+    verify
+      [
+        ("left", `String "1 + 1");
+        ("relation", `String "equal");
+        ("right", `String "3");
+      ]
+  in
+  Alcotest.(check string) "1+1=3 refuted" "refuted" (verdict refuted);
+  let ordered =
+    verify
+      [
+        ("left", `String "7/8");
+        ("relation", `String "less_than");
+        ("right", `String "0.9");
+      ]
+  in
+  Alcotest.(check string) "7/8<0.9 verified" "verified" (verdict ordered);
+  let enclosure_order =
+    verify
+      [
+        ("left", `String "sqrt(2)");
+        ("relation", `String "less_than");
+        ("right", `String "2");
+      ]
+  in
+  Alcotest.(check string)
+    "sqrt(2)<2 verified by enclosure" "verified" (verdict enclosure_order);
+  Alcotest.(check string)
+    "enclosure assurance" "certified_enclosure"
+    (enclosure_order |> json_member "verification" |> json_member "assurance"
+   |> json_string "class");
+  let left_side =
+    enclosure_order |> json_member "verification" |> json_member "evidence"
+    |> json_member "left"
+  in
+  Alcotest.(check bool)
+    "enclosure side exposes dyadic bounds" true
+    (match json_member "dyadic" left_side with
+    | `Assoc fields ->
+        List.mem_assoc "lower_mantissa" fields
+        && List.mem_assoc "upper_mantissa" fields
+        && List.mem_assoc "binary_exponent" fields
+    | _ -> false);
+  let real_equal =
+    verify
+      [
+        ("left", `String "pi");
+        ("relation", `String "equal");
+        ("right", `String "3");
+      ]
+  in
+  Alcotest.(check string)
+    "real equality remains unknown" "unknown" (verdict real_equal);
+  let named_constant_order =
+    verify
+      [
+        ("left", `String "pi");
+        ("relation", `String "greater_than");
+        ("right", `String "3");
+      ]
+  in
+  Alcotest.(check string)
+    "named constants are closed enclosure expressions" "verified"
+    (verdict named_constant_order);
+  let not_strict =
+    verify
+      [
+        ("left", `String "2");
+        ("relation", `String "less_than");
+        ("right", `String "2");
+      ]
+  in
+  Alcotest.(check string)
+    "exact equal values do not verify strict less_than" "refuted"
+    (verdict not_strict);
+  let quantified =
+    verify
+      [
+        ("left", `String "x + 0");
+        ("relation", `String "equal");
+        ("right", `String "x");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check string)
+    "quantified rational polynomial identity is unknown pending theorem"
+    "unknown" (verdict quantified);
+  Alcotest.(check string)
+    "polynomial scope" "univariate_rational_polynomial" (scope quantified);
+  Alcotest.(check string)
+    "pending theorem keeps assurance none" "none"
+    (quantified |> json_member "verification" |> json_member "assurance"
+   |> json_string "class");
+  Alcotest.(check string)
+    "pending theorem reason is explicit" "polynomial_soundness_theorem_pending"
+    (quantified |> json_member "verification" |> json_member "evidence"
+   |> json_string "reason");
+  let poly_identity =
+    verify
+      [
+        ("left", `String "(x+1)^2");
+        ("relation", `String "equal");
+        ("right", `String "x^2+2*x+1");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check string)
+    "expanded square identity is unknown pending theorem" "unknown"
+    (verdict poly_identity);
+  Alcotest.(check bool)
+    "normalized difference is present" true
+    (match
+       poly_identity |> json_member "verification" |> json_member "evidence"
+       |> json_member "normalized_difference"
+     with
+    | `String text -> text = "0"
+    | _ -> false);
+  let poly_disequality =
+    verify
+      [
+        ("left", `String "x");
+        ("relation", `String "not_equal");
+        ("right", `String "x");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check string)
+    "identical polynomial disequality is exactly refuted" "refuted"
+    (verdict poly_disequality);
+  let disequality_witness =
+    poly_disequality |> json_member "verification" |> json_member "evidence"
+    |> json_member "counterexample"
+  in
+  Alcotest.(check string)
+    "disequality witness has equal exact sides"
+    (disequality_witness |> json_member "left" |> json_string "text")
+    (disequality_witness |> json_member "right" |> json_string "text");
+  let poly_refuted =
+    verify
+      [
+        ("left", `String "(x+1)^2");
+        ("relation", `String "equal");
+        ("right", `String "x^2+2*x");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check string)
+    "false polynomial identity is refuted" "refuted" (verdict poly_refuted);
+  Alcotest.(check string)
+    "refutation uses witness assurance" "witness_checked"
+    (poly_refuted |> json_member "verification" |> json_member "assurance"
+   |> json_string "class");
+  let bounded_normalization =
+    verify
+      ~limits:(`Assoc [ ("max_expression_nodes", `Int 20) ])
+      [
+        ("left", `String "(x+1)^8");
+        ("relation", `String "equal");
+        ("right", `String "x^8");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "rational") ] ]
+        );
+      ]
+  in
+  Alcotest.(check bool)
+    "polynomial normalization respects work limit" true
+    (is_error bounded_normalization);
+  Alcotest.(check string)
+    "polynomial work limit is operational" "resource_limit"
+    (error_code bounded_normalization);
+  Alcotest.(check bool)
+    "refutation includes counterexample binding" true
+    (match
+       poly_refuted |> json_member "verification" |> json_member "evidence"
+       |> json_member "counterexample"
+     with
+    | `Assoc fields ->
+        begin match List.assoc_opt "bindings" fields with
+        | Some (`Assoc bindings) -> List.mem_assoc "x" bindings
+        | _ -> false
+        end
+    | _ -> false);
+  let assumed =
+    verify
+      [
+        ("left", `String "1");
+        ("relation", `String "equal");
+        ("right", `String "1");
+        ("assumptions", `List [ `String "x > 0" ]);
+      ]
+  in
+  Alcotest.(check string)
+    "free-form assumptions remain unknown" "unknown" (verdict assumed);
+  let open_claim =
+    verify
+      [
+        ("left", `String "(x+1)^2");
+        ("relation", `String "equal");
+        ("right", `String "x^2+2*x+1");
+      ]
+  in
+  Alcotest.(check string)
+    "free variables require quantification" "unknown" (verdict open_claim);
+  let unknown_field =
+    verify
+      [
+        ("left", `String "1");
+        ("relation", `String "equal");
+        ("right", `String "1");
+        ("extra", `String "nope");
+      ]
+  in
+  Alcotest.(check bool) "unknown field is error" true (is_error unknown_field);
+  Alcotest.(check string)
+    "unknown field code" "invalid_request" (error_code unknown_field);
+  let duplicate_field =
+    verify
+      [
+        ("left", `String "1");
+        ("left", `String "2");
+        ("relation", `String "equal");
+        ("right", `String "1");
+      ]
+  in
+  Alcotest.(check bool)
+    "duplicate claim field is error" true (is_error duplicate_field);
+  Alcotest.(check string)
+    "duplicate claim field code" "invalid_claim"
+    (error_code duplicate_field);
+  let bad_variable =
+    verify
+      [
+        ("left", `String "1");
+        ("relation", `String "equal");
+        ("right", `String "1");
+        ( "variables",
+          `List
+            [ `Assoc [ ("name", `String "x"); ("domain", `String "complex") ] ]
+        );
+      ]
+  in
+  Alcotest.(check bool) "bad domain is error" true (is_error bad_variable);
+  Alcotest.(check string)
+    "bad domain code" "invalid_claim" (error_code bad_variable);
+  let bad_variable_name =
+    verify
+      [
+        ("left", `String "1");
+        ("relation", `String "equal");
+        ("right", `String "1");
+        ( "variables",
+          `List
+            [
+              `Assoc
+                [
+                  ("name", `String "not a name"); ("domain", `String "rational");
+                ];
+            ] );
+      ]
+  in
+  Alcotest.(check bool)
+    "invalid variable name is error" true
+    (is_error bad_variable_name);
+  let duplicate_variable_field =
+    verify
+      [
+        ("left", `String "x");
+        ("relation", `String "equal");
+        ("right", `String "x");
+        ( "variables",
+          `List
+            [
+              `Assoc
+                [
+                  ("name", `String "x");
+                  ("name", `String "y");
+                  ("domain", `String "rational");
+                ];
+            ] );
+      ]
+  in
+  Alcotest.(check bool)
+    "duplicate variable field is error" true
+    (is_error duplicate_variable_field);
+  let duplicate_variables =
+    verify
+      [
+        ("left", `String "x");
+        ("relation", `String "equal");
+        ("right", `String "x");
+        ( "variables",
+          `List
+            [
+              `Assoc [ ("name", `String "x"); ("domain", `String "rational") ];
+              `Assoc [ ("name", `String "x"); ("domain", `String "rational") ];
+            ] );
+      ]
+  in
+  Alcotest.(check bool)
+    "duplicate variables are error" true
+    (is_error duplicate_variables);
+  let bad_assumption =
+    verify
+      [
+        ("left", `String "1");
+        ("relation", `String "equal");
+        ("right", `String "1");
+        ("assumptions", `List [ `Int 1 ]);
+      ]
+  in
+  Alcotest.(check bool)
+    "non-string assumption is error" true (is_error bad_assumption);
+  let tiny =
+    verify
+      ~limits:(`Assoc [ ("max_result_bytes", `Int 50) ])
+      [
+        ("left", `String "0.1 + 0.2");
+        ("relation", `String "equal");
+        ("right", `String "3/10");
+      ]
+  in
+  Alcotest.(check bool)
+    "oversized verification response is operational error" true (is_error tiny);
+  Alcotest.(check string)
+    "oversized response code" "resource_limit" (error_code tiny);
+  let cancelled =
+    Centl_protocol.handle_json
+      ~cancelled:(fun () -> true)
+      (Centl_protocol.create ())
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "verify");
+           ("left", `String "1");
+           ("relation", `String "equal");
+           ("right", `String "1");
+         ])
+  in
+  Alcotest.(check bool)
+    "cancellation is operational error" true (is_error cancelled);
+  Alcotest.(check string) "cancellation code" "cancelled" (error_code cancelled);
+  let state = Centl_protocol.create () in
+  ignore
+    (Centl_protocol.handle_json state
+       (`Assoc
+          [
+            ("version", `Int 1);
+            ("op", `String "define");
+            ("expression", `String "a = 3/10");
+          ]));
+  let with_definition =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "verify");
+           ("left", `String "0.1 + 0.2");
+           ("relation", `String "equal");
+           ("right", `String "a");
+         ])
+  in
+  Alcotest.(check string)
+    "verify may read session definitions" "verified" (verdict with_definition);
+  Alcotest.(check (list string))
+    "session dependency recorded on claim" [ "a" ]
+    (match
+       with_definition |> json_member "verification" |> json_member "evidence"
+       |> json_member "dependencies"
+     with
+    | `List items ->
+        List.map
+          (function
+            | `String name -> name
+            | _ -> Alcotest.fail "dependency was not a string")
+          items
+    | _ -> Alcotest.fail "dependencies missing");
+  Alcotest.(check int)
+    "verify does not mutate session" 1
+    (Centl_engine.session_binding_count (Centl_protocol.session state));
+  let shadowed = Centl_protocol.create () in
+  ignore
+    (Centl_protocol.handle_json shadowed
+       (`Assoc
+          [
+            ("version", `Int 1);
+            ("op", `String "define");
+            ("expression", `String "x = 1");
+          ]));
+  let shadowed_claim =
+    Centl_protocol.handle_json shadowed
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "verify");
+           ("left", `String "x");
+           ("relation", `String "equal");
+           ("right", `String "0");
+           ( "variables",
+             `List
+               [
+                 `Assoc
+                   [ ("name", `String "x"); ("domain", `String "rational") ];
+               ] );
+         ])
+  in
+  Alcotest.(check string)
+    "quantified variable does not capture a session binding" "unknown"
+    (verdict shadowed_claim);
+  Alcotest.(check string)
+    "session-shadow reason is explicit"
+    "quantified_variable_shadows_session_binding"
+    (shadowed_claim |> json_member "verification" |> json_member "evidence"
+   |> json_string "reason");
+  let again =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "verify");
+           ("left", `String "0.1 + 0.2");
+           ("relation", `String "equal");
+           ("right", `String "a");
+         ])
+  in
+  Alcotest.(check string)
+    "repeated verification is deterministic" "verified" (verdict again);
+  Alcotest.(check string)
+    "repeated verification keeps exact scope" "closed_exact_rational"
+    (scope again);
+  ignore
+    (Centl_protocol.handle_json state
+       (`Assoc
+          [
+            ("version", `Int 1);
+            ("op", `String "define");
+            ("expression", `String "b = a");
+          ]));
+  let transitive =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "verify");
+           ("left", `String "0.1 + 0.2");
+           ("relation", `String "equal");
+           ("right", `String "b");
+         ])
+  in
+  Alcotest.(check (list string))
+    "claim evidence includes transitive session dependencies" [ "a"; "b" ]
+    (match
+       transitive |> json_member "verification" |> json_member "evidence"
+       |> json_member "dependencies"
+     with
+    | `List items ->
+        List.map
+          (function
+            | `String name -> name
+            | _ -> Alcotest.fail "dependency was not a string")
+          items
+    | _ -> Alcotest.fail "dependencies missing")
+
+let assert_grammar () =
+  let parse source =
+    match Centl_parser.parse_statement_located source with
+    | Ok located -> located.statement
+    | Error error -> Alcotest.failf "parse failed: %s" error.message
+  in
+  begin match parse "assert(0.1 + 0.2 = 3/10)" with
+  | Centl_parser.Assert
+      { left_source; relation = "equal"; right_source; variable = None } ->
+      Alcotest.(check string)
+        "assert left" "0.1 + 0.2" (String.trim left_source);
+      Alcotest.(check string) "assert right" "3/10" (String.trim right_source)
+  | _ -> Alcotest.fail "expected closed assert statement"
+  end;
+  begin match
+    parse "assert((x+1)^2 = x^2+2*x+1, for_all = x, domain = rational)"
+  with
+  | Centl_parser.Assert { relation = "equal"; variable = Some "x"; _ } -> ()
+  | _ -> Alcotest.fail "expected quantified assert statement"
+  end;
+  begin match parse "assert(1 < 2)" with
+  | Centl_parser.Assert { relation = "less_than"; variable = None; _ } -> ()
+  | _ -> Alcotest.fail "expected less_than assert"
+  end;
+  begin match
+    Centl_engine.evaluate_in_session_detailed
+      (Centl_engine.create_session ())
+      "assert(1 = 1)"
+  with
+  | Error error ->
+      Alcotest.(check string)
+        "engine assert is host-only" "assert_host_only" error.code
+  | Ok _ -> Alcotest.fail "engine must not evaluate assert"
+  end;
+  begin match
+    Centl_engine.evaluate_in_session_detailed
+      (Centl_engine.create_session ())
+      "assert = 1"
+  with
+  | Error error ->
+      Alcotest.(check string)
+        "assert cannot be redefined" "reserved_name" error.code
+  | Ok _ -> Alcotest.fail "assert must remain reserved host syntax"
+  end
 
 let machine_cancellation () =
   let evaluation =
@@ -1645,6 +2240,10 @@ let mcp_output_schemas () =
   Alcotest.(check bool)
     "help descriptor uses exact schema" true
     (json_member "outputSchema" (Centl_mcp.help_tool ()) = help_schema);
+  let verify_schema = Lazy.force Centl_mcp.verify_output_schema in
+  Alcotest.(check bool)
+    "verify descriptor uses exact schema" true
+    (json_member "outputSchema" (Centl_mcp.verify_tool ()) = verify_schema);
   Alcotest.(check bool)
     "reset descriptor uses self-contained reset schema" true
     (json_member "outputSchema" (Centl_mcp.reset_tool ()) = reset_schema);
@@ -1730,6 +2329,42 @@ let mcp_output_schemas () =
     "capabilities response conforms to schema" true
     (schema_accepts capabilities_schema (control "centl_capabilities" []));
   Alcotest.(check bool)
+    "verify response conforms to schema" true
+    (schema_accepts verify_schema
+       (control "centl_verify"
+          [
+            ("left", `String "0.1 + 0.2");
+            ("relation", `String "equal");
+            ("right", `String "3/10");
+          ]));
+  Alcotest.(check bool)
+    "unknown verification conforms to schema" true
+    (schema_accepts verify_schema
+       (control "centl_verify"
+          [
+            ("left", `String "x + 1");
+            ("relation", `String "equal");
+            ("right", `String "x + 1");
+          ]));
+  Alcotest.(check bool)
+    "enclosure verification conforms to schema" true
+    (schema_accepts verify_schema
+       (control "centl_verify"
+          [
+            ("left", `String "sqrt(2)");
+            ("relation", `String "less_than");
+            ("right", `String "2");
+          ]));
+  Alcotest.(check bool)
+    "verification failure conforms to schema" true
+    (schema_accepts verify_schema
+       (control "centl_verify"
+          [
+            ("left", `String "1");
+            ("relation", `String "unsupported");
+            ("right", `String "1");
+          ]));
+  Alcotest.(check bool)
     "session response conforms to schema" true
     (schema_accepts session_schema (control "centl_session" []));
   Alcotest.(check bool)
@@ -1778,6 +2413,7 @@ let mcp_protocol () =
     [
       "centl_compute";
       "centl_define";
+      "centl_verify";
       "centl_capabilities";
       "centl_session";
       "centl_help";
@@ -2425,6 +3061,9 @@ let () =
             machine_compute_and_define;
           Alcotest.test_case "structured error metadata" `Quick
             machine_error_metadata;
+          Alcotest.test_case "closed rational claim verification" `Quick
+            closed_claim_verification;
+          Alcotest.test_case "assert grammar" `Quick assert_grammar;
           Alcotest.test_case "agent tool evaluation corpus" `Quick
             agent_tool_corpus;
           Alcotest.test_case "MCP residual text matches human" `Quick

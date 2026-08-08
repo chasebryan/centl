@@ -24,11 +24,19 @@ Configure an MCP client with the equivalent of:
 }
 ```
 
-CENTL exposes seven tools in deterministic order:
+CENTL exposes these tools in deterministic order (v0.11.0 ships seven without
+`centl_verify`; this draft adds `centl_verify` as an eighth unreleased tool):
 
 - `centl_compute` performs read-only mathematical evaluation and rejects
   definitions.
 - `centl_define` creates one immutable value or function definition.
+- `centl_verify` checks one structured mathematical claim and returns
+  `verified`, `refuted`, `unknown`, or `invalid` with evidence. It decides
+  closed exact rational comparisons and certified enclosure order/inequality
+  (with dyadic bounds). Univariate rational polynomial false equalities may be
+  `refuted` with an exact witness; polynomial identities stay `unknown`
+  pending a completed F* soundness theorem. Free-form assumptions and
+  multi-variable claims return `unknown`.
 - `centl_capabilities` returns supported domains, resolution statuses, limits,
   and cancellation behavior.
 - `centl_session` inspects definitions and their direct dependencies without

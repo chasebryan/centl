@@ -107,7 +107,7 @@ let cancellable_request_id = function
         (List.assoc_opt "version" fields, operation fields, request_id fields)
       with
       | Some (`Int 1), Ok operation, Ok (Some id)
-        when List.mem operation [ "evaluate"; "compute"; "define" ] ->
+        when List.mem operation [ "evaluate"; "compute"; "define"; "verify" ] ->
           Some id
       | _ -> None
       end
@@ -190,6 +190,7 @@ let describe state id =
                         "compute";
                         "define";
                         "evaluate";
+                        "verify";
                         "cancel";
                         "reset";
                         "describe";
@@ -199,6 +200,31 @@ let describe state id =
                       ]) );
                ("resolution_statuses", resolution_statuses);
                ("mathematical_domains", mathematical_domains);
+               ( "verification_scopes",
+                 `List
+                   [
+                     `String "closed_exact_rational";
+                     `String "closed_real_enclosure";
+                     `String "univariate_rational_polynomial";
+                     `String "open_claim";
+                     `String "quantified_claim_not_implemented";
+                     `String "unsupported_assumption_domain";
+                   ] );
+               ( "verification_verdicts",
+                 `List
+                   (List.map
+                      (fun value -> `String value)
+                      [ "verified"; "refuted"; "unknown"; "invalid" ]) );
+               ( "assurance_classes",
+                 `List
+                   (List.map
+                      (fun value -> `String value)
+                      [
+                        "exact_algorithm";
+                        "certified_enclosure";
+                        "witness_checked";
+                        "none";
+                      ]) );
                ( "cancellation",
                  `Assoc
                    [
@@ -239,6 +265,87 @@ let inspect_session state id fields =
            ( "definitions",
              Centl_engine.json_of_session_definitions state.session );
          ])
+
+let verify_request_fields fields =
+  let allowed =
+    [
+      "version";
+      "id";
+      "op";
+      "limits";
+      "left";
+      "right";
+      "relation";
+      "variables";
+      "assumptions";
+    ]
+  in
+  match List.find_opt (fun (name, _) -> not (List.mem name allowed)) fields with
+  | Some (name, _) -> Error ("unknown field " ^ name)
+  | None ->
+      Ok
+        (List.filter
+           (fun (name, _) ->
+             List.mem name
+               [ "left"; "right"; "relation"; "variables"; "assumptions" ])
+           fields)
+
+let verify ?(cancelled = Centl_engine.never_cancelled) state id fields =
+  if Option.is_some (List.assoc_opt "expression" fields) then
+    invalid state ?id "verify does not accept expression; use left and right"
+  else
+    match verify_request_fields fields with
+    | Error message -> invalid state ?id message
+    | Ok claim_fields ->
+        begin match request_limits state fields with
+        | Error message -> invalid state ?id message
+        | Ok limits ->
+            if cancelled () then
+              response state ?id
+                (Centl_engine.json_of_evaluation
+                   (Error
+                      {
+                        Centl_engine.code = "cancelled";
+                        message = "the request was cancelled";
+                        position = None;
+                      }))
+            else
+              begin match
+                Centl_verify.verify ~cancelled ~limits state.session
+                  claim_fields
+              with
+              | Error error ->
+                  response state ?id
+                    (Centl_engine.json_of_evaluation (Error error))
+              | Ok verification ->
+                  let body =
+                    `Assoc
+                      [
+                        ("version", `Int 1);
+                        ("ok", `Bool true);
+                        ( "verification",
+                          Centl_verify.json_of_verification verification );
+                      ]
+                  in
+                  let response_json =
+                    response state ?id
+                      ~provenance:
+                        (Centl_engine.json_of_provenance
+                           ~classification:"verification"
+                           ~method_:"claim_verification" ~backend:"centl-verify")
+                      body
+                  in
+                  begin match
+                    Centl_verify.enforce_response_limit ~cancelled limits
+                      response_json
+                  with
+                  | Ok json -> json
+                  | Error error ->
+                      response state ?id
+                        (Centl_engine.json_of_evaluation (Error error))
+                  end
+              end
+        end
 
 let help state id fields =
   if Option.is_some (List.assoc_opt "expression" fields) then
@@ -325,6 +432,7 @@ let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id
               | Ok "session" -> inspect_session state id fields
+              | Ok "verify" -> verify ~cancelled state id fields
               | Ok "help" -> help state id fields
               | Ok "ping" -> ping state id
               | Ok name -> invalid state ?id ("unknown operation " ^ name)
@@ -440,18 +548,92 @@ let text = function
             | _ -> Yojson.Safe.to_string response
             end
         | _ ->
-            begin match List.assoc_opt "error" fields with
-            | Some (`Assoc error) ->
-                begin match List.assoc_opt "message" error with
-                | Some (`String message) ->
-                    begin match List.assoc_opt "suggestion" error with
-                    | Some (`String suggestion) ->
-                        message ^ "\nsuggestion: " ^ suggestion
-                    | _ -> message
+            begin match List.assoc_opt "verification" fields with
+            | Some verification ->
+                begin match
+                  ( string_field "verdict" verification,
+                    string_field "scope" verification,
+                    string_field "method" verification )
+                with
+                | Some verdict, Some scope, Some method_ ->
+                    let base =
+                      Printf.sprintf "verdict: %s (%s via %s)" verdict scope
+                        method_
+                    in
+                    let details =
+                      match verification with
+                      | `Assoc fields ->
+                          begin match List.assoc_opt "evidence" fields with
+                          | Some evidence ->
+                              let scalar_details =
+                                List.filter_map Fun.id
+                                  [
+                                    Option.map
+                                      (fun comparison ->
+                                        "comparison=" ^ comparison)
+                                      (string_field "comparison" evidence);
+                                    Option.map
+                                      (fun reason -> "reason=" ^ reason)
+                                      (string_field "reason" evidence);
+                                  ]
+                              in
+                              let counterexample =
+                                match evidence with
+                                | `Assoc evidence_fields ->
+                                    begin match
+                                      List.assoc_opt "counterexample"
+                                        evidence_fields
+                                    with
+                                    | Some (`Assoc counterexample_fields) ->
+                                        begin match
+                                          List.assoc_opt "bindings"
+                                            counterexample_fields
+                                        with
+                                        | Some (`Assoc bindings) ->
+                                            let bindings =
+                                              List.filter_map
+                                                (fun (name, value) ->
+                                                  match value with
+                                                  | `String value ->
+                                                      Some (name ^ "=" ^ value)
+                                                  | _ -> None)
+                                                bindings
+                                            in
+                                            Some
+                                              ("counterexample={"
+                                              ^ String.concat ", " bindings
+                                              ^ "}")
+                                        | _ -> None
+                                        end
+                                    | _ -> None
+                                    end
+                                | _ -> None
+                              in
+                              scalar_details @ Option.to_list counterexample
+                          | None -> []
+                          end
+                      | _ -> []
+                    in
+                    begin match details with
+                    | [] -> base
+                    | details -> base ^ "; " ^ String.concat "; " details
                     end
                 | _ -> Yojson.Safe.to_string response
                 end
-            | _ -> Yojson.Safe.to_string response
+            | None ->
+                begin match List.assoc_opt "error" fields with
+                | Some (`Assoc error) ->
+                    begin match List.assoc_opt "message" error with
+                    | Some (`String message) ->
+                        begin match List.assoc_opt "suggestion" error with
+                        | Some (`String suggestion) ->
+                            message ^ "\nsuggestion: " ^ suggestion
+                        | _ -> message
+                        end
+                    | _ -> Yojson.Safe.to_string response
+                    end
+                | _ -> Yojson.Safe.to_string response
+                end
             end
         end
       in

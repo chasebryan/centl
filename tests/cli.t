@@ -129,8 +129,8 @@
   symbolic math: f(...) name= f(...)= solve diff integrate substitute simplify expand factor assuming = != < <= > >=
 
   $ ../src/main.exe --help | sed -n '1p;3p;5,12p'
-  CENTL — exact mathematics, directly.
-  Usage: centl [--json|--serve|--mcp] [--syntax] [--no-history] [--color=auto|always|never] [--file PATH] [EXPRESSION]
+  CENTL - exact mathematics, directly.
+  Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE
     centl EXPRESSION   calculate
     centl              open the calculator
     --file PATH        run a script
@@ -223,7 +223,7 @@
   {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"x^2 + 1\nresolution: unsupported (operation=factor; reason=no_supported_factorization; supported_domain=symbolic even-power differences of squares, unit (x +/- 1)^2 quadratics, and common variable-power factors in univariate rational polynomials)"}],"structuredContent":{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"x^2 + 1","text":"x^2 + 1"},"resolution":{"status":"unsupported","operation":"factor","reason":"no_supported_factorization","supported_domain":"symbolic even-power differences of squares, unit (x +/- 1)^2 quadratics, and common variable-power factors in univariate rational polynomials"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":3}},"isError":false}}
 
   $ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' | ../src/main.exe --mcp
-  {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"centl","title":"CENTL exact mathematics","version":"0.11.0"},"instructions":"Use read-only centl_compute for mathematics and centl_define for immutable session definitions. centl_calculate remains available for compatibility. Definitions persist until centl_reset or process exit."}}
+  {"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-11-25","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"centl","title":"CENTL exact mathematics","version":"0.11.0"},"instructions":"Use read-only centl_compute for mathematics, centl_verify for structured claims, and centl_define for immutable session definitions. centl_calculate remains available for compatibility. Definitions persist until centl_reset or process exit."}}
   {"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"3/10"}],"structuredContent":{"version":1,"ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":3}},"isError":false}}
 
   $ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":"finite","method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"product(k, k = 1, 6)"}}}' | ../src/main.exe --mcp | tail -n 1
@@ -337,6 +337,81 @@
   1 | sum = 3
     | ^
   [2]
+
+  $ printf '%s\n' '{"version":1,"id":"v1","op":"verify","left":"0.1 + 0.2","relation":"equal","right":"3/10"}' '{"version":1,"id":"v2","op":"verify","left":"1+1","relation":"equal","right":"3"}' | ../src/main.exe --serve
+  {"version":1,"id":"v1","ok":true,"verification":{"schema":1,"verdict":"verified","scope":"closed_exact_rational","method":"closed_rational_comparison","claim":{"left":"0.1 + 0.2","relation":"equal","right":"3/10","variables":[],"assumptions":[]},"evidence":{"left":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"right":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"comparison":"equal","left_resolution":{"status":"computed"},"right_resolution":{"status":"computed"}},"assurance":{"class":"exact_algorithm"},"producer":{"name":"centl","version":"0.11.0"}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"verification","method":"claim_verification","backend":"centl-verify"},"session":{"definitions":0,"requests":1}}
+  {"version":1,"id":"v2","ok":true,"verification":{"schema":1,"verdict":"refuted","scope":"closed_exact_rational","method":"closed_rational_comparison","claim":{"left":"1+1","relation":"equal","right":"3","variables":[],"assumptions":[]},"evidence":{"left":{"kind":"integer","text":"2","numerator":"2","denominator":"1"},"right":{"kind":"integer","text":"3","numerator":"3","denominator":"1"},"comparison":"less","left_resolution":{"status":"computed"},"right_resolution":{"status":"computed"}},"assurance":{"class":"exact_algorithm"},"producer":{"name":"centl","version":"0.11.0"}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"verification","method":"claim_verification","backend":"centl-verify"},"session":{"definitions":0,"requests":2}}
+
+  $ ../src/main.exe verify --left '0.1 + 0.2' --relation equal --right '3/10'
+  verdict: verified (closed_exact_rational via closed_rational_comparison); comparison=equal
+
+  $ ../src/main.exe verify --left '1+1' --relation equal --right '3'; echo $?
+  verdict: refuted (closed_exact_rational via closed_rational_comparison); comparison=less
+  1
+
+  $ ../src/main.exe verify --left 'sqrt(2)' --relation less_than --right '2'
+  verdict: verified (closed_real_enclosure via certified_enclosure_sign); comparison=less
+
+  $ ../src/main.exe verify --left '0.1 + 0.2' --relation equal --right '3/10' --json | python3 -c 'import sys,json; o=json.load(sys.stdin); v=o["verification"]; print(v["verdict"], v["scope"], v["assurance"]["class"], o["provenance"]["classification"], o["session"]["requests"])'
+  verified closed_exact_rational exact_algorithm verification 1
+
+  $ ../src/main.exe verify --left '(x+1)^2' --relation equal --right 'x^2+2*x+1' --variable x:rational; echo $?
+  verdict: unknown (univariate_rational_polynomial via polynomial_zero_difference); comparison=equal; reason=polynomial_soundness_theorem_pending
+  1
+
+  $ ../src/main.exe verify --left '(x+1)^2' --relation equal --right 'x^2+2*x' --variable x:rational; echo $?
+  verdict: refuted (univariate_rational_polynomial via exact_rational_counterexample); counterexample={x=0}
+  1
+
+  $ ../src/main.exe 'assert(0.1 + 0.2 = 3/10)'
+  verdict: verified (closed_exact_rational via closed_rational_comparison); comparison=equal
+
+  $ ../src/main.exe --json 'assert(0.1 + 0.2 = 3/10)' | python3 -c 'import sys,json; o=json.load(sys.stdin); print(o["verification"]["verdict"], o["provenance"]["classification"], o["session"]["requests"])'
+  verified verification 1
+
+  $ ../src/main.exe 'assertion(1)'
+  assertion(1)
+
+  $ ../src/main.exe 'assert(1 + 1 = 3)'; echo $?
+  verdict: refuted (closed_exact_rational via closed_rational_comparison); comparison=less
+  1
+
+  $ ../src/main.exe 'assert((x+1)^2 = x^2+2*x+1, for_all = x, domain = rational)'; echo $?
+  verdict: unknown (univariate_rational_polynomial via polynomial_zero_difference); comparison=equal; reason=polynomial_soundness_theorem_pending
+  1
+
+  $ ../src/main.exe check fixtures/contracts.centl; echo $?
+  line 2: verified
+  line 3: verified
+  line 4: defined
+  line 5: verified
+  line 6: verified
+  line 7: unknown
+  line 8: unknown
+  1
+
+  $ ../src/main.exe check fixtures/contracts.centl --json | python3 -c 'import sys,json; o=json.load(sys.stdin); print(o["ok"], o["failures"], o["results"][0]["verification"]["verdict"], o["results"][2]["kind"], o["results"][-1]["verification"]["verdict"])'
+  False 2 verified define unknown
+
+  $ printf '%s\n' 'define | broken =' > malformed-contract.centl
+  $ ../src/main.exe check malformed-contract.centl; echo $?
+  line 1: ERROR expected a number or '(', found the end of the expression at column 9
+  2
+
+  $ printf '%s\n' 'define | x = 1' > definition-only-contract.centl
+  $ ../src/main.exe check definition-only-contract.centl; echo $?
+  centl: no assertions in definition-only-contract.centl
+  2
+
+  $ printf '%s\n' 'equal | factorial(100001) | 1' > resource-contract.centl
+  $ ../src/main.exe check resource-contract.centl; echo $?
+  line 1: ERROR the exact result exceeds the bit limit at column 1
+  2
+
+  $ awk 'BEGIN { for (i = 0; i < 32769; i++) printf "x"; print "" }' > oversized-contract.centl
+  $ ../src/main.exe check oversized-contract.centl; echo $?
+  centl: contract exceeds the 32768-byte source limit
+  2
 
   $ printf '{"version":2,"expression":"1 + 1"}\n' | ../src/main.exe --json
   {"version":1,"ok":false,"error":{"code":"invalid_request","message":"unsupported protocol version","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
