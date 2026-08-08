@@ -3,7 +3,7 @@
 (library
  (name centl_verified)
  (wrapped false)
- (modules Prims FStar_Pervasives_Native Centl_Gcd Centl_Core)
+ (modules Prims FStar_Pervasives_Native Centl_Gcd Centl_Core Centl_Physics)
  (flags
   (:standard -w -8-27))
  (libraries zarith))

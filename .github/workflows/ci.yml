@@ -69,7 +69,8 @@ jobs:
         run: |
           make extract
           git ls-files --error-unmatch \
-            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
+            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
+            src/generated/Centl_Physics.ml
           git diff --exit-code -- src/generated
           opam exec -- make quality native-test
 

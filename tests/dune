@@ -35,6 +35,11 @@
    %{dep:../src/main.exe}
    (run %{test}))))
 
+(test
+ (name test_physics)
+ (modules test_physics)
+ (libraries centl_verified alcotest zarith))
+
 (cram
  (applies_to cli)
  (deps
