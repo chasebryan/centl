@@ -1,6 +1,11 @@
 open Centl_physics
 open Centl_physics_protocol
 
+exception Physics_cancelled
+
+let never_cancelled () = false
+let check_cancelled cancelled = if cancelled () then raise Physics_cancelled
+
 let exact_quantity_json_si quantity unit_symbol =
   `Assoc
     [
@@ -157,7 +162,33 @@ let constant_result fields =
 
 let trajectory_json trajectory = `List (List.map particle_json trajectory)
 
-let simulation_result limits fields =
+let run_simulation ?(cancelled = never_cancelled) ~include_trajectory ~steps ~dt
+    ~forces initial =
+  if steps < 0 then
+    raise (Physics_error "simulation steps must be non-negative");
+  if steps > 1_000_000 then
+    raise
+      (Physics_error "simulation steps exceed the 1000000-step safety limit");
+  let rec final_loop remaining state =
+    check_cancelled cancelled;
+    if remaining = 0 then state
+    else
+      let next = step_symplectic_euler ~dt ~forces state in
+      final_loop (remaining - 1) next
+  in
+  if include_trajectory then
+    let rec trajectory_loop remaining state acc =
+      check_cancelled cancelled;
+      if remaining = 0 then (state, List.rev (state :: acc))
+      else
+        let next = step_symplectic_euler ~dt ~forces state in
+        trajectory_loop (remaining - 1) next (state :: acc)
+    in
+    let final, trajectory = trajectory_loop steps initial [] in
+    (final, Some trajectory)
+  else (final_loop steps initial, None)
+
+let simulation_result ?(cancelled = never_cancelled) limits fields =
   match
     check_fields
       [
@@ -204,8 +235,10 @@ let simulation_result limits fields =
             with
             | Ok particle, Ok forces, Ok dt ->
                 begin try
-                  let trajectory = simulate ~steps ~dt ~forces particle in
-                  let final = final_state trajectory in
+                  let final, trajectory =
+                    run_simulation ~cancelled ~include_trajectory ~steps ~dt
+                      ~forces particle
+                  in
                   let initial_momentum = momentum particle in
                   let final_momentum = momentum final in
                   let initial_ke = kinetic_energy particle in
@@ -240,10 +273,11 @@ let simulation_result limits fields =
                     ]
                   in
                   let result_fields =
-                    if include_trajectory then
-                      result_fields
-                      @ [ ("trajectory", trajectory_json trajectory) ]
-                    else result_fields
+                    match trajectory with
+                    | Some trajectory ->
+                        result_fields
+                        @ [ ("trajectory", trajectory_json trajectory) ]
+                    | None -> result_fields
                   in
                   Ok (`Assoc result_fields)
                 with Physics_error message -> Error message

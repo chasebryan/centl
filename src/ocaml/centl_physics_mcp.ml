@@ -190,10 +190,10 @@ let validate_arguments arguments =
       end
   | Some _ -> Error "centl_physics action must be a string"
 
-let call state arguments =
+let call ?(cancelled = Centl_engine.never_cancelled) state arguments =
   if not (Centl_physics_server.admit state) then
     Centl_physics_protocol.failure ~method_:"request" "resource_limit"
       "the physics process has reached its request limit"
   else
-    Centl_physics_server.handle_json state
+    Centl_physics_server.handle_json ~cancelled state
       (`Assoc (("version", `Int 1) :: arguments))

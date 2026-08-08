@@ -100,31 +100,35 @@ let collision_result fields =
       | _, _, _, None -> Error "missing velocity2"
       end
 
-let dispatch state id action fields =
-  let result =
-    match action with
-    | "capabilities" ->
-        begin match check_fields [ "version"; "id"; "action" ] fields with
-        | Ok () -> Ok (capabilities_result state.limits)
-        | Error _ as error -> error
-        end
-    | "units" ->
-        begin match check_fields [ "version"; "id"; "action" ] fields with
-        | Ok () -> Ok (units_result ())
-        | Error _ as error -> error
-        end
-    | "convert" -> convert_result fields
-    | "constant" -> constant_result fields
-    | "simulate_particle" -> simulation_result state.limits fields
-    | "elastic_collision_1d" -> collision_result fields
-    | name -> Error ("unknown physics action " ^ name)
-  in
-  match result with
-  | Ok physics -> success ?id ~method_:action physics
-  | Error message ->
-      failure ?id ~method_:action "invalid_physics_request" message
+let dispatch ?(cancelled = never_cancelled) state id action fields =
+  try
+    check_cancelled cancelled;
+    let result =
+      match action with
+      | "capabilities" ->
+          begin match check_fields [ "version"; "id"; "action" ] fields with
+          | Ok () -> Ok (capabilities_result state.limits)
+          | Error _ as error -> error
+          end
+      | "units" ->
+          begin match check_fields [ "version"; "id"; "action" ] fields with
+          | Ok () -> Ok (units_result ())
+          | Error _ as error -> error
+          end
+      | "convert" -> convert_result fields
+      | "constant" -> constant_result fields
+      | "simulate_particle" -> simulation_result ~cancelled state.limits fields
+      | "elastic_collision_1d" -> collision_result fields
+      | name -> Error ("unknown physics action " ^ name)
+    in
+    match result with
+    | Ok physics -> success ?id ~method_:action physics
+    | Error message ->
+        failure ?id ~method_:action "invalid_physics_request" message
+  with Physics_cancelled ->
+    failure ?id ~method_:action "cancelled" "physics computation cancelled"
 
-let handle_json state = function
+let handle_json ?(cancelled = never_cancelled) state = function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> failure ~method_:"request" "invalid_request" message
@@ -132,7 +136,7 @@ let handle_json state = function
           begin match List.assoc_opt "version" fields with
           | Some (`Int 1) ->
               begin match string_field "action" fields with
-              | Ok action -> dispatch state id action fields
+              | Ok action -> dispatch ~cancelled state id action fields
               | Error message ->
                   failure ?id ~method_:"request" "invalid_request" message
               end
@@ -155,7 +159,7 @@ let admit state =
     true
   end
 
-let handle_line state line =
+let handle_line ?(cancelled = never_cancelled) state line =
   if not (admit state) then
     failure ~method_:"request" "resource_limit"
       "the process has reached its request limit"
@@ -163,7 +167,7 @@ let handle_line state line =
     failure ~method_:"request" "resource_limit"
       "the request exceeds the byte limit"
   else
-    try Yojson.Safe.from_string line |> handle_json state
+    try Yojson.Safe.from_string line |> handle_json ~cancelled state
     with Yojson.Json_error message ->
       failure ~method_:"request" "invalid_request" ("invalid JSON: " ^ message)
 

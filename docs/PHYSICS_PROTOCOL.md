@@ -3,8 +3,8 @@
 Status: experimental development interface for the post-0.11.0 physics engine.
 
 `centl-physics --serve` exposes the current deterministic particle-mechanics
-engine as a stateless JSON Lines service. This is the first machine-facing
-physics surface intended for CENTL AI and other automated callers.
+engine as a stateless JSON Lines service. This is the machine-facing physics
+surface used by CENTL AI and other automated callers.
 
 The AI is not a second physics evaluator. It may interpret a natural-language
 question, select a supported physical model, construct one of the typed requests
@@ -149,10 +149,17 @@ Example:
 The result names `symplectic_euler` explicitly and returns typed initial/final
 particle states plus exact momentum and kinetic-energy diagnostics. If
 `include_trajectory` is true, every discrete state is returned, subject to the
-lower trajectory-output ceiling.
+lower trajectory-output ceiling. If it is false, the machine executor retains
+only the current state and final result instead of building a trajectory list.
 
 A discrete trajectory is the exact rational result of the selected integrator.
 It is not represented as the analytic continuous-time solution.
+
+Through MCP, every physics action has an admission-time cancellation checkpoint,
+and particle simulation is additionally cooperatively cancellable at integration
+step boundaries. A step already in progress completes before the next
+cancellation checkpoint. The standalone JSON Lines transport remains a simple
+request/response stream and does not define a separate cancellation message.
 
 ## Exact one-dimensional elastic collisions
 
@@ -172,10 +179,15 @@ This is important for CENTL AI: a model must not transform an unsupported
 request into a superficially similar supported simulation without making that
 change explicit to the user.
 
-## Next integration step
+## Current integration and next engine boundary
 
-The JSON Lines interface establishes the typed physics contract first. The next
-layer is a thin MCP adapter over this same request/result model so CENTL AI can
-select physics operations through the same tool-discovery path as deterministic
-mathematics and claim verification. MCP must not introduce separate physics
-semantics.
+The JSON Lines interface is the canonical typed physics contract. The MCP
+adapter exposes that same contract through `centl_physics`; it does not
+introduce separate physics semantics.
+
+The next engine boundary is physical breadth rather than another transport:
+multi-particle world state, exact pair interactions where the underlying model
+remains representable by CENTL's exact arithmetic, explicit collision
+resolution, and conservation diagnostics across a world step. Models requiring
+non-rational measured constants or algebraic normalization must retain honest
+provenance and must not be mislabeled as exact rational mechanics.
