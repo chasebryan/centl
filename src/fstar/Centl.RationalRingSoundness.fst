@@ -135,10 +135,10 @@ let multiply_associative
     first.denominator second.denominator third.denominator;
   assert (left_numerator = right_numerator);
   assert (left_denominator = right_denominator);
-  assert (raw_left.numerator = left_numerator);
-  assert (raw_right.numerator = right_numerator);
-  assert (raw_left.denominator = left_denominator);
-  assert (raw_right.denominator = right_denominator);
+  assert_norm (raw_left.numerator = left_numerator);
+  assert_norm (raw_right.numerator = right_numerator);
+  assert_norm (raw_left.denominator = left_denominator);
+  assert_norm (raw_right.denominator = right_denominator);
   assert (raw_left.numerator = raw_right.numerator);
   assert (raw_left.denominator = raw_right.denominator);
   assert (raw_left = raw_right);
