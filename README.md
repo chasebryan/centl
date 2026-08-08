@@ -1,29 +1,40 @@
 # centl
 
-> A calculator first, a language when needed.
+> Check the numbers before they merge.
 
-CENTL is a calculator-first numerical language. Write mathematics directly,
-interactively or in scripts, without programming ceremony. It is exact by
-default, explicit about approximation, and never prints an unjustified digit.
+CENTL is a deterministic, exact-first mathematical evaluation kernel with a
+calculator, a small expression language, and script, JSON, and MCP interfaces.
+It keeps exact values exact, produces rigorous enclosures when approximation is
+requested, and leaves unsupported or indeterminate work visible instead of
+manufacturing certainty.
 
-You should not need to become a programmer to calculate or abandon mathematical
-rigor to program.
+CENTL 0.10.0 is the shipped calculation foundation for the
+[accepted product direction](docs/DESIGN_PATH.md): a mathematical contract
+checker for code and automated workflows—a type checker for mathematical
+claims. The planned claim interface will verify an explicit formula, identity,
+bound, threshold, or expected result; refute it with evidence; or return an
+honest `unknown`. General claim verification and evidence receipts are
+post-0.10 design work, not features claimed by this release.
 
 CENTL 0.10.0 adds exact finite sequences and first-order recurrences, verified
-exact roots for real quadratics, a more capable calculator input experience,
-durable cross-process history, local runtime diagnostics, stack-safe exact
+exact roots for real quadratics, syntax-aware multiline input, durable
+cross-process history, source-localized runtime diagnostics, stack-safe exact
 rendering, and deterministic hardening and performance gates.
 
 ## Principles
 
-- Typing an expression produces an answer immediately.
-- A script is simply a saved sequence of calculator expressions and definitions.
-- Ordinary mathematics requires no imports, boilerplate, entry points, or type
-  declarations.
-- Integers, decimals, and fractions are exact by default.
-- Approximation and rounding are always visible and intentional.
-- Advanced capabilities appear gradually without changing the basic language.
-- Error messages explain the mathematics, not compiler internals.
+- Exactness describes a value; it does not imply that every requested operation
+  completed.
+- Integers, decimals, and fractions are exact values rather than binary
+  floating-point approximations.
+- Explicit approximation returns a rigorous enclosure, not an unqualified
+  floating-point guess.
+- Unsupported transformations remain visible or return a structured failure;
+  they do not masquerade as completed work.
+- Conditions and domain obligations are retained instead of silently discarded.
+- The calculator, scripts, JSON, and MCP expose the same typed semantics.
+- Every unqualified printed digit is justified by an exact value or the full
+  returned enclosure.
 
 ## Try it
 
