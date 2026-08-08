@@ -106,7 +106,9 @@ let cancellable_request_id = function
       begin match
         (List.assoc_opt "version" fields, operation fields, request_id fields)
       with
-      | Some (`Int 1), Ok "evaluate", Ok (Some id) -> Some id
+      | Some (`Int 1), Ok operation, Ok (Some id)
+        when List.mem operation [ "evaluate"; "compute"; "define" ] ->
+          Some id
       | _ -> None
       end
   | _ -> None
@@ -127,7 +129,45 @@ let request_limits state fields =
     fields
 
 let session_result state id evaluation =
-  Centl_engine.json_of_session_evaluation evaluation |> response state ?id
+  Centl_engine.json_of_detailed_session_evaluation evaluation
+  |> response state ?id
+
+let mathematical_domains =
+  let domain operation supported_domain examples =
+    `Assoc
+      [
+        ("operation", `String operation);
+        ("supported_domain", `String supported_domain);
+        ("examples", `List (List.map (fun value -> `String value) examples));
+      ]
+  in
+  `List
+    [
+      domain "diff" Centl_engine.differentiation_domain
+        [ "diff(x^3, x)"; "diff(sin(x), x)" ];
+      domain "integrate" Centl_engine.integration_domain
+        [ "integrate(x^2, x)"; "integrate(x^2, x = 0, 1)" ];
+      domain "simplify" Centl_engine.polynomial_domain [ "simplify(2*x + 3*x)" ];
+      domain "expand" Centl_engine.polynomial_domain [ "expand((x + 1)^3)" ];
+      domain "factor" Centl_engine.factor_domain [ "factor(x^2 - 1)" ];
+      domain "solve" Centl_engine.equation_domain
+        [ "solve(2*x + 3 = 11, x)"; "solve(x^2 = 2, x)" ];
+      domain "substitute" Centl_engine.substitution_domain
+        [ "substitute(x^2 + 1, x = 3)" ];
+    ]
+
+let resolution_statuses =
+  `List
+    (List.map
+       (fun status -> `String status)
+       [
+         "computed";
+         "transformed";
+         "unchanged_proved";
+         "residual";
+         "unsupported";
+         "indeterminate";
+       ])
 
 let describe state id =
   let evaluation = state.limits.evaluation in
@@ -146,7 +186,19 @@ let describe state id =
                  `List
                    (List.map
                       (fun operation -> `String operation)
-                      [ "evaluate"; "cancel"; "reset"; "describe"; "ping" ]) );
+                      [
+                        "compute";
+                        "define";
+                        "evaluate";
+                        "cancel";
+                        "reset";
+                        "describe";
+                        "session";
+                        "help";
+                        "ping";
+                      ]) );
+               ("resolution_statuses", resolution_statuses);
+               ("mathematical_domains", mathematical_domains);
                ( "cancellation",
                  `Assoc
                    [
@@ -174,11 +226,51 @@ let describe state id =
              ] );
        ])
 
-let evaluate ?(cancelled = Centl_engine.never_cancelled) state id fields =
+let inspect_session state id fields =
+  if Option.is_some (List.assoc_opt "expression" fields) then
+    invalid state ?id "session does not accept an expression"
+  else
+    response state ?id
+      ~provenance:(control_provenance "session_inspection")
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("ok", `Bool true);
+           ( "definitions",
+             Centl_engine.json_of_session_definitions state.session );
+         ])
+
+let help state id fields =
+  if Option.is_some (List.assoc_opt "expression" fields) then
+    invalid state ?id "help does not accept an expression"
+  else
+    match List.assoc_opt "query" fields with
+    | None ->
+        response state ?id
+          ~provenance:(control_provenance "syntax_help")
+          (`Assoc
+             [
+               ("version", `Int 1);
+               ("ok", `Bool true);
+               ("help", Centl_syntax.json_help ());
+             ])
+    | Some (`String query) ->
+        response state ?id
+          ~provenance:(control_provenance "syntax_help")
+          (`Assoc
+             [
+               ("version", `Int 1);
+               ("ok", `Bool true);
+               ("help", Centl_syntax.json_help ~query ());
+             ])
+    | Some _ -> invalid state ?id "help query must be a string"
+
+let evaluate ?(cancelled = Centl_engine.never_cancelled)
+    ?(intent = Centl_engine.Evaluate_or_define) state id fields =
   match (List.assoc_opt "expression" fields, request_limits state fields) with
   | Some (`String expression), Ok limits ->
-      Centl_engine.evaluate_in_session_with_limits ~cancelled limits
-        state.session expression
+      Centl_engine.evaluate_in_session_outcome_with_limits ~cancelled ~intent
+        limits state.session expression
       |> session_result state id
   | Some (`String _), Error message -> invalid state ?id message
   | None, _ -> invalid state ?id "missing expression"
@@ -223,9 +315,17 @@ let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
               begin match operation fields with
               | Error message -> invalid state ?id message
               | Ok "evaluate" -> evaluate ~cancelled state id fields
+              | Ok "compute" ->
+                  evaluate ~cancelled ~intent:Centl_engine.Compute_only state id
+                    fields
+              | Ok "define" ->
+                  evaluate ~cancelled ~intent:Centl_engine.Define_only state id
+                    fields
               | Ok "cancel" -> cancel state id fields
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id
+              | Ok "session" -> inspect_session state id fields
+              | Ok "help" -> help state id fields
               | Ok "ping" -> ping state id
               | Ok name -> invalid state ?id ("unknown operation " ^ name)
               end
@@ -288,23 +388,76 @@ let cancelled_response = function
       end
   | _ -> false
 
-let text = function
+let string_field name = function
   | `Assoc fields ->
-      begin match List.assoc_opt "value" fields with
-      | Some (`Assoc value) ->
-          begin match List.assoc_opt "text" value with
-          | Some (`String text) -> text
-          | _ -> Yojson.Safe.to_string (`Assoc fields)
+      begin match List.assoc_opt name fields with
+      | Some (`String value) -> Some value
+      | _ -> None
+      end
+  | _ -> None
+
+let resolution_text_annotation = function
+  | `Assoc fields ->
+      begin match List.assoc_opt "resolution" fields with
+      | Some (`Assoc resolution) ->
+          begin match List.assoc_opt "status" resolution with
+          | Some
+              (`String
+                 (( "unchanged_proved" | "residual" | "unsupported"
+                  | "indeterminate" ) as status)) ->
+              let details =
+                List.filter_map Fun.id
+                  [
+                    Option.map
+                      (fun operation -> "operation=" ^ operation)
+                      (string_field "operation" (`Assoc resolution));
+                    Option.map
+                      (fun reason -> "reason=" ^ reason)
+                      (string_field "reason" (`Assoc resolution));
+                    Option.map
+                      (fun domain -> "supported_domain=" ^ domain)
+                      (string_field "supported_domain" (`Assoc resolution));
+                  ]
+              in
+              Some
+                (Printf.sprintf "resolution: %s%s" status
+                   (match details with
+                   | [] -> ""
+                   | details -> " (" ^ String.concat "; " details ^ ")"))
+          | _ -> None
           end
-      | _ ->
-          begin match List.assoc_opt "error" fields with
-          | Some (`Assoc error) ->
-              begin match List.assoc_opt "message" error with
-              | Some (`String message) -> message
-              | _ -> Yojson.Safe.to_string (`Assoc fields)
-              end
-          | _ -> Yojson.Safe.to_string (`Assoc fields)
-          end
+      | _ -> None
+      end
+  | _ -> None
+
+let text = function
+  | `Assoc fields as response ->
+      let body =
+        begin match List.assoc_opt "value" fields with
+        | Some (`Assoc value) ->
+            begin match List.assoc_opt "text" value with
+            | Some (`String text) -> text
+            | _ -> Yojson.Safe.to_string response
+            end
+        | _ ->
+            begin match List.assoc_opt "error" fields with
+            | Some (`Assoc error) ->
+                begin match List.assoc_opt "message" error with
+                | Some (`String message) ->
+                    begin match List.assoc_opt "suggestion" error with
+                    | Some (`String suggestion) ->
+                        message ^ "\nsuggestion: " ^ suggestion
+                    | _ -> message
+                    end
+                | _ -> Yojson.Safe.to_string response
+                end
+            | _ -> Yojson.Safe.to_string response
+            end
+        end
+      in
+      begin match resolution_text_annotation response with
+      | None -> body
+      | Some annotation -> body ^ "\n" ^ annotation
       end
   | json -> Yojson.Safe.to_string json
 

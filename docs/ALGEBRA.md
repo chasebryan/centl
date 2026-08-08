@@ -20,8 +20,10 @@ larger than 64; a larger or unsupported expression remains visible rather than
 consuming unbounded resources or returning a guessed form.
 
 The initial factorizer recognizes differences of squares, unit perfect-square
-quadratics, and common monomial factors. Unsupported factors return the
-canonical expression unchanged.
+quadratics, and common monomial factors. When it cannot apply a supported
+factorization, it returns the canonical expression with an explicit
+`unsupported` resolution and stable reason; unchanged text is not evidence
+that factoring completed.
 
 ## Assumptions
 
@@ -60,6 +62,7 @@ linear equations and real quadratics with rational coefficients, including a
 canonical exact `center ± sqrt(radicand)` pair for a positive nonsquare
 discriminant. The pair is invariant under nonzero rational scaling of the
 equation. CENTL also distinguishes no solutions from all values. A
-higher-degree or non-polynomial equation is reported as `unresolved` instead
-of guessed or silently approximated. Real-quadratic values are currently local
-to solution sets rather than general scalar expressions.
+higher-degree or non-polynomial equation is reported as an `unresolved` value
+with `unsupported` resolution instead of being guessed or silently
+approximated. Real-quadratic values are currently local to solution sets rather
+than general scalar expressions.

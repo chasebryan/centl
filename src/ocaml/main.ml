@@ -201,11 +201,11 @@ let diagnostic_text ?source_name ?(start_line = 1) source
 
 let evaluate_human_in_session ?source_name ?(start_line = 1) ~color session
     source =
-  match Centl_engine.evaluate_in_session session source with
+  match Centl_engine.evaluate_in_session_detailed session source with
   | Ok result ->
       print_endline
-        (if color then Centl_engine.colored_text_of_session_result result
-         else Centl_engine.text_of_session_result result);
+        (if color then Centl_engine.colored_text_of_session_outcome result
+         else Centl_engine.text_of_session_outcome result);
       true
   | Error error ->
       let message = diagnostic_text ?source_name ~start_line source error in
@@ -213,8 +213,8 @@ let evaluate_human_in_session ?source_name ?(start_line = 1) ~color session
       false
 
 let evaluate_json source =
-  let result = Centl_engine.evaluate source in
-  print_json (Centl_engine.json_of_evaluation result);
+  let result = Centl_engine.evaluate_detailed source in
+  print_json (Centl_engine.json_of_detailed_evaluation result);
   Result.is_ok result
 
 type statement_builder = {

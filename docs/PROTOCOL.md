@@ -24,23 +24,40 @@ An evaluation request is:
 ```
 
 `id` is optional, may be a string or integer, and is echoed unchanged. `op`
-defaults to `evaluate`. Stateless `--json` accepts evaluation requests (with or
-without an explicit `op: "evaluate"`); the persistent `--serve` mode also
-provides the control operations below:
+defaults to the compatibility operation `evaluate`. Stateless `--json` accepts
+evaluation requests (with or without an explicit `op: "evaluate"`); the
+persistent `--serve` mode separates read-only computation from mutation and
+also provides the control operations below:
 
 ```json
-{"version":1,"id":1,"op":"evaluate","expression":"r = 3"}
-{"version":1,"id":2,"op":"reset"}
-{"version":1,"id":3,"op":"describe"}
-{"version":1,"id":4,"op":"ping"}
+{"version":1,"id":1,"op":"compute","expression":"1 + 1"}
+{"version":1,"id":2,"op":"define","expression":"r = 3"}
+{"version":1,"id":3,"op":"evaluate","expression":"legacy = 4"}
+{"version":1,"id":4,"op":"reset"}
+{"version":1,"id":5,"op":"describe"}
+{"version":1,"id":6,"op":"session"}
+{"version":1,"id":7,"op":"help","query":"factor"}
+{"version":1,"id":8,"op":"ping"}
 {"version":1,"id":"stop-17","op":"cancel","target":"job-17"}
 ```
+
+`compute` accepts expressions, may read existing definitions, and never mutates
+the session; a definition returns `definition_not_allowed`. `define` accepts
+only an immutable value or function definition; an ordinary expression returns
+`definition_required`. `evaluate` retains the earlier combined behavior for
+existing clients. New automated callers should use `compute` and `define`.
+
+`describe` publishes resolution statuses, supported mathematical domains with
+examples, cancellation behavior, and active limits. `session` returns every
+immutable definition in creation order with its canonical expression and
+direct definition dependencies. `help` searches the canonical syntax catalog;
+its optional `query` matches section names, forms, meanings, and examples.
 
 Successful and failed responses report the current definition and request
 counts:
 
 ```json
-{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"job-17","ok":true,"value":{"kind":"rational","exact":true,"numerator":"3","denominator":"10","text":"3/10"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact","method":"rational_evaluation","backend":"centl-core"},"session":{"definitions":0,"requests":1}}
 ```
 
 Definitions use the same calculator syntax and remain immutable:
@@ -50,7 +67,7 @@ Definitions use the same calculator syntax and remain immutable:
 ```
 
 ```json
-{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
+{"version":1,"id":1,"ok":true,"value":{"kind":"definition","exact":true,"definition_kind":"function","name":"f","parameters":["x"],"expression":"x^2 + 1","text":"f(x) = x^2 + 1"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_definition","method":"session_binding","backend":"centl-session"},"session":{"definitions":1,"requests":1}}
 ```
 
 ## Limits
@@ -131,7 +148,7 @@ that has a string or integer `id`:
 The acknowledgement is ordered with normal session traffic:
 
 ```json
-{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
+{"version":1,"id":"stop-17","ok":true,"cancellation":{"target":"job-17","status":"requested"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"control","method":"cancel","backend":"centl-protocol"},"session":{"definitions":0,"requests":1}}
 ```
 
 Input is read independently from evaluation, so the cancellation signal can
@@ -183,6 +200,36 @@ result, while `backend` identifies the responsible evaluation boundary.
 `producer` records the CENTL version and `schema` versions the provenance
 object independently of protocol version 1.
 
+## Transformation resolution
+
+Every successful evaluation has a top-level `resolution` object. It is
+orthogonal to `value.exact` and provenance: exactness describes the returned
+value, while resolution describes whether CENTL completed the operation the
+caller requested.
+
+`status` is one of:
+
+- `computed`: ordinary evaluation completed without a symbolic transformation
+- `transformed`: the requested transformation completed
+- `unchanged_proved`: CENTL proved the input already has the requested form
+- `residual`: the requested operation remains explicitly present in the value
+- `unsupported`: the request is outside CENTL's implemented domain
+- `indeterminate`: CENTL cannot justify a definite resolution
+
+Transformation results also identify `operation` and `supported_domain`.
+Non-complete and unchanged results include a stable `reason` code. For example:
+
+```json
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"integrate(sin(x), x)","text":"integrate(sin(x), x)"},"resolution":{"status":"unsupported","operation":"integrate","reason":"non_polynomial_integrand","supported_domain":"rational-coefficient univariate polynomials with exact rational bounds"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+```
+
+This is a successful exact symbolic value, but not a completed integration.
+Human output appends the same classification for `unchanged_proved`,
+`residual`, `unsupported`, and `indeterminate` results. Errors remain errors
+and do not carry `resolution`. Existing in-process callers can use the legacy
+value-only evaluation functions; JSON, JSON Lines, and MCP always expose the
+detailed result.
+
 ## Values
 
 Integers use `kind: "integer"` and a decimal-string `value`. All unbounded
@@ -192,13 +239,13 @@ type.
 An exact symbolic result uses canonical plain text:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"3 * x^2","text":"3 * x^2"},"resolution":{"status":"transformed","operation":"diff","supported_domain":"the documented exact symbolic differentiation rules"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Conditional symbolic results retain machine-readable conditions:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"symbolic","exact":true,"expression":"1 where x != 0","text":"1 where x != 0","conditions":[{"left":"x","relation":"not_equal","right":"0","text":"x != 0"}]},"resolution":{"status":"transformed","operation":"assuming","supported_domain":"exact expressions with retained conditions"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_symbolic","method":"symbolic_evaluation","backend":"centl-core"}}
 ```
 
 Relation codes are `equal`, `not_equal`, `less_than`, `less_or_equal`,
@@ -211,7 +258,7 @@ the ordered scalar values using the existing integer, rational, and symbolic
 schemas, and `length` is a JSON integer bounded by the active iteration limit:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
+{"version":1,"ok":true,"value":{"kind":"sequence","exact":true,"length":3,"items":[{"kind":"rational","exact":true,"numerator":"1","denominator":"2","text":"1/2"},{"kind":"integer","exact":true,"value":"1","text":"1"},{"kind":"rational","exact":true,"numerator":"3","denominator":"2","text":"3/2"}],"text":"[1/2, 1, 3/2]"},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_sequence","method":"finite_iteration","backend":"centl-iteration"}}
 ```
 
 Empty ranges have `length: 0`, `items: []`, and `text: "[]"`. Nested sequence
@@ -223,7 +270,7 @@ Equation solving returns a structured solution set. Rational parts remain
 decimal strings:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"numerator":"-1","denominator":"1","text":"-1"},{"numerator":"1","denominator":"1","text":"1"}],"equation":{"left":"x^2 - 1","right":"0"},"text":"x in {-1, 1}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_solution_set","method":"equation_solving","backend":"centl-exact"}}
 ```
 
 `status` is `finite`, `none`, `all`, or `unresolved`. An unresolved result is a
@@ -234,7 +281,7 @@ Finite rational solutions retain the protocol's original untagged
 nonsquare discriminant uses a tagged exact solution object instead:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"kind":"real_quadratic","exact":true,"branch":"lower","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"-sqrt(2)"},{"kind":"real_quadratic","exact":true,"branch":"upper","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"sqrt(2)"}],"equation":{"left":"x^2","right":"2"},"text":"x in {-sqrt(2), sqrt(2)}"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"exact_solution_set","method":"verified_quadratic_solving","backend":"centl-core"}}
+{"version":1,"ok":true,"value":{"kind":"solution_set","exact":true,"resolved":true,"status":"finite","variable":"x","solutions":[{"kind":"real_quadratic","exact":true,"branch":"lower","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"-sqrt(2)"},{"kind":"real_quadratic","exact":true,"branch":"upper","center":{"numerator":"0","denominator":"1"},"radicand":{"numerator":"2","denominator":"1"},"text":"sqrt(2)"}],"equation":{"left":"x^2","right":"2"},"text":"x in {-sqrt(2), sqrt(2)}"},"resolution":{"status":"transformed","operation":"solve","supported_domain":"linear and real quadratic equations with rational coefficients"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"exact_solution_set","method":"verified_quadratic_solving","backend":"centl-core"}}
 ```
 
 `branch` is `lower` for `center - sqrt(radicand)` and `upper` for
@@ -250,7 +297,7 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 `precision` records actual backend work:
 
 ```json
-{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
+{"version":1,"ok":true,"value":{"kind":"real_enclosure","exact":false,"text":"≈ [3.141592653, 3.141592654]","dyadic":{"lower_mantissa":"497805226624462170461043889243","upper_mantissa":"497805226624462170461043889245","binary_exponent":-97},"decimal":{"lower":"3.141592653","upper":"3.141592654","requested_significant_digits":10,"certified_significant_digits":10},"precision":{"working_bits":98,"backend":"flint-arb","rigorous":true}},"resolution":{"status":"computed"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"rigorous_enclosure","method":"interval_evaluation","backend":"flint-arb"}}
 ```
 
 ## Errors
@@ -258,17 +305,23 @@ A rigorous approximation uses `kind: "real_enclosure"` and `exact: false`.
 Failures have stable codes and mathematical messages:
 
 ```json
-{"version":1,"ok":false,"error":{"code":"division_by_zero","message":"division by zero"},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.10.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
+{"version":1,"ok":false,"error":{"suggestion":"Change the input or retain an explicit nonzero domain condition.","code":"division_by_zero","message":"division by zero","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
 ```
 
 Syntax errors and runtime mathematical failures that can be localized to source
-also contain a zero-based byte `position`; request/session-wide failures omit it
-when no single source expression is responsible. Version 1 error codes include
+also contain a legacy zero-based byte `position` and a structured zero-width
+`range` with `start` and `end` byte offsets. Request/session-wide failures omit
+both when no single source expression is responsible. Every error states
+whether it is `retryable`; a `suggestion` is included when CENTL knows a useful
+recovery. Limit failures additionally carry `details.category: "limit"` and the
+specific configurable `details.limit` name when it can be identified. Version
+1 error codes include
 `syntax_error`, `division_by_zero`, `zero_denominator`,
 `invalid_request`, `invalid_arguments`, `undefined_power`, `domain_error`,
 `precision_limit`, `insufficient_precision`, `resource_limit`,
 `unsupported_approximation`, `invalid_solution_variable`,
 `solution_set_not_expression`, `approximation_not_expression`,
+`definition_not_allowed`, `definition_required`,
 `backend_failure`, and
 `core_contract_violation`. Cooperative cancellation uses `cancelled`.
 Finite-iteration bounds that are not exact integers use `invalid_arguments`;

@@ -1,9 +1,10 @@
 opam-version: "2.0"
-synopsis: "An exact-first calculator and numerical language"
+synopsis: "A deterministic, exact-first mathematical evaluation kernel"
 description: """
-CENTL is a calculator-first numerical language. It evaluates ordinary
-mathematical expressions exactly by default and makes every approximation
-explicit.
+CENTL is a deterministic, exact-first mathematical evaluation kernel with a
+calculator, a small expression language, and script, JSON, and MCP interfaces.
+It keeps exact values exact, returns rigorous enclosures for explicit
+approximation, and reports unsupported or indeterminate work honestly.
 """
 maintainer: "chasebryan@users.noreply.github.com"
 authors: "Chase Bryan"

@@ -130,8 +130,11 @@ ComplexEnclosure
 Indeterminate
 ```
 
-Every result also carries provenance sufficient to explain whether it was
-computed exactly, enclosed numerically, or left unresolved.
+Every evaluation result carries two independent descriptions. Provenance says
+how and where CENTL produced the value. Transformation resolution says whether
+the requested operation was `computed`, `transformed`, `unchanged_proved`,
+left `residual`, `unsupported`, or `indeterminate`. Exactness is a property of
+the value and never implies that a requested transformation completed.
 
 An exact solution set contains a typed solution union. Rational solutions keep
 their normalized numerator and denominator. A nonsquare positive quadratic
@@ -164,6 +167,12 @@ are created only after the F* core validates this representation.
    resource limit is reached, or further refinement cannot decide the result.
 6. Render only information justified by the exact value or full enclosure.
 
+Symbolic transformation boundaries classify their own outcomes while the
+operation is still visible. Evaluation propagates the strongest classification
+to the host result; human, JSON, JSON Lines, and MCP render that same typed
+metadata. Final-value inspection is not used to guess whether a transformation
+completed.
+
 Predicates over enclosures are three-valued: certainly true, certainly false,
 or unknown. Unknown is never silently treated as false.
 
@@ -184,9 +193,9 @@ name, line, column, and a caret excerpt; machine errors expose the stable
 zero-based byte position when a source location applies.
 
 The machine interface uses versioned JSON over standard input and output. It
-returns structured exact values, enclosure endpoints, precision metadata,
-stable error codes, and explanatory messages. Pretty terminal output is never
-parsed by machine clients.
+returns structured exact values, transformation resolution, enclosure
+endpoints, precision metadata, stable error codes, and explanatory messages.
+Pretty terminal output is never parsed by machine clients.
 
 Terminal coloration is derived from typed result fragments: numbers, symbols,
 functions, operators, and punctuation. ANSI codes are never stored in values or

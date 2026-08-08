@@ -211,6 +211,70 @@ let plain_text () =
   String.concat "\n"
     ([ "CENTL syntax" ] @ groups @ [ ""; "examples:" ] @ calculations)
 
+let contains_text haystack needle =
+  let haystack = String.lowercase_ascii haystack in
+  let needle = String.lowercase_ascii needle in
+  let haystack_length = String.length haystack in
+  let needle_length = String.length needle in
+  let rec search index =
+    needle_length = 0
+    || index + needle_length <= haystack_length
+       && (String.sub haystack index needle_length = needle
+          || search (index + 1))
+  in
+  search 0
+
+let help_entries ?query () =
+  let matches section item =
+    match query with
+    | None -> true
+    | Some query ->
+        contains_text section.name query
+        || contains_text item.form query
+        || contains_text item.meaning query
+  in
+  Array.fold_left
+    (fun results section ->
+      Array.fold_left
+        (fun results item ->
+          if matches section item then (section.name, item) :: results
+          else results)
+        results section.entries)
+    [] sections
+  |> List.rev
+
+let json_help ?query () =
+  let entries =
+    help_entries ?query ()
+    |> List.map (fun (section, item) ->
+        `Assoc
+          [
+            ("section", `String section);
+            ("form", `String item.form);
+            ("meaning", `String item.meaning);
+          ])
+  in
+  let examples =
+    Array.to_list examples
+    |> List.filter (fun example ->
+        match query with
+        | None -> true
+        | Some query ->
+            contains_text example.kind query
+            || contains_text example.calculation query
+            || contains_text example.result query)
+    |> List.map (fun example ->
+        `Assoc
+          [
+            ("kind", `String example.kind);
+            ("calculation", `String example.calculation);
+            ("result", `String example.result);
+          ])
+  in
+  `Assoc
+    ([ ("entries", `List entries); ("examples", `List examples) ]
+    @ match query with None -> [] | Some query -> [ ("query", `String query) ])
+
 let print channel =
   output_string channel (plain_text ());
   output_char channel '\n'

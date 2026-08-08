@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.11.0 — 2026-08-08
+
+### Added
+
+- Every successful evaluation now carries an orthogonal transformation
+  resolution: `computed`, `transformed`, `unchanged_proved`, `residual`,
+  `unsupported`, or `indeterminate`. Transformation metadata identifies the
+  operation, stable reason, and supported mathematical domain where relevant.
+- Persistent JSON Lines adds read-only `compute` and explicit `define`
+  operations. MCP adds `centl_compute` and `centl_define` with accurate
+  read-only/idempotence annotations and exact discriminated output schemas.
+- `describe` and `centl_capabilities` publish resolution statuses, supported
+  mathematical domains, examples, limits, and cancellation behavior.
+- `session` and `centl_session` return immutable definitions in creation order
+  with canonical expressions and direct dependencies.
+- `help` and `centl_help` provide focused structured help generated from the
+  canonical syntax catalog.
+- Machine errors include retryability, structured source ranges, named limit
+  details, and recovery suggestions when known.
+- An executable agent-tool corpus covers correct calls, supported-domain
+  selection, residual recognition, read-only rejection, cancellation, limit
+  failures, exact sequences, substitution, define-only validation, and
+  unresolved equations.
+- MCP tool text content now mirrors human residual annotations and includes
+  recovery suggestions on mathematical tool errors, while structured content
+  remains the canonical machine result.
+- End-to-end CLI coverage exercises `compute`/`define`/`session`/`help` and
+  residual classification on human, JSON Lines, and MCP surfaces.
+
+### Changed
+
+- Residual or unsupported differentiation, integration, simplification,
+  expansion, factoring, and solving can no longer look like a completed
+  transformation in human, JSON, JSON Lines, or MCP output.
+- `centl_calculate` and JSON `evaluate` retain their combined compute/define
+  behavior as a documented compatibility route. New automated integrations
+  should use the split operations.
+
+Machine protocol version 1 remains unchanged. Successful evaluation responses
+now require top-level `resolution`; machine error objects now require
+`retryable`. Strict clients should update their response schemas. MCP tool
+discovery exposes seven tools instead of two.
+
 ## 0.10.0 — 2026-08-04
 
 ### Added

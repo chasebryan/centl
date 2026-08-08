@@ -57,6 +57,10 @@ integrate(sin(x), x)
 integrate(sin(x), x)
 ```
 
+Human output follows that expression with an `unsupported` resolution label;
+JSON, JSON Lines, and MCP carry the same status, operation, stable reason, and
+supported-domain text in a structured `resolution` object.
+
 Substitute an exact expression or value:
 
 ```text
@@ -72,6 +76,9 @@ guessed:
 ```text
 diff(f(x), x)
 ```
+
+That residual derivative is likewise labeled `unsupported`, distinguishing an
+exact symbolic expression from a completed differentiation.
 
 Attach a domain condition without hiding it:
 

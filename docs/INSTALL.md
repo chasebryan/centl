@@ -17,7 +17,7 @@ The x86_64 packages target the baseline x86-64 ISA and select optimized GMP
 routines at runtime when the processor supports them.
 
 ```sh
-sh install --version 0.10.0
+sh install --version 0.11.0
 sh install --prefix "$HOME/software"
 ```
 
@@ -36,7 +36,7 @@ installs below `%LOCALAPPDATA%\Programs\CENTL`, and adds its command directory
 to the user's PATH. Open a new terminal after the first installation.
 
 ```powershell
-.\install.ps1 -Version 0.10.0
+.\install.ps1 -Version 0.11.0
 .\install.ps1 -Prefix "$HOME\Software\CENTL" -NoPath
 ```
 
@@ -86,9 +86,9 @@ make test
 Maintainers package an already-tested native build with:
 
 ```sh
-make release VERSION=0.10.0
+make release VERSION=0.11.0
 ```
 
 ```powershell
-.\scripts\package-release.ps1 0.10.0
+.\scripts\package-release.ps1 0.11.0
 ```

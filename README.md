@@ -1,6 +1,6 @@
 # centl
 
-> Check the numbers before they merge.
+> change the world.
 
 CENTL is a deterministic, exact-first mathematical evaluation kernel with a
 calculator, a small expression language, and script, JSON, and MCP interfaces.
@@ -8,18 +8,17 @@ It keeps exact values exact, produces rigorous enclosures when approximation is
 requested, and leaves unsupported or indeterminate work visible instead of
 manufacturing certainty.
 
-CENTL 0.10.0 is the shipped calculation foundation for the
+CENTL 0.11.0 is the agent-safe calculation foundation for the
 [accepted product direction](docs/DESIGN_PATH.md): a mathematical contract
 checker for code and automated workflows—a type checker for mathematical
-claims. The planned claim interface will verify an explicit formula, identity,
-bound, threshold, or expected result; refute it with evidence; or return an
-honest `unknown`. General claim verification and evidence receipts are
-post-0.10 design work, not features claimed by this release.
+claims. General claim verification and evidence receipts remain future work;
+this release makes the underlying compute surface safe to interpret.
 
-CENTL 0.10.0 adds exact finite sequences and first-order recurrences, verified
-exact roots for real quadratics, syntax-aware multiline input, durable
-cross-process history, source-localized runtime diagnostics, stack-safe exact
-rendering, and deterministic hardening and performance gates.
+CENTL 0.11.0 reports whether every requested transformation completed, proved
+an input unchanged, remained residual, or was unsupported. It separates
+read-only computation from explicit session mutation, publishes closed MCP
+schemas and supported domains, exposes definition dependencies and focused
+syntax help, and returns structured retry and source-range error metadata.
 
 ## Principles
 
@@ -33,6 +32,8 @@ rendering, and deterministic hardening and performance gates.
   they do not masquerade as completed work.
 - Conditions and domain obligations are retained instead of silently discarded.
 - The calculator, scripts, JSON, and MCP expose the same typed semantics.
+- Automated callers can use a read-only compute operation that rejects all
+  session mutation; definitions use a separate explicit operation.
 - Every unqualified printed digit is justified by an exact value or the full
   returned enclosure.
 

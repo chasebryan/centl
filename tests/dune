@@ -1,7 +1,7 @@
 (test
  (name test_centl)
  (modules test_centl)
- (deps ../docs/SYNTAX.md)
+ (deps ../docs/SYNTAX.md corpus/agent_tools.jsonl)
  (libraries centl_lib alcotest qcheck zarith yojson))
 
 (test

@@ -1,6 +1,6 @@
 # CENTL product design path
 
-Status: accepted near-term direction after `0.10.0`.
+Status: `0.11.0` agent-safe foundation shipped; `0.12.0` contracts are next.
 
 This document turns CENTL's existing exactness, verification, numerical, and
 machine-interface work into an ordered product path. It does not replace the
@@ -27,7 +27,7 @@ The short positioning is:
 
 The operational promise is:
 
-> Check the numbers before they merge.
+> change the world.
 
 This direction is more valuable than competing on the number of supported
 calculator functions. It turns a calculation into a durable repository
@@ -642,6 +642,8 @@ across surfaces.
 ### `0.11.0` — Honest outcomes
 
 Objective: make CENTL safe for an automated caller to interpret.
+
+Status: shipped on 2026-08-08.
 
 Required work:
 
