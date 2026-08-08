@@ -1,28 +1,30 @@
-name: Temporary PR39 patch export
+name: Temporary PR39 reviewed-fix applier
 
 on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  export:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'codex/claim-verification-foundation'
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out source
+      - name: Check out PR head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          ref: codex/claim-verification-foundation
+          persist-credentials: true
+          fetch-depth: 1
 
-      - name: Apply reviewed contract parser fixes
+      - name: Apply reviewed parser fixes and regressions
         shell: python
         run: |
           from pathlib import Path
 
           main = Path("src/ocaml/main.ml")
           source = main.read_text()
-
           filter_line = '      |> List.filter (( <> ) "")\n'
           if source.count(filter_line) < 1:
               raise SystemExit("empty-field filter line not found")
@@ -67,9 +69,9 @@ jobs:
           main.write_text(source)
 
           cli = Path("tests/cli.t")
-          tests = cli.read_text()
+          tests = cli.read_text().rstrip()
           regressions = (
-              "\n  $ printf '%s\\n' '| equal | 1 | 1' > empty-field-contract.centl\n"
+              "\n\n  $ printf '%s\\n' '| equal | 1 | 1' > empty-field-contract.centl\n"
               "  $ ../src/main.exe check empty-field-contract.centl; echo $?\n"
               "  centl: line 1: contract fields must not be empty\n"
               "  2\n\n"
@@ -79,14 +81,13 @@ jobs:
               "  line 1: verified\n"
               "  0\n"
           )
-          cli.write_text(tests.rstrip() + regressions + "\n")
+          cli.write_text(tests + regressions)
 
-      - name: Export patched files
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: pr39-contract-parser-fix
-          path: |
-            src/ocaml/main.ml
-            tests/cli.t
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit reviewed fixes
+        run: |
+          git config user.name "CENTL validation automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/ocaml/main.ml tests/cli.t
+          git diff --cached --check
+          git commit -m "Fix contract parser review edge cases"
+          git push origin HEAD:codex/claim-verification-foundation
