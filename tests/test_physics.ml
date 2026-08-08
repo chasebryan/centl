@@ -134,16 +134,17 @@ let test_dimensionless_gate () =
   | _ -> Alcotest.fail "dimensionless transcendental argument must be admitted"
 
 let check_dimension message expected value =
-  Alcotest.(check bool) message true
-    (Centl_Physics.dimension_equal value.Centl_Physics.quantity_dimension expected)
+  Alcotest.(check bool)
+    message true
+    (Centl_Physics.dimension_equal value.Centl_Physics.quantity_dimension
+       expected)
 
 let test_mechanics_momentum () =
   let mass =
     Centl_Physics.quantity_of_unit (exact 2 1) Centl_Physics.kilogram
   in
   let velocity =
-    Centl_Physics.quantity_of_unit (exact 3 1)
-      Centl_Physics.meter_per_second
+    Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter_per_second
   in
   match Centl_Physics.mechanics_momentum mass velocity with
   | Centl_Physics.QuantityOk momentum ->
@@ -171,8 +172,7 @@ let test_mechanics_kinetic_energy () =
     Centl_Physics.quantity_of_unit (exact 2 1) Centl_Physics.kilogram
   in
   let velocity =
-    Centl_Physics.quantity_of_unit (exact 3 1)
-      Centl_Physics.meter_per_second
+    Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter_per_second
   in
   match Centl_Physics.mechanics_kinetic_energy mass velocity with
   | Centl_Physics.QuantityOk energy ->
@@ -189,24 +189,19 @@ let test_mechanics_uniform_potential () =
     Centl_Physics.quantity_of_unit (exact 10 1)
       Centl_Physics.meter_per_second_squared
   in
-  let height =
-    Centl_Physics.quantity_of_unit (exact 5 1) Centl_Physics.meter
-  in
+  let height = Centl_Physics.quantity_of_unit (exact 5 1) Centl_Physics.meter in
   match
-    Centl_Physics.mechanics_uniform_gravitational_potential mass gravity
-      height
+    Centl_Physics.mechanics_uniform_gravitational_potential mass gravity height
   with
   | Centl_Physics.QuantityOk energy ->
-      check_rational "uniform gravitational potential" 100 1
-        energy.magnitude;
-      check_dimension "potential energy dimension" Centl_Physics.energy_dimension
-        energy
+      check_rational "uniform gravitational potential" 100 1 energy.magnitude;
+      check_dimension "potential energy dimension"
+        Centl_Physics.energy_dimension energy
   | _ -> Alcotest.fail "valid gravitational-potential formula was rejected"
 
 let test_mechanics_constant_acceleration_velocity () =
   let velocity =
-    Centl_Physics.quantity_of_unit (exact 3 1)
-      Centl_Physics.meter_per_second
+    Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter_per_second
   in
   let acceleration =
     Centl_Physics.quantity_of_unit (exact (-2) 1)
@@ -216,20 +211,18 @@ let test_mechanics_constant_acceleration_velocity () =
     Centl_Physics.quantity_of_unit (exact 4 1) Centl_Physics.second
   in
   match
-    Centl_Physics.mechanics_constant_acceleration_velocity velocity
-      acceleration elapsed
+    Centl_Physics.mechanics_constant_acceleration_velocity velocity acceleration
+      elapsed
   with
   | Centl_Physics.QuantityOk result ->
-      check_rational "constant-acceleration velocity" (-5) 1
-        result.magnitude;
+      check_rational "constant-acceleration velocity" (-5) 1 result.magnitude;
       check_dimension "velocity dimension" Centl_Physics.velocity_dimension
         result
   | _ -> Alcotest.fail "valid constant-acceleration velocity was rejected"
 
 let test_mechanics_constant_acceleration_displacement () =
   let velocity =
-    Centl_Physics.quantity_of_unit (exact 3 1)
-      Centl_Physics.meter_per_second
+    Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter_per_second
   in
   let acceleration =
     Centl_Physics.quantity_of_unit (exact (-2) 1)
@@ -251,8 +244,7 @@ let test_mechanics_constant_acceleration_displacement () =
 
 let test_mechanics_hooke_force () =
   let spring =
-    Centl_Physics.quantity_of_unit (exact 4 1)
-      Centl_Physics.newton_per_meter
+    Centl_Physics.quantity_of_unit (exact 4 1) Centl_Physics.newton_per_meter
   in
   let displacement =
     Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter
@@ -265,12 +257,9 @@ let test_mechanics_hooke_force () =
   | _ -> Alcotest.fail "valid Hooke-law formula was rejected"
 
 let test_mechanics_dimension_mismatch () =
-  let length =
-    Centl_Physics.quantity_of_unit (exact 2 1) Centl_Physics.meter
-  in
+  let length = Centl_Physics.quantity_of_unit (exact 2 1) Centl_Physics.meter in
   let velocity =
-    Centl_Physics.quantity_of_unit (exact 3 1)
-      Centl_Physics.meter_per_second
+    Centl_Physics.quantity_of_unit (exact 3 1) Centl_Physics.meter_per_second
   in
   match Centl_Physics.mechanics_momentum length velocity with
   | Centl_Physics.DimensionMismatch -> ()
@@ -322,21 +311,21 @@ let () =
           Alcotest.test_case "dimensionless gate" `Quick test_dimensionless_gate;
         ] );
       ( "mechanics",
-      [
-        Alcotest.test_case "momentum" `Quick test_mechanics_momentum;
-        Alcotest.test_case "force" `Quick test_mechanics_force;
-        Alcotest.test_case "kinetic energy" `Quick
-          test_mechanics_kinetic_energy;
-        Alcotest.test_case "uniform gravitational potential" `Quick
-          test_mechanics_uniform_potential;
-        Alcotest.test_case "constant-acceleration velocity" `Quick
-          test_mechanics_constant_acceleration_velocity;
-        Alcotest.test_case "constant-acceleration displacement" `Quick
-          test_mechanics_constant_acceleration_displacement;
-        Alcotest.test_case "Hooke force" `Quick test_mechanics_hooke_force;
-        Alcotest.test_case "dimension mismatch" `Quick
-          test_mechanics_dimension_mismatch;
-      ] );
+        [
+          Alcotest.test_case "momentum" `Quick test_mechanics_momentum;
+          Alcotest.test_case "force" `Quick test_mechanics_force;
+          Alcotest.test_case "kinetic energy" `Quick
+            test_mechanics_kinetic_energy;
+          Alcotest.test_case "uniform gravitational potential" `Quick
+            test_mechanics_uniform_potential;
+          Alcotest.test_case "constant-acceleration velocity" `Quick
+            test_mechanics_constant_acceleration_velocity;
+          Alcotest.test_case "constant-acceleration displacement" `Quick
+            test_mechanics_constant_acceleration_displacement;
+          Alcotest.test_case "Hooke force" `Quick test_mechanics_hooke_force;
+          Alcotest.test_case "dimension mismatch" `Quick
+            test_mechanics_dimension_mismatch;
+        ] );
       ( "dimensions",
         [
           Alcotest.test_case "derived force dimension" `Quick
