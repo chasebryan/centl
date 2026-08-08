@@ -2,39 +2,11 @@ include Centl_mcp_base
 
 let replace_field name value fields =
   if List.mem_assoc name fields then
-    List.map (fun (field, current) -> if field = name then (field, value) else (field, current)) fields
+    List.map
+      (fun (field, current) ->
+        if field = name then (field, value) else (field, current))
+      fields
   else fields @ [ (name, value) ]
-
-let augment_initialize_response = function
-  | `Assoc response_fields as response ->
-      begin match List.assoc_opt "result" response_fields with
-      | Some (`Assoc result_fields) ->
-          let result_fields =
-            match List.assoc_opt "serverInfo" result_fields with
-            | Some (`Assoc server_info) ->
-                let server_info =
-                  replace_field "title"
-                    (`String "CENTL exact mathematics and physics")
-                    server_info
-                in
-                replace_field "serverInfo" (`Assoc server_info) result_fields
-            | _ -> result_fields
-          in
-          let result_fields =
-            replace_field "instructions"
-              (`String
-                "Use read-only centl_compute for mathematics, centl_verify for \
-                 structured mathematical claims, centl_physics for \
-                 exact-rational dimension-safe particle mechanics, and \
-                 centl_define for immutable session definitions. \
-                 centl_calculate remains available for compatibility. \
-                 Definitions persist until centl_reset or process exit.")
-              result_fields
-          in
-          `Assoc (replace_field "result" (`Assoc result_fields) response_fields)
-      | _ -> response
-      end
-  | response -> response
 
 let append_physics_tool = function
   | `Assoc response_fields as response ->
@@ -95,10 +67,8 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
 let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
     method_name fields =
   match method_name with
-  | "initialize" ->
+  | "initialize" | "ping" ->
       Centl_mcp_base.handle_request ~cancelled state id method_name fields
-      |> augment_initialize_response
-  | "ping" -> Centl_mcp_base.handle_request ~cancelled state id method_name fields
   | _ when not state.initialized ->
       Centl_mcp_base.handle_request ~cancelled state id method_name fields
   | "tools/list" ->
