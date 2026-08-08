@@ -50,7 +50,12 @@ let cancellable_request_id = function
           begin match List.assoc_opt "name" parameters with
           | Some (`String name)
             when List.mem name
-                   [ "centl_compute"; "centl_define"; "centl_calculate" ] ->
+                   [
+                     "centl_compute";
+                     "centl_define";
+                     "centl_calculate";
+                     "centl_verify";
+                   ] ->
               Some id
           | _ -> None
           end
@@ -627,6 +632,42 @@ let capabilities_output_schema =
            ("resolution_statuses", string_array);
            ( "mathematical_domains",
              `Assoc [ ("type", `String "array"); ("items", domain) ] );
+           ( "verification_scopes",
+             `Assoc
+               [
+                 ("type", `String "array");
+                 ( "items",
+                   enum_string
+                     [
+                       "closed_exact_rational";
+                       "closed_real_enclosure";
+                       "univariate_rational_polynomial";
+                       "open_claim";
+                       "quantified_claim_not_implemented";
+                       "unsupported_assumption_domain";
+                     ] );
+               ] );
+           ( "verification_verdicts",
+             `Assoc
+               [
+                 ("type", `String "array");
+                 ( "items",
+                   enum_string [ "verified"; "refuted"; "unknown"; "invalid" ]
+                 );
+               ] );
+           ( "assurance_classes",
+             `Assoc
+               [
+                 ("type", `String "array");
+                 ( "items",
+                   enum_string
+                     [
+                       "exact_algorithm";
+                       "certified_enclosure";
+                       "witness_checked";
+                       "none";
+                     ] );
+               ] );
            ("cancellation", cancellation);
            ("limits", limits);
          ]
@@ -636,6 +677,9 @@ let capabilities_output_schema =
            "operations";
            "resolution_statuses";
            "mathematical_domains";
+           "verification_scopes";
+           "verification_verdicts";
+           "assurance_classes";
            "cancellation";
            "limits";
          ]
@@ -969,6 +1013,318 @@ let help_tool () =
       ("annotations", read_only_annotations);
     ]
 
+let verify_output_schema =
+  lazy
+    (let dyadic =
+       strict_object
+         [
+           ("lower_mantissa", string_schema);
+           ("upper_mantissa", string_schema);
+           ("binary_exponent", integer_schema);
+         ]
+         [ "lower_mantissa"; "upper_mantissa"; "binary_exponent" ]
+     in
+     let side =
+       strict_object
+         [
+           ( "kind",
+             enum_string
+               [
+                 "integer";
+                 "rational";
+                 "symbolic";
+                 "sequence";
+                 "real_enclosure";
+                 "solution_set";
+               ] );
+           ("text", string_schema);
+           ("numerator", string_schema);
+           ("denominator", string_schema);
+           ("dyadic", dyadic);
+           ("lower", string_schema);
+           ("upper", string_schema);
+           ("requested_digits", nonnegative_integer_schema);
+           ("working_bits", nonnegative_integer_schema);
+         ]
+         [ "kind"; "text" ]
+     in
+     let variable =
+       strict_object
+         [ ("name", string_schema); ("domain", const_string "rational") ]
+         [ "name"; "domain" ]
+     in
+     let claim =
+       strict_object
+         [
+           ("left", string_schema);
+           ( "relation",
+             enum_string
+               [
+                 "equal";
+                 "not_equal";
+                 "less_than";
+                 "less_or_equal";
+                 "greater_than";
+                 "greater_or_equal";
+               ] );
+           ("right", string_schema);
+           ( "variables",
+             `Assoc [ ("type", `String "array"); ("items", variable) ] );
+           ( "assumptions",
+             `Assoc [ ("type", `String "array"); ("items", string_schema) ] );
+         ]
+         [ "left"; "relation"; "right"; "variables"; "assumptions" ]
+     in
+     let resolution =
+       strict_object
+         [
+           ( "status",
+             enum_string
+               [
+                 "computed";
+                 "transformed";
+                 "unchanged_proved";
+                 "residual";
+                 "unsupported";
+                 "indeterminate";
+               ] );
+           ("operation", string_schema);
+           ("reason", string_schema);
+           ("supported_domain", string_schema);
+         ]
+         [ "status" ]
+     in
+     let counterexample =
+       strict_object
+         [
+           ( "bindings",
+             `Assoc
+               [
+                 ("type", `String "object");
+                 ("additionalProperties", string_schema);
+               ] );
+           ("left", side);
+           ("right", side);
+         ]
+         [ "bindings"; "left"; "right" ]
+     in
+     let evidence =
+       strict_object
+         [
+           ("left", side);
+           ("right", side);
+           ("comparison", enum_string [ "less"; "equal"; "greater" ]);
+           ("reason", string_schema);
+           ("normalized_difference", string_schema);
+           ("counterexample", counterexample);
+           ( "dependencies",
+             `Assoc [ ("type", `String "array"); ("items", string_schema) ] );
+           ("left_resolution", resolution);
+           ("right_resolution", resolution);
+         ]
+         []
+     in
+     let assurance =
+       strict_object
+         [
+           ( "class",
+             enum_string
+               [
+                 "exact_algorithm";
+                 "certified_enclosure";
+                 "witness_checked";
+                 "none";
+               ] );
+           ("theorem", string_schema);
+         ]
+         [ "class" ]
+     in
+     let producer =
+       strict_object
+         [ ("name", const_string "centl"); ("version", string_schema) ]
+         [ "name"; "version" ]
+     in
+     let verification =
+       strict_object
+         [
+           ("schema", const_int 1);
+           ( "verdict",
+             enum_string [ "verified"; "refuted"; "unknown"; "invalid" ] );
+           ( "scope",
+             enum_string
+               [
+                 "closed_exact_rational";
+                 "closed_real_enclosure";
+                 "univariate_rational_polynomial";
+                 "open_claim";
+                 "quantified_claim_not_implemented";
+                 "unsupported_assumption_domain";
+               ] );
+           ( "method",
+             enum_string
+               [
+                 "closed_rational_comparison";
+                 "certified_enclosure_sign";
+                 "polynomial_zero_difference";
+                 "exact_rational_counterexample";
+                 "claim_admission";
+               ] );
+           ("claim", claim);
+           ("evidence", evidence);
+           ("assurance", assurance);
+           ("producer", producer);
+         ]
+         [
+           "schema";
+           "verdict";
+           "scope";
+           "method";
+           "claim";
+           "evidence";
+           "assurance";
+           "producer";
+         ]
+     in
+     let session =
+       strict_object
+         [
+           ("definitions", nonnegative_integer_schema);
+           ("requests", nonnegative_integer_schema);
+         ]
+         [ "definitions"; "requests" ]
+     in
+     let provenance =
+       strict_object
+         [
+           ("schema", const_int 1);
+           ("producer", producer);
+           ("classification", string_schema);
+           ("method", string_schema);
+           ("backend", string_schema);
+         ]
+         [ "schema"; "producer"; "classification"; "method"; "backend" ]
+     in
+     let success =
+       strict_object
+         [
+           ("version", const_int 1);
+           ("ok", const_bool true);
+           ("verification", verification);
+           ("provenance", provenance);
+           ("session", session);
+         ]
+         [ "version"; "ok"; "verification"; "provenance"; "session" ]
+     in
+     let error =
+       let range =
+         strict_object
+           [
+             ("start", nonnegative_integer_schema);
+             ("end", nonnegative_integer_schema);
+           ]
+           [ "start"; "end" ]
+       in
+       let details =
+         strict_object
+           [ ("category", const_string "limit"); ("limit", string_schema) ]
+           [ "category"; "limit" ]
+       in
+       strict_object
+         [
+           ("code", string_schema);
+           ("message", string_schema);
+           ("position", nonnegative_integer_schema);
+           ("range", range);
+           ("retryable", boolean_schema);
+           ("suggestion", string_schema);
+           ("details", details);
+         ]
+         [ "code"; "message"; "retryable" ]
+     in
+     let failure =
+       strict_object
+         [
+           ("version", const_int 1);
+           ("ok", const_bool false);
+           ("error", error);
+           ("provenance", provenance);
+           ("session", session);
+         ]
+         [ "version"; "ok"; "error"; "provenance"; "session" ]
+     in
+     `Assoc [ ("oneOf", `List [ success; failure ]) ])
+
+let verify_tool () =
+  `Assoc
+    [
+      ("name", `String "centl_verify");
+      ("title", `String "Verify a mathematical claim");
+      ( "description",
+        `String
+          "Check one structured mathematical claim. Returns verified, refuted, \
+           unknown, or invalid with evidence. Read-only. Decides closed exact \
+           rational comparisons and certified enclosure orderings. It may \
+           refute a false univariate polynomial equality with an exact \
+           witness; identities remain unknown pending their F* soundness \
+           theorem. Free-form assumptions return unknown." );
+      ( "inputSchema",
+        strict_object
+          [
+            ( "left",
+              `Assoc
+                [
+                  ("type", `String "string");
+                  ("description", `String "Left-hand expression.");
+                ] );
+            ( "relation",
+              enum_string
+                [
+                  "equal";
+                  "not_equal";
+                  "less_than";
+                  "less_or_equal";
+                  "greater_than";
+                  "greater_or_equal";
+                ] );
+            ( "right",
+              `Assoc
+                [
+                  ("type", `String "string");
+                  ("description", `String "Right-hand expression.");
+                ] );
+            ( "variables",
+              `Assoc
+                [
+                  ("type", `String "array");
+                  ( "items",
+                    strict_object
+                      [
+                        ("name", string_schema);
+                        ("domain", const_string "rational");
+                      ]
+                      [ "name"; "domain" ] );
+                  ( "description",
+                    `String
+                      "Optional quantified variables. One rational variable \
+                       enables exact-witness refutation for false polynomial \
+                       equalities; other quantified outcomes remain unknown." );
+                ] );
+            ( "assumptions",
+              `Assoc
+                [
+                  ("type", `String "array");
+                  ("items", string_schema);
+                  ( "description",
+                    `String
+                      "Optional assumptions. Returns unknown when non-empty." );
+                ] );
+            ("limits", limits_schema);
+          ]
+          [ "left"; "relation"; "right" ] );
+      ("outputSchema", Lazy.force verify_output_schema);
+      ("annotations", read_only_annotations);
+    ]
+
 let reset_tool () =
   `Assoc
     [
@@ -1032,11 +1388,11 @@ let initialize state id fields =
                        ] );
                    ( "instructions",
                      `String
-                       "Use read-only centl_compute for mathematics and \
-                        centl_define for immutable session definitions. \
-                        centl_calculate remains available for compatibility. \
-                        Definitions persist until centl_reset or process exit."
-                   );
+                       "Use read-only centl_compute for mathematics, \
+                        centl_verify for structured claims, and centl_define \
+                        for immutable session definitions. centl_calculate \
+                        remains available for compatibility. Definitions \
+                        persist until centl_reset or process exit." );
                  ])
         | _ ->
             jsonrpc_error id (-32602)
@@ -1118,6 +1474,38 @@ let define ?cancelled state id arguments =
   evaluate_tool ?cancelled ~tool_name:"centl_define" ~operation:"define"
     ~argument_name:"definition" state id arguments
 
+let verify ?cancelled state id arguments =
+  let unknown =
+    List.find_opt
+      (fun (name, _) ->
+        not
+          (List.mem name
+             [
+               "left"; "right"; "relation"; "variables"; "assumptions"; "limits";
+             ]))
+      arguments
+  in
+  match unknown with
+  | Some (name, _) ->
+      jsonrpc_error id (-32602) ("unknown centl_verify argument " ^ name)
+  | None ->
+      let fields =
+        ("version", `Int 1)
+        :: ("op", `String "verify")
+        :: List.filter (fun (name, _) -> name <> "limits") arguments
+      in
+      let fields =
+        match List.assoc_opt "limits" arguments with
+        | None -> fields
+        | Some limits -> fields @ [ ("limits", limits) ]
+      in
+      begin match Centl_protocol.request_limits state.protocol fields with
+      | Error message -> jsonrpc_error id (-32602) message
+      | Ok _ ->
+          Centl_protocol.handle_json ?cancelled state.protocol (`Assoc fields)
+          |> tool_result |> jsonrpc_result id
+      end
+
 let protocol_control state id operation fields =
   Centl_protocol.handle_json state.protocol
     (`Assoc (("version", `Int 1) :: ("op", `String operation) :: fields))
@@ -1166,6 +1554,10 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
           define ~cancelled state id arguments
       | Some (`String "centl_define"), None ->
           jsonrpc_error id (-32602) "centl_define requires arguments"
+      | Some (`String "centl_verify"), Some (`Assoc arguments) ->
+          verify ~cancelled state id arguments
+      | Some (`String "centl_verify"), None ->
+          jsonrpc_error id (-32602) "centl_verify requires arguments"
       | Some (`String "centl_capabilities"), Some (`Assoc arguments) ->
           capabilities state id arguments
       | Some (`String "centl_capabilities"), None -> capabilities state id []
@@ -1204,6 +1596,7 @@ let handle_request ?(cancelled = Centl_engine.never_cancelled) state id
                  [
                    compute_tool ();
                    define_tool ();
+                   verify_tool ();
                    capabilities_tool ();
                    session_tool ();
                    help_tool ();

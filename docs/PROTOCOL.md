@@ -330,3 +330,91 @@ aggregate-iteration, expression-node, exact-bit, work, or result-byte budgets
 use `resource_limit`. A non-scalar or inexact sequence term uses
 `exact_sequence_required`, while trying to consume a completed sequence as a
 scalar uses `sequence_not_expression`.
+
+## Claim verification
+
+Read-only structured claim checking is available on the development path and
+will ship with the math-contracts release. Protocol version remains 1; the
+`verify` operation is additive.
+
+A protocol request names both sides and one of six relations:
+
+```json
+{"version":1,"id":9,"op":"verify","left":"0.1 + 0.2","relation":"equal","right":"3/10"}
+```
+
+A decisive exact result is explicit about its scope, method, assurance, values,
+and the transformation resolution of each side:
+
+```json
+{"version":1,"id":9,"ok":true,"verification":{"schema":1,"verdict":"verified","scope":"closed_exact_rational","method":"closed_rational_comparison","claim":{"left":"0.1 + 0.2","relation":"equal","right":"3/10","variables":[],"assumptions":[]},"evidence":{"left":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"right":{"kind":"rational","text":"3/10","numerator":"3","denominator":"10"},"comparison":"equal","left_resolution":{"status":"computed"},"right_resolution":{"status":"computed"}},"assurance":{"class":"exact_algorithm"},"producer":{"name":"centl","version":"0.11.0"}},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"verification","method":"claim_verification","backend":"centl-verify"},"session":{"definitions":0,"requests":1}}
+```
+
+`relation` is `equal`, `not_equal`, `less_than`, `less_or_equal`,
+`greater_than`, or `greater_or_equal`. Unknown request fields are rejected.
+`variables` is an optional array of closed `{name, domain}` objects; the only
+accepted domain is `rational`. `assumptions` is an optional string array.
+
+The decisive scopes in this initial slice are:
+
+| Scope | Decisive outcomes |
+| --- | --- |
+| `closed_exact_rational` | Both sides reduce to exact integers or rationals; all six relations are decided. |
+| `closed_real_enclosure` | Disjoint rigorous enclosures decide order, inequalities, and non-equality. |
+| `univariate_rational_polynomial` | One quantified rational variable. False equalities are `refuted` only with an exact rational counterexample (`witness_checked`). Zero-difference identities stay `unknown` with reason `polynomial_soundness_theorem_pending` until F* soundness is fully proved. |
+
+Real equality is not inferred from enclosures. Overlapping enclosures,
+free-form assumptions, multi-variable claims, quantified order, unproved
+polynomial identities, and unquantified free symbols return `unknown` with a
+stable reason. Invalid mathematical inputs return the `invalid` verdict.
+Cancellation, resource or precision exhaustion, insufficient precision, and
+backend failures remain protocol errors with `ok: false`; they are never
+converted to `unknown`. Polynomial identities must not report `verified_core`
+or a decisive `verified` verdict while the F* lemma remains unfinished.
+Counterexample refutations report `witness_checked`; closed exact rational
+comparisons report `exact_algorithm`; enclosure order reports
+`certified_enclosure`.
+
+Enclosure evidence contains exact dyadic `lower_mantissa`,
+`upper_mantissa`, and `binary_exponent` fields alongside outward-rounded
+decimal bounds. Claims that read immutable session definitions report those
+dependencies in their evidence. Verification does not add, replace, or remove
+session bindings.
+
+Unlike ordinary evaluation's mathematical-value limit, verification applies
+`max_result_bytes` to the complete protocol response, including the echoed
+claim, evidence, provenance, and session counters.
+
+The same operation is exposed as MCP tool `centl_verify` and through:
+
+```sh
+centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
+centl check path/to/contracts.centl
+```
+
+`centl verify` exits 0 for `verified`, 1 for `refuted`, `unknown`, or
+`invalid`, and 2 for malformed input or an operational error. `centl check`
+uses the same classification across the whole file: any malformed or
+operational line makes the process exit 2; otherwise any non-verified
+assertion makes it exit 1.
+
+Contract files are line-oriented. Blank lines and lines beginning with `#`
+are ignored:
+
+```text
+equal | 0.1 + 0.2 | 3/10
+define | r = 3
+equal | r^2 | 9
+less_than | sqrt(2) | 2
+```
+
+Definitions mutate only the private session created for that one `centl check`
+process. A fourth assertion field such as `x:rational` selects the univariate
+rational polynomial method for equality claims.
+
+Calculator scripts may also write:
+
+```text
+assert(0.1 + 0.2 = 3/10)
+assert((x + 1)^2 = x^2 + 2*x + 1, for_all = x, domain = rational)
+```

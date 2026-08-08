@@ -41,6 +41,7 @@
   ../src/main.exe
   fixtures/definitions.centl
   fixtures/exact.centl
+  fixtures/contracts.centl
   raw-repl))
 
 (cram

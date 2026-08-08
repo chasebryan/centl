@@ -125,7 +125,11 @@ let sections =
     };
     {
       name = "Scripts";
-      entries = [| entry "# comment" "ignored line in a script" |];
+      entries =
+        [|
+          entry "assert(left relation right)" "check a mathematical claim";
+          entry "# comment" "ignored line in a script";
+        |];
     };
   |]
 

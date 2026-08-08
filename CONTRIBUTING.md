@@ -125,3 +125,17 @@ Open pull requests against `main`. Include the behavior being changed and the
 commands used to validate it. Pull requests run one fast Linux verification,
 quality, native-test, and Julia/Nemo job. Full native packaging remains on
 `main`, version tags, and manual release-workflow runs.
+
+## Math contracts (0.12 foundation)
+
+Local claim checking without a full release:
+
+```sh
+./centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
+./centl verify --left 'sqrt(2)' --relation less_than --right '2'
+./centl check tests/fixtures/contracts.centl
+./centl check tests/fixtures/contracts.centl --json
+```
+
+Protocol: `op: "verify"`. MCP: `centl_verify`. See `docs/PROTOCOL.md` and
+`docs/DESIGN_PATH.md`.

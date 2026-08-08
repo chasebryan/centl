@@ -677,6 +677,21 @@ whose status cannot be confused with mathematical completion.
 
 Objective: make mathematical claims enforceable in repositories.
 
+Status: **verification draft advancing toward 0.12.0** (not versioned).
+
+In this tree: closed exact rational comparison; certified enclosure
+order/inequality with dyadic evidence; univariate rational polynomial
+counterexample refutation (`witness_checked`); calculator `assert` grammar;
+sequential side evaluation; operational errors stay errors; closed request
+schemas; response-byte enforcement; `verify` / `centl_verify` / `centl verify`
+/ `centl check`; and passing plus deliberately pending contract examples.
+Polynomial identities that normalize to zero difference remain `unknown`
+(`polynomial_soundness_theorem_pending`) because the draft F* lemma still has
+unproved obligations and is not landed assurance. Free-form assumptions and
+multi-variable claims return `unknown`. Still open for 0.12.0: the completed
+F* `verified_core` polynomial theorem, bounded replayable receipts, validated
+release identity, and a published CI action.
+
 Required work:
 
 1. Add the structured claim and verdict types.
@@ -722,6 +737,20 @@ Select exactly one primary expansion after `0.12.0` pilots:
 | Engineering and scientific bounds | Bounded variables, interval subdivision, certified extrema or inequalities | Extends the existing Arb strength and makes rigorous bounds accessible without theorem-prover ceremony. |
 | Pricing and billing | Decimal quantization, named rounding modes, scale contracts, exact rate composition | Produces immediately useful regression contracts for financially sensitive code. |
 | Conversion-heavy software | First-class dimensions and exact unit conversions | Prevents a common class of formula and conversion errors. |
+
+If pilot demand selects units or scientific mechanics, productize them as
+**CENTL Physics** rather than as a general-purpose physics/game engine. The
+design boundary is documented in [PHYSICS.md](PHYSICS.md):
+
+- unit-safe quantities and exact conversion first;
+- pure Newtonian mechanics contracts next;
+- only then a bounded, deterministic 1D discrete simulator;
+- no rigid-body contact, fluids, relativity, general ODEs, or claims that an
+  exact discrete update is the continuous trajectory.
+
+Physics development must not start on the claim-verification branch. Finish
+0.12 contracts, green verification, and release first ([PHYSICS.md](PHYSICS.md)
+stage 0).
 
 Selection gate:
 

@@ -1,0 +1,8 @@
+# sample contracts for closed and polynomial verification
+equal | 0.1 + 0.2 | 3/10
+less_than | 7/8 | 0.9
+define | r = 3
+equal | r^2 | 9
+less_than | sqrt(2) | 2
+equal | (x+1)^2 | x^2+2*x+1 | x:rational
+equal | pi | 3

@@ -1,0 +1,8 @@
+# Pending univariate rational polynomial identities.
+# These normalize to zero but intentionally remain unknown until the F*
+# zero-difference soundness theorem is fully proved.
+# Run: centl check examples/contracts/pending-polynomials.centl
+
+equal | (x+1)^2 | x^2+2*x+1 | x:rational
+equal | (x+1)^3 | x^3+3*x^2+3*x+1 | x:rational
+equal | x + 0 | x | x:rational

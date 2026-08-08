@@ -12,11 +12,10 @@ type command = {
 }
 
 let usage =
-  "Usage: centl [--json|--serve|--mcp] [--syntax] [--no-history] \
-   [--color=auto|always|never] [--file PATH] [EXPRESSION]"
+  "Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE"
 
 let print_help () =
-  print_endline "CENTL — exact mathematics, directly.";
+  print_endline "CENTL - exact mathematics, directly.";
   print_endline "";
   print_endline usage;
   print_endline "";
@@ -29,7 +28,15 @@ let print_help () =
   print_endline "  --mcp              MCP server over standard I/O";
   print_endline "  --no-history       do not load or save durable history";
   print_endline "  --color=MODE       auto, always, or never";
-  print_endline "  --version          show the version"
+  print_endline "  --version          show the version";
+  print_endline "";
+  print_endline "  centl verify --left L --relation R --right Rhs";
+  print_endline "      [--variable x:rational] [--json]";
+  print_endline
+    "                      check a structured claim (exit 0 only if verified)";
+  print_endline "  centl check FILE [--json]  check contract assertions";
+  print_endline
+    "  assert(LEFT REL RIGHT)   calculator claim form (host-checked)"
 
 let print_repl_help () =
   print_endline "Enter mathematics directly, then press return.";
@@ -199,23 +206,145 @@ let diagnostic_text ?source_name ?(start_line = 1) source
       in
       heading ^ "\n" ^ context
 
+let assert_claim_fields source =
+  match Centl_parser.parse_statement_located source with
+  | Error error ->
+      Error
+        {
+          Centl_engine.code = "syntax_error";
+          message = error.message;
+          position = Some error.position;
+        }
+  | Ok located ->
+      begin match located.statement with
+      | Centl_parser.Assert { left_source; relation; right_source; variable } ->
+          let fields =
+            [
+              ("left", `String left_source);
+              ("relation", `String relation);
+              ("right", `String right_source);
+            ]
+          in
+          let fields =
+            match variable with
+            | None -> fields
+            | Some name ->
+                fields
+                @ [
+                    ( "variables",
+                      `List
+                        [
+                          `Assoc
+                            [
+                              ("name", `String name);
+                              ("domain", `String "rational");
+                            ];
+                        ] );
+                  ]
+          in
+          Ok fields
+      | _ ->
+          Error
+            {
+              Centl_engine.code = "invalid_request";
+              message = "not an assert statement";
+              position = None;
+            }
+      end
+
+let run_assert_statement session source =
+  match assert_claim_fields source with
+  | Error _ as error -> error
+  | Ok fields -> Centl_verify.verify session fields
+
+let is_assert_source source =
+  let trimmed = String.trim source in
+  let length = String.length trimmed in
+  if length < 7 || String.sub trimmed 0 6 <> "assert" then false
+  else
+    let rec next_non_space index =
+      if index >= length then None
+      else
+        match trimmed.[index] with
+        | ' ' | '\t' | '\r' | '\n' -> next_non_space (index + 1)
+        | character -> Some character
+    in
+    next_non_space 6 = Some '('
+
+(* Statement evaluation outcomes map to CLI exits:
+   Success -> 0, Claim_failed (refuted/unknown/invalid) -> 1, Failed -> 2. *)
+type statement_result = Success | Claim_failed | Failed
+
+let statement_result_exit = function
+  | Success -> 0
+  | Claim_failed -> 1
+  | Failed -> 2
+
+let statement_result_ok = function
+  | Success -> true
+  | Claim_failed | Failed -> false
+
 let evaluate_human_in_session ?source_name ?(start_line = 1) ~color session
     source =
-  match Centl_engine.evaluate_in_session_detailed session source with
-  | Ok result ->
-      print_endline
-        (if color then Centl_engine.colored_text_of_session_outcome result
-         else Centl_engine.text_of_session_outcome result);
-      true
-  | Error error ->
-      let message = diagnostic_text ?source_name ~start_line source error in
-      prerr_endline (if color then ansi "91" message else message);
-      false
+  if is_assert_source source then
+    begin match run_assert_statement session source with
+    | Ok verification ->
+        print_endline (Centl_verify.text_of_verification verification);
+        if verification.verdict = Centl_verify.Verified then Success
+        else Claim_failed
+    | Error error ->
+        let message = diagnostic_text ?source_name ~start_line source error in
+        prerr_endline (if color then ansi "91" message else message);
+        Failed
+    end
+  else
+    match Centl_engine.evaluate_in_session_detailed session source with
+    | Ok result ->
+        print_endline
+          (if color then Centl_engine.colored_text_of_session_outcome result
+           else Centl_engine.text_of_session_outcome result);
+        Success
+    | Error error ->
+        let message = diagnostic_text ?source_name ~start_line source error in
+        prerr_endline (if color then ansi "91" message else message);
+        Failed
 
 let evaluate_json source =
-  let result = Centl_engine.evaluate_detailed source in
-  print_json (Centl_engine.json_of_detailed_evaluation result);
-  Result.is_ok result
+  if is_assert_source source then
+    begin match assert_claim_fields source with
+    | Ok fields ->
+        let state = Centl_protocol.create () in
+        let line =
+          Yojson.Safe.to_string
+            (`Assoc (("version", `Int 1) :: ("op", `String "verify") :: fields))
+        in
+        let response = Centl_protocol.handle_line state line in
+        print_json response;
+        begin match response with
+        | `Assoc response_fields ->
+            begin match
+              ( List.assoc_opt "ok" response_fields,
+                List.assoc_opt "verification" response_fields )
+            with
+            | Some (`Bool true), Some (`Assoc verification_fields) ->
+                begin match List.assoc_opt "verdict" verification_fields with
+                | Some (`String "verified") -> Success
+                | Some (`String ("refuted" | "unknown" | "invalid")) ->
+                    Claim_failed
+                | _ -> Failed
+                end
+            | _ -> Failed
+            end
+        | _ -> Failed
+        end
+    | Error error ->
+        print_json (Centl_engine.json_of_detailed_evaluation (Error error));
+        Failed
+    end
+  else
+    let result = Centl_engine.evaluate_detailed source in
+    print_json (Centl_engine.json_of_detailed_evaluation result);
+    if Result.is_ok result then Success else Failed
 
 type statement_builder = {
   mutable lines : string list;
@@ -323,17 +452,20 @@ let run_channel ~color mode name channel =
         begin match add_statement_line builder ~line_number:number line with
         | Ignored | Incomplete -> lines (number + 1)
         | Statement (source, start_line) ->
-            if evaluate source start_line then lines (number + 1) else false
+            begin match evaluate source start_line with
+            | Success -> lines (number + 1)
+            | result -> result
+            end
         end
     | Centl_protocol.Oversized ->
         prerr_endline
           (Printf.sprintf
              "%s:%d: error: the expression exceeds the source-byte limit" name
              number);
-        false
+        Failed
     | Centl_protocol.End ->
         begin match finish_statement builder with
-        | None -> true
+        | None -> Success
         | Some (source, start_line) -> evaluate source start_line
         end
   in
@@ -873,10 +1005,12 @@ let repl ~color ~persistent_history () =
         prerr_endline "error: the expression exceeds the source-byte limit";
         loop ()
     | Repl_statement source ->
-        ignore (evaluate_human_in_session ~color session source);
+        ignore
+          (evaluate_human_in_session ~color session source : statement_result);
         loop ()
     | Repl_final_statement source ->
-        ignore (evaluate_human_in_session ~color session source)
+        ignore
+          (evaluate_human_in_session ~color session source : statement_result)
     | Repl_command (":quit" | ":q") -> ()
     | Repl_command ":help" ->
         print_repl_help ();
@@ -1005,53 +1139,407 @@ let run_mcp () =
   Thread.join reader;
   reader_succeeded queue
 
-let () =
-  let arguments = Array.to_list Sys.argv |> List.tl in
-  match parse_arguments arguments with
+let verify_exit_code = function
+  | Centl_verify.Verified -> 0
+  | Centl_verify.Refuted | Centl_verify.Unknown | Centl_verify.Invalid -> 1
+
+let verification_response_exit_code = function
+  | `Assoc fields ->
+      begin match List.assoc_opt "ok" fields with
+      | Some (`Bool false) -> 2
+      | Some (`Bool true) ->
+          begin match List.assoc_opt "verification" fields with
+          | Some (`Assoc verification) ->
+              begin match List.assoc_opt "verdict" verification with
+              | Some (`String "verified") -> 0
+              | Some (`String ("refuted" | "unknown" | "invalid")) -> 1
+              | _ -> 2
+              end
+          | _ -> 2
+          end
+      | _ -> 2
+      end
+  | _ -> 2
+
+let parse_variable_spec = function
+  | value ->
+      begin match String.split_on_char ':' value with
+      | [ name; domain ] when name <> "" && domain <> "" -> Ok (name, domain)
+      | [ name ] when name <> "" -> Ok (name, "rational")
+      | _ -> Error ("invalid --variable " ^ value ^ " (expected name:rational)")
+      end
+
+let parse_verify_arguments arguments =
+  let rec loop left relation right variable json = function
+    | [] -> Ok (left, relation, right, variable, json)
+    | "--json" :: rest -> loop left relation right variable true rest
+    | "--left" :: value :: rest ->
+        loop (Some value) relation right variable json rest
+    | "--relation" :: value :: rest ->
+        loop left (Some value) right variable json rest
+    | "--right" :: value :: rest ->
+        loop left relation (Some value) variable json rest
+    | "--variable" :: value :: rest ->
+        begin match parse_variable_spec value with
+        | Ok variable -> loop left relation right (Some variable) json rest
+        | Error _ as error -> error
+        end
+    | "--left" :: [] | "--relation" :: [] | "--right" :: [] | "--variable" :: []
+      ->
+        Error "verify options require a value"
+    | option :: _ when String.starts_with ~prefix:"--" option ->
+        Error ("unknown verify option " ^ option)
+    | other :: _ -> Error ("unexpected verify argument " ^ other)
+  in
+  match loop None None None None false arguments with
+  | Error _ as error -> error
+  | Ok (Some left, Some relation, Some right, variable, json) ->
+      Ok (left, relation, right, variable, json)
+  | Ok _ -> Error "verify requires --left, --relation, and --right"
+
+let run_verify arguments =
+  match parse_verify_arguments arguments with
   | Error message ->
       prerr_endline ("centl: " ^ message);
-      prerr_endline usage;
+      prerr_endline
+        "Usage: centl verify --left EXPR --relation REL --right EXPR \
+         [--variable name:rational] [--json]";
       exit 2
-  | Ok command ->
-      let color =
-        match (command.mode, command.color) with
-        | (Json | Serve | Mcp), _ | Human, Never -> false
-        | Human, Always -> true
-        | Human, Auto ->
-            Unix.isatty Unix.stdout
-            && Option.is_none (Sys.getenv_opt "NO_COLOR")
-            && Sys.getenv_opt "TERM" <> Some "dumb"
+  | Ok (left, relation, right, variable, as_json) ->
+      let fields =
+        [
+          ("left", `String left);
+          ("relation", `String relation);
+          ("right", `String right);
+        ]
       in
-      let expression = String.concat " " command.expression_parts in
-      let ok =
-        match (command.file, expression, command.mode) with
-        | Some _, _, (Serve | Mcp) ->
-            prerr_endline "centl: --serve and --mcp do not accept --file";
-            false
-        | None, expression, (Serve | Mcp) when expression <> "" ->
-            prerr_endline "centl: --serve and --mcp do not accept an expression";
-            false
-        | Some _, expression, _ when expression <> "" ->
-            prerr_endline "centl: use either --file or an expression, not both";
-            false
-        | Some path, _, mode ->
-            begin try run_file ~color mode path
-            with Sys_error message ->
-              prerr_endline ("centl: " ^ message);
-              false
-            end
-        | None, expression, Human when expression <> "" ->
-            evaluate_human_in_session ~color
-              (Centl_engine.create_session ())
-              expression
-        | None, expression, Json when expression <> "" ->
-            evaluate_json expression
-        | None, _, Json -> run_json_stream ()
-        | None, _, Serve -> run_serve ()
-        | None, _, Mcp -> run_mcp ()
-        | None, _, Human when Unix.isatty Unix.stdin ->
-            repl ~color ~persistent_history:command.persistent_history ();
-            true
-        | None, _, Human -> run_channel ~color Human "standard input" stdin
+      let fields =
+        match variable with
+        | None -> fields
+        | Some (name, domain) ->
+            fields
+            @ [
+                ( "variables",
+                  `List
+                    [
+                      `Assoc
+                        [ ("name", `String name); ("domain", `String domain) ];
+                    ] );
+              ]
       in
-      if not ok then exit 2
+      if as_json then begin
+        let state = Centl_protocol.create () in
+        let line =
+          Yojson.Safe.to_string
+            (`Assoc (("version", `Int 1) :: ("op", `String "verify") :: fields))
+        in
+        let response = Centl_protocol.handle_line state line in
+        print_json response;
+        exit (verification_response_exit_code response)
+      end
+      else
+        begin match
+          Centl_verify.verify (Centl_engine.create_session ()) fields
+        with
+        | Error error ->
+            prerr_endline ("centl: " ^ Centl_engine.error_text error);
+            exit 2
+        | Ok verification ->
+            print_endline (Centl_verify.text_of_verification verification);
+            exit (verify_exit_code verification.verdict)
+        end
+
+type check_line =
+  | Check_define of { line_number : int; definition : string }
+  | Check_assert of {
+      line_number : int;
+      left : string;
+      relation : string;
+      right : string;
+      variable : (string * string) option;
+    }
+
+let parse_check_line line_number line =
+  let trimmed = String.trim line in
+  if trimmed = "" || String.starts_with ~prefix:"#" trimmed then None
+  else
+    let parts =
+      trimmed |> String.split_on_char '|' |> List.map String.trim
+      |> List.filter (( <> ) "")
+    in
+    begin match parts with
+    | [ "define"; definition ] ->
+        Some (Check_define { line_number; definition })
+    | [ relation; left; right ] ->
+        Some
+          (Check_assert { line_number; left; relation; right; variable = None })
+    | [ relation; left; right; variable ] ->
+        begin match parse_variable_spec variable with
+        | Ok variable ->
+            Some
+              (Check_assert
+                 {
+                   line_number;
+                   left;
+                   relation;
+                   right;
+                   variable = Some variable;
+                 })
+        | Error message ->
+            failwith ("line " ^ string_of_int line_number ^ ": " ^ message)
+        end
+    | _ ->
+        failwith
+          ("line " ^ string_of_int line_number
+         ^ ": expected define | DEF or RELATION | LEFT | RIGHT [| \
+            VAR[:rational]]")
+    end
+
+let read_check_file path =
+  let max_bytes = Centl_engine.default_evaluation_limits.max_source_bytes in
+  let file_size = (Unix.LargeFile.stat path).st_size in
+  if Int64.compare file_size (Int64.of_int max_bytes) > 0 then
+    failwith
+      (Printf.sprintf "contract exceeds the %d-byte source limit" max_bytes);
+  let channel = open_in path in
+  Fun.protect
+    ~finally:(fun () -> close_in channel)
+    (fun () ->
+      let rec loop line_number total_bytes acc =
+        match Centl_protocol.read_line channel max_bytes with
+        | Centl_protocol.Line line ->
+            let total_bytes = total_bytes + String.length line + 1 in
+            if total_bytes > max_bytes then
+              failwith
+                (Printf.sprintf "contract exceeds the %d-byte source limit"
+                   max_bytes);
+            let acc =
+              match parse_check_line line_number line with
+              | None -> acc
+              | Some assertion -> assertion :: acc
+            in
+            loop (line_number + 1) total_bytes acc
+        | Centl_protocol.Oversized ->
+            failwith
+              (Printf.sprintf "line %d exceeds the %d-byte source limit"
+                 line_number max_bytes)
+        | Centl_protocol.End -> List.rev acc
+      in
+      loop 1 0 [])
+
+let parse_check_arguments arguments =
+  let rec loop path as_json = function
+    | [] -> Ok (path, as_json)
+    | "--json" :: rest -> loop path true rest
+    | option :: _ when String.starts_with ~prefix:"--" option ->
+        Error ("unknown check option " ^ option)
+    | value :: rest ->
+        begin match path with
+        | None -> loop (Some value) as_json rest
+        | Some _ -> Error ("unexpected check argument " ^ value)
+        end
+  in
+  match loop None false arguments with
+  | Error _ as error -> error
+  | Ok (Some path, as_json) -> Ok (path, as_json)
+  | Ok (None, _) -> Error "check requires a contract file path"
+
+let run_check arguments =
+  match parse_check_arguments arguments with
+  | Error message ->
+      prerr_endline ("centl: " ^ message);
+      prerr_endline "Usage: centl check FILE [--json]";
+      exit 2
+  | Ok (path, as_json) ->
+      begin try
+        let lines = read_check_file path in
+        if lines = [] then begin
+          prerr_endline ("centl: no assertions in " ^ path);
+          exit 2
+        end;
+        let session = Centl_engine.create_session () in
+        let failures = ref 0 in
+        let operational_failure = ref false in
+        let results = ref [] in
+        List.iter
+          (fun line ->
+            match line with
+            | Check_define { line_number; definition } ->
+                begin match
+                  Centl_engine.evaluate_in_session_outcome_with_limits
+                    ~intent:Centl_engine.Define_only
+                    Centl_engine.default_evaluation_limits session definition
+                with
+                | Error error ->
+                    incr failures;
+                    operational_failure := true;
+                    let entry =
+                      `Assoc
+                        [
+                          ("line", `Int line_number);
+                          ("kind", `String "define");
+                          ("ok", `Bool false);
+                          ("error", Centl_engine.json_of_error error);
+                        ]
+                    in
+                    results := entry :: !results;
+                    if not as_json then
+                      Printf.printf "line %d: ERROR %s\n" line_number
+                        (Centl_engine.error_text error)
+                | Ok _ ->
+                    let entry =
+                      `Assoc
+                        [
+                          ("line", `Int line_number);
+                          ("kind", `String "define");
+                          ("ok", `Bool true);
+                          ("definition", `String definition);
+                        ]
+                    in
+                    results := entry :: !results;
+                    if not as_json then
+                      Printf.printf "line %d: defined\n" line_number
+                end
+            | Check_assert assertion ->
+                let fields =
+                  [
+                    ("left", `String assertion.left);
+                    ("relation", `String assertion.relation);
+                    ("right", `String assertion.right);
+                  ]
+                in
+                let fields =
+                  match assertion.variable with
+                  | None -> fields
+                  | Some (name, domain) ->
+                      fields
+                      @ [
+                          ( "variables",
+                            `List
+                              [
+                                `Assoc
+                                  [
+                                    ("name", `String name);
+                                    ("domain", `String domain);
+                                  ];
+                              ] );
+                        ]
+                in
+                begin match Centl_verify.verify session fields with
+                | Error error ->
+                    incr failures;
+                    operational_failure := true;
+                    let entry =
+                      `Assoc
+                        [
+                          ("line", `Int assertion.line_number);
+                          ("kind", `String "assert");
+                          ("ok", `Bool false);
+                          ("error", Centl_engine.json_of_error error);
+                        ]
+                    in
+                    results := entry :: !results;
+                    if not as_json then
+                      Printf.printf "line %d: ERROR %s\n" assertion.line_number
+                        (Centl_engine.error_text error)
+                | Ok verification ->
+                    let verdict =
+                      Centl_verify.verdict_name verification.verdict
+                    in
+                    if verification.verdict <> Centl_verify.Verified then
+                      incr failures;
+                    let entry =
+                      `Assoc
+                        [
+                          ("line", `Int assertion.line_number);
+                          ("kind", `String "assert");
+                          ("ok", `Bool true);
+                          ( "verification",
+                            Centl_verify.json_of_verification verification );
+                        ]
+                    in
+                    results := entry :: !results;
+                    if not as_json then
+                      Printf.printf "line %d: %s\n" assertion.line_number
+                        verdict
+                end)
+          lines;
+        if as_json then
+          print_json
+            (`Assoc
+               [
+                 ("version", `Int 1);
+                 ("ok", `Bool (!failures = 0));
+                 ("path", `String path);
+                 ("failures", `Int !failures);
+                 ("results", `List (List.rev !results));
+               ]);
+        if !operational_failure then exit 2
+        else if !failures = 0 then exit 0
+        else exit 1
+      with
+      | Sys_error message ->
+          prerr_endline ("centl: " ^ message);
+          exit 2
+      | Failure message ->
+          prerr_endline ("centl: " ^ message);
+          exit 2
+      end
+
+let () =
+  let arguments = Array.to_list Sys.argv |> List.tl in
+  match arguments with
+  | "verify" :: verify_arguments -> run_verify verify_arguments
+  | "check" :: check_arguments -> run_check check_arguments
+  | _ ->
+      begin match parse_arguments arguments with
+      | Error message ->
+          prerr_endline ("centl: " ^ message);
+          prerr_endline usage;
+          exit 2
+      | Ok command ->
+          let color =
+            match (command.mode, command.color) with
+            | (Json | Serve | Mcp), _ | Human, Never -> false
+            | Human, Always -> true
+            | Human, Auto ->
+                Unix.isatty Unix.stdout
+                && Option.is_none (Sys.getenv_opt "NO_COLOR")
+                && Sys.getenv_opt "TERM" <> Some "dumb"
+          in
+          let expression = String.concat " " command.expression_parts in
+          let result =
+            match (command.file, expression, command.mode) with
+            | Some _, _, (Serve | Mcp) ->
+                prerr_endline "centl: --serve and --mcp do not accept --file";
+                Failed
+            | None, expression, (Serve | Mcp) when expression <> "" ->
+                prerr_endline
+                  "centl: --serve and --mcp do not accept an expression";
+                Failed
+            | Some _, expression, _ when expression <> "" ->
+                prerr_endline
+                  "centl: use either --file or an expression, not both";
+                Failed
+            | Some path, _, mode ->
+                begin try run_file ~color mode path
+                with Sys_error message ->
+                  prerr_endline ("centl: " ^ message);
+                  Failed
+                end
+            | None, expression, Human when expression <> "" ->
+                evaluate_human_in_session ~color
+                  (Centl_engine.create_session ())
+                  expression
+            | None, expression, Json when expression <> "" ->
+                evaluate_json expression
+            | None, _, Json -> if run_json_stream () then Success else Failed
+            | None, _, Serve -> if run_serve () then Success else Failed
+            | None, _, Mcp -> if run_mcp () then Success else Failed
+            | None, _, Human when Unix.isatty Unix.stdin ->
+                repl ~color ~persistent_history:command.persistent_history ();
+                Success
+            | None, _, Human -> run_channel ~color Human "standard input" stdin
+          in
+          exit (statement_result_exit result)
+      end
