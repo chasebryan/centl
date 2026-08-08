@@ -1265,9 +1265,13 @@ let parse_check_line line_number line =
   else
     let parts =
       trimmed |> String.split_on_char '|' |> List.map String.trim
-      |> List.filter (( <> ) "")
     in
-    begin match parts with
+    if List.exists (( = ) "") parts then
+      failwith
+        ("line " ^ string_of_int line_number
+       ^ ": contract fields must not be empty")
+    else
+      begin match parts with
     | [ "define"; definition ] ->
         Some (Check_define { line_number; definition })
     | [ relation; left; right ] ->
@@ -1305,27 +1309,22 @@ let read_check_file path =
   Fun.protect
     ~finally:(fun () -> close_in channel)
     (fun () ->
-      let rec loop line_number total_bytes acc =
+      let rec loop line_number acc =
         match Centl_protocol.read_line channel max_bytes with
         | Centl_protocol.Line line ->
-            let total_bytes = total_bytes + String.length line + 1 in
-            if total_bytes > max_bytes then
-              failwith
-                (Printf.sprintf "contract exceeds the %d-byte source limit"
-                   max_bytes);
             let acc =
               match parse_check_line line_number line with
               | None -> acc
               | Some assertion -> assertion :: acc
             in
-            loop (line_number + 1) total_bytes acc
+            loop (line_number + 1) acc
         | Centl_protocol.Oversized ->
             failwith
               (Printf.sprintf "line %d exceeds the %d-byte source limit"
                  line_number max_bytes)
         | Centl_protocol.End -> List.rev acc
       in
-      loop 1 0 [])
+      loop 1 [])
 
 let parse_check_arguments arguments =
   let rec loop path as_json = function

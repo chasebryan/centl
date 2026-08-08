@@ -416,3 +416,14 @@
   $ printf '{"version":2,"expression":"1 + 1"}\n' | ../src/main.exe --json
   {"version":1,"ok":false,"error":{"code":"invalid_request","message":"unsupported protocol version","retryable":false},"provenance":{"schema":1,"producer":{"name":"centl","version":"0.11.0"},"classification":"failure","method":"evaluation","backend":"centl-runtime"}}
   [2]
+
+  $ printf '%s\n' '| equal | 1 | 1' > empty-field-contract.centl
+  $ ../src/main.exe check empty-field-contract.centl; echo $?
+  centl: line 1: contract fields must not be empty
+  2
+
+  $ python3 -c 'from pathlib import Path; p=Path("exact-limit-contract.centl"); prefix=b"equal | 1 | 1\n#"; p.write_bytes(prefix + b"x" * (32768 - len(prefix))); print(p.stat().st_size)'
+  32768
+  $ ../src/main.exe check exact-limit-contract.centl; echo $?
+  line 1: verified
+  0
