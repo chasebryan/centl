@@ -119,6 +119,40 @@ gravity potential energy, spring potential energy, and exact invariant
 comparison. An invariant report distinguishes exact equality from a nonzero
 delta.
 
+### Multi-particle world and exact sphere contact classification
+
+The library has a bounded deterministic world layer for ordered particle state.
+A world accepts at most 256 particles, requires every particle identifier to be
+non-empty and unique, preserves particle order across a step, and exposes exact
+whole-world vector momentum and kinetic-energy diagnostics.
+
+`step_world_symplectic_euler` applies the existing exact particle transition to
+each particle using the supplied force models. This first world transition does
+not implicitly detect or resolve collisions and does not invent pairwise force
+models. Contact processing remains a separate operation.
+
+For contact geometry, a particle may be paired with a positive exact-rational
+sphere radius. CENTL classifies each sphere pair as exactly one of:
+
+- `separated`
+- `touching`
+- `overlapping`
+
+The classifier compares the exact squared center distance with the exact square
+of the summed radii. It therefore needs no square-root normalization and keeps
+rational positions and radii rational. The bounded sphere-world operation
+enumerates unordered pairs deterministically and can return only exactly
+`touching` pairs when requested.
+
+`overlapping` is a first-class result. CENTL does not silently move penetrated
+particles apart or reinterpret overlap as an instantaneous contact suitable for
+an elastic impulse. Likewise, `touching` identifies geometric contact only; the
+separate collision-response primitive still decides whether the relative normal
+motion requires an impulse.
+
+This world/contact layer is currently a library API. It is not yet exposed as a
+new CLI, JSON Lines, or MCP world action.
+
 ### Elastic collisions
 
 CENTL provides an ideal one-dimensional perfectly elastic collision primitive
@@ -141,10 +175,9 @@ momentum and kinetic-energy conservation.
 The machine result records the trust boundary explicitly as
 `caller_supplied_contact_with_distinct_centers`.
 
-These are collision-response primitives, not geometric collision detection or
-a general rigid-body solver. The 3D operation does not infer radii, establish
-that contact occurred, correct penetration, model spin or torque, or apply
-friction.
+These are collision-response primitives, not a general rigid-body solver. The
+3D response operation does not infer radii, establish contact by itself, correct
+penetration, model spin or torque, or apply friction.
 
 ### Physical constants
 
@@ -176,9 +209,11 @@ the same deterministic physics semantics through one read-only, idempotent
 `centl_physics` tool. The MCP adapter delegates to the typed physics protocol;
 it does not implement a second evaluator.
 
-Capability discovery advertises the exact supported actions, including the 1D
-collision operation and `elastic_collision_3d_at_contact`. Physics simulation
-calls retain deterministic request, step, trajectory, and cancellation limits.
+Capability discovery advertises the exact supported machine actions, including
+the 1D collision operation and `elastic_collision_3d_at_contact`. The new
+multi-particle world/contact layer remains library-only for now. Physics
+simulation calls retain deterministic request, step, trajectory, and
+cancellation limits.
 
 ## Numerical contract
 
@@ -187,12 +222,15 @@ The physics engine follows CENTL's exact-first philosophy:
 1. Decimal and rational inputs are parsed as exact rationals.
 2. Rational unit scales are exact.
 3. Dimension mismatches are errors, not implicit coercions.
-4. The fixed-step engine evolves rational states using exact rational arithmetic.
+4. Fixed-step particle and world transitions preserve rational state using
+   exact rational arithmetic.
 5. Discrete simulation results are identified as results of the chosen
    integrator; they are not claimed to equal a closed-form continuous solution.
-6. Collision response is distinguished from contact detection, and the 3D
-   contact assumption is returned explicitly.
-7. No measured quantity is silently promoted to mathematical exactness.
+6. Sphere contact classification uses exact squared-distance comparisons and
+   distinguishes separation, contact, and overlap.
+7. Collision response remains distinct from contact detection, and the 3D
+   machine response reports its caller-supplied contact assumption explicitly.
+8. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -200,9 +238,11 @@ The engine is now real, but it is intentionally small. The following are not
 implemented yet:
 
 - rigid-body orientation and angular inertia tensors
-- geometric broad-phase or narrow-phase collision detection
+- spatial broad-phase collision acceleration
+- general-shape narrow-phase collision detection
 - continuous collision detection
 - penetration correction or contact manifolds
+- automatic world-level collision response
 - constraints and joints
 - frictional contact solvers
 - adaptive or higher-order ODE integrators
@@ -213,7 +253,8 @@ implemented yet:
 
 Those are future engine layers. The present implementation is a deterministic,
 dimension-safe, exact-rational particle mechanics foundation with library, CLI,
-JSON Lines, and MCP interfaces.
+JSON Lines, and MCP interfaces; the multi-particle world/contact layer currently
+extends the library boundary only.
 
 ## Validation
 
@@ -225,6 +266,12 @@ JSON Lines, and MCP interfaces.
 - an exact ten-step gravity trajectory
 - spring force and potential energy
 - kinetic energy
+- exact multi-particle world momentum and kinetic energy
+- deterministic ordered world stepping
+- duplicate world-identifier rejection
+- exact separated, touching, and overlapping sphere classification
+- fractional exact contact without square-root normalization
+- deterministic sphere-pair ordering
 - ideal 1D elastic-collision momentum and energy conservation
 - exact 3D head-on and oblique contact response
 - separating-contact no-impulse behavior
