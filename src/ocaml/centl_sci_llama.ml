@@ -70,7 +70,7 @@ let argv config problem =
     "--temp";
     "0";
     "--json-schema";
-    Centl_sci_ir.json_schema;
+    Centl_sci_schema.json_schema;
     "--prompt";
     prompt problem;
   |]
