@@ -202,7 +202,9 @@ A sphere combines a particle state with a positive length radius:
 }
 ```
 
-Sphere-world particle identifiers must be non-empty and unique. Radius values
+Sphere-world particle identifiers are required explicitly and must be non-empty
+and unique. Unlike the legacy single-particle parser, sphere contact requests do
+not synthesize a default `"body"` identifier when `id` is omitted. Radius values
 must be positive and dimensionally lengths. The existing world constructor
 retains the 256-particle library ceiling; machine contact requests additionally
 must fit the 4,096-pair budget.
@@ -304,10 +306,10 @@ from manufacturing that stronger claim.
 ## Error behavior
 
 Malformed requests, unknown fields, unsupported force models, dimension
-mismatches, invalid rational strings, duplicate or blank world identifiers,
-invalid sphere radii, contact-pair budget violations, and other resource-limit
-violations return structured errors. Unsupported models do not silently fall
-back to a different physical interpretation.
+mismatches, invalid rational strings, missing, duplicate, or blank sphere-world
+identifiers, invalid sphere radii, contact-pair budget violations, and other
+resource-limit violations return structured errors. Unsupported models do not
+silently fall back to a different physical interpretation.
 
 This is important for CENTL AI: a model must not transform an unsupported
 request into a superficially similar supported simulation without making that
@@ -317,20 +319,3 @@ By contrast, `deferred` from the isolated sphere-contact resolver is a valid
 physics result, not an error. It preserves the distinction between invalid input
 and valid input for which the current exact solver refuses to invent a unique
 physical resolution.
-
-## Integration boundary
-
-The JSON Lines interface is the canonical typed physics contract. The MCP
-adapter exposes that same contract through `centl_physics`; it does not
-introduce separate physics semantics.
-
-The next physics boundary is no longer basic multi-particle contact exposure.
-That exists. The next hard problem is **certified evolution across contact**:
-explicit event/contact-time reasoning or another bounded contract that can
-connect discrete integration to contact resolution without pretending CENTL has
-continuous collision detection, penetration correction, rigid-body manifolds,
-friction, spin, or a general simultaneous-contact impulse solver.
-
-Any future expansion that requires measured constants, algebraic normalization,
-or numerical approximation must retain honest provenance and must not be
-mislabeled as exact rational mechanics.
