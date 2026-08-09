@@ -73,6 +73,15 @@ let words text =
   |> String.split_on_char ' '
   |> List.filter (fun token -> token <> "")
 
+let compact_coefficient ~variable token =
+  let token_length = String.length token in
+  let variable_length = String.length variable in
+  if variable_length = 0 || token_length <= variable_length then None
+  else
+    let offset = token_length - variable_length in
+    if String.sub token offset variable_length <> variable then None
+    else canonical_number (String.sub token 0 offset)
+
 let parse_term ~variable = function
   | token :: "squared" :: rest when token = variable ->
       Some (variable ^ "^2", rest)
@@ -92,6 +101,13 @@ let parse_term ~variable = function
   | coefficient :: "times" :: token :: rest
     when token = variable && Option.is_some (canonical_number coefficient) ->
       let coefficient = Option.get (canonical_number coefficient) in
+      Some (coefficient ^ "*" ^ variable, rest)
+  | token :: "squared" :: rest
+    when Option.is_some (compact_coefficient ~variable token) ->
+      let coefficient = Option.get (compact_coefficient ~variable token) in
+      Some (coefficient ^ "*" ^ variable ^ "^2", rest)
+  | token :: rest when Option.is_some (compact_coefficient ~variable token) ->
+      let coefficient = Option.get (compact_coefficient ~variable token) in
       Some (coefficient ^ "*" ^ variable, rest)
   | token :: rest ->
       begin match canonical_number token with
@@ -125,62 +141,71 @@ let parse_expression ~variable text =
       | None -> None
       end
 
+let infer_leading_variable body =
+  match words body with
+  | variable :: _ when valid_identifier variable -> Some variable
+  | _ -> None
+
 let interpret problem =
   let cleaned = trim_terminal problem in
   match drop_prefix_ci "solve " cleaned with
   | None -> None
   | Some body ->
       let lower = String.lowercase_ascii body in
-      begin match rfind_substring ~needle:" for " lower with
+      let equation, variable =
+        match rfind_substring ~needle:" for " lower with
+        | Some for_index ->
+            let equation = String.sub body 0 for_index |> String.trim in
+            let variable =
+              String.sub body (for_index + 5) (String.length body - for_index - 5)
+              |> String.trim |> String.lowercase_ascii
+            in
+            (equation, if valid_identifier variable then Some variable else None)
+        | None -> (body, infer_leading_variable body)
+      in
+      begin match variable with
       | None -> None
-      | Some for_index ->
-          let equation = String.sub body 0 for_index |> String.trim in
-          let variable =
-            String.sub body (for_index + 5) (String.length body - for_index - 5)
-            |> String.trim |> String.lowercase_ascii
-          in
-          if not (valid_identifier variable) then None
-          else
-            let equation_lower = String.lowercase_ascii equation in
-            begin match find_substring ~needle:" equals " equation_lower with
-            | None -> None
-            | Some equal_index ->
-                let after_equal = equal_index + String.length " equals " in
-                let right_length = String.length equation - after_equal in
-                let left = String.sub equation 0 equal_index |> String.trim in
-                let right =
-                  String.sub equation after_equal right_length |> String.trim
-                in
-                let remaining_right = String.lowercase_ascii right in
-                if
-                  Option.is_some
-                    (find_substring ~needle:" equals " remaining_right)
-                then None
-                else
-                  begin match
-                    ( parse_expression ~variable left,
-                      parse_expression ~variable right )
-                  with
-                  | Some left, Some right ->
-                      begin match
-                        Centl_sci_ir.of_json
-                          (`Assoc
-                             [
-                               ("schema_version", `Int 1);
-                               ("domain", `String "mathematics");
-                               ("problem_class", `String "polynomial_equation");
-                               ("operation", `String "solve");
-                               ("assumptions", `List []);
-                               ("left", `String left);
-                               ("relation", `String "equal");
-                               ("right", `String right);
-                               ("variable", `String variable);
-                             ])
-                      with
-                      | Ok ir -> Some ir
-                      | Error _ -> None
-                      end
-                  | _ -> None
-                  end
-            end
+      | Some variable ->
+          let equation_lower = String.lowercase_ascii equation in
+          begin match find_substring ~needle:" equals " equation_lower with
+          | None -> None
+          | Some equal_index ->
+              let after_equal = equal_index + String.length " equals " in
+              let right_length = String.length equation - after_equal in
+              let left = String.sub equation 0 equal_index |> String.trim in
+              let right =
+                String.sub equation after_equal right_length |> String.trim
+              in
+              let remaining_right = String.lowercase_ascii right in
+              if
+                Option.is_some
+                  (find_substring ~needle:" equals " remaining_right)
+              then None
+              else
+                begin match
+                  ( parse_expression ~variable left,
+                    parse_expression ~variable right )
+                with
+                | Some left, Some right ->
+                    begin match
+                      Centl_sci_ir.of_json
+                        (`Assoc
+                           [
+                             ("schema_version", `Int 1);
+                             ("domain", `String "mathematics");
+                             ("problem_class", `String "polynomial_equation");
+                             ("operation", `String "solve");
+                             ("assumptions", `List []);
+                             ("left", `String left);
+                             ("relation", `String "equal");
+                             ("right", `String right);
+                             ("variable", `String variable);
+                           ])
+                    with
+                    | Ok ir -> Some ir
+                    | Error _ -> None
+                    end
+                | _ -> None
+                end
+          end
       end
