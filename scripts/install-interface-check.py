@@ -51,6 +51,12 @@ fi
 set -eu
 if [ "${1:-}" = "What is 0.1 plus 0.2?" ]; then
   printf '3/10\\n'
+elif [ "${1:-}" = "--repl" ]; then
+  printf 'CENTL-SCi v0.0.1-Camelus\\n'
+  printf 'Free for science.\\n\\n'
+  printf '> '
+  IFS= read -r command || true
+  [ "${command:-}" = ":exit" ] || exit 2
 else
   printf 'fake centl-sci: unsupported test input\\n' >&2
   exit 2
@@ -111,6 +117,17 @@ def run() -> None:
         ).strip()
         if sci_output != "3/10":
             raise SystemExit(f"installed CENTL-SCi returned {sci_output!r}")
+
+        repl = subprocess.run(
+            [str(sci_command), "--repl"],
+            input=":exit\n",
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        ).stdout
+        if "CENTL-SCi v0.0.1-Camelus" not in repl or "Free for science." not in repl:
+            raise SystemExit(f"installed CENTL-SCi REPL did not initialize correctly:\n{repl}")
 
         output = completed.stdout
         for expected in (
