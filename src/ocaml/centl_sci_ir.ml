@@ -1,10 +1,7 @@
 type error = { code : string; message : string }
 
 type t =
-  | Exact_expression of {
-      expression : string;
-      exact_assumptions : string list;
-    }
+  | Exact_expression of { expression : string; exact_assumptions : string list }
   | Polynomial_equation of {
       left : string;
       right : string;
@@ -17,12 +14,14 @@ type t =
       to_unit : string;
       conversion_assumptions : string list;
     }
-  | Unsupported of { unsupported_reason : string; unsupported_assumptions : string list }
+  | Unsupported of {
+      unsupported_reason : string;
+      unsupported_assumptions : string list;
+    }
 
 let ( let* ) = Result.bind
 let fail code message = Error { code; message }
 let string_of_error error = error.code ^ ": " ^ error.message
-
 let max_model_text_bytes = 4_096
 let max_assumptions = 16
 let max_assumption_bytes = 512
@@ -108,8 +107,8 @@ let assumptions_field fields =
           | [] -> Ok (List.rev acc)
           | `String assumption :: rest ->
               let* assumption =
-                validate_text ~field:"assumption" ~max_bytes:max_assumption_bytes
-                  assumption
+                validate_text ~field:"assumption"
+                  ~max_bytes:max_assumption_bytes assumption
               in
               parse (assumption :: acc) rest
           | _ -> fail "invalid_ir" "assumptions must contain only strings"
@@ -163,14 +162,18 @@ let parse_polynomial_equation fields =
     let* left = string_field "left" fields in
     let* right = string_field "right" fields in
     let* variable = string_field "variable" fields in
-    let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
+    let* left =
+      validate_text ~field:"left" ~max_bytes:max_model_text_bytes left
+    in
     let* right =
       validate_text ~field:"right" ~max_bytes:max_model_text_bytes right
     in
     let* variable = validate_text ~field:"variable" ~max_bytes:64 variable in
     if not (valid_identifier variable) then
       fail "invalid_ir" "variable must be a CENTL identifier"
-    else if contains_any left [ ','; '='; ';' ] || contains_any right [ ','; '='; ';' ]
+    else if
+      contains_any left [ ','; '='; ';' ]
+      || contains_any right [ ','; '='; ';' ]
     then
       fail "invalid_ir"
         "equation sides may not contain commas, equality signs, or semicolons"
@@ -193,7 +196,9 @@ let parse_unit_conversion fields =
   let* from_unit =
     validate_text ~field:"from_unit" ~max_bytes:max_unit_bytes from_unit
   in
-  let* to_unit = validate_text ~field:"to_unit" ~max_bytes:max_unit_bytes to_unit in
+  let* to_unit =
+    validate_text ~field:"to_unit" ~max_bytes:max_unit_bytes to_unit
+  in
   Ok
     (Unit_conversion
        { value; from_unit; to_unit; conversion_assumptions = assumptions })
@@ -206,7 +211,9 @@ let parse_unsupported fields =
       ~operation:"unsupported"
   in
   let* reason = string_field "reason" fields in
-  let* reason = validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason in
+  let* reason =
+    validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason
+  in
   Ok
     (Unsupported
        { unsupported_reason = reason; unsupported_assumptions = assumptions })
@@ -270,7 +277,9 @@ let to_json value =
   in
   match value with
   | Exact_expression data ->
-      `Assoc (common data.exact_assumptions @ [ ("expression", `String data.expression) ])
+      `Assoc
+        (common data.exact_assumptions
+        @ [ ("expression", `String data.expression) ])
   | Polynomial_equation data ->
       `Assoc
         (common data.equation_assumptions
