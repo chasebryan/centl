@@ -26,10 +26,10 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
-	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
-	hardening-test differential-test sci-model-test sci-interface-check sci-assimilate \
-	sci-assimilate-full sci-assimilate-publish build test release clean
+.PHONY: all format format-fix fmt lint quality install-interface-check verify extract \
+	native-build native-test adversarial-test fuzz-test metamorphic-test sanitizer-test \
+	performance-test hardening-test differential-test sci-model-test sci-interface-check \
+	sci-assimilate sci-assimilate-full sci-assimilate-publish build test release clean
 
 all: build
 
@@ -46,7 +46,10 @@ lint:
 	$(OPAM) lint centl.opam
 	scripts/check-toolchain-pins
 
-quality: format lint
+install-interface-check:
+	$(PYTHON) scripts/install-interface-check.py
+
+quality: format lint install-interface-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
