@@ -105,6 +105,61 @@ let test_rational_crossing_resolves_and_advances_remainder () =
   Alcotest.(check bool) "momentum" true result.momentum_conserved;
   Alcotest.(check bool) "kinetic energy" true result.kinetic_energy_conserved
 
+let test_endpoint_crossing_resolves_at_boundary () =
+  let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
+  let sphere2 = body ~id:"b" ~x:"4" ~y:"0" ~vx:"0" ~vy:"0" in
+  let result =
+    evolve_linear_sphere_pair_through_contact ~duration:(time "2") sphere1
+      sphere2
+    |> completed
+  in
+  Alcotest.(check string)
+    "certificate" "crossing_contact"
+    (linear_contact_status_to_string result.certificate.status);
+  check_q "event time" "2" (event_time result).si_value;
+  Alcotest.(check string) "response" "resolved" (response_status result);
+  Alcotest.(check string)
+    "at-event relation" "touching"
+    (contact_relation_to_string (contact_evidence result).relation);
+  check_vector_x "final sphere1 x" "2" result.final_sphere1.particle.position;
+  check_vector_x "final sphere2 x" "4" result.final_sphere2.particle.position;
+  check_q "final sphere1 vx" "0" result.final_sphere1.particle.velocity.x;
+  check_q "final sphere2 vx" "1" result.final_sphere2.particle.velocity.x;
+  Alcotest.(check bool) "momentum" true result.momentum_conserved;
+  Alcotest.(check bool) "kinetic energy" true result.kinetic_energy_conserved
+
+let test_oblique_rational_crossing_stays_exact () =
+  let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
+  let sphere2 = body ~id:"b" ~x:"16/5" ~y:"8/5" ~vx:"0" ~vy:"0" in
+  let result =
+    evolve_linear_sphere_pair_through_contact ~duration:(time "3") sphere1
+      sphere2
+    |> completed
+  in
+  Alcotest.(check string)
+    "certificate" "crossing_contact"
+    (linear_contact_status_to_string result.certificate.status);
+  check_q "event time" "2" (event_time result).si_value;
+  let evidence = contact_evidence result in
+  Alcotest.(check string)
+    "at-event relation" "touching"
+    (contact_relation_to_string evidence.relation);
+  check_vector_x "contact delta x" "-6/5" evidence.center_delta;
+  check_vector_y "contact delta y" "-8/5" evidence.center_delta;
+  check_q "distance squared" "4" evidence.distance_squared.si_value;
+  check_q "radius sum squared" "4" evidence.radius_sum_squared.si_value;
+  Alcotest.(check string) "response" "resolved" (response_status result);
+  check_q "sphere1 vx" "16/25" result.final_sphere1.particle.velocity.x;
+  check_q "sphere1 vy" "-12/25" result.final_sphere1.particle.velocity.y;
+  check_q "sphere2 vx" "9/25" result.final_sphere2.particle.velocity.x;
+  check_q "sphere2 vy" "12/25" result.final_sphere2.particle.velocity.y;
+  check_vector_x "final sphere1 x" "66/25" result.final_sphere1.particle.position;
+  check_vector_y "final sphere1 y" "-12/25" result.final_sphere1.particle.position;
+  check_vector_x "final sphere2 x" "89/25" result.final_sphere2.particle.position;
+  check_vector_y "final sphere2 y" "52/25" result.final_sphere2.particle.position;
+  Alcotest.(check bool) "momentum" true result.momentum_conserved;
+  Alcotest.(check bool) "kinetic energy" true result.kinetic_energy_conserved
+
 let test_touching_at_start_approaching_resolves_immediately () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"2" ~y:"0" ~vx:"0" ~vy:"0" in
@@ -242,6 +297,10 @@ let () =
             test_no_contact_advances_full_duration;
           Alcotest.test_case "rational crossing" `Quick
             test_rational_crossing_resolves_and_advances_remainder;
+          Alcotest.test_case "endpoint crossing" `Quick
+            test_endpoint_crossing_resolves_at_boundary;
+          Alcotest.test_case "oblique rational crossing" `Quick
+            test_oblique_rational_crossing_stays_exact;
           Alcotest.test_case "touching start approaching" `Quick
             test_touching_at_start_approaching_resolves_immediately;
           Alcotest.test_case "touching start separating" `Quick
