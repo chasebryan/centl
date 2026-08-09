@@ -32,9 +32,7 @@ let particle_world state =
 
 let vector_exact_equal a b =
   dim_equal a.vector_dimension b.vector_dimension
-  && Q.equal a.x b.x
-  && Q.equal a.y b.y
-  && Q.equal a.z b.z
+  && Q.equal a.x b.x && Q.equal a.y b.y && Q.equal a.z b.z
 
 let quantity_exact_equal a b =
   dim_equal a.quantity_dimension b.quantity_dimension
