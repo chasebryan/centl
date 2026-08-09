@@ -121,10 +121,13 @@ let missing_information_text outcome =
         let detail =
           String.sub reason 8 (String.length reason - 8) |> String.trim
         in
-        if detail = "" then Some "More information is required to solve this problem."
+        if detail = "" then
+          Some "More information is required to solve this problem."
         else
           let detail =
-            match strip_suffix "." detail with Some value -> value | None -> detail
+            match strip_suffix "." detail with
+            | Some value -> value
+            | None -> detail
           in
           Some ("More information is required: " ^ detail ^ ".")
       else if contains_substring ~needle:"missing" lower then
