@@ -52,6 +52,7 @@
   Centl_physics_protocol
   Centl_physics_world_json
   Centl_physics_jsonl
+  Centl_physics_capabilities
   Centl_physics_collision_json
   Centl_physics_server
   Centl_physics_mcp_output
