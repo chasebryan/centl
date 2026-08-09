@@ -1,6 +1,6 @@
 # CENTL-SCi
 
-Status: experimental architecture, version `0.0.1`.
+Status: experimental architecture, version `0.0.1-Camelus`.
 
 CENTL-SCi means **Chase's Explicit Number Theory Language — Specific CENTL
 Interpreter**.
@@ -42,7 +42,7 @@ CENTL protocol        CENTL Physics protocol
 
 CENTL remains the authority wherever it has implemented semantics.
 
-## v0.0.1 support boundary
+## v0.0.1-Camelus support boundary
 
 The first milestone deliberately supports only four IR classes:
 
@@ -145,7 +145,7 @@ do not depend on Qwen-specific APIs or a hosted inference provider.
 ## Model candidates
 
 No model is declared mathematically authoritative and no model is bundled with
-CENTL-SCi v0.0.1.
+CENTL-SCi v0.0.1-Camelus.
 
 The initial evaluation candidates are:
 
@@ -270,8 +270,9 @@ The final SCi status is derived from CENTL's structured result:
 CENTL-SCi never converts an `unsupported` CENTL result into a model-generated
 numerical answer.
 
-Interpreter assumptions remain separate from CENTL evidence. v0.0.1 does not
-silently invent physical constants, initial conditions, or missing quantities.
+Interpreter assumptions remain separate from CENTL evidence. v0.0.1-Camelus does
+not silently invent physical constants, initial conditions, or missing
+quantities.
 
 ## Security boundary
 
@@ -335,10 +336,10 @@ OCaml package dependency; it reuses `unix` and `yojson`, which CENTL already
 uses.
 
 The current native release archive scripts still explicitly package only
-`centl` and `centl-physics`. Therefore v0.0.1 should be treated as source/opam
-experimental functionality until those archive scripts are deliberately
-extended and tested for `centl-sci`. Model weights remain a separate artifact
-even after native packaging is added.
+`centl` and `centl-physics`. Therefore v0.0.1-Camelus should be treated as
+source/opam experimental functionality until those archive scripts are
+deliberately extended and tested for `centl-sci`. Model weights remain a
+separate artifact even after native packaging is added.
 
 ## Next interpretation surfaces
 
