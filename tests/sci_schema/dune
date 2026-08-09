@@ -1,0 +1,4 @@
+(test
+ (name test_schema)
+ (modules test_schema)
+ (libraries centl_lib alcotest yojson))
