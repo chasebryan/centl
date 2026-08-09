@@ -69,8 +69,8 @@ let argv config problem =
     "0";
     "--temp";
     "0";
-    "--json-schema";
-    Centl_sci_schema.json_schema;
+    "--grammar";
+    Centl_sci_schema.llama_grammar;
     "--prompt";
     prompt problem;
   |]
