@@ -48,6 +48,30 @@ let test_rational_crossing_time () =
   | _ -> Alcotest.fail "expected rational first-contact time"
   end
 
+let test_crossing_exactly_at_interval_end () =
+  let a =
+    sphere_body ~id:"a" ~position:("0", "0", "0") ~velocity:("1", "0", "0")
+  in
+  let b =
+    sphere_body ~id:"b" ~position:("4", "0", "0") ~velocity:("0", "0", "0")
+  in
+  let certificate =
+    certify_linear_sphere_contact ~duration:(duration "2") a b
+  in
+  check_status "endpoint crossing" "crossing_contact" certificate;
+  check_q "endpoint minimum is zero" Q.zero
+    certificate.minimum_clearance_squared.si_value;
+  begin match certificate.discriminant with
+  | Some discriminant ->
+      check_q "endpoint discriminant" (q "16") discriminant.si_value
+  | None -> Alcotest.fail "endpoint crossing must expose a discriminant"
+  end;
+  begin match certificate.first_contact_time with
+  | Some (Rational_contact_time time) ->
+      check_q "endpoint first contact" (q "2") time.si_value
+  | _ -> Alcotest.fail "endpoint crossing must report exact time two"
+  end
+
 let test_exact_tangent_contact () =
   let a =
     sphere_body ~id:"a" ~position:("0", "0", "0") ~velocity:("1", "0", "0")
@@ -176,6 +200,32 @@ let test_initial_overlap () =
   check_q "negative initial clearance" (q "-3")
     certificate.polynomial_c.si_value
 
+let test_distinct_ids_required () =
+  let a =
+    sphere_body ~id:"same" ~position:("0", "0", "0")
+      ~velocity:("0", "0", "0")
+  in
+  let b =
+    sphere_body ~id:"same" ~position:("3", "0", "0")
+      ~velocity:("0", "0", "0")
+  in
+  match certify_linear_sphere_contact ~duration:(duration "1") a b with
+  | _ -> Alcotest.fail "same-id contact pair must be rejected"
+  | exception Physics_error "linear contact pair requires distinct particle ids" -> ()
+  | exception Physics_error message ->
+      Alcotest.fail ("unexpected error: " ^ message)
+
+let test_duration_dimension_required () =
+  let a =
+    sphere_body ~id:"a" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
+  in
+  let b =
+    sphere_body ~id:"b" ~position:("3", "0", "0") ~velocity:("0", "0", "0")
+  in
+  match certify_linear_sphere_contact ~duration:(quantity Q.one "m") a b with
+  | _ -> Alcotest.fail "non-time duration must be rejected"
+  | exception Physics_error _ -> ()
+
 let test_negative_duration_rejected () =
   let a =
     sphere_body ~id:"a" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
@@ -196,6 +246,8 @@ let () =
         [
           Alcotest.test_case "rational crossing" `Quick
             test_rational_crossing_time;
+          Alcotest.test_case "endpoint crossing" `Quick
+            test_crossing_exactly_at_interval_end;
           Alcotest.test_case "tangent" `Quick test_exact_tangent_contact;
           Alcotest.test_case "irrational crossing" `Quick
             test_irrational_quadratic_contact_time;
@@ -207,6 +259,9 @@ let () =
             test_stationary_separation;
           Alcotest.test_case "touching start" `Quick test_touching_at_start;
           Alcotest.test_case "initial overlap" `Quick test_initial_overlap;
+          Alcotest.test_case "distinct ids" `Quick test_distinct_ids_required;
+          Alcotest.test_case "duration dimension" `Quick
+            test_duration_dimension_required;
           Alcotest.test_case "negative duration" `Quick
             test_negative_duration_rejected;
         ] );
