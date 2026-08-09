@@ -1,7 +1,5 @@
 type executor = Core | Physics
-
 type plan = { executor : executor; request : Yojson.Safe.t }
-
 type status = Established | Unresolved | Unsupported | Failed
 
 type outcome = {
@@ -45,7 +43,8 @@ let plan = function
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
       let expression =
-        Printf.sprintf "solve((%s) = (%s), %s)" data.left data.right data.variable
+        Printf.sprintf "solve((%s) = (%s), %s)" data.left data.right
+          data.variable
       in
       Some { executor = Core; request = core_request expression }
   | Centl_sci_ir.Unit_conversion data ->
@@ -69,10 +68,14 @@ let assoc_field name = function
   | _ -> None
 
 let string_field name json =
-  match assoc_field name json with Some (`String value) -> Some value | _ -> None
+  match assoc_field name json with
+  | Some (`String value) -> Some value
+  | _ -> None
 
 let bool_field name json =
-  match assoc_field name json with Some (`Bool value) -> Some value | _ -> None
+  match assoc_field name json with
+  | Some (`Bool value) -> Some value
+  | _ -> None
 
 let resolution_status response =
   match assoc_field "resolution" response with
@@ -87,7 +90,8 @@ let classify executor response =
       | Physics -> Established
       | Core ->
           begin match resolution_status response with
-          | Some ("computed" | "transformed" | "unchanged_proved") -> Established
+          | Some ("computed" | "transformed" | "unchanged_proved") ->
+              Established
           | Some ("residual" | "unsupported" | "indeterminate") -> Unresolved
           | Some _ | None -> Unresolved
           end
@@ -163,7 +167,8 @@ let provenance_text response =
 
 let interpretation_text ir =
   Printf.sprintf "%s.%s -> %s" (Centl_sci_ir.domain ir)
-    (Centl_sci_ir.problem_class ir) (Centl_sci_ir.operation ir)
+    (Centl_sci_ir.problem_class ir)
+    (Centl_sci_ir.operation ir)
 
 let assumptions_text assumptions =
   match assumptions with [] -> "none" | values -> String.concat "; " values
