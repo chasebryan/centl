@@ -123,11 +123,14 @@ dune exec centl-physics -- gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10
 ```
 
 Native packages built from this development path install `centl-physics`
-alongside `centl`. The initial engine implements seven-base SI dimensional
-analysis, exact unit conversion, dimension-safe 3D vectors, particle state,
-constant force, uniform gravity, Hooke springs, linear drag, symplectic-Euler
-time evolution, energy and momentum diagnostics, and exact ideal 1D elastic
-collision response. It does not yet claim rigid-body contact simulation,
+alongside `centl`. The engine implements seven-base SI dimensional analysis,
+exact unit conversion, dimension-safe 3D vectors, particle state, constant
+force, uniform gravity, Hooke springs, linear drag, symplectic-Euler time
+evolution, energy and momentum diagnostics, exact ideal 1D elastic collision
+response, and an exact frictionless 3D response primitive for a caller-supplied
+contact with distinct particle centers. The 3D primitive deliberately does not
+perform collision detection, infer radii, correct penetration, or model spin,
+torque, or friction. It does not yet claim a general rigid-body contact solver,
 adaptive integration, continuum/fluid solvers, or rigorous truncation-error
 enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) for the exact contract and
 current boundary.
