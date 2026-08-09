@@ -52,7 +52,8 @@ if git diff --cached --quiet -- "$json_report" "$markdown_report"; then
   echo "CENTL-SCi: assimilation report unchanged; nothing to publish"
 else
   short_commit=$(printf '%s' "$source_head" | cut -c1-8)
-  git commit -m "Record CENTL-SCi assimilation report for $short_commit"
+  git commit --only -m "Record CENTL-SCi assimilation report for $short_commit" -- \
+    "$json_report" "$markdown_report"
   git push origin "HEAD:$branch"
   echo "CENTL-SCi: published assimilation report on $branch"
 fi
