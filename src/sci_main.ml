@@ -1,6 +1,8 @@
+type color_mode = Auto | Always | Never
+
 let usage =
   "Usage: centl-sci --model MODEL.gguf [--llama-cli PATH] [--json] \
-   'mathematics or physics problem'"
+   [--color=MODE] 'mathematics or physics problem'"
 
 let env_or default name =
   match Sys.getenv_opt name with
@@ -22,10 +24,66 @@ let read_stdin_problem () =
   in
   loop 0
 
+let color_enabled = function
+  | Always -> true
+  | Never -> false
+  | Auto ->
+      Sys.getenv_opt "NO_COLOR" = None
+      && Unix.isatty (Unix.descr_of_out_channel stdout)
+
+let ansi enabled code text =
+  if enabled then Printf.sprintf "\027[%sm%s\027[0m" code text else text
+
+let brand_header color =
+  String.concat "\n"
+    [
+      ansi color "1;36"
+        "╭──────────────────────────────────────────────────────────────╮";
+      ansi color "1;36" "│  CENTL-SCi                                                   │";
+      ansi color "36"
+        "│  Free Computation Foundation · Free for science.             │";
+      ansi color "1;36"
+        "╰──────────────────────────────────────────────────────────────╯";
+    ]
+
+let colorize_line color line =
+  if String.starts_with ~prefix:"Status: established" line then
+    ansi color "1;32" line
+  else if
+    String.starts_with ~prefix:"Status: unresolved" line
+    || String.starts_with ~prefix:"Status: unsupported" line
+  then ansi color "1;33" line
+  else if String.starts_with ~prefix:"Status: failed" line then
+    ansi color "1;31" line
+  else if String.starts_with ~prefix:"Result:" line then ansi color "1;37" line
+  else
+    match String.index_opt line ':' with
+    | None -> line
+    | Some index ->
+        let label = String.sub line 0 index in
+        let rest = String.sub line index (String.length line - index) in
+        ansi color "36" label ^ rest
+
+let branded_human ~color ~problem outcome =
+  let body =
+    Centl_sci_runtime.human ~problem outcome |> String.split_on_char '\n'
+    |> List.map (colorize_line color) |> String.concat "\n"
+  in
+  String.concat "\n"
+    [
+      brand_header color;
+      "";
+      ansi color "36" "Problem";
+      "  " ^ problem;
+      "";
+      body;
+    ]
+
 let () =
   let model = ref (Sys.getenv_opt "CENTL_SCI_MODEL") in
   let llama_cli = ref (env_or "llama-cli" "CENTL_SCI_LLAMA_CLI") in
   let json_output = ref false in
+  let color = ref Auto in
   let anonymous = ref [] in
   let options =
     [
@@ -36,6 +94,15 @@ let () =
         Arg.Set_string llama_cli,
         "PATH llama.cpp llama-cli executable (default: llama-cli)" );
       ("--json", Arg.Set json_output, "emit the reproducible structured result");
+      ("--color", Arg.Unit (fun () -> color := Always), "force ANSI color");
+      ("--no-color", Arg.Unit (fun () -> color := Never), "disable ANSI color");
+      ("--color=auto", Arg.Unit (fun () -> color := Auto), "automatic ANSI color");
+      ( "--color=always",
+        Arg.Unit (fun () -> color := Always),
+        "force ANSI color" );
+      ( "--color=never",
+        Arg.Unit (fun () -> color := Never),
+        "disable ANSI color" );
       ( "--version",
         Arg.Unit
           (fun () ->
@@ -68,7 +135,9 @@ let () =
       if !json_output then
         Centl_sci_runtime.to_json ~problem outcome
         |> Yojson.Safe.pretty_to_string |> print_endline
-      else Centl_sci_runtime.human ~problem outcome |> print_endline;
+      else
+        branded_human ~color:(color_enabled !color) ~problem outcome
+        |> print_endline;
       begin match outcome.status with
       | Centl_sci_runtime.Failed -> exit 1
       | _ -> ()
