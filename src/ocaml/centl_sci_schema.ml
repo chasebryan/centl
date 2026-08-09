@@ -3,21 +3,25 @@ let json_schema =
 
 (*
    llama.cpp's JSON-Schema-to-GBNF converter is intentionally not part of the
-   CENTL-SCi trust boundary.  The runtime uses this small native GBNF grammar
+   CENTL-SCi trust boundary. The runtime uses this small native GBNF grammar
    directly, then reparses and independently validates the resulting JSON
-   against the stricter OCaml IR contract above.  Fixed property order keeps
-   the generation grammar small and deterministic without changing what the
-   IR validator accepts.
+   against the stricter OCaml IR contract above.
+
+   Generation is deliberately canonical and whitespace-free. Earlier grammar
+   revisions admitted unbounded whitespace before/after the root object. The
+   /completion server could therefore keep producing legal whitespace until
+   n_predict was exhausted even after a complete IR had been generated. A
+   canonical terminating root both removes that performance trap and reduces
+   token count without weakening the independent IR validator.
 *)
 let llama_grammar =
-  {|root ::= ws (exact-expression | polynomial-equation | unit-conversion | unsupported) ws
-exact-expression ::= "{" ws "\"schema_version\"" ws ":" ws "1" ws "," ws "\"domain\"" ws ":" ws "\"mathematics\"" ws "," ws "\"problem_class\"" ws ":" ws "\"exact_expression\"" ws "," ws "\"operation\"" ws ":" ws "\"compute\"" ws "," ws "\"assumptions\"" ws ":" ws assumptions ws "," ws "\"expression\"" ws ":" ws string ws "}"
-polynomial-equation ::= "{" ws "\"schema_version\"" ws ":" ws "1" ws "," ws "\"domain\"" ws ":" ws "\"mathematics\"" ws "," ws "\"problem_class\"" ws ":" ws "\"polynomial_equation\"" ws "," ws "\"operation\"" ws ":" ws "\"solve\"" ws "," ws "\"assumptions\"" ws ":" ws assumptions ws "," ws "\"left\"" ws ":" ws string ws "," ws "\"relation\"" ws ":" ws "\"equal\"" ws "," ws "\"right\"" ws ":" ws string ws "," ws "\"variable\"" ws ":" ws string ws "}"
-unit-conversion ::= "{" ws "\"schema_version\"" ws ":" ws "1" ws "," ws "\"domain\"" ws ":" ws "\"physics\"" ws "," ws "\"problem_class\"" ws ":" ws "\"unit_conversion\"" ws "," ws "\"operation\"" ws ":" ws "\"convert\"" ws "," ws "\"assumptions\"" ws ":" ws assumptions ws "," ws "\"value\"" ws ":" ws string ws "," ws "\"from_unit\"" ws ":" ws string ws "," ws "\"to_unit\"" ws ":" ws string ws "}"
-unsupported ::= "{" ws "\"schema_version\"" ws ":" ws "1" ws "," ws "\"domain\"" ws ":" ws "\"unsupported\"" ws "," ws "\"problem_class\"" ws ":" ws "\"unsupported\"" ws "," ws "\"operation\"" ws ":" ws "\"unsupported\"" ws "," ws "\"assumptions\"" ws ":" ws assumptions ws "," ws "\"reason\"" ws ":" ws string ws "}"
-assumptions ::= "[" ws (string (ws "," ws string)*)? ws "]"
+  {|root ::= exact-expression | polynomial-equation | unit-conversion | unsupported
+exact-expression ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"exact_expression\",\"operation\":\"compute\",\"assumptions\":" assumptions ",\"expression\":" string "}"
+polynomial-equation ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"polynomial_equation\",\"operation\":\"solve\",\"assumptions\":" assumptions ",\"left\":" string ",\"relation\":\"equal\",\"right\":" string ",\"variable\":" string "}"
+unit-conversion ::= "{\"schema_version\":1,\"domain\":\"physics\",\"problem_class\":\"unit_conversion\",\"operation\":\"convert\",\"assumptions\":" assumptions ",\"value\":" string ",\"from_unit\":" string ",\"to_unit\":" string "}"
+unsupported ::= "{\"schema_version\":1,\"domain\":\"unsupported\",\"problem_class\":\"unsupported\",\"operation\":\"unsupported\",\"assumptions\":" assumptions ",\"reason\":" string "}"
+assumptions ::= "[" (string ("," string)*)? "]"
 string ::= "\"" char* "\""
 char ::= [^"\\\x7F\x00-\x1F] | "\\" (["\\/bfnrt] | "u" hex hex hex hex)
 hex ::= [0-9a-fA-F]
-ws ::= [ \t\n]*
 |}
