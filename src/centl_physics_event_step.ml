@@ -54,12 +54,11 @@ let advance_sphere_linear ~dt body =
 
 let vector_equal a b =
   dim_equal a.vector_dimension b.vector_dimension
-  && Q.equal a.x b.x
-  && Q.equal a.y b.y
-  && Q.equal a.z b.z
+  && Q.equal a.x b.x && Q.equal a.y b.y && Q.equal a.z b.z
 
 let quantity_equal a b =
-  dim_equal a.quantity_dimension b.quantity_dimension && Q.equal a.si_value b.si_value
+  dim_equal a.quantity_dimension b.quantity_dimension
+  && Q.equal a.si_value b.si_value
 
 let particle_equal a b =
   String.equal a.id b.id
@@ -67,13 +66,16 @@ let particle_equal a b =
   && vector_equal a.position b.position
   && vector_equal a.velocity b.velocity
 
-let sphere_equal a b = particle_equal a.particle b.particle && quantity_equal a.radius b.radius
+let sphere_equal a b =
+  particle_equal a.particle b.particle && quantity_equal a.radius b.radius
 
 let pair_momentum sphere1 sphere2 =
   vector_add (momentum sphere1.particle) (momentum sphere2.particle)
 
 let pair_kinetic_energy sphere1 sphere2 =
-  quantity_add (kinetic_energy sphere1.particle) (kinetic_energy sphere2.particle)
+  quantity_add
+    (kinetic_energy sphere1.particle)
+    (kinetic_energy sphere2.particle)
 
 let completed ~certificate ~event_time ~response_status ~contact_evidence
     ~initial_sphere1 ~initial_sphere2 ~contact_sphere1 ~contact_sphere2
@@ -110,44 +112,47 @@ let resolve_rational_event ~duration ~certificate ~event_time sphere1 sphere2 =
          "internal event-step invariant: contact time exceeds duration");
   let contact_sphere1 = advance_sphere_linear ~dt:event_time sphere1 in
   let contact_sphere2 = advance_sphere_linear ~dt:event_time sphere2 in
-  let contact_evidence = classify_sphere_contact contact_sphere1 contact_sphere2 in
+  let contact_evidence =
+    classify_sphere_contact contact_sphere1 contact_sphere2
+  in
   if contact_evidence.relation <> Touching then
     raise
       (Physics_error
-         "internal event-step invariant: certified rational event is not exact contact");
+         "internal event-step invariant: certified rational event is not exact \
+          contact");
   let response =
-    elastic_collision_3d_at_contact contact_sphere1.particle contact_sphere2.particle
+    elastic_collision_3d_at_contact contact_sphere1.particle
+      contact_sphere2.particle
   in
-  let responded_sphere1 = { contact_sphere1 with particle = response.particle1 } in
-  let responded_sphere2 = { contact_sphere2 with particle = response.particle2 } in
+  let responded_sphere1 =
+    { contact_sphere1 with particle = response.particle1 }
+  in
+  let responded_sphere2 =
+    { contact_sphere2 with particle = response.particle2 }
+  in
   let remaining = quantity_sub duration event_time in
   let final_sphere1 = advance_sphere_linear ~dt:remaining responded_sphere1 in
   let final_sphere2 = advance_sphere_linear ~dt:remaining responded_sphere2 in
   completed ~certificate ~event_time:(Some event_time)
-    ~response_status:(Some response.status) ~contact_evidence:(Some contact_evidence)
-    ~initial_sphere1:sphere1 ~initial_sphere2:sphere2
-    ~contact_sphere1:(Some contact_sphere1) ~contact_sphere2:(Some contact_sphere2)
-    ~final_sphere1 ~final_sphere2
+    ~response_status:(Some response.status)
+    ~contact_evidence:(Some contact_evidence) ~initial_sphere1:sphere1
+    ~initial_sphere2:sphere2 ~contact_sphere1:(Some contact_sphere1)
+    ~contact_sphere2:(Some contact_sphere2) ~final_sphere1 ~final_sphere2
 
 let evolve_linear_sphere_pair_through_contact ~duration sphere1 sphere2 =
   let certificate = certify_linear_sphere_contact ~duration sphere1 sphere2 in
   match (certificate.status, certificate.first_contact_time) with
   | Initially_overlapping, _ ->
-      Deferred
-        {
-          reason = Initial_overlap;
-          certificate;
-          sphere1;
-          sphere2;
-        }
+      Deferred { reason = Initial_overlap; certificate; sphere1; sphere2 }
   | No_contact_in_interval, None ->
       let final_sphere1 = advance_sphere_linear ~dt:duration sphere1 in
       let final_sphere2 = advance_sphere_linear ~dt:duration sphere2 in
       completed ~certificate ~event_time:None ~response_status:None
         ~contact_evidence:None ~initial_sphere1:sphere1 ~initial_sphere2:sphere2
-        ~contact_sphere1:None ~contact_sphere2:None ~final_sphere1 ~final_sphere2
-  | (Touching_at_start | Tangent_contact | Crossing_contact),
-    Some (Rational_contact_time event_time) ->
+        ~contact_sphere1:None ~contact_sphere2:None ~final_sphere1
+        ~final_sphere2
+  | ( (Touching_at_start | Tangent_contact | Crossing_contact),
+      Some (Rational_contact_time event_time) ) ->
       resolve_rational_event ~duration ~certificate ~event_time sphere1 sphere2
   | Crossing_contact, Some (Quadratic_irrational_contact_time _) ->
       Deferred
@@ -160,4 +165,5 @@ let evolve_linear_sphere_pair_through_contact ~duration sphere1 sphere2 =
   | _ ->
       raise
         (Physics_error
-           "internal event-step invariant: inconsistent linear contact certificate")
+           "internal event-step invariant: inconsistent linear contact \
+            certificate")
