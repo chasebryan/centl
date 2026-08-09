@@ -118,8 +118,9 @@ let linear_contact_result fields =
           with
           | Ok sphere1, Ok sphere2, Ok duration ->
               begin try
-                certify_linear_sphere_contact ~duration sphere1 sphere2
-                |> certificate_json |> Result.ok
+                Ok
+                  (certificate_json
+                     (certify_linear_sphere_contact ~duration sphere1 sphere2))
               with Physics_error message -> Error message
               end
           | Error message, _, _ | _, Error message, _ | _, _, Error message ->
