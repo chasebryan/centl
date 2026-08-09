@@ -332,15 +332,39 @@ Contribution capture remains opt-in and is **off by default**.
 Starting or using the REPL does not change contribution mode and does not make
 REPL input training data automatically.
 
-## Portability
+## Platform support
 
-Shared SCi runtime and presentation code must remain portable across Linux,
-macOS, and Windows. Terminal handling uses ordinary standard input/output and EOF
-semantics; the REPL does not depend on a particular shell or ANSI terminal
-control sequence.
+**Linux is the reference platform for CENTL-SCi.** During the early development
+series, Linux is the primary development and release-blocking target.
+
+Windows support is experimental and best-effort. Windows-specific failures do
+not block scientific feature development unless they indicate a cross-platform
+correctness or safety problem. Windows support is retained rather than removed,
+and portability regressions should still be fixed when the cost is reasonable,
+but early CENTL-SCi releases do not require fresh Windows validation before every
+scientific change can proceed.
+
+macOS remains a supported native target where the existing portable runtime and
+release pipeline continue to operate without distracting from the reference
+Linux implementation.
+
+Shared SCi runtime and presentation code should remain portable across Linux,
+macOS, and Windows where practical. Terminal handling uses ordinary standard
+input/output and EOF semantics; the REPL does not depend on a particular shell
+or ANSI terminal control sequence.
 
 Platform-specific file-permission operations in the contribution subsystem are
 guarded so Windows does not execute unsupported `Unix.fchmod` behavior.
+
+The support hierarchy is therefore:
+
+1. **Linux — reference platform:** primary development, full validation, and
+   release-blocking correctness target.
+2. **macOS — supported native platform:** maintained where the portable build and
+   release path remains practical.
+3. **Windows x86_64 — experimental/best-effort:** supported when practical, but
+   Windows-only failures are non-blocking unless they reveal a shared correctness
+   or safety defect.
 
 ## Validation and assimilation
 
