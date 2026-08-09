@@ -75,6 +75,8 @@ let argv config problem =
     "--silent";
     "--show-error";
     "--fail-with-body";
+    "--noproxy";
+    "*";
     "--connect-timeout";
     "5";
     "--max-time";
@@ -146,11 +148,14 @@ let interpret config problem =
           let channel = Unix.open_process_args_in config.curl_executable args in
           let output = read_bounded channel in
           let status = Unix.close_process_in channel in
-          match (output, status) with
-          | Error _ as error, _ -> error
-          | Ok _, (Unix.WEXITED 0) ->
-              begin match output with Ok text -> parse_response text | Error _ -> assert false end
-          | Ok _, status -> fail "inference_failed" (status_message status)
+          begin match output with
+          | Error _ as error -> error
+          | Ok text ->
+              begin match status with
+              | Unix.WEXITED 0 -> parse_response text
+              | _ -> fail "inference_failed" (status_message status)
+              end
+          end
         with Unix.Unix_error (code, function_name, argument) ->
           fail "inference_failed"
             (Printf.sprintf "%s(%s): %s" function_name argument
