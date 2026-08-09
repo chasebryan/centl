@@ -1,0 +1,98 @@
+{
+  "cases": [
+    {
+      "elapsed_seconds": 67.064474,
+      "exit_code": 0,
+      "id": "exact_decimal_addition",
+      "mismatches": [],
+      "observed": {
+        "centl_response": {
+          "ok": true,
+          "provenance": {
+            "backend": "centl-core",
+            "classification": "exact",
+            "method": "rational_evaluation",
+            "producer": {
+              "name": "centl",
+              "version": "0.12.0-rc.1"
+            },
+            "schema": 1
+          },
+          "resolution": {
+            "status": "computed"
+          },
+          "session": {
+            "definitions": 0,
+            "requests": 1
+          },
+          "value": {
+            "denominator": "10",
+            "exact": true,
+            "kind": "rational",
+            "numerator": "3",
+            "text": "3/10"
+          },
+          "version": 1
+        },
+        "execution": {
+          "executor": "centl",
+          "request": {
+            "expression": "0.1 + 0.2",
+            "limits": {
+              "max_exact_bits": 262144,
+              "max_expression_nodes": 20000,
+              "max_integer_iterations": 10000,
+              "max_precision_digits": 256,
+              "max_result_bytes": 262144,
+              "max_source_bytes": 8192,
+              "max_working_bits": 4096
+            },
+            "op": "compute",
+            "version": 1
+          }
+        },
+        "interpretation": {
+          "assumptions": [],
+          "domain": "mathematics",
+          "expression": "0.1 + 0.2",
+          "operation": "compute",
+          "problem_class": "exact_expression",
+          "schema_version": 1
+        },
+        "problem": "What is 0.1 plus 0.2?",
+        "sci_version": "0.0.1",
+        "status": "established"
+      },
+      "pass": true,
+      "stderr": ""
+    }
+  ],
+  "corpus": "/var/home/chasebryan/Projects/centl/tests/corpus/sci_v0_0_1.jsonl",
+  "model": {
+    "label": "Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "path": "/var/home/chasebryan/Models/CENTL-SCi/Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "size_bytes": 2497280736
+  },
+  "runtime": {
+    "centl_sci": "/var/home/chasebryan/Projects/centl/_build/default/src/sci_main.exe",
+    "centl_sci_version": "CENTL-SCi 0.0.1",
+    "llama_cli": "/home/linuxbrew/.linuxbrew/bin/llama-cli",
+    "llama_cli_version": "version: 10330 (687e77892)",
+    "note": "elapsed_seconds includes process startup and model loading for each case; it is not an interpretation-only latency measurement"
+  },
+  "schema_version": 1,
+  "sci_version": "0.0.1",
+  "summary": {
+    "failed": 0,
+    "pass_rate": 1.0,
+    "passed": 1,
+    "total": 1,
+    "total_elapsed_seconds": 67.064474
+  },
+  "system": {
+    "machine": "x86_64",
+    "platform": "Linux-7.0.12-201.fc44.x86_64-x86_64-with-glibc2.43",
+    "processor": "",
+    "python": "3.14.6"
+  }
+}
