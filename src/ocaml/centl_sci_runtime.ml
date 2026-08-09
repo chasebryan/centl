@@ -38,13 +38,62 @@ let core_request expression =
       ("limits", core_limits);
     ]
 
+let identifier_char = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
+  | _ -> false
+
+let digit = function '0' .. '9' -> true | _ -> false
+
+let starts_at text index needle =
+  let needle_length = String.length needle in
+  index >= 0
+  && index + needle_length <= String.length text
+  && String.sub text index needle_length = needle
+
+(*
+   The semantic IR preserves the model's original equation text for auditing,
+   but CENTL syntax requires explicit multiplication.  Lower only the narrow,
+   unambiguous coefficient/parenthesized-factor cases involving the declared
+   solve variable, e.g. 5x -> 5*x and (1/2)x -> (1/2)*x.  Do not attempt a
+   general implicit-multiplication parser here; anything else remains CENTL's
+   responsibility to accept or reject.
+*)
+let normalize_polynomial_side ~variable text =
+  let variable_length = String.length variable in
+  if variable_length = 0 then text
+  else
+    let buffer = Buffer.create (String.length text + 8) in
+    let rec loop index =
+      if index >= String.length text then Buffer.contents buffer
+      else
+        let preceding_factor =
+          index > 0 && (digit text.[index - 1] || text.[index - 1] = ')')
+        in
+        let variable_here = starts_at text index variable in
+        let boundary_after =
+          let next = index + variable_length in
+          next >= String.length text || not (identifier_char text.[next])
+        in
+        if preceding_factor && variable_here && boundary_after then begin
+          Buffer.add_char buffer '*';
+          Buffer.add_string buffer variable;
+          loop (index + variable_length)
+        end
+        else begin
+          Buffer.add_char buffer text.[index];
+          loop (index + 1)
+        end
+    in
+    loop 0
+
 let plan = function
   | Centl_sci_ir.Exact_expression data ->
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
+      let left = normalize_polynomial_side ~variable:data.variable data.left in
+      let right = normalize_polynomial_side ~variable:data.variable data.right in
       let expression =
-        Printf.sprintf "solve((%s) = (%s), %s)" data.left data.right
-          data.variable
+        Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in
       Some { executor = Core; request = core_request expression }
   | Centl_sci_ir.Unit_conversion data ->
