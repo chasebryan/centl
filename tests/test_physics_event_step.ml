@@ -5,12 +5,12 @@ open Centl_physics_linear_contact
 open Centl_physics_event_step
 
 let q value = Q.of_string value
-
 let time value = quantity (q value) "s"
 
 let body ~id ~x ~y ~vx ~vy =
   let particle =
-    particle ~id ~mass:(quantity (q "1") "kg")
+    particle ~id
+      ~mass:(quantity (q "1") "kg")
       ~position:(vector3 ~unit_symbol:"m" (q x) (q y) Q.zero)
       ~velocity:(vector3 ~unit_symbol:"m/s" (q vx) (q vy) Q.zero)
   in
@@ -50,7 +50,8 @@ let contact_evidence result =
 
 let check_preserved_identity initial final =
   Alcotest.(check string) "id" initial.particle.id final.particle.id;
-  check_q "mass" (Q.to_string initial.particle.mass.si_value)
+  check_q "mass"
+    (Q.to_string initial.particle.mass.si_value)
     final.particle.mass.si_value;
   check_q "radius" (Q.to_string initial.radius.si_value) final.radius.si_value
 
@@ -58,14 +59,17 @@ let test_no_contact_advances_full_duration () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"10" ~y:"0" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "2") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "2") sphere1
+      sphere2
     |> completed
   in
   Alcotest.(check string)
     "certificate" "no_contact_in_interval"
     (linear_contact_status_to_string result.certificate.status);
   Alcotest.(check bool) "no event" true (Option.is_none result.event_time);
-  Alcotest.(check bool) "no response" true (Option.is_none result.response_status);
+  Alcotest.(check bool)
+    "no response" true
+    (Option.is_none result.response_status);
   check_vector_x "sphere1 x" "2" result.final_sphere1.particle.position;
   check_vector_x "sphere2 x" "10" result.final_sphere2.particle.position;
   Alcotest.(check bool) "state changed" true result.state_changed;
@@ -76,7 +80,8 @@ let test_rational_crossing_resolves_and_advances_remainder () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"4" ~y:"0" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "3") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "3") sphere1
+      sphere2
     |> completed
   in
   Alcotest.(check string)
@@ -104,7 +109,8 @@ let test_touching_at_start_approaching_resolves_immediately () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"2" ~y:"0" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1
+      sphere2
     |> completed
   in
   Alcotest.(check string)
@@ -121,7 +127,8 @@ let test_touching_at_start_separating_does_not_impulse () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"0" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"2" ~y:"0" ~vx:"1" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1
+      sphere2
     |> completed
   in
   check_q "event time" "0" (event_time result).si_value;
@@ -136,7 +143,8 @@ let test_tangent_contact_has_no_impulse () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"3" ~y:"2" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "4") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "4") sphere1
+      sphere2
     |> completed
   in
   Alcotest.(check string)
@@ -159,7 +167,8 @@ let test_irrational_crossing_defers_without_mutation () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"3" ~y:"1" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "3") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "3") sphere1
+      sphere2
     |> deferred
   in
   Alcotest.(check string)
@@ -175,14 +184,19 @@ let test_irrational_crossing_defers_without_mutation () =
       check_q "bracket upper" "3" evidence.bracket_upper.si_value
   | _ -> Alcotest.fail "expected quadratic-irrational event evidence"
   end;
-  Alcotest.(check bool) "sphere1 unchanged" true (sphere_equal sphere1 result.sphere1);
-  Alcotest.(check bool) "sphere2 unchanged" true (sphere_equal sphere2 result.sphere2)
+  Alcotest.(check bool)
+    "sphere1 unchanged" true
+    (sphere_equal sphere1 result.sphere1);
+  Alcotest.(check bool)
+    "sphere2 unchanged" true
+    (sphere_equal sphere2 result.sphere2)
 
 let test_initial_overlap_defers_without_mutation () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"1" ~y:"0" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "1") sphere1
+      sphere2
     |> deferred
   in
   Alcotest.(check string)
@@ -191,23 +205,30 @@ let test_initial_overlap_defers_without_mutation () =
   Alcotest.(check string)
     "certificate" "initially_overlapping"
     (linear_contact_status_to_string result.certificate.status);
-  Alcotest.(check bool) "sphere1 unchanged" true (sphere_equal sphere1 result.sphere1);
-  Alcotest.(check bool) "sphere2 unchanged" true (sphere_equal sphere2 result.sphere2)
+  Alcotest.(check bool)
+    "sphere1 unchanged" true
+    (sphere_equal sphere1 result.sphere1);
+  Alcotest.(check bool)
+    "sphere2 unchanged" true
+    (sphere_equal sphere2 result.sphere2)
 
 let test_zero_duration_separated_is_unchanged_completion () =
   let sphere1 = body ~id:"a" ~x:"0" ~y:"0" ~vx:"1" ~vy:"0" in
   let sphere2 = body ~id:"b" ~x:"4" ~y:"0" ~vx:"0" ~vy:"0" in
   let result =
-    evolve_linear_sphere_pair_through_contact ~duration:(time "0") sphere1 sphere2
+    evolve_linear_sphere_pair_through_contact ~duration:(time "0") sphere1
+      sphere2
     |> completed
   in
   Alcotest.(check string)
     "certificate" "no_contact_in_interval"
     (linear_contact_status_to_string result.certificate.status);
   Alcotest.(check bool) "state unchanged" false result.state_changed;
-  Alcotest.(check bool) "sphere1 unchanged" true
+  Alcotest.(check bool)
+    "sphere1 unchanged" true
     (sphere_equal sphere1 result.final_sphere1);
-  Alcotest.(check bool) "sphere2 unchanged" true
+  Alcotest.(check bool)
+    "sphere2 unchanged" true
     (sphere_equal sphere2 result.final_sphere2);
   Alcotest.(check bool) "momentum" true result.momentum_conserved;
   Alcotest.(check bool) "kinetic energy" true result.kinetic_energy_conserved
@@ -217,14 +238,16 @@ let () =
     [
       ( "event step",
         [
-          Alcotest.test_case "no contact" `Quick test_no_contact_advances_full_duration;
+          Alcotest.test_case "no contact" `Quick
+            test_no_contact_advances_full_duration;
           Alcotest.test_case "rational crossing" `Quick
             test_rational_crossing_resolves_and_advances_remainder;
           Alcotest.test_case "touching start approaching" `Quick
             test_touching_at_start_approaching_resolves_immediately;
           Alcotest.test_case "touching start separating" `Quick
             test_touching_at_start_separating_does_not_impulse;
-          Alcotest.test_case "tangent" `Quick test_tangent_contact_has_no_impulse;
+          Alcotest.test_case "tangent" `Quick
+            test_tangent_contact_has_no_impulse;
           Alcotest.test_case "irrational crossing deferred" `Quick
             test_irrational_crossing_defers_without_mutation;
           Alcotest.test_case "initial overlap deferred" `Quick
