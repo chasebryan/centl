@@ -1,8 +1,3 @@
-let append_string values value =
-  match values with
-  | `List items -> `List (items @ [ `String value ])
-  | json -> json
-
 let add_contact_actions = function
   | `List items ->
       `List
