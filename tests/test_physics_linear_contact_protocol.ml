@@ -87,21 +87,26 @@ let test_rational_crossing_certificate () =
   Alcotest.(check bool) "success" true (bool "ok" response);
   let certificate = physics response in
   Alcotest.(check string)
-    "kind" "linear_sphere_contact_certificate" (string "kind" certificate);
+    "kind" "linear_sphere_contact_certificate"
+    (string "kind" certificate);
   Alcotest.(check bool) "exact" true (bool "exact" certificate);
   Alcotest.(check string)
-    "status" "crossing_contact" (string "status" certificate);
+    "status" "crossing_contact"
+    (string "status" certificate);
   let polynomial = assoc "polynomial" certificate in
   Alcotest.(check string) "a" "1" (string "value" (assoc "a" polynomial));
   Alcotest.(check string) "b" "-8" (string "value" (assoc "b" polynomial));
   Alcotest.(check string) "c" "12" (string "value" (assoc "c" polynomial));
   let first = assoc "first_contact_time" certificate in
   Alcotest.(check string) "time kind" "rational" (string "kind" first);
-  Alcotest.(check string) "first contact" "2" (string "value" (assoc "time" first));
+  Alcotest.(check string)
+    "first contact" "2"
+    (string "value" (assoc "time" first));
   let trust = assoc "trust_boundary" certificate in
   Alcotest.(check bool) "no sampling" false (bool "time_sampling" trust);
   Alcotest.(check bool)
-    "no float roots" false (bool "floating_point_root_finding" trust)
+    "no float roots" false
+    (bool "floating_point_root_finding" trust)
 
 let test_irrational_crossing_certificate () =
   let response =
@@ -112,12 +117,14 @@ let test_irrational_crossing_certificate () =
   Alcotest.(check bool) "success" true (bool "ok" response);
   let certificate = physics response in
   Alcotest.(check string)
-    "status" "crossing_contact" (string "status" certificate);
+    "status" "crossing_contact"
+    (string "status" certificate);
   let first = assoc "first_contact_time" certificate in
   Alcotest.(check string)
     "algebraic kind" "quadratic_irrational" (string "kind" first);
   Alcotest.(check string)
-    "discriminant" "12" (string "value" (assoc "discriminant" first));
+    "discriminant" "12"
+    (string "value" (assoc "discriminant" first));
   let bracket = assoc "rational_bracket" first in
   Alcotest.(check string) "lower" "0" (string "value" (assoc "lower" bracket));
   Alcotest.(check string) "upper" "3" (string "value" (assoc "upper" bracket))
@@ -131,12 +138,15 @@ let test_endpoint_crossing_not_tangent () =
   Alcotest.(check bool) "success" true (bool "ok" response);
   let certificate = physics response in
   Alcotest.(check string)
-    "endpoint is crossing" "crossing_contact" (string "status" certificate);
+    "endpoint is crossing" "crossing_contact"
+    (string "status" certificate);
   Alcotest.(check string)
     "minimum zero" "0"
     (string "value" (assoc "minimum_clearance_squared" certificate));
   let first = assoc "first_contact_time" certificate in
-  Alcotest.(check string) "first contact" "2" (string "value" (assoc "time" first))
+  Alcotest.(check string)
+    "first contact" "2"
+    (string "value" (assoc "time" first))
 
 let test_no_contact_uses_null_event () =
   let response =
@@ -147,7 +157,8 @@ let test_no_contact_uses_null_event () =
   Alcotest.(check bool) "success" true (bool "ok" response);
   let certificate = physics response in
   Alcotest.(check string)
-    "status" "no_contact_in_interval" (string "status" certificate);
+    "status" "no_contact_in_interval"
+    (string "status" certificate);
   match assoc "first_contact_time" certificate with
   | `Null -> ()
   | _ -> Alcotest.fail "no-contact certificate must use null event time"
@@ -160,8 +171,7 @@ let test_duration_dimension_rejected () =
   in
   Alcotest.(check bool) "failure" false (bool "ok" response);
   let error = assoc "error" response in
-  Alcotest.(check string)
-    "code" "invalid_physics_request" (string "code" error)
+  Alcotest.(check string) "code" "invalid_physics_request" (string "code" error)
 
 let test_unknown_field_rejected () =
   let response =
