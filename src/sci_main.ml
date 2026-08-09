@@ -152,7 +152,8 @@ let show_contribution_status () =
 let export_contribution path =
   contribution_or_exit (Centl_sci_contrib.export_pending path);
   Printf.printf "CENTL-SCi contribution export: %s\n" path;
-  print_endline "No data was uploaded. Review the exported file before sharing it.";
+  print_endline
+    "No data was uploaded. Review the exported file before sharing it.";
   exit 0
 
 let clear_contribution () =
@@ -205,19 +206,23 @@ let () =
         Arg.Unit
           (fun () ->
             set_contribution_mode Centl_sci_contrib.Off
-              "CENTL-SCi contribution mode: off. Existing pending data is not deleted."),
+              "CENTL-SCi contribution mode: off. Existing pending data is not \
+               deleted."),
         "persistently disable local contribution capture (default)" );
       ( "--contribution-diagnostics",
         Arg.Unit
           (fun () ->
             set_contribution_mode Centl_sci_contrib.Diagnostics
-              "CENTL-SCi contribution mode: diagnostics. Problem text is not captured; nothing is uploaded automatically."),
+              "CENTL-SCi contribution mode: diagnostics. Problem text is not \
+               captured; nothing is uploaded automatically."),
         "opt in to local metadata/error capture without problem text" );
       ( "--contribution-examples",
         Arg.Unit
           (fun () ->
             set_contribution_mode Centl_sci_contrib.Examples
-              "CENTL-SCi contribution mode: examples. Raw problem text is captured locally and may contain sensitive information; nothing is uploaded automatically."),
+              "CENTL-SCi contribution mode: examples. Raw problem text is \
+               captured locally and may contain sensitive information; nothing \
+               is uploaded automatically."),
         "opt in to local example capture including raw problem text" );
       ( "--contribution-status",
         Arg.Unit show_contribution_status,
@@ -307,8 +312,8 @@ let () =
         Centl_sci_contrib.record ~source:(source_text source) ~problem ~ir
           ~outcome ()
     | Some backend ->
-        Centl_sci_contrib.record ~source:(source_text source) ~backend ~problem ~ir
-          ~outcome ()
+        Centl_sci_contrib.record ~source:(source_text source) ~backend ~problem
+          ~ir ~outcome ()
   in
   warn_contribution contribution;
   if !json_output then
@@ -318,4 +323,5 @@ let () =
   else
     branded_human ~color:(color_enabled !color) ~problem ~source outcome
     |> print_endline;
-  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> () end
+  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> ()
+  end
