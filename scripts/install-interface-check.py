@@ -147,6 +147,32 @@ def run() -> None:
         if str(prefix / "bin") not in profile:
             raise SystemExit("installer PATH setup omitted the command directory")
 
+        # Headless CI, containers, and service environments may not export SHELL.
+        # The installer must still complete and fall back to the POSIX profile.
+        headless_home = work / "headless-home"
+        headless_home.mkdir()
+        headless_env = env.copy()
+        headless_env["HOME"] = str(headless_home)
+        headless_env.pop("SHELL", None)
+        subprocess.run(
+            ["sh", str(INSTALLER), "--archive", str(archive)],
+            cwd=ROOT,
+            env=headless_env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        headless_prefix = headless_home / ".local"
+        headless_profile = headless_home / ".profile"
+        if not (headless_prefix / "bin" / "centl-sci").is_symlink():
+            raise SystemExit("installer did not activate CENTL-SCi without SHELL")
+        if not headless_profile.is_file():
+            raise SystemExit("installer did not use .profile when SHELL was unset")
+        headless_text = headless_profile.read_text(encoding="utf-8")
+        if f"# CENTL PATH: {headless_prefix / 'bin'}" not in headless_text:
+            raise SystemExit("headless installer PATH setup omitted the CENTL marker")
+
     print("CENTL installer interface check: PASS")
 
 
