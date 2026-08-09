@@ -30,14 +30,14 @@ let exact_outcome () =
     match
       Centl_sci_ir.of_json
         (`Assoc
-          [
-            ("schema_version", `Int 1);
-            ("domain", `String "mathematics");
-            ("problem_class", `String "exact_expression");
-            ("operation", `String "compute");
-            ("assumptions", `List []);
-            ("expression", `String "0.1 + 0.2");
-          ])
+           [
+             ("schema_version", `Int 1);
+             ("domain", `String "mathematics");
+             ("problem_class", `String "exact_expression");
+             ("operation", `String "compute");
+             ("assumptions", `List []);
+             ("expression", `String "0.1 + 0.2");
+           ])
     with
     | Ok value -> value
     | Error error -> Alcotest.fail (Centl_sci_ir.string_of_error error)
@@ -61,8 +61,7 @@ let test_diagnostics_excludes_problem () =
   require_ok (Centl_sci_contrib.set_mode Centl_sci_contrib.Diagnostics);
   let ir, outcome = exact_outcome () in
   let problem = "PRIVATE-MARKER-829104: What is 0.1 plus 0.2?" in
-  require_ok
-    (Centl_sci_contrib.record ~source:"fast" ~problem ~ir ~outcome ());
+  require_ok (Centl_sci_contrib.record ~source:"fast" ~problem ~ir ~outcome ());
   let path = Option.get (Centl_sci_contrib.pending_path ()) in
   let text = read_file path in
   Alcotest.(check bool)
@@ -77,8 +76,7 @@ let test_examples_include_problem_locally () =
   require_ok (Centl_sci_contrib.set_mode Centl_sci_contrib.Examples);
   let ir, outcome = exact_outcome () in
   let problem = "EXAMPLE-MARKER-173205: What is 0.1 plus 0.2?" in
-  require_ok
-    (Centl_sci_contrib.record ~source:"fast" ~problem ~ir ~outcome ());
+  require_ok (Centl_sci_contrib.record ~source:"fast" ~problem ~ir ~outcome ());
   let path = Option.get (Centl_sci_contrib.pending_path ()) in
   let text = read_file path in
   Alcotest.(check bool)
