@@ -135,6 +135,95 @@ def main():
             print("Test E2 failed: expected rc=0 when product gates requested and source is HEAD\n", out, err)
             failures += 1
 
+        # Additional structural negative tests required by the task:
+        # a) unsupported/wrong schema_version fails
+        report_a = t / "report_a_schema.json"
+        make_report_json(report_a, commit_feature, product_pass=True)
+        # mutate to wrong schema_version
+        j = json.loads(report_a.read_text(encoding='utf-8'))
+        j['schema_version'] = 2
+        report_a.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_a, cwd=repo)
+        print("Test a (schema_version): rc=", rc)
+        if rc == 0:
+            print("Test a failed: expected non-zero for unsupported schema_version\n", out, err)
+            failures += 1
+
+        # b) product summary total mismatch fails
+        report_b = t / "report_b_total_mismatch.json"
+        make_report_json(report_b, commit_feature, product_pass=True)
+        j = json.loads(report_b.read_text(encoding='utf-8'))
+        j['product']['summary']['total'] = 2
+        report_b.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_b, cwd=repo)
+        print("Test b (total mismatch): rc=", rc)
+        if rc == 0:
+            print("Test b failed: expected non-zero for product total mismatch\n", out, err)
+            failures += 1
+
+        # c) product summary passed mismatch fails
+        report_c = t / "report_c_passed_mismatch.json"
+        make_report_json(report_c, commit_feature, product_pass=True)
+        j = json.loads(report_c.read_text(encoding='utf-8'))
+        j['product']['summary']['passed'] = 0
+        report_c.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_c, cwd=repo)
+        print("Test c (passed mismatch): rc=", rc)
+        if rc == 0:
+            print("Test c failed: expected non-zero for product passed mismatch\n", out, err)
+            failures += 1
+
+        # d) missing required gate fails
+        report_d2 = t / "report_d_missing_gate.json"
+        make_report_json(report_d2, commit_feature, product_pass=True)
+        j = json.loads(report_d2.read_text(encoding='utf-8'))
+        # remove "product" gate
+        del j['gates']['product']
+        report_d2.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_d2, cwd=repo)
+        print("Test d (missing gate): rc=", rc)
+        if rc == 0:
+            print("Test d failed: expected non-zero for missing gate\n", out, err)
+            failures += 1
+
+        # e) current-HEAD report with --require-product-gates fails when native or product gate is false
+        report_e_native = t / "report_e_native_false.json"
+        make_report_json(report_e_native, commit_main, product_pass=True)
+        j = json.loads(report_e_native.read_text(encoding='utf-8'))
+        j['gates']['native'] = False
+        report_e_native.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_e_native, ["--require-product-gates"], cwd=repo)
+        print("Test e1 (native false): rc=", rc)
+        if rc == 0:
+            print("Test e1 failed: expected non-zero when native gate is false under --require-product-gates\n", out, err)
+            failures += 1
+
+        report_e_product = t / "report_e_product_false.json"
+        make_report_json(report_e_product, commit_main, product_pass=True)
+        j = json.loads(report_e_product.read_text(encoding='utf-8'))
+        j['gates']['product'] = False
+        report_e_product.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_e_product, ["--require-product-gates"], cwd=repo)
+        print("Test e2 (product false): rc=", rc)
+        if rc == 0:
+            print("Test e2 failed: expected non-zero when product gate is false under --require-product-gates\n", out, err)
+            failures += 1
+
+        # f) model.enabled=true with model_safety=false fails under --require-product-gates
+        report_f = t / "report_f_model_safety_false.json"
+        make_report_json(report_f, commit_main, product_pass=True, model_enabled=True)
+        j = json.loads(report_f.read_text(encoding='utf-8'))
+        # model_safety gate false
+        j['gates']['model_safety'] = False
+        # ensure model summary/cases consistent
+        j['model'] = {"enabled": True, "summary": {"total": 1, "passed": 1}, "cases": [{"name": "m1", "pass": True}]}
+        report_f.write_text(json.dumps(j), encoding='utf-8')
+        rc, out, err = run_checker(report_f, ["--require-product-gates"], cwd=repo)
+        print("Test f (model_safety false): rc=", rc)
+        if rc == 0:
+            print("Test f failed: expected non-zero when model_safety is false under --require-product-gates\n", out, err)
+            failures += 1
+
     finally:
         shutil.rmtree(tmpdir)
 
