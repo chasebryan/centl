@@ -53,11 +53,7 @@ let particle ~id ~x ~vx =
     ]
 
 let sphere ~id ~x ~vx =
-  `Assoc
-    [
-      ("particle", particle ~id ~x ~vx);
-      ("radius", quantity "1" "m");
-    ]
+  `Assoc [ ("particle", particle ~id ~x ~vx); ("radius", quantity "1" "m") ]
 
 let sphere_velocity_x state id =
   let spheres = list "spheres" state in
@@ -95,7 +91,9 @@ let test_capabilities_advertise_contacts () =
     "resolver advertised" true
     (List.mem "resolve_isolated_elastic_sphere_contacts" actions);
   let limits = assoc "limits" physics in
-  Alcotest.(check int) "contact pair ceiling" 4_096 (int "max_contact_pairs" limits)
+  Alcotest.(check int)
+    "contact pair ceiling" 4_096
+    (int "max_contact_pairs" limits)
 
 let test_exact_contact_analysis () =
   let response =
@@ -127,7 +125,8 @@ let test_exact_contact_analysis () =
       Alcotest.(check string) "second id" "b" (string "particle2_id" contact);
       Alcotest.(check string) "relation" "touching" (string "relation" contact);
       Alcotest.(check string)
-        "distance squared" "4" (string "value" (assoc "distance_squared" contact));
+        "distance squared" "4"
+        (string "value" (assoc "distance_squared" contact));
       Alcotest.(check string)
         "radius sum squared" "4"
         (string "value" (assoc "radius_sum_squared" contact))
@@ -159,7 +158,8 @@ let test_isolated_contact_resolution () =
   Alcotest.(check string) "b velocity" "1" (sphere_velocity_x final_world "b");
   Alcotest.(check string) "c velocity" "3" (sphere_velocity_x final_world "c");
   match list "pair_resolutions" physics with
-  | [ pair ] -> Alcotest.(check string) "resolved" "resolved" (string "status" pair)
+  | [ pair ] ->
+      Alcotest.(check string) "resolved" "resolved" (string "status" pair)
   | _ -> Alcotest.fail "expected exactly one pair resolution"
 
 let test_overlap_is_valid_deferred_verdict () =
@@ -169,10 +169,7 @@ let test_overlap_is_valid_deferred_verdict () =
         ("action", `String "resolve_isolated_elastic_sphere_contacts");
         ( "spheres",
           `List
-            [
-              sphere ~id:"a" ~x:"0" ~vx:"1";
-              sphere ~id:"b" ~x:"1" ~vx:"-1";
-            ] );
+            [ sphere ~id:"a" ~x:"0" ~vx:"1"; sphere ~id:"b" ~x:"1" ~vx:"-1" ] );
       ]
   in
   Alcotest.(check bool) "deferred is protocol success" true (bool "ok" response);
@@ -208,7 +205,8 @@ let test_shared_contact_is_valid_deferred_verdict () =
   | _ -> Alcotest.fail "only b should be ambiguous"
   end;
   Alcotest.(check int)
-    "two touching contacts" 2 (List.length (list "touching_contacts" physics))
+    "two touching contacts" 2
+    (List.length (list "touching_contacts" physics))
 
 let test_duplicate_ids_rejected () =
   let response =
@@ -217,7 +215,9 @@ let test_duplicate_ids_rejected () =
         ("action", `String "analyze_sphere_contacts");
         ( "spheres",
           `List
-            [ sphere ~id:"same" ~x:"0" ~vx:"0"; sphere ~id:"same" ~x:"3" ~vx:"0" ] );
+            [
+              sphere ~id:"same" ~x:"0" ~vx:"0"; sphere ~id:"same" ~x:"3" ~vx:"0";
+            ] );
       ]
   in
   Alcotest.(check bool) "failure" false (bool "ok" response)
@@ -225,20 +225,20 @@ let test_duplicate_ids_rejected () =
 let test_contact_pair_limit () =
   let spheres =
     List.init 92 (fun index ->
-        sphere ~id:(Printf.sprintf "s%d" index)
-          ~x:(string_of_int (index * 3)) ~vx:"0")
+        sphere
+          ~id:(Printf.sprintf "s%d" index)
+          ~x:(string_of_int (index * 3))
+          ~vx:"0")
   in
   let response =
     request
       [
-        ("action", `String "analyze_sphere_contacts");
-        ("spheres", `List spheres);
+        ("action", `String "analyze_sphere_contacts"); ("spheres", `List spheres);
       ]
   in
   Alcotest.(check bool) "failure" false (bool "ok" response);
   let error = assoc "error" response in
-  Alcotest.(check string)
-    "code" "invalid_physics_request" (string "code" error)
+  Alcotest.(check string) "code" "invalid_physics_request" (string "code" error)
 
 let () =
   Alcotest.run "centl physics contact protocol"
