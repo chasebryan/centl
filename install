@@ -228,6 +228,13 @@ if [ "$sci_available" = true ]; then
   fi
   [ "$sci_smoke" = '3/10' ] ||
     fail "the CENTL-SCi executable failed its exact-arithmetic smoke test"
+  if ! sci_repl_smoke=$(printf ':exit\n' | "$staging/bin/centl-sci" --repl 2>&1); then
+    fail "the CENTL-SCi REPL cannot start on this system: $sci_repl_smoke"
+  fi
+  printf '%s\n' "$sci_repl_smoke" | grep -Eq '^CENTL-SCi v' ||
+    fail "the CENTL-SCi REPL did not report its identity"
+  printf '%s\n' "$sci_repl_smoke" | grep -Fqx 'Free for science.' ||
+    fail "the CENTL-SCi REPL did not report its scientific identity"
 fi
 mv "$staging" "$target"
 staging=""
