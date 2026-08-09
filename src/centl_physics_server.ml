@@ -1,6 +1,7 @@
 open Centl_physics
 open Centl_physics_protocol
 open Centl_physics_jsonl
+open Centl_physics_capabilities
 open Centl_physics_collision_json
 open Centl_physics_world_json
 
