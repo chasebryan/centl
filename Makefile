@@ -20,6 +20,7 @@ SCI_LLAMA_CLI ?= llama-cli
 SCI_TIMEOUT ?= 300
 SCI_REPORT ?= sci-model-report.json
 SCI_SERVER_URL ?=
+SCI_MODEL ?=
 SCI_MODEL_LABEL ?= resident-model
 SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
@@ -129,6 +130,7 @@ sci-assimilate-full:
 
 sci-assimilate-publish:
 	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
+	CENTL_SCI_MODEL="$(SCI_MODEL)" \
 	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
 		sh scripts/sci-assimilate-publish \
 		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
