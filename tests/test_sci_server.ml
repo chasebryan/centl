@@ -44,7 +44,7 @@ let test_request_contract () =
   Alcotest.(check bool) "cache prompt" true (bool "cache_prompt" request);
   Alcotest.(check int) "bounded generation" 192 (int "n_predict" request);
   Alcotest.(check string)
-    "class grammar" Centl_sci_schema.polynomial_equation_grammar
+    "class grammar" Centl_sci_poly_grammar.polynomial_equation_grammar
     (string "grammar" request);
   let prompt = string "prompt" request in
   Alcotest.(check bool)
@@ -54,6 +54,9 @@ let test_request_contract () =
     "class is fixed" true
     (String.starts_with ~prefix:"CENTL-SCi v0.0.1" prompt
     && String.contains prompt 'p');
+  Alcotest.(check bool)
+    "equality is split" true
+    (String.contains prompt '=');
   Alcotest.(check bool)
     "problem encoded as data" true
     (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);
