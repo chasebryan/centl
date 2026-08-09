@@ -50,6 +50,7 @@
   Centl_physics_world
   Centl_physics_contact_solver
   Centl_physics_linear_contact
+  Centl_physics_event_step
   Centl_physics_protocol
   Centl_physics_world_json
   Centl_physics_linear_contact_json
