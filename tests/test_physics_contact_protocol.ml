@@ -52,8 +52,20 @@ let particle ~id ~x ~vx =
       ("velocity", vector vx "0" "0" "m/s");
     ]
 
+let particle_without_id ~x ~vx =
+  `Assoc
+    [
+      ("mass", quantity "1" "kg");
+      ("position", vector x "0" "0" "m");
+      ("velocity", vector vx "0" "0" "m/s");
+    ]
+
 let sphere ~id ~x ~vx =
   `Assoc [ ("particle", particle ~id ~x ~vx); ("radius", quantity "1" "m") ]
+
+let sphere_without_id ~x ~vx =
+  `Assoc
+    [ ("particle", particle_without_id ~x ~vx); ("radius", quantity "1" "m") ]
 
 let sphere_velocity_x state id =
   let spheres = list "spheres" state in
@@ -222,6 +234,19 @@ let test_duplicate_ids_rejected () =
   in
   Alcotest.(check bool) "failure" false (bool "ok" response)
 
+let test_missing_id_rejected () =
+  let response =
+    request
+      [
+        ("action", `String "analyze_sphere_contacts");
+        ("spheres", `List [ sphere_without_id ~x:"0" ~vx:"0" ]);
+      ]
+  in
+  Alcotest.(check bool) "failure" false (bool "ok" response);
+  let error = assoc "error" response in
+  Alcotest.(check string)
+    "message" "sphere particle requires id" (string "message" error)
+
 let test_contact_pair_limit () =
   let spheres =
     List.init 92 (fun index ->
@@ -255,6 +280,7 @@ let () =
           Alcotest.test_case "shared contact deferred" `Quick
             test_shared_contact_is_valid_deferred_verdict;
           Alcotest.test_case "duplicate ids" `Quick test_duplicate_ids_rejected;
+          Alcotest.test_case "missing id" `Quick test_missing_id_rejected;
           Alcotest.test_case "pair limit" `Quick test_contact_pair_limit;
         ] );
     ]
