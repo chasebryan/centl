@@ -98,7 +98,8 @@ let test_spoken_equation_executes_exactly () =
       begin match List.assoc_opt "value" fields with
       | Some (`Assoc value_fields) ->
           begin match List.assoc_opt "text" value_fields with
-          | Some (`String value) -> Alcotest.(check string) "solutions" "x in {2, 3}" value
+          | Some (`String value) ->
+              Alcotest.(check string) "solutions" "x in {2, 3}" value
           | _ -> Alcotest.fail "missing solution text"
           end
       | _ -> Alcotest.fail "missing CENTL value"
