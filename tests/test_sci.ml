@@ -159,7 +159,9 @@ let test_transport_extracts_one_json_object () =
   | Error error -> Alcotest.fail (Centl_sci_llama.string_of_error error)
 
 let test_transport_rejects_multiple_json_objects () =
-  match Centl_sci_llama.extract_transport_json {|noise\n{"a":1}\n{"b":2}\n|} with
+  match
+    Centl_sci_llama.extract_transport_json {|noise\n{"a":1}\n{"b":2}\n|}
+  with
   | Error _ -> ()
   | Ok _ -> Alcotest.fail "transport must reject multiple JSON objects"
 
@@ -189,9 +191,11 @@ let test_model_argv_is_offline_and_grammar_constrained () =
   let arguments = Centl_sci_llama.argv config "Solve x = 2." |> Array.to_list in
   Alcotest.(check bool) "offline" true (List.mem "--offline" arguments);
   Alcotest.(check bool) "grammar" true (List.mem "--grammar" arguments);
-  Alcotest.(check bool) "simple subprocess I/O" true
+  Alcotest.(check bool)
+    "simple subprocess I/O" true
     (List.mem "--simple-io" arguments);
-  Alcotest.(check bool) "no schema conversion" false
+  Alcotest.(check bool)
+    "no schema conversion" false
     (List.mem "--json-schema" arguments);
   Alcotest.(check bool) "single turn" true (List.mem "--single-turn" arguments);
   Alcotest.(check bool) "no shell command" false (List.mem "sh" arguments)

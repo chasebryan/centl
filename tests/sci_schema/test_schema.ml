@@ -25,5 +25,11 @@ let () =
     (fun class_name ->
       Alcotest.(check bool)
         ("grammar admits " ^ class_name)
-        true (contains grammar class_name))
-    [ "exact_expression"; "polynomial_equation"; "unit_conversion"; "unsupported" ]
+        true
+        (contains grammar class_name))
+    [
+      "exact_expression";
+      "polynomial_equation";
+      "unit_conversion";
+      "unsupported";
+    ]

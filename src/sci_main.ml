@@ -36,7 +36,8 @@ let ansi enabled code text =
   if enabled then Printf.sprintf "\027[%sm%s\027[0m" code text else text
 
 let after prefix line =
-  String.sub line (String.length prefix) (String.length line - String.length prefix)
+  String.sub line (String.length prefix)
+    (String.length line - String.length prefix)
   |> String.trim
 
 let source_text = function
@@ -82,20 +83,25 @@ let render_line color line =
   else if String.starts_with ~prefix:"CENTL resolution:" line then
     ansi color "1;96" "RS>" ^ " " ^ after "CENTL resolution:" line
   else if String.starts_with ~prefix:"CENTL provenance:" line then
-    ansi color "1;96" "PV>" ^ " " ^ ansi color "90" (after "CENTL provenance:" line)
+    ansi color "1;96" "PV>" ^ " "
+    ^ ansi color "90" (after "CENTL provenance:" line)
   else if String.starts_with ~prefix:"Reason:" line then
     ansi color "1;33" "WHY>" ^ " " ^ after "Reason:" line
   else line
 
 let branded_human ~color ~problem ~source outcome =
   let body =
-    Centl_sci_runtime.human ~problem outcome |> String.split_on_char '\n'
-    |> List.map (render_line color) |> String.concat "\n"
+    Centl_sci_runtime.human ~problem outcome
+    |> String.split_on_char '\n'
+    |> List.map (render_line color)
+    |> String.concat "\n"
   in
   let source_line =
     ansi color "1;96" "RT>" ^ " "
     ^ ansi color
-        (match source with Fast_path -> "1;32" | Model_cli | Model_server -> "1;94")
+        (match source with
+        | Fast_path -> "1;32"
+        | Model_cli | Model_server -> "1;94")
         (source_label source)
   in
   String.concat "\n"
@@ -110,7 +116,9 @@ let branded_human ~color ~problem ~source outcome =
 
 let with_interpreter_path source = function
   | `Assoc fields ->
-      let fields = ("interpreter_path", `String (source_text source)) :: fields in
+      let fields =
+        ("interpreter_path", `String (source_text source)) :: fields
+      in
       let fields =
         match backend_text source with
         | None -> fields
@@ -135,20 +143,25 @@ let () =
         "PATH local GGUF model file for the cold reference backend" );
       ( "--server-url",
         Arg.String (fun value -> server_url := Some value),
-        "URL loopback resident llama-server, for example http://127.0.0.1:8080" );
+        "URL loopback resident llama-server, for example http://127.0.0.1:8080"
+      );
       ( "--llama-cli",
         Arg.Set_string llama_cli,
         "PATH llama.cpp llama-cli executable (default: llama-cli)" );
       ( "--curl",
         Arg.Set_string curl,
-        "PATH curl executable used for loopback resident inference (default: curl)" );
+        "PATH curl executable used for loopback resident inference (default: \
+         curl)" );
       ("--json", Arg.Set json_output, "emit the reproducible structured result");
       ( "--force-model",
         Arg.Set force_model,
-        "bypass deterministic interpretation; intended for model qualification/debugging" );
+        "bypass deterministic interpretation; intended for model \
+         qualification/debugging" );
       ("--color", Arg.Unit (fun () -> color := Always), "force ANSI color");
       ("--no-color", Arg.Unit (fun () -> color := Never), "disable ANSI color");
-      ("--color=auto", Arg.Unit (fun () -> color := Auto), "automatic ANSI color");
+      ( "--color=auto",
+        Arg.Unit (fun () -> color := Auto),
+        "automatic ANSI color" );
       ( "--color=always",
         Arg.Unit (fun () -> color := Always),
         "force ANSI color" );
@@ -177,7 +190,8 @@ let () =
         in
         begin match Centl_sci_server.interpret config problem with
         | Error error ->
-            Printf.eprintf "centl-sci: %s\n" (Centl_sci_server.string_of_error error);
+            Printf.eprintf "centl-sci: %s\n"
+              (Centl_sci_server.string_of_error error);
             exit 1
         | Ok ir -> (Model_server, ir)
         end
@@ -187,13 +201,16 @@ let () =
           | Some value when value <> "" -> value
           | _ ->
               Printf.eprintf
-                "centl-sci: this problem requires semantic inference; configure --server-url/CENTL_SCI_SERVER_URL or --model/CENTL_SCI_MODEL\n";
+                "centl-sci: this problem requires semantic inference; \
+                 configure --server-url/CENTL_SCI_SERVER_URL or \
+                 --model/CENTL_SCI_MODEL\n";
               exit 2
         in
         let config = Centl_sci_llama.default ~executable:!llama_cli ~model () in
         begin match Centl_sci_llama.interpret config problem with
         | Error error ->
-            Printf.eprintf "centl-sci: %s\n" (Centl_sci_llama.string_of_error error);
+            Printf.eprintf "centl-sci: %s\n"
+              (Centl_sci_llama.string_of_error error);
             exit 1
         | Ok ir -> (Model_cli, ir)
         end
@@ -208,12 +225,10 @@ let () =
   let outcome = Centl_sci_runtime.execute ir in
   if !json_output then
     Centl_sci_runtime.to_json ~problem outcome
-    |> with_interpreter_path source |> Yojson.Safe.pretty_to_string
-    |> print_endline
+    |> with_interpreter_path source
+    |> Yojson.Safe.pretty_to_string |> print_endline
   else
     branded_human ~color:(color_enabled !color) ~problem ~source outcome
     |> print_endline;
-  begin match outcome.status with
-  | Centl_sci_runtime.Failed -> exit 1
-  | _ -> ()
+  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> ()
   end

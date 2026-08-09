@@ -1,6 +1,7 @@
 let require_some label = function
   | Some value -> value
-  | None -> Alcotest.fail (label ^ " was not admitted by the deterministic fast path")
+  | None ->
+      Alcotest.fail (label ^ " was not admitted by the deterministic fast path")
 
 let test_exact_decimal_language () =
   match
@@ -35,16 +36,14 @@ let test_symbolic_equation () =
 
 let test_natural_equation_defers_to_model () =
   Alcotest.(check bool)
-    "natural-language equation is not overclaimed"
-    true
+    "natural-language equation is not overclaimed" true
     (Option.is_none
        (Centl_sci_fastpath.interpret
           "Solve x squared minus 5 x plus 6 equals zero for x."))
 
 let test_general_knowledge_defers_to_model () =
   Alcotest.(check bool)
-    "general knowledge is not admitted"
-    true
+    "general knowledge is not admitted" true
     (Option.is_none
        (Centl_sci_fastpath.interpret
           "Who was the 16th president of the United States?"))
@@ -64,7 +63,8 @@ let test_fast_path_executes_exactly () =
       begin match List.assoc_opt "value" fields with
       | Some (`Assoc value_fields) ->
           begin match List.assoc_opt "text" value_fields with
-          | Some (`String value) -> Alcotest.(check string) "exact result" "3/10" value
+          | Some (`String value) ->
+              Alcotest.(check string) "exact result" "3/10" value
           | _ -> Alcotest.fail "missing exact result text"
           end
       | _ -> Alcotest.fail "missing CENTL value"
@@ -87,5 +87,8 @@ let () =
             test_general_knowledge_defers_to_model;
         ] );
       ( "execution",
-        [ Alcotest.test_case "exact result" `Quick test_fast_path_executes_exactly ] );
+        [
+          Alcotest.test_case "exact result" `Quick
+            test_fast_path_executes_exactly;
+        ] );
     ]

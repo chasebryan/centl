@@ -141,7 +141,9 @@ let extract_transport_json text =
   in
   let is_json_object candidate =
     try
-      match Yojson.Safe.from_string candidate with `Assoc _ -> true | _ -> false
+      match Yojson.Safe.from_string candidate with
+      | `Assoc _ -> true
+      | _ -> false
     with Yojson.Json_error _ -> false
   in
   let rec collect index candidates =
@@ -153,12 +155,13 @@ let extract_transport_json text =
       | Some stop ->
           let candidate = String.sub text index (stop - index + 1) in
           let candidates =
-            if is_json_object candidate then candidate :: candidates else candidates
+            if is_json_object candidate then candidate :: candidates
+            else candidates
           in
           collect (stop + 1) candidates
   in
   match collect 0 [] with
-  | [candidate] -> Ok candidate
+  | [ candidate ] -> Ok candidate
   | [] ->
       fail "invalid_model_output"
         "llama-cli transport contained no complete JSON object"

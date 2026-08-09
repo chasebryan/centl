@@ -19,8 +19,7 @@ let parse text =
 let test_coefficient_variable () =
   Alcotest.(check string)
     "coefficient multiplication" "x^2 - 5*x + 6"
-    (Centl_sci_runtime.normalize_polynomial_side ~variable:"x"
-       "x^2 - 5x + 6");
+    (Centl_sci_runtime.normalize_polynomial_side ~variable:"x" "x^2 - 5x + 6");
   Alcotest.(check string)
     "parenthesized coefficient multiplication" "(1/2)*x + 1"
     (Centl_sci_runtime.normalize_polynomial_side ~variable:"x" "(1/2)x + 1")
@@ -60,7 +59,8 @@ let () =
         [
           Alcotest.test_case "coefficient variable" `Quick
             test_coefficient_variable;
-          Alcotest.test_case "identifier boundary" `Quick test_identifier_boundary;
+          Alcotest.test_case "identifier boundary" `Quick
+            test_identifier_boundary;
           Alcotest.test_case "model style equation executes" `Quick
             test_model_style_equation_executes;
         ] );

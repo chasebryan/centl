@@ -17,7 +17,8 @@ let default ?(curl_executable = "curl") ?(max_tokens = 192)
 
 let strip_trailing_slash text =
   let rec finish length =
-    if length > 0 && text.[length - 1] = '/' then finish (length - 1) else length
+    if length > 0 && text.[length - 1] = '/' then finish (length - 1)
+    else length
   in
   let length = finish (String.length text) in
   String.sub text 0 length
@@ -26,9 +27,13 @@ let parse_loopback_port prefix url =
   if not (String.starts_with ~prefix url) then None
   else
     let suffix =
-      String.sub url (String.length prefix) (String.length url - String.length prefix)
+      String.sub url (String.length prefix)
+        (String.length url - String.length prefix)
     in
-    if suffix = "" || not (String.for_all (function '0' .. '9' -> true | _ -> false) suffix)
+    if
+      suffix = ""
+      || not
+           (String.for_all (function '0' .. '9' -> true | _ -> false) suffix)
     then None
     else
       try
@@ -47,7 +52,8 @@ let validate_config config =
     fail "invalid_configuration" "empty curl executable path"
   else if not (valid_loopback_url config.base_url) then
     fail "invalid_configuration"
-      "resident inference URL must be loopback http://127.0.0.1:PORT or http://localhost:PORT"
+      "resident inference URL must be loopback http://127.0.0.1:PORT or \
+       http://localhost:PORT"
   else if config.max_tokens <= 0 || config.max_tokens > 512 then
     fail "invalid_configuration" "max_tokens must be between 1 and 512"
   else if config.timeout_seconds <= 0 || config.timeout_seconds > 600 then
@@ -124,7 +130,8 @@ let read_bounded channel =
 
 let status_message = function
   | Unix.WEXITED code -> Printf.sprintf "curl exited with status %d" code
-  | Unix.WSIGNALED signal -> Printf.sprintf "curl terminated by signal %d" signal
+  | Unix.WSIGNALED signal ->
+      Printf.sprintf "curl terminated by signal %d" signal
   | Unix.WSTOPPED signal -> Printf.sprintf "curl stopped by signal %d" signal
 
 let parse_response text =
@@ -137,10 +144,14 @@ let parse_response text =
             | Ok ir -> Ok ir
             | Error error ->
                 fail error.code
-                  ("resident model produced invalid CENTL-SCi IR: " ^ error.message)
+                  ("resident model produced invalid CENTL-SCi IR: "
+                 ^ error.message)
             end
-        | Some _ -> fail "invalid_model_output" "resident response content must be a string"
-        | None -> fail "invalid_model_output" "resident response is missing content"
+        | Some _ ->
+            fail "invalid_model_output"
+              "resident response content must be a string"
+        | None ->
+            fail "invalid_model_output" "resident response is missing content"
         end
     | _ -> fail "invalid_model_output" "resident response must be a JSON object"
   with Yojson.Json_error message ->
@@ -150,7 +161,8 @@ let interpret config problem =
   match validate_config config with
   | Error _ as error -> error
   | Ok () ->
-      if String.length problem = 0 then fail "invalid_problem" "problem must not be empty"
+      if String.length problem = 0 then
+        fail "invalid_problem" "problem must not be empty"
       else if String.length problem > Centl_sci_llama.max_problem_bytes then
         fail "resource_limit" "problem exceeds the CENTL-SCi byte limit"
       else
@@ -160,9 +172,12 @@ let interpret config problem =
           let output = read_bounded channel in
           let status = Unix.close_process_in channel in
           match (output, status) with
-          | Error _ as error, _ -> error
-          | Ok _, (Unix.WEXITED 0) ->
-              begin match output with Ok text -> parse_response text | Error _ -> assert false end
+          | (Error _ as error), _ -> error
+          | Ok _, Unix.WEXITED 0 ->
+              begin match output with
+              | Ok text -> parse_response text
+              | Error _ -> assert false
+              end
           | Ok _, status -> fail "inference_failed" (status_message status)
         with Unix.Unix_error (code, function_name, argument) ->
           fail "inference_failed"

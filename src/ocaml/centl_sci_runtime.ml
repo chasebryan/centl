@@ -91,7 +91,9 @@ let plan = function
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
       let left = normalize_polynomial_side ~variable:data.variable data.left in
-      let right = normalize_polynomial_side ~variable:data.variable data.right in
+      let right =
+        normalize_polynomial_side ~variable:data.variable data.right
+      in
       let expression =
         Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in

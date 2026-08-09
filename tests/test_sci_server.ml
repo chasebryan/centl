@@ -46,7 +46,9 @@ let test_request_contract () =
   Alcotest.(check string)
     "grammar" Centl_sci_schema.llama_grammar (string "grammar" request);
   let prompt = string "prompt" request in
-  Alcotest.(check bool) "compact resident prompt" true (String.length prompt < 1_024);
+  Alcotest.(check bool)
+    "compact resident prompt" true
+    (String.length prompt < 1_024);
   Alcotest.(check bool)
     "problem encoded as data" true
     (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);

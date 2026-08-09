@@ -59,7 +59,8 @@ let drop_prefix_ci prefix text =
   let prefix = String.lowercase_ascii prefix in
   if String.starts_with ~prefix lower then
     Some
-      (String.sub text (String.length prefix) (String.length text - String.length prefix)
+      (String.sub text (String.length prefix)
+         (String.length text - String.length prefix)
       |> String.trim)
   else None
 
@@ -73,8 +74,9 @@ let numeric_token text =
   && String.exists (function '0' .. '9' -> true | _ -> false) text
 
 let arithmetic_char = function
-  | '0' .. '9' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')'
-  | 'e' | 'E' -> true
+  | '0' .. '9'
+  | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | 'e' | 'E' ->
+      true
   | _ -> false
 
 let contains_operator text =
@@ -116,21 +118,23 @@ let exact_expression problem =
   | None -> None
   | Some candidate ->
       let expression = normalize_arithmetic candidate in
-      if expression = "" || not (String.for_all arithmetic_char expression)
-         || not (contains_operator expression)
+      if
+        expression = ""
+        || (not (String.for_all arithmetic_char expression))
+        || not (contains_operator expression)
       then None
       else
         begin match
           Centl_sci_ir.of_json
             (`Assoc
-              [
-                ("schema_version", `Int 1);
-                ("domain", `String "mathematics");
-                ("problem_class", `String "exact_expression");
-                ("operation", `String "compute");
-                ("assumptions", `List []);
-                ("expression", `String expression);
-              ])
+               [
+                 ("schema_version", `Int 1);
+                 ("domain", `String "mathematics");
+                 ("problem_class", `String "exact_expression");
+                 ("operation", `String "compute");
+                 ("assumptions", `List []);
+                 ("expression", `String expression);
+               ])
         with
         | Ok ir -> Some ir
         | Error _ -> None
@@ -139,8 +143,10 @@ let exact_expression problem =
 let canonical_unit text =
   match String.lowercase_ascii (String.trim text) with
   | "m" | "meter" | "meters" | "metre" | "metres" -> Some "m"
-  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" -> Some "cm"
-  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" -> Some "mm"
+  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" ->
+      Some "cm"
+  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" ->
+      Some "mm"
   | "km" | "kilometer" | "kilometers" | "kilometre" | "kilometres" -> Some "km"
   | "s" | "second" | "seconds" -> Some "s"
   | "ms" | "millisecond" | "milliseconds" -> Some "ms"
@@ -153,9 +159,11 @@ let canonical_unit text =
   | "mol" | "mole" | "moles" -> Some "mol"
   | "cd" | "candela" | "candelas" -> Some "cd"
   | "m/s" | "meter per second" | "meters per second" | "metre per second"
-  | "metres per second" -> Some "m/s"
+  | "metres per second" ->
+      Some "m/s"
   | "m/s^2" | "meter per second squared" | "meters per second squared"
-  | "metre per second squared" | "metres per second squared" -> Some "m/s^2"
+  | "metre per second squared" | "metres per second squared" ->
+      Some "m/s^2"
   | "n" | "newton" | "newtons" -> Some "N"
   | "j" | "joule" | "joules" -> Some "J"
   | "pa" | "pascal" | "pascals" -> Some "Pa"
@@ -192,16 +200,16 @@ let unit_conversion problem =
                   begin match
                     Centl_sci_ir.of_json
                       (`Assoc
-                        [
-                          ("schema_version", `Int 1);
-                          ("domain", `String "physics");
-                          ("problem_class", `String "unit_conversion");
-                          ("operation", `String "convert");
-                          ("assumptions", `List []);
-                          ("value", `String value);
-                          ("from_unit", `String from_unit);
-                          ("to_unit", `String to_unit);
-                        ])
+                         [
+                           ("schema_version", `Int 1);
+                           ("domain", `String "physics");
+                           ("problem_class", `String "unit_conversion");
+                           ("operation", `String "convert");
+                           ("assumptions", `List []);
+                           ("value", `String value);
+                           ("from_unit", `String from_unit);
+                           ("to_unit", `String to_unit);
+                         ])
                   with
                   | Ok ir -> Some ir
                   | Error _ -> None
@@ -212,8 +220,11 @@ let unit_conversion problem =
       end
 
 let equation_char = function
-  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | ' ' | '\t' | '.' | '+' | '-'
-  | '*' | '/' | '^' | '(' | ')' -> true
+  | 'a' .. 'z'
+  | 'A' .. 'Z'
+  | '0' .. '9'
+  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' ->
+      true
   | _ -> false
 
 let polynomial_equation problem =
@@ -239,25 +250,26 @@ let polynomial_equation problem =
                   (String.length equation - equal_index - 1)
                 |> String.trim
               in
-              if left = "" || right = "" || variable = ""
-                 || not (String.for_all equation_char left)
-                 || not (String.for_all equation_char right)
+              if
+                left = "" || right = "" || variable = ""
+                || (not (String.for_all equation_char left))
+                || not (String.for_all equation_char right)
               then None
               else
                 begin match
                   Centl_sci_ir.of_json
                     (`Assoc
-                      [
-                        ("schema_version", `Int 1);
-                        ("domain", `String "mathematics");
-                        ("problem_class", `String "polynomial_equation");
-                        ("operation", `String "solve");
-                        ("assumptions", `List []);
-                        ("left", `String left);
-                        ("relation", `String "equal");
-                        ("right", `String right);
-                        ("variable", `String variable);
-                      ])
+                       [
+                         ("schema_version", `Int 1);
+                         ("domain", `String "mathematics");
+                         ("problem_class", `String "polynomial_equation");
+                         ("operation", `String "solve");
+                         ("assumptions", `List []);
+                         ("left", `String left);
+                         ("relation", `String "equal");
+                         ("right", `String right);
+                         ("variable", `String variable);
+                       ])
                 with
                 | Ok ir -> Some ir
                 | Error _ -> None
