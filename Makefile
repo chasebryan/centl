@@ -19,10 +19,16 @@ FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 SCI_LLAMA_CLI ?= llama-cli
 SCI_TIMEOUT ?= 300
 SCI_REPORT ?= sci-model-report.json
+SCI_SERVER_URL ?=
+SCI_MODEL_LABEL ?= resident-model
+SCI_ASSIMILATION_FAST_REPEATS ?= 5
+SCI_ASSIMILATION_MODEL_REPEATS ?= 1
+SCI_ASSIMILATION_ARGS ?=
 
 .PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
 	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
-	hardening-test differential-test sci-model-test build test release clean
+	hardening-test differential-test sci-model-test sci-assimilate \
+	sci-assimilate-full sci-assimilate-publish build test release clean
 
 all: build
 
@@ -103,6 +109,31 @@ sci-model-test: build
 		--llama-cli "$(SCI_LLAMA_CLI)" \
 		--timeout "$(SCI_TIMEOUT)" \
 		--output "$(SCI_REPORT)"
+
+sci-assimilate:
+	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
+	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+		$(PYTHON) scripts/sci-assimilate.py \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
+
+sci-assimilate-full:
+	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
+	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+		$(PYTHON) scripts/sci-assimilate.py \
+		--full \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
+
+sci-assimilate-publish:
+	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
+	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+		sh scripts/sci-assimilate-publish \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
 
 build: extract native-build
 
