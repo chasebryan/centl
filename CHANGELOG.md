@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.12.0-rc.3 — 2026-08-09
+
+### Added
+
+- CENTL-SCi is packaged and activated as a first-class native command alongside
+  `centl` and `centl-physics`.
+- A bare `centl-sci` starts the answer-first live scientific REPL.
+- Native installers smoke-test CENTL-SCi exact arithmetic and REPL startup
+  before activating the installed command.
+- Unix installation can configure the user's PATH automatically, with an
+  explicit opt-out and a POSIX profile fallback when the shell cannot be
+  identified.
+- Dedicated release notes document the first-run scientific interface and
+  platform policy.
+
+### Fixed
+
+- The Unix installer no longer fails under `set -u` when `SHELL` is absent in a
+  headless CI, container, or service environment.
+- Windows installer validation no longer depends on PowerShell preserving
+  native REPL line boundaries; it still requires both CENTL-SCi identity
+  markers before activation.
+- Regression coverage now exercises installation with `SHELL` explicitly
+  removed and verifies `~/.profile` PATH fallback plus `centl-sci` activation.
+
+### Release-candidate notes
+
+- Linux remains the CENTL-SCi reference platform. Windows support is
+  experimental and best-effort during the early development series.
+- This is a candidate build for validation, not the final 0.12.0 publication.
+
 ## 0.12.0-rc.1 — 2026-08-08
 
 ### Added

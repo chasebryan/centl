@@ -253,7 +253,8 @@ case ":${PATH:-}:" in
 esac
 
 if [ "$path_active" = false ] && [ "$configure_path" = true ] && [ -n "${HOME:-}" ]; then
-  shell_name=${SHELL##*/}
+  shell_path=${SHELL:-}
+  shell_name=${shell_path##*/}
   case "$shell_name" in
     bash) profile="$HOME/.bashrc" ;;
     zsh) profile="$HOME/.zshrc" ;;
