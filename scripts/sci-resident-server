@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+set -eu
+
+model="${1:-${CENTL_SCI_MODEL:-}}"
+server="${CENTL_SCI_LLAMA_SERVER:-llama-server}"
+port="${CENTL_SCI_PORT:-8080}"
+
+if [ -z "$model" ]; then
+  echo "usage: scripts/sci-resident-server /path/to/model.gguf" >&2
+  echo "or set CENTL_SCI_MODEL" >&2
+  exit 2
+fi
+
+if [ ! -f "$model" ]; then
+  echo "CENTL-SCi: model not found: $model" >&2
+  exit 2
+fi
+
+case "$port" in
+  ''|*[!0-9]*)
+    echo "CENTL-SCi: CENTL_SCI_PORT must be an integer" >&2
+    exit 2
+    ;;
+esac
+
+if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+  echo "CENTL-SCi: CENTL_SCI_PORT must be between 1 and 65535" >&2
+  exit 2
+fi
+
+exec "$server" \
+  -m "$model" \
+  --offline \
+  --host 127.0.0.1 \
+  --port "$port" \
+  --ctx-size 2048 \
+  --parallel 1 \
+  --reasoning off \
+  --no-ui \
+  --cors-origins localhost
