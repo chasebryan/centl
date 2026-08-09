@@ -45,6 +45,9 @@
   Centl_receipt
   Centl_protocol
   Centl_request_queue
+  Centl_sci_ir
+  Centl_sci_llama
+  Centl_sci_runtime
   Centl_physics
   Centl_physics_collision
   Centl_physics_world
@@ -79,3 +82,10 @@
  (package centl)
  (modules Physics_main)
  (libraries centl_lib zarith yojson))
+
+(executable
+ (name sci_main)
+ (public_name centl-sci)
+ (package centl)
+ (modules Sci_main)
+ (libraries centl_lib unix yojson))
