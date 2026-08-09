@@ -27,8 +27,10 @@ The installer:
 7. smoke-tests exact physics unit conversion when CENTL Physics is present;
 8. smoke-tests `centl-sci 'What is 0.1 plus 0.2?'` and requires `3/10` when
    CENTL-SCi is present;
-9. atomically activates the installed version and command launchers;
-10. configures the current user's Bash, Zsh, or POSIX profile when the command
+9. starts `centl-sci --repl`, exits it cleanly, and requires both the CENTL-SCi
+   identity line and `Free for science.` before activation;
+10. atomically activates the installed version and command launchers;
+11. configures the current user's Bash, Zsh, or POSIX profile when the command
     directory is not already on `PATH`, unless `--no-path` is requested.
 
 The default prefix is `~/.local`. If PATH configuration was required, open a new
