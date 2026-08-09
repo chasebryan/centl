@@ -144,6 +144,29 @@ let test_unsupported_has_no_execution () =
   Alcotest.(check bool) "no execution" true (Option.is_none outcome.plan);
   Alcotest.(check bool) "no response" true (Option.is_none outcome.response)
 
+let fake_model_executable () =
+  match Sys.getenv_opt "CENTL_SCI_FAKE_MODEL" with
+  | Some value when value <> "" -> value
+  | _ -> Alcotest.fail "CENTL_SCI_FAKE_MODEL is not configured"
+
+let test_end_to_end_local_process () =
+  let config =
+    Centl_sci_llama.default ~executable:(fake_model_executable ())
+      ~model:"unused.gguf" ()
+  in
+  let ir =
+    match Centl_sci_llama.interpret config "What is 0.1 plus 0.2?" with
+    | Ok value -> value
+    | Error error -> Alcotest.fail (Centl_sci_llama.string_of_error error)
+  in
+  let outcome = Centl_sci_runtime.execute ir in
+  Alcotest.(check string)
+    "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
+  let result = response outcome in
+  let value = assoc "value" result in
+  Alcotest.(check string) "checked result" "3/10" (string "text" value)
+
 let test_model_argv_is_offline_and_schema_constrained () =
   let config =
     Centl_sci_llama.default ~executable:"/usr/bin/llama-cli"
@@ -182,6 +205,8 @@ let () =
         ] );
       ( "inference",
         [
+          Alcotest.test_case "end-to-end local process" `Quick
+            test_end_to_end_local_process;
           Alcotest.test_case "offline constrained argv" `Quick
             test_model_argv_is_offline_and_schema_constrained;
         ] );
