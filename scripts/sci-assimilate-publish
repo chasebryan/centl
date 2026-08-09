@@ -75,13 +75,13 @@ if [ -n "$model" ]; then
     tail -n 40 "$server_log" >&2 || true
     exit 1
   fi
-  CENTL_SCI_SERVER_URL="$server_url"
-  export CENTL_SCI_SERVER_URL
   echo "CENTL-SCi: resident model healthy at $server_url"
 fi
 
 set +e
-python3 scripts/sci-assimilate.py \
+CENTL_SCI_SERVER_URL= python3 scripts/sci-assimilate.py \
+  --server-url "$server_url" \
+  --model-label "${CENTL_SCI_MODEL_LABEL:-resident-model}" \
   --output-json "$tmp_json" \
   --output-markdown "$tmp_markdown" \
   "$@"
