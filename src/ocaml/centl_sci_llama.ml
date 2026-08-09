@@ -110,6 +110,62 @@ let read_bounded channel =
   in
   loop ()
 
+(* llama-cli --simple-io may emit runtime startup/exit text on stdout in some
+   builds. The grammar still constrains the generated payload to one JSON
+   object. Treat the process stream as a transport envelope: locate complete
+   top-level JSON objects, require exactly one parseable object, then pass that
+   object through the independent CENTL-SCi IR validator. Arbitrary prose is
+   never promoted into IR and multiple objects are rejected. *)
+let extract_transport_json text =
+  let length = String.length text in
+  let find_object start =
+    let rec loop index depth in_string escaped =
+      if index >= length then None
+      else
+        let ch = text.[index] in
+        if in_string then
+          if escaped then loop (index + 1) depth true false
+          else if ch = '\\' then loop (index + 1) depth true true
+          else if ch = '"' then loop (index + 1) depth false false
+          else loop (index + 1) depth true false
+        else if ch = '"' then loop (index + 1) depth true false
+        else if ch = '{' then loop (index + 1) (depth + 1) false false
+        else if ch = '}' then
+          let depth = depth - 1 in
+          if depth = 0 then Some index
+          else if depth < 0 then None
+          else loop (index + 1) depth false false
+        else loop (index + 1) depth false false
+    in
+    loop (start + 1) 1 false false
+  in
+  let is_json_object candidate =
+    try
+      match Yojson.Safe.from_string candidate with `Assoc _ -> true | _ -> false
+    with Yojson.Json_error _ -> false
+  in
+  let rec collect index candidates =
+    if index >= length then List.rev candidates
+    else if text.[index] <> '{' then collect (index + 1) candidates
+    else
+      match find_object index with
+      | None -> collect (index + 1) candidates
+      | Some stop ->
+          let candidate = String.sub text index (stop - index + 1) in
+          let candidates =
+            if is_json_object candidate then candidate :: candidates else candidates
+          in
+          collect (stop + 1) candidates
+  in
+  match collect 0 [] with
+  | [candidate] -> Ok candidate
+  | [] ->
+      fail "invalid_model_output"
+        "llama-cli transport contained no complete JSON object"
+  | _ ->
+      fail "invalid_model_output"
+        "llama-cli transport contained more than one JSON object"
+
 let status_message = function
   | Unix.WEXITED code -> Printf.sprintf "llama-cli exited with status %d" code
   | Unix.WSIGNALED signal ->
@@ -149,12 +205,16 @@ let interpret config problem =
               let status = Unix.close_process_in channel in
               begin match status with
               | Unix.WEXITED 0 ->
-                  begin match Centl_sci_ir.of_string (String.trim output) with
-                  | Ok ir -> Ok ir
-                  | Error error ->
-                      fail error.code
-                        ("local model produced invalid CENTL-SCi IR: "
-                       ^ error.message)
+                  begin match extract_transport_json output with
+                  | Error _ as error -> error
+                  | Ok payload ->
+                      begin match Centl_sci_ir.of_string payload with
+                      | Ok ir -> Ok ir
+                      | Error error ->
+                          fail error.code
+                            ("local model produced invalid CENTL-SCi IR: "
+                           ^ error.message)
+                      end
                   end
               | _ -> fail "inference_failed" (status_message status)
               end
