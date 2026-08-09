@@ -5,7 +5,6 @@ open Centl_physics_world
 open Centl_physics_contact_solver
 
 let max_contact_pairs = 4_096
-
 let pair_count count = if count < 2 then 0 else count * (count - 1) / 2
 
 let exact_quantity_si_json quantity unit_symbol =
@@ -94,7 +93,8 @@ let sphere_world_input = function
             if pairs > max_contact_pairs then
               Error
                 (Printf.sprintf
-                   "sphere contact analysis would require %d pairs, exceeding the %d-pair machine-interface limit"
+                   "sphere contact analysis would require %d pairs, exceeding \
+                    the %d-pair machine-interface limit"
                    pairs max_contact_pairs)
             else Ok (sphere_world spheres)
           with Physics_error message -> Error message
@@ -143,8 +143,7 @@ let trust_boundary_json =
   `Assoc
     [
       ("geometry", `String "exact_pairwise_spheres");
-      ( "contact_test",
-        `String "distance_squared_vs_radius_sum_squared" );
+      ("contact_test", `String "distance_squared_vs_radius_sum_squared");
       ("response", `String "frictionless_elastic_normal_impulse");
       ("resolution_scope", `String "disjoint_touching_pairs_only");
       ("overlap_policy", `String "defer_entire_world");
@@ -174,14 +173,15 @@ let contact_analysis_result fields =
                      ("exact", `Bool true);
                      ("world", sphere_world_json state);
                      ("summary", contact_summary_json contacts);
-                     ( "active_contacts",
-                       `List (List.map contact_json active) );
+                     ("active_contacts", `List (List.map contact_json active));
                      ("trust_boundary", trust_boundary_json);
                      ( "text",
                        `String
                          (Printf.sprintf
-                            "%d sphere(s), %d pair(s): %d touching, %d overlapping"
-                            (List.length state.spheres) (List.length contacts)
+                            "%d sphere(s), %d pair(s): %d touching, %d \
+                             overlapping"
+                            (List.length state.spheres)
+                            (List.length contacts)
                             (count_relation Touching contacts)
                             (count_relation Overlapping contacts)) );
                    ])
@@ -228,9 +228,11 @@ let completed_resolution_json initial contacts result =
       ( "text",
         `String
           (Printf.sprintf
-             "completed: %d touching pair(s), %d elastic impulse(s); momentum=%b; kinetic_energy=%b"
-             (List.length result.pair_resolutions) impulses
-             result.momentum_conserved result.kinetic_energy_conserved) );
+             "completed: %d touching pair(s), %d elastic impulse(s); \
+              momentum=%b; kinetic_energy=%b"
+             (List.length result.pair_resolutions)
+             impulses result.momentum_conserved result.kinetic_energy_conserved)
+      );
     ]
 
 let overlap_deferred_json initial contacts overlaps =
@@ -249,7 +251,8 @@ let overlap_deferred_json initial contacts overlaps =
       ( "text",
         `String
           (Printf.sprintf
-             "deferred: %d overlapping pair(s); CENTL does not perform penetration correction"
+             "deferred: %d overlapping pair(s); CENTL does not perform \
+              penetration correction"
              (List.length overlaps)) );
     ]
 
@@ -271,7 +274,8 @@ let ambiguity_deferred_json initial contacts ids =
       ( "text",
         `String
           (Printf.sprintf
-             "deferred: %d particle(s) participate in multiple simultaneous touching contacts"
+             "deferred: %d particle(s) participate in multiple simultaneous \
+              touching contacts"
              (List.length ids)) );
     ]
 
@@ -287,7 +291,8 @@ let contact_resolution_result fields =
           | Ok state ->
               let contacts = classify_sphere_contacts state in
               begin match resolve_isolated_elastic_touching_contacts state with
-              | Completed result -> Ok (completed_resolution_json state contacts result)
+              | Completed result ->
+                  Ok (completed_resolution_json state contacts result)
               | Deferred (_, Overlap_detected overlaps) ->
                   Ok (overlap_deferred_json state contacts overlaps)
               | Deferred (_, Ambiguous_simultaneous_contacts ids) ->
