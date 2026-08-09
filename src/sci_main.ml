@@ -47,9 +47,7 @@ let backend_text = function
 
 let with_interpreter_path source = function
   | `Assoc fields ->
-      let fields =
-        ("interpreter_path", `String (source_text source)) :: fields
-      in
+      let fields = ("interpreter_path", `String (source_text source)) :: fields in
       let fields =
         match backend_text source with
         | None -> fields
@@ -137,8 +135,12 @@ let () =
         Arg.Set_string curl,
         "PATH curl executable used for loopback resident inference (default: \
          curl)" );
-      ("--details", Arg.Set details_output, "show concise scientific details");
-      ("--json", Arg.Set json_output, "emit the reproducible structured result");
+      ( "--details",
+        Arg.Set details_output,
+        "show concise scientific details" );
+      ( "--json",
+        Arg.Set json_output,
+        "emit the reproducible structured result" );
       ( "--repl",
         Arg.Set force_repl,
         "start the live scientific problem interpreter even when stdin is not a TTY"
@@ -223,7 +225,9 @@ let () =
         end
     | _ ->
         let configured_model =
-          match !model with Some value when value <> "" -> Some value | _ -> None
+          match !model with
+          | Some value when value <> "" -> Some value
+          | _ -> None
         in
         begin match configured_model with
         | None ->
@@ -235,7 +239,8 @@ let () =
                 exit_code = 2;
                 human_message = "CENTL-SCi cannot solve this problem yet.";
                 detail_message =
-                  "Semantic interpretation is required, but no local model backend is configured.";
+                  "Semantic interpretation is required, but no local model \
+                   backend is configured.";
                 diagnostic =
                   "this problem requires semantic inference; configure \
                    --server-url/CENTL_SCI_SERVER_URL or --model/CENTL_SCI_MODEL";
@@ -288,7 +293,8 @@ let () =
       Centl_sci_runtime.to_json ~problem outcome
       |> with_interpreter_path source
       |> Yojson.Safe.pretty_to_string |> print_endline
-    else if !details_output then Centl_sci_present.details outcome |> print_endline
+    else if !details_output then
+      Centl_sci_present.details outcome |> print_endline
     else Centl_sci_present.human outcome |> print_endline
   in
   let run_one problem =
@@ -348,10 +354,11 @@ let () =
             loop ()
           end
           else if problem = "" then loop ()
-          else if String.length problem > Centl_sci_llama.max_problem_bytes then begin
-            print_endline "This problem exceeds the CENTL-SCi input limit.";
-            loop ()
-          end
+          else if String.length problem > Centl_sci_llama.max_problem_bytes then
+            begin
+              print_endline "This problem exceeds the CENTL-SCi input limit.";
+              loop ()
+            end
           else begin
             begin match execute_problem problem with
             | Error error -> human_error ~details:!details error |> print_endline
@@ -369,7 +376,7 @@ let () =
   | _ :: _ when !force_repl ->
       Printf.eprintf "centl-sci: --repl does not accept a one-shot problem\n";
       exit 2
-  | (_ :: _ as values) -> String.concat " " values |> String.trim |> run_one
+  | _ :: _ as values -> String.concat " " values |> String.trim |> run_one
   | [] when !force_repl ->
       if !json_output then begin
         Printf.eprintf "centl-sci: --json is not available in the human REPL\n";
