@@ -84,6 +84,23 @@ def load_corpus(path: Path) -> list[dict[str, Any]]:
     return fixtures
 
 
+def command_version(executable: str) -> str | None:
+    try:
+        completed = subprocess.run(
+            [executable, "--version"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10.0,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    text = completed.stdout.strip() or completed.stderr.strip()
+    if not text:
+        return None
+    return text.splitlines()[0][:1024]
+
+
 def dict_contains(actual: Any, expected_subset: Any) -> bool:
     if isinstance(expected_subset, dict):
         if not isinstance(actual, dict):
@@ -302,7 +319,9 @@ def main() -> int:
         },
         "runtime": {
             "centl_sci": str(centl_sci),
+            "centl_sci_version": command_version(str(centl_sci)),
             "llama_cli": args.llama_cli,
+            "llama_cli_version": command_version(args.llama_cli),
             "note": (
                 "elapsed_seconds includes process startup and model loading for each case; "
                 "it is not an interpretation-only latency measurement"
@@ -311,6 +330,7 @@ def main() -> int:
         "system": {
             "platform": platform.platform(),
             "machine": platform.machine(),
+            "processor": platform.processor(),
             "python": platform.python_version(),
         },
         "corpus": str(corpus),
