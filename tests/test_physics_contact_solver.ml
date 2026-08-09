@@ -9,8 +9,7 @@ let check_q message expected actual =
   Alcotest.(check string) message (Q.to_string expected) (Q.to_string actual)
 
 let body ~id ~position:(px, py, pz) ~velocity:(vx, vy, vz) =
-  particle ~id
-    ~mass:(quantity Q.one "kg")
+  particle ~id ~mass:(quantity Q.one "kg")
     ~position:(vector3 ~unit_symbol:"m" (q px) (q py) (q pz))
     ~velocity:(vector3 ~unit_symbol:"m/s" (q vx) (q vy) (q vz))
 
@@ -18,14 +17,20 @@ let sphere_body ~id ~position ~velocity =
   sphere ~particle:(body ~id ~position ~velocity) ~radius:(quantity Q.one "m")
 
 let sphere_by_id_exn state id =
-  match List.find_opt (fun sphere -> String.equal sphere.particle.id id) state.spheres with
+  match
+    List.find_opt
+      (fun sphere -> String.equal sphere.particle.id id)
+      state.spheres
+  with
   | Some sphere -> sphere
   | None -> Alcotest.fail ("missing sphere: " ^ id)
 
 let pair_key pair = pair.particle1_id ^ pair.particle2_id
 
 let check_pair_status message expected pair =
-  Alcotest.(check string) message expected (contact_status_to_string pair.status)
+  Alcotest.(check string)
+    message expected
+    (contact_status_to_string pair.status)
 
 let test_single_touching_pair_resolves () =
   let a =
@@ -38,8 +43,11 @@ let test_single_touching_pair_resolves () =
   | Deferred _ -> Alcotest.fail "isolated touching pair must resolve"
   | Completed result ->
       Alcotest.(check bool) "momentum conserved" true result.momentum_conserved;
-      Alcotest.(check bool) "energy conserved" true result.kinetic_energy_conserved;
-      Alcotest.(check int) "one pair response" 1 (List.length result.pair_resolutions);
+      Alcotest.(check bool)
+        "energy conserved" true result.kinetic_energy_conserved;
+      Alcotest.(check int)
+        "one pair response" 1
+        (List.length result.pair_resolutions);
       let pair = List.hd result.pair_resolutions in
       Alcotest.(check string) "pair ids" "ab" (pair_key pair);
       check_pair_status "pair resolved" "resolved" pair;
@@ -77,9 +85,12 @@ let test_separated_world_completes_without_pairs () =
   match resolve_isolated_elastic_touching_contacts (sphere_world [ a; b ]) with
   | Deferred _ -> Alcotest.fail "separated world must not defer"
   | Completed result ->
-      Alcotest.(check int) "no pair responses" 0 (List.length result.pair_resolutions);
+      Alcotest.(check int)
+        "no pair responses" 0
+        (List.length result.pair_resolutions);
       Alcotest.(check bool) "momentum conserved" true result.momentum_conserved;
-      Alcotest.(check bool) "energy conserved" true result.kinetic_energy_conserved;
+      Alcotest.(check bool)
+        "energy conserved" true result.kinetic_energy_conserved;
       check_q "a vx unchanged" (q "3")
         (sphere_by_id_exn result.world "a").particle.velocity.x
 
@@ -112,11 +123,14 @@ let test_shared_touching_particle_defers () =
   let c =
     sphere_body ~id:"c" ~position:("4", "0", "0") ~velocity:("-1", "0", "0")
   in
-  match resolve_isolated_elastic_touching_contacts (sphere_world [ a; b; c ]) with
+  match
+    resolve_isolated_elastic_touching_contacts (sphere_world [ a; b; c ])
+  with
   | Completed _ -> Alcotest.fail "shared simultaneous contact must defer"
   | Deferred (_, Overlap_detected _) -> Alcotest.fail "no pair overlaps"
   | Deferred (returned, Ambiguous_simultaneous_contacts ids) ->
-      Alcotest.(check (list string)) "only shared particle is ambiguous" [ "b" ] ids;
+      Alcotest.(check (list string))
+        "only shared particle is ambiguous" [ "b" ] ids;
       check_q "shared particle unchanged" Q.zero
         (sphere_by_id_exn returned "b").particle.velocity.x
 
@@ -139,9 +153,12 @@ let test_two_disjoint_touching_pairs_resolve () =
   | Deferred _ -> Alcotest.fail "disjoint touching matching must resolve"
   | Completed result ->
       let pair_keys = List.map pair_key result.pair_resolutions in
-      Alcotest.(check (list string)) "deterministic pair order" [ "ab"; "cd" ] pair_keys;
-      Alcotest.(check bool) "world momentum conserved" true result.momentum_conserved;
-      Alcotest.(check bool) "world energy conserved" true result.kinetic_energy_conserved;
+      Alcotest.(check (list string))
+        "deterministic pair order" [ "ab"; "cd" ] pair_keys;
+      Alcotest.(check bool)
+        "world momentum conserved" true result.momentum_conserved;
+      Alcotest.(check bool)
+        "world energy conserved" true result.kinetic_energy_conserved;
       check_q "a vx" (q "-1")
         (sphere_by_id_exn result.world "a").particle.velocity.x;
       check_q "b vx" (q "1")
@@ -184,7 +201,8 @@ let () =
             test_touching_separating_pair_has_no_impulse;
           Alcotest.test_case "separated world" `Quick
             test_separated_world_completes_without_pairs;
-          Alcotest.test_case "overlap defers" `Quick test_overlap_defers_unchanged;
+          Alcotest.test_case "overlap defers" `Quick
+            test_overlap_defers_unchanged;
           Alcotest.test_case "shared touching particle defers" `Quick
             test_shared_touching_particle_defers;
           Alcotest.test_case "two disjoint pairs" `Quick
