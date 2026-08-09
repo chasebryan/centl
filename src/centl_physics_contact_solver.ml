@@ -55,7 +55,7 @@ let sphere_by_id state id =
   | Some sphere -> sphere
   | None -> raise (Physics_error ("unknown sphere particle id: " ^ id))
 
-let touching_count id contacts =
+let touching_count id (contacts : sphere_contact list) =
   List.fold_left
     (fun count contact ->
       if
@@ -70,7 +70,7 @@ let ambiguous_touching_ids state contacts =
   |> List.filter (fun sphere -> touching_count sphere.particle.id contacts > 1)
   |> List.map (fun sphere -> sphere.particle.id)
 
-let resolve_touching_pair state contact =
+let resolve_touching_pair state (contact : sphere_contact) =
   let sphere1 = sphere_by_id state contact.particle1_id in
   let sphere2 = sphere_by_id state contact.particle2_id in
   let response =
