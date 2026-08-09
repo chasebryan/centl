@@ -42,21 +42,25 @@ let classify problem =
     || contains ~needle:"spring" problem
   in
   let general_knowledge =
-    starts "who " problem || starts "who was " problem || starts "who is " problem
+    starts "who " problem || starts "who was " problem
+    || starts "who is " problem
   in
   if contradictory then Unsupported "contradictory request"
   else if mechanics then
     if contains ~needle:"spring" problem then
       Unsupported "missing physics parameters or unsupported mechanics"
     else Unsupported "mechanics outside CENTL-SCi v0.0.1"
-  else if general_knowledge then Unsupported "general knowledge outside CENTL-SCi"
+  else if general_knowledge then
+    Unsupported "general knowledge outside CENTL-SCi"
   else if
     starts "convert " problem
-    || (starts "how many " problem && Centl_sci_units.mentions_known_unit problem)
+    || starts "how many " problem
+       && Centl_sci_units.mentions_known_unit problem
   then Unit_conversion
   else if equation_request then Polynomial_equation
   else if
-    starts "what is " problem || starts "calculate " problem
+    starts "what is " problem
+    || starts "calculate " problem
     || starts "compute " problem || starts "evaluate " problem
   then Exact_expression
   else Any
