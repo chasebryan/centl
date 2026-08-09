@@ -124,6 +124,10 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
         (quantity_sub (quantity_mul b b)
            (quantity_scale (Q.of_int 4) (quantity_mul a c)))
   in
+  let crossing_result discriminant =
+    ( Crossing_contact,
+      Some (first_crossing_time ~a ~b ~c ~discriminant ~closest_time) )
+  in
   let status, first_contact_time =
     if initial_comparison < 0 then (Initially_overlapping, None)
     else if initial_comparison = 0 then
@@ -134,7 +138,10 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
       in
       if minimum_comparison > 0 then (No_contact_in_interval, None)
       else if minimum_comparison = 0 then
-        (Tangent_contact, Some (Rational_contact_time closest_time))
+        match discriminant with
+        | Some discriminant when Q.compare discriminant.si_value Q.zero > 0 ->
+            crossing_result discriminant
+        | _ -> (Tangent_contact, Some (Rational_contact_time closest_time))
       else
         match discriminant with
         | None ->
@@ -142,9 +149,7 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
               (Physics_error
                  "internal linear-contact invariant: crossing requires \
                   relative motion")
-        | Some discriminant ->
-            ( Crossing_contact,
-              Some (first_crossing_time ~a ~b ~c ~discriminant ~closest_time) )
+        | Some discriminant -> crossing_result discriminant
   in
   {
     particle1_id = sphere1.particle.id;
