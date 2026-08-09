@@ -172,7 +172,9 @@ evidence model, and current boundary.
 
 ## CENTL-SCi
 
-CENTL-SCi v0.0.1 is an experimental local semantic interpreter for mathematics
+![CENTL-SCi v0.0.1-Camelus — Free Computation Foundation](assets/branding/centl-sci-v0.0.1-camelus-banner.png)
+
+CENTL-SCi v0.0.1-Camelus is an experimental local semantic interpreter for mathematics
 and physics. It is not a general chatbot and it is not a replacement for CENTL.
 A local model translates one ordinary-language problem into a closed, validated
 problem representation; CENTL or CENTL Physics then performs the admitted
@@ -186,7 +188,7 @@ unsupported rather than being replaced by a model guess. The local inference
 runtime and model are optional: ordinary CENTL and CENTL Physics continue to
 work without them.
 
-See [docs/SCI.md](docs/SCI.md) for the v0.0.1 architecture, Problem IR, trust
+See [docs/SCI.md](docs/SCI.md) for the v0.0.1-Camelus architecture, Problem IR, trust
 boundary, local-runtime configuration, model-evaluation policy, tests, and
 packaging status.
 
