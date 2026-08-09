@@ -56,6 +56,11 @@
  (libraries centl_lib alcotest yojson))
 
 (test
+ (name test_sci_hint)
+ (modules test_sci_hint)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_sci_lowering)
  (modules test_sci_lowering)
  (libraries centl_lib alcotest yojson))
