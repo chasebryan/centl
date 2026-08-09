@@ -202,16 +202,16 @@ let test_initial_overlap () =
 
 let test_distinct_ids_required () =
   let a =
-    sphere_body ~id:"same" ~position:("0", "0", "0")
-      ~velocity:("0", "0", "0")
+    sphere_body ~id:"same" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
   in
   let b =
-    sphere_body ~id:"same" ~position:("3", "0", "0")
-      ~velocity:("0", "0", "0")
+    sphere_body ~id:"same" ~position:("3", "0", "0") ~velocity:("0", "0", "0")
   in
   match certify_linear_sphere_contact ~duration:(duration "1") a b with
   | _ -> Alcotest.fail "same-id contact pair must be rejected"
-  | exception Physics_error "linear contact pair requires distinct particle ids" -> ()
+  | exception Physics_error "linear contact pair requires distinct particle ids"
+    ->
+      ()
   | exception Physics_error message ->
       Alcotest.fail ("unexpected error: " ^ message)
 
