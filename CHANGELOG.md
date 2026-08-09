@@ -1,21 +1,21 @@
 # Changelog
 
-## Unreleased
+## 0.12.0-rc.1 — 2026-08-08
 
 ### Added
 
-- Claim verification foundation (not a released version):
+- Math-contract release candidate:
   - Protocol `op: "verify"` and MCP `centl_verify` check structured claims.
   - CLI `centl verify --left/--relation/--right [--variable name:rational]
-    [--json]` and `centl check FILE [--json]`.
+    [--json] [--receipt FILE]` and `centl check FILE [--json]
+    [--receipt FILE]`.
   - Calculator grammar `assert(left rel right)` and quantified
     `assert(left rel right, for_all = x, domain = rational)`, host-checked
     outside the engine (assert exits follow verify: 0/1/2).
-  - Decisive scopes: closed exact rational comparison and certified enclosure
-    order/inequality. Univariate rational polynomial identities normalize to
-    zero difference but stay `unknown` with reason
-    `polynomial_soundness_theorem_pending`; the F* soundness theorem is not
-    complete and must not be advertised as landed assurance.
+  - Decisive scopes: closed exact rational comparison, certified enclosure
+    order/inequality, and universal equality in the F*-admitted univariate
+    rational-polynomial fragment. The latter reports `verified_core` and names
+    `Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound`.
   - False polynomial equalities are `refuted` only with an exactly rechecked
     rational counterexample (`witness_checked`).
   - Enclosure evidence includes exact dyadic endpoints plus decimal bounds;
@@ -26,14 +26,22 @@
   - Free-form assumptions, multi-variable claims, quantified order, and
     unproved polynomial identities return `unknown`.
   - Session definitions may be read; verification never mutates session state.
+  - Bounded receipts include the resolved claim, active limits, exact
+    transitive session dependencies, session revision, verdict evidence, and
+    the binary's semantic version, optional commit, and generated-core hash.
+  - `--build-info` exposes the stamped build identity, receipt schema, and
+    protocol version. Native archives carry a validated `BUILD_MANIFEST.json`.
+  - A reusable local `centl-check` GitHub Action runs passing contracts and can
+    retain their receipt collection as an artifact.
   - Passing and deliberately pending example contracts live under
     `examples/contracts/`.
   - `describe` advertises verification scopes, verdicts, and assurance classes.
 
-### Notes
+### Release-candidate notes
 
-- v0.11.0 remains the released package; MCP tool discovery for v0.11.0 exposes
-  seven tools. The unreleased `centl_verify` tool is additive draft work.
+- Claims outside the admitted proof fragment—including symbolic division and
+  multiple free variables—remain `unknown`; this is intentional.
+- This is a candidate build for validation, not the final 0.12.0 publication.
 
 ## 0.11.0 — 2026-08-08
 

@@ -1,3 +1,5 @@
+![Free Computation Foundation — FCF and camel banner](assets/branding/fcf-centl-banner.png)
+
 # centl
 
 > change the world.
@@ -8,15 +10,15 @@ It keeps exact values exact, produces rigorous enclosures when approximation is
 requested, and leaves unsupported or indeterminate work visible instead of
 manufacturing certainty.
 
-CENTL 0.11.0 is the agent-safe calculation foundation for the
+CENTL 0.12.0-rc.1 is the release candidate for the
 [accepted product direction](docs/DESIGN_PATH.md): a mathematical contract
 checker for code and automated workflows—a type checker for mathematical
-claims. This release makes the compute surface safe to interpret. Draft claim
-verification (`centl verify`, `centl check`, MCP `centl_verify`) is under
-review on the development path; proof-backed polynomial identity verdicts and
-replayable receipts remain gated for 0.12.0 math contracts.
+claims. It adds structured claim verification (`centl verify`, `centl check`,
+MCP `centl_verify`), F*-backed universal equality for the admitted univariate
+rational-polynomial fragment, exact counterexamples, and bounded replayable
+receipts tied to the binary's extracted-core identity.
 
-CENTL 0.11.0 reports whether every requested transformation completed, proved
+The 0.11.0 foundation reports whether every requested transformation completed, proved
 an input unchanged, remained residual, or was unsupported. It separates
 read-only computation from explicit session mutation, publishes closed MCP
 schemas and supported domains, exposes definition dependencies and focused
@@ -79,8 +81,8 @@ make test
 ./centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
 ./centl verify --left 'sqrt(2)' --relation less_than --right '2'
 ./centl verify --left '(x+1)^2' --relation equal --right 'x^2+2*x+1' \
-  --variable x:rational
-./centl check examples/contracts/math-contracts.centl
+  --variable x:rational --receipt identity.json
+./centl check examples/contracts/math-contracts.centl --receipt contracts.json
 ```
 
 ```text

@@ -67,8 +67,9 @@ that exact output, runs the complete test suite, packages it, installs the
 package into a clean temporary prefix, and runs an installed-binary smoke test.
 The release workflow also reruns the deterministic fuzzing, metamorphic,
 sanitizer, performance, and Julia/Nemo differential gates on Linux, then
-re-verifies every collected asset against its adjacent checksum. A tag is
-published only after those gates and all four native jobs pass.
+re-verifies every collected asset against its adjacent checksum and compares
+the embedded build manifests across all four platforms. A tag is published
+only after those gates, identity checks, and all four native jobs pass.
 
 Archives contain complete license texts for the bundled runtime components and
 an exact source-reference file. The Windows executable statically links FLINT,
@@ -86,9 +87,9 @@ make test
 Maintainers package an already-tested native build with:
 
 ```sh
-make release VERSION=0.11.0
+make release VERSION=0.12.0-rc.1
 ```
 
 ```powershell
-.\scripts\package-release.ps1 0.11.0
+.\scripts\package-release.ps1 0.12.0-rc.1
 ```

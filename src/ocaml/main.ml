@@ -3,6 +3,15 @@ type color_mode = Auto | Always | Never
 
 let version = Centl_version.value
 
+let print_build_info () =
+  let optional = Option.value ~default:"unknown" in
+  Printf.printf "semantic_version=%s\n" version;
+  Printf.printf "commit=%s\n" (optional Centl_build.commit);
+  Printf.printf "generated_core_hash=%s\n"
+    (optional Centl_build.generated_core_hash);
+  Printf.printf "receipt_schema=%d\n" Centl_receipt.schema_version;
+  print_endline "protocol_version=1"
+
 type command = {
   mode : mode;
   color : color_mode;
@@ -29,6 +38,7 @@ let print_help () =
   print_endline "  --no-history       do not load or save durable history";
   print_endline "  --color=MODE       auto, always, or never";
   print_endline "  --version          show the version";
+  print_endline "  --build-info       show stamped release identity";
   print_endline "";
   print_endline "  centl verify --left L --relation R --right Rhs";
   print_endline "      [--variable x:rational] [--json]";
@@ -68,6 +78,9 @@ let parse_arguments arguments =
         exit 0
     | "--version" :: _ ->
         print_endline ("centl " ^ version);
+        exit 0
+    | "--build-info" :: _ ->
+        print_build_info ();
         exit 0
     | "--syntax" :: _ ->
         Centl_syntax.print stdout;
@@ -1170,31 +1183,37 @@ let parse_variable_spec = function
       end
 
 let parse_verify_arguments arguments =
-  let rec loop left relation right variable json = function
-    | [] -> Ok (left, relation, right, variable, json)
-    | "--json" :: rest -> loop left relation right variable true rest
+  let rec loop left relation right variable json receipt = function
+    | [] -> Ok (left, relation, right, variable, json, receipt)
+    | "--json" :: rest -> loop left relation right variable true receipt rest
+    | "--receipt" :: value :: rest ->
+        loop left relation right variable json (Some value) rest
     | "--left" :: value :: rest ->
-        loop (Some value) relation right variable json rest
+        loop (Some value) relation right variable json receipt rest
     | "--relation" :: value :: rest ->
-        loop left (Some value) right variable json rest
+        loop left (Some value) right variable json receipt rest
     | "--right" :: value :: rest ->
-        loop left relation (Some value) variable json rest
+        loop left relation (Some value) variable json receipt rest
     | "--variable" :: value :: rest ->
         begin match parse_variable_spec value with
-        | Ok variable -> loop left relation right (Some variable) json rest
+        | Ok variable ->
+            loop left relation right (Some variable) json receipt rest
         | Error _ as error -> error
         end
-    | "--left" :: [] | "--relation" :: [] | "--right" :: [] | "--variable" :: []
-      ->
+    | "--left" :: []
+    | "--relation" :: []
+    | "--right" :: []
+    | "--variable" :: []
+    | "--receipt" :: [] ->
         Error "verify options require a value"
     | option :: _ when String.starts_with ~prefix:"--" option ->
         Error ("unknown verify option " ^ option)
     | other :: _ -> Error ("unexpected verify argument " ^ other)
   in
-  match loop None None None None false arguments with
+  match loop None None None None false None arguments with
   | Error _ as error -> error
-  | Ok (Some left, Some relation, Some right, variable, json) ->
-      Ok (left, relation, right, variable, json)
+  | Ok (Some left, Some relation, Some right, variable, json, receipt) ->
+      Ok (left, relation, right, variable, json, receipt)
   | Ok _ -> Error "verify requires --left, --relation, and --right"
 
 let run_verify arguments =
@@ -1203,9 +1222,9 @@ let run_verify arguments =
       prerr_endline ("centl: " ^ message);
       prerr_endline
         "Usage: centl verify --left EXPR --relation REL --right EXPR \
-         [--variable name:rational] [--json]";
+         [--variable name:rational] [--json] [--receipt PATH]";
       exit 2
-  | Ok (left, relation, right, variable, as_json) ->
+  | Ok (left, relation, right, variable, as_json, receipt_path) ->
       let fields =
         [
           ("left", `String left);
@@ -1227,7 +1246,7 @@ let run_verify arguments =
                     ] );
               ]
       in
-      if as_json then begin
+      if as_json && Option.is_none receipt_path then begin
         let state = Centl_protocol.create () in
         let line =
           Yojson.Safe.to_string
@@ -1238,14 +1257,35 @@ let run_verify arguments =
         exit (verification_response_exit_code response)
       end
       else
-        begin match
-          Centl_verify.verify (Centl_engine.create_session ()) fields
-        with
+        let session = Centl_engine.create_session () in
+        begin match Centl_verify.verify session fields with
         | Error error ->
             prerr_endline ("centl: " ^ Centl_engine.error_text error);
             exit 2
         | Ok verification ->
-            print_endline (Centl_verify.text_of_verification verification);
+            begin match receipt_path with
+            | None -> ()
+            | Some path ->
+                begin match
+                  Centl_receipt.write_file path
+                    (Centl_receipt.make session verification)
+                with
+                | Ok () -> ()
+                | Error message ->
+                    prerr_endline ("centl: could not write receipt: " ^ message);
+                    exit 2
+                end
+            end;
+            if as_json then
+              print_json
+                (`Assoc
+                   [
+                     ("version", `Int 1);
+                     ("ok", `Bool true);
+                     ( "verification",
+                       Centl_verify.json_of_verification verification );
+                   ])
+            else print_endline (Centl_verify.text_of_verification verification);
             exit (verify_exit_code verification.verdict)
         end
 
@@ -1326,29 +1366,31 @@ let read_check_file path =
       loop 1 [])
 
 let parse_check_arguments arguments =
-  let rec loop path as_json = function
-    | [] -> Ok (path, as_json)
-    | "--json" :: rest -> loop path true rest
+  let rec loop path as_json receipt = function
+    | [] -> Ok (path, as_json, receipt)
+    | "--json" :: rest -> loop path true receipt rest
+    | "--receipt" :: value :: rest -> loop path as_json (Some value) rest
+    | "--receipt" :: [] -> Error "--receipt requires a path"
     | option :: _ when String.starts_with ~prefix:"--" option ->
         Error ("unknown check option " ^ option)
     | value :: rest ->
         begin match path with
-        | None -> loop (Some value) as_json rest
+        | None -> loop (Some value) as_json receipt rest
         | Some _ -> Error ("unexpected check argument " ^ value)
         end
   in
-  match loop None false arguments with
+  match loop None false None arguments with
   | Error _ as error -> error
-  | Ok (Some path, as_json) -> Ok (path, as_json)
-  | Ok (None, _) -> Error "check requires a contract file path"
+  | Ok (Some path, as_json, receipt) -> Ok (path, as_json, receipt)
+  | Ok (None, _, _) -> Error "check requires a contract file path"
 
 let run_check arguments =
   match parse_check_arguments arguments with
   | Error message ->
       prerr_endline ("centl: " ^ message);
-      prerr_endline "Usage: centl check FILE [--json]";
+      prerr_endline "Usage: centl check FILE [--json] [--receipt PATH]";
       exit 2
-  | Ok (path, as_json) ->
+  | Ok (path, as_json, receipt_path) ->
       begin try
         let lines = read_check_file path in
         if
@@ -1383,6 +1425,7 @@ let run_check arguments =
         let failures = ref 0 in
         let operational_failure = ref false in
         let results = ref [] in
+        let receipts = ref [] in
         List.iter
           (fun line ->
             match line with
@@ -1465,6 +1508,8 @@ let run_check arguments =
                       Printf.printf "line %d: ERROR %s\n" assertion.line_number
                         (Centl_engine.error_text error)
                 | Ok verification ->
+                    receipts :=
+                      Centl_receipt.make session verification :: !receipts;
                     let verdict =
                       Centl_verify.verdict_name verification.verdict
                     in
@@ -1486,6 +1531,19 @@ let run_check arguments =
                         verdict
                 end)
           lines;
+        begin match receipt_path with
+        | None -> ()
+        | Some receipt_path ->
+            begin match
+              Centl_receipt.write_collection receipt_path ~contract_path:path
+                (List.rev !receipts)
+            with
+            | Ok () -> ()
+            | Error message ->
+                prerr_endline ("centl: could not write receipt: " ^ message);
+                operational_failure := true
+            end
+        end;
         if as_json then
           print_json
             (`Assoc
@@ -1511,6 +1569,9 @@ let run_check arguments =
 let () =
   let arguments = Array.to_list Sys.argv |> List.tl in
   match arguments with
+  | [ "--build-info" ] ->
+      print_build_info ();
+      exit 0
   | "verify" :: verify_arguments -> run_verify verify_arguments
   | "check" :: check_arguments -> run_check check_arguments
   | _ ->

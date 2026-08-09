@@ -14,6 +14,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Pinned CI defaults (also checked against toolchain.lock):
+# FLINT 3.0.1; sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
+# GMP 6.3.0; sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
+# MPFR 4.2.2; sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $Version = $Version.TrimStart("v")
 if ($Version -notmatch '^[0-9A-Za-z.+_-]+$' -or $Version.Contains("..")) {
@@ -32,6 +37,13 @@ if (-not (Test-Path -LiteralPath $PhysicsBinary -PathType Leaf)) {
 $ReportedVersion = (& $Binary --version | Out-String).Trim()
 if ($LASTEXITCODE -ne 0 -or $ReportedVersion -ne "centl $Version") {
     throw "centl package: binary reports '$ReportedVersion', expected 'centl $Version'"
+}
+$BuildInfo = @{}
+foreach ($Line in (& $Binary --build-info)) {
+    if ($Line -match '^([^=]+)=(.*)$') { $BuildInfo[$Matches[1]] = $Matches[2] }
+}
+if ($BuildInfo.semantic_version -ne $Version) {
+    throw "centl package: build identity version does not match $Version"
 }
 
 function Copy-License {
@@ -170,20 +182,29 @@ Build-time-only test dependencies are not included in this archive.
 "@
     $ThirdPartyNotices.TrimStart() | Set-Content `
         -LiteralPath (Join-Path $Package "THIRD-PARTY-NOTICES") -Encoding UTF8
+    $FlintVersion = if ($env:FLINT_VERSION) { $env:FLINT_VERSION } else { "3.0.1" }
+    $FlintSourceUrl = if ($env:FLINT_SOURCE_URL) { $env:FLINT_SOURCE_URL } else { "https://github.com/flintlib/flint/releases/download/v$FlintVersion/flint-$FlintVersion.tar.gz" }
+    $FlintSourceSha256 = if ($env:FLINT_SHA256) { $env:FLINT_SHA256 } else { "unknown" }
+    $GmpVersion = if ($env:GMP_VERSION) { $env:GMP_VERSION } else { "6.3.0" }
+    $GmpSourceUrl = if ($env:GMP_SOURCE_URL) { $env:GMP_SOURCE_URL } else { "https://ftp.gnu.org/gnu/gmp/gmp-$GmpVersion.tar.xz" }
+    $GmpSourceSha256 = if ($env:GMP_SHA256) { $env:GMP_SHA256 } else { "unknown" }
+    $MpfrVersion = if ($env:MPFR_VERSION) { $env:MPFR_VERSION } else { "4.2.2" }
+    $MpfrSourceUrl = if ($env:MPFR_SOURCE_URL) { $env:MPFR_SOURCE_URL } else { "https://ftp.gnu.org/gnu/mpfr/mpfr-$MpfrVersion.tar.xz" }
+    $MpfrSourceSha256 = if ($env:MPFR_SHA256) { $env:MPFR_SHA256 } else { "unknown" }
     $ComponentSources = @"
 CENTL $Version corresponding application source and relinking build scripts:
 https://github.com/chasebryan/centl/tree/v$Version
 
 Exact native-library sources used by the release workflow:
-FLINT 3.0.1
-  https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.gz
-  sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
-GMP 6.3.0
-  https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
-  sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
-MPFR 4.2.2
-  https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
-  sha256 b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
+FLINT $FlintVersion
+  $FlintSourceUrl
+  sha256 $FlintSourceSha256
+GMP $GmpVersion
+  $GmpSourceUrl
+  sha256 $GmpSourceSha256
+MPFR $MpfrVersion
+  $MpfrSourceUrl
+  sha256 $MpfrSourceSha256
 Bundled runtime-library upstream source (not version-pinned by the current
 rolling MSYS2 toolchain):
 winpthreads (when bundled as libwinpthread-1.dll)
@@ -197,6 +218,61 @@ winpthreads is dynamically bundled as libwinpthread-1.dll when required.
     $ComponentSources.TrimStart() | Set-Content `
         -LiteralPath (Join-Path $Package "COMPONENT-SOURCES.txt") -Encoding UTF8
     $Version | Set-Content -LiteralPath (Join-Path $Package "VERSION") -Encoding ASCII
+
+    $CoreFiles = @(
+        (Join-Path $ProjectRoot "src\generated\Centl_Core.ml"),
+        (Join-Path $ProjectRoot "src\generated\Centl_Gcd.ml"),
+        (Join-Path $ProjectRoot "src\generated\Centl_PolynomialSoundness.ml")
+    )
+    $Hasher = [System.Security.Cryptography.SHA256]::Create()
+    $Stream = New-Object System.IO.MemoryStream
+    try {
+        foreach ($CoreFile in $CoreFiles) {
+            $Bytes = [System.IO.File]::ReadAllBytes($CoreFile)
+            $Stream.Write($Bytes, 0, $Bytes.Length)
+        }
+        $Stream.Position = 0
+        $HashBytes = $Hasher.ComputeHash($Stream)
+        $GeneratedCoreHash = ([System.BitConverter]::ToString($HashBytes) -replace "-", "").ToLowerInvariant()
+    }
+    finally {
+        $Stream.Dispose()
+        $Hasher.Dispose()
+    }
+    $BuildCommit = $env:CENTL_BUILD_COMMIT
+    if (-not $BuildCommit) { $BuildCommit = $env:SOURCE_COMMIT }
+    if (-not $BuildCommit) { $BuildCommit = $env:GITHUB_SHA }
+    if ($BuildInfo.generated_core_hash -ne $GeneratedCoreHash) {
+        throw "centl package: binary generated-core hash does not match packaged sources"
+    }
+    if ($BuildCommit -and $BuildInfo.commit -ne $BuildCommit) {
+        throw "centl package: binary commit does not match $BuildCommit"
+    }
+    $ManifestPath = Join-Path $Package "BUILD_MANIFEST.json"
+    $Manifest = [ordered]@{
+        schema               = 1
+        kind                 = "centl_build_manifest"
+        semantic_version     = $Version
+        platform             = "windows"
+        architecture         = "x86_64"
+        generated_core_hash  = $GeneratedCoreHash
+        verification         = [ordered]@{
+            command = $(if ($env:CENTL_VERIFICATION_COMMAND) { $env:CENTL_VERIFICATION_COMMAND } else { "make verify" })
+            result  = $(if ($env:CENTL_VERIFICATION_RESULT) { $env:CENTL_VERIFICATION_RESULT } else { "not_attested" })
+        }
+        toolchain            = [ordered]@{
+            fstar = $(if ($env:FSTAR_VERSION) { $env:FSTAR_VERSION } else { "unknown" })
+            ocaml = $(if ($env:OCAML_VERSION) { $env:OCAML_VERSION } else { "4.14.1" })
+            flint = $(if ($env:FLINT_VERSION) { $env:FLINT_VERSION } else { "unknown" })
+            gmp   = $(if ($env:GMP_VERSION) { $env:GMP_VERSION } else { "unknown" })
+            mpfr  = $(if ($env:MPFR_VERSION) { $env:MPFR_VERSION } else { "unknown" })
+        }
+        receipt_schema       = 1
+        protocol_version     = 1
+    }
+    if ($BuildCommit) { $Manifest.commit = $BuildCommit }
+    ($Manifest | ConvertTo-Json -Depth 4) + "`n" |
+        Set-Content -LiteralPath $ManifestPath -Encoding UTF8
     $Readme = @"
 CENTL $Version for Windows x86_64
 
@@ -204,7 +280,8 @@ Run centl.exe for the mathematical kernel and centl-physics.exe for the
 exact-first physics engine. Required native libraries are included beside the
 executables. Use centl.exe --serve for stateful JSON Lines or --mcp for a local
 MCP server. License texts are in licenses; source and relinking references are
-in COMPONENT-SOURCES.txt.
+in COMPONENT-SOURCES.txt. Use centl.exe check FILE with --receipt to retain an
+audit record; BUILD_MANIFEST.json records the package build identity.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8
 

@@ -69,9 +69,11 @@ jobs:
         run: |
           make extract
           git ls-files --error-unmatch \
-            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml
+            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
+            src/generated/Centl_PolynomialSoundness.ml
           git diff --exit-code -- src/generated
           opam exec -- make quality native-test
+          test "$(./_build/default/src/main.exe --build-info | sed -n 's/^commit=//p')" = "$GITHUB_SHA"
 
       - name: Exercise deterministic fuzzing, sanitizers, and performance budgets
         env:

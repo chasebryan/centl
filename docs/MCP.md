@@ -24,8 +24,7 @@ Configure an MCP client with the equivalent of:
 }
 ```
 
-CENTL exposes these tools in deterministic order. v0.11.0 ships seven tools;
-the post-0.11.0 development path adds `centl_verify` and `centl_physics`:
+CENTL 0.12.0-rc.1 exposes these nine tools in deterministic order:
 
 - `centl_compute` performs read-only mathematical evaluation and rejects
   definitions.
@@ -34,11 +33,11 @@ the post-0.11.0 development path adds `centl_verify` and `centl_physics`:
   `verified`, `refuted`, `unknown`, or `invalid` with evidence. It decides
   closed exact rational comparisons and certified enclosure order/inequality
   (with dyadic bounds). Univariate rational polynomial false equalities may be
-  `refuted` with an exact witness; polynomial identities stay `unknown`
-  pending a completed F* soundness theorem. Free-form assumptions and
-  multi-variable claims return `unknown`.
-- `centl_capabilities` returns supported mathematical domains, resolution
-  statuses, limits, and cancellation behavior.
+  `refuted` with an exact witness; admitted polynomial identities are verified
+  by the named F* zero-difference soundness theorem. Free-form assumptions,
+  unsupported proof syntax, and multi-variable claims return `unknown`.
+- `centl_capabilities` returns supported domains, resolution statuses, limits,
+  and cancellation behavior.
 - `centl_session` inspects definitions and their direct dependencies without
   mutation.
 - `centl_help` searches focused help generated from the canonical syntax
