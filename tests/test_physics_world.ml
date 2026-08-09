@@ -19,28 +19,23 @@ let sphere_body ~id ~position ~radius =
 
 let test_world_diagnostics () =
   let p1 =
-    body ~id:"p1" ~mass:"2" ~position:("0", "0", "0")
-      ~velocity:("1", "0", "0")
+    body ~id:"p1" ~mass:"2" ~position:("0", "0", "0") ~velocity:("1", "0", "0")
   in
   let p2 =
-    body ~id:"p2" ~mass:"1" ~position:("1", "0", "0")
-      ~velocity:("-2", "0", "0")
+    body ~id:"p2" ~mass:"1" ~position:("1", "0", "0") ~velocity:("-2", "0", "0")
   in
   let world = world [ p1; p2 ] in
   let momentum = world_momentum world in
   check_q "total momentum x" Q.zero momentum.x;
   check_q "total momentum y" Q.zero momentum.y;
-  check_q "total kinetic energy" (q "3")
-    (world_kinetic_energy world).si_value
+  check_q "total kinetic energy" (q "3") (world_kinetic_energy world).si_value
 
 let test_world_rejects_duplicate_ids () =
   let p1 =
-    body ~id:"same" ~mass:"1" ~position:("0", "0", "0")
-      ~velocity:("0", "0", "0")
+    body ~id:"same" ~mass:"1" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
   in
   let p2 =
-    body ~id:"same" ~mass:"1" ~position:("1", "0", "0")
-      ~velocity:("0", "0", "0")
+    body ~id:"same" ~mass:"1" ~position:("1", "0", "0") ~velocity:("0", "0", "0")
   in
   match world [ p1; p2 ] with
   | _ -> Alcotest.fail "duplicate world ids must be rejected"
@@ -48,19 +43,19 @@ let test_world_rejects_duplicate_ids () =
 
 let test_world_step_is_exact_and_ordered () =
   let p1 =
-    body ~id:"p1" ~mass:"1" ~position:("0", "0", "0")
-      ~velocity:("0", "0", "0")
+    body ~id:"p1" ~mass:"1" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
   in
   let p2 =
-    body ~id:"p2" ~mass:"3" ~position:("2", "0", "0")
-      ~velocity:("1", "0", "0")
+    body ~id:"p2" ~mass:"3" ~position:("2", "0", "0") ~velocity:("1", "0", "0")
   in
   let gravity =
     uniform_gravity (vector3 ~unit_symbol:"m/s^2" Q.zero (q "-10") Q.zero)
   in
   let stepped =
-    step_world_symplectic_euler ~dt:(quantity (q "1/10") "s")
-      ~forces:[ gravity ] (world [ p1; p2 ])
+    step_world_symplectic_euler
+      ~dt:(quantity (q "1/10") "s")
+      ~forces:[ gravity ]
+      (world [ p1; p2 ])
   in
   match stepped.particles with
   | [ final1; final2 ] ->
@@ -73,20 +68,15 @@ let test_world_step_is_exact_and_ordered () =
   | _ -> Alcotest.fail "world step must preserve particle count and order"
 
 let check_relation message expected contact =
-  Alcotest.(check string) message expected
+  Alcotest.(check string)
+    message expected
     (contact_relation_to_string contact.relation)
 
 let test_exact_sphere_contact_relations () =
   let first = sphere_body ~id:"a" ~position:("0", "0", "0") ~radius:"1" in
-  let touching =
-    sphere_body ~id:"b" ~position:("2", "0", "0") ~radius:"1"
-  in
-  let separated =
-    sphere_body ~id:"c" ~position:("3", "0", "0") ~radius:"1"
-  in
-  let overlapping =
-    sphere_body ~id:"d" ~position:("1", "0", "0") ~radius:"1"
-  in
+  let touching = sphere_body ~id:"b" ~position:("2", "0", "0") ~radius:"1" in
+  let separated = sphere_body ~id:"c" ~position:("3", "0", "0") ~radius:"1" in
+  let overlapping = sphere_body ~id:"d" ~position:("1", "0", "0") ~radius:"1" in
   let touching_contact = classify_sphere_contact first touching in
   check_relation "touching" "touching" touching_contact;
   check_q "touching distance squared" (q "4")
@@ -99,15 +89,12 @@ let test_exact_sphere_contact_relations () =
     (classify_sphere_contact first overlapping)
 
 let test_fractional_touching_without_square_root () =
-  let first =
-    sphere_body ~id:"a" ~position:("0", "0", "0") ~radius:"1/2"
-  in
-  let second =
-    sphere_body ~id:"b" ~position:("3/2", "0", "0") ~radius:"1"
-  in
+  let first = sphere_body ~id:"a" ~position:("0", "0", "0") ~radius:"1/2" in
+  let second = sphere_body ~id:"b" ~position:("3/2", "0", "0") ~radius:"1" in
   let contact = classify_sphere_contact first second in
   check_relation "fractional touching" "touching" contact;
-  check_q "fractional distance squared" (q "9/4") contact.distance_squared.si_value;
+  check_q "fractional distance squared" (q "9/4")
+    contact.distance_squared.si_value;
   check_q "fractional radius sum squared" (q "9/4")
     contact.radius_sum_squared.si_value
 
@@ -131,7 +118,8 @@ let () =
       ( "world",
         [
           Alcotest.test_case "exact diagnostics" `Quick test_world_diagnostics;
-          Alcotest.test_case "duplicate ids" `Quick test_world_rejects_duplicate_ids;
+          Alcotest.test_case "duplicate ids" `Quick
+            test_world_rejects_duplicate_ids;
           Alcotest.test_case "exact ordered step" `Quick
             test_world_step_is_exact_and_ordered;
           Alcotest.test_case "sphere contact relations" `Quick
