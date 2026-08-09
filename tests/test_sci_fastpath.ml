@@ -48,9 +48,9 @@ let test_spoken_equation () =
 
 let test_spoken_equation_infers_leading_variable () =
   match
-    Centl_sci_fastpath.interpret
-      "Solve x squared minus 5x plus 6 equals zero."
-    |> require_some "spoken polynomial equation without explicit variable suffix"
+    Centl_sci_fastpath.interpret "Solve x squared minus 5x plus 6 equals zero."
+    |> require_some
+         "spoken polynomial equation without explicit variable suffix"
   with
   | Centl_sci_ir.Polynomial_equation data ->
       Alcotest.(check string) "left" "x^2 - 5*x + 6" data.left;
