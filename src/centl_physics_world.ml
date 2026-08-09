@@ -13,7 +13,8 @@ let validate_particle_ids particles =
         else if List.mem particle.id seen then
           raise
             (Physics_error
-               (Printf.sprintf "world particle id must be unique: %s" particle.id))
+               (Printf.sprintf "world particle id must be unique: %s"
+                  particle.id))
         else loop (particle.id :: seen) rest
   in
   loop [] particles
@@ -35,15 +36,13 @@ let world_momentum world =
 let world_kinetic_energy world =
   List.fold_left
     (fun total particle -> quantity_add total (kinetic_energy particle))
-    (quantity_of_si Q.zero dim_energy) world.particles
+    (quantity_of_si Q.zero dim_energy)
+    world.particles
 
 let step_world_symplectic_euler ~dt ~forces state =
   world (List.map (step_symplectic_euler ~dt ~forces) state.particles)
 
-type sphere = {
-  particle : particle;
-  radius : quantity;
-}
+type sphere = { particle : particle; radius : quantity }
 
 let sphere ~particle ~radius =
   require_dimension ~context:"sphere radius" ~expected:dim_length
