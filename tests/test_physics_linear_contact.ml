@@ -17,10 +17,13 @@ let body ~id ~position:(px, py, pz) ~velocity:(vx, vy, vz) =
     ~position:(vector3 ~unit_symbol:"m" (q px) (q py) (q pz))
     ~velocity:(vector3 ~unit_symbol:"m/s" (q vx) (q vy) (q vz))
 
-let sphere_body ?(radius = "1") ~id ~position ~velocity =
+let sphere_body_with_radius ~radius ~id ~position ~velocity =
   sphere
     ~particle:(body ~id ~position ~velocity)
     ~radius:(quantity (q radius) "m")
+
+let sphere_body ~id ~position ~velocity =
+  sphere_body_with_radius ~radius:"1" ~id ~position ~velocity
 
 let duration value = quantity (q value) "s"
 
