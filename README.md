@@ -129,8 +129,9 @@ exact unit conversion, dimension-safe 3D vectors, particle and bounded
 multi-particle world state, constant force, uniform gravity, Hooke springs,
 linear drag, symplectic-Euler time evolution, energy and momentum diagnostics,
 exact ideal 1D elastic collision response, exact frictionless 3D contact
-response, and exact sphere contact classification using squared-distance
-comparisons that introduce no square root.
+response, exact sphere contact classification using squared-distance
+comparisons that introduce no square root, and certified bounded continuous
+sphere-contact reasoning for an exact constant-velocity pair model.
 
 The versioned JSON Lines physics service and read-only `centl_physics` MCP tool
 can analyze complete sphere worlds and return exact evidence for touching or
@@ -141,11 +142,21 @@ returns an explicit successful `deferred` verdict with the world unchanged
 instead of inventing an impulse order or penetration correction. Machine
 contact requests are bounded to 4,096 unordered sphere pairs.
 
-These contact operations remain separate from time stepping. CENTL does not yet
-claim continuous collision detection, penetration correction, a general
-simultaneous-contact solver, rigid-body contact dynamics, friction/spin contact,
-adaptive integration, continuum/fluid solvers, or rigorous truncation-error
-enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) and
+For one sphere pair moving with constant exact-rational velocity over a bounded
+exact-rational duration, the same machine interfaces can certify whether
+contact occurs anywhere in the interval without time sampling. The result
+exposes the exact squared-clearance quadratic and returns the first contact time
+exactly when rational. A quadratic-irrational event time remains an algebraic
+certificate with an exact discriminant and rational bracket rather than being
+rounded into a fabricated rational timestamp.
+
+Discrete contact analysis and response remain separate from time stepping, and
+the continuous certificate is deliberately narrow. CENTL does not claim general
+or force-driven continuous collision detection, penetration correction, a
+general simultaneous-contact solver, rigid-body contact dynamics, friction/spin
+contact, adaptive integration, continuum/fluid solvers, or rigorous
+truncation-error enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md),
+[docs/PHYSICS_LINEAR_CONTACT.md](docs/PHYSICS_LINEAR_CONTACT.md), and
 [docs/PHYSICS_PROTOCOL.md](docs/PHYSICS_PROTOCOL.md) for the exact contract,
 evidence model, and current boundary.
 
