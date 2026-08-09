@@ -63,6 +63,9 @@ let rec ensure_dir path =
                  (Unix.error_message code))
         end
 
+let set_private_mode descriptor =
+  if Sys.win32 then () else Unix.fchmod descriptor 0o600
+
 let write_private path text =
   match ensure_dir (Filename.dirname path) with
   | Error _ as error -> error
@@ -72,7 +75,7 @@ let write_private path text =
         let descriptor =
           Unix.openfile temp [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ] 0o600
         in
-        Unix.fchmod descriptor 0o600;
+        set_private_mode descriptor;
         let channel = Unix.out_channel_of_descr descriptor in
         output_string channel text;
         close_out channel;
@@ -128,7 +131,7 @@ let append_private path json =
             [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND ]
             0o600
         in
-        Unix.fchmod descriptor 0o600;
+        set_private_mode descriptor;
         let channel = Unix.out_channel_of_descr descriptor in
         output_string channel (Yojson.Safe.to_string json);
         output_char channel '\n';
@@ -251,7 +254,7 @@ let copy_file source destination =
             [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
             0o600
         in
-        Unix.fchmod descriptor 0o600;
+        set_private_mode descriptor;
         let output_channel = Unix.out_channel_of_descr descriptor in
         let buffer = Bytes.create 16_384 in
         let rec loop () =
