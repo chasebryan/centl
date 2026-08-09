@@ -6,12 +6,10 @@ on:
     paths:
       - "lab/sci-assimilation/latest.json"
       - "lab/sci-assimilation/latest.md"
-      - "scripts/sci-assimilation-check.py"
   pull_request:
     paths:
       - "lab/sci-assimilation/latest.json"
       - "lab/sci-assimilation/latest.md"
-      - "scripts/sci-assimilation-check.py"
 
 concurrency:
   group: sci-assimilation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
