@@ -85,6 +85,19 @@ let sphere ~id ~x ~vx =
       ("radius", quantity "1" "m");
     ]
 
+let sphere_without_id ~x ~vx =
+  `Assoc
+    [
+      ( "particle",
+        `Assoc
+          [
+            ("mass", quantity "1" "kg");
+            ("position", vector x "0" "0" "m");
+            ("velocity", vector vx "0" "0" "m/s");
+          ] );
+      ("radius", quantity "1" "m");
+    ]
+
 let test_analysis_through_mcp () =
   let state = Centl_mcp.create () in
   initialize state;
@@ -140,6 +153,23 @@ let test_strict_contact_arguments () =
   | `Int -32602 -> ()
   | _ -> Alcotest.fail "unknown contact argument must be rejected"
 
+let test_missing_sphere_id_is_tool_error () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let response =
+    tool_call state 2
+      [
+        ("action", `String "analyze_sphere_contacts");
+        ("spheres", `List [ sphere_without_id ~x:"0" ~vx:"0" ]);
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check bool) "protocol failure" false (bool "ok" protocol);
+  let error = assoc "error" protocol in
+  Alcotest.(check string)
+    "message" "sphere particle requires id" (string "message" error)
+
 let test_capabilities_through_mcp () =
   let state = Centl_mcp.create () in
   initialize state;
@@ -161,6 +191,8 @@ let () =
             test_deferred_is_not_tool_error;
           Alcotest.test_case "strict arguments" `Quick
             test_strict_contact_arguments;
+          Alcotest.test_case "missing sphere id" `Quick
+            test_missing_sphere_id_is_tool_error;
           Alcotest.test_case "capabilities" `Quick test_capabilities_through_mcp;
         ] );
     ]
