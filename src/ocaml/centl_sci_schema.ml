@@ -3,20 +3,17 @@ let json_schema =
 
 (*
    llama.cpp's JSON-Schema-to-GBNF converter is intentionally not part of the
-   CENTL-SCi trust boundary. The runtime uses this small native GBNF grammar
+   CENTL-SCi trust boundary. The runtime uses these small native GBNF grammars
    directly, then reparses and independently validates the resulting JSON
    against the stricter OCaml IR contract above.
 
    Generation is deliberately canonical and whitespace-free. Earlier grammar
    revisions admitted unbounded whitespace before/after the root object. The
    /completion server could therefore keep producing legal whitespace until
-   n_predict was exhausted even after a complete IR had been generated. A
-   canonical terminating root both removes that performance trap and reduces
-   token count without weakening the independent IR validator.
+   n_predict was exhausted even after a complete IR had been generated.
 *)
-let llama_grammar =
-  {|root ::= exact-expression | polynomial-equation | unit-conversion | unsupported
-exact-expression ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"exact_expression\",\"operation\":\"compute\",\"assumptions\":" assumptions ",\"expression\":" string "}"
+let grammar_rules =
+  {|exact-expression ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"exact_expression\",\"operation\":\"compute\",\"assumptions\":" assumptions ",\"expression\":" string "}"
 polynomial-equation ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"polynomial_equation\",\"operation\":\"solve\",\"assumptions\":" assumptions ",\"left\":" string ",\"relation\":\"equal\",\"right\":" string ",\"variable\":" string "}"
 unit-conversion ::= "{\"schema_version\":1,\"domain\":\"physics\",\"problem_class\":\"unit_conversion\",\"operation\":\"convert\",\"assumptions\":" assumptions ",\"value\":" string ",\"from_unit\":" string ",\"to_unit\":" string "}"
 unsupported ::= "{\"schema_version\":1,\"domain\":\"unsupported\",\"problem_class\":\"unsupported\",\"operation\":\"unsupported\",\"assumptions\":" assumptions ",\"reason\":" string "}"
@@ -25,3 +22,10 @@ string ::= "\"" char* "\""
 char ::= [^"\\\x7F\x00-\x1F] | "\\" (["\\/bfnrt] | "u" hex hex hex hex)
 hex ::= [0-9a-fA-F]
 |}
+
+let grammar root = "root ::= " ^ root ^ "\n" ^ grammar_rules
+let llama_grammar = grammar "exact-expression | polynomial-equation | unit-conversion | unsupported"
+let exact_expression_grammar = grammar "exact-expression"
+let polynomial_equation_grammar = grammar "polynomial-equation"
+let unit_conversion_grammar = grammar "unit-conversion"
+let unsupported_grammar = grammar "unsupported"
