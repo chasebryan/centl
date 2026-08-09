@@ -150,12 +150,22 @@ exactly when rational. A quadratic-irrational event time remains an algebraic
 certificate with an exact discriminant and rational bracket rather than being
 rounded into a fabricated rational timestamp.
 
-Discrete contact analysis and response remain separate from time stepping, and
-the continuous certificate is deliberately narrow. CENTL does not claim general
-or force-driven continuous collision detection, penetration correction, a
-general simultaneous-contact solver, rigid-body contact dynamics, friction/spin
-contact, adaptive integration, continuum/fluid solvers, or rigorous
-truncation-error enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md),
+At the library level, an exact rational first-contact time can now drive a
+narrow two-sphere event step: CENTL advances exactly to the event, independently
+re-checks exact `touching` geometry, applies the existing frictionless 3D elastic
+response, and advances the exact remaining duration with the returned
+velocities. Initial overlap and quadratic-irrational event time instead defer
+with the original spheres unchanged. This event-step composition is not yet a
+JSON Lines or MCP action and is not automatically coupled to the force
+integrator or multi-particle world step.
+
+Discrete contact analysis and response remain separate from ordinary time
+stepping, and the continuous/event-aware contracts are deliberately narrow.
+CENTL does not claim general or force-driven continuous collision detection,
+penetration correction, a general simultaneous-contact solver, rigid-body
+contact dynamics, friction/spin contact, adaptive integration, continuum/fluid
+solvers, or rigorous truncation-error enclosures. See
+[docs/PHYSICS.md](docs/PHYSICS.md),
 [docs/PHYSICS_LINEAR_CONTACT.md](docs/PHYSICS_LINEAR_CONTACT.md), and
 [docs/PHYSICS_PROTOCOL.md](docs/PHYSICS_PROTOCOL.md) for the exact contract,
 evidence model, and current boundary.
