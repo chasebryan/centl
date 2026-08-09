@@ -45,6 +45,7 @@
   Centl_receipt
   Centl_protocol
   Centl_request_queue
+  Centl_sci_schema
   Centl_sci_ir
   Centl_sci_llama
   Centl_sci_runtime
