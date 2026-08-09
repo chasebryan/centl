@@ -112,7 +112,7 @@ sci-model-test: build
 		--output "$(SCI_REPORT)"
 
 sci-assimilate:
-	CENTL_SCI_SERVER_URL= \
+	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
 		$(PYTHON) scripts/sci-assimilate.py \
 		--server-url "$(SCI_SERVER_URL)" \
 		--model-label "$(SCI_MODEL_LABEL)" \
@@ -121,7 +121,7 @@ sci-assimilate:
 		$(SCI_ASSIMILATION_ARGS)
 
 sci-assimilate-full:
-	CENTL_SCI_SERVER_URL= \
+	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
 		$(PYTHON) scripts/sci-assimilate.py \
 		--server-url "$(SCI_SERVER_URL)" \
 		--model-label "$(SCI_MODEL_LABEL)" \
