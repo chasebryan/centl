@@ -35,10 +35,20 @@
    %{dep:../src/main.exe}
    (run %{test}))))
 
+(executable
+ (name sci_fake_model)
+ (modules sci_fake_model))
+
 (test
  (name test_sci)
  (modules test_sci)
- (libraries centl_lib alcotest yojson))
+ (deps sci_fake_model.exe)
+ (libraries centl_lib alcotest yojson)
+ (action
+  (setenv
+   CENTL_SCI_FAKE_MODEL
+   %{dep:sci_fake_model.exe}
+   (run %{test}))))
 
 (test
  (name test_physics)
