@@ -28,187 +28,268 @@ problem text
     v
 conservative deterministic fast path
     | admitted                       | ambiguous
-    v                                v
-CENTL-SCi IR                    FCF-SCi Engine
-    |                                |
-    |                           typed SCi IR only
+    |                                v
+    |                         FCF semantic model
+    |                         (untrusted parser)
     |                                |
     +---------------+----------------+
+                    v
+             CENTL-SCi IR
+                    |
+              strict validation
+                    |
+         +----------+----------+
+         |                     |
+         v                     v
+       CENTL              CENTL Physics
+         |                     |
+         +----------+----------+
+                    v
+         checked scientific evidence
                     |
                     v
-             strict validation
-                    |
-                    v
-                  CENTL
-                    |
-                    v
-             checked evidence
+             deterministic rendering
 ```
 
-CENTL remains the mathematical authority. The inference engine is an untrusted
-semantic parser even when it is distributed by FCF.
+The model never becomes mathematical authority. Exactness, proof status,
+resolution, unit consistency, resource bounds, and provenance come from CENTL
+and CENTL Physics.
 
-The engine must never gain permission to emit an arbitrary executable command,
-filesystem operation, network request, CENTL operation, or mathematical result.
-It emits only the closed, versioned SCi Problem IR accepted by the validator.
+## Current qualification evidence
 
-## Runtime direction
+The reference local backend has now completed a real end-to-end qualification
+case on developer hardware.
 
-The v0.0.1-Camelus reference implementation begins with `llama.cpp` compatibility,
-but the production direction is an FCF-specific scientific inference runtime.
-The runtime should retain upstream license/provenance information while exposing
-only the functionality CENTL-SCi needs.
+Observed reference configuration:
 
-Production priorities are:
+- model: `Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf`;
+- runtime: `llama.cpp` `llama-cli` build `b10330-687e77892`;
+- case: `exact_decimal_addition`;
+- result: **PASS**;
+- observed whole-process elapsed time: **67.064 seconds**;
+- mathematical result: CENTL establishes exact `3/10` for `0.1 + 0.2`.
 
-1. persistent resident inference rather than per-problem model loading;
-2. deterministic fast-path admission before neural inference;
-3. grammar-constrained structured output;
-4. a compact semantic model specialized for mathematics/physics interpretation;
-5. CPU-first portability and measured accelerator support;
-6. no general chat/persona/tool/agent surface;
-7. reproducible local and hosted behavior using the same SCi IR contract.
+The 67.064-second measurement includes a fresh process and model load. It is a
+cold reference-path measurement, not a steady-state inference claim and not an
+acceptable production latency target.
 
-The current `llama-cli` path remains useful as a qualification/reference
-backend, not the performance target.
+Model qualification now explicitly uses `--force-model`, so deterministic
+fast-path routing cannot accidentally inflate model-quality results.
 
-## Performance tiers
+## Tier 0 — deterministic fast path
 
-### Tier 0: deterministic interpretation
+CENTL-SCi now has a conservative deterministic interpreter ahead of the model.
+It admits only surfaces that can be translated without semantic guessing and
+then sends the resulting IR through the same independent validator and CENTL
+execution boundary.
 
-Mechanically recognizable supported problems should bypass neural inference.
-Examples include exact arithmetic, canonical unit conversion, and directly
-symbolic equations when the translation is unambiguous.
+Initial admitted forms include:
 
-Tier 0 must remain conservative. If a statement requires semantic judgment, it
-must fall through rather than guessing.
+- exact arithmetic such as `What is 0.1 plus 0.2?`;
+- canonical unit conversions such as `Convert 100 centimeters to meters.`;
+- directly symbolic equations such as
+  `Solve x^2 - 5*x + 6 = 0 for x.`.
 
-### Tier 1: semantic inference
+Natural-language equations such as `x squared minus five x ...` deliberately
+fall through to the semantic model until their deterministic translation is
+proven safe. General-knowledge prompts also fall through rather than being
+misclassified as mathematics.
 
-Remaining supported ordinary-language mathematics and physics problems go to a
-small resident semantic model. The model's only job is translating the problem
-into SCi IR.
+Normal JSON responses expose `interpreter_path` as `fast` or `model` so routing
+is auditable. Model-quality evaluation requires `model`.
 
-The current 4B Qwen model is a reference/teacher candidate rather than the
-intended production model. Sub-billion parameter models are an engineering
-target if the deterministic corpus demonstrates adequate interpretation quality.
-No size or latency target becomes a compatibility claim until it is measured.
+## FCF inference engine
 
-### Tier 2: deterministic computation
+The initial reference adapter uses `llama.cpp` because it provides a strong
+portable inference substrate. The production direction is an FCF-maintained
+fork with a deliberately reduced scientific surface.
 
-All admitted operations are lowered into CENTL or CENTL Physics. Exactness,
-dimensional validity, conditions, resource limits, unsupported behavior, and
-verification status are established there rather than by the semantic model.
+Working internal name: **FCF-SCi Engine**.
 
-## Resident engine
+The fork should:
 
-A persistent service avoids reloading model weights for every problem. The
-initial compatibility layer may use a loopback `llama-server`; the longer-term
-FCF-SCi Engine should expose a narrower versioned protocol containing only the
-operations necessary for SCi interpretation.
+- preserve required upstream license and copyright notices;
+- remove or disable generic chat UI, personas, agent/tool calling, multimodal
+  features, arbitrary model downloads, and unrelated user-facing surfaces;
+- expose only the inference primitives CENTL-SCi needs;
+- keep the model resident instead of starting a new process per problem;
+- provide a small versioned local IPC/HTTP interface returning one structured
+  interpretation object;
+- support CPU first, with explicit optional GPU acceleration;
+- keep network access out of local inference mode;
+- make grammar/structured-output constraints part of the server request;
+- measure model-load time separately from warm interpretation latency;
+- retain upstream provenance in build/license information while presenting
+  FCF/CENTL-SCi branding to normal users.
 
-The service must be explicitly local when used by the local product. Hosted
-CENTL-SCi is a separate deployment mode and must not silently change a local
-installation into a network client.
+This is a fork of an inference runtime, not a dependency on Meta Llama model
+weights. CENTL-SCi's model layer remains replaceable.
 
-A resident request contains conceptually:
+## Model direction
 
-```json
-{
-  "version": 1,
-  "problem": "Solve x squared minus five x plus six equals zero for x.",
-  "schema": "centl-sci-problem-ir-v1"
-}
+Qwen3-4B-Instruct-2507 Q4 is the current qualification/reference model. It is
+not the intended final performance architecture.
+
+The production model should be a **small specialized semantic compiler**, not a
+general assistant. Its training objective and output vocabulary should be
+centered on CENTL-SCi IR.
+
+Development path:
+
+1. use the reference model plus human-reviewed fixtures to generate and validate
+   interpretation examples;
+2. expand adversarial and paraphrase corpora around each admitted typed IR;
+3. train/distill a substantially smaller model for classification and slot
+   extraction into the closed IR;
+4. quantize and benchmark candidates on CPU;
+5. accept a model only when corpus accuracy and reject/unsupported behavior meet
+   the release threshold;
+6. never use model confidence as a substitute for CENTL verification.
+
+The desired steady-state model is sub-billion-parameter if evaluation supports
+it. This remains an engineering target, not a compatibility claim.
+
+## Performance architecture
+
+Starting a 4B process for every query is a reference-only path. Production
+performance is layered:
+
+### Tier 0 — deterministic fast path
+
+Already in implementation. High-confidence arithmetic, unit conversion, and
+direct symbolic equation surfaces can skip neural inference entirely.
+
+Target: effectively immediate relative to model inference.
+
+### Tier 1 — resident specialized semantic model
+
+Ambiguous natural-language problems use the FCF semantic model. The model stays
+loaded. Requests carry a compact versioned semantic contract rather than the
+long prototype instruction prompt on every call.
+
+### Tier 2 — CENTL execution
+
+CENTL performs exact/symbolic computation and verification. This remains the
+source of mathematical authority.
+
+### Tier 3 — rendering
+
+Human output is deterministic. No second model pass is required merely to
+explain the result.
+
+## Hosted architecture
+
+FCF may host CENTL-SCi while retaining the same semantics as the local product.
+
+```text
+web / desktop / CLI
+        |
+        v
+FCF CENTL-SCi gateway
+        |
+        +--> deterministic fast path
+        |
+        +--> resident FCF-SCi workers
+                    |
+                    v
+                SCi IR
+                    |
+                    v
+            CENTL execution pool
+                    |
+                    v
+           structured response
 ```
 
-and the only successful semantic output is validated SCi Problem IR.
+Hosted requirements:
 
-## Model strategy
-
-General conversational quality is not the selection objective. Candidate models
-must instead be measured for:
-
-- semantic math/physics classification;
-- exact field extraction;
-- paraphrase robustness;
-- schema compliance under constrained decoding;
-- adversarial instruction resistance;
-- unsupported-problem recognition;
-- CPU interpretation latency;
-- peak/model memory;
-- quantization sensitivity;
-- redistribution license and model-card obligations.
-
-A smaller specialized student can be trained or distilled using independently
-reviewed SCi fixtures and teacher-generated candidates, but expected IR and
-mathematical results must remain independently established. Teacher output is
-never ground truth merely because it came from a larger model.
-
-## Local and hosted parity
-
-The local and FCF-hosted products should share:
-
-- the same SCi Problem IR version;
-- the same validation rules;
-- the same deterministic fast path where practical;
-- the same CENTL request lowering;
-- the same evidence/status semantics.
-
-Hosting changes deployment and capacity. It does not change what counts as
-mathematical evidence.
+- no requirement that a user run proprietary software locally;
+- model workers stay warm/resident;
+- bounded request sizes and execution budgets;
+- per-request IR and CENTL evidence remain separable for auditing;
+- no hidden model-generated numerical answer may bypass CENTL;
+- local and hosted modes use the same versioned SCi IR contract;
+- deterministic operations may be cached by normalized request where safe;
+- privacy and retention policy must be explicit before public hosting;
+- health/version endpoints must not expose filesystem model paths or internal
+  infrastructure details.
 
 ## Visual identity
 
-The human interface is an FCF scientific console, not a chatbot and not a card
-dashboard.
+CENTL-SCi should feel like a modern scientific command console with restrained
+DOS/Commander ancestry, not a chat transcript and not a boxed dashboard.
 
-Terminal presentation uses a compact Commander/DOS-derived prompt grammar:
+Baseline terminal composition:
 
 ```text
  CENTL-SCi    //  FCF
 Free Computation Foundation  //  Free for science.
 
-SCI> Solve x squared minus 5x plus 6 equals zero.
+SCI> What is 0.1 plus 0.2?
+RT> FAST
 
 OK> ESTABLISHED
-=> x in {2, 3}
-IR> mathematics.polynomial_equation -> solve
+=> 3/10
+IR> mathematics.exact_expression -> compute
 AS> none
-RS> transformed
+RS> computed
 PV> exact via CENTL
 ```
 
-ANSI-capable terminals may use a restrained deep-blue title treatment,
-blue/cyan structural channels, bright result text, green established status,
-amber unresolved status, and red failure status. `--json` and machine protocols
-must remain presentation-free.
+Prompt channels are part of the interface grammar:
 
-The same visual grammar should carry into the hosted interface: deep scientific
-blue, cyan information channels, prominent mathematical results, compact
-provenance, and a terminal-like problem entry surface without pretending to be
-an old terminal emulator.
+- `SCI>` submitted scientific problem;
+- `RT>` interpretation route (`FAST` or `MODEL`);
+- `OK>` established result;
+- `WAIT>` unresolved or unsupported;
+- `ERR>` failed;
+- `=>` result;
+- `IR>` semantic interpretation;
+- `AS>` assumptions;
+- `RS>` CENTL resolution;
+- `PV>` provenance;
+- `WHY>` reason for rejection or unsupported state.
 
-## Measurements
+Color semantics remain stable rather than decorative:
 
-Performance reporting should separate at least:
+- deep blue / cyan: CENTL-SCi identity and structural channels;
+- green: established/exact;
+- amber: unresolved or assumption-bearing;
+- red: failed/rejected;
+- muted gray: provenance/runtime metadata.
 
-- engine/model load time;
-- interpretation latency;
-- deterministic CENTL computation time;
-- verification time;
-- rendering time;
-- model memory;
-- process peak memory.
+`--json`, machine protocols, and hosted API responses remain free of ANSI or
+presentation markup.
 
-Cold `llama-cli` measurements must not be advertised as steady-state latency.
-Likewise, GPU measurements must not be presented as CPU compatibility results.
+## Performance metrics required before release claims
 
-## Upstream and licensing
+Record at minimum:
 
-An FCF fork of `llama.cpp` must retain the upstream copyright and MIT license
-notices required by the upstream license. The FCF product may have distinct
-branding and architecture while accurately preserving that provenance.
+- cold model load time;
+- warm interpretation p50/p95/p99;
+- time to first generated token/structured field;
+- total interpretation time;
+- deterministic-fast-path time;
+- CENTL execution time;
+- peak resident memory;
+- CPU model and thread count;
+- accelerator/backend if present;
+- fixture pass rate;
+- unsupported/rejection precision;
+- semantic false-accept rate;
+- exact CENTL outcome rate for admitted fixtures.
 
-Model licensing is separate from inference-runtime licensing. Every bundled or
-recommended model must be reviewed independently for redistribution and use
-rights before release.
+Do not publish broad `fast`, hardware-support, or accuracy claims without
+measured data.
+
+## Immediate implementation order
+
+1. keep the working `llama-cli` path as a forced reference/qualification backend;
+2. finish and benchmark the deterministic fast path;
+3. replace per-request model startup with a persistent resident server adapter;
+4. measure warm latency separately from cold load time;
+5. benchmark smaller permissively licensed semantic-model candidates;
+6. build a reviewed interpretation/distillation corpus;
+7. define the hosted FCF-SCi service protocol and deployment hardening;
+8. broaden mathematics/physics IR only after the performance/trust boundary is
+   stable.
