@@ -36,7 +36,8 @@ let drop_prefix_ci prefix text =
   let prefix_lower = String.lowercase_ascii prefix in
   if String.starts_with ~prefix:prefix_lower lower then
     Some
-      (String.sub text (String.length prefix) (String.length text - String.length prefix)
+      (String.sub text (String.length prefix)
+         (String.length text - String.length prefix)
       |> String.trim)
   else None
 
@@ -57,22 +58,24 @@ let valid_identifier text =
   String.length text > 0 && is_first text.[0] && rest 1
 
 let numeric_token text =
-  let valid = function
-    | '0' .. '9' | '.' | '/' -> true
-    | _ -> false
-  in
+  let valid = function '0' .. '9' | '.' | '/' -> true | _ -> false in
   String.length text > 0
   && String.for_all valid text
   && String.exists (function '0' .. '9' -> true | _ -> false) text
 
-let canonical_number = function "zero" -> Some "0" | token when numeric_token token -> Some token | _ -> None
+let canonical_number = function
+  | "zero" -> Some "0"
+  | token when numeric_token token -> Some token
+  | _ -> None
 
 let words text =
-  String.lowercase_ascii text |> String.split_on_char ' '
+  String.lowercase_ascii text
+  |> String.split_on_char ' '
   |> List.filter (fun token -> token <> "")
 
 let parse_term ~variable = function
-  | token :: "squared" :: rest when token = variable -> Some (variable ^ "^2", rest)
+  | token :: "squared" :: rest when token = variable ->
+      Some (variable ^ "^2", rest)
   | token :: rest when token = variable -> Some (variable, rest)
   | coefficient :: token :: "squared" :: rest
     when token = variable && Option.is_some (canonical_number coefficient) ->
@@ -101,7 +104,7 @@ let parse_expression ~variable text =
   let rec loop acc tokens =
     match tokens with
     | [] -> Some (String.concat " " (List.rev acc))
-    | ("plus" | "minus" as operator) :: rest ->
+    | (("plus" | "minus") as operator) :: rest ->
         begin match parse_term ~variable rest with
         | Some (term, remaining) ->
             let symbol = if operator = "plus" then "+" else "-" in
@@ -145,12 +148,18 @@ let interpret problem =
                 let after_equal = equal_index + String.length " equals " in
                 let right_length = String.length equation - after_equal in
                 let left = String.sub equation 0 equal_index |> String.trim in
-                let right = String.sub equation after_equal right_length |> String.trim in
+                let right =
+                  String.sub equation after_equal right_length |> String.trim
+                in
                 let remaining_right = String.lowercase_ascii right in
-                if Option.is_some (find_substring ~needle:" equals " remaining_right) then None
+                if
+                  Option.is_some
+                    (find_substring ~needle:" equals " remaining_right)
+                then None
                 else
                   begin match
-                    (parse_expression ~variable left, parse_expression ~variable right)
+                    ( parse_expression ~variable left,
+                      parse_expression ~variable right )
                   with
                   | Some left, Some right ->
                       begin match
