@@ -163,7 +163,7 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "centl install: CENTL-SCi REPL failed to start: $SciReplSmoke"
         }
-        if ($SciReplSmoke -notmatch '(?m)^CENTL-SCi v' -or $SciReplSmoke -notmatch '(?m)^Free for science\.$') {
+        if ($SciReplSmoke -notmatch 'CENTL-SCi v' -or $SciReplSmoke -notmatch 'Free for science\.') {
             throw "centl install: CENTL-SCi REPL did not report the expected identity: $SciReplSmoke"
         }
     }
