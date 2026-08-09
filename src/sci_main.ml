@@ -127,6 +127,50 @@ let with_interpreter_path source = function
       `Assoc fields
   | json -> json
 
+let contribution_or_exit action =
+  match action with
+  | Ok () -> ()
+  | Error error ->
+      Printf.eprintf "centl-sci: %s\n" (Centl_sci_contrib.string_of_error error);
+      exit 2
+
+let set_contribution_mode mode message =
+  contribution_or_exit (Centl_sci_contrib.set_mode mode);
+  print_endline message;
+  exit 0
+
+let show_contribution_status () =
+  Printf.printf "mode=%s\n"
+    (Centl_sci_contrib.mode_text (Centl_sci_contrib.load_mode ()));
+  begin match Centl_sci_contrib.pending_path () with
+  | Some path -> Printf.printf "pending=%s\n" path
+  | None -> print_endline "pending=unavailable"
+  end;
+  print_endline "network_upload=false";
+  exit 0
+
+let export_contribution path =
+  contribution_or_exit (Centl_sci_contrib.export_pending path);
+  Printf.printf "CENTL-SCi contribution export: %s\n" path;
+  print_endline "No data was uploaded. Review the exported file before sharing it.";
+  exit 0
+
+let clear_contribution () =
+  contribution_or_exit (Centl_sci_contrib.clear_pending ());
+  print_endline "CENTL-SCi pending contribution data cleared.";
+  exit 0
+
+let warn_contribution = function
+  | Ok () -> ()
+  | Error error ->
+      Printf.eprintf "centl-sci: contribution capture warning: %s\n"
+        (Centl_sci_contrib.string_of_error error)
+
+let record_interpreter_error ~source ?backend ~problem ~code ~message () =
+  warn_contribution
+    (Centl_sci_contrib.record_interpreter_error ~source ?backend ~problem ~code
+       ~message ())
+
 let () =
   let model = ref (Sys.getenv_opt "CENTL_SCI_MODEL") in
   let server_url = ref (Sys.getenv_opt "CENTL_SCI_SERVER_URL") in
@@ -157,6 +201,33 @@ let () =
         Arg.Set force_model,
         "bypass deterministic interpretation; intended for model \
          qualification/debugging" );
+      ( "--contribution-off",
+        Arg.Unit
+          (fun () ->
+            set_contribution_mode Centl_sci_contrib.Off
+              "CENTL-SCi contribution mode: off. Existing pending data is not deleted."),
+        "persistently disable local contribution capture (default)" );
+      ( "--contribution-diagnostics",
+        Arg.Unit
+          (fun () ->
+            set_contribution_mode Centl_sci_contrib.Diagnostics
+              "CENTL-SCi contribution mode: diagnostics. Problem text is not captured; nothing is uploaded automatically."),
+        "opt in to local metadata/error capture without problem text" );
+      ( "--contribution-examples",
+        Arg.Unit
+          (fun () ->
+            set_contribution_mode Centl_sci_contrib.Examples
+              "CENTL-SCi contribution mode: examples. Raw problem text is captured locally and may contain sensitive information; nothing is uploaded automatically."),
+        "opt in to local example capture including raw problem text" );
+      ( "--contribution-status",
+        Arg.Unit show_contribution_status,
+        "show contribution mode and local pending-data path" );
+      ( "--contribution-export",
+        Arg.String export_contribution,
+        "PATH export the pending local JSONL for explicit review/sharing" );
+      ( "--contribution-clear",
+        Arg.Unit clear_contribution,
+        "delete pending local contribution data" );
       ("--color", Arg.Unit (fun () -> color := Always), "force ANSI color");
       ("--no-color", Arg.Unit (fun () -> color := Never), "disable ANSI color");
       ( "--color=auto",
@@ -190,6 +261,8 @@ let () =
         in
         begin match Centl_sci_server.interpret config problem with
         | Error error ->
+            record_interpreter_error ~source:"model" ~backend:"llama-server"
+              ~problem ~code:error.code ~message:error.message ();
             Printf.eprintf "centl-sci: %s\n"
               (Centl_sci_server.string_of_error error);
             exit 1
@@ -200,6 +273,9 @@ let () =
           match !model with
           | Some value when value <> "" -> value
           | _ ->
+              record_interpreter_error ~source:"deferred" ~problem
+                ~code:"semantic_inference_required"
+                ~message:"no semantic model backend is configured" ();
               Printf.eprintf
                 "centl-sci: this problem requires semantic inference; \
                  configure --server-url/CENTL_SCI_SERVER_URL or \
@@ -209,6 +285,8 @@ let () =
         let config = Centl_sci_llama.default ~executable:!llama_cli ~model () in
         begin match Centl_sci_llama.interpret config problem with
         | Error error ->
+            record_interpreter_error ~source:"model" ~backend:"llama-cli"
+              ~problem ~code:error.code ~message:error.message ();
             Printf.eprintf "centl-sci: %s\n"
               (Centl_sci_llama.string_of_error error);
             exit 1
@@ -223,6 +301,16 @@ let () =
       | None -> model_interpret ()
   in
   let outcome = Centl_sci_runtime.execute ir in
+  let contribution =
+    match backend_text source with
+    | None ->
+        Centl_sci_contrib.record ~source:(source_text source) ~problem ~ir
+          ~outcome ()
+    | Some backend ->
+        Centl_sci_contrib.record ~source:(source_text source) ~backend ~problem ~ir
+          ~outcome ()
+  in
+  warn_contribution contribution;
   if !json_output then
     Centl_sci_runtime.to_json ~problem outcome
     |> with_interpreter_path source
@@ -230,5 +318,4 @@ let () =
   else
     branded_human ~color:(color_enabled !color) ~problem ~source outcome
     |> print_endline;
-  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> ()
-  end
+  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> () end
