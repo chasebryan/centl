@@ -201,27 +201,18 @@ def run_fixture(
 
     stdout = completed.stdout.strip()
     stderr = completed.stderr.strip()
-    if completed.returncode != 0:
-        return {
-            "id": fixture["id"],
-            "pass": False,
-            "elapsed_seconds": round(elapsed, 6),
-            "exit_code": completed.returncode,
-            "mismatches": ["centl-sci exited unsuccessfully"],
-            "stdout": stdout,
-            "stderr": stderr,
-            "observed": None,
-        }
-
     try:
         payload = json.loads(stdout)
     except json.JSONDecodeError as error:
+        mismatch = f"centl-sci did not emit JSON: {error}"
+        if completed.returncode != 0:
+            mismatch += f"; exit code {completed.returncode}"
         return {
             "id": fixture["id"],
             "pass": False,
             "elapsed_seconds": round(elapsed, 6),
             "exit_code": completed.returncode,
-            "mismatches": [f"centl-sci did not emit JSON: {error}"],
+            "mismatches": [mismatch],
             "stdout": stdout,
             "stderr": stderr,
             "observed": None,
@@ -231,6 +222,13 @@ def run_fixture(
         mismatches = ["centl-sci JSON output is not an object"]
     else:
         mismatches = score_payload(fixture, payload)
+
+    expected_status = fixture["expected"].get("centl", {}).get("status")
+    expected_exit = 1 if expected_status == "failed" else 0
+    if completed.returncode != expected_exit:
+        mismatches.append(
+            f"exit code: expected {expected_exit}, observed {completed.returncode}"
+        )
 
     return {
         "id": fixture["id"],
