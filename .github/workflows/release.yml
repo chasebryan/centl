@@ -765,7 +765,11 @@ jobs:
           VERSION: ${{ needs.linux-x86_64.outputs.version }}
         run: |
           test "v$VERSION" = "$GITHUB_REF_NAME"
+          prerelease=()
+          case "$VERSION" in
+            *-*) prerelease=(--prerelease) ;;
+          esac
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" --generate-notes \
-            --prerelease \
+            "${prerelease[@]}" \
             --title "CENTL $VERSION — Math Contracts"
