@@ -67,7 +67,8 @@ let sphere_input = function
           with
           | Some particle, Some radius ->
               begin match
-                (sphere_particle_input particle, quantity_input "sphere radius" radius)
+                ( sphere_particle_input particle,
+                  quantity_input "sphere radius" radius )
               with
               | Ok particle, Ok radius ->
                   begin try Ok (sphere ~particle ~radius)
