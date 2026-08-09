@@ -55,9 +55,7 @@ let clamp_time duration value =
 
 let clearance_at ~a ~b ~c time =
   let t_squared = quantity_mul time time in
-  quantity_add
-    (quantity_add (quantity_mul a t_squared) (quantity_mul b time))
-    c
+  quantity_add (quantity_add (quantity_mul a t_squared) (quantity_mul b time)) c
 
 let perfect_square_root_z value =
   if Z.sign value < 0 then None
@@ -105,7 +103,8 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
   let radius_sum_squared = quantity_mul radius_sum radius_sum in
   let a = vector_norm_squared relative_velocity in
   let b =
-    vector_dot relative_position relative_velocity |> quantity_scale (Q.of_int 2)
+    vector_dot relative_position relative_velocity
+    |> quantity_scale (Q.of_int 2)
   in
   let c =
     quantity_sub (vector_norm_squared relative_position) radius_sum_squared
@@ -114,9 +113,7 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
   let closest_time =
     if Q.equal a.si_value Q.zero then time_of_si Q.zero
     else
-      let vertex =
-        Q.div (Q.neg b.si_value) (Q.mul (Q.of_int 2) a.si_value)
-      in
+      let vertex = Q.div (Q.neg b.si_value) (Q.mul (Q.of_int 2) a.si_value) in
       clamp_time duration vertex
   in
   let minimum_clearance_squared = clearance_at ~a ~b ~c closest_time in
@@ -143,11 +140,11 @@ let certify_linear_sphere_contact ~duration sphere1 sphere2 =
         | None ->
             raise
               (Physics_error
-                 "internal linear-contact invariant: crossing requires relative motion")
+                 "internal linear-contact invariant: crossing requires \
+                  relative motion")
         | Some discriminant ->
             ( Crossing_contact,
-              Some
-                (first_crossing_time ~a ~b ~c ~discriminant ~closest_time) )
+              Some (first_crossing_time ~a ~b ~c ~discriminant ~closest_time) )
   in
   {
     particle1_id = sphere1.particle.id;
