@@ -10,8 +10,8 @@ type config = {
 let fail code message = Error { code; message }
 let string_of_error error = error.code ^ ": " ^ error.message
 
-let default ?(executable = "llama-cli") ?(max_tokens = 512) ?(context_size = 4_096)
-    ~model () =
+let default ?(executable = "llama-cli") ?(max_tokens = 512)
+    ?(context_size = 4_096) ~model () =
   { executable; model; max_tokens; context_size }
 
 let max_problem_bytes = 8_192
@@ -101,7 +101,8 @@ let read_bounded channel =
         loop ()
     | exception End_of_file ->
         if !oversized then
-          fail "resource_limit" "local model output exceeds the CENTL-SCi byte limit"
+          fail "resource_limit"
+            "local model output exceeds the CENTL-SCi byte limit"
         else Ok (Buffer.contents buffer)
   in
   loop ()
@@ -110,10 +111,12 @@ let status_message = function
   | Unix.WEXITED code -> Printf.sprintf "llama-cli exited with status %d" code
   | Unix.WSIGNALED signal ->
       Printf.sprintf "llama-cli terminated by signal %d" signal
-  | Unix.WSTOPPED signal -> Printf.sprintf "llama-cli stopped by signal %d" signal
+  | Unix.WSTOPPED signal ->
+      Printf.sprintf "llama-cli stopped by signal %d" signal
 
 let validate_config config =
-  if config.executable = "" then fail "invalid_configuration" "empty llama-cli path"
+  if config.executable = "" then
+    fail "invalid_configuration" "empty llama-cli path"
   else if config.model = "" then fail "invalid_configuration" "empty model path"
   else if config.max_tokens <= 0 || config.max_tokens > 1_024 then
     fail "invalid_configuration" "max_tokens must be between 1 and 1024"
@@ -125,7 +128,8 @@ let interpret config problem =
   match validate_config config with
   | Error _ as error -> error
   | Ok () ->
-      if String.length problem = 0 then fail "invalid_problem" "problem must not be empty"
+      if String.length problem = 0 then
+        fail "invalid_problem" "problem must not be empty"
       else if String.length problem > max_problem_bytes then
         fail "resource_limit" "problem exceeds the CENTL-SCi byte limit"
       else
@@ -147,14 +151,13 @@ let interpret config problem =
                   | Error error ->
                       fail error.code
                         ("local model produced invalid CENTL-SCi IR: "
-                        ^ error.message)
+                       ^ error.message)
                   end
               | _ -> fail "inference_failed" (status_message status)
               end
           end
-        with
-        | Unix.Unix_error (error, function_name, argument) ->
-            fail "inference_failed"
-              (Printf.sprintf "%s(%s): %s" function_name argument
-                 (Unix.error_message error))
+        with Unix.Unix_error (error, function_name, argument) ->
+          fail "inference_failed"
+            (Printf.sprintf "%s(%s): %s" function_name argument
+               (Unix.error_message error))
         end
