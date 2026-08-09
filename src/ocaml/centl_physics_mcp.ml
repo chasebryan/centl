@@ -44,7 +44,8 @@ let particle_input_schema =
   strict_object particle_input_properties [ "mass"; "position"; "velocity" ]
 
 let identified_particle_input_schema =
-  strict_object particle_input_properties [ "id"; "mass"; "position"; "velocity" ]
+  strict_object particle_input_properties
+    [ "id"; "mass"; "position"; "velocity" ]
 
 let sphere_input_schema =
   strict_object
