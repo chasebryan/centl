@@ -1,0 +1,46 @@
+#!/usr/bin/env sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$root"
+
+branch=$(git branch --show-current)
+if [ -z "$branch" ]; then
+  echo "CENTL-SCi: assimilation publishing requires a named Git branch" >&2
+  exit 2
+fi
+if [ "$branch" = "main" ] && [ "${CENTL_SCI_ALLOW_MAIN_REPORT:-0}" != "1" ]; then
+  echo "CENTL-SCi: refusing to publish an assimilation report directly to main" >&2
+  echo "set CENTL_SCI_ALLOW_MAIN_REPORT=1 only if that is intentional" >&2
+  exit 2
+fi
+
+json_report="lab/sci-assimilation/latest.json"
+markdown_report="lab/sci-assimilation/latest.md"
+
+set +e
+python3 scripts/sci-assimilate.py \
+  --output-json "$json_report" \
+  --output-markdown "$markdown_report" \
+  "$@"
+harness_status=$?
+set -e
+
+if [ ! -f "$json_report" ] || [ ! -f "$markdown_report" ]; then
+  echo "CENTL-SCi: assimilation harness did not produce both report files" >&2
+  exit 1
+fi
+
+python3 scripts/sci-assimilation-check.py "$json_report"
+
+git add -- "$json_report" "$markdown_report"
+if git diff --cached --quiet -- "$json_report" "$markdown_report"; then
+  echo "CENTL-SCi: assimilation report unchanged; nothing to publish"
+else
+  source_commit=$(python3 -c 'import json; print(json.load(open("lab/sci-assimilation/latest.json"))["git"]["commit"])')
+  git commit -m "Record CENTL-SCi assimilation report for ${source_commit%????????????????????????????????}"
+  git push origin "HEAD:$branch"
+  echo "CENTL-SCi: published assimilation report on $branch"
+fi
+
+exit "$harness_status"
