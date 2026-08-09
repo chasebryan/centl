@@ -170,6 +170,26 @@ solvers, or rigorous truncation-error enclosures. See
 [docs/PHYSICS_PROTOCOL.md](docs/PHYSICS_PROTOCOL.md) for the exact contract,
 evidence model, and current boundary.
 
+## CENTL-SCi
+
+CENTL-SCi v0.0.1 is an experimental local semantic interpreter for mathematics
+and physics. It is not a general chatbot and it is not a replacement for CENTL.
+A local model translates one ordinary-language problem into a closed, validated
+problem representation; CENTL or CENTL Physics then performs the admitted
+computation and returns the structured evidence used for the result.
+
+The first milestone admits exact-expression computation, single-variable
+polynomial equations, exact unit conversion, and an explicit unsupported path.
+Model output is treated as untrusted input, generated mathematics is routed
+through bounded existing machine interfaces, and unsupported CENTL work remains
+unsupported rather than being replaced by a model guess. The local inference
+runtime and model are optional: ordinary CENTL and CENTL Physics continue to
+work without them.
+
+See [docs/SCI.md](docs/SCI.md) for the v0.0.1 architecture, Problem IR, trust
+boundary, local-runtime configuration, model-evaluation policy, tests, and
+packaging status.
+
 Calculator sessions and scripts remember immutable definitions written as
 `r = 3` or `f(x) = x^2 + 1`.
 
@@ -208,6 +228,7 @@ make test
 
 CENTL is in early development. See the [architecture](docs/DESIGN.md),
 [near-term product design path](docs/DESIGN_PATH.md),
+[CENTL-SCi architecture](docs/SCI.md),
 [complete syntax sheet](docs/SYNTAX.md),
 [numerical contract](docs/NUMERICS.md),
 [calculus syntax](docs/CALCULUS.md),
