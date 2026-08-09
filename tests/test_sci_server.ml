@@ -44,11 +44,16 @@ let test_request_contract () =
   Alcotest.(check bool) "cache prompt" true (bool "cache_prompt" request);
   Alcotest.(check int) "bounded generation" 192 (int "n_predict" request);
   Alcotest.(check string)
-    "grammar" Centl_sci_schema.llama_grammar (string "grammar" request);
+    "class grammar" Centl_sci_schema.polynomial_equation_grammar
+    (string "grammar" request);
   let prompt = string "prompt" request in
   Alcotest.(check bool)
     "compact resident prompt" true
     (String.length prompt < 1_024);
+  Alcotest.(check bool)
+    "class is fixed" true
+    (String.starts_with ~prefix:"CENTL-SCi v0.0.1" prompt
+    && String.contains prompt 'p');
   Alcotest.(check bool)
     "problem encoded as data" true
     (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);
