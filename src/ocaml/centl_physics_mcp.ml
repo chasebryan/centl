@@ -32,19 +32,26 @@ let vector_input_schema =
     ]
     [ "x"; "y"; "z"; "unit" ]
 
+let particle_input_properties =
+  [
+    ("id", string_schema);
+    ("mass", quantity_input_schema);
+    ("position", vector_input_schema);
+    ("velocity", vector_input_schema);
+  ]
+
 let particle_input_schema =
-  strict_object
-    [
-      ("id", string_schema);
-      ("mass", quantity_input_schema);
-      ("position", vector_input_schema);
-      ("velocity", vector_input_schema);
-    ]
-    [ "mass"; "position"; "velocity" ]
+  strict_object particle_input_properties [ "mass"; "position"; "velocity" ]
+
+let identified_particle_input_schema =
+  strict_object particle_input_properties [ "id"; "mass"; "position"; "velocity" ]
 
 let sphere_input_schema =
   strict_object
-    [ ("particle", particle_input_schema); ("radius", quantity_input_schema) ]
+    [
+      ("particle", identified_particle_input_schema);
+      ("radius", quantity_input_schema);
+    ]
     [ "particle"; "radius" ]
 
 let force_input_schema =
