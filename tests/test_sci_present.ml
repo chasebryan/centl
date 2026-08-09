@@ -44,7 +44,7 @@ let test_missing_information () =
       {|{"schema_version":1,"domain":"unsupported","problem_class":"unsupported","operation":"unsupported","assumptions":[],"reason":"missing initial position and velocity"}|}
   in
   Alcotest.(check string)
-    "missing data" "More information is required to solve this problem."
+    "missing data" "More information is required: initial position and velocity."
     (Centl_sci_present.human outcome)
 
 let test_unsupported () =
