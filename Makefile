@@ -1,6 +1,7 @@
 FSTAR ?= fstar.exe
 JULIA ?= julia
 OPAM ?= opam
+PYTHON ?= python3
 OPAM_SWITCH ?= centl
 DUNE ?= $(shell \
 	if command -v dune >/dev/null 2>&1; then command -v dune; \
@@ -15,10 +16,20 @@ GENERATED := src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
 	src/generated/Centl_PolynomialSoundness.ml
 FSTAR_COMMON := --include src/fstar --cache_dir $(FSTAR_CACHE) \
 	--hint_dir $(FSTAR_CACHE) --split_queries always --z3rlimit 2
+SCI_LLAMA_CLI ?= llama-cli
+SCI_TIMEOUT ?= 300
+SCI_REPORT ?= sci-model-report.json
+SCI_SERVER_URL ?=
+SCI_MODEL ?=
+SCI_MODEL_LABEL ?= resident-model
+SCI_ASSIMILATION_FAST_REPEATS ?= 5
+SCI_ASSIMILATION_MODEL_REPEATS ?= 1
+SCI_ASSIMILATION_ARGS ?=
 
 .PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
 	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
-	hardening-test differential-test build test release clean
+	hardening-test differential-test sci-model-test sci-assimilate \
+	sci-assimilate-full sci-assimilate-publish build test release clean
 
 all: build
 
@@ -91,6 +102,42 @@ hardening-test: fuzz-test metamorphic-test sanitizer-test performance-test
 
 differential-test: build
 	$(JULIA) --project=lab/julia lab/julia/differential.jl
+
+sci-model-test: build
+	test -n "$(MODEL)" || { echo "MODEL=/path/to/model.gguf is required" >&2; exit 2; }
+	$(PYTHON) scripts/sci-model-eval.py \
+		--model "$(MODEL)" \
+		--llama-cli "$(SCI_LLAMA_CLI)" \
+		--timeout "$(SCI_TIMEOUT)" \
+		--output "$(SCI_REPORT)"
+
+sci-assimilate:
+	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
+		$(PYTHON) scripts/sci-assimilate.py \
+		--server-url "$(SCI_SERVER_URL)" \
+		--model-label "$(SCI_MODEL_LABEL)" \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
+
+sci-assimilate-full:
+	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
+		$(PYTHON) scripts/sci-assimilate.py \
+		--server-url "$(SCI_SERVER_URL)" \
+		--model-label "$(SCI_MODEL_LABEL)" \
+		--full \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
+
+sci-assimilate-publish:
+	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
+	CENTL_SCI_MODEL="$(SCI_MODEL)" \
+	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+		sh scripts/sci-assimilate-publish \
+		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
+		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
+		$(SCI_ASSIMILATION_ARGS)
 
 build: extract native-build
 

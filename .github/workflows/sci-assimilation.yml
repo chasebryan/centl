@@ -1,0 +1,54 @@
+name: CENTL-SCi assimilation report
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "lab/sci-assimilation/latest.json"
+      - "lab/sci-assimilation/latest.md"
+
+concurrency:
+  group: sci-assimilation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: Validate and surface assimilation evidence
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out report history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 32
+
+      - name: Validate harness Python syntax
+        run: |
+          python3 -m py_compile \
+            scripts/sci-assimilate.py \
+            scripts/sci-assimilation-check.py
+
+      - name: Validate report structure and provenance
+        run: python3 scripts/sci-assimilation-check.py lab/sci-assimilation/latest.json
+
+      - name: Surface report summary
+        run: cat lab/sci-assimilation/latest.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve assimilation evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: centl-sci-assimilation-${{ github.sha }}
+          path: |
+            lab/sci-assimilation/latest.json
+            lab/sci-assimilation/latest.md
+          if-no-files-found: error
+
+      - name: Enforce product and safety gates
+        run: |
+          python3 scripts/sci-assimilation-check.py \
+            --require-product-gates \
+            lab/sci-assimilation/latest.json

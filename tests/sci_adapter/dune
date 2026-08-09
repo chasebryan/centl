@@ -1,0 +1,4 @@
+(test
+ (name test_adapter)
+ (modules test_adapter)
+ (libraries centl_lib alcotest yojson))

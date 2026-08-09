@@ -1,0 +1,118 @@
+#!/usr/bin/env sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$root"
+
+branch=$(git branch --show-current)
+if [ -z "$branch" ]; then
+  echo "CENTL-SCi: assimilation publishing requires a named Git branch" >&2
+  exit 2
+fi
+if [ "$branch" = "main" ] && [ "${CENTL_SCI_ALLOW_MAIN_REPORT:-0}" != "1" ]; then
+  echo "CENTL-SCi: refusing to publish an assimilation report directly to main" >&2
+  echo "set CENTL_SCI_ALLOW_MAIN_REPORT=1 only if that is intentional" >&2
+  exit 2
+fi
+
+source_head=$(git rev-parse HEAD)
+json_report="lab/sci-assimilation/latest.json"
+markdown_report="lab/sci-assimilation/latest.md"
+tmpdir=$(mktemp -d)
+tmp_json="$tmpdir/latest.json"
+tmp_markdown="$tmpdir/latest.md"
+server_log="$tmpdir/llama-server.log"
+server_pid=""
+
+cleanup() {
+  if [ -n "$server_pid" ]; then
+    kill "$server_pid" 2>/dev/null || true
+    wait "$server_pid" 2>/dev/null || true
+  fi
+  rm -rf "$tmpdir"
+}
+trap cleanup EXIT HUP INT TERM
+
+server_url=${CENTL_SCI_SERVER_URL:-}
+model=${CENTL_SCI_MODEL:-}
+if [ -n "$server_url" ] && [ -n "$model" ]; then
+  echo "CENTL-SCi: choose either SCI_SERVER_URL or SCI_MODEL, not both" >&2
+  exit 2
+fi
+
+if [ -n "$model" ]; then
+  if [ ! -f "$model" ]; then
+    echo "CENTL-SCi: assimilation model not found: $model" >&2
+    exit 2
+  fi
+  port=${CENTL_SCI_PORT:-8080}
+  server_url="http://127.0.0.1:$port"
+  if curl --silent --fail --noproxy '*' --max-time 2 "$server_url/health" >/dev/null 2>&1; then
+    echo "CENTL-SCi: $server_url is already serving; use SCI_SERVER_URL to qualify that explicit server" >&2
+    exit 2
+  fi
+
+  echo "CENTL-SCi: starting resident model for assimilation"
+  sh scripts/sci-resident-server "$model" >"$server_log" 2>&1 &
+  server_pid=$!
+  ready=0
+  attempt=0
+  while [ "$attempt" -lt 30 ]; do
+    if ! kill -0 "$server_pid" 2>/dev/null; then
+      echo "CENTL-SCi: resident server exited before becoming healthy" >&2
+      tail -n 40 "$server_log" >&2 || true
+      exit 1
+    fi
+    if curl --silent --fail --noproxy '*' --max-time 2 "$server_url/health" >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
+    attempt=$((attempt + 1))
+    sleep 1
+  done
+  if [ "$ready" -ne 1 ]; then
+    echo "CENTL-SCi: resident server did not become healthy" >&2
+    tail -n 40 "$server_log" >&2 || true
+    exit 1
+  fi
+  echo "CENTL-SCi: resident model healthy at $server_url"
+fi
+
+set +e
+CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= python3 scripts/sci-assimilate.py \
+  --server-url "$server_url" \
+  --model-label "${CENTL_SCI_MODEL_LABEL:-resident-model}" \
+  --output-json "$tmp_json" \
+  --output-markdown "$tmp_markdown" \
+  "$@"
+harness_status=$?
+set -e
+
+if [ ! -f "$tmp_json" ] || [ ! -f "$tmp_markdown" ]; then
+  echo "CENTL-SCi: assimilation harness did not produce fresh report files" >&2
+  exit 1
+fi
+
+python3 scripts/sci-assimilation-check.py "$tmp_json"
+reported_head=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["git"]["commit"])' "$tmp_json")
+if [ "$reported_head" != "$source_head" ]; then
+  echo "CENTL-SCi: report source commit does not match the tested HEAD" >&2
+  exit 1
+fi
+
+mkdir -p "$(dirname "$json_report")"
+cp "$tmp_json" "$json_report"
+cp "$tmp_markdown" "$markdown_report"
+
+git add -- "$json_report" "$markdown_report"
+if git diff --cached --quiet -- "$json_report" "$markdown_report"; then
+  echo "CENTL-SCi: assimilation report unchanged; nothing to publish"
+else
+  short_commit=$(printf '%s' "$source_head" | cut -c1-8)
+  git commit --only -m "Record CENTL-SCi assimilation report for $short_commit" -- \
+    "$json_report" "$markdown_report"
+  git push origin "HEAD:$branch"
+  echo "CENTL-SCi: published assimilation report on $branch"
+fi
+
+exit "$harness_status"
