@@ -9,8 +9,8 @@ surface used by CENTL AI and other automated callers.
 The AI is not a second physics evaluator. It may interpret a natural-language
 question, select a supported physical model, construct one of the typed requests
 below, and explain the returned result. Numerical state evolution, exact contact
-classification, collision response, and physical dimension checks remain inside
-deterministic CENTL.
+classification, collision response, continuous linear-contact certification,
+and physical dimension checks remain inside deterministic CENTL.
 
 ## Transport
 
@@ -74,7 +74,9 @@ Request:
 
 The result lists the supported actions, force models, integrators, exact
 constant symbols, and active machine-protocol limits, including the sphere
-contact-pair ceiling.
+contact-pair ceiling. The action list includes the discrete sphere-analysis and
+resolution actions plus `certify_linear_sphere_contact` for the narrow bounded
+constant-velocity continuous-contact contract.
 
 `units` returns the current unit catalog with exact SI scale and seven-base SI
 dimension metadata.
@@ -289,27 +291,109 @@ deferral, so the operation is failure-atomic.
 The trust-boundary object states the current limits directly: exact pairwise
 sphere geometry, squared-distance contact testing, frictionless elastic normal
 response, disjoint touching pairs only, whole-world deferral on overlap or
-shared-contact ambiguity, and no claims of continuous collision detection,
-penetration correction, friction, or spin.
+shared-contact ambiguity, and no claim that this discrete resolver performs
+general continuous collision detection, penetration correction, friction, or
+spin.
 
-## Contact analysis is not time stepping
+## Certified bounded continuous sphere contact
 
-The sphere actions operate on one supplied discrete world state. They are not
-implicitly called by `simulate_particle` or by the library world step.
+`certify_linear_sphere_contact` answers a different question from the discrete
+world actions: whether two exact-rational spheres make contact anywhere in a
+bounded interval under a constant-velocity center-motion model.
 
-In particular, CENTL does **not** currently claim that a symplectic-Euler step
-cannot pass through a contact between two sampled states. That would require a
-continuous collision-detection or event-location contract. Keeping contact
-analysis/resolution separate from time stepping prevents the machine interface
-from manufacturing that stronger claim.
+Request:
+
+```json
+{
+  "version": 1,
+  "action": "certify_linear_sphere_contact",
+  "sphere1": {
+    "particle": {
+      "id": "a",
+      "mass": {"value":"1","unit":"kg"},
+      "position": {"x":"0","y":"0","z":"0","unit":"m"},
+      "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+    },
+    "radius": {"value":"1","unit":"m"}
+  },
+  "sphere2": {
+    "particle": {
+      "id": "b",
+      "mass": {"value":"1","unit":"kg"},
+      "position": {"x":"4","y":"0","z":"0","unit":"m"},
+      "velocity": {"x":"0","y":"0","z":"0","unit":"m/s"}
+    },
+    "radius": {"value":"1","unit":"m"}
+  },
+  "duration": {"value":"3","unit":"s"}
+}
+```
+
+CENTL forms the exact squared-clearance polynomial
+
+```text
+f(t) = |r + vt|^2 - R^2 = a t^2 + b t + c
+```
+
+for relative position `r`, relative velocity `v`, and summed radius `R`. It then
+certifies the exact minimum over `[0,duration]`; it does not sample the interval
+or invoke a floating-point root finder.
+
+The result status is exactly one of:
+
+- `initially_overlapping`
+- `touching_at_start`
+- `no_contact_in_interval`
+- `tangent_contact`
+- `crossing_contact`
+
+The certificate includes particle identifiers, duration, exact `a`, `b`, and
+`c`, the exact closest time, exact minimum squared clearance, and the exact
+discriminant when relative motion exists.
+
+`first_contact_time` is one of three machine shapes:
+
+- `null` when there is no first contact in the interval;
+- `kind: "rational"` with an exact time quantity when the first root is
+  rational;
+- `kind: "quadratic_irrational"` with the exact polynomial, exact
+  discriminant, and a certified rational bracket when the event time is not
+  rational.
+
+CENTL therefore never converts a quadratic-irrational event time into a decimal
+or fabricated rational timestamp merely to cross the JSON boundary. The output
+also carries a trust-boundary object stating `constant_velocity`, exact sphere
+geometry, exact squared-clearance reasoning, no sampling, no floating-point
+root finding, no force integration, no automatic response, and no simultaneous
+contact solving.
+
+This action is not a general continuous collision detector. It certifies one
+specific exact mathematical motion model. It does not claim contact timing under
+acceleration or force integration, and it is not implicitly coupled to
+`symplectic_euler`.
+
+## Contact reasoning is not automatic time stepping
+
+The discrete sphere-world actions operate on one supplied world state. The
+continuous action operates on one supplied constant-velocity pair model. None
+of them is implicitly called by `simulate_particle` or by the library world
+step, and none automatically applies a collision response at a certified event.
+
+CENTL therefore does **not** claim that a force-driven symplectic-Euler step
+cannot pass through contact between sampled states. The linear certificate can
+answer that question only when the caller intentionally supplies and accepts the
+constant-velocity model for the queried interval. Keeping these contracts
+separate prevents the machine interface from manufacturing a stronger
+force-driven CCD claim.
 
 ## Error behavior
 
 Malformed requests, unknown fields, unsupported force models, dimension
 mismatches, invalid rational strings, missing, duplicate, or blank sphere-world
-identifiers, invalid sphere radii, contact-pair budget violations, and other
-resource-limit violations return structured errors. Unsupported models do not
-silently fall back to a different physical interpretation.
+identifiers, invalid sphere radii, contact-pair budget violations, invalid
+continuous-contact duration, and other resource-limit violations return
+structured errors. Unsupported models do not silently fall back to a different
+physical interpretation.
 
 This is important for CENTL AI: a model must not transform an unsupported
 request into a superficially similar supported simulation without making that
@@ -318,4 +402,6 @@ change explicit to the user.
 By contrast, `deferred` from the isolated sphere-contact resolver is a valid
 physics result, not an error. It preserves the distinction between invalid input
 and valid input for which the current exact solver refuses to invent a unique
-physical resolution.
+physical resolution. Likewise, a successful continuous-contact certificate is
+evidence about the admitted constant-velocity model; it does not imply that
+CENTL integrated or mutated a physical world.
