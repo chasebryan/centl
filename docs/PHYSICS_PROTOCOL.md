@@ -8,8 +8,9 @@ surface used by CENTL AI and other automated callers.
 
 The AI is not a second physics evaluator. It may interpret a natural-language
 question, select a supported physical model, construct one of the typed requests
-below, and explain the returned result. The numerical state evolution and
-physical dimension checks remain inside deterministic CENTL.
+below, and explain the returned result. Numerical state evolution, exact contact
+classification, collision response, and physical dimension checks remain inside
+deterministic CENTL.
 
 ## Transport
 
@@ -20,7 +21,7 @@ centl-physics --serve
 ```
 
 Send one JSON object per line and read one JSON response per line. Every request
-requires:
+requires a protocol version and action:
 
 ```json
 {"version":1,"action":"capabilities"}
@@ -34,10 +35,17 @@ The default process limits are:
 - 10,000 admitted requests per process
 - 100,000 simulation steps per request
 - 4,096 simulation steps when the full trajectory is requested
+- 4,096 pairwise sphere comparisons for contact-machine requests
 
-The underlying physics engine retains its separate 1,000,000-step library safety
-limit. The machine protocol deliberately uses the lower ceiling to bound
+The underlying particle integrator retains its separate 1,000,000-step library
+safety limit. The machine protocol deliberately uses lower ceilings to bound
 latency and response growth for automated callers.
+
+The contact-pair ceiling is evaluated before pairwise classification. Since a
+world of `n` spheres contains `n(n-1)/2` unordered pairs, 91 spheres require
+4,095 comparisons and fit the current machine budget, while 92 spheres require
+4,186 and are rejected. This machine-output bound is separate from the
+256-particle library world ceiling.
 
 ## Exact scalar representation
 
@@ -65,7 +73,8 @@ Request:
 ```
 
 The result lists the supported actions, force models, integrators, exact
-constant symbols, and active machine-protocol limits.
+constant symbols, and active machine-protocol limits, including the sphere
+contact-pair ceiling.
 
 `units` returns the current unit catalog with exact SI scale and seven-base SI
 dimension metadata.
@@ -161,33 +170,152 @@ step boundaries. A step already in progress completes before the next
 cancellation checkpoint. The standalone JSON Lines transport remains a simple
 request/response stream and does not define a separate cancellation message.
 
-## Exact one-dimensional elastic collisions
+## Exact elastic collisions
 
 `elastic_collision_1d` accepts two positive masses and two one-dimensional
 velocities as typed quantities. It returns both final velocities and exact
 checks of momentum and kinetic-energy conservation for the ideal collision
 model.
 
+`elastic_collision_3d_at_contact` accepts two complete particle states at a
+caller-supplied contact configuration with distinct centers. It applies the
+exact rational frictionless elastic normal response and returns both final
+particle states plus exact momentum and kinetic-energy checks. It does not infer
+radii or prove that the caller actually supplied a touching configuration.
+
+For sphere worlds, use the contact-analysis and isolated-resolution actions
+below instead. Those actions perform the exact sphere contact test inside CENTL.
+
+## Sphere input
+
+A sphere combines a particle state with a positive length radius:
+
+```json
+{
+  "particle": {
+    "id": "a",
+    "mass": {"value":"1","unit":"kg"},
+    "position": {"x":"0","y":"0","z":"0","unit":"m"},
+    "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+  },
+  "radius": {"value":"1","unit":"m"}
+}
+```
+
+Sphere-world particle identifiers are required explicitly and must be non-empty
+and unique. Unlike the legacy single-particle parser, sphere contact requests do
+not synthesize a default `"body"` identifier when `id` is omitted. Radius values
+must be positive and dimensionally lengths. The existing world constructor
+retains the 256-particle library ceiling; machine contact requests additionally
+must fit the 4,096-pair budget.
+
+## Exact sphere contact analysis
+
+`analyze_sphere_contacts` performs exact pairwise spherical contact
+classification without changing the world:
+
+```json
+{
+  "version": 1,
+  "action": "analyze_sphere_contacts",
+  "spheres": [
+    {
+      "particle": {
+        "id": "a",
+        "mass": {"value":"1","unit":"kg"},
+        "position": {"x":"0","y":"0","z":"0","unit":"m"},
+        "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+      },
+      "radius": {"value":"1","unit":"m"}
+    },
+    {
+      "particle": {
+        "id": "b",
+        "mass": {"value":"1","unit":"kg"},
+        "position": {"x":"2","y":"0","z":"0","unit":"m"},
+        "velocity": {"x":"-1","y":"0","z":"0","unit":"m/s"}
+      },
+      "radius": {"value":"1","unit":"m"}
+    }
+  ]
+}
+```
+
+CENTL compares the exact squared center distance with the exact squared sum of
+radii. No square-root normalization is needed:
+
+- distance squared greater than radius-sum squared => `separated`
+- equal => `touching`
+- less => `overlapping`
+
+The result returns exact counts for all unordered pairs and detailed evidence
+for every non-separated pair. Evidence contains the center delta, exact squared
+distance, exact squared radius sum, and relation. Separated pairs are counted
+but intentionally not expanded into detailed output, which keeps ordinary
+machine responses compact.
+
+## Exact isolated sphere-contact resolution
+
+`resolve_isolated_elastic_sphere_contacts` combines the exact sphere contact
+test with the merged exact 3D elastic response. It is deliberately a partial
+solver with explicit verdicts.
+
+The deterministic precedence is:
+
+1. If any pair is already overlapping, return `decision: "deferred"` with
+   `reason: "overlap_detected"` and the world unchanged.
+2. Otherwise, if any particle participates in more than one simultaneous
+   touching pair, return `decision: "deferred"` with
+   `reason: "ambiguous_simultaneous_contacts"` and the world unchanged.
+3. Otherwise the touching graph is a disjoint matching. Each touching pair can
+   be resolved independently with the exact 3D elastic normal response.
+4. If there are no touching pairs, return `decision: "completed"` with an
+   unchanged world and an empty pair-resolution list.
+
+A completed result includes:
+
+- the exact initial and resulting sphere worlds
+- the initial contact summary and exact touching evidence
+- one status per touching pair (`resolved` or `separating_or_stationary`)
+- whether the world changed
+- exact whole-world momentum and kinetic-energy conservation flags
+- the explicit solver trust boundary
+
+A deferred result is **not** a malformed request and is **not** a tool error. It
+is a successful exact CENTL verdict that says the supplied state lies outside
+the solver's justified resolution domain. No partial impulses are applied before
+deferral, so the operation is failure-atomic.
+
+The trust-boundary object states the current limits directly: exact pairwise
+sphere geometry, squared-distance contact testing, frictionless elastic normal
+response, disjoint touching pairs only, whole-world deferral on overlap or
+shared-contact ambiguity, and no claims of continuous collision detection,
+penetration correction, friction, or spin.
+
+## Contact analysis is not time stepping
+
+The sphere actions operate on one supplied discrete world state. They are not
+implicitly called by `simulate_particle` or by the library world step.
+
+In particular, CENTL does **not** currently claim that a symplectic-Euler step
+cannot pass through a contact between two sampled states. That would require a
+continuous collision-detection or event-location contract. Keeping contact
+analysis/resolution separate from time stepping prevents the machine interface
+from manufacturing that stronger claim.
+
 ## Error behavior
 
 Malformed requests, unknown fields, unsupported force models, dimension
-mismatches, invalid rational strings, and resource-limit violations return
-structured errors. Unsupported models do not silently fall back to a different
-physical interpretation.
+mismatches, invalid rational strings, missing, duplicate, or blank sphere-world
+identifiers, invalid sphere radii, contact-pair budget violations, and other
+resource-limit violations return structured errors. Unsupported models do not
+silently fall back to a different physical interpretation.
 
 This is important for CENTL AI: a model must not transform an unsupported
 request into a superficially similar supported simulation without making that
 change explicit to the user.
 
-## Current integration and next engine boundary
-
-The JSON Lines interface is the canonical typed physics contract. The MCP
-adapter exposes that same contract through `centl_physics`; it does not
-introduce separate physics semantics.
-
-The next engine boundary is physical breadth rather than another transport:
-multi-particle world state, exact pair interactions where the underlying model
-remains representable by CENTL's exact arithmetic, explicit collision
-resolution, and conservation diagnostics across a world step. Models requiring
-non-rational measured constants or algebraic normalization must retain honest
-provenance and must not be mislabeled as exact rational mechanics.
+By contrast, `deferred` from the isolated sphere-contact resolver is a valid
+physics result, not an error. It preserves the distinction between invalid input
+and valid input for which the current exact solver refuses to invent a unique
+physical resolution.

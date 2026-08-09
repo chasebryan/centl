@@ -47,9 +47,10 @@ CENTL 0.12.0-rc.1 exposes these nine tools in deterministic order:
 - `centl_reset` forgets definitions held by the current process.
 - `centl_physics` exposes deterministic exact-rational particle mechanics:
   physics capability and unit discovery, exact compatible-unit conversion,
-  exact physical constants, dimension-checked particle simulation with the
-  currently implemented force models, and exact ideal one-dimensional elastic
-  collision response.
+  exact physical constants, dimension-checked particle simulation, exact ideal
+  elastic collisions in 1D and at caller-supplied 3D contact, exact sphere
+  contact analysis, and isolated exact sphere-contact resolution with explicit
+  deferral outside the justified solver domain.
 
 `centl_compute` requires `expression`; `centl_define` requires `definition`;
 both accept the same optional `limits` object as `centl --serve`. Compute may
@@ -68,7 +69,7 @@ than free-form text contracts.
 model documented in [PHYSICS_PROTOCOL.md](PHYSICS_PROTOCOL.md). MCP does not
 implement a second physics evaluator.
 
-The tool accepts one of six discriminated actions:
+The tool accepts one of nine discriminated actions:
 
 - `capabilities`
 - `units`
@@ -76,6 +77,9 @@ The tool accepts one of six discriminated actions:
 - `constant`
 - `simulate_particle`
 - `elastic_collision_1d`
+- `elastic_collision_3d_at_contact`
+- `analyze_sphere_contacts`
+- `resolve_isolated_elastic_sphere_contacts`
 
 Physical numeric inputs are strings so arbitrary-precision integers, finite
 decimals, and fractions cross the JSON boundary without host-number rounding.
@@ -121,17 +125,72 @@ and kinetic-energy diagnostics. Unsupported force models and incompatible
 physical dimensions return structured tool errors rather than being silently
 reinterpreted.
 
+Sphere contact analysis uses complete stateless sphere-world input. For example:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "contact",
+  "method": "tools/call",
+  "params": {
+    "name": "centl_physics",
+    "arguments": {
+      "action": "analyze_sphere_contacts",
+      "spheres": [
+        {
+          "particle": {
+            "id": "a",
+            "mass": {"value":"1","unit":"kg"},
+            "position": {"x":"0","y":"0","z":"0","unit":"m"},
+            "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+          },
+          "radius": {"value":"1","unit":"m"}
+        },
+        {
+          "particle": {
+            "id": "b",
+            "mass": {"value":"1","unit":"kg"},
+            "position": {"x":"2","y":"0","z":"0","unit":"m"},
+            "velocity": {"x":"-1","y":"0","z":"0","unit":"m/s"}
+          },
+          "radius": {"value":"1","unit":"m"}
+        }
+      ]
+    }
+  }
+}
+```
+
+The result reports the exact pairwise contact summary and expands every
+non-separated pair with exact squared-distance evidence. The paired action
+`resolve_isolated_elastic_sphere_contacts` composes that contact classification
+with CENTL's exact 3D elastic response only when the touching graph is a
+disjoint matching.
+
+Overlap or simultaneous shared-contact ambiguity returns a successful physics
+result with `decision: "deferred"`; it does **not** set MCP `isError: true`.
+That distinction is intentional. `deferred` means the request was valid and
+CENTL exactly determined that the state lies outside the current solver's
+justified resolution domain. The returned world is unchanged and no partial
+impulses are applied.
+
 The current physics MCP action is stateless with respect to simulated physical
-worlds: every call supplies the complete initial particle state and force model.
-It inherits the ordinary MCP process request-admission limit and retains the
-physics protocol's 100,000-step simulation ceiling and 4,096-step full
-trajectory-output ceiling. When `include_trajectory` is false, the executor
-retains only the current particle state and final result rather than allocating
-a state list proportional to the requested step count.
+worlds: every call supplies the complete initial particle or sphere state. It
+inherits the ordinary MCP process request-admission limit and retains the
+physics protocol's 100,000-step simulation ceiling, 4,096-step full
+trajectory-output ceiling, and 4,096-pair sphere-contact ceiling. Because an
+`n`-sphere world has `n(n-1)/2` unordered pairs, 91 spheres fit that contact
+budget with 4,095 pairs while 92 spheres require 4,186 and are rejected.
+
+When `include_trajectory` is false, the particle executor retains only the
+current state and final result rather than allocating a state list proportional
+to the requested step count. Sphere contact actions likewise expand detailed
+evidence only for non-separated pairs, while still returning exact counts for
+all classified pairs.
 
 Exact finite `sum`, `product`, `sequence`, and `recurrence` expressions use
-`centl_compute`. Sums and products return the ordinary exact integer, rational, or
-symbolic value schema. Sequences and recurrences return a structured exact
+`centl_compute`. Sums and products return the ordinary exact integer, rational,
+or symbolic value schema. Sequences and recurrences return a structured exact
 `sequence` value whose ordered `items` use those scalar schemas:
 
 ```json
@@ -156,9 +215,11 @@ include the stable message and, when known, a recovery `suggestion` line.
 `structuredContent` remains authoritative. Mathematical failures such as
 division by zero are MCP tool errors with `isError: true`; malformed JSON-RPC,
 unknown methods, unknown tools, and invalid arguments are protocol errors.
-Physics request failures such as a dimension mismatch or unsupported force
-model also return `isError: true` with the physics response preserved in
-`structuredContent`.
+Physics request failures such as a dimension mismatch, malformed sphere world,
+contact-pair budget violation, or unsupported force model also return
+`isError: true` with the physics response preserved in `structuredContent`.
+A physics `deferred` contact verdict is instead a successful result with
+`isError: false`.
 
 Every successful mathematical calculation also has
 `structuredContent.resolution`, which states whether the request was computed,
@@ -174,9 +235,11 @@ Physics results carry their own physics provenance with the deterministic
 Each calculation tool advertises a closed, discriminated `outputSchema`.
 `centl_compute` permits only mathematical values or errors; `centl_define`
 permits only definitions or errors; the compatibility tool permits either.
-`centl_physics` likewise advertises closed success variants for capability
-metadata, units, conversions, constants, particle simulations, and collisions,
-plus a closed structured failure variant. The solution-set branch for
+`centl_physics` preserves its original closed output schema and adds a second
+strict layer for enhanced capabilities plus exact sphere-contact analysis and
+resolution results. Completed contact resolution, overlap deferral, and
+simultaneous-contact deferral are separate closed variants, so callers do not
+have to infer the verdict from free-form text. The solution-set branch for
 mathematics accepts the existing rational solution object and the exact
 `real_quadratic` object documented in
 [the machine protocol](PROTOCOL.md#values). `centl_reset` advertises a separate
@@ -207,8 +270,8 @@ request that was cancelled before execution does not run. Physics particle
 simulation additionally checks cancellation at deterministic integration-step
 boundaries. A symplectic-Euler step already in progress completes before the
 next cancellation checkpoint. Conversion, constant lookup, capability queries,
-unit listing, and exact one-dimensional collision calls are short bounded
-operations and do not contain internal cancellation checkpoints after
+unit listing, exact collision calls, and sphere contact analysis/resolution are
+bounded operations and do not contain internal cancellation checkpoints after
 admission. A signal that races with an already completed call may have no
 effect.
 

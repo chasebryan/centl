@@ -4,9 +4,9 @@ Status: experimental physics engine foundation on the development path after 0.1
 
 CENTL Physics extends the exact-first mathematical kernel with typed physical
 quantities and deterministic particle simulation. Rational inputs remain exact
-through unit conversion, force evaluation, collision formulas, and fixed-step
-time evolution. A physics result is not silently coerced across incompatible
-physical dimensions.
+through unit conversion, force evaluation, collision formulas, contact
+classification, and fixed-step time evolution. A physics result is not silently
+coerced across incompatible physical dimensions.
 
 The engine is available as the `Centl_physics` OCaml module, through the
 `centl-physics` command-line executable and its versioned JSON Lines server, and
@@ -181,10 +181,15 @@ simultaneous multi-contact physics has a unique pairwise solution. CENTL does
 not choose an arbitrary impulse order for a contact graph such as A-B-C, and it
 does not reinterpret an already penetrated configuration as a valid contact
 state. This operation is also not part of the time integrator: detection and
-response remain explicit library calls.
+response remain explicit operations.
 
-The world/contact and isolated-composition layers are currently library APIs.
-They are not yet exposed as new CLI, JSON Lines, or MCP world actions.
+The world/contact and isolated-composition layers are now machine-facing through
+the version-1 JSON Lines physics protocol and the read-only `centl_physics` MCP
+tool. `analyze_sphere_contacts` exposes exact geometry and evidence without
+mutation. `resolve_isolated_elastic_sphere_contacts` exposes the partial exact
+resolver and returns an explicit `deferred` verdict when CENTL cannot justify a
+unique operation. These are not automatic time-step hooks and are not separate
+human CLI subcommands.
 
 ### Elastic collisions
 
@@ -243,10 +248,21 @@ the same deterministic physics semantics through one read-only, idempotent
 it does not implement a second evaluator.
 
 Capability discovery advertises the exact supported machine actions, including
-the 1D collision operation and `elastic_collision_3d_at_contact`. The
-multi-particle world/contact and isolated-composition layers remain library-only
-for now. Physics simulation calls retain deterministic request, step,
-trajectory, and cancellation limits.
+`elastic_collision_1d`, `elastic_collision_3d_at_contact`,
+`analyze_sphere_contacts`, and
+`resolve_isolated_elastic_sphere_contacts`. Contact-machine requests are bounded
+to 4,096 unordered sphere pairs. Detailed analysis output expands only
+non-separated pairs while the summary still counts every pair.
+
+A resolver `deferred` result is a successful exact physics verdict, not a
+malformed request or MCP tool error. It means CENTL exactly identified a valid
+world outside the current solver's justified response domain. Overlap and
+shared simultaneous-contact ambiguity return the original world unchanged, so
+machine callers do not have to infer whether a partial impulse was applied.
+
+Physics simulation calls retain deterministic request, step, trajectory, and
+cancellation limits. Sphere contact requests remain stateless and bounded and
+do not create persistent physical worlds inside the server.
 
 ## Numerical contract
 
@@ -263,9 +279,11 @@ The physics engine follows CENTL's exact-first philosophy:
    distinguishes separation, contact, and overlap.
 7. World-level elastic composition is admitted only for disjoint exact touching
    pairs; overlap and shared simultaneous contacts defer without mutation.
-8. Collision response remains distinct from contact detection, and the 3D
-   machine response reports its caller-supplied contact assumption explicitly.
-9. No measured quantity is silently promoted to mathematical exactness.
+8. Collision response remains distinct from contact detection, and the direct
+   3D machine response reports its caller-supplied contact assumption explicitly.
+9. Machine-facing contact evidence exposes the exact geometric basis of a
+   touching or overlapping verdict rather than only a human-readable label.
+10. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -289,8 +307,15 @@ implemented yet:
 
 Those are future engine layers. The present implementation is a deterministic,
 dimension-safe, exact-rational particle mechanics foundation with library, CLI,
-JSON Lines, and MCP interfaces; the multi-particle world/contact and
-isolated-composition layers currently extend the library boundary only.
+JSON Lines, and MCP interfaces. Multi-particle world state, exact sphere contact
+classification, and isolated exact contact resolution now cross the machine
+boundary through JSON Lines and MCP while remaining deliberately separate from
+automatic time stepping.
+
+The next difficult boundary is certified evolution across contact: event-time or
+other bounded reasoning that can connect discrete integration to exact contact
+resolution without claiming continuous collision detection or inventing a
+simultaneous-contact solution.
 
 ## Validation
 
@@ -321,9 +346,16 @@ isolated-composition layers currently extend the library boundary only.
 - separating-contact no-impulse behavior
 - coincident-center rejection
 - JSON and MCP 3D collision surfaces and the explicit contact trust boundary
+- JSON Lines exact sphere-contact analysis and squared-distance evidence
+- JSON Lines completed isolated sphere-contact resolution and conservation flags
+- JSON Lines overlap and simultaneous-contact deferral semantics
+- MCP sphere-contact analysis and resolution
+- MCP `deferred` verdicts remaining successful tool results
+- strict MCP rejection of unknown sphere-contact arguments
+- the 4,096-pair machine-interface contact ceiling
 - exact physical constants
 - CLI success and failure behavior
 
 The repository-level randomized `./executeme` gauntlet remains complementary:
 it stresses mathematical physics identities, while these tests exercise the
-actual stateful physics engine implementation.
+actual stateful physics engine implementation and its typed machine boundaries.

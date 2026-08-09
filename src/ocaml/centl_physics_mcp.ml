@@ -32,15 +32,28 @@ let vector_input_schema =
     ]
     [ "x"; "y"; "z"; "unit" ]
 
+let particle_input_properties =
+  [
+    ("id", string_schema);
+    ("mass", quantity_input_schema);
+    ("position", vector_input_schema);
+    ("velocity", vector_input_schema);
+  ]
+
 let particle_input_schema =
+  strict_object particle_input_properties [ "mass"; "position"; "velocity" ]
+
+let identified_particle_input_schema =
+  strict_object particle_input_properties
+    [ "id"; "mass"; "position"; "velocity" ]
+
+let sphere_input_schema =
   strict_object
     [
-      ("id", string_schema);
-      ("mass", quantity_input_schema);
-      ("position", vector_input_schema);
-      ("velocity", vector_input_schema);
+      ("particle", identified_particle_input_schema);
+      ("radius", quantity_input_schema);
     ]
-    [ "mass"; "position"; "velocity" ]
+    [ "particle"; "radius" ]
 
 let force_input_schema =
   one_of
@@ -120,6 +133,18 @@ let input_schema =
           ("particle2", particle_input_schema);
         ]
         [ "action"; "particle1"; "particle2" ];
+      strict_object
+        [
+          ("action", const_string "analyze_sphere_contacts");
+          ("spheres", array_of sphere_input_schema);
+        ]
+        [ "action"; "spheres" ];
+      strict_object
+        [
+          ("action", const_string "resolve_isolated_elastic_sphere_contacts");
+          ("spheres", array_of sphere_input_schema);
+        ]
+        [ "action"; "spheres" ];
     ]
 
 let read_only_annotations =
@@ -141,10 +166,12 @@ let tool () =
           "Use CENTL's deterministic exact-rational particle mechanics. \
            Discover physics capabilities and units, convert compatible units, \
            inspect exact physical constants, simulate a dimension-checked \
-           particle with supported force models, or solve ideal exact elastic \
-           collisions in 1D and at a caller-supplied 3D contact." );
+           particle, solve ideal exact elastic collisions, analyze exact \
+           sphere contact geometry, or resolve only isolated disjoint touching \
+           sphere pairs. Overlaps and ambiguous simultaneous contacts are \
+           returned as explicit deferred results rather than guessed." );
       ("inputSchema", input_schema);
-      ("outputSchema", Lazy.force Centl_physics_mcp_output.output_schema);
+      ("outputSchema", Lazy.force Centl_physics_contact_mcp_output.output_schema);
       ("annotations", read_only_annotations);
     ]
 
@@ -173,6 +200,8 @@ let action_fields = function
       Some
         ( [ "action"; "particle1"; "particle2" ],
           [ "action"; "particle1"; "particle2" ] )
+  | "analyze_sphere_contacts" | "resolve_isolated_elastic_sphere_contacts" ->
+      Some ([ "action"; "spheres" ], [ "action"; "spheres" ])
   | _ -> None
 
 let validate_arguments arguments =

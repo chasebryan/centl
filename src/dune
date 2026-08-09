@@ -50,10 +50,13 @@
   Centl_physics_world
   Centl_physics_contact_solver
   Centl_physics_protocol
+  Centl_physics_world_json
   Centl_physics_jsonl
+  Centl_physics_capabilities
   Centl_physics_collision_json
   Centl_physics_server
   Centl_physics_mcp_output
+  Centl_physics_contact_mcp_output
   Centl_physics_mcp
   Centl_mcp_base
   Centl_mcp)
