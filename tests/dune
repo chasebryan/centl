@@ -65,6 +65,11 @@
  (modules test_sci_lowering)
  (libraries centl_lib alcotest yojson))
 
+(test
+ (name test_sci_contrib)
+ (modules test_sci_contrib)
+ (libraries centl_lib alcotest unix yojson))
+
 (executable
  (name sci_fake_curl)
  (modules sci_fake_curl))
