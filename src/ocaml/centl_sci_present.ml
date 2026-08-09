@@ -75,9 +75,10 @@ let solution_set_text value =
         begin match solution_text with
         | [] -> Some "no solutions"
         | values ->
-            values
-            |> List.map (fun value -> variable ^ " = " ^ value)
-            |> String.concat " or " |> Option.some
+            Some
+              (values
+              |> List.map (fun value -> variable ^ " = " ^ value)
+              |> String.concat " or ")
         end
   | _ -> None
 
@@ -159,12 +160,6 @@ let variable_text = function
   | Centl_sci_ir.Polynomial_equation data -> Some data.variable
   | _ -> None
 
-let assumptions = function
-  | Centl_sci_ir.Exact_expression data -> data.assumptions
-  | Centl_sci_ir.Polynomial_equation data -> data.assumptions
-  | Centl_sci_ir.Unit_conversion data -> data.assumptions
-  | Centl_sci_ir.Unsupported data -> data.unsupported_assumptions
-
 let failure_reason outcome =
   match outcome.Centl_sci_runtime.response with
   | None -> None
@@ -186,13 +181,14 @@ let details outcome =
   | Some method_ -> add ("Method: " ^ method_)
   | None -> ()
   end;
-  begin match assumptions outcome.Centl_sci_runtime.ir with
+  begin match Centl_sci_ir.assumptions outcome.Centl_sci_runtime.ir with
   | [] -> ()
   | values -> add ("Assumptions: " ^ String.concat "; " values)
   end;
   begin match outcome.Centl_sci_runtime.status with
   | Centl_sci_runtime.Established -> add "Verified by CENTL"
-  | Centl_sci_runtime.Unresolved -> add "CENTL did not establish a complete result"
+  | Centl_sci_runtime.Unresolved ->
+      add "CENTL did not establish a complete result"
   | Centl_sci_runtime.Unsupported ->
       begin match unsupported_reason outcome.Centl_sci_runtime.ir with
       | Some reason when String.trim reason <> "" -> add ("Reason: " ^ reason)
