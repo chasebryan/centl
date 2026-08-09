@@ -5,6 +5,7 @@ let add_contact_actions = function
         @ [
             `String "analyze_sphere_contacts";
             `String "resolve_isolated_elastic_sphere_contacts";
+            `String "certify_linear_sphere_contact";
           ])
   | json -> json
 
