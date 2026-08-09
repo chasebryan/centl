@@ -36,11 +36,14 @@ let canonical_or_original text =
 
 let mentions_known_unit text =
   let lowered = String.lowercase_ascii text in
-  let separators = [ ' '; '\t'; '\n'; ','; '.'; '?'; '!'; ':'; ';'; '('; ')' ] in
+  let separators =
+    [ ' '; '\t'; '\n'; ','; '.'; '?'; '!'; ':'; ';'; '('; ')' ]
+  in
   let is_separator character = List.mem character separators in
   let buffer = Buffer.create (String.length lowered) in
   String.iter
-    (fun character -> Buffer.add_char buffer (if is_separator character then ' ' else character))
+    (fun character ->
+      Buffer.add_char buffer (if is_separator character then ' ' else character))
     lowered;
   Buffer.contents buffer |> String.split_on_char ' '
   |> List.exists (fun token -> token <> "" && Option.is_some (canonical token))
