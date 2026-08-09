@@ -25,9 +25,9 @@ let sphere_by_id_exn state id =
   | Some sphere -> sphere
   | None -> Alcotest.fail ("missing sphere: " ^ id)
 
-let pair_key pair = pair.particle1_id ^ pair.particle2_id
+let pair_key (pair : pair_resolution) = pair.particle1_id ^ pair.particle2_id
 
-let check_pair_status message expected pair =
+let check_pair_status message expected (pair : pair_resolution) =
   Alcotest.(check string)
     message expected
     (contact_status_to_string pair.status)
