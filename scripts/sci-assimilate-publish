@@ -79,7 +79,7 @@ if [ -n "$model" ]; then
 fi
 
 set +e
-CENTL_SCI_SERVER_URL= python3 scripts/sci-assimilate.py \
+CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= python3 scripts/sci-assimilate.py \
   --server-url "$server_url" \
   --model-label "${CENTL_SCI_MODEL_LABEL:-resident-model}" \
   --output-json "$tmp_json" \
