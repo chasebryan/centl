@@ -66,8 +66,18 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_physics_contact_protocol)
+ (modules test_physics_contact_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
  (name test_physics_mcp)
  (modules test_physics_mcp)
+ (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_physics_contact_mcp)
+ (modules test_physics_contact_mcp)
  (libraries centl_lib alcotest zarith yojson))
 
 (test
