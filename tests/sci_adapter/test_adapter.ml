@@ -21,8 +21,12 @@ let () =
     Centl_sci_llama.default ~executable:"llama-cli" ~model:"model.gguf" ()
   in
   let arguments = Centl_sci_llama.argv config problem |> Array.to_list in
-  match argument_after "--json-schema" arguments with
-  | Some schema ->
+  begin match argument_after "--grammar" arguments with
+  | Some grammar ->
       Alcotest.(check string)
-        "active constrained schema" Centl_sci_schema.json_schema schema
-  | None -> Alcotest.fail "missing --json-schema argument"
+        "active constrained grammar" Centl_sci_schema.llama_grammar grammar
+  | None -> Alcotest.fail "missing --grammar argument"
+  end;
+  Alcotest.(check bool)
+    "json-schema converter is not used" false
+    (List.mem "--json-schema" arguments)
