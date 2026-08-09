@@ -16,6 +16,11 @@ let bool name json =
   | `Bool value -> value
   | _ -> Alcotest.fail ("expected bool field " ^ name)
 
+let int name json =
+  match assoc name json with
+  | `Int value -> value
+  | _ -> Alcotest.fail ("expected int field " ^ name)
+
 let fake_curl () =
   match Sys.getenv_opt "CENTL_SCI_FAKE_CURL" with
   | Some value when value <> "" -> value
@@ -33,11 +38,20 @@ let test_loopback_only () =
   | Ok () -> Alcotest.fail "resident adapter must reject non-loopback URLs"
 
 let test_request_contract () =
+  let problem = "Solve x squared minus 5 x plus 6 equals zero for x." in
   let config = Centl_sci_server.default ~base_url:"http://localhost:8080/" () in
-  let request = Centl_sci_server.request_json config "What is 0.1 plus 0.2?" in
+  let request = Centl_sci_server.request_json config problem in
   Alcotest.(check bool) "cache prompt" true (bool "cache_prompt" request);
+  Alcotest.(check int) "bounded generation" 192 (int "n_predict" request);
   Alcotest.(check string)
     "grammar" Centl_sci_schema.llama_grammar (string "grammar" request);
+  let prompt = string "prompt" request in
+  Alcotest.(check bool) "compact resident prompt" true (String.length prompt < 1_024);
+  Alcotest.(check bool)
+    "problem encoded as data" true
+    (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);
+  let arguments = Centl_sci_server.argv config problem |> Array.to_list in
+  Alcotest.(check bool) "proxy bypass" true (List.mem "--noproxy" arguments);
   Alcotest.(check string)
     "endpoint" "http://localhost:8080/completion"
     (Centl_sci_server.endpoint config)
