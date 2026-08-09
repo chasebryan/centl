@@ -59,6 +59,7 @@ let argv config problem =
     "--no-display-prompt";
     "--no-show-timings";
     "--single-turn";
+    "--simple-io";
     "--reasoning";
     "off";
     "--color";
