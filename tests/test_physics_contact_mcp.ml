@@ -54,10 +54,7 @@ let initialize state =
 let tool_call state id arguments =
   request state id "tools/call"
     (`Assoc
-       [
-         ("name", `String "centl_physics");
-         ("arguments", `Assoc arguments);
-       ])
+       [ ("name", `String "centl_physics"); ("arguments", `Assoc arguments) ])
 
 let structured response = assoc "structuredContent" (assoc "result" response)
 let tool_is_error response = bool "isError" (assoc "result" response)
@@ -96,11 +93,8 @@ let test_analysis_through_mcp () =
       [
         ("action", `String "analyze_sphere_contacts");
         ( "spheres",
-          `List
-            [
-              sphere ~id:"a" ~x:"0" ~vx:"0";
-              sphere ~id:"b" ~x:"2" ~vx:"0";
-            ] );
+          `List [ sphere ~id:"a" ~x:"0" ~vx:"0"; sphere ~id:"b" ~x:"2" ~vx:"0" ]
+        );
       ]
   in
   Alcotest.(check bool) "tool success" false (tool_is_error response);
@@ -119,13 +113,11 @@ let test_deferred_is_not_tool_error () =
         ("action", `String "resolve_isolated_elastic_sphere_contacts");
         ( "spheres",
           `List
-            [
-              sphere ~id:"a" ~x:"0" ~vx:"1";
-              sphere ~id:"b" ~x:"1" ~vx:"-1";
-            ] );
+            [ sphere ~id:"a" ~x:"0" ~vx:"1"; sphere ~id:"b" ~x:"1" ~vx:"-1" ] );
       ]
   in
-  Alcotest.(check bool) "deferred is valid tool result" false (tool_is_error response);
+  Alcotest.(check bool)
+    "deferred is valid tool result" false (tool_is_error response);
   let protocol = structured response in
   Alcotest.(check bool) "protocol success" true (bool "ok" protocol);
   let physics = assoc "physics" protocol in
@@ -145,15 +137,13 @@ let test_strict_contact_arguments () =
   in
   let error = assoc "error" response in
   match assoc "code" error with
-  | `Int (-32602) -> ()
+  | `Int -32602 -> ()
   | _ -> Alcotest.fail "unknown contact argument must be rejected"
 
 let test_capabilities_through_mcp () =
   let state = Centl_mcp.create () in
   initialize state;
-  let response =
-    tool_call state 2 [ ("action", `String "capabilities") ]
-  in
+  let response = tool_call state 2 [ ("action", `String "capabilities") ] in
   Alcotest.(check bool) "tool success" false (tool_is_error response);
   let physics = assoc "physics" (structured response) in
   let limits = assoc "limits" physics in
@@ -169,7 +159,8 @@ let () =
           Alcotest.test_case "analysis" `Quick test_analysis_through_mcp;
           Alcotest.test_case "deferred verdict" `Quick
             test_deferred_is_not_tool_error;
-          Alcotest.test_case "strict arguments" `Quick test_strict_contact_arguments;
+          Alcotest.test_case "strict arguments" `Quick
+            test_strict_contact_arguments;
           Alcotest.test_case "capabilities" `Quick test_capabilities_through_mcp;
         ] );
     ]
