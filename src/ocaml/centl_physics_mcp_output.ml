@@ -240,9 +240,10 @@ let collision_3d_schema =
       ("kind", const_string "elastic_collision_3d_at_contact");
       ( "status",
         one_of
-          [ const_string "resolved"; const_string "separating_or_stationary" ] );
+          [ const_string "resolved"; const_string "separating_or_stationary" ]
+      );
       ( "contact_assumption",
-        const_string "caller_supplied_distinct_centers" );
+        const_string "caller_supplied_contact_with_distinct_centers" );
       ("particle1_final", particle_schema);
       ("particle2_final", particle_schema);
       ( "invariants",
