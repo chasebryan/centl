@@ -36,6 +36,11 @@
    (run %{test}))))
 
 (test
+ (name test_sci)
+ (modules test_sci)
+ (libraries centl_lib alcotest yojson))
+
+(test
  (name test_physics)
  (modules test_physics)
  (libraries centl_lib alcotest zarith))
