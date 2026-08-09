@@ -39,8 +39,12 @@ let replace_all ~needle ~replacement text =
     let rec loop offset =
       if offset >= String.length text then ()
       else
-        match find_substring ~needle (String.sub text offset (String.length text - offset)) with
-        | None -> Buffer.add_substring buffer text offset (String.length text - offset)
+        match
+          find_substring ~needle
+            (String.sub text offset (String.length text - offset))
+        with
+        | None ->
+            Buffer.add_substring buffer text offset (String.length text - offset)
         | Some relative ->
             let index = offset + relative in
             Buffer.add_substring buffer text offset (index - offset);
@@ -102,7 +106,8 @@ let exact_expression problem =
                 begin match drop_prefix_ci "evaluate " cleaned with
                 | Some value -> Some value
                 | None ->
-                    if String.for_all arithmetic_char cleaned then Some cleaned else None
+                    if String.for_all arithmetic_char cleaned then Some cleaned
+                    else None
                 end
             end
         end
@@ -211,16 +216,6 @@ let equation_char = function
   | '*' | '/' | '^' | '(' | ')' -> true
   | _ -> false
 
-let normalize_equation_side text =
-  String.lowercase_ascii text
-  |> replace_all ~needle:" squared" ~replacement:"^2"
-  |> replace_all ~needle:" multiplied by " ~replacement:" * "
-  |> replace_all ~needle:" divided by " ~replacement:" / "
-  |> replace_all ~needle:" plus " ~replacement:" + "
-  |> replace_all ~needle:" minus " ~replacement:" - "
-  |> replace_all ~needle:" times " ~replacement:" * "
-  |> String.trim
-
 let polynomial_equation problem =
   let cleaned = trim_terminal problem in
   match drop_prefix_ci "solve " cleaned with
@@ -235,26 +230,14 @@ let polynomial_equation problem =
             String.sub body (for_index + 5) (String.length body - for_index - 5)
             |> String.trim
           in
-          let equation_lower = String.lowercase_ascii equation in
-          let split =
-            match find_substring ~needle:"=" equation with
-            | Some index -> Some (index, 1)
-            | None ->
-                begin match find_substring ~needle:" equals " equation_lower with
-                | Some index -> Some (index, 8)
-                | None -> None
-                end
-          in
-          begin match split with
+          begin match find_substring ~needle:"=" equation with
           | None -> None
-          | Some (equal_index, separator_length) ->
-              let left =
-                String.sub equation 0 equal_index |> normalize_equation_side
-              in
+          | Some equal_index ->
+              let left = String.sub equation 0 equal_index |> String.trim in
               let right =
-                String.sub equation (equal_index + separator_length)
-                  (String.length equation - equal_index - separator_length)
-                |> normalize_equation_side
+                String.sub equation (equal_index + 1)
+                  (String.length equation - equal_index - 1)
+                |> String.trim
               in
               if left = "" || right = "" || variable = ""
                  || not (String.for_all equation_char left)
