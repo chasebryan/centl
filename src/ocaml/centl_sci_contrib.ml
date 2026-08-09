@@ -28,15 +28,20 @@ let base_dir env_name fallback_suffix =
   | _ -> Option.map (fun root -> Filename.concat root fallback_suffix) (home ())
 
 let config_dir () =
-  Option.map (fun root -> Filename.concat root "centl-sci")
+  Option.map
+    (fun root -> Filename.concat root "centl-sci")
     (base_dir "XDG_CONFIG_HOME" ".config")
 
 let state_dir () =
-  Option.map (fun root -> Filename.concat root "centl-sci/contributions")
+  Option.map
+    (fun root -> Filename.concat root "centl-sci/contributions")
     (base_dir "XDG_STATE_HOME" ".local/state")
 
-let config_path () = Option.map (fun dir -> Filename.concat dir "contribution.json") (config_dir ())
-let pending_path () = Option.map (fun dir -> Filename.concat dir "pending.jsonl") (state_dir ())
+let config_path () =
+  Option.map (fun dir -> Filename.concat dir "contribution.json") (config_dir ())
+
+let pending_path () =
+  Option.map (fun dir -> Filename.concat dir "pending.jsonl") (state_dir ())
 
 let rec ensure_dir path =
   if Sys.file_exists path then Ok ()
@@ -66,8 +71,11 @@ let write_private path text =
         try
           let temp = path ^ ".tmp" in
           let descriptor =
-            Unix.openfile temp [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ] 0o600
+            Unix.openfile temp
+              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
+              0o600
           in
+          Unix.fchmod descriptor 0o600;
           let channel = Unix.out_channel_of_descr descriptor in
           output_string channel text;
           close_out channel;
@@ -81,7 +89,8 @@ let write_private path text =
 
 let set_mode mode =
   match config_path () with
-  | None -> fail "contribution_configuration" "HOME/XDG_CONFIG_HOME is unavailable"
+  | None ->
+      fail "contribution_configuration" "HOME/XDG_CONFIG_HOME is unavailable"
   | Some path ->
       let payload =
         `Assoc
@@ -105,7 +114,8 @@ let load_mode () =
             match Yojson.Safe.from_file path with
             | `Assoc fields ->
                 begin match List.assoc_opt "mode" fields with
-                | Some (`String text) -> Option.value (mode_of_string text) ~default:Off
+                | Some (`String text) ->
+                    Option.value (mode_of_string text) ~default:Off
                 | _ -> Off
                 end
             | _ -> Off
@@ -119,7 +129,9 @@ let append_private path json =
       begin
         try
           let descriptor =
-            Unix.openfile path [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND ] 0o600
+            Unix.openfile path
+              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND ]
+              0o600
           in
           Unix.fchmod descriptor 0o600;
           let channel = Unix.out_channel_of_descr descriptor in
@@ -143,7 +155,10 @@ let common_fields ~mode ~source ?backend ~problem =
     ("interpreter_path", `String source);
     ("problem_bytes", `Int (String.length problem));
   ]
-  @ match backend with None -> [] | Some value -> [ ("interpreter_backend", `String value) ]
+  @
+  match backend with
+  | None -> []
+  | Some value -> [ ("interpreter_backend", `String value) ]
 
 let diagnostics_json ~source ?backend ~problem ~ir ~outcome =
   let fields =
@@ -152,7 +167,9 @@ let diagnostics_json ~source ?backend ~problem ~ir ~outcome =
         ("domain", `String (Centl_sci_ir.domain ir));
         ("problem_class", `String (Centl_sci_ir.problem_class ir));
         ("operation", `String (Centl_sci_ir.operation ir));
-        ("status", `String (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status));
+        ( "status",
+          `String
+            (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status) );
       ]
   in
   `Assoc fields
@@ -164,7 +181,9 @@ let examples_json ~source ?backend ~problem ~ir ~outcome =
         ("contains_user_problem_text", `Bool true);
         ("problem", `String problem);
         ("interpretation", Centl_sci_ir.to_json ir);
-        ("status", `String (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status));
+        ( "status",
+          `String
+            (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status) );
       ]
   in
   let fields =
@@ -179,12 +198,14 @@ let record ~source ?backend ~problem ~ir ~outcome () =
   | Off -> Ok ()
   | mode ->
       begin match pending_path () with
-      | None -> fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
+      | None ->
+          fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
       | Some path ->
           let json =
             match mode with
             | Off -> assert false
-            | Diagnostics -> diagnostics_json ~source ?backend ~problem ~ir ~outcome
+            | Diagnostics ->
+                diagnostics_json ~source ?backend ~problem ~ir ~outcome
             | Examples -> examples_json ~source ?backend ~problem ~ir ~outcome
           in
           append_private path json
@@ -203,7 +224,10 @@ let error_json ~mode ~source ?backend ~problem ~code ~message =
     match mode with
     | Examples ->
         fields
-        @ [ ("contains_user_problem_text", `Bool true); ("problem", `String problem) ]
+        @ [
+            ("contains_user_problem_text", `Bool true);
+            ("problem", `String problem);
+          ]
     | Diagnostics | Off -> fields
   in
   `Assoc fields
@@ -213,8 +237,11 @@ let record_interpreter_error ~source ?backend ~problem ~code ~message () =
   | Off -> Ok ()
   | mode ->
       begin match pending_path () with
-      | None -> fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
-      | Some path -> append_private path (error_json ~mode ~source ?backend ~problem ~code ~message)
+      | None ->
+          fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
+      | Some path ->
+          append_private path
+            (error_json ~mode ~source ?backend ~problem ~code ~message)
       end
 
 let copy_file source destination =
@@ -223,22 +250,25 @@ let copy_file source destination =
   | Ok () ->
       begin
         try
-          let input = open_in_bin source in
+          let input_channel = open_in_bin source in
           let descriptor =
-            Unix.openfile destination [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ] 0o600
+            Unix.openfile destination
+              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
+              0o600
           in
-          let output = Unix.out_channel_of_descr descriptor in
+          Unix.fchmod descriptor 0o600;
+          let output_channel = Unix.out_channel_of_descr descriptor in
           let buffer = Bytes.create 16_384 in
           let rec loop () =
-            match input input buffer 0 (Bytes.length buffer) with
+            match input input_channel buffer 0 (Bytes.length buffer) with
             | 0 -> ()
             | count ->
-                output output buffer 0 count;
+                output output_channel buffer 0 count;
                 loop ()
           in
           loop ();
-          close_in input;
-          close_out output;
+          close_in input_channel;
+          close_out output_channel;
           Ok ()
         with
         | Sys_error message -> fail "contribution_io" message
@@ -250,14 +280,17 @@ let copy_file source destination =
 
 let export_pending destination =
   match pending_path () with
-  | None -> fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
+  | None ->
+      fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
   | Some source ->
-      if not (Sys.file_exists source) then fail "contribution_empty" "no pending contribution data"
+      if not (Sys.file_exists source) then
+        fail "contribution_empty" "no pending contribution data"
       else copy_file source destination
 
 let clear_pending () =
   match pending_path () with
-  | None -> fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
+  | None ->
+      fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
   | Some path ->
       if not (Sys.file_exists path) then Ok ()
       else
