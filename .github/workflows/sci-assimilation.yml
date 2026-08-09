@@ -6,13 +6,9 @@ on:
     paths:
       - "lab/sci-assimilation/latest.json"
       - "lab/sci-assimilation/latest.md"
-  pull_request:
-    paths:
-      - "lab/sci-assimilation/latest.json"
-      - "lab/sci-assimilation/latest.md"
 
 concurrency:
-  group: sci-assimilation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: sci-assimilation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
