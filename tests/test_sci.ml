@@ -167,14 +167,16 @@ let test_end_to_end_local_process () =
   let value = assoc "value" result in
   Alcotest.(check string) "checked result" "3/10" (string "text" value)
 
-let test_model_argv_is_offline_and_schema_constrained () =
+let test_model_argv_is_offline_and_grammar_constrained () =
   let config =
     Centl_sci_llama.default ~executable:"/usr/bin/llama-cli"
       ~model:"/models/sci.gguf" ()
   in
   let arguments = Centl_sci_llama.argv config "Solve x = 2." |> Array.to_list in
   Alcotest.(check bool) "offline" true (List.mem "--offline" arguments);
-  Alcotest.(check bool) "schema" true (List.mem "--json-schema" arguments);
+  Alcotest.(check bool) "grammar" true (List.mem "--grammar" arguments);
+  Alcotest.(check bool) "no schema conversion" false
+    (List.mem "--json-schema" arguments);
   Alcotest.(check bool) "single turn" true (List.mem "--single-turn" arguments);
   Alcotest.(check bool) "no shell command" false (List.mem "sh" arguments)
 
@@ -208,6 +210,6 @@ let () =
           Alcotest.test_case "end-to-end local process" `Quick
             test_end_to_end_local_process;
           Alcotest.test_case "offline constrained argv" `Quick
-            test_model_argv_is_offline_and_schema_constrained;
+            test_model_argv_is_offline_and_grammar_constrained;
         ] );
     ]
