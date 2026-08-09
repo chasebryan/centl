@@ -8,8 +8,9 @@ through unit conversion, force evaluation, collision formulas, and fixed-step
 time evolution. A physics result is not silently coerced across incompatible
 physical dimensions.
 
-The initial engine is available as the `Centl_physics` OCaml module and through
-the `centl-physics` command-line executable.
+The engine is available as the `Centl_physics` OCaml module, through the
+`centl-physics` command-line executable and its versioned JSON Lines server, and
+through the read-only `centl_physics` MCP tool.
 
 ## Implemented now
 
@@ -120,12 +121,30 @@ delta.
 
 ### Elastic collisions
 
-The initial collision primitive solves ideal one-dimensional perfectly elastic
-collisions for two positive masses with exact rational arithmetic. It preserves
-the algebraic momentum and kinetic-energy identities of that model.
+CENTL provides an ideal one-dimensional perfectly elastic collision primitive
+for two positive masses with exact rational arithmetic.
 
-This is a collision-response primitive, not yet a geometric contact-detection
-system.
+It also provides `elastic_collision_3d_at_contact`, an exact rational,
+frictionless three-dimensional contact-response primitive for two particles.
+The caller supplies two particles already known to be at an instantaneous
+contact with distinct centers. CENTL projects relative velocity onto the
+line of centers without normalizing that line, so rational positions,
+velocities, and masses stay rational and no square root is introduced merely
+to compute the collision normal.
+
+If the particles are approaching along the contact normal, CENTL applies the
+ideal elastic normal impulse. If they are separating or stationary along that
+normal, it returns `separating_or_stationary` and applies no impulse. The result
+includes both final particle states and exact whole-pair checks for vector
+momentum and kinetic-energy conservation.
+
+The machine result records the trust boundary explicitly as
+`caller_supplied_contact_with_distinct_centers`.
+
+These are collision-response primitives, not geometric collision detection or
+a general rigid-body solver. The 3D operation does not infer radii, establish
+that contact occurred, correct penetration, model spin or torque, or apply
+friction.
 
 ### Physical constants
 
@@ -149,6 +168,18 @@ Example:
 centl-physics constant c
 ```
 
+## Machine interfaces
+
+`centl-physics --serve` exposes the implemented physics operations through a
+versioned, stateless JSON Lines protocol. The main `centl --mcp` server exposes
+the same deterministic physics semantics through one read-only, idempotent
+`centl_physics` tool. The MCP adapter delegates to the typed physics protocol;
+it does not implement a second evaluator.
+
+Capability discovery advertises the exact supported actions, including the 1D
+collision operation and `elastic_collision_3d_at_contact`. Physics simulation
+calls retain deterministic request, step, trajectory, and cancellation limits.
+
 ## Numerical contract
 
 The physics engine follows CENTL's exact-first philosophy:
@@ -159,7 +190,9 @@ The physics engine follows CENTL's exact-first philosophy:
 4. The fixed-step engine evolves rational states using exact rational arithmetic.
 5. Discrete simulation results are identified as results of the chosen
    integrator; they are not claimed to equal a closed-form continuous solution.
-6. No measured quantity is silently promoted to mathematical exactness.
+6. Collision response is distinguished from contact detection, and the 3D
+   contact assumption is returned explicitly.
+7. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -169,17 +202,18 @@ implemented yet:
 - rigid-body orientation and angular inertia tensors
 - geometric broad-phase or narrow-phase collision detection
 - continuous collision detection
-- constraints, joints, and contact manifolds
+- penetration correction or contact manifolds
+- constraints and joints
 - frictional contact solvers
 - adaptive or higher-order ODE integrators
 - rigorous enclosure propagation for truncation error
 - measured-constant uncertainty propagation
 - relativistic, quantum, continuum, fluid, or field solvers
-- a physics surface in the main `centl` expression grammar, JSON protocol, or MCP
+- a physics surface in the main `centl` expression grammar
 
 Those are future engine layers. The present implementation is a deterministic,
-dimension-safe, exact-rational particle mechanics foundation with a public CLI
-and library API.
+dimension-safe, exact-rational particle mechanics foundation with library, CLI,
+JSON Lines, and MCP interfaces.
 
 ## Validation
 
@@ -191,7 +225,11 @@ and library API.
 - an exact ten-step gravity trajectory
 - spring force and potential energy
 - kinetic energy
-- ideal elastic-collision momentum and energy conservation
+- ideal 1D elastic-collision momentum and energy conservation
+- exact 3D head-on and oblique contact response
+- separating-contact no-impulse behavior
+- coincident-center rejection
+- JSON and MCP 3D collision surfaces and the explicit contact trust boundary
 - exact physical constants
 - CLI success and failure behavior
 
