@@ -111,12 +111,25 @@ let unsupported_reason = function
   | Centl_sci_ir.Unsupported data -> Some data.unsupported_reason
   | _ -> None
 
-let missing_information outcome =
+let missing_information_text outcome =
   match unsupported_reason outcome.Centl_sci_runtime.ir with
-  | None -> false
+  | None -> None
   | Some reason ->
-      reason |> String.lowercase_ascii
-      |> contains_substring ~needle:"missing"
+      let reason = String.trim reason in
+      let lower = String.lowercase_ascii reason in
+      if String.starts_with ~prefix:"missing " lower then
+        let detail =
+          String.sub reason 8 (String.length reason - 8) |> String.trim
+        in
+        if detail = "" then Some "More information is required to solve this problem."
+        else
+          let detail =
+            match strip_suffix "." detail with Some value -> value | None -> detail
+          in
+          Some ("More information is required: " ^ detail ^ ".")
+      else if contains_substring ~needle:"missing" lower then
+        Some "More information is required to solve this problem."
+      else None
 
 let human outcome =
   match outcome.Centl_sci_runtime.status with
@@ -124,9 +137,10 @@ let human outcome =
   | Centl_sci_runtime.Unresolved ->
       "CENTL could not establish a complete result."
   | Centl_sci_runtime.Unsupported ->
-      if missing_information outcome then
-        "More information is required to solve this problem."
-      else "CENTL-SCi cannot solve this problem yet."
+      begin match missing_information_text outcome with
+      | Some text -> text
+      | None -> "CENTL-SCi cannot solve this problem yet."
+      end
   | Centl_sci_runtime.Failed -> "CENTL could not establish a result."
 
 let response_exact outcome =
