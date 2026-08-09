@@ -302,5 +302,4 @@ let to_json value =
         (common data.unsupported_assumptions
         @ [ ("reason", `String data.unsupported_reason) ])
 
-let json_schema =
-  {|{"type":"object","properties":{"schema_version":{"type":"integer","const":1},"domain":{"type":"string","enum":["mathematics","physics","unsupported"]},"problem_class":{"type":"string","enum":["exact_expression","polynomial_equation","unit_conversion","unsupported"]},"operation":{"type":"string","enum":["compute","solve","convert","unsupported"]},"assumptions":{"type":"array","maxItems":16,"items":{"type":"string","maxLength":512}},"expression":{"type":"string","maxLength":4096},"left":{"type":"string","maxLength":4096},"relation":{"type":"string","enum":["equal"]},"right":{"type":"string","maxLength":4096},"variable":{"type":"string","maxLength":64},"value":{"type":"string","maxLength":256},"from_unit":{"type":"string","maxLength":64},"to_unit":{"type":"string","maxLength":64},"reason":{"type":"string","maxLength":1024}},"required":["schema_version","domain","problem_class","operation","assumptions"],"additionalProperties":false}|}
+let json_schema = Centl_sci_schema.json_schema
