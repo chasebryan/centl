@@ -54,9 +54,7 @@ let test_request_contract () =
     "class is fixed" true
     (String.starts_with ~prefix:"CENTL-SCi v0.0.1" prompt
     && String.contains prompt 'p');
-  Alcotest.(check bool)
-    "equality is split" true
-    (String.contains prompt '=');
+  Alcotest.(check bool) "equality is split" true (String.contains prompt '=');
   Alcotest.(check bool)
     "problem encoded as data" true
     (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);
@@ -65,6 +63,28 @@ let test_request_contract () =
   Alcotest.(check string)
     "endpoint" "http://localhost:8080/completion"
     (Centl_sci_server.endpoint config)
+
+let test_unit_request_contract () =
+  let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
+  let request =
+    Centl_sci_server.request_json config "Convert 100 centimeters to meters."
+  in
+  Alcotest.(check string)
+    "unit grammar" Centl_sci_schema.unit_conversion_grammar
+    (string "grammar" request);
+  Alcotest.(check bool)
+    "canonical unit prompt" true
+    (String.contains (string "prompt" request) 'c')
+
+let test_unsupported_request_contract () =
+  let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
+  let request =
+    Centl_sci_server.request_json config
+      "Who was the 16th president of the United States?"
+  in
+  Alcotest.(check string)
+    "unsupported grammar" Centl_sci_schema.unsupported_grammar
+    (string "grammar" request)
 
 let test_end_to_end_fake_server () =
   let config =
@@ -93,6 +113,10 @@ let () =
         [
           Alcotest.test_case "loopback only" `Quick test_loopback_only;
           Alcotest.test_case "request contract" `Quick test_request_contract;
+          Alcotest.test_case "unit request contract" `Quick
+            test_unit_request_contract;
+          Alcotest.test_case "unsupported request contract" `Quick
+            test_unsupported_request_contract;
           Alcotest.test_case "fake resident inference" `Quick
             test_end_to_end_fake_server;
         ] );
