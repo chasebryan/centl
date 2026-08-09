@@ -24,7 +24,11 @@ hex ::= [0-9a-fA-F]
 |}
 
 let grammar root = "root ::= " ^ root ^ "\n" ^ grammar_rules
-let llama_grammar = grammar "exact-expression | polynomial-equation | unit-conversion | unsupported"
+
+let llama_grammar =
+  grammar
+    "exact-expression | polynomial-equation | unit-conversion | unsupported"
+
 let exact_expression_grammar = grammar "exact-expression"
 let polynomial_equation_grammar = grammar "polynomial-equation"
 let unit_conversion_grammar = grammar "unit-conversion"
