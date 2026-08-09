@@ -51,6 +51,12 @@ let sphere_world_json state =
       ("spheres", `List (List.map sphere_json state.spheres));
     ]
 
+let sphere_particle_input = function
+  | `Assoc fields as json ->
+      if List.mem_assoc "id" fields then particle_input json
+      else Error "sphere particle requires id"
+  | json -> particle_input json
+
 let sphere_input = function
   | `Assoc fields ->
       begin match check_fields [ "particle"; "radius" ] fields with
@@ -61,7 +67,7 @@ let sphere_input = function
           with
           | Some particle, Some radius ->
               begin match
-                (particle_input particle, quantity_input "sphere radius" radius)
+                (sphere_particle_input particle, quantity_input "sphere radius" radius)
               with
               | Ok particle, Ok radius ->
                   begin try Ok (sphere ~particle ~radius)
