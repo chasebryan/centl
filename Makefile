@@ -28,7 +28,7 @@ SCI_ASSIMILATION_ARGS ?=
 
 .PHONY: all format format-fix fmt lint quality verify extract native-build native-test \
 	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
-	hardening-test differential-test sci-model-test sci-assimilate \
+	hardening-test differential-test sci-model-test sci-interface-check sci-assimilate \
 	sci-assimilate-full sci-assimilate-publish build test release clean
 
 all: build
@@ -111,6 +111,9 @@ sci-model-test: build
 		--timeout "$(SCI_TIMEOUT)" \
 		--output "$(SCI_REPORT)"
 
+sci-interface-check: native-build
+	$(PYTHON) scripts/sci-interface-check.py
+
 sci-assimilate:
 	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
 		$(PYTHON) scripts/sci-assimilate.py \
@@ -119,6 +122,7 @@ sci-assimilate:
 		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
 		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
 		$(SCI_ASSIMILATION_ARGS)
+	$(PYTHON) scripts/sci-interface-check.py
 
 sci-assimilate-full:
 	CENTL_SCI_SERVER_URL= CENTL_SCI_MODEL= \
@@ -129,6 +133,7 @@ sci-assimilate-full:
 		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
 		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
 		$(SCI_ASSIMILATION_ARGS)
+	$(PYTHON) scripts/sci-interface-check.py
 
 sci-assimilate-publish:
 	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
