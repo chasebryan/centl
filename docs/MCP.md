@@ -49,8 +49,9 @@ CENTL 0.12.0-rc.1 exposes these nine tools in deterministic order:
   physics capability and unit discovery, exact compatible-unit conversion,
   exact physical constants, dimension-checked particle simulation, exact ideal
   elastic collisions in 1D and at caller-supplied 3D contact, exact sphere
-  contact analysis, and isolated exact sphere-contact resolution with explicit
-  deferral outside the justified solver domain.
+  contact analysis, isolated exact sphere-contact resolution with explicit
+  deferral outside the justified solver domain, and certified bounded
+  continuous sphere contact under an exact constant-velocity model.
 
 `centl_compute` requires `expression`; `centl_define` requires `definition`;
 both accept the same optional `limits` object as `centl --serve`. Compute may
@@ -69,7 +70,7 @@ than free-form text contracts.
 model documented in [PHYSICS_PROTOCOL.md](PHYSICS_PROTOCOL.md). MCP does not
 implement a second physics evaluator.
 
-The tool accepts one of nine discriminated actions:
+The tool accepts one of ten discriminated actions:
 
 - `capabilities`
 - `units`
@@ -80,6 +81,7 @@ The tool accepts one of nine discriminated actions:
 - `elastic_collision_3d_at_contact`
 - `analyze_sphere_contacts`
 - `resolve_isolated_elastic_sphere_contacts`
+- `certify_linear_sphere_contact`
 
 Physical numeric inputs are strings so arbitrary-precision integers, finite
 decimals, and fractions cross the JSON boundary without host-number rounding.
@@ -174,6 +176,58 @@ CENTL exactly determined that the state lies outside the current solver's
 justified resolution domain. The returned world is unchanged and no partial
 impulses are applied.
 
+### Certified continuous sphere contact
+
+`certify_linear_sphere_contact` accepts two identified spheres and an exact
+nonnegative duration. It certifies contact over the whole supplied interval
+under one explicit model: both sphere centers move with constant exact-rational
+velocity for the duration.
+
+Example MCP arguments:
+
+```json
+{
+  "action": "certify_linear_sphere_contact",
+  "sphere1": {
+    "particle": {
+      "id": "a",
+      "mass": {"value":"1","unit":"kg"},
+      "position": {"x":"0","y":"0","z":"0","unit":"m"},
+      "velocity": {"x":"1","y":"0","z":"0","unit":"m/s"}
+    },
+    "radius": {"value":"1","unit":"m"}
+  },
+  "sphere2": {
+    "particle": {
+      "id": "b",
+      "mass": {"value":"1","unit":"kg"},
+      "position": {"x":"4","y":"0","z":"0","unit":"m"},
+      "velocity": {"x":"0","y":"0","z":"0","unit":"m/s"}
+    },
+    "radius": {"value":"1","unit":"m"}
+  },
+  "duration": {"value":"3","unit":"s"}
+}
+```
+
+The successful `structuredContent.physics` value is an exact
+`linear_sphere_contact_certificate`. It exposes the squared-clearance quadratic,
+closest time, minimum squared clearance, discriminant when applicable, and one
+of five statuses: `initially_overlapping`, `touching_at_start`,
+`no_contact_in_interval`, `tangent_contact`, or `crossing_contact`.
+
+When first contact has a rational event time, the result returns that time as an
+exact physical quantity. When the root is quadratic irrational, the tool does
+not fabricate a decimal or rational timestamp; it returns a
+`quadratic_irrational` certificate with the exact polynomial, exact
+discriminant, and a certified rational bracket. This operation uses no time
+sampling and no floating-point root finder.
+
+The certificate is deliberately narrower than a general continuous-collision
+solver. It does not integrate forces, alter particle state, apply collision
+response, order simultaneous events, or claim that a force-driven
+symplectic-Euler trajectory follows the admitted constant-velocity path.
+
 The current physics MCP action is stateless with respect to simulated physical
 worlds: every call supplies the complete initial particle or sphere state. It
 inherits the ordinary MCP process request-admission limit and retains the
@@ -235,17 +289,19 @@ Physics results carry their own physics provenance with the deterministic
 Each calculation tool advertises a closed, discriminated `outputSchema`.
 `centl_compute` permits only mathematical values or errors; `centl_define`
 permits only definitions or errors; the compatibility tool permits either.
-`centl_physics` preserves its original closed output schema and adds a second
-strict layer for enhanced capabilities plus exact sphere-contact analysis and
-resolution results. Completed contact resolution, overlap deferral, and
-simultaneous-contact deferral are separate closed variants, so callers do not
-have to infer the verdict from free-form text. The solution-set branch for
-mathematics accepts the existing rational solution object and the exact
-`real_quadratic` object documented in
-[the machine protocol](PROTOCOL.md#values). `centl_reset` advertises a separate
-self-contained control-response schema. The schemas are constructed only for
-`tools/list`, so ordinary calculator and JSON startup do not allocate MCP-only
-schema trees.
+`centl_physics` preserves its original closed output schema and extends it with
+strict variants for enhanced capabilities, exact sphere-contact analysis,
+isolated contact resolution, and certified continuous linear-contact results.
+Completed contact resolution, overlap deferral, simultaneous-contact deferral,
+and linear-contact certificates are closed typed variants, so callers do not
+have to infer the verdict from free-form text. A quadratic-irrational contact
+time has its own closed representation rather than being coerced into the
+rational quantity schema. The solution-set branch for mathematics accepts the
+existing rational solution object and the exact `real_quadratic` object
+documented in [the machine protocol](PROTOCOL.md#values). `centl_reset`
+advertises a separate self-contained control-response schema. The schemas are
+constructed only for `tools/list`, so ordinary calculator and JSON startup do
+not allocate MCP-only schema trees.
 
 ## Cancellation
 
@@ -270,10 +326,10 @@ request that was cancelled before execution does not run. Physics particle
 simulation additionally checks cancellation at deterministic integration-step
 boundaries. A symplectic-Euler step already in progress completes before the
 next cancellation checkpoint. Conversion, constant lookup, capability queries,
-unit listing, exact collision calls, and sphere contact analysis/resolution are
-bounded operations and do not contain internal cancellation checkpoints after
-admission. A signal that races with an already completed call may have no
-effect.
+unit listing, exact collision calls, discrete sphere contact analysis/resolution,
+and the bounded continuous linear-contact certificate are bounded operations
+and do not contain internal cancellation checkpoints after admission. A signal
+that races with an already completed call may have no effect.
 
 As required by MCP, a cancellation notification has no response and CENTL does
 not emit the cancelled tool call's response. Unknown, completed, and malformed
