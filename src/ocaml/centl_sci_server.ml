@@ -63,14 +63,14 @@ let grammar_for_hint = function
   | Centl_sci_hint.Any -> Centl_sci_schema.llama_grammar
   | Centl_sci_hint.Exact_expression -> Centl_sci_schema.exact_expression_grammar
   | Centl_sci_hint.Polynomial_equation ->
-      Centl_sci_schema.polynomial_equation_grammar
+      Centl_sci_poly_grammar.polynomial_equation_grammar
   | Centl_sci_hint.Unit_conversion -> Centl_sci_schema.unit_conversion_grammar
 
 let prompt hint problem =
   let contract =
     match hint with
     | Centl_sci_hint.Polynomial_equation ->
-        "Required class: polynomial_equation. Extract left, right, and variable. Relation is equal. Do not solve."
+        "Required class: polynomial_equation. Split the equality into left and right; neither side may contain '='. Extract the solve variable. Do not solve."
     | Centl_sci_hint.Exact_expression ->
         "Required class: exact_expression. Extract the expression."
     | Centl_sci_hint.Unit_conversion ->
