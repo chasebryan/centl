@@ -34,47 +34,54 @@ let color_enabled = function
 let ansi enabled code text =
   if enabled then Printf.sprintf "\027[%sm%s\027[0m" code text else text
 
+let after prefix line =
+  String.sub line (String.length prefix) (String.length line - String.length prefix)
+  |> String.trim
+
 let brand_header color =
+  let title =
+    ansi color "1;97;44" " CENTL-SCi " ^ ansi color "1;94" "  //  FCF"
+  in
   String.concat "\n"
     [
-      ansi color "1;36"
-        "╭──────────────────────────────────────────────────────────────╮";
-      ansi color "1;36" "│  CENTL-SCi                                                   │";
-      ansi color "36"
-        "│  Free Computation Foundation · Free for science.             │";
-      ansi color "1;36"
-        "╰──────────────────────────────────────────────────────────────╯";
+      title;
+      ansi color "96" "Free Computation Foundation"
+      ^ ansi color "90" "  //  Free for science.";
     ]
 
-let colorize_line color line =
+let render_line color line =
   if String.starts_with ~prefix:"Status: established" line then
-    ansi color "1;32" line
-  else if
-    String.starts_with ~prefix:"Status: unresolved" line
-    || String.starts_with ~prefix:"Status: unsupported" line
-  then ansi color "1;33" line
+    ansi color "1;32" "OK>" ^ " " ^ ansi color "1;32" "ESTABLISHED"
+  else if String.starts_with ~prefix:"Status: unresolved" line then
+    ansi color "1;33" "WAIT>" ^ " " ^ ansi color "1;33" "UNRESOLVED"
+  else if String.starts_with ~prefix:"Status: unsupported" line then
+    ansi color "1;33" "WAIT>" ^ " " ^ ansi color "1;33" "UNSUPPORTED"
   else if String.starts_with ~prefix:"Status: failed" line then
-    ansi color "1;31" line
-  else if String.starts_with ~prefix:"Result:" line then ansi color "1;37" line
-  else
-    match String.index_opt line ':' with
-    | None -> line
-    | Some index ->
-        let label = String.sub line 0 index in
-        let rest = String.sub line index (String.length line - index) in
-        ansi color "36" label ^ rest
+    ansi color "1;31" "ERR>" ^ " " ^ ansi color "1;31" "FAILED"
+  else if String.starts_with ~prefix:"Result:" line then
+    ansi color "1;94" "=>" ^ " " ^ ansi color "1;97" (after "Result:" line)
+  else if String.starts_with ~prefix:"Interpretation:" line then
+    ansi color "1;96" "IR>" ^ " " ^ after "Interpretation:" line
+  else if String.starts_with ~prefix:"Interpreter assumptions:" line then
+    ansi color "1;96" "AS>" ^ " " ^ after "Interpreter assumptions:" line
+  else if String.starts_with ~prefix:"CENTL resolution:" line then
+    ansi color "1;96" "RS>" ^ " " ^ after "CENTL resolution:" line
+  else if String.starts_with ~prefix:"CENTL provenance:" line then
+    ansi color "1;96" "PV>" ^ " " ^ ansi color "90" (after "CENTL provenance:" line)
+  else if String.starts_with ~prefix:"Reason:" line then
+    ansi color "1;33" "WHY>" ^ " " ^ after "Reason:" line
+  else line
 
 let branded_human ~color ~problem outcome =
   let body =
     Centl_sci_runtime.human ~problem outcome |> String.split_on_char '\n'
-    |> List.map (colorize_line color) |> String.concat "\n"
+    |> List.map (render_line color) |> String.concat "\n"
   in
   String.concat "\n"
     [
       brand_header color;
       "";
-      ansi color "36" "Problem";
-      "  " ^ problem;
+      ansi color "1;94" "SCI>" ^ " " ^ ansi color "97" problem;
       "";
       body;
     ]
