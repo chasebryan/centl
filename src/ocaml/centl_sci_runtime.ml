@@ -52,9 +52,9 @@ let starts_at text index needle =
 
 (*
    The semantic IR preserves the model's original equation text for auditing,
-   but CENTL syntax requires explicit multiplication.  Lower only the narrow,
+   but CENTL syntax requires explicit multiplication. Lower only the narrow,
    unambiguous coefficient/parenthesized-factor cases involving the declared
-   solve variable, e.g. 5x -> 5*x and (1/2)x -> (1/2)*x.  Do not attempt a
+   solve variable, e.g. 5x -> 5*x and (1/2)x -> (1/2)*x. Do not attempt a
    general implicit-multiplication parser here; anything else remains CENTL's
    responsibility to accept or reject.
 *)
@@ -91,14 +91,14 @@ let plan = function
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
       let left = normalize_polynomial_side ~variable:data.variable data.left in
-      let right =
-        normalize_polynomial_side ~variable:data.variable data.right
-      in
+      let right = normalize_polynomial_side ~variable:data.variable data.right in
       let expression =
         Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in
       Some { executor = Core; request = core_request expression }
   | Centl_sci_ir.Unit_conversion data ->
+      let from_unit = Centl_sci_units.canonical_or_original data.from_unit in
+      let to_unit = Centl_sci_units.canonical_or_original data.to_unit in
       Some
         {
           executor = Physics;
@@ -108,8 +108,8 @@ let plan = function
                 ("version", `Int 1);
                 ("action", `String "convert");
                 ("value", `String data.value);
-                ("from_unit", `String data.from_unit);
-                ("to_unit", `String data.to_unit);
+                ("from_unit", `String from_unit);
+                ("to_unit", `String to_unit);
               ];
         }
   | Centl_sci_ir.Unsupported _ -> None
