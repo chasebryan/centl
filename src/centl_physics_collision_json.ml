@@ -30,7 +30,9 @@ let collision_3d_result fields =
               begin try
                 let initial_momentum = total_momentum particle1 particle2 in
                 let initial_ke = total_kinetic_energy particle1 particle2 in
-                let result = elastic_collision_3d_at_contact particle1 particle2 in
+                let result =
+                  elastic_collision_3d_at_contact particle1 particle2
+                in
                 let final_momentum =
                   total_momentum result.particle1 result.particle2
                 in
@@ -44,7 +46,8 @@ let collision_3d_result fields =
                        ("kind", `String "elastic_collision_3d_at_contact");
                        ("status", `String status);
                        ( "contact_assumption",
-                         `String "caller_supplied_contact_with_distinct_centers" );
+                         `String "caller_supplied_contact_with_distinct_centers"
+                       );
                        ("particle1_final", particle_json result.particle1);
                        ("particle2_final", particle_json result.particle2);
                        ( "invariants",
@@ -55,7 +58,8 @@ let collision_3d_result fields =
                                  (vector_equal initial_momentum final_momentum)
                              );
                              ( "kinetic_energy",
-                               `Bool (Q.equal initial_ke.si_value final_ke.si_value)
+                               `Bool
+                                 (Q.equal initial_ke.si_value final_ke.si_value)
                              );
                              ( "initial_momentum",
                                exact_vector_json_si initial_momentum "kg*m/s" );
@@ -70,10 +74,10 @@ let collision_3d_result fields =
                        ( "text",
                          `String
                            (status ^ ": v1="
-                          ^ vector_to_string_as result.particle1.velocity "m/s"
-                          ^ " m/s; v2="
-                          ^ vector_to_string_as result.particle2.velocity "m/s"
-                          ^ " m/s") );
+                           ^ vector_to_string_as result.particle1.velocity "m/s"
+                           ^ " m/s; v2="
+                           ^ vector_to_string_as result.particle2.velocity "m/s"
+                           ^ " m/s") );
                      ])
               with Physics_error message -> Error message
               end
