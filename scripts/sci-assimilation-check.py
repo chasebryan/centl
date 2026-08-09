@@ -19,6 +19,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="fail if native/product/model-safety gates are not passing",
     )
+    parser.add_argument(
+        "--require-source-ancestor",
+        action="store_true",
+        help="require that the report.git.commit is an ancestor of HEAD",
+    )
     return parser.parse_args()
 
 
@@ -42,7 +47,15 @@ def git_is_ancestor(commit: str) -> bool:
         capture_output=True,
         text=True,
     )
-    return completed.returncode == 0
+    # git merge-base --is-ancestor returns:
+    # 0 = yes (commit is ancestor), 1 = no (not ancestor), >1 = error
+    if completed.returncode == 0:
+        return True
+    if completed.returncode == 1:
+        return False
+    # propagate git errors with stderr for diagnostics
+    stderr = (completed.stderr or completed.stdout or "").strip()
+    raise SystemExit(f"git error while checking ancestry: returncode={completed.returncode} {stderr}")
 
 
 def main() -> int:
@@ -64,10 +77,18 @@ def main() -> int:
     require(isinstance(git, dict), "report.git must be an object")
     source_commit = git.get("commit")
     require(valid_commit_sha(source_commit), "report.git.commit must be a full hexadecimal commit SHA")
-    require(
-        git_is_ancestor(source_commit),
-        "report source commit is not an ancestor of the committed report",
-    )
+
+    # Strong provenance (ancestor) is optional by default. It is required
+    # only when the caller sets --require-source-ancestor or when
+    # --require-product-gates is requested (product gates imply strong
+    # provenance to ensure fresh/fenced evidence can't be bypassed).
+    if args.require_source_ancestor or args.require_product_gates:
+        is_ancestor = git_is_ancestor(source_commit)
+        require(isinstance(is_ancestor, bool), "git ancestry check failed")
+        require(
+            is_ancestor,
+            "report source commit is not an ancestor of the committed report",
+        )
 
     product = payload.get("product")
     require(isinstance(product, dict), "report.product must be an object")

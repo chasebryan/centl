@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 32
+          fetch-depth: 0
 
       - name: Validate harness Python syntax
         run: |
@@ -77,5 +77,6 @@ jobs:
         if: steps.provenance.outputs.enforce == 'true'
         run: |
           python3 scripts/sci-assimilation-check.py \
+            --require-source-ancestor \
             --require-product-gates \
             lab/sci-assimilation/latest.json
