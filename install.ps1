@@ -85,11 +85,13 @@ try {
     $Package = Join-Path $Extracted "centl"
     $PackageBinary = Join-Path $Package "centl.exe"
     $PackagePhysicsBinary = Join-Path $Package "centl-physics.exe"
+    $PackageSciBinary = Join-Path $Package "centl-sci.exe"
     $VersionFile = Join-Path $Package "VERSION"
     if (-not (Test-Path -LiteralPath $PackageBinary -PathType Leaf)) {
         throw "centl install: the release contains no CENTL executable"
     }
     $PhysicsAvailable = Test-Path -LiteralPath $PackagePhysicsBinary -PathType Leaf
+    $SciAvailable = Test-Path -LiteralPath $PackageSciBinary -PathType Leaf
     if (-not (Test-Path -LiteralPath $VersionFile -PathType Leaf)) {
         throw "centl install: the release contains no version metadata"
     }
@@ -110,6 +112,7 @@ try {
     $BinDirectory = Join-Path $Prefix "bin"
     $CommandPath = Join-Path $BinDirectory "centl.cmd"
     $PhysicsCommandPath = Join-Path $BinDirectory "centl-physics.cmd"
+    $SciCommandPath = Join-Path $BinDirectory "centl-sci.cmd"
     if (Test-Path -LiteralPath $CommandPath -PathType Leaf) {
         $FirstLine = Get-Content -LiteralPath $CommandPath -TotalCount 1
         if ($FirstLine -ne "@rem CENTL launcher") {
@@ -120,6 +123,12 @@ try {
         $PhysicsFirstLine = Get-Content -LiteralPath $PhysicsCommandPath -TotalCount 1
         if ($PhysicsFirstLine -ne "@rem CENTL launcher") {
             throw "centl install: $PhysicsCommandPath already exists and is not a CENTL launcher"
+        }
+    }
+    if ($SciAvailable -and (Test-Path -LiteralPath $SciCommandPath -PathType Leaf)) {
+        $SciFirstLine = Get-Content -LiteralPath $SciCommandPath -TotalCount 1
+        if ($SciFirstLine -ne "@rem CENTL launcher") {
+            throw "centl install: $SciCommandPath already exists and is not a CENTL launcher"
         }
     }
     if (Test-Path -LiteralPath $Target) {
@@ -142,6 +151,13 @@ try {
         $PhysicsSmoke = (& $StagedPhysicsBinary convert 100 cm m | Out-String).Trim()
         if ($LASTEXITCODE -ne 0 -or $PhysicsSmoke -ne "1") {
             throw "centl install: CENTL Physics executable failed its unit-conversion smoke test: $PhysicsSmoke"
+        }
+    }
+    if ($SciAvailable) {
+        $StagedSciBinary = Join-Path $Staging "centl-sci.exe"
+        $SciSmoke = (& $StagedSciBinary 'What is 0.1 plus 0.2?' | Out-String).Trim()
+        if ($LASTEXITCODE -ne 0 -or $SciSmoke -ne "3/10") {
+            throw "centl install: CENTL-SCi executable failed its exact-arithmetic smoke test: $SciSmoke"
         }
     }
     Move-Item -LiteralPath $Staging -Destination $Target
@@ -167,13 +183,26 @@ try {
         Move-Item -LiteralPath $PhysicsLauncherTemporary -Destination $PhysicsCommandPath -Force
     }
 
+    if ($SciAvailable) {
+        $SciLauncherTemporary = "$SciCommandPath.new"
+        $SciLauncher = @"
+@rem CENTL launcher
+@echo off
+"%~dp0..\versions\$PackageVersion\centl-sci.exe" %*
+"@
+        $SciLauncher.TrimStart() | Set-Content -LiteralPath $SciLauncherTemporary -Encoding ASCII
+        Move-Item -LiteralPath $SciLauncherTemporary -Destination $SciCommandPath -Force
+    }
+
+    $PathUpdated = $false
     if (-not $NoPath) {
         $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
         $Entries = @($UserPath -split ';' | Where-Object { $_ })
         if (-not ($Entries | Where-Object { $_.TrimEnd('\') -ieq $BinDirectory.TrimEnd('\') })) {
             $NewPath = (@($Entries) + $BinDirectory) -join ';'
             [Environment]::SetEnvironmentVariable("Path", $NewPath, "User")
-            Write-Host "Added $BinDirectory to your user PATH; open a new terminal to use it."
+            $PathUpdated = $true
+            Write-Host "Added $BinDirectory to your user PATH."
         }
     }
 
@@ -181,6 +210,21 @@ try {
     Write-Host "Command: $CommandPath"
     if ($PhysicsAvailable) {
         Write-Host "Physics command: $PhysicsCommandPath"
+    }
+    if ($SciAvailable) {
+        Write-Host "Scientific command: $SciCommandPath"
+        Write-Host ""
+        Write-Host "CENTL-SCi is ready."
+        if ($PathUpdated) {
+            Write-Host "Open a new terminal and run: centl-sci"
+        }
+        else {
+            Write-Host "Start: centl-sci"
+        }
+    }
+    else {
+        Write-Host ""
+        Write-Host "CENTL-SCi is not included in CENTL $PackageVersion."
     }
 }
 finally {
