@@ -159,6 +159,13 @@ try {
         if ($LASTEXITCODE -ne 0 -or $SciSmoke -ne "3/10") {
             throw "centl install: CENTL-SCi executable failed its exact-arithmetic smoke test: $SciSmoke"
         }
+        $SciReplSmoke = (":exit`n" | & $StagedSciBinary --repl | Out-String).TrimEnd()
+        if ($LASTEXITCODE -ne 0) {
+            throw "centl install: CENTL-SCi REPL failed to start: $SciReplSmoke"
+        }
+        if ($SciReplSmoke -notmatch '(?m)^CENTL-SCi v' -or $SciReplSmoke -notmatch '(?m)^Free for science\.$') {
+            throw "centl install: CENTL-SCi REPL did not report the expected identity: $SciReplSmoke"
+        }
     }
     Move-Item -LiteralPath $Staging -Destination $Target
     $Staging = $null
