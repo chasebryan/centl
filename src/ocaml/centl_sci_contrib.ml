@@ -1,5 +1,4 @@
 type mode = Off | Diagnostics | Examples
-
 type error = { code : string; message : string }
 
 let fail code message = Error { code; message }
@@ -38,7 +37,9 @@ let state_dir () =
     (base_dir "XDG_STATE_HOME" ".local/state")
 
 let config_path () =
-  Option.map (fun dir -> Filename.concat dir "contribution.json") (config_dir ())
+  Option.map
+    (fun dir -> Filename.concat dir "contribution.json")
+    (config_dir ())
 
 let pending_path () =
   Option.map (fun dir -> Filename.concat dir "pending.jsonl") (state_dir ())
@@ -51,40 +52,36 @@ let rec ensure_dir path =
     match parent_result with
     | Error _ as error -> error
     | Ok () ->
-        begin
-          try
-            Unix.mkdir path 0o700;
-            Ok ()
-          with
-          | Unix.Unix_error (Unix.EEXIST, _, _) -> Ok ()
-          | Unix.Unix_error (code, function_name, argument) ->
-              fail "contribution_io"
-                (Printf.sprintf "%s(%s): %s" function_name argument
-                   (Unix.error_message code))
+        begin try
+          Unix.mkdir path 0o700;
+          Ok ()
+        with
+        | Unix.Unix_error (Unix.EEXIST, _, _) -> Ok ()
+        | Unix.Unix_error (code, function_name, argument) ->
+            fail "contribution_io"
+              (Printf.sprintf "%s(%s): %s" function_name argument
+                 (Unix.error_message code))
         end
 
 let write_private path text =
   match ensure_dir (Filename.dirname path) with
   | Error _ as error -> error
   | Ok () ->
-      begin
-        try
-          let temp = path ^ ".tmp" in
-          let descriptor =
-            Unix.openfile temp
-              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
-              0o600
-          in
-          Unix.fchmod descriptor 0o600;
-          let channel = Unix.out_channel_of_descr descriptor in
-          output_string channel text;
-          close_out channel;
-          Unix.rename temp path;
-          Ok ()
-        with Unix.Unix_error (code, function_name, argument) ->
-          fail "contribution_io"
-            (Printf.sprintf "%s(%s): %s" function_name argument
-               (Unix.error_message code))
+      begin try
+        let temp = path ^ ".tmp" in
+        let descriptor =
+          Unix.openfile temp [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ] 0o600
+        in
+        Unix.fchmod descriptor 0o600;
+        let channel = Unix.out_channel_of_descr descriptor in
+        output_string channel text;
+        close_out channel;
+        Unix.rename temp path;
+        Ok ()
+      with Unix.Unix_error (code, function_name, argument) ->
+        fail "contribution_io"
+          (Printf.sprintf "%s(%s): %s" function_name argument
+             (Unix.error_message code))
       end
 
 let set_mode mode =
@@ -109,43 +106,41 @@ let load_mode () =
   | Some path ->
       if not (Sys.file_exists path) then Off
       else
-        begin
-          try
-            match Yojson.Safe.from_file path with
-            | `Assoc fields ->
-                begin match List.assoc_opt "mode" fields with
-                | Some (`String text) ->
-                    Option.value (mode_of_string text) ~default:Off
-                | _ -> Off
-                end
-            | _ -> Off
-          with _ -> Off
+        begin try
+          match Yojson.Safe.from_file path with
+          | `Assoc fields ->
+              begin match List.assoc_opt "mode" fields with
+              | Some (`String text) ->
+                  Option.value (mode_of_string text) ~default:Off
+              | _ -> Off
+              end
+          | _ -> Off
+        with _ -> Off
         end
 
 let append_private path json =
   match ensure_dir (Filename.dirname path) with
   | Error _ as error -> error
   | Ok () ->
-      begin
-        try
-          let descriptor =
-            Unix.openfile path
-              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND ]
-              0o600
-          in
-          Unix.fchmod descriptor 0o600;
-          let channel = Unix.out_channel_of_descr descriptor in
-          output_string channel (Yojson.Safe.to_string json);
-          output_char channel '\n';
-          close_out channel;
-          Ok ()
-        with Unix.Unix_error (code, function_name, argument) ->
-          fail "contribution_io"
-            (Printf.sprintf "%s(%s): %s" function_name argument
-               (Unix.error_message code))
+      begin try
+        let descriptor =
+          Unix.openfile path
+            [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND ]
+            0o600
+        in
+        Unix.fchmod descriptor 0o600;
+        let channel = Unix.out_channel_of_descr descriptor in
+        output_string channel (Yojson.Safe.to_string json);
+        output_char channel '\n';
+        close_out channel;
+        Ok ()
+      with Unix.Unix_error (code, function_name, argument) ->
+        fail "contribution_io"
+          (Printf.sprintf "%s(%s): %s" function_name argument
+             (Unix.error_message code))
       end
 
-let common_fields ~mode ~source ?backend ~problem =
+let common_fields ~mode ~source ?backend ~problem () =
   [
     ("schema_version", `Int 1);
     ("recorded_unix_seconds", `Float (Unix.gettimeofday ()));
@@ -160,9 +155,9 @@ let common_fields ~mode ~source ?backend ~problem =
   | None -> []
   | Some value -> [ ("interpreter_backend", `String value) ]
 
-let diagnostics_json ~source ?backend ~problem ~ir ~outcome =
+let diagnostics_json ~source ?backend ~problem ~ir ~outcome () =
   let fields =
-    common_fields ~mode:Diagnostics ~source ?backend ~problem
+    common_fields ~mode:Diagnostics ~source ?backend ~problem ()
     @ [
         ("domain", `String (Centl_sci_ir.domain ir));
         ("problem_class", `String (Centl_sci_ir.problem_class ir));
@@ -174,9 +169,9 @@ let diagnostics_json ~source ?backend ~problem ~ir ~outcome =
   in
   `Assoc fields
 
-let examples_json ~source ?backend ~problem ~ir ~outcome =
+let examples_json ~source ?backend ~problem ~ir ~outcome () =
   let fields =
-    common_fields ~mode:Examples ~source ?backend ~problem
+    common_fields ~mode:Examples ~source ?backend ~problem ()
     @ [
         ("contains_user_problem_text", `Bool true);
         ("problem", `String problem);
@@ -205,15 +200,16 @@ let record ~source ?backend ~problem ~ir ~outcome () =
             match mode with
             | Off -> assert false
             | Diagnostics ->
-                diagnostics_json ~source ?backend ~problem ~ir ~outcome
-            | Examples -> examples_json ~source ?backend ~problem ~ir ~outcome
+                diagnostics_json ~source ?backend ~problem ~ir ~outcome ()
+            | Examples ->
+                examples_json ~source ?backend ~problem ~ir ~outcome ()
           in
           append_private path json
       end
 
-let error_json ~mode ~source ?backend ~problem ~code ~message =
+let error_json ~mode ~source ?backend ~problem ~code ~message () =
   let fields =
-    common_fields ~mode ~source ?backend ~problem
+    common_fields ~mode ~source ?backend ~problem ()
     @ [
         ("event", `String "interpreter_error");
         ("error_code", `String code);
@@ -241,41 +237,40 @@ let record_interpreter_error ~source ?backend ~problem ~code ~message () =
           fail "contribution_configuration" "HOME/XDG_STATE_HOME is unavailable"
       | Some path ->
           append_private path
-            (error_json ~mode ~source ?backend ~problem ~code ~message)
+            (error_json ~mode ~source ?backend ~problem ~code ~message ())
       end
 
 let copy_file source destination =
   match ensure_dir (Filename.dirname destination) with
   | Error _ as error -> error
   | Ok () ->
-      begin
-        try
-          let input_channel = open_in_bin source in
-          let descriptor =
-            Unix.openfile destination
-              [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
-              0o600
-          in
-          Unix.fchmod descriptor 0o600;
-          let output_channel = Unix.out_channel_of_descr descriptor in
-          let buffer = Bytes.create 16_384 in
-          let rec loop () =
-            match input input_channel buffer 0 (Bytes.length buffer) with
-            | 0 -> ()
-            | count ->
-                output output_channel buffer 0 count;
-                loop ()
-          in
-          loop ();
-          close_in input_channel;
-          close_out output_channel;
-          Ok ()
-        with
-        | Sys_error message -> fail "contribution_io" message
-        | Unix.Unix_error (code, function_name, argument) ->
-            fail "contribution_io"
-              (Printf.sprintf "%s(%s): %s" function_name argument
-                 (Unix.error_message code))
+      begin try
+        let input_channel = open_in_bin source in
+        let descriptor =
+          Unix.openfile destination
+            [ Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC ]
+            0o600
+        in
+        Unix.fchmod descriptor 0o600;
+        let output_channel = Unix.out_channel_of_descr descriptor in
+        let buffer = Bytes.create 16_384 in
+        let rec loop () =
+          match input input_channel buffer 0 (Bytes.length buffer) with
+          | 0 -> ()
+          | count ->
+              output output_channel buffer 0 count;
+              loop ()
+        in
+        loop ();
+        close_in input_channel;
+        close_out output_channel;
+        Ok ()
+      with
+      | Sys_error message -> fail "contribution_io" message
+      | Unix.Unix_error (code, function_name, argument) ->
+          fail "contribution_io"
+            (Printf.sprintf "%s(%s): %s" function_name argument
+               (Unix.error_message code))
       end
 
 let export_pending destination =
@@ -294,12 +289,11 @@ let clear_pending () =
   | Some path ->
       if not (Sys.file_exists path) then Ok ()
       else
-        begin
-          try
-            Unix.unlink path;
-            Ok ()
-          with Unix.Unix_error (code, function_name, argument) ->
-            fail "contribution_io"
-              (Printf.sprintf "%s(%s): %s" function_name argument
-                 (Unix.error_message code))
+        begin try
+          Unix.unlink path;
+          Ok ()
+        with Unix.Unix_error (code, function_name, argument) ->
+          fail "contribution_io"
+            (Printf.sprintf "%s(%s): %s" function_name argument
+               (Unix.error_message code))
         end
