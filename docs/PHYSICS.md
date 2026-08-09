@@ -266,6 +266,43 @@ penetration, order simultaneous contact events, or solve friction/spin/rigid-bod
 contact. See [PHYSICS_LINEAR_CONTACT.md](PHYSICS_LINEAR_CONTACT.md) for the
 formal boundary.
 
+### Exact rational contact event stepping
+
+The library also provides `evolve_linear_sphere_pair_through_contact`, which
+composes the continuous certificate with exact state evolution and the existing
+3D elastic response when the first-contact time is rational.
+
+For exactly two spheres under the declared force-free constant-velocity model,
+the operation:
+
+1. certifies the whole interval;
+2. advances exactly to a rational first-contact time when one exists;
+3. independently re-checks that the advanced geometry is exactly `touching`;
+4. applies `elastic_collision_3d_at_contact` at that exact state;
+5. advances the exact remaining duration with the returned velocities.
+
+No-contact intervals advance linearly for the entire duration. Initial overlap
+returns `Deferred initial_overlap` with both inputs unchanged. A
+quadratic-irrational first-contact time returns
+`Deferred quadratic_irrational_event_time`, also unchanged; CENTL does not round
+that event into a fake rational time merely to continue the step.
+
+Completed results retain the original contact certificate, event time when
+present, at-event sphere states, exact contact evidence, response status, final
+sphere states, state-change information, and exact pair momentum and
+kinetic-energy conservation flags.
+
+For an admitted rational collision event, the exact response makes the
+post-contact normal motion non-approaching. With force-free constant velocities
+after the response, the remaining segment therefore does not silently contain a
+second contact of the same pair.
+
+This event-step operation is **library-only** at this stage. It is not a JSON
+Lines or MCP action and is not an automatic hook in `symplectic_euler` or the
+multi-particle world step. It defines no force-driven trajectory semantics and
+no simultaneous multi-contact event ordering. See
+[PHYSICS_LINEAR_CONTACT.md](PHYSICS_LINEAR_CONTACT.md) for the detailed contract.
+
 ### Physical constants
 
 The first constant catalog deliberately contains only exact SI defining or
@@ -315,6 +352,11 @@ Its trust boundary explicitly records constant velocity, exact sphere geometry,
 no time sampling, no floating-point root finding, no force integration, no
 automatic response, and no simultaneous-contact solving.
 
+The rational event-step composition is not yet exposed through these machine
+interfaces. Machine callers may obtain the continuous certificate, but they do
+not yet have a protocol action that advances through the event and applies the
+response.
+
 Physics simulation calls retain deterministic request, step, trajectory, and
 cancellation limits. Sphere/contact requests remain stateless and bounded and
 do not create persistent physical worlds inside the server.
@@ -341,7 +383,10 @@ The physics engine follows CENTL's exact-first philosophy:
 10. Bounded continuous sphere contact is certified only for the declared
     constant-velocity pair model; irrational first-contact time remains an
     algebraic certificate instead of being rounded into a fake rational time.
-11. No measured quantity is silently promoted to mathematical exactness.
+11. Event-aware state advancement is admitted only for two-body force-free cases
+    with an exact rational event time; initial overlap and irrational event time
+    defer unchanged.
+12. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -352,9 +397,11 @@ implemented yet:
 - spatial broad-phase collision acceleration
 - general-shape narrow-phase collision detection
 - general or force-driven continuous collision detection
+- exact state evolution through quadratic-irrational event time
 - penetration correction or contact manifolds
 - simultaneous multi-contact event ordering or impulse solving
 - automatic collision processing inside world time stepping
+- force-aware event stepping
 - constraints and joints
 - frictional contact solvers
 - adaptive or higher-order ODE integrators
@@ -367,13 +414,16 @@ Those are future engine layers. The present implementation is a deterministic,
 dimension-safe, exact-rational particle mechanics foundation with library, CLI,
 JSON Lines, and MCP interfaces. Multi-particle world state, exact discrete sphere
 contact classification, isolated exact contact resolution, and bounded
-constant-velocity continuous sphere-contact certificates now cross the machine
-boundary while remaining deliberately separate from automatic time stepping.
+constant-velocity continuous sphere-contact certificates cross the machine
+boundary. A two-sphere rational-event composition layer now exists in the
+library while remaining deliberately separate from automatic time stepping and
+machine exposure.
 
-The next difficult boundary is certified event-aware evolution: composing event
-evidence with state advancement and exact response without silently changing the
-integrator, rounding algebraic event time, or inventing semantics for
-force-driven or simultaneous multi-contact cases.
+The next difficult boundary is deciding how, or whether, to expose event-aware
+evolution through the machine protocol without weakening its refusal semantics.
+Force-driven event location, algebraic event-state evolution, and simultaneous
+multi-contact ordering remain separate research problems rather than implied
+extensions of this exact linear model.
 
 ## Validation
 
@@ -411,6 +461,16 @@ force-driven or simultaneous multi-contact cases.
 - parallel and stationary continuous-contact misses
 - continuous contact at time zero and initial overlap
 - distinct-ID and duration-dimension enforcement for continuous contact
+- exact no-contact full-duration event advancement
+- rational head-on event response plus exact remainder advancement
+- exact event response at the interval endpoint
+- exact oblique rational 3D event response with fractional geometry and state
+- touching-at-start approaching and separating event-step behavior
+- tangent event stepping with no impulse
+- failure-atomic irrational-event and initial-overlap deferral
+- zero-duration event-step behavior
+- identifier, mass, and radius preservation through event composition
+- exact pair momentum and kinetic-energy conservation through completed events
 - JSON and MCP 3D collision surfaces and the explicit contact trust boundary
 - JSON Lines exact sphere-contact analysis and squared-distance evidence
 - JSON Lines completed isolated sphere-contact resolution and conservation flags
