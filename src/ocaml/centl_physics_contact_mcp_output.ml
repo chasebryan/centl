@@ -137,8 +137,7 @@ let trust_boundary_schema =
   strict_object
     [
       ("geometry", const_string "exact_pairwise_spheres");
-      ( "contact_test",
-        const_string "distance_squared_vs_radius_sum_squared" );
+      ("contact_test", const_string "distance_squared_vs_radius_sum_squared");
       ("response", const_string "frictionless_elastic_normal_impulse");
       ("resolution_scope", const_string "disjoint_touching_pairs_only");
       ("overlap_policy", const_string "defer_entire_world");
@@ -168,8 +167,7 @@ let pair_resolution_schema =
       ("particle2_id", string_schema);
       ( "status",
         one_of
-          [ const_string "resolved"; const_string "separating_or_stationary" ]
-      );
+          [ const_string "resolved"; const_string "separating_or_stationary" ] );
     ]
     [ "particle1_id"; "particle2_id"; "status" ]
 
@@ -364,6 +362,4 @@ let new_success_schema =
     [ "version"; "ok"; "physics"; "provenance" ]
 
 let output_schema =
-  lazy
-    (one_of
-       [ Lazy.force Centl_physics_mcp_output.output_schema; new_success_schema ])
+  lazy (one_of [ Lazy.force Centl_physics_mcp_output.output_schema; new_success_schema ])
