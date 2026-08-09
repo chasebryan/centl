@@ -19,6 +19,7 @@ DEFAULT_SCI = ROOT / "_build" / "default" / "src" / "sci_main.exe"
 SCI_RUNTIME_SOURCES = [
     ROOT / "src" / "sci_main.ml",
     ROOT / "src" / "ocaml" / "centl_sci_ir.ml",
+    ROOT / "src" / "ocaml" / "centl_sci_fastpath.ml",
     ROOT / "src" / "ocaml" / "centl_sci_llama.ml",
     ROOT / "src" / "ocaml" / "centl_sci_runtime.ml",
     ROOT / "src" / "ocaml" / "centl_sci_schema.ml",
@@ -159,8 +160,13 @@ def score_payload(fixture: dict[str, Any], payload: dict[str, Any]) -> list[str]
     interpretation = payload.get("interpretation")
     mismatches: list[str] = []
 
+    if payload.get("interpreter_path") != "model":
+        mismatches.append(
+            "model qualification did not traverse the model interpreter path"
+        )
+
     if not isinstance(interpretation, dict):
-        return ["centl-sci output has no structured interpretation"]
+        return mismatches + ["centl-sci output has no structured interpretation"]
 
     for field in ("domain", "problem_class", "operation", "assumptions"):
         if interpretation.get(field) != expected.get(field):
@@ -214,6 +220,7 @@ def run_fixture(
         str(model),
         "--llama-cli",
         llama_cli,
+        "--force-model",
         "--json",
         fixture["problem"],
     ]
@@ -296,7 +303,7 @@ def main() -> int:
         )
     ensure_default_binary_is_fresh(centl_sci)
     if not corpus.is_file():
-        raise SystemExit(f"corpus not found: {corpus}")
+        raise SystemExit(f"corpus file not found: {corpus}")
     if args.timeout <= 0:
         raise SystemExit("--timeout must be positive")
 
@@ -353,6 +360,7 @@ def main() -> int:
             "centl_sci_version": command_version(str(centl_sci)),
             "llama_cli": args.llama_cli,
             "llama_cli_version": command_version(args.llama_cli),
+            "qualification_path": "forced model inference; deterministic fast path disabled",
             "note": (
                 "elapsed_seconds includes process startup and model loading for each case; "
                 "it is not an interpretation-only latency measurement"
