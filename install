@@ -5,16 +5,18 @@ repository="chasebryan/centl"
 release_version="latest"
 archive_path=""
 prefix=${CENTL_PREFIX:-}
+configure_path=true
 
 usage() {
   cat <<'EOF'
 Install a prebuilt CENTL release.
 
-Usage: ./install [--version VERSION] [--prefix PATH] [--archive PATH]
+Usage: ./install [--version VERSION] [--prefix PATH] [--archive PATH] [--no-path]
 
   --version VERSION  install a specific release (default: latest)
   --prefix PATH       install below PATH (default: ~/.local)
   --archive PATH      install and verify a local release archive
+  --no-path           do not update a shell startup file when PATH needs setup
   --help              show this help
 EOF
 }
@@ -22,6 +24,11 @@ EOF
 fail() {
   printf 'centl install: %s\n' "$1" >&2
   exit 1
+}
+
+shell_quote() {
+  escaped=$(printf '%s' "$1" | sed "s/'/'\\\\''/g")
+  printf "'%s'" "$escaped"
 }
 
 while [ "$#" -gt 0 ]; do
@@ -41,6 +48,10 @@ while [ "$#" -gt 0 ]; do
       archive_path=$2
       shift 2
       ;;
+    --no-path)
+      configure_path=false
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -55,6 +66,8 @@ done
 }
 [ -n "$prefix" ] || fail "the installation prefix cannot be empty"
 case "$prefix" in
+  *'
+'*) fail "the installation prefix cannot contain a newline" ;;
   /*) ;;
   *) prefix="$(pwd)/$prefix" ;;
 esac
@@ -150,6 +163,15 @@ if [ -e "$package/bin/centl-physics" ] || [ -e "$package/libexec/centl-physics" 
   physics_available=true
 fi
 
+sci_available=false
+if [ -e "$package/bin/centl-sci" ] || [ -e "$package/libexec/centl-sci" ]; then
+  [ -x "$package/bin/centl-sci" ] ||
+    fail "the release contains an invalid CENTL-SCi launcher"
+  [ -x "$package/libexec/centl-sci" ] ||
+    fail "the release contains an invalid CENTL-SCi executable"
+  sci_available=true
+fi
+
 version=$(sed -n '1p' "$package/VERSION")
 case "$version" in
   ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the release version is invalid" ;;
@@ -165,6 +187,7 @@ target="$versions/$version"
 bin_directory="$prefix/bin"
 command_path="$bin_directory/centl"
 physics_command_path="$bin_directory/centl-physics"
+sci_command_path="$bin_directory/centl-sci"
 
 if [ -e "$command_path" ] && [ ! -L "$command_path" ]; then
   fail "$command_path already exists and is not a symbolic link"
@@ -172,6 +195,10 @@ fi
 if [ "$physics_available" = true ] && \
    [ -e "$physics_command_path" ] && [ ! -L "$physics_command_path" ]; then
   fail "$physics_command_path already exists and is not a symbolic link"
+fi
+if [ "$sci_available" = true ] && \
+   [ -e "$sci_command_path" ] && [ ! -L "$sci_command_path" ]; then
+  fail "$sci_command_path already exists and is not a symbolic link"
 fi
 
 mkdir -p "$versions" "$bin_directory"
@@ -195,11 +222,45 @@ if [ "$physics_available" = true ]; then
   [ "$physics_smoke" = 1 ] ||
     fail "the CENTL Physics executable failed its unit-conversion smoke test"
 fi
+if [ "$sci_available" = true ]; then
+  if ! sci_smoke=$("$staging/bin/centl-sci" 'What is 0.1 plus 0.2?' 2>&1); then
+    fail "the CENTL-SCi executable cannot run on this system: $sci_smoke"
+  fi
+  [ "$sci_smoke" = '3/10' ] ||
+    fail "the CENTL-SCi executable failed its exact-arithmetic smoke test"
+fi
 mv "$staging" "$target"
 staging=""
 ln -sfn "$target/bin/centl" "$command_path"
 if [ "$physics_available" = true ]; then
   ln -sfn "$target/bin/centl-physics" "$physics_command_path"
+fi
+if [ "$sci_available" = true ]; then
+  ln -sfn "$target/bin/centl-sci" "$sci_command_path"
+fi
+
+path_profile=""
+case ":${PATH:-}:" in
+  *":$bin_directory:"*) path_active=true ;;
+  *) path_active=false ;;
+esac
+
+if [ "$path_active" = false ] && [ "$configure_path" = true ] && [ -n "${HOME:-}" ]; then
+  shell_name=${SHELL##*/}
+  case "$shell_name" in
+    bash) profile="$HOME/.bashrc" ;;
+    zsh) profile="$HOME/.zshrc" ;;
+    *) profile="$HOME/.profile" ;;
+  esac
+  marker="# CENTL PATH: $bin_directory"
+  if [ ! -f "$profile" ] || ! grep -Fqx "$marker" "$profile"; then
+    quoted_bin=$(shell_quote "$bin_directory")
+    {
+      printf '\n%s\n' "$marker"
+      printf 'export PATH=%s:"$PATH"\n' "$quoted_bin"
+    } >> "$profile"
+  fi
+  path_profile=$profile
 fi
 
 printf 'Installed CENTL %s at %s\n' "$version" "$target"
@@ -207,7 +268,19 @@ printf 'Command: %s\n' "$command_path"
 if [ "$physics_available" = true ]; then
   printf 'Physics command: %s\n' "$physics_command_path"
 fi
-case ":${PATH:-}:" in
-  *":$bin_directory:"*) ;;
-  *) printf 'Add %s to PATH to run centl anywhere.\n' "$bin_directory" ;;
-esac
+if [ "$sci_available" = true ]; then
+  printf 'Scientific command: %s\n' "$sci_command_path"
+  printf '\nCENTL-SCi is ready.\n'
+  if [ "$path_active" = true ]; then
+    printf 'Start: centl-sci\n'
+  elif [ -n "$path_profile" ]; then
+    printf 'PATH configured in %s for new shells.\n' "$path_profile"
+    printf 'Open a new terminal and run: centl-sci\n'
+    printf 'Or start now with:\n  export PATH=%s:"$PATH"\n  centl-sci\n' \
+      "$(shell_quote "$bin_directory")"
+  else
+    printf 'Add %s to PATH, then run: centl-sci\n' "$bin_directory"
+  fi
+else
+  printf '\nCENTL-SCi is not included in CENTL %s.\n' "$version"
+fi
