@@ -157,7 +157,8 @@ let interpret problem =
         | Some for_index ->
             let equation = String.sub body 0 for_index |> String.trim in
             let variable =
-              String.sub body (for_index + 5) (String.length body - for_index - 5)
+              String.sub body (for_index + 5)
+                (String.length body - for_index - 5)
               |> String.trim |> String.lowercase_ascii
             in
             (equation, if valid_identifier variable then Some variable else None)
