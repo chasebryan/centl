@@ -72,7 +72,7 @@ let test_head_on_protocol_response () =
     "kind" "elastic_collision_3d_at_contact" (string "kind" physics);
   Alcotest.(check string) "status" "resolved" (string "status" physics);
   Alcotest.(check string)
-    "contact assumption" "caller_supplied_distinct_centers"
+    "contact assumption" "caller_supplied_contact_with_distinct_centers"
     (string "contact_assumption" physics);
   let v1 = assoc "velocity" (assoc "particle1_final" physics) in
   let v2 = assoc "velocity" (assoc "particle2_final" physics) in
