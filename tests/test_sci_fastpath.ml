@@ -46,6 +46,18 @@ let test_spoken_equation () =
       Alcotest.(check string) "variable" "x" data.variable
   | _ -> Alcotest.fail "expected spoken polynomial_equation fast-path IR"
 
+let test_spoken_equation_infers_leading_variable () =
+  match
+    Centl_sci_fastpath.interpret
+      "Solve x squared minus 5x plus 6 equals zero."
+    |> require_some "spoken polynomial equation without explicit variable suffix"
+  with
+  | Centl_sci_ir.Polynomial_equation data ->
+      Alcotest.(check string) "left" "x^2 - 5*x + 6" data.left;
+      Alcotest.(check string) "right" "0" data.right;
+      Alcotest.(check string) "variable" "x" data.variable
+  | _ -> Alcotest.fail "expected polynomial_equation fast-path IR"
+
 let test_ambiguous_spoken_equation_defers_to_model () =
   Alcotest.(check bool)
     "ambiguous language is not overclaimed" true
@@ -117,6 +129,8 @@ let () =
             test_unit_conversion_language;
           Alcotest.test_case "symbolic equation" `Quick test_symbolic_equation;
           Alcotest.test_case "spoken equation" `Quick test_spoken_equation;
+          Alcotest.test_case "spoken equation infers leading variable" `Quick
+            test_spoken_equation_infers_leading_variable;
           Alcotest.test_case "ambiguous spoken equation defers" `Quick
             test_ambiguous_spoken_equation_defers_to_model;
           Alcotest.test_case "general knowledge defers" `Quick
