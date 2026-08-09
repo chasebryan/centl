@@ -1,7 +1,7 @@
 # CENTL-SCi Assimilation Report
 
-- Generated: `2026-08-09T10:18:49.044783+00:00`
-- Source commit: `885773e6e11796ff3a93d453aaf73c1f807f56ef`
+- Generated: `2026-08-09T10:21:01.307814+00:00`
+- Source commit: `8d9d9e01feaed559ade97c5bd88a031e3508136e`
 - Branch: `agent/centl-sci-v0-0-1-milestone`
 - Source dirty (excluding report files): `True`
 
@@ -17,7 +17,7 @@
 ## Product path
 
 - Cases: **17/25 passed** (68.0%)
-- Fast latency: p50 `0.002822` s, p95 `0.002999` s
+- Fast latency: p50 `0.002643` s, p95 `0.002799` s
 
 ### Product failures
 
@@ -35,7 +35,7 @@
 - Model label: `Qwen2.5-0.5B-Instruct-Q4_K_M`
 - Health: `True`
 - Cases: **2/13 passed** (15.4%)
-- Latency: p50 `3.885696` s, p95 `12.202003` s
+- Latency: p50 `3.540327` s, p95 `11.996304` s
 
 ### Model failures
 

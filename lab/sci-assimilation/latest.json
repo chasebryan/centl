@@ -5,10 +5,10 @@
     "native": false,
     "product": false
   },
-  "generated_at": "2026-08-09T10:18:49.044783+00:00",
+  "generated_at": "2026-08-09T10:21:01.307814+00:00",
   "git": {
     "branch": "agent/centl-sci-v0-0-1-milestone",
-    "commit": "885773e6e11796ff3a93d453aaf73c1f807f56ef",
+    "commit": "8d9d9e01feaed559ade97c5bd88a031e3508136e",
     "dirty": true
   },
   "model": {
@@ -18,10 +18,10 @@
         "id": "exact_decimal_addition",
         "latency": {
           "count": 1,
-          "max_seconds": 3.756812,
-          "min_seconds": 3.756812,
-          "p50_seconds": 3.756812,
-          "p95_seconds": 3.756812
+          "max_seconds": 3.532936,
+          "min_seconds": 3.532936,
+          "p50_seconds": 3.532936,
+          "p95_seconds": 3.532936
         },
         "mismatches": [],
         "observed": {
@@ -91,10 +91,10 @@
         "id": "exact_fraction_addition",
         "latency": {
           "count": 1,
-          "max_seconds": 3.590897,
-          "min_seconds": 3.590897,
-          "p50_seconds": 3.590897,
-          "p95_seconds": 3.590897
+          "max_seconds": 3.21755,
+          "min_seconds": 3.21755,
+          "p50_seconds": 3.21755,
+          "p95_seconds": 3.21755
         },
         "mismatches": [],
         "observed": {
@@ -164,10 +164,10 @@
         "id": "quadratic_direct",
         "latency": {
           "count": 1,
-          "max_seconds": 3.94528,
-          "min_seconds": 3.94528,
-          "p50_seconds": 3.94528,
-          "p95_seconds": 3.94528
+          "max_seconds": 4.264624,
+          "min_seconds": 4.264624,
+          "p50_seconds": 4.264624,
+          "p95_seconds": 4.264624
         },
         "mismatches": [
           "CENTL text: expected 'x in {2, 3}', observed 'unresolved: solve(x_squared = -5 * x + 6, x)'",
@@ -253,10 +253,10 @@
         "id": "quadratic_paraphrase",
         "latency": {
           "count": 1,
-          "max_seconds": 4.185613,
-          "min_seconds": 4.185613,
-          "p50_seconds": 4.185613,
-          "p95_seconds": 4.185613
+          "max_seconds": 4.101689,
+          "min_seconds": 4.101689,
+          "p50_seconds": 4.101689,
+          "p95_seconds": 4.101689
         },
         "mismatches": [
           "no JSON stdout; stderr='centl-sci: invalid_ir: resident model produced invalid CENTL-SCi IR: equation sides may not contain commas, equality signs, or semicolons'"
@@ -269,10 +269,10 @@
         "id": "linear_irrelevant_wording",
         "latency": {
           "count": 1,
-          "max_seconds": 3.525736,
-          "min_seconds": 3.525736,
-          "p50_seconds": 3.525736,
-          "p95_seconds": 3.525736
+          "max_seconds": 3.161878,
+          "min_seconds": 3.161878,
+          "p50_seconds": 3.161878,
+          "p95_seconds": 3.161878
         },
         "mismatches": [
           "CENTL text: expected 'y = 4', observed 'expected an operator, found identifier \"y\"'",
@@ -350,10 +350,10 @@
         "id": "unit_centimeters_to_meters",
         "latency": {
           "count": 1,
-          "max_seconds": 3.885696,
-          "min_seconds": 3.885696,
-          "p50_seconds": 3.885696,
-          "p95_seconds": 3.885696
+          "max_seconds": 3.492671,
+          "min_seconds": 3.492671,
+          "p50_seconds": 3.492671,
+          "p95_seconds": 3.492671
         },
         "mismatches": [
           "CENTL text: expected '1 m', observed 'unknown unit: centimeters'",
@@ -414,10 +414,10 @@
         "id": "unit_exact_decimal",
         "latency": {
           "count": 1,
-          "max_seconds": 12.202003,
-          "min_seconds": 12.202003,
-          "p50_seconds": 12.202003,
-          "p95_seconds": 12.202003
+          "max_seconds": 12.280335,
+          "min_seconds": 12.280335,
+          "p50_seconds": 12.280335,
+          "p95_seconds": 12.280335
         },
         "mismatches": [
           "no JSON stdout; stderr='centl-sci: invalid_model_output: resident model produced invalid CENTL-SCi IR: invalid JSON: Line 1, bytes 289-290:\\nUnexpected end of input'"
@@ -430,10 +430,10 @@
         "id": "unit_dimension_mismatch",
         "latency": {
           "count": 1,
-          "max_seconds": 10.059343,
-          "min_seconds": 10.059343,
-          "p50_seconds": 10.059343,
-          "p95_seconds": 10.059343
+          "max_seconds": 4.275835,
+          "min_seconds": 4.275835,
+          "p50_seconds": 4.275835,
+          "p95_seconds": 4.275835
         },
         "mismatches": [
           "exit code: expected 1, observed 0",
@@ -521,10 +521,10 @@
         "id": "mechanics_not_yet_admitted",
         "latency": {
           "count": 1,
-          "max_seconds": 3.471148,
-          "min_seconds": 3.471148,
-          "p50_seconds": 3.471148,
-          "p95_seconds": 3.471148
+          "max_seconds": 3.429683,
+          "min_seconds": 3.429683,
+          "p50_seconds": 3.429683,
+          "p95_seconds": 3.429683
         },
         "mismatches": [
           "exit code: expected 0, observed 1",
@@ -587,10 +587,10 @@
         "id": "missing_physics_parameter",
         "latency": {
           "count": 1,
-          "max_seconds": 19.687728,
-          "min_seconds": 19.687728,
-          "p50_seconds": 19.687728,
-          "p95_seconds": 19.687728
+          "max_seconds": 11.996304,
+          "min_seconds": 11.996304,
+          "p50_seconds": 11.996304,
+          "p95_seconds": 11.996304
         },
         "mismatches": [
           "no JSON stdout; stderr='centl-sci: invalid_model_output: resident model produced invalid CENTL-SCi IR: invalid JSON: Line 1, bytes 302-303:\\nUnexpected end of input'"
@@ -603,10 +603,10 @@
         "id": "general_knowledge_rejected",
         "latency": {
           "count": 1,
-          "max_seconds": 4.036426,
-          "min_seconds": 4.036426,
-          "p50_seconds": 4.036426,
-          "p95_seconds": 4.036426
+          "max_seconds": 4.068349,
+          "min_seconds": 4.068349,
+          "p50_seconds": 4.068349,
+          "p95_seconds": 4.068349
         },
         "mismatches": [
           "exit code: expected 0, observed 1",
@@ -668,10 +668,10 @@
         "id": "embedded_instruction_is_data",
         "latency": {
           "count": 1,
-          "max_seconds": 3.502811,
-          "min_seconds": 3.502811,
-          "p50_seconds": 3.502811,
-          "p95_seconds": 3.502811
+          "max_seconds": 3.540327,
+          "min_seconds": 3.540327,
+          "p50_seconds": 3.540327,
+          "p95_seconds": 3.540327
         },
         "mismatches": [
           "CENTL text: expected 'x = 2', observed \"expected an operator, found '='\"",
@@ -749,10 +749,10 @@
         "id": "contradictory_request_rejected",
         "latency": {
           "count": 1,
-          "max_seconds": 2.807071,
-          "min_seconds": 2.807071,
-          "p50_seconds": 2.807071,
-          "p95_seconds": 2.807071
+          "max_seconds": 2.64202,
+          "min_seconds": 2.64202,
+          "p50_seconds": 2.64202,
+          "p95_seconds": 2.64202
         },
         "mismatches": [
           "exit code: expected 0, observed 1",
@@ -829,7 +829,7 @@
     "enabled": true,
     "health": {
       "body": "{\"status\":\"ok\"}",
-      "elapsed_seconds": 0.023768,
+      "elapsed_seconds": 0.012896,
       "ok": true,
       "status": 200
     },
@@ -839,10 +839,10 @@
       "failed": 11,
       "latency": {
         "count": 13,
-        "max_seconds": 19.687728,
-        "min_seconds": 2.807071,
-        "p50_seconds": 3.885696,
-        "p95_seconds": 12.202003
+        "max_seconds": 12.280335,
+        "min_seconds": 2.64202,
+        "p50_seconds": 3.540327,
+        "p95_seconds": 11.996304
       },
       "pass_rate": 0.15384615384615385,
       "passed": 2,
@@ -856,7 +856,7 @@
           "make",
           "extract"
         ],
-        "elapsed_seconds": 3.6321,
+        "elapsed_seconds": 3.61895,
         "returncode": 0,
         "stderr_tail": "",
         "stdout_tail": "mkdir -p src/generated\nfstar.exe --include src/fstar --cache_dir _build/fstar --hint_dir _build/fstar --split_queries always --z3rlimit 2 \\\n\t--codegen OCaml --extract Centl.Gcd \\\n\t--odir src/generated src/fstar/Centl.Gcd.fst\nExtracted module Centl.Gcd\nVerified module: Centl.Gcd\nAll verification conditions discharged successfully\nfstar.exe --include src/fstar --cache_dir _build/fstar --hint_dir _build/fstar --split_queries always --z3rlimit 2 \\\n\t--codegen OCaml --extract Centl.Core \\\n\t--odir src/generated src/fstar/Centl.Core.fst\nExtracted module Centl.Core\nVerified module: Centl.Core\nAll verification conditions discharged successfully\nfstar.exe --include src/fstar --cache_dir _build/fstar --hint_dir _build/fstar --split_queries always --z3rlimit 2 \\\n\t--codegen OCaml --extract Centl.PolynomialSoundness \\\n\t--odir src/generated src/fstar/Centl.PolynomialSoundness.fst\nExtracted module Centl.PolynomialSoundness\nVerified module: Centl.PolynomialSoundness\nAll verification conditions discharged successfully\nmake[1]: Leaving directory '/var/home/chasebryan/Projects/centl'",
@@ -867,7 +867,7 @@
           "make",
           "quality"
         ],
-        "elapsed_seconds": 0.20074,
+        "elapsed_seconds": 0.102447,
         "returncode": 2,
         "stderr_tail": "+  Alcotest.(check bool) \"equality is split\" true (String.contains prompt '=');\n   Alcotest.(check bool)\n     \"problem encoded as data\" true\n     (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem)) prompt);\nFile \"tests/test_sci_fastpath.ml\", line 1, characters 0-0:\ndiff --git a/_build/default/tests/test_sci_fastpath.ml b/_build/.sandbox/6ea9c97baa83dd85ee1a06d02e8c4c83/default/tests/test_sci_fastpath.ml.corrected\nindex 76456a9..9849255 100644\n--- a/_build/default/tests/test_sci_fastpath.ml\n+++ b/_build/.sandbox/6ea9c97baa83dd85ee1a06d02e8c4c83/default/tests/test_sci_fastpath.ml.corrected\n@@ -98,7 +98,8 @@ let test_spoken_equation_executes_exactly () =\n       begin match List.assoc_opt \"value\" fields with\n       | Some (`Assoc value_fields) ->\n           begin match List.assoc_opt \"text\" value_fields with\n-          | Some (`String value) -> Alcotest.(check string) \"solutions\" \"x in {2, 3}\" value\n+          | Some (`String value) ->\n+              Alcotest.(check string) \"solutions\" \"x in {2, 3}\" value\n           | _ -> Alcotest.fail \"missing solution text\"\n           end\n       | _ -> Alcotest.fail \"missing CENTL value\"\nmake[1]: *** [Makefile:37: format] Error 1",
         "stdout_tail": "make[1]: Entering directory '/var/home/chasebryan/Projects/centl'\nopam exec --switch=centl -- dune build @fmt\nmake[1]: Leaving directory '/var/home/chasebryan/Projects/centl'",
@@ -884,10 +884,10 @@
         "id": "fast_exact_decimal_addition",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002936,
-          "min_seconds": 0.002562,
-          "p50_seconds": 0.002738,
-          "p95_seconds": 0.002936
+          "max_seconds": 0.002675,
+          "min_seconds": 0.00238,
+          "p50_seconds": 0.002516,
+          "p95_seconds": 0.002675
         },
         "mismatches": [],
         "mode": "fast",
@@ -957,10 +957,10 @@
         "id": "fast_fraction_addition",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002959,
-          "min_seconds": 0.002644,
-          "p50_seconds": 0.002812,
-          "p95_seconds": 0.002959
+          "max_seconds": 0.002723,
+          "min_seconds": 0.002419,
+          "p50_seconds": 0.002602,
+          "p95_seconds": 0.002723
         },
         "mismatches": [],
         "mode": "fast",
@@ -1029,10 +1029,10 @@
         "id": "fast_integer_multiplication",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002881,
-          "min_seconds": 0.002665,
-          "p50_seconds": 0.00269,
-          "p95_seconds": 0.002881
+          "max_seconds": 0.002655,
+          "min_seconds": 0.002519,
+          "p50_seconds": 0.002543,
+          "p95_seconds": 0.002655
         },
         "mismatches": [],
         "mode": "fast",
@@ -1101,10 +1101,10 @@
         "id": "fast_exact_division",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002899,
-          "min_seconds": 0.002586,
-          "p50_seconds": 0.002817,
-          "p95_seconds": 0.002899
+          "max_seconds": 0.002721,
+          "min_seconds": 0.002458,
+          "p50_seconds": 0.002585,
+          "p95_seconds": 0.002721
         },
         "mismatches": [],
         "mode": "fast",
@@ -1174,10 +1174,10 @@
         "id": "fast_integer_subtraction",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002826,
-          "min_seconds": 0.002682,
-          "p50_seconds": 0.002776,
-          "p95_seconds": 0.002826
+          "max_seconds": 0.002831,
+          "min_seconds": 0.002626,
+          "p50_seconds": 0.002694,
+          "p95_seconds": 0.002831
         },
         "mismatches": [],
         "mode": "fast",
@@ -1246,10 +1246,10 @@
         "id": "fast_cm_to_m",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002859,
-          "min_seconds": 0.002697,
-          "p50_seconds": 0.002822,
-          "p95_seconds": 0.002859
+          "max_seconds": 0.002962,
+          "min_seconds": 0.002555,
+          "p50_seconds": 0.002591,
+          "p95_seconds": 0.002962
         },
         "mismatches": [],
         "mode": "fast",
@@ -1325,10 +1325,10 @@
         "id": "fast_mm_to_m",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002944,
-          "min_seconds": 0.002741,
-          "p50_seconds": 0.002825,
-          "p95_seconds": 0.002944
+          "max_seconds": 0.003815,
+          "min_seconds": 0.002609,
+          "p50_seconds": 0.00277,
+          "p95_seconds": 0.003815
         },
         "mismatches": [],
         "mode": "fast",
@@ -1404,10 +1404,10 @@
         "id": "fast_km_to_m",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003017,
-          "min_seconds": 0.002679,
-          "p50_seconds": 0.002755,
-          "p95_seconds": 0.003017
+          "max_seconds": 0.002824,
+          "min_seconds": 0.002515,
+          "p50_seconds": 0.002643,
+          "p95_seconds": 0.002824
         },
         "mismatches": [],
         "mode": "fast",
@@ -1483,10 +1483,10 @@
         "id": "fast_seconds_to_minutes",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002854,
-          "min_seconds": 0.002725,
-          "p50_seconds": 0.002827,
-          "p95_seconds": 0.002854
+          "max_seconds": 0.002822,
+          "min_seconds": 0.002581,
+          "p50_seconds": 0.002629,
+          "p95_seconds": 0.002822
         },
         "mismatches": [],
         "mode": "fast",
@@ -1562,10 +1562,10 @@
         "id": "fast_grams_to_kg",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002952,
-          "min_seconds": 0.00271,
-          "p50_seconds": 0.00279,
-          "p95_seconds": 0.002952
+          "max_seconds": 0.002854,
+          "min_seconds": 0.002519,
+          "p50_seconds": 0.002641,
+          "p95_seconds": 0.002854
         },
         "mismatches": [],
         "mode": "fast",
@@ -1641,10 +1641,10 @@
         "id": "fast_dimension_mismatch",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002877,
-          "min_seconds": 0.00268,
-          "p50_seconds": 0.002721,
-          "p95_seconds": 0.002877
+          "max_seconds": 0.002839,
+          "min_seconds": 0.002532,
+          "p50_seconds": 0.002564,
+          "p95_seconds": 0.002839
         },
         "mismatches": [],
         "mode": "fast",
@@ -1700,10 +1700,10 @@
         "id": "fast_symbolic_quadratic",
         "latency": {
           "count": 5,
-          "max_seconds": 0.002931,
-          "min_seconds": 0.002809,
-          "p50_seconds": 0.002836,
-          "p95_seconds": 0.002931
+          "max_seconds": 0.00292,
+          "min_seconds": 0.00266,
+          "p50_seconds": 0.002823,
+          "p95_seconds": 0.00292
         },
         "mismatches": [],
         "mode": "fast",
@@ -1795,10 +1795,10 @@
         "id": "fast_symbolic_linear",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003035,
-          "min_seconds": 0.002873,
-          "p50_seconds": 0.002926,
-          "p95_seconds": 0.003035
+          "max_seconds": 0.00295,
+          "min_seconds": 0.002734,
+          "p50_seconds": 0.002784,
+          "p95_seconds": 0.00295
         },
         "mismatches": [],
         "mode": "fast",
@@ -1885,10 +1885,10 @@
         "id": "fast_spoken_quadratic",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003217,
-          "min_seconds": 0.002801,
-          "p50_seconds": 0.002999,
-          "p95_seconds": 0.003217
+          "max_seconds": 0.003077,
+          "min_seconds": 0.002642,
+          "p50_seconds": 0.002799,
+          "p95_seconds": 0.003077
         },
         "mismatches": [],
         "mode": "fast",
@@ -1980,10 +1980,10 @@
         "id": "fast_spoken_linear",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003113,
-          "min_seconds": 0.002859,
-          "p50_seconds": 0.00297,
-          "p95_seconds": 0.003113
+          "max_seconds": 0.002907,
+          "min_seconds": 0.002685,
+          "p50_seconds": 0.002781,
+          "p95_seconds": 0.002907
         },
         "mismatches": [],
         "mode": "fast",
@@ -2070,10 +2070,10 @@
         "id": "fast_spoken_simple_linear",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003243,
-          "min_seconds": 0.002694,
-          "p50_seconds": 0.002822,
-          "p95_seconds": 0.003243
+          "max_seconds": 0.002921,
+          "min_seconds": 0.002627,
+          "p50_seconds": 0.002687,
+          "p95_seconds": 0.002921
         },
         "mismatches": [],
         "mode": "fast",
@@ -2160,10 +2160,10 @@
         "id": "fast_spoken_quadratic_coefficient",
         "latency": {
           "count": 5,
-          "max_seconds": 0.003111,
-          "min_seconds": 0.002803,
-          "p50_seconds": 0.003021,
-          "p95_seconds": 0.003111
+          "max_seconds": 0.002901,
+          "min_seconds": 0.002638,
+          "p50_seconds": 0.00277,
+          "p95_seconds": 0.002901
         },
         "mismatches": [],
         "mode": "fast",
@@ -2252,7 +2252,7 @@
       },
       {
         "category": "semantic-defer",
-        "elapsed_seconds": 3.267801,
+        "elapsed_seconds": 3.25779,
         "id": "defer_word_fraction",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2264,7 +2264,7 @@
       },
       {
         "category": "semantic-defer",
-        "elapsed_seconds": 4.514627,
+        "elapsed_seconds": 3.964531,
         "id": "defer_unicode_paraphrase",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2276,7 +2276,7 @@
       },
       {
         "category": "semantic-defer",
-        "elapsed_seconds": 2.78073,
+        "elapsed_seconds": 2.767248,
         "id": "defer_narrative_linear",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2288,7 +2288,7 @@
       },
       {
         "category": "safety-defer",
-        "elapsed_seconds": 4.023423,
+        "elapsed_seconds": 3.77896,
         "id": "defer_general_knowledge",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2300,7 +2300,7 @@
       },
       {
         "category": "scope-defer",
-        "elapsed_seconds": 3.44714,
+        "elapsed_seconds": 3.296605,
         "id": "defer_mechanics",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2312,7 +2312,7 @@
       },
       {
         "category": "safety-defer",
-        "elapsed_seconds": 3.149856,
+        "elapsed_seconds": 3.082912,
         "id": "defer_ambiguous_reference",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2324,7 +2324,7 @@
       },
       {
         "category": "safety-defer",
-        "elapsed_seconds": 2.642899,
+        "elapsed_seconds": 3.021412,
         "id": "defer_contradiction",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2336,7 +2336,7 @@
       },
       {
         "category": "safety-defer",
-        "elapsed_seconds": 3.615881,
+        "elapsed_seconds": 3.815506,
         "id": "defer_embedded_instruction",
         "mismatches": [
           "expected deterministic layer to defer without producing an answer"
@@ -2351,10 +2351,10 @@
       "failed": 8,
       "fast_latency": {
         "count": 17,
-        "max_seconds": 0.003021,
-        "min_seconds": 0.00269,
-        "p50_seconds": 0.002822,
-        "p95_seconds": 0.002999
+        "max_seconds": 0.002823,
+        "min_seconds": 0.002516,
+        "p50_seconds": 0.002643,
+        "p95_seconds": 0.002799
       },
       "pass_rate": 0.68,
       "passed": 17,
