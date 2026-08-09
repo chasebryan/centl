@@ -47,7 +47,34 @@ jobs:
             lab/sci-assimilation/latest.md
           if-no-files-found: error
 
+      - name: Determine whether this push publishes fresh evidence
+        id: provenance
+        shell: bash
+        run: |
+          source_commit=$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("lab/sci-assimilation/latest.json").read_text(encoding="utf-8"))
+          print(report["git"]["commit"])
+          PY
+          )
+          printf 'source_commit=%s\n' "$source_commit" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            printf 'enforce=true\n' >> "$GITHUB_OUTPUT"
+            printf 'Manual dispatch: enforcing report product/safety gates.\n' >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$source_commit" = "${{ github.event.before }}" ]; then
+            printf 'enforce=true\n' >> "$GITHUB_OUTPUT"
+            printf 'Fresh report publication detected for source commit `%s`.\n' "$source_commit" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf 'enforce=false\n' >> "$GITHUB_OUTPUT"
+            printf 'Historical/stale report carried by this push; structural/provenance validation passed, but product/safety gates are not re-enforced. Report source: `%s`; push predecessor: `%s`.\n' \
+              "$source_commit" "${{ github.event.before }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Enforce product and safety gates
+        if: steps.provenance.outputs.enforce == 'true'
         run: |
           python3 scripts/sci-assimilation-check.py \
             --require-product-gates \
