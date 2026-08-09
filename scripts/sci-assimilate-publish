@@ -38,7 +38,8 @@ if git diff --cached --quiet -- "$json_report" "$markdown_report"; then
   echo "CENTL-SCi: assimilation report unchanged; nothing to publish"
 else
   source_commit=$(python3 -c 'import json; print(json.load(open("lab/sci-assimilation/latest.json"))["git"]["commit"])')
-  git commit -m "Record CENTL-SCi assimilation report for ${source_commit%????????????????????????????????}"
+  short_commit=$(printf '%s' "$source_commit" | cut -c1-8)
+  git commit -m "Record CENTL-SCi assimilation report for $short_commit"
   git push origin "HEAD:$branch"
   echo "CENTL-SCi: published assimilation report on $branch"
 fi
