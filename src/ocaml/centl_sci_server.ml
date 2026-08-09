@@ -65,18 +65,22 @@ let grammar_for_hint = function
   | Centl_sci_hint.Polynomial_equation ->
       Centl_sci_poly_grammar.polynomial_equation_grammar
   | Centl_sci_hint.Unit_conversion -> Centl_sci_schema.unit_conversion_grammar
+  | Centl_sci_hint.Unsupported _ -> Centl_sci_schema.unsupported_grammar
 
 let prompt hint problem =
   let contract =
     match hint with
     | Centl_sci_hint.Polynomial_equation ->
-        "Required class: polynomial_equation. Split the equality into left and right; neither side may contain '='. Extract the solve variable. Do not solve."
+        "Required class: polynomial_equation. Split the equality into left and right; neither side may contain '='. Translate spoken powers such as 'x squared' to x^2. Extract the solve variable. Do not solve."
     | Centl_sci_hint.Exact_expression ->
-        "Required class: exact_expression. Extract the expression."
+        "Required class: exact_expression. Translate ordinary arithmetic words into a CENTL expression. Do not evaluate it."
     | Centl_sci_hint.Unit_conversion ->
-        "Required class: unit_conversion. Extract value, from_unit, and to_unit."
+        "Required class: unit_conversion. Extract value, from_unit, and to_unit. Prefer canonical CENTL unit symbols such as cm, m, s, kg, N, J, Pa, Hz, W, and V."
+    | Centl_sci_hint.Unsupported reason ->
+        "Required class: unsupported. Do not compute. Give a short reason consistent with this routing hint: "
+        ^ reason ^ "."
     | Centl_sci_hint.Any ->
-        "Choose exact_expression, polynomial_equation, unit_conversion, or unsupported."
+        "Choose exact_expression, polynomial_equation, unit_conversion, or unsupported. Be conservative: unsupported is correct when required information or an admitted v0.0.1 class is missing."
   in
   "CENTL-SCi v0.0.1. Produce one JSON IR. " ^ contract
   ^ " Always schema_version=1 and assumptions (normally []). Problem: "
@@ -152,6 +156,7 @@ let matches_hint hint ir =
   | Centl_sci_hint.Exact_expression, Centl_sci_ir.Exact_expression _ -> true
   | Centl_sci_hint.Polynomial_equation, Centl_sci_ir.Polynomial_equation _ -> true
   | Centl_sci_hint.Unit_conversion, Centl_sci_ir.Unit_conversion _ -> true
+  | Centl_sci_hint.Unsupported _, Centl_sci_ir.Unsupported _ -> true
   | _ -> false
 
 let parse_response hint text =
@@ -190,20 +195,21 @@ let interpret config problem =
       else
         let hint = Centl_sci_hint.classify problem in
         let args = argv config problem in
-        begin try
-          let channel = Unix.open_process_args_in config.curl_executable args in
-          let output = read_bounded channel in
-          let status = Unix.close_process_in channel in
-          match (output, status) with
-          | (Error _ as error), _ -> error
-          | Ok _, Unix.WEXITED 0 ->
-              begin match output with
-              | Ok text -> parse_response hint text
-              | Error _ -> assert false
-              end
-          | Ok _, status -> fail "inference_failed" (status_message status)
-        with Unix.Unix_error (code, function_name, argument) ->
-          fail "inference_failed"
-            (Printf.sprintf "%s(%s): %s" function_name argument
-               (Unix.error_message code))
+        begin
+          try
+            let channel = Unix.open_process_args_in config.curl_executable args in
+            let output = read_bounded channel in
+            let status = Unix.close_process_in channel in
+            match (output, status) with
+            | (Error _ as error), _ -> error
+            | Ok _, Unix.WEXITED 0 ->
+                begin match output with
+                | Ok text -> parse_response hint text
+                | Error _ -> assert false
+                end
+            | Ok _, status -> fail "inference_failed" (status_message status)
+          with Unix.Unix_error (code, function_name, argument) ->
+            fail "inference_failed"
+              (Printf.sprintf "%s(%s): %s" function_name argument
+                 (Unix.error_message code))
         end
