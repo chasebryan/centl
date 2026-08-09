@@ -88,11 +88,9 @@ let test_3d_collision_tool_call () =
                   [
                     ("action", `String "elastic_collision_3d_at_contact");
                     ( "particle1",
-                      particle "p1" "1" ("0", "0", "0")
-                        ("1", "0", "0") );
+                      particle "p1" "1" ("0", "0", "0") ("1", "0", "0") );
                     ( "particle2",
-                      particle "p2" "1" ("1", "1", "0")
-                        ("0", "0", "0") );
+                      particle "p2" "1" ("1", "1", "0") ("0", "0", "0") );
                   ] );
             ] );
       ]
@@ -105,6 +103,9 @@ let test_3d_collision_tool_call () =
   Alcotest.(check string)
     "kind" "elastic_collision_3d_at_contact" (string "kind" physics);
   Alcotest.(check string) "status" "resolved" (string "status" physics);
+  Alcotest.(check string)
+    "contact assumption" "caller_supplied_contact_with_distinct_centers"
+    (string "contact_assumption" physics);
   let v1 = assoc "velocity" (assoc "particle1_final" physics) in
   let v2 = assoc "velocity" (assoc "particle2_final" physics) in
   Alcotest.(check string) "v1 x" "1/2" (string "x" v1);
