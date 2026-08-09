@@ -55,6 +55,11 @@
  (modules test_sci_fastpath)
  (libraries centl_lib alcotest yojson))
 
+(test
+ (name test_sci_lowering)
+ (modules test_sci_lowering)
+ (libraries centl_lib alcotest yojson))
+
 (executable
  (name sci_fake_curl)
  (modules sci_fake_curl))
