@@ -93,33 +93,87 @@ The operation requires:
 - a nonnegative duration carrying the time dimension;
 - constant velocity throughout the queried interval.
 
+## Exact rational event composition
+
+The library now includes `evolve_linear_sphere_pair_through_contact`, a narrow
+composition layer for the cases where the certificate can support an exact
+state transition without approximating event time.
+
+Its behavior is deterministic:
+
+1. It first obtains the ordinary `certify_linear_sphere_contact` certificate.
+2. `initially_overlapping` returns `Deferred initial_overlap` with both original
+   spheres unchanged. No penetration repair or partial response is attempted.
+3. `no_contact_in_interval` advances both centers linearly for the full exact
+   duration while preserving their velocities.
+4. `touching_at_start`, `tangent_contact`, or `crossing_contact` with a rational
+   first-contact time advances both spheres exactly to that time.
+5. Before any impulse is allowed, the advanced geometry is independently
+   reclassified by the exact sphere classifier and must be exactly `touching`.
+   An internal inconsistency raises instead of manufacturing a response.
+6. The existing `elastic_collision_3d_at_contact` primitive then returns either
+   `resolved` or `separating_or_stationary`.
+7. The spheres are advanced linearly through the exact remaining duration using
+   the post-response velocities.
+8. A quadratic-irrational crossing returns
+   `Deferred quadratic_irrational_event_time` with both original spheres
+   unchanged and the algebraic event certificate preserved.
+
+A completed result records the original certificate, rational event time when
+present, exact at-event sphere states and contact evidence, collision-response
+status, final sphere states, a state-change flag, and exact pair momentum and
+kinetic-energy conservation flags.
+
+The operation is failure-atomic for every deferred result. It never advances to
+a rational approximation of an irrational event and then applies an impulse.
+
+For the admitted two-body, force-free model, the exact elastic response makes
+the post-contact normal motion non-approaching. With constant post-event
+velocities, the remainder segment therefore does not silently introduce a
+second contact of the same pair.
+
+### Event-step assurance boundary
+
+This composition layer is intentionally smaller than a general event-driven
+physics engine:
+
+- exactly two spheres are admitted;
+- motion between event boundaries is constant velocity;
+- there are no applied forces or acceleration;
+- only rational first-contact times may drive a response;
+- quadratic-irrational event times defer unchanged;
+- initial overlap defers unchanged;
+- no penetration correction is performed;
+- no friction, spin, torque, orientation, or rigid-body geometry is modeled;
+- no simultaneous multi-contact event ordering is defined;
+- the operation is not called automatically by `symplectic_euler` or the world
+  step;
+- it is currently a library operation, not a JSON Lines or MCP action.
+
+The distinction matters: an exact event step under an explicitly linear motion
+model is not evidence that a force-driven numerical integration step follows
+that same path.
+
 ## Explicit non-claims
 
-This certificate does not claim any of the following:
+The continuous certificate and its rational event-step composition do not claim
+any of the following:
 
 - continuous collision detection under acceleration or force integration;
 - a guarantee that a symplectic-Euler step follows the admitted linear path;
 - penetration correction;
-- automatic collision response;
+- automatic world collision processing;
 - friction, spin, torque, or rigid-body geometry;
 - simultaneous multi-contact event ordering or impulse solving;
-- a floating-point approximation of irrational event time.
+- a floating-point approximation of irrational event time;
+- exact state evolution through an irrational event time.
 
-The result is therefore evidence about one exact mathematical motion model, not
-an implicit change to CENTL's world integrator.
-
-## Composition direction
-
-The safe next composition boundary is event-aware physics that treats this
-certificate as evidence rather than silently changing integrator semantics. A
-future layer may use a rational contact time directly, or preserve an algebraic
-contact-time certificate when the root is irrational. It must still defer where
-force-driven trajectories or simultaneous contacts lack a justified exact
-semantics.
+The result is therefore evidence and state evolution inside one exact
+mathematical motion model, not an implicit change to CENTL's world integrator.
 
 ## Regression coverage
 
-The native test suite covers:
+The native test suite covers the certificate itself with:
 
 - rational head-on first contact;
 - first contact exactly at the bounded interval endpoint;
@@ -133,3 +187,18 @@ The native test suite covers:
 - distinct-ID enforcement;
 - duration-dimension enforcement;
 - negative-duration rejection.
+
+The event-composition tests additionally cover:
+
+- full-duration exact advancement when there is no contact;
+- rational head-on response plus exact remainder advancement;
+- response exactly at the interval endpoint;
+- an oblique rational 3D event with fractional contact geometry, fractional
+  post-impact velocities, and fractional final positions;
+- touching-at-start approaching and separating cases;
+- exact tangency with no impulse;
+- failure-atomic deferral of quadratic-irrational contact;
+- failure-atomic deferral of initial overlap;
+- zero-duration separated evolution;
+- preservation of identifiers, masses, and radii;
+- exact pair momentum and kinetic-energy conservation after completed steps.
