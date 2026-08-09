@@ -25,8 +25,8 @@ let elastic_collision_3d_at_contact particle1 particle2 =
     { status = No_impulse; particle1; particle2 }
   else
     let normal_rate = quantity_div normal_alignment distance_squared in
-    require_dimension ~context:"3D collision normal rate" ~expected:dim_frequency
-      normal_rate.quantity_dimension;
+    require_dimension ~context:"3D collision normal rate"
+      ~expected:dim_frequency normal_rate.quantity_dimension;
     let normal_velocity = vector_times_quantity delta normal_rate in
     require_dimension ~context:"3D collision normal velocity"
       ~expected:dim_velocity normal_velocity.vector_dimension;
