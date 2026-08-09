@@ -55,6 +55,21 @@
  (modules test_sci_fastpath)
  (libraries centl_lib alcotest yojson))
 
+(executable
+ (name sci_fake_curl)
+ (modules sci_fake_curl))
+
+(test
+ (name test_sci_server)
+ (modules test_sci_server)
+ (deps sci_fake_curl.exe)
+ (libraries centl_lib alcotest yojson)
+ (action
+  (setenv
+   CENTL_SCI_FAKE_CURL
+   %{dep:sci_fake_curl.exe}
+   (run %{test}))))
+
 (test
  (name test_physics)
  (modules test_physics)
