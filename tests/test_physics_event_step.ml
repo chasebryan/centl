@@ -153,10 +153,14 @@ let test_oblique_rational_crossing_stays_exact () =
   check_q "sphere1 vy" "-12/25" result.final_sphere1.particle.velocity.y;
   check_q "sphere2 vx" "9/25" result.final_sphere2.particle.velocity.x;
   check_q "sphere2 vy" "12/25" result.final_sphere2.particle.velocity.y;
-  check_vector_x "final sphere1 x" "66/25" result.final_sphere1.particle.position;
-  check_vector_y "final sphere1 y" "-12/25" result.final_sphere1.particle.position;
-  check_vector_x "final sphere2 x" "89/25" result.final_sphere2.particle.position;
-  check_vector_y "final sphere2 y" "52/25" result.final_sphere2.particle.position;
+  check_vector_x "final sphere1 x" "66/25"
+    result.final_sphere1.particle.position;
+  check_vector_y "final sphere1 y" "-12/25"
+    result.final_sphere1.particle.position;
+  check_vector_x "final sphere2 x" "89/25"
+    result.final_sphere2.particle.position;
+  check_vector_y "final sphere2 y" "52/25"
+    result.final_sphere2.particle.position;
   Alcotest.(check bool) "momentum" true result.momentum_conserved;
   Alcotest.(check bool) "kinetic energy" true result.kinetic_energy_conserved
 
