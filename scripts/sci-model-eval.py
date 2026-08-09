@@ -16,6 +16,13 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CORPUS = ROOT / "tests" / "corpus" / "sci_v0_0_1.jsonl"
 DEFAULT_SCI = ROOT / "_build" / "default" / "src" / "sci_main.exe"
+SCI_RUNTIME_SOURCES = [
+    ROOT / "src" / "sci_main.ml",
+    ROOT / "src" / "ocaml" / "centl_sci_ir.ml",
+    ROOT / "src" / "ocaml" / "centl_sci_llama.ml",
+    ROOT / "src" / "ocaml" / "centl_sci_runtime.ml",
+    ROOT / "src" / "ocaml" / "centl_sci_schema.ml",
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -99,6 +106,23 @@ def command_version(executable: str) -> str | None:
     if not text:
         return None
     return text.splitlines()[0][:1024]
+
+
+def ensure_default_binary_is_fresh(centl_sci: Path) -> None:
+    if centl_sci != DEFAULT_SCI.resolve():
+        return
+    executable_mtime = centl_sci.stat().st_mtime
+    newer_sources = [
+        source
+        for source in SCI_RUNTIME_SOURCES
+        if source.is_file() and source.stat().st_mtime > executable_mtime
+    ]
+    if newer_sources:
+        relative = ", ".join(str(source.relative_to(ROOT)) for source in newer_sources)
+        raise SystemExit(
+            "default centl-sci executable is older than SCi source files "
+            f"({relative}); run `make build` before model evaluation"
+        )
 
 
 def dict_contains(actual: Any, expected_subset: Any) -> bool:
@@ -270,6 +294,7 @@ def main() -> int:
         raise SystemExit(
             f"centl-sci executable not found: {centl_sci}; run `make build` first"
         )
+    ensure_default_binary_is_fresh(centl_sci)
     if not corpus.is_file():
         raise SystemExit(f"corpus not found: {corpus}")
     if args.timeout <= 0:
@@ -306,6 +331,12 @@ def main() -> int:
         )
         for mismatch in result["mismatches"]:
             print(f"    - {mismatch}", file=sys.stderr, flush=True)
+        if not result["pass"]:
+            stderr = str(result.get("stderr") or "").strip()
+            if stderr:
+                print("    centl-sci stderr:", file=sys.stderr, flush=True)
+                for line in stderr.splitlines()[-12:]:
+                    print(f"      {line}", file=sys.stderr, flush=True)
 
     passed = sum(1 for result in results if result["pass"])
     total = len(results)
