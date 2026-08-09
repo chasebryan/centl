@@ -44,10 +44,7 @@ let particle_input_schema =
 
 let sphere_input_schema =
   strict_object
-    [
-      ("particle", particle_input_schema);
-      ("radius", quantity_input_schema);
-    ]
+    [ ("particle", particle_input_schema); ("radius", quantity_input_schema) ]
     [ "particle"; "radius" ]
 
 let force_input_schema =
@@ -161,10 +158,10 @@ let tool () =
           "Use CENTL's deterministic exact-rational particle mechanics. \
            Discover physics capabilities and units, convert compatible units, \
            inspect exact physical constants, simulate a dimension-checked \
-           particle, solve ideal exact elastic collisions, analyze exact sphere \
-           contact geometry, or resolve only isolated disjoint touching sphere \
-           pairs. Overlaps and ambiguous simultaneous contacts are returned as \
-           explicit deferred results rather than guessed." );
+           particle, solve ideal exact elastic collisions, analyze exact \
+           sphere contact geometry, or resolve only isolated disjoint touching \
+           sphere pairs. Overlaps and ambiguous simultaneous contacts are \
+           returned as explicit deferred results rather than guessed." );
       ("inputSchema", input_schema);
       ("outputSchema", Lazy.force Centl_physics_contact_mcp_output.output_schema);
       ("annotations", read_only_annotations);
@@ -195,8 +192,7 @@ let action_fields = function
       Some
         ( [ "action"; "particle1"; "particle2" ],
           [ "action"; "particle1"; "particle2" ] )
-  | ( "analyze_sphere_contacts"
-    | "resolve_isolated_elastic_sphere_contacts" ) ->
+  | "analyze_sphere_contacts" | "resolve_isolated_elastic_sphere_contacts" ->
       Some ([ "action"; "spheres" ], [ "action"; "spheres" ])
   | _ -> None
 
