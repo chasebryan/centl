@@ -149,6 +149,20 @@ let fake_model_executable () =
   | Some value when value <> "" -> value
   | _ -> Alcotest.fail "CENTL_SCI_FAKE_MODEL is not configured"
 
+let test_transport_extracts_one_json_object () =
+  let payload =
+    {|{"schema_version":1,"domain":"mathematics","problem_class":"exact_expression","operation":"compute","assumptions":[],"expression":"0.1 + 0.2"}|}
+  in
+  let transport = "Loading model...\n" ^ payload ^ "\nExiting...\n" in
+  match Centl_sci_llama.extract_transport_json transport with
+  | Ok actual -> Alcotest.(check string) "payload" payload actual
+  | Error error -> Alcotest.fail (Centl_sci_llama.string_of_error error)
+
+let test_transport_rejects_multiple_json_objects () =
+  match Centl_sci_llama.extract_transport_json {|noise\n{"a":1}\n{"b":2}\n|} with
+  | Error _ -> ()
+  | Ok _ -> Alcotest.fail "transport must reject multiple JSON objects"
+
 let test_end_to_end_local_process () =
   let config =
     Centl_sci_llama.default ~executable:(fake_model_executable ())
@@ -209,6 +223,10 @@ let () =
         ] );
       ( "inference",
         [
+          Alcotest.test_case "transport framing" `Quick
+            test_transport_extracts_one_json_object;
+          Alcotest.test_case "transport multiple objects" `Quick
+            test_transport_rejects_multiple_json_objects;
           Alcotest.test_case "end-to-end local process" `Quick
             test_end_to_end_local_process;
           Alcotest.test_case "offline constrained argv" `Quick
