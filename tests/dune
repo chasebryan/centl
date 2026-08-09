@@ -61,6 +61,11 @@
  (libraries centl_lib alcotest zarith))
 
 (test
+ (name test_physics_event_step)
+ (modules test_physics_event_step)
+ (libraries centl_lib alcotest zarith))
+
+(test
  (name test_physics_linear_contact_protocol)
  (modules test_physics_linear_contact_protocol)
  (libraries centl_lib alcotest zarith yojson))
