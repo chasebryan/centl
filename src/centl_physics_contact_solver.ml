@@ -57,7 +57,7 @@ let sphere_by_id state id =
 
 let touching_count id (contacts : sphere_contact list) =
   List.fold_left
-    (fun count contact ->
+    (fun count (contact : sphere_contact) ->
       if
         String.equal contact.particle1_id id
         || String.equal contact.particle2_id id
@@ -102,12 +102,16 @@ let apply_replacements state replacements =
 let resolve_isolated_elastic_touching_contacts state =
   let contacts = classify_sphere_contacts state in
   let overlaps =
-    List.filter (fun contact -> contact.relation = Overlapping) contacts
+    List.filter
+      (fun (contact : sphere_contact) -> contact.relation = Overlapping)
+      contacts
   in
   if overlaps <> [] then Deferred (state, Overlap_detected overlaps)
   else
     let touching =
-      List.filter (fun contact -> contact.relation = Touching) contacts
+      List.filter
+        (fun (contact : sphere_contact) -> contact.relation = Touching)
+        contacts
     in
     let ambiguous_ids = ambiguous_touching_ids state touching in
     if ambiguous_ids <> [] then
@@ -115,7 +119,7 @@ let resolve_isolated_elastic_touching_contacts state =
     else
       let replacements, pair_resolutions =
         List.fold_left
-          (fun (replacements, pair_resolutions) contact ->
+          (fun (replacements, pair_resolutions) (contact : sphere_contact) ->
             let pair_replacements, pair_resolution =
               resolve_touching_pair state contact
             in
