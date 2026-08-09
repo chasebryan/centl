@@ -150,8 +150,41 @@ an elastic impulse. Likewise, `touching` identifies geometric contact only; the
 separate collision-response primitive still decides whether the relative normal
 motion requires an impulse.
 
-This world/contact layer is currently a library API. It is not yet exposed as a
-new CLI, JSON Lines, or MCP world action.
+### Exact isolated contact composition
+
+`resolve_isolated_elastic_touching_contacts` composes exact sphere contact
+detection with the existing exact 3D elastic response under a deliberately
+narrow world-level contract.
+
+The operation first classifies every unordered sphere pair. Its decision rules
+are deterministic:
+
+1. If any pair is `overlapping`, the entire operation returns `Deferred` with
+   `overlap_detected`. No particle is modified. Overlap has precedence over any
+   other contact condition.
+2. Otherwise, if any particle belongs to more than one simultaneous `touching`
+   pair, the entire operation returns `Deferred` with
+   `ambiguous_simultaneous_contacts`. No particle is modified.
+3. Otherwise the touching pairs form a disjoint matching. Each pair is passed to
+   `elastic_collision_3d_at_contact` independently, and the resulting velocities
+   are installed while preserving sphere order, positions, masses, identifiers,
+   and radii.
+4. If there are no touching pairs, the operation completes with the unchanged
+   world and an empty pair-response list.
+
+A completed result returns the per-pair `resolved` or
+`separating_or_stationary` response status plus exact whole-world momentum and
+kinetic-energy conservation flags.
+
+The disjoint-matching restriction is an assurance boundary, not a claim that
+simultaneous multi-contact physics has a unique pairwise solution. CENTL does
+not choose an arbitrary impulse order for a contact graph such as A-B-C, and it
+does not reinterpret an already penetrated configuration as a valid contact
+state. This operation is also not part of the time integrator: detection and
+response remain explicit library calls.
+
+The world/contact and isolated-composition layers are currently library APIs.
+They are not yet exposed as new CLI, JSON Lines, or MCP world actions.
 
 ### Elastic collisions
 
@@ -210,10 +243,10 @@ the same deterministic physics semantics through one read-only, idempotent
 it does not implement a second evaluator.
 
 Capability discovery advertises the exact supported machine actions, including
-the 1D collision operation and `elastic_collision_3d_at_contact`. The new
-multi-particle world/contact layer remains library-only for now. Physics
-simulation calls retain deterministic request, step, trajectory, and
-cancellation limits.
+the 1D collision operation and `elastic_collision_3d_at_contact`. The
+multi-particle world/contact and isolated-composition layers remain library-only
+for now. Physics simulation calls retain deterministic request, step,
+trajectory, and cancellation limits.
 
 ## Numerical contract
 
@@ -228,9 +261,11 @@ The physics engine follows CENTL's exact-first philosophy:
    integrator; they are not claimed to equal a closed-form continuous solution.
 6. Sphere contact classification uses exact squared-distance comparisons and
    distinguishes separation, contact, and overlap.
-7. Collision response remains distinct from contact detection, and the 3D
+7. World-level elastic composition is admitted only for disjoint exact touching
+   pairs; overlap and shared simultaneous contacts defer without mutation.
+8. Collision response remains distinct from contact detection, and the 3D
    machine response reports its caller-supplied contact assumption explicitly.
-8. No measured quantity is silently promoted to mathematical exactness.
+9. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -242,7 +277,8 @@ implemented yet:
 - general-shape narrow-phase collision detection
 - continuous collision detection
 - penetration correction or contact manifolds
-- automatic world-level collision response
+- simultaneous multi-contact impulse solving
+- automatic collision processing inside world time stepping
 - constraints and joints
 - frictional contact solvers
 - adaptive or higher-order ODE integrators
@@ -253,8 +289,8 @@ implemented yet:
 
 Those are future engine layers. The present implementation is a deterministic,
 dimension-safe, exact-rational particle mechanics foundation with library, CLI,
-JSON Lines, and MCP interfaces; the multi-particle world/contact layer currently
-extends the library boundary only.
+JSON Lines, and MCP interfaces; the multi-particle world/contact and
+isolated-composition layers currently extend the library boundary only.
 
 ## Validation
 
@@ -272,6 +308,14 @@ extends the library boundary only.
 - exact separated, touching, and overlapping sphere classification
 - fractional exact contact without square-root normalization
 - deterministic sphere-pair ordering
+- isolated touching-pair elastic composition
+- separating touching-pair no-impulse composition
+- no-contact world completion without mutation
+- overlap deferral without mutation
+- shared simultaneous-contact deferral without mutation
+- deterministic resolution of multiple disjoint touching pairs
+- overlap precedence over simultaneous-contact ambiguity
+- exact whole-world conservation checks after completed contact composition
 - ideal 1D elastic-collision momentum and energy conservation
 - exact 3D head-on and oblique contact response
 - separating-contact no-impulse behavior

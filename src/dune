@@ -48,6 +48,7 @@
   Centl_physics
   Centl_physics_collision
   Centl_physics_world
+  Centl_physics_contact_solver
   Centl_physics_protocol
   Centl_physics_jsonl
   Centl_physics_collision_json
