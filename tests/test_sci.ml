@@ -42,7 +42,8 @@ let test_exact_expression_ir () =
       {|{"schema_version":1,"domain":"mathematics","problem_class":"exact_expression","operation":"compute","assumptions":[],"expression":"0.1 + 0.2"}|}
   in
   Alcotest.(check string)
-    "class" "exact_expression" (Centl_sci_ir.problem_class ir);
+    "class" "exact_expression"
+    (Centl_sci_ir.problem_class ir);
   Alcotest.(check string) "operation" "compute" (Centl_sci_ir.operation ir)
 
 let test_equation_ir () =
@@ -69,7 +70,7 @@ let test_unit_conversion_ir () =
 
 let test_ir_rejects_hallucinated_operation () =
   expect_ir_error
-    {|{"schema_version":1,"domain":"mathematics","problem_class":"exact_expression","operation":"run_shell","assumptions":[],"expression":"1 + 1"}|}
+    {|{"schema_version":1,"domain":"mathematics","problem_class":"exact_expression","operation":"estimate","assumptions":[],"expression":"1 + 1"}|}
 
 let test_ir_rejects_unknown_field () =
   expect_ir_error
@@ -77,10 +78,9 @@ let test_ir_rejects_unknown_field () =
 
 let test_ir_rejects_equation_separator_injection () =
   expect_ir_error
-    {|{"schema_version":1,"domain":"mathematics","problem_class":"polynomial_equation","operation":"solve","assumptions":[],"left":"x, unsupported(1)","relation":"equal","right":"0","variable":"x"}|}
+    {|{"schema_version":1,"domain":"mathematics","problem_class":"polynomial_equation","operation":"solve","assumptions":[],"left":"x, y","relation":"equal","right":"0","variable":"x"}|}
 
-let test_ir_rejects_prose () =
-  expect_ir_error "The answer is probably 42."
+let test_ir_rejects_prose () = expect_ir_error "The answer is probably 42."
 
 let test_compute_runtime () =
   let ir =
@@ -89,13 +89,16 @@ let test_compute_runtime () =
   in
   let outcome = Centl_sci_runtime.execute ir in
   Alcotest.(check string)
-    "status" "established" (Centl_sci_runtime.status_text outcome.status);
+    "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
   let result = response outcome in
   Alcotest.(check bool) "success" true (bool "ok" result);
   let value = assoc "value" result in
   Alcotest.(check string) "exact decimal result" "3/10" (string "text" value);
   let provenance = assoc "provenance" result in
-  Alcotest.(check string) "classification" "exact" (string "classification" provenance)
+  Alcotest.(check string)
+    "classification" "exact"
+    (string "classification" provenance)
 
 let test_solve_runtime () =
   let ir =
@@ -104,12 +107,15 @@ let test_solve_runtime () =
   in
   let outcome = Centl_sci_runtime.execute ir in
   Alcotest.(check string)
-    "status" "established" (Centl_sci_runtime.status_text outcome.status);
+    "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
   let result = response outcome in
   let value = assoc "value" result in
   Alcotest.(check string) "solutions" "x in {2, 3}" (string "text" value);
   let resolution = assoc "resolution" result in
-  Alcotest.(check string) "resolution" "transformed" (string "status" resolution)
+  Alcotest.(check string)
+    "resolution" "transformed"
+    (string "status" resolution)
 
 let test_conversion_runtime () =
   let ir =
@@ -118,7 +124,8 @@ let test_conversion_runtime () =
   in
   let outcome = Centl_sci_runtime.execute ir in
   Alcotest.(check string)
-    "status" "established" (Centl_sci_runtime.status_text outcome.status);
+    "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
   let result = response outcome in
   Alcotest.(check bool) "success" true (bool "ok" result);
   let physics = assoc "physics" result in
@@ -132,7 +139,8 @@ let test_unsupported_has_no_execution () =
   in
   let outcome = Centl_sci_runtime.execute ir in
   Alcotest.(check string)
-    "status" "unsupported" (Centl_sci_runtime.status_text outcome.status);
+    "status" "unsupported"
+    (Centl_sci_runtime.status_text outcome.status);
   Alcotest.(check bool) "no execution" true (Option.is_none outcome.plan);
   Alcotest.(check bool) "no response" true (Option.is_none outcome.response)
 
@@ -158,7 +166,8 @@ let () =
           Alcotest.test_case "unit conversion" `Quick test_unit_conversion_ir;
           Alcotest.test_case "hallucinated operation" `Quick
             test_ir_rejects_hallucinated_operation;
-          Alcotest.test_case "unknown field" `Quick test_ir_rejects_unknown_field;
+          Alcotest.test_case "unknown field" `Quick
+            test_ir_rejects_unknown_field;
           Alcotest.test_case "equation injection" `Quick
             test_ir_rejects_equation_separator_injection;
           Alcotest.test_case "prose output" `Quick test_ir_rejects_prose;
@@ -168,7 +177,8 @@ let () =
           Alcotest.test_case "exact computation" `Quick test_compute_runtime;
           Alcotest.test_case "equation solve" `Quick test_solve_runtime;
           Alcotest.test_case "unit conversion" `Quick test_conversion_runtime;
-          Alcotest.test_case "unsupported" `Quick test_unsupported_has_no_execution;
+          Alcotest.test_case "unsupported" `Quick
+            test_unsupported_has_no_execution;
         ] );
       ( "inference",
         [
