@@ -52,6 +52,28 @@ let test_model_style_equation_executes () =
       Alcotest.(check string) "solutions" "x in {2, 3}" (string "text" value)
   | None -> Alcotest.fail "expected CENTL response"
 
+let test_model_unit_names_execute () =
+  let ir =
+    parse
+      {|{"schema_version":1,"domain":"physics","problem_class":"unit_conversion","operation":"convert","assumptions":[],"value":"100","from_unit":"centimeters","to_unit":"meters"}|}
+  in
+  let outcome = Centl_sci_runtime.execute ir in
+  Alcotest.(check string)
+    "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
+  begin match outcome.plan with
+  | Some plan ->
+      Alcotest.(check string) "canonical from" "cm" (string "from_unit" plan.request);
+      Alcotest.(check string) "canonical to" "m" (string "to_unit" plan.request)
+  | None -> Alcotest.fail "expected conversion execution plan"
+  end;
+  match outcome.response with
+  | Some response ->
+      Alcotest.(check (option string))
+        "exact result" (Some "1 m")
+        (Centl_sci_runtime.result_text response)
+  | None -> Alcotest.fail "expected CENTL Physics response"
+
 let () =
   Alcotest.run "centl-sci-lowering"
     [
@@ -63,5 +85,10 @@ let () =
             test_identifier_boundary;
           Alcotest.test_case "model style equation executes" `Quick
             test_model_style_equation_executes;
+        ] );
+      ( "units",
+        [
+          Alcotest.test_case "model unit names execute" `Quick
+            test_model_unit_names_execute;
         ] );
     ]
