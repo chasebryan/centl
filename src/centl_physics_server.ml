@@ -2,6 +2,7 @@ open Centl_physics
 open Centl_physics_protocol
 open Centl_physics_jsonl
 open Centl_physics_collision_json
+open Centl_physics_world_json
 
 let collision_result fields =
   match
@@ -108,7 +109,7 @@ let dispatch ?(cancelled = never_cancelled) state id action fields =
       match action with
       | "capabilities" ->
           begin match check_fields [ "version"; "id"; "action" ] fields with
-          | Ok () -> Ok (capabilities_result state.limits)
+          | Ok () -> Ok (enhanced_capabilities_result state.limits)
           | Error _ as error -> error
           end
       | "units" ->
@@ -121,6 +122,9 @@ let dispatch ?(cancelled = never_cancelled) state id action fields =
       | "simulate_particle" -> simulation_result ~cancelled state.limits fields
       | "elastic_collision_1d" -> collision_result fields
       | "elastic_collision_3d_at_contact" -> collision_3d_result fields
+      | "analyze_sphere_contacts" -> contact_analysis_result fields
+      | "resolve_isolated_elastic_sphere_contacts" ->
+          contact_resolution_result fields
       | name -> Error ("unknown physics action " ^ name)
     in
     match result with
