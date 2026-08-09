@@ -3,7 +3,9 @@ let usage =
    'mathematics or physics problem'"
 
 let env_or default name =
-  match Sys.getenv_opt name with Some value when value <> "" -> value | _ -> default
+  match Sys.getenv_opt name with
+  | Some value when value <> "" -> value
+  | _ -> default
 
 let read_stdin_problem () =
   let buffer = Buffer.create 1_024 in
@@ -35,7 +37,10 @@ let () =
         "PATH llama.cpp llama-cli executable (default: llama-cli)" );
       ("--json", Arg.Set json_output, "emit the reproducible structured result");
       ( "--version",
-        Arg.Unit (fun () -> print_endline "CENTL-SCi 0.0.1"; exit 0),
+        Arg.Unit
+          (fun () ->
+            print_endline "CENTL-SCi 0.0.1";
+            exit 0),
         "print CENTL-SCi version" );
     ]
   in
@@ -64,4 +69,7 @@ let () =
         Centl_sci_runtime.to_json ~problem outcome
         |> Yojson.Safe.pretty_to_string |> print_endline
       else Centl_sci_runtime.human ~problem outcome |> print_endline;
-      begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> () end
+      begin match outcome.status with
+      | Centl_sci_runtime.Failed -> exit 1
+      | _ -> ()
+      end
