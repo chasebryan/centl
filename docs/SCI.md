@@ -205,6 +205,55 @@ dune exec centl-sci -- \
 Ordinary execution requires no network connection after the selected inference
 runtime and model artifacts are installed.
 
+## Local model qualification
+
+A model should be evaluated against the checked-in SCi corpus before it is
+recommended. The normal local path is:
+
+```sh
+make sci-model-test MODEL=/path/to/model.gguf
+```
+
+This builds the current CENTL tree and writes `sci-model-report.json`. Useful
+configuration variables are:
+
+```sh
+make sci-model-test \
+  MODEL=/path/to/model.gguf \
+  SCI_LLAMA_CLI=/path/to/llama-cli \
+  SCI_TIMEOUT=300 \
+  SCI_REPORT=reports/qwen3-4b-q4.json
+```
+
+The report records the model path and file size, operating-system and machine
+identity, every fixture result, validated interpretation, compiled/executed
+CENTL result, mismatch reasons, process exit status, and per-case elapsed time.
+It is intended to make local developer feedback reproducible rather than
+subjective.
+
+The corpus currently includes exact arithmetic, equation paraphrases, irrelevant
+wording, exact unit conversion, dimensional mismatch, missing physics data,
+out-of-domain questions, contradictions, and prompt-injection-like text embedded
+inside a mathematics problem.
+
+For targeted investigation without running the whole corpus:
+
+```sh
+python3 scripts/sci-model-eval.py \
+  --model /path/to/model.gguf \
+  --model-label 'Qwen3-4B-Instruct-2507 Q4' \
+  --case embedded_instruction_is_data \
+  --case unit_dimension_mismatch \
+  --output sci-targeted-report.json
+```
+
+The current adapter starts `llama-cli` separately for each submitted problem.
+Therefore `elapsed_seconds` in this report includes process startup and model
+loading and must **not** be published as interpretation-only latency. Separating
+model load time from steady-state interpretation latency requires a persistent
+inference adapter or an independently measured runtime and remains follow-up
+performance work.
+
 ## Mathematical honesty
 
 A successful model parse does not imply a successful mathematical operation.
@@ -255,6 +304,8 @@ weight download:
 - exact polynomial equation solving through CENTL;
 - exact unit conversion through CENTL Physics;
 - no execution for `unsupported`;
+- a deterministic local-process end-to-end path from problem text through the
+  inference adapter, validated IR, and the actual CENTL kernel;
 - offline, single-turn, schema-constrained `llama-cli` argv construction.
 
 Model-quality evaluation is a separate test layer because it is model- and
@@ -269,6 +320,10 @@ hardware-dependent. It must record at least:
 - explanation/rendering time;
 - peak process memory and model memory;
 - CPU/GPU/backend and operating system.
+
+The initial `sci-model-eval.py` report provides fixture accuracy and an honest
+whole-process elapsed measurement. It does not yet claim to separate all of the
+performance categories above.
 
 Do not publish hardware support or performance numbers until they have actually
 been measured.
