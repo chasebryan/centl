@@ -175,6 +175,8 @@ let test_model_argv_is_offline_and_grammar_constrained () =
   let arguments = Centl_sci_llama.argv config "Solve x = 2." |> Array.to_list in
   Alcotest.(check bool) "offline" true (List.mem "--offline" arguments);
   Alcotest.(check bool) "grammar" true (List.mem "--grammar" arguments);
+  Alcotest.(check bool) "simple subprocess I/O" true
+    (List.mem "--simple-io" arguments);
   Alcotest.(check bool) "no schema conversion" false
     (List.mem "--json-schema" arguments);
   Alcotest.(check bool) "single turn" true (List.mem "--single-turn" arguments);
