@@ -1,9 +1,17 @@
-type color_mode = Auto | Always | Never
 type interpretation_source = Fast_path | Model_cli | Model_server
 
+type interpreter_error = {
+  exit_code : int;
+  human_message : string;
+  detail_message : string;
+  diagnostic : string;
+}
+
 let usage =
-  "Usage: centl-sci [--server-url URL | --model MODEL.gguf] [--json] \
-   [--color=MODE] 'mathematics or physics problem'"
+  "Usage: centl-sci [--server-url URL | --model MODEL.gguf] [--details | \
+   --json] [--repl] 'mathematics or physics problem'"
+
+let repl_version = "0.0.1-Camelus"
 
 let env_or default name =
   match Sys.getenv_opt name with
@@ -15,30 +23,19 @@ let read_stdin_problem () =
   let rec loop count =
     match input_char stdin with
     | character ->
-        if count >= Centl_sci_llama.max_problem_bytes then begin
-          Printf.eprintf "centl-sci: problem exceeds the CENTL-SCi byte limit\n";
-          exit 2
-        end;
-        Buffer.add_char buffer character;
-        loop (count + 1)
-    | exception End_of_file -> Buffer.contents buffer |> String.trim
+        if count >= Centl_sci_llama.max_problem_bytes then
+          Error "problem exceeds the CENTL-SCi byte limit"
+        else begin
+          Buffer.add_char buffer character;
+          loop (count + 1)
+        end
+    | exception End_of_file -> Ok (Buffer.contents buffer |> String.trim)
   in
   loop 0
 
-let color_enabled = function
-  | Always -> true
-  | Never -> false
-  | Auto ->
-      Sys.getenv_opt "NO_COLOR" = None
-      && Unix.isatty (Unix.descr_of_out_channel stdout)
-
-let ansi enabled code text =
-  if enabled then Printf.sprintf "\027[%sm%s\027[0m" code text else text
-
-let after prefix line =
-  String.sub line (String.length prefix)
-    (String.length line - String.length prefix)
-  |> String.trim
+let stdin_is_tty () =
+  try Unix.isatty (Unix.descr_of_in_channel stdin)
+  with Unix.Unix_error _ -> false
 
 let source_text = function
   | Fast_path -> "fast"
@@ -48,71 +45,6 @@ let backend_text = function
   | Fast_path -> None
   | Model_cli -> Some "llama-cli"
   | Model_server -> Some "llama-server"
-
-let source_label = function
-  | Fast_path -> "FAST"
-  | Model_cli -> "MODEL // CLI"
-  | Model_server -> "MODEL // RESIDENT"
-
-let brand_header color =
-  let title =
-    ansi color "1;97;44" " CENTL-SCi " ^ ansi color "1;94" "  //  FCF"
-  in
-  String.concat "\n"
-    [
-      title;
-      ansi color "96" "Free Computation Foundation"
-      ^ ansi color "90" "  //  Free for science.";
-    ]
-
-let render_line color line =
-  if String.starts_with ~prefix:"Status: established" line then
-    ansi color "1;32" "OK>" ^ " " ^ ansi color "1;32" "ESTABLISHED"
-  else if String.starts_with ~prefix:"Status: unresolved" line then
-    ansi color "1;33" "WAIT>" ^ " " ^ ansi color "1;33" "UNRESOLVED"
-  else if String.starts_with ~prefix:"Status: unsupported" line then
-    ansi color "1;33" "WAIT>" ^ " " ^ ansi color "1;33" "UNSUPPORTED"
-  else if String.starts_with ~prefix:"Status: failed" line then
-    ansi color "1;31" "ERR>" ^ " " ^ ansi color "1;31" "FAILED"
-  else if String.starts_with ~prefix:"Result:" line then
-    ansi color "1;94" "=>" ^ " " ^ ansi color "1;97" (after "Result:" line)
-  else if String.starts_with ~prefix:"Interpretation:" line then
-    ansi color "1;96" "IR>" ^ " " ^ after "Interpretation:" line
-  else if String.starts_with ~prefix:"Interpreter assumptions:" line then
-    ansi color "1;96" "AS>" ^ " " ^ after "Interpreter assumptions:" line
-  else if String.starts_with ~prefix:"CENTL resolution:" line then
-    ansi color "1;96" "RS>" ^ " " ^ after "CENTL resolution:" line
-  else if String.starts_with ~prefix:"CENTL provenance:" line then
-    ansi color "1;96" "PV>" ^ " "
-    ^ ansi color "90" (after "CENTL provenance:" line)
-  else if String.starts_with ~prefix:"Reason:" line then
-    ansi color "1;33" "WHY>" ^ " " ^ after "Reason:" line
-  else line
-
-let branded_human ~color ~problem ~source outcome =
-  let body =
-    Centl_sci_runtime.human ~problem outcome
-    |> String.split_on_char '\n'
-    |> List.map (render_line color)
-    |> String.concat "\n"
-  in
-  let source_line =
-    ansi color "1;96" "RT>" ^ " "
-    ^ ansi color
-        (match source with
-        | Fast_path -> "1;32"
-        | Model_cli | Model_server -> "1;94")
-        (source_label source)
-  in
-  String.concat "\n"
-    [
-      brand_header color;
-      "";
-      ansi color "1;94" "SCI>" ^ " " ^ ansi color "97" problem;
-      source_line;
-      "";
-      body;
-    ]
 
 let with_interpreter_path source = function
   | `Assoc fields ->
@@ -172,14 +104,23 @@ let record_interpreter_error ~source ?backend ~problem ~code ~message () =
     (Centl_sci_contrib.record_interpreter_error ~source ?backend ~problem ~code
        ~message ())
 
+let human_error ~details error =
+  if details then
+    String.concat "\n"
+      [ error.human_message; ""; "Details:"; "  " ^ error.detail_message ]
+  else error.human_message
+
+let print_json_error error = Printf.eprintf "centl-sci: %s\n" error.diagnostic
+
 let () =
   let model = ref (Sys.getenv_opt "CENTL_SCI_MODEL") in
   let server_url = ref (Sys.getenv_opt "CENTL_SCI_SERVER_URL") in
   let llama_cli = ref (env_or "llama-cli" "CENTL_SCI_LLAMA_CLI") in
   let curl = ref (env_or "curl" "CENTL_SCI_CURL") in
   let json_output = ref false in
+  let details_output = ref false in
   let force_model = ref false in
-  let color = ref Auto in
+  let force_repl = ref false in
   let anonymous = ref [] in
   let options =
     [
@@ -197,7 +138,12 @@ let () =
         Arg.Set_string curl,
         "PATH curl executable used for loopback resident inference (default: \
          curl)" );
+      ("--details", Arg.Set details_output, "show concise scientific details");
       ("--json", Arg.Set json_output, "emit the reproducible structured result");
+      ( "--repl",
+        Arg.Set force_repl,
+        "start the live scientific problem interpreter even when stdin is not \
+         a TTY" );
       ( "--force-model",
         Arg.Set force_model,
         "bypass deterministic interpretation; intended for model \
@@ -233,17 +179,15 @@ let () =
       ( "--contribution-clear",
         Arg.Unit clear_contribution,
         "delete pending local contribution data" );
-      ("--color", Arg.Unit (fun () -> color := Always), "force ANSI color");
-      ("--no-color", Arg.Unit (fun () -> color := Never), "disable ANSI color");
-      ( "--color=auto",
-        Arg.Unit (fun () -> color := Auto),
-        "automatic ANSI color" );
+      ("--color", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
+      ("--no-color", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
+      ("--color=auto", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
       ( "--color=always",
-        Arg.Unit (fun () -> color := Always),
-        "force ANSI color" );
+        Arg.Unit (fun () -> ()),
+        "accepted for CLI compatibility" );
       ( "--color=never",
-        Arg.Unit (fun () -> color := Never),
-        "disable ANSI color" );
+        Arg.Unit (fun () -> ()),
+        "accepted for CLI compatibility" );
       ( "--version",
         Arg.Unit
           (fun () ->
@@ -253,12 +197,11 @@ let () =
     ]
   in
   Arg.parse options (fun value -> anonymous := value :: !anonymous) usage;
-  let problem =
-    match List.rev !anonymous with
-    | [] -> read_stdin_problem ()
-    | values -> String.concat " " values |> String.trim
-  in
-  let model_interpret () =
+  if !json_output && !details_output then begin
+    Printf.eprintf "centl-sci: --details and --json are mutually exclusive\n";
+    exit 2
+  end;
+  let model_interpret problem =
     match !server_url with
     | Some url when String.trim url <> "" ->
         let config =
@@ -268,60 +211,191 @@ let () =
         | Error error ->
             record_interpreter_error ~source:"model" ~backend:"llama-server"
               ~problem ~code:error.code ~message:error.message ();
-            Printf.eprintf "centl-sci: %s\n"
-              (Centl_sci_server.string_of_error error);
-            exit 1
-        | Ok ir -> (Model_server, ir)
+            Error
+              {
+                exit_code = 1;
+                human_message = "CENTL-SCi could not interpret this problem.";
+                detail_message = error.message;
+                diagnostic = Centl_sci_server.string_of_error error;
+              }
+        | Ok ir -> Ok (Model_server, ir)
         end
     | _ ->
-        let model =
+        let configured_model =
           match !model with
-          | Some value when value <> "" -> value
-          | _ ->
-              record_interpreter_error ~source:"deferred" ~problem
-                ~code:"semantic_inference_required"
-                ~message:"no semantic model backend is configured" ();
-              Printf.eprintf
-                "centl-sci: this problem requires semantic inference; \
-                 configure --server-url/CENTL_SCI_SERVER_URL or \
-                 --model/CENTL_SCI_MODEL\n";
-              exit 2
+          | Some value when value <> "" -> Some value
+          | _ -> None
         in
-        let config = Centl_sci_llama.default ~executable:!llama_cli ~model () in
-        begin match Centl_sci_llama.interpret config problem with
-        | Error error ->
-            record_interpreter_error ~source:"model" ~backend:"llama-cli"
-              ~problem ~code:error.code ~message:error.message ();
-            Printf.eprintf "centl-sci: %s\n"
-              (Centl_sci_llama.string_of_error error);
-            exit 1
-        | Ok ir -> (Model_cli, ir)
+        begin match configured_model with
+        | None ->
+            let message = "no semantic model backend is configured" in
+            record_interpreter_error ~source:"deferred" ~problem
+              ~code:"semantic_inference_required" ~message ();
+            Error
+              {
+                exit_code = 2;
+                human_message = "CENTL-SCi cannot solve this problem yet.";
+                detail_message =
+                  "Semantic interpretation is required, but no local model \
+                   backend is configured.";
+                diagnostic =
+                  "this problem requires semantic inference; configure \
+                   --server-url/CENTL_SCI_SERVER_URL or \
+                   --model/CENTL_SCI_MODEL";
+              }
+        | Some model_path ->
+            let config =
+              Centl_sci_llama.default ~executable:!llama_cli ~model:model_path
+                ()
+            in
+            begin match Centl_sci_llama.interpret config problem with
+            | Error error ->
+                record_interpreter_error ~source:"model" ~backend:"llama-cli"
+                  ~problem ~code:error.code ~message:error.message ();
+                Error
+                  {
+                    exit_code = 1;
+                    human_message =
+                      "CENTL-SCi could not interpret this problem.";
+                    detail_message = error.message;
+                    diagnostic = Centl_sci_llama.string_of_error error;
+                  }
+            | Ok ir -> Ok (Model_cli, ir)
+            end
         end
   in
-  let source, ir =
-    if !force_model then model_interpret ()
+  let interpret problem =
+    if !force_model then model_interpret problem
     else
       match Centl_sci_fastpath.interpret problem with
-      | Some ir -> (Fast_path, ir)
-      | None -> model_interpret ()
+      | Some ir -> Ok (Fast_path, ir)
+      | None -> model_interpret problem
   in
-  let outcome = Centl_sci_runtime.execute ir in
-  let contribution =
-    match backend_text source with
-    | None ->
-        Centl_sci_contrib.record ~source:(source_text source) ~problem ~ir
-          ~outcome ()
-    | Some backend ->
-        Centl_sci_contrib.record ~source:(source_text source) ~backend ~problem
-          ~ir ~outcome ()
+  let execute_problem problem =
+    match interpret problem with
+    | Error error -> Error error
+    | Ok (source, ir) ->
+        let outcome = Centl_sci_runtime.execute ir in
+        let contribution =
+          match backend_text source with
+          | None ->
+              Centl_sci_contrib.record ~source:(source_text source) ~problem ~ir
+                ~outcome ()
+          | Some backend ->
+              Centl_sci_contrib.record ~source:(source_text source) ~backend
+                ~problem ~ir ~outcome ()
+        in
+        warn_contribution contribution;
+        Ok (source, outcome)
   in
-  warn_contribution contribution;
-  if !json_output then
-    Centl_sci_runtime.to_json ~problem outcome
-    |> with_interpreter_path source
-    |> Yojson.Safe.pretty_to_string |> print_endline
-  else
-    branded_human ~color:(color_enabled !color) ~problem ~source outcome
-    |> print_endline;
-  begin match outcome.status with Centl_sci_runtime.Failed -> exit 1 | _ -> ()
-  end
+  let print_outcome ~problem ~source outcome =
+    if !json_output then
+      Centl_sci_runtime.to_json ~problem outcome
+      |> with_interpreter_path source
+      |> Yojson.Safe.pretty_to_string |> print_endline
+    else if !details_output then
+      Centl_sci_present.details outcome |> print_endline
+    else Centl_sci_present.human outcome |> print_endline
+  in
+  let run_one problem =
+    if problem = "" then begin
+      Printf.eprintf "centl-sci: a mathematics or physics problem is required\n";
+      exit 2
+    end;
+    match execute_problem problem with
+    | Error error ->
+        if !json_output then print_json_error error
+        else human_error ~details:!details_output error |> print_endline;
+        exit error.exit_code
+    | Ok (source, outcome) ->
+        print_outcome ~problem ~source outcome;
+        begin match outcome.Centl_sci_runtime.status with
+        | Centl_sci_runtime.Failed -> exit 1
+        | _ -> ()
+        end
+  in
+  let repl () =
+    print_endline ("CENTL-SCi v" ^ repl_version);
+    print_endline "Free for science.";
+    print_newline ();
+    let details = ref !details_output in
+    let help () =
+      print_endline ":help        show session controls";
+      print_endline ":details on  show scientific details";
+      print_endline ":details off show only the answer";
+      print_endline ":quit        exit";
+      print_endline ":exit        exit"
+    in
+    let rec loop () =
+      print_string "> ";
+      flush stdout;
+      match input_line stdin with
+      | exception End_of_file -> print_newline ()
+      | line ->
+          let problem = String.trim line in
+          let command = String.lowercase_ascii problem in
+          if command = ":quit" || command = ":exit" then ()
+          else if command = ":help" then begin
+            help ();
+            loop ()
+          end
+          else if command = ":details on" then begin
+            details := true;
+            print_endline "Details on.";
+            loop ()
+          end
+          else if command = ":details off" then begin
+            details := false;
+            print_endline "Details off.";
+            loop ()
+          end
+          else if String.starts_with ~prefix:":" command then begin
+            print_endline "Unknown session control. Use :help.";
+            loop ()
+          end
+          else if problem = "" then loop ()
+          else if String.length problem > Centl_sci_llama.max_problem_bytes then begin
+            print_endline "This problem exceeds the CENTL-SCi input limit.";
+            loop ()
+          end
+          else begin
+            begin match execute_problem problem with
+            | Error error ->
+                human_error ~details:!details error |> print_endline
+            | Ok (_, outcome) ->
+                if !details then
+                  Centl_sci_present.details outcome |> print_endline
+                else Centl_sci_present.human outcome |> print_endline
+            end;
+            loop ()
+          end
+    in
+    loop ()
+  in
+  let arguments = List.rev !anonymous in
+  match arguments with
+  | _ :: _ when !force_repl ->
+      Printf.eprintf "centl-sci: --repl does not accept a one-shot problem\n";
+      exit 2
+  | _ :: _ as values -> String.concat " " values |> String.trim |> run_one
+  | [] when !force_repl ->
+      if !json_output then begin
+        Printf.eprintf "centl-sci: --json is not available in the human REPL\n";
+        exit 2
+      end;
+      repl ()
+  | [] when stdin_is_tty () ->
+      if !json_output then begin
+        Printf.eprintf
+          "centl-sci: --json requires a problem or non-interactive standard \
+           input\n";
+        exit 2
+      end;
+      repl ()
+  | [] ->
+      begin match read_stdin_problem () with
+      | Error message ->
+          Printf.eprintf "centl-sci: %s\n" message;
+          exit 2
+      | Ok problem -> run_one problem
+      end

@@ -8,7 +8,9 @@ param(
 
     [string] $Binary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\main.exe"),
 
-    [string] $PhysicsBinary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\physics_main.exe")
+    [string] $PhysicsBinary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\physics_main.exe"),
+
+    [string] $SciBinary = (Join-Path (Split-Path -Parent $PSScriptRoot) "_build\default\src\sci_main.exe")
 )
 
 Set-StrictMode -Version Latest
@@ -32,6 +34,9 @@ if (-not (Test-Path -LiteralPath $Binary -PathType Leaf)) {
 }
 if (-not (Test-Path -LiteralPath $PhysicsBinary -PathType Leaf)) {
     throw "centl package: build CENTL Physics before packaging: $PhysicsBinary"
+}
+if (-not (Test-Path -LiteralPath $SciBinary -PathType Leaf)) {
+    throw "centl package: build CENTL-SCi before packaging: $SciBinary"
 }
 
 $ReportedVersion = (& $Binary --version | Out-String).Trim()
@@ -81,9 +86,13 @@ if (-not $Objdump) {
 $SearchDirectories = [System.Collections.Generic.List[string]]::new()
 $BinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $Binary)
 $PhysicsBinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $PhysicsBinary)
+$SciBinaryDirectory = Split-Path -Parent (Resolve-Path -LiteralPath $SciBinary)
 $SearchDirectories.Add($BinaryDirectory)
 if ($PhysicsBinaryDirectory -ne $BinaryDirectory) {
     $SearchDirectories.Add($PhysicsBinaryDirectory)
+}
+if ($SciBinaryDirectory -ne $BinaryDirectory -and $SciBinaryDirectory -ne $PhysicsBinaryDirectory) {
+    $SearchDirectories.Add($SciBinaryDirectory)
 }
 $NativeStubDirectory = Join-Path $BinaryDirectory "native"
 if (Test-Path -LiteralPath $NativeStubDirectory -PathType Container) {
@@ -105,12 +114,15 @@ New-Item -ItemType Directory -Path $Licenses -Force | Out-Null
 try {
     $PackagedBinary = Join-Path $Package "centl.exe"
     $PackagedPhysicsBinary = Join-Path $Package "centl-physics.exe"
+    $PackagedSciBinary = Join-Path $Package "centl-sci.exe"
     Copy-Item -LiteralPath $Binary -Destination $PackagedBinary
     Copy-Item -LiteralPath $PhysicsBinary -Destination $PackagedPhysicsBinary
+    Copy-Item -LiteralPath $SciBinary -Destination $PackagedSciBinary
 
     $Pending = [System.Collections.Generic.Queue[string]]::new()
     $Pending.Enqueue($PackagedBinary)
     $Pending.Enqueue($PackagedPhysicsBinary)
+    $Pending.Enqueue($PackagedSciBinary)
     $Visited = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     $BundledRuntimeDlls = [System.Collections.Generic.List[string]]::new()
     $SystemDirectory = [Environment]::GetFolderPath([Environment+SpecialFolder]::System)
@@ -276,12 +288,15 @@ winpthreads is dynamically bundled as libwinpthread-1.dll when required.
     $Readme = @"
 CENTL $Version for Windows x86_64
 
-Run centl.exe for the mathematical kernel and centl-physics.exe for the
-exact-first physics engine. Required native libraries are included beside the
-executables. Use centl.exe --serve for stateful JSON Lines or --mcp for a local
-MCP server. License texts are in licenses; source and relinking references are
-in COMPONENT-SOURCES.txt. Use centl.exe check FILE with --receipt to retain an
-audit record; BUILD_MANIFEST.json records the package build identity.
+Run centl.exe for the mathematical kernel, centl-physics.exe for the exact-first
+physics engine, and centl-sci.exe for the natural-language scientific problem
+interpreter. Required native libraries are included beside the executables. Use
+centl.exe --serve for stateful JSON Lines or --mcp for a local MCP server.
+CENTL-SCi can run deterministic supported problems without a model; semantic
+problems require an explicitly configured local model backend. License texts are
+in licenses; source and relinking references are in COMPONENT-SOURCES.txt. Use
+centl.exe check FILE with --receipt to retain an audit record;
+BUILD_MANIFEST.json records the package build identity.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8
 
@@ -292,6 +307,10 @@ audit record; BUILD_MANIFEST.json records the package build identity.
     $PhysicsSmoke = (& $PackagedPhysicsBinary convert 100 cm m | Out-String).Trim()
     if ($LASTEXITCODE -ne 0 -or $PhysicsSmoke -ne "1") {
         throw "centl package: packaged physics executable failed its smoke test: $PhysicsSmoke"
+    }
+    $SciSmoke = (& $PackagedSciBinary 'What is 0.1 plus 0.2?' | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $SciSmoke -ne "3/10") {
+        throw "centl package: packaged CENTL-SCi executable failed its smoke test: $SciSmoke"
     }
 
     $EpochText = if ($env:SOURCE_DATE_EPOCH) { $env:SOURCE_DATE_EPOCH } else { "315532800" }

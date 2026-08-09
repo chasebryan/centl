@@ -11,6 +11,7 @@ version=${1:-}
 output_directory=${2:-"$project_root/dist"}
 binary=${CENTL_BINARY:-"$project_root/_build/default/src/main.exe"}
 physics_binary=${CENTL_PHYSICS_BINARY:-"$project_root/_build/default/src/physics_main.exe"}
+sci_binary=${CENTL_SCI_BINARY:-"$project_root/_build/default/src/sci_main.exe"}
 tar_command=${TAR:-tar}
 
 fail() {
@@ -46,6 +47,7 @@ esac
 
 [ -x "$binary" ] || fail "build CENTL before packaging: make build"
 [ -x "$physics_binary" ] || fail "build CENTL Physics before packaging: make build"
+[ -x "$sci_binary" ] || fail "build CENTL-SCi before packaging: make build"
 reported_version=$("$binary" --version)
 [ "$reported_version" = "centl $version" ] ||
   fail "binary reports '$reported_version', expected 'centl $version'"
@@ -145,20 +147,25 @@ mkdir -p "$package/bin" "$package/lib" "$package/libexec" \
   "$package/licenses"
 cp "$project_root/scripts/release-launcher" "$package/bin/centl"
 cp "$project_root/scripts/release-launcher" "$package/bin/centl-physics"
+cp "$project_root/scripts/release-launcher" "$package/bin/centl-sci"
 cp "$binary" "$package/libexec/centl"
 cp "$physics_binary" "$package/libexec/centl-physics"
+cp "$sci_binary" "$package/libexec/centl-sci"
 chmod 755 "$package/bin/centl" "$package/bin/centl-physics" \
-  "$package/libexec/centl" "$package/libexec/centl-physics"
+  "$package/bin/centl-sci" "$package/libexec/centl" \
+  "$package/libexec/centl-physics" "$package/libexec/centl-sci"
 
 if [ "$platform" = linux ]; then
   flint=$(linux_dependency_path '^libflint[.]so' "$binary")
   gmp=$(linux_dependency_path '^libgmp[.]so' "$binary")
   mpfr=$(linux_dependency_path '^libmpfr[.]so' "$flint")
 else
-  flint=$(macos_dependency_path '/libflint([.][0-9]+)*[.]dylib$' "$binary")
+  flint=$(macos_dependency_path '/libflint([.][0-9]+)*[.]dylib$' \
+    "$binary" "$sci_binary")
   gmp=$(macos_dependency_path '/libgmp([.][0-9]+)*[.]dylib$' \
-    "$binary" "$physics_binary" "$flint")
-  mpfr=$(macos_dependency_path '/libmpfr([.][0-9]+)*[.]dylib$' "$binary" "$flint")
+    "$binary" "$physics_binary" "$sci_binary" "$flint")
+  mpfr=$(macos_dependency_path '/libmpfr([.][0-9]+)*[.]dylib$' \
+    "$binary" "$sci_binary" "$flint")
 fi
 
 flint_name=$(basename "$flint")
@@ -170,11 +177,11 @@ cp -L "$mpfr" "$package/lib/$mpfr_name"
 
 if [ "$platform" = linux ]; then
   if command -v strip >/dev/null 2>&1; then
-    chmod u+w "$package/libexec/centl" \
-      "$package/lib/$flint_name" "$package/lib/$gmp_name" \
-      "$package/lib/$mpfr_name"
+    chmod u+w "$package/libexec/centl" "$package/libexec/centl-physics" \
+      "$package/libexec/centl-sci" "$package/lib/$flint_name" \
+      "$package/lib/$gmp_name" "$package/lib/$mpfr_name"
     strip --strip-unneeded "$package/libexec/centl" \
-      "$package/libexec/centl-physics" \
+      "$package/libexec/centl-physics" "$package/libexec/centl-sci" \
       "$package/lib/$flint_name" "$package/lib/$gmp_name" \
       "$package/lib/$mpfr_name"
   fi
@@ -185,7 +192,8 @@ else
     rewrite_macos_reference "$object" "$gmp" "@loader_path/$gmp_name"
     rewrite_macos_reference "$object" "$mpfr" "@loader_path/$mpfr_name"
   done
-  for executable in "$package/libexec/centl" "$package/libexec/centl-physics"; do
+  for executable in "$package/libexec/centl" "$package/libexec/centl-physics" \
+    "$package/libexec/centl-sci"; do
     rewrite_macos_reference "$executable" "$flint" "@loader_path/../lib/$flint_name"
     rewrite_macos_reference "$executable" "$gmp" "@loader_path/../lib/$gmp_name"
     rewrite_macos_reference "$executable" "$mpfr" "@loader_path/../lib/$mpfr_name"
@@ -199,6 +207,7 @@ else
   done
   codesign --force --sign - "$package/libexec/centl"
   codesign --force --sign - "$package/libexec/centl-physics"
+  codesign --force --sign - "$package/libexec/centl-sci"
 fi
 
 cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
@@ -326,23 +335,29 @@ json_escape() {
 cat > "$package/README" <<EOF
 CENTL $version for $platform_name $architecture
 
-Run bin/centl for the mathematical kernel and bin/centl-physics for the
-exact-first physics engine. The bundled native libraries are loaded only for
-CENTL. Use bin/centl --serve for stateful JSON Lines or --mcp for a local MCP
-server. License texts are in licenses; source and relinking references are in
-COMPONENT-SOURCES. Use bin/centl check FILE with --receipt to retain an audit
-record; BUILD_MANIFEST.json records the package build identity.
+Run bin/centl for the mathematical kernel, bin/centl-physics for the exact-first
+physics engine, and bin/centl-sci for the natural-language scientific problem
+interpreter. The bundled native libraries are loaded only for CENTL. Use
+bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
+CENTL-SCi can run deterministic supported problems without a model; semantic
+problems require an explicitly configured local model backend. License texts are
+in licenses; source and relinking references are in COMPONENT-SOURCES. Use
+bin/centl check FILE with --receipt to retain an audit record;
+BUILD_MANIFEST.json records the package build identity.
 EOF
 
 find "$package" -type d -exec chmod 755 {} +
 find "$package" -type f -exec chmod 644 {} +
 chmod 755 "$package/bin/centl" "$package/bin/centl-physics" \
-  "$package/libexec/centl" "$package/libexec/centl-physics"
+  "$package/bin/centl-sci" "$package/libexec/centl" \
+  "$package/libexec/centl-physics" "$package/libexec/centl-sci"
 
 "$package/bin/centl" '0.1 + 0.2' | grep -qx '3/10' ||
   fail "packaged executable failed its smoke test"
 "$package/bin/centl-physics" convert 100 cm m | grep -qx '1' ||
   fail "packaged physics executable failed its smoke test"
+"$package/bin/centl-sci" 'What is 0.1 plus 0.2?' | grep -qx '3/10' ||
+  fail "packaged CENTL-SCi executable failed its smoke test"
 
 mkdir -p "$output_directory"
 asset="centl-$platform-$architecture.tar.gz"

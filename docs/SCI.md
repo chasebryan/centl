@@ -1,87 +1,220 @@
 # CENTL-SCi
 
-Status: experimental architecture, version `0.0.1-Camelus`.
+Status: experimental architecture, current released milestone `0.0.1-Camelus`.
 
-CENTL-SCi means **Chase's Explicit Number Theory Language — Specific CENTL
-Interpreter**.
+**CENTL-SCi means Specific CENTL Interpreter.** It is developed as part of CENTL
+under the Free Computation Foundation.
+
+> Free for science.
 
 CENTL-SCi is a local, domain-restricted semantic interpreter for mathematics and
-physics. It is not a general chatbot and it is not a second mathematical or
-physics evaluator. Its job is to translate an ordinary-language problem into a
-small validated problem representation, dispatch that representation to
-CENTL's deterministic machinery, and present the resulting evidence without
-upgrading model guesses into mathematical facts.
+physics. It is not a general-purpose chatbot and it is not a second mathematical
+or physics evaluator. Its job is to interpret a scientific problem, produce a
+strict validated representation, dispatch that representation to CENTL's
+deterministic machinery, and present only what the resulting evidence justifies.
 
-The trust relationship is:
+The model is an untrusted semantic interpreter. CENTL remains authoritative for
+mathematics, exactness, approximation, bounds, units, solving, physics,
+verification, resource limits, provenance, and whether a result is actually
+established.
+
+## Trust and presentation boundary
 
 ```text
-ordinary-language problem
+ordinary-language scientific problem
         |
         v
-local model (untrusted interpreter)
-        |
-        v
-CENTL-SCi Problem IR v1
-        |
-   strict validation
-        |
-        +-------------------+
-        |                   |
-        v                   v
-CENTL protocol        CENTL Physics protocol
-(read-only compute)   (typed exact request)
-        |                   |
-        +---------+---------+
-                  |
-                  v
-        structured CENTL evidence
-                  |
-                  v
-          mathematical result
+Tier-0 deterministic interpreter --------+
+        |                                 |
+        | defer                           |
+        v                                 |
+local semantic model                      |
+(untrusted interpreter)                   |
+        |                                 |
+        +---------------+-----------------+
+                        |
+                        v
+               validated Problem IR
+                        |
+                   strict lowering
+                        |
+        +---------------+----------------+
+        |                                |
+        v                                v
+CENTL protocol                    CENTL Physics protocol
+(read-only compute)               (typed exact request)
+        |                                |
+        +---------------+----------------+
+                        |
+                        v
+              structured CENTL evidence
+                        |
+                        v
+             deterministic presentation
+                 /        |        \
+                /         |         \
+           human      --details     --json
 ```
 
-CENTL remains the authority wherever it has implemented semantics.
+The presentation layer consumes structured evidence. It does not recompute
+mathematics, invoke a language model to rewrite answers, or infer facts absent
+from the outcome.
 
-## v0.0.1-Camelus support boundary
+## Current support boundary
 
-The first milestone deliberately supports only four IR classes:
+The current validated IR deliberately supports four classes:
 
 | Problem class | Domain | Execution |
 | --- | --- | --- |
 | `exact_expression` | mathematics | read-only CENTL `compute` |
 | `polynomial_equation` | mathematics | compile to CENTL `solve` |
-| `unit_conversion` | physics | typed `centl-physics` `convert` |
+| `unit_conversion` | physics | typed CENTL Physics conversion |
 | `unsupported` | either/outside scope | no computation |
 
-The equation path inherits CENTL's current solver boundary: linear and real
-quadratic equations with rational coefficients are the completed exact domain.
-Unsupported equations remain explicit in CENTL's structured resolution rather
-than being guessed.
+The equation path inherits CENTL's current admitted solver domain. Unsupported
+or unresolved work stays visible internally and is never replaced by a model
+guess.
 
-The unit-conversion path inherits CENTL Physics dimensional checking and exact
-rational scalar parsing. Dimensionally incompatible conversions are failures.
+CENTL Physics already implements more mechanics than the current natural-language
+SCi contract exposes. A physics feature is promoted into SCi only after its
+interpretation schema, lowering, safety boundary, and fixtures are defined.
 
-CENTL Physics already implements more mechanics than this table exposes. That
-broader functionality is intentionally not available through natural-language
-SCi planning yet. A physics feature is not promoted into the SCi support
-contract until its interpretation schema and adversarial fixtures are defined
-and tested.
+## Answer-first human output
+
+The default interface is intentionally small. A scientist should need knowledge
+of mathematics or physics, not knowledge of CENTL-SCi's implementation terms.
+
+```sh
+centl-sci 'What is 0.1 plus 0.2?'
+```
+
+```text
+3/10
+```
+
+```sh
+centl-sci 'Solve x squared minus 5x plus 6 equals zero.'
+```
+
+```text
+x = 2 or x = 3
+```
+
+```sh
+centl-sci 'Convert 2.5 kilometers to meters.'
+```
+
+```text
+2500 m
+```
+
+Default output contains the answer, conventional units when relevant, and only
+scientifically necessary qualifications. It does not print interpreter route
+codes, backend/model names, provenance identifiers, schema versions, Problem IR,
+verification state codes, or implementation status prefixes.
+
+Exact values remain exact. Human presentation does not turn `3/10` into a
+binary-floating approximation. A finite solution set is rendered naturally
+rather than exposing protocol syntax.
+
+If CENTL provides a rigorous approximation interval, the human renderer keeps
+the qualification visible instead of presenting an unjustified point value.
+If CENTL cannot establish a result, the renderer does not manufacture one.
+
+## `--details`
+
+`--details` adds concise scientific metadata without changing the answer:
+
+```sh
+centl-sci --details 'Solve x squared minus 5x plus 6 equals zero.'
+```
+
+```text
+x = 2 or x = 3
+
+Details:
+  Exact result
+  Variable: x
+  Method: polynomial equation solving
+  Verified by CENTL
+```
+
+The details view intentionally uses scientific language rather than internal
+route/status codes.
+
+## `--json`
+
+`--json` remains the machine interface. It preserves the complete structured
+outcome used by tests, pipelines, assimilation tooling, and developers,
+including interpretation, CENTL response/evidence, status, route, and provenance
+where available.
+
+```sh
+centl-sci --json 'What is 0.1 plus 0.2?'
+```
+
+Human simplification is a presentation change, not an evidence deletion.
+`--details` and `--json` are mutually exclusive.
+
+## Live scientific REPL
+
+Running `centl-sci` in an interactive terminal starts the live scientific
+problem interpreter:
+
+```text
+CENTL-SCi v0.0.1-Camelus
+Free for science.
+
+> What is 0.1 plus 0.2?
+3/10
+> Solve x squared minus 5x plus 6 equals zero.
+x = 2 or x = 3
+> Convert 2.5 kilometers to meters.
+2500 m
+>
+```
+
+The REPL is not a conversation. Each submitted line is an independent
+scientific problem. No language-model conversational memory or implicit
+cross-question state is created.
+
+Session controls are deliberately minimal:
+
+- `:help`
+- `:details on`
+- `:details off`
+- `:quit`
+- `:exit`
+- Ctrl-D / EOF
+
+`--repl` forces the REPL when standard input is not a terminal, which is useful
+for integration testing. Bare non-interactive standard input retains one-shot
+stdin behavior for compatibility.
+
+An unsupported or failed request does not terminate the REPL; the next problem
+is interpreted independently.
+
+## Tier-0 deterministic interpretation
+
+CENTL-SCi first uses a conservative deterministic path where the language is
+unambiguous. Current examples include exact arithmetic, exact unit conversion,
+symbolic polynomial equations, and a bounded spoken-polynomial form.
+
+For example, both of these are deterministic:
+
+```text
+Solve x squared minus 5 x plus 6 equals zero for x.
+Solve x squared minus 5x plus 6 equals zero.
+```
+
+The second form infers the variable only when the spoken equation begins with an
+unambiguous identifier. Ambiguous narrative language still defers to the semantic
+layer rather than being aggressively pattern-matched.
 
 ## Problem IR v1
 
-Every model result is one JSON object. Common fields are:
-
-```json
-{
-  "schema_version": 1,
-  "domain": "mathematics",
-  "problem_class": "polynomial_equation",
-  "operation": "solve",
-  "assumptions": []
-}
-```
-
-A polynomial equation adds explicit sides and a variable:
+The semantic model produces one closed JSON object. A polynomial equation looks
+like:
 
 ```json
 {
@@ -106,245 +239,168 @@ An exact unit conversion is typed separately:
   "problem_class": "unit_conversion",
   "operation": "convert",
   "assumptions": [],
-  "value": "100",
-  "from_unit": "cm",
+  "value": "2.5",
+  "from_unit": "km",
   "to_unit": "m"
 }
 ```
 
-The validator rejects unknown fields, duplicate fields, unknown operations,
-invalid class/domain/operation combinations, invalid identifiers, control
-characters, oversized model fields, and unsafe equation separators. Validation
-is independent of the model's claim that its output is valid.
+The validator rejects unknown or duplicate fields, unknown operations, invalid
+class/domain/operation combinations, invalid identifiers, control characters,
+oversized fields, and unsafe equation separators. Validation is independent of
+the model's claim that its output is valid.
+
+The architectural direction is to make future model generations smaller rather
+than larger: predict only semantic information that genuinely requires semantic
+interpretation, then let OCaml construct deterministic boilerplate and canonical
+Problem IR.
 
 ## Local inference boundary
 
-The initial adapter targets `llama.cpp`'s `llama-cli`.
+The cold reference adapter targets a local `llama.cpp` `llama-cli`, and a
+resident loopback `llama-server` adapter is also supported. No model is bundled
+or declared mathematically authoritative.
 
-CENTL-SCi:
+The local adapters:
 
-- starts the executable directly with `Unix.open_process_args_in`; it does not
-  construct a shell command;
-- passes `--offline` so the inference invocation does not fetch remote models;
-- passes a JSON Schema constraint to `llama-cli`;
-- also describes the schema in the prompt because grammar constraints alone do
-  not tell the model what fields mean;
-- uses one bounded single-turn generation;
-- caps problem and model-output bytes;
-- parses exactly one JSON object and does not extract JSON from surrounding
-  prose;
-- treats every generated expression and field as untrusted input after
-  generation.
+- use explicitly configured local executables/model paths;
+- constrain model output to the SCi schema;
+- use bounded single-problem generation;
+- cap problem and model-output bytes;
+- parse a complete JSON object rather than scraping prose;
+- treat generated fields and expressions as untrusted after generation;
+- never let the model select arbitrary shell commands or tools.
 
-The configured `llama-cli` executable and model path are local operator
-configuration, not values chosen by the model.
+A local model may be configured through `--model` / `CENTL_SCI_MODEL`, or a
+resident loopback backend through `--server-url` / `CENTL_SCI_SERVER_URL`.
 
-The adapter is intentionally replaceable. CENTL-SCi's IR and execution bridge
-do not depend on Qwen-specific APIs or a hosted inference provider.
+Deterministic Tier-0 problems do not require a model.
 
-## Model candidates
+## Build and native packages
 
-No model is declared mathematically authoritative and no model is bundled with
-CENTL-SCi v0.0.1-Camelus.
-
-The initial evaluation candidates are:
-
-1. `Qwen/Qwen3-4B-Instruct-2507` — Apache-2.0, approximately 4B parameters,
-   instruction-tuned and non-thinking-only. It is the first candidate to test
-   for structured math/physics interpretation.
-2. `Qwen/Qwen3-1.7B` — Apache-2.0, approximately 1.7B parameters. It is the
-   lower-resource comparison baseline.
-
-`llama.cpp` is MIT-licensed and supports local GGUF inference, quantization,
-CPU execution, Apple Silicon, and multiple optional accelerator backends.
-
-These are **evaluation candidates, not compatibility claims**. A model should
-only become a recommended default after the CENTL-SCi fixture corpus measures
-interpretation accuracy, schema compliance, latency, and memory use on tested
-hardware.
-
-Upstream resources:
-
-- <https://github.com/ggml-org/llama.cpp>
-- <https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507>
-- <https://huggingface.co/Qwen/Qwen3-1.7B>
-
-Users are responsible for obtaining model weights under the model's applicable
-license. CENTL release archives should not silently download model weights.
-
-## Build and run
-
-Build CENTL from source using the normal pinned toolchain:
+From a source checkout:
 
 ```sh
 make build
+_build/default/src/sci_main.exe 'What is 0.1 plus 0.2?'
 ```
 
-Install or build `llama.cpp`, place a compatible GGUF model on the local
-machine, then run one problem:
+The Dune package registers `centl-sci` as a public executable.
 
-```sh
-dune exec centl-sci -- \
-  --model /path/to/model.gguf \
-  'Solve x squared minus 5 x plus 6 equals zero for x.'
-```
+The native release builders now include CENTL-SCi alongside CENTL and CENTL
+Physics. Unix/macOS archives contain `bin/centl-sci`; Windows archives contain
+`centl-sci.exe`. The package smoke tests require exact arithmetic through the
+packaged SCi executable before an archive is emitted.
 
-The model may also be configured with `CENTL_SCI_MODEL`, and an alternate
-`llama-cli` path may be configured with `CENTL_SCI_LLAMA_CLI`.
-
-For a reproducible envelope containing the original problem, validated IR,
-compiled CENTL request, structured CENTL response, resolution, and provenance:
-
-```sh
-dune exec centl-sci -- \
-  --model /path/to/model.gguf \
-  --json \
-  'Convert 100 centimeters to meters.'
-```
-
-Ordinary execution requires no network connection after the selected inference
-runtime and model artifacts are installed.
-
-## Local model qualification
-
-A model should be evaluated against the checked-in SCi corpus before it is
-recommended. The normal local path is:
-
-```sh
-make sci-model-test MODEL=/path/to/model.gguf
-```
-
-This builds the current CENTL tree and writes `sci-model-report.json`. Useful
-configuration variables are:
-
-```sh
-make sci-model-test \
-  MODEL=/path/to/model.gguf \
-  SCI_LLAMA_CLI=/path/to/llama-cli \
-  SCI_TIMEOUT=300 \
-  SCI_REPORT=reports/qwen3-4b-q4.json
-```
-
-The report records the model path and file size, operating-system and machine
-identity, every fixture result, validated interpretation, compiled/executed
-CENTL result, mismatch reasons, process exit status, and per-case elapsed time.
-It is intended to make local developer feedback reproducible rather than
-subjective.
-
-The corpus currently includes exact arithmetic, equation paraphrases, irrelevant
-wording, exact unit conversion, dimensional mismatch, missing physics data,
-out-of-domain questions, contradictions, and prompt-injection-like text embedded
-inside a mathematics problem.
-
-For targeted investigation without running the whole corpus:
-
-```sh
-python3 scripts/sci-model-eval.py \
-  --model /path/to/model.gguf \
-  --model-label 'Qwen3-4B-Instruct-2507 Q4' \
-  --case embedded_instruction_is_data \
-  --case unit_dimension_mismatch \
-  --output sci-targeted-report.json
-```
-
-The current adapter starts `llama-cli` separately for each submitted problem.
-Therefore `elapsed_seconds` in this report includes process startup and model
-loading and must **not** be published as interpretation-only latency. Separating
-model load time from steady-state interpretation latency requires a persistent
-inference adapter or an independently measured runtime and remains follow-up
-performance work.
+Model weights remain separate artifacts and are never silently downloaded by a
+CENTL release package.
 
 ## Mathematical honesty
 
-A successful model parse does not imply a successful mathematical operation.
-The final SCi status is derived from CENTL's structured result:
+A successful interpretation is not the same thing as a successful mathematical
+operation. Internally, CENTL-SCi distinguishes established, unresolved,
+unsupported, and failed outcomes. Human presentation translates those states
+into useful scientific language without upgrading them.
 
-- `established`: CENTL reports a completed computation/transformation, or CENTL
-  Physics reports a successful typed result;
-- `unresolved`: CENTL returned a residual, unsupported, indeterminate, or other
-  non-complete mathematical resolution;
-- `unsupported`: the validated SCi IR explicitly declines the problem and no
-  CENTL operation is executed;
-- `failed`: the CENTL machine interface rejected or failed the request.
+Examples:
 
-CENTL-SCi never converts an `unsupported` CENTL result into a model-generated
-numerical answer.
+```text
+More information is required to solve this problem.
+```
 
-Interpreter assumptions remain separate from CENTL evidence. v0.0.1-Camelus does
-not silently invent physical constants, initial conditions, or missing
-quantities.
+or:
 
-## Security boundary
+```text
+CENTL-SCi cannot solve this problem yet.
+```
 
-Treat all three of these as untrusted:
+A result that CENTL did not establish is never converted into a confident human
+answer merely because the semantic model emitted plausible fields.
 
-1. the user's problem text;
-2. the local model's output;
-3. model-generated mathematical expressions.
+Interpreter assumptions remain separate from CENTL evidence. CENTL-SCi does not
+silently invent physical constants, initial conditions, or missing quantities.
 
-The first milestone adds no network listener, filesystem tool, arbitrary shell
-execution, or model-selected process invocation. The only generated operation
-names are admitted by the closed SCi IR. Mathematical requests are then
-processed by the existing bounded CENTL/CENTL Physics interfaces.
+## Contribution and privacy model
 
-`exact_expression` is intentionally routed through the existing read-only
-`compute` intent, so a generated definition cannot mutate a CENTL session.
+Contribution capture remains opt-in and is **off by default**.
 
-## Testing
+- `diagnostics` captures metadata/errors without raw problem text;
+- `examples` may capture raw problem text only after explicit opt-in;
+- no mode performs hidden network upload;
+- exported data is intended for user review before sharing.
 
-`tests/test_sci.ml` covers the deterministic boundary without requiring a model
-weight download:
+Starting or using the REPL does not change contribution mode and does not make
+REPL input training data automatically.
 
-- valid IR for each implemented class;
-- schema parseability;
-- hallucinated operation rejection;
-- unknown-field rejection;
-- equation separator/injection rejection;
-- arbitrary prose rejection;
-- exact decimal computation through CENTL;
-- exact polynomial equation solving through CENTL;
-- exact unit conversion through CENTL Physics;
-- no execution for `unsupported`;
-- a deterministic local-process end-to-end path from problem text through the
-  inference adapter, validated IR, and the actual CENTL kernel;
-- offline, single-turn, schema-constrained `llama-cli` argv construction.
+## Platform support
 
-Model-quality evaluation is a separate test layer because it is model- and
-hardware-dependent. It must record at least:
+**Linux is the reference platform for CENTL-SCi.** During the early development
+series, Linux is the primary development and release-blocking target.
 
-- model and quantization identity;
-- fixture accuracy and schema-valid rate;
-- model loading time;
-- interpretation latency;
-- CENTL execution time;
-- verification time where applicable;
-- explanation/rendering time;
-- peak process memory and model memory;
-- CPU/GPU/backend and operating system.
+Windows support is experimental and best-effort. Windows-specific failures do
+not block scientific feature development unless they indicate a cross-platform
+correctness or safety problem. Windows support is retained rather than removed,
+and portability regressions should still be fixed when the cost is reasonable,
+but early CENTL-SCi releases do not require fresh Windows validation before every
+scientific change can proceed.
 
-The initial `sci-model-eval.py` report provides fixture accuracy and an honest
-whole-process elapsed measurement. It does not yet claim to separate all of the
-performance categories above.
+macOS remains a supported native target where the existing portable runtime and
+release pipeline continue to operate without distracting from the reference
+Linux implementation.
 
-Do not publish hardware support or performance numbers until they have actually
-been measured.
+Shared SCi runtime and presentation code should remain portable across Linux,
+macOS, and Windows where practical. Terminal handling uses ordinary standard
+input/output and EOF semantics; the REPL does not depend on a particular shell
+or ANSI terminal control sequence.
 
-## Packaging status
+Platform-specific file-permission operations in the contribution subsystem are
+guarded so Windows does not execute unsupported `Unix.fchmod` behavior.
 
-The Dune package registers `centl-sci` as a public executable and adds no new
-OCaml package dependency; it reuses `unix` and `yojson`, which CENTL already
-uses.
+The support hierarchy is therefore:
 
-The current native release archive scripts still explicitly package only
-`centl` and `centl-physics`. Therefore v0.0.1-Camelus should be treated as
-source/opam experimental functionality until those archive scripts are
-deliberately extended and tested for `centl-sci`. Model weights remain a
-separate artifact even after native packaging is added.
+1. **Linux — reference platform:** primary development, full validation, and
+   release-blocking correctness target.
+2. **macOS — supported native platform:** maintained where the portable build and
+   release path remains practical.
+3. **Windows x86_64 — experimental/best-effort:** supported when practical, but
+   Windows-only failures are non-blocking unless they reveal a shared correctness
+   or safety defect.
+
+## Validation and assimilation
+
+The deterministic validation layers include:
+
+- IR/schema and execution tests;
+- Tier-0 fast-path tests;
+- deterministic presentation golden tests;
+- one-shot CLI and `--details` tests;
+- structured `--json` preservation checks;
+- multi-request REPL integration tests;
+- `:quit`, `:exit`, and EOF behavior;
+- recovery after an unsupported/deferred request;
+- contribution privacy tests;
+- the existing SCi product/model assimilation harness;
+- `scripts/sci-interface-check.py`, which exercises the visible product interface
+  and is included in CI and `make sci-assimilate`.
+
+Run the normal deterministic assimilation path with:
+
+```sh
+make sci-assimilate
+```
+
+A local semantic model can be qualified separately through the existing model
+and resident-server assimilation paths. Model performance results must identify
+the model/runtime/hardware and must not be generalized beyond what was actually
+measured.
 
 ## Next interpretation surfaces
 
-Expansion should be fixture-driven rather than breadth-driven. Candidate next
-classes are exact differentiation/integration plans and a typed basic-mechanics
-IR that maps to the existing `simulate_particle` physics request. Mechanics
-must explicitly represent quantities, units, initial state, force model,
-integration semantics, assumptions, and requested result before it is admitted.
+Expansion remains fixture-driven rather than chatbot-driven. Candidate next
+classes include exact differentiation/integration extraction and typed basic
+mechanics slots that lower into existing CENTL Physics operations.
+
+The governing rule remains:
+
+> The model interprets. CENTL computes. CENTL verifies. The interface gives the
+> scientist the answer.

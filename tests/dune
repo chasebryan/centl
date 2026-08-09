@@ -56,6 +56,11 @@
  (libraries centl_lib alcotest yojson))
 
 (test
+ (name test_sci_present)
+ (modules test_sci_present)
+ (libraries centl_lib alcotest yojson))
+
+(test
  (name test_sci_hint)
  (modules test_sci_hint)
  (libraries centl_lib alcotest))
@@ -173,6 +178,10 @@
   fixtures/exact.centl
   fixtures/contracts.centl
   raw-repl))
+
+(cram
+ (applies_to sci_cli)
+ (deps ../src/sci_main.exe))
 
 (cram
  (applies_to executeme)
