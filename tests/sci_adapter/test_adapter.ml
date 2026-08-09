@@ -1,5 +1,4 @@
-let suffix text length =
-  String.sub text (String.length text - length) length
+let suffix text length = String.sub text (String.length text - length) length
 
 let argument_after needle arguments =
   let rec loop = function
