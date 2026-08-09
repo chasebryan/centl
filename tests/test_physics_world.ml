@@ -12,6 +12,9 @@ let body ~id ~mass ~position:(px, py, pz) ~velocity:(vx, vy, vz) =
     ~position:(vector3 ~unit_symbol:"m" (q px) (q py) (q pz))
     ~velocity:(vector3 ~unit_symbol:"m/s" (q vx) (q vy) (q vz))
 
+let static_body id =
+  body ~id ~mass:"1" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
+
 let sphere_body ~id ~position ~radius =
   sphere
     ~particle:(body ~id ~mass:"1" ~position ~velocity:("0", "0", "0"))
@@ -41,6 +44,20 @@ let test_world_rejects_duplicate_ids () =
   | _ -> Alcotest.fail "duplicate world ids must be rejected"
   | exception Physics_error _ -> ()
 
+let test_world_rejects_blank_id () =
+  match world [ static_body "   " ] with
+  | _ -> Alcotest.fail "blank world ids must be rejected"
+  | exception Physics_error _ -> ()
+
+let test_world_particle_limit () =
+  let bodies count =
+    List.init count (fun index -> static_body (Printf.sprintf "p%d" index))
+  in
+  ignore (world (bodies max_world_particles));
+  match world (bodies (max_world_particles + 1)) with
+  | _ -> Alcotest.fail "worlds above the particle limit must be rejected"
+  | exception Physics_error _ -> ()
+
 let test_world_step_is_exact_and_ordered () =
   let p1 =
     body ~id:"p1" ~mass:"1" ~position:("0", "0", "0") ~velocity:("0", "0", "0")
@@ -66,6 +83,20 @@ let test_world_step_is_exact_and_ordered () =
       check_q "p2 x" (q "21/10") final2.position.x;
       check_q "p2 vy" (q "-1") final2.velocity.y
   | _ -> Alcotest.fail "world step must preserve particle count and order"
+
+let test_sphere_requires_positive_length_radius () =
+  let particle = static_body "p" in
+  begin match sphere ~particle ~radius:(quantity Q.zero "m") with
+  | _ -> Alcotest.fail "zero sphere radius must be rejected"
+  | exception Physics_error _ -> ()
+  end;
+  begin match sphere ~particle ~radius:(quantity (q "-1") "m") with
+  | _ -> Alcotest.fail "negative sphere radius must be rejected"
+  | exception Physics_error _ -> ()
+  end;
+  match sphere ~particle ~radius:(quantity Q.one "s") with
+  | _ -> Alcotest.fail "sphere radius must have length dimension"
+  | exception Physics_error _ -> ()
 
 let check_relation message expected contact =
   Alcotest.(check string)
@@ -98,6 +129,13 @@ let test_fractional_touching_without_square_root () =
   check_q "fractional radius sum squared" (q "9/4")
     contact.radius_sum_squared.si_value
 
+let test_contact_pair_requires_distinct_ids () =
+  let first = sphere_body ~id:"same" ~position:("0", "0", "0") ~radius:"1" in
+  let second = sphere_body ~id:"same" ~position:("2", "0", "0") ~radius:"1" in
+  match classify_sphere_contact first second with
+  | _ -> Alcotest.fail "contact pair ids must be distinct"
+  | exception Physics_error _ -> ()
+
 let test_pair_order_is_deterministic () =
   let a = sphere_body ~id:"a" ~position:("0", "0", "0") ~radius:"1" in
   let b = sphere_body ~id:"b" ~position:("2", "0", "0") ~radius:"1" in
@@ -120,12 +158,18 @@ let () =
           Alcotest.test_case "exact diagnostics" `Quick test_world_diagnostics;
           Alcotest.test_case "duplicate ids" `Quick
             test_world_rejects_duplicate_ids;
+          Alcotest.test_case "blank id" `Quick test_world_rejects_blank_id;
+          Alcotest.test_case "particle limit" `Quick test_world_particle_limit;
           Alcotest.test_case "exact ordered step" `Quick
             test_world_step_is_exact_and_ordered;
+          Alcotest.test_case "sphere radius admission" `Quick
+            test_sphere_requires_positive_length_radius;
           Alcotest.test_case "sphere contact relations" `Quick
             test_exact_sphere_contact_relations;
           Alcotest.test_case "fractional touching" `Quick
             test_fractional_touching_without_square_root;
+          Alcotest.test_case "distinct contact ids" `Quick
+            test_contact_pair_requires_distinct_ids;
           Alcotest.test_case "deterministic pair order" `Quick
             test_pair_order_is_deterministic;
         ] );
