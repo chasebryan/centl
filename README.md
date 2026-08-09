@@ -111,8 +111,9 @@ written to a terminal; use
 The development path now includes an experimental exact-first particle physics
 engine. It is implemented as the `Centl_physics` library module and the
 `centl-physics` executable. Rational inputs remain arbitrary-precision
-rationals through unit conversion, force evaluation, collision formulas, and
-fixed-step state evolution; incompatible physical dimensions fail explicitly.
+rationals through unit conversion, force evaluation, collision formulas,
+contact classification, and fixed-step state evolution; incompatible physical
+dimensions fail explicitly.
 
 After a source build:
 
@@ -124,16 +125,29 @@ dune exec centl-physics -- gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10
 
 Native packages built from this development path install `centl-physics`
 alongside `centl`. The engine implements seven-base SI dimensional analysis,
-exact unit conversion, dimension-safe 3D vectors, particle state, constant
-force, uniform gravity, Hooke springs, linear drag, symplectic-Euler time
-evolution, energy and momentum diagnostics, exact ideal 1D elastic collision
-response, and an exact frictionless 3D response primitive for a caller-supplied
-contact with distinct particle centers. The 3D primitive deliberately does not
-perform collision detection, infer radii, correct penetration, or model spin,
-torque, or friction. It does not yet claim a general rigid-body contact solver,
+exact unit conversion, dimension-safe 3D vectors, particle and bounded
+multi-particle world state, constant force, uniform gravity, Hooke springs,
+linear drag, symplectic-Euler time evolution, energy and momentum diagnostics,
+exact ideal 1D elastic collision response, exact frictionless 3D contact
+response, and exact sphere contact classification using squared-distance
+comparisons that introduce no square root.
+
+The versioned JSON Lines physics service and read-only `centl_physics` MCP tool
+can analyze complete sphere worlds and return exact evidence for touching or
+overlapping pairs. They can also resolve isolated disjoint touching pairs with
+whole-world momentum and kinetic-energy checks. If a world is already
+overlapping or has a particle in multiple simultaneous touching contacts, CENTL
+returns an explicit successful `deferred` verdict with the world unchanged
+instead of inventing an impulse order or penetration correction. Machine
+contact requests are bounded to 4,096 unordered sphere pairs.
+
+These contact operations remain separate from time stepping. CENTL does not yet
+claim continuous collision detection, penetration correction, a general
+simultaneous-contact solver, rigid-body contact dynamics, friction/spin contact,
 adaptive integration, continuum/fluid solvers, or rigorous truncation-error
-enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) for the exact contract and
-current boundary.
+enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) and
+[docs/PHYSICS_PROTOCOL.md](docs/PHYSICS_PROTOCOL.md) for the exact contract,
+evidence model, and current boundary.
 
 Calculator sessions and scripts remember immutable definitions written as
 `r = 3` or `f(x) = x^2 + 1`.
