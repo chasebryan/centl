@@ -145,6 +145,14 @@ let input_schema =
           ("spheres", array_of sphere_input_schema);
         ]
         [ "action"; "spheres" ];
+      strict_object
+        [
+          ("action", const_string "certify_linear_sphere_contact");
+          ("sphere1", sphere_input_schema);
+          ("sphere2", sphere_input_schema);
+          ("duration", quantity_input_schema);
+        ]
+        [ "action"; "sphere1"; "sphere2"; "duration" ];
     ]
 
 let read_only_annotations =
@@ -167,11 +175,15 @@ let tool () =
            Discover physics capabilities and units, convert compatible units, \
            inspect exact physical constants, simulate a dimension-checked \
            particle, solve ideal exact elastic collisions, analyze exact \
-           sphere contact geometry, or resolve only isolated disjoint touching \
-           sphere pairs. Overlaps and ambiguous simultaneous contacts are \
-           returned as explicit deferred results rather than guessed." );
+           sphere contact geometry, resolve only isolated disjoint touching \
+           sphere pairs, or certify bounded continuous sphere contact under an \
+           exact constant-velocity model. Overlaps and ambiguous simultaneous \
+           contacts are returned as explicit deferred results rather than \
+           guessed, and irrational contact times remain algebraic certificates \
+           rather than rounded timestamps." );
       ("inputSchema", input_schema);
-      ("outputSchema", Lazy.force Centl_physics_contact_mcp_output.output_schema);
+      ( "outputSchema",
+        Lazy.force Centl_physics_linear_contact_mcp_output.output_schema );
       ("annotations", read_only_annotations);
     ]
 
@@ -202,6 +214,10 @@ let action_fields = function
           [ "action"; "particle1"; "particle2" ] )
   | "analyze_sphere_contacts" | "resolve_isolated_elastic_sphere_contacts" ->
       Some ([ "action"; "spheres" ], [ "action"; "spheres" ])
+  | "certify_linear_sphere_contact" ->
+      Some
+        ( [ "action"; "sphere1"; "sphere2"; "duration" ],
+          [ "action"; "sphere1"; "sphere2"; "duration" ] )
   | _ -> None
 
 let validate_arguments arguments =
