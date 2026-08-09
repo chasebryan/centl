@@ -63,7 +63,9 @@ let test_model_unit_names_execute () =
     (Centl_sci_runtime.status_text outcome.status);
   begin match outcome.plan with
   | Some plan ->
-      Alcotest.(check string) "canonical from" "cm" (string "from_unit" plan.request);
+      Alcotest.(check string)
+        "canonical from" "cm"
+        (string "from_unit" plan.request);
       Alcotest.(check string) "canonical to" "m" (string "to_unit" plan.request)
   | None -> Alcotest.fail "expected conversion execution plan"
   end;
