@@ -122,15 +122,28 @@ dune exec centl-physics -- constant c
 dune exec centl-physics -- gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10
 ```
 
+For a terminal-ready physics-core presentation, run
+`./scripts/physics-core-demo` after building the project.
+
+The exact sphere-contact contract demo is available with:
+
+```sh
+python3 scripts/centl_contact_demo.py
+```
+
+It discovers the local Dune build automatically, including builds managed by
+the `centl` opam switch.
+
 Native packages built from this development path install `centl-physics`
 alongside `centl`. The initial engine implements seven-base SI dimensional
 analysis, exact unit conversion, dimension-safe 3D vectors, particle state,
 constant force, uniform gravity, Hooke springs, linear drag, symplectic-Euler
-time evolution, energy and momentum diagnostics, and exact ideal 1D elastic
-collision response. It does not yet claim rigid-body contact simulation,
-adaptive integration, continuum/fluid solvers, or rigorous truncation-error
-enclosures. See [docs/PHYSICS.md](docs/PHYSICS.md) for the exact contract and
-current boundary.
+time evolution, energy and momentum diagnostics, exact ideal 1D and isolated
+3D sphere-contact collision response, and exact sphere-contact classification.
+It does not yet claim general rigid-body contact simulation, adaptive
+integration, continuum/fluid solvers, or rigorous truncation-error enclosures.
+See [docs/PHYSICS.md](docs/PHYSICS.md) for the exact contract and current
+boundary.
 
 Calculator sessions and scripts remember immutable definitions written as
 `r = 3` or `f(x) = x^2 + 1`.

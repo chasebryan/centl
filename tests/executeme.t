@@ -1,2 +1,2 @@
-  $ CENTL_BIN=../src/main.exe CENTL_STRESS_SEED=424242 CENTL_STRESS_ROUNDS=2 ../executeme
+  $ CENTL_BIN=../src/main.exe CENTL_STRESS_SEED=424242 CENTL_STRESS_ROUNDS=24 ../executeme
   1

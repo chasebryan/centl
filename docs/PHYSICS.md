@@ -31,7 +31,7 @@ conversion is exact when the unit scale is rational.
 
 The initial unit catalog includes `m`, `cm`, `mm`, `km`, `s`, `ms`, `min`, `h`,
 `kg`, `g`, `A`, `K`, `mol`, `cd`, `m/s`, `m/s^2`, `N`, `J`, `Pa`, `Hz`, `C`,
-`W`, `V`, `N/m`, `kg/s`, `J*s`, `J/K`, and `1/mol`.
+`W`, `V`, `N/m`, `kg/s`, `m^2`, `J*s`, `J/K`, and `1/mol`.
 
 For example:
 
@@ -124,8 +124,32 @@ The initial collision primitive solves ideal one-dimensional perfectly elastic
 collisions for two positive masses with exact rational arithmetic. It preserves
 the algebraic momentum and kinetic-energy identities of that model.
 
-This is a collision-response primitive, not yet a geometric contact-detection
-system.
+### Sphere worlds and exact contact composition
+
+The bounded world layer accepts at most 256 particles, requires non-empty
+unique identifiers, and exposes exact whole-world momentum and kinetic-energy
+diagnostics. Sphere worlds are additionally bounded to 4,096 unordered contact
+pairs.
+
+Sphere pairs are classified exactly as `separated`, `touching`, or
+`overlapping` by comparing squared center distance with the squared sum of
+radii. No square root, floating-point normalization, or penetration correction
+is introduced.
+
+The JSONL service exposes `analyze_sphere_contacts` and
+`resolve_isolated_elastic_sphere_contacts`. Resolution is failure-atomic:
+overlap is deferred, and a world in which one particle belongs to multiple
+simultaneous touching pairs is deferred as
+`ambiguous_simultaneous_contacts`. Disjoint touching pairs are passed to the
+exact frictionless 3D elastic response independently, with exact momentum and
+kinetic-energy checks.
+
+The contract deliberately excludes continuous collision detection, penetration
+correction, friction, spin, and general rigid-body contact graphs. The
+`scripts/centl_contact_demo.py` script exercises the live JSONL contract.
+
+The 3D response remains a collision-response primitive: it assumes the caller
+has supplied distinct-center contact geometry and does not infer radii itself.
 
 ### Physical constants
 
@@ -167,7 +191,7 @@ The engine is now real, but it is intentionally small. The following are not
 implemented yet:
 
 - rigid-body orientation and angular inertia tensors
-- geometric broad-phase or narrow-phase collision detection
+- general geometric broad-phase collision detection
 - continuous collision detection
 - constraints, joints, and contact manifolds
 - frictional contact solvers

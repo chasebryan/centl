@@ -68,6 +68,9 @@ let capabilities_result limits =
             "constant";
             "simulate_particle";
             "elastic_collision_1d";
+            "elastic_collision_3d_at_contact";
+            "analyze_sphere_contacts";
+            "resolve_isolated_elastic_sphere_contacts";
           ] );
       ( "force_models",
         strings
@@ -86,6 +89,8 @@ let capabilities_result limits =
             ("max_requests", `Int limits.max_requests);
             ("max_steps", `Int limits.max_steps);
             ("max_trajectory_steps", `Int limits.max_trajectory_steps);
+            ( "max_contact_pairs",
+              `Int Centl_physics_world.max_contact_pairs );
           ] );
       ( "text",
         `String

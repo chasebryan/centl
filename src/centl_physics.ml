@@ -94,6 +94,7 @@ let unit_catalog =
   [
     unit_def "dimensionless" "1" dim_dimensionless "1";
     unit_def "metre" "m" dim_length "1";
+    unit_def "square metre" "m^2" (dim_pow dim_length 2) "1";
     unit_def "centimetre" "cm" dim_length "1/100";
     unit_def "millimetre" "mm" dim_length "1/1000";
     unit_def "kilometre" "km" dim_length "1000";

@@ -47,13 +47,29 @@ let particle () =
       ("velocity", vector "1" "0" "0" "m/s");
     ]
 
+let sphere id position velocity =
+  `Assoc
+    [
+      ( "particle",
+        `Assoc
+          [
+            ("id", `String id);
+            ("mass", quantity "1" "kg");
+            ("position", vector position "0" "0" "m");
+            ("velocity", vector velocity "0" "0" "m/s");
+          ] );
+      ("radius", quantity "1" "m");
+    ]
+
 let test_capabilities () =
   let response = request [ ("action", `String "capabilities") ] in
   Alcotest.(check bool) "success" true (bool "ok" response);
   let physics = assoc "physics" response in
   Alcotest.(check string) "kind" "physics_capabilities" (string "kind" physics);
   let limits = assoc "limits" physics in
-  Alcotest.(check int) "step limit" 100_000 (int "max_steps" limits)
+  Alcotest.(check int) "step limit" 100_000 (int "max_steps" limits);
+  Alcotest.(check int)
+    "contact-pair limit" 4_096 (int "max_contact_pairs" limits)
 
 let test_exact_conversion () =
   let response =
@@ -177,6 +193,78 @@ let test_trajectory_limit () =
   in
   Alcotest.(check bool) "failure" false (bool "ok" response)
 
+let test_sphere_contact_analysis () =
+  let response =
+    request
+      [
+        ("action", `String "analyze_sphere_contacts");
+        ( "spheres",
+          `List
+            [ sphere "A" "0" "1"; sphere "B" "2" "-1"; sphere "C" "5" "0" ] );
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  let physics = assoc "physics" response in
+  let summary = assoc "summary" physics in
+  Alcotest.(check int) "pair count" 3 (int "pair_count" summary);
+  Alcotest.(check int) "touching count" 1 (int "touching" summary);
+  match assoc "active_contacts" physics with
+  | `List [ contact ] ->
+      Alcotest.(check string) "contact relation" "touching"
+        (string "relation" contact);
+      Alcotest.(check string) "exact distance squared" "4"
+        (string "value" (assoc "distance_squared" contact))
+  | _ -> Alcotest.fail "expected one active contact"
+
+let test_isolated_contact_resolution () =
+  let response =
+    request
+      [
+        ("action", `String "resolve_isolated_elastic_sphere_contacts");
+        ( "spheres",
+          `List
+            [ sphere "A" "0" "1"; sphere "B" "2" "-1"; sphere "C" "6" "3" ] );
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  let physics = assoc "physics" response in
+  Alcotest.(check string) "decision" "completed" (string "decision" physics);
+  Alcotest.(check bool) "world changed" true (bool "world_changed" physics);
+  let world = assoc "world" physics in
+  match assoc "spheres" world with
+  | `List bodies ->
+      begin match bodies with
+      | `Assoc fields :: _ ->
+          let particle = assoc "particle" (`Assoc fields) in
+          Alcotest.(check string) "first particle id" "A"
+            (string "id" particle)
+      | _ -> Alcotest.fail "expected resolved spheres"
+      end;
+      begin match bodies with
+      | `Assoc first :: _ ->
+          let velocity = assoc "velocity" (assoc "particle" (`Assoc first)) in
+          Alcotest.(check string) "resolved A velocity" "-1"
+            (string "x" velocity)
+      | _ -> Alcotest.fail "expected resolved spheres"
+      end
+  | _ -> Alcotest.fail "world spheres must be an array"
+
+let test_ambiguous_contact_is_deferred () =
+  let response =
+    request
+      [
+        ("action", `String "resolve_isolated_elastic_sphere_contacts");
+        ( "spheres",
+          `List
+            [ sphere "A" "0" "1"; sphere "B" "2" "0"; sphere "C" "4" "-1" ] );
+      ]
+  in
+  let physics = assoc "physics" response in
+  Alcotest.(check string) "decision" "deferred" (string "decision" physics);
+  Alcotest.(check string)
+    "reason" "ambiguous_simultaneous_contacts" (string "reason" physics);
+  Alcotest.(check bool) "failure atomic" false (bool "world_changed" physics)
+
 let () =
   Alcotest.run "centl physics protocol"
     [
@@ -190,5 +278,11 @@ let () =
             test_collision_invariants;
           Alcotest.test_case "unsupported force" `Quick test_unsupported_force;
           Alcotest.test_case "trajectory limit" `Quick test_trajectory_limit;
+          Alcotest.test_case "sphere contact analysis" `Quick
+            test_sphere_contact_analysis;
+          Alcotest.test_case "isolated contact resolution" `Quick
+            test_isolated_contact_resolution;
+          Alcotest.test_case "ambiguous contact deferral" `Quick
+            test_ambiguous_contact_is_deferred;
         ] );
     ]

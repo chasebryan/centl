@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$project_root"
+
+physics_binary="_build/default/src/physics_main.exe"
+if [ ! -x "$physics_binary" ]; then
+  echo "CENTL Physics is not built. Run: opam exec --switch=centl -- make build" >&2
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "This presentation script requires jq." >&2
+  exit 1
+fi
+
+printf '\033[2J\033[H'
+printf '\033[1;36mCENTL 0.12.0-rc.1 — EXACT MATH + PHYSICS\033[0m\n\n'
+
+printf '\033[1mMATHEMATICAL CONTRACT\033[0m\n'
+printf 'd/dx integral(5x^4 - 6x^2 + 7) dx\n'
+printf '= 5x^4 - 6x^2 + 7, for every rational x\n\n'
+
+./centl verify \
+  --left 'diff(integrate(5*x^4 - 6*x^2 + 7, x), x)' \
+  --relation equal \
+  --right '5*x^4 - 6*x^2 + 7' \
+  --variable x:rational \
+  --json |
+  jq -r '
+    "Verdict:               \(.verification.verdict | ascii_upcase)",
+    "Resolved expression:   \(.verification.evidence.left.text)",
+    "Normalized difference: \(.verification.evidence.normalized_difference)",
+    "Assurance:             \(.verification.assurance.class)",
+    "Theorem:               \(.verification.assurance.theorem | split(".") | last)"'
+
+printf '\n\033[1mEXACT ELASTIC COLLISION\033[0m\n'
+printf 'Initial: m1=7/2 kg, v1=11/3 m/s | m2=5/4 kg, v2=-2/5 m/s\n\n'
+
+collision_request='{"version":1,"id":"demo","action":"elastic_collision_1d","mass1":{"value":"7/2","unit":"kg"},"velocity1":{"value":"11/3","unit":"m/s"},"mass2":{"value":"5/4","unit":"kg"},"velocity2":{"value":"-2/5","unit":"m/s"}}'
+
+printf '%s\n' "$collision_request" |
+  "$physics_binary" --serve |
+  jq -r '
+    .physics as $p |
+    "Final:    v1=\($p.velocity1_final.text) | v2=\($p.velocity2_final.text)",
+    "Momentum: \($p.invariants.initial_momentum.text) -> \($p.invariants.final_momentum.text)  CONSERVED=\($p.invariants.momentum)",
+    "Energy:   \($p.invariants.initial_kinetic_energy.text) -> \($p.invariants.final_kinetic_energy.text)  CONSERVED=\($p.invariants.kinetic_energy)",
+    "Arithmetic exact: \($p.exact)"'
