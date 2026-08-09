@@ -93,7 +93,7 @@ centl-physics convert 100 cm m
 ```text
 3/10
 x in {2, 3}
-established
+verdict: verified (closed_exact_rational via closed_rational_comparison); comparison=equal
 1
 ```
 
