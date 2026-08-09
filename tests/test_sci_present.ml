@@ -26,7 +26,8 @@ let test_unit_human () =
     execute
       {|{"schema_version":1,"domain":"physics","problem_class":"unit_conversion","operation":"convert","assumptions":[],"value":"2.5","from_unit":"km","to_unit":"m"}|}
   in
-  Alcotest.(check string) "natural unit" "2500 m" (Centl_sci_present.human outcome)
+  Alcotest.(check string)
+    "natural unit" "2500 m" (Centl_sci_present.human outcome)
 
 let test_details () =
   let outcome =
@@ -102,7 +103,8 @@ let () =
           Alcotest.test_case "exact arithmetic" `Quick test_exact_human;
           Alcotest.test_case "solution set" `Quick test_solution_set_human;
           Alcotest.test_case "unit conversion" `Quick test_unit_human;
-          Alcotest.test_case "missing information" `Quick test_missing_information;
+          Alcotest.test_case "missing information" `Quick
+            test_missing_information;
           Alcotest.test_case "unsupported" `Quick test_unsupported;
           Alcotest.test_case "failed" `Quick test_failed;
           Alcotest.test_case "approximation qualification" `Quick
