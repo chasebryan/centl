@@ -167,7 +167,8 @@ let pair_resolution_schema =
       ("particle2_id", string_schema);
       ( "status",
         one_of
-          [ const_string "resolved"; const_string "separating_or_stationary" ] );
+          [ const_string "resolved"; const_string "separating_or_stationary" ]
+      );
     ]
     [ "particle1_id"; "particle2_id"; "status" ]
 
@@ -362,4 +363,6 @@ let new_success_schema =
     [ "version"; "ok"; "physics"; "provenance" ]
 
 let output_schema =
-  lazy (one_of [ Lazy.force Centl_physics_mcp_output.output_schema; new_success_schema ])
+  lazy
+    (one_of
+       [ Lazy.force Centl_physics_mcp_output.output_schema; new_success_schema ])
