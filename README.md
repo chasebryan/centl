@@ -1,224 +1,139 @@
 ![Free Computation Foundation — FCF and camel banner](assets/branding/fcf-centl-banner.png)
 
-# centl
+# CENTL
 
-> change the world.
+> Good maths should be free.
 
-CENTL is a deterministic, exact-first mathematical evaluation kernel with a
-calculator, a small expression language, and script, JSON, and MCP interfaces.
-It keeps exact values exact, produces rigorous enclosures when approximation is
-requested, and leaves unsupported or indeterminate work visible instead of
-manufacturing certainty.
+CENTL is an exact-first mathematics and physics system built to avoid
+manufacturing numerical certainty. Exact values stay exact, approximations carry
+explicit bounds, and unsupported work remains visible instead of being replaced
+by a plausible-looking answer.
 
-CENTL 0.12.0-rc.1 is the release candidate for the
-[accepted product direction](docs/DESIGN_PATH.md): a mathematical contract
-checker for code and automated workflows—a type checker for mathematical
-claims. It adds structured claim verification (`centl verify`, `centl check`,
-MCP `centl_verify`), F*-backed universal equality for the admitted univariate
-rational-polynomial fragment, exact counterexamples, and bounded replayable
-receipts tied to the binary's extracted-core identity.
+**CENTL-SCi** is the simplest way to use it: enter one mathematics or physics
+problem at a time and let CENTL perform the admitted computation and verification.
+It is a scientific interpreter, not a general chatbot.
 
-The 0.11.0 foundation reports whether every requested transformation completed, proved
-an input unchanged, remained residual, or was unsupported. It separates
-read-only computation from explicit session mutation, publishes closed MCP
-schemas and supported domains, exposes definition dependencies and focused
-syntax help, and returns structured retry and source-range error metadata.
+## Install
 
-## Principles
-
-- Exactness describes a value; it does not imply that every requested operation
-  completed.
-- Integers, decimals, and fractions are exact values rather than binary
-  floating-point approximations.
-- Explicit approximation returns a rigorous enclosure, not an unqualified
-  floating-point guess.
-- Unsupported transformations remain visible or return a structured failure;
-  they do not masquerade as completed work.
-- Conditions and domain obligations are retained instead of silently discarded.
-- The calculator, scripts, JSON, and MCP expose the same typed semantics.
-- Automated callers can use a read-only compute operation that rejects all
-  session mutation; definitions use a separate explicit operation.
-- Every unqualified printed digit is justified by an exact value or the full
-  returned enclosure.
-
-## Try it
-
-Install a native Linux or macOS release without a compiler toolchain:
+Linux is the reference platform. Native releases bundle the runtime components
+needed to run CENTL; a compiler, OCaml, Dune, OPAM, F*, GMP, MPFR, and FLINT do
+not need to be installed separately.
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
-less install
 sh install
-centl 'solve(x^2 - 5*x + 6 = 0, x)'
 ```
 
-On Windows PowerShell:
-
-```powershell
-Invoke-WebRequest https://raw.githubusercontent.com/chasebryan/centl/main/install.ps1 -OutFile install.ps1
-Get-Content .\install.ps1
-Unblock-File .\install.ps1
-.\install.ps1
-centl 'solve(x^2 - 5*x + 6 = 0, x)'
-```
-
-From a source checkout with the development toolchain installed:
+If the installer adds `~/.local/bin` to your shell configuration, open a new
+terminal once. Then start the live scientific interface with:
 
 ```sh
-make test
-./centl '0.1 + 0.2'
-./centl 'diff(x^3 + 2*x + 1, x)'
-./centl 'integrate(3*x^2 + 2*x + 1, x)'
-./centl 'integrate(x^2, x = 0, 1)'
-./centl 'factor(x^2 - 1)'
-./centl 'solve(x^2 - 5*x + 6 = 0, x)'
-./centl 'solve(x^2 = 2, x)'
-./centl 'sum(k^2, k = 1, 100)'
-./centl 'sequence(k^2, k = 1, 5)'
-./centl 'recurrence(1, a = a*n, n = 0, 5)'
-./centl 'distance(0, 0, 3, 4)'
-./centl 'approx(sin(pi / 6), 20)'
-./centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
-./centl verify --left 'sqrt(2)' --relation less_than --right '2'
-./centl verify --left '(x+1)^2' --relation equal --right 'x^2+2*x+1' \
-  --variable x:rational --receipt identity.json
-./centl check examples/contracts/math-contracts.centl --receipt contracts.json
+centl-sci
+```
+
+The intended first-run experience is simply:
+
+```text
+CENTL-SCi v0.0.1-Camelus
+Free for science.
+
+> What is 0.1 plus 0.2?
+3/10
+> Solve x squared minus 5x plus 6 equals zero.
+x = 2 or x = 3
+> Solve -4.9*t^2 + 20*t = 0 for t.
+t = 0 or t = 200/49
+>
+```
+
+The last equation can represent idealized vertical motion for an object launched
+upward at 20 m/s under `g = 9.8 m/s^2`, neglecting drag. CENTL keeps the nonzero
+flight time exact as `200/49` seconds instead of turning it into an arbitrary
+floating-point decimal.
+
+For complete installation details, offline archives, macOS, and the experimental
+Windows path, see [docs/INSTALL.md](docs/INSTALL.md).
+
+## What gets installed
+
+Current native packages expose three commands:
+
+- `centl-sci` — live answer-first scientific interpreter;
+- `centl` — exact calculator, language, verification, JSON, and MCP interfaces;
+- `centl-physics` — exact-first typed physics operations and services.
+
+The installer verifies the release checksum, stages and smoke-tests the package
+before activation, validates CENTL exact arithmetic, validates a physics unit
+conversion, validates CENTL-SCi exact arithmetic, and then activates the command
+launchers atomically.
+
+## Why CENTL
+
+CENTL follows a small set of rules:
+
+- integers, fractions, and decimal literals are exact values;
+- exact results remain exact for as long as the admitted mathematics permits;
+- requested approximations return justified enclosures rather than unqualified
+  floating-point guesses;
+- mathematical and physical dimension errors fail explicitly;
+- unsupported or unresolved operations remain unsupported or unresolved;
+- semantic model output is untrusted and cannot overrule CENTL's mathematical
+  evidence;
+- every unqualified printed digit must be justified.
+
+For example:
+
+```sh
+centl '0.1 + 0.2'
+centl 'solve(x^2 - 5*x + 6 = 0, x)'
+centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
+centl-physics convert 100 cm m
 ```
 
 ```text
 3/10
-3 * x^2 + 2
-x^3 + x^2 + x
-1/3
-(x - 1) * (x + 1)
 x in {2, 3}
-x in {-sqrt(2), sqrt(2)}
-338350
-[1, 4, 9, 16, 25]
-[1, 1, 2, 6, 24, 120]
-5
-≈ [0.49999999999999999999, 0.50000000000000000001]
+verdict: verified (closed_exact_rational via closed_rational_comparison); comparison=equal
+1
 ```
-
-Run `./centl` for the calculator, `./centl --syntax` for every implemented form,
-`./centl --file path` for a script, `./centl --serve` for persistent JSON Lines,
-or `./centl --mcp` as a local AI tool. Mathematical output is colored when
-written to a terminal; use
-`--color=always`, `--no-color`, or `NO_COLOR` to control it.
-
-## Physics engine
-
-The development path now includes an experimental exact-first particle physics
-engine. It is implemented as the `Centl_physics` library module and the
-`centl-physics` executable. Rational inputs remain arbitrary-precision
-rationals through unit conversion, force evaluation, collision formulas,
-contact classification, and fixed-step state evolution; incompatible physical
-dimensions fail explicitly.
-
-After a source build:
-
-```sh
-dune exec centl-physics -- convert 100 cm m
-dune exec centl-physics -- constant c
-dune exec centl-physics -- gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10
-```
-
-Native packages built from this development path install `centl-physics`
-alongside `centl`. The engine implements seven-base SI dimensional analysis,
-exact unit conversion, dimension-safe 3D vectors, particle and bounded
-multi-particle world state, constant force, uniform gravity, Hooke springs,
-linear drag, symplectic-Euler time evolution, energy and momentum diagnostics,
-exact ideal 1D elastic collision response, exact frictionless 3D contact
-response, exact sphere contact classification using squared-distance
-comparisons that introduce no square root, and certified bounded continuous
-sphere-contact reasoning for an exact constant-velocity pair model.
-
-The versioned JSON Lines physics service and read-only `centl_physics` MCP tool
-can analyze complete sphere worlds and return exact evidence for touching or
-overlapping pairs. They can also resolve isolated disjoint touching pairs with
-whole-world momentum and kinetic-energy checks. If a world is already
-overlapping or has a particle in multiple simultaneous touching contacts, CENTL
-returns an explicit successful `deferred` verdict with the world unchanged
-instead of inventing an impulse order or penetration correction. Machine
-contact requests are bounded to 4,096 unordered sphere pairs.
-
-For one sphere pair moving with constant exact-rational velocity over a bounded
-exact-rational duration, the same machine interfaces can certify whether
-contact occurs anywhere in the interval without time sampling. The result
-exposes the exact squared-clearance quadratic and returns the first contact time
-exactly when rational. A quadratic-irrational event time remains an algebraic
-certificate with an exact discriminant and rational bracket rather than being
-rounded into a fabricated rational timestamp.
-
-At the library level, an exact rational first-contact time can now drive a
-narrow two-sphere event step: CENTL advances exactly to the event, independently
-re-checks exact `touching` geometry, applies the existing frictionless 3D elastic
-response, and advances the exact remaining duration with the returned
-velocities. Initial overlap and quadratic-irrational event time instead defer
-with the original spheres unchanged. This event-step composition is not yet a
-JSON Lines or MCP action and is not automatically coupled to the force
-integrator or multi-particle world step.
-
-Discrete contact analysis and response remain separate from ordinary time
-stepping, and the continuous/event-aware contracts are deliberately narrow.
-CENTL does not claim general or force-driven continuous collision detection,
-penetration correction, a general simultaneous-contact solver, rigid-body
-contact dynamics, friction/spin contact, adaptive integration, continuum/fluid
-solvers, or rigorous truncation-error enclosures. See
-[docs/PHYSICS.md](docs/PHYSICS.md),
-[docs/PHYSICS_LINEAR_CONTACT.md](docs/PHYSICS_LINEAR_CONTACT.md), and
-[docs/PHYSICS_PROTOCOL.md](docs/PHYSICS_PROTOCOL.md) for the exact contract,
-evidence model, and current boundary.
 
 ## CENTL-SCi
 
 ![CENTL-SCi v0.0.1-Camelus — Free Computation Foundation](assets/branding/centl-sci-v0.0.1-camelus-banner.png)
 
-CENTL-SCi v0.0.1-Camelus is an experimental local semantic interpreter for mathematics
-and physics. It is not a general chatbot and it is not a replacement for CENTL.
-A local model translates one ordinary-language problem into a closed, validated
-problem representation; CENTL or CENTL Physics then performs the admitted
-computation and returns the structured evidence used for the result.
+CENTL-SCi uses a conservative deterministic interpreter first. Current admitted
+fast paths include exact arithmetic, single-variable polynomial equations,
+spoken polynomial forms, and exact unit conversion. These paths are local and do
+not require a language model.
 
-The first milestone admits exact-expression computation, single-variable
-polynomial equations, exact unit conversion, and an explicit unsupported path.
-Model output is treated as untrusted input, generated mathematics is routed
-through bounded existing machine interfaces, and unsupported CENTL work remains
-unsupported rather than being replaced by a model guess. The local inference
-runtime and model are optional: ordinary CENTL and CENTL Physics continue to
-work without them.
+A separately configured local semantic model can interpret problems that require
+more language understanding, but it is never the mathematical authority. Model
+output must pass the closed Problem IR validator and is then lowered into CENTL
+or CENTL Physics. A model cannot manufacture a result that CENTL did not
+establish.
 
-See [docs/SCI.md](docs/SCI.md) for the v0.0.1-Camelus architecture, Problem IR, trust
-boundary, local-runtime configuration, model-evaluation policy, tests, and
-packaging status.
+Model weights remain separate artifacts and are not silently downloaded by the
+installer. This keeps the deterministic scientific runtime immediately usable
+while preserving explicit provenance and consent for optional semantic models.
 
-Calculator sessions and scripts remember immutable definitions written as
-`r = 3` or `f(x) = x^2 + 1`.
+See [docs/SCI.md](docs/SCI.md) for the architecture and evidence boundary and
+[docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for platform policy.
 
-In an interactive terminal, incomplete statements continue at a `....>`
-prompt. Tab completes built-in and session-defined names, Up/Down browse the
-bounded history saved across calculator processes, and `:history` or
-`:clear-history` inspect or durably clear it. Standard-input and `--file`
-scripts use the same multiline statement rules. Human syntax errors identify
-the source line and column and show a caret at the failing byte.
+## Physics
 
-History is stored as private, versioned state at
-`$XDG_STATE_HOME/centl/history.json` on Unix, falling back to
-`$HOME/.local/state/centl/history.json`, and at
-`%LOCALAPPDATA%\centl\history.json` on Windows. It is capped at 1,000 entries
-and 1 MiB, and concurrent calculator processes merge additions under a lock
-before an atomic replacement. Use
-`--no-history`, set `CENTL_NO_HISTORY`, or set `CENTL_HISTORY=off` to retain
-Up/Down history only for the current process. The
-[syntax guide](docs/SYNTAX.md#interactive-history) documents paths, privacy,
-concurrency, limits, and the disk-format policy.
+CENTL Physics provides exact rational unit conversion, SI dimensional analysis,
+3D vector and particle operations, force and gravity evaluation, energy and
+momentum diagnostics, bounded collision/contact reasoning, and narrow exact
+event-aware mechanics contracts.
 
-## Developer quickstart
+It deliberately does not claim a general-purpose physics simulator. Exact
+supported domains and known boundaries are documented in
+[docs/PHYSICS.md](docs/PHYSICS.md).
 
-New to OCaml, F*, or rigorous numerics? Follow the complete
-[manual contributor onboarding](docs/ONBOARDING.md). See
-[CONTRIBUTING.md](CONTRIBUTING.md) for system prerequisites, the pinned F* setup,
-and the reproducible opam bootstrap. Once those are installed:
+## Developers
+
+A native release is recommended for ordinary use. Development from source uses
+the pinned toolchain and verified F* extraction path:
 
 ```sh
 scripts/bootstrap-opam
@@ -226,25 +141,28 @@ eval "$(opam env --switch=centl)"
 make test
 ```
 
-## Design
+Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-CENTL is in early development. See the [architecture](docs/DESIGN.md),
-[near-term product design path](docs/DESIGN_PATH.md),
-[CENTL-SCi architecture](docs/SCI.md),
-[complete syntax sheet](docs/SYNTAX.md),
-[numerical contract](docs/NUMERICS.md),
-[calculus syntax](docs/CALCULUS.md),
-[algebra syntax](docs/ALGEBRA.md),
-[mathematical functions](docs/MATHEMATICS.md),
-[exact finite iteration and sequences](docs/ITERATION.md),
-[physics engine contract](docs/PHYSICS.md),
-[installation and binary releases](docs/INSTALL.md),
-[verification boundary](docs/VERIFICATION.md),
-[performance contract](docs/PERFORMANCE.md),
-[machine protocol](docs/PROTOCOL.md), [MCP adapter](docs/MCP.md), and
-[roadmap](docs/ROADMAP.md). Release history is summarized in the
-[changelog](CHANGELOG.md).
+## Documentation
+
+- [CENTL-SCi](docs/SCI.md)
+- [Installation](docs/INSTALL.md)
+- [Syntax](docs/SYNTAX.md)
+- [Mathematics](docs/MATHEMATICS.md)
+- [Numerical contract](docs/NUMERICS.md)
+- [Physics](docs/PHYSICS.md)
+- [Verification](docs/VERIFICATION.md)
+- [Machine protocol](docs/PROTOCOL.md)
+- [MCP adapter](docs/MCP.md)
+- [Architecture](docs/DESIGN.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
 `SPDX-License-Identifier: AGPL-3.0-or-later`
+
+Developed under the **Free Computation Foundation**.
+
+> Free for science.
