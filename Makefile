@@ -112,17 +112,19 @@ sci-model-test: build
 		--output "$(SCI_REPORT)"
 
 sci-assimilate:
-	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
-	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+	CENTL_SCI_SERVER_URL= \
 		$(PYTHON) scripts/sci-assimilate.py \
+		--server-url "$(SCI_SERVER_URL)" \
+		--model-label "$(SCI_MODEL_LABEL)" \
 		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
 		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
 		$(SCI_ASSIMILATION_ARGS)
 
 sci-assimilate-full:
-	CENTL_SCI_SERVER_URL="$(SCI_SERVER_URL)" \
-	CENTL_SCI_MODEL_LABEL="$(SCI_MODEL_LABEL)" \
+	CENTL_SCI_SERVER_URL= \
 		$(PYTHON) scripts/sci-assimilate.py \
+		--server-url "$(SCI_SERVER_URL)" \
+		--model-label "$(SCI_MODEL_LABEL)" \
 		--full \
 		--fast-repeats "$(SCI_ASSIMILATION_FAST_REPEATS)" \
 		--model-repeats "$(SCI_ASSIMILATION_MODEL_REPEATS)" \
