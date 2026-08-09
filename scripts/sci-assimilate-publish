@@ -19,9 +19,66 @@ source_head=$(git rev-parse HEAD)
 json_report="lab/sci-assimilation/latest.json"
 markdown_report="lab/sci-assimilation/latest.md"
 tmpdir=$(mktemp -d)
-trap 'rm -rf "$tmpdir"' EXIT HUP INT TERM
 tmp_json="$tmpdir/latest.json"
 tmp_markdown="$tmpdir/latest.md"
+server_log="$tmpdir/llama-server.log"
+server_pid=""
+
+cleanup() {
+  if [ -n "$server_pid" ]; then
+    kill "$server_pid" 2>/dev/null || true
+    wait "$server_pid" 2>/dev/null || true
+  fi
+  rm -rf "$tmpdir"
+}
+trap cleanup EXIT HUP INT TERM
+
+server_url=${CENTL_SCI_SERVER_URL:-}
+model=${CENTL_SCI_MODEL:-}
+if [ -n "$server_url" ] && [ -n "$model" ]; then
+  echo "CENTL-SCi: choose either SCI_SERVER_URL or SCI_MODEL, not both" >&2
+  exit 2
+fi
+
+if [ -n "$model" ]; then
+  if [ ! -f "$model" ]; then
+    echo "CENTL-SCi: assimilation model not found: $model" >&2
+    exit 2
+  fi
+  port=${CENTL_SCI_PORT:-8080}
+  server_url="http://127.0.0.1:$port"
+  if curl --silent --fail --noproxy '*' --max-time 2 "$server_url/health" >/dev/null 2>&1; then
+    echo "CENTL-SCi: $server_url is already serving; use SCI_SERVER_URL to qualify that explicit server" >&2
+    exit 2
+  fi
+
+  echo "CENTL-SCi: starting resident model for assimilation"
+  sh scripts/sci-resident-server "$model" >"$server_log" 2>&1 &
+  server_pid=$!
+  ready=0
+  attempt=0
+  while [ "$attempt" -lt 30 ]; do
+    if ! kill -0 "$server_pid" 2>/dev/null; then
+      echo "CENTL-SCi: resident server exited before becoming healthy" >&2
+      tail -n 40 "$server_log" >&2 || true
+      exit 1
+    fi
+    if curl --silent --fail --noproxy '*' --max-time 2 "$server_url/health" >/dev/null 2>&1; then
+      ready=1
+      break
+    fi
+    attempt=$((attempt + 1))
+    sleep 1
+  done
+  if [ "$ready" -ne 1 ]; then
+    echo "CENTL-SCi: resident server did not become healthy" >&2
+    tail -n 40 "$server_log" >&2 || true
+    exit 1
+  fi
+  CENTL_SCI_SERVER_URL="$server_url"
+  export CENTL_SCI_SERVER_URL
+  echo "CENTL-SCi: resident model healthy at $server_url"
+fi
 
 set +e
 python3 scripts/sci-assimilate.py \
