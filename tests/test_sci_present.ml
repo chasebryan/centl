@@ -27,7 +27,8 @@ let test_unit_human () =
       {|{"schema_version":1,"domain":"physics","problem_class":"unit_conversion","operation":"convert","assumptions":[],"value":"2.5","from_unit":"km","to_unit":"m"}|}
   in
   Alcotest.(check string)
-    "natural unit" "2500 m" (Centl_sci_present.human outcome)
+    "natural unit" "2500 m"
+    (Centl_sci_present.human outcome)
 
 let test_details () =
   let outcome =
@@ -36,7 +37,12 @@ let test_details () =
   in
   Alcotest.(check string)
     "details"
-    "x = 2 or x = 3\n\nDetails:\n  Exact result\n  Variable: x\n  Method: polynomial equation solving\n  Verified by CENTL"
+    "x = 2 or x = 3\n\n\
+     Details:\n\
+    \  Exact result\n\
+    \  Variable: x\n\
+    \  Method: polynomial equation solving\n\
+    \  Verified by CENTL"
     (Centl_sci_present.details outcome)
 
 let test_missing_information () =
@@ -45,7 +51,8 @@ let test_missing_information () =
       {|{"schema_version":1,"domain":"unsupported","problem_class":"unsupported","operation":"unsupported","assumptions":[],"reason":"missing initial position and velocity"}|}
   in
   Alcotest.(check string)
-    "missing data" "More information is required: initial position and velocity."
+    "missing data"
+    "More information is required: initial position and velocity."
     (Centl_sci_present.human outcome)
 
 let test_unsupported () =
