@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import string
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,14 @@ def parse_args() -> argparse.Namespace:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise SystemExit(message)
+
+
+def valid_commit_sha(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 40
+        and all(character in string.hexdigits for character in value)
+    )
 
 
 def git_is_ancestor(commit: str) -> bool:
@@ -54,10 +63,7 @@ def main() -> int:
     git = payload.get("git")
     require(isinstance(git, dict), "report.git must be an object")
     source_commit = git.get("commit")
-    require(
-        isinstance(source_commit, str) and len(source_commit) == 40,
-        "report.git.commit must be a 40-character commit SHA",
-    )
+    require(valid_commit_sha(source_commit), "report.git.commit must be a full hexadecimal commit SHA")
     require(
         git_is_ancestor(source_commit),
         "report source commit is not an ancestor of the committed report",
