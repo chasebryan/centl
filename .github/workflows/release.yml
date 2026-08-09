@@ -129,7 +129,7 @@ jobs:
         run: |
           apt-get update
           apt-get install --yes --no-install-recommends \
-            build-essential ca-certificates curl git m4 opam patch pkg-config qemu-user xz-utils
+            build-essential ca-certificates curl git m4 opam patch pkg-config python3 qemu-user xz-utils
 
       - name: Build pinned native libraries
         run: |
@@ -556,6 +556,7 @@ jobs:
         run: |
           $env:NATIVE_PREFIX + "\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\msys64\mingw64\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
+          "CENTL_BUILD_IDENTITY_SHELL=C:\msys64\usr\bin\sh.exe" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
           $Native = $env:NATIVE_PREFIX.Replace('\', '/')
           $Archives = @("libflint.a", "libmpfr.a", "libgmp.a")
           foreach ($Archive in $Archives) {
@@ -764,6 +765,11 @@ jobs:
           VERSION: ${{ needs.linux-x86_64.outputs.version }}
         run: |
           test "v$VERSION" = "$GITHUB_REF_NAME"
+          prerelease=()
+          case "$VERSION" in
+            *-*) prerelease=(--prerelease) ;;
+          esac
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" --generate-notes \
+            "${prerelease[@]}" \
             --title "CENTL $VERSION — Math Contracts"
