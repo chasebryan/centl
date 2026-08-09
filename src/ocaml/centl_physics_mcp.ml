@@ -160,7 +160,8 @@ let tool () =
         `String
           "Use CENTL's deterministic exact-rational particle mechanics. Discover physics capabilities and units, convert compatible units, inspect exact physical constants, simulate a dimension-checked particle, solve ideal exact elastic collisions, analyze exact sphere contact geometry, or resolve only isolated disjoint touching sphere pairs. Overlaps and ambiguous simultaneous contacts are returned as explicit deferred results rather than guessed." );
       ("inputSchema", input_schema);
-      ("outputSchema", Lazy.force Centl_physics_mcp_output.output_schema);
+      ( "outputSchema",
+        Lazy.force Centl_physics_contact_mcp_output.output_schema );
       ("annotations", read_only_annotations);
     ]
 
