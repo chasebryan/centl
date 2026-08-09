@@ -8,8 +8,8 @@ type interpreter_error = {
 }
 
 let usage =
-  "Usage: centl-sci [--server-url URL | --model MODEL.gguf] [--details | --json] \
-   [--repl] 'mathematics or physics problem'"
+  "Usage: centl-sci [--server-url URL | --model MODEL.gguf] [--details | \
+   --json] [--repl] 'mathematics or physics problem'"
 
 let repl_version = "0.0.1-Camelus"
 
@@ -34,7 +34,8 @@ let read_stdin_problem () =
   loop 0
 
 let stdin_is_tty () =
-  try Unix.isatty (Unix.descr_of_in_channel stdin) with Unix.Unix_error _ -> false
+  try Unix.isatty (Unix.descr_of_in_channel stdin)
+  with Unix.Unix_error _ -> false
 
 let source_text = function
   | Fast_path -> "fast"
@@ -47,7 +48,9 @@ let backend_text = function
 
 let with_interpreter_path source = function
   | `Assoc fields ->
-      let fields = ("interpreter_path", `String (source_text source)) :: fields in
+      let fields =
+        ("interpreter_path", `String (source_text source)) :: fields
+      in
       let fields =
         match backend_text source with
         | None -> fields
@@ -135,16 +138,12 @@ let () =
         Arg.Set_string curl,
         "PATH curl executable used for loopback resident inference (default: \
          curl)" );
-      ( "--details",
-        Arg.Set details_output,
-        "show concise scientific details" );
-      ( "--json",
-        Arg.Set json_output,
-        "emit the reproducible structured result" );
+      ("--details", Arg.Set details_output, "show concise scientific details");
+      ("--json", Arg.Set json_output, "emit the reproducible structured result");
       ( "--repl",
         Arg.Set force_repl,
-        "start the live scientific problem interpreter even when stdin is not a TTY"
-      );
+        "start the live scientific problem interpreter even when stdin is not \
+         a TTY" );
       ( "--force-model",
         Arg.Set force_model,
         "bypass deterministic interpretation; intended for model \
@@ -182,9 +181,7 @@ let () =
         "delete pending local contribution data" );
       ("--color", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
       ("--no-color", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
-      ( "--color=auto",
-        Arg.Unit (fun () -> ()),
-        "accepted for CLI compatibility" );
+      ("--color=auto", Arg.Unit (fun () -> ()), "accepted for CLI compatibility");
       ( "--color=always",
         Arg.Unit (fun () -> ()),
         "accepted for CLI compatibility" );
@@ -243,11 +240,13 @@ let () =
                    backend is configured.";
                 diagnostic =
                   "this problem requires semantic inference; configure \
-                   --server-url/CENTL_SCI_SERVER_URL or --model/CENTL_SCI_MODEL";
+                   --server-url/CENTL_SCI_SERVER_URL or \
+                   --model/CENTL_SCI_MODEL";
               }
         | Some model_path ->
             let config =
-              Centl_sci_llama.default ~executable:!llama_cli ~model:model_path ()
+              Centl_sci_llama.default ~executable:!llama_cli ~model:model_path
+                ()
             in
             begin match Centl_sci_llama.interpret config problem with
             | Error error ->
@@ -256,7 +255,8 @@ let () =
                 Error
                   {
                     exit_code = 1;
-                    human_message = "CENTL-SCi could not interpret this problem.";
+                    human_message =
+                      "CENTL-SCi could not interpret this problem.";
                     detail_message = error.message;
                     diagnostic = Centl_sci_llama.string_of_error error;
                   }
@@ -354,16 +354,17 @@ let () =
             loop ()
           end
           else if problem = "" then loop ()
-          else if String.length problem > Centl_sci_llama.max_problem_bytes then
-            begin
-              print_endline "This problem exceeds the CENTL-SCi input limit.";
-              loop ()
-            end
+          else if String.length problem > Centl_sci_llama.max_problem_bytes then begin
+            print_endline "This problem exceeds the CENTL-SCi input limit.";
+            loop ()
+          end
           else begin
             begin match execute_problem problem with
-            | Error error -> human_error ~details:!details error |> print_endline
+            | Error error ->
+                human_error ~details:!details error |> print_endline
             | Ok (_, outcome) ->
-                if !details then Centl_sci_present.details outcome |> print_endline
+                if !details then
+                  Centl_sci_present.details outcome |> print_endline
                 else Centl_sci_present.human outcome |> print_endline
             end;
             loop ()
@@ -386,7 +387,8 @@ let () =
   | [] when stdin_is_tty () ->
       if !json_output then begin
         Printf.eprintf
-          "centl-sci: --json requires a problem or non-interactive standard input\n";
+          "centl-sci: --json requires a problem or non-interactive standard \
+           input\n";
         exit 2
       end;
       repl ()
