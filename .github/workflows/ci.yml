@@ -72,8 +72,23 @@ jobs:
             src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
             src/generated/Centl_PolynomialSoundness.ml
           git diff --exit-code -- src/generated
-          opam exec -- make quality native-test
+          opam exec -- make quality native-test native-build
           test "$(./_build/default/src/main.exe --build-info | sed -n 's/^commit=//p')" = "$GITHUB_SHA"
+
+      - name: Run CENTL-SCi deterministic product assimilation
+        run: |
+          python3 -m py_compile \
+            scripts/sci-assimilate.py \
+            scripts/sci-assimilation-check.py
+          python3 scripts/sci-assimilate.py \
+            --skip-native \
+            --fast-repeats 2 \
+            --output-json "$RUNNER_TEMP/sci-assimilation.json" \
+            --output-markdown "$RUNNER_TEMP/sci-assimilation.md"
+          python3 scripts/sci-assimilation-check.py \
+            --require-product-gates \
+            "$RUNNER_TEMP/sci-assimilation.json"
+          cat "$RUNNER_TEMP/sci-assimilation.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Exercise deterministic fuzzing, sanitizers, and performance budgets
         env:
