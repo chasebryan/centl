@@ -109,7 +109,8 @@ let test_rational_certificate_through_mcp () =
   Alcotest.(check bool) "protocol success" true (bool "ok" protocol);
   let certificate = assoc "physics" protocol in
   Alcotest.(check string)
-    "status" "crossing_contact" (string "status" certificate);
+    "status" "crossing_contact"
+    (string "status" certificate);
   let first = assoc "first_contact_time" certificate in
   Alcotest.(check string) "kind" "rational" (string "kind" first);
   Alcotest.(check string) "time" "2" (string "value" (assoc "time" first))
