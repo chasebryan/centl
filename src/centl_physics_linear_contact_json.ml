@@ -22,8 +22,7 @@ let exact_contact_time_json = function
   | Rational_contact_time time ->
       `Assoc
         [
-          ("kind", `String "rational");
-          ("time", exact_quantity_si_json time "s");
+          ("kind", `String "rational"); ("time", exact_quantity_si_json time "s");
         ]
   | Quadratic_irrational_contact_time
       {
@@ -60,7 +59,8 @@ let trust_boundary_json =
 let first_contact_text = function
   | None -> "none"
   | Some (Rational_contact_time time) -> Q.to_string time.si_value ^ " s"
-  | Some (Quadratic_irrational_contact_time { bracket_lower; bracket_upper; _ }) ->
+  | Some (Quadratic_irrational_contact_time { bracket_lower; bracket_upper; _ })
+    ->
       Printf.sprintf "quadratic_irrational in [%s,%s] s"
         (Q.to_string bracket_lower.si_value)
         (Q.to_string bracket_upper.si_value)
