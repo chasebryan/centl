@@ -14,11 +14,7 @@ let linear_contact_status_schema =
 
 let polynomial_schema =
   strict_object
-    [
-      ("a", quantity_schema);
-      ("b", quantity_schema);
-      ("c", quantity_schema);
-    ]
+    [ ("a", quantity_schema); ("b", quantity_schema); ("c", quantity_schema) ]
     [ "a"; "b"; "c" ]
 
 let rational_bracket_schema =
