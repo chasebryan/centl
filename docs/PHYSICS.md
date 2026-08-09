@@ -183,7 +183,7 @@ does not reinterpret an already penetrated configuration as a valid contact
 state. This operation is also not part of the time integrator: detection and
 response remain explicit operations.
 
-The world/contact and isolated-composition layers are now machine-facing through
+The world/contact and isolated-composition layers are machine-facing through
 the version-1 JSON Lines physics protocol and the read-only `centl_physics` MCP
 tool. `analyze_sphere_contacts` exposes exact geometry and evidence without
 mutation. `resolve_isolated_elastic_sphere_contacts` exposes the partial exact
@@ -217,6 +217,55 @@ These are collision-response primitives, not a general rigid-body solver. The
 3D response operation does not infer radii, establish contact by itself, correct
 penetration, model spin or torque, or apply friction.
 
+### Certified bounded continuous sphere contact
+
+`certify_linear_sphere_contact` certifies whether two exact-rational spheres
+make contact during a bounded interval when both centers follow constant
+exact-rational velocity throughout that interval.
+
+For initial relative center position `r`, relative velocity `v`, and summed
+radius `R`, CENTL reasons exactly about
+
+```text
+f(t) = |r + v t|^2 - R^2
+     = a t^2 + b t + c
+```
+
+where `a = v·v`, `b = 2(r·v)`, and `c = r·r - R^2`. Since the quadratic is
+convex, CENTL can minimize it exactly on `[0,duration]` and certify contact or
+non-contact over the whole admitted interval without time sampling.
+
+The certificate returns one of five statuses:
+
+- `initially_overlapping`
+- `touching_at_start`
+- `no_contact_in_interval`
+- `tangent_contact`
+- `crossing_contact`
+
+For a crossing, an exact rational first-contact time is returned when the
+quadratic discriminant is a perfect rational square. When the first-contact time
+is quadratic irrational, CENTL does not manufacture a decimal or rational
+timestamp: it preserves the exact polynomial and discriminant and returns a
+certified rational bracket for the algebraic event.
+
+A zero bounded minimum is not automatically treated as tangency. If first
+contact occurs exactly at the interval endpoint and the discriminant is
+positive, the certificate reports `crossing_contact`; true tangency requires a
+repeated root.
+
+The operation requires distinct particle identifiers, positive sphere radii,
+dimension-checked position and velocity, and a nonnegative duration carrying
+the time dimension. It does not mutate either sphere or apply a collision
+impulse.
+
+This is a narrow certified continuous-contact contract, not a general CCD
+engine. It does not reason about acceleration or force-integrated trajectories,
+guarantee that a symplectic-Euler step follows the admitted linear path, resolve
+penetration, order simultaneous contact events, or solve friction/spin/rigid-body
+contact. See [PHYSICS_LINEAR_CONTACT.md](PHYSICS_LINEAR_CONTACT.md) for the
+formal boundary.
+
 ### Physical constants
 
 The first constant catalog deliberately contains only exact SI defining or
@@ -249,10 +298,10 @@ it does not implement a second evaluator.
 
 Capability discovery advertises the exact supported machine actions, including
 `elastic_collision_1d`, `elastic_collision_3d_at_contact`,
-`analyze_sphere_contacts`, and
-`resolve_isolated_elastic_sphere_contacts`. Contact-machine requests are bounded
-to 4,096 unordered sphere pairs. Detailed analysis output expands only
-non-separated pairs while the summary still counts every pair.
+`analyze_sphere_contacts`, `resolve_isolated_elastic_sphere_contacts`, and
+`certify_linear_sphere_contact`. Contact-world requests are bounded to 4,096
+unordered sphere pairs. Detailed world analysis expands only non-separated
+pairs while the summary still counts every pair.
 
 A resolver `deferred` result is a successful exact physics verdict, not a
 malformed request or MCP tool error. It means CENTL exactly identified a valid
@@ -260,8 +309,14 @@ world outside the current solver's justified response domain. Overlap and
 shared simultaneous-contact ambiguity return the original world unchanged, so
 machine callers do not have to infer whether a partial impulse was applied.
 
+The continuous contact action exposes its exact polynomial evidence, closest
+time, minimum clearance, discriminant, and typed first-contact representation.
+Its trust boundary explicitly records constant velocity, exact sphere geometry,
+no time sampling, no floating-point root finding, no force integration, no
+automatic response, and no simultaneous-contact solving.
+
 Physics simulation calls retain deterministic request, step, trajectory, and
-cancellation limits. Sphere contact requests remain stateless and bounded and
+cancellation limits. Sphere/contact requests remain stateless and bounded and
 do not create persistent physical worlds inside the server.
 
 ## Numerical contract
@@ -283,7 +338,10 @@ The physics engine follows CENTL's exact-first philosophy:
    3D machine response reports its caller-supplied contact assumption explicitly.
 9. Machine-facing contact evidence exposes the exact geometric basis of a
    touching or overlapping verdict rather than only a human-readable label.
-10. No measured quantity is silently promoted to mathematical exactness.
+10. Bounded continuous sphere contact is certified only for the declared
+    constant-velocity pair model; irrational first-contact time remains an
+    algebraic certificate instead of being rounded into a fake rational time.
+11. No measured quantity is silently promoted to mathematical exactness.
 
 ## Current boundary
 
@@ -293,9 +351,9 @@ implemented yet:
 - rigid-body orientation and angular inertia tensors
 - spatial broad-phase collision acceleration
 - general-shape narrow-phase collision detection
-- continuous collision detection
+- general or force-driven continuous collision detection
 - penetration correction or contact manifolds
-- simultaneous multi-contact impulse solving
+- simultaneous multi-contact event ordering or impulse solving
 - automatic collision processing inside world time stepping
 - constraints and joints
 - frictional contact solvers
@@ -307,15 +365,15 @@ implemented yet:
 
 Those are future engine layers. The present implementation is a deterministic,
 dimension-safe, exact-rational particle mechanics foundation with library, CLI,
-JSON Lines, and MCP interfaces. Multi-particle world state, exact sphere contact
-classification, and isolated exact contact resolution now cross the machine
-boundary through JSON Lines and MCP while remaining deliberately separate from
-automatic time stepping.
+JSON Lines, and MCP interfaces. Multi-particle world state, exact discrete sphere
+contact classification, isolated exact contact resolution, and bounded
+constant-velocity continuous sphere-contact certificates now cross the machine
+boundary while remaining deliberately separate from automatic time stepping.
 
-The next difficult boundary is certified evolution across contact: event-time or
-other bounded reasoning that can connect discrete integration to exact contact
-resolution without claiming continuous collision detection or inventing a
-simultaneous-contact solution.
+The next difficult boundary is certified event-aware evolution: composing event
+evidence with state advancement and exact response without silently changing the
+integrator, rounding algebraic event time, or inventing semantics for
+force-driven or simultaneous multi-contact cases.
 
 ## Validation
 
@@ -345,13 +403,23 @@ simultaneous-contact solution.
 - exact 3D head-on and oblique contact response
 - separating-contact no-impulse behavior
 - coincident-center rejection
+- rational continuous first-contact time
+- first contact exactly at the bounded interval endpoint
+- exact tangent contact
+- quadratic-irrational first-contact certification and rational bracketing
+- short-interval continuous no-contact certification
+- parallel and stationary continuous-contact misses
+- continuous contact at time zero and initial overlap
+- distinct-ID and duration-dimension enforcement for continuous contact
 - JSON and MCP 3D collision surfaces and the explicit contact trust boundary
 - JSON Lines exact sphere-contact analysis and squared-distance evidence
 - JSON Lines completed isolated sphere-contact resolution and conservation flags
 - JSON Lines overlap and simultaneous-contact deferral semantics
+- JSON Lines rational, irrational, endpoint, and no-contact continuous certificates
 - MCP sphere-contact analysis and resolution
 - MCP `deferred` verdicts remaining successful tool results
-- strict MCP rejection of unknown sphere-contact arguments
+- MCP rational and quadratic-irrational continuous-contact certificates
+- strict MCP rejection of unknown sphere/contact arguments
 - the 4,096-pair machine-interface contact ceiling
 - exact physical constants
 - CLI success and failure behavior
