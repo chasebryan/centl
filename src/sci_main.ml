@@ -369,7 +369,7 @@ let () =
   | _ :: _ when !force_repl ->
       Printf.eprintf "centl-sci: --repl does not accept a one-shot problem\n";
       exit 2
-  | values when values <> [] -> String.concat " " values |> String.trim |> run_one
+  | (_ :: _ as values) -> String.concat " " values |> String.trim |> run_one
   | [] when !force_repl ->
       if !json_output then begin
         Printf.eprintf "centl-sci: --json is not available in the human REPL\n";
