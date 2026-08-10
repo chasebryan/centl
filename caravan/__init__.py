@@ -13,6 +13,7 @@ from .policy import (
     verify_policy_receipt,
     write_policy_receipt,
 )
+from .retrieval import RetrievalError, RetrievalResult, retrieve_verified
 
 __all__ = [
     "ArtifactIdentity",
@@ -33,4 +34,7 @@ __all__ = [
     "CatalogArtifact",
     "CatalogError",
     "TufCatalogClient",
+    "RetrievalError",
+    "RetrievalResult",
+    "retrieve_verified",
 ]
