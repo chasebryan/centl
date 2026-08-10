@@ -14,6 +14,12 @@ let write_text path text =
     ~finally:(fun () -> close_out_noerr channel)
     (fun () -> output_string channel text)
 
+let read_text path =
+  let channel = open_in path in
+  Fun.protect
+    ~finally:(fun () -> close_in_noerr channel)
+    (fun () -> really_input_string channel (in_channel_length channel))
+
 let create_native_value workspace =
   Centl_sci_workspace.ensure workspace;
   write_text (Filename.concat workspace.Centl_sci_workspace.modules_dir "tau.centl")
@@ -92,6 +98,51 @@ let test_symlink_is_rejected_before_copy () =
       Centl_sci_portable.validate_bundle bundle
       |> expect_rejected "contains a symlink")
 
+let test_snapshot_rejects_symlinked_workspace_state () =
+  let root = temp_dir "centl-caramels-snapshot-symlink-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let outside = Filename.concat root "outside.txt" in
+      write_text outside "outside\n";
+      Unix.symlink outside (Filename.concat workspace.data "escape-link");
+      begin match Centl_sci_snapshot.create workspace with
+      | Ok _ -> Alcotest.fail "snapshot unexpectedly followed symlinked workspace state"
+      | Error message ->
+          Alcotest.(check bool) "snapshot symlink rejection" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"symlinked workspace state" message))
+      end;
+      Alcotest.(check string) "outside file untouched" "outside\n" (read_text outside))
+
+let test_snapshot_rollback_does_not_advance_revision () =
+  let root = temp_dir "centl-caramels-snapshot-rollback-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let state = Filename.concat workspace.data "state.txt" in
+      write_text state "before\n";
+      let revision_before = Centl_sci_workspace.read_revision workspace in
+      let snapshot =
+        match Centl_sci_snapshot.create workspace with
+        | Ok path -> path
+        | Error message -> Alcotest.fail message
+      in
+      write_text state "after\n";
+      begin match Centl_sci_snapshot.rollback workspace snapshot with
+      | Error message -> Alcotest.fail message
+      | Ok revision ->
+          Alcotest.(check int) "rollback revision unchanged" revision_before revision
+      end;
+      Alcotest.(check int) "workspace revision unchanged" revision_before
+        (Centl_sci_workspace.read_revision workspace);
+      Alcotest.(check string) "snapshot surface restored" "before\n" (read_text state))
+
 let test_dependency_invalid_bundle_is_rejected () =
   let root = temp_dir "centl-caramels-dependency-import-" in
   Fun.protect
@@ -139,6 +190,10 @@ let () =
             test_absolute_manifest_source_is_rejected;
           Alcotest.test_case "reject symlink" `Quick
             test_symlink_is_rejected_before_copy;
+          Alcotest.test_case "snapshot rejects symlink" `Quick
+            test_snapshot_rejects_symlinked_workspace_state;
+          Alcotest.test_case "rollback preserves revision" `Quick
+            test_snapshot_rollback_does_not_advance_revision;
           Alcotest.test_case "reject dependency-invalid bundle" `Quick
             test_dependency_invalid_bundle_is_rejected;
           Alcotest.test_case "import preserves reload signal" `Quick
