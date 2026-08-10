@@ -57,6 +57,34 @@ let test_invalid_native_extension_is_not_promoted () =
           Alcotest.(check string) "assurance unchanged"
             "locally_tested_extension" report.assurance)
 
+let test_generated_adapter_cannot_enter_native_loader () =
+  let root = temp_dir "centl-caramels-adapter-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      begin match
+        Centl_sci_scaffold.create workspace
+          ~kind:Centl_sci_scaffold.Python_adapter ~name:"reader" ~target:"astropy"
+      with
+      | Error message -> Alcotest.fail message
+      | Ok _ -> ()
+      end;
+      begin match Centl_sci_extensions.read_manifest workspace "reader" with
+      | Error message -> Alcotest.fail message
+      | Ok manifest ->
+          Alcotest.(check string) "adapter kind" "python_adapter" manifest.kind;
+          Alcotest.(check bool) "scaffold starts disabled" false manifest.enabled
+      end;
+      match Centl_sci_extensions.set_enabled workspace "reader" true with
+      | Error message ->
+          Alcotest.(check bool) "native loader refusal is explicit" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"will not route it through the native CENTL definition loader"
+                  message))
+      | Ok _ -> Alcotest.fail "Python adapter scaffold must not enter native loader")
+
 let test_package_validation_preserves_member_assurance () =
   let root = temp_dir "centl-caramels-package-" in
   Fun.protect
@@ -153,6 +181,8 @@ let () =
             test_native_extension_validation;
           Alcotest.test_case "invalid native extension" `Quick
             test_invalid_native_extension_is_not_promoted;
+          Alcotest.test_case "adapter activation boundary" `Quick
+            test_generated_adapter_cannot_enter_native_loader;
           Alcotest.test_case "package membership assurance" `Quick
             test_package_validation_preserves_member_assurance;
         ] );
