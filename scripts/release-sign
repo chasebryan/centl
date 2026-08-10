@@ -15,13 +15,26 @@ need() {
   command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
 }
 
+find_signify() {
+  if [ -n "${SIGNIFY:-}" ]; then
+    command -v "$SIGNIFY" >/dev/null 2>&1 || fail "SIGNIFY executable not found: $SIGNIFY"
+    command -v "$SIGNIFY"
+  elif command -v signify >/dev/null 2>&1; then
+    command -v signify
+  elif command -v signify-openbsd >/dev/null 2>&1; then
+    command -v signify-openbsd
+  else
+    fail "signify is required (Debian/Ubuntu package: signify-openbsd)"
+  fi
+}
+
 [ -d "$release_dir" ] || fail "release directory not found: $release_dir"
 [ -n "$secret_key" ] || fail "FCF_SIGNIFY_SECRET_KEY must name the protected secret key"
 [ -f "$secret_key" ] || fail "secret key not found: $secret_key"
 [ -n "$public_key" ] || fail "FCF_SIGNIFY_PUBLIC_KEY must name the matching public key"
 [ -f "$public_key" ] || fail "public key not found: $public_key"
-need signify
 need python3
+signify_bin=$(find_signify)
 
 secret_dir=$(CDPATH= cd -- "$(dirname -- "$secret_key")" && pwd)
 secret_abs="$secret_dir/$(basename -- "$secret_key")"
@@ -47,14 +60,15 @@ python3 "$repo_root/scripts/integrity.py" manifest \
   "$@"
 
 rm -f "$signature"
-signify -S -s "$secret_key" -m "$manifest" -x "$signature"
+"$signify_bin" -S -s "$secret_key" -m "$manifest" -x "$signature"
 
 # A signing operation is not considered complete until the output verifies with
 # the explicitly selected public key and the checksum manifest verifies the
 # release bytes.
-signify -V -p "$public_key" -m "$manifest" -x "$signature"
+"$signify_bin" -V -p "$public_key" -m "$manifest" -x "$signature"
 python3 "$repo_root/scripts/integrity.py" verify "$manifest" --root "$release_dir"
 
 printf 'Signed CENTL release manifest: %s\n' "$manifest"
 printf 'Signature: %s\n' "$signature"
 printf 'Public key: %s\n' "$public_key"
+printf 'Signify implementation: %s\n' "$signify_bin"
