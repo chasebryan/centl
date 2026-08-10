@@ -5,6 +5,7 @@ on:
     paths:
       - "infra/offline-build/Containerfile"
       - "scripts/capsule-build"
+      - "scripts/capsule-run"
       - "scripts/offline-rebuild"
       - "docs/SCI-RUNTIME-PRESERVATION.md"
       - ".github/workflows/sci-runtime-preservation.yml"
@@ -14,6 +15,7 @@ on:
     paths:
       - "infra/offline-build/Containerfile"
       - "scripts/capsule-build"
+      - "scripts/capsule-run"
       - "scripts/offline-rebuild"
       - "docs/SCI-RUNTIME-PRESERVATION.md"
       - ".github/workflows/sci-runtime-preservation.yml"
@@ -35,7 +37,10 @@ jobs:
       - name: Check recovery-script syntax
         run: |
           sh -n scripts/capsule-build
+          sh -n scripts/capsule-run
           sh -n scripts/offline-rebuild
+          ! grep -F -- '-v "$repo_root:/driver:ro"' scripts/capsule-run
+          grep -F 'git clone --quiet /mirror/project/centl.bundle' scripts/capsule-run
 
       - name: Install reference compiler tools
         run: |
