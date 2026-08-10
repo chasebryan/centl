@@ -80,6 +80,16 @@
  (modules test_sci_human_variation)
  (libraries centl_lib alcotest))
 
+(test
+ (name test_sci_mechanics)
+ (modules test_sci_mechanics)
+ (libraries centl_lib alcotest yojson))
+
+(test
+ (name test_sci_codegen)
+ (modules test_sci_codegen)
+ (libraries centl_lib alcotest yojson))
+
 (executable
  (name sci_fake_curl)
  (modules sci_fake_curl))
