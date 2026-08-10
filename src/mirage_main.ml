@@ -80,21 +80,42 @@ let execution_plan_with readiness_path readiness =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
+let evidence_with workspace execution_plan_path execution_plan =
+  match
+    Centl_sci_mirage_evidence.construct workspace execution_plan_path execution_plan
+  with
+  | Ok result -> result
+  | Error message ->
+      prerr_endline ("centl-mirage: " ^ message);
+      exit 2
+
+let receipt_counts (evidence : Centl_sci_mirage_evidence.report) =
+  List.fold_left
+    (fun (passed, pending, blocked) (receipt : Centl_sci_mirage_evidence.receipt) ->
+      match receipt.state with
+      | Centl_sci_mirage_evidence.Passed -> (passed + 1, pending, blocked)
+      | Centl_sci_mirage_evidence.Pending -> (passed, pending + 1, blocked)
+      | Centl_sci_mirage_evidence.Blocked -> (passed, pending, blocked + 1))
+    (0, 0, 0) evidence.receipts
+
 let record_candidate_phase result goal_path graph obligations_path obligations
     candidates_path candidates materialization_path materialization readiness_path
-    readiness execution_plan_path execution_plan =
+    readiness execution_plan_path execution_plan evidence_path evidence =
+  let evidence_passed, evidence_pending, evidence_blocked = receipt_counts evidence in
   Centl_sci_workspace.atomic_write_json result.Centl_sci_mirage.active_path
     (`Assoc
       [
-        ("schema_version", `Int 1);
+        ("schema_version", `Int 2);
         ("system", `String "CENTL-MIRAGE");
         ("status", `String "active");
-        ("phase", `String "candidate_materialization_and_evidence_planned");
+        ("phase", `String "candidate_evidence_execution_started");
         ( "next_phase",
           `String
-            (if obligations.Centl_sci_mirage_obligation.blocked_cells = [] then
-               "execute_candidate_evidence"
-             else "resolve_blocking_requirements") );
+            (if obligations.Centl_sci_mirage_obligation.blocked_cells <> [] then
+               "resolve_blocking_requirements"
+             else if evidence_blocked > 0 then "resolve_blocked_evidence"
+             else if evidence_pending > 0 then "execute_remaining_candidate_evidence"
+             else "recompute_candidate_readiness") );
         ("source_digest", `String result.source_digest);
         ("source_stored_path", `String result.stored_path);
         ("specification_ir", `String result.spec_path);
@@ -105,6 +126,7 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ("candidate_materialization", `String materialization_path);
         ("candidate_evidence_readiness", `String readiness_path);
         ("candidate_evidence_execution_plan", `String execution_plan_path);
+        ("candidate_evidence_receipts", `String evidence_path);
         ("workspace_revision", `Int result.revision);
         ("goal_nodes", `Int (List.length graph.Centl_sci_mirage_goal.nodes));
         ("goal_edges", `Int (List.length graph.edges));
@@ -121,6 +143,10 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ( "execution_plan_candidate_count",
           `Int
             (List.length execution_plan.Centl_sci_mirage_execution_plan.candidates) );
+        ("evidence_receipt_count", `Int (List.length evidence.receipts));
+        ("evidence_passed_count", `Int evidence_passed);
+        ("evidence_pending_count", `Int evidence_pending);
+        ("evidence_blocked_count", `Int evidence_blocked);
         ( "candidate_blocked",
           `Bool (obligations.Centl_sci_mirage_obligation.blocked_cells <> []) );
         ( "blocked_cells",
@@ -129,8 +155,14 @@ let record_candidate_phase result goal_path graph obligations_path obligations
                (fun id -> `Int id)
                obligations.Centl_sci_mirage_obligation.blocked_cells) );
         ("candidate_source_activated", `Bool false);
-        ("evidence_execution_performed", `Bool false);
-        ("workspace_mutated", `Bool false);
+        ("evidence_execution_performed", `Bool (evidence.receipts <> []));
+        ( "workspace_mutated",
+          `Bool
+            (List.exists
+               (fun (receipt : Centl_sci_mirage_evidence.receipt) ->
+                 receipt.state = Centl_sci_mirage_evidence.Passed
+                 && receipt.executor = "workspace_snapshot")
+               evidence.receipts) );
         ("assurance_promoted", `Bool false);
         ("network_required", `Bool false);
       ])
@@ -150,9 +182,12 @@ let start path =
   let execution_plan_path, execution_plan =
     execution_plan_with readiness_path readiness
   in
+  let evidence_path, evidence =
+    evidence_with workspace execution_plan_path execution_plan
+  in
   record_candidate_phase result goal_path graph obligations_path obligations
     candidates_path candidates materialization_path materialization readiness_path
-    readiness execution_plan_path execution_plan;
+    readiness execution_plan_path execution_plan evidence_path evidence;
   print_endline (Centl_sci_mirage.render_ingest result);
   Printf.printf "Goal graph: %s\n%s\n" goal_path
     (Centl_sci_mirage_goal.render graph);
@@ -166,12 +201,14 @@ let start path =
     (Centl_sci_mirage_readiness.render readiness);
   Printf.printf "Candidate evidence execution plan: %s\n%s\n" execution_plan_path
     (Centl_sci_mirage_execution_plan.render execution_plan);
+  Printf.printf "Candidate evidence receipts: %s\n%s\n" evidence_path
+    (Centl_sci_mirage_evidence.render evidence);
   if obligations.blocked_cells <> [] then
     print_endline
-      "MIRAGE staged only non-mutating candidate transactions and halted before synthesis for blocked source cells."
+      "MIRAGE staged only non-mutating candidate transactions and halted candidate synthesis for blocked source cells. Evidence execution does not override those source-level blocks."
   else
     print_endline
-      "MIRAGE staged candidate transactions, conservatively materialized only candidates supported by deterministic local lowering, consumed successful transaction-bound parser evidence, and planned remaining evidence work. No candidate source was activated and no candidate is admissible yet."
+      "MIRAGE staged candidate transactions, conservatively materialized only deterministic local lowering, consumed parser evidence, created reversible pre-activation workspace snapshots where required, and left unexecuted validators explicitly pending. No candidate source was activated and no assurance was promoted."
 
 let status () =
   let workspace = workspace_or_exit () in
