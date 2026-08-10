@@ -17,9 +17,12 @@ PY
   caravan/coordinator.py \
   caravan/identity.py \
   caravan/policy.py \
+  caravan/enrollment.py \
   tests/test_caravan_phase1.py \
-  tests/test_caravan_identity.py
+  tests/test_caravan_identity.py \
+  tests/test_caravan_enrollment.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
-  tests/test_caravan_identity.py
+  tests/test_caravan_identity.py \
+  tests/test_caravan_enrollment.py
