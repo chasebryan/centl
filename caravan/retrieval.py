@@ -15,7 +15,7 @@ import tempfile
 from typing import BinaryIO, Callable, Mapping, Sequence
 
 from .catalog import ChunkRecord
-from .content import ArtifactIdentity, ContentStore, IntegrityError
+from .content import DEFAULT_CHUNK_SIZE, ArtifactIdentity, ContentStore, IntegrityError
 from .coordinator import CoordinatorError, CoordinatorState, RetrievalTicket
 
 
@@ -52,6 +52,30 @@ def _read_exact(stream: BinaryIO, length: int) -> bytes:
         blocks.append(block)
         remaining -= len(block)
     return b"".join(blocks)
+
+
+def _validate_manifest(expected: ArtifactIdentity, chunks: Sequence[ChunkRecord]) -> None:
+    if expected.length == 0:
+        if chunks:
+            raise RetrievalError("zero-length artifact must not contain chunks")
+        return
+    if not chunks:
+        raise RetrievalError("non-empty authenticated artifact requires chunks")
+
+    expected_offset = 0
+    for index, chunk in enumerate(chunks):
+        if chunk.offset != expected_offset:
+            raise RetrievalError("authenticated chunk manifest is not contiguous and ordered")
+        if chunk.length <= 0 or chunk.length > DEFAULT_CHUNK_SIZE:
+            raise RetrievalError("authenticated chunk length exceeds CARAVAN Phase 1 limit")
+        if index < len(chunks) - 1 and chunk.length != DEFAULT_CHUNK_SIZE:
+            raise RetrievalError("all non-final authenticated chunks must be exactly 4 MiB")
+        expected_offset += chunk.length
+        if expected_offset > expected.length:
+            raise RetrievalError("authenticated chunk manifest exceeds artifact length")
+
+    if expected_offset != expected.length:
+        raise RetrievalError("authenticated chunk manifest length does not match artifact")
 
 
 def _verify_into_file(
@@ -111,8 +135,15 @@ def retrieve_verified(
 
     if max_attempts <= 0:
         raise ValueError("max_attempts must be positive")
-    if sum(chunk.length for chunk in chunks) != expected.length:
-        raise RetrievalError("authenticated chunk manifest length does not match artifact")
+    _validate_manifest(expected, chunks)
+
+    # Enforce the same storage and free-space ceiling before creating the
+    # retrieval temporary file. Import-time checks remain authoritative too,
+    # but they are intentionally not the first capacity boundary.
+    try:
+        store.ensure_capacity(expected.length)
+    except IntegrityError as exc:
+        raise RetrievalError("authenticated artifact does not fit CARAVAN store limits") from exc
 
     last_error: Exception | None = None
     for attempt in range(1, max_attempts + 1):
