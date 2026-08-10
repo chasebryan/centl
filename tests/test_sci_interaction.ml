@@ -73,6 +73,9 @@ let test_caramels_capability_discovery () =
     (List.mem "workspace portability" (capability_names "import workspace bundle"));
   Alcotest.(check bool) "audit reuses workspace audit" true
     (List.mem "workspace audit" (capability_names "audit workspace"));
+  Alcotest.(check bool) "dependency graph is discoverable" true
+    (List.mem "extension dependency graph"
+       (capability_names "show extension dependency graph"));
   Alcotest.(check bool) "assurance explanation is discoverable" true
     (List.mem "assurance explanation" (capability_names "explain assurance"));
   Alcotest.(check bool) "revision history is discoverable" true
