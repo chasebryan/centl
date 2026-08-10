@@ -92,8 +92,66 @@ let normalize_lexical text =
       replace_all ~needle ~replacement current)
     text safe_lexical_corrections
 
-let normalize _mode text =
-  text |> normalize_unicode |> normalize_lexical |> collapse_spaces
+let drop_prefix_ci prefix text =
+  let lower = String.lowercase_ascii text in
+  let prefix_lower = String.lowercase_ascii prefix in
+  if String.starts_with ~prefix:prefix_lower lower then
+    Some
+      (String.sub text (String.length prefix)
+         (String.length text - String.length prefix)
+      |> String.trim)
+  else None
+
+let canonicalize_root_request text =
+  let prefixes =
+    [
+      "find the roots of ";
+      "find roots of ";
+      "roots of ";
+      "find the zeros of ";
+      "find zeros of ";
+      "zeros of ";
+    ]
+  in
+  let rec choose = function
+    | [] -> None
+    | prefix :: rest ->
+        begin match drop_prefix_ci prefix text with
+        | Some body when body <> "" -> Some body
+        | _ -> choose rest
+        end
+  in
+  match choose prefixes with
+  | None -> text
+  | Some body ->
+      let lower_body = String.lowercase_ascii body in
+      if
+        String.contains body '='
+        || find_substring ~needle:" equals " lower_body <> None
+      then "solve " ^ body
+      else "solve " ^ body ^ " equals zero"
+
+let canonicalize_conversion text =
+  match drop_prefix_ci "change " text with
+  | None -> text
+  | Some body ->
+      let lower = String.lowercase_ascii body in
+      if
+        find_substring ~needle:" into " lower <> None
+        || find_substring ~needle:" to " lower <> None
+      then
+        "convert "
+        ^ replace_all ~needle:" into " ~replacement:" to " body
+      else text
+
+let canonicalize_common_intent text =
+  text |> canonicalize_root_request |> canonicalize_conversion
+
+let normalize mode text =
+  let normalized =
+    text |> normalize_unicode |> normalize_lexical |> collapse_spaces
+  in
+  match mode with Build -> normalized | Math | Phys | Hybrid -> canonicalize_common_intent normalized
 
 let session_commands =
   [
@@ -142,22 +200,19 @@ let physics_completions =
 
 let build_completions =
   [
-    "create function";
-    "create value";
-    "initialize workspace";
-    "inspect workspace";
-    "modify function";
-    "modify value";
-    "show workspace";
-    "add";
+    "function";
+    "value";
+    "workspace";
     "create";
+    "initialize";
+    "inspect";
+    "modify";
+    "show";
+    "add";
     "disable";
     "enable";
     "extend";
-    "inspect";
-    "modify";
     "remove";
-    "show";
     "undo";
   ]
 
