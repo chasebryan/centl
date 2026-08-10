@@ -3,7 +3,12 @@
 fuzzer="$SRC/centl/.clusterfuzzlite/caravan_content_fuzzer.py"
 package="$OUT/caravan_content_fuzzer.pkg"
 
-pyinstaller --distpath "$OUT" --onefile --name "$(basename "$package")" "$fuzzer"
+pyinstaller \
+  --paths "$SRC/centl" \
+  --distpath "$OUT" \
+  --onefile \
+  --name "$(basename "$package")" \
+  "$fuzzer"
 
 cat > "$OUT/caravan_content_fuzzer" <<'EOF'
 #!/bin/sh
