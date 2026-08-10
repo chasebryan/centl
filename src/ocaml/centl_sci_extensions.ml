@@ -139,6 +139,29 @@ let list workspace =
            | Error _ -> None)
     |> order_by_local_dependencies
 
+let enabled_dependents workspace name =
+  list workspace
+  |> List.filter (fun manifest ->
+         manifest.enabled
+         && manifest.name <> name
+         && List.exists
+              (fun dependency -> local_dependency_name dependency = Some name)
+              manifest.dependencies)
+  |> List.map (fun manifest -> manifest.name)
+  |> List.sort_uniq String.compare
+
+let validate_no_enabled_dependents workspace name =
+  match enabled_dependents workspace name with
+  | [] -> Ok ()
+  | dependents ->
+      Error
+        (Printf.sprintf
+           "local extension %s is required by enabled local extension%s %s; disable or update the dependent extension%s first"
+           name
+           (if List.length dependents = 1 then "" else "s")
+           (String.concat ", " dependents)
+           (if List.length dependents = 1 then "" else "s"))
+
 let strings values = `List (List.map (fun value -> `String value) values)
 
 let to_json manifest ~revision =
@@ -262,11 +285,11 @@ let set_enabled workspace name enabled =
            manifest.name manifest.kind)
   | Ok manifest ->
       let activation_check =
-        if not enabled then Ok ()
-        else
+        if enabled then
           match validate_native_activation workspace manifest with
           | Error _ as error -> error
           | Ok () -> validate_local_dependencies_for_activation workspace manifest
+        else validate_no_enabled_dependents workspace manifest.name
       in
       begin match activation_check with
       | Error _ as error -> error
@@ -287,23 +310,27 @@ let remove workspace name =
   match read_manifest workspace name with
   | Error message -> Error message
   | Ok manifest ->
-      try
-        Centl_sci_workspace.ensure workspace;
-        Centl_sci_workspace.ensure_directory (trash_dir workspace);
-        let revision = Centl_sci_workspace.bump_revision workspace in
-        let suffix = Printf.sprintf ".r%d" revision in
-        let manifest_path = Centl_sci_workspace.manifest_path workspace name in
-        let source = source_path workspace manifest in
-        let archived_manifest =
-          Filename.concat (trash_dir workspace) (name ^ suffix ^ ".json")
-        in
-        Unix.rename manifest_path archived_manifest;
-        if Sys.file_exists source && not (Sys.is_directory source) then
-          Unix.rename source
-            (Filename.concat (trash_dir workspace)
-               (name ^ suffix ^ Filename.extension source));
-        Ok revision
-      with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+      begin match validate_no_enabled_dependents workspace manifest.name with
+      | Error _ as error -> error
+      | Ok () ->
+          try
+            Centl_sci_workspace.ensure workspace;
+            Centl_sci_workspace.ensure_directory (trash_dir workspace);
+            let revision = Centl_sci_workspace.bump_revision workspace in
+            let suffix = Printf.sprintf ".r%d" revision in
+            let manifest_path = Centl_sci_workspace.manifest_path workspace name in
+            let source = source_path workspace manifest in
+            let archived_manifest =
+              Filename.concat (trash_dir workspace) (name ^ suffix ^ ".json")
+            in
+            Unix.rename manifest_path archived_manifest;
+            if Sys.file_exists source && not (Sys.is_directory source) then
+              Unix.rename source
+                (Filename.concat (trash_dir workspace)
+                   (name ^ suffix ^ Filename.extension source));
+            Ok revision
+          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+      end
 
 let render_manifest manifest =
   let dependencies =
