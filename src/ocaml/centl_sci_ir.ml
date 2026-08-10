@@ -8,6 +8,12 @@ type t =
       variable : string;
       equation_assumptions : string list;
     }
+  | Verification_claim of {
+      left : string;
+      relation : string;
+      right : string;
+      verification_assumptions : string list;
+    }
   | Unit_conversion of {
       value : string;
       from_unit : string;
@@ -189,25 +195,45 @@ let parse_polynomial_equation fields =
     let* left = string_field "left" fields in
     let* right = string_field "right" fields in
     let* variable = string_field "variable" fields in
-    let* left =
-      validate_text ~field:"left" ~max_bytes:max_model_text_bytes left
-    in
-    let* right =
-      validate_text ~field:"right" ~max_bytes:max_model_text_bytes right
-    in
+    let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
+    let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
     let* variable = validate_text ~field:"variable" ~max_bytes:64 variable in
     if not (valid_identifier variable) then
       fail "invalid_ir" "variable must be a CENTL identifier"
-    else if
-      contains_any left [ ','; '='; ';' ]
-      || contains_any right [ ','; '='; ';' ]
-    then
+    else if contains_any left [ ','; '='; ';' ] || contains_any right [ ','; '='; ';' ] then
       fail "invalid_ir"
         "equation sides may not contain commas, equality signs, or semicolons"
     else
       Ok
         (Polynomial_equation
            { left; right; variable; equation_assumptions = assumptions })
+
+let supported_verification_relation = function
+  | "equal" | "not_equal" | "less_than" | "less_or_equal"
+  | "greater_than" | "greater_or_equal" -> true
+  | _ -> false
+
+let parse_verification_claim fields =
+  let allowed = [ "left"; "relation"; "right" ] @ common_fields in
+  let* () = check_fields allowed fields in
+  let* assumptions =
+    require_common fields ~domain:"mathematics"
+      ~problem_class:"verification_claim" ~operation:"verify"
+  in
+  let* left = string_field "left" fields in
+  let* relation = string_field "relation" fields in
+  let* right = string_field "right" fields in
+  let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
+  let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
+  if not (supported_verification_relation relation) then
+    fail "invalid_ir" "unsupported verification relation"
+  else if assumptions <> [] then
+    fail "invalid_ir"
+      "Caramels closed verification claims do not admit interpreter assumptions"
+  else
+    Ok
+      (Verification_claim
+         { left; relation; right; verification_assumptions = assumptions })
 
 let parse_unit_conversion fields =
   let allowed = [ "value"; "from_unit"; "to_unit" ] @ common_fields in
@@ -315,9 +341,7 @@ let parse_unsupported fields =
       ~operation:"unsupported"
   in
   let* reason = string_field "reason" fields in
-  let* reason =
-    validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason
-  in
+  let* reason = validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason in
   Ok
     (Unsupported
        { unsupported_reason = reason; unsupported_assumptions = assumptions })
@@ -327,6 +351,7 @@ let of_json = function
       begin match List.assoc_opt "problem_class" fields with
       | Some (`String "exact_expression") -> parse_exact_expression fields
       | Some (`String "polynomial_equation") -> parse_polynomial_equation fields
+      | Some (`String "verification_claim") -> parse_verification_claim fields
       | Some (`String "unit_conversion") -> parse_unit_conversion fields
       | Some (`String "physical_constant") -> parse_physical_constant fields
       | Some (`String "uniform_gravity_particle") -> parse_uniform_gravity_particle fields
@@ -349,19 +374,21 @@ let of_string text =
 let assumptions = function
   | Exact_expression value -> value.exact_assumptions
   | Polynomial_equation value -> value.equation_assumptions
+  | Verification_claim value -> value.verification_assumptions
   | Unit_conversion value -> value.conversion_assumptions
   | Physical_constant value -> value.constant_assumptions
   | Uniform_gravity_particle value -> value.mechanics_assumptions
   | Unsupported value -> value.unsupported_assumptions
 
 let domain = function
-  | Exact_expression _ | Polynomial_equation _ -> "mathematics"
+  | Exact_expression _ | Polynomial_equation _ | Verification_claim _ -> "mathematics"
   | Unit_conversion _ | Physical_constant _ | Uniform_gravity_particle _ -> "physics"
   | Unsupported _ -> "unsupported"
 
 let problem_class = function
   | Exact_expression _ -> "exact_expression"
   | Polynomial_equation _ -> "polynomial_equation"
+  | Verification_claim _ -> "verification_claim"
   | Unit_conversion _ -> "unit_conversion"
   | Physical_constant _ -> "physical_constant"
   | Uniform_gravity_particle _ -> "uniform_gravity_particle"
@@ -370,6 +397,7 @@ let problem_class = function
 let operation = function
   | Exact_expression _ -> "compute"
   | Polynomial_equation _ -> "solve"
+  | Verification_claim _ -> "verify"
   | Unit_conversion _ -> "convert"
   | Physical_constant _ -> "constant"
   | Uniform_gravity_particle _ -> "simulate"
@@ -389,9 +417,7 @@ let to_json value =
   in
   match value with
   | Exact_expression data ->
-      `Assoc
-        (common data.exact_assumptions
-        @ [ ("expression", `String data.expression) ])
+      `Assoc (common data.exact_assumptions @ [ ("expression", `String data.expression) ])
   | Polynomial_equation data ->
       `Assoc
         (common data.equation_assumptions
@@ -400,6 +426,14 @@ let to_json value =
             ("relation", `String "equal");
             ("right", `String data.right);
             ("variable", `String data.variable);
+          ])
+  | Verification_claim data ->
+      `Assoc
+        (common data.verification_assumptions
+        @ [
+            ("left", `String data.left);
+            ("relation", `String data.relation);
+            ("right", `String data.right);
           ])
   | Unit_conversion data ->
       `Assoc
