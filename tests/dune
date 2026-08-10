@@ -25,6 +25,11 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_history_hardening)
+ (modules test_history_hardening)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_request_queue)
  (modules test_request_queue)
  (deps ../src/main.exe)
