@@ -5,12 +5,16 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.12.0-rc.1` adds enforceable math contracts to the agent-safe 0.11.0
+`0.12.0` is stable and adds enforceable math contracts to the agent-safe 0.11.0
 foundation. Structured verification, F*-backed equality for the admitted
 univariate rational-polynomial fragment, exact counterexamples, replayable
-receipts, stamped build identity, and the reusable `centl-check` Action are in
-candidate validation. Protocol version 1 remains stable with documented
-compatibility operations. Final publication and external pilots remain.
+receipts, stamped build identity, and the reusable `centl-check` Action are
+published. Protocol version 1 remains stable with documented compatibility
+operations.
+
+CENTL-SCi `v0.0.2-Caramels` is the active interaction/self-extension development
+line. GNU/Linux is the supported reference platform and the only release-blocking
+operating system for this series.
 
 ## 0. Foundation
 
@@ -136,27 +140,30 @@ machine schema, and differential test suite.
 
 ## 7. Hardening and release
 
-- Pull-request verification now runs the pinned F*, OCaml, native, quality, and
-  seeded Julia/Nemo path without invoking all-platform packaging. Full package
-  jobs remain on `main`, tags, and manual runs, and the x86_64 release smoke
-  exercises large exact GMP arithmetic under an emulated Core 2 CPU.
-- Exact and symbolic rendering now uses an explicit traversal stack, iterative
-  size preflight, bounded buffers, and adversarial depth, allocation, and
+- Pull-request verification runs the pinned F*, OCaml, native, quality, seeded
+  Julia/Nemo, CENTL-SCi assimilation, sanitizer, fuzz, and performance paths on
+  Linux without invoking packaging. Native Linux packaging remains on `main`,
+  tags, and manual runs.
+- Exact and symbolic rendering uses an explicit traversal stack, iterative size
+  preflight, bounded buffers, and adversarial depth, allocation, and
   cancellation tests.
-- Deterministic mutation corpora now fuzz compatibility and located parsers,
-  JSON Lines, MCP, and native Arb boundaries; coverage-guided fuzzing remains a
+- Deterministic mutation corpora fuzz compatibility and located parsers, JSON
+  Lines, MCP, and native Arb boundaries; coverage-guided fuzzing remains a
   future extension.
 - Exact-rational interval containment, refinement, transcendental-identity, and
   cross-surface metamorphic tests are implemented.
 - Compare difficult cases against independent Julia/Nemo evaluations.
-- Produce reproducible native release bundles and dependency notices.
-- Publish native Linux, macOS, and Windows packages, with x86_64 and Arm targets
-  where their upstream numerical dependencies support them.
-- Test every package on a clean native runner against the same language and
-  numerical conformance suite.
+- Produce reproducible Linux x86_64 native release bundles and dependency
+  notices.
+- Test the supported Linux package on a clean runner against the same language,
+  numerical, hardening, and installation conformance gates.
 - Request queues, native precision/exponent inputs, algebraic completion,
   resource exhaustion, cancellation, and hostile machine requests have focused
   adversarial coverage; continue auditing as new domains are added.
+- Keep macOS and Windows source compatibility opportunistic only where it is
+  naturally free of maintenance cost; do not add release, CI, packaging, or
+  compatibility obligations for unsupported operating systems.
 
-Exit condition: the release process reproduces verified binaries and publishes
-the exact toolchain, numerical backend, and remaining trust assumptions.
+Exit condition: the supported Linux release process reproduces verified binaries
+and publishes the exact toolchain, numerical backend, and remaining trust
+assumptions.
