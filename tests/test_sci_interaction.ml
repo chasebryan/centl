@@ -44,7 +44,16 @@ let test_build_completion_surface () =
     (fun candidate ->
       Alcotest.(check bool) (candidate ^ " completion") true
         (List.mem candidate completions))
-    [ "audit"; "capabilities"; "export"; "import"; "package"; "validate" ]
+    [
+      "assurance";
+      "audit";
+      "capabilities";
+      "export";
+      "import";
+      "package";
+      "revisions";
+      "validate";
+    ]
 
 let test_physics_completion_surface () =
   let completions =
@@ -64,6 +73,10 @@ let test_caramels_capability_discovery () =
     (List.mem "workspace portability" (capability_names "import workspace bundle"));
   Alcotest.(check bool) "audit reuses workspace audit" true
     (List.mem "workspace audit" (capability_names "audit workspace"));
+  Alcotest.(check bool) "assurance explanation is discoverable" true
+    (List.mem "assurance explanation" (capability_names "explain assurance"));
+  Alcotest.(check bool) "revision history is discoverable" true
+    (List.mem "workspace revision history" (capability_names "show revision history"));
   Alcotest.(check bool) "function creation reuses English-to-CENTL" true
     (List.mem "English-to-CENTL extension"
        (capability_names "create function for a local extension"));
