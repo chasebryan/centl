@@ -11,10 +11,15 @@ Exact values remain exact, approximations carry explicit justification, invalid 
 unsupported work stays visible, and semantic tooling is never allowed to overrule
 the mathematical evidence produced by CENTL itself.
 
-**Current consolidation line: CENTL v0.14.0 — Oasis.** Oasis integrates the
-validated post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory
-into one deliberately organized and hardened baseline. The intermediate v0.13.0
-development line was not formally published as a stable release.
+**Current consolidation candidate: CENTL v0.14.0.** It integrates the validated
+post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory into one
+reviewed baseline. The intermediate v0.13.0 development line was not formally
+published as a stable release.
+
+v0.14.0 is being qualified for an **Oasis declaration**. Oasis is not a codename:
+it is a repeatable release classification reserved for a CENTL release that has
+been reconciled, organized, hardened, validated, and established as a cohesive
+stable baseline. The declaration is withheld until those gates are complete.
 
 CENTL combines five closely related pieces:
 
@@ -23,8 +28,8 @@ CENTL combines five closely related pieces:
 | `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
 | `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
 | `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
-| **CENTL-MIRAGE** | Local introspective self-development bootstrap for specification ingestion, capability analysis, evidence obligations, and staged candidate transactions |
-| **CENTL CARAVAN** | Content-addressed authenticated preservation and availability system, shipped in Oasis as a bounded Phase 1 local laboratory |
+| **CENTL-MIRAGE** | Local introspective self-development bootstrap for specification ingestion, capability analysis, staged materialization, and evidence planning |
+| **CENTL CARAVAN** | Content-addressed authenticated preservation and availability system, included in v0.14.0 as a bounded Phase 1 local laboratory |
 
 ## Quick start
 
@@ -140,17 +145,25 @@ INGEST
   -> RECOMPUTE GAPS
 ```
 
-The Oasis bootstrap implements the controlled front half of that architecture. A
+The v0.14.0 bootstrap implements the controlled front half of that architecture. A
 user document remains attributable source material. MIRAGE preserves provenance,
 lowers the document into a Specification IR, constructs a typed goal/capability
 graph, detects conflicts, and first asks whether an existing CENTL capability can
 satisfy the request through composition before creating anything new.
 
-MIRAGE then constructs explicit evidence obligations and stages a non-mutating
-candidate transaction describing the smallest currently justified strategy. The
-transaction records matched capability inputs and mandatory obligations while
-explicitly retaining `workspace_mutated=false` and `assurance_promoted=false`.
-Ambiguous, conflicting, or policy-blocked goals do not become guessed source edits.
+MIRAGE constructs explicit evidence obligations and stages a non-mutating candidate
+transaction describing the smallest currently justified strategy. Where a request
+maps to supported deterministic CENTL generation, MIRAGE can materialize the exact
+candidate source, bind it to the transaction with SHA-256 identity, and run the
+authoritative parser against that staged source. Parser success establishes syntax
+only; it does not establish mathematical correctness, regression success, activation
+safety, or verified-core assurance.
+
+A readiness artifact consumes that transaction-bound structural evidence, and an
+execution-plan artifact names the still-required evidence mechanisms and their
+preconditions. These artifacts explicitly retain `workspace_mutated=false`,
+`execution_performed=false`, and `assurance_promoted=false`. Ambiguous, conflicting,
+unsupported, or policy-blocked goals do not become guessed source edits.
 
 Candidate changes are admitted only after explicit engineering and assurance gates.
 The architecture separates hard admissibility from preference: parsing, type and
@@ -161,7 +174,7 @@ native CENTL mechanisms, lower dependency surface, and preserved behavior.
 
 The local command surface includes `centl-mirage start PATH`, `ingest`, `analyze`,
 and `status`. Actual autonomous source mutation, CEGIS/equality-saturation execution,
-semantic behavioral fingerprints, obligation execution, and monotone autonomous
+semantic behavioral fingerprints, evidence execution, and monotone autonomous
 acceptance/rejection remain later MIRAGE layers.
 
 A local semantic model may propose interpretations, programs, tests, names, or
@@ -172,14 +185,14 @@ boundaries as every other candidate.
 MIRAGE autonomy is local. It does not imply automatic network publication, and a
 user-provided document is always treated as data rather than executable authority.
 
-See [docs/CENTL-MIRAGE.md](docs/CENTL-MIRAGE.md) for the full architecture and
-implemented Oasis boundary.
+See [docs/CENTL-MIRAGE.md](docs/CENTL-MIRAGE.md) for the full architecture and the
+implemented v0.14.0 boundary.
 
 ## CENTL CARAVAN
 
 **Content-Addressed Resilient Artifact Verification and Availability Network**
 
-Oasis ships the completed **CARAVAN Phase 1 local laboratory**. It is a bounded,
+v0.14.0 includes the completed **CARAVAN Phase 1 local laboratory**. It is a bounded,
 reproducible environment for protecting and retrieving approved CENTL/FCF artifacts;
 it is **not** authorization for arbitrary public volunteer enrollment.
 
@@ -202,12 +215,14 @@ The Phase 1 laboratory includes:
 - signed policy-acceptance receipts without host/user identity fields;
 - TUF-authenticated artifact catalogs with an independently supplied trust root;
 - outbound-only laboratory carrier/coordinator sessions with bounded bodies,
-  polling, concurrency, reconnect behavior, and resource use;
+  challenge/session populations, polling, concurrency, reconnect behavior, and
+  resource use;
+- pre-transfer storage-capacity enforcement and authenticated chunk-size limits;
 - short-lived, artifact/carrier-bound, single-use retrieval capabilities;
 - verified multi-carrier retrieval with automatic quarantine and fallback when a
   carrier supplies incorrect bytes;
-- hostile-transfer rejection for corruption, ordering errors, truncation, and
-  appended bytes;
+- hostile-transfer rejection for corruption, ordering errors, truncation,
+  appended bytes, and invalid authenticated chunk layouts;
 - explicit `join`, `status`, and `leave` lifecycle plus a reproducible local lab.
 
 Production relay deployment, public enrollment, final privacy/telemetry policy,
@@ -293,7 +308,7 @@ The supported source-tree organization is documented in
 - [MCP adapter](docs/MCP.md)
 - [Architecture](docs/DESIGN.md)
 - [Repository map](docs/REPOSITORY-MAP.md)
-- [Oasis release notes](docs/releases/0.14.0.md)
+- [v0.14.0 release notes](docs/releases/0.14.0.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 
