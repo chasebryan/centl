@@ -1,0 +1,393 @@
+"""Coordinator state model for the CARAVAN Phase 1 laboratory.
+
+The coordinator routes only catalog-approved content identities. It never changes
+an artifact identity based on carrier population, reputation, or availability.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import hashlib
+import secrets
+import sqlite3
+import time
+from pathlib import Path
+from typing import Iterable
+
+
+class CoordinatorError(RuntimeError):
+    """Raised for invalid coordinator state transitions or authorizations."""
+
+
+def _validate_artifact_id(artifact_id: str) -> str:
+    prefix = "sha256:"
+    if not artifact_id.startswith(prefix):
+        raise ValueError("artifact id must use sha256:<digest>")
+    digest = artifact_id[len(prefix) :]
+    if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
+        raise ValueError("artifact id must contain a 64-character lowercase SHA-256")
+    return artifact_id
+
+
+@dataclass(frozen=True, slots=True)
+class NetworkStats:
+    available_caravans: int
+    protected_artifacts: int
+    verified_replicas: int
+
+
+@dataclass(frozen=True, slots=True)
+class RetrievalTicket:
+    token: str
+    node_id: str
+    artifact_id: str
+    expires_at: float
+
+
+class CoordinatorState:
+    """SQLite-backed routing state with expiring presence and one-use tickets."""
+
+    def __init__(
+        self,
+        database: str | Path,
+        *,
+        heartbeat_ttl: float = 45.0,
+    ) -> None:
+        if heartbeat_ttl <= 0:
+            raise ValueError("heartbeat_ttl must be positive")
+        self.database = str(database)
+        self.heartbeat_ttl = float(heartbeat_ttl)
+        self._initialize()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.database)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+        return connection
+
+    def _initialize(self) -> None:
+        with self._connect() as db:
+            db.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS catalog (
+                    artifact_id TEXT PRIMARY KEY,
+                    length INTEGER NOT NULL CHECK(length >= 0),
+                    catalog_version INTEGER NOT NULL CHECK(catalog_version >= 1),
+                    distribution TEXT NOT NULL CHECK(distribution IN ('public-approved', 'revoked'))
+                );
+
+                CREATE TABLE IF NOT EXISTS carriers (
+                    node_id TEXT PRIMARY KEY,
+                    public_identity TEXT NOT NULL,
+                    policy_version TEXT NOT NULL,
+                    agent_version TEXT NOT NULL,
+                    state TEXT NOT NULL CHECK(state IN ('active', 'quarantined', 'withdrawn')),
+                    last_seen REAL NOT NULL,
+                    load REAL NOT NULL DEFAULT 0 CHECK(load >= 0),
+                    capacity INTEGER NOT NULL DEFAULT 0 CHECK(capacity >= 0)
+                );
+
+                CREATE TABLE IF NOT EXISTS replicas (
+                    node_id TEXT NOT NULL REFERENCES carriers(node_id) ON DELETE CASCADE,
+                    artifact_id TEXT NOT NULL REFERENCES catalog(artifact_id) ON DELETE CASCADE,
+                    verified_at REAL NOT NULL,
+                    PRIMARY KEY (node_id, artifact_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS tickets (
+                    token_hash TEXT PRIMARY KEY,
+                    node_id TEXT NOT NULL REFERENCES carriers(node_id) ON DELETE CASCADE,
+                    artifact_id TEXT NOT NULL REFERENCES catalog(artifact_id) ON DELETE CASCADE,
+                    expires_at REAL NOT NULL,
+                    used INTEGER NOT NULL DEFAULT 0 CHECK(used IN (0, 1))
+                );
+
+                CREATE TABLE IF NOT EXISTS integrity_failures (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    node_id TEXT NOT NULL REFERENCES carriers(node_id) ON DELETE CASCADE,
+                    artifact_id TEXT NOT NULL,
+                    expected_digest TEXT NOT NULL,
+                    observed_digest TEXT NOT NULL,
+                    observed_at REAL NOT NULL
+                );
+                """
+            )
+
+    def apply_authenticated_catalog(
+        self,
+        targets: Iterable[tuple[str, int, str]],
+        *,
+        catalog_version: int,
+    ) -> None:
+        """Replace routing eligibility from already-authenticated catalog data.
+
+        Authentication is deliberately outside the coordinator. Callers must
+        pass only targets that have already crossed the CARAVAN TUF trust gate.
+        """
+
+        if catalog_version < 1:
+            raise ValueError("catalog_version must be positive")
+        normalized: list[tuple[str, int, int, str]] = []
+        for artifact_id, length, distribution in targets:
+            _validate_artifact_id(artifact_id)
+            if length < 0:
+                raise ValueError("artifact length must be non-negative")
+            if distribution not in {"public-approved", "revoked"}:
+                raise ValueError("unsupported distribution class for coordinator catalog")
+            normalized.append((artifact_id, length, catalog_version, distribution))
+
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("DELETE FROM replicas")
+            db.execute("DELETE FROM tickets")
+            db.execute("DELETE FROM catalog")
+            db.executemany(
+                "INSERT INTO catalog(artifact_id, length, catalog_version, distribution) VALUES (?, ?, ?, ?)",
+                normalized,
+            )
+
+    def register_carrier(
+        self,
+        node_id: str,
+        *,
+        public_identity: str,
+        policy_version: str,
+        agent_version: str,
+        now: float | None = None,
+    ) -> None:
+        if not node_id or not public_identity or not policy_version or not agent_version:
+            raise ValueError("carrier registration fields must be non-empty")
+        timestamp = time.time() if now is None else float(now)
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT public_identity, state FROM carriers WHERE node_id = ?", (node_id,)
+            ).fetchone()
+            if row is not None and row["public_identity"] != public_identity:
+                raise CoordinatorError("node identity collision with different public identity")
+            if row is None:
+                db.execute(
+                    """INSERT INTO carriers(
+                        node_id, public_identity, policy_version, agent_version, state, last_seen
+                    ) VALUES (?, ?, ?, ?, 'active', ?)""",
+                    (node_id, public_identity, policy_version, agent_version, timestamp),
+                )
+            elif row["state"] == "withdrawn":
+                raise CoordinatorError("withdrawn node identity must not be silently reactivated")
+            else:
+                db.execute(
+                    """UPDATE carriers
+                       SET policy_version = ?, agent_version = ?, last_seen = ?
+                       WHERE node_id = ?""",
+                    (policy_version, agent_version, timestamp, node_id),
+                )
+
+    def heartbeat(
+        self,
+        node_id: str,
+        *,
+        load: float,
+        capacity: int,
+        now: float | None = None,
+    ) -> None:
+        if load < 0 or capacity < 0:
+            raise ValueError("load and capacity must be non-negative")
+        timestamp = time.time() if now is None else float(now)
+        with self._connect() as db:
+            row = db.execute("SELECT state FROM carriers WHERE node_id = ?", (node_id,)).fetchone()
+            if row is None:
+                raise CoordinatorError("unknown carrier")
+            if row["state"] != "active":
+                raise CoordinatorError(f"carrier is not active: {row['state']}")
+            db.execute(
+                "UPDATE carriers SET last_seen = ?, load = ?, capacity = ? WHERE node_id = ?",
+                (timestamp, float(load), int(capacity), node_id),
+            )
+
+    def advertise_replica(
+        self,
+        node_id: str,
+        artifact_id: str,
+        *,
+        now: float | None = None,
+    ) -> None:
+        _validate_artifact_id(artifact_id)
+        timestamp = time.time() if now is None else float(now)
+        with self._connect() as db:
+            carrier = db.execute(
+                "SELECT state FROM carriers WHERE node_id = ?", (node_id,)
+            ).fetchone()
+            if carrier is None or carrier["state"] != "active":
+                raise CoordinatorError("only active registered carriers may advertise")
+            target = db.execute(
+                "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
+            ).fetchone()
+            if target is None or target["distribution"] != "public-approved":
+                raise CoordinatorError("carrier may advertise only public-approved catalog artifacts")
+            db.execute(
+                """INSERT INTO replicas(node_id, artifact_id, verified_at)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(node_id, artifact_id)
+                   DO UPDATE SET verified_at = excluded.verified_at""",
+                (node_id, artifact_id, timestamp),
+            )
+
+    def _fresh_cutoff(self, now: float) -> float:
+        return now - self.heartbeat_ttl
+
+    def network_stats(self, *, now: float | None = None) -> NetworkStats:
+        timestamp = time.time() if now is None else float(now)
+        cutoff = self._fresh_cutoff(timestamp)
+        with self._connect() as db:
+            available = db.execute(
+                """SELECT COUNT(*) AS count FROM (
+                       SELECT DISTINCT c.node_id
+                       FROM carriers c
+                       JOIN replicas r ON r.node_id = c.node_id
+                       JOIN catalog a ON a.artifact_id = r.artifact_id
+                       WHERE c.state = 'active'
+                         AND c.last_seen >= ?
+                         AND a.distribution = 'public-approved'
+                   )""",
+                (cutoff,),
+            ).fetchone()["count"]
+            protected = db.execute(
+                """SELECT COUNT(DISTINCT r.artifact_id) AS count
+                   FROM replicas r
+                   JOIN carriers c ON c.node_id = r.node_id
+                   JOIN catalog a ON a.artifact_id = r.artifact_id
+                   WHERE c.state = 'active'
+                     AND c.last_seen >= ?
+                     AND a.distribution = 'public-approved'""",
+                (cutoff,),
+            ).fetchone()["count"]
+            replicas = db.execute(
+                """SELECT COUNT(*) AS count
+                   FROM replicas r
+                   JOIN carriers c ON c.node_id = r.node_id
+                   JOIN catalog a ON a.artifact_id = r.artifact_id
+                   WHERE c.state = 'active'
+                     AND c.last_seen >= ?
+                     AND a.distribution = 'public-approved'""",
+                (cutoff,),
+            ).fetchone()["count"]
+        return NetworkStats(int(available), int(protected), int(replicas))
+
+    def quarantine(self, node_id: str) -> None:
+        with self._connect() as db:
+            changed = db.execute(
+                "UPDATE carriers SET state = 'quarantined' WHERE node_id = ? AND state = 'active'",
+                (node_id,),
+            ).rowcount
+            if changed != 1:
+                raise CoordinatorError("carrier cannot be quarantined from current state")
+            db.execute("DELETE FROM tickets WHERE node_id = ?", (node_id,))
+
+    def withdraw(self, node_id: str) -> None:
+        with self._connect() as db:
+            changed = db.execute(
+                "UPDATE carriers SET state = 'withdrawn' WHERE node_id = ? AND state != 'withdrawn'",
+                (node_id,),
+            ).rowcount
+            if changed != 1:
+                raise CoordinatorError("carrier is already withdrawn or unknown")
+            db.execute("DELETE FROM replicas WHERE node_id = ?", (node_id,))
+            db.execute("DELETE FROM tickets WHERE node_id = ?", (node_id,))
+
+    def record_integrity_failure(
+        self,
+        node_id: str,
+        artifact_id: str,
+        *,
+        expected_digest: str,
+        observed_digest: str,
+        now: float | None = None,
+        quarantine: bool = True,
+    ) -> None:
+        _validate_artifact_id(artifact_id)
+        timestamp = time.time() if now is None else float(now)
+        with self._connect() as db:
+            carrier = db.execute("SELECT state FROM carriers WHERE node_id = ?", (node_id,)).fetchone()
+            if carrier is None:
+                raise CoordinatorError("unknown carrier")
+            db.execute(
+                """INSERT INTO integrity_failures(
+                    node_id, artifact_id, expected_digest, observed_digest, observed_at
+                ) VALUES (?, ?, ?, ?, ?)""",
+                (node_id, artifact_id, expected_digest, observed_digest, timestamp),
+            )
+            if quarantine and carrier["state"] == "active":
+                db.execute("UPDATE carriers SET state = 'quarantined' WHERE node_id = ?", (node_id,))
+                db.execute("DELETE FROM tickets WHERE node_id = ?", (node_id,))
+
+    def issue_ticket(
+        self,
+        artifact_id: str,
+        *,
+        ttl: float = 30.0,
+        now: float | None = None,
+    ) -> RetrievalTicket:
+        _validate_artifact_id(artifact_id)
+        if ttl <= 0:
+            raise ValueError("ticket ttl must be positive")
+        timestamp = time.time() if now is None else float(now)
+        cutoff = self._fresh_cutoff(timestamp)
+        with self._connect() as db:
+            target = db.execute(
+                "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
+            ).fetchone()
+            if target is None or target["distribution"] != "public-approved":
+                raise CoordinatorError("artifact is not public-approved")
+            carrier = db.execute(
+                """SELECT c.node_id
+                   FROM carriers c
+                   JOIN replicas r ON r.node_id = c.node_id
+                   WHERE r.artifact_id = ?
+                     AND c.state = 'active'
+                     AND c.last_seen >= ?
+                   ORDER BY c.load ASC, c.last_seen DESC, c.node_id ASC
+                   LIMIT 1""",
+                (artifact_id, cutoff),
+            ).fetchone()
+            if carrier is None:
+                raise CoordinatorError("no eligible carrier available")
+            token = secrets.token_urlsafe(32)
+            token_hash = hashlib.sha256(token.encode("ascii")).hexdigest()
+            expires_at = timestamp + ttl
+            db.execute(
+                "INSERT INTO tickets(token_hash, node_id, artifact_id, expires_at, used) VALUES (?, ?, ?, ?, 0)",
+                (token_hash, carrier["node_id"], artifact_id, expires_at),
+            )
+        return RetrievalTicket(token, carrier["node_id"], artifact_id, expires_at)
+
+    def consume_ticket(
+        self,
+        token: str,
+        *,
+        node_id: str,
+        artifact_id: str,
+        now: float | None = None,
+    ) -> None:
+        _validate_artifact_id(artifact_id)
+        timestamp = time.time() if now is None else float(now)
+        token_hash = hashlib.sha256(token.encode("ascii")).hexdigest()
+        cutoff = self._fresh_cutoff(timestamp)
+        with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            ticket = db.execute(
+                "SELECT node_id, artifact_id, expires_at, used FROM tickets WHERE token_hash = ?",
+                (token_hash,),
+            ).fetchone()
+            if ticket is None:
+                raise CoordinatorError("unknown retrieval ticket")
+            if ticket["used"]:
+                raise CoordinatorError("retrieval ticket replay rejected")
+            if ticket["expires_at"] < timestamp:
+                raise CoordinatorError("retrieval ticket expired")
+            if ticket["node_id"] != node_id or ticket["artifact_id"] != artifact_id:
+                raise CoordinatorError("retrieval ticket binding mismatch")
+            carrier = db.execute(
+                "SELECT state, last_seen FROM carriers WHERE node_id = ?", (node_id,)
+            ).fetchone()
+            if carrier is None or carrier["state"] != "active" or carrier["last_seen"] < cutoff:
+                raise CoordinatorError("retrieval ticket carrier is no longer eligible")
+            db.execute("UPDATE tickets SET used = 1 WHERE token_hash = ?", (token_hash,))

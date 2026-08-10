@@ -1,0 +1,52 @@
+#!/bin/sh
+set -eu
+
+PYTHON=${PYTHON:-python3}
+
+"$PYTHON" - <<'PY'
+from importlib.metadata import version
+
+required = {
+    "cryptography": "50.0.0",
+    "tuf": "7.0.0",
+}
+for package, expected in required.items():
+    actual = version(package)
+    if actual != expected:
+        raise SystemExit(
+            f"CARAVAN Phase 1 requires {package} {expected}, got {actual}"
+        )
+PY
+
+"$PYTHON" -m py_compile \
+  caravan/__init__.py \
+  caravan/content.py \
+  caravan/coordinator.py \
+  caravan/identity.py \
+  caravan/policy.py \
+  caravan/enrollment.py \
+  caravan/catalog.py \
+  caravan/tuf_lab.py \
+  caravan/session.py \
+  caravan/transport.py \
+  caravan/retrieval.py \
+  caravan/lifecycle.py \
+  caravan/lab.py \
+  tests/test_caravan_phase1.py \
+  tests/test_caravan_identity.py \
+  tests/test_caravan_enrollment.py \
+  tests/test_caravan_tuf_catalog.py \
+  tests/test_caravan_transport.py \
+  tests/test_caravan_retrieval.py \
+  tests/test_caravan_lifecycle.py
+
+PYTHONPATH=. "$PYTHON" -m unittest -v \
+  tests/test_caravan_phase1.py \
+  tests/test_caravan_identity.py \
+  tests/test_caravan_enrollment.py \
+  tests/test_caravan_tuf_catalog.py \
+  tests/test_caravan_transport.py \
+  tests/test_caravan_retrieval.py \
+  tests/test_caravan_lifecycle.py
+
+PYTHONPATH=. "$PYTHON" -m caravan.lab >/dev/null
