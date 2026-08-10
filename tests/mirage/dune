@@ -1,0 +1,4 @@
+(test
+ (name test_sci_mirage)
+ (modules test_sci_mirage)
+ (libraries centl_lib alcotest unix yojson))
