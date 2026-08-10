@@ -100,6 +100,9 @@ let layout workspace =
     workspace.generated;
   ]
 
+let same_directory (left : Unix.stats) (right : Unix.stats) =
+  left.Unix.st_dev = right.Unix.st_dev && left.Unix.st_ino = right.Unix.st_ino
+
 let require_managed_directory path =
   match lstat path with
   | Some stat when stat.Unix.st_kind = Unix.S_DIR ->
@@ -108,7 +111,31 @@ let require_managed_directory path =
       if stat.Unix.st_perm land 0o022 <> 0 then
         raise
           (Sys_error
-             ("workspace directory must not be group/other writable: " ^ path))
+             ("workspace directory must not be group/other writable: " ^ path));
+      let descriptor = Unix.openfile path [ Unix.O_RDONLY ] 0 in
+      Fun.protect
+        ~finally:(fun () -> Unix.close descriptor)
+        (fun () ->
+          let opened = Unix.fstat descriptor in
+          if
+            opened.Unix.st_kind <> Unix.S_DIR
+            || not (same_directory stat opened)
+            || opened.Unix.st_uid <> Unix.geteuid ()
+          then
+            raise
+              (Sys_error
+                 ("workspace directory changed during validation: " ^ path));
+          Unix.fchmod descriptor 0o700;
+          let hardened = Unix.fstat descriptor in
+          if
+            hardened.Unix.st_kind <> Unix.S_DIR
+            || not (same_directory opened hardened)
+            || hardened.Unix.st_uid <> Unix.geteuid ()
+            || hardened.Unix.st_perm land 0o077 <> 0
+          then
+            raise
+              (Sys_error
+                 ("workspace directory permissions could not be secured: " ^ path)))
   | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
       raise (Sys_error ("refusing symbolic-link workspace directory: " ^ path))
   | Some _ -> raise (Sys_error ("workspace path is not a directory: " ^ path))
