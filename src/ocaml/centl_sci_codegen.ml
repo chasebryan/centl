@@ -33,18 +33,7 @@ let strip_prefix_ci prefix text =
       |> String.trim)
   else None
 
-let valid_identifier name =
-  let first = function
-    | 'a' .. 'z' | 'A' .. 'Z' | '_' -> true
-    | _ -> false
-  in
-  let rest = function
-    | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
-    | _ -> false
-  in
-  String.length name > 0
-  && first name.[0]
-  && String.for_all rest name
+let valid_identifier = Centl_sci_change_ir.valid_identifier
 
 let split_parameters text =
   let normalized =
@@ -69,6 +58,33 @@ let validate_source expected source =
       | `Value, Centl_parser.Define_value _ -> Ok source
       | `Function, _ -> Error "The generated source is not a CENTL function definition."
       | `Value, _ -> Error "The generated source is not a CENTL value definition."
+      end
+
+let generate_native ~replace ~target_kind ~name ~parameters ~implementation =
+  let action =
+    if replace then Centl_sci_change_ir.Modify else Centl_sci_change_ir.Create
+  in
+  let request =
+    Centl_sci_change_ir.native_definition ~action ~target_kind ~name ~parameters
+      ~implementation
+  in
+  match Centl_sci_change_ir.to_centl_source request with
+  | Error message -> Needs_clarification ("Invalid change request: " ^ message ^ ".")
+  | Ok source ->
+      let expected =
+        match target_kind with
+        | Centl_sci_change_ir.Function -> `Function
+        | Centl_sci_change_ir.Value -> `Value
+        | _ -> `Value
+      in
+      begin match validate_source expected source with
+      | Error message -> Needs_clarification message
+      | Ok source ->
+          begin match target_kind with
+          | Centl_sci_change_ir.Function -> Generated (Function { replace; source })
+          | Centl_sci_change_ir.Value -> Generated (Value { replace; source })
+          | _ -> Not_generated
+          end
       end
 
 let parse_function ~replace text =
@@ -130,14 +146,8 @@ let parse_function ~replace text =
                 Needs_clarification
                   "The generated function needs a non-empty implementation expression."
               else
-                let source =
-                  Printf.sprintf "%s(%s) = %s" name
-                    (String.concat ", " parameters) (String.trim expression)
-                in
-                begin match validate_source `Function source with
-                | Ok source -> Generated (Function { replace; source })
-                | Error message -> Needs_clarification message
-                end
+                generate_native ~replace ~target_kind:Centl_sci_change_ir.Function
+                  ~name ~parameters ~implementation:(String.trim expression)
           end
       end
 
@@ -190,11 +200,8 @@ let parse_value ~replace text =
       | Some (_, expression) when String.trim expression = "" ->
           Needs_clarification "The generated value needs a non-empty expression."
       | Some (name, expression) ->
-          let source = name ^ " = " ^ String.trim expression in
-          begin match validate_source `Value source with
-          | Ok source -> Generated (Value { replace; source })
-          | Error message -> Needs_clarification message
-          end
+          generate_native ~replace ~target_kind:Centl_sci_change_ir.Value
+            ~name ~parameters:[] ~implementation:(String.trim expression)
       end
 
 let generate text =
