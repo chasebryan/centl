@@ -1,0 +1,75 @@
+name: Preservation drill tooling
+
+on:
+  pull_request:
+    paths:
+      - "scripts/preservation-drill"
+      - "infra/preservation/**"
+      - ".github/workflows/preservation-drill.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/preservation-drill"
+      - "infra/preservation/**"
+      - ".github/workflows/preservation-drill.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test local preservation scheduler
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check shell and unit syntax
+        run: |
+          sh -n scripts/preservation-drill
+          test -s infra/preservation/centl-preservation.service
+          test -s infra/preservation/centl-preservation.timer
+          test -s infra/preservation/preservation.env.example
+          if command -v systemd-analyze >/dev/null 2>&1; then
+            systemd-analyze verify \
+              infra/preservation/centl-preservation.service \
+              infra/preservation/centl-preservation.timer
+          fi
+
+      - name: Reject report paths inside a mirror without mutation
+        run: |
+          primary="$RUNNER_TEMP/primary"
+          mkdir -p "$primary"
+
+          if CENTL_DRILL_REPORT_DIR="$primary/reports" \
+               sh scripts/preservation-drill verify "$primary"; then
+            echo 'in-mirror report path unexpectedly accepted' >&2
+            exit 1
+          fi
+
+          test ! -e "$primary/reports"
+
+      - name: Preserve failure status and external report
+        run: |
+          primary="$RUNNER_TEMP/incomplete-mirror"
+          reports="$RUNNER_TEMP/reports"
+          mkdir -p "$primary" "$reports"
+
+          if CENTL_DRILL_REPORT_DIR="$reports" \
+               sh scripts/preservation-drill verify "$primary"; then
+            echo 'incomplete preservation mirror unexpectedly passed' >&2
+            exit 1
+          fi
+
+          count=$(find "$reports" -maxdepth 1 -type f \
+            -name 'centl-preservation-*.log' | wc -l | tr -d ' ')
+          test "$count" = 1
+          report=$(find "$reports" -maxdepth 1 -type f \
+            -name 'centl-preservation-*.log' -print -quit)
+          grep -Fqx 'result=FAIL' "$report"
+          grep -Fqx 'failed_step=supply-chain mirror audit' "$report"
+          grep -Fqx 'step_status=FAIL code=1' "$report"
