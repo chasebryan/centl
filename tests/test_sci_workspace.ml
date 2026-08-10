@@ -14,6 +14,16 @@ let temp_dir prefix =
 let cleanup path =
   try Centl_sci_snapshot.remove_tree path with _ -> ()
 
+let with_workspace_env root action =
+  let previous = Sys.getenv_opt "CENTL_WORKSPACE" in
+  Unix.putenv "CENTL_WORKSPACE" root;
+  Fun.protect
+    ~finally:(fun () ->
+      match previous with
+      | Some value -> Unix.putenv "CENTL_WORKSPACE" value
+      | None -> Unix.putenv "CENTL_WORKSPACE" "")
+    action
+
 let create_native_value workspace name source =
   Centl_sci_workspace.ensure workspace;
   write_text
@@ -198,6 +208,34 @@ let test_export_import_and_undo () =
             (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"))
       end)
 
+let test_build_import_dispatches_as_mutation () =
+  let root = temp_dir "centl-caramels-build-import-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let source = Centl_sci_workspace.make (Filename.concat root "source") in
+      let target = Centl_sci_workspace.make (Filename.concat root "target") in
+      let bundle = Filename.concat root "bundle" in
+      create_native_value source "tau" "tau = 2*pi\n";
+      begin match Centl_sci_portable.export source (Some bundle) with
+      | Error message -> Alcotest.fail message
+      | Ok _ -> ()
+      end;
+      create_native_value target "old_value" "old_value = 7\n";
+      with_workspace_env target.root (fun () ->
+          match Centl_sci_build.handle ("import workspace " ^ bundle) with
+          | Centl_sci_build.Not_handled ->
+              Alcotest.fail "BUILD must recognize workspace import"
+          | Centl_sci_build.Handled handled ->
+              Alcotest.(check bool) "BUILD marks import as changed" true handled.changed;
+              Alcotest.(check bool) "BUILD import has revision" true
+                (Option.is_some handled.revision);
+              Alcotest.(check bool) "imported source is active workspace state" true
+                (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"));
+              Alcotest.(check bool) "replaced downstream source is gone" false
+                (Sys.file_exists
+                   (Filename.concat target.modules_dir "old_value.centl"))))
+
 let () =
   Alcotest.run "CENTL-SCi Caramels workspace"
     [
@@ -218,5 +256,7 @@ let () =
         [
           Alcotest.test_case "export/import/undo" `Quick
             test_export_import_and_undo;
+          Alcotest.test_case "BUILD import mutation dispatch" `Quick
+            test_build_import_dispatches_as_mutation;
         ] );
     ]
