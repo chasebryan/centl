@@ -151,6 +151,10 @@ let scaffold workspace ~kind ~name ~target ~summary =
       end
     with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
+let create workspace ~kind ~name ~target =
+  scaffold workspace ~kind ~name ~target
+    ~summary:"Inactive local scaffold created through CENTL-SCi BUILD mode"
+
 let prepare_upstream workspace =
   try
     Centl_sci_workspace.ensure workspace;
