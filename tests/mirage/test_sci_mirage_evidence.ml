@@ -59,6 +59,37 @@ let test_workspace_snapshot_executes () =
             | None -> false)
       | _ -> Alcotest.fail "expected one evidence receipt")
 
+let test_snapshot_actions_share_one_cycle_snapshot () =
+  let root = temp_dir "centl-mirage-evidence-shared-snapshot-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let report =
+        Centl_sci_mirage_evidence.execute workspace
+          (plan
+             [
+               action ~id:"snapshot-action-1" ~kind:"rollback_available"
+                 ~executor:"workspace_snapshot" ~precondition:"before_activation" ();
+               action ~id:"snapshot-action-2" ~kind:"rollback_available"
+                 ~executor:"workspace_snapshot" ~precondition:"before_activation" ();
+             ])
+      in
+      match report.receipts with
+      | [ first; second ] ->
+          Alcotest.(check string) "first snapshot passes" "passed"
+            (Centl_sci_mirage_evidence.receipt_state_text first.state);
+          Alcotest.(check string) "second snapshot passes" "passed"
+            (Centl_sci_mirage_evidence.receipt_state_text second.state);
+          Alcotest.(check bool) "both obligations share one snapshot" true
+            (match (first.snapshot_path, second.snapshot_path) with
+            | Some left, Some right -> left = right
+            | _ -> false);
+          Alcotest.(check int) "one retained snapshot directory" 1
+            (Array.length (Sys.readdir (Centl_sci_snapshot.snapshot_root workspace)))
+      | _ -> Alcotest.fail "expected two evidence receipts")
+
 let test_unimplemented_executor_stays_pending () =
   let root = temp_dir "centl-mirage-evidence-pending-" in
   Fun.protect
@@ -133,6 +164,8 @@ let () =
       ( "execution",
         [
           Alcotest.test_case "workspace snapshot" `Quick test_workspace_snapshot_executes;
+          Alcotest.test_case "shared cycle snapshot" `Quick
+            test_snapshot_actions_share_one_cycle_snapshot;
           Alcotest.test_case "unimplemented executor" `Quick
             test_unimplemented_executor_stays_pending;
           Alcotest.test_case "unsupported executor" `Quick
