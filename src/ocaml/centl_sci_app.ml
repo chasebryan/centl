@@ -206,7 +206,7 @@ let extension_candidates () =
   | Some workspace ->
       Centl_sci_extensions.list workspace
       |> List.filter (fun manifest -> manifest.Centl_sci_extensions.enabled)
-      |> List.map (fun manifest -> manifest.name)
+      |> List.map (fun (manifest : Centl_sci_extensions.manifest) -> manifest.name)
 
 let starts_any prefixes text =
   List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
