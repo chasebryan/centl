@@ -453,10 +453,12 @@ development may use compatible distribution packages. Do not change a version
 in only one file: update the canonical lock and all intentionally mirrored
 locations, then run `scripts/check-toolchain-pins` through `make quality`.
 
-The project is licensed
-[AGPL-3.0-or-later](https://www.gnu.org/licenses/agpl-3.0.html). Read the license
-and preserve SPDX notices when adding source files or redistributing modified
-network-accessible versions.
+FCF-owned CENTL software is licensed under
+[`Apache-2.0`](../LICENSE), while project documentation and branding follow the
+path-specific terms in [`LICENSING.md`](../LICENSING.md) and
+[`.reuse/dep5`](../.reuse/dep5). Preserve SPDX, copyright, NOTICE, and valid
+third-party notices. Contributions must also carry the DCO sign-off described in
+[`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
 Readiness gate: explain what each CI/release job protects and successfully run
 the local suite appropriate to the proposed packaging or dependency change.
