@@ -118,6 +118,32 @@ let test_package_validation_preserves_member_assurance () =
           | _ -> Alcotest.fail "expected one package member"
           end)
 
+let test_workspace_audit_reports_invalid_local_state () =
+  let root = temp_dir "centl-caramels-audit-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      create_native_value workspace "tau" "tau = 2*pi\n";
+      create_native_value workspace "broken" "broken = (\n";
+      let audit = Centl_sci_audit.collect workspace in
+      Alcotest.(check int) "two extensions" 2 (List.length audit.extensions);
+      Alcotest.(check bool) "audit records warning" true (audit.warnings <> []);
+      Alcotest.(check bool) "broken extension named in warning" true
+        (List.exists
+           (fun warning ->
+             Option.is_some
+               (Centl_sci_interaction.find_substring ~needle:"broken" warning))
+           audit.warnings);
+      let json = Centl_sci_audit.to_json audit in
+      match json with
+      | `Assoc fields ->
+          begin match List.assoc_opt "verified_core_modified" fields with
+          | Some (`Bool false) -> ()
+          | _ -> Alcotest.fail "workspace audit must state verified_core_modified=false"
+          end
+      | _ -> Alcotest.fail "workspace audit JSON must be an object")
+
 let test_export_import_and_undo () =
   let root = temp_dir "centl-caramels-portable-" in
   Fun.protect
@@ -185,6 +211,8 @@ let () =
             test_generated_adapter_cannot_enter_native_loader;
           Alcotest.test_case "package membership assurance" `Quick
             test_package_validation_preserves_member_assurance;
+          Alcotest.test_case "workspace audit" `Quick
+            test_workspace_audit_reports_invalid_local_state;
         ] );
       ( "portability",
         [
