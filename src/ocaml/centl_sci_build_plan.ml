@@ -154,6 +154,16 @@ let render_validation name =
       | Ok report -> Centl_sci_validate.render report
       end
 
+let render_export target =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before exporting it."
+  | Some workspace ->
+      begin match Centl_sci_portable.export workspace target with
+      | Error message -> "Workspace export failed: " ^ message
+      | Ok result -> result.message
+      end
+
 let generic_text plan =
   String.concat "\n"
     ([
@@ -193,21 +203,36 @@ let render plan =
       ]
   then
     "Available CENTL / CENTL-SCi capabilities:\n" ^ Centl_sci_capabilities.render_all ()
+  else if List.mem request [ "export workspace"; "export my workspace" ] then
+    render_export None
   else
-    match drop_prefix_ci "show capability " plan.request with
-    | Some query when query <> "" ->
-        "Capability matches for `" ^ query ^ "`:\n"
-        ^ Centl_sci_capabilities.render_matches query
+    match drop_prefix_ci "export workspace " plan.request with
+    | Some path when path <> "" -> render_export (Some path)
     | _ ->
-        begin match drop_prefix_ci "validate extension " plan.request with
-        | Some name when name <> "" -> render_validation name
+        begin match drop_prefix_ci "export my workspace " plan.request with
+        | Some path when path <> "" -> render_export (Some path)
         | _ ->
-            begin match drop_prefix_ci "validate " plan.request with
-            | Some name when name <> "" -> render_validation name
+            begin match drop_prefix_ci "show capability " plan.request with
+            | Some query when query <> "" ->
+                "Capability matches for `" ^ query ^ "`:\n"
+                ^ Centl_sci_capabilities.render_matches query
             | _ ->
-                begin match plan.layer with
-                | Core_patch -> render_core_plan plan
-                | _ -> generic_text plan
+                begin match drop_prefix_ci "validate extension " plan.request with
+                | Some name when name <> "" -> render_validation name
+                | _ ->
+                    begin match drop_prefix_ci "validate " plan.request with
+                    | Some name when name <> "" -> render_validation name
+                    | _ ->
+                        begin match drop_prefix_ci "import workspace " plan.request with
+                        | Some _ ->
+                            "The Caramels import validator and reversible importer are implemented, but BUILD import remains gated until the dispatcher can reload the active downstream core session in the same operation. No workspace state was changed."
+                        | None ->
+                            begin match plan.layer with
+                            | Core_patch -> render_core_plan plan
+                            | _ -> generic_text plan
+                            end
+                        end
+                    end
                 end
             end
         end
