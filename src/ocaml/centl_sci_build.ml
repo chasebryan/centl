@@ -406,6 +406,18 @@ let prepare_upstream () =
               revision = Some (Centl_sci_workspace.read_revision workspace);
             })
 
+let portable_command command =
+  workspace_result (fun workspace ->
+      match Centl_sci_portable.execute workspace command with
+      | Error message -> Handled { message; changed = false; revision = None }
+      | Ok result ->
+          Handled
+            {
+              message = result.Centl_sci_portable.message;
+              changed = result.changed;
+              revision = result.revision;
+            })
+
 let render_plan input =
   let plan = Centl_sci_build_plan.plan input in
   Handled
@@ -494,68 +506,72 @@ let handle_direct trimmed lower =
       ]
   then prepare_upstream ()
   else
-    match drop_prefix_ci "create package " trimmed with
-    | Some name when name <> "" -> create_package name
-    | _ ->
-        begin match drop_prefix_ci "show package " trimmed with
-        | Some name when name <> "" -> show_package name
+    match Centl_sci_portable.parse trimmed with
+    | Some command -> portable_command command
+    | None ->
+        begin match drop_prefix_ci "create package " trimmed with
+        | Some name when name <> "" -> create_package name
         | _ ->
-            begin match drop_prefix_ci "add extension " trimmed with
-            | Some rest when rest <> "" ->
-                begin match parse_package_membership rest with
-                | Some (extension_name, package_name) ->
-                    add_extension_to_package ~extension_name ~package_name
-                | None ->
-                    Handled
-                      {
-                        message =
-                          "Package composition syntax: `add extension EXTENSION to package PACKAGE`.";
-                        changed = false;
-                        revision = None;
-                      }
-                end
+            begin match drop_prefix_ci "show package " trimmed with
+            | Some name when name <> "" -> show_package name
             | _ ->
-                begin match drop_prefix_ci "scaffold python adapter " trimmed with
+                begin match drop_prefix_ci "add extension " trimmed with
                 | Some rest when rest <> "" ->
-                    scaffold Centl_sci_scaffold.Python_adapter rest
+                    begin match parse_package_membership rest with
+                    | Some (extension_name, package_name) ->
+                        add_extension_to_package ~extension_name ~package_name
+                    | None ->
+                        Handled
+                          {
+                            message =
+                              "Package composition syntax: `add extension EXTENSION to package PACKAGE`.";
+                            changed = false;
+                            revision = None;
+                          }
+                    end
                 | _ ->
-                    begin match drop_prefix_ci "scaffold native extension " trimmed with
+                    begin match drop_prefix_ci "scaffold python adapter " trimmed with
                     | Some rest when rest <> "" ->
-                        scaffold Centl_sci_scaffold.Native_extension rest
+                        scaffold Centl_sci_scaffold.Python_adapter rest
                     | _ ->
-                        begin match drop_prefix_ci "create function " trimmed with
-                        | Some source when source <> "" ->
-                            create_function ~replace:false source
+                        begin match drop_prefix_ci "scaffold native extension " trimmed with
+                        | Some rest when rest <> "" ->
+                            scaffold Centl_sci_scaffold.Native_extension rest
                         | _ ->
-                            begin match drop_prefix_ci "modify function " trimmed with
+                            begin match drop_prefix_ci "create function " trimmed with
                             | Some source when source <> "" ->
-                                create_function ~replace:true source
+                                create_function ~replace:false source
                             | _ ->
-                                begin match drop_prefix_ci "create value " trimmed with
+                                begin match drop_prefix_ci "modify function " trimmed with
                                 | Some source when source <> "" ->
-                                    create_value ~replace:false source
+                                    create_function ~replace:true source
                                 | _ ->
-                                    begin match drop_prefix_ci "modify value " trimmed with
+                                    begin match drop_prefix_ci "create value " trimmed with
                                     | Some source when source <> "" ->
-                                        create_value ~replace:true source
+                                        create_value ~replace:false source
                                     | _ ->
-                                        begin match drop_prefix_ci "inspect " trimmed with
-                                        | Some name when name <> "" -> inspect_extension name
+                                        begin match drop_prefix_ci "modify value " trimmed with
+                                        | Some source when source <> "" ->
+                                            create_value ~replace:true source
                                         | _ ->
-                                            begin match drop_prefix_ci "disable " trimmed with
-                                            | Some name when name <> "" ->
-                                                set_extension_enabled name false
+                                            begin match drop_prefix_ci "inspect " trimmed with
+                                            | Some name when name <> "" -> inspect_extension name
                                             | _ ->
-                                                begin match drop_prefix_ci "enable " trimmed with
+                                                begin match drop_prefix_ci "disable " trimmed with
                                                 | Some name when name <> "" ->
-                                                    set_extension_enabled name true
+                                                    set_extension_enabled name false
                                                 | _ ->
-                                                    begin match drop_prefix_ci "remove " trimmed with
+                                                    begin match drop_prefix_ci "enable " trimmed with
                                                     | Some name when name <> "" ->
-                                                        remove_extension name
+                                                        set_extension_enabled name true
                                                     | _ ->
-                                                        if trimmed = "" then Not_handled
-                                                        else render_plan trimmed
+                                                        begin match drop_prefix_ci "remove " trimmed with
+                                                        | Some name when name <> "" ->
+                                                            remove_extension name
+                                                        | _ ->
+                                                            if trimmed = "" then Not_handled
+                                                            else render_plan trimmed
+                                                        end
                                                     end
                                                 end
                                             end
