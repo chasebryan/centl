@@ -1,0 +1,14 @@
+# Copy this file outside the repository, fill it with operator-verified facts,
+# then bind it with CENTL_SCI_MODEL_PROVENANCE_FILE=/path/to/file.
+schema=1
+file_name=example.gguf
+base_model_id=upstream-owner/upstream-model
+base_model_source=https://example.invalid/upstream-model
+base_model_license=SPDX-or-recorded-license
+quantization=Q4_K_M
+quantized_source_status=verified
+quantized_source_repository=https://example.invalid/quantized-model-repository
+quantized_source_file=example.gguf
+quantized_source_sha256=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+redistribution_status=not-approved
+note=Exact quantized origin must be verified by content SHA-256; redistribution requires a separate license/review decision.
