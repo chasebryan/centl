@@ -34,8 +34,26 @@ let test_plan_contains_pending_work () =
           Alcotest.(check bool) "all actions planned" true
             (List.for_all
                (fun action -> String.equal action.Centl_sci_mirage_execution_plan.state "planned")
+               candidate.actions);
+          Alcotest.(check bool) "all actions have identities" true
+            (List.for_all
+               (fun action -> String.length action.Centl_sci_mirage_execution_plan.action_id = 64)
                candidate.actions)
       | _ -> Alcotest.fail "expected one candidate")
+
+let test_action_identity_is_deterministic_and_transaction_bound () =
+  let make transaction_fingerprint =
+    Centl_sci_mirage_execution_plan.action_id
+      ~candidate_id:"candidate:cell:1:downstream_extension"
+      ~transaction_fingerprint ~obligation_id:"obligation:1:candidate_parses"
+      ~kind:"candidate_parses"
+  in
+  let first = make "transaction-a" in
+  let second = make "transaction-a" in
+  let changed = make "transaction-b" in
+  Alcotest.(check string) "same transaction produces same action identity" first second;
+  Alcotest.(check bool) "transaction drift changes action identity" true
+    (not (String.equal first changed))
 
 let test_artifact_denies_execution () =
   let root = temp_dir "centl-mirage-plan-file-" in
@@ -58,7 +76,11 @@ let test_artifact_denies_execution () =
           Alcotest.(check bool) "assurance unchanged" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
-                  ~needle:"\"assurance_promoted\":false" text)))
+                  ~needle:"\"assurance_promoted\":false" text));
+          Alcotest.(check bool) "action identity semantics persisted" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"\"action_identity_semantics\"" text)))
 
 let () =
   Alcotest.run "CENTL-MIRAGE execution plan"
@@ -66,6 +88,8 @@ let () =
       ( "planning",
         [
           Alcotest.test_case "pending work is planned" `Quick test_plan_contains_pending_work;
+          Alcotest.test_case "action identity is transaction-bound" `Quick
+            test_action_identity_is_deterministic_and_transaction_bound;
           Alcotest.test_case "artifact does not claim execution" `Quick
             test_artifact_denies_execution;
         ] );
