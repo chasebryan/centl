@@ -37,7 +37,8 @@ let classify request =
     || contains "core" text
   then Core_patch
   else if
-    contains "rust" text || contains "ocaml" text || contains " c " (" " ^ text ^ " ")
+    contains "rust" text || contains "ocaml" text
+    || contains " c " (" " ^ text ^ " ")
     || contains "native backend" text || contains "sparse matrix" text
   then Native_extension
   else if
@@ -52,6 +53,9 @@ let classify request =
 
 let plan request =
   let layer = classify request in
+  let discovered =
+    Centl_sci_capabilities.search request |> List.map Centl_sci_capabilities.render
+  in
   let reusable_capabilities, proposed_steps, trust_notes, unresolved =
     match layer with
     | Declarative ->
@@ -120,6 +124,9 @@ let plan request =
           [ "publishing upstream remains an explicit user choice" ],
           [ "automatic Git publication is outside the local runtime trust boundary" ] )
   in
+  let reusable_capabilities =
+    List.sort_uniq String.compare (discovered @ reusable_capabilities)
+  in
   { layer; request; reusable_capabilities; proposed_steps; trust_notes; unresolved }
 
 let bullets title values =
@@ -133,7 +140,7 @@ let render plan =
        "  request: " ^ plan.request;
        "  implementation layer: " ^ layer_text plan.layer;
      ]
-    @ bullets "  reusable capabilities:" plan.reusable_capabilities
+    @ bullets "  existing/reusable capabilities:" plan.reusable_capabilities
     @ bullets "  proposed first-pass steps:" plan.proposed_steps
     @ bullets "  trust/assurance:" plan.trust_notes
     @ bullets "  unresolved:" plan.unresolved)
