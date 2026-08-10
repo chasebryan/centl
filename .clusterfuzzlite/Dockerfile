@@ -2,5 +2,4 @@ FROM gcr.io/oss-fuzz-base/base-builder-python:v1@sha256:6b2b3a7e4a2da50de47f9492
 
 COPY . $SRC/centl
 WORKDIR $SRC/centl
-RUN python3 -m pip install --no-cache-dir -r caravan/requirements-phase1.txt
 COPY ./.clusterfuzzlite/build.sh $SRC/build.sh
