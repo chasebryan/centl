@@ -19,6 +19,8 @@ type t = {
   revision : int;
   extensions : extension_entry list;
   packages : package_entry list;
+  dependencies_valid : bool;
+  dependency_issues : string list;
   warnings : string list;
 }
 
@@ -70,6 +72,10 @@ let collect workspace =
     Centl_sci_extensions.list workspace |> List.map (extension_entry workspace)
   in
   let packages = Centl_sci_package.list workspace |> List.map (package_entry workspace) in
+  let dependency_report = Centl_sci_dependencies.validate workspace in
+  let dependency_issues =
+    List.map Centl_sci_dependencies.issue_text dependency_report.issues
+  in
   let warnings =
     extensions
     |> List.concat_map (fun extension ->
@@ -95,12 +101,15 @@ let collect workspace =
              [
                "package " ^ package.name ^ " has invalid or missing membership";
              ]))
+    @ dependency_issues
   in
   {
     workspace_root = workspace.Centl_sci_workspace.root;
     revision = Centl_sci_workspace.read_revision workspace;
     extensions;
     packages;
+    dependencies_valid = dependency_report.valid;
+    dependency_issues;
     warnings;
   }
 
@@ -135,6 +144,8 @@ let to_json audit =
       ("revision", `Int audit.revision);
       ("extensions", `List (List.map extension_json audit.extensions));
       ("packages", `List (List.map package_json audit.packages));
+      ("dependencies_valid", `Bool audit.dependencies_valid);
+      ("dependency_issues", strings audit.dependency_issues);
       ("warnings", strings audit.warnings);
       ("verified_core_modified", `Bool false);
     ]
@@ -155,6 +166,8 @@ let render audit =
        "  root: " ^ audit.workspace_root;
        "  revision: " ^ string_of_int audit.revision;
        "  verified core modified by audit: false";
+       "  dependency graph structurally valid: "
+       ^ string_of_bool audit.dependencies_valid;
        "Extensions:";
      ]
     @
@@ -164,6 +177,10 @@ let render audit =
     @
     (if audit.packages = [] then [ "  - none" ]
      else List.map render_package audit.packages)
+    @ [ "Dependency issues:" ]
+    @
+    (if audit.dependency_issues = [] then [ "  - none" ]
+     else List.map (fun issue -> "  - " ^ issue) audit.dependency_issues)
     @ [ "Warnings:" ]
     @
     (if audit.warnings = [] then [ "  - none" ]
