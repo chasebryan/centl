@@ -104,16 +104,23 @@ That authority belongs to authenticated catalog metadata.
 
 ## 6. Carrier identity
 
-The Phase 1 identity profile is **Ed25519** using a maintained cryptographic
-implementation. The planned Python laboratory backend is PyCA `cryptography`
-49.0.0.
+The Phase 1 identity profile is **Ed25519** using PyCA `cryptography` 50.0.0.
+The earlier laboratory selection of 49.0.0 was replaced before merge after
+repository dependency review identified CVE-2026-69247; PyCA documents the fix in
+50.0.0.
 
-The private key remains on the carrier. The coordinator receives a public key and
-derived pseudonymous node identifier. A carrier identity is for authentication,
-revocation, and abuse control; it is not a public user profile.
+The carrier private key remains on the carrier in an owner-only user directory.
+The coordinator receives a public identity and derived pseudonymous node
+identifier. A carrier identity is for authentication, revocation, and abuse
+control; it is not a public user profile and is not an FCF artifact-signing key.
 
-Identity generation/verification is the next implementation slice after the
-content/coordinator foundation.
+Phase 1 now implements identity generation/loading, Ed25519 signing and
+verification, exact versioned host-policy acceptance receipts, and a coordinator
+enrollment boundary that verifies the signed receipt against the required policy
+bytes. The outbound session layer still needs a live proof-of-possession exchange
+before the carrier transport is considered authenticated.
+
+See `CARAVAN-IDENTITY.md` for the exact representation and receipt boundary.
 
 ## 7. Coordinator state
 
@@ -216,11 +223,11 @@ with the carrier transport slice.
 
 The authorized local-laboratory sequence is:
 
-1. content-addressed immutable store and negative filesystem/integrity tests;
+1. content-addressed immutable store and negative filesystem/integrity tests — implemented;
 2. SQLite coordinator state, availability counters, quarantine and replay-safe
-   retrieval tickets;
-3. Ed25519 carrier identity and accepted-policy receipt;
-4. python-tuf authenticated catalog and test repository;
+   retrieval tickets — implemented;
+3. Ed25519 carrier identity and accepted-policy receipt — implemented;
+4. python-tuf authenticated catalog and test repository — next;
 5. outbound-only carrier/coordinator transport;
 6. two-carrier verified retrieval with automatic fallback;
 7. hostile carrier and malformed-transfer suite;
