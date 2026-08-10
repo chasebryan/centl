@@ -124,6 +124,7 @@ class SessionTests(unittest.TestCase):
                 max_pending_challenges=2,
                 max_challenges_per_node=2,
                 max_active_sessions=1,
+                max_sessions_per_node=1,
             )
 
             first = sessions.issue_challenge(identity.node_id, now=10)
@@ -146,7 +147,7 @@ class SessionTests(unittest.TestCase):
                 second.challenge_id,
                 second.challenge,
             )
-            with self.assertRaisesRegex(SessionError, "too many active carrier sessions"):
+            with self.assertRaisesRegex(SessionError, "too many active sessions for carrier"):
                 sessions.complete_challenge(
                     node_id=identity.node_id,
                     challenge_id=second.challenge_id,
@@ -154,6 +155,44 @@ class SessionTests(unittest.TestCase):
                     signature=identity.sign(second_payload),
                     now=10,
                 )
+
+    def test_one_carrier_cannot_monopolize_global_session_pool(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            identity_a = CarrierIdentity.create(root / "identity-a")
+            identity_b = CarrierIdentity.create(root / "identity-b")
+            _register(coordinator, identity_a)
+            _register(coordinator, identity_b)
+            sessions = SessionAuthority(
+                coordinator,
+                max_pending_challenges=4,
+                max_challenges_per_node=2,
+                max_active_sessions=2,
+                max_sessions_per_node=1,
+            )
+
+            def complete(identity: CarrierIdentity):
+                challenge = sessions.issue_challenge(identity.node_id, now=10)
+                payload = session_proof_payload(
+                    identity.node_id,
+                    challenge.challenge_id,
+                    challenge.challenge,
+                )
+                return sessions.complete_challenge(
+                    node_id=identity.node_id,
+                    challenge_id=challenge.challenge_id,
+                    challenge=challenge.challenge,
+                    signature=identity.sign(payload),
+                    now=10,
+                )
+
+            complete(identity_a)
+            with self.assertRaisesRegex(SessionError, "too many active sessions for carrier"):
+                complete(identity_a)
+
+            session_b = complete(identity_b)
+            self.assertEqual(sessions.authenticate(session_b.token, now=10), identity_b.node_id)
 
 
 class OutboundTransportTests(unittest.TestCase):
