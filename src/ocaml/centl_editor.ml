@@ -16,7 +16,7 @@ let write text =
 let save_cursor = "\027[s"
 let restore_cursor = "\027[u"
 
-let redraw ?ghost ~prompt ~text ~cursor =
+let redraw ~ghost ~prompt ~text ~cursor =
   let suffix =
     match ghost with
     | Some value when cursor = String.length text && value.display <> "" ->
@@ -130,7 +130,7 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
       let byte = Bytes.create 1 in
       let current_ghost () = suggest !text !cursor in
       let redraw_current () =
-        redraw ?ghost:(current_ghost ()) ~prompt ~text:!text ~cursor:!cursor
+        redraw ~ghost:(current_ghost ()) ~prompt ~text:!text ~cursor:!cursor
       in
       let rec read_byte () =
         try
@@ -215,12 +215,12 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
         end
       in
       let submit () =
-        redraw ~prompt ~text:!text ~cursor:!cursor;
+        redraw ~ghost:None ~prompt ~text:!text ~cursor:!cursor;
         write "\r\n";
         if !overflowed then Input_limit_exceeded else Submitted !text
       in
       let end_of_input () =
-        redraw ~prompt ~text:!text ~cursor:!cursor;
+        redraw ~ghost:None ~prompt ~text:!text ~cursor:!cursor;
         write "\r\n";
         if !overflowed then Input_limit_exceeded
         else if !text = "" then End_of_input
@@ -277,7 +277,7 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
         match input () with
         | '\r' | '\n' -> submit ()
         | '\003' ->
-            redraw ~prompt ~text:!text ~cursor:!cursor;
+            redraw ~ghost:None ~prompt ~text:!text ~cursor:!cursor;
             write "^C\r\n";
             Interrupted
         | '\004' when !text = "" ->
@@ -325,7 +325,7 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
       redraw_current ();
       loop ())
 
-let read_line ?(suggest = fun _ _ -> None) ~prompt ~history ~candidates ~max_bytes =
+let read_line ~suggest ~prompt ~history ~candidates ~max_bytes =
   if
     Sys.win32
     || not (Unix.isatty Unix.stdout)
