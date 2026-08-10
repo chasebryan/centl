@@ -18,6 +18,8 @@ let seeds =
     { mode = Math; prompt = "approximate pi" };
     { mode = Math; prompt = "approximate sqrt(2) to 30 significant digits" };
     { mode = Math; prompt = "verify 0.1 + 0.2 equals 3/10" };
+    { mode = Math; prompt = "check whether 1/3 < 1/2" };
+    { mode = Math; prompt = "verify this mathematical claim" };
     { mode = Hybrid; prompt = "what is 1/3 + 2/7" };
     { mode = Hybrid; prompt = "calculate (12 + 4) / 8" };
     { mode = Phys; prompt = "convert 25 kilometers to meters" };
