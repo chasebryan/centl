@@ -25,7 +25,7 @@ type t = {
   warnings : string list;
 }
 
-let extension_entry workspace manifest =
+let extension_entry workspace (manifest : Centl_sci_extensions.manifest) =
   match Centl_sci_validate.validate workspace manifest.Centl_sci_extensions.name with
   | Error message ->
       {
@@ -46,7 +46,7 @@ let extension_entry workspace manifest =
         notes = report.checks;
       }
 
-let package_entry workspace package =
+let package_entry workspace (package : Centl_sci_package.t) =
   match Centl_sci_package.validate workspace package.Centl_sci_package.name with
   | Error message ->
       {
@@ -58,8 +58,8 @@ let package_entry workspace package =
   | Ok validation ->
       let missing_members =
         validation.members
-        |> List.filter (fun member -> not member.Centl_sci_package.present)
-        |> List.map (fun member -> member.name)
+        |> List.filter (fun (member : Centl_sci_package.member_state) -> not member.present)
+        |> List.map (fun (member : Centl_sci_package.member_state) -> member.name)
       in
       {
         name = package.name;
@@ -80,7 +80,7 @@ let collect workspace =
     manifest_errors
     @
     (extensions
-    |> List.concat_map (fun extension ->
+    |> List.concat_map (fun (extension : extension_entry) ->
            let structural =
              if extension.structurally_valid then []
              else [ "extension " ^ extension.name ^ " failed structural validation" ]
@@ -97,12 +97,9 @@ let collect workspace =
            structural @ activation))
     @
     (packages
-    |> List.concat_map (fun package ->
+    |> List.concat_map (fun (package : package_entry) ->
            if package.valid then []
-           else
-             [
-               "package " ^ package.name ^ " has invalid or missing membership";
-             ]))
+           else [ "package " ^ package.name ^ " failed structural validation" ]))
     @ dependency_issues
   in
   {
@@ -116,83 +113,78 @@ let collect workspace =
     warnings;
   }
 
-let strings values = `List (List.map (fun value -> `String value) values)
+let healthy report = report.warnings = []
 
-let extension_json entry =
-  `Assoc
-    [
-      ("name", `String entry.name);
-      ("kind", `String entry.kind);
-      ("enabled", `Bool entry.enabled);
-      ("assurance", `String entry.assurance);
-      ("structurally_valid", `Bool entry.structurally_valid);
-      ("notes", strings entry.notes);
-    ]
+let render report =
+  let extension_lines =
+    report.extensions
+    |> List.map (fun extension ->
+           Printf.sprintf "  - %s — %s — %s — assurance=%s" extension.name
+             (if extension.enabled then "enabled" else "disabled")
+             (if extension.structurally_valid then "valid" else "invalid")
+             extension.assurance)
+  in
+  let package_lines =
+    report.packages
+    |> List.map (fun package ->
+           Printf.sprintf "  - %s — %s — members=%d" package.name
+             (if package.valid then "valid" else "invalid") package.members)
+  in
+  String.concat "\n"
+    ([
+       "Caramels workspace audit";
+       "  workspace: " ^ report.workspace_root;
+       "  revision: " ^ string_of_int report.revision;
+       "  health: " ^ (if healthy report then "healthy" else "attention_required");
+       "  verified core modified: false";
+       "Extensions:";
+     ]
+    @ (if extension_lines = [] then [ "  - none" ] else extension_lines)
+    @ [ "Packages:" ]
+    @ (if package_lines = [] then [ "  - none" ] else package_lines)
+    @ [ "Warnings:" ]
+    @
+    (if report.warnings = [] then [ "  - none" ]
+     else List.map (fun warning -> "  - " ^ warning) report.warnings)
+    @ [
+        "Assurance note: workspace health is structural consistency, not a trust score.";
+      ])
 
-let package_json entry =
-  `Assoc
-    [
-      ("name", `String entry.name);
-      ("valid", `Bool entry.valid);
-      ("members", `Int entry.members);
-      ("missing_members", strings entry.missing_members);
-    ]
-
-let to_json audit =
+let to_json report =
+  let extension_json extension =
+    `Assoc
+      [
+        ("name", `String extension.name);
+        ("kind", `String extension.kind);
+        ("enabled", `Bool extension.enabled);
+        ("assurance", `String extension.assurance);
+        ("structurally_valid", `Bool extension.structurally_valid);
+        ("notes", `List (List.map (fun note -> `String note) extension.notes));
+      ]
+  in
+  let package_json package =
+    `Assoc
+      [
+        ("name", `String package.name);
+        ("valid", `Bool package.valid);
+        ("members", `Int package.members);
+        ( "missing_members",
+          `List (List.map (fun member -> `String member) package.missing_members) );
+      ]
+  in
   `Assoc
     [
       ("schema_version", `Int 1);
       ("centl_sci_version", `String "0.0.2-Caramels");
-      ("workspace_root", `String audit.workspace_root);
-      ("revision", `Int audit.revision);
-      ("extensions", `List (List.map extension_json audit.extensions));
-      ("manifest_errors", strings audit.manifest_errors);
-      ("packages", `List (List.map package_json audit.packages));
-      ("dependencies_valid", `Bool audit.dependencies_valid);
-      ("dependency_issues", strings audit.dependency_issues);
-      ("warnings", strings audit.warnings);
+      ("workspace", `String report.workspace_root);
+      ("revision", `Int report.revision);
+      ("health", `String (if healthy report then "healthy" else "attention_required"));
       ("verified_core_modified", `Bool false);
+      ("extensions", `List (List.map extension_json report.extensions));
+      ("manifest_errors", `List (List.map (fun value -> `String value) report.manifest_errors));
+      ("packages", `List (List.map package_json report.packages));
+      ("dependencies_valid", `Bool report.dependencies_valid);
+      ("dependency_issues", `List (List.map (fun value -> `String value) report.dependency_issues));
+      ("warnings", `List (List.map (fun value -> `String value) report.warnings));
+      ("assurance_promoted", `Bool false);
     ]
-
-let render_extension entry =
-  Printf.sprintf "  - %s — kind=%s — %s — assurance=%s — structural=%s"
-    entry.name entry.kind (if entry.enabled then "enabled" else "disabled")
-    entry.assurance (if entry.structurally_valid then "valid" else "invalid")
-
-let render_package entry =
-  Printf.sprintf "  - %s — members=%d — membership=%s" entry.name entry.members
-    (if entry.valid then "valid" else "invalid")
-
-let render audit =
-  String.concat "\n"
-    ([
-       "Caramels workspace audit";
-       "  root: " ^ audit.workspace_root;
-       "  revision: " ^ string_of_int audit.revision;
-       "  verified core modified by audit: false";
-       "  dependency graph structurally valid: "
-       ^ string_of_bool audit.dependencies_valid;
-       "Extensions:";
-     ]
-    @
-    (if audit.extensions = [] then [ "  - none" ]
-     else List.map render_extension audit.extensions)
-    @ [ "Manifest errors:" ]
-    @
-    (if audit.manifest_errors = [] then [ "  - none" ]
-     else List.map (fun error -> "  - " ^ error) audit.manifest_errors)
-    @ [ "Packages:" ]
-    @
-    (if audit.packages = [] then [ "  - none" ]
-     else List.map render_package audit.packages)
-    @ [ "Dependency issues:" ]
-    @
-    (if audit.dependency_issues = [] then [ "  - none" ]
-     else List.map (fun issue -> "  - " ^ issue) audit.dependency_issues)
-    @ [ "Warnings:" ]
-    @
-    (if audit.warnings = [] then [ "  - none" ]
-     else List.map (fun warning -> "  - " ^ warning) audit.warnings)
-    @ [
-        "Assurance note: this audit checks local structural/workspace consistency only; it does not promote downstream code to verified CENTL core.";
-      ])
