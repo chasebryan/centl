@@ -4,8 +4,8 @@ Status: required operational procedure for FCF-controlled preservation storage.
 
 The preservation mirror is useful only if its copies are complete and can be
 verified independently. A directory existing on another disk is not sufficient
-evidence that a multi-gigabyte model, OCI capsule, source archive, or package
-snapshot copied correctly.
+evidence that a multi-gigabyte model, OCI capsule, source archive, package
+snapshot, or symbolic-link layout copied correctly.
 
 CENTL therefore supports a whole-mirror SHA-256 receipt in addition to the
 resource-specific checks already performed by `scripts/supply-chain audit`.
@@ -17,18 +17,26 @@ A finalized mirror receives:
 ```text
 MIRROR-SHA256SUMS
 MIRROR-SHA256SUMS.sha256
+MIRROR-SYMLINKS
+MIRROR-SYMLINKS.sha256
 ```
 
 `MIRROR-SHA256SUMS` contains one standard SHA-256 entry for every regular file in
-the mirror except those two receipt files themselves. It therefore covers the
+the mirror except the receipt files themselves. It therefore covers the
 preserved source bundle, dependency archives, Git mirrors, opam material,
 Julia/Nemo depot, CENTL-SCi model bytes, OCI capsule, and other preservation
 material present when the receipt is created.
 
-`MIRROR-SHA256SUMS.sha256` records the SHA-256 of the manifest itself.
+`MIRROR-SYMLINKS` records every symbolic-link path by the SHA-256 of its literal
+link-target string. Links are not dereferenced during this check. This preserves
+package/runtime layouts such as versioned shared-library links without trusting
+or reading a target outside the mirror.
 
-The receipt does not invent a new digest format or algorithm. It uses the same
-standard SHA-256 process as the rest of CENTL.
+The two `.sha256` files record the SHA-256 values of those manifests themselves.
+
+The process does not invent a new digest algorithm. Every content identity is
+standard SHA-256; the project-owned procedure defines which preservation objects
+must be covered and how regular files and symbolic links are checked separately.
 
 ## Finalize a primary mirror
 
@@ -49,8 +57,9 @@ Then create the whole-mirror receipt:
 sh scripts/mirror-receipt create /srv/centl-mirror
 ```
 
-The command immediately re-verifies the generated manifest. It fails if the tree
-contains symlinks or if any recorded bytes do not match.
+The command immediately re-verifies the generated receipts. It rejects unsupported
+special filesystem objects and any mismatch between the recorded tree and the
+actual tree.
 
 A mirror should be considered finalized for copying only after this command
 passes.
@@ -61,25 +70,29 @@ passes.
 sh scripts/mirror-receipt verify /srv/centl-mirror
 ```
 
-Strict verification checks two things:
+Strict verification checks all of the following:
 
-1. every listed file still has the recorded SHA-256; and
-2. the mirror contains exactly the recorded regular-file set.
+1. every listed regular file still has the recorded SHA-256;
+2. the mirror contains exactly the recorded regular-file set;
+3. every recorded symbolic link still exists;
+4. every symbolic link still has the recorded target string; and
+5. no unexpected symbolic links have appeared.
 
-Missing files and unexpected extra files are failures. This is intentionally
-stricter than ordinary `sha256sum -c`, which verifies listed files but does not
-normally prove that the directory contains no unrecorded additions.
+Missing files, unexpected extra files, changed link targets, and unsupported file
+types are failures. This is intentionally stricter than ordinary
+`sha256sum -c`, which verifies listed regular files but does not normally prove
+the complete filesystem membership of a preservation tree.
 
 ## Create and prove an independent copy
 
-Copy the complete finalized mirror with the file-copy mechanism appropriate for
-the storage environment. For a simple local example:
+Copy the complete finalized mirror with a mechanism that preserves symbolic links.
+For a simple local example:
 
 ```sh
 cp -a /srv/centl-mirror /mnt/fcf-backup/centl-mirror
 ```
 
-Then prove the copy against the primary receipt:
+Then prove the copy against the primary receipts:
 
 ```sh
 sh scripts/mirror-receipt compare \
@@ -87,9 +100,10 @@ sh scripts/mirror-receipt compare \
   /mnt/fcf-backup/centl-mirror
 ```
 
-`compare` first verifies the primary, requires the receipt files themselves to
-match in the secondary copy, and then checks every secondary file against the
-primary manifest with exact tree-membership enforcement.
+`compare` first verifies the primary, requires all receipt files themselves to
+match in the secondary copy, and then checks every secondary regular file and
+symbolic link against the primary manifests with exact tree-membership
+enforcement.
 
 A successful file-copy command is not treated as proof of a successful backup.
 The `compare` result is the proof used by the FCF preservation process.
@@ -143,7 +157,7 @@ For the current project scale, the practical minimum is:
 
 - one primary FCF-controlled preservation mirror;
 - at least one independent second copy;
-- a current whole-mirror receipt;
+- current regular-file and symbolic-link receipts;
 - successful strict comparison after each material update;
 - periodic re-verification of stored copies;
 - a saved OCI build capsule inside the mirror;
