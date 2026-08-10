@@ -276,6 +276,14 @@ class OutboundTransportTests(unittest.TestCase):
                 worker.join(timeout=3)
                 self.assertFalse(worker.is_alive())
                 self.assertEqual(poll_errors, [])
+
+                # The client can receive the poll response before the server-side
+                # thread finishes its finally block. Observe the service's idle
+                # state rather than assuming response delivery and bookkeeping are
+                # the same scheduler event.
+                idle_deadline = time.monotonic() + 2.0
+                while service.active_requests != 0 and time.monotonic() < idle_deadline:
+                    time.sleep(0.01)
                 self.assertEqual(service.active_requests, 0)
                 client.heartbeat(load=0, capacity=1)
 
