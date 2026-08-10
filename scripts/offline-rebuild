@@ -112,6 +112,7 @@ export JULIA_NUM_THREADS=1
 cd "$source_dir"
 opam exec --switch="$switch" -- make quality
 opam exec --switch="$switch" -- make test
+opam exec --switch="$switch" -- make native-build
 
 CENTL_BIN="$source_dir/_build/default/src/main.exe" \
   julia --startup-file=no --project="$source_dir/lab/julia" \
@@ -124,7 +125,78 @@ reported_commit=$(
 [ "$reported_commit" = "$commit" ] ||
   fail "rebuilt binary reports commit $reported_commit, expected $commit"
 
+sci_status=not-preserved
+if [ -f "$mirror/models/ACTIVE.sha256" ]; then
+  sci_status=checking
+  model_digest=$(sed -n '1p' "$mirror/models/ACTIVE.sha256")
+  case "$model_digest" in
+    ''|*[!0-9a-f]*) fail "invalid active CENTL-SCi model digest" ;;
+  esac
+  [ "${#model_digest}" -eq 64 ] || fail "active model digest must be SHA-256"
+  model_dir="$mirror/models/$model_digest"
+  model_manifest="$model_dir/MANIFEST"
+  [ -f "$model_manifest" ] || fail "active model MANIFEST is missing"
+  model_name=$(sed -n 's/^file=//p' "$model_manifest" | sed -n '1p')
+  case "$model_name" in
+    ''|*/*|*..*|*'\'*) fail "unsafe active model filename" ;;
+  esac
+  model="$model_dir/$model_name"
+  [ -f "$model" ] && [ ! -L "$model" ] || fail "active model bytes are missing"
+
+  runtime_dir="$mirror/sci-runtime"
+  [ -f "$runtime_dir/LLAMA-COMMIT" ] || fail "preserved llama-cli commit identity is missing"
+  [ -f "$runtime_dir/LLAMA-BUILD-NUMBER" ] || fail "preserved llama-cli build number is missing"
+  [ -f "$runtime_dir/llama-cli.sha256" ] || fail "preserved llama-cli checksum is missing"
+  python3 "$source_dir/scripts/integrity.py" verify \
+    "$runtime_dir/llama-cli.sha256" --root "$runtime_dir"
+
+  expected_llama_commit=$(
+    awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+      "$source_dir/supply-chain/sources.lock"
+  )
+  observed_llama_commit=$(sed -n '1p' "$runtime_dir/LLAMA-COMMIT")
+  [ "$observed_llama_commit" = "$expected_llama_commit" ] ||
+    fail "preserved llama-cli commit does not match CENTL supply-chain lock"
+  llama_build_number=$(sed -n '1p' "$runtime_dir/LLAMA-BUILD-NUMBER")
+  case "$llama_build_number" in
+    ''|*[!0-9]*) fail "invalid preserved llama-cli build number" ;;
+  esac
+
+  sci_cli=${CENTL_SCI_LLAMA_CLI:-}
+  if [ -z "$sci_cli" ] && [ -x /opt/centl-sci/bin/llama-cli ]; then
+    sci_cli=/opt/centl-sci/bin/llama-cli
+  fi
+  if [ -z "$sci_cli" ] && [ -x "$runtime_dir/llama-cli" ]; then
+    sci_cli="$runtime_dir/llama-cli"
+  fi
+  if [ -z "$sci_cli" ] && command -v llama-cli >/dev/null 2>&1; then
+    sci_cli=$(command -v llama-cli)
+  fi
+  [ -n "$sci_cli" ] && [ -x "$sci_cli" ] ||
+    fail "active CENTL-SCi model is preserved but no qualified llama-cli is executable"
+
+  runtime_version=$($sci_cli --version 2>&1) ||
+    fail "preserved llama-cli cannot execute in the recovery environment"
+  short_commit=$(printf '%s' "$expected_llama_commit" | cut -c1-9)
+  printf '%s\n' "$runtime_version" | grep -F "$short_commit" >/dev/null ||
+    fail "llama-cli version does not report pinned commit $short_commit"
+  printf '%s\n' "$runtime_version" | grep -F "$llama_build_number" >/dev/null ||
+    fail "llama-cli version does not report build $llama_build_number"
+
+  sci_report="$work/sci-recovery.json"
+  python3 "$source_dir/scripts/sci-model-eval.py" \
+    --model "$model" \
+    --model-label "preserved:$model_digest" \
+    --llama-cli "$sci_cli" \
+    --centl-sci "$source_dir/_build/default/src/sci_main.exe" \
+    --case exact_decimal_addition \
+    --timeout "${CENTL_SCI_RECOVERY_TIMEOUT:-300}" \
+    --output "$sci_report"
+  sci_status=pass
+fi
+
 printf 'CENTL offline rebuild gate: PASS\n'
 printf 'source_commit=%s\n' "$commit"
 printf 'mirror=%s\n' "$mirror"
 printf 'network_namespace=isolated\n'
+printf 'sci_model_recovery=%s\n' "$sci_status"

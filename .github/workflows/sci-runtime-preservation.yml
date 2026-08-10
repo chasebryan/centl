@@ -1,0 +1,116 @@
+name: CENTL-SCi runtime preservation
+
+on:
+  pull_request:
+    paths:
+      - "infra/offline-build/Containerfile"
+      - "scripts/capsule-build"
+      - "scripts/capsule-run"
+      - "scripts/offline-rebuild"
+      - "docs/SCI-RUNTIME-PRESERVATION.md"
+      - "docs/DISASTER-RECOVERY.md"
+      - ".github/workflows/sci-runtime-preservation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/offline-build/Containerfile"
+      - "scripts/capsule-build"
+      - "scripts/capsule-run"
+      - "scripts/offline-rebuild"
+      - "docs/SCI-RUNTIME-PRESERVATION.md"
+      - "docs/DISASTER-RECOVERY.md"
+      - ".github/workflows/sci-runtime-preservation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-runtime:
+    name: Build pinned llama-cli recovery target
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check recovery-script syntax
+        run: |
+          sh -n scripts/capsule-build
+          sh -n scripts/capsule-run
+          sh -n scripts/offline-rebuild
+          ! grep -F -- '-v "$repo_root:/driver:ro"' scripts/capsule-run
+          grep -F 'git clone --quiet /mirror/project/centl.bundle' scripts/capsule-run
+          grep -F 'cp "$repo_root/scripts/capsule-run" "$recovery_dir/capsule-run"' scripts/capsule-build
+          grep -F 'current_commit" = "$mirror_source_commit' scripts/capsule-build
+
+      - name: Install reference compiler tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential cmake git
+
+      - name: Build exact pinned llama-cli target
+        run: |
+          commit=$(
+            awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+              supply-chain/sources.lock
+          )
+          test "${#commit}" = 40
+          build_number=$(
+            sed -n 's/.*`llama.cpp` `llama-cli` build `b\([0-9][0-9]*\)-[0-9a-f][0-9a-f]*`.*/\1/p' \
+              docs/SCI-ENGINE.md | sed -n '1p'
+          )
+          test -n "$build_number"
+
+          source="$RUNNER_TEMP/llama.cpp"
+          build="$RUNNER_TEMP/llama-build"
+          git init -q "$source"
+          git -C "$source" remote add origin https://github.com/ggml-org/llama.cpp.git
+          git -C "$source" fetch --quiet --depth=1 origin "$commit"
+          git -C "$source" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$source" rev-parse HEAD)" = "$commit"
+
+          cmake -S "$source" -B "$build" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DGGML_NATIVE=OFF \
+            -DGGML_OPENMP=OFF \
+            -DGGML_BLAS=OFF \
+            -DGGML_LLAMAFILE=OFF \
+            -DLLAMA_BUILD_TESTS=OFF \
+            -DLLAMA_BUILD_EXAMPLES=OFF \
+            -DLLAMA_BUILD_TOOLS=ON \
+            -DLLAMA_BUILD_SERVER=ON \
+            -DLLAMA_BUILD_APP=OFF \
+            -DLLAMA_BUILD_UI=OFF \
+            -DLLAMA_USE_PREBUILT_UI=OFF \
+            -DLLAMA_OPENSSL=OFF \
+            -DLLAMA_SUBPROCESS=OFF \
+            -DLLAMA_LLGUIDANCE=OFF \
+            -DLLAMA_BUILD_COMMIT="$commit" \
+            -DLLAMA_BUILD_NUMBER="$build_number"
+          cmake --build "$build" --target llama-cli --parallel 2
+
+          cli="$build/bin/llama-cli"
+          test -x "$cli"
+          version=$($cli --version 2>&1)
+          printf '%s\n' "$version"
+          short_commit=$(printf '%s' "$commit" | cut -c1-9)
+          printf '%s\n' "$version" | grep -F "$short_commit"
+          printf '%s\n' "$version" | grep -F "$build_number"
+
+      - name: Prove Git archive contains recovery source
+        run: |
+          commit=$(
+            awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+              supply-chain/sources.lock
+          )
+          source="$RUNNER_TEMP/llama.cpp"
+          archive="$RUNNER_TEMP/llama.cpp.tar"
+          git -C "$source" archive --format=tar --prefix=llama.cpp/ \
+            "$commit" > "$archive"
+          tar -tf "$archive" | grep -Fqx 'llama.cpp/CMakeLists.txt'
+          tar -tf "$archive" | grep -Fqx 'llama.cpp/tools/cli/CMakeLists.txt'
