@@ -8,6 +8,7 @@ on:
       - "scripts/capsule-run"
       - "scripts/offline-rebuild"
       - "docs/SCI-RUNTIME-PRESERVATION.md"
+      - "docs/DISASTER-RECOVERY.md"
       - ".github/workflows/sci-runtime-preservation.yml"
   push:
     branches:
@@ -18,6 +19,7 @@ on:
       - "scripts/capsule-run"
       - "scripts/offline-rebuild"
       - "docs/SCI-RUNTIME-PRESERVATION.md"
+      - "docs/DISASTER-RECOVERY.md"
       - ".github/workflows/sci-runtime-preservation.yml"
 
 permissions:
@@ -41,6 +43,8 @@ jobs:
           sh -n scripts/offline-rebuild
           ! grep -F -- '-v "$repo_root:/driver:ro"' scripts/capsule-run
           grep -F 'git clone --quiet /mirror/project/centl.bundle' scripts/capsule-run
+          grep -F 'cp "$repo_root/scripts/capsule-run" "$recovery_dir/capsule-run"' scripts/capsule-build
+          grep -F 'current_commit" = "$mirror_source_commit' scripts/capsule-build
 
       - name: Install reference compiler tools
         run: |
