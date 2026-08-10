@@ -7,6 +7,7 @@ on:
       - 'src/ocaml/centl_sci_mirage.ml'
       - 'src/ocaml/centl_sci_mirage_goal.ml'
       - 'src/ocaml/centl_sci_mirage_obligation.ml'
+      - 'src/ocaml/centl_sci_mirage_candidate.ml'
       - 'src/mirage_main.ml'
       - 'src/dune'
       - 'tests/mirage/**'
@@ -32,6 +33,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2
 
       - name: Install system build dependencies
         run: |
