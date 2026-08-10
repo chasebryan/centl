@@ -18,7 +18,7 @@ CENTL combines four closely related pieces:
 | `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
 | `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
 | `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
-| **CENTL CARAVAN** | Content-addressed preservation, verification, and availability for approved CENTL artifacts |
+| **CENTL CARAVAN** | Planned content-addressed preservation, verification, and availability network for approved CENTL artifacts |
 
 ## Quick start
 
@@ -108,9 +108,13 @@ See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
 
 **Content-Addressed Resilient Artifact Verification and Availability Network**
 
-CENTL CARAVAN is the preservation and availability layer for approved CENTL and
-FCF artifacts. It is designed so ordinary Linux machines can contribute bounded
-storage and bandwidth without becoming authorities over the content they carry.
+CENTL CARAVAN is a **future release line and is not part of CENTL v0.13.0**.
+Its architecture and local laboratory work are being developed separately from the
+v0.13.0 release boundary.
+
+CARAVAN is designed as the preservation and availability layer for approved CENTL
+and FCF artifacts, so ordinary Linux machines can contribute bounded storage and
+bandwidth without becoming authorities over the content they carry.
 
 > A carrier may provide bytes, but a carrier may never define which bytes are trusted.
 

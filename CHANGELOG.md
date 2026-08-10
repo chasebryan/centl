@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.13.0 — 2026-08-10
+
+### Added
+
+- CENTL-SCi v0.0.2-Caramels becomes the current scientific interaction generation,
+  with answer-first natural-language mathematics and physics, deterministic fast
+  paths, evidence-backed presentation, clarification for underspecified requests,
+  structured result recall, and `MATH>`, `PHYS>`, `HYBRID>`, and `BUILD>` modes.
+- Caramels adds user-owned extension workflows with persistent workspaces,
+  revisions, snapshots, package composition, dependency-aware extension
+  lifecycle operations, validation/audit surfaces, workspace import/export, and
+  controlled downstream core-change planning without redefining verified CENTL.
+- Deterministic Caramels interpretation covers exact arithmetic, equations,
+  algebraic transforms, approximation, unit conversion, physical constants,
+  closed verification claims, and supported uniform-gravity mechanics before
+  any optional local semantic model is consulted.
+- FCF preservation tooling can preserve published release bytes, run recurring
+  local integrity/recovery drills, reconstruct the qualified CENTL-SCi runtime
+  offline, preserve exact model provenance and immutable base-model repository
+  revisions, and export only explicitly approved public release material.
+- Installers can consume a host-neutral immutable release tree through an
+  explicit HTTPS or local `file://` release base, allowing preserved FCF release
+  storage to serve packages without changing CENTL's release format.
+
+### Changed
+
+- GNU/Linux is now the sole active development, CI, packaging, validation,
+  installation, and release target. Historical macOS and Windows code may remain
+  available, but active development for those platforms is halted.
+- CENTL-SCi model output remains untrusted semantic input: model provenance is
+  bound to exact bytes, and generated/external semantics cannot promote
+  themselves to verified CENTL core.
+- Release preservation and publication are separated: private recovery material
+  such as models, caches, Git mirrors, OCI capsules, and reconstruction state is
+  not automatically redistributable or included in public exports.
+
+### Deferred
+
+- CENTL CARAVAN is not part of v0.13.0. Its architecture and Phase 1 laboratory
+  implementation remain a separate future release line.
+- The experimental external JSONL execution boundary remains under development
+  and is not part of the v0.13.0 stable release boundary.
+
 ## 0.12.0 — 2026-08-09
 
 ### Changed
