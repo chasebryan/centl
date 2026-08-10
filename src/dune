@@ -67,6 +67,7 @@
   Centl_sci_extensions
   Centl_sci_package
   Centl_sci_capabilities
+  Centl_sci_assurance
   Centl_sci_change_ir
   Centl_sci_build_plan
   Centl_sci_core_plan
