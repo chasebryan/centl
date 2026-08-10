@@ -23,6 +23,36 @@ let test_unit_conversion_language () =
       Alcotest.(check string) "to" "m" data.to_unit
   | _ -> Alcotest.fail "expected unit_conversion fast-path IR"
 
+let test_exact_constant_language () =
+  match
+    Centl_sci_fastpath.interpret "What is the speed of light in vacuum?"
+    |> require_some "speed of light"
+  with
+  | Centl_sci_ir.Physical_constant data ->
+      Alcotest.(check string) "constant symbol" "c" data.symbol
+  | _ -> Alcotest.fail "expected physical_constant fast-path IR"
+
+let test_exact_constant_symbol_language () =
+  match
+    Centl_sci_fastpath.interpret "constant k_B"
+    |> require_some "Boltzmann constant symbol"
+  with
+  | Centl_sci_ir.Physical_constant data ->
+      Alcotest.(check string) "constant symbol" "k_B" data.symbol
+  | _ -> Alcotest.fail "expected physical_constant fast-path IR"
+
+let test_measured_constant_is_explicitly_outside_catalog () =
+  match
+    Centl_sci_fastpath.interpret "What is the Newtonian gravitational constant G?"
+    |> require_some "measured Newtonian gravitational constant boundary"
+  with
+  | Centl_sci_ir.Unsupported data ->
+      Alcotest.(check bool) "measured boundary is explicit" true
+        (Option.is_some
+           (Centl_sci_interaction.find_substring ~needle:"measured Newtonian"
+              data.unsupported_reason))
+  | _ -> Alcotest.fail "expected explicit unsupported IR for measured constant"
+
 let test_symbolic_equation () =
   match
     Centl_sci_fastpath.interpret "Solve x^2 - 5*x + 6 = 0 for x."
@@ -95,6 +125,25 @@ let test_fast_path_executes_exactly () =
       end
   | Some _ -> Alcotest.fail "expected structured CENTL response"
 
+let test_exact_constant_executes () =
+  let ir =
+    Centl_sci_fastpath.interpret "What is the speed of light?"
+    |> require_some "speed of light"
+  in
+  let outcome = Centl_sci_runtime.execute ir in
+  Alcotest.(check string) "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
+  match outcome.response with
+  | Some response ->
+      begin match Centl_sci_runtime.result_text response with
+      | Some text ->
+          Alcotest.(check bool) "exact c value appears" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring ~needle:"299792458" text))
+      | None -> Alcotest.fail "missing constant result text"
+      end
+  | None -> Alcotest.fail "expected physics constant response"
+
 let test_spoken_equation_executes_exactly () =
   let ir =
     Centl_sci_fastpath.interpret
@@ -127,6 +176,12 @@ let () =
             test_exact_decimal_language;
           Alcotest.test_case "unit conversion language" `Quick
             test_unit_conversion_language;
+          Alcotest.test_case "exact physical constant" `Quick
+            test_exact_constant_language;
+          Alcotest.test_case "constant symbol" `Quick
+            test_exact_constant_symbol_language;
+          Alcotest.test_case "measured constant boundary" `Quick
+            test_measured_constant_is_explicitly_outside_catalog;
           Alcotest.test_case "symbolic equation" `Quick test_symbolic_equation;
           Alcotest.test_case "spoken equation" `Quick test_spoken_equation;
           Alcotest.test_case "spoken equation infers leading variable" `Quick
@@ -140,6 +195,8 @@ let () =
         [
           Alcotest.test_case "exact result" `Quick
             test_fast_path_executes_exactly;
+          Alcotest.test_case "exact physical constant result" `Quick
+            test_exact_constant_executes;
           Alcotest.test_case "spoken equation exact result" `Quick
             test_spoken_equation_executes_exactly;
         ] );
