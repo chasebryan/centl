@@ -59,8 +59,6 @@ activates the command launchers atomically.
 For full installation details and offline archives, see
 [docs/INSTALL.md](docs/INSTALL.md).
 
-![CENTL-SCi v0.0.2-Caramels — Free Computation Foundation](assets/branding/centl-sci-v0.0.2-caramels.png)
-
 ## CENTL-SCi — v0.0.2-Caramels
 
 **Caramels** is the current CENTL-SCi interaction generation: a local scientific
@@ -105,8 +103,6 @@ meaning. Model weights remain separate artifacts and are never silently download
 
 See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
 [docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.
-
-![CENTL CARAVAN — Content-Addressed Resilient Artifact Verification and Availability Network](assets/branding/fcf-centl-caravan.png)
 
 ## CENTL CARAVAN
 
