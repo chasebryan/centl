@@ -73,6 +73,24 @@ exactly once in the authenticated `SHA256SUMS`, runs the normal CENTL
 `release-verify` authentication/integrity path before copying, and repeats that
 verification against the staged copy.
 
+The exact selected public key is then copied into the immutable release directory
+as:
+
+```text
+SIGNING-PUBLIC-KEY
+SIGNING-PUBLIC-KEY.sha256
+```
+
+The copied key is SHA-256 verified and is itself used for the staged
+`release-verify` pass before the release is accepted. This ensures the historical
+verification material remains available even if the active project key rotates
+later.
+
+The embedded public key is not self-authenticating. A user still needs a trusted
+FCF channel, prior key identity, or other trust anchor to decide that the key
+belongs to FCF. Preservation of a verification key and trust in that key are
+separate properties.
+
 ## Historical unsigned releases
 
 Older CENTL releases may predate the FCF signing key. They remain worth
@@ -116,7 +134,14 @@ centl-mirror/
       RELEASE-CONTENTS-SHA256SUMS.sha256
 ```
 
-Signed releases additionally retain `SHA256SUMS` and `SHA256SUMS.sig`.
+Signed releases additionally retain:
+
+```text
+SHA256SUMS
+SHA256SUMS.sig
+SIGNING-PUBLIC-KEY
+SIGNING-PUBLIC-KEY.sha256
+```
 
 `RELEASE-CONTENTS-SHA256SUMS` covers the exact regular-file contents of the
 version directory except its own receipt pair. This creates a release-local
@@ -128,8 +153,8 @@ A version path is immutable once preserved.
 
 If `releases/vVERSION` already exists, a new ingest succeeds only when the newly
 verified staging tree is byte-for-byte identical to the existing preserved tree.
-A different archive, checksum, source commit, authentication state, or receipt
-causes failure rather than replacement.
+A different archive, checksum, source commit, authentication state, verification
+key, or receipt causes failure rather than replacement.
 
 A version is not silently overwritten simply because its filename matches.
 
@@ -152,6 +177,14 @@ sh scripts/mirror-receipt compare \
   /mnt/fcf-backup/centl-mirror
 ```
 
+## Public export
+
+A preservation mirror is not itself a web root. Use
+[`PUBLICATION.md`](PUBLICATION.md) and `scripts/publication-export` to create a
+verified public-only tree containing intentionally publishable release material
+without exposing models, build capsules, development caches, Git mirrors, or
+other internal recovery state.
+
 ## What this removes from GitHub
 
 GitHub Releases may remain a convenient public distribution surface. It is not
@@ -159,5 +192,5 @@ the preservation authority.
 
 Once a release is ingested into FCF storage and copied to an independent second
 location, loss of the GitHub Release page does not remove the native release
-archives, their checksum evidence, their source-commit binding, or their release
-signature when one exists.
+archives, their checksum evidence, their source-commit binding, their embedded
+verification key, or their release signature when one exists.
