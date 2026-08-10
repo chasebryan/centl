@@ -25,6 +25,21 @@ need podman
 need python3
 need git
 
+# Capsule tooling must correspond exactly to the source snapshot it claims to
+# recover. A different HEAD or tracked local edits would otherwise let the image
+# contain recovery logic that is absent from the preserved CENTL bundle.
+[ -f "$mirror/project/SOURCE-COMMIT" ] || fail "mirror SOURCE-COMMIT is missing"
+mirror_source_commit=$(sed -n '1p' "$mirror/project/SOURCE-COMMIT")
+case "$mirror_source_commit" in
+  ''|*[!0-9a-f]*) fail "invalid mirror SOURCE-COMMIT" ;;
+esac
+[ "${#mirror_source_commit}" -eq 40 ] || fail "mirror SOURCE-COMMIT must be full length"
+current_commit=$(git -C "$repo_root" rev-parse HEAD)
+[ "$current_commit" = "$mirror_source_commit" ] ||
+  fail "capsule checkout $current_commit does not match mirror SOURCE-COMMIT $mirror_source_commit"
+git -C "$repo_root" diff --quiet -- && git -C "$repo_root" diff --cached --quiet -- ||
+  fail "tracked worktree must be clean before capsule construction"
+
 # The base is acquired by immutable digest once during capsule construction. The
 # final saved OCI archive includes those layers, so recovery does not need to
 # pull the base again.
@@ -122,6 +137,19 @@ python3 "$repo_root/scripts/integrity.py" verify "$sci_runtime/llama-cli.sha256"
 
 python3 "$repo_root/scripts/integrity.py" verify "$archive.sha256" --root "$out"
 
+# Preserve the standalone recovery launcher itself. capsule-run no longer reads
+# the host checkout; keeping this copy means a disaster-recovery operator can
+# start from the mirror with only a POSIX shell, Podman, and SHA-256 utility.
+recovery_dir="$mirror/recovery"
+mkdir -p "$recovery_dir"
+cp "$repo_root/scripts/capsule-run" "$recovery_dir/capsule-run"
+chmod 0755 "$recovery_dir/capsule-run"
+printf '%s\n' "$current_commit" > "$recovery_dir/DRIVER-COMMIT"
+python3 "$repo_root/scripts/integrity.py" hash "$recovery_dir/capsule-run" \
+  > "$recovery_dir/capsule-run.sha256"
+python3 "$repo_root/scripts/integrity.py" verify "$recovery_dir/capsule-run.sha256" \
+  --root "$recovery_dir"
+
 # Capsule/runtime refresh changes the preservation tree. Finalize those new bytes
 # immediately so a successful capsule build never leaves a stale whole-mirror
 # receipt behind.
@@ -135,3 +163,4 @@ printf 'sha256_file=%s\n' "$archive.sha256"
 printf 'llama_commit=%s\n' "$llama_commit"
 printf 'llama_build_number=%s\n' "$llama_build_number"
 printf 'llama_cli=%s\n' "$sci_runtime/llama-cli"
+printf 'recovery_driver=%s\n' "$recovery_dir/capsule-run"
