@@ -277,484 +277,60 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
-  macos:
-    name: macOS ${{ matrix.architecture }}
-    needs: verify
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15-intel
-            architecture: x86_64
-          - runner: macos-15
-            architecture: arm64
-    env:
-      MACOSX_DEPLOYMENT_TARGET: "13.0"
-      NATIVE_PREFIX: ${{ github.workspace }}/.native
-      PORTABLE_X86_CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic
-
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Restore verified OCaml
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0
-        with:
-          name: verified-ocaml
-          path: .
-
-      - name: Set up pinned OCaml
-        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3
-        with:
-          ocaml-compiler: ocaml-base-compiler.4.14.1
-          opam-pin: false
-
-      - name: Install native build prerequisites
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: "1"
-        run: brew install gnu-tar
-
-      - name: Build pinned native libraries
-        run: |
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/gmp.tar.xz"
-          printf '%s  %s\n' "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz" | shasum -a 256 --check
-          tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
-          if [ "${{ matrix.architecture }}" = x86_64 ]; then
-            export CFLAGS="$PORTABLE_X86_CFLAGS"
-            baseline_build=$(sh ./configfsf.guess)
-            case "$baseline_build" in
-              x86_64-apple-darwin*) ;;
-              *) printf 'unexpected GMP package build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
-            esac
-            ABI=64 ./configure --build="$baseline_build" \
-              --prefix="$NATIVE_PREFIX" --disable-static --enable-shared --enable-fat
-            grep -qx '#define WANT_FAT_BINARY 1' config.h
-          else
-            ./configure --prefix="$NATIVE_PREFIX" --disable-static --enable-shared
-          fi
-          make -j2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/mpfr.tar.xz"
-          printf '%s  %s\n' "$MPFR_SHA256" "$RUNNER_TEMP/mpfr.tar.xz" | shasum -a 256 --check
-          tar -xf "$RUNNER_TEMP/mpfr.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/mpfr-${MPFR_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --disable-static --enable-shared
-          make -j2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
-            --output "$RUNNER_TEMP/flint.tar.gz"
-          printf '%s  %s\n' "$FLINT_SHA256" "$RUNNER_TEMP/flint.tar.gz" | shasum -a 256 --check
-          tar -xzf "$RUNNER_TEMP/flint.tar.gz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
-          ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --with-mpfr="$NATIVE_PREFIX"
-          make -j2
-          make install
-
-      - name: Install pinned OCaml tools
-        env:
-          PKG_CONFIG_PATH: ${{ github.workspace }}/.native/lib/pkgconfig
-          LIBRARY_PATH: ${{ github.workspace }}/.native/lib
-          DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
-          C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
-        run: |
-          opam install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 \
-            yojson.2.2.2 zarith.1.14
-
-      - name: Test, package, and install CENTL
-        env:
-          PKG_CONFIG_PATH: ${{ github.workspace }}/.native/lib/pkgconfig
-          LIBRARY_PATH: ${{ github.workspace }}/.native/lib
-          DYLD_LIBRARY_PATH: ${{ github.workspace }}/.native/lib
-          C_INCLUDE_PATH: ${{ github.workspace }}/.native/include
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          if [ "${{ matrix.architecture }}" = x86_64 ]; then
-            export CFLAGS="$PORTABLE_X86_CFLAGS"
-          fi
-          opam exec -- make native-test
-          reported=$(opam exec -- _build/default/src/main.exe --version)
-          version=${reported#centl }
-          test -n "$version"
-          if [ "$GITHUB_REF_TYPE" = tag ]; then
-            test "v$version" = "$GITHUB_REF_NAME"
-          fi
-          license_sources="$RUNNER_TEMP/centl-opam-license-sources"
-          mkdir -p "$license_sources"
-          opam source --dir="$license_sources/ocaml" ocaml-base-compiler.4.14.1
-          opam source --dir="$license_sources/zarith" zarith.1.14
-          opam source --dir="$license_sources/yojson" yojson.2.2.2
-          CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
-          CENTL_GMP_LGPL_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
-          CENTL_GMP_GPL3_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYINGv3" \
-          CENTL_MPFR_LGPL_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
-          CENTL_MPFR_GPL3_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING" \
-          CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
-          CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
-          CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
-          CENTL_YOJSON_LICENSE="$license_sources/yojson/LICENSE.md" \
-          TAR="$(brew --prefix gnu-tar)/bin/gtar" \
-            scripts/package-release "$version"
-          install_root=$(mktemp -d)
-          sh install --archive "$PWD/dist/centl-macos-${{ matrix.architecture }}.tar.gz" \
-            --prefix "$install_root"
-          "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
-          printf '%s\n' \
-            '{"version":1,"expression":"r = 3"}' \
-            '{"version":1,"expression":"circle_area(r)"}' \
-            | "$install_root/bin/centl" --serve \
-            > "$RUNNER_TEMP/centl-serve-${{ matrix.architecture }}.jsonl"
-          grep -q '"text":"9 \* pi"' \
-            "$RUNNER_TEMP/centl-serve-${{ matrix.architecture }}.jsonl"
-          printf '%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}' \
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' \
-            | "$install_root/bin/centl" --mcp \
-            > "$RUNNER_TEMP/centl-mcp-${{ matrix.architecture }}.jsonl"
-          grep -q '"text":"3/10"' \
-            "$RUNNER_TEMP/centl-mcp-${{ matrix.architecture }}.jsonl"
-
-      - name: Preserve macOS release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: centl-macos-${{ matrix.architecture }}
-          path: dist/*
-          if-no-files-found: error
-
-  windows-x86_64:
-    name: Windows x86_64
-    needs: verify
-    runs-on: windows-2022
-    env:
-      NATIVE_PREFIX: ${{ github.workspace }}\.native
-      C_INCLUDE_PATH: ${{ github.workspace }}\.native\include
-      LIBRARY_PATH: ${{ github.workspace }}\.native\lib
-      PKG_CONFIG_PATH: ${{ github.workspace }}\.native\lib\pkgconfig
-      CENTL_RUNTIME_PATHS: ${{ github.workspace }}\.native\bin;C:\msys64\mingw64\bin
-      CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic -std=gnu17
-
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Restore verified OCaml
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0
-        with:
-          name: verified-ocaml
-          path: .
-
-      - name: Set up MSYS2
-        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            base-devel
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-toolchain
-
-      - name: Set up pinned OCaml
-        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3
-        with:
-          ocaml-compiler: ocaml-base-compiler.4.14.1
-          opam-pin: false
-          windows-compiler: mingw
-          windows-environment: msys2
-
-      - name: Restore pinned native libraries
-        id: windows-native-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .native
-          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v3
-
-      - name: Restore pinned native sources
-        shell: msys2 {0}
-        run: |
-          set -euo pipefail
-          runner_temp=$(cygpath -u "$RUNNER_TEMP")
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
-            --output "$runner_temp/gmp.tar.xz"
-          printf '%s  %s\n' "$GMP_SHA256" "$runner_temp/gmp.tar.xz" | sha256sum --check
-          tar -xf "$runner_temp/gmp.tar.xz" -C "$runner_temp"
-
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
-            --output "$runner_temp/mpfr.tar.xz"
-          printf '%s  %s\n' "$MPFR_SHA256" "$runner_temp/mpfr.tar.xz" | sha256sum --check
-          tar -xf "$runner_temp/mpfr.tar.xz" -C "$runner_temp"
-
-          curl --fail --silent --show-error --location \
-            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
-            --output "$runner_temp/flint.tar.gz"
-          printf '%s  %s\n' "$FLINT_SHA256" "$runner_temp/flint.tar.gz" | sha256sum --check
-          tar -xzf "$runner_temp/flint.tar.gz" -C "$runner_temp"
-
-      - name: Build pinned native libraries
-        if: steps.windows-native-cache.outputs.cache-hit != 'true'
-        shell: msys2 {0}
-        run: |
-          set -euo pipefail
-          runner_temp=$(cygpath -u "$RUNNER_TEMP")
-          native_prefix=$(cygpath -u "$NATIVE_PREFIX")
-          mkdir -p "$native_prefix"
-          export PATH="$native_prefix/bin:$PATH"
-          export C_INCLUDE_PATH="$native_prefix/include"
-          export LIBRARY_PATH="$native_prefix/lib"
-          export PKG_CONFIG_PATH="$native_prefix/lib/pkgconfig"
-
-          cd "$runner_temp/gmp-${GMP_VERSION}"
-          ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
-            --enable-static --disable-shared
-          make -j2
-          make install
-
-          cd "$runner_temp/mpfr-${MPFR_VERSION}"
-          ./configure --prefix="$native_prefix" --host=x86_64-w64-mingw32 \
-            --with-gmp="$native_prefix" --enable-static --disable-shared
-          make -j2
-          make install
-
-          GMPDIR="$native_prefix" MPFRDIR="$native_prefix" \
-            cmake -S "$runner_temp/flint-${FLINT_VERSION}" \
-              -B "$runner_temp/flint-build" -G Ninja \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_INSTALL_PREFIX="$native_prefix" \
-              -DCMAKE_PREFIX_PATH="$native_prefix" \
-              -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
-              -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF
-          cmake --build "$runner_temp/flint-build" --parallel 2
-          cmake --install "$runner_temp/flint-build"
-
-      - name: Save pinned native libraries
-        if: steps.windows-native-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .native
-          key: centl-windows-x86_64-gmp-6.3.0-mpfr-4.2.2-flint-3.0.1-v3
-
-      - name: Expose native runtime
-        shell: pwsh
-        run: |
-          $env:NATIVE_PREFIX + "\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
-          "C:\msys64\mingw64\bin" | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
-          "CENTL_BUILD_IDENTITY_SHELL=C:\msys64\usr\bin\sh.exe" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          $Native = $env:NATIVE_PREFIX.Replace('\', '/')
-          $Archives = @("libflint.a", "libmpfr.a", "libgmp.a")
-          foreach ($Archive in $Archives) {
-            $ArchivePath = "$Native/lib/$Archive"
-            if (-not (Test-Path -LiteralPath $ArchivePath -PathType Leaf)) {
-              throw "missing Windows static library: $ArchivePath"
-            }
-          }
-          $Nm = "C:\msys64\mingw64\bin\nm.exe"
-          $HasArbSymbol = & $Nm -g --defined-only "$Native/lib/libflint.a" |
-            Select-String -Pattern '\barb_abs$' -Quiet
-          if (-not $HasArbSymbol) {
-            throw "Windows FLINT archive does not expose ordinary native symbols"
-          }
-          "CENTL_FLINT_LIBRARY=-l:libflint.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "CENTL_MPFR_LIBRARY=-l:libmpfr.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "CENTL_GMP_LIBRARY=-l:libgmp.a" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          $Opam = (Get-Command opam.exe -ErrorAction Stop).Source
-          "OPAM_EXE=$Opam" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install pinned OCaml tools
-        shell: msys2 {0}
-        run: |
-          set -euo pipefail
-          command -v x86_64-w64-mingw32-pkgconf
-          opam_exe=$(cygpath -u "$OPAM_EXE")
-          test -x "$opam_exe"
-          "$opam_exe" install --assume-depexts alcotest.1.9.1 dune.3.24.1 qcheck.0.91 yojson.2.2.2 zarith.1.14
-
-      - name: Test, package, and install CENTL
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $PSNativeCommandUseErrorActionPreference = $true
-          Set-Location $env:GITHUB_WORKSPACE
-          $Native = $env:NATIVE_PREFIX.Replace('\', '/')
-          $env:FLEXLINKFLAGS = "-L$Native/lib"
-          opam exec -- dune build src/main.exe tests/test_centl.exe
-          $Objdump = (Get-Command objdump.exe -ErrorAction Stop).Source
-          $Imports = (& $Objdump -p .\_build\default\src\main.exe | Out-String)
-          if ($Imports -match 'dllcentl_arb') {
-            throw "CENTL Windows executable unexpectedly depends on a native stub DLL"
-          }
-          opam exec -- dune runtest
-          $Reported = (opam exec -- .\_build\default\src\main.exe --version | Out-String).Trim()
-          $Version = $Reported -replace '^centl ', ''
-          if (-not $Version) { throw "CENTL reported no version" }
-          if ($env:GITHUB_REF_TYPE -eq "tag" -and "v$Version" -ne $env:GITHUB_REF_NAME) {
-            throw "tag $env:GITHUB_REF_NAME does not match CENTL $Version"
-          }
-          $LicenseSources = Join-Path $env:RUNNER_TEMP "centl-opam-license-sources"
-          New-Item -ItemType Directory -Path $LicenseSources -Force | Out-Null
-          $OcamlSource = Join-Path $LicenseSources "ocaml"
-          $ZarithSource = Join-Path $LicenseSources "zarith"
-          $YojsonSource = Join-Path $LicenseSources "yojson"
-          opam source --dir=$OcamlSource ocaml-base-compiler.4.14.1
-          opam source --dir=$ZarithSource zarith.1.14
-          opam source --dir=$YojsonSource yojson.2.2.2
-          $env:CENTL_FLINT_LICENSE = Join-Path $env:RUNNER_TEMP "flint-$env:FLINT_VERSION\LICENSE"
-          $env:CENTL_GMP_LGPL_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYING.LESSERv3"
-          $env:CENTL_GMP_GPL3_LICENSE = Join-Path $env:RUNNER_TEMP "gmp-$env:GMP_VERSION\COPYINGv3"
-          $env:CENTL_MPFR_LGPL_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING.LESSER"
-          $env:CENTL_MPFR_GPL3_LICENSE = Join-Path $env:RUNNER_TEMP "mpfr-$env:MPFR_VERSION\COPYING"
-          $env:CENTL_WINPTHREADS_LICENSE = "C:\msys64\mingw64\share\licenses\libwinpthread\COPYING"
-          $env:CENTL_FSTAR_LICENSE = Join-Path $env:GITHUB_WORKSPACE "release-input\licenses\FSTAR"
-          $env:CENTL_OCAML_LICENSE = Join-Path $OcamlSource "LICENSE"
-          $env:CENTL_ZARITH_LICENSE = Join-Path $ZarithSource "LICENSE"
-          $env:CENTL_YOJSON_LICENSE = Join-Path $YojsonSource "LICENSE.md"
-          & .\scripts\package-release.ps1 $Version
-          $ReproDirectory = Join-Path $env:RUNNER_TEMP "centl-windows-package-repro"
-          & .\scripts\package-release.ps1 $Version $ReproDirectory
-          $PrimaryArchive = Join-Path $env:GITHUB_WORKSPACE "dist\centl-windows-x86_64.zip"
-          $ReproArchive = Join-Path $ReproDirectory "centl-windows-x86_64.zip"
-          $PrimaryDigest = (Get-FileHash -LiteralPath $PrimaryArchive -Algorithm SHA256).Hash
-          $ReproDigest = (Get-FileHash -LiteralPath $ReproArchive -Algorithm SHA256).Hash
-          if ($PrimaryDigest -ne $ReproDigest) {
-            throw "Windows packaging is not reproducible within one release run"
-          }
-          $InstallRoot = Join-Path $env:RUNNER_TEMP "centl-install-test"
-          & .\install.ps1 -Archive .\dist\centl-windows-x86_64.zip `
-            -Prefix $InstallRoot -NoPath
-          $Smoke = (& "$InstallRoot\bin\centl.cmd" '0.1 + 0.2' | Out-String).Trim()
-          if ($Smoke -ne "3/10") { throw "installed CENTL smoke test failed: $Smoke" }
-          $ServeInput = @(
-            '{"version":1,"expression":"r = 3"}',
-            '{"version":1,"expression":"circle_area(r)"}'
-          ) -join "`n"
-          $ServeOutput = ($ServeInput | & "$InstallRoot\bin\centl.cmd" --serve | Out-String)
-          if (-not $ServeOutput.Contains('"text":"9 * pi"')) {
-            throw "installed CENTL serve smoke test failed: $ServeOutput"
-          }
-          $McpInput = @(
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}',
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}',
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}'
-          ) -join "`n"
-          $McpOutput = ($McpInput | & "$InstallRoot\bin\centl.cmd" --mcp | Out-String)
-          if (-not $McpOutput.Contains('"text":"3/10"')) {
-            throw "installed CENTL MCP smoke test failed: $McpOutput"
-          }
-
-      - name: Preserve Windows release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: centl-windows-x86_64
-          path: dist/*
-          if-no-files-found: error
-
   release:
-    name: Complete native release
+    name: Complete Linux native release
     needs:
       - linux-x86_64
-      - macos
-      - windows-x86_64
     runs-on: ubuntu-24.04
     permissions:
       contents: write
 
     steps:
-      - name: Collect native releases
+      - name: Collect Linux release
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.0
         with:
-          pattern: centl-*
+          name: centl-linux-x86_64
           path: dist
-          merge-multiple: true
 
-      - name: Validate release set
+      - name: Validate Linux release
         env:
           VERSION: ${{ needs.linux-x86_64.outputs.version }}
         run: |
-          for asset in \
-            centl-linux-x86_64.tar.gz \
-            centl-macos-x86_64.tar.gz \
-            centl-macos-arm64.tar.gz \
-            centl-windows-x86_64.zip; do
-            test -s "dist/$asset"
-            test -s "dist/$asset.sha256"
-            (cd dist && sha256sum --check "$asset.sha256")
-          done
-          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 8
+          asset=centl-linux-x86_64.tar.gz
+          test -s "dist/$asset"
+          test -s "dist/$asset.sha256"
+          (cd dist && sha256sum --check "$asset.sha256")
           python3 - <<'PY'
-          import io
           import json
           import os
           import pathlib
           import tarfile
-          import zipfile
 
-          root = pathlib.Path("dist")
-          archives = sorted(root.glob("centl-*.tar.gz")) + sorted(root.glob("centl-*.zip"))
-          manifests = []
-          for archive in archives:
-              if archive.suffix == ".zip":
-                  with zipfile.ZipFile(archive) as package:
-                      data = package.read("centl/BUILD_MANIFEST.json")
-              else:
-                  with tarfile.open(archive, "r:gz") as package:
-                      member = package.extractfile("centl/BUILD_MANIFEST.json")
-                      if member is None:
-                          raise SystemExit(f"missing manifest in {archive}")
-                      data = member.read()
-              manifests.append((archive.name, json.loads(data)))
+          archive = pathlib.Path("dist/centl-linux-x86_64.tar.gz")
+          with tarfile.open(archive, "r:gz") as package:
+              member = package.extractfile("centl/BUILD_MANIFEST.json")
+              if member is None:
+                  raise SystemExit("missing build manifest in Linux release")
+              manifest = json.loads(member.read())
 
-          expected_targets = {
-              ("linux", "x86_64"),
-              ("macos", "x86_64"),
-              ("macos", "arm64"),
-              ("windows", "x86_64"),
-          }
-          targets = {(m["platform"], m["architecture"]) for _, m in manifests}
-          if targets != expected_targets:
-              raise SystemExit(f"unexpected manifest targets: {sorted(targets)}")
-
-          common_fields = (
-              "semantic_version", "commit", "generated_core_hash",
-              "verification", "toolchain", "receipt_schema", "protocol_version",
-          )
-          reference = manifests[0][1]
-          for name, manifest in manifests:
-              if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
-                  raise SystemExit(f"invalid manifest schema in {name}")
-              if manifest.get("semantic_version") != os.environ["VERSION"]:
-                  raise SystemExit(f"version mismatch in {name}")
-              if manifest.get("commit") != os.environ["GITHUB_SHA"]:
-                  raise SystemExit(f"commit mismatch in {name}")
-              if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
-                  raise SystemExit(f"verification attestation mismatch in {name}")
-              if len(manifest.get("generated_core_hash", "")) != 64:
-                  raise SystemExit(f"invalid generated-core hash in {name}")
-              for field in common_fields:
-                  if manifest.get(field) != reference.get(field):
-                      raise SystemExit(f"cross-platform {field} mismatch in {name}")
+          if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
+              raise SystemExit("invalid Linux build manifest schema")
+          if (manifest.get("platform"), manifest.get("architecture")) != ("linux", "x86_64"):
+              raise SystemExit("unexpected Linux release target")
+          if manifest.get("semantic_version") != os.environ["VERSION"]:
+              raise SystemExit("Linux release version mismatch")
+          if manifest.get("commit") != os.environ["GITHUB_SHA"]:
+              raise SystemExit("Linux release commit mismatch")
+          if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
+              raise SystemExit("Linux verification attestation mismatch")
+          if len(manifest.get("generated_core_hash", "")) != 64:
+              raise SystemExit("invalid generated-core hash in Linux release")
           PY
 
-      - name: Preserve complete release set
+      - name: Preserve complete Linux release
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: centl-${{ needs.linux-x86_64.outputs.version }}-native-releases
+          name: centl-${{ needs.linux-x86_64.outputs.version }}-linux-release
           path: dist/*
           if-no-files-found: error
 
