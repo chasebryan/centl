@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +50,13 @@ def validate_relative_name(name: str) -> Path:
     return path
 
 
+def normalize_ignored(names: list[str]) -> set[str]:
+    ignored: set[str] = set()
+    for name in names:
+        ignored.add(validate_relative_name(name).as_posix())
+    return ignored
+
+
 def self_test(*, announce: bool) -> None:
     for payload, expected in KNOWN_VECTORS:
         actual = hashlib.sha256(payload).hexdigest()
@@ -66,6 +74,34 @@ def tracked_paths() -> list[str]:
     )
     names = result.stdout.decode("utf-8").split("\0")
     return sorted(name for name in names if name)
+
+
+def tree_regular_paths(root: Path, ignored: set[str]) -> list[str]:
+    root = root.resolve()
+    if not root.is_dir():
+        die(f"tree root is not a directory: {root}")
+
+    names: list[str] = []
+    for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=False):
+        current = Path(dirpath)
+
+        for dirname in list(dirnames):
+            directory = current / dirname
+            relative = directory.relative_to(root).as_posix()
+            if directory.is_symlink():
+                die(f"tree contains symlink directory: {relative}")
+
+        for filename in filenames:
+            path = current / filename
+            relative = path.relative_to(root).as_posix()
+            if relative in ignored:
+                continue
+            if path.is_symlink() or not path.is_file():
+                die(f"tree path is not a regular file: {relative}")
+            validate_relative_name(relative)
+            names.append(relative)
+
+    return sorted(names)
 
 
 def write_manifest(output: Path, root: Path, names: list[str]) -> None:
@@ -99,6 +135,24 @@ def write_manifest(output: Path, root: Path, names: list[str]) -> None:
 
 def create_source_manifest(output: Path) -> None:
     write_manifest(output, ROOT, tracked_paths())
+
+
+def create_tree_manifest(output: Path, root: Path, ignored: set[str]) -> None:
+    root = root.resolve()
+    output_resolved = output.resolve()
+    try:
+        output_relative = output_resolved.relative_to(root).as_posix()
+    except ValueError:
+        output_relative = None
+
+    effective_ignored = set(ignored)
+    if output_relative is not None:
+        effective_ignored.add(output_relative)
+        effective_ignored.add(f"{output_relative}.sha256")
+
+    names = tree_regular_paths(root, effective_ignored)
+    write_manifest(output, root, names)
+    verify_tree_manifest(output, root, ignored=effective_ignored)
 
 
 def parse_manifest(manifest: Path) -> list[tuple[str, str]]:
@@ -150,6 +204,34 @@ def verify_manifest(manifest: Path, root: Path, *, verbose: bool = False) -> Non
     print(f"SHA-256 manifest verified: {manifest} ({len(entries)} files)")
 
 
+def verify_tree_manifest(
+    manifest: Path,
+    root: Path,
+    *,
+    ignored: set[str],
+    verbose: bool = False,
+) -> None:
+    entries = parse_manifest(manifest)
+    expected_names = {name for _, name in entries}
+    if expected_names & ignored:
+        die("tree manifest contains a path configured as ignored")
+
+    actual_names = set(tree_regular_paths(root, ignored))
+    missing = sorted(expected_names - actual_names)
+    extra = sorted(actual_names - expected_names)
+    if missing:
+        for name in missing:
+            print(f"MISSING {name}", file=sys.stderr)
+    if extra:
+        for name in extra:
+            print(f"UNEXPECTED {name}", file=sys.stderr)
+    if missing or extra:
+        die(f"tree membership mismatch: {len(missing)} missing, {len(extra)} unexpected")
+
+    verify_manifest(manifest, root, verbose=verbose)
+    print(f"SHA-256 tree verified exactly: {root} ({len(entries)} files)")
+
+
 def hash_command(path: Path) -> None:
     if not path.is_file() or path.is_symlink():
         die(f"not a regular file: {path}")
@@ -170,10 +252,27 @@ def main() -> int:
     manifest.add_argument("--output", required=True, type=Path)
     manifest.add_argument("paths", nargs="+")
 
+    tree_manifest = sub.add_parser(
+        "tree-manifest",
+        help="create a strict SHA256SUMS manifest for every regular file in a tree",
+    )
+    tree_manifest.add_argument("--root", required=True, type=Path)
+    tree_manifest.add_argument("--output", required=True, type=Path)
+    tree_manifest.add_argument("--ignore", action="append", default=[])
+
     verify = sub.add_parser("verify", help="verify a conventional SHA256SUMS manifest")
     verify.add_argument("manifest", type=Path)
     verify.add_argument("--root", type=Path, default=ROOT)
     verify.add_argument("--verbose", action="store_true")
+
+    tree_verify = sub.add_parser(
+        "tree-verify",
+        help="verify checksums and exact regular-file membership for a tree",
+    )
+    tree_verify.add_argument("manifest", type=Path)
+    tree_verify.add_argument("--root", required=True, type=Path)
+    tree_verify.add_argument("--ignore", action="append", default=[])
+    tree_verify.add_argument("--verbose", action="store_true")
 
     one = sub.add_parser("hash", help="print the SHA-256 of one regular file")
     one.add_argument("path", type=Path)
@@ -189,9 +288,20 @@ def main() -> int:
         self_test(announce=False)
         write_manifest(args.output, args.root, args.paths)
         verify_manifest(args.output, args.root)
+    elif args.command == "tree-manifest":
+        self_test(announce=False)
+        create_tree_manifest(args.output, args.root, normalize_ignored(args.ignore))
     elif args.command == "verify":
         self_test(announce=False)
         verify_manifest(args.manifest, args.root, verbose=args.verbose)
+    elif args.command == "tree-verify":
+        self_test(announce=False)
+        verify_tree_manifest(
+            args.manifest,
+            args.root,
+            ignored=normalize_ignored(args.ignore),
+            verbose=args.verbose,
+        )
     elif args.command == "hash":
         self_test(announce=False)
         hash_command(args.path)
