@@ -81,6 +81,22 @@ let native_ir expression =
     | Ok ir -> Some ir
     | Error _ -> None
 
+let unsupported_ir reason =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "unsupported");
+           ("problem_class", `String "unsupported");
+           ("operation", `String "unsupported");
+           ("assumptions", `List []);
+           ("reason", `String reason);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
 let split_once_ci needle text =
   let lower = String.lowercase_ascii text in
   match find_substring ~needle:(String.lowercase_ascii needle) lower with
@@ -301,6 +317,78 @@ let unit_conversion problem =
           end
       end
 
+let constant_ir symbol =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "physics");
+           ("problem_class", `String "physical_constant");
+           ("operation", `String "constant");
+           ("assumptions", `List []);
+           ("symbol", `String symbol);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
+let constant_body text =
+  let prefixes =
+    [
+      "what is the value of the ";
+      "what is the value of ";
+      "what is the ";
+      "what is ";
+      "give me the value of the ";
+      "give me the value of ";
+      "give me the ";
+      "give me ";
+      "lookup the ";
+      "lookup ";
+      "look up the ";
+      "look up ";
+      "physical constant ";
+      "constant ";
+      "value of the ";
+      "value of ";
+    ]
+  in
+  let rec choose = function
+    | [] -> text
+    | prefix :: rest ->
+        begin match drop_prefix_ci prefix text with
+        | Some body when body <> "" -> body
+        | _ -> choose rest
+        end
+  in
+  choose prefixes |> String.trim |> String.lowercase_ascii
+
+let physical_constant problem =
+  let cleaned = trim_terminal problem in
+  let body = constant_body cleaned in
+  let symbol =
+    match body with
+    | "c" | "speed of light" | "speed of light in vacuum" -> Some "c"
+    | "h" | "planck constant" | "planck's constant" -> Some "h"
+    | "e" | "elementary charge" -> Some "e"
+    | "k_b" | "boltzmann constant" -> Some "k_B"
+    | "n_a" | "avogadro constant" | "avogadro's constant" -> Some "N_A"
+    | "g0" | "standard gravity" | "standard acceleration of gravity" -> Some "g0"
+    | _ -> None
+  in
+  match symbol with
+  | Some symbol -> constant_ir symbol
+  | None ->
+      let lower = String.lowercase_ascii cleaned in
+      if
+        find_substring ~needle:"newtonian gravitational constant" lower <> None
+        || find_substring ~needle:"gravitational constant g" lower <> None
+      then
+        unsupported_ir
+          "the measured Newtonian gravitational constant is outside the exact defining/conventional CENTL Physics constant catalog"
+      else None
+
 let equation_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'
   | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' -> true
@@ -363,15 +451,19 @@ let interpret problem =
       begin match unit_conversion problem with
       | Some _ as result -> result
       | None ->
-          begin match polynomial_equation problem with
+          begin match physical_constant problem with
           | Some _ as result -> result
           | None ->
-              begin match Centl_sci_spoken_poly.interpret problem with
+              begin match polynomial_equation problem with
               | Some _ as result -> result
               | None ->
-                  begin match symbolic_transform problem with
+                  begin match Centl_sci_spoken_poly.interpret problem with
                   | Some _ as result -> result
-                  | None -> exact_expression problem
+                  | None ->
+                      begin match symbolic_transform problem with
+                      | Some _ as result -> result
+                      | None -> exact_expression problem
+                      end
                   end
               end
           end
