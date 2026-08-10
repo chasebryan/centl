@@ -18,6 +18,7 @@ canonical_dir() {
 validate_adjacent_checksum() {
   checksum=$1
   asset=$2
+  root=$3
 
   awk -v wanted="$asset" '
     BEGIN { count = 0; valid = 0 }
@@ -34,7 +35,16 @@ validate_adjacent_checksum() {
     END { exit !(count == 1 && valid == 1) }
   ' "$checksum" || fail "$checksum must contain exactly one SHA-256 entry for $asset"
 
-  python3 "$repo_root/scripts/integrity.py" verify "$checksum" --root "$release_dir"
+  python3 "$repo_root/scripts/integrity.py" verify "$checksum" --root "$root"
+}
+
+manifest_contains_asset_once() {
+  manifest_path=$1
+  wanted=$2
+  awk -v wanted="$wanted" '
+    NF && substr($0, 67) == wanted { count++ }
+    END { exit !(count == 1) }
+  ' "$manifest_path"
 }
 
 [ -n "$mirror" ] && [ -n "$version" ] && [ -n "$release_dir" ] ||
@@ -78,7 +88,7 @@ for path in "$release_dir"/centl-*.tar.gz "$release_dir"/centl-*.zip; do
   checksum="$path.sha256"
   [ -f "$checksum" ] && [ ! -L "$checksum" ] ||
     fail "adjacent checksum missing or not a regular file: $checksum"
-  validate_adjacent_checksum "$checksum" "$asset"
+  validate_adjacent_checksum "$checksum" "$asset" "$release_dir"
   set -- "$@" "$asset"
 done
 [ "$#" -gt 0 ] || fail "no CENTL release archives found in $release_dir"
@@ -92,6 +102,10 @@ if [ -e "$manifest" ] || [ -e "$signature" ]; then
     fail "signed release has no regular SHA256SUMS.sig"
   [ -n "${FCF_SIGNIFY_PUBLIC_KEY:-}" ] ||
     fail "FCF_SIGNIFY_PUBLIC_KEY is required to preserve an authenticated release"
+  for asset in "$@"; do
+    manifest_contains_asset_once "$manifest" "$asset" ||
+      fail "authenticated SHA256SUMS does not cover release archive exactly once: $asset"
+  done
   FCF_SIGNIFY_PUBLIC_KEY="$FCF_SIGNIFY_PUBLIC_KEY" \
     sh "$repo_root/scripts/release-verify" "$release_dir"
   authentication=signify
@@ -113,7 +127,7 @@ trap cleanup 0 HUP INT TERM
 for asset in "$@"; do
   cp "$release_dir/$asset" "$stage/$asset"
   cp "$release_dir/$asset.sha256" "$stage/$asset.sha256"
-  validate_adjacent_checksum "$stage/$asset.sha256" "$asset"
+  validate_adjacent_checksum "$stage/$asset.sha256" "$asset" "$stage"
 done
 if [ "$authentication" = signify ]; then
   cp "$manifest" "$stage/SHA256SUMS"
@@ -143,12 +157,12 @@ if [ -e "$target" ]; then
     fail "existing release target is not a normal directory: $target"
   if diff -qr "$stage" "$target" >/dev/null; then
     printf 'CENTL release already preserved identically: %s\n' "$target"
+    rm -rf "$stage"
   else
     fail "release v$version is already preserved with different contents"
   fi
 else
   mv "$stage" "$target"
-  mkdir -p "$stage"
   printf 'Preserved CENTL release: %s\n' "$target"
 fi
 
