@@ -105,8 +105,8 @@ let create_function ~replace source =
                             {
                               message =
                                 Printf.sprintf
-                                  "Created local CENTL function %s.\nSource: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
-                                  name path revision;
+                                  "Created local CENTL function %s.\nGenerated/validated source: %s\nSource file: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
+                                  name source path revision;
                               changed = true;
                               revision = Some revision;
                             }
@@ -191,8 +191,8 @@ let create_value ~replace source =
                             {
                               message =
                                 Printf.sprintf
-                                  "Created local CENTL value %s.\nSource: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
-                                  name path revision;
+                                  "Created local CENTL value %s.\nGenerated/validated source: %s\nSource file: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
+                                  name source path revision;
                               changed = true;
                               revision = Some revision;
                             }
@@ -308,8 +308,7 @@ let scaffold kind rest =
       workspace_result (fun workspace ->
           snapshot_or_message workspace (fun () ->
               match Centl_sci_scaffold.create workspace ~kind ~name ~target with
-              | Error message ->
-                  Handled { message; changed = false; revision = None }
+              | Error message -> Handled { message; changed = false; revision = None }
               | Ok (root, revision) ->
                   Handled
                     {
@@ -347,9 +346,17 @@ let render_plan input =
       revision = None;
     }
 
-let handle input =
-  let trimmed = String.trim input in
-  let lower = String.lowercase_ascii trimmed in
+let generated_change input =
+  match Centl_sci_codegen.generate input with
+  | Centl_sci_codegen.Not_generated -> None
+  | Centl_sci_codegen.Needs_clarification message ->
+      Some (Handled { message; changed = false; revision = None })
+  | Centl_sci_codegen.Generated (Centl_sci_codegen.Function { replace; source }) ->
+      Some (create_function ~replace source)
+  | Centl_sci_codegen.Generated (Centl_sci_codegen.Value { replace; source }) ->
+      Some (create_value ~replace source)
+
+let handle_direct trimmed lower =
   if
     List.mem lower
       [
@@ -418,8 +425,7 @@ let handle input =
     | Some rest when rest <> "" -> scaffold Centl_sci_scaffold.Python_adapter rest
     | _ ->
         begin match drop_prefix_ci "scaffold native extension " trimmed with
-        | Some rest when rest <> "" ->
-            scaffold Centl_sci_scaffold.Native_extension rest
+        | Some rest when rest <> "" -> scaffold Centl_sci_scaffold.Native_extension rest
         | _ ->
             begin match drop_prefix_ci "create function " trimmed with
             | Some source when source <> "" -> create_function ~replace:false source
@@ -456,3 +462,10 @@ let handle input =
                 end
             end
         end
+
+let handle input =
+  let trimmed = String.trim input in
+  let lower = String.lowercase_ascii trimmed in
+  match generated_change trimmed with
+  | Some result -> result
+  | None -> handle_direct trimmed lower
