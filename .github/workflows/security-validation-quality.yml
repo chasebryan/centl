@@ -1,0 +1,125 @@
+name: Security validation quality diagnostics
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-validation-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-diagnostics:
+    name: Isolate repository quality gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out validation branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates git make m4 pkg-config python3 \
+            libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install pinned CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Formatting
+        id: formatting
+        continue-on-error: true
+        run: opam exec -- dune build @fmt
+
+      - name: Source lint
+        id: lint
+        continue-on-error: true
+        run: python3 scripts/lint-source.py
+
+      - name: License headers
+        id: licenses
+        continue-on-error: true
+        run: python3 scripts/check-license-headers.py
+
+      - name: Install interface
+        id: install_interface
+        continue-on-error: true
+        run: python3 scripts/install-interface-check.py
+
+      - name: Architecture
+        id: architecture
+        continue-on-error: true
+        run: python3 scripts/check-architecture.py
+
+      - name: Feed hygiene
+        id: feed_hygiene
+        continue-on-error: true
+        run: python3 scripts/check-feed-hygiene.py
+
+      - name: Repository hygiene
+        id: repo_hygiene
+        continue-on-error: true
+        run: python3 scripts/check-repo-hygiene.py
+
+      - name: Dependency integrity
+        id: dependency_integrity
+        continue-on-error: true
+        run: python3 scripts/check-dependency-integrity.py
+
+      - name: Formal trust
+        id: formal_trust
+        continue-on-error: true
+        run: python3 scripts/check-formal-trust.py
+
+      - name: Security boundaries
+        id: security_boundaries
+        continue-on-error: true
+        run: python3 scripts/check-security-boundaries.py
+
+      - name: Require every quality component
+        if: always()
+        env:
+          FORMATTING: ${{ steps.formatting.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          LICENSES: ${{ steps.licenses.outcome }}
+          INSTALL_INTERFACE: ${{ steps.install_interface.outcome }}
+          ARCHITECTURE: ${{ steps.architecture.outcome }}
+          FEED_HYGIENE: ${{ steps.feed_hygiene.outcome }}
+          REPO_HYGIENE: ${{ steps.repo_hygiene.outcome }}
+          DEPENDENCY_INTEGRITY: ${{ steps.dependency_integrity.outcome }}
+          FORMAL_TRUST: ${{ steps.formal_trust.outcome }}
+          SECURITY_BOUNDARIES: ${{ steps.security_boundaries.outcome }}
+        run: |
+          set -euo pipefail
+          printf '%-24s %s\n' \
+            formatting "$FORMATTING" \
+            lint "$LINT" \
+            licenses "$LICENSES" \
+            install-interface "$INSTALL_INTERFACE" \
+            architecture "$ARCHITECTURE" \
+            feed-hygiene "$FEED_HYGIENE" \
+            repo-hygiene "$REPO_HYGIENE" \
+            dependency-integrity "$DEPENDENCY_INTEGRITY" \
+            formal-trust "$FORMAL_TRUST" \
+            security-boundaries "$SECURITY_BOUNDARIES"
+          for result in \
+            "$FORMATTING" "$LINT" "$LICENSES" "$INSTALL_INTERFACE" \
+            "$ARCHITECTURE" "$FEED_HYGIENE" "$REPO_HYGIENE" \
+            "$DEPENDENCY_INTEGRITY" "$FORMAL_TRUST" "$SECURITY_BOUNDARIES"; do
+            test "$result" = success
+          done
