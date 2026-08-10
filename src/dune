@@ -42,6 +42,7 @@
   Centl_engine
   Centl_version
   Centl_build
+  Centl_sha256
   Centl_verify
   Centl_receipt
   Centl_protocol
@@ -72,6 +73,10 @@
   Centl_sci_dependencies
   Centl_sci_change_ir
   Centl_sci_build_plan
+  Centl_sci_mirage
+  Centl_sci_mirage_goal
+  Centl_sci_mirage_obligation
+  Centl_sci_mirage_candidate
   Centl_sci_core_plan
   Centl_sci_scaffold
   Centl_sci_codegen
@@ -122,4 +127,11 @@
  (public_name centl-sci)
  (package centl)
  (modules Sci_main)
+ (libraries centl_lib unix yojson))
+
+(executable
+ (name mirage_main)
+ (public_name centl-mirage)
+ (package centl)
+ (modules Mirage_main)
  (libraries centl_lib unix yojson))

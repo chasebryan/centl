@@ -1,0 +1,24 @@
+(test
+ (name test_sci_mirage)
+ (modules test_sci_mirage)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_goal)
+ (modules test_sci_mirage_goal)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_obligation)
+ (modules test_sci_mirage_obligation)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_candidate)
+ (modules test_sci_mirage_candidate)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sha256)
+ (modules test_sha256)
+ (libraries centl_lib alcotest))

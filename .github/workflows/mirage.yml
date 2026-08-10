@@ -1,0 +1,60 @@
+name: MIRAGE bootstrap validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/ocaml/centl_sha256.ml'
+      - 'src/ocaml/centl_sci_mirage.ml'
+      - 'src/ocaml/centl_sci_mirage_goal.ml'
+      - 'src/ocaml/centl_sci_mirage_obligation.ml'
+      - 'src/ocaml/centl_sci_mirage_candidate.ml'
+      - 'src/mirage_main.ml'
+      - 'src/dune'
+      - 'tests/mirage/**'
+      - 'docs/CENTL-MIRAGE.md'
+      - '.github/workflows/mirage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirage-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    name: Compile and test local MIRAGE bootstrap
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install pinned CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Compile MIRAGE executable
+        run: opam exec -- dune build src/mirage_main.exe
+
+      - name: Run dedicated MIRAGE tests
+        run: opam exec -- dune runtest tests/mirage
+
+      - name: Check patch whitespace
+        run: git diff --check HEAD^
