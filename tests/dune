@@ -101,6 +101,11 @@
  (libraries centl_lib alcotest yojson))
 
 (test
+ (name test_sci_capabilities)
+ (modules test_sci_capabilities)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sci_workspace)
  (modules test_sci_workspace)
  (libraries centl_lib alcotest unix yojson))
