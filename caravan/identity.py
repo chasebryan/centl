@@ -35,11 +35,17 @@ def _b64url_encode(raw: bytes) -> str:
 
 
 def _b64url_decode(text: str) -> bytes:
+    if not text or "=" in text:
+        raise IdentityError("carrier identity must use unpadded base64url")
     try:
-        padded = text + "=" * ((4 - len(text) % 4) % 4)
-        return base64.urlsafe_b64decode(padded.encode("ascii"))
-    except Exception as exc:
+        encoded = text.encode("ascii")
+        padded = encoded + b"=" * ((4 - len(encoded) % 4) % 4)
+        raw = base64.b64decode(padded, altchars=b"-_", validate=True)
+    except (UnicodeEncodeError, ValueError) as exc:
         raise IdentityError("invalid base64url carrier identity") from exc
+    if _b64url_encode(raw) != text:
+        raise IdentityError("carrier identity is not canonical base64url")
+    return raw
 
 
 def public_identity_from_key(public_key: Ed25519PublicKey) -> str:
@@ -51,7 +57,7 @@ def public_identity_from_key(public_key: Ed25519PublicKey) -> str:
 
 
 def public_key_from_identity(public_identity: str) -> Ed25519PublicKey:
-    if not public_identity.startswith(PUBLIC_ID_PREFIX):
+    if not isinstance(public_identity, str) or not public_identity.startswith(PUBLIC_ID_PREFIX):
         raise IdentityError("carrier public identity must use ed25519:<base64url>")
     raw = _b64url_decode(public_identity[len(PUBLIC_ID_PREFIX) :])
     if len(raw) != 32:
@@ -162,7 +168,12 @@ class CarrierIdentity:
         _require_private_directory(root_path, create=True)
         private_path = root_path / PRIVATE_KEY_NAME
         public_path = root_path / PUBLIC_ID_NAME
-        if private_path.exists() or private_path.is_symlink() or public_path.exists() or public_path.is_symlink():
+        if (
+            private_path.exists()
+            or private_path.is_symlink()
+            or public_path.exists()
+            or public_path.is_symlink()
+        ):
             raise IdentityError("carrier identity already exists")
 
         private_key = Ed25519PrivateKey.generate()
