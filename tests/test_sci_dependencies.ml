@@ -108,6 +108,37 @@ let test_extension_listing_orders_local_dependencies_first () =
       Alcotest.(check (list string)) "dependency precedes dependent"
         [ "zeta"; "alpha" ] names)
 
+let test_manifest_identity_mismatch_is_rejected () =
+  let root = temp_dir "centl-caramels-manifest-identity-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"alpha" ~enabled:false ~dependencies:[];
+      let path = Centl_sci_workspace.manifest_path workspace "alpha" in
+      let json = Yojson.Safe.from_file path in
+      let mismatched =
+        match json with
+        | `Assoc fields ->
+            `Assoc
+              (List.map
+                 (fun (field, value) ->
+                   if field = "name" then (field, `String "beta") else (field, value))
+                 fields)
+        | _ -> Alcotest.fail "test manifest must be an object"
+      in
+      Centl_sci_workspace.atomic_write_json path mismatched;
+      begin match Centl_sci_extensions.read_manifest workspace "alpha" with
+      | Ok _ -> Alcotest.fail "manifest identity mismatch unexpectedly accepted"
+      | Error message ->
+          Alcotest.(check bool) "identity mismatch refusal" true
+            (contains "file alpha.json declares name beta" message)
+      end;
+      let manifests, errors = Centl_sci_extensions.scan workspace in
+      Alcotest.(check int) "mismatched identity not executable" 0
+        (List.length manifests);
+      Alcotest.(check int) "identity error retained" 1 (List.length errors))
+
 let test_activation_rejects_missing_local_dependency () =
   let root = temp_dir "centl-caramels-activation-missing-" in
   Fun.protect
@@ -205,6 +236,8 @@ let () =
             test_external_and_opaque_dependencies_are_preserved;
           Alcotest.test_case "dependency-aware extension order" `Quick
             test_extension_listing_orders_local_dependencies_first;
+          Alcotest.test_case "manifest identity mismatch" `Quick
+            test_manifest_identity_mismatch_is_rejected;
           Alcotest.test_case "activation rejects missing dependency" `Quick
             test_activation_rejects_missing_local_dependency;
           Alcotest.test_case "activation rejects disabled dependency" `Quick
