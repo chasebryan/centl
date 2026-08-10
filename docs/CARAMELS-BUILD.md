@@ -154,30 +154,29 @@ BUILD> export workspace
 BUILD> export workspace /path/to/bundle
 ```
 
+Validated reversible import is also live:
+
+```text
+BUILD> import workspace /path/to/bundle
+```
+
 A Caramels bundle contains downstream manifests, native modules, packages, tests, data, and generated scaffolds. It excludes verified core, history, snapshots, prior exports, and local workspace identity/configuration.
 
-Bundle validation rejects:
+Bundle validation rejects malformed metadata, symlinks, unsupported filesystem objects, absolute or traversal-style manifest sources, invalid extensions, enabled non-native kinds, invalid dependency graphs, disabled required local dependencies, and packages that reference missing extensions.
 
-- unknown bundle metadata/schema
-- symlinks anywhere in the bundle
-- absolute or traversal-style extension source paths
-- structurally invalid extensions
-- enabled non-native extension kinds
-- packages that reference absent extensions
+Import/export scanning is bounded to 10,000 files, 16 MiB per file, 256 MiB aggregate payload, and 64 directory levels. Export preflights the included workspace surfaces before creating the target. Export target ancestry is normalized so traversal and symlink-parent aliases cannot redirect an export into active workspace state.
 
-Explicit export targets may be outside the active workspace or below the dedicated `generated/exports/` area. Targets inside active `modules/`, `packages/`, `data/`, `tests/`, `extensions/`, or other active workspace surfaces are rejected to prevent recursive/self-copying exports.
+`BUILD> import workspace PATH` validates the bundle before mutation, snapshots the current downstream state, replaces only downstream surfaces, advances the workspace revision, and reloads enabled native definitions into the active core session in the same REPL operation. A post-validation copy failure triggers automatic snapshot rollback; a rollback failure is reported explicitly rather than hidden.
 
-A validated reversible importer exists internally. `BUILD> import workspace PATH` remains deliberately gated until import and active downstream core-session reload can be completed as one operation. The current BUILD command reports that boundary and does not mutate state.
+Read-only bundle inspection and import planning expose inventory and add/remove/replace/unchanged changes without mutating the workspace or promoting assurance.
 
 ## Current Caramels boundary
 
-The following are deliberately separate integration/refinement work rather than silently claimed complete:
+The following remain deliberately separate from the completed Caramels BUILD surface:
 
-- live BUILD import + same-command active-session reload
-- migration of the main `centl` calculator from its embedded legacy editor to the shared `Centl_editor`
 - stable executable ABI/activation for generated external/native scaffolds
 - automatic trusted-core patch application
 - automatic upstream publication
-- repair of stale CLI golden fixtures and current CI failures, which belongs to the later repair pass
+- support, packaging, installer, CI, and release validation for operating systems other than GNU/Linux
 
-Caramels is Linux-first during this development milestone. Local ownership and extension freedom do not change the core assurance rule: **user code may grow CENTL without silently redefining what verified core means.**
+Caramels is Linux-first and Linux-supported. Local ownership and extension freedom do not change the core assurance rule: **user code may grow CENTL without silently redefining what verified core means.**
