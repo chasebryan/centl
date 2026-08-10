@@ -6,16 +6,6 @@ type handled = {
 
 type result = Handled of handled | Not_handled
 
-let find_substring ~needle text =
-  let needle_length = String.length needle in
-  let rec loop index =
-    if needle_length = 0 then Some index
-    else if index + needle_length > String.length text then None
-    else if String.sub text index needle_length = needle then Some index
-    else loop (index + 1)
-  in
-  loop 0
-
 let drop_prefix_ci prefix text =
   let trimmed = String.trim text in
   let lower = String.lowercase_ascii trimmed in
@@ -226,6 +216,58 @@ let create_value ~replace source =
                 }
           end)
 
+let inspect_extension name =
+  workspace_result (fun workspace ->
+      match Centl_sci_extensions.read_manifest workspace name with
+      | Error message ->
+          Handled { message; changed = false; revision = None }
+      | Ok manifest ->
+          Handled
+            {
+              message = Centl_sci_extensions.render_manifest manifest;
+              changed = false;
+              revision = Some (Centl_sci_workspace.read_revision workspace);
+            })
+
+let set_extension_enabled name enabled =
+  workspace_result (fun workspace ->
+      match Centl_sci_extensions.set_enabled workspace name enabled with
+      | Error message -> Handled { message; changed = false; revision = None }
+      | Ok manifest ->
+          Handled
+            {
+              message =
+                Printf.sprintf "%s local extension %s.\n%s"
+                  (if enabled then "Enabled" else "Disabled") name
+                  (Centl_sci_extensions.render_manifest manifest);
+              changed = true;
+              revision = Some manifest.workspace_revision;
+            })
+
+let remove_extension name =
+  workspace_result (fun workspace ->
+      match Centl_sci_extensions.remove workspace name with
+      | Error message -> Handled { message; changed = false; revision = None }
+      | Ok revision ->
+          Handled
+            {
+              message =
+                Printf.sprintf
+                  "Removed local extension %s from the active workspace and archived its files for recovery.\nWorkspace revision: %d"
+                  name revision;
+              changed = true;
+              revision = Some revision;
+            })
+
+let render_plan input =
+  let plan = Centl_sci_build_plan.plan input in
+  Handled
+    {
+      message = Centl_sci_build_plan.render plan;
+      changed = false;
+      revision = None;
+    }
+
 let handle input =
   let trimmed = String.trim input in
   let lower = String.lowercase_ascii trimmed in
@@ -238,12 +280,22 @@ let handle input =
         "show my workspace";
         "show me everything i've changed from upstream";
         "show me everything i’ve changed from upstream";
+        ":changes";
       ]
   then
     workspace_result (fun workspace ->
+        let extensions = Centl_sci_extensions.render_list workspace in
         Handled
           {
-            message = Centl_sci_workspace.describe workspace;
+            message = Centl_sci_workspace.describe workspace ^ "\n\nLocal changes:\n" ^ extensions;
+            changed = false;
+            revision = Some (Centl_sci_workspace.read_revision workspace);
+          })
+  else if List.mem lower [ "extensions"; "list extensions"; "show extensions"; ":extensions" ] then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_extensions.render_list workspace;
             changed = false;
             revision = Some (Centl_sci_workspace.read_revision workspace);
           })
@@ -278,7 +330,25 @@ let handle input =
             | _ ->
                 begin match drop_prefix_ci "modify value " trimmed with
                 | Some source when source <> "" -> create_value ~replace:true source
-                | _ -> Not_handled
+                | _ ->
+                    begin match drop_prefix_ci "inspect " trimmed with
+                    | Some name when name <> "" -> inspect_extension name
+                    | _ ->
+                        begin match drop_prefix_ci "disable " trimmed with
+                        | Some name when name <> "" -> set_extension_enabled name false
+                        | _ ->
+                            begin match drop_prefix_ci "enable " trimmed with
+                            | Some name when name <> "" -> set_extension_enabled name true
+                            | _ ->
+                                begin match drop_prefix_ci "remove " trimmed with
+                                | Some name when name <> "" -> remove_extension name
+                                | _ ->
+                                    if trimmed = "" then Not_handled
+                                    else render_plan trimmed
+                                end
+                            end
+                        end
+                    end
                 end
             end
         end
