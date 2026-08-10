@@ -183,11 +183,11 @@ let nearest_objective (cells : spec_cell list) before_id =
   | value :: _ -> Some value
 
 let cell_edges (cells : spec_cell list) =
-  cells |> List.filter_map (fun cell -> match String.uppercase_ascii cell.kind with
-    | "ACCEPTANCE" | "EXAMPLE" -> Option.map (fun objective ->
+  cells |> List.filter_map (fun (cell : spec_cell) -> match String.uppercase_ascii cell.kind with
+    | "ACCEPTANCE" | "EXAMPLE" -> Option.map (fun (objective : spec_cell) ->
         { source = cell_node_id cell.id; target = cell_node_id objective.id; kind = Refines })
         (nearest_objective cells cell.id)
-    | "NON_GOAL" -> Option.map (fun objective ->
+    | "NON_GOAL" -> Option.map (fun (objective : spec_cell) ->
         { source = cell_node_id cell.id; target = cell_node_id objective.id; kind = Constrains })
         (nearest_objective cells cell.id)
     | _ -> None)
@@ -196,18 +196,18 @@ let conflict_edges pairs = List.map (fun (left, right) ->
   { source = cell_node_id left; target = cell_node_id right; kind = Conflicts_with }) pairs
 
 let capability_edges workspace (cells : spec_cell list) =
-  cells |> List.filter (fun cell -> match String.uppercase_ascii cell.kind with
+  cells |> List.filter (fun (cell : spec_cell) -> match String.uppercase_ascii cell.kind with
     | "DIRECTIVE" | "INVARIANT" -> true | _ -> false)
-  |> List.concat_map (fun cell -> capability_matches workspace cell.text |> List.map (fun capability ->
+  |> List.concat_map (fun (cell : spec_cell) -> capability_matches workspace cell.text |> List.map (fun capability ->
        { source = cell_node_id cell.id;
          target = capability_node_id capability.Centl_sci_capabilities.name;
          kind = Candidate_satisfied_by }))
 
-let cell_nodes (cells : spec_cell list) = List.map (fun cell ->
+let cell_nodes (cells : spec_cell list) = List.map (fun (cell : spec_cell) ->
   { id = cell_node_id cell.id; kind = cell_node_kind cell.kind; label = cell.text; source_cell = Some cell.id }) cells
 
 let capability_nodes workspace (cells : spec_cell list) =
-  cells |> List.concat_map (fun cell -> capability_matches workspace cell.text)
+  cells |> List.concat_map (fun (cell : spec_cell) -> capability_matches workspace cell.text)
   |> List.sort_uniq (fun left right ->
        String.compare left.Centl_sci_capabilities.name right.Centl_sci_capabilities.name)
   |> List.map (fun capability ->
