@@ -14,10 +14,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-diagnostics:
-    name: Isolate repository quality gate
+  quality-diagnostic:
+    name: Quality diagnostic — ${{ matrix.check }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: formatting
+            needs_ocaml: true
+          - check: dune-checks
+            needs_ocaml: true
+          - check: opam-lint
+            needs_ocaml: true
+          - check: toolchain-pins
+            needs_ocaml: false
+          - check: licensing
+            needs_ocaml: false
+          - check: install-interface
+            needs_ocaml: false
+          - check: integrity
+            needs_ocaml: false
+          - check: supply-chain
+            needs_ocaml: false
 
     steps:
       - name: Check out validation branch
@@ -25,90 +45,61 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install system dependencies
+      - name: Install OCaml build dependencies
+        if: matrix.needs_ocaml
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            ca-certificates git make m4 pkg-config python3 \
+            ca-certificates git make m4 pkg-config \
             libgmp-dev libmpfr-dev libflint-dev
 
       - name: Set up pinned OCaml
+        if: matrix.needs_ocaml
         uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
         with:
           ocaml-compiler: ocaml-base-compiler.4.14.1
           opam-pin: false
 
       - name: Install pinned CENTL dependencies
+        if: matrix.needs_ocaml
         run: opam install . --deps-only --with-test --assume-depexts
 
-      - name: Formatting
-        id: formatting
-        continue-on-error: true
-        run: opam exec -- dune build @fmt
-
-      - name: Dune checks
-        id: dune_checks
-        continue-on-error: true
-        run: opam exec -- dune build @check
-
-      - name: Opam lint
-        id: opam_lint
-        continue-on-error: true
-        run: opam lint centl.opam
-
-      - name: Toolchain pins
-        id: toolchain_pins
-        continue-on-error: true
-        run: scripts/check-toolchain-pins
-
-      - name: Licensing
-        id: licensing
-        continue-on-error: true
-        run: sh scripts/check-licensing
-
-      - name: Install interface
-        id: install_interface
-        continue-on-error: true
-        run: python3 scripts/install-interface-check.py
-
-      - name: Integrity self-test and source manifest
-        id: integrity
-        continue-on-error: true
-        run: |
-          python3 scripts/integrity.py self-test
-          mkdir -p _build/integrity
-          python3 scripts/integrity.py source-manifest --output _build/integrity/SHA256SUMS
-          python3 scripts/integrity.py hash _build/integrity/SHA256SUMS > _build/integrity/SHA256SUMS.sha256
-
-      - name: Supply-chain check
-        id: supply_chain
-        continue-on-error: true
-        run: python3 scripts/supply-chain-check.py
-
-      - name: Require every quality component
-        if: always()
+      - name: Run exact quality component
         env:
-          FORMATTING: ${{ steps.formatting.outcome }}
-          DUNE_CHECKS: ${{ steps.dune_checks.outcome }}
-          OPAM_LINT: ${{ steps.opam_lint.outcome }}
-          TOOLCHAIN_PINS: ${{ steps.toolchain_pins.outcome }}
-          LICENSING: ${{ steps.licensing.outcome }}
-          INSTALL_INTERFACE: ${{ steps.install_interface.outcome }}
-          INTEGRITY: ${{ steps.integrity.outcome }}
-          SUPPLY_CHAIN: ${{ steps.supply_chain.outcome }}
+          QUALITY_CHECK: ${{ matrix.check }}
+        shell: bash
         run: |
           set -euo pipefail
-          printf '%-24s %s\n' \
-            formatting "$FORMATTING" \
-            dune-checks "$DUNE_CHECKS" \
-            opam-lint "$OPAM_LINT" \
-            toolchain-pins "$TOOLCHAIN_PINS" \
-            licensing "$LICENSING" \
-            install-interface "$INSTALL_INTERFACE" \
-            integrity "$INTEGRITY" \
-            supply-chain "$SUPPLY_CHAIN"
-          for result in \
-            "$FORMATTING" "$DUNE_CHECKS" "$OPAM_LINT" "$TOOLCHAIN_PINS" \
-            "$LICENSING" "$INSTALL_INTERFACE" "$INTEGRITY" "$SUPPLY_CHAIN"; do
-            test "$result" = success
-          done
+          case "$QUALITY_CHECK" in
+            formatting)
+              opam exec -- dune build @fmt
+              ;;
+            dune-checks)
+              opam exec -- dune build @check
+              ;;
+            opam-lint)
+              opam lint centl.opam
+              ;;
+            toolchain-pins)
+              scripts/check-toolchain-pins
+              ;;
+            licensing)
+              sh scripts/check-licensing
+              ;;
+            install-interface)
+              python3 scripts/install-interface-check.py
+              ;;
+            integrity)
+              python3 scripts/integrity.py self-test
+              mkdir -p _build/integrity
+              python3 scripts/integrity.py source-manifest --output _build/integrity/SHA256SUMS
+              python3 scripts/integrity.py hash _build/integrity/SHA256SUMS > _build/integrity/SHA256SUMS.sha256
+              ;;
+            supply-chain)
+              python3 scripts/supply-chain-check.py
+              ;;
+            *)
+              printf 'unknown quality diagnostic: %s\n' "$QUALITY_CHECK" >&2
+              exit 2
+              ;;
+          esac
