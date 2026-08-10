@@ -274,7 +274,13 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 
 ## License
 
-`SPDX-License-Identifier: AGPL-3.0-or-later`
+FCF-owned CENTL software is licensed under the **Apache License 2.0** (`Apache-2.0`).
+Project documentation is licensed under **CC BY 4.0** where identified, while
+official FCF/CENTL branding is governed separately so forks remain free without
+being mistaken for official releases.
+
+See [LICENSING.md](LICENSING.md), [TRADEMARKS.md](TRADEMARKS.md), and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the complete license map.
 
 Developed under the **Free Computation Foundation**.
 
