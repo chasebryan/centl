@@ -2,6 +2,8 @@
 
 CENTL depends on and interoperates with software and model artifacts that are **not relicensed by CENTL's Apache-2.0 migration**. Their upstream licenses remain authoritative.
 
+The pinned dependency and artifact inventory is also available in machine-readable form in [`third-party.toml`](third-party.toml). SPDX expressions are recorded there only when verified from current upstream metadata or authoritative upstream licensing statements; `NOASSERTION` is intentional and means that the packaged upstream license/provenance must be consulted rather than guessed.
+
 ## Native and build dependencies
 
 Current source and release tooling uses components including:
@@ -14,7 +16,7 @@ Current source and release tooling uses components including:
 | Yojson | JSON support | upstream license is preserved |
 | FLINT | exact and rigorous native mathematics | upstream LGPL notices/source references are preserved in native release packages |
 | GMP | arbitrary-precision integer/rational native arithmetic | upstream GPL/LGPL notices/source references are preserved in native release packages |
-| MPFR | correctly rounded floating-point arithmetic | upstream GPL/LGPL notices/source references are preserved in native release packages |
+| MPFR | correctly rounded floating-point arithmetic | upstream LGPL notices/source references are preserved in native release packages |
 | Julia / Nemo | independent differential-testing laboratory | upstream licenses apply; these are not relicensed as CENTL code |
 | llama.cpp | optional local CENTL-SCi inference runtime | upstream license/copyright notices must remain with any redistributed runtime |
 
@@ -32,4 +34,4 @@ Any imported image, dataset, fixture, standard text, or other material carrying 
 
 ## Relicensing rule
 
-Nothing in `LICENSE`, `LICENSING.md`, `.reuse/dep5`, or repository metadata is intended to replace a valid third-party license. If a conflict is discovered, the narrower third-party notice governs that material until the provenance is corrected.
+Nothing in `LICENSE`, `LICENSING.md`, `.reuse/dep5`, `third-party.toml`, or repository metadata is intended to replace a valid third-party license. If a conflict is discovered, the narrower third-party notice governs that material until the provenance is corrected.
