@@ -289,7 +289,7 @@ let import workspace path =
     | Ok () ->
         begin match Centl_sci_snapshot.create workspace with
         | Error message -> Error ("could not snapshot the current workspace before import: " ^ message)
-        | Ok _ ->
+        | Ok snapshot ->
             try
               replace_surface workspace path;
               let revision = Centl_sci_workspace.bump_revision workspace in
@@ -303,7 +303,18 @@ let import workspace path =
                   revision = Some revision;
                 }
             with Sys_error message | Unix.Unix_error (_, _, message) ->
-              Error ("workspace import failed after snapshot: " ^ message)
+              begin match Centl_sci_snapshot.rollback workspace snapshot with
+              | Ok revision ->
+                  Error
+                    (Printf.sprintf
+                       "workspace import failed during mutation and was rolled back without advancing the workspace revision (still %d): %s"
+                       revision message)
+              | Error rollback_message ->
+                  Error
+                    (Printf.sprintf
+                       "workspace import failed during mutation: %s; automatic rollback also failed: %s"
+                       message rollback_message)
+              end
         end
 
 let execute workspace = function
