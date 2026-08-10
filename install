@@ -4,6 +4,11 @@ set -eu
 repository="chasebryan/centl"
 default_release_version="0.14.0"
 release_version=${CENTL_RELEASE_VERSION:-$default_release_version}
+if [ -n "${CENTL_RELEASE_VERSION+x}" ]; then
+  version_explicit=true
+else
+  version_explicit=false
+fi
 release_base_url=${CENTL_RELEASE_BASE_URL:-}
 archive_path=""
 prefix=${CENTL_PREFIX:-}
@@ -15,7 +20,7 @@ Install a prebuilt CENTL release on GNU/Linux.
 
 Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [--archive PATH] [--no-path]
 
-  --version VERSION          install a specific release (default: 0.14.0; use latest explicitly if desired)
+  --version VERSION          install a specific release (default network release: 0.14.0)
   --release-base-url URL     use URL/vVERSION as the release directory
                              (HTTPS or file://; latest is not accepted)
   --prefix PATH              install below PATH (default: ~/.local)
@@ -24,9 +29,12 @@ Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [-
   --help                     show this help
 
 Environment:
-  CENTL_RELEASE_VERSION      release version to install (default: 0.14.0)
+  CENTL_RELEASE_VERSION      release version to install (default network release: 0.14.0)
   CENTL_RELEASE_BASE_URL     same as --release-base-url
   CENTL_PREFIX               same as --prefix
+
+For --archive, the archive's own VERSION is accepted unless --version or
+CENTL_RELEASE_VERSION explicitly requests an exact version.
 EOF
 }
 
@@ -45,6 +53,7 @@ while [ "$#" -gt 0 ]; do
     --version)
       [ "$#" -ge 2 ] || fail "--version needs a value"
       release_version=$2
+      version_explicit=true
       shift 2
       ;;
     --release-base-url)
@@ -234,7 +243,8 @@ version=$(sed -n '1p' "$package/VERSION")
 case "$version" in
   ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the release version is invalid" ;;
 esac
-if [ "$release_version" != latest ]; then
+if [ "$release_version" != latest ] && \
+   { [ -z "$archive_path" ] || [ "$version_explicit" = true ]; }; then
   requested=${release_version#v}
   [ "$version" = "$requested" ] ||
     fail "requested $requested but the archive contains $version"
