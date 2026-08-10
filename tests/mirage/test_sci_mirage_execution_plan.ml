@@ -10,15 +10,17 @@ let cleanup path =
 let cell id kind text : Centl_sci_mirage_goal.spec_cell =
   { id; kind; text; start_line = id; end_line = id }
 
-let build_report workspace =
+let build_readiness workspace =
   let graph =
     Centl_sci_mirage_goal.build workspace
       [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
   in
   let obligations = Centl_sci_mirage_obligation.build graph in
   let candidates = Centl_sci_mirage_candidate.build graph obligations in
-  let readiness = Centl_sci_mirage_readiness.build obligations candidates in
-  Centl_sci_mirage_execution_plan.build readiness
+  Centl_sci_mirage_readiness.build obligations candidates
+
+let build_report workspace =
+  build_readiness workspace |> Centl_sci_mirage_execution_plan.build
 
 let test_plan_contains_pending_work () =
   let root = temp_dir "centl-mirage-plan-" in
@@ -61,10 +63,10 @@ let test_artifact_denies_execution () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
-      let report = build_report workspace in
+      let readiness = build_readiness workspace in
       match
         Centl_sci_mirage_execution_plan.construct
-          (Filename.concat root "design.readiness.json") report
+          (Filename.concat root "design.readiness.json") readiness
       with
       | Error message -> Alcotest.fail message
       | Ok (path, _) ->
