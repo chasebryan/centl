@@ -176,7 +176,8 @@ let prune_other_snapshots root keep =
   |> Array.iter (fun name ->
          let path = Filename.concat root name in
          if path <> keep then
-           try remove_tree path with Sys_error _ | Unix.Unix_error _ -> ())
+           try remove_tree path
+           with Sys_error _ | Unix.Unix_error (_, _, _) -> ())
 
 let create workspace =
   try
