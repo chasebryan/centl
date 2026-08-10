@@ -1,0 +1,177 @@
+name: Base model repository preservation
+
+on:
+  pull_request:
+    paths:
+      - "scripts/model-repository-preserve.py"
+      - "docs/BASE-MODEL-PRESERVATION.md"
+      - ".github/workflows/base-model-preservation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/model-repository-preserve.py"
+      - "docs/BASE-MODEL-PRESERVATION.md"
+      - ".github/workflows/base-model-preservation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Preserve immutable synthetic model revision
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check preservation syntax
+        run: python3 -m py_compile scripts/model-repository-preserve.py
+
+      - name: Build synthetic model hub fixture
+        run: |
+          fixture="$RUNNER_TEMP/model-hub"
+          revision=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          repo_root="$fixture/example/TestModel"
+          exact_api="$fixture/api/models/example/TestModel/revision/$revision"
+          mkdir -p "$(dirname "$exact_api")" "$repo_root/resolve/$revision"
+
+          printf '{"model_type":"synthetic"}\n' \
+            > "$repo_root/resolve/$revision/config.json"
+          printf 'synthetic large model bytes\n' \
+            > "$repo_root/resolve/$revision/weights.bin"
+
+          config_blob=$(python3 - "$repo_root/resolve/$revision/config.json" <<'PY'
+          import hashlib, pathlib, sys
+          data = pathlib.Path(sys.argv[1]).read_bytes()
+          h = hashlib.sha1()
+          h.update(f"blob {len(data)}\0".encode("ascii"))
+          h.update(data)
+          print(h.hexdigest())
+          PY
+          )
+          weights_sha=$(sha256sum "$repo_root/resolve/$revision/weights.bin" | awk '{ print $1 }')
+          weights_size=$(wc -c < "$repo_root/resolve/$revision/weights.bin" | tr -d ' ')
+          config_size=$(wc -c < "$repo_root/resolve/$revision/config.json" | tr -d ' ')
+
+          cat > "$exact_api" <<EOF
+          {
+            "sha": "$revision",
+            "cardData": {"license": "apache-2.0"},
+            "siblings": [
+              {
+                "rfilename": "config.json",
+                "blobId": "$config_blob",
+                "size": $config_size
+              },
+              {
+                "rfilename": "weights.bin",
+                "lfs": {"oid": "$weights_sha", "size": $weights_size}
+              }
+            ]
+          }
+          EOF
+          sed -i 's/^          //' "$exact_api"
+
+          printf '%s\n' "$fixture" > "$RUNNER_TEMP/model-hub-path"
+          printf '%s\n' "$revision" > "$RUNNER_TEMP/model-revision"
+
+      - name: Start local synthetic model hub
+        run: |
+          fixture=$(cat "$RUNNER_TEMP/model-hub-path")
+          revision=$(cat "$RUNNER_TEMP/model-revision")
+          python3 -m http.server 8765 \
+            --bind 127.0.0.1 \
+            --directory "$fixture" \
+            > "$RUNNER_TEMP/model-hub.log" 2>&1 &
+          printf '%s\n' "$!" > "$RUNNER_TEMP/model-hub.pid"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent \
+                 "http://127.0.0.1:8765/api/models/example/TestModel/revision/$revision?blobs=true" \
+                 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/model-hub.log" >&2
+          exit 1
+
+      - name: Plan and preserve exact revision
+        env:
+          CENTL_MODEL_PRESERVE_TEST_ALLOW_HTTP: "1"
+        run: |
+          mirror="$RUNNER_TEMP/model-mirror"
+          revision=$(cat "$RUNNER_TEMP/model-revision")
+          mkdir -p "$mirror/project" "$mirror/private"
+          printf '%s\n' "$GITHUB_SHA" > "$mirror/project/SOURCE-COMMIT"
+          printf 'unrelated private mirror material\n' > "$mirror/private/state"
+          sh scripts/mirror-receipt create "$mirror"
+
+          plan=$(python3 scripts/model-repository-preserve.py \
+            "$mirror" \
+            --repository example/TestModel \
+            --revision "$revision" \
+            --base-url http://127.0.0.1:8765 \
+            --plan)
+          printf '%s\n' "$plan"
+          printf '%s\n' "$plan" | grep -Fqx 'files=2'
+          test ! -e "$mirror/model-repositories"
+
+          python3 scripts/model-repository-preserve.py \
+            "$mirror" \
+            --repository example/TestModel \
+            --revision "$revision" \
+            --base-url http://127.0.0.1:8765
+
+          target="$mirror/model-repositories/example_TestModel/$revision"
+          test -f "$target/files/config.json"
+          test -f "$target/files/weights.bin"
+          grep -Fqx "$revision" "$mirror/model-repositories/example_TestModel/ACTIVE"
+          grep -Fqx 'unrelated private mirror material' "$mirror/private/state"
+
+          python3 - "$target/SOURCE.json" "$target/UPSTREAM-IDENTITIES.json" <<'PY'
+          import json, sys
+          source = json.load(open(sys.argv[1], encoding='utf-8'))
+          identities = json.load(open(sys.argv[2], encoding='utf-8'))
+          assert source['repository'] == 'example/TestModel'
+          assert source['resolved_revision'] == 'a' * 40
+          assert source['license'] == 'apache-2.0'
+          assert source['file_count'] == 2
+          assert source['token_used'] is False
+          assert {row['path'] for row in identities} == {'config.json', 'weights.bin'}
+          assert all(len(row['fcf_sha256']) == 64 for row in identities)
+          weights = next(row for row in identities if row['path'] == 'weights.bin')
+          assert weights['lfs_sha256'] == weights['fcf_sha256']
+          config = next(row for row in identities if row['path'] == 'config.json')
+          assert config['git_blob_sha1'] is not None
+          PY
+
+          python3 scripts/integrity.py verify \
+            "$target/REPOSITORY-SHA256SUMS.sha256" --root "$target"
+          python3 scripts/integrity.py tree-verify \
+            "$target/REPOSITORY-SHA256SUMS" --root "$target" \
+            --ignore REPOSITORY-SHA256SUMS \
+            --ignore REPOSITORY-SHA256SUMS.sha256
+          sh scripts/mirror-receipt verify "$mirror"
+          printf '%s\n' "$mirror" > "$RUNNER_TEMP/model-mirror-path"
+
+      - name: Refuse corrupted downloaded repository state
+        run: |
+          mirror=$(cat "$RUNNER_TEMP/model-mirror-path")
+          revision=$(cat "$RUNNER_TEMP/model-revision")
+          target="$mirror/model-repositories/example_TestModel/$revision"
+          printf 'tamper\n' >> "$target/files/weights.bin"
+          if sh scripts/mirror-receipt verify "$mirror"; then
+            echo 'whole-mirror verification unexpectedly accepted model repository tamper' >&2
+            exit 1
+          fi
+
+      - name: Stop local synthetic model hub
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/model-hub.pid"; then
+            kill "$(cat "$RUNNER_TEMP/model-hub.pid")" 2>/dev/null || true
+          fi
