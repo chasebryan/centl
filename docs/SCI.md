@@ -87,6 +87,7 @@ Caramels currently has typed deterministic paths for:
 | --- | --- | --- |
 | `exact_expression` | mathematics | CENTL `compute` |
 | `polynomial_equation` | mathematics | CENTL `solve` |
+| `verification_claim` | mathematics | read-only CENTL `verify` protocol |
 | `unit_conversion` | physics | typed CENTL Physics conversion |
 | `physical_constant` | physics | typed CENTL Physics exact defining/conventional constant lookup |
 | `uniform_gravity_particle` | physics | typed CENTL Physics `simulate_particle` |
@@ -94,7 +95,7 @@ Caramels currently has typed deterministic paths for:
 
 The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, factoring, and approximation requests into existing native CENTL expressions instead of creating separate implementations.
 
-The optional local-model schema now admits the same Caramels constant and uniform-gravity classes. Model output still passes through the independent typed IR validator before execution.
+The canonical SCI JSON schema includes the closed `verification_claim` class. The optional local-model GBNF remains deliberately narrower in this Caramels slice: model generation admits exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. Supported closed verification phrasing is handled deterministically rather than delegated to the model.
 
 ## Deterministic approximation
 
@@ -115,6 +116,39 @@ approx(sqrt(2), 30)
 ```
 
 CENTL remains responsible for the numerical contract: requested digits must be justified by the returned enclosure, and unresolved precision remains visible rather than being replaced by guessed decimal output.
+
+## Closed mathematical claim verification
+
+Caramels has a first deterministic natural-language route into CENTL's existing mathematical contract checker.
+
+Examples:
+
+```text
+MATH> verify 0.1 + 0.2 equals 3/10
+MATH> check whether 1/3 < 1/2
+```
+
+The request becomes typed `verification_claim` IR and lowers to the additive, read-only protocol operation:
+
+```json
+{"version":1,"op":"verify","left":"0.1 + 0.2","relation":"equal","right":"3/10"}
+```
+
+The accepted relation vocabulary maps to the verifier's existing protocol relations:
+
+- `equal`;
+- `not_equal`;
+- `less_than`;
+- `less_or_equal`;
+- `greater_than`;
+- `greater_or_equal`.
+
+Verifier verdicts remain explicit:
+
+- `verified` and `refuted` are authoritative established outcomes;
+- `unknown` and `invalid` remain unresolved and visible rather than being guessed into a truth value.
+
+This first Caramels route is deliberately limited to **closed claims**. CENTL-SCi does not infer quantified variables, domains, or free-form assumptions from natural language for this class. Requests containing phrases such as `for all` or `assuming` receive clarification instead of silent formalization. The underlying CENTL verifier already has richer explicit contract machinery; expanding natural-language access to that machinery is a later slice.
 
 ## Exact physical constants
 
@@ -174,7 +208,7 @@ centl-sci 'Solve x squared minus 5x plus 6 equals zero.'
 x = 2 or x = 3
 ```
 
-Exact values remain exact. Approximation qualifications remain visible. If CENTL cannot establish a result, the presenter does not manufacture one.
+Exact values remain exact. Approximation qualifications remain visible. Verification verdicts remain explicit. If CENTL cannot establish a result, the presenter does not manufacture one.
 
 ## Evidence explanation
 
@@ -194,6 +228,8 @@ Exact values remain exact. Approximation qualifications remain visible. If CENTL
 - workspace revision where available;
 - execution/evidence events;
 - resulting value/text.
+
+For verification claims, the details surface can also expose the verifier verdict, scope, method, assurance class/theorem, and evidence reason supplied by the authoritative verifier response.
 
 The explanation renderer does not ask a language model to invent a derivation after the fact.
 
@@ -262,10 +298,13 @@ BUILD> capabilities
 BUILD> show capability integration
 BUILD> validate NAME
 BUILD> validate package NAME
+BUILD> dependencies
+BUILD> revisions
+BUILD> assurance
 BUILD> audit workspace
 ```
 
-The inventory includes reusable Caramels capabilities such as workspace audit, structural extension validation, package validation, reversible workspace portability, and English-to-CENTL extension generation.
+The inventory includes reusable Caramels capabilities such as workspace audit, structural extension validation, extension dependency validation, package validation, assurance explanation, bounded revision history, reversible workspace portability, and English-to-CENTL extension generation.
 
 The goal is to answer questions such as:
 
@@ -312,7 +351,7 @@ generated/
 
 `workspace.json` identifies the environment as user-owned downstream state and records the rule that local extensions never silently inherit verified-core assurance.
 
-Each workspace mutation increments a local revision and records a JSONL revision event.
+Each workspace mutation increments a local revision and records a JSONL revision event. Caramels also exposes a bounded read-only revision-history view over the durable ledger; the view does not itself mutate workspace state.
 
 ## Extension manifests and assurance
 
@@ -336,6 +375,39 @@ A locally generated capability is never silently presented as verified CENTL cor
 `validate NAME` performs structural checks appropriate to the extension kind. Structural validation does not upgrade assurance to verified core.
 
 Native extensions are revalidated before activation. A missing, unparsable, non-definition, or non-native source cannot be enabled through the native CENTL definition loader.
+
+The read-only assurance catalog explains what each label establishes and, equally importantly, what it does **not** establish. Per-extension assurance inspection combines the label with manifest provenance without changing the manifest.
+
+## Extension dependencies
+
+Local extension dependencies are explicit manifest metadata.
+
+The first structural convention is:
+
+```text
+extension:NAME
+```
+
+for another local downstream extension. `external:NAME` is preserved as external provenance rather than falsely validated as a local dependency; unprefixed legacy dependency strings remain opaque provenance.
+
+Caramels validates the local dependency graph and reports:
+
+- missing local dependencies;
+- disabled local dependencies;
+- dependency cycles;
+- external and opaque dependency provenance.
+
+Enabled native definitions are ordered dependency-first when loading into the downstream core session. Activation refuses missing, disabled, self, or non-native declared local prerequisites before mutating workspace state. Workspace import also rejects dependency-invalid or activation-incomplete extension graphs before replacing the current downstream surface.
+
+Read-only inspection is available through:
+
+```text
+BUILD> dependencies
+BUILD> show dependency graph
+BUILD> audit workspace
+```
+
+Dependency validation is a structural workspace property; it does not promote any extension's assurance.
 
 ## Packages
 
@@ -370,6 +442,12 @@ Mutating operations create a reversible snapshot first. Snapshot payloads cover 
 
 Removal archives local files instead of silently pretending the extension never existed.
 
+## Workspace audit
+
+`audit workspace` is a read-only structural inventory across local extensions, packages, and the dependency graph. It reports activation/validation warnings while explicitly recording that the audit itself did not modify verified core.
+
+The machine audit includes `verified_core_modified=false`. This is an audit-scope statement, not a claim that arbitrary external processes could never have changed files outside the audited downstream workspace.
+
 ## Workspace portability
 
 Caramels implements a revision-stamped downstream workspace bundle format.
@@ -389,7 +467,7 @@ BUILD> import workspace /path/to/bundle
 
 The bundle includes downstream extension manifests, native modules, packages, tests, data, and generated scaffolds. It excludes verified core, history, undo snapshots, prior exports, and local workspace identity/configuration.
 
-Import validates bundle metadata, rejects symlinks/unsupported filesystem objects, validates extension manifests and structural extension checks, checks package membership and activation policy, and snapshots the existing downstream workspace **before mutation**. Only then are downstream surfaces replaced.
+Import validates bundle metadata, rejects symlinks/unsupported filesystem objects, validates extension manifests and structural extension checks, checks package membership, validates the local dependency/activation graph, and snapshots the existing downstream workspace **before mutation**. Only then are downstream surfaces replaced.
 
 A successful BUILD import returns `changed=true`; the existing CENTL-SCi app path then rebuilds the active downstream core session and reloads enabled native definitions immediately. The prior downstream state remains available through `undo`.
 
@@ -448,7 +526,7 @@ The first implementation pass prioritizes complete end-to-end Linux functionalit
 
 ## Human-variation gate
 
-Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains **435 prompt variants** spanning mathematics, approximation, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.
+Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains **450 prompt variants** spanning mathematics, approximation, closed verification, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.
 
 The corpus varies:
 
@@ -466,7 +544,9 @@ The test surface includes a target of at least **95% useful interpretation or us
 
 A local model remains optional for requests that genuinely need semantic inference. Deterministic Tier-0 requests do not require a model.
 
-The reference local model boundaries remain `llama-cli` and loopback `llama-server`, configured explicitly. The Caramels model schema/grammars admit exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.
+The reference local model boundaries remain `llama-cli` and loopback `llama-server`, configured explicitly. The current Caramels model grammars admit exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. Closed verification is intentionally handled by the deterministic route and is present in the canonical SCI JSON schema without being added to model generation yet.
+
+The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.
 
 ## Development sequence for `v0.0.2-Caramels`
 
