@@ -14,8 +14,7 @@ let restore_cursor = "\027[u"
 let redraw ~prompt ~text ~cursor =
   write (restore_cursor ^ "\027[J" ^ prompt ^ text);
   if cursor < String.length text then
-    write
-      (restore_cursor ^ prompt ^ String.sub text 0 cursor)
+    write (restore_cursor ^ prompt ^ String.sub text 0 cursor)
 
 let identifier_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
@@ -127,7 +126,9 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
         | Unix.Unix_error (Unix.EINTR, _, _) -> read_byte ()
         | Unix.Unix_error (Unix.EIO, _, _) -> None
       in
-      let input () = match read_byte () with Some c -> c | None -> raise End_of_file in
+      let input () =
+        match read_byte () with Some c -> c | None -> raise End_of_file
+      in
       let set value =
         if String.length value > max_bytes then write "\007"
         else begin
@@ -186,7 +187,12 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
           redraw ~prompt ~text:!text ~cursor:!cursor
         end
       in
-      let finish () =
+      let submit () =
+        redraw ~prompt ~text:!text ~cursor:!cursor;
+        write "\r\n";
+        if !overflowed then Input_limit_exceeded else Submitted !text
+      in
+      let end_of_input () =
         redraw ~prompt ~text:!text ~cursor:!cursor;
         write "\r\n";
         if !overflowed then Input_limit_exceeded
@@ -234,7 +240,7 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
       in
       let rec loop () =
         match input () with
-        | '\r' | '\n' -> finish ()
+        | '\r' | '\n' -> submit ()
         | '\003' ->
             redraw ~prompt ~text:!text ~cursor:!cursor;
             write "^C\r\n";
@@ -242,23 +248,43 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
         | '\004' when !text = "" ->
             write "\r\n";
             End_of_input
-        | '\004' -> delete (); loop ()
-        | '\001' -> cursor := 0; redraw ~prompt ~text:!text ~cursor:!cursor; loop ()
-        | '\005' -> cursor := String.length !text; redraw ~prompt ~text:!text ~cursor:!cursor; loop ()
-        | '\t' -> ignore (complete ~prompt ~candidates ~max_bytes text cursor); loop ()
-        | '\016' -> older (); loop ()
-        | '\014' -> newer (); loop ()
-        | '\008' | '\127' -> backspace (); loop ()
+        | '\004' ->
+            delete ();
+            loop ()
+        | '\001' ->
+            cursor := 0;
+            redraw ~prompt ~text:!text ~cursor:!cursor;
+            loop ()
+        | '\005' ->
+            cursor := String.length !text;
+            redraw ~prompt ~text:!text ~cursor:!cursor;
+            loop ()
+        | '\t' ->
+            ignore (complete ~prompt ~candidates ~max_bytes text cursor);
+            loop ()
+        | '\016' ->
+            older ();
+            loop ()
+        | '\014' ->
+            newer ();
+            loop ()
+        | '\008' | '\127' ->
+            backspace ();
+            loop ()
         | '\021' ->
             text := String.sub !text !cursor (String.length !text - !cursor);
             cursor := 0;
             overflowed := false;
             redraw ~prompt ~text:!text ~cursor:!cursor;
             loop ()
-        | '\027' -> escape (); loop ()
+        | '\027' ->
+            escape ();
+            loop ()
         | c when Char.code c < 32 -> loop ()
-        | c -> insert c; loop ()
-        | exception End_of_file -> finish ()
+        | c ->
+            insert c;
+            loop ()
+        | exception End_of_file -> end_of_input ()
       in
       write (save_cursor ^ prompt);
       loop ())
@@ -270,6 +296,7 @@ let read_line ~prompt ~history ~candidates ~max_bytes =
     || Sys.getenv_opt "TERM" = Some "dumb"
   then read_canonical ~prompt ~max_bytes
   else
-    try read_raw ~prompt ~history ~candidates ~max_bytes (Unix.tcgetattr Unix.stdin)
+    try
+      read_raw ~prompt ~history ~candidates ~max_bytes (Unix.tcgetattr Unix.stdin)
     with Unix.Unix_error _ | Invalid_argument _ ->
       read_canonical ~prompt ~max_bytes
