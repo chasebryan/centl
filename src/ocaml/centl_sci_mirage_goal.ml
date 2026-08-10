@@ -173,7 +173,7 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
 
 let nearest_objective (cells : spec_cell list) before_id =
   let candidates =
-    cells |> List.filter (fun cell ->
+    cells |> List.filter (fun (cell : spec_cell) ->
       cell.id < before_id && match String.uppercase_ascii cell.kind with
       | "DIRECTIVE" | "INVARIANT" -> true
       | _ -> false)
