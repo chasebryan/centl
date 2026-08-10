@@ -30,12 +30,15 @@ PY
   caravan/session.py \
   caravan/transport.py \
   caravan/retrieval.py \
+  caravan/lifecycle.py \
+  caravan/lab.py \
   tests/test_caravan_phase1.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
-  tests/test_caravan_retrieval.py
+  tests/test_caravan_retrieval.py \
+  tests/test_caravan_lifecycle.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
@@ -43,4 +46,7 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
-  tests/test_caravan_retrieval.py
+  tests/test_caravan_retrieval.py \
+  tests/test_caravan_lifecycle.py
+
+PYTHONPATH=. "$PYTHON" -m caravan.lab >/dev/null
