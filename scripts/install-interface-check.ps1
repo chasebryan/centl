@@ -75,8 +75,24 @@ public static class Program {
 }
 "@
 
+    # PowerShell 7's Add-Type no longer emits console applications. Use the
+    # Windows .NET Framework compiler that is part of the runner/OS instead so
+    # this regression still installs and executes real PE .exe files.
+    $CompilerCandidates = @(
+        (Join-Path $env:WINDIR "Microsoft.NET\Framework64\v4.0.30319\csc.exe"),
+        (Join-Path $env:WINDIR "Microsoft.NET\Framework\v4.0.30319\csc.exe")
+    )
+    $Compiler = $CompilerCandidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    if (-not $Compiler) {
+        throw "CENTL installer regression requires the Windows .NET Framework C# compiler"
+    }
+    $SourceFile = Join-Path $Work "Program.cs"
+    Set-Content -LiteralPath $SourceFile -Value $Source -Encoding UTF8
     $TemplateExe = Join-Path $Work "template.exe"
-    Add-Type -TypeDefinition $Source -OutputAssembly $TemplateExe -OutputType ConsoleApplication
+    & $Compiler /nologo /target:exe "/out:$TemplateExe" $SourceFile
+    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $TemplateExe -PathType Leaf)) {
+        throw "failed to compile the synthetic CENTL Windows executable"
+    }
     foreach ($Name in @("centl.exe", "centl-physics.exe", "centl-sci.exe")) {
         Copy-Item -LiteralPath $TemplateExe -Destination (Join-Path $Package $Name)
     }
