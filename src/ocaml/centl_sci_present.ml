@@ -65,9 +65,7 @@ let solution_set_text value =
       let solution_text =
         List.map
           (fun solution ->
-            match string_field "text" solution with
-            | Some text -> text
-            | None -> "")
+            match string_field "text" solution with Some text -> text | None -> "")
           solutions
       in
       if List.exists (fun text -> text = "") solution_text then None
@@ -118,16 +116,11 @@ let missing_information_text outcome =
       let reason = String.trim reason in
       let lower = String.lowercase_ascii reason in
       if String.starts_with ~prefix:"missing " lower then
-        let detail =
-          String.sub reason 8 (String.length reason - 8) |> String.trim
-        in
-        if detail = "" then
-          Some "More information is required to solve this problem."
+        let detail = String.sub reason 8 (String.length reason - 8) |> String.trim in
+        if detail = "" then Some "More information is required to solve this problem."
         else
           let detail =
-            match strip_suffix "." detail with
-            | Some value -> value
-            | None -> detail
+            match strip_suffix "." detail with Some value -> value | None -> detail
           in
           Some ("More information is required: " ^ detail ^ ".")
       else if contains_substring ~needle:"missing" lower then
@@ -137,8 +130,7 @@ let missing_information_text outcome =
 let human outcome =
   match outcome.Centl_sci_runtime.status with
   | Centl_sci_runtime.Established -> established_text outcome
-  | Centl_sci_runtime.Unresolved ->
-      "CENTL could not establish a complete result."
+  | Centl_sci_runtime.Unresolved -> "CENTL could not establish a complete result."
   | Centl_sci_runtime.Unsupported ->
       begin match missing_information_text outcome with
       | Some text -> text
@@ -152,25 +144,28 @@ let response_exact outcome =
   | Some response ->
       begin match assoc_field "value" response with
       | Some value ->
-          begin match bool_field "exact" value with
-          | Some value -> value
-          | None -> false
-          end
+          begin match bool_field "exact" value with Some value -> value | None -> false end
       | None ->
           begin match assoc_field "physics" response with
           | Some physics ->
               begin match bool_field "exact" physics with
               | Some value -> value
-              | None -> false
+              | None ->
+                  begin match string_field "kind" physics with
+                  | Some "particle_simulation" -> true
+                  | _ -> false
+                  end
               end
           | None -> false
           end
       end
 
 let method_text = function
-  | Centl_sci_ir.Exact_expression _ -> Some "exact arithmetic"
-  | Centl_sci_ir.Polynomial_equation _ -> Some "polynomial equation solving"
-  | Centl_sci_ir.Unit_conversion _ -> Some "unit conversion"
+  | Centl_sci_ir.Exact_expression _ -> Some "CENTL exact/symbolic computation"
+  | Centl_sci_ir.Polynomial_equation _ -> Some "CENTL polynomial equation solving"
+  | Centl_sci_ir.Unit_conversion _ -> Some "CENTL Physics unit conversion"
+  | Centl_sci_ir.Uniform_gravity_particle _ ->
+      Some "CENTL Physics uniform-gravity particle simulation (symplectic Euler)"
   | Centl_sci_ir.Unsupported _ -> None
 
 let variable_text = function
@@ -186,10 +181,21 @@ let failure_reason outcome =
       | None -> None
       end
 
+let mechanics_details outcome =
+  match outcome.Centl_sci_runtime.ir with
+  | Centl_sci_ir.Uniform_gravity_particle data ->
+      [
+        Printf.sprintf "Steps: %d" data.steps;
+        Printf.sprintf "Time step: %s %s" data.dt_value data.dt_unit;
+        "Integrator result is the exact discrete symplectic-Euler evolution of the admitted model";
+        "Not claimed to be the analytic continuous-time trajectory";
+      ]
+  | _ -> []
+
 let details outcome =
   let lines = ref [ human outcome; ""; "Details:" ] in
   let add line = lines := !lines @ [ "  " ^ line ] in
-  if response_exact outcome then add "Exact result";
+  if response_exact outcome then add "Exact result within the admitted deterministic model";
   begin match variable_text outcome.Centl_sci_runtime.ir with
   | Some variable -> add ("Variable: " ^ variable)
   | None -> ()
@@ -198,14 +204,14 @@ let details outcome =
   | Some method_ -> add ("Method: " ^ method_)
   | None -> ()
   end;
+  List.iter add (mechanics_details outcome);
   begin match Centl_sci_ir.assumptions outcome.Centl_sci_runtime.ir with
   | [] -> ()
   | values -> add ("Assumptions: " ^ String.concat "; " values)
   end;
   begin match outcome.Centl_sci_runtime.status with
-  | Centl_sci_runtime.Established -> add "Verified by CENTL"
-  | Centl_sci_runtime.Unresolved ->
-      add "CENTL did not establish a complete result"
+  | Centl_sci_runtime.Established -> add "Established by the authoritative CENTL execution path"
+  | Centl_sci_runtime.Unresolved -> add "CENTL did not establish a complete result"
   | Centl_sci_runtime.Unsupported ->
       begin match unsupported_reason outcome.Centl_sci_runtime.ir with
       | Some reason when String.trim reason <> "" -> add ("Reason: " ^ reason)
