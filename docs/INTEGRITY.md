@@ -1,12 +1,12 @@
-# CENTL SHA-256 integrity process
+# CENTL integrity and release authentication
 
 Status: required development and release infrastructure.
 
-CENTL uses a project-owned verification **process** built from the standard
-SHA-256 cryptographic hash function. CENTL does not define or modify the hash
-algorithm.
+CENTL uses a project-owned verification **process** built from established
+cryptographic primitives and formats. CENTL does not define or modify a hash or
+signature algorithm.
 
-## Standard
+## Integrity primitive: SHA-256
 
 The integrity primitive is SHA-256 as standardized by FIPS 180-4 and widely
 implemented by operating systems, language runtimes, package managers, and
@@ -22,32 +22,27 @@ The checksum manifest format is deliberately conventional:
 <64 lowercase hex SHA-256 characters><two spaces><relative path>
 ```
 
-This is the ordinary `SHA256SUMS` / GNU `sha256sum -c` representation for normal
-file names. We are not creating a CENTL-specific digest algorithm.
+This is ordinary `SHA256SUMS` / `sha256sum -c` style data for normal file names.
+CENTL adds conservative path validation, duplicate rejection, regular-file
+requirements, and root containment around that format.
 
-## What a SHA-256 check proves
+## Authentication primitive: signify
 
-If a file's computed SHA-256 equals a trusted expected SHA-256, the verifier has
-strong evidence that the checked bytes are the same bytes represented by that
-expected digest.
+Release checksum manifests are authenticated with OpenBSD `signify`. `signify`
+is an established utility for signing/verifying files and signed checksum lists.
+FCF uses it as defined rather than introducing a custom signature scheme.
 
-SHA-256 **does not by itself authenticate the publisher**. If an attacker can
-replace both a file and its expected checksum, an unsigned checksum alone does
-not establish origin.
+The two properties remain separate:
 
-CENTL therefore treats these as separate properties:
+- **integrity:** the bytes match a trusted SHA-256 value;
+- **authentication:** the trusted checksum manifest was signed by the selected
+  FCF release key.
 
-- **integrity:** SHA-256 digest comparison;
-- **provenance/authentication:** Git commit identity today, and a standard
-  signature mechanism for published FCF checksum manifests as the hosting layer
-  is established.
+A checksum is not treated as proof of publisher identity by itself.
 
-A future signature layer must sign the standard checksum/receipt material. It
-must not replace SHA-256 with a home-grown cryptographic construction.
+## Development source gate
 
-## Development gate
-
-`make quality` now includes `integrity-source`.
+`make quality` includes `integrity-source`.
 
 That target:
 
@@ -66,8 +61,7 @@ make integrity-source
 ```
 
 The resulting pair is an integrity receipt for the exact source tree seen by the
-build process. CI associates that receipt with the commit SHA that was checked
-out.
+build process. CI associates that receipt with the Git commit being tested.
 
 ## Dependency and toolchain gate
 
@@ -100,80 +94,145 @@ recomputes the model digest before accepting it.
 The model filename, model-host URL, or upstream repository name is not used as a
 substitute for content integrity.
 
-## Release integrity
+## Preservation receipt
 
-CENTL native release packaging already emits an adjacent SHA-256 checksum for
-each release archive:
-
-```text
-centl-linux-x86_64.tar.gz
-centl-linux-x86_64.tar.gz.sha256
-```
-
-The installer refuses to extract or execute a downloaded/local archive until the
-archive SHA-256 matches the expected value. Offline installs use the same check.
-
-Therefore the verification chain is intentionally layered:
+`make supply-chain-preserve MIRROR=... MODEL=...` requires a clean tracked
+worktree and records:
 
 ```text
-source SHA256SUMS receipt
-        |
-        v
-pinned dependency SHA-256 / Git commits
-        |
-        v
-verified + tested build
-        |
-        v
-release archive
-        |
-        v
-archive SHA-256
-        |
-        v
-installer recomputes SHA-256 before execution
+project/SOURCE-COMMIT
+project/SOURCE-SHA256SUMS
+project/SOURCE-SHA256SUMS.sha256
+project/centl.bundle
 ```
 
-## Preservation gate
+alongside the mirrored dependency artifacts, Git repositories, opam material,
+Julia/Nemo depot, and optional model bytes.
 
-`make supply-chain-preserve MIRROR=... MODEL=...` now starts by generating the
-source integrity receipt before synchronizing the external preservation mirror.
-The preservation run therefore records the source state and the preserved
-external inputs as one development operation.
-
-The mirror itself is then checked with:
+The mirror itself is checked with:
 
 ```sh
 make supply-chain-audit MIRROR=/srv/centl-mirror
 ```
 
+## No-network rebuild gate
+
+The preserved mirror is tested as an actual recovery source with:
+
+```sh
+make offline-rebuild MIRROR=/srv/centl-mirror
+```
+
+`scripts/offline-rebuild` creates a Linux network namespace with no upstream
+network route, audits the mirror, verifies the recorded source receipt, recovers
+the exact source commit from the Git bundle, obtains F* from the SHA-256-pinned
+mirror, uses the preserved Julia/Nemo depot, and runs CENTL's quality, verified
+build, test, and differential gates.
+
+A missing dependency is a preservation/build-capsule failure. The gate is not
+allowed to solve the problem by downloading from upstream.
+
+See `infra/offline-build/README.md`.
+
+## Release integrity and authentication
+
+Native packaging produces per-archive `.sha256` files for the existing installer
+contract. Final multi-platform release promotion additionally creates:
+
+```text
+SHA256SUMS
+SHA256SUMS.sig
+```
+
+using:
+
+```sh
+make release-sign \
+  RELEASE_DIR=/path/to/release \
+  FCF_SIGNIFY_SECRET_KEY=/protected/keys/fcf-centl-release-2026.sec \
+  FCF_SIGNIFY_PUBLIC_KEY=/protected/keys/fcf-centl-release-2026.pub
+```
+
+`release-sign` creates and verifies the deterministic SHA-256 manifest, signs it,
+verifies the new signature against the selected public key, and recomputes all
+listed checksums before reporting success.
+
+Independent verification is:
+
+```sh
+make release-verify \
+  RELEASE_DIR=/path/to/release \
+  FCF_SIGNIFY_PUBLIC_KEY=keys/fcf-centl-release-2026.pub
+```
+
+The verifier authenticates `SHA256SUMS` first and then recomputes every listed
+SHA-256 value.
+
+## Release key continuity
+
+FCF production secret keys are passphrase-protected and are treated as
+recoverable organizational assets. The policy deliberately avoids making one
+person or one device the only path to future releases.
+
+The normal model is:
+
+- one protected working copy;
+- at least two additional encrypted backups in independent locations/services;
+- separately recoverable passphrase information;
+- additional trusted custodians when maintainership grows;
+- explicit key rotation with old public keys retained for historical releases.
+
+If every copy of a secret key is lost, releases already signed by it remain
+verifiable with the old public key. Future releases continue under a replacement
+key after its public identity and transition are published.
+
+See `keys/README.md` and `docs/RELEASE-SIGNING.md`.
+
+## Verification chain
+
+```text
+Git-tracked source files
+        |
+        v
+source SHA256SUMS + manifest digest + exact commit
+        |
+        v
+pinned dependency SHA-256 / full Git commits
+        |
+        v
+mirror audit + no-network rebuild/test
+        |
+        v
+final release archives
+        |
+        v
+SHA256SUMS
+        |
+        v
+FCF signify signature over SHA256SUMS
+        |
+        v
+signature verification + archive SHA-256 recomputation
+        |
+        v
+installation/execution
+```
+
 ## Operational policy
 
-The required policy for new external binary/source inputs is:
+For a new external binary/source input:
 
 1. identify an authoritative upstream release or immutable source commit;
 2. obtain the expected SHA-256 from a trusted channel when upstream publishes
-   one, or calculate and record it only after maintainers have deliberately
-   accepted the exact bytes being preserved;
+   one, or calculate and record it only after maintainers deliberately accept
+   the exact bytes being preserved;
 3. pin the version/commit and SHA-256 in CENTL's preservation metadata;
 4. preserve the exact bytes under FCF control;
 5. recompute SHA-256 whenever the bytes cross a trust/storage boundary;
-6. reject any mismatch; never "update the checksum" merely to make a mismatch
-   pass;
-7. require the normal verification/test gates before promoting a changed pin.
+6. reject any mismatch; never update a checksum merely to make a mismatch pass;
+7. require normal verification/test gates before promoting a changed pin.
 
-A checksum mismatch is treated as an integrity failure until independently
-explained. The expected digest is not rewritten during incident handling.
-
-## Next authentication layer
-
-The next step after FCF-controlled hosting exists is to publish and preserve a
-standard cryptographic signature over release `SHA256SUMS`/integrity receipts so
-a user can verify both:
-
-1. the bytes match the SHA-256 digest; and
-2. the expected digest was authenticated by an FCF release key/identity.
-
-That should use an established signature system and documented key-rotation and
-offline-key procedures. It is intentionally separate from this SHA-256 integrity
-layer.
+A checksum mismatch is an integrity failure until independently explained. A
+signature failure is an authentication failure until independently explained.
+Neither expected identity is rewritten during incident handling simply to make a
+failed artifact pass.
