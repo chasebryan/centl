@@ -1,6 +1,71 @@
 # Changelog
 
-## 0.13.0 — 2026-08-10
+## 0.14.0 — Oasis — 2026-08-10
+
+### Release posture
+
+- Oasis is the consolidation and hardening release that succeeds v0.12.0 as the
+  next formally intended stable CENTL baseline. The v0.13.0 development line
+  was never formally published as a stable release; its validated work is
+  incorporated here rather than presented as a separate public release.
+- The canonical release tag remains `v0.14.0`; **Oasis** is the human release
+  codename/title so Semantic Versioning tooling sees an ordinary stable version.
+
+### Added
+
+- CENTL-MIRAGE — Mathematical Introspective Recursive Autonomous Growth Engine —
+  adds bounded local design-document ingestion, SHA-256 source identity,
+  provenance-preserving Specification IR, typed goal/capability graphs,
+  deterministic conflict detection, capability-gap analysis, evidence
+  obligations, and non-mutating candidate transactions.
+- MIRAGE exposes local `start`, `ingest`, `analyze`, and `status` workflows while
+  keeping generated/downstream work below verified-core assurance until the
+  appropriate engineering and validation obligations are discharged.
+- CENTL CARAVAN Phase 1 adds the reproducible local laboratory for authenticated,
+  content-addressed artifact preservation and availability: immutable storage,
+  deterministic chunk identities, Ed25519 carrier identity, signed policy
+  acceptance, TUF-authenticated catalogs, outbound-only laboratory transport,
+  bounded verified retrieval, bad-carrier quarantine/fallback, hostile-transfer
+  coverage, and explicit join/status/leave lifecycle.
+- `docs/REPOSITORY-MAP.md` defines the supported Oasis source-tree organization
+  and the boundary between runtime, laboratory, documentation, assets, scripts,
+  tests, automation, and historical branch state.
+- `docs/releases/0.14.0.md` records the Oasis release identity and stable feature,
+  trust, security, and rollout boundaries.
+
+### Changed
+
+- The authoritative CENTL version is 0.14.0.
+- CARAVAN is now a shipped **local laboratory** component rather than a future
+  placeholder. Arbitrary public volunteer enrollment remains outside Oasis.
+- MIRAGE documentation is reconciled with the implemented bootstrap: candidate
+  obligations and candidate transaction staging are present, while autonomous
+  source mutation, CEGIS/equality-saturation execution, semantic fingerprints,
+  and autonomous acceptance remain later layers.
+- Repository hygiene and security are treated as release gates rather than
+  post-release chores. Historical branches are preserved until unique work is
+  reconciled; active release state is reduced to intentional current work.
+
+### Security and repository hygiene
+
+- Removed the obsolete one-shot v0.13.0 auto-tag workflow and v0.13.0 native-gate
+  observer, preventing abandoned release automation from mutating refs or
+  creating failure branches after Oasis work begins.
+- Corrected the immutable `ocaml/setup-ocaml` action annotation in MIRAGE CI to
+  match the pinned 3.7.0 commit; the associated GitHub Advanced Security review
+  thread resolved after the source fix.
+- CARAVAN continues to pin the remediated `cryptography` release selected after
+  dependency review rejected the earlier vulnerable laboratory pin.
+- Oasis retains least-privilege workflow permissions, immutable action pins,
+  dependency review, and GitHub Actions security analysis as release gates.
+
+### Preserved from the unreleased 0.13.0 line
+
+- CENTL-SCi v0.0.2-Caramels, GNU/Linux-only active platform policy, FCF release
+  preservation/recovery work, model-provenance boundaries, and host-neutral
+  preserved release-tree support are incorporated into Oasis.
+
+## 0.13.0 — UNRELEASED DEVELOPMENT LINE — 2026-08-10
 
 ### Added
 
