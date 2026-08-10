@@ -7,7 +7,7 @@ type result = {
 type command = Export of string option | Import of string
 
 let drop_prefix_ci prefix text =
-  let trimmed = String.trim text in
+  let trimmed = String.trim input in
   let lower = String.lowercase_ascii trimmed in
   let prefix_lower = String.lowercase_ascii prefix in
   if String.starts_with ~prefix:prefix_lower lower then
@@ -196,6 +196,15 @@ let validate_extensions workspace names =
   in
   loop names
 
+let validate_dependencies workspace =
+  let report = Centl_sci_dependencies.validate workspace in
+  match report.issues with
+  | [] -> Ok ()
+  | issues ->
+      Error
+        ("extension dependency graph is not activation-ready: "
+        ^ String.concat "; " (List.map Centl_sci_dependencies.issue_text issues))
+
 let package_names workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.packages) then []
   else Sys.readdir workspace.packages |> Array.to_list
@@ -242,9 +251,13 @@ let validate_bundle path =
                 begin match validate_extensions bundle_workspace names with
                 | Error _ as error -> error
                 | Ok () ->
-                    begin match validate_packages bundle_workspace names with
+                    begin match validate_dependencies bundle_workspace with
                     | Error _ as error -> error
-                    | Ok () -> Ok ()
+                    | Ok () ->
+                        begin match validate_packages bundle_workspace names with
+                        | Error _ as error -> error
+                        | Ok () -> Ok ()
+                        end
                     end
                 end
             end
