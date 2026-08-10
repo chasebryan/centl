@@ -69,8 +69,10 @@
   Centl_sci_capabilities
   Centl_sci_change_ir
   Centl_sci_build_plan
+  Centl_sci_core_plan
   Centl_sci_scaffold
   Centl_sci_codegen
+  Centl_sci_validate
   Centl_sci_build
   Centl_sci_evidence
   Centl_sci_session
