@@ -38,7 +38,63 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
             ca-certificates curl libflint-dev libgmp-dev libmpfr-dev \
-            libzstd1 make pkg-config tar
+            libzstd1 make pkg-config signify-openbsd tar
+
+      - name: Check preservation tooling syntax
+        run: |
+          python3 -m py_compile scripts/integrity.py scripts/supply-chain-check.py
+          sh -n scripts/supply-chain
+          sh -n scripts/release-sign
+          sh -n scripts/release-verify
+          sh -n scripts/offline-rebuild
+          sh -n scripts/capsule-build
+          sh -n scripts/capsule-run
+
+      - name: Exercise release authentication and integrity tooling
+        run: |
+          root="$RUNNER_TEMP/centl-release-auth-test"
+          release="$root/release"
+          keys="$root/keys"
+          mkdir -p "$release" "$keys"
+
+          # This is an ephemeral CI-only test key. Production FCF keys are
+          # passphrase-protected and never enter hosted CI.
+          signify-openbsd -G -n \
+            -c 'CENTL CI test key - not for releases' \
+            -p "$keys/test.pub" \
+            -s "$keys/test.sec"
+
+          printf 'synthetic CENTL release candidate\n' \
+            > "$release/centl-linux-x86_64.tar.gz"
+          cp "$release/centl-linux-x86_64.tar.gz" "$root/archive.good"
+
+          FCF_SIGNIFY_SECRET_KEY="$keys/test.sec" \
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-sign "$release"
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-verify "$release"
+
+          # Authenticated checksum list + modified payload must fail integrity.
+          printf 'tamper\n' >> "$release/centl-linux-x86_64.tar.gz"
+          if FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+               sh scripts/release-verify "$release"; then
+            echo 'tampered release archive unexpectedly verified' >&2
+            exit 1
+          fi
+          cp "$root/archive.good" "$release/centl-linux-x86_64.tar.gz"
+
+          # Modified checksum list must fail authentication before payload trust.
+          cp "$release/SHA256SUMS" "$root/SHA256SUMS.good"
+          printf '# tamper\n' >> "$release/SHA256SUMS"
+          if FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+               sh scripts/release-verify "$release"; then
+            echo 'tampered checksum manifest unexpectedly verified' >&2
+            exit 1
+          fi
+          cp "$root/SHA256SUMS.good" "$release/SHA256SUMS"
+
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-verify "$release"
 
       - name: Install pinned F*
         run: |

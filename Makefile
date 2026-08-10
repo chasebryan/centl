@@ -3,6 +3,8 @@ JULIA ?= julia
 OPAM ?= opam
 PYTHON ?= python3
 OPAM_SWITCH ?= centl
+INTEGRITY_MANIFEST ?= _build/integrity/SHA256SUMS
+RELEASE_DIR ?= dist
 DUNE ?= $(shell \
 	if command -v dune >/dev/null 2>&1; then command -v dune; \
 	elif command -v opam >/dev/null 2>&1; then \
@@ -26,10 +28,14 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality install-interface-check verify extract \
-	native-build native-test adversarial-test fuzz-test metamorphic-test sanitizer-test \
-	performance-test hardening-test differential-test sci-model-test sci-interface-check \
-	sci-assimilate sci-assimilate-full sci-assimilate-publish build test release clean
+.PHONY: all format format-fix fmt lint quality install-interface-check integrity-self-test \
+	integrity-source supply-chain-check supply-chain-sync supply-chain-audit \
+	supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-preserve \
+	offline-rebuild capsule-build capsule-run release-sign release-verify verify \
+	extract native-build native-test adversarial-test fuzz-test metamorphic-test \
+	sanitizer-test performance-test hardening-test differential-test sci-model-test \
+	sci-interface-check sci-assimilate sci-assimilate-full sci-assimilate-publish \
+	build test release clean
 
 all: build
 
@@ -49,7 +55,82 @@ lint:
 install-interface-check:
 	$(PYTHON) scripts/install-interface-check.py
 
-quality: format lint install-interface-check
+integrity-self-test:
+	$(PYTHON) scripts/integrity.py self-test
+
+integrity-source: integrity-self-test
+	mkdir -p "$(dir $(INTEGRITY_MANIFEST))"
+	$(PYTHON) scripts/integrity.py source-manifest --output "$(INTEGRITY_MANIFEST)"
+	$(PYTHON) scripts/integrity.py hash "$(INTEGRITY_MANIFEST)" > "$(INTEGRITY_MANIFEST).sha256"
+
+supply-chain-check:
+	$(PYTHON) scripts/supply-chain-check.py
+
+supply-chain-sync:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	@if [ -n "$(MODEL)" ]; then \
+		sh scripts/supply-chain sync "$(MIRROR)" "$(MODEL)"; \
+	else \
+		sh scripts/supply-chain sync "$(MIRROR)"; \
+	fi
+
+supply-chain-audit:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/supply-chain audit "$(MIRROR)"
+
+supply-chain-snapshot-opam:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/supply-chain snapshot-opam "$(MIRROR)"
+
+supply-chain-snapshot-julia:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
+
+supply-chain-preserve:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	git diff --quiet -- && git diff --cached --quiet -- || { \
+		echo "tracked worktree must be clean before preservation" >&2; exit 2; \
+	}
+	$(MAKE) integrity-source supply-chain-check
+	@if [ -n "$(MODEL)" ]; then \
+		sh scripts/supply-chain sync "$(MIRROR)" "$(MODEL)"; \
+	else \
+		sh scripts/supply-chain sync "$(MIRROR)"; \
+	fi
+	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/supply-chain snapshot-opam "$(MIRROR)"
+	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
+	mkdir -p "$(MIRROR)/project"
+	cp "$(INTEGRITY_MANIFEST)" "$(MIRROR)/project/SOURCE-SHA256SUMS"
+	$(PYTHON) scripts/integrity.py hash "$(MIRROR)/project/SOURCE-SHA256SUMS" \
+		> "$(MIRROR)/project/SOURCE-SHA256SUMS.sha256"
+	git rev-parse HEAD > "$(MIRROR)/project/SOURCE-COMMIT"
+	sh scripts/supply-chain audit "$(MIRROR)"
+
+offline-rebuild:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/offline-rebuild "$(MIRROR)"
+
+capsule-build:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/capsule-build "$(MIRROR)"
+
+capsule-run:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/capsule-run "$(MIRROR)"
+
+release-sign:
+	test -n "$(FCF_SIGNIFY_SECRET_KEY)" || { echo "FCF_SIGNIFY_SECRET_KEY is required" >&2; exit 2; }
+	test -n "$(FCF_SIGNIFY_PUBLIC_KEY)" || { echo "FCF_SIGNIFY_PUBLIC_KEY is required" >&2; exit 2; }
+	FCF_SIGNIFY_SECRET_KEY="$(FCF_SIGNIFY_SECRET_KEY)" \
+	FCF_SIGNIFY_PUBLIC_KEY="$(FCF_SIGNIFY_PUBLIC_KEY)" \
+		sh scripts/release-sign "$(RELEASE_DIR)"
+
+release-verify:
+	test -n "$(FCF_SIGNIFY_PUBLIC_KEY)" || { echo "FCF_SIGNIFY_PUBLIC_KEY is required" >&2; exit 2; }
+	FCF_SIGNIFY_PUBLIC_KEY="$(FCF_SIGNIFY_PUBLIC_KEY)" \
+		sh scripts/release-verify "$(RELEASE_DIR)"
+
+quality: format lint install-interface-check integrity-source supply-chain-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)

@@ -1,0 +1,395 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+lock_file="$repo_root/supply-chain/sources.lock"
+
+usage() {
+  cat <<'EOF'
+CENTL supply-chain preservation helper.
+
+Usage:
+  sh scripts/supply-chain sync MIRROR_DIR [MODEL.gguf]
+  sh scripts/supply-chain audit MIRROR_DIR
+  sh scripts/supply-chain fetch NAME MIRROR_DIR [OUTPUT]
+  sh scripts/supply-chain snapshot-opam MIRROR_DIR
+  sh scripts/supply-chain snapshot-julia MIRROR_DIR
+  sh scripts/supply-chain snapshot-centl MIRROR_DIR
+
+Environment:
+  CENTL_SUPPLY_CHAIN_OFFLINE=1
+      Never contact an upstream source. Missing material is an error.
+  CENTL_SOURCE_MIRROR_DIR=/path
+      Default local mirror used by fetch.
+  CENTL_SOURCE_MIRROR_URL=https://host/centl-sources
+      Optional static HTTP mirror for artifact fetches.
+  CENTL_GIT_MIRROR_BASE=/path/or/url
+      Optional base containing fstar.git, llama.cpp.git, opam-repository.git.
+  CENTL_OPAM_SWITCH=centl
+      Switch preserved by snapshot-opam.
+  JULIA=julia
+      Julia executable used by snapshot-julia.
+EOF
+}
+
+fail() {
+  printf 'centl supply-chain: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+sha256_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  else
+    fail "sha256sum or shasum is required"
+  fi
+}
+
+verify_sha256() {
+  path=$1
+  expected=$2
+  actual=$(sha256_file "$path")
+  [ "$actual" = "$expected" ] ||
+    fail "checksum mismatch for $path: expected $expected, got $actual"
+}
+
+lock_rows() {
+  awk -F '|' '
+    /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+    NF != 6 { printf "invalid lock row at line %d\n", NR > "/dev/stderr"; exit 2 }
+    { print }
+  ' "$lock_file"
+}
+
+find_row() {
+  wanted=$1
+  lock_rows | awk -F '|' -v wanted="$wanted" '$2 == wanted { print; found=1; exit } END { if (!found) exit 1 }'
+}
+
+download() {
+  url=$1
+  output=$2
+  need curl
+  mkdir -p "$(dirname "$output")"
+  tmp="$output.part.$$"
+  rm -f "$tmp"
+  trap 'rm -f "$tmp"' HUP INT TERM EXIT
+  curl --fail --silent --show-error --location "$url" --output "$tmp"
+  mv "$tmp" "$output"
+  trap - HUP INT TERM EXIT
+}
+
+artifact_source() {
+  mirror_name=$1
+  upstream=$2
+  local_dir=${CENTL_SOURCE_MIRROR_DIR:-}
+  mirror_url=${CENTL_SOURCE_MIRROR_URL:-}
+
+  if [ -n "$local_dir" ] && [ -f "$local_dir/artifacts/$mirror_name" ]; then
+    printf '%s\n' "$local_dir/artifacts/$mirror_name"
+    return
+  fi
+
+  if [ -n "$mirror_url" ]; then
+    printf '%s\n' "${mirror_url%/}/artifacts/$mirror_name"
+    return
+  fi
+
+  [ "${CENTL_SUPPLY_CHAIN_OFFLINE:-0}" != 1 ] ||
+    fail "offline mode: artifact $mirror_name is not present in CENTL_SOURCE_MIRROR_DIR"
+
+  printf '%s\n' "$upstream"
+}
+
+fetch_artifact_to() {
+  name=$1
+  mirror_dir=$2
+  output=$3
+  row=$(find_row "$name") || fail "unknown source name: $name"
+  kind=$(printf '%s\n' "$row" | cut -d '|' -f 1)
+  [ "$kind" = artifact ] || fail "$name is a git source, not an artifact"
+  mirror_name=$(printf '%s\n' "$row" | cut -d '|' -f 4)
+  expected=$(printf '%s\n' "$row" | cut -d '|' -f 5)
+  upstream=$(printf '%s\n' "$row" | cut -d '|' -f 6)
+
+  source_path="$mirror_dir/artifacts/$mirror_name"
+  if [ ! -f "$source_path" ]; then
+    source=$(artifact_source "$mirror_name" "$upstream")
+    case "$source" in
+      http://*|https://*) download "$source" "$source_path" ;;
+      *) mkdir -p "$(dirname "$source_path")"; cp "$source" "$source_path" ;;
+    esac
+  fi
+  verify_sha256 "$source_path" "$expected"
+
+  if [ "$output" != "$source_path" ]; then
+    mkdir -p "$(dirname "$output")"
+    cp "$source_path" "$output"
+  fi
+  verify_sha256 "$output" "$expected"
+}
+
+sync_git() {
+  name=$1
+  commit=$2
+  mirror_name=$3
+  upstream=$4
+  mirror_dir=$5
+
+  need git
+  destination="$mirror_dir/git/$mirror_name"
+  git_base=${CENTL_GIT_MIRROR_BASE:-}
+  source=$upstream
+  if [ -n "$git_base" ]; then
+    source="${git_base%/}/$mirror_name"
+  fi
+
+  if [ -d "$destination" ]; then
+    if [ "${CENTL_SUPPLY_CHAIN_OFFLINE:-0}" != 1 ]; then
+      git -C "$destination" remote update --prune
+    fi
+  else
+    [ "${CENTL_SUPPLY_CHAIN_OFFLINE:-0}" != 1 ] ||
+      fail "offline mode: missing git mirror $destination"
+    mkdir -p "$(dirname "$destination")"
+    git clone --mirror "$source" "$destination"
+  fi
+
+  git -C "$destination" cat-file -e "$commit^{commit}" ||
+    fail "$name mirror does not contain pinned commit $commit"
+}
+
+snapshot_model() {
+  model=$1
+  mirror_dir=$2
+  [ -f "$model" ] || fail "model not found: $model"
+  digest=$(sha256_file "$model")
+  base=$(basename "$model")
+  target_dir="$mirror_dir/models/$digest"
+  mkdir -p "$target_dir"
+  target="$target_dir/$base"
+  if [ ! -f "$target" ]; then
+    cp "$model" "$target"
+  fi
+  verify_sha256 "$target" "$digest"
+  {
+    printf 'sha256=%s\n' "$digest"
+    printf 'file=%s\n' "$base"
+    printf 'bytes=%s\n' "$(wc -c < "$target" | tr -d ' ')"
+  } > "$target_dir/MANIFEST"
+  printf '%s\n' "$digest" > "$mirror_dir/models/ACTIVE.sha256"
+  printf 'Preserved model: %s\n' "$target"
+}
+
+snapshot_centl() {
+  mirror_dir=$1
+  need git
+  mkdir -p "$mirror_dir/project"
+  git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
+    fail "CENTL checkout is not a git worktree"
+  git -C "$repo_root" bundle create "$mirror_dir/project/centl.bundle" --all
+  git -C "$repo_root" rev-parse HEAD > "$mirror_dir/project/CENTL_HEAD"
+  printf 'Preserved CENTL git bundle: %s\n' "$mirror_dir/project/centl.bundle"
+}
+
+sync_all() {
+  mirror_dir=$1
+  model=${2:-}
+  mkdir -p "$mirror_dir/artifacts" "$mirror_dir/git" "$mirror_dir/models"
+
+  lock_rows | while IFS='|' read -r kind name version mirror_name checksum upstream; do
+    case "$kind" in
+      artifact)
+        fetch_artifact_to "$name" "$mirror_dir" "$mirror_dir/artifacts/$mirror_name"
+        printf 'OK artifact %s %s\n' "$name" "$version"
+        ;;
+      git)
+        sync_git "$name" "$version" "$mirror_name" "$upstream" "$mirror_dir"
+        printf 'OK git %s %s\n' "$name" "$version"
+        ;;
+      *) fail "unsupported source kind: $kind" ;;
+    esac
+  done
+
+  snapshot_centl "$mirror_dir"
+  if [ -n "$model" ]; then
+    snapshot_model "$model" "$mirror_dir"
+  elif [ -n "${CENTL_SCI_MODEL:-}" ] && [ -f "${CENTL_SCI_MODEL}" ]; then
+    snapshot_model "$CENTL_SCI_MODEL" "$mirror_dir"
+  fi
+
+  cp "$lock_file" "$mirror_dir/sources.lock"
+  printf 'Supply-chain source sync complete: %s\n' "$mirror_dir"
+}
+
+audit_all() {
+  mirror_dir=$1
+  need git
+  failures=0
+
+  while IFS='|' read -r kind name version mirror_name checksum upstream; do
+    case "$kind" in
+      artifact)
+        path="$mirror_dir/artifacts/$mirror_name"
+        if [ ! -f "$path" ]; then
+          printf 'MISSING artifact %s: %s\n' "$name" "$path" >&2
+          failures=$((failures + 1))
+        elif [ "$(sha256_file "$path")" != "$checksum" ]; then
+          printf 'BAD artifact %s: checksum mismatch\n' "$name" >&2
+          failures=$((failures + 1))
+        else
+          printf 'OK artifact %s %s\n' "$name" "$version"
+        fi
+        ;;
+      git)
+        path="$mirror_dir/git/$mirror_name"
+        if [ ! -d "$path" ]; then
+          printf 'MISSING git %s: %s\n' "$name" "$path" >&2
+          failures=$((failures + 1))
+        elif ! git -C "$path" cat-file -e "$version^{commit}" 2>/dev/null; then
+          printf 'BAD git %s: pinned commit %s absent\n' "$name" "$version" >&2
+          failures=$((failures + 1))
+        else
+          printf 'OK git %s %s\n' "$name" "$version"
+        fi
+        ;;
+    esac
+  done <<EOF
+$(lock_rows)
+EOF
+
+  if [ -f "$mirror_dir/models/ACTIVE.sha256" ]; then
+    digest=$(sed -n '1p' "$mirror_dir/models/ACTIVE.sha256")
+    model_dir="$mirror_dir/models/$digest"
+    model_file=$(find "$model_dir" -maxdepth 1 -type f ! -name MANIFEST -print -quit 2>/dev/null || true)
+    if [ -z "$model_file" ] || [ "$(sha256_file "$model_file")" != "$digest" ]; then
+      printf 'BAD model snapshot %s\n' "$digest" >&2
+      failures=$((failures + 1))
+    else
+      printf 'OK model sha256:%s\n' "$digest"
+    fi
+  fi
+
+  [ "$failures" -eq 0 ] || fail "$failures mirror audit check(s) failed"
+  printf 'Supply-chain audit passed: %s\n' "$mirror_dir"
+}
+
+snapshot_opam() {
+  mirror_dir=$1
+  need opam
+  switch=${CENTL_OPAM_SWITCH:-centl}
+  out="$mirror_dir/opam"
+  mkdir -p "$out/sources"
+
+  opam switch list --short | grep -Fqx "$switch" ||
+    fail "opam switch not found: $switch"
+
+  opam switch export "$out/centl-switch.export" --switch="$switch" --full
+  opam list --switch="$switch" --installed --short \
+    > "$out/installed-package-names.txt"
+  : > "$out/installed-packages.txt"
+
+  opam_root=$(opam var root)
+  if [ -d "$opam_root/download-cache" ]; then
+    rm -rf "$out/download-cache"
+    cp -R "$opam_root/download-cache" "$out/download-cache"
+  fi
+
+  while IFS= read -r package; do
+    [ -n "$package" ] || continue
+    version=$(opam show --switch="$switch" --installed --field=version "$package")
+    printf '%s %s\n' "$package" "$version" >> "$out/installed-packages.txt"
+    target="$out/sources/$package-$version"
+    rm -rf "$target"
+    if opam source --switch="$switch" --dir="$target" "$package.$version" >/dev/null 2>&1; then
+      :
+    else
+      printf 'WARN opam source unavailable for %s.%s; switch/cache snapshot retained\n' \
+        "$package" "$version" >&2
+      rm -rf "$target"
+    fi
+  done < "$out/installed-package-names.txt"
+
+  (
+    cd "$out"
+    find sources -type f -print | LC_ALL=C sort | while IFS= read -r path; do
+      printf '%s  %s\n' "$(sha256_file "$path")" "$path"
+    done
+  ) > "$out/SOURCES.sha256"
+
+  printf 'Preserved opam switch/cache/sources: %s\n' "$out"
+}
+
+snapshot_julia() {
+  mirror_dir=$1
+  julia_bin=${JULIA:-julia}
+  command -v "$julia_bin" >/dev/null 2>&1 || fail "$julia_bin is required"
+  out="$mirror_dir/julia"
+  temp_depot="$out/depot.new.$$"
+  rm -rf "$temp_depot"
+  mkdir -p "$temp_depot"
+
+  JULIA_DEPOT_PATH="$temp_depot" JULIA_PKG_PRECOMPILE_AUTO=0 \
+    "$julia_bin" --startup-file=no --project="$repo_root/lab/julia" \
+    -e 'using Pkg; Pkg.instantiate()'
+
+  rm -rf "$out/depot"
+  mv "$temp_depot" "$out/depot"
+  cp "$repo_root/lab/julia/Project.toml" "$out/Project.toml"
+  cp "$repo_root/lab/julia/Manifest.toml" "$out/Manifest.toml"
+  "$julia_bin" --version > "$out/JULIA_VERSION"
+
+  (
+    cd "$out"
+    find depot -type f -print | LC_ALL=C sort | while IFS= read -r path; do
+      printf '%s  %s\n' "$(sha256_file "$path")" "$path"
+    done
+  ) > "$out/DEPOT.sha256"
+
+  printf 'Preserved instantiated Julia/Nemo depot: %s\n' "$out"
+}
+
+command=${1:-}
+case "$command" in
+  sync)
+    [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }
+    sync_all "$2" "${3:-}"
+    ;;
+  audit)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    audit_all "$2"
+    ;;
+  fetch)
+    [ "$#" -ge 3 ] && [ "$#" -le 4 ] || { usage >&2; exit 2; }
+    row=$(find_row "$2") || fail "unknown source name: $2"
+    mirror_name=$(printf '%s\n' "$row" | cut -d '|' -f 4)
+    output=${4:-"$mirror_name"}
+    fetch_artifact_to "$2" "$3" "$output"
+    printf '%s\n' "$output"
+    ;;
+  snapshot-opam)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    snapshot_opam "$2"
+    ;;
+  snapshot-julia)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    snapshot_julia "$2"
+    ;;
+  snapshot-centl)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    snapshot_centl "$2"
+    ;;
+  -h|--help|help|'')
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
