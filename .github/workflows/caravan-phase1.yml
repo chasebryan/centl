@@ -7,11 +7,13 @@ on:
       - 'docs/CARAVAN-PHASE1.md'
       - 'docs/CARAVAN-IDENTITY.md'
       - 'docs/CARAVAN-CATALOG.md'
+      - 'docs/CARAVAN-TRANSPORT.md'
       - 'scripts/caravan-phase1-check'
       - 'tests/test_caravan_phase1.py'
       - 'tests/test_caravan_identity.py'
       - 'tests/test_caravan_enrollment.py'
       - 'tests/test_caravan_tuf_catalog.py'
+      - 'tests/test_caravan_transport.py'
       - '.github/workflows/caravan-phase1.yml'
 
 permissions:
@@ -23,7 +25,7 @@ concurrency:
 
 jobs:
   laboratory:
-    name: Identity, integrity, TUF catalog, policy, and coordinator gates
+    name: Identity, integrity, catalog, policy, and outbound transport gates
     runs-on: ubuntu-24.04
 
     steps:
