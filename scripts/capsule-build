@@ -150,9 +150,18 @@ python3 "$repo_root/scripts/integrity.py" hash "$recovery_dir/capsule-run" \
 python3 "$repo_root/scripts/integrity.py" verify "$recovery_dir/capsule-run.sha256" \
   --root "$recovery_dir"
 
-# Capsule/runtime refresh changes the preservation tree. Finalize those new bytes
-# immediately so a successful capsule build never leaves a stale whole-mirror
-# receipt behind.
+# Bind model provenance before finalizing the mirror. If the current qualified
+# filename is recognized, CENTL records the verified base-model lineage while
+# leaving the exact quantized GGUF origin unverified unless an operator-provided
+# sidecar proves it by matching the active model SHA-256.
+if [ -f "$mirror/models/ACTIVE.sha256" ]; then
+  python3 "$repo_root/scripts/model-provenance.py" bind "$mirror"
+  python3 "$repo_root/scripts/model-provenance.py" verify "$mirror"
+fi
+
+# Capsule/runtime/provenance refresh changes the preservation tree. Finalize
+# those new bytes immediately so a successful capsule build never leaves a stale
+# whole-mirror receipt behind.
 sh "$repo_root/scripts/mirror-receipt" create "$mirror"
 
 printf 'FCF CENTL build capsule preserved.\n'

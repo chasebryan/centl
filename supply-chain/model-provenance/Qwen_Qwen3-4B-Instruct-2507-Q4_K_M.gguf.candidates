@@ -1,0 +1,7 @@
+# Known candidate origins for exact SHA-256 comparison only.
+# A row does NOT claim that the local CENTL model came from that source.
+# schema=1
+# sha256|repository|file
+0f29ca0fc71631d6a62ce14bd10ed30193e579e0c4e2f17e9db66e1e8569e335|https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF|Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+bff41c9e28d682ff346689f573a5b9c90e77e92cff4efee4cd9e52c37371f246|https://huggingface.co/QuantFactory/Qwen3-4B-Instruct-2507-GGUF|Qwen3-4B-Instruct-2507.Q4_K_M.gguf
+f1b4ff49bbcf1d41fd3b18b65a2d6f0cbb8932a88aaa87bbd54da673fffae5b6|https://huggingface.co/Prince-v/Qwen3-4B-Instruct-2507-Q4_K_M-GGUF|Qwen3-4B-Instruct-2507-Q4_K_M.gguf
