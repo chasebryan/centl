@@ -47,6 +47,14 @@ sh scripts/supply-chain snapshot-julia "$MIRROR"
 sh scripts/supply-chain audit "$MIRROR"
 ```
 
+The same operation is available through the Makefile:
+
+```sh
+make supply-chain-preserve \
+  MIRROR=/srv/centl-mirror \
+  MODEL=/var/home/chasebryan/Models/CENTL-SCi/Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+```
+
 If `CENTL_SCI_MODEL` already names the active model, the model argument may be
 omitted from `sync`.
 
@@ -124,18 +132,20 @@ sh scripts/supply-chain fetch fstar-linux-x86_64 \
   "$CENTL_SOURCE_MIRROR_DIR" /tmp/fstar.tar.gz
 ```
 
-## CENTL release hosting
+## CENTL release preservation
 
-The Unix installer supports `CENTL_RELEASE_BASE_URL`. FCF can therefore host the
-same release directory contract independently of GitHub:
+CENTL release archives can already be installed without GitHub through the
+installer's local archive path. Preserve each release archive beside its
+`.sha256` file in FCF storage, then install directly from that copy:
 
 ```sh
-CENTL_RELEASE_BASE_URL=https://artifacts.example.invalid/centl/releases \
-  sh install --version 0.12.0
+sh install --archive /srv/centl-mirror/releases/centl-linux-x86_64.tar.gz
 ```
 
-The release archive and adjacent `.sha256` remain mandatory. Self-hosting does
-not weaken release verification.
+The local archive path performs the same checksum, extraction, staging, runtime,
+and CENTL-SCi smoke checks as a network-installed release. A future FCF release
+endpoint may mirror GitHub's release layout, but recovery does not need to wait
+for that hosting layer because `--archive` is already an offline contract.
 
 ## Git recovery
 
