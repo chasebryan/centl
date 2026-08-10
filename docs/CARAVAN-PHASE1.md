@@ -1,238 +1,79 @@
 # CENTL CARAVAN Phase 1 laboratory profile
 
-Status: **implementation profile for the local laboratory; not a public network protocol**.
+Status: **implemented local laboratory; not a public volunteer network protocol**.
 
-This document freezes the first implementation choices required to begin the
-CARAVAN local laboratory described in `CARAVAN-ROLLOUT.md`. These choices are
-intentionally conservative and may be revised before a public protocol version
-is declared.
-
-## 1. Governing invariant
+CENTL CARAVAN is the **Content-Addressed Resilient Artifact Verification and Availability Network**. Phase 1 establishes the local, reproducible laboratory boundary required before any private pilot or public volunteer enrollment.
 
 > A carrier may provide bytes, but a carrier may never define which bytes are trusted.
 
-The first implementation therefore separates three concerns:
+Carrier population affects availability only. Authenticated FCF/TUF metadata defines artifact identity and redistribution eligibility.
 
-1. authenticated catalog authority;
-2. byte storage/transport;
-3. coordinator availability/routing state.
+## Implemented trust boundary
 
-Carrier count, reputation, or majority never rewrites an expected content hash.
+Phase 1 uses `python-tuf` 7.0.0 with TUF 1.0 JSON metadata. The laboratory verifies the root -> timestamp -> snapshot -> targets chain around `caravan/catalog-v1.json`. The trusted bootstrap root is supplied independently of carriers. There is no trust-on-first-carrier mode.
 
-## 2. Authenticated catalog profile
+Only `public-approved` artifacts may enter volunteer routing. `revoked` targets disable known identities; `pending-review` and `fcf-preservation-only` material cannot be advertised by volunteer carriers.
 
-Phase 1 uses **python-tuf 7.0.0** and the TUF 1.0 JSON metadata model. The
-laboratory now implements a complete root -> timestamp -> snapshot -> targets
-verification path around the CARAVAN application catalog.
+Whole-artifact identity is `sha256:<64 lowercase hexadecimal characters>` plus exact byte length. The authenticated chunk profile uses ordered, contiguous 4 MiB SHA-256 records, with a shorter final chunk permitted. Chunk verification supplements rather than replaces mandatory whole-file verification.
 
-The carrier/downloader side needs verification only. Repository/key-generation
-code is laboratory/FCF tooling and is not part of the normal volunteer runtime.
-The initial trusted root must come from the authenticated CARAVAN agent/release
-bootstrap rather than from a volunteer carrier. There is no trust-on-first-carrier
-mode.
+## Implemented carrier boundary
 
-The authenticated TUF target is `caravan/catalog-v1.json`. Its strict CARAVAN
-schema carries distribution classification, content identity, exact length, and
-ordered chunk identities. Only `public-approved` targets are eligible for
-volunteer advertisement or routing. `revoked` entries may be retained in
-coordinator state only to disable a known identity; `pending-review` and
-`fcf-preservation-only` targets never enter volunteer routing.
+The laboratory provides:
 
-Direct carrier advertisements cannot create catalog entries or rewrite an
-expected content hash. See `CARAVAN-CATALOG.md` for the exact boundary.
+- user-owned immutable content-addressed storage;
+- source/store symlink rejection and regular-file enforcement;
+- hash-while-copy verification and atomic no-overwrite promotion;
+- storage ceiling and minimum free-disk reserve;
+- Ed25519 pseudonymous carrier identities stored under owner-only permissions;
+- signed policy-acceptance receipts binding exact policy SHA-256/version, agent version, acceptance mode, and UTC timestamp;
+- SQLite coordinator state with fresh-heartbeat availability semantics;
+- quarantine and withdrawal states;
+- privacy-safe aggregate counts for available caravans, protected artifacts, and verified replicas;
+- one-use, short-lived retrieval tickets bound to one carrier and artifact;
+- live Ed25519 proof-of-possession carrier sessions;
+- outbound-only carrier/coordinator HTTP transport for the loopback laboratory, with HTTPS required outside explicit loopback mode;
+- exact request/response bounds and bounded laboratory long polling.
 
-## 3. Content identity
+The normal carrier never needs a public listening port, router configuration, root, or sudo.
 
-Whole-artifact identity is:
+## Verified retrieval and fallback
 
-```text
-sha256:<64 lowercase hexadecimal characters>
-```
+Phase 1 now implements verified multi-carrier retrieval. A selected carrier receives only a ticket for the authenticated artifact identity. Received bytes are checked against ordered authenticated chunk records and the mandatory whole-artifact length and SHA-256 before promotion into the immutable store.
 
-The authenticated target also carries the exact byte length. Both length and
-SHA-256 must match before an artifact is promoted into the content-addressed
-store or released as a successful download.
+Malformed or hostile bytes are discarded. Truncation, appended bytes, chunk mismatch/reordering, and whole-file mismatch cannot be promoted. Integrity failure records the expected and observed digests without rewriting expected identity, quarantines the bad carrier, consumes the failed ticket, and automatically asks the coordinator for another eligible route. The dedicated test suite includes a bad-carrier -> good-carrier fallback proving this behavior.
 
-SHA-256 is the existing CENTL integrity primitive; CARAVAN does not define a new
-hash function.
+## Join / status / leave lifecycle
 
-## 4. Chunk profile
+The local lifecycle API provides explicit `join`, `status`, and `leave` operations. Join creates or loads a user-owned Ed25519 identity, records exact policy acceptance, and enrolls only after receipt verification. Leave withdraws the carrier, removes it from routing eligibility, and preserves local identity/state for explicit operator control.
 
-Phase 1 fixes the laboratory chunk size at **4 MiB (4,194,304 bytes)**.
+Participation remains voluntary and reversible.
 
-Each chunk record contains:
+## One-command laboratory
+
+From a source checkout with the pinned Phase 1 Python dependencies installed:
 
 ```text
-offset
-length
-sha256
+PYTHONPATH=. python3 -m caravan.lab
 ```
 
-The final chunk may be shorter. CARAVAN's authenticated catalog requires the
-chunk sequence to be ordered, contiguous, and to cover the exact declared file
-length. Non-final chunks must be exactly 4 MiB. Chunk verification supplements
-rather than replaces mandatory whole-artifact length and SHA-256 verification.
+The command constructs an owner-only temporary laboratory, creates two policy-accepted carriers, applies already-authenticated catalog data at the coordinator trust boundary, deliberately serves corrupted bytes from the preferred carrier, verifies that the bad carrier is quarantined, falls back to the second carrier, verifies and stores the exact artifact, reports aggregate network state, and cleans up temporary state.
 
-## 5. Content store
-
-The local store is user-owned and requires no root privileges.
-
-Initial layout:
+The complete Phase 1 validation gate is:
 
 ```text
-<store>/
-  objects/
-    sha256/
-      <first-two-hex>/
-        <full-sha256>
-  tmp/
+sh scripts/caravan-phase1-check
 ```
 
-Properties implemented in the first foundation:
+It compiles the laboratory modules, verifies exact dependency pins, runs storage/coordinator/identity/policy/TUF/session/transport/retrieval/lifecycle tests, hostile-transfer cases, and the one-command laboratory.
 
-- source files must be regular files and symbolic-link sources are rejected;
-- store directories may not be symbolic links;
-- bytes are hashed while copied from an already-open source descriptor;
-- promotion is same-filesystem and no-overwrite;
-- stored objects are made read-only after promotion;
-- an existing object is reverified instead of silently replaced;
-- configurable maximum stored bytes are authoritative;
-- configurable minimum free-disk reserve is authoritative;
-- verification recomputes whole-file SHA-256 and length.
+## Dependency security
 
-The store does not know whether content is legally or operationally approved.
-That authority belongs to authenticated catalog metadata.
+Phase 1 pins PyCA `cryptography` 50.0.0. The earlier 49.0.0 selection was rejected after dependency review identified CVE-2026-69247. The vulnerability gate was fixed rather than suppressed.
 
-## 6. Carrier identity
+## Public-network boundary
 
-The Phase 1 identity profile is **Ed25519** using PyCA `cryptography` 50.0.0.
-The earlier laboratory selection of 49.0.0 was replaced before merge after
-repository dependency review identified CVE-2026-69247; PyCA documents the fix in
-50.0.0.
+Phase 1 **does not authorize public volunteer enrollment**. It does not expose home carrier endpoints and it does not claim global anonymity.
 
-The carrier private key remains on the carrier in an owner-only user directory.
-The coordinator receives a public identity and derived pseudonymous node
-identifier. A carrier identity is for authentication, revocation, and abuse
-control; it is not a public user profile and is not an FCF artifact-signing key.
+A later private/pilot phase must still establish production TLS deployment, bounded concurrency and rate policy derived from measurement, reconnect/backoff behavior at deployment scale, credential revocation operations, finalized telemetry retention, abuse controls, legal/privacy review of host policy, default downloader privacy relay, website integration, and production operational monitoring.
 
-Phase 1 now implements identity generation/loading, Ed25519 signing and
-verification, exact versioned host-policy acceptance receipts, and a coordinator
-enrollment boundary that verifies the signed receipt against the required policy
-bytes. The outbound session layer still needs a live proof-of-possession exchange
-before the carrier transport is considered authenticated.
-
-See `CARAVAN-IDENTITY.md` for the exact representation and receipt boundary.
-
-## 7. Coordinator state
-
-The Phase 1 coordinator uses SQLite because it is available through the Python
-standard library, transactional, and sufficient for a local/private pilot.
-
-Coordinator state includes:
-
-- authenticated eligible artifact IDs and lengths;
-- catalog version;
-- carrier pseudonymous identity;
-- policy and agent versions;
-- active/quarantined/withdrawn state;
-- last heartbeat;
-- coarse load/capacity;
-- verified replica advertisements;
-- short-lived retrieval tickets;
-- integrity-failure records.
-
-A catalog refresh may change routing eligibility, but carrier state cannot change
-artifact identity.
-
-## 8. Availability definition and website counters
-
-The coordinator maintains exact internal counts. An **available caravan** is a
-carrier that:
-
-- is registered and active;
-- is not quarantined or withdrawn;
-- has a heartbeat inside the configured freshness window; and
-- advertises at least one currently `public-approved` artifact.
-
-The three network-health quantities are:
-
-- **available caravans** — currently eligible carrier machines;
-- **protected artifacts** — distinct `public-approved` artifact identities with
-  at least one fresh eligible replica;
-- **verified replicas** — total fresh eligible carrier/artifact replica pairs.
-
-The public website will expose only privacy-safe aggregate forms of these values.
-It must not expose node IDs, IP addresses, hostnames, precise locations, or raw
-per-carrier uptime. During a very small pilot, public counts may be delayed or
-bucketed to reduce trivial observation of a specific volunteer machine coming
-online or going offline.
-
-## 9. Presence
-
-The laboratory default heartbeat freshness window is **45 seconds**. Presence is
-leased state, not permanent membership. Stale carriers disappear from current
-availability counts and route selection automatically.
-
-Production values will be measured during the private pilot rather than inferred
-from the laboratory default.
-
-## 10. Retrieval authorization
-
-Phase 1 uses coordinator-issued random bearer capabilities generated by the
-operating system CSPRNG through Python `secrets`.
-
-A retrieval ticket is:
-
-- bound to one artifact ID;
-- bound to one selected carrier;
-- short-lived (30-second default);
-- single-use;
-- stored coordinator-side only as SHA-256 of the bearer token;
-- rejected after expiry, replay, binding mismatch, quarantine, withdrawal, or
-  heartbeat expiry.
-
-This is authorization, not artifact authentication. The ticket cannot alter the
-catalog digest.
-
-## 11. Outbound transport
-
-The Phase 1 network transport baseline is an outbound request/long-poll model that
-works over ordinary HTTPS without a public carrier listening port. Laboratory
-integration may run on loopback HTTP because it is not Internet-facing.
-
-Before Phase 2, the transport must be TLS-protected and packet/log tests must
-prove that the default carrier does not require inbound NAT/router configuration.
-HTTP/2 or HTTP/3 multiplexing may replace the laboratory polling transport after
-measurement without changing artifact trust semantics.
-
-## 12. Resource policy
-
-No coordinator instruction may override local carrier limits. The implementation
-will expose at minimum:
-
-- maximum storage bytes;
-- minimum free-disk reserve;
-- maximum upload concurrency;
-- upload rate limit;
-- optional active schedule;
-- pause/leave controls.
-
-The content foundation implements the first two limits. Network limits arrive
-with the carrier transport slice.
-
-## 13. Phase 1 implementation sequence
-
-The authorized local-laboratory sequence is:
-
-1. content-addressed immutable store and negative filesystem/integrity tests — implemented;
-2. SQLite coordinator state, availability counters, quarantine and replay-safe
-   retrieval tickets — implemented;
-3. Ed25519 carrier identity and accepted-policy receipt — implemented;
-4. python-tuf authenticated catalog and test repository — implemented, pending
-   full branch CI/dependency-review validation;
-5. outbound-only carrier/coordinator transport — next;
-6. two-carrier verified retrieval with automatic fallback;
-7. hostile carrier and malformed-transfer suite;
-8. one-command local laboratory runner.
-
-No public volunteer enrollment is authorized by this phase.
+Those are production-network gates, not reasons to keep the completed local laboratory out of the CENTL source tree.
