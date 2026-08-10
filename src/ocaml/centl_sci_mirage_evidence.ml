@@ -26,6 +26,19 @@ let receipt_state_text = function
   | Pending -> "pending"
   | Blocked -> "blocked"
 
+let receipt_counts (report : report) =
+  List.fold_left
+    (fun (passed, pending, blocked) (receipt : receipt) ->
+      match receipt.state with
+      | Passed -> (passed + 1, pending, blocked)
+      | Pending -> (passed, pending + 1, blocked)
+      | Blocked -> (passed, pending, blocked + 1))
+    (0, 0, 0) report.receipts
+
+let evidence_complete (report : report) =
+  let _, pending, blocked = receipt_counts report in
+  report.receipts <> [] && pending = 0 && blocked = 0 && report.blocked_cells = []
+
 let action_requires_snapshot (action : Centl_sci_mirage_execution_plan.action) =
   action.executor = "workspace_snapshot" && action.precondition = "before_activation"
 
@@ -135,17 +148,22 @@ let receipt_to_json (receipt : receipt) =
     ]
 
 let to_json (report : report) =
+  let passed, pending, blocked = receipt_counts report in
   `Assoc
     [
-      ("schema_version", `Int 2);
+      ("schema_version", `Int 3);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_receipts");
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ("passed_action_count", `Int passed);
+      ("pending_action_count", `Int pending);
+      ("blocked_action_count", `Int blocked);
+      ("evidence_complete", `Bool (evidence_complete report));
       ("candidate_source_activated", `Bool false);
       ("assurance_promoted", `Bool false);
       ( "execution_semantics",
         `String
-          "a passed receipt records only the named evidence action; rollback obligations in one evidence cycle share at most one newly created workspace snapshot; no receipt implies candidate admissibility, mathematical correctness, regression success, activation, or verified-core status" );
+          "a passed receipt records only the named evidence action; evidence_complete means every action emitted in this execution cycle passed and no source cells are blocked, but it does not imply candidate admissibility, mathematical correctness beyond those named obligations, activation, or verified-core status; rollback obligations in one evidence cycle share at most one newly created workspace snapshot" );
       ("receipts", `List (List.map receipt_to_json report.receipts));
     ]
 
@@ -165,21 +183,14 @@ let construct workspace execution_plan_path plan =
   with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
 let render (report : report) =
-  let passed, pending, blocked =
-    List.fold_left
-      (fun (passed, pending, blocked) (receipt : receipt) ->
-        match receipt.state with
-        | Passed -> (passed + 1, pending, blocked)
-        | Pending -> (passed, pending + 1, blocked)
-        | Blocked -> (passed, pending, blocked + 1))
-      (0, 0, 0) report.receipts
-  in
+  let passed, pending, blocked = receipt_counts report in
   String.concat "\n"
     [
       "CENTL-MIRAGE evidence execution receipts";
       "passed actions: " ^ string_of_int passed;
       "pending actions: " ^ string_of_int pending;
       "blocked actions: " ^ string_of_int blocked;
+      "evidence cycle complete: " ^ (if evidence_complete report then "yes" else "no");
       "workspace snapshots created per evidence cycle: at most one";
       "candidate source activated: no";
       "assurance promoted: no";
