@@ -26,8 +26,10 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality install-interface-check verify extract \
-	native-build native-test adversarial-test fuzz-test metamorphic-test sanitizer-test \
+.PHONY: all format format-fix fmt lint quality install-interface-check supply-chain-check \
+	supply-chain-sync supply-chain-audit supply-chain-snapshot-opam \
+	supply-chain-snapshot-julia supply-chain-preserve verify extract native-build \
+	native-test adversarial-test fuzz-test metamorphic-test sanitizer-test \
 	performance-test hardening-test differential-test sci-model-test sci-interface-check \
 	sci-assimilate sci-assimilate-full sci-assimilate-publish build test release clean
 
@@ -49,7 +51,32 @@ lint:
 install-interface-check:
 	$(PYTHON) scripts/install-interface-check.py
 
-quality: format lint install-interface-check
+supply-chain-check:
+	$(PYTHON) scripts/supply-chain-check.py
+
+supply-chain-sync:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	@if [ -n "$(MODEL)" ]; then \
+		sh scripts/supply-chain sync "$(MIRROR)" "$(MODEL)"; \
+	else \
+		sh scripts/supply-chain sync "$(MIRROR)"; \
+	fi
+
+supply-chain-audit:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/supply-chain audit "$(MIRROR)"
+
+supply-chain-snapshot-opam:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/supply-chain snapshot-opam "$(MIRROR)"
+
+supply-chain-snapshot-julia:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
+
+supply-chain-preserve: supply-chain-check supply-chain-sync supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-audit
+
+quality: format lint install-interface-check supply-chain-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
