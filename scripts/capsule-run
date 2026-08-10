@@ -1,0 +1,89 @@
+#!/bin/sh
+set -eu
+
+mirror=${1:-}
+
+fail() {
+  printf 'centl capsule-run: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+sha256_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{ print $1 }'
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{ print $1 }'
+  else
+    fail "sha256sum or shasum is required"
+  fi
+}
+
+[ -n "$mirror" ] || fail "usage: scripts/capsule-run MIRROR_DIR"
+mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror not found: $mirror"
+need podman
+
+capsule="$mirror/capsule"
+archive="$capsule/centl-build-capsule.oci.tar"
+checksum="$archive.sha256"
+image_ref_file="$capsule/IMAGE-REF"
+[ -f "$archive" ] && [ ! -L "$archive" ] || fail "capsule archive not found or unsafe: $archive"
+[ -f "$checksum" ] && [ ! -L "$checksum" ] || fail "capsule checksum not found or unsafe: $checksum"
+[ -f "$image_ref_file" ] && [ ! -L "$image_ref_file" ] || fail "capsule IMAGE-REF not found or unsafe"
+[ -f "$mirror/project/centl.bundle" ] || fail "CENTL recovery bundle is missing"
+[ -f "$mirror/project/SOURCE-COMMIT" ] || fail "CENTL SOURCE-COMMIT is missing"
+
+checksum_entries=$(awk 'NF { count++ } END { print count + 0 }' "$checksum")
+[ "$checksum_entries" -eq 1 ] || fail "capsule checksum must contain exactly one entry"
+expected=$(awk 'NF { print substr($0, 1, 64); exit }' "$checksum")
+checksum_name=$(awk 'NF { print substr($0, 67); exit }' "$checksum")
+case "$expected" in
+  ''|*[!0-9a-f]*) fail "capsule checksum digest is malformed" ;;
+esac
+[ "${#expected}" -eq 64 ] || fail "capsule checksum digest must be SHA-256"
+[ "$checksum_name" = "$(basename -- "$archive")" ] ||
+  fail "capsule checksum does not name the saved OCI archive"
+actual=$(sha256_file "$archive")
+[ "$actual" = "$expected" ] || fail "capsule OCI archive SHA-256 verification failed"
+
+podman load --input "$archive" >/dev/null
+image_ref=$(sed -n '1p' "$image_ref_file")
+case "$image_ref" in
+  ''|*'
+'*) fail "capsule IMAGE-REF is invalid" ;;
+esac
+podman image exists "$image_ref" || fail "loaded capsule did not provide $image_ref"
+
+# The host checkout is intentionally not mounted. The recovery driver is cloned
+# from the FCF-held CENTL bundle inside the no-network container and checked out
+# at the mirror's recorded SOURCE-COMMIT before any project recovery logic runs.
+# Therefore a saved OCI capsule + preservation mirror + Podman are sufficient;
+# GitHub and a matching host-side CENTL checkout are not part of this path.
+podman run --rm \
+  --network none \
+  --security-opt label=disable \
+  -e CENTL_OFFLINE_REBUILD_INNER=1 \
+  -e CENTL_OPAM_SWITCH=centl \
+  -v "$mirror:/mirror:ro" \
+  "$image_ref" \
+  sh -c '
+    set -eu
+    driver=/tmp/centl-recovery-driver
+    git clone --quiet /mirror/project/centl.bundle "$driver"
+    commit=$(sed -n "1p" /mirror/project/SOURCE-COMMIT)
+    case "$commit" in
+      ""|*[!0-9a-f]*) echo "invalid preserved SOURCE-COMMIT" >&2; exit 2 ;;
+    esac
+    [ "${#commit}" -eq 40 ] || { echo "SOURCE-COMMIT is not full length" >&2; exit 2; }
+    git -C "$driver" checkout --quiet --detach "$commit"
+    [ "$(git -C "$driver" rev-parse HEAD)" = "$commit" ] || {
+      echo "recovery driver checkout does not match SOURCE-COMMIT" >&2
+      exit 2
+    }
+    exec sh "$driver/scripts/offline-rebuild" /mirror
+  '
+
+printf 'FCF CENTL capsule no-network rebuild: PASS\n'

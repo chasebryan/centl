@@ -1,0 +1,15 @@
+# CENTL external source lock
+# schema=1
+#
+# kind|name|version-or-commit|mirror-name|sha256-or--|upstream
+#
+# Artifact checksums are authoritative and must match before a mirrored file is
+# accepted. Git rows pin commits that must be present in the bare mirror.
+artifact|fstar-linux-x86_64|2026.07.05|fstar-v2026.07.05-Linux-x86_64.tar.gz|23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4|https://github.com/FStarLang/FStar/releases/download/v2026.07.05/fstar-v2026.07.05-Linux-x86_64.tar.gz
+artifact|gmp|6.3.0|gmp-6.3.0.tar.xz|a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898|https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+artifact|mpfr|4.2.2|mpfr-4.2.2.tar.xz|b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01|https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
+artifact|flint|3.0.1|flint-3.0.1.tar.gz|7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4|https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.gz
+artifact|julia-linux-x86_64|1.12.6|julia-1.12.6-linux-x86_64.tar.gz|bbabf3bef19421a9dbd24a767d807606ab85e444323b5a1c73ffe293fa3d079a|https://julialang-s3.julialang.org/bin/linux/x64/1.12/julia-1.12.6-linux-x86_64.tar.gz
+git|fstar|2173bc4316a51f01754f10bf94f697aba083c2e0|fstar.git|-|https://github.com/FStarLang/FStar.git
+git|llama.cpp|687e7789271ec1276e3470f158428e11a4f80b6f|llama.cpp.git|-|https://github.com/ggml-org/llama.cpp.git
+git|opam-repository|1ce329a5a9963b4f3708601d6116dfebd8f77c8f|opam-repository.git|-|https://github.com/ocaml/opam-repository.git

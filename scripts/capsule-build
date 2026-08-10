@@ -1,0 +1,166 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${1:-}
+image_ref=${CENTL_CAPSULE_IMAGE:-localhost/fcf/centl-build-capsule:ubuntu22.04-v1}
+base_ref=docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
+
+fail() {
+  printf 'centl capsule-build: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+[ -n "$mirror" ] || fail "usage: scripts/capsule-build MIRROR_DIR"
+mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror not found: $mirror"
+case $(uname -m) in
+  x86_64|amd64) ;;
+  *) fail "the reference build capsule currently targets Linux x86_64" ;;
+esac
+need podman
+need python3
+need git
+
+# Capsule tooling must correspond exactly to the source snapshot it claims to
+# recover. A different HEAD or tracked local edits would otherwise let the image
+# contain recovery logic that is absent from the preserved CENTL bundle.
+[ -f "$mirror/project/SOURCE-COMMIT" ] || fail "mirror SOURCE-COMMIT is missing"
+mirror_source_commit=$(sed -n '1p' "$mirror/project/SOURCE-COMMIT")
+case "$mirror_source_commit" in
+  ''|*[!0-9a-f]*) fail "invalid mirror SOURCE-COMMIT" ;;
+esac
+[ "${#mirror_source_commit}" -eq 40 ] || fail "mirror SOURCE-COMMIT must be full length"
+current_commit=$(git -C "$repo_root" rev-parse HEAD)
+[ "$current_commit" = "$mirror_source_commit" ] ||
+  fail "capsule checkout $current_commit does not match mirror SOURCE-COMMIT $mirror_source_commit"
+git -C "$repo_root" diff --quiet -- && git -C "$repo_root" diff --cached --quiet -- ||
+  fail "tracked worktree must be clean before capsule construction"
+
+# The base is acquired by immutable digest once during capsule construction. The
+# final saved OCI archive includes those layers, so recovery does not need to
+# pull the base again.
+if ! podman image exists "$base_ref"; then
+  [ "${CENTL_CAPSULE_BOOTSTRAP_OFFLINE:-0}" != 1 ] ||
+    fail "pinned Ubuntu base image is not local and bootstrap-offline mode is enabled"
+  podman pull "$base_ref"
+fi
+
+# The capsule consumes only already-preserved CENTL-specific source artifacts.
+# apt/opam are still used while constructing the first capsule; the resulting OCI
+# image is then itself preserved so recovery does not need to repeat that step.
+context=$(mktemp -d "${TMPDIR:-/tmp}/centl-capsule-context.XXXXXXXX")
+cleanup() {
+  rm -rf "$context"
+}
+trap cleanup EXIT HUP INT TERM
+
+cp "$repo_root/infra/offline-build/Containerfile" "$context/Containerfile"
+CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
+  gmp "$mirror" "$context/gmp.tar.xz" >/dev/null
+CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
+  mpfr "$mirror" "$context/mpfr.tar.xz" >/dev/null
+CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
+  flint "$mirror" "$context/flint.tar.gz" >/dev/null
+CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
+  julia-linux-x86_64 "$mirror" "$context/julia.tar.gz" >/dev/null
+
+# Recover the exact qualified llama.cpp source from the preserved bare mirror.
+# The build number is upstream's own `git rev-list --count HEAD` identity, as used
+# by llama.cpp's cmake/build-info.cmake.
+llama_commit=$(
+  awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+    "$repo_root/supply-chain/sources.lock"
+)
+case "$llama_commit" in
+  ''|*[!0-9a-f]*) fail "invalid llama.cpp commit in supply-chain lock" ;;
+esac
+[ "${#llama_commit}" -eq 40 ] || fail "llama.cpp lock must use a full commit"
+llama_repo="$mirror/git/llama.cpp.git"
+[ -d "$llama_repo" ] || fail "preserved llama.cpp Git mirror is missing: $llama_repo"
+git -C "$llama_repo" cat-file -e "$llama_commit^{commit}" ||
+  fail "preserved llama.cpp mirror lacks $llama_commit"
+llama_build_number=$(git -C "$llama_repo" rev-list --count "$llama_commit")
+case "$llama_build_number" in
+  ''|*[!0-9]*) fail "could not derive llama.cpp build number" ;;
+esac
+
+documented_build=$(
+  sed -n 's/.*`llama.cpp` `llama-cli` build `b\([0-9][0-9]*\)-[0-9a-f][0-9a-f]*`.*/\1/p' \
+    "$repo_root/docs/SCI-ENGINE.md" | sed -n '1p'
+)
+[ -n "$documented_build" ] ||
+  fail "could not recover documented CENTL-SCi llama.cpp build number"
+[ "$llama_build_number" = "$documented_build" ] ||
+  fail "llama.cpp commit count $llama_build_number disagrees with documented build b$documented_build"
+
+git -C "$llama_repo" archive --format=tar --prefix=llama.cpp/ \
+  "$llama_commit" > "$context/llama.cpp.tar"
+
+podman build --pull=never \
+  --build-arg "LLAMA_COMMIT=$llama_commit" \
+  --build-arg "LLAMA_BUILD_NUMBER=$llama_build_number" \
+  --tag "$image_ref" --file "$context/Containerfile" "$context"
+
+out="$mirror/capsule"
+mkdir -p "$out"
+archive="$out/centl-build-capsule.oci.tar"
+rm -f "$archive" "$archive.sha256"
+podman save --format oci-archive --output "$archive" "$image_ref"
+
+python3 "$repo_root/scripts/integrity.py" hash "$archive" > "$archive.sha256"
+printf '%s\n' "$image_ref" > "$out/IMAGE-REF"
+printf '%s\n' "$base_ref" > "$out/BASE-REF"
+podman image inspect "$image_ref" --format '{{.Id}}' > "$out/IMAGE-ID"
+podman run --rm --network none "$image_ref" \
+  cat /opt/fcf-capsule/IDENTITY > "$out/IDENTITY"
+
+# Export the exact reference CLI bytes as an additional recovery artifact. The
+# authoritative portable execution environment remains the saved OCI capsule,
+# because the CLI may depend on the capsule's libc/libstdc++ ABI.
+sci_runtime="$mirror/sci-runtime"
+mkdir -p "$sci_runtime"
+podman run --rm --network none "$image_ref" \
+  cat /opt/centl-sci/bin/llama-cli > "$sci_runtime/llama-cli"
+chmod 0755 "$sci_runtime/llama-cli"
+podman run --rm --network none "$image_ref" \
+  cat /opt/centl-sci/LLAMA-VERSION > "$sci_runtime/LLAMA-VERSION"
+printf '%s\n' "$llama_commit" > "$sci_runtime/LLAMA-COMMIT"
+printf '%s\n' "$llama_build_number" > "$sci_runtime/LLAMA-BUILD-NUMBER"
+python3 "$repo_root/scripts/integrity.py" hash "$sci_runtime/llama-cli" \
+  > "$sci_runtime/llama-cli.sha256"
+python3 "$repo_root/scripts/integrity.py" verify "$sci_runtime/llama-cli.sha256" \
+  --root "$sci_runtime"
+
+python3 "$repo_root/scripts/integrity.py" verify "$archive.sha256" --root "$out"
+
+# Preserve the standalone recovery launcher itself. capsule-run no longer reads
+# the host checkout; keeping this copy means a disaster-recovery operator can
+# start from the mirror with only a POSIX shell, Podman, and SHA-256 utility.
+recovery_dir="$mirror/recovery"
+mkdir -p "$recovery_dir"
+cp "$repo_root/scripts/capsule-run" "$recovery_dir/capsule-run"
+chmod 0755 "$recovery_dir/capsule-run"
+printf '%s\n' "$current_commit" > "$recovery_dir/DRIVER-COMMIT"
+python3 "$repo_root/scripts/integrity.py" hash "$recovery_dir/capsule-run" \
+  > "$recovery_dir/capsule-run.sha256"
+python3 "$repo_root/scripts/integrity.py" verify "$recovery_dir/capsule-run.sha256" \
+  --root "$recovery_dir"
+
+# Capsule/runtime refresh changes the preservation tree. Finalize those new bytes
+# immediately so a successful capsule build never leaves a stale whole-mirror
+# receipt behind.
+sh "$repo_root/scripts/mirror-receipt" create "$mirror"
+
+printf 'FCF CENTL build capsule preserved.\n'
+printf 'image=%s\n' "$image_ref"
+printf 'base=%s\n' "$base_ref"
+printf 'archive=%s\n' "$archive"
+printf 'sha256_file=%s\n' "$archive.sha256"
+printf 'llama_commit=%s\n' "$llama_commit"
+printf 'llama_build_number=%s\n' "$llama_build_number"
+printf 'llama_cli=%s\n' "$sci_runtime/llama-cli"
+printf 'recovery_driver=%s\n' "$recovery_dir/capsule-run"

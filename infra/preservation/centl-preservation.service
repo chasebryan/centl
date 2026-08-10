@@ -1,0 +1,9 @@
+[Unit]
+Description=CENTL FCF preservation verification drill
+Documentation=https://github.com/chasebryan/centl/blob/main/infra/preservation/README.md
+After=local-fs.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/centl/preservation.env
+ExecStart=/bin/sh -lc 'cd "$CENTL_REPO" && exec sh scripts/preservation-drill'

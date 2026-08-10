@@ -1,0 +1,61 @@
+name: FCF Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'assets/branding/fcf-centl-banner.png'
+      - 'assets/branding/centl-sci-v0.0.1-camelus-banner.png'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Configure Pages
+        id: pages
+        continue-on-error: true
+        uses: actions/configure-pages@v6
+
+      - name: First-time Pages enablement notice
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo '::notice::GitHub Pages is not enabled for this repository yet. In Settings -> Pages, select GitHub Actions as the source, then re-run FCF Pages.'
+
+      - name: Assemble static site
+        if: steps.pages.outcome == 'success'
+        run: |
+          set -eu
+          rm -rf _site
+          mkdir -p _site/assets
+          cp -a site/. _site/
+          cp assets/branding/fcf-centl-banner.png _site/assets/fcf-centl-banner.png
+          cp assets/branding/centl-sci-v0.0.1-camelus-banner.png _site/assets/centl-sci-v0.0.1-camelus-banner.png
+
+      - name: Upload Pages artifact
+        if: steps.pages.outcome == 'success'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        if: steps.pages.outcome == 'success'
+        id: deployment
+        uses: actions/deploy-pages@v4

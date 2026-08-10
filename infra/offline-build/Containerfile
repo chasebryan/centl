@@ -1,0 +1,134 @@
+FROM docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG GMP_VERSION=6.3.0
+ARG MPFR_VERSION=4.2.2
+ARG FLINT_VERSION=3.0.1
+ARG OCAML_VERSION=4.14.1
+ARG JULIA_VERSION=1.12.6
+ARG LLAMA_COMMIT
+ARG LLAMA_BUILD_NUMBER
+
+ENV NATIVE_PREFIX=/opt/centl-native \
+    OPAMROOT=/opt/centl-opam \
+    OPAMYES=1 \
+    PKG_CONFIG_PATH=/opt/centl-native/lib/pkgconfig \
+    LIBRARY_PATH=/opt/centl-native/lib \
+    LD_LIBRARY_PATH=/opt/centl-native/lib \
+    C_INCLUDE_PATH=/opt/centl-native/include \
+    JULIA_DEPOT_PATH=/mirror/julia/depot \
+    JULIA_PKG_OFFLINE=true \
+    JULIA_PKG_PRECOMPILE_AUTO=0 \
+    JULIA_NUM_THREADS=1 \
+    CENTL_OPAM_SWITCH=centl \
+    CENTL_SCI_LLAMA_CLI=/opt/centl-sci/bin/llama-cli
+
+RUN apt-get update && apt-get install --yes --no-install-recommends \
+      build-essential ca-certificates cmake curl git libzstd1 m4 make opam patch \
+      pkg-config python3 qemu-user signify-openbsd tar util-linux xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY gmp.tar.xz /tmp/centl-capsule/gmp.tar.xz
+COPY mpfr.tar.xz /tmp/centl-capsule/mpfr.tar.xz
+COPY flint.tar.gz /tmp/centl-capsule/flint.tar.gz
+
+RUN set -eux; \
+    mkdir -p "$NATIVE_PREFIX" /tmp/native; \
+    tar -xf /tmp/centl-capsule/gmp.tar.xz -C /tmp/native; \
+    cd "/tmp/native/gmp-${GMP_VERSION}"; \
+    baseline_build=$(sh ./configfsf.guess); \
+    case "$baseline_build" in x86_64-*-linux-gnu) ;; *) exit 1 ;; esac; \
+    ABI=64 CFLAGS='-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic' \
+      ./configure --build="$baseline_build" --prefix="$NATIVE_PREFIX" \
+        --disable-static --enable-shared --enable-fat; \
+    make --jobs=2; \
+    make install; \
+    tar -xf /tmp/centl-capsule/mpfr.tar.xz -C /tmp/native; \
+    cd "/tmp/native/mpfr-${MPFR_VERSION}"; \
+    CFLAGS='-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic' \
+      ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+        --disable-static --enable-shared; \
+    make --jobs=2; \
+    make install; \
+    tar -xzf /tmp/centl-capsule/flint.tar.gz -C /tmp/native; \
+    cd "/tmp/native/flint-${FLINT_VERSION}"; \
+    CFLAGS='-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic' \
+      ./configure --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+        --with-mpfr="$NATIVE_PREFIX"; \
+    make --jobs=2; \
+    make install; \
+    rm -rf /tmp/native /tmp/centl-capsule/gmp.tar.xz \
+      /tmp/centl-capsule/mpfr.tar.xz /tmp/centl-capsule/flint.tar.gz
+
+COPY julia.tar.gz /tmp/centl-capsule/julia.tar.gz
+RUN set -eux; \
+    mkdir -p /opt/julia; \
+    tar -xzf /tmp/centl-capsule/julia.tar.gz -C /opt/julia --strip-components=1; \
+    rm -f /tmp/centl-capsule/julia.tar.gz; \
+    /opt/julia/bin/julia --version | grep -F "julia version ${JULIA_VERSION}"
+ENV PATH=/opt/julia/bin:${PATH}
+
+# Build the qualified CENTL-SCi inference runtime from the exact source commit
+# exported by scripts/capsule-build from the FCF Git mirror. No model or runtime
+# source is downloaded during this build step.
+COPY llama.cpp.tar /tmp/centl-capsule/llama.cpp.tar
+RUN set -eux; \
+    test -n "$LLAMA_COMMIT"; \
+    test -n "$LLAMA_BUILD_NUMBER"; \
+    mkdir -p /tmp/llama-src /tmp/llama-build /opt/centl-sci/bin; \
+    tar -xf /tmp/centl-capsule/llama.cpp.tar -C /tmp/llama-src; \
+    cmake -S /tmp/llama-src/llama.cpp -B /tmp/llama-build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DGGML_NATIVE=OFF \
+      -DGGML_OPENMP=OFF \
+      -DGGML_BLAS=OFF \
+      -DGGML_LLAMAFILE=OFF \
+      -DLLAMA_BUILD_TESTS=OFF \
+      -DLLAMA_BUILD_EXAMPLES=OFF \
+      -DLLAMA_BUILD_TOOLS=ON \
+      -DLLAMA_BUILD_SERVER=ON \
+      -DLLAMA_BUILD_APP=OFF \
+      -DLLAMA_BUILD_UI=OFF \
+      -DLLAMA_USE_PREBUILT_UI=OFF \
+      -DLLAMA_OPENSSL=OFF \
+      -DLLAMA_SUBPROCESS=OFF \
+      -DLLAMA_LLGUIDANCE=OFF \
+      -DLLAMA_BUILD_COMMIT="$LLAMA_COMMIT" \
+      -DLLAMA_BUILD_NUMBER="$LLAMA_BUILD_NUMBER"; \
+    cmake --build /tmp/llama-build --target llama-cli --parallel 2; \
+    install -m 0755 /tmp/llama-build/bin/llama-cli /opt/centl-sci/bin/llama-cli; \
+    /opt/centl-sci/bin/llama-cli --version > /opt/centl-sci/LLAMA-VERSION 2>&1; \
+    grep -F "$LLAMA_BUILD_NUMBER" /opt/centl-sci/LLAMA-VERSION; \
+    printf '%s' "$LLAMA_COMMIT" | cut -c1-9 \
+      | xargs -I{} grep -F '{}' /opt/centl-sci/LLAMA-VERSION; \
+    rm -rf /tmp/llama-src /tmp/llama-build /tmp/centl-capsule/llama.cpp.tar
+
+RUN set -eux; \
+    opam init --bare --disable-sandboxing; \
+    opam switch create centl "ocaml-base-compiler.${OCAML_VERSION}" --jobs=2; \
+    opam install --switch=centl --assume-depexts \
+      alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
+      yojson.2.2.2 zarith.1.14; \
+    opam clean --switch=centl --logs --repo-cache
+
+RUN set -eux; \
+    mkdir -p /opt/fcf-capsule; \
+    { \
+      printf 'base=docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f\n'; \
+      printf 'ocaml=%s\n' "$OCAML_VERSION"; \
+      printf 'julia=%s\n' "$JULIA_VERSION"; \
+      printf 'gmp=%s\n' "$GMP_VERSION"; \
+      printf 'mpfr=%s\n' "$MPFR_VERSION"; \
+      printf 'flint=%s\n' "$FLINT_VERSION"; \
+      printf 'llama_commit=%s\n' "$LLAMA_COMMIT"; \
+      printf 'llama_build_number=%s\n' "$LLAMA_BUILD_NUMBER"; \
+      opam --version | sed 's/^/opam=/'; \
+      gcc --version | sed -n '1s/^/cc=/p'; \
+      cmake --version | sed -n '1s/^/cmake=/p'; \
+      sed 's/^/llama_cli=/' /opt/centl-sci/LLAMA-VERSION; \
+      signify-openbsd -h 2>&1 | sed -n '1s/^/signify=/p' || true; \
+    } > /opt/fcf-capsule/IDENTITY
+
+WORKDIR /work
+CMD ["/bin/sh"]

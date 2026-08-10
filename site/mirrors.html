@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="FCF preservation mirror status and public distribution index."><title>Mirrors / pub — Free Computation Foundation</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="shell"><header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>Mirrors / pub</h1><p>Preserved bytes, immutable identities, and public distribution.</p></div></header>
+<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">Mirrors / pub</a></li><li><a href="docs.html">Documentation</a></li></ul></nav>
+<main><h2>Mirror policy</h2><p>FCF preservation follows a simple rule: a URL is not a backup. A resource is considered preserved only when FCF controls a copy of the bytes and records an immutable identity such as a full Git commit or SHA-256 digest.</p>
+<div class="notice"><strong>Current public state:</strong> the CENTL preservation, SHA-256 integrity, release-authentication, no-network rebuild, and OCI recovery-capsule tooling are implemented in the canonical source tree. The actual FCF preservation store and public artifact mirror are still being provisioned. This page will not label bytes as mirrored until those copies exist and pass the defined audit gates.</div>
+<p><strong>Browse:</strong> <a href="pub/">Index of /pub</a></p>
+<h2>CENTL preservation set</h2><table class="directory"><tr><th>Resource class</th><th>Public status</th><th>Identity / recovery contract</th></tr><tr><td>CENTL source</td><td>Canonical repository available</td><td>Exact Git commit + deterministic source SHA256SUMS receipt</td></tr><tr><td>CENTL native releases</td><td>Available from GitHub Releases</td><td>Archive SHA-256; signed release SHA256SUMS supported for FCF-authenticated releases</td></tr><tr><td>Build/toolchain sources</td><td>Preservation tooling implemented; FCF store provisioning pending</td><td>Immutable archive SHA-256 or full Git commit</td></tr><tr><td>CENTL-SCi model weights</td><td>Preservation-by-content-hash implemented; not served by this Pages site</td><td>Exact GGUF SHA-256 + provenance</td></tr><tr><td>Development caches/environments</td><td>Snapshot tooling implemented; FCF store provisioning pending</td><td>opam/Julia snapshot manifests + source commit</td></tr><tr><td>Linux recovery capsule</td><td>OCI build/save/run tooling implemented; first preserved capsule pending</td><td>Saved OCI archive SHA-256 + no-network recovery test</td></tr></table>
+<h2>Implemented recovery path</h2><pre><code>source receipt + exact commit
+        |
+preserved dependency/model bytes
+        |
+SHA-256-protected OCI build capsule
+        |
+no-network rebuild + test + Nemo differential gate
+        |
+release SHA256SUMS
+        |
+FCF signify signature</code></pre><p>The implementation and operational boundaries are documented in the <a href="https://github.com/chasebryan/centl/blob/main/docs/SUPPLY-CHAIN.md">supply-chain preservation guide</a>, <a href="https://github.com/chasebryan/centl/blob/main/docs/INTEGRITY.md">integrity and authentication guide</a>, and <a href="https://github.com/chasebryan/centl/blob/main/docs/RELEASE-SIGNING.md">release-signing guide</a>.</p>
+<h2>Planned public hierarchy</h2><pre><code>/pub/
+  centl/
+    releases/
+    source/
+    toolchain/
+    models/
+    manifests/
+    keys/
+  SHA256SUMS</code></pre><p>The exact backing store may move as FCF infrastructure grows. Public URLs are a distribution layer; they are not the sole preservation copy or cryptographic identity.</p>
+<h2>Integrity and authentication</h2><p>SHA-256 detects byte changes when the expected digest is trusted. It does not by itself prove who published that digest. CENTL therefore keeps integrity and authentication separate: standard SHA-256 for byte identity and OpenBSD <code>signify</code> for authenticated FCF release checksum manifests. No custom hash or signature algorithm is introduced.</p>
+<h2>Canonical source</h2><p>Until an item is explicitly marked mirrored here, use the <a href="https://github.com/chasebryan/centl">CENTL repository</a> and <a href="https://github.com/chasebryan/centl/releases/latest">official releases</a> as the distribution source.</p>
+</main></div><footer>Free Computation Foundation · Preservation status is stated conservatively.</footer></div></body></html>

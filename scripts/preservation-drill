@@ -1,0 +1,156 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mode=${1:-${CENTL_DRILL_MODE:-verify}}
+primary=${2:-${CENTL_MIRROR:-}}
+secondary=${3:-${CENTL_SECONDARY_MIRROR:-}}
+
+fail() {
+  printf 'centl preservation-drill: %s\n' "$*" >&2
+  exit 1
+}
+
+canonical_dir() {
+  CDPATH= cd -- "$1" && pwd
+}
+
+prospective_path() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+print(os.path.realpath(os.path.expanduser(sys.argv[1])))
+PY
+}
+
+case "$mode" in
+  verify|full) ;;
+  *) fail "mode must be 'verify' or 'full'" ;;
+esac
+
+command -v python3 >/dev/null 2>&1 || fail "python3 is required"
+[ -n "$primary" ] || fail "primary mirror is required (argument or CENTL_MIRROR)"
+[ -d "$primary" ] || fail "primary mirror not found: $primary"
+primary=$(canonical_dir "$primary")
+
+if [ -n "$secondary" ]; then
+  [ -d "$secondary" ] || fail "secondary mirror not found: $secondary"
+  secondary=$(canonical_dir "$secondary")
+fi
+
+if [ -n "${CENTL_DRILL_REPORT_DIR:-}" ]; then
+  report_root=$CENTL_DRILL_REPORT_DIR
+elif [ -n "${XDG_STATE_HOME:-}" ]; then
+  report_root="$XDG_STATE_HOME/centl/preservation"
+elif [ -n "${HOME:-}" ]; then
+  report_root="$HOME/.local/state/centl/preservation"
+else
+  fail "CENTL_DRILL_REPORT_DIR is required when HOME/XDG_STATE_HOME are unavailable"
+fi
+
+# Resolve the intended report path before creating it. A bad configuration must
+# not mutate a preservation mirror merely by attempting to reject that path.
+report_root=$(prospective_path "$report_root")
+case "$report_root" in
+  "$primary"|"$primary"/*)
+    fail "report directory must not be inside the primary mirror"
+    ;;
+esac
+if [ -n "$secondary" ]; then
+  case "$report_root" in
+    "$secondary"|"$secondary"/*)
+      fail "report directory must not be inside the secondary mirror"
+      ;;
+  esac
+fi
+
+mkdir -p "$report_root"
+report_root=$(canonical_dir "$report_root")
+
+stamp=$(date -u '+%Y%m%dT%H%M%SZ')
+started=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+report="$report_root/centl-preservation-$stamp-$$.log"
+step_output="$report_root/.centl-preservation-step-$$"
+rm -f "$step_output"
+trap 'rm -f "$step_output"' 0 HUP INT TERM
+
+repo_commit=unknown
+if command -v git >/dev/null 2>&1; then
+  repo_commit=$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf unknown)
+fi
+
+{
+  printf 'CENTL FCF preservation drill\n'
+  printf 'started_utc=%s\n' "$started"
+  printf 'mode=%s\n' "$mode"
+  printf 'repo_commit=%s\n' "$repo_commit"
+  printf 'primary=%s\n' "$primary"
+  printf 'secondary=%s\n' "${secondary:-none}"
+} > "$report"
+
+run_step() {
+  label=$1
+  shift
+  printf '\n== %s ==\n' "$label" | tee -a "$report"
+  rm -f "$step_output"
+  if "$@" > "$step_output" 2>&1; then
+    tee -a "$report" < "$step_output"
+    rm -f "$step_output"
+    printf 'step_status=PASS\n' | tee -a "$report"
+    return 0
+  else
+    status=$?
+    tee -a "$report" < "$step_output" >&2
+    rm -f "$step_output"
+    printf 'step_status=FAIL code=%s\n' "$status" | tee -a "$report" >&2
+    return "$status"
+  fi
+}
+
+abort_drill() {
+  status=$1
+  label=$2
+  finished=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  {
+    printf '\nresult=FAIL\n'
+    printf 'failed_step=%s\n' "$label"
+    printf 'finished_utc=%s\n' "$finished"
+    printf 'report=%s\n' "$report"
+  } | tee -a "$report" >&2
+  exit "$status"
+}
+
+run_step "supply-chain mirror audit" \
+  sh "$repo_root/scripts/supply-chain" audit "$primary" ||
+  abort_drill $? "supply-chain mirror audit"
+
+run_step "primary whole-mirror receipt" \
+  sh "$repo_root/scripts/mirror-receipt" verify "$primary" ||
+  abort_drill $? "primary whole-mirror receipt"
+
+if [ -n "$secondary" ]; then
+  run_step "primary/secondary exact comparison" \
+    sh "$repo_root/scripts/mirror-receipt" compare "$primary" "$secondary" ||
+    abort_drill $? "primary/secondary exact comparison"
+fi
+
+run_step "regular-file receipt identity" \
+  python3 "$repo_root/scripts/integrity.py" hash "$primary/MIRROR-SHA256SUMS" ||
+  abort_drill $? "regular-file receipt identity"
+
+run_step "symlink receipt identity" \
+  python3 "$repo_root/scripts/integrity.py" hash "$primary/MIRROR-SYMLINKS" ||
+  abort_drill $? "symlink receipt identity"
+
+if [ "$mode" = full ]; then
+  run_step "saved OCI no-network recovery build" \
+    sh "$repo_root/scripts/capsule-run" "$primary" ||
+    abort_drill $? "saved OCI no-network recovery build"
+fi
+
+finished=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+{
+  printf '\nresult=PASS\n'
+  printf 'finished_utc=%s\n' "$finished"
+  printf 'report=%s\n' "$report"
+} | tee -a "$report"

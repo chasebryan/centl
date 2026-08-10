@@ -3,6 +3,7 @@ set -eu
 
 repository="chasebryan/centl"
 release_version="latest"
+release_base_url=${CENTL_RELEASE_BASE_URL:-}
 archive_path=""
 prefix=${CENTL_PREFIX:-}
 configure_path=true
@@ -11,13 +12,19 @@ usage() {
   cat <<'EOF'
 Install a prebuilt CENTL release.
 
-Usage: ./install [--version VERSION] [--prefix PATH] [--archive PATH] [--no-path]
+Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [--archive PATH] [--no-path]
 
-  --version VERSION  install a specific release (default: latest)
-  --prefix PATH       install below PATH (default: ~/.local)
-  --archive PATH      install and verify a local release archive
-  --no-path           do not update a shell startup file when PATH needs setup
-  --help              show this help
+  --version VERSION          install a specific release (default: latest)
+  --release-base-url URL     use URL/vVERSION as the release directory
+                             (HTTPS or file://; requires explicit --version)
+  --prefix PATH              install below PATH (default: ~/.local)
+  --archive PATH             install and verify a local release archive
+  --no-path                  do not update a shell startup file when PATH needs setup
+  --help                     show this help
+
+Environment:
+  CENTL_RELEASE_BASE_URL     same as --release-base-url
+  CENTL_PREFIX               same as --prefix
 EOF
 }
 
@@ -36,6 +43,11 @@ while [ "$#" -gt 0 ]; do
     --version)
       [ "$#" -ge 2 ] || fail "--version needs a value"
       release_version=$2
+      shift 2
+      ;;
+    --release-base-url)
+      [ "$#" -ge 2 ] || fail "--release-base-url needs a URL"
+      release_base_url=$2
       shift 2
       ;;
     --prefix)
@@ -71,6 +83,24 @@ case "$prefix" in
   /*) ;;
   *) prefix="$(pwd)/$prefix" ;;
 esac
+
+if [ -n "$archive_path" ] && [ -n "$release_base_url" ]; then
+  fail "--archive and --release-base-url are mutually exclusive"
+fi
+if [ -n "$release_base_url" ]; then
+  case "$release_base_url" in
+    *'
+'*) fail "the release base URL cannot contain a newline" ;;
+    https://*|file://*) ;;
+    *) fail "the release base URL must use https:// or file://" ;;
+  esac
+  [ "$release_version" != latest ] ||
+    fail "a custom release base URL requires an explicit --version"
+  requested_release=${release_version#v}
+  case "$requested_release" in
+    ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested release version is invalid" ;;
+  esac
+fi
 
 case $(uname -s) in
   Linux) platform=linux ;;
@@ -108,12 +138,16 @@ if [ -n "$archive_path" ]; then
   cp "$archive_path" "$archive"
   cp "$archive_path.sha256" "$checksum"
 else
-  case "$release_version" in
-    latest) release_path=latest/download ;;
-    v*) release_path="download/$release_version" ;;
-    *) release_path="download/v$release_version" ;;
-  esac
-  base_url="https://github.com/$repository/releases/$release_path"
+  if [ -n "$release_base_url" ]; then
+    base_url="${release_base_url%/}/v$requested_release"
+  else
+    case "$release_version" in
+      latest) release_path=latest/download ;;
+      v*) release_path="download/$release_version" ;;
+      *) release_path="download/v$release_version" ;;
+    esac
+    base_url="https://github.com/$repository/releases/$release_path"
+  fi
   command -v curl >/dev/null 2>&1 || fail "curl is required to download CENTL"
   printf 'Downloading CENTL %s for %s-%s...\n' \
     "$release_version" "$platform" "$architecture"

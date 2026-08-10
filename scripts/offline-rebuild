@@ -1,0 +1,202 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${1:-}
+work_parent=${2:-${TMPDIR:-/tmp}}
+
+fail() {
+  printf 'centl offline-rebuild: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required in the FCF build capsule"
+}
+
+[ -n "$mirror" ] || fail "usage: scripts/offline-rebuild MIRROR_DIR [WORK_PARENT]"
+mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror not found: $mirror"
+[ -f "$mirror/project/centl.bundle" ] || fail "CENTL bundle missing from mirror"
+[ -f "$mirror/project/SOURCE-COMMIT" ] || fail "SOURCE-COMMIT missing from mirror"
+[ -f "$mirror/project/SOURCE-SHA256SUMS" ] || fail "SOURCE-SHA256SUMS missing from mirror"
+[ -f "$mirror/project/SOURCE-SHA256SUMS.sha256" ] ||
+  fail "SOURCE-SHA256SUMS.sha256 missing from mirror"
+
+# The outer invocation creates a fresh Linux network namespace. This is stronger
+# than merely setting package-manager offline flags: the build process has no
+# network interface capable of reaching an upstream host.
+if [ "${CENTL_OFFLINE_REBUILD_INNER:-0}" != 1 ]; then
+  need unshare
+  exec unshare --net --map-root-user \
+    env CENTL_OFFLINE_REBUILD_INNER=1 \
+    sh "$0" "$mirror" "$work_parent"
+fi
+
+need git
+need make
+need opam
+need python3
+need julia
+need tar
+
+# A loopback interface is not needed. Refuse an obviously connected namespace
+# if a default route somehow survived setup.
+if command -v ip >/dev/null 2>&1 && ip route 2>/dev/null | grep -q '^default '; then
+  fail "network namespace still has a default route"
+fi
+
+sh "$repo_root/scripts/supply-chain" audit "$mirror"
+
+# Verify preservation receipts before trusting the recorded source state.
+python3 "$repo_root/scripts/integrity.py" verify \
+  "$mirror/project/SOURCE-SHA256SUMS.sha256" --root "$mirror/project"
+if [ -s "$mirror/julia/DEPOT.sha256" ]; then
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/julia/DEPOT.sha256" --root "$mirror/julia"
+else
+  fail "preserved Julia depot checksum manifest is missing or empty"
+fi
+if [ -s "$mirror/opam/SOURCES.sha256" ]; then
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/opam/SOURCES.sha256" --root "$mirror/opam"
+else
+  fail "preserved opam source checksum manifest is missing or empty"
+fi
+
+work=$(mktemp -d "$work_parent/centl-offline-rebuild.XXXXXXXX")
+cleanup() {
+  rm -rf "$work"
+}
+trap cleanup EXIT HUP INT TERM
+
+source_dir="$work/centl"
+git clone --quiet "$mirror/project/centl.bundle" "$source_dir"
+commit=$(sed -n '1p' "$mirror/project/SOURCE-COMMIT")
+case "$commit" in
+  *[!0-9a-f]*|'') fail "invalid SOURCE-COMMIT" ;;
+esac
+[ "${#commit}" -eq 40 ] || fail "SOURCE-COMMIT must be a full Git SHA-1"
+git -C "$source_dir" checkout --quiet --detach "$commit"
+[ "$(git -C "$source_dir" rev-parse HEAD)" = "$commit" ] ||
+  fail "recovered checkout does not match SOURCE-COMMIT"
+
+python3 "$source_dir/scripts/integrity.py" verify \
+  "$mirror/project/SOURCE-SHA256SUMS" --root "$source_dir"
+
+# Recover the verifier from preserved bytes, not from PATH or an upstream host.
+export CENTL_SUPPLY_CHAIN_OFFLINE=1
+export CENTL_SOURCE_MIRROR_DIR="$mirror"
+sh "$source_dir/scripts/supply-chain" fetch fstar-linux-x86_64 \
+  "$mirror" "$work/fstar.tar.gz" >/dev/null
+mkdir -p "$work/fstar"
+tar -xzf "$work/fstar.tar.gz" -C "$work/fstar"
+fstar=$(find "$work/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
+[ -n "$fstar" ] || fail "preserved F* archive contains no fstar.exe"
+export FSTAR="$fstar"
+
+# The FCF build capsule must contain the pinned opam switch. Package downloads
+# are impossible in this namespace; a missing dependency is therefore a hard
+# preservation/capsule failure rather than an upstream fallback.
+switch=${CENTL_OPAM_SWITCH:-centl}
+opam switch list --short | grep -Fqx "$switch" ||
+  fail "FCF build capsule is missing opam switch $switch"
+
+# Use the preserved Julia/Nemo depot. No instantiate/update operation is allowed
+# during this gate.
+[ -d "$mirror/julia/depot" ] || fail "preserved Julia depot is missing"
+export JULIA_DEPOT_PATH="$mirror/julia/depot"
+export JULIA_PKG_OFFLINE=true
+export JULIA_PKG_PRECOMPILE_AUTO=0
+export JULIA_NUM_THREADS=1
+
+cd "$source_dir"
+opam exec --switch="$switch" -- make quality
+opam exec --switch="$switch" -- make test
+opam exec --switch="$switch" -- make native-build
+
+CENTL_BIN="$source_dir/_build/default/src/main.exe" \
+  julia --startup-file=no --project="$source_dir/lab/julia" \
+    "$source_dir/lab/julia/differential.jl"
+
+reported_commit=$(
+  "$source_dir/_build/default/src/main.exe" --build-info \
+    | sed -n 's/^commit=//p'
+)
+[ "$reported_commit" = "$commit" ] ||
+  fail "rebuilt binary reports commit $reported_commit, expected $commit"
+
+sci_status=not-preserved
+if [ -f "$mirror/models/ACTIVE.sha256" ]; then
+  sci_status=checking
+  model_digest=$(sed -n '1p' "$mirror/models/ACTIVE.sha256")
+  case "$model_digest" in
+    ''|*[!0-9a-f]*) fail "invalid active CENTL-SCi model digest" ;;
+  esac
+  [ "${#model_digest}" -eq 64 ] || fail "active model digest must be SHA-256"
+  model_dir="$mirror/models/$model_digest"
+  model_manifest="$model_dir/MANIFEST"
+  [ -f "$model_manifest" ] || fail "active model MANIFEST is missing"
+  model_name=$(sed -n 's/^file=//p' "$model_manifest" | sed -n '1p')
+  case "$model_name" in
+    ''|*/*|*..*|*'\'*) fail "unsafe active model filename" ;;
+  esac
+  model="$model_dir/$model_name"
+  [ -f "$model" ] && [ ! -L "$model" ] || fail "active model bytes are missing"
+
+  runtime_dir="$mirror/sci-runtime"
+  [ -f "$runtime_dir/LLAMA-COMMIT" ] || fail "preserved llama-cli commit identity is missing"
+  [ -f "$runtime_dir/LLAMA-BUILD-NUMBER" ] || fail "preserved llama-cli build number is missing"
+  [ -f "$runtime_dir/llama-cli.sha256" ] || fail "preserved llama-cli checksum is missing"
+  python3 "$source_dir/scripts/integrity.py" verify \
+    "$runtime_dir/llama-cli.sha256" --root "$runtime_dir"
+
+  expected_llama_commit=$(
+    awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+      "$source_dir/supply-chain/sources.lock"
+  )
+  observed_llama_commit=$(sed -n '1p' "$runtime_dir/LLAMA-COMMIT")
+  [ "$observed_llama_commit" = "$expected_llama_commit" ] ||
+    fail "preserved llama-cli commit does not match CENTL supply-chain lock"
+  llama_build_number=$(sed -n '1p' "$runtime_dir/LLAMA-BUILD-NUMBER")
+  case "$llama_build_number" in
+    ''|*[!0-9]*) fail "invalid preserved llama-cli build number" ;;
+  esac
+
+  sci_cli=${CENTL_SCI_LLAMA_CLI:-}
+  if [ -z "$sci_cli" ] && [ -x /opt/centl-sci/bin/llama-cli ]; then
+    sci_cli=/opt/centl-sci/bin/llama-cli
+  fi
+  if [ -z "$sci_cli" ] && [ -x "$runtime_dir/llama-cli" ]; then
+    sci_cli="$runtime_dir/llama-cli"
+  fi
+  if [ -z "$sci_cli" ] && command -v llama-cli >/dev/null 2>&1; then
+    sci_cli=$(command -v llama-cli)
+  fi
+  [ -n "$sci_cli" ] && [ -x "$sci_cli" ] ||
+    fail "active CENTL-SCi model is preserved but no qualified llama-cli is executable"
+
+  runtime_version=$($sci_cli --version 2>&1) ||
+    fail "preserved llama-cli cannot execute in the recovery environment"
+  short_commit=$(printf '%s' "$expected_llama_commit" | cut -c1-9)
+  printf '%s\n' "$runtime_version" | grep -F "$short_commit" >/dev/null ||
+    fail "llama-cli version does not report pinned commit $short_commit"
+  printf '%s\n' "$runtime_version" | grep -F "$llama_build_number" >/dev/null ||
+    fail "llama-cli version does not report build $llama_build_number"
+
+  sci_report="$work/sci-recovery.json"
+  python3 "$source_dir/scripts/sci-model-eval.py" \
+    --model "$model" \
+    --model-label "preserved:$model_digest" \
+    --llama-cli "$sci_cli" \
+    --centl-sci "$source_dir/_build/default/src/sci_main.exe" \
+    --case exact_decimal_addition \
+    --timeout "${CENTL_SCI_RECOVERY_TIMEOUT:-300}" \
+    --output "$sci_report"
+  sci_status=pass
+fi
+
+printf 'CENTL offline rebuild gate: PASS\n'
+printf 'source_commit=%s\n' "$commit"
+printf 'mirror=%s\n' "$mirror"
+printf 'network_namespace=isolated\n'
+printf 'sci_model_recovery=%s\n' "$sci_status"

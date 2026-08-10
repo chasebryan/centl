@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [string] $Version = "latest",
+    [string] $ReleaseBaseUrl = $env:CENTL_RELEASE_BASE_URL,
     [string] $Prefix = $(if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "Programs\CENTL" }),
     [string] $Archive,
     [switch] $NoPath
@@ -15,6 +16,9 @@ if (-not $Prefix) {
 }
 if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -ne "AMD64") {
     throw "centl install: prebuilt Windows releases currently support x86_64 only"
+}
+if ($Archive -and $ReleaseBaseUrl) {
+    throw "centl install: -Archive and -ReleaseBaseUrl are mutually exclusive"
 }
 
 $Prefix = [IO.Path]::GetFullPath($Prefix)
@@ -38,19 +42,61 @@ try {
         Copy-Item -LiteralPath "$Archive.sha256" -Destination $Checksum
     }
     else {
-        $ReleasePath = if ($Version -eq "latest") {
-            "latest/download"
-        }
-        elseif ($Version.StartsWith("v")) {
-            "download/$Version"
+        if ($ReleaseBaseUrl) {
+            if ($Version -eq "latest") {
+                throw "centl install: a custom release base URL requires an explicit -Version"
+            }
+            $RequestedVersion = $Version.TrimStart("v")
+            if ($RequestedVersion -notmatch '^[0-9A-Za-z.+_-]+$' -or $RequestedVersion.Contains("..")) {
+                throw "centl install: the requested release version is invalid"
+            }
+
+            $BaseUri = $null
+            if (-not [Uri]::TryCreate($ReleaseBaseUrl, [UriKind]::Absolute, [ref] $BaseUri)) {
+                throw "centl install: the release base URL is invalid"
+            }
+            if ($BaseUri.Scheme -ne "https" -and $BaseUri.Scheme -ne "file") {
+                throw "centl install: the release base URL must use https:// or file://"
+            }
+            if ($BaseUri.Query -or $BaseUri.Fragment) {
+                throw "centl install: the release base URL must not contain a query or fragment"
+            }
+
+            Write-Host "Downloading CENTL $Version for windows-x86_64..."
+            if ($BaseUri.Scheme -eq "file") {
+                $VersionDirectory = Join-Path $BaseUri.LocalPath "v$RequestedVersion"
+                $SourceArchive = Join-Path $VersionDirectory $Asset
+                $SourceChecksum = "$SourceArchive.sha256"
+                if (-not (Test-Path -LiteralPath $SourceArchive -PathType Leaf)) {
+                    throw "centl install: release archive not found: $SourceArchive"
+                }
+                if (-not (Test-Path -LiteralPath $SourceChecksum -PathType Leaf)) {
+                    throw "centl install: release checksum not found: $SourceChecksum"
+                }
+                Copy-Item -LiteralPath $SourceArchive -Destination $DownloadedArchive
+                Copy-Item -LiteralPath $SourceChecksum -Destination $Checksum
+            }
+            else {
+                $BaseUrl = $BaseUri.AbsoluteUri.TrimEnd('/') + "/v$RequestedVersion"
+                Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset" -OutFile $DownloadedArchive
+                Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset.sha256" -OutFile $Checksum
+            }
         }
         else {
-            "download/v$Version"
+            $ReleasePath = if ($Version -eq "latest") {
+                "latest/download"
+            }
+            elseif ($Version.StartsWith("v")) {
+                "download/$Version"
+            }
+            else {
+                "download/v$Version"
+            }
+            $BaseUrl = "https://github.com/$Repository/releases/$ReleasePath"
+            Write-Host "Downloading CENTL $Version for windows-x86_64..."
+            Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset" -OutFile $DownloadedArchive
+            Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset.sha256" -OutFile $Checksum
         }
-        $BaseUrl = "https://github.com/$Repository/releases/$ReleasePath"
-        Write-Host "Downloading CENTL $Version for windows-x86_64..."
-        Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset" -OutFile $DownloadedArchive
-        Invoke-WebRequest -UseBasicParsing -Uri "$BaseUrl/$Asset.sha256" -OutFile $Checksum
     }
 
     $ChecksumText = (Get-Content -LiteralPath $Checksum -Raw).Trim()
