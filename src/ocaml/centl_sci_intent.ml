@@ -55,8 +55,24 @@ let lower text = String.lowercase_ascii (String.trim text)
 let contains needle text =
   Option.is_some (Centl_sci_interaction.find_substring ~needle text)
 
-let starts prefixes text =
-  List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
+let contains_any needles text = List.exists (fun needle -> contains needle text) needles
+let starts prefixes text = List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
+
+let constant_phrase input =
+  contains_any
+    [
+      "speed of light";
+      "planck constant";
+      "planck's constant";
+      "elementary charge";
+      "boltzmann constant";
+      "avogadro constant";
+      "avogadro's constant";
+      "standard gravity";
+      "standard acceleration of gravity";
+    ]
+    input
+  || starts [ "constant "; "physical constant "; "lookup constant " ] input
 
 let classify ~mode input =
   let input = lower input in
@@ -65,27 +81,73 @@ let classify ~mode input =
   else
     match mode with
     | Centl_sci_interaction.Build ->
-        if starts [ "show "; "inspect "; "list "; "why " ] input then
-          result System_inspection High "BUILD inspection verb"
-        else if starts [ "create "; "write "; "make " ] input then
+        if
+          starts
+            [
+              "show ";
+              "inspect ";
+              "list ";
+              "why ";
+              "validate ";
+              "capabilities";
+              "workspace";
+              "extensions";
+              "packages";
+            ]
+            input
+        then result System_inspection High "BUILD inspection/validation verb"
+        else if starts [ "create "; "write "; "make "; "scaffold " ] input then
           result Program_creation High "BUILD creation verb"
-        else if starts [ "add "; "extend "; "install "; "integrate " ] input then
+        else if starts [ "add "; "extend "; "install "; "integrate "; "prepare " ] input then
           result System_extension High "BUILD extension verb"
-        else if starts [ "modify "; "change "; "replace "; "remove "; "disable "; "enable "; "undo " ] input then
-          result System_modification High "BUILD modification verb"
+        else if
+          starts
+            [
+              "modify ";
+              "change ";
+              "replace ";
+              "remove ";
+              "disable ";
+              "enable ";
+              "undo ";
+              "import ";
+            ]
+            input
+        then result System_modification High "BUILD modification verb"
         else result System_extension Medium "BUILD mode default"
     | _ ->
-        if starts [ "convert "; "change " ] input && (contains " to " input || contains " into " input) then
-          result Unit_conversion High "conversion verb and target unit"
-        else if starts [ "solve "; "find the roots"; "roots of "; "zeros of "; "find zeros"; "solutions of " ] input then
-          result Equation_solving High "equation-solving phrase"
-        else if starts [ "differentiate "; "derivative of "; "take the derivative"; "find dy/dx" ] input then
-          result Differentiation High "differentiation phrase"
+        if
+          starts [ "convert "; "change "; "how many " ] input
+          && (contains " to " input || contains " into " input || contains " in " input)
+        then result Unit_conversion High "conversion phrase with source/target units"
+        else if constant_phrase input then
+          result Constant_lookup High "known physical-constant lookup phrase"
+        else if
+          starts
+            [
+              "solve ";
+              "find the roots";
+              "roots of ";
+              "zeros of ";
+              "find zeros";
+              "solutions of ";
+            ]
+            input
+        then result Equation_solving High "equation-solving phrase"
+        else if
+          starts
+            [ "differentiate "; "derivative of "; "take the derivative"; "find dy/dx" ]
+            input
+        then result Differentiation High "differentiation phrase"
         else if starts [ "integrate "; "integral of "; "find the integral" ] input then
           result Integration High "integration phrase"
         else if starts [ "simplify "; "reduce " ] input then
           result Simplification High "simplification phrase"
-        else if starts [ "verify "; "check whether "; "prove whether " ] input then
+        else if starts [ "substitute "; "plug "; "replace " ] input && contains " into " input then
+          result Substitution High "substitution phrase"
+        else if starts [ "approx "; "approximate "; "decimal "; "estimate " ] input then
+          result Approximation High "approximation phrase"
+        else if starts [ "verify "; "check whether "; "prove whether "; "assert " ] input then
           result Verification High "verification phrase"
         else if starts [ "simulate "; "step "; "evolve " ] input then
           result Physics_simulation Medium "simulation verb"
@@ -97,7 +159,9 @@ let classify ~mode input =
 
 let strip_prefix prefix text =
   if String.starts_with ~prefix text then
-    Some (String.sub text (String.length prefix) (String.length text - String.length prefix) |> String.trim)
+    Some
+      (String.sub text (String.length prefix) (String.length text - String.length prefix)
+      |> String.trim)
   else None
 
 let canonicalize classification input =
@@ -106,17 +170,23 @@ let canonicalize classification input =
   match classification.intent with
   | Unit_conversion ->
       let normalized =
-        Centl_sci_interaction.replace_all ~needle:" into " ~replacement:" to " trimmed
+        Centl_sci_interaction.replace_all_ci ~needle:" into " ~replacement:" to " trimmed
       in
       begin match strip_prefix "change " (lower normalized) with
-      | Some _ ->
-          "convert " ^ String.sub normalized 7 (String.length normalized - 7)
+      | Some _ -> "convert " ^ String.sub normalized 7 (String.length normalized - 7)
       | None -> normalized
       end
   | Equation_solving ->
       let root_body =
         let candidates =
-          [ "find the roots of "; "find roots of "; "roots of "; "find the zeros of "; "find zeros of "; "zeros of " ]
+          [
+            "find the roots of ";
+            "find roots of ";
+            "roots of ";
+            "find the zeros of ";
+            "find zeros of ";
+            "zeros of ";
+          ]
         in
         let rec choose = function
           | [] -> None
