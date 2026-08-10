@@ -42,6 +42,7 @@
   Centl_engine
   Centl_version
   Centl_build
+  Centl_sha256
   Centl_verify
   Centl_receipt
   Centl_protocol
