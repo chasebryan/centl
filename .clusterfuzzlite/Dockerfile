@@ -1,0 +1,5 @@
+FROM gcr.io/oss-fuzz-base/base-builder-python:v1
+
+COPY . $SRC/centl
+WORKDIR $SRC/centl
+COPY ./.clusterfuzzlite/build.sh $SRC/build.sh
