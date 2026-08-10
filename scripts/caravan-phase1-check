@@ -3,10 +3,23 @@ set -eu
 
 PYTHON=${PYTHON:-python3}
 
+"$PYTHON" - <<'PY'
+import cryptography
+if cryptography.__version__ != "49.0.0":
+    raise SystemExit(
+        f"CARAVAN Phase 1 requires cryptography 49.0.0, got {cryptography.__version__}"
+    )
+PY
+
 "$PYTHON" -m py_compile \
   caravan/__init__.py \
   caravan/content.py \
   caravan/coordinator.py \
-  tests/test_caravan_phase1.py
+  caravan/identity.py \
+  caravan/policy.py \
+  tests/test_caravan_phase1.py \
+  tests/test_caravan_identity.py
 
-PYTHONPATH=. "$PYTHON" -m unittest -v tests/test_caravan_phase1.py
+PYTHONPATH=. "$PYTHON" -m unittest -v \
+  tests/test_caravan_phase1.py \
+  tests/test_caravan_identity.py
