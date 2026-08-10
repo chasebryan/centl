@@ -49,6 +49,8 @@ let test_workspace_snapshot_executes () =
                  ~executor:"workspace_snapshot" ~precondition:"before_activation" ();
              ])
       in
+      Alcotest.(check bool) "single passed action completes evidence cycle" true
+        (Centl_sci_mirage_evidence.evidence_complete report);
       match report.receipts with
       | [ receipt ] ->
           Alcotest.(check string) "snapshot passes" "passed"
@@ -105,6 +107,8 @@ let test_unimplemented_executor_stays_pending () =
                  ~precondition:"candidate_materialized" ();
              ])
       in
+      Alcotest.(check bool) "pending evidence is not complete" false
+        (Centl_sci_mirage_evidence.evidence_complete report);
       match report.receipts with
       | [ receipt ] ->
           Alcotest.(check string) "not fabricated as executed" "pending"
@@ -127,6 +131,8 @@ let test_unsupported_executor_is_blocked () =
                  ~precondition:"blocking_requirement_resolved" ();
              ])
       in
+      Alcotest.(check bool) "blocked evidence is not complete" false
+        (Centl_sci_mirage_evidence.evidence_complete report);
       match report.receipts with
       | [ receipt ] ->
           Alcotest.(check string) "unsupported executor blocks" "blocked"
@@ -153,6 +159,14 @@ let test_persisted_receipts_deny_activation () =
       | Ok (path, _) ->
           let json = Yojson.Safe.from_file path in
           let open Yojson.Safe.Util in
+          Alcotest.(check int) "passed count" 1
+            (json |> member "passed_action_count" |> to_int);
+          Alcotest.(check int) "pending count" 0
+            (json |> member "pending_action_count" |> to_int);
+          Alcotest.(check int) "blocked count" 0
+            (json |> member "blocked_action_count" |> to_int);
+          Alcotest.(check bool) "named evidence cycle is complete" true
+            (json |> member "evidence_complete" |> to_bool);
           Alcotest.(check bool) "candidate remains inactive" false
             (json |> member "candidate_source_activated" |> to_bool);
           Alcotest.(check bool) "assurance remains unpromoted" false
