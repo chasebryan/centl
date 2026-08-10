@@ -1,0 +1,48 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${1:-}
+
+fail() {
+  printf 'centl capsule-run: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+[ -n "$mirror" ] || fail "usage: scripts/capsule-run MIRROR_DIR"
+mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror not found: $mirror"
+need podman
+need python3
+
+capsule="$mirror/capsule"
+archive="$capsule/centl-build-capsule.oci.tar"
+checksum="$archive.sha256"
+image_ref_file="$capsule/IMAGE-REF"
+[ -f "$archive" ] || fail "capsule archive not found: $archive"
+[ -f "$checksum" ] || fail "capsule checksum not found: $checksum"
+[ -f "$image_ref_file" ] || fail "capsule IMAGE-REF not found"
+
+python3 "$repo_root/scripts/integrity.py" verify "$checksum" --root "$capsule"
+podman load --input "$archive" >/dev/null
+image_ref=$(sed -n '1p' "$image_ref_file")
+[ -n "$image_ref" ] || fail "capsule IMAGE-REF is empty"
+podman image exists "$image_ref" || fail "loaded capsule did not provide $image_ref"
+
+# Network isolation is imposed by the container runtime. The inner rebuild script
+# verifies that no default route is present and therefore skips creating a nested
+# user/network namespace.
+podman run --rm \
+  --network none \
+  --security-opt label=disable \
+  -e CENTL_OFFLINE_REBUILD_INNER=1 \
+  -e CENTL_OPAM_SWITCH=centl \
+  -v "$mirror:/mirror:ro" \
+  -v "$repo_root:/driver:ro" \
+  "$image_ref" \
+  sh /driver/scripts/offline-rebuild /mirror
+
+printf 'FCF CENTL capsule no-network rebuild: PASS\n'
