@@ -72,6 +72,7 @@
   Centl_sci_dependencies
   Centl_sci_change_ir
   Centl_sci_build_plan
+  Centl_sci_mirage
   Centl_sci_core_plan
   Centl_sci_scaffold
   Centl_sci_codegen
