@@ -333,6 +333,7 @@ let build_completions =
   [
     "adapter";
     "add";
+    "assurance";
     "audit";
     "capabilities";
     "create";
@@ -350,6 +351,8 @@ let build_completions =
     "packages";
     "prepare";
     "remove";
+    "revision";
+    "revisions";
     "scaffold";
     "show";
     "undo";
@@ -392,7 +395,7 @@ let clarification mode normalized =
     match mode with
     | Build ->
         Some
-          "BUILD can inspect capabilities; audit the workspace; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
+          "BUILD can inspect capabilities and assurance; audit the workspace; read revision history; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export or import a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
     | (Phys | Hybrid) when missing_mechanics <> [] ->
         Some
           ("I understand this as a uniform-gravity particle simulation, but required fields are missing: "
