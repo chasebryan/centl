@@ -26,13 +26,13 @@ let test_extension_is_staged_without_mutation () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
-      let _, _, report =
-        make_report workspace
-          [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
-      in
+      let requirement = "Implement quasar_flux_tensorization" in
+      let _, _, report = make_report workspace [ cell 1 "DIRECTIVE" requirement ] in
       let candidate = only_candidate report in
       Alcotest.(check string) "strategy" "downstream_extension"
         (Centl_sci_mirage_candidate.strategy_text candidate.strategy);
+      Alcotest.(check string) "source requirement retained" requirement
+        candidate.source_requirement;
       Alcotest.(check bool) "transaction does not mutate workspace" false
         candidate.mutates_workspace;
       Alcotest.(check bool) "obligations attached" true
@@ -111,6 +111,28 @@ let test_transaction_fingerprint_detects_plan_drift () =
         ((only_candidate extension_report).transaction_fingerprint
         <> (only_candidate composition_report).transaction_fingerprint))
 
+let test_transaction_fingerprint_detects_requirement_drift () =
+  let root = temp_dir "centl-mirage-candidate-requirement-drift-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let _, _, first =
+        make_report workspace
+          [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
+      in
+      let _, _, second =
+        make_report workspace
+          [ cell 1 "DIRECTIVE" "Implement pulsar_phase_tensorization" ]
+      in
+      let first = only_candidate first in
+      let second = only_candidate second in
+      Alcotest.(check string) "same strategy retained" 
+        (Centl_sci_mirage_candidate.strategy_text first.strategy)
+        (Centl_sci_mirage_candidate.strategy_text second.strategy);
+      Alcotest.(check bool) "different requirement changes identity" true
+        (first.transaction_fingerprint <> second.transaction_fingerprint))
+
 let test_construct_persists_transaction_artifact () =
   let root = temp_dir "centl-mirage-candidate-file-" in
   Fun.protect
@@ -164,6 +186,8 @@ let () =
             test_transaction_fingerprint_is_deterministic;
           Alcotest.test_case "transaction identity detects plan drift" `Quick
             test_transaction_fingerprint_detects_plan_drift;
+          Alcotest.test_case "transaction identity detects requirement drift" `Quick
+            test_transaction_fingerprint_detects_requirement_drift;
           Alcotest.test_case "persist artifact" `Quick
             test_construct_persists_transaction_artifact;
         ] );
