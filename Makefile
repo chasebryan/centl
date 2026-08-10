@@ -84,7 +84,20 @@ supply-chain-snapshot-julia:
 	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
 	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
 
-supply-chain-preserve: integrity-source supply-chain-check supply-chain-sync supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-audit
+supply-chain-preserve: integrity-source supply-chain-check
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	@if [ -n "$(MODEL)" ]; then \
+		sh scripts/supply-chain sync "$(MIRROR)" "$(MODEL)"; \
+	else \
+		sh scripts/supply-chain sync "$(MIRROR)"; \
+	fi
+	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/supply-chain snapshot-opam "$(MIRROR)"
+	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
+	mkdir -p "$(MIRROR)/project"
+	cp "$(INTEGRITY_MANIFEST)" "$(MIRROR)/project/SOURCE-SHA256SUMS"
+	cp "$(INTEGRITY_MANIFEST).sha256" "$(MIRROR)/project/SOURCE-SHA256SUMS.sha256"
+	git rev-parse HEAD > "$(MIRROR)/project/SOURCE-COMMIT"
+	sh scripts/supply-chain audit "$(MIRROR)"
 
 quality: format lint install-interface-check integrity-source supply-chain-check
 
