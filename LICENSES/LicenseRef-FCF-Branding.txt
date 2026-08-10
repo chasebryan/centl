@@ -1,0 +1,11 @@
+FCF BRANDING ASSET TERMS
+
+Copyright 2026 Chase Bryan. All rights reserved except as stated below or as permitted by applicable law.
+
+These terms apply only to files specifically identified as LicenseRef-FCF-Branding. They do not apply to CENTL software licensed under Apache-2.0 or documentation licensed under CC-BY-4.0.
+
+Permission is granted to reproduce an unmodified branding asset when reasonably necessary to identify, describe, discuss, review, link to, archive, or accurately refer to the official Free Computation Foundation or CENTL project, and to make nominative, fair, or other uses permitted by applicable law.
+
+No permission is granted by these terms to use an FCF or CENTL branding asset as the primary identity of an unofficial fork, product, service, organization, or distribution, or to imply sponsorship, endorsement, certification, partnership, or official status that has not been granted.
+
+Modified software distributions remain fully permitted under their applicable software license. See TRADEMARKS.md for the project identity policy and for guidance on clearly distinguishing forks from official releases.
