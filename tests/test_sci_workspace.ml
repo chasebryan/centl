@@ -154,6 +154,34 @@ let test_workspace_audit_reports_invalid_local_state () =
           end
       | _ -> Alcotest.fail "workspace audit JSON must be an object")
 
+let test_workspace_audit_surfaces_malformed_manifest () =
+  let root = temp_dir "centl-caramels-audit-manifest-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      Centl_sci_workspace.ensure workspace;
+      write_text (Centl_sci_workspace.manifest_path workspace "broken") "{not-json\n";
+      let audit = Centl_sci_audit.collect workspace in
+      Alcotest.(check int) "malformed manifest is not a usable extension" 0
+        (List.length audit.extensions);
+      Alcotest.(check int) "manifest error is retained" 1
+        (List.length audit.manifest_errors);
+      Alcotest.(check bool) "manifest error reaches warnings" true
+        (List.exists
+           (fun warning ->
+             Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"invalid extension manifest broken.json" warning))
+           audit.warnings);
+      match Centl_sci_audit.to_json audit with
+      | `Assoc fields ->
+          begin match List.assoc_opt "manifest_errors" fields with
+          | Some (`List [ `String _ ]) -> ()
+          | _ -> Alcotest.fail "audit JSON must preserve malformed manifest evidence"
+          end
+      | _ -> Alcotest.fail "workspace audit JSON must be an object")
+
 let test_export_import_and_undo () =
   let root = temp_dir "centl-caramels-portable-" in
   Fun.protect
@@ -251,6 +279,8 @@ let () =
             test_package_validation_preserves_member_assurance;
           Alcotest.test_case "workspace audit" `Quick
             test_workspace_audit_reports_invalid_local_state;
+          Alcotest.test_case "workspace audit malformed manifest" `Quick
+            test_workspace_audit_surfaces_malformed_manifest;
         ] );
       ( "portability",
         [
