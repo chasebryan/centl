@@ -1,0 +1,140 @@
+name: Release preservation tooling
+
+on:
+  pull_request:
+    paths:
+      - "scripts/release-preserve"
+      - "docs/RELEASE-PRESERVATION.md"
+      - ".github/workflows/release-preservation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/release-preserve"
+      - "docs/RELEASE-PRESERVATION.md"
+      - ".github/workflows/release-preservation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Verify local release ingestion
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install signing verifier
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends signify-openbsd
+
+      - name: Check shell syntax
+        run: sh -n scripts/release-preserve
+
+      - name: Preserve checksum-only release and enforce immutability
+        run: |
+          root="$RUNNER_TEMP/release-preserve"
+          mirror="$root/mirror"
+          release="$root/unsigned"
+          mkdir -p "$mirror" "$release"
+
+          printf 'synthetic unsigned release\n' \
+            > "$release/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$release/centl-linux-x86_64.tar.gz" \
+            > "$release/centl-linux-x86_64.tar.gz.sha256"
+
+          CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            sh scripts/release-preserve "$mirror" 9.9.9 "$release"
+
+          target="$mirror/releases/v9.9.9"
+          test -f "$target/centl-linux-x86_64.tar.gz"
+          grep -Fqx 'adjacent-sha256' "$target/AUTHENTICATION"
+          grep -Fqx "$GITHUB_SHA" "$target/SOURCE-COMMIT"
+          sh scripts/mirror-receipt verify "$mirror"
+
+          # An identical ingest is idempotent.
+          CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            sh scripts/release-preserve "$mirror" 9.9.9 "$release"
+
+          # A different but internally checksum-valid artifact must not replace
+          # an already-preserved version.
+          printf 'different synthetic release\n' \
+            > "$release/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$release/centl-linux-x86_64.tar.gz" \
+            > "$release/centl-linux-x86_64.tar.gz.sha256"
+          if CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+               sh scripts/release-preserve "$mirror" 9.9.9 "$release"; then
+            echo 'different bytes unexpectedly replaced an immutable release' >&2
+            exit 1
+          fi
+          sh scripts/mirror-receipt verify "$mirror"
+
+      - name: Preserve authenticated release
+        run: |
+          root="$RUNNER_TEMP/release-preserve-signed"
+          mirror="$root/mirror"
+          release="$root/release"
+          keys="$root/keys"
+          mkdir -p "$mirror" "$release" "$keys"
+
+          signify-openbsd -G -n \
+            -c 'CENTL CI release-preservation key - not production' \
+            -p "$keys/test.pub" \
+            -s "$keys/test.sec"
+
+          printf 'synthetic signed release\n' \
+            > "$release/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$release/centl-linux-x86_64.tar.gz" \
+            > "$release/centl-linux-x86_64.tar.gz.sha256"
+
+          FCF_SIGNIFY_SECRET_KEY="$keys/test.sec" \
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-sign "$release"
+
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+          CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            sh scripts/release-preserve "$mirror" 9.9.10 "$release"
+
+          target="$mirror/releases/v9.9.10"
+          grep -Fqx 'signify' "$target/AUTHENTICATION"
+          grep -Fqx "$GITHUB_SHA" "$target/SOURCE-COMMIT"
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-verify "$target"
+          sh scripts/mirror-receipt verify "$mirror"
+
+      - name: Refuse signed release without trusted public key
+        run: |
+          root="$RUNNER_TEMP/release-preserve-no-key"
+          mirror="$root/mirror"
+          release="$root/release"
+          keys="$root/keys"
+          mkdir -p "$mirror" "$release" "$keys"
+
+          signify-openbsd -G -n \
+            -c 'CENTL CI release-preservation key - not production' \
+            -p "$keys/test.pub" \
+            -s "$keys/test.sec"
+          printf 'synthetic signed release\n' \
+            > "$release/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$release/centl-linux-x86_64.tar.gz" \
+            > "$release/centl-linux-x86_64.tar.gz.sha256"
+          FCF_SIGNIFY_SECRET_KEY="$keys/test.sec" \
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-sign "$release"
+
+          if env -u FCF_SIGNIFY_PUBLIC_KEY \
+               CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+               sh scripts/release-preserve "$mirror" 9.9.11 "$release"; then
+            echo 'authenticated release unexpectedly preserved without trusted public key' >&2
+            exit 1
+          fi
+          test ! -e "$mirror/releases/v9.9.11"
