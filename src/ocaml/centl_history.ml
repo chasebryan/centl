@@ -201,16 +201,33 @@ let prepare_directory path =
   if not Sys.win32 then begin
     if metadata.Unix.st_uid <> Unix.geteuid () then
       raise (Sys_error ("history directory is not owned by the current user: " ^ directory));
-    if String.lowercase_ascii (Filename.basename directory) = "centl" then
-      Unix.chmod directory 0o700;
-    let verified = Unix.lstat directory in
-    if
-      verified.Unix.st_kind <> Unix.S_DIR
-      || not (same_file metadata verified)
-      || verified.Unix.st_uid <> Unix.geteuid ()
-      || verified.Unix.st_perm land 0o022 <> 0
-    then
-      raise (Sys_error ("unsafe history directory: " ^ directory))
+    let private_directory =
+      String.lowercase_ascii (Filename.basename directory) = "centl"
+    in
+    let descriptor = Unix.openfile directory [ Unix.O_RDONLY ] 0 in
+    Fun.protect
+      ~finally:(fun () -> close_noerr descriptor)
+      (fun () ->
+        let opened = Unix.fstat descriptor in
+        if
+          opened.Unix.st_kind <> Unix.S_DIR
+          || not (same_file metadata opened)
+          || opened.Unix.st_uid <> Unix.geteuid ()
+        then
+          raise (Sys_error ("history directory changed during validation: " ^ directory));
+        if private_directory then Unix.fchmod descriptor 0o700;
+        let verified = Unix.fstat descriptor in
+        let unsafe_permissions =
+          if private_directory then verified.Unix.st_perm land 0o077 <> 0
+          else verified.Unix.st_perm land 0o022 <> 0
+        in
+        if
+          verified.Unix.st_kind <> Unix.S_DIR
+          || not (same_file opened verified)
+          || verified.Unix.st_uid <> Unix.geteuid ()
+          || unsafe_permissions
+        then
+          raise (Sys_error ("unsafe history directory: " ^ directory)))
   end;
   directory
 
