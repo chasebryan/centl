@@ -357,18 +357,22 @@ let polynomial_equation problem =
       end
 
 let interpret problem =
-  match unit_conversion problem with
+  match Centl_sci_mechanics.interpret problem with
   | Some _ as result -> result
   | None ->
-      begin match polynomial_equation problem with
+      begin match unit_conversion problem with
       | Some _ as result -> result
       | None ->
-          begin match Centl_sci_spoken_poly.interpret problem with
+          begin match polynomial_equation problem with
           | Some _ as result -> result
           | None ->
-              begin match symbolic_transform problem with
+              begin match Centl_sci_spoken_poly.interpret problem with
               | Some _ as result -> result
-              | None -> exact_expression problem
+              | None ->
+                  begin match symbolic_transform problem with
+                  | Some _ as result -> result
+                  | None -> exact_expression problem
+                  end
               end
           end
       end
