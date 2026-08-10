@@ -12,6 +12,24 @@ let test_exact_decimal_language () =
       Alcotest.(check string) "expression" "0.1 + 0.2" data.expression
   | _ -> Alcotest.fail "expected exact_expression fast-path IR"
 
+let test_approximation_language () =
+  match
+    Centl_sci_fastpath.interpret "Approximate pi."
+    |> require_some "default approximation"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "approx(pi)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression approximation IR"
+
+let test_approximation_precision_language () =
+  match
+    Centl_sci_fastpath.interpret "Approximate sqrt(2) to 30 significant digits."
+    |> require_some "explicit approximation precision"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "approx(sqrt(2), 30)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression approximation IR"
+
 let test_unit_conversion_language () =
   match
     Centl_sci_fastpath.interpret "Convert 100 centimeters to meters."
@@ -174,6 +192,10 @@ let () =
         [
           Alcotest.test_case "exact decimal language" `Quick
             test_exact_decimal_language;
+          Alcotest.test_case "default approximation" `Quick
+            test_approximation_language;
+          Alcotest.test_case "explicit approximation precision" `Quick
+            test_approximation_precision_language;
           Alcotest.test_case "unit conversion language" `Quick
             test_unit_conversion_language;
           Alcotest.test_case "exact physical constant" `Quick
