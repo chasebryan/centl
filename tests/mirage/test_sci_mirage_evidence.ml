@@ -55,6 +55,8 @@ let test_workspace_snapshot_executes () =
       | [ receipt ] ->
           Alcotest.(check string) "snapshot passes" "passed"
             (Centl_sci_mirage_evidence.receipt_state_text receipt.state);
+          Alcotest.(check int) "receipt fingerprint is sha256" 64
+            (String.length receipt.receipt_fingerprint);
           Alcotest.(check bool) "snapshot path exists" true
             (match receipt.snapshot_path with
             | Some path -> Sys.file_exists path
@@ -88,6 +90,8 @@ let test_snapshot_actions_share_one_cycle_snapshot () =
             (match (first.snapshot_path, second.snapshot_path) with
             | Some left, Some right -> left = right
             | _ -> false);
+          Alcotest.(check bool) "distinct planned actions have distinct receipts" false
+            (String.equal first.receipt_fingerprint second.receipt_fingerprint);
           Alcotest.(check int) "one retained snapshot directory" 1
             (Array.length (Sys.readdir (Centl_sci_snapshot.snapshot_root workspace)))
       | _ -> Alcotest.fail "expected two evidence receipts")
@@ -167,6 +171,11 @@ let test_persisted_receipts_deny_activation () =
             (json |> member "blocked_action_count" |> to_int);
           Alcotest.(check bool) "named evidence cycle is complete" true
             (json |> member "evidence_complete" |> to_bool);
+          let receipt = json |> member "receipts" |> to_list |> List.hd in
+          Alcotest.(check string) "fingerprint algorithm" "sha256"
+            (receipt |> member "receipt_fingerprint_algorithm" |> to_string);
+          Alcotest.(check int) "persisted fingerprint length" 64
+            (receipt |> member "receipt_fingerprint" |> to_string |> String.length);
           Alcotest.(check bool) "candidate remains inactive" false
             (json |> member "candidate_source_activated" |> to_bool);
           Alcotest.(check bool) "assurance remains unpromoted" false
