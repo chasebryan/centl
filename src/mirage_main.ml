@@ -58,19 +58,28 @@ let candidates_with obligations_path graph obligations =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
+let readiness_with candidates_path obligations candidates =
+  match
+    Centl_sci_mirage_readiness.construct candidates_path obligations candidates
+  with
+  | Ok result -> result
+  | Error message ->
+      prerr_endline ("centl-mirage: " ^ message);
+      exit 2
+
 let record_candidate_phase result goal_path graph obligations_path obligations
-    candidates_path candidates =
+    candidates_path candidates readiness_path readiness =
   Centl_sci_workspace.atomic_write_json result.Centl_sci_mirage.active_path
     (`Assoc
       [
         ("schema_version", `Int 1);
         ("system", `String "CENTL-MIRAGE");
         ("status", `String "active");
-        ("phase", `String "candidate_transactions_staged");
+        ("phase", `String "candidate_evidence_readiness_planned");
         ( "next_phase",
           `String
             (if obligations.Centl_sci_mirage_obligation.blocked_cells = [] then
-               "candidate_synthesis_and_validation"
+               "candidate_synthesis_and_evidence_execution"
              else "resolve_blocking_requirements") );
         ("source_digest", `String result.source_digest);
         ("source_stored_path", `String result.stored_path);
@@ -79,6 +88,7 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ("goal_graph", `String goal_path);
         ("evidence_obligations", `String obligations_path);
         ("candidate_transactions", `String candidates_path);
+        ("candidate_evidence_readiness", `String readiness_path);
         ("workspace_revision", `Int result.revision);
         ("goal_nodes", `Int (List.length graph.Centl_sci_mirage_goal.nodes));
         ("goal_edges", `Int (List.length graph.edges));
@@ -88,6 +98,8 @@ let record_candidate_phase result goal_path graph obligations_path obligations
           `Int (List.length obligations.Centl_sci_mirage_obligation.obligations) );
         ( "candidate_transaction_count",
           `Int (List.length candidates.Centl_sci_mirage_candidate.candidates) );
+        ( "readiness_candidate_count",
+          `Int (List.length readiness.Centl_sci_mirage_readiness.candidates) );
         ( "candidate_blocked",
           `Bool (obligations.Centl_sci_mirage_obligation.blocked_cells <> []) );
         ( "blocked_cells",
@@ -108,8 +120,11 @@ let start path =
   let candidates_path, candidates =
     candidates_with obligations_path graph obligations
   in
+  let readiness_path, readiness =
+    readiness_with candidates_path obligations candidates
+  in
   record_candidate_phase result goal_path graph obligations_path obligations
-    candidates_path candidates;
+    candidates_path candidates readiness_path readiness;
   print_endline (Centl_sci_mirage.render_ingest result);
   Printf.printf "Goal graph: %s\n%s\n" goal_path
     (Centl_sci_mirage_goal.render graph);
@@ -117,12 +132,14 @@ let start path =
     (Centl_sci_mirage_obligation.render obligations);
   Printf.printf "Candidate transactions: %s\n%s\n" candidates_path
     (Centl_sci_mirage_candidate.render candidates);
+  Printf.printf "Candidate evidence readiness: %s\n%s\n" readiness_path
+    (Centl_sci_mirage_readiness.render readiness);
   if obligations.blocked_cells <> [] then
     print_endline
       "MIRAGE staged only non-mutating candidate transactions and halted before synthesis for blocked source cells."
   else
     print_endline
-      "MIRAGE staged non-mutating candidate transactions with explicit evidence obligations. Next phase: candidate synthesis and validation."
+      "MIRAGE staged non-mutating candidate transactions and classified their mandatory evidence gates. No candidate is admissible until the required executable checks are actually discharged."
 
 let status () =
   let workspace = workspace_or_exit () in
