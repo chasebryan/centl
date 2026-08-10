@@ -75,6 +75,8 @@ let copy_workspace_surface workspace path =
     (Filename.concat path "extensions");
   copy_tree workspace.modules_dir (Filename.concat path "modules");
   copy_tree workspace.packages (Filename.concat path "packages");
+  copy_tree workspace.tests (Filename.concat path "tests");
+  copy_tree workspace.data (Filename.concat path "data");
   copy_tree (scaffolds_root workspace)
     (Filename.concat path "generated-scaffolds")
 
@@ -99,10 +101,14 @@ let restore_surface workspace path =
   clear_directory workspace.Centl_sci_workspace.extensions;
   clear_directory workspace.modules_dir;
   clear_directory workspace.packages;
+  clear_directory workspace.tests;
+  clear_directory workspace.data;
   clear_directory (scaffolds_root workspace);
   copy_tree (Filename.concat path "extensions") workspace.extensions;
   copy_tree (Filename.concat path "modules") workspace.modules_dir;
   copy_tree (Filename.concat path "packages") workspace.packages;
+  copy_tree (Filename.concat path "tests") workspace.tests;
+  copy_tree (Filename.concat path "data") workspace.data;
   copy_tree (Filename.concat path "generated-scaffolds")
     (scaffolds_root workspace)
 
