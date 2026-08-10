@@ -272,7 +272,7 @@ let render_plan ~source_path ~source_digest cells entries =
       "# CENTL-MIRAGE development cycle";
       "";
       "Source: `" ^ source_path ^ "`  ";
-      "Content ID: `" ^ source_digest ^ "`  ";
+      "Content ID (SHA-256): `" ^ source_digest ^ "`  ";
       "Specification cells: " ^ string_of_int (List.length cells) ^ "  ";
       "Implementation objectives: " ^ string_of_int (List.length entries) ^ "  ";
       "";
@@ -319,6 +319,7 @@ let spec_json ~original_path ~stored_path ~source_digest cells entries =
       ("schema_version", `Int schema_version);
       ("system", `String "CENTL-MIRAGE");
       ("source_digest", `String source_digest);
+      ("source_digest_algorithm", `String "sha256");
       ("source_original_path", `String original_path);
       ("source_stored_path", `String stored_path);
       ("cell_count", `Int (List.length cells));
@@ -341,6 +342,7 @@ let active_json ~source_digest ~stored_path ~spec_path ~plan_path ~revision =
       ("phase", `String "specification_ingested");
       ("next_phase", `String "capability_gap_analysis");
       ("source_digest", `String source_digest);
+      ("source_digest_algorithm", `String "sha256");
       ("source_stored_path", `String stored_path);
       ("specification_ir", `String spec_path);
       ("development_plan", `String plan_path);
@@ -359,7 +361,7 @@ let ingest workspace path =
         let generated = mirage_dir workspace in
         Centl_sci_workspace.ensure_directory library;
         Centl_sci_workspace.ensure_directory generated;
-        let source_digest = Digest.to_hex (Digest.string content) in
+        let source_digest = Centl_sha256.hex_string content in
         let basename =
           match Filename.basename path with "" | "." | ".." -> "design.txt" | value -> value
         in
@@ -396,7 +398,7 @@ let render_ingest result =
   String.concat "\n"
     [
       "CENTL-MIRAGE cycle initiated.";
-      "Content ID: " ^ result.source_digest;
+      "Content ID (SHA-256): " ^ result.source_digest;
       "Structure-library source: " ^ result.stored_path;
       "Specification IR: " ^ result.spec_path;
       "Development plan: " ^ result.plan_path;
