@@ -9,10 +9,10 @@ type report = {
 let read_text path =
   try
     let channel = open_in_bin path in
-    Fun.protect
-      ~finally:(fun () -> close_in_noerr channel)
-      (fun () -> really_input_string channel (in_channel_length channel))
-    |> Result.ok
+    Ok
+      (Fun.protect
+         ~finally:(fun () -> close_in_noerr channel)
+         (fun () -> really_input_string channel (in_channel_length channel)))
   with Sys_error message | End_of_file -> Error message
 
 let assoc name = function
