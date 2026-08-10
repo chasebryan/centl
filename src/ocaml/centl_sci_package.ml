@@ -6,10 +6,25 @@ type t = {
   workspace_revision : int;
 }
 
+type member_state = {
+  name : string;
+  present : bool;
+  enabled : bool option;
+  kind : string option;
+  assurance : string option;
+}
+
+type validation = {
+  package : t;
+  members : member_state list;
+  valid : bool;
+}
+
 let package_dir workspace name =
   Filename.concat workspace.Centl_sci_workspace.packages name
 
-let manifest_path workspace name = Filename.concat (package_dir workspace name) "package.json"
+let manifest_path workspace name =
+  Filename.concat (package_dir workspace name) "package.json"
 
 let string_field name = function
   | `Assoc fields ->
@@ -112,7 +127,9 @@ let add_extension workspace ~package_name ~extension_name =
             let updated =
               {
                 package with
-                extensions = List.sort_uniq String.compare (extension_name :: package.extensions);
+                extensions =
+                  List.sort_uniq String.compare
+                    (extension_name :: package.extensions);
                 workspace_revision = revision;
               }
             in
@@ -124,11 +141,55 @@ let add_extension workspace ~package_name ~extension_name =
 let list workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.packages) then []
   else
-    Sys.readdir workspace.packages
-    |> Array.to_list
+    Sys.readdir workspace.packages |> Array.to_list
     |> List.filter_map (fun name ->
            match read workspace name with Ok package -> Some package | Error _ -> None)
     |> List.sort (fun left right -> String.compare left.name right.name)
+
+let member_state workspace name =
+  match Centl_sci_extensions.read_manifest workspace name with
+  | Error _ ->
+      { name; present = false; enabled = None; kind = None; assurance = None }
+  | Ok manifest ->
+      {
+        name;
+        present = true;
+        enabled = Some manifest.enabled;
+        kind = Some manifest.kind;
+        assurance = Some manifest.assurance;
+      }
+
+let validate workspace name =
+  match read workspace name with
+  | Error message -> Error message
+  | Ok package ->
+      let members = List.map (member_state workspace) package.extensions in
+      let valid = List.for_all (fun member -> member.present) members in
+      Ok { package; members; valid }
+
+let render_member member =
+  if not member.present then member.name ^ " — missing"
+  else
+    let enabled =
+      match member.enabled with Some true -> "enabled" | Some false -> "disabled" | None -> "unknown"
+    in
+    let kind = Option.value ~default:"unknown" member.kind in
+    let assurance = Option.value ~default:"unknown" member.assurance in
+    Printf.sprintf "%s — %s — kind=%s — assurance=%s" member.name enabled kind
+      assurance
+
+let render_validation validation =
+  String.concat "\n"
+    ([
+       "Package validation: " ^ validation.package.name;
+       "  membership valid: " ^ string_of_bool validation.valid;
+       "  package-level assurance: none (member assurance is preserved individually)";
+       "  members:";
+     ]
+    @
+    (match validation.members with
+    | [] -> [ "    - none" ]
+    | members -> List.map (fun member -> "    - " ^ render_member member) members))
 
 let render package =
   String.concat "\n"
