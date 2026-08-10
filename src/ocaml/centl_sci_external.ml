@@ -21,10 +21,10 @@ let process_status_text = function
 
 let error_text = function
   | Request_too_large bytes ->
-      Printf.sprintf "external adapter request exceeds the %d-byte limit: %d bytes"
+      Printf.sprintf "external adapter request exceeds the default %d-byte limit: %d bytes"
         default_max_request_bytes bytes
   | Response_too_large bytes ->
-      Printf.sprintf "external adapter response exceeds the %d-byte limit: %d bytes"
+      Printf.sprintf "external adapter response exceeds the default %d-byte limit: %d bytes"
         default_max_response_bytes bytes
   | Spawn_failed message -> "could not start external adapter: " ^ message
   | Protocol_error message -> "external adapter protocol error: " ^ message
@@ -61,7 +61,7 @@ let invoke ?(max_request_bytes = default_max_request_bytes)
             Ok { response; assurance = "external_backend"; program }
         | Unix.WEXITED 0, Ok _ ->
             Error (Protocol_error "response must be a JSON object")
-        | Unix.WEXITED 0, Error _ as error -> error
+        | Unix.WEXITED 0, Error error -> Error error
         | _, _ -> Error (Process_failed (process_status_text status))
         end
     with
