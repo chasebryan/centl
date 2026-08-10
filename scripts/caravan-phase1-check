@@ -5,9 +5,9 @@ PYTHON=${PYTHON:-python3}
 
 "$PYTHON" - <<'PY'
 import cryptography
-if cryptography.__version__ != "49.0.0":
+if cryptography.__version__ != "50.0.0":
     raise SystemExit(
-        f"CARAVAN Phase 1 requires cryptography 49.0.0, got {cryptography.__version__}"
+        f"CARAVAN Phase 1 requires cryptography 50.0.0, got {cryptography.__version__}"
     )
 PY
 
