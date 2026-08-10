@@ -1,9 +1,9 @@
 # CENTL-MIRAGE
 
-**Codename:** Mathematical Introspective Recursive Autonomous Growth Engine  
-**Status:** active development architecture  
-**Scope:** CENTL-SCi self-development, local specification ingestion, synthesis, validation, recursive improvement  
-**Network requirement:** none  
+**Codename:** Mathematical Introspective Recursive Autonomous Growth Engine
+**Status:** active development architecture
+**Scope:** CENTL-SCi self-development, local specification ingestion, synthesis, validation, recursive improvement
+**Network requirement:** none
 
 > A self-extensible system must be able to change itself without being allowed to lie to itself.
 
