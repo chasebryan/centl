@@ -68,23 +68,37 @@ def tracked_paths() -> list[str]:
     return sorted(name for name in names if name)
 
 
-def create_source_manifest(output: Path) -> None:
-    lines: list[str] = []
+def write_manifest(output: Path, root: Path, names: list[str]) -> None:
+    root = root.resolve()
     output_resolved = output.resolve()
-    for name in tracked_paths():
+    lines: list[str] = []
+    seen: set[str] = set()
+    for name in sorted(names):
         relative = validate_relative_name(name)
-        path = ROOT / relative
+        canonical = relative.as_posix()
+        if canonical in seen:
+            die(f"duplicate manifest path: {canonical}")
+        seen.add(canonical)
+        path = root / relative
+        try:
+            path.resolve().relative_to(root)
+        except ValueError:
+            die(f"manifest path escapes root: {canonical}")
         if path.resolve() == output_resolved:
-            continue
-        if path.is_symlink():
-            die(f"tracked symlink requires explicit integrity policy: {name}")
-        if not path.is_file():
-            die(f"tracked path is not a regular file: {name}")
-        lines.append(f"{sha256_file(path)}  {name}\n")
+            die(f"manifest cannot hash itself: {canonical}")
+        if path.is_symlink() or not path.is_file():
+            die(f"manifest path is not a regular file: {canonical}")
+        lines.append(f"{sha256_file(path)}  {canonical}\n")
+    if not lines:
+        die("refusing to create an empty checksum manifest")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("".join(lines), encoding="utf-8", newline="\n")
     print(f"Wrote {len(lines)} SHA-256 entries: {output}")
     print(f"Manifest SHA-256: {sha256_file(output)}")
+
+
+def create_source_manifest(output: Path) -> None:
+    write_manifest(output, ROOT, tracked_paths())
 
 
 def parse_manifest(manifest: Path) -> list[tuple[str, str]]:
@@ -110,10 +124,17 @@ def parse_manifest(manifest: Path) -> list[tuple[str, str]]:
 
 
 def verify_manifest(manifest: Path, root: Path, *, verbose: bool = False) -> None:
+    root = root.resolve()
     failures = 0
     entries = parse_manifest(manifest)
     for expected, name in entries:
         path = root / name
+        try:
+            path.resolve().relative_to(root)
+        except ValueError:
+            print(f"FAILED {name}: path escapes verification root", file=sys.stderr)
+            failures += 1
+            continue
         if path.is_symlink() or not path.is_file():
             print(f"MISSING {name}", file=sys.stderr)
             failures += 1
@@ -144,6 +165,11 @@ def main() -> int:
     source = sub.add_parser("source-manifest", help="hash every Git-tracked regular file")
     source.add_argument("--output", required=True, type=Path)
 
+    manifest = sub.add_parser("manifest", help="create a SHA256SUMS manifest for named files")
+    manifest.add_argument("--root", required=True, type=Path)
+    manifest.add_argument("--output", required=True, type=Path)
+    manifest.add_argument("paths", nargs="+")
+
     verify = sub.add_parser("verify", help="verify a conventional SHA256SUMS manifest")
     verify.add_argument("manifest", type=Path)
     verify.add_argument("--root", type=Path, default=ROOT)
@@ -159,6 +185,10 @@ def main() -> int:
         self_test(announce=False)
         create_source_manifest(args.output)
         verify_manifest(args.output, ROOT)
+    elif args.command == "manifest":
+        self_test(announce=False)
+        write_manifest(args.output, args.root, args.paths)
+        verify_manifest(args.output, args.root)
     elif args.command == "verify":
         self_test(announce=False)
         verify_manifest(args.manifest, args.root, verbose=args.verbose)
