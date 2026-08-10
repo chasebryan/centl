@@ -154,6 +154,16 @@ let render_validation name =
       | Ok report -> Centl_sci_validate.render report
       end
 
+let render_package_validation name =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before validating a package."
+  | Some workspace ->
+      begin match Centl_sci_package.validate workspace name with
+      | Error message -> "Package validation failed: " ^ message
+      | Ok validation -> Centl_sci_package.render_validation validation
+      end
+
 let render_export target =
   match Centl_sci_workspace.default () with
   | None ->
@@ -217,19 +227,23 @@ let render plan =
                 "Capability matches for `" ^ query ^ "`:\n"
                 ^ Centl_sci_capabilities.render_matches query
             | _ ->
-                begin match drop_prefix_ci "validate extension " plan.request with
-                | Some name when name <> "" -> render_validation name
+                begin match drop_prefix_ci "validate package " plan.request with
+                | Some name when name <> "" -> render_package_validation name
                 | _ ->
-                    begin match drop_prefix_ci "validate " plan.request with
+                    begin match drop_prefix_ci "validate extension " plan.request with
                     | Some name when name <> "" -> render_validation name
                     | _ ->
-                        begin match drop_prefix_ci "import workspace " plan.request with
-                        | Some _ ->
-                            "The Caramels import validator and reversible importer are implemented, but BUILD import remains gated until the dispatcher can reload the active downstream core session in the same operation. No workspace state was changed."
-                        | None ->
-                            begin match plan.layer with
-                            | Core_patch -> render_core_plan plan
-                            | _ -> generic_text plan
+                        begin match drop_prefix_ci "validate " plan.request with
+                        | Some name when name <> "" -> render_validation name
+                        | _ ->
+                            begin match drop_prefix_ci "import workspace " plan.request with
+                            | Some _ ->
+                                "The Caramels import validator and reversible importer are implemented, but BUILD import remains gated until the dispatcher can reload the active downstream core session in the same operation. No workspace state was changed."
+                            | None ->
+                                begin match plan.layer with
+                                | Core_patch -> render_core_plan plan
+                                | _ -> generic_text plan
+                                end
                             end
                         end
                     end
