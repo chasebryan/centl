@@ -23,6 +23,7 @@ case $(uname -m) in
 esac
 need podman
 need python3
+need git
 
 # The base is acquired by immutable digest once during capsule construction. The
 # final saved OCI archive includes those layers, so recovery does not need to
@@ -52,7 +53,42 @@ CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
 CENTL_SUPPLY_CHAIN_OFFLINE=1 sh "$repo_root/scripts/supply-chain" fetch \
   julia-linux-x86_64 "$mirror" "$context/julia.tar.gz" >/dev/null
 
-podman build --pull=never --tag "$image_ref" --file "$context/Containerfile" "$context"
+# Recover the exact qualified llama.cpp source from the preserved bare mirror.
+# The build number is upstream's own `git rev-list --count HEAD` identity, as used
+# by llama.cpp's cmake/build-info.cmake.
+llama_commit=$(
+  awk -F '|' '$1 == "git" && $2 == "llama.cpp" { print $3; exit }' \
+    "$repo_root/supply-chain/sources.lock"
+)
+case "$llama_commit" in
+  ''|*[!0-9a-f]*) fail "invalid llama.cpp commit in supply-chain lock" ;;
+esac
+[ "${#llama_commit}" -eq 40 ] || fail "llama.cpp lock must use a full commit"
+llama_repo="$mirror/git/llama.cpp.git"
+[ -d "$llama_repo" ] || fail "preserved llama.cpp Git mirror is missing: $llama_repo"
+git -C "$llama_repo" cat-file -e "$llama_commit^{commit}" ||
+  fail "preserved llama.cpp mirror lacks $llama_commit"
+llama_build_number=$(git -C "$llama_repo" rev-list --count "$llama_commit")
+case "$llama_build_number" in
+  ''|*[!0-9]*) fail "could not derive llama.cpp build number" ;;
+esac
+
+documented_build=$(
+  sed -n 's/.*`llama.cpp` `llama-cli` build `b\([0-9][0-9]*\)-[0-9a-f][0-9a-f]*`.*/\1/p' \
+    "$repo_root/docs/SCI-ENGINE.md" | sed -n '1p'
+)
+[ -n "$documented_build" ] ||
+  fail "could not recover documented CENTL-SCi llama.cpp build number"
+[ "$llama_build_number" = "$documented_build" ] ||
+  fail "llama.cpp commit count $llama_build_number disagrees with documented build b$documented_build"
+
+git -C "$llama_repo" archive --format=tar --prefix=llama.cpp/ \
+  "$llama_commit" > "$context/llama.cpp.tar"
+
+podman build --pull=never \
+  --build-arg "LLAMA_COMMIT=$llama_commit" \
+  --build-arg "LLAMA_BUILD_NUMBER=$llama_build_number" \
+  --tag "$image_ref" --file "$context/Containerfile" "$context"
 
 out="$mirror/capsule"
 mkdir -p "$out"
@@ -67,6 +103,23 @@ podman image inspect "$image_ref" --format '{{.Id}}' > "$out/IMAGE-ID"
 podman run --rm --network none "$image_ref" \
   cat /opt/fcf-capsule/IDENTITY > "$out/IDENTITY"
 
+# Export the exact reference CLI bytes as an additional recovery artifact. The
+# authoritative portable execution environment remains the saved OCI capsule,
+# because the CLI may depend on the capsule's libc/libstdc++ ABI.
+sci_runtime="$mirror/sci-runtime"
+mkdir -p "$sci_runtime"
+podman run --rm --network none "$image_ref" \
+  cat /opt/centl-sci/bin/llama-cli > "$sci_runtime/llama-cli"
+chmod 0755 "$sci_runtime/llama-cli"
+podman run --rm --network none "$image_ref" \
+  cat /opt/centl-sci/LLAMA-VERSION > "$sci_runtime/LLAMA-VERSION"
+printf '%s\n' "$llama_commit" > "$sci_runtime/LLAMA-COMMIT"
+printf '%s\n' "$llama_build_number" > "$sci_runtime/LLAMA-BUILD-NUMBER"
+python3 "$repo_root/scripts/integrity.py" hash "$sci_runtime/llama-cli" \
+  > "$sci_runtime/llama-cli.sha256"
+python3 "$repo_root/scripts/integrity.py" verify "$sci_runtime/llama-cli.sha256" \
+  --root "$sci_runtime"
+
 python3 "$repo_root/scripts/integrity.py" verify "$archive.sha256" --root "$out"
 
 printf 'FCF CENTL build capsule preserved.\n'
@@ -74,3 +127,6 @@ printf 'image=%s\n' "$image_ref"
 printf 'base=%s\n' "$base_ref"
 printf 'archive=%s\n' "$archive"
 printf 'sha256_file=%s\n' "$archive.sha256"
+printf 'llama_commit=%s\n' "$llama_commit"
+printf 'llama_build_number=%s\n' "$llama_build_number"
+printf 'llama_cli=%s\n' "$sci_runtime/llama-cli"
