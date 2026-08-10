@@ -40,6 +40,20 @@ let test_plan_contains_pending_work () =
           Alcotest.(check bool) "all actions have identities" true
             (List.for_all
                (fun action -> String.length action.Centl_sci_mirage_execution_plan.action_id = 64)
+               candidate.actions);
+          Alcotest.(check bool) "all actions name executors" true
+            (List.for_all
+               (fun action ->
+                 not
+                   (String.equal action.Centl_sci_mirage_execution_plan.executor
+                      "unsupported_evidence_executor"))
+               candidate.actions);
+          Alcotest.(check bool) "all actions name preconditions" true
+            (List.for_all
+               (fun action ->
+                 not
+                   (String.equal action.Centl_sci_mirage_execution_plan.precondition
+                      "explicit_executor_required"))
                candidate.actions)
       | _ -> Alcotest.fail "expected one candidate")
 
@@ -56,6 +70,18 @@ let test_action_identity_is_deterministic_and_transaction_bound () =
   Alcotest.(check string) "same transaction produces same action identity" first second;
   Alcotest.(check bool) "transaction drift changes action identity" true
     (not (String.equal first changed))
+
+let test_execution_contracts_are_explicit () =
+  let parser_executor, parser_precondition =
+    Centl_sci_mirage_execution_plan.execution_contract "candidate_parses"
+  in
+  Alcotest.(check string) "parser executor" "candidate_parser_or_build" parser_executor;
+  Alcotest.(check string) "parser precondition" "candidate_materialized" parser_precondition;
+  let rollback_executor, rollback_precondition =
+    Centl_sci_mirage_execution_plan.execution_contract "rollback_available"
+  in
+  Alcotest.(check string) "rollback executor" "workspace_snapshot" rollback_executor;
+  Alcotest.(check string) "rollback precondition" "before_activation" rollback_precondition
 
 let test_artifact_denies_execution () =
   let root = temp_dir "centl-mirage-plan-file-" in
@@ -82,7 +108,15 @@ let test_artifact_denies_execution () =
           Alcotest.(check bool) "action identity semantics persisted" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
-                  ~needle:"\"action_identity_semantics\"" text)))
+                  ~needle:"\"action_identity_semantics\"" text));
+          Alcotest.(check bool) "executor semantics persisted" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"\"execution_contract_semantics\"" text));
+          Alcotest.(check bool) "executor persisted" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"\"executor\":\"candidate_parser_or_build\"" text)))
 
 let () =
   Alcotest.run "CENTL-MIRAGE execution plan"
@@ -92,6 +126,8 @@ let () =
           Alcotest.test_case "pending work is planned" `Quick test_plan_contains_pending_work;
           Alcotest.test_case "action identity is transaction-bound" `Quick
             test_action_identity_is_deterministic_and_transaction_bound;
+          Alcotest.test_case "execution contracts are explicit" `Quick
+            test_execution_contracts_are_explicit;
           Alcotest.test_case "artifact does not claim execution" `Quick
             test_artifact_denies_execution;
         ] );
