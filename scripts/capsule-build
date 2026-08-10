@@ -4,6 +4,7 @@ set -eu
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 mirror=${1:-}
 image_ref=${CENTL_CAPSULE_IMAGE:-localhost/fcf/centl-build-capsule:ubuntu22.04-v1}
+base_ref=docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
 
 fail() {
   printf 'centl capsule-build: %s\n' "$*" >&2
@@ -22,6 +23,15 @@ case $(uname -m) in
 esac
 need podman
 need python3
+
+# The base is acquired by immutable digest once during capsule construction. The
+# final saved OCI archive includes those layers, so recovery does not need to
+# pull the base again.
+if ! podman image exists "$base_ref"; then
+  [ "${CENTL_CAPSULE_BOOTSTRAP_OFFLINE:-0}" != 1 ] ||
+    fail "pinned Ubuntu base image is not local and bootstrap-offline mode is enabled"
+  podman pull "$base_ref"
+fi
 
 # The capsule consumes only already-preserved CENTL-specific source artifacts.
 # apt/opam are still used while constructing the first capsule; the resulting OCI
@@ -52,6 +62,7 @@ podman save --format oci-archive --output "$archive" "$image_ref"
 
 python3 "$repo_root/scripts/integrity.py" hash "$archive" > "$archive.sha256"
 printf '%s\n' "$image_ref" > "$out/IMAGE-REF"
+printf '%s\n' "$base_ref" > "$out/BASE-REF"
 podman image inspect "$image_ref" --format '{{.Id}}' > "$out/IMAGE-ID"
 podman run --rm --network none "$image_ref" \
   cat /opt/fcf-capsule/IDENTITY > "$out/IDENTITY"
@@ -60,5 +71,6 @@ python3 "$repo_root/scripts/integrity.py" verify "$archive.sha256" --root "$out"
 
 printf 'FCF CENTL build capsule preserved.\n'
 printf 'image=%s\n' "$image_ref"
+printf 'base=%s\n' "$base_ref"
 printf 'archive=%s\n' "$archive"
 printf 'sha256_file=%s\n' "$archive.sha256"
