@@ -19,6 +19,8 @@ mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror not found: $mirror"
 [ -f "$mirror/project/centl.bundle" ] || fail "CENTL bundle missing from mirror"
 [ -f "$mirror/project/SOURCE-COMMIT" ] || fail "SOURCE-COMMIT missing from mirror"
 [ -f "$mirror/project/SOURCE-SHA256SUMS" ] || fail "SOURCE-SHA256SUMS missing from mirror"
+[ -f "$mirror/project/SOURCE-SHA256SUMS.sha256" ] ||
+  fail "SOURCE-SHA256SUMS.sha256 missing from mirror"
 
 # The outer invocation creates a fresh Linux network namespace. This is stronger
 # than merely setting package-manager offline flags: the build process has no
@@ -27,7 +29,7 @@ if [ "${CENTL_OFFLINE_REBUILD_INNER:-0}" != 1 ]; then
   need unshare
   exec unshare --net --map-root-user \
     env CENTL_OFFLINE_REBUILD_INNER=1 \
-    "$0" "$mirror" "$work_parent"
+    sh "$0" "$mirror" "$work_parent"
 fi
 
 need git
@@ -43,7 +45,23 @@ if command -v ip >/dev/null 2>&1 && ip route 2>/dev/null | grep -q '^default '; 
   fail "network namespace still has a default route"
 fi
 
-"$repo_root/scripts/supply-chain" audit "$mirror"
+sh "$repo_root/scripts/supply-chain" audit "$mirror"
+
+# Verify preservation receipts before trusting the recorded source state.
+python3 "$repo_root/scripts/integrity.py" verify \
+  "$mirror/project/SOURCE-SHA256SUMS.sha256" --root "$mirror/project"
+if [ -s "$mirror/julia/DEPOT.sha256" ]; then
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/julia/DEPOT.sha256" --root "$mirror/julia"
+else
+  fail "preserved Julia depot checksum manifest is missing or empty"
+fi
+if [ -s "$mirror/opam/SOURCES.sha256" ]; then
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/opam/SOURCES.sha256" --root "$mirror/opam"
+else
+  fail "preserved opam source checksum manifest is missing or empty"
+fi
 
 work=$(mktemp -d "$work_parent/centl-offline-rebuild.XXXXXXXX")
 cleanup() {
@@ -68,7 +86,7 @@ python3 "$source_dir/scripts/integrity.py" verify \
 # Recover the verifier from preserved bytes, not from PATH or an upstream host.
 export CENTL_SUPPLY_CHAIN_OFFLINE=1
 export CENTL_SOURCE_MIRROR_DIR="$mirror"
-"$source_dir/scripts/supply-chain" fetch fstar-linux-x86_64 \
+sh "$source_dir/scripts/supply-chain" fetch fstar-linux-x86_64 \
   "$mirror" "$work/fstar.tar.gz" >/dev/null
 mkdir -p "$work/fstar"
 tar -xzf "$work/fstar.tar.gz" -C "$work/fstar"
