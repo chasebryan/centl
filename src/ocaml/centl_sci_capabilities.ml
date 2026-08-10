@@ -26,8 +26,8 @@ let builtins =
     { name = "approx"; aliases = [ "approximate"; "decimal"; "enclosure" ]; category = "mathematics"; origin = Verified_core; assurance = "certified/existing"; summary = "precision-aware approximation/enclosure path" };
     { name = "verify"; aliases = [ "claim"; "contract"; "assert" ]; category = "mathematics"; origin = Verified_core; assurance = "verification"; summary = "structured mathematical claim verification" };
     { name = "unit conversion"; aliases = [ "convert"; "units"; "dimension" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic"; summary = "exact dimension-checked unit conversion" };
-    { name = "physical constants"; aliases = [ "constant"; "speed of light" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic catalog"; summary = "physics constant catalog with explicit exactness policy" };
-    { name = "particle simulation"; aliases = [ "simulate"; "gravity"; "particle"; "mechanics" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic model"; summary = "particle integration including uniform gravity" };
+    { name = "physical constants"; aliases = [ "constant"; "speed of light"; "planck"; "boltzmann"; "avogadro" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic exact catalog"; summary = "exact defining/conventional physics constants with provenance" };
+    { name = "particle simulation"; aliases = [ "simulate"; "gravity"; "particle"; "mechanics" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic model"; summary = "particle integration including explicit uniform gravity" };
     { name = "sphere contact analysis"; aliases = [ "sphere"; "contact"; "collision" ]; category = "physics"; origin = Physics_engine; assurance = "exact geometry"; summary = "exact sphere contact classification and bounded contact machinery" };
   ]
 
@@ -65,12 +65,16 @@ let local_capabilities () =
                category = "local";
                origin = Local_extension;
                assurance = manifest.assurance;
-               summary = manifest.summary;
+               summary =
+                 Printf.sprintf "%s (%s)" manifest.summary
+                   (if manifest.enabled then "enabled" else "disabled");
              })
+
+let all () = builtins @ local_capabilities ()
 
 let search request =
   let request_words = words request in
-  (builtins @ local_capabilities ())
+  all ()
   |> List.map (fun capability -> (score request_words capability, capability))
   |> List.filter (fun (value, _) -> value > 0)
   |> List.sort (fun (left_score, left) (right_score, right) ->
@@ -89,3 +93,11 @@ let render_matches request =
       values
       |> List.map (fun capability -> "  - " ^ render capability)
       |> String.concat "\n"
+
+let render_all () =
+  all ()
+  |> List.sort (fun left right ->
+         let by_category = String.compare left.category right.category in
+         if by_category <> 0 then by_category else String.compare left.name right.name)
+  |> List.map (fun capability -> "  - " ^ render capability)
+  |> String.concat "\n"
