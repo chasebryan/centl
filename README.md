@@ -11,13 +11,14 @@ Exact values remain exact, approximations carry explicit justification, invalid 
 unsupported work stays visible, and semantic tooling is never allowed to overrule
 the mathematical evidence produced by CENTL itself.
 
-CENTL combines four closely related pieces:
+CENTL combines five closely related pieces:
 
 | Surface | Purpose |
 | --- | --- |
 | `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
 | `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
 | `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
+| **CENTL-MIRAGE** | Local introspective self-development architecture for specification ingestion, synthesis, validation, and recursive improvement |
 | **CENTL CARAVAN** | Planned content-addressed preservation, verification, and availability network for approved CENTL artifacts |
 
 ## Quick start
@@ -103,6 +104,64 @@ meaning. Model weights remain separate artifacts and are never silently download
 
 See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
 [docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.
+
+![CENTL-MIRAGE — a camel appearing through desert heat haze](assets/branding/centl-mirage.png)
+
+## CENTL-MIRAGE
+
+**Mathematical Introspective Recursive Autonomous Growth Engine**
+
+CENTL-MIRAGE is the local self-development architecture for CENTL-SCi. Its purpose
+is to let a user describe a system, capability, mathematical workflow, or design in
+ordinary language and let CENTL turn that intent into an explicit, inspectable,
+reversible development process without requiring a paid or remote AI service.
+
+MIRAGE is not a chatbot that is trusted to rewrite source code. It is a recursive
+engineering loop built around CENTL's existing rule that claims require evidence.
+The intended cycle is:
+
+```text
+INGEST
+  -> NORMALIZE
+  -> BUILD GOAL GRAPH
+  -> INTROSPECT CAPABILITIES
+  -> COMPUTE GAPS
+  -> SYNTHESIZE CANDIDATES
+  -> CONSTRUCT OBLIGATIONS
+  -> VERIFY / SEARCH FOR COUNTEREXAMPLES
+  -> COMPARE WITH BASELINE
+  -> ACCEPT OR REJECT
+  -> RECORD REVISION + EVIDENCE
+  -> RECOMPUTE GAPS
+```
+
+A user document remains attributable source material. MIRAGE preserves provenance,
+lowers the document into a Specification IR, constructs a typed goal/capability
+graph, detects conflicts, and first asks whether an existing CENTL capability can
+satisfy the request through composition before creating anything new.
+
+Candidate changes are admitted only after explicit engineering and assurance gates.
+The architecture separates hard admissibility from preference: parsing, type and
+dimension safety, invariants, regressions, provenance, trust boundaries, and
+rollback requirements come before any candidate is scored or preferred. Among
+admissible candidates, MIRAGE favors the smallest semantic delta, stronger evidence,
+native CENTL mechanisms, lower dependency surface, and preserved behavior.
+
+The active MIRAGE development work includes local design-document ingestion,
+provenance-preserving specification cells, Structure Library persistence, goal and
+capability graphs, deterministic conflict detection, capability-gap analysis, and
+commands such as `centl-mirage start PATH`, `ingest`, `analyze`, and `status`.
+Later layers extend this into candidate transactions, explicit evidence obligations,
+CEGIS and equality-saturation synthesis, semantic behavioral fingerprints, and
+monotone autonomous acceptance or rejection.
+
+A local semantic model may propose interpretations, programs, tests, names, or
+refactorings, but it never confers mathematical or engineering authority. Its output
+must cross the same CENTL parsing, validation, testing, regression, and verification
+boundaries as every other candidate.
+
+MIRAGE autonomy is local. It does not imply automatic network publication, and a
+user-provided document is always treated as data rather than executable authority.
 
 ## CENTL CARAVAN
 
@@ -196,6 +255,7 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
+- CENTL-MIRAGE — full architecture is under active development in the MIRAGE branch
 - [CENTL CARAVAN](docs/CARAVAN.md)
 - [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
 - [CARAVAN host policy](docs/CARAVAN-HOST-POLICY.md)
