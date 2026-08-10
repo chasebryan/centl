@@ -1,4 +1,9 @@
-type origin = Verified_core | Physics_engine | Local_extension | Local_package
+type origin =
+  | Verified_core
+  | Physics_engine
+  | Caramels_runtime
+  | Local_extension
+  | Local_package
 
 type capability = {
   name : string;
@@ -12,6 +17,7 @@ type capability = {
 let origin_text = function
   | Verified_core -> "verified/core CENTL"
   | Physics_engine -> "deterministic CENTL Physics"
+  | Caramels_runtime -> "CENTL-SCi Caramels runtime"
   | Local_extension -> "local downstream extension"
   | Local_package -> "local downstream package"
 
@@ -24,12 +30,17 @@ let builtins =
     { name = "expand"; aliases = [ "polynomial expansion" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported symbolic expansion" };
     { name = "factor"; aliases = [ "factorization"; "factorisation" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported polynomial factoring domain" };
     { name = "substitute"; aliases = [ "substitution"; "replace variable" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "symbolic substitution" };
-    { name = "approx"; aliases = [ "approximate"; "decimal"; "enclosure" ]; category = "mathematics"; origin = Verified_core; assurance = "certified/existing"; summary = "precision-aware approximation/enclosure path" };
+    { name = "approx"; aliases = [ "approximate"; "decimal"; "enclosure"; "significant digits" ]; category = "mathematics"; origin = Verified_core; assurance = "certified/existing"; summary = "precision-aware approximation/enclosure path, including deterministic Caramels natural-language lowering" };
     { name = "verify"; aliases = [ "claim"; "contract"; "assert" ]; category = "mathematics"; origin = Verified_core; assurance = "verification"; summary = "structured mathematical claim verification" };
     { name = "unit conversion"; aliases = [ "convert"; "units"; "dimension" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic"; summary = "exact dimension-checked unit conversion" };
     { name = "physical constants"; aliases = [ "constant"; "speed of light"; "planck"; "boltzmann"; "avogadro" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic exact catalog"; summary = "exact defining/conventional physics constants with provenance" };
     { name = "particle simulation"; aliases = [ "simulate"; "gravity"; "particle"; "mechanics" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic model"; summary = "particle integration including explicit uniform gravity" };
     { name = "sphere contact analysis"; aliases = [ "sphere"; "contact"; "collision" ]; category = "physics"; origin = Physics_engine; assurance = "exact geometry"; summary = "exact sphere contact classification and bounded contact machinery" };
+    { name = "workspace audit"; aliases = [ "audit workspace"; "check workspace"; "validate workspace"; "workspace consistency" ]; category = "build"; origin = Caramels_runtime; assurance = "read-only structural audit"; summary = "reports extension/package structure, assurance, activation state, and warnings without mutating verified core" };
+    { name = "extension validation"; aliases = [ "validate extension"; "validate manifest"; "structural validation" ]; category = "build"; origin = Caramels_runtime; assurance = "structural only"; summary = "validates native definitions and generated adapter/native scaffold contracts without assurance promotion" };
+    { name = "package validation"; aliases = [ "validate package"; "package membership"; "package composition" ]; category = "build"; origin = Caramels_runtime; assurance = "composition only"; summary = "checks package membership while preserving every member extension's assurance" };
+    { name = "workspace portability"; aliases = [ "export workspace"; "import workspace"; "bundle"; "portable workspace"; "restore workspace" ]; category = "build"; origin = Caramels_runtime; assurance = "validated reversible downstream operation"; summary = "exports and imports user-owned downstream state with validation, snapshot rollback, and no verified-core replacement" };
+    { name = "English-to-CENTL extension"; aliases = [ "create function"; "create value"; "modify function"; "modify value"; "extend centl"; "generate centl" ]; category = "build"; origin = Caramels_runtime; assurance = "parser-validated local extension"; summary = "turns supported BUILD requests into native CENTL definitions, manifests, revisions, and live downstream session reloads" };
   ]
 
 let words text =
