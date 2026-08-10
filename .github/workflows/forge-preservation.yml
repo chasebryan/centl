@@ -1,0 +1,104 @@
+name: Forge metadata preservation
+
+on:
+  pull_request:
+    paths:
+      - "scripts/forge-snapshot.py"
+      - "docs/FORGE-PRESERVATION.md"
+      - ".github/workflows/forge-preservation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/forge-snapshot.py"
+      - "docs/FORGE-PRESERVATION.md"
+      - ".github/workflows/forge-preservation.yml"
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+jobs:
+  test:
+    name: Snapshot public forge metadata
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check snapshot syntax
+        run: python3 -m py_compile scripts/forge-snapshot.py
+
+      - name: Create finalized synthetic preservation mirror
+        run: |
+          mirror="$RUNNER_TEMP/forge-mirror"
+          mkdir -p "$mirror/project" "$mirror/models/private"
+          printf '%s\n' "$GITHUB_SHA" > "$mirror/project/SOURCE-COMMIT"
+          printf 'PRIVATE MODEL MATERIAL\n' > "$mirror/models/private/model.gguf"
+          sh scripts/mirror-receipt create "$mirror"
+          printf '%s\n' "$mirror" > "$RUNNER_TEMP/forge-mirror-path"
+
+      - name: Capture repository collaboration metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mirror=$(cat "$RUNNER_TEMP/forge-mirror-path")
+          python3 scripts/forge-snapshot.py "$mirror" \
+            --repository chasebryan/centl
+
+          forge="$mirror/forge/github"
+          for file in \
+            repository.json issues.json issue-comments.json issue-events.json \
+            pulls.json pull-review-comments.json releases.json tags.json \
+            branches.json labels.json milestones.json contributors.json \
+            workflows.json SNAPSHOT.json FORGE-SHA256SUMS \
+            FORGE-SHA256SUMS.sha256; do
+            test -f "$forge/$file"
+          done
+
+          python3 - "$forge/SNAPSHOT.json" <<'PY'
+          import json, sys
+          snapshot = json.load(open(sys.argv[1], encoding='utf-8'))
+          assert snapshot['schema'] == 1
+          assert snapshot['repository'] == 'chasebryan/centl'
+          assert snapshot['token_used'] is True
+          assert snapshot['preservation_source_commit']
+          assert snapshot['datasets']['repository.json'] == 1
+          assert snapshot['datasets']['issues.json'] >= 1
+          assert snapshot['datasets']['pulls.json'] >= 1
+          PY
+
+          python3 scripts/integrity.py verify \
+            "$forge/FORGE-SHA256SUMS.sha256" --root "$forge"
+          python3 scripts/integrity.py tree-verify \
+            "$forge/FORGE-SHA256SUMS" --root "$forge" \
+            --ignore FORGE-SHA256SUMS \
+            --ignore FORGE-SHA256SUMS.sha256
+          sh scripts/mirror-receipt verify "$mirror"
+
+          # The forge snapshot stays in preservation storage; it does not disturb
+          # unrelated private mirror material.
+          grep -Fqx 'PRIVATE MODEL MATERIAL' "$mirror/models/private/model.gguf"
+
+      - name: Refuse to overwrite a corrupted finalized mirror
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mirror=$(cat "$RUNNER_TEMP/forge-mirror-path")
+          forge="$mirror/forge/github"
+          before=$(sha256sum "$forge/SNAPSHOT.json" | awk '{ print $1 }')
+          printf 'tamper\n' >> "$mirror/models/private/model.gguf"
+
+          if python3 scripts/forge-snapshot.py "$mirror" \
+               --repository chasebryan/centl; then
+            echo 'forge snapshot unexpectedly accepted a corrupted finalized mirror' >&2
+            exit 1
+          fi
+
+          after=$(sha256sum "$forge/SNAPSHOT.json" | awk '{ print $1 }')
+          test "$before" = "$after"
