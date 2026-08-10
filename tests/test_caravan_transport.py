@@ -211,7 +211,10 @@ class OutboundTransportTests(unittest.TestCase):
 
                 def slow_poll() -> None:
                     try:
-                        self.assertEqual(client.poll(wait_seconds=0.5), [])
+                        # Hold the sole request slot for the maximum admitted lab
+                        # poll interval so CI scheduler jitter cannot let the poll
+                        # finish before the saturation probe reaches the server.
+                        self.assertEqual(client.poll(wait_seconds=2.0), [])
                     except BaseException as exc:  # preserve assertion/thread failures
                         poll_errors.append(exc)
 
@@ -225,7 +228,7 @@ class OutboundTransportTests(unittest.TestCase):
                 with self.assertRaises(TransportError):
                     client.heartbeat(load=0, capacity=1)
 
-                worker.join(timeout=2)
+                worker.join(timeout=3)
                 self.assertFalse(worker.is_alive())
                 self.assertEqual(poll_errors, [])
                 self.assertEqual(service.active_requests, 0)
