@@ -51,8 +51,8 @@ let test_request_contract () =
     "compact resident prompt" true
     (String.length prompt < 1_024);
   Alcotest.(check bool)
-    "class is fixed" true
-    (String.starts_with ~prefix:"CENTL-SCi v0.0.1" prompt
+    "Caramels class is fixed" true
+    (String.starts_with ~prefix:"CENTL-SCi v0.0.2-Caramels" prompt
     && String.contains prompt 'p');
   Alcotest.(check bool) "equality is split" true (String.contains prompt '=');
   Alcotest.(check bool)
@@ -75,6 +75,31 @@ let test_unit_request_contract () =
   Alcotest.(check bool)
     "canonical unit prompt" true
     (String.contains (string "prompt" request) 'c')
+
+let test_constant_request_contract () =
+  let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
+  let request =
+    Centl_sci_server.request_json config "What is the speed of light in vacuum?"
+  in
+  Alcotest.(check string)
+    "constant grammar" Centl_sci_schema.physical_constant_grammar
+    (string "grammar" request);
+  Alcotest.(check bool) "constant prompt names exact catalog" true
+    (String.length (string "prompt" request) > 0)
+
+let test_uniform_gravity_request_contract () =
+  let problem =
+    "simulate a particle with mass 2 kg, position (0,0,10) m, velocity \
+     (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10"
+  in
+  let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
+  let request = Centl_sci_server.request_json config problem in
+  Alcotest.(check string)
+    "mechanics grammar" Centl_sci_schema.uniform_gravity_particle_grammar
+    (string "grammar" request);
+  Alcotest.(check bool) "problem remains encoded data" true
+    (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem))
+       (string "prompt" request))
 
 let test_unsupported_request_contract () =
   let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
@@ -115,6 +140,10 @@ let () =
           Alcotest.test_case "request contract" `Quick test_request_contract;
           Alcotest.test_case "unit request contract" `Quick
             test_unit_request_contract;
+          Alcotest.test_case "constant request contract" `Quick
+            test_constant_request_contract;
+          Alcotest.test_case "uniform gravity request contract" `Quick
+            test_uniform_gravity_request_contract;
           Alcotest.test_case "unsupported request contract" `Quick
             test_unsupported_request_contract;
           Alcotest.test_case "fake resident inference" `Quick
