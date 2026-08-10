@@ -50,6 +50,29 @@ let replace_all ~needle ~replacement text =
     loop 0;
     Buffer.contents output
 
+let replace_all_ci ~needle ~replacement text =
+  let lower_text = String.lowercase_ascii text in
+  let lower_needle = String.lowercase_ascii needle in
+  if lower_needle = "" then text
+  else
+    let output = Buffer.create (String.length text) in
+    let rec loop offset =
+      if offset >= String.length text then ()
+      else
+        let remaining_lower =
+          String.sub lower_text offset (String.length lower_text - offset)
+        in
+        match find_substring ~needle:lower_needle remaining_lower with
+        | None -> Buffer.add_substring output text offset (String.length text - offset)
+        | Some relative ->
+            let index = offset + relative in
+            Buffer.add_substring output text offset (index - offset);
+            Buffer.add_string output replacement;
+            loop (index + String.length needle)
+    in
+    loop 0;
+    Buffer.contents output
+
 let collapse_spaces text =
   let output = Buffer.create (String.length text) in
   let pending_space = ref false in
@@ -84,11 +107,14 @@ let safe_lexical_corrections =
     ("equls", "equals");
     ("kilomters", "kilometers");
     ("metres", "meters");
+    ("whats", "what is");
+    ("what's", "what is");
   ]
 
 let normalize_lexical text =
   List.fold_left
-    (fun current (needle, replacement) -> replace_all ~needle ~replacement current)
+    (fun current (needle, replacement) ->
+      replace_all_ci ~needle ~replacement current)
     text safe_lexical_corrections
 
 let drop_prefix_ci prefix text =
@@ -100,6 +126,45 @@ let drop_prefix_ci prefix text =
          (String.length text - String.length prefix)
       |> String.trim)
   else None
+
+let strip_polite_prefix text =
+  let prefixes =
+    [
+      "could you please ";
+      "would you please ";
+      "can you please ";
+      "please ";
+      "could you ";
+      "would you ";
+      "can you ";
+    ]
+  in
+  let rec strip current =
+    let rec choose = function
+      | [] -> current
+      | prefix :: rest ->
+          begin match drop_prefix_ci prefix current with
+          | Some body when body <> "" -> strip body
+          | _ -> choose rest
+          end
+    in
+    choose prefixes
+  in
+  strip text
+
+let strip_polite_suffix text =
+  let text = String.trim text in
+  let lower = String.lowercase_ascii text in
+  let suffixes = [ ", please"; " please" ] in
+  let rec choose = function
+    | [] -> text
+    | suffix :: rest ->
+        if String.ends_with ~suffix lower then
+          String.sub text 0 (String.length text - String.length suffix)
+          |> String.trim
+        else choose rest
+  in
+  choose suffixes
 
 let canonicalize_root_request text =
   let prefixes =
@@ -134,14 +199,17 @@ let canonicalize_conversion text =
   | Some body ->
       let lower = String.lowercase_ascii body in
       if find_substring ~needle:" into " lower <> None || find_substring ~needle:" to " lower <> None
-      then "convert " ^ replace_all ~needle:" into " ~replacement:" to " body
+      then "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
       else text
 
 let canonicalize_common_intent text =
   text |> canonicalize_root_request |> canonicalize_conversion
 
 let normalize mode text =
-  let normalized = text |> normalize_unicode |> normalize_lexical |> collapse_spaces in
+  let normalized =
+    text |> normalize_unicode |> normalize_lexical |> collapse_spaces
+    |> strip_polite_prefix |> strip_polite_suffix
+  in
   match mode with
   | Build -> normalized
   | Math | Phys | Hybrid -> canonicalize_common_intent normalized
