@@ -198,6 +198,8 @@ jobs:
           JULIA_NUM_THREADS: "1"
         run: |
           cd "$GITHUB_WORKSPACE"
+          export CFLAGS="$PORTABLE_X86_CFLAGS"
+          opam exec --switch=centl -- make native-build
           CENTL_BIN="$GITHUB_WORKSPACE/_build/default/src/main.exe" \
             julia --startup-file=no --project=lab/julia lab/julia/differential.jl
 
