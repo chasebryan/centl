@@ -59,7 +59,7 @@ activates the command launchers atomically.
 For full installation details and offline archives, see
 [docs/INSTALL.md](docs/INSTALL.md).
 
-![CENTL-SCi v0.0.2-Caramels — Free Computation Foundation](assets/branding/centl-sci-v0.0.2-caramels-banner.svg)
+![CENTL-SCi v0.0.2-Caramels — Free Computation Foundation](assets/branding/centl-sci-v0.0.2-caramels.png)
 
 ## CENTL-SCi — v0.0.2-Caramels
 
