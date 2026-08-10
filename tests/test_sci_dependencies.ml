@@ -151,6 +151,46 @@ let test_activation_rejects_disabled_local_dependency () =
                 (contains "required local extension beta is disabled" message)
           end)
 
+let test_disabling_required_extension_is_rejected () =
+  let root = temp_dir "centl-caramels-disable-required-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"alpha" ~enabled:true ~dependencies:[];
+      write_manifest workspace ~name:"beta" ~enabled:true
+        ~dependencies:[ "extension:alpha" ];
+      let revision = Centl_sci_workspace.read_revision workspace in
+      begin match Centl_sci_extensions.set_enabled workspace "alpha" false with
+      | Ok _ -> Alcotest.fail "required extension was unexpectedly disabled"
+      | Error message ->
+          Alcotest.(check bool) "dependent refusal" true
+            (contains "required by enabled local extension beta" message)
+      end;
+      Alcotest.(check int) "refusal does not mutate revision" revision
+        (Centl_sci_workspace.read_revision workspace))
+
+let test_removing_required_extension_is_rejected () =
+  let root = temp_dir "centl-caramels-remove-required-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"alpha" ~enabled:true ~dependencies:[];
+      write_manifest workspace ~name:"beta" ~enabled:true
+        ~dependencies:[ "extension:alpha" ];
+      let revision = Centl_sci_workspace.read_revision workspace in
+      begin match Centl_sci_extensions.remove workspace "alpha" with
+      | Ok _ -> Alcotest.fail "required extension was unexpectedly removed"
+      | Error message ->
+          Alcotest.(check bool) "dependent refusal" true
+            (contains "required by enabled local extension beta" message)
+      end;
+      Alcotest.(check int) "refusal does not mutate revision" revision
+        (Centl_sci_workspace.read_revision workspace);
+      Alcotest.(check bool) "manifest remains present" true
+        (Sys.file_exists (Centl_sci_workspace.manifest_path workspace "alpha")))
+
 let () =
   Alcotest.run "CENTL-SCi Caramels dependencies"
     [
@@ -169,5 +209,9 @@ let () =
             test_activation_rejects_missing_local_dependency;
           Alcotest.test_case "activation rejects disabled dependency" `Quick
             test_activation_rejects_disabled_local_dependency;
+          Alcotest.test_case "disable required extension is rejected" `Quick
+            test_disabling_required_extension_is_rejected;
+          Alcotest.test_case "remove required extension is rejected" `Quick
+            test_removing_required_extension_is_rejected;
         ] );
     ]
