@@ -121,6 +121,24 @@ let test_workspace_rejects_symlinked_managed_directory () =
       end;
       Alcotest.(check int) "outside directory untouched" 0 (Array.length (Sys.readdir outside)))
 
+let test_workspace_tightens_managed_directory_permissions () =
+  let root = temp_dir "centl-caramels-workspace-mode-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace_root = Filename.concat root "workspace" in
+      Unix.mkdir workspace_root 0o755;
+      Unix.chmod workspace_root 0o755;
+      let data = Filename.concat workspace_root "data" in
+      Unix.mkdir data 0o755;
+      Unix.chmod data 0o755;
+      let workspace = Centl_sci_workspace.make workspace_root in
+      Centl_sci_workspace.ensure workspace;
+      Alcotest.(check int) "workspace root is private" 0o700
+        ((Unix.stat workspace_root).Unix.st_perm land 0o777);
+      Alcotest.(check int) "managed data directory is private" 0o700
+        ((Unix.stat data).Unix.st_perm land 0o777))
+
 let test_atomic_json_write_ignores_predictable_tmp_symlink () =
   let root = temp_dir "centl-caramels-atomic-symlink-" in
   Fun.protect
@@ -300,6 +318,8 @@ let () =
             test_symlink_is_rejected_before_copy;
           Alcotest.test_case "workspace directory rejects symlink" `Quick
             test_workspace_rejects_symlinked_managed_directory;
+          Alcotest.test_case "workspace directory permissions are private" `Quick
+            test_workspace_tightens_managed_directory_permissions;
           Alcotest.test_case "atomic write ignores predictable tmp symlink" `Quick
             test_atomic_json_write_ignores_predictable_tmp_symlink;
           Alcotest.test_case "snapshot rejects symlink" `Quick
