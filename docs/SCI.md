@@ -88,10 +88,28 @@ Caramels currently has typed deterministic paths for:
 | `exact_expression` | mathematics | CENTL `compute` |
 | `polynomial_equation` | mathematics | CENTL `solve` |
 | `unit_conversion` | physics | typed CENTL Physics conversion |
+| `physical_constant` | physics | typed CENTL Physics exact defining/conventional constant lookup |
 | `uniform_gravity_particle` | physics | typed CENTL Physics `simulate_particle` |
 | `unsupported` | either/outside scope | no fabricated computation |
 
 The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, and factoring requests into existing native CENTL expressions instead of creating separate implementations.
+
+The optional local-model schema now admits the same Caramels constant and uniform-gravity classes. Model output still passes through the independent typed IR validator before execution.
+
+## Exact physical constants
+
+Caramels exposes the deliberately narrow exact CENTL Physics constant catalog:
+
+- speed of light in vacuum, `c`;
+- Planck constant, `h`;
+- elementary charge, `e`;
+- Boltzmann constant, `k_B`;
+- Avogadro constant, `N_A`;
+- standard acceleration of gravity, `g0`.
+
+These are defining or conventional exact values already represented by CENTL Physics with provenance. Natural-language requests for those constants use the deterministic fast path and do not require a model.
+
+Measured constants are not silently promoted to exactness. For example, a request for the Newtonian gravitational constant `G` is explicitly refused by this route because CENTL does not yet have first-class measured-uncertainty/provenance semantics for that catalog entry.
 
 ## Narrow mechanics class
 
@@ -147,8 +165,11 @@ Exact values remain exact. Approximation qualifications remain visible. If CENTL
 - normalized input;
 - mode;
 - deterministic intent classification;
+- typed IR domain, problem class, and operation;
+- interpreter-introduced assumptions;
 - interpreter path;
 - authoritative executor;
+- the executor request actually sent to CENTL/CENTL Physics;
 - runtime status;
 - workspace revision where available;
 - execution/evidence events;
@@ -212,7 +233,16 @@ Generated text does not bypass the existing parser boundary.
 
 ## Reuse before invention
 
-Generic BUILD planning searches a first-pass capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces and active downstream extensions.
+Generic BUILD planning searches a capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces and downstream extensions.
+
+Useful inspection forms include:
+
+```text
+BUILD> capabilities
+BUILD> show capability integration
+BUILD> validate NAME
+BUILD> validate package NAME
+```
 
 The goal is to answer questions such as:
 
@@ -230,6 +260,8 @@ BUILD planning currently distinguishes:
 4. generated native extension;
 5. downstream core patch;
 6. upstream contribution preparation.
+
+Core-patch-classified requests create persistent downstream JSON and Markdown plan artifacts. Planning does not silently edit or publish trusted core source.
 
 ## User-owned workspace
 
@@ -278,6 +310,21 @@ Current assurance labels include distinctions for verified extensions, validated
 
 A locally generated capability is never silently presented as verified CENTL core.
 
+`validate NAME` performs structural checks appropriate to the extension kind. Structural validation does not upgrade assurance to verified core.
+
+## Packages
+
+Local packages group downstream extensions without creating a separate package-level assurance claim.
+
+Package validation reports every member's:
+
+- presence/missing state;
+- enabled/disabled state;
+- extension kind;
+- individual assurance label.
+
+Package composition never promotes member assurance.
+
 ## Inspect, disable, remove, undo
 
 BUILD exposes lifecycle foundations for downstream ownership:
@@ -294,9 +341,26 @@ undo
 
 The REPL also exposes colon forms for the common inspection/lifecycle operations implemented by the current app.
 
-Mutating operations create a reversible snapshot first. Snapshot payloads cover manifests, native modules, packages, and generated extension scaffolds while deliberately excluding the revision/history ledger and snapshot store itself.
+Mutating operations create a reversible snapshot first. Snapshot payloads cover manifests, native modules, packages, tests, data, and generated extension scaffolds while deliberately excluding the revision/history ledger, workspace identity/configuration, and snapshot store itself.
 
 Removal archives local files instead of silently pretending the extension never existed.
+
+## Workspace portability
+
+Caramels implements a revision-stamped downstream workspace bundle format.
+
+A safe read-only export is exposed through BUILD:
+
+```text
+BUILD> export workspace
+BUILD> export workspace /path/to/bundle
+```
+
+The bundle includes downstream extension manifests, native modules, packages, tests, data, and generated scaffolds. It excludes verified core, history, undo snapshots, prior exports, and local workspace identity/configuration.
+
+A validated reversible importer is implemented internally. It validates bundle metadata, extension manifests, structural extension checks, package membership, and activation policy before mutation, then snapshots the existing downstream workspace before replacing downstream surfaces.
+
+**BUILD import activation remains intentionally gated in the current branch** until the dispatcher can reload the active downstream core session in the same operation. A current `import workspace PATH` BUILD request therefore reports that boundary and does not mutate state. This avoids a half-imported live session.
 
 ## External and native extension scaffolds
 
@@ -351,7 +415,7 @@ The first implementation pass prioritizes complete end-to-end Linux functionalit
 
 ## Human-variation gate
 
-Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains 315 prompt variants spanning mathematics, physics, mechanics, incomplete requests, and BUILD-oriented input.
+Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains **405 prompt variants** spanning mathematics, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.
 
 The corpus varies:
 
@@ -369,7 +433,7 @@ The test surface includes a target of at least **95% useful interpretation or us
 
 A local model remains optional for requests that genuinely need semantic inference. Deterministic Tier-0 requests do not require a model.
 
-The reference local model boundaries remain `llama-cli` and loopback `llama-server`, configured explicitly. The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.
+The reference local model boundaries remain `llama-cli` and loopback `llama-server`, configured explicitly. The Caramels model schema/grammars admit exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.
 
 ## Development sequence for `v0.0.2-Caramels`
 
