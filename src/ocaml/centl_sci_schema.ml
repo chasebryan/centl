@@ -34,6 +34,21 @@ let json_schema =
       "type": "object",
       "properties": {
         "schema_version": {"type": "integer", "const": 1},
+        "domain": {"type": "string", "enum": ["mathematics"]},
+        "problem_class": {"type": "string", "enum": ["verification_claim"]},
+        "operation": {"type": "string", "enum": ["verify"]},
+        "assumptions": {"type": "array", "maxItems": 0},
+        "left": {"type": "string", "maxLength": 4096},
+        "relation": {"type": "string", "enum": ["equal", "not_equal", "less_than", "less_or_equal", "greater_than", "greater_or_equal"]},
+        "right": {"type": "string", "maxLength": 4096}
+      },
+      "required": ["schema_version", "domain", "problem_class", "operation", "assumptions", "left", "relation", "right"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_version": {"type": "integer", "const": 1},
         "domain": {"type": "string", "enum": ["physics"]},
         "problem_class": {"type": "string", "enum": ["unit_conversion"]},
         "operation": {"type": "string", "enum": ["convert"]},
@@ -108,6 +123,12 @@ let json_schema =
    CENTL-SCi trust boundary. The runtime uses these small native GBNF grammars
    directly, then reparses and independently validates the resulting JSON
    against the stricter OCaml IR contract above.
+
+   Verification claims are intentionally absent from the model grammar for the
+   current Caramels slice. Supported closed verification phrasing is handled by
+   Tier-0 deterministic interpretation and lowered directly to the read-only
+   CENTL verification protocol. The canonical JSON schema still includes the
+   typed class so structured IR remains self-consistent.
 *)
 let grammar_rules =
   {|exact-expression ::= "{\"schema_version\":1,\"domain\":\"mathematics\",\"problem_class\":\"exact_expression\",\"operation\":\"compute\",\"assumptions\":" assumptions ",\"expression\":" string "}"
