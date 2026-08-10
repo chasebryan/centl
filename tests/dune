@@ -91,6 +91,11 @@
  (libraries centl_lib alcotest))
 
 (test
+ (name test_sci_session)
+ (modules test_sci_session)
+ (libraries centl_lib alcotest unix))
+
+(test
  (name test_sci_mechanics)
  (modules test_sci_mechanics)
  (libraries centl_lib alcotest yojson))
