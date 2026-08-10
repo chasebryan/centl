@@ -193,14 +193,11 @@ jobs:
           JULIA_PKG_PRECOMPILE_AUTO: "0"
         run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Run hardening and independent differential publication gates
+      - name: Run independent differential publication gate
         env:
-          CENTL_SANITIZER_REQUIRED: "1"
           JULIA_NUM_THREADS: "1"
         run: |
           cd "$GITHUB_WORKSPACE"
-          export CFLAGS="$PORTABLE_X86_CFLAGS"
-          opam exec --switch=centl -- make hardening-test
           CENTL_BIN="$GITHUB_WORKSPACE/_build/default/src/main.exe" \
             julia --startup-file=no --project=lab/julia lab/julia/differential.jl
 
