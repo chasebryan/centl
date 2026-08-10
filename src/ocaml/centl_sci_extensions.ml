@@ -139,6 +139,11 @@ let write_json path json =
 let set_enabled workspace name enabled =
   match read_manifest workspace name with
   | Error message -> Error message
+  | Ok manifest when enabled && manifest.kind <> "native_centl" ->
+      Error
+        (Printf.sprintf
+           "local extension %s has kind %s. Caramels will not route it through the native CENTL definition loader; implement and validate its explicit runtime boundary before activation."
+           manifest.name manifest.kind)
   | Ok manifest ->
       try
         Centl_sci_workspace.ensure workspace;
