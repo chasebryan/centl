@@ -13,7 +13,9 @@ let read_text path =
       (Fun.protect
          ~finally:(fun () -> close_in_noerr channel)
          (fun () -> really_input_string channel (in_channel_length channel)))
-  with Sys_error message | End_of_file -> Error message
+  with
+  | Sys_error message -> Error message
+  | End_of_file -> Error ("unexpected end of file while reading " ^ path)
 
 let assoc name = function
   | `Assoc fields -> List.assoc_opt name fields
@@ -124,13 +126,27 @@ let validate workspace name =
 let render report =
   String.concat "\n"
     ([
-       "Extension validation: " ^ report.name;
+       "Caramels extension validation";
+       "  name: " ^ report.name;
        "  kind: " ^ report.kind;
-       "  structurally valid: " ^ string_of_bool report.valid;
+       "  valid: " ^ string_of_bool report.valid;
        "  assurance: " ^ report.assurance;
-       "  checks:";
+       "Checks:";
      ]
-    @ List.map (fun check -> "    - " ^ check) report.checks
+    @ List.map (fun check -> "  - " ^ check) report.checks
     @ [
-        "  note: validation confirms the checks above only; it does not promote a local/generated extension to verified CENTL core.";
+        "Assurance note: structural validation does not grant verified-core assurance.";
       ])
+
+let to_json report =
+  `Assoc
+    [
+      ("schema_version", `Int 1);
+      ("centl_sci_version", `String "0.0.2-Caramels");
+      ("name", `String report.name);
+      ("kind", `String report.kind);
+      ("valid", `Bool report.valid);
+      ("checks", `List (List.map (fun check -> `String check) report.checks));
+      ("assurance", `String report.assurance);
+      ("assurance_promoted", `Bool false);
+    ]
