@@ -166,6 +166,18 @@ let strip_polite_suffix text =
   in
   choose suffixes
 
+let strip_sentence_terminal text =
+  let text = String.trim text in
+  let rec finish length =
+    if length = 0 then 0
+    else
+      match text.[length - 1] with
+      | '?' | '.' -> finish (length - 1)
+      | _ -> length
+  in
+  let length = finish (String.length text) in
+  String.sub text 0 length |> String.trim
+
 let canonicalize_root_request text =
   let prefixes =
     [
@@ -208,7 +220,7 @@ let canonicalize_how_many_conversion text =
             let source =
               String.sub body (index + String.length marker)
                 (String.length body - index - String.length marker)
-              |> String.trim
+              |> String.trim |> strip_sentence_terminal
             in
             let source =
               match drop_prefix_ci "exactly " source with
