@@ -30,6 +30,30 @@ let test_approximation_precision_language () =
       Alcotest.(check string) "expression" "approx(sqrt(2), 30)" data.expression
   | _ -> Alcotest.fail "expected exact_expression approximation IR"
 
+let test_verification_language () =
+  match
+    Centl_sci_fastpath.interpret "Verify 0.1 + 0.2 equals 3/10."
+    |> require_some "closed verification claim"
+  with
+  | Centl_sci_ir.Verification_claim data ->
+      Alcotest.(check string) "left" "0.1 + 0.2" data.left;
+      Alcotest.(check string) "relation" "equal" data.relation;
+      Alcotest.(check string) "right" "3/10" data.right;
+      Alcotest.(check (list string)) "no inferred assumptions" []
+        data.verification_assumptions
+  | _ -> Alcotest.fail "expected verification_claim fast-path IR"
+
+let test_verification_inequality_language () =
+  match
+    Centl_sci_fastpath.interpret "Check whether 1/3 < 1/2."
+    |> require_some "closed inequality verification claim"
+  with
+  | Centl_sci_ir.Verification_claim data ->
+      Alcotest.(check string) "left" "1/3" data.left;
+      Alcotest.(check string) "relation" "less_than" data.relation;
+      Alcotest.(check string) "right" "1/2" data.right
+  | _ -> Alcotest.fail "expected verification_claim inequality IR"
+
 let test_unit_conversion_language () =
   match
     Centl_sci_fastpath.interpret "Convert 100 centimeters to meters."
@@ -143,6 +167,32 @@ let test_fast_path_executes_exactly () =
       end
   | Some _ -> Alcotest.fail "expected structured CENTL response"
 
+let verification_outcome problem =
+  let ir = Centl_sci_fastpath.interpret problem |> require_some problem in
+  Centl_sci_runtime.execute ir
+
+let test_verification_executes_verified () =
+  let outcome = verification_outcome "Verify 0.1 + 0.2 equals 3/10." in
+  Alcotest.(check string) "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
+  Alcotest.(check string) "human verdict" "Verified."
+    (Centl_sci_present.human outcome)
+
+let test_verification_executes_refuted () =
+  let outcome = verification_outcome "Verify 2 + 2 equals 5." in
+  Alcotest.(check string) "status" "established"
+    (Centl_sci_runtime.status_text outcome.status);
+  Alcotest.(check string) "human verdict" "Refuted."
+    (Centl_sci_present.human outcome)
+
+let test_verification_unknown_remains_visible () =
+  let outcome = verification_outcome "Verify x + 1 equals 2." in
+  Alcotest.(check string) "status" "unresolved"
+    (Centl_sci_runtime.status_text outcome.status);
+  let rendered = Centl_sci_present.human outcome in
+  Alcotest.(check bool) "unknown verifier verdict is visible" true
+    (String.starts_with ~prefix:"Unknown" rendered)
+
 let test_exact_constant_executes () =
   let ir =
     Centl_sci_fastpath.interpret "What is the speed of light?"
@@ -196,6 +246,10 @@ let () =
             test_approximation_language;
           Alcotest.test_case "explicit approximation precision" `Quick
             test_approximation_precision_language;
+          Alcotest.test_case "closed verification claim" `Quick
+            test_verification_language;
+          Alcotest.test_case "closed verification inequality" `Quick
+            test_verification_inequality_language;
           Alcotest.test_case "unit conversion language" `Quick
             test_unit_conversion_language;
           Alcotest.test_case "exact physical constant" `Quick
@@ -217,6 +271,12 @@ let () =
         [
           Alcotest.test_case "exact result" `Quick
             test_fast_path_executes_exactly;
+          Alcotest.test_case "verification verified" `Quick
+            test_verification_executes_verified;
+          Alcotest.test_case "verification refuted" `Quick
+            test_verification_executes_refuted;
+          Alcotest.test_case "verification unknown" `Quick
+            test_verification_unknown_remains_visible;
           Alcotest.test_case "exact physical constant result" `Quick
             test_exact_constant_executes;
           Alcotest.test_case "spoken equation exact result" `Quick
