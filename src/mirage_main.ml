@@ -50,9 +50,7 @@ let obligations_with goal_path graph =
       exit 2
 
 let candidates_with obligations_path graph obligations =
-  match
-    Centl_sci_mirage_candidate.construct obligations_path graph obligations
-  with
+  match Centl_sci_mirage_candidate.construct obligations_path graph obligations with
   | Ok result -> result
   | Error message ->
       prerr_endline ("centl-mirage: " ^ message);
@@ -65,9 +63,10 @@ let materialization_with candidates_path candidates =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
-let readiness_with candidates_path obligations candidates =
+let readiness_with candidates_path obligations candidates materialization =
   match
     Centl_sci_mirage_readiness.construct candidates_path obligations candidates
+      materialization
   with
   | Ok result -> result
   | Error message ->
@@ -141,14 +140,12 @@ let start path =
   let result = ingest_with workspace path in
   let goal_path, graph = analyze_with workspace result.spec_path in
   let obligations_path, obligations = obligations_with goal_path graph in
-  let candidates_path, candidates =
-    candidates_with obligations_path graph obligations
-  in
+  let candidates_path, candidates = candidates_with obligations_path graph obligations in
   let materialization_path, materialization =
     materialization_with candidates_path candidates
   in
   let readiness_path, readiness =
-    readiness_with candidates_path obligations candidates
+    readiness_with candidates_path obligations candidates materialization
   in
   let execution_plan_path, execution_plan =
     execution_plan_with readiness_path readiness
@@ -174,7 +171,7 @@ let start path =
       "MIRAGE staged only non-mutating candidate transactions and halted before synthesis for blocked source cells."
   else
     print_endline
-      "MIRAGE staged candidate transactions, conservatively materialized only candidates supported by deterministic local lowering, and planned unresolved evidence work. No candidate source was activated and no candidate is admissible yet."
+      "MIRAGE staged candidate transactions, conservatively materialized only candidates supported by deterministic local lowering, consumed successful transaction-bound parser evidence, and planned remaining evidence work. No candidate source was activated and no candidate is admissible yet."
 
 let status () =
   let workspace = workspace_or_exit () in
