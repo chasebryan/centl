@@ -1,0 +1,13 @@
+# CENTL qualified model lineage record
+schema=1
+file_name=Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+base_model_id=Qwen/Qwen3-4B-Instruct-2507
+base_model_source=https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+base_model_license=Apache-2.0
+quantization=Q4_K_M
+quantized_source_status=unverified
+quantized_source_repository=-
+quantized_source_file=-
+quantized_source_sha256=-
+redistribution_status=not-approved
+note=Base-model lineage is recorded; the exact GGUF quantizer/repository has not been content-hash verified.
