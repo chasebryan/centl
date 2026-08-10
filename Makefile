@@ -28,7 +28,7 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality install-interface-check integrity-self-test \
+.PHONY: all format format-fix fmt lint quality licensing-check install-interface-check integrity-self-test \
 	integrity-source supply-chain-check supply-chain-sync supply-chain-audit \
 	supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-preserve \
 	offline-rebuild capsule-build capsule-run release-sign release-verify verify \
@@ -51,6 +51,9 @@ lint:
 	$(DUNE) build @check
 	$(OPAM) lint centl.opam
 	scripts/check-toolchain-pins
+
+licensing-check:
+	sh scripts/check-licensing
 
 install-interface-check:
 	$(PYTHON) scripts/install-interface-check.py
@@ -130,7 +133,7 @@ release-verify:
 	FCF_SIGNIFY_PUBLIC_KEY="$(FCF_SIGNIFY_PUBLIC_KEY)" \
 		sh scripts/release-verify "$(RELEASE_DIR)"
 
-quality: format lint install-interface-check integrity-source supply-chain-check
+quality: format lint licensing-check install-interface-check integrity-source supply-chain-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
