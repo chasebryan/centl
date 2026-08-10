@@ -38,6 +38,10 @@ a:hover { text-decoration-thickness: 2px; }
   border-bottom: 1px solid var(--rule);
   background: #fff;
 }
+.home-masthead {
+  grid-template-columns: 1fr;
+  background: var(--blue);
+}
 
 .brand {
   padding: 16px 14px;
@@ -47,6 +51,8 @@ a:hover { text-decoration-thickness: 2px; }
 .brand a { color: #fff; text-decoration: none; }
 .brand strong { display: block; font: 700 28px/1 Georgia, serif; letter-spacing: .04em; }
 .brand span { display: block; margin-top: 7px; font-size: 12px; line-height: 1.25; }
+.brand small { display: block; margin-top: 5px; font-size: 12px; opacity: .88; }
+.home-masthead .brand { padding-inline: 18px; }
 
 .title {
   padding: 14px 20px 12px;
