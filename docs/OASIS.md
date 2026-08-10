@@ -1,7 +1,7 @@
 # The CENTL Oasis Release Standard
 
-**Status:** project release policy  
-**Applies to:** any CENTL stable release  
+**Status:** project release policy
+**Applies to:** any CENTL stable release
 **SemVer effect:** none
 
 ## Definition
