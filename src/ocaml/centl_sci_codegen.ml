@@ -206,13 +206,16 @@ let parse_value ~replace text =
 
 let generate text =
   match parse_function ~replace:false text with
-  | Generated _ as result | Needs_clarification _ as result -> result
+  | Generated change -> Generated change
+  | Needs_clarification message -> Needs_clarification message
   | Not_generated ->
       begin match parse_function ~replace:true text with
-      | Generated _ as result | Needs_clarification _ as result -> result
+      | Generated change -> Generated change
+      | Needs_clarification message -> Needs_clarification message
       | Not_generated ->
           begin match parse_value ~replace:false text with
-          | Generated _ as result | Needs_clarification _ as result -> result
+          | Generated change -> Generated change
+          | Needs_clarification message -> Needs_clarification message
           | Not_generated -> parse_value ~replace:true text
           end
       end
