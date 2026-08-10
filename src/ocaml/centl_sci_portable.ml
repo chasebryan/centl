@@ -7,7 +7,7 @@ type result = {
 type command = Export of string option | Import of string
 
 let drop_prefix_ci prefix text =
-  let trimmed = String.trim input in
+  let trimmed = String.trim text in
   let lower = String.lowercase_ascii trimmed in
   let prefix_lower = String.lowercase_ascii prefix in
   if String.starts_with ~prefix:prefix_lower lower then
