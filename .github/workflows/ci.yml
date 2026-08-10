@@ -97,13 +97,15 @@ jobs:
           FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
             sh scripts/release-verify "$release"
 
-          # Whole-mirror receipts must prove exact tree membership, not only
-          # verify whichever files happen to be listed.
+          # Whole-mirror receipts must prove exact tree membership, regular-file
+          # bytes, and symbolic-link target strings.
           mirror_a="$root/mirror-a"
           mirror_b="$root/mirror-b"
           mkdir -p "$mirror_a/artifacts" "$mirror_a/models/example"
           printf 'artifact bytes\n' > "$mirror_a/artifacts/example.tar.gz"
           printf 'model bytes\n' > "$mirror_a/models/example/model.gguf"
+          ln -s ../../artifacts/example.tar.gz \
+            "$mirror_a/models/example/artifact-link"
           sh scripts/mirror-receipt create "$mirror_a"
           cp -a "$mirror_a" "$mirror_b"
           sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"
@@ -119,6 +121,16 @@ jobs:
           printf 'unexpected\n' > "$mirror_b/EXTRA"
           if sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"; then
             echo 'mirror copy with an unexpected file unexpectedly verified' >&2
+            exit 1
+          fi
+
+          rm -rf "$mirror_b"
+          cp -a "$mirror_a" "$mirror_b"
+          rm "$mirror_b/models/example/artifact-link"
+          ln -s ../../artifacts/different.tar.gz \
+            "$mirror_b/models/example/artifact-link"
+          if sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"; then
+            echo 'mirror copy with a changed symlink target unexpectedly verified' >&2
             exit 1
           fi
 
