@@ -15,6 +15,7 @@ type candidate = {
   obligation_ids : string list;
   assurance : string;
   mutates_workspace : bool;
+  transaction_fingerprint : string;
 }
 
 type report = {
@@ -55,20 +56,55 @@ let obligations_for_cell (report : Centl_sci_mirage_obligation.report) cell_id =
   |> List.filter (fun obligation -> obligation.Centl_sci_mirage_obligation.cell_id = cell_id)
   |> List.map (fun obligation -> obligation.Centl_sci_mirage_obligation.id)
 
+let json_strings values = `List (List.map (fun value -> `String value) values)
+
+let fingerprint_material ~id ~cell_id ~strategy ~state ~capability_inputs
+    ~obligation_ids ~assurance ~mutates_workspace =
+  `Assoc
+    [
+      ("fingerprint_schema_version", `Int 1);
+      ("id", `String id);
+      ("cell_id", `Int cell_id);
+      ("strategy", `String (strategy_text strategy));
+      ("state", `String (state_text state));
+      ("capability_inputs", json_strings capability_inputs);
+      ("obligation_ids", json_strings obligation_ids);
+      ("assurance", `String assurance);
+      ("mutates_workspace", `Bool mutates_workspace);
+    ]
+  |> Yojson.Safe.to_string
+
+let transaction_fingerprint ~id ~cell_id ~strategy ~state ~capability_inputs
+    ~obligation_ids ~assurance ~mutates_workspace =
+  fingerprint_material ~id ~cell_id ~strategy ~state ~capability_inputs
+    ~obligation_ids ~assurance ~mutates_workspace
+  |> Centl_sha256.hex_string
+
 let candidate_of_gap obligations (gap : Centl_sci_mirage_goal.gap) =
   match strategy_of_gap_status gap.status with
   | None -> None
   | Some strategy ->
+      let id = Printf.sprintf "candidate:cell:%d:%s" gap.cell_id (strategy_text strategy) in
+      let state = Planned in
+      let capability_inputs = gap.capability_matches in
+      let obligation_ids = obligations_for_cell obligations gap.cell_id in
+      let assurance = assurance_text strategy in
+      let mutates_workspace = false in
+      let transaction_fingerprint =
+        transaction_fingerprint ~id ~cell_id:gap.cell_id ~strategy ~state
+          ~capability_inputs ~obligation_ids ~assurance ~mutates_workspace
+      in
       Some
         {
-          id = Printf.sprintf "candidate:cell:%d:%s" gap.cell_id (strategy_text strategy);
+          id;
           cell_id = gap.cell_id;
           strategy;
-          state = Planned;
-          capability_inputs = gap.capability_matches;
-          obligation_ids = obligations_for_cell obligations gap.cell_id;
-          assurance = assurance_text strategy;
-          mutates_workspace = false;
+          state;
+          capability_inputs;
+          obligation_ids;
+          assurance;
+          mutates_workspace;
+          transaction_fingerprint;
         }
 
 let build (graph : Centl_sci_mirage_goal.graph)
@@ -81,8 +117,6 @@ let build (graph : Centl_sci_mirage_goal.graph)
   in
   { candidates; blocked_cells }
 
-let json_strings values = `List (List.map (fun value -> `String value) values)
-
 let candidate_to_json candidate =
   `Assoc
     [
@@ -94,12 +128,14 @@ let candidate_to_json candidate =
       ("obligation_ids", json_strings candidate.obligation_ids);
       ("assurance", `String candidate.assurance);
       ("mutates_workspace", `Bool candidate.mutates_workspace);
+      ("transaction_fingerprint_algorithm", `String "sha256");
+      ("transaction_fingerprint", `String candidate.transaction_fingerprint);
     ]
 
 let to_json report =
   `Assoc
     [
-      ("schema_version", `Int 1);
+      ("schema_version", `Int 2);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_transactions");
       ("candidate_count", `Int (List.length report.candidates));
@@ -107,6 +143,7 @@ let to_json report =
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
       ("workspace_mutated", `Bool false);
       ("assurance_promoted", `Bool false);
+      ("fingerprint_semantics", `String "structural transaction identity only; not behavioral validation or mathematical proof");
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -138,4 +175,5 @@ let render report =
       "candidate-blocked cells: " ^ blocked;
       "workspace mutated: no";
       "assurance promoted: no";
+      "transaction fingerprints: structural identity only; not behavioral proof";
     ]
