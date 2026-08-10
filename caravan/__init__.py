@@ -5,6 +5,7 @@ from .content import ArtifactIdentity, ContentStore, IntegrityError
 from .coordinator import CoordinatorState, CoordinatorError
 from .enrollment import register_accepted_carrier
 from .identity import CarrierIdentity, IdentityError
+from .lifecycle import CarrierStatus, LifecycleError, join, leave, status
 from .policy import (
     PolicyAcceptanceReceipt,
     PolicyError,
@@ -23,6 +24,11 @@ __all__ = [
     "CoordinatorError",
     "CarrierIdentity",
     "IdentityError",
+    "CarrierStatus",
+    "LifecycleError",
+    "join",
+    "leave",
+    "status",
     "PolicyAcceptanceReceipt",
     "PolicyError",
     "create_policy_receipt",
