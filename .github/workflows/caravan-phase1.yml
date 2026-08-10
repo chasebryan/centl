@@ -5,10 +5,13 @@ on:
     paths:
       - 'caravan/**'
       - 'docs/CARAVAN-PHASE1.md'
+      - 'docs/CARAVAN-IDENTITY.md'
+      - 'docs/CARAVAN-CATALOG.md'
       - 'scripts/caravan-phase1-check'
       - 'tests/test_caravan_phase1.py'
       - 'tests/test_caravan_identity.py'
       - 'tests/test_caravan_enrollment.py'
+      - 'tests/test_caravan_tuf_catalog.py'
       - '.github/workflows/caravan-phase1.yml'
 
 permissions:
@@ -20,7 +23,7 @@ concurrency:
 
 jobs:
   laboratory:
-    name: Identity, integrity, policy, and coordinator gates
+    name: Identity, integrity, TUF catalog, policy, and coordinator gates
     runs-on: ubuntu-24.04
 
     steps:
@@ -32,7 +35,7 @@ jobs:
       - name: Create isolated Python environment
         run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
 
-      - name: Install pinned Phase 1 dependency
+      - name: Install pinned Phase 1 dependencies
         run: |
           "$RUNNER_TEMP/caravan-venv/bin/python" -m pip \
             --disable-pip-version-check install \
