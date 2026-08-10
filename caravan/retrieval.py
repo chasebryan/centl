@@ -131,72 +131,87 @@ def retrieve_verified(
     artifact. Integrity failure records the observed digest, quarantines that
     carrier, discards its bytes, and asks the coordinator for another eligible
     route. No observed carrier bytes can change ``expected``.
+
+    A store-level admission lock is held across the bounded attempt sequence so
+    concurrent local retrieval/import operations cannot all pass the same
+    capacity check and collectively exceed the configured object/free-space
+    ceiling with temporary transfer bytes.
     """
 
     if max_attempts <= 0:
         raise ValueError("max_attempts must be positive")
     _validate_manifest(expected, chunks)
 
-    # Enforce the same storage and free-space ceiling before creating the
-    # retrieval temporary file. Import-time checks remain authoritative too,
-    # but they are intentionally not the first capacity boundary.
     try:
-        store.ensure_capacity(expected.length)
+        guard = store.transfer_guard(expected.length)
+        with guard:
+            last_error: Exception | None = None
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    ticket = coordinator.issue_ticket(expected.artifact_id)
+                except CoordinatorError as exc:
+                    last_error = exc
+                    break
+
+                fetcher = fetchers.get(ticket.node_id)
+                if fetcher is None:
+                    raise RetrievalError(
+                        f"no laboratory fetcher configured for carrier {ticket.node_id}"
+                    )
+
+                coordinator.consume_ticket(
+                    ticket.token,
+                    node_id=ticket.node_id,
+                    artifact_id=expected.artifact_id,
+                )
+
+                fd, tmp_name = tempfile.mkstemp(prefix="retrieval-", dir=store.root / "tmp")
+                tmp_path = Path(tmp_name)
+                try:
+                    with os.fdopen(fd, "wb", closefd=True) as destination:
+                        with closing(fetcher(ticket)) as stream:
+                            _verify_into_file(
+                                stream,
+                                destination,
+                                expected=expected,
+                                chunks=chunks,
+                            )
+                        destination.flush()
+                        os.fsync(destination.fileno())
+                    identity = store.import_file(
+                        tmp_path,
+                        expected=expected,
+                        _lock_held=True,
+                    )
+                    return RetrievalResult(
+                        identity=identity,
+                        node_id=ticket.node_id,
+                        attempts=attempt,
+                        stored_path=store.path_for_verified(identity),
+                    )
+                except TransferIntegrityError as exc:
+                    last_error = exc
+                    coordinator.record_integrity_failure(
+                        ticket.node_id,
+                        expected.artifact_id,
+                        expected_digest=expected.sha256,
+                        observed_digest=exc.observed_digest,
+                        quarantine=True,
+                    )
+                finally:
+                    try:
+                        tmp_path.unlink()
+                    except FileNotFoundError:
+                        pass
+                    try:
+                        os.close(fd)
+                    except OSError:
+                        pass
+
+            if last_error is None:
+                raise RetrievalError("CARAVAN retrieval exhausted without an eligible carrier")
+            raise RetrievalError(
+                f"CARAVAN retrieval failed after {max_attempts} attempts: {last_error}"
+            ) from last_error
     except IntegrityError as exc:
         raise RetrievalError("authenticated artifact does not fit CARAVAN store limits") from exc
-
-    last_error: Exception | None = None
-    for attempt in range(1, max_attempts + 1):
-        try:
-            ticket = coordinator.issue_ticket(expected.artifact_id)
-        except CoordinatorError as exc:
-            last_error = exc
-            break
-
-        fetcher = fetchers.get(ticket.node_id)
-        if fetcher is None:
-            raise RetrievalError(f"no laboratory fetcher configured for carrier {ticket.node_id}")
-
-        coordinator.consume_ticket(
-            ticket.token,
-            node_id=ticket.node_id,
-            artifact_id=expected.artifact_id,
-        )
-
-        fd, tmp_name = tempfile.mkstemp(prefix="retrieval-", dir=store.root / "tmp")
-        tmp_path = Path(tmp_name)
-        try:
-            with os.fdopen(fd, "wb", closefd=True) as destination:
-                with closing(fetcher(ticket)) as stream:
-                    _verify_into_file(stream, destination, expected=expected, chunks=chunks)
-                destination.flush()
-                os.fsync(destination.fileno())
-            identity = store.import_file(tmp_path, expected=expected)
-            return RetrievalResult(
-                identity=identity,
-                node_id=ticket.node_id,
-                attempts=attempt,
-                stored_path=store.path_for_verified(identity),
-            )
-        except TransferIntegrityError as exc:
-            last_error = exc
-            coordinator.record_integrity_failure(
-                ticket.node_id,
-                expected.artifact_id,
-                expected_digest=expected.sha256,
-                observed_digest=exc.observed_digest,
-                quarantine=True,
-            )
-        finally:
-            try:
-                tmp_path.unlink()
-            except FileNotFoundError:
-                pass
-            try:
-                os.close(fd)
-            except OSError:
-                pass
-
-    if last_error is None:
-        raise RetrievalError("CARAVAN retrieval exhausted without an eligible carrier")
-    raise RetrievalError(f"CARAVAN retrieval failed after {max_attempts} attempts: {last_error}") from last_error
