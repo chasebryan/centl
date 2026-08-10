@@ -20,6 +20,9 @@ from .coordinator import CoordinatorState
 from .identity import IdentityError, verify_signature
 
 SESSION_PROOF_SCHEMA = "centl-caravan-session-proof-v1"
+DEFAULT_MAX_PENDING_CHALLENGES = 1024
+DEFAULT_MAX_CHALLENGES_PER_NODE = 8
+DEFAULT_MAX_ACTIVE_SESSIONS = 4096
 
 
 class SessionError(RuntimeError):
@@ -71,7 +74,7 @@ def session_proof_payload(node_id: str, challenge_id: str, challenge: str) -> by
 
 
 class SessionAuthority:
-    """Issue challenges and short-lived sessions for registered active carriers."""
+    """Issue bounded challenges and short-lived sessions for active carriers."""
 
     def __init__(
         self,
@@ -79,12 +82,22 @@ class SessionAuthority:
         *,
         challenge_ttl: float = 30.0,
         session_ttl: float = 300.0,
+        max_pending_challenges: int = DEFAULT_MAX_PENDING_CHALLENGES,
+        max_challenges_per_node: int = DEFAULT_MAX_CHALLENGES_PER_NODE,
+        max_active_sessions: int = DEFAULT_MAX_ACTIVE_SESSIONS,
     ) -> None:
         if challenge_ttl <= 0 or session_ttl <= 0:
             raise ValueError("session TTL values must be positive")
+        if max_pending_challenges <= 0 or max_challenges_per_node <= 0 or max_active_sessions <= 0:
+            raise ValueError("session resource limits must be positive")
+        if max_challenges_per_node > max_pending_challenges:
+            raise ValueError("per-node challenge limit cannot exceed global challenge limit")
         self.coordinator = coordinator
         self.challenge_ttl = float(challenge_ttl)
         self.session_ttl = float(session_ttl)
+        self.max_pending_challenges = int(max_pending_challenges)
+        self.max_challenges_per_node = int(max_challenges_per_node)
+        self.max_active_sessions = int(max_active_sessions)
         self._challenges: dict[str, _ChallengeState] = {}
         self._sessions: dict[str, _SessionState] = {}
         self._lock = threading.Lock()
@@ -115,7 +128,11 @@ class SessionAuthority:
     def _token_hash(token: str) -> str:
         if not token:
             raise SessionError("empty session token")
-        return hashlib.sha256(token.encode("ascii")).hexdigest()
+        try:
+            encoded = token.encode("ascii")
+        except UnicodeEncodeError as exc:
+            raise SessionError("session token must be ASCII") from exc
+        return hashlib.sha256(encoded).hexdigest()
 
     def _purge_locked(self, now: float) -> None:
         self._challenges = {
@@ -139,6 +156,13 @@ class SessionAuthority:
         expires_at = timestamp + self.challenge_ttl
         with self._lock:
             self._purge_locked(timestamp)
+            if len(self._challenges) >= self.max_pending_challenges:
+                raise SessionError("too many pending carrier session challenges")
+            pending_for_node = sum(
+                1 for value in self._challenges.values() if value.node_id == node_id
+            )
+            if pending_for_node >= self.max_challenges_per_node:
+                raise SessionError("too many pending session challenges for carrier")
             self._challenges[challenge_id] = _ChallengeState(
                 node_id,
                 challenge_hash,
@@ -184,6 +208,8 @@ class SessionAuthority:
         expires_at = timestamp + self.session_ttl
         with self._lock:
             self._purge_locked(timestamp)
+            if len(self._sessions) >= self.max_active_sessions:
+                raise SessionError("too many active carrier sessions")
             self._sessions[token_hash] = _SessionState(node_id, expires_at)
         return CarrierSession(token, node_id, expires_at)
 
