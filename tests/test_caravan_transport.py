@@ -4,6 +4,8 @@ import hashlib
 from pathlib import Path
 import socket
 import tempfile
+import threading
+import time
 import unittest
 from unittest import mock
 
@@ -190,6 +192,44 @@ class OutboundTransportTests(unittest.TestCase):
                 self.assertEqual(stats.available_caravans, 1)
                 self.assertEqual(stats.protected_artifacts, 1)
                 self.assertEqual(stats.verified_replicas, 1)
+
+    def test_request_thread_population_is_bounded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            identity = CarrierIdentity.create(root / "identity")
+            _register(coordinator, identity)
+
+            with CoordinatorLabService(coordinator, max_concurrent_requests=1) as service:
+                client = CarrierTransportClient(
+                    service.base_url,
+                    identity,
+                    allow_loopback_http=True,
+                )
+                client.connect()
+                poll_errors: list[BaseException] = []
+
+                def slow_poll() -> None:
+                    try:
+                        self.assertEqual(client.poll(wait_seconds=0.5), [])
+                    except BaseException as exc:  # preserve assertion/thread failures
+                        poll_errors.append(exc)
+
+                worker = threading.Thread(target=slow_poll, daemon=True)
+                worker.start()
+                deadline = time.monotonic() + 2.0
+                while service.active_requests != 1 and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertEqual(service.active_requests, 1)
+
+                with self.assertRaises(TransportError):
+                    client.heartbeat(load=0, capacity=1)
+
+                worker.join(timeout=2)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(poll_errors, [])
+                self.assertEqual(service.active_requests, 0)
+                client.heartbeat(load=0, capacity=1)
 
     def test_quarantine_invalidates_existing_session_on_next_request(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
