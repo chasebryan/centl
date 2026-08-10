@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            ca-certificates curl git make m4 opam pkg-config python3 \
+            ca-certificates curl git make m4 pkg-config python3 \
             libgmp-dev libmpfr-dev libflint-dev
 
       - name: Install pinned F* toolchain
@@ -60,22 +60,23 @@ jobs:
           "$z3" --version | grep -F "Z3 version ${Z3_VERSION}"
           printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
 
-      - name: Install pinned OCaml dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          opam init --bare --disable-sandboxing --yes
-          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
-          opam install --switch=centl --deps-only --with-test --assume-depexts --yes .
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install pinned CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
 
       - name: Verify F* source
-        run: opam exec --switch=centl -- make verify
+        run: opam exec -- make verify
 
       - name: Run repository quality gates
-        run: opam exec --switch=centl -- make quality
+        run: opam exec -- make quality
 
       - name: Run integrated native test suite
-        run: opam exec --switch=centl -- make native-test
+        run: opam exec -- make native-test
 
       - name: Check patch whitespace
         run: git diff --check
