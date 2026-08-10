@@ -1,6 +1,6 @@
 # CENTL Repository Map
 
-This document describes the supported organization of the CENTL source tree for the v0.14.0 Oasis baseline. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the runtime.
+This document describes the supported organization of the CENTL source tree used to qualify v0.14.0 for an Oasis release declaration. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the runtime.
 
 ## Root
 
@@ -88,10 +88,10 @@ Laboratory or research material that is intentionally outside the stable runtime
 
 Short-lived feature/fix branches are implementation vehicles, not long-term product surfaces. `archive/*` or explicitly documented preservation refs may retain historically important pre-merge states. Before deleting an old branch, compare it to current `main` or otherwise establish that unique work is intentionally discarded or preserved elsewhere.
 
-Oasis does not treat the existence of old remote refs as a runtime defect; the release hygiene goal is to eliminate ambiguous *active* development state while preserving history safely.
+Oasis qualification does not treat the existence of old remote refs as a runtime defect; the release hygiene goal is to eliminate ambiguous *active* development state while preserving history safely.
 
 ## Releases
 
-Stable release tags use plain Semantic Versioning, for example `v0.14.0`. Human codenames such as **Oasis** belong in release titles and notes rather than SemVer prerelease identifiers.
+Stable release tags use plain Semantic Versioning, for example `v0.14.0`. **Oasis is not a codename or SemVer component.** It is a repeatable quality declaration attached to a release only after that release satisfies the repository's reconciliation, hardening, security, and validation gate.
 
 Release artifacts must be reproducible from the tagged commit through the supported release workflow and must retain checksum/build-manifest identity before activation or publication.
