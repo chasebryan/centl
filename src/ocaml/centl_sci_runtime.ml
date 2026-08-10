@@ -38,6 +38,16 @@ let core_request expression =
       ("limits", core_limits);
     ]
 
+let verification_request left relation right =
+  `Assoc
+    [
+      ("version", `Int 1);
+      ("op", `String "verify");
+      ("left", `String left);
+      ("relation", `String relation);
+      ("right", `String right);
+    ]
+
 let quantity value unit_symbol =
   `Assoc [ ("value", `String value); ("unit", `String unit_symbol) ]
 
@@ -100,6 +110,12 @@ let plan = function
         Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in
       Some { executor = Core; request = core_request expression }
+  | Centl_sci_ir.Verification_claim data ->
+      Some
+        {
+          executor = Core;
+          request = verification_request data.left data.relation data.right;
+        }
   | Centl_sci_ir.Unit_conversion data ->
       let from_unit = Centl_sci_units.canonical_or_original data.from_unit in
       let to_unit = Centl_sci_units.canonical_or_original data.to_unit in
@@ -186,6 +202,11 @@ let resolution_status response =
   | Some resolution -> string_field "status" resolution
   | None -> None
 
+let verification_verdict response =
+  match assoc_field "verification" response with
+  | Some verification -> string_field "verdict" verification
+  | None -> None
+
 let classify executor response =
   match bool_field "ok" response with
   | Some false | None -> Failed
@@ -193,10 +214,16 @@ let classify executor response =
       begin match executor with
       | Physics -> Established
       | Core ->
-          begin match resolution_status response with
-          | Some ("computed" | "transformed" | "unchanged_proved") -> Established
-          | Some ("residual" | "unsupported" | "indeterminate") -> Unresolved
-          | Some _ | None -> Unresolved
+          begin match verification_verdict response with
+          | Some ("verified" | "refuted") -> Established
+          | Some ("unknown" | "invalid") -> Unresolved
+          | Some _ -> Unresolved
+          | None ->
+              begin match resolution_status response with
+              | Some ("computed" | "transformed" | "unchanged_proved") -> Established
+              | Some ("residual" | "unsupported" | "indeterminate") -> Unresolved
+              | Some _ | None -> Unresolved
+              end
           end
       end
 
@@ -275,23 +302,56 @@ let simulation_text physics =
       end
   | _ -> None
 
+let verification_text response =
+  match assoc_field "verification" response with
+  | None -> None
+  | Some verification ->
+      begin match string_field "verdict" verification with
+      | Some "verified" -> Some "Verified."
+      | Some "refuted" -> Some "Refuted."
+      | Some "unknown" ->
+          begin match assoc_field "evidence" verification with
+          | Some evidence ->
+              begin match string_field "reason" evidence with
+              | Some reason -> Some ("Unknown: " ^ reason ^ ".")
+              | None -> Some "Unknown."
+              end
+          | None -> Some "Unknown."
+          end
+      | Some "invalid" ->
+          begin match assoc_field "evidence" verification with
+          | Some evidence ->
+              begin match string_field "reason" evidence with
+              | Some reason -> Some ("Invalid claim: " ^ reason ^ ".")
+              | None -> Some "Invalid claim."
+              end
+          | None -> Some "Invalid claim."
+          end
+      | Some verdict -> Some ("Verification verdict: " ^ verdict ^ ".")
+      | None -> None
+      end
+
 let result_text response =
   match assoc_field "value" response with
   | Some value -> string_field "text" value
   | None ->
-      begin match assoc_field "physics" response with
-      | Some physics ->
-          begin match string_field "text" physics with
-          | Some value -> Some value
-          | None ->
-              begin match string_field "result" physics with
-              | Some value -> Some value
-              | None -> simulation_text physics
-              end
-          end
+      begin match verification_text response with
+      | Some _ as value -> value
       | None ->
-          begin match assoc_field "error" response with
-          | Some error -> string_field "message" error
-          | None -> None
+          begin match assoc_field "physics" response with
+          | Some physics ->
+              begin match string_field "text" physics with
+              | Some value -> Some value
+              | None ->
+                  begin match string_field "result" physics with
+                  | Some value -> Some value
+                  | None -> simulation_text physics
+                  end
+              end
+          | None ->
+              begin match assoc_field "error" response with
+              | Some error -> string_field "message" error
+              | None -> None
+              end
           end
       end
