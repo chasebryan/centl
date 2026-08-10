@@ -8,6 +8,7 @@ on:
       - 'scripts/caravan-phase1-check'
       - 'tests/test_caravan_phase1.py'
       - 'tests/test_caravan_identity.py'
+      - 'tests/test_caravan_enrollment.py'
       - '.github/workflows/caravan-phase1.yml'
 
 permissions:
@@ -19,7 +20,7 @@ concurrency:
 
 jobs:
   laboratory:
-    name: Identity, integrity, and coordinator gates
+    name: Identity, integrity, policy, and coordinator gates
     runs-on: ubuntu-24.04
 
     steps:
