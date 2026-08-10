@@ -1,0 +1,190 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${1:-}
+output=${2:-}
+
+fail() {
+  printf 'centl publication-export: %s\n' "$*" >&2
+  exit 1
+}
+
+prospective_path() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+print(os.path.realpath(os.path.expanduser(sys.argv[1])))
+PY
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+[ -n "$mirror" ] && [ -n "$output" ] ||
+  fail "usage: scripts/publication-export MIRROR_DIR OUTPUT_DIR"
+need python3
+need awk
+need find
+
+[ -d "$mirror" ] || fail "preservation mirror not found: $mirror"
+mirror=$(CDPATH= cd -- "$mirror" && pwd)
+output=$(prospective_path "$output")
+
+case "$output" in
+  "$mirror"|"$mirror"/*) fail "publication output must not be inside the preservation mirror" ;;
+esac
+case "$mirror" in
+  "$output"|"$output"/*) fail "publication output must not contain the preservation mirror" ;;
+esac
+[ ! -L "$output" ] || fail "publication output must not be a symbolic link"
+
+sh "$repo_root/scripts/mirror-receipt" verify "$mirror"
+
+[ -d "$mirror/releases" ] || fail "preservation mirror contains no releases directory"
+[ -f "$mirror/project/SOURCE-COMMIT" ] || fail "preservation mirror SOURCE-COMMIT is missing"
+source_commit=$(sed -n '1p' "$mirror/project/SOURCE-COMMIT")
+case "$source_commit" in
+  ''|*[!0-9a-f]*) fail "invalid preservation SOURCE-COMMIT" ;;
+esac
+[ "${#source_commit}" -eq 40 ] || fail "preservation SOURCE-COMMIT must be full length"
+
+regular_receipt=$(
+  python3 "$repo_root/scripts/integrity.py" hash "$mirror/MIRROR-SHA256SUMS" \
+    | awk 'NR == 1 { print $1 }'
+)
+symlink_receipt=$(
+  python3 "$repo_root/scripts/integrity.py" hash "$mirror/MIRROR-SYMLINKS" \
+    | awk 'NR == 1 { print $1 }'
+)
+
+parent=$(dirname -- "$output")
+mkdir -p "$parent"
+parent=$(CDPATH= cd -- "$parent" && pwd)
+base=$(basename -- "$output")
+case "$base" in ''|.|..) fail "unsafe publication output name" ;; esac
+stage="$parent/.$base.new.$$"
+backup=""
+rm -rf "$stage"
+mkdir -p "$stage"
+
+cleanup() {
+  if [ -n "$stage" ] && [ -e "$stage" ]; then
+    rm -rf "$stage"
+  fi
+  if [ -n "$backup" ] && [ -e "$backup" ]; then
+    if [ ! -e "$output" ]; then
+      mv "$backup" "$output" 2>/dev/null || true
+    else
+      rm -rf "$backup"
+    fi
+  fi
+}
+trap cleanup 0 HUP INT TERM
+
+versions="$stage/VERSIONS"
+: > "$versions"
+found=0
+for release in "$mirror/releases"/v*; do
+  [ -e "$release" ] || continue
+  [ -d "$release" ] && [ ! -L "$release" ] ||
+    fail "release entry is not a normal directory: $release"
+  if find "$release" -type l -print -quit | grep -q .; then
+    fail "public release directory contains a symbolic link: $release"
+  fi
+
+  release_name=$(basename -- "$release")
+  version=${release_name#v}
+  case "$version" in
+    ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid preserved release directory: $release_name" ;;
+  esac
+  [ -f "$release/VERSION" ] || fail "$release_name has no VERSION metadata"
+  [ "$(sed -n '1p' "$release/VERSION")" = "$version" ] ||
+    fail "$release_name VERSION metadata disagrees with its directory"
+  [ -f "$release/RELEASE-CONTENTS-SHA256SUMS" ] ||
+    fail "$release_name has no release contents receipt"
+  [ -f "$release/RELEASE-CONTENTS-SHA256SUMS.sha256" ] ||
+    fail "$release_name has no release contents receipt checksum"
+
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$release/RELEASE-CONTENTS-SHA256SUMS.sha256" --root "$release"
+  python3 "$repo_root/scripts/integrity.py" tree-verify \
+    "$release/RELEASE-CONTENTS-SHA256SUMS" --root "$release" \
+    --ignore RELEASE-CONTENTS-SHA256SUMS \
+    --ignore RELEASE-CONTENTS-SHA256SUMS.sha256
+
+  authentication=$(sed -n '1p' "$release/AUTHENTICATION" 2>/dev/null || true)
+  case "$authentication" in
+    adjacent-sha256)
+      asset_count=0
+      for asset in "$release"/centl-*.tar.gz "$release"/centl-*.zip; do
+        [ -f "$asset" ] || continue
+        [ ! -L "$asset" ] || fail "release archive is a symlink: $asset"
+        checksum="$asset.sha256"
+        [ -f "$checksum" ] && [ ! -L "$checksum" ] ||
+          fail "release archive checksum missing: $checksum"
+        python3 "$repo_root/scripts/integrity.py" verify "$checksum" --root "$release"
+        asset_count=$((asset_count + 1))
+      done
+      [ "$asset_count" -gt 0 ] || fail "$release_name contains no CENTL release archives"
+      ;;
+    signify)
+      [ -f "$release/SIGNING-PUBLIC-KEY" ] && [ ! -L "$release/SIGNING-PUBLIC-KEY" ] ||
+        fail "$release_name has no embedded signing public key"
+      [ -f "$release/SIGNING-PUBLIC-KEY.sha256" ] ||
+        fail "$release_name has no signing public-key receipt"
+      python3 "$repo_root/scripts/integrity.py" verify \
+        "$release/SIGNING-PUBLIC-KEY.sha256" --root "$release"
+      FCF_SIGNIFY_PUBLIC_KEY="$release/SIGNING-PUBLIC-KEY" \
+        sh "$repo_root/scripts/release-verify" "$release"
+      ;;
+    *) fail "$release_name has unsupported AUTHENTICATION metadata: $authentication" ;;
+  esac
+
+  mkdir -p "$stage/$release_name"
+  cp -R "$release/." "$stage/$release_name/"
+  printf '%s\n' "$version" >> "$versions"
+  found=$((found + 1))
+done
+[ "$found" -gt 0 ] || fail "preservation mirror contains no publishable releases"
+
+LC_ALL=C sort -u "$versions" -o "$versions"
+{
+  printf 'schema=1\n'
+  printf 'preservation_source_commit=%s\n' "$source_commit"
+  printf 'mirror_regular_receipt_sha256=%s\n' "$regular_receipt"
+  printf 'mirror_symlink_receipt_sha256=%s\n' "$symlink_receipt"
+  printf 'release_count=%s\n' "$found"
+} > "$stage/PUBLICATION-SOURCE"
+
+python3 "$repo_root/scripts/integrity.py" tree-manifest \
+  --root "$stage" --output "$stage/PUBLIC-SHA256SUMS"
+python3 "$repo_root/scripts/integrity.py" hash "$stage/PUBLIC-SHA256SUMS" \
+  > "$stage/PUBLIC-SHA256SUMS.sha256"
+python3 "$repo_root/scripts/integrity.py" verify \
+  "$stage/PUBLIC-SHA256SUMS.sha256" --root "$stage"
+python3 "$repo_root/scripts/integrity.py" tree-verify \
+  "$stage/PUBLIC-SHA256SUMS" --root "$stage" \
+  --ignore PUBLIC-SHA256SUMS \
+  --ignore PUBLIC-SHA256SUMS.sha256
+
+if [ -e "$output" ]; then
+  [ -d "$output" ] && [ ! -L "$output" ] ||
+    fail "existing publication output is not a normal directory: $output"
+  backup="$parent/.$base.old.$$"
+  rm -rf "$backup"
+  mv "$output" "$backup"
+fi
+mv "$stage" "$output"
+stage=""
+if [ -n "$backup" ]; then
+  rm -rf "$backup"
+  backup=""
+fi
+
+printf 'FCF CENTL publication export: PASS\n'
+printf 'source_mirror=%s\n' "$mirror"
+printf 'output=%s\n' "$output"
+printf 'releases=%s\n' "$found"
+printf 'source_commit=%s\n' "$source_commit"

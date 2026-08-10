@@ -102,6 +102,8 @@ if [ -e "$manifest" ] || [ -e "$signature" ]; then
     fail "signed release has no regular SHA256SUMS.sig"
   [ -n "${FCF_SIGNIFY_PUBLIC_KEY:-}" ] ||
     fail "FCF_SIGNIFY_PUBLIC_KEY is required to preserve an authenticated release"
+  [ -f "$FCF_SIGNIFY_PUBLIC_KEY" ] && [ ! -L "$FCF_SIGNIFY_PUBLIC_KEY" ] ||
+    fail "FCF_SIGNIFY_PUBLIC_KEY must name a regular public-key file"
   for asset in "$@"; do
     manifest_contains_asset_once "$manifest" "$asset" ||
       fail "authenticated SHA256SUMS does not cover release archive exactly once: $asset"
@@ -132,7 +134,12 @@ done
 if [ "$authentication" = signify ]; then
   cp "$manifest" "$stage/SHA256SUMS"
   cp "$signature" "$stage/SHA256SUMS.sig"
-  FCF_SIGNIFY_PUBLIC_KEY="$FCF_SIGNIFY_PUBLIC_KEY" \
+  cp "$FCF_SIGNIFY_PUBLIC_KEY" "$stage/SIGNING-PUBLIC-KEY"
+  python3 "$repo_root/scripts/integrity.py" hash "$stage/SIGNING-PUBLIC-KEY" \
+    > "$stage/SIGNING-PUBLIC-KEY.sha256"
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$stage/SIGNING-PUBLIC-KEY.sha256" --root "$stage"
+  FCF_SIGNIFY_PUBLIC_KEY="$stage/SIGNING-PUBLIC-KEY" \
     sh "$repo_root/scripts/release-verify" "$stage"
 fi
 
