@@ -18,7 +18,9 @@ create a `public-approved` target, or sign an FCF release/catalog role.
 
 ## Identity primitive
 
-Phase 1 uses Ed25519 through PyCA `cryptography` 49.0.0.
+Phase 1 uses Ed25519 through PyCA `cryptography` 50.0.0. The earlier laboratory
+selection of 49.0.0 was replaced before merge after dependency review identified
+CVE-2026-69247 in that release; 50.0.0 contains PyCA's fix.
 
 The carrier stores:
 
