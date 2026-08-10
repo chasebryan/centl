@@ -387,6 +387,18 @@ let mechanics_missing lower =
     |> List.filter (fun field ->
            find_substring ~needle:(field ^ " ") lower = None)
 
+let verification_relation_present lower =
+  String.exists (function '=' | '<' | '>' -> true | _ -> false) lower
+  || List.exists
+       (fun phrase -> find_substring ~needle:phrase lower <> None)
+       [
+         " equals ";
+         " equal to ";
+         " not equal to ";
+         " less than ";
+         " greater than ";
+       ]
+
 let clarification mode normalized =
   let lower = String.lowercase_ascii normalized in
   if lower = "" then None
@@ -409,6 +421,21 @@ let clarification mode normalized =
           lower ->
         Some
           "I recognize a particle-simulation request, but its typed fields could not be parsed safely. Use explicit vector forms such as position (0,0,10) m and velocity (1,0,0) m/s; CENTL-SCi will not invent missing physical values."
+    | Math | Hybrid
+      when
+        starts_with_any [ "verify "; "verify whether "; "check whether " ] lower
+        &&
+        (find_substring ~needle:" for all " lower <> None
+        || find_substring ~needle:" assuming " lower <> None
+        || find_substring ~needle:" under the assumption " lower <> None) ->
+        Some
+          "I understand this as mathematical claim verification. This Caramels slice routes closed claims only; quantified variables and free-form assumptions are not inferred. Use an explicit closed claim such as: verify 0.1 + 0.2 equals 3/10."
+    | Math | Hybrid
+      when
+        starts_with_any [ "verify "; "verify whether "; "check whether " ] lower
+        && not (verification_relation_present lower) ->
+        Some
+          "I understand this as mathematical claim verification, but an explicit relation and both sides are required. For example: verify 0.1 + 0.2 equals 3/10."
     | Math | Hybrid
       when
         starts_with_any
