@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 — 2026-08-09
+
+### Changed
+
+- Promoted validated release candidate series to stable 0.12.0.
+- Authoritative CLI/golden outputs updated to 0.12.0 where appropriate.
+- Historical rc.2/rc.3 records preserved.
+
+
 ## 0.12.0-rc.3 — 2026-08-09
 
 ### Added
