@@ -195,9 +195,40 @@ let canonicalize_root_request text =
       then "solve " ^ body
       else "solve " ^ body ^ " equals zero"
 
+let canonicalize_how_many_conversion text =
+  match drop_prefix_ci "how many " text with
+  | None -> text
+  | Some body ->
+      let lower = String.lowercase_ascii body in
+      let split marker =
+        match find_substring ~needle:marker lower with
+        | None -> None
+        | Some index ->
+            let target = String.sub body 0 index |> String.trim in
+            let source =
+              String.sub body (index + String.length marker)
+                (String.length body - index - String.length marker)
+              |> String.trim
+            in
+            let source =
+              match drop_prefix_ci "exactly " source with
+              | Some value when value <> "" -> value
+              | _ -> source
+            in
+            if target = "" || source = "" then None
+            else Some ("convert " ^ source ^ " to " ^ target)
+      in
+      begin match split " are in " with
+      | Some value -> value
+      | None ->
+          begin match split " are " with
+          | Some value -> value
+          | None -> text
+          end
+      end
+
 let canonicalize_conversion text =
   match drop_prefix_ci "change " text with
-  | None -> text
   | Some body ->
       let lower = String.lowercase_ascii body in
       if
@@ -206,6 +237,7 @@ let canonicalize_conversion text =
       then
         "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
       else text
+  | None -> canonicalize_how_many_conversion text
 
 let canonicalize_common_intent text =
   text |> canonicalize_root_request |> canonicalize_conversion
@@ -289,6 +321,7 @@ let build_completions =
   [
     "adapter";
     "add";
+    "audit";
     "capabilities";
     "create";
     "disable";
@@ -347,7 +380,7 @@ let clarification mode normalized =
     match mode with
     | Build ->
         Some
-          "BUILD can inspect capabilities; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
+          "BUILD can inspect capabilities; audit the workspace; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
     | (Phys | Hybrid) when missing_mechanics <> [] ->
         Some
           ("I understand this as a uniform-gravity particle simulation, but required fields are missing: "
