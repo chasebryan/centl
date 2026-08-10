@@ -132,18 +132,19 @@ let validate workspace =
   let manifest_values = List.map snd manifests in
   let local_edges =
     manifest_values
-    |> List.map (fun manifest -> (manifest.name, local_names manifest))
+    |> List.map (fun (manifest : Centl_sci_extensions.manifest) ->
+           (manifest.name, local_names manifest))
   in
   let external_dependencies =
     manifest_values
-    |> List.filter_map (fun manifest ->
+    |> List.filter_map (fun (manifest : Centl_sci_extensions.manifest) ->
            match external_names manifest with
            | [] -> None
            | values -> Some (manifest.name, values))
   in
   let opaque_dependencies =
     manifest_values
-    |> List.filter_map (fun manifest ->
+    |> List.filter_map (fun (manifest : Centl_sci_extensions.manifest) ->
            match opaque_names manifest with
            | [] -> None
            | values -> Some (manifest.name, values))
