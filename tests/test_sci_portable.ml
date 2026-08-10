@@ -92,6 +92,19 @@ let test_symlink_is_rejected_before_copy () =
       Centl_sci_portable.validate_bundle bundle
       |> expect_rejected "contains a symlink")
 
+let test_dependency_invalid_bundle_is_rejected () =
+  let root = temp_dir "centl-caramels-dependency-import-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let bundle = make_bundle root in
+      let manifest_path = Filename.concat (Filename.concat bundle "extensions") "tau.json" in
+      let manifest = Yojson.Safe.from_file manifest_path in
+      Centl_sci_workspace.atomic_write_json manifest_path
+        (replace_assoc "dependencies" (`List [ `String "extension:missing" ]) manifest);
+      Centl_sci_portable.validate_bundle bundle
+      |> expect_rejected "dependency graph is not activation-ready")
+
 let test_import_preserves_reload_signal () =
   let root = temp_dir "centl-caramels-import-" in
   Fun.protect
@@ -126,6 +139,8 @@ let () =
             test_absolute_manifest_source_is_rejected;
           Alcotest.test_case "reject symlink" `Quick
             test_symlink_is_rejected_before_copy;
+          Alcotest.test_case "reject dependency-invalid bundle" `Quick
+            test_dependency_invalid_bundle_is_rejected;
           Alcotest.test_case "import preserves reload signal" `Quick
             test_import_preserves_reload_signal;
         ] );
