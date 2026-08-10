@@ -52,6 +52,36 @@ let test_model_style_equation_executes () =
       Alcotest.(check string) "solutions" "x in {2, 3}" (string "text" value)
   | None -> Alcotest.fail "expected CENTL response"
 
+let test_verification_schema_and_lowering () =
+  Alcotest.(check bool) "canonical schema includes verification_claim" true
+    (Option.is_some
+       (Centl_sci_interaction.find_substring ~needle:"verification_claim"
+          Centl_sci_ir.json_schema));
+  let ir =
+    parse
+      {|{"schema_version":1,"domain":"mathematics","problem_class":"verification_claim","operation":"verify","assumptions":[],"left":"0.1 + 0.2","relation":"equal","right":"3/10"}|}
+  in
+  match Centl_sci_runtime.plan ir with
+  | None -> Alcotest.fail "expected verification execution plan"
+  | Some plan ->
+      Alcotest.(check string) "op" "verify" (string "op" plan.request);
+      Alcotest.(check string) "left" "0.1 + 0.2" (string "left" plan.request);
+      Alcotest.(check string) "relation" "equal" (string "relation" plan.request);
+      Alcotest.(check string) "right" "3/10" (string "right" plan.request)
+
+let test_verification_rejects_inferred_assumptions () =
+  match
+    Centl_sci_ir.of_string
+      {|{"schema_version":1,"domain":"mathematics","problem_class":"verification_claim","operation":"verify","assumptions":["x is real"],"left":"x","relation":"equal","right":"x"}|}
+  with
+  | Error error ->
+      Alcotest.(check string) "error class" "invalid_ir" error.code;
+      Alcotest.(check bool) "closed-claim boundary is explicit" true
+        (Option.is_some
+           (Centl_sci_interaction.find_substring ~needle:"closed verification claims"
+              error.message))
+  | Ok _ -> Alcotest.fail "verification_claim must reject inferred assumptions"
+
 let test_model_unit_names_execute () =
   let ir =
     parse
@@ -87,6 +117,13 @@ let () =
             test_identifier_boundary;
           Alcotest.test_case "model style equation executes" `Quick
             test_model_style_equation_executes;
+        ] );
+      ( "verification",
+        [
+          Alcotest.test_case "schema and protocol lowering" `Quick
+            test_verification_schema_and_lowering;
+          Alcotest.test_case "closed claims reject assumptions" `Quick
+            test_verification_rejects_inferred_assumptions;
         ] );
       ( "units",
         [
