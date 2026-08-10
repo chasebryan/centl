@@ -14,11 +14,24 @@ need() {
   command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
 }
 
+find_signify() {
+  if [ -n "${SIGNIFY:-}" ]; then
+    command -v "$SIGNIFY" >/dev/null 2>&1 || fail "SIGNIFY executable not found: $SIGNIFY"
+    command -v "$SIGNIFY"
+  elif command -v signify >/dev/null 2>&1; then
+    command -v signify
+  elif command -v signify-openbsd >/dev/null 2>&1; then
+    command -v signify-openbsd
+  else
+    fail "signify is required (Debian/Ubuntu package: signify-openbsd)"
+  fi
+}
+
 [ -d "$release_dir" ] || fail "release directory not found: $release_dir"
 [ -n "$public_key" ] || fail "FCF_SIGNIFY_PUBLIC_KEY must name an FCF release public key"
 [ -f "$public_key" ] || fail "public key not found: $public_key"
-need signify
 need python3
+signify_bin=$(find_signify)
 
 manifest="$release_dir/SHA256SUMS"
 signature="$release_dir/SHA256SUMS.sig"
@@ -27,9 +40,10 @@ signature="$release_dir/SHA256SUMS.sig"
 
 # Authentication first: establish that the expected SHA-256 list was signed by
 # the selected FCF release key. Integrity second: recompute every listed digest.
-signify -V -p "$public_key" -m "$manifest" -x "$signature"
+"$signify_bin" -V -p "$public_key" -m "$manifest" -x "$signature"
 python3 "$repo_root/scripts/integrity.py" verify "$manifest" --root "$release_dir" --verbose
 
 printf 'CENTL release authentication and SHA-256 verification passed.\n'
 printf 'Manifest: %s\n' "$manifest"
 printf 'Public key: %s\n' "$public_key"
+printf 'Signify implementation: %s\n' "$signify_bin"
