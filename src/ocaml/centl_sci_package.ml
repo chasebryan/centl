@@ -167,7 +167,7 @@ let validate workspace name =
       let valid = List.for_all (fun member -> member.present) members in
       Ok { package; members; valid }
 
-let render_member member =
+let render_member (member : member_state) =
   if not member.present then member.name ^ " — missing"
   else
     let enabled =
@@ -177,3 +177,37 @@ let render_member member =
     let assurance = Option.value ~default:"unknown" member.assurance in
     Printf.sprintf "%s — %s — kind=%s — assurance=%s" member.name enabled kind
       assurance
+
+let render_validation (validation : validation) =
+  String.concat "\n"
+    ([
+       "Package validation: " ^ validation.package.name;
+       "  membership valid: " ^ string_of_bool validation.valid;
+       "  package-level assurance: none (member assurance is preserved individually)";
+       "  members:";
+     ]
+    @
+    (match validation.members with
+    | [] -> [ "    - none" ]
+    | members -> List.map (fun member -> "    - " ^ render_member member) members))
+
+let render (package : t) =
+  String.concat "\n"
+    [
+      "Package: " ^ package.name;
+      "  version: " ^ package.version;
+      "  workspace revision: " ^ string_of_int package.workspace_revision;
+      "  extensions: "
+      ^ (if package.extensions = [] then "none" else String.concat ", " package.extensions);
+      "  summary: " ^ package.summary;
+    ]
+
+let render_list workspace =
+  match list workspace with
+  | [] -> "(no local packages)"
+  | packages ->
+      packages
+      |> List.map (fun (package : t) ->
+             Printf.sprintf "%s  %s  (%d extensions)" package.name package.version
+               (List.length package.extensions))
+      |> String.concat "\n"
