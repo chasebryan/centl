@@ -217,6 +217,41 @@ let validate_native_activation workspace manifest =
             end
         end
 
+let validate_local_dependencies_for_activation workspace manifest =
+  let dependencies =
+    manifest.dependencies
+    |> List.filter_map local_dependency_name
+    |> List.sort_uniq String.compare
+  in
+  let rec loop = function
+    | [] -> Ok ()
+    | dependency :: rest when dependency = manifest.name ->
+        Error
+          (Printf.sprintf
+             "local extension %s cannot be enabled because it declares itself as a local dependency"
+             manifest.name)
+    | dependency :: rest ->
+        begin match read_manifest workspace dependency with
+        | Error _ ->
+            Error
+              (Printf.sprintf
+                 "local extension %s cannot be enabled because required local extension %s is missing"
+                 manifest.name dependency)
+        | Ok target when not target.enabled ->
+            Error
+              (Printf.sprintf
+                 "local extension %s cannot be enabled because required local extension %s is disabled"
+                 manifest.name dependency)
+        | Ok target when target.kind <> "native_centl" ->
+            Error
+              (Printf.sprintf
+                 "local extension %s cannot be enabled because required local extension %s has non-native kind %s"
+                 manifest.name dependency target.kind)
+        | Ok _ -> loop rest
+        end
+  in
+  loop dependencies
+
 let set_enabled workspace name enabled =
   match read_manifest workspace name with
   | Error message -> Error message
@@ -227,7 +262,11 @@ let set_enabled workspace name enabled =
            manifest.name manifest.kind)
   | Ok manifest ->
       let activation_check =
-        if enabled then validate_native_activation workspace manifest else Ok ()
+        if not enabled then Ok ()
+        else
+          match validate_native_activation workspace manifest with
+          | Error _ as error -> error
+          | Ok () -> validate_local_dependencies_for_activation workspace manifest
       in
       begin match activation_check with
       | Error _ as error -> error
