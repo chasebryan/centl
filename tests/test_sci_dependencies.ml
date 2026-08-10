@@ -20,6 +20,9 @@ let write_manifest workspace ~name ~enabled ~dependencies =
 
 let has_issue predicate report = List.exists predicate report.Centl_sci_dependencies.issues
 
+let contains needle text =
+  Option.is_some (Centl_sci_interaction.find_substring ~needle text)
+
 let test_missing_local_dependency () =
   let root = temp_dir "centl-caramels-dependency-missing-" in
   Fun.protect
@@ -105,6 +108,49 @@ let test_extension_listing_orders_local_dependencies_first () =
       Alcotest.(check (list string)) "dependency precedes dependent"
         [ "zeta"; "alpha" ] names)
 
+let test_activation_rejects_missing_local_dependency () =
+  let root = temp_dir "centl-caramels-activation-missing-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"alpha" ~enabled:false
+        ~dependencies:[ "extension:beta" ];
+      match Centl_sci_extensions.read_manifest workspace "alpha" with
+      | Error message -> Alcotest.fail message
+      | Ok manifest ->
+          begin match
+            Centl_sci_extensions.validate_local_dependencies_for_activation workspace
+              manifest
+          with
+          | Ok () -> Alcotest.fail "activation dependency validation unexpectedly succeeded"
+          | Error message ->
+              Alcotest.(check bool) "missing dependency refusal" true
+                (contains "required local extension beta is missing" message)
+          end)
+
+let test_activation_rejects_disabled_local_dependency () =
+  let root = temp_dir "centl-caramels-activation-disabled-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"beta" ~enabled:false ~dependencies:[];
+      write_manifest workspace ~name:"alpha" ~enabled:false
+        ~dependencies:[ "extension:beta" ];
+      match Centl_sci_extensions.read_manifest workspace "alpha" with
+      | Error message -> Alcotest.fail message
+      | Ok manifest ->
+          begin match
+            Centl_sci_extensions.validate_local_dependencies_for_activation workspace
+              manifest
+          with
+          | Ok () -> Alcotest.fail "disabled dependency unexpectedly allowed activation"
+          | Error message ->
+              Alcotest.(check bool) "disabled dependency refusal" true
+                (contains "required local extension beta is disabled" message)
+          end)
+
 let () =
   Alcotest.run "CENTL-SCi Caramels dependencies"
     [
@@ -119,5 +165,9 @@ let () =
             test_external_and_opaque_dependencies_are_preserved;
           Alcotest.test_case "dependency-aware extension order" `Quick
             test_extension_listing_orders_local_dependencies_first;
+          Alcotest.test_case "activation rejects missing dependency" `Quick
+            test_activation_rejects_missing_local_dependency;
+          Alcotest.test_case "activation rejects disabled dependency" `Quick
+            test_activation_rejects_disabled_local_dependency;
         ] );
     ]
