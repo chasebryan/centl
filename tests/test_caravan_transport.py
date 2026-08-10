@@ -207,13 +207,19 @@ class OutboundTransportTests(unittest.TestCase):
                     allow_loopback_http=True,
                 )
                 client.connect()
+
+                # connect() has received its response, but the server-side request
+                # thread may still be completing its finally block. Require a
+                # genuinely idle server before starting the saturation probe.
+                idle_deadline = time.monotonic() + 2.0
+                while service.active_requests != 0 and time.monotonic() < idle_deadline:
+                    time.sleep(0.01)
+                self.assertEqual(service.active_requests, 0)
+
                 poll_errors: list[BaseException] = []
 
                 def slow_poll() -> None:
                     try:
-                        # Hold the sole request slot for the maximum admitted lab
-                        # poll interval so CI scheduler jitter cannot let the poll
-                        # finish before the saturation probe reaches the server.
                         self.assertEqual(client.poll(wait_seconds=2.0), [])
                     except BaseException as exc:  # preserve assertion/thread failures
                         poll_errors.append(exc)
