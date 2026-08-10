@@ -75,7 +75,7 @@ let read workspace name =
     try Yojson.Safe.from_file path |> of_json
     with Sys_error message | Yojson.Json_error message -> Error message
 
-let write workspace package =
+let write workspace (package : t) =
   let directory = package_dir workspace package.name in
   Centl_sci_workspace.ensure_directory directory;
   let json =
@@ -144,7 +144,7 @@ let list workspace =
     Sys.readdir workspace.packages |> Array.to_list
     |> List.filter_map (fun name ->
            match read workspace name with Ok package -> Some package | Error _ -> None)
-    |> List.sort (fun left right -> String.compare left.name right.name)
+    |> List.sort (fun (left : t) (right : t) -> String.compare left.name right.name)
 
 let member_state workspace name =
   match Centl_sci_extensions.read_manifest workspace name with
@@ -177,37 +177,3 @@ let render_member member =
     let assurance = Option.value ~default:"unknown" member.assurance in
     Printf.sprintf "%s — %s — kind=%s — assurance=%s" member.name enabled kind
       assurance
-
-let render_validation validation =
-  String.concat "\n"
-    ([
-       "Package validation: " ^ validation.package.name;
-       "  membership valid: " ^ string_of_bool validation.valid;
-       "  package-level assurance: none (member assurance is preserved individually)";
-       "  members:";
-     ]
-    @
-    (match validation.members with
-    | [] -> [ "    - none" ]
-    | members -> List.map (fun member -> "    - " ^ render_member member) members))
-
-let render package =
-  String.concat "\n"
-    [
-      "Package: " ^ package.name;
-      "  version: " ^ package.version;
-      "  workspace revision: " ^ string_of_int package.workspace_revision;
-      "  extensions: "
-      ^ (if package.extensions = [] then "none" else String.concat ", " package.extensions);
-      "  summary: " ^ package.summary;
-    ]
-
-let render_list workspace =
-  match list workspace with
-  | [] -> "(no local packages)"
-  | packages ->
-      packages
-      |> List.map (fun package ->
-             Printf.sprintf "%s  %s  (%d extensions)" package.name package.version
-               (List.length package.extensions))
-      |> String.concat "\n"
