@@ -18,6 +18,7 @@ type t = {
   workspace_root : string;
   revision : int;
   extensions : extension_entry list;
+  manifest_errors : string list;
   packages : package_entry list;
   dependencies_valid : bool;
   dependency_issues : string list;
@@ -68,16 +69,17 @@ let package_entry workspace package =
       }
 
 let collect workspace =
-  let extensions =
-    Centl_sci_extensions.list workspace |> List.map (extension_entry workspace)
-  in
+  let manifest_values, manifest_errors = Centl_sci_extensions.scan workspace in
+  let extensions = List.map (extension_entry workspace) manifest_values in
   let packages = Centl_sci_package.list workspace |> List.map (package_entry workspace) in
   let dependency_report = Centl_sci_dependencies.validate workspace in
   let dependency_issues =
     List.map Centl_sci_dependencies.issue_text dependency_report.issues
   in
   let warnings =
-    extensions
+    manifest_errors
+    @
+    (extensions
     |> List.concat_map (fun extension ->
            let structural =
              if extension.structurally_valid then []
@@ -92,7 +94,7 @@ let collect workspace =
                ]
              else []
            in
-           structural @ activation)
+           structural @ activation))
     @
     (packages
     |> List.concat_map (fun package ->
@@ -107,6 +109,7 @@ let collect workspace =
     workspace_root = workspace.Centl_sci_workspace.root;
     revision = Centl_sci_workspace.read_revision workspace;
     extensions;
+    manifest_errors;
     packages;
     dependencies_valid = dependency_report.valid;
     dependency_issues;
@@ -143,6 +146,7 @@ let to_json audit =
       ("workspace_root", `String audit.workspace_root);
       ("revision", `Int audit.revision);
       ("extensions", `List (List.map extension_json audit.extensions));
+      ("manifest_errors", strings audit.manifest_errors);
       ("packages", `List (List.map package_json audit.packages));
       ("dependencies_valid", `Bool audit.dependencies_valid);
       ("dependency_issues", strings audit.dependency_issues);
@@ -173,6 +177,10 @@ let render audit =
     @
     (if audit.extensions = [] then [ "  - none" ]
      else List.map render_extension audit.extensions)
+    @ [ "Manifest errors:" ]
+    @
+    (if audit.manifest_errors = [] then [ "  - none" ]
+     else List.map (fun error -> "  - " ^ error) audit.manifest_errors)
     @ [ "Packages:" ]
     @
     (if audit.packages = [] then [ "  - none" ]
