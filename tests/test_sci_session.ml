@@ -44,8 +44,9 @@ let test_render_preserves_provenance () =
   let session = Centl_sci_session.create () in
   add session 1 ~revision:(Some 17);
   let record =
-    Centl_sci_session.last session
-    |> Option.value ~default:(Alcotest.fail "missing result record")
+    match Centl_sci_session.last session with
+    | Some record -> record
+    | None -> Alcotest.fail "missing result record"
   in
   let rendered = Centl_sci_session.render record in
   Alcotest.(check bool) "revision rendered" true
