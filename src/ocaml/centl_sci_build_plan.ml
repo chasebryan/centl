@@ -217,7 +217,13 @@ let render_core_plan plan =
   match Centl_sci_workspace.default () with
   | None -> summary ^ "\n  artifact: not persisted because no local workspace is available"
   | Some workspace ->
-      begin match Centl_sci_core_plan.persist workspace plan with
+      begin match
+        Centl_sci_core_plan.persist workspace ~request:plan.request
+          ~implementation_layer:(layer_text plan.layer)
+          ~reusable_capabilities:plan.reusable_capabilities
+          ~proposed_steps:plan.proposed_steps ~trust_notes:plan.trust_notes
+          ~unresolved:plan.unresolved
+      with
       | Error message -> summary ^ "\n  artifact error: " ^ message
       | Ok artifact ->
           summary
