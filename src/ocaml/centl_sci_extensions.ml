@@ -126,18 +126,31 @@ let order_by_local_dependencies manifests =
   List.iter visit manifests;
   List.rev !ordered
 
-let list workspace =
-  if not (Sys.file_exists workspace.Centl_sci_workspace.extensions) then []
+let scan workspace =
+  if not (Sys.file_exists workspace.Centl_sci_workspace.extensions) then ([], [])
   else
-    Sys.readdir workspace.extensions
-    |> Array.to_list
-    |> List.filter (fun name -> Filename.check_suffix name ".json")
-    |> List.filter_map (fun filename ->
-           let name = Filename.chop_suffix filename ".json" in
-           match read_manifest workspace name with
-           | Ok value -> Some value
-           | Error _ -> None)
-    |> order_by_local_dependencies
+    let filenames =
+      Sys.readdir workspace.extensions
+      |> Array.to_list
+      |> List.filter (fun name -> Filename.check_suffix name ".json")
+      |> List.sort String.compare
+    in
+    let manifests, errors =
+      List.fold_left
+        (fun (manifests, errors) filename ->
+          let name = Filename.chop_suffix filename ".json" in
+          match read_manifest workspace name with
+          | Ok value -> (value :: manifests, errors)
+          | Error message ->
+              ( manifests,
+                (Printf.sprintf "invalid extension manifest %s: %s" filename message)
+                :: errors ))
+        ([], []) filenames
+    in
+    (order_by_local_dependencies (List.rev manifests), List.rev errors)
+
+let list workspace = fst (scan workspace)
+let manifest_errors workspace = snd (scan workspace)
 
 let enabled_dependents workspace name =
   list workspace
@@ -248,7 +261,7 @@ let validate_local_dependencies_for_activation workspace manifest =
   in
   let rec loop = function
     | [] -> Ok ()
-    | dependency :: rest when dependency = manifest.name ->
+    | dependency :: _ when dependency = manifest.name ->
         Error
           (Printf.sprintf
              "local extension %s cannot be enabled because it declares itself as a local dependency"
