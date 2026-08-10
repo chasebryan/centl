@@ -127,7 +127,7 @@ let test_transaction_fingerprint_detects_requirement_drift () =
       in
       let first = only_candidate first in
       let second = only_candidate second in
-      Alcotest.(check string) "same strategy retained" 
+      Alcotest.(check string) "same strategy retained"
         (Centl_sci_mirage_candidate.strategy_text first.strategy)
         (Centl_sci_mirage_candidate.strategy_text second.strategy);
       Alcotest.(check bool) "different requirement changes identity" true
