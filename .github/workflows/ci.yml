@@ -40,6 +40,16 @@ jobs:
             ca-certificates curl libflint-dev libgmp-dev libmpfr-dev \
             libzstd1 make pkg-config signify-openbsd tar
 
+      - name: Check preservation tooling syntax
+        run: |
+          python3 -m py_compile scripts/integrity.py scripts/supply-chain-check.py
+          sh -n scripts/supply-chain
+          sh -n scripts/release-sign
+          sh -n scripts/release-verify
+          sh -n scripts/offline-rebuild
+          sh -n scripts/capsule-build
+          sh -n scripts/capsule-run
+
       - name: Exercise release authentication and integrity tooling
         run: |
           root="$RUNNER_TEMP/centl-release-auth-test"
