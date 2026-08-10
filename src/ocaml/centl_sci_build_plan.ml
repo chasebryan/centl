@@ -246,14 +246,9 @@ let render plan =
                         begin match drop_prefix_ci "validate " plan.request with
                         | Some name when name <> "" -> render_validation name
                         | _ ->
-                            begin match drop_prefix_ci "import workspace " plan.request with
-                            | Some _ ->
-                                "The Caramels import validator and reversible importer are implemented, but BUILD import remains gated until the dispatcher can reload the active downstream core session in the same operation. No workspace state was changed."
-                            | None ->
-                                begin match plan.layer with
-                                | Core_patch -> render_core_plan plan
-                                | _ -> generic_text plan
-                                end
+                            begin match plan.layer with
+                            | Core_patch -> render_core_plan plan
+                            | _ -> generic_text plan
                             end
                         end
                     end
