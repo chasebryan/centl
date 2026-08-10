@@ -29,15 +29,18 @@ PY
   caravan/tuf_lab.py \
   caravan/session.py \
   caravan/transport.py \
+  caravan/retrieval.py \
   tests/test_caravan_phase1.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_tuf_catalog.py \
-  tests/test_caravan_transport.py
+  tests/test_caravan_transport.py \
+  tests/test_caravan_retrieval.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_tuf_catalog.py \
-  tests/test_caravan_transport.py
+  tests/test_caravan_transport.py \
+  tests/test_caravan_retrieval.py
