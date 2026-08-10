@@ -88,6 +88,44 @@ let read_manifest workspace name =
     | Error message -> Error message
     | Ok json -> manifest_of_json json
 
+let local_dependency_name dependency =
+  let dependency = String.trim dependency in
+  let prefix = "extension:" in
+  if String.starts_with ~prefix dependency then
+    let name =
+      String.sub dependency (String.length prefix)
+        (String.length dependency - String.length prefix)
+      |> String.trim
+    in
+    if name = "" then None else Some name
+  else None
+
+let order_by_local_dependencies manifests =
+  let manifests =
+    List.sort (fun left right -> String.compare left.name right.name) manifests
+  in
+  let by_name = List.map (fun manifest -> (manifest.name, manifest)) manifests in
+  let state = Hashtbl.create (List.length manifests) in
+  let ordered = ref [] in
+  let rec visit manifest =
+    match Hashtbl.find_opt state manifest.name with
+    | Some `Done -> ()
+    | Some `Visiting -> ()
+    | None ->
+        Hashtbl.replace state manifest.name `Visiting;
+        manifest.dependencies
+        |> List.filter_map local_dependency_name
+        |> List.sort_uniq String.compare
+        |> List.iter (fun name ->
+               match List.assoc_opt name by_name with
+               | Some dependency -> visit dependency
+               | None -> ());
+        Hashtbl.replace state manifest.name `Done;
+        ordered := manifest :: !ordered
+  in
+  List.iter visit manifests;
+  List.rev !ordered
+
 let list workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.extensions) then []
   else
@@ -99,7 +137,7 @@ let list workspace =
            match read_manifest workspace name with
            | Ok value -> Some value
            | Error _ -> None)
-    |> List.sort (fun left right -> String.compare left.name right.name)
+    |> order_by_local_dependencies
 
 let strings values = `List (List.map (fun value -> `String value) values)
 
