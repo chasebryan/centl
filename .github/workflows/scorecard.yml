@@ -2,6 +2,9 @@ name: OpenSSF Scorecard
 
 on:
   branch_protection_rule:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
