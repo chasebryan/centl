@@ -81,6 +81,11 @@
  (libraries centl_lib alcotest))
 
 (test
+ (name test_sci_suggestion)
+ (modules test_sci_suggestion)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_sci_mechanics)
  (modules test_sci_mechanics)
  (libraries centl_lib alcotest yojson))
