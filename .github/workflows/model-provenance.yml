@@ -1,0 +1,137 @@
+name: CENTL-SCi model provenance
+
+on:
+  pull_request:
+    paths:
+      - "scripts/model-provenance.py"
+      - "scripts/capsule-build"
+      - "scripts/preservation-drill"
+      - "supply-chain/model-provenance/**"
+      - "docs/MODEL-PROVENANCE.md"
+      - ".github/workflows/model-provenance.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/model-provenance.py"
+      - "scripts/capsule-build"
+      - "scripts/preservation-drill"
+      - "supply-chain/model-provenance/**"
+      - "docs/MODEL-PROVENANCE.md"
+      - ".github/workflows/model-provenance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Bind model provenance without guessing origin
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check provenance tooling syntax
+        run: |
+          python3 -m py_compile scripts/model-provenance.py
+          sh -n scripts/capsule-build
+          sh -n scripts/preservation-drill
+          grep -F 'scripts/model-provenance.py" bind' scripts/capsule-build
+          grep -F 'active model provenance' scripts/preservation-drill
+
+      - name: Bind catalog lineage to exact active bytes
+        run: |
+          mirror="$RUNNER_TEMP/model-mirror"
+          model_name='Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf'
+          mkdir -p "$mirror/models" "$mirror/project"
+          printf '%s\n' "$GITHUB_SHA" > "$mirror/project/SOURCE-COMMIT"
+
+          tmp="$RUNNER_TEMP/$model_name"
+          printf 'synthetic qualified-model bytes\n' > "$tmp"
+          digest=$(sha256sum "$tmp" | awk '{ print $1 }')
+          model_dir="$mirror/models/$digest"
+          mkdir -p "$model_dir"
+          cp "$tmp" "$model_dir/$model_name"
+          {
+            printf 'sha256=%s\n' "$digest"
+            printf 'file=%s\n' "$model_name"
+            printf 'bytes=%s\n' "$(wc -c < "$tmp" | tr -d ' ')"
+          } > "$model_dir/MANIFEST"
+          printf '%s\n' "$digest" > "$mirror/models/ACTIVE.sha256"
+
+          python3 scripts/model-provenance.py bind "$mirror"
+          python3 scripts/model-provenance.py verify "$mirror"
+          grep -Fqx 'base_model_id=Qwen/Qwen3-4B-Instruct-2507' "$model_dir/PROVENANCE"
+          grep -Fqx 'base_model_license=Apache-2.0' "$model_dir/PROVENANCE"
+          grep -Fqx 'quantized_source_status=unverified' "$model_dir/PROVENANCE"
+          grep -Fqx 'quantized_source_sha256=-' "$model_dir/PROVENANCE"
+          grep -Fqx 'redistribution_status=not-approved' "$model_dir/PROVENANCE"
+          grep -Fqx "content_sha256=$digest" "$model_dir/PROVENANCE"
+          grep -Fqx "preservation_source_commit=$GITHUB_SHA" "$model_dir/PROVENANCE"
+
+          printf '%s\n' "$mirror" > "$RUNNER_TEMP/model-mirror-path"
+          printf '%s\n' "$digest" > "$RUNNER_TEMP/model-digest"
+
+      - name: Refuse false exact-source claims
+        run: |
+          mirror=$(cat "$RUNNER_TEMP/model-mirror-path")
+          digest=$(cat "$RUNNER_TEMP/model-digest")
+          sidecar="$RUNNER_TEMP/wrong.provenance"
+          cat > "$sidecar" <<EOF
+          schema=1
+          file_name=Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+          base_model_id=Qwen/Qwen3-4B-Instruct-2507
+          base_model_source=https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+          base_model_license=Apache-2.0
+          quantization=Q4_K_M
+          quantized_source_status=verified
+          quantized_source_repository=https://example.invalid/quantized
+          quantized_source_file=model.gguf
+          quantized_source_sha256=0000000000000000000000000000000000000000000000000000000000000000
+          redistribution_status=not-approved
+          note=synthetic operator record
+          EOF
+          sed -i 's/^          //' "$sidecar"
+
+          if CENTL_SCI_MODEL_PROVENANCE_FILE="$sidecar" \
+               python3 scripts/model-provenance.py bind "$mirror"; then
+            echo 'wrong exact-source SHA unexpectedly accepted' >&2
+            exit 1
+          fi
+
+          sed -i "s/quantized_source_sha256=.*/quantized_source_sha256=$digest/" "$sidecar"
+          CENTL_SCI_MODEL_PROVENANCE_FILE="$sidecar" \
+            python3 scripts/model-provenance.py bind "$mirror"
+          python3 scripts/model-provenance.py verify "$mirror"
+          model_dir="$mirror/models/$digest"
+          grep -Fqx 'quantized_source_status=verified' "$model_dir/PROVENANCE"
+          grep -Fqx "quantized_source_sha256=$digest" "$model_dir/PROVENANCE"
+
+      - name: Refuse redistribution approval without verified exact origin
+        run: |
+          mirror=$(cat "$RUNNER_TEMP/model-mirror-path")
+          sidecar="$RUNNER_TEMP/unverified-allowed.provenance"
+          cat > "$sidecar" <<'EOF'
+          schema=1
+          file_name=Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+          base_model_id=Qwen/Qwen3-4B-Instruct-2507
+          base_model_source=https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+          base_model_license=Apache-2.0
+          quantization=Q4_K_M
+          quantized_source_status=unverified
+          quantized_source_repository=-
+          quantized_source_file=-
+          quantized_source_sha256=-
+          redistribution_status=operator-reviewed-allowed
+          note=synthetic invalid record
+          EOF
+          sed -i 's/^          //' "$sidecar"
+
+          if CENTL_SCI_MODEL_PROVENANCE_FILE="$sidecar" \
+               python3 scripts/model-provenance.py bind "$mirror"; then
+            echo 'unverified exact origin unexpectedly allowed redistribution' >&2
+            exit 1
+          fi
