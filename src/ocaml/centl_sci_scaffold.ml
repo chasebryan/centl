@@ -5,8 +5,8 @@ let kind_text = function
   | Native_extension -> "native_extension"
 
 let assurance = function
-  | Python_adapter -> "external_backend"
-  | Native_extension -> "unverified_generated_extension"
+  | Python_adapter -> Centl_sci_workspace.External_backend
+  | Native_extension -> Centl_sci_workspace.Unverified_generated
 
 let write_text_file path text =
   let channel = open_out_bin path in
@@ -20,6 +20,7 @@ let scaffold workspace ~kind ~name ~target ~summary =
   else
     let kind_text = kind_text kind in
     let assurance = assurance kind in
+    let assurance_text = Centl_sci_workspace.assurance_text assurance in
     let root = Filename.concat workspace.Centl_sci_workspace.generated ("scaffolds/" ^ name) in
     let source_file, test_file, source_text, test_text =
       match kind with
@@ -113,7 +114,7 @@ let scaffold workspace ~kind ~name ~target ~summary =
             ("test", `String test_file);
             ("transport", `String "jsonl_stdio");
             ("activation", `String "explicit_after_validation");
-            ("assurance", `String assurance);
+            ("assurance", `String assurance_text);
             ("verified_core_modified", `Bool false);
             ("network_access", `String "not_granted_by_scaffold");
             ("filesystem_access", `String "not_granted_by_scaffold");
