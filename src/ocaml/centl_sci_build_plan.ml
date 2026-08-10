@@ -170,6 +170,26 @@ let render_workspace_audit () =
       "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before auditing it."
   | Some workspace -> Centl_sci_audit.collect workspace |> Centl_sci_audit.render
 
+let render_assurance name =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before inspecting extension assurance."
+  | Some workspace ->
+      begin match Centl_sci_extensions.read_manifest workspace name with
+      | Error message -> "Assurance inspection failed: " ^ message
+      | Ok manifest -> Centl_sci_assurance.render_manifest manifest
+      end
+
+let render_revisions () =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before reading revision history."
+  | Some workspace ->
+      begin match Centl_sci_revisions.read workspace with
+      | Error message -> "Revision history could not be read: " ^ message
+      | Ok history -> Centl_sci_revisions.render history
+      end
+
 let render_export target =
   match Centl_sci_workspace.default () with
   | None ->
@@ -220,6 +240,12 @@ let render plan =
   then
     "Available CENTL / CENTL-SCi capabilities:\n" ^ Centl_sci_capabilities.render_all ()
   else if
+    List.mem request [ "assurance"; "show assurance"; "assurance levels"; "show assurance levels" ]
+  then Centl_sci_assurance.render_catalog ()
+  else if
+    List.mem request [ "revisions"; "show revisions"; "revision history"; "show revision history" ]
+  then render_revisions ()
+  else if
     List.mem request
       [ "audit workspace"; "workspace audit"; "validate workspace"; "check workspace" ]
   then render_workspace_audit ()
@@ -232,23 +258,31 @@ let render plan =
         begin match drop_prefix_ci "export my workspace " plan.request with
         | Some path when path <> "" -> render_export (Some path)
         | _ ->
-            begin match drop_prefix_ci "show capability " plan.request with
-            | Some query when query <> "" ->
-                "Capability matches for `" ^ query ^ "`:\n"
-                ^ Centl_sci_capabilities.render_matches query
+            begin match drop_prefix_ci "explain assurance " plan.request with
+            | Some name when name <> "" -> render_assurance name
             | _ ->
-                begin match drop_prefix_ci "validate package " plan.request with
-                | Some name when name <> "" -> render_package_validation name
+                begin match drop_prefix_ci "show assurance " plan.request with
+                | Some name when name <> "" -> render_assurance name
                 | _ ->
-                    begin match drop_prefix_ci "validate extension " plan.request with
-                    | Some name when name <> "" -> render_validation name
+                    begin match drop_prefix_ci "show capability " plan.request with
+                    | Some query when query <> "" ->
+                        "Capability matches for `" ^ query ^ "`:\n"
+                        ^ Centl_sci_capabilities.render_matches query
                     | _ ->
-                        begin match drop_prefix_ci "validate " plan.request with
-                        | Some name when name <> "" -> render_validation name
+                        begin match drop_prefix_ci "validate package " plan.request with
+                        | Some name when name <> "" -> render_package_validation name
                         | _ ->
-                            begin match plan.layer with
-                            | Core_patch -> render_core_plan plan
-                            | _ -> generic_text plan
+                            begin match drop_prefix_ci "validate extension " plan.request with
+                            | Some name when name <> "" -> render_validation name
+                            | _ ->
+                                begin match drop_prefix_ci "validate " plan.request with
+                                | Some name when name <> "" -> render_validation name
+                                | _ ->
+                                    begin match plan.layer with
+                                    | Core_patch -> render_core_plan plan
+                                    | _ -> generic_text plan
+                                    end
+                                end
                             end
                         end
                     end
