@@ -118,6 +118,25 @@ let test_snapshot_rejects_symlinked_workspace_state () =
       end;
       Alcotest.(check string) "outside file untouched" "outside\n" (read_text outside))
 
+let test_snapshot_rejects_symlinked_snapshot_root () =
+  let root = temp_dir "centl-caramels-snapshot-root-symlink-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let outside = Filename.concat root "outside-snapshots" in
+      Unix.mkdir outside 0o700;
+      Unix.symlink outside (Centl_sci_snapshot.snapshot_root workspace);
+      begin match Centl_sci_snapshot.create workspace with
+      | Ok _ -> Alcotest.fail "snapshot unexpectedly accepted a symlinked snapshot root"
+      | Error message ->
+          Alcotest.(check bool) "snapshot-root symlink rejection" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"symlinked snapshot root" message))
+      end)
+
 let test_snapshot_rollback_does_not_advance_revision () =
   let root = temp_dir "centl-caramels-snapshot-rollback-" in
   Fun.protect
@@ -142,6 +161,54 @@ let test_snapshot_rollback_does_not_advance_revision () =
       Alcotest.(check int) "workspace revision unchanged" revision_before
         (Centl_sci_workspace.read_revision workspace);
       Alcotest.(check string) "snapshot surface restored" "before\n" (read_text state))
+
+let test_snapshot_retains_only_latest_undo_state () =
+  let root = temp_dir "centl-caramels-snapshot-bounded-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let state = Filename.concat workspace.data "state.txt" in
+      write_text state "first\n";
+      let first =
+        match Centl_sci_snapshot.create workspace with
+        | Ok path -> path
+        | Error message -> Alcotest.fail message
+      in
+      write_text state "second\n";
+      let second =
+        match Centl_sci_snapshot.create workspace with
+        | Ok path -> path
+        | Error message -> Alcotest.fail message
+      in
+      Alcotest.(check bool) "new snapshot retained" true (Sys.file_exists second);
+      Alcotest.(check bool) "old snapshot pruned" false (Sys.file_exists first);
+      Alcotest.(check int) "only one snapshot retained" 1
+        (Array.length (Sys.readdir (Centl_sci_snapshot.snapshot_root workspace)));
+      begin match Centl_sci_snapshot.restore_last workspace with
+      | Error message -> Alcotest.fail message
+      | Ok _ -> ()
+      end;
+      Alcotest.(check string) "latest undo state restored" "second\n" (read_text state))
+
+let test_snapshot_rollback_rejects_outside_path () =
+  let root = temp_dir "centl-caramels-snapshot-outside-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      Centl_sci_workspace.ensure workspace;
+      let outside = Filename.concat root "outside-snapshot" in
+      Unix.mkdir outside 0o700;
+      begin match Centl_sci_snapshot.rollback workspace outside with
+      | Ok _ -> Alcotest.fail "rollback unexpectedly accepted an unmanaged snapshot path"
+      | Error message ->
+          Alcotest.(check bool) "outside rollback rejected" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"outside the managed snapshot root" message))
+      end)
 
 let test_dependency_invalid_bundle_is_rejected () =
   let root = temp_dir "centl-caramels-dependency-import-" in
@@ -192,8 +259,14 @@ let () =
             test_symlink_is_rejected_before_copy;
           Alcotest.test_case "snapshot rejects symlink" `Quick
             test_snapshot_rejects_symlinked_workspace_state;
+          Alcotest.test_case "snapshot root rejects symlink" `Quick
+            test_snapshot_rejects_symlinked_snapshot_root;
           Alcotest.test_case "rollback preserves revision" `Quick
             test_snapshot_rollback_does_not_advance_revision;
+          Alcotest.test_case "snapshot retains one undo" `Quick
+            test_snapshot_retains_only_latest_undo_state;
+          Alcotest.test_case "rollback rejects outside path" `Quick
+            test_snapshot_rollback_rejects_outside_path;
           Alcotest.test_case "reject dependency-invalid bundle" `Quick
             test_dependency_invalid_bundle_is_rejected;
           Alcotest.test_case "import preserves reload signal" `Quick
