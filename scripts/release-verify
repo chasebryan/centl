@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+release_dir=${1:-"$repo_root/dist"}
+public_key=${FCF_SIGNIFY_PUBLIC_KEY:-}
+
+fail() {
+  printf 'centl release-verify: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+[ -d "$release_dir" ] || fail "release directory not found: $release_dir"
+[ -n "$public_key" ] || fail "FCF_SIGNIFY_PUBLIC_KEY must name an FCF release public key"
+[ -f "$public_key" ] || fail "public key not found: $public_key"
+need signify
+need python3
+
+manifest="$release_dir/SHA256SUMS"
+signature="$release_dir/SHA256SUMS.sig"
+[ -f "$manifest" ] || fail "release checksum manifest not found: $manifest"
+[ -f "$signature" ] || fail "release signature not found: $signature"
+
+# Authentication first: establish that the expected SHA-256 list was signed by
+# the selected FCF release key. Integrity second: recompute every listed digest.
+signify -V -p "$public_key" -m "$manifest" -x "$signature"
+python3 "$repo_root/scripts/integrity.py" verify "$manifest" --root "$release_dir" --verbose
+
+printf 'CENTL release authentication and SHA-256 verification passed.\n'
+printf 'Manifest: %s\n' "$manifest"
+printf 'Public key: %s\n' "$public_key"
