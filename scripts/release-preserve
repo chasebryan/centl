@@ -1,0 +1,163 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${1:-}
+version=${2:-}
+release_dir=${3:-}
+
+fail() {
+  printf 'centl release-preserve: %s\n' "$*" >&2
+  exit 1
+}
+
+canonical_dir() {
+  CDPATH= cd -- "$1" && pwd
+}
+
+validate_adjacent_checksum() {
+  checksum=$1
+  asset=$2
+
+  awk -v wanted="$asset" '
+    BEGIN { count = 0; valid = 0 }
+    NF {
+      count++
+      digest = substr($0, 1, 64)
+      separator = substr($0, 65, 2)
+      name = substr($0, 67)
+      if (length(digest) == 64 && digest ~ /^[0-9a-f]+$/ &&
+          separator == "  " && name == wanted) {
+        valid++
+      }
+    }
+    END { exit !(count == 1 && valid == 1) }
+  ' "$checksum" || fail "$checksum must contain exactly one SHA-256 entry for $asset"
+
+  python3 "$repo_root/scripts/integrity.py" verify "$checksum" --root "$release_dir"
+}
+
+[ -n "$mirror" ] && [ -n "$version" ] && [ -n "$release_dir" ] ||
+  fail "usage: scripts/release-preserve MIRROR_DIR VERSION RELEASE_DIR"
+
+version=${version#v}
+case "$version" in
+  ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid version: $version" ;;
+esac
+
+[ -d "$mirror" ] || fail "preservation mirror not found: $mirror"
+[ -d "$release_dir" ] || fail "release directory not found: $release_dir"
+mirror=$(canonical_dir "$mirror")
+release_dir=$(canonical_dir "$release_dir")
+command -v python3 >/dev/null 2>&1 || fail "python3 is required"
+command -v git >/dev/null 2>&1 || fail "git is required"
+command -v diff >/dev/null 2>&1 || fail "diff is required"
+
+source_commit=${CENTL_RELEASE_SOURCE_COMMIT:-}
+if [ -z "$source_commit" ]; then
+  source_commit=$(
+    git -C "$repo_root" rev-parse "v$version^{commit}" 2>/dev/null || true
+  )
+fi
+case "$source_commit" in
+  ''|*[!0-9a-f]*)
+    fail "CENTL_RELEASE_SOURCE_COMMIT or local tag v$version must provide a full commit"
+    ;;
+esac
+[ "${#source_commit}" -eq 40 ] ||
+  fail "release source commit must be a full 40-character Git commit"
+
+git -C "$repo_root" cat-file -e "$source_commit^{commit}" 2>/dev/null ||
+  fail "release source commit is not present in the local CENTL repository: $source_commit"
+
+set --
+for path in "$release_dir"/centl-*.tar.gz "$release_dir"/centl-*.zip; do
+  [ -f "$path" ] || continue
+  [ ! -L "$path" ] || fail "release archive must not be a symlink: $path"
+  asset=$(basename -- "$path")
+  checksum="$path.sha256"
+  [ -f "$checksum" ] && [ ! -L "$checksum" ] ||
+    fail "adjacent checksum missing or not a regular file: $checksum"
+  validate_adjacent_checksum "$checksum" "$asset"
+  set -- "$@" "$asset"
+done
+[ "$#" -gt 0 ] || fail "no CENTL release archives found in $release_dir"
+
+manifest="$release_dir/SHA256SUMS"
+signature="$release_dir/SHA256SUMS.sig"
+if [ -e "$manifest" ] || [ -e "$signature" ]; then
+  [ -f "$manifest" ] && [ ! -L "$manifest" ] ||
+    fail "signed release has no regular SHA256SUMS manifest"
+  [ -f "$signature" ] && [ ! -L "$signature" ] ||
+    fail "signed release has no regular SHA256SUMS.sig"
+  [ -n "${FCF_SIGNIFY_PUBLIC_KEY:-}" ] ||
+    fail "FCF_SIGNIFY_PUBLIC_KEY is required to preserve an authenticated release"
+  FCF_SIGNIFY_PUBLIC_KEY="$FCF_SIGNIFY_PUBLIC_KEY" \
+    sh "$repo_root/scripts/release-verify" "$release_dir"
+  authentication=signify
+else
+  authentication=adjacent-sha256
+fi
+
+release_root="$mirror/releases"
+mkdir -p "$release_root"
+target="$release_root/v$version"
+stage="$release_root/.v$version.new.$$"
+rm -rf "$stage"
+mkdir -p "$stage"
+cleanup() {
+  rm -rf "$stage"
+}
+trap cleanup 0 HUP INT TERM
+
+for asset in "$@"; do
+  cp "$release_dir/$asset" "$stage/$asset"
+  cp "$release_dir/$asset.sha256" "$stage/$asset.sha256"
+  validate_adjacent_checksum "$stage/$asset.sha256" "$asset"
+done
+if [ "$authentication" = signify ]; then
+  cp "$manifest" "$stage/SHA256SUMS"
+  cp "$signature" "$stage/SHA256SUMS.sig"
+  FCF_SIGNIFY_PUBLIC_KEY="$FCF_SIGNIFY_PUBLIC_KEY" \
+    sh "$repo_root/scripts/release-verify" "$stage"
+fi
+
+printf '%s\n' "$version" > "$stage/VERSION"
+printf '%s\n' "$source_commit" > "$stage/SOURCE-COMMIT"
+printf '%s\n' "$authentication" > "$stage/AUTHENTICATION"
+
+python3 "$repo_root/scripts/integrity.py" tree-manifest \
+  --root "$stage" --output "$stage/RELEASE-CONTENTS-SHA256SUMS"
+python3 "$repo_root/scripts/integrity.py" hash \
+  "$stage/RELEASE-CONTENTS-SHA256SUMS" \
+  > "$stage/RELEASE-CONTENTS-SHA256SUMS.sha256"
+python3 "$repo_root/scripts/integrity.py" verify \
+  "$stage/RELEASE-CONTENTS-SHA256SUMS.sha256" --root "$stage"
+python3 "$repo_root/scripts/integrity.py" tree-verify \
+  "$stage/RELEASE-CONTENTS-SHA256SUMS" --root "$stage" \
+  --ignore RELEASE-CONTENTS-SHA256SUMS \
+  --ignore RELEASE-CONTENTS-SHA256SUMS.sha256
+
+if [ -e "$target" ]; then
+  [ -d "$target" ] && [ ! -L "$target" ] ||
+    fail "existing release target is not a normal directory: $target"
+  if diff -qr "$stage" "$target" >/dev/null; then
+    printf 'CENTL release already preserved identically: %s\n' "$target"
+  else
+    fail "release v$version is already preserved with different contents"
+  fi
+else
+  mv "$stage" "$target"
+  mkdir -p "$stage"
+  printf 'Preserved CENTL release: %s\n' "$target"
+fi
+
+# Adding a release changes the preservation tree. Finish the operation by
+# regenerating and verifying the whole-mirror receipt so no stale top-level
+# receipt can survive a successful release-ingest command.
+sh "$repo_root/scripts/mirror-receipt" create "$mirror"
+
+printf 'version=%s\n' "$version"
+printf 'source_commit=%s\n' "$source_commit"
+printf 'authentication=%s\n' "$authentication"
+printf 'mirror=%s\n' "$mirror"
