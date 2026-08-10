@@ -49,18 +49,28 @@ let obligations_with goal_path graph =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
-let record_goal_phase result goal_path graph obligations_path obligations =
+let candidates_with obligations_path graph obligations =
+  match
+    Centl_sci_mirage_candidate.construct obligations_path graph obligations
+  with
+  | Ok result -> result
+  | Error message ->
+      prerr_endline ("centl-mirage: " ^ message);
+      exit 2
+
+let record_candidate_phase result goal_path graph obligations_path obligations
+    candidates_path candidates =
   Centl_sci_workspace.atomic_write_json result.Centl_sci_mirage.active_path
     (`Assoc
       [
         ("schema_version", `Int 1);
         ("system", `String "CENTL-MIRAGE");
         ("status", `String "active");
-        ("phase", `String "evidence_obligations_constructed");
+        ("phase", `String "candidate_transactions_staged");
         ( "next_phase",
           `String
             (if obligations.Centl_sci_mirage_obligation.blocked_cells = [] then
-               "candidate_synthesis"
+               "candidate_synthesis_and_validation"
              else "resolve_blocking_requirements") );
         ("source_digest", `String result.source_digest);
         ("source_stored_path", `String result.stored_path);
@@ -68,6 +78,7 @@ let record_goal_phase result goal_path graph obligations_path obligations =
         ("development_plan", `String result.plan_path);
         ("goal_graph", `String goal_path);
         ("evidence_obligations", `String obligations_path);
+        ("candidate_transactions", `String candidates_path);
         ("workspace_revision", `Int result.revision);
         ("goal_nodes", `Int (List.length graph.Centl_sci_mirage_goal.nodes));
         ("goal_edges", `Int (List.length graph.edges));
@@ -75,6 +86,8 @@ let record_goal_phase result goal_path graph obligations_path obligations =
         ("conflicts", `Int (List.length graph.conflicts));
         ( "evidence_obligation_count",
           `Int (List.length obligations.Centl_sci_mirage_obligation.obligations) );
+        ( "candidate_transaction_count",
+          `Int (List.length candidates.Centl_sci_mirage_candidate.candidates) );
         ( "candidate_blocked",
           `Bool (obligations.Centl_sci_mirage_obligation.blocked_cells <> []) );
         ( "blocked_cells",
@@ -82,6 +95,7 @@ let record_goal_phase result goal_path graph obligations_path obligations =
             (List.map
                (fun id -> `Int id)
                obligations.Centl_sci_mirage_obligation.blocked_cells) );
+        ("workspace_mutated", `Bool false);
         ("assurance_promoted", `Bool false);
         ("network_required", `Bool false);
       ])
@@ -91,18 +105,24 @@ let start path =
   let result = ingest_with workspace path in
   let goal_path, graph = analyze_with workspace result.spec_path in
   let obligations_path, obligations = obligations_with goal_path graph in
-  record_goal_phase result goal_path graph obligations_path obligations;
+  let candidates_path, candidates =
+    candidates_with obligations_path graph obligations
+  in
+  record_candidate_phase result goal_path graph obligations_path obligations
+    candidates_path candidates;
   print_endline (Centl_sci_mirage.render_ingest result);
   Printf.printf "Goal graph: %s\n%s\n" goal_path
     (Centl_sci_mirage_goal.render graph);
   Printf.printf "Evidence obligations: %s\n%s\n" obligations_path
     (Centl_sci_mirage_obligation.render obligations);
+  Printf.printf "Candidate transactions: %s\n%s\n" candidates_path
+    (Centl_sci_mirage_candidate.render candidates);
   if obligations.blocked_cells <> [] then
     print_endline
-      "MIRAGE halted before candidate synthesis because one or more source cells require explicit resolution."
+      "MIRAGE staged only non-mutating candidate transactions and halted before synthesis for blocked source cells."
   else
     print_endline
-      "MIRAGE specification, capability-gap analysis, and evidence-obligation construction completed. Next phase: candidate synthesis."
+      "MIRAGE staged non-mutating candidate transactions with explicit evidence obligations. Next phase: candidate synthesis and validation."
 
 let status () =
   let workspace = workspace_or_exit () in
