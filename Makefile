@@ -31,10 +31,11 @@ SCI_ASSIMILATION_ARGS ?=
 .PHONY: all format format-fix fmt lint quality install-interface-check integrity-self-test \
 	integrity-source supply-chain-check supply-chain-sync supply-chain-audit \
 	supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-preserve \
-	offline-rebuild release-sign release-verify verify extract native-build native-test \
-	adversarial-test fuzz-test metamorphic-test sanitizer-test performance-test \
-	hardening-test differential-test sci-model-test sci-interface-check sci-assimilate \
-	sci-assimilate-full sci-assimilate-publish build test release clean
+	offline-rebuild capsule-build capsule-run release-sign release-verify verify \
+	extract native-build native-test adversarial-test fuzz-test metamorphic-test \
+	sanitizer-test performance-test hardening-test differential-test sci-model-test \
+	sci-interface-check sci-assimilate sci-assimilate-full sci-assimilate-publish \
+	build test release clean
 
 all: build
 
@@ -108,6 +109,14 @@ supply-chain-preserve:
 offline-rebuild:
 	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
 	CENTL_OPAM_SWITCH="$(OPAM_SWITCH)" sh scripts/offline-rebuild "$(MIRROR)"
+
+capsule-build:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/capsule-build "$(MIRROR)"
+
+capsule-run:
+	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	sh scripts/capsule-run "$(MIRROR)"
 
 release-sign:
 	test -n "$(FCF_SIGNIFY_SECRET_KEY)" || { echo "FCF_SIGNIFY_SECRET_KEY is required" >&2; exit 2; }
