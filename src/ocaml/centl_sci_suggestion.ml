@@ -67,7 +67,7 @@ let structural ~mode input cursor =
     let lower = String.lowercase_ascii normalized in
     let classification = Centl_sci_intent.classify ~mode normalized in
     let mechanics_missing = Centl_sci_interaction.mechanics_missing lower in
-    let make display slots explanation =
+    let make ?(alternatives = []) display slots explanation =
       Some
         {
           category = Structural;
@@ -78,7 +78,7 @@ let structural ~mode input cursor =
           confidence = 0.75;
           safe_to_accept = false;
           explanation;
-          alternatives = [];
+          alternatives;
           missing_slots = slots;
           source = "deterministic-grammar";
         }
@@ -97,10 +97,24 @@ let structural ~mode input cursor =
            && not (contains " with respect to " lower) ->
         make " with respect to [variable]" [ "variable" ]
           "integration grammar is missing an integration variable or bounds"
+    | Centl_sci_intent.Approximation
+      when not (contains " digits" lower) && not (contains " significant digits" lower) ->
+        make " to [digits] significant digits" [ "optional digit target" ]
+          "CENTL can use its default justified-digit target, or you can request an explicit 1..1000 digit target"
+    | Centl_sci_intent.Verification
+      when not (String.contains lower '=') && not (contains " equals " lower) ->
+        make " [left claim] = [right claim]" [ "claim relation" ]
+          "verification needs an explicit mathematical relation"
     | Centl_sci_intent.Unit_conversion
       when not (contains " to " lower) && not (contains " into " lower) ->
         make " to [unit]" [ "target unit" ]
           "unit conversion is missing a target unit"
+    | Centl_sci_intent.Constant_lookup
+      when lower = "constant" || lower = "physical constant"
+           || lower = "lookup constant" ->
+        make ~alternatives:[ "c"; "h"; "e"; "k_B"; "N_A"; "g0" ]
+          " [c | h | e | k_B | N_A | g0]" [ "exact catalog symbol" ]
+          "Caramels exposes only the exact defining/conventional CENTL Physics constant catalog through this route"
     | Centl_sci_intent.Physics_simulation when mechanics_missing <> [] ->
         make
           (" [missing: " ^ String.concat ", " mechanics_missing ^ "]")
@@ -110,6 +124,12 @@ let structural ~mode input cursor =
       when mode = Centl_sci_interaction.Build && not (String.contains lower '=') ->
         make " = [expression]" [ "implementation expression" ]
           "BUILD creation request is missing an implementation body"
+    | Centl_sci_intent.System_inspection
+      when mode = Centl_sci_interaction.Build
+           && (lower = "validate" || lower = "validate extension"
+              || lower = "validate package") ->
+        make " [name]" [ "extension or package name" ]
+          "BUILD validation needs a local object name"
     | _ -> None
 
 let suggest ~mode input cursor =
