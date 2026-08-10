@@ -1,9 +1,4 @@
-type origin =
-  | Verified_core
-  | Physics_engine
-  | Caramels_runtime
-  | Local_extension
-  | Local_package
+type origin = Builtin | Local_extension | Local_package
 
 type capability = {
   name : string;
@@ -14,36 +9,56 @@ type capability = {
   summary : string;
 }
 
-let origin_text = function
-  | Verified_core -> "verified/core CENTL"
-  | Physics_engine -> "deterministic CENTL Physics"
-  | Caramels_runtime -> "CENTL-SCi Caramels runtime"
-  | Local_extension -> "local downstream extension"
-  | Local_package -> "local downstream package"
-
 let builtins =
   [
-    { name = "solve"; aliases = [ "equation"; "root"; "zero" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported equation-solving path" };
-    { name = "diff"; aliases = [ "differentiate"; "derivative" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "symbolic differentiation for supported expressions" };
-    { name = "integrate"; aliases = [ "integral"; "antiderivative" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported exact integration path" };
-    { name = "simplify"; aliases = [ "canonicalize"; "simplification" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported symbolic simplification" };
-    { name = "expand"; aliases = [ "polynomial expansion" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported symbolic expansion" };
-    { name = "factor"; aliases = [ "factorization"; "factorisation" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "supported polynomial factoring domain" };
-    { name = "substitute"; aliases = [ "substitution"; "replace variable" ]; category = "mathematics"; origin = Verified_core; assurance = "core"; summary = "symbolic substitution" };
-    { name = "approx"; aliases = [ "approximate"; "decimal"; "enclosure"; "significant digits" ]; category = "mathematics"; origin = Verified_core; assurance = "certified/existing"; summary = "precision-aware approximation/enclosure path, including deterministic Caramels natural-language lowering" };
-    { name = "verify"; aliases = [ "claim"; "contract"; "assert" ]; category = "mathematics"; origin = Verified_core; assurance = "verification"; summary = "structured mathematical claim verification" };
-    { name = "unit conversion"; aliases = [ "convert"; "units"; "dimension" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic"; summary = "exact dimension-checked unit conversion" };
-    { name = "physical constants"; aliases = [ "constant"; "speed of light"; "planck"; "boltzmann"; "avogadro" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic exact catalog"; summary = "exact defining/conventional physics constants with provenance" };
-    { name = "particle simulation"; aliases = [ "simulate"; "gravity"; "particle"; "mechanics" ]; category = "physics"; origin = Physics_engine; assurance = "deterministic model"; summary = "particle integration including explicit uniform gravity" };
-    { name = "sphere contact analysis"; aliases = [ "sphere"; "contact"; "collision" ]; category = "physics"; origin = Physics_engine; assurance = "exact geometry"; summary = "exact sphere contact classification and bounded contact machinery" };
-    { name = "workspace audit"; aliases = [ "audit workspace"; "check workspace"; "validate workspace"; "workspace consistency" ]; category = "build"; origin = Caramels_runtime; assurance = "read-only structural audit"; summary = "reports extension/package structure, assurance, activation state, dependency issues, and warnings without mutating verified core" };
-    { name = "extension validation"; aliases = [ "validate extension"; "validate manifest"; "structural validation" ]; category = "build"; origin = Caramels_runtime; assurance = "structural only"; summary = "validates native definitions and generated adapter/native scaffold contracts without assurance promotion" };
-    { name = "extension dependency graph"; aliases = [ "dependencies"; "dependency graph"; "extension dependencies"; "local dependencies"; "dependency cycle" ]; category = "build"; origin = Caramels_runtime; assurance = "read-only structural dependency validation"; summary = "tracks explicit local extension dependencies, activation ordering, missing/disabled dependencies, and cycles while preserving external or opaque dependency provenance" };
-    { name = "package validation"; aliases = [ "validate package"; "package membership"; "package composition" ]; category = "build"; origin = Caramels_runtime; assurance = "composition only"; summary = "checks package membership while preserving every member extension's assurance" };
-    { name = "assurance explanation"; aliases = [ "assurance"; "assurance levels"; "explain assurance"; "trust boundary"; "provenance" ]; category = "build"; origin = Caramels_runtime; assurance = "read-only explanation"; summary = "explains what each downstream assurance label establishes and explicitly does not establish" };
-    { name = "workspace revision history"; aliases = [ "revisions"; "revision history"; "workspace history"; "changes history" ]; category = "build"; origin = Caramels_runtime; assurance = "read-only bounded history"; summary = "shows the most recent bounded workspace revision events without mutating state" };
-    { name = "workspace portability"; aliases = [ "export workspace"; "import workspace"; "bundle"; "portable workspace"; "restore workspace" ]; category = "build"; origin = Caramels_runtime; assurance = "validated reversible downstream operation"; summary = "exports and imports user-owned downstream state with validation, snapshot rollback, and no verified-core replacement" };
-    { name = "English-to-CENTL extension"; aliases = [ "create function"; "create value"; "modify function"; "modify value"; "extend centl"; "generate centl" ]; category = "build"; origin = Caramels_runtime; assurance = "parser-validated local extension"; summary = "turns supported BUILD requests into native CENTL definitions, manifests, revisions, and live downstream session reloads" };
+    {
+      name = "exact arithmetic";
+      aliases = [ "arithmetic"; "rational"; "fraction"; "decimal" ];
+      category = "mathematics";
+      origin = Builtin;
+      assurance = "verified/exact CENTL core where admitted";
+      summary = "exact integer/rational arithmetic and exact decimal literals";
+    };
+    {
+      name = "polynomial solve";
+      aliases = [ "solve"; "roots"; "equation"; "quadratic" ];
+      category = "mathematics";
+      origin = Builtin;
+      assurance = "verified/exact admitted polynomial core";
+      summary = "single-variable rational polynomial solving in the admitted domain";
+    };
+    {
+      name = "mathematical verification";
+      aliases = [ "verify"; "claim"; "contract"; "assert" ];
+      category = "mathematics";
+      origin = Builtin;
+      assurance = "method-specific verifier evidence";
+      summary = "closed mathematical claim checking with explicit verdicts";
+    };
+    {
+      name = "certified approximation";
+      aliases = [ "approx"; "approximate"; "digits"; "enclosure" ];
+      category = "numerics";
+      origin = Builtin;
+      assurance = "bounded numerical enclosure";
+      summary = "rigorous approximation using CENTL's native enclosure machinery";
+    };
+    {
+      name = "unit conversion";
+      aliases = [ "convert"; "units"; "measurement" ];
+      category = "physics";
+      origin = Builtin;
+      assurance = "typed exact CENTL Physics operation";
+      summary = "exact rational conversion across admitted physical units";
+    };
+    {
+      name = "uniform gravity particle";
+      aliases = [ "gravity"; "particle"; "simulate"; "mechanics" ];
+      category = "physics";
+      origin = Builtin;
+      assurance = "typed deterministic CENTL Physics operation";
+      summary = "bounded discrete particle mechanics under explicit uniform gravity";
+    };
   ]
 
 let words text =
@@ -70,7 +85,7 @@ let score request_words capability =
 
 let local_extension_capabilities workspace =
   Centl_sci_extensions.list workspace
-  |> List.map (fun manifest ->
+  |> List.map (fun (manifest : Centl_sci_extensions.manifest) ->
          {
            name = manifest.name;
            aliases = [];
@@ -84,7 +99,7 @@ let local_extension_capabilities workspace =
 
 let local_package_capabilities workspace =
   Centl_sci_package.list workspace
-  |> List.map (fun package ->
+  |> List.map (fun (package : Centl_sci_package.t) ->
          {
            name = package.name;
            aliases = package.extensions;
@@ -108,29 +123,31 @@ let all () = builtins @ local_capabilities ()
 let search request =
   let request_words = words request in
   all ()
-  |> List.map (fun capability -> (score request_words capability, capability))
-  |> List.filter (fun (value, _) -> value > 0)
+  |> List.filter_map (fun capability ->
+         let relevance = score request_words capability in
+         if relevance = 0 then None else Some (relevance, capability))
   |> List.sort (fun (left_score, left) (right_score, right) ->
-         let by_score = compare right_score left_score in
-         if by_score <> 0 then by_score else String.compare left.name right.name)
+         match Int.compare right_score left_score with
+         | 0 -> String.compare left.name right.name
+         | order -> order)
   |> List.map snd
 
+let origin_text = function
+  | Builtin -> "builtin"
+  | Local_extension -> "local-extension"
+  | Local_package -> "local-package"
+
 let render capability =
-  Printf.sprintf "%s — %s — assurance: %s — %s" capability.name
+  Printf.sprintf "%s [%s; %s] — %s" capability.name
     (origin_text capability.origin) capability.assurance capability.summary
 
-let render_matches request =
-  match search request with
-  | [] -> "  - no obvious reusable capability matched this request"
-  | values ->
-      values
-      |> List.map (fun capability -> "  - " ^ render capability)
-      |> String.concat "\n"
-
-let render_all () =
-  all ()
-  |> List.sort (fun left right ->
-         let by_category = String.compare left.category right.category in
-         if by_category <> 0 then by_category else String.compare left.name right.name)
-  |> List.map (fun capability -> "  - " ^ render capability)
-  |> String.concat "\n"
+let to_json capability =
+  `Assoc
+    [
+      ("name", `String capability.name);
+      ("aliases", `List (List.map (fun alias -> `String alias) capability.aliases));
+      ("category", `String capability.category);
+      ("origin", `String (origin_text capability.origin));
+      ("assurance", `String capability.assurance);
+      ("summary", `String capability.summary);
+    ]
