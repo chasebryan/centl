@@ -18,6 +18,10 @@ Neither guarantee is substituted for the other.
 files and signed checksum lists. CENTL uses it as defined; no custom signature
 scheme or home-grown cryptography is introduced.
 
+The OpenBSD `signify` interface also protects generated secret keys with a
+passphrase by default; `-n` explicitly disables that protection. FCF production
+keys must remain passphrase-protected.
+
 The release contract is:
 
 ```text
@@ -34,10 +38,16 @@ contains the standard lowercase SHA-256 digest plus two spaces plus filename for
 each release archive. `SHA256SUMS.sig` is a detached signify signature over the
 exact checksum-manifest bytes.
 
-## Trust model
+## Trust and availability model
 
-Hosted CI may build and test candidate artifacts, but it must not possess the FCF
-production release secret key.
+Hosted CI may build and test candidate artifacts, but it does not need access to
+the FCF production release secret key.
+
+FCF does **not** require one irreplaceable air-gapped key. The production signing
+identity is an organizational asset and must be recoverable. The working secret
+key is passphrase-protected, and multiple encrypted backup copies are maintained
+independently. When additional trusted maintainers exist, at least one other
+custodian should have a documented recovery path.
 
 The intended flow is:
 
@@ -51,7 +61,7 @@ build/test/reproducibility gates
 unsigned candidate archives
           |
           v
-offline release-signing environment
+explicit FCF signing action
           |
           +--> create SHA256SUMS
           +--> signify signature
@@ -62,15 +72,15 @@ offline release-signing environment
 publish archives + SHA256SUMS + SHA256SUMS.sig
 ```
 
-A compromised CI runner therefore cannot create a release that authenticates as
-FCF merely by controlling the build output.
+A compromised ordinary CI runner therefore cannot create an authenticated FCF
+release merely by controlling build output. At the same time, loss of one
+workstation or storage device does not strand the project.
 
-## One-time production key creation
+## Production key creation and recovery
 
-The production key pair must be created outside GitHub and ordinary networked
-CI. See `keys/README.md`.
-
-Example on the offline signing machine:
+The production key pair must be created outside ordinary hosted CI. It may be
+created on a trusted FCF administrator workstation or on a more isolated machine.
+See `keys/README.md` for the custody policy.
 
 ```sh
 umask 077
@@ -80,19 +90,29 @@ signify -G \
   -s fcf-centl-release-2026.sec
 ```
 
-Do not use an unprotected production secret key. Only the `.pub` file belongs in
-the CENTL repository.
+Do not use `-n` for an FCF production key. Only the `.pub` file belongs in the
+public CENTL repository.
+
+Operationally, FCF should retain:
+
+- one protected working copy;
+- at least two additional encrypted backups on independent storage/services;
+- a separately recoverable record of the passphrase in a reputable password
+  manager or equivalent protected recovery system;
+- a tested restoration procedure.
+
+This is intentionally simpler than threshold cryptography. The goal is good
+security with reliable continuity, not ceremony for its own sake.
 
 ## Signing a completed candidate release
 
-On the isolated signing environment, with the final candidate archives in one
-directory:
+With the final candidate archives in one directory:
 
 ```sh
-export FCF_SIGNIFY_SECRET_KEY=/offline/keys/fcf-centl-release-2026.sec
-export FCF_SIGNIFY_PUBLIC_KEY=/offline/keys/fcf-centl-release-2026.pub
+export FCF_SIGNIFY_SECRET_KEY=/protected/keys/fcf-centl-release-2026.sec
+export FCF_SIGNIFY_PUBLIC_KEY=/protected/keys/fcf-centl-release-2026.pub
 
-sh scripts/release-sign /offline/candidate-release
+sh scripts/release-sign /path/to/candidate-release
 ```
 
 The command refuses to use a secret key stored inside the CENTL repository. It
@@ -106,8 +126,8 @@ then:
 5. verifies the new signature with the explicitly selected public key;
 6. recomputes every archive checksum again before reporting success.
 
-The signing machine should not download or rebuild the candidate. Its role is to
-authenticate already-gated bytes.
+A fully offline signing environment may be used for a higher-assurance release,
+but it is not mandatory for every normal CENTL release.
 
 ## Independent verification
 
@@ -136,12 +156,24 @@ true:
 - required test/verification gates passed;
 - required reproducibility/offline gate passed for the release class;
 - final archive SHA-256 values were generated from the final candidate bytes;
-- `SHA256SUMS` was signed by an active offline FCF release key;
+- `SHA256SUMS` was signed by an active FCF release key;
 - the resulting signature and all checksums were independently reverified.
 
 A signing failure or checksum mismatch aborts promotion. The checksum, public
 key, or expected identity must never be silently changed simply to make failed
 verification pass.
+
+## Lost key
+
+If every copy of the secret key is lost, historical releases remain verifiable
+with the corresponding public key. FCF loses only the ability to make *new*
+signatures under that old signing identity.
+
+Future releases can continue after generating a replacement key, publishing its
+public key, and recording the transition. This is why old public keys must remain
+available permanently and why key rotation is a normal supported operation.
+
+A lost key is therefore an operational incident, not a project-ending event.
 
 ## Key rotation and compromise
 
@@ -158,7 +190,7 @@ The FCF operational record should maintain:
 - compromise/revocation status;
 - which release series used the key.
 
-If a secret key may have been exposed, stop using it immediately. Create a new
-offline key, publish the new public key through multiple channels, and document
-the transition. Do not re-sign old unknown artifacts merely to make them appear
-continuous with the new identity.
+If a secret key may have been exposed, stop using it. Create a replacement key,
+publish the new public key through normal FCF channels, and document the
+transition. Do not re-sign unknown historical artifacts merely to make them
+appear continuous with the new identity.
