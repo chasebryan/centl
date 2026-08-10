@@ -38,6 +38,18 @@ let core_request expression =
       ("limits", core_limits);
     ]
 
+let quantity value unit_symbol =
+  `Assoc [ ("value", `String value); ("unit", `String unit_symbol) ]
+
+let vector x y z unit_symbol =
+  `Assoc
+    [
+      ("x", `String x);
+      ("y", `String y);
+      ("z", `String z);
+      ("unit", `String unit_symbol);
+    ]
+
 let identifier_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
   | _ -> false
@@ -83,9 +95,7 @@ let plan = function
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
       let left = normalize_polynomial_side ~variable:data.variable data.left in
-      let right =
-        normalize_polynomial_side ~variable:data.variable data.right
-      in
+      let right = normalize_polynomial_side ~variable:data.variable data.right in
       let expression =
         Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in
@@ -104,6 +114,43 @@ let plan = function
                 ("value", `String data.value);
                 ("from_unit", `String from_unit);
                 ("to_unit", `String to_unit);
+              ];
+        }
+  | Centl_sci_ir.Uniform_gravity_particle data ->
+      Some
+        {
+          executor = Physics;
+          request =
+            `Assoc
+              [
+                ("version", `Int 1);
+                ("action", `String "simulate_particle");
+                ( "particle",
+                  `Assoc
+                    [
+                      ("id", `String "body");
+                      ("mass", quantity data.mass_value data.mass_unit);
+                      ( "position",
+                        vector data.position_x data.position_y data.position_z
+                          data.position_unit );
+                      ( "velocity",
+                        vector data.velocity_x data.velocity_y data.velocity_z
+                          data.velocity_unit );
+                    ] );
+                ( "forces",
+                  `List
+                    [
+                      `Assoc
+                        [
+                          ("kind", `String "uniform_gravity");
+                          ( "acceleration",
+                            vector data.gravity_x data.gravity_y data.gravity_z
+                              data.gravity_unit );
+                        ];
+                    ] );
+                ("dt", quantity data.dt_value data.dt_unit);
+                ("steps", `Int data.steps);
+                ("include_trajectory", `Bool false);
               ];
         }
   | Centl_sci_ir.Unsupported _ -> None
@@ -135,8 +182,7 @@ let classify executor response =
       | Physics -> Established
       | Core ->
           begin match resolution_status response with
-          | Some ("computed" | "transformed" | "unchanged_proved") ->
-              Established
+          | Some ("computed" | "transformed" | "unchanged_proved") -> Established
           | Some ("residual" | "unsupported" | "indeterminate") -> Unresolved
           | Some _ | None -> Unresolved
           end
@@ -188,12 +234,49 @@ let to_json ~problem outcome =
   in
   `Assoc fields
 
+let vector_text json =
+  match
+    (string_field "x" json, string_field "y" json, string_field "z" json,
+     string_field "unit" json)
+  with
+  | Some x, Some y, Some z, Some unit_symbol ->
+      Some (Printf.sprintf "(%s, %s, %s) %s" x y z unit_symbol)
+  | _ -> None
+
+let simulation_text physics =
+  match
+    (string_field "kind" physics, string_field "integrator" physics,
+     assoc_field "final" physics)
+  with
+  | Some "particle_simulation", Some integrator, Some final ->
+      begin match (assoc_field "position" final, assoc_field "velocity" final) with
+      | Some position, Some velocity ->
+          begin match (vector_text position, vector_text velocity) with
+          | Some position_text, Some velocity_text ->
+              Some
+                (Printf.sprintf
+                   "Final position %s; final velocity %s; discrete integrator: %s"
+                   position_text velocity_text integrator)
+          | _ -> None
+          end
+      | _ -> None
+      end
+  | _ -> None
+
 let result_text response =
   match assoc_field "value" response with
   | Some value -> string_field "text" value
   | None ->
       begin match assoc_field "physics" response with
-      | Some physics -> string_field "text" physics
+      | Some physics ->
+          begin match string_field "text" physics with
+          | Some value -> Some value
+          | None ->
+              begin match string_field "result" physics with
+              | Some value -> Some value
+              | None -> simulation_text physics
+              end
+          end
       | None ->
           begin match assoc_field "error" response with
           | Some error -> string_field "message" error
