@@ -16,7 +16,7 @@ need() {
 }
 
 [ -d "$release_dir" ] || fail "release directory not found: $release_dir"
-[ -n "$secret_key" ] || fail "FCF_SIGNIFY_SECRET_KEY must name the offline secret key"
+[ -n "$secret_key" ] || fail "FCF_SIGNIFY_SECRET_KEY must name the protected secret key"
 [ -f "$secret_key" ] || fail "secret key not found: $secret_key"
 [ -n "$public_key" ] || fail "FCF_SIGNIFY_PUBLIC_KEY must name the matching public key"
 [ -f "$public_key" ] || fail "public key not found: $public_key"
