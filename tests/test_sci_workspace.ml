@@ -16,7 +16,8 @@ let cleanup path =
 
 let create_native_value workspace name source =
   Centl_sci_workspace.ensure workspace;
-  write_text (Filename.concat workspace.Centl_sci_workspace.modules_dir (name ^ ".centl"))
+  write_text
+    (Filename.concat workspace.Centl_sci_workspace.modules_dir (name ^ ".centl"))
     source;
   match
     Centl_sci_workspace.write_manifest workspace ~name ~enabled:true
@@ -55,6 +56,39 @@ let test_invalid_native_extension_is_not_promoted () =
           Alcotest.(check bool) "invalid definition rejected" false report.valid;
           Alcotest.(check string) "assurance unchanged"
             "locally_tested_extension" report.assurance)
+
+let test_package_validation_preserves_member_assurance () =
+  let root = temp_dir "centl-caramels-package-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      create_native_value workspace "tau" "tau = 2*pi\n";
+      begin match
+        Centl_sci_package.create workspace ~name:"science"
+          ~summary:"package validation test"
+      with
+      | Error message -> Alcotest.fail message
+      | Ok _ -> ()
+      end;
+      begin match
+        Centl_sci_package.add_extension workspace ~package_name:"science"
+          ~extension_name:"tau"
+      with
+      | Error message -> Alcotest.fail message
+      | Ok _ -> ()
+      end;
+      match Centl_sci_package.validate workspace "science" with
+      | Error message -> Alcotest.fail message
+      | Ok validation ->
+          Alcotest.(check bool) "membership valid" true validation.valid;
+          begin match validation.members with
+          | [ member ] ->
+              Alcotest.(check string) "member" "tau" member.name;
+              Alcotest.(check (option string)) "member assurance"
+                (Some "locally_tested_extension") member.assurance
+          | _ -> Alcotest.fail "expected one package member"
+          end)
 
 let test_export_import_and_undo () =
   let root = temp_dir "centl-caramels-portable-" in
@@ -95,11 +129,10 @@ let test_export_import_and_undo () =
             (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"));
           Alcotest.(check bool) "old source replaced" false
             (Sys.file_exists (Filename.concat target.modules_dir "old_value.centl"));
-          begin match Centl_sci_package.read target "science" with
+          begin match Centl_sci_package.validate target "science" with
           | Error message -> Alcotest.fail message
-          | Ok package ->
-              Alcotest.(check bool) "package membership survives" true
-                (List.mem "tau" package.extensions)
+          | Ok validation ->
+              Alcotest.(check bool) "imported package validates" true validation.valid
           end
       end;
       begin match Centl_sci_snapshot.restore_last target with
@@ -120,6 +153,8 @@ let () =
             test_native_extension_validation;
           Alcotest.test_case "invalid native extension" `Quick
             test_invalid_native_extension_is_not_promoted;
+          Alcotest.test_case "package membership assurance" `Quick
+            test_package_validation_preserves_member_assurance;
         ] );
       ( "portability",
         [
