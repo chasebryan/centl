@@ -109,6 +109,17 @@ let unsupported_reason = function
   | Centl_sci_ir.Unsupported data -> Some data.unsupported_reason
   | _ -> None
 
+let is_verification = function
+  | Centl_sci_ir.Verification_claim _ -> true
+  | _ -> false
+
+let verification_result outcome =
+  if not (is_verification outcome.Centl_sci_runtime.ir) then None
+  else
+    match outcome.Centl_sci_runtime.response with
+    | None -> None
+    | Some response -> Centl_sci_runtime.result_text response
+
 let missing_information_text outcome =
   match unsupported_reason outcome.Centl_sci_runtime.ir with
   | None -> None
@@ -140,7 +151,11 @@ let unsupported_text outcome =
 let human outcome =
   match outcome.Centl_sci_runtime.status with
   | Centl_sci_runtime.Established -> established_text outcome
-  | Centl_sci_runtime.Unresolved -> "CENTL could not establish a complete result."
+  | Centl_sci_runtime.Unresolved ->
+      begin match verification_result outcome with
+      | Some text -> text
+      | None -> "CENTL could not establish a complete result."
+      end
   | Centl_sci_runtime.Unsupported -> unsupported_text outcome
   | Centl_sci_runtime.Failed -> "CENTL could not establish a result."
 
@@ -169,6 +184,7 @@ let response_exact outcome =
 let method_text = function
   | Centl_sci_ir.Exact_expression _ -> Some "CENTL exact/symbolic computation"
   | Centl_sci_ir.Polynomial_equation _ -> Some "CENTL polynomial equation solving"
+  | Centl_sci_ir.Verification_claim _ -> Some "CENTL structured claim verification"
   | Centl_sci_ir.Unit_conversion _ -> Some "CENTL Physics unit conversion"
   | Centl_sci_ir.Physical_constant _ ->
       Some "CENTL Physics exact defining/conventional constant lookup"
@@ -200,6 +216,36 @@ let mechanics_details outcome =
       ]
   | _ -> []
 
+let verification_details outcome =
+  if not (is_verification outcome.Centl_sci_runtime.ir) then []
+  else
+    match outcome.Centl_sci_runtime.response with
+    | Some response ->
+        begin match assoc_field "verification" response with
+        | Some verification ->
+            let fields = ref [] in
+            let add label = function
+              | Some value -> fields := !fields @ [ label ^ ": " ^ value ]
+              | None -> ()
+            in
+            add "Verdict" (string_field "verdict" verification);
+            add "Verification scope" (string_field "scope" verification);
+            add "Verification method" (string_field "method" verification);
+            begin match assoc_field "assurance" verification with
+            | Some assurance ->
+                add "Verification assurance" (string_field "class" assurance);
+                add "Verification theorem" (string_field "theorem" assurance)
+            | None -> ()
+            end;
+            begin match assoc_field "evidence" verification with
+            | Some evidence -> add "Verification reason" (string_field "reason" evidence)
+            | None -> ()
+            end;
+            !fields
+        | None -> []
+        end
+    | None -> []
+
 let details outcome =
   let lines = ref [ human outcome; ""; "Details:" ] in
   let add line = lines := !lines @ [ "  " ^ line ] in
@@ -213,6 +259,7 @@ let details outcome =
   | None -> ()
   end;
   List.iter add (mechanics_details outcome);
+  List.iter add (verification_details outcome);
   begin match Centl_sci_ir.assumptions outcome.Centl_sci_runtime.ir with
   | [] -> ()
   | values -> add ("Assumptions: " ^ String.concat "; " values)
