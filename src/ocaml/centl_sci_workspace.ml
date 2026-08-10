@@ -87,9 +87,41 @@ let layout workspace =
     workspace.generated;
   ]
 
-let ensure workspace = List.iter ensure_directory (layout workspace)
+let atomic_write_json path json =
+  let temporary = path ^ ".tmp" in
+  let channel =
+    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+  in
+  Fun.protect
+    ~finally:(fun () -> close_out_noerr channel)
+    (fun () ->
+      Yojson.Safe.pretty_to_channel channel json;
+      output_char channel '\n';
+      flush channel);
+  Unix.rename temporary path
+
+let workspace_metadata_path workspace = Filename.concat workspace.root "workspace.json"
+
+let ensure_workspace_metadata workspace =
+  let path = workspace_metadata_path workspace in
+  if not (Sys.file_exists path) then
+    atomic_write_json path
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("workspace_name", `String workspace.name);
+           ("owner_model", `String "user-owned-downstream");
+           ("upstream_project", `String "centl");
+           ("created_by", `String "CENTL-SCi v0.0.2-Caramels");
+           ("assurance_policy", `String "local extensions never silently inherit verified-core assurance");
+         ])
+
+let ensure workspace =
+  List.iter ensure_directory (layout workspace);
+  ensure_workspace_metadata workspace
 
 let revision_path workspace = Filename.concat workspace.config "revision"
+let revision_log_path workspace = Filename.concat workspace.history "revisions.jsonl"
 
 let read_revision workspace =
   try
@@ -110,15 +142,40 @@ let write_revision workspace revision =
   ensure workspace;
   let path = revision_path workspace in
   let temporary = path ^ ".tmp" in
-  let channel = open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary in
+  let channel =
+    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+  in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
     (fun () -> write_all channel (string_of_int revision ^ "\n"));
   Unix.rename temporary path
 
+let record_revision workspace revision =
+  ensure workspace;
+  let channel =
+    open_out_gen [ Open_wronly; Open_creat; Open_append; Open_text ] 0o600
+      (revision_log_path workspace)
+  in
+  Fun.protect
+    ~finally:(fun () -> close_out_noerr channel)
+    (fun () ->
+      let json =
+        `Assoc
+          [
+            ("revision", `Int revision);
+            ("timestamp_unix", `Float (Unix.gettimeofday ()));
+            ("actor", `String "CENTL-SCi v0.0.2-Caramels");
+            ("scope", `String "local-downstream-workspace");
+          ]
+      in
+      Yojson.Safe.to_channel channel json;
+      output_char channel '\n';
+      flush channel)
+
 let bump_revision workspace =
   let next = read_revision workspace + 1 in
   write_revision workspace next;
+  record_revision workspace next;
   next
 
 let manifest_path workspace name =
@@ -134,7 +191,11 @@ let valid_extension_name name =
          | _ -> false)
        name
 
-let write_manifest workspace ~name ~enabled ~assurance ~source ~summary =
+let strings values = `List (List.map (fun value -> `String value) values)
+
+let write_manifest workspace ~name ~enabled ~assurance ~source ~summary
+    ?(kind = "native_centl") ?(provenance = "local BUILD request")
+    ?(dependencies = []) ?(tests = []) () =
   if not (valid_extension_name name) then
     Error "extension names may contain only letters, digits, '.', '-', and '_'"
   else
@@ -144,22 +205,21 @@ let write_manifest workspace ~name ~enabled ~assurance ~source ~summary =
       let json =
         `Assoc
           [
-            ("schema_version", `Int 1);
+            ("schema_version", `Int 2);
             ("name", `String name);
+            ("kind", `String kind);
             ("enabled", `Bool enabled);
             ("assurance", `String (assurance_text assurance));
             ("source", `String source);
             ("summary", `String summary);
+            ("provenance", `String provenance);
+            ("dependencies", strings dependencies);
+            ("tests", strings tests);
             ("workspace_revision", `Int revision);
+            ("recorded_at_unix", `Float (Unix.gettimeofday ()));
           ]
       in
-      let path = manifest_path workspace name in
-      let temporary = path ^ ".tmp" in
-      let channel = open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary in
-      Fun.protect
-        ~finally:(fun () -> close_out_noerr channel)
-        (fun () -> Yojson.Safe.pretty_to_channel channel json; output_char channel '\n');
-      Unix.rename temporary path;
+      atomic_write_json (manifest_path workspace name) json;
       Ok revision
     with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
@@ -169,6 +229,8 @@ let to_json workspace =
       ("name", `String workspace.name);
       ("root", `String workspace.root);
       ("revision", `Int (read_revision workspace));
+      ("metadata", `String (workspace_metadata_path workspace));
+      ("revision_log", `String (revision_log_path workspace));
       ("extensions", `String workspace.extensions);
       ("modules", `String workspace.modules_dir);
       ("tests", `String workspace.tests);
@@ -185,7 +247,10 @@ let describe workspace =
       "Workspace: " ^ workspace.name;
       "Root: " ^ workspace.root;
       "Revision: " ^ string_of_int (read_revision workspace);
+      "Metadata: " ^ workspace_metadata_path workspace;
+      "Revision ledger: " ^ revision_log_path workspace;
       "Extensions: " ^ workspace.extensions;
       "Modules: " ^ workspace.modules_dir;
+      "Packages: " ^ workspace.packages;
       "Generated: " ^ workspace.generated;
     ]
