@@ -1,17 +1,23 @@
 let find_substring ~needle text =
   Centl_sci_interaction.find_substring ~needle text
 
-let strip_leading_separators text =
+let strip_separators text =
   let text = String.trim text in
+  let separator = function ',' | ';' | ':' | '.' -> true | _ -> false in
   let rec start index =
     if index >= String.length text then index
-    else
-      match text.[index] with
-      | ',' | ';' | ':' -> start (index + 1)
-      | _ -> index
+    else if separator text.[index] then start (index + 1)
+    else index
   in
-  let index = start 0 in
-  String.sub text index (String.length text - index) |> String.trim
+  let rec finish index =
+    if index <= 0 then 0
+    else if separator text.[index - 1] then finish (index - 1)
+    else index
+  in
+  let first = start 0 in
+  let last = finish (String.length text) in
+  if last <= first then ""
+  else String.sub text first (last - first) |> String.trim
 
 let section ~from_marker ~to_marker text lower =
   match find_substring ~needle:from_marker lower with
@@ -24,9 +30,7 @@ let section ~from_marker ~to_marker text lower =
       begin match find_substring ~needle:to_marker remaining_lower with
       | None -> None
       | Some relative ->
-          Some
-            (String.sub text content_start relative
-            |> strip_leading_separators |> String.trim)
+          Some (String.sub text content_start relative |> strip_separators)
       end
 
 let trailing ~marker text lower =
@@ -35,25 +39,24 @@ let trailing ~marker text lower =
   | Some index ->
       let start = index + String.length marker in
       Some
-        (String.sub text start (String.length text - start)
-        |> strip_leading_separators |> String.trim)
+        (String.sub text start (String.length text - start) |> strip_separators)
 
 let split_first_space text =
-  let text = String.trim text in
+  let text = strip_separators text in
   match String.index_opt text ' ' with
   | None -> None
   | Some index ->
       let left = String.sub text 0 index |> String.trim in
       let right =
         String.sub text (index + 1) (String.length text - index - 1)
-        |> String.trim
+        |> strip_separators
       in
       if left = "" || right = "" then None else Some (left, right)
 
 let parse_quantity = split_first_space
 
 let parse_vector text =
-  let text = String.trim text in
+  let text = strip_separators text in
   match (String.index_opt text '(', String.index_opt text ')') with
   | Some open_index, Some close_index when close_index > open_index ->
       let body =
@@ -61,7 +64,7 @@ let parse_vector text =
       in
       let unit =
         String.sub text (close_index + 1) (String.length text - close_index - 1)
-        |> String.trim
+        |> strip_separators
       in
       begin match String.split_on_char ',' body |> List.map String.trim with
       | [ x; y; z ] when x <> "" && y <> "" && z <> "" && unit <> "" ->
@@ -71,12 +74,12 @@ let parse_vector text =
   | _ -> None
 
 let parse_steps text =
+  let cleaned = strip_separators text in
+  let lower = String.lowercase_ascii cleaned in
   let cleaned =
-    text |> String.trim
-    |> fun value ->
-    if String.ends_with ~suffix:" steps" (String.lowercase_ascii value) then
-      String.sub value 0 (String.length value - 6) |> String.trim
-    else value
+    if String.ends_with ~suffix:" steps" lower then
+      String.sub cleaned 0 (String.length cleaned - 6) |> String.trim
+    else cleaned
   in
   match int_of_string_opt cleaned with
   | Some value when value > 0 && value <= 100_000 -> Some value
