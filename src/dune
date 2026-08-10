@@ -124,3 +124,10 @@
  (package centl)
  (modules Sci_main)
  (libraries centl_lib unix yojson))
+
+(executable
+ (name mirage_main)
+ (public_name centl-mirage)
+ (package centl)
+ (modules Mirage_main)
+ (libraries centl_lib unix yojson))
