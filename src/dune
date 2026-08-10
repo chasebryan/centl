@@ -78,6 +78,7 @@
   Centl_sci_mirage_obligation
   Centl_sci_mirage_candidate
   Centl_sci_mirage_readiness
+  Centl_sci_mirage_execution_plan
   Centl_sci_core_plan
   Centl_sci_scaffold
   Centl_sci_codegen
