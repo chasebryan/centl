@@ -20,6 +20,10 @@ let seeds =
     { mode = Phys; prompt = "convert 25 kilometers to meters" };
     { mode = Phys; prompt = "change 2500 metres into kilometers" };
     { mode = Phys; prompt = "convert 10 meters per second to km" };
+    { mode = Phys; prompt = "what is the speed of light in vacuum" };
+    { mode = Phys; prompt = "give me the Boltzmann constant" };
+    { mode = Phys; prompt = "constant N_A" };
+    { mode = Phys; prompt = "what is the Newtonian gravitational constant G" };
     {
       mode = Phys;
       prompt =
@@ -29,6 +33,8 @@ let seeds =
     { mode = Math; prompt = "find x squared plus 4" };
     { mode = Phys; prompt = "convert 25 kilometers" };
     { mode = Build; prompt = "show workspace" };
+    { mode = Build; prompt = "show capabilities" };
+    { mode = Build; prompt = "validate kinetic_energy" };
     {
       mode = Build;
       prompt =
