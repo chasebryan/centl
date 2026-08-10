@@ -210,7 +210,11 @@ else
   codesign --force --sign - "$package/libexec/centl-sci"
 fi
 
-cp "$project_root/LICENSE" "$package/licenses/CENTL-AGPL-3.0-or-later"
+cp "$project_root/LICENSE" "$package/licenses/CENTL-Apache-2.0"
+cp "$project_root/NOTICE" "$package/NOTICE"
+cp "$project_root/LICENSING.md" "$package/LICENSING.md"
+cp "$project_root/TRADEMARKS.md" "$package/TRADEMARKS.md"
+cp "$project_root/THIRD_PARTY_NOTICES.md" "$package/THIRD_PARTY_NOTICES.md"
 copy_license "$package/licenses/FLINT-LGPL-2.1-or-later" \
   "${CENTL_FLINT_LICENSE:-}" /usr/share/common-licenses/LGPL-2.1
 copy_license "$package/licenses/GMP-LGPL-3.0-or-later" \
@@ -341,8 +345,9 @@ interpreter. The bundled native libraries are loaded only for CENTL. Use
 bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
 CENTL-SCi can run deterministic supported problems without a model; semantic
 problems require an explicitly configured local model backend. License texts are
-in licenses; source and relinking references are in COMPONENT-SOURCES. Use
-bin/centl check FILE with --receipt to retain an audit record;
+in licenses; source and relinking references are in COMPONENT-SOURCES. Project
+licensing, NOTICE, trademark, and third-party policy files are included beside
+this README. Use bin/centl check FILE with --receipt to retain an audit record;
 BUILD_MANIFEST.json records the package build identity.
 EOF
 
