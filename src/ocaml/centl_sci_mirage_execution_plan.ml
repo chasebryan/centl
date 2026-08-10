@@ -5,6 +5,8 @@ type action = {
   kind : string;
   executor : string;
   precondition : string;
+  executor_supported : bool;
+  blocking_reason : string option;
   state : string;
 }
 
@@ -31,18 +33,34 @@ let execution_contract kind =
       ("human_resolution", "blocking_requirement_resolved")
   | _ -> ("unsupported_evidence_executor", "explicit_executor_required")
 
+let executor_support executor =
+  match executor with
+  | "candidate_parser_or_build"
+  | "deterministic_regression_gate"
+  | "workspace_snapshot"
+  | "capability_discovery"
+  | "relevant_core_validation" -> (true, None)
+  | "human_resolution" ->
+      (false, Some "requires an explicit human product or policy decision")
+  | _ ->
+      (false, Some "no local MIRAGE evidence executor is defined for this obligation")
+
 let action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id
     ~kind =
   let executor, precondition = execution_contract kind in
+  let executor_supported, blocking_reason = executor_support executor in
   `Assoc
     [
-      ("identity_schema_version", `Int 2);
+      ("identity_schema_version", `Int 3);
       ("candidate_id", `String candidate_id);
       ("transaction_fingerprint", `String transaction_fingerprint);
       ("obligation_id", `String obligation_id);
       ("kind", `String kind);
       ("executor", `String executor);
       ("precondition", `String precondition);
+      ("executor_supported", `Bool executor_supported);
+      ( "blocking_reason",
+        match blocking_reason with None -> `Null | Some value -> `String value );
     ]
   |> Yojson.Safe.to_string
 
@@ -54,6 +72,7 @@ let action_of_check candidate_id transaction_fingerprint
     (check : Centl_sci_mirage_readiness.check) =
   if check.state = Centl_sci_mirage_readiness.Execution_required then
     let executor, precondition = execution_contract check.kind in
+    let executor_supported, blocking_reason = executor_support executor in
     Some
       {
         action_id =
@@ -64,6 +83,8 @@ let action_of_check candidate_id transaction_fingerprint
         kind = check.kind;
         executor;
         precondition;
+        executor_supported;
+        blocking_reason;
         state = "planned";
       }
   else None
@@ -94,6 +115,9 @@ let action_to_json (action : action) =
       ("kind", `String action.kind);
       ("executor", `String action.executor);
       ("precondition", `String action.precondition);
+      ("executor_supported", `Bool action.executor_supported);
+      ( "blocking_reason",
+        match action.blocking_reason with None -> `Null | Some value -> `String value );
       ("state", `String action.state);
     ]
 
@@ -108,7 +132,7 @@ let candidate_to_json (candidate : candidate_plan) =
 let to_json (report : report) =
   `Assoc
     [
-      ("schema_version", `Int 3);
+      ("schema_version", `Int 4);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_plan");
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
@@ -117,10 +141,10 @@ let to_json (report : report) =
       ("assurance_promoted", `Bool false);
       ( "action_identity_semantics",
         `String
-          "action IDs bind candidate transaction identity, unresolved evidence obligation, executor, and precondition; identity is not evidence that the action executed or passed" );
+          "action IDs bind candidate transaction identity, unresolved evidence obligation, executor, precondition, and executor-support state; identity is not evidence that the action executed or passed" );
       ( "execution_contract_semantics",
         `String
-          "executor names identify the required local validation mechanism; preconditions must hold before execution and no executor is represented as having run in this artifact" );
+          "executor names identify the required local validation mechanism; preconditions must hold before execution, unsupported executors remain explicitly blocked, and no executor is represented as having run in this artifact" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -144,10 +168,21 @@ let render (report : report) =
     report.candidates
     |> List.fold_left (fun total candidate -> total + List.length candidate.actions) 0
   in
+  let unsupported =
+    report.candidates
+    |> List.fold_left
+         (fun total candidate ->
+           total
+           + List.fold_left
+               (fun count action -> if action.executor_supported then count else count + 1)
+               0 candidate.actions)
+         0
+  in
   String.concat "\n"
     [
       "CENTL-MIRAGE evidence execution plan";
       "planned actions: " ^ string_of_int actions;
+      "unsupported executor actions: " ^ string_of_int unsupported;
       "action identities: deterministic, transaction-bound, and executor-bound";
       "execution performed: no";
       "workspace mutated: no";
