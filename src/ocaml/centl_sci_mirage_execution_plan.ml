@@ -41,7 +41,7 @@ let build (readiness : Centl_sci_mirage_readiness.report) =
     blocked_cells = readiness.blocked_cells;
   }
 
-let action_to_json action =
+let action_to_json (action : action) =
   `Assoc
     [
       ("candidate_id", `String action.candidate_id);
@@ -50,7 +50,7 @@ let action_to_json action =
       ("state", `String action.state);
     ]
 
-let candidate_to_json candidate =
+let candidate_to_json (candidate : candidate_plan) =
   `Assoc
     [
       ("candidate_id", `String candidate.candidate_id);
@@ -58,7 +58,7 @@ let candidate_to_json candidate =
       ("actions", `List (List.map action_to_json candidate.actions));
     ]
 
-let to_json report =
+let to_json (report : report) =
   `Assoc
     [
       ("schema_version", `Int 1);
@@ -86,7 +86,7 @@ let construct readiness_path readiness =
     Ok (path, report)
   with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
-let render report =
+let render (report : report) =
   let actions =
     report.candidates
     |> List.fold_left (fun total candidate -> total + List.length candidate.actions) 0
