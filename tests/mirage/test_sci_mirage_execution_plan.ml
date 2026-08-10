@@ -17,7 +17,8 @@ let build_readiness workspace =
   in
   let obligations = Centl_sci_mirage_obligation.build graph in
   let candidates = Centl_sci_mirage_candidate.build graph obligations in
-  Centl_sci_mirage_readiness.build obligations candidates
+  let materialization = Centl_sci_mirage_materialize.build candidates in
+  Centl_sci_mirage_readiness.build obligations candidates materialization
 
 let build_report workspace =
   build_readiness workspace |> Centl_sci_mirage_execution_plan.build
