@@ -17,7 +17,7 @@ library_directory="$release_root/lib"
 command=$(basename -- "$launcher")
 
 case "$command" in
-  centl|centl-physics|centl-sci) ;;
+  centl|centl-physics|centl-sci|centl-mirage) ;;
   *)
     printf 'centl launcher: unsupported command name: %s\n' "$command" >&2
     exit 1

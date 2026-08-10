@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+# Native CENTL releases are intentionally GNU/Linux x86_64 only.
 # Pinned CI defaults (also checked against toolchain.lock):
 # FLINT 3.0.1; sha256 7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4
 # GMP 6.3.0; sha256 a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
@@ -12,6 +13,7 @@ output_directory=${2:-"$project_root/dist"}
 binary=${CENTL_BINARY:-"$project_root/_build/default/src/main.exe"}
 physics_binary=${CENTL_PHYSICS_BINARY:-"$project_root/_build/default/src/physics_main.exe"}
 sci_binary=${CENTL_SCI_BINARY:-"$project_root/_build/default/src/sci_main.exe"}
+mirage_binary=${CENTL_MIRAGE_BINARY:-"$project_root/_build/default/src/mirage_main.exe"}
 tar_command=${TAR:-tar}
 
 fail() {
@@ -26,28 +28,23 @@ case "$version" in
 esac
 
 case $(uname -s) in
-  Linux)
-    platform=linux
-    platform_name=Linux
-    ;;
-  Darwin)
-    platform=macos
-    platform_name=macOS
-    ;;
-  *) fail "release packaging supports Linux and macOS; use package-release.ps1 on Windows" ;;
+  Linux) ;;
+  Darwin) fail "macOS release packaging is unsupported; CENTL native releases are GNU/Linux only" ;;
+  *) fail "CENTL native release packaging supports GNU/Linux only" ;;
 esac
 
 case $(uname -m) in
   x86_64|amd64) architecture=x86_64 ;;
-  arm64|aarch64) architecture=arm64 ;;
-  *) fail "unsupported release architecture: $(uname -m)" ;;
+  *) fail "Linux release packaging currently supports x86_64 only: $(uname -m)" ;;
 esac
-[ "$platform" != linux ] || [ "$architecture" = x86_64 ] ||
-  fail "Linux release packaging currently supports x86_64 only"
+platform=linux
+platform_name=Linux
 
-[ -x "$binary" ] || fail "build CENTL before packaging: make build"
-[ -x "$physics_binary" ] || fail "build CENTL Physics before packaging: make build"
-[ -x "$sci_binary" ] || fail "build CENTL-SCi before packaging: make build"
+[ -x "$binary" ] || fail "build CENTL before packaging: make native-build"
+[ -x "$physics_binary" ] || fail "build CENTL Physics before packaging: make native-build"
+[ -x "$sci_binary" ] || fail "build CENTL-SCi before packaging: make native-build"
+[ -x "$mirage_binary" ] || fail "build CENTL-MIRAGE before packaging: make native-build"
+
 reported_version=$("$binary" --version)
 [ "$reported_version" = "centl $version" ] ||
   fail "binary reports '$reported_version', expected 'centl $version'"
@@ -69,24 +66,8 @@ linux_dependency_path() {
   object=$2
   path=$(ldd "$object" | awk -v pattern="$pattern" \
     '$1 ~ pattern && $2 == "=>" { print $3; exit }')
-  [ -n "$path" ] && [ -f "$path" ] || fail "missing runtime library matching: $pattern"
-  printf '%s\n' "$path"
-}
-
-macos_dependency_path() {
-  pattern=$1
-  shift
-  path=""
-  for object in "$@"; do
-    path=$(otool -L "$object" | awk -v pattern="$pattern" \
-      'NR > 1 && $1 ~ pattern { print $1; exit }')
-    [ -z "$path" ] || break
-  done
-  case "$path" in
-    /*) [ -f "$path" ] || fail "missing runtime library: $path" ;;
-    '') fail "missing runtime library matching: $pattern" ;;
-    *) fail "runtime library does not have an absolute build path: $path" ;;
-  esac
+  [ -n "$path" ] && [ -f "$path" ] ||
+    fail "missing runtime library matching $pattern for $object"
   printf '%s\n' "$path"
 }
 
@@ -94,22 +75,12 @@ copy_license() {
   destination=$1
   shift
   for source in "$@"; do
-    if [ -f "$source" ]; then
+    if [ -n "$source" ] && [ -f "$source" ]; then
       cp "$source" "$destination"
       return
     fi
   done
-  fail "could not locate $destination"
-}
-
-rewrite_macos_reference() {
-  object=$1
-  old=$2
-  new=$3
-  if otool -L "$object" | awk -v expected="$old" \
-    'NR > 1 && $1 == expected { found = 1 } END { exit !found }'; then
-    install_name_tool -change "$old" "$new" "$object"
-  fi
+  fail "could not locate license text for $(basename "$destination")"
 }
 
 if [ -n "${OPAM_SWITCH_PREFIX:-}" ]; then
@@ -143,31 +114,23 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 package="$temporary/centl"
-mkdir -p "$package/bin" "$package/lib" "$package/libexec" \
-  "$package/licenses"
-cp "$project_root/scripts/release-launcher" "$package/bin/centl"
-cp "$project_root/scripts/release-launcher" "$package/bin/centl-physics"
-cp "$project_root/scripts/release-launcher" "$package/bin/centl-sci"
+mkdir -p "$package/bin" "$package/lib" "$package/libexec" "$package/licenses"
+
+for command in centl centl-physics centl-sci centl-mirage; do
+  cp "$project_root/scripts/release-launcher" "$package/bin/$command"
+done
 cp "$binary" "$package/libexec/centl"
 cp "$physics_binary" "$package/libexec/centl-physics"
 cp "$sci_binary" "$package/libexec/centl-sci"
+cp "$mirage_binary" "$package/libexec/centl-mirage"
 chmod 755 "$package/bin/centl" "$package/bin/centl-physics" \
-  "$package/bin/centl-sci" "$package/libexec/centl" \
-  "$package/libexec/centl-physics" "$package/libexec/centl-sci"
+  "$package/bin/centl-sci" "$package/bin/centl-mirage" \
+  "$package/libexec/centl" "$package/libexec/centl-physics" \
+  "$package/libexec/centl-sci" "$package/libexec/centl-mirage"
 
-if [ "$platform" = linux ]; then
-  flint=$(linux_dependency_path '^libflint[.]so' "$binary")
-  gmp=$(linux_dependency_path '^libgmp[.]so' "$binary")
-  mpfr=$(linux_dependency_path '^libmpfr[.]so' "$flint")
-else
-  flint=$(macos_dependency_path '/libflint([.][0-9]+)*[.]dylib$' \
-    "$binary" "$sci_binary")
-  gmp=$(macos_dependency_path '/libgmp([.][0-9]+)*[.]dylib$' \
-    "$binary" "$physics_binary" "$sci_binary" "$flint")
-  mpfr=$(macos_dependency_path '/libmpfr([.][0-9]+)*[.]dylib$' \
-    "$binary" "$sci_binary" "$flint")
-fi
-
+flint=$(linux_dependency_path '^libflint[.]so' "$binary")
+gmp=$(linux_dependency_path '^libgmp[.]so' "$binary")
+mpfr=$(linux_dependency_path '^libmpfr[.]so' "$flint")
 flint_name=$(basename "$flint")
 gmp_name=$(basename "$gmp")
 mpfr_name=$(basename "$mpfr")
@@ -175,39 +138,14 @@ cp -L "$flint" "$package/lib/$flint_name"
 cp -L "$gmp" "$package/lib/$gmp_name"
 cp -L "$mpfr" "$package/lib/$mpfr_name"
 
-if [ "$platform" = linux ]; then
-  if command -v strip >/dev/null 2>&1; then
-    chmod u+w "$package/libexec/centl" "$package/libexec/centl-physics" \
-      "$package/libexec/centl-sci" "$package/lib/$flint_name" \
-      "$package/lib/$gmp_name" "$package/lib/$mpfr_name"
-    strip --strip-unneeded "$package/libexec/centl" \
-      "$package/libexec/centl-physics" "$package/libexec/centl-sci" \
-      "$package/lib/$flint_name" "$package/lib/$gmp_name" \
-      "$package/lib/$mpfr_name"
-  fi
-else
-  for object in "$package/lib/$flint_name" "$package/lib/$gmp_name" \
-    "$package/lib/$mpfr_name"; do
-    rewrite_macos_reference "$object" "$flint" "@loader_path/$flint_name"
-    rewrite_macos_reference "$object" "$gmp" "@loader_path/$gmp_name"
-    rewrite_macos_reference "$object" "$mpfr" "@loader_path/$mpfr_name"
-  done
-  for executable in "$package/libexec/centl" "$package/libexec/centl-physics" \
-    "$package/libexec/centl-sci"; do
-    rewrite_macos_reference "$executable" "$flint" "@loader_path/../lib/$flint_name"
-    rewrite_macos_reference "$executable" "$gmp" "@loader_path/../lib/$gmp_name"
-    rewrite_macos_reference "$executable" "$mpfr" "@loader_path/../lib/$mpfr_name"
-  done
-  install_name_tool -id "@rpath/$flint_name" "$package/lib/$flint_name"
-  install_name_tool -id "@rpath/$gmp_name" "$package/lib/$gmp_name"
-  install_name_tool -id "@rpath/$mpfr_name" "$package/lib/$mpfr_name"
-  for object in "$package/lib/$flint_name" "$package/lib/$gmp_name" \
-    "$package/lib/$mpfr_name"; do
-    codesign --force --sign - "$object"
-  done
-  codesign --force --sign - "$package/libexec/centl"
-  codesign --force --sign - "$package/libexec/centl-physics"
-  codesign --force --sign - "$package/libexec/centl-sci"
+if command -v strip >/dev/null 2>&1; then
+  chmod u+w "$package/libexec/centl" "$package/libexec/centl-physics" \
+    "$package/libexec/centl-sci" "$package/libexec/centl-mirage" \
+    "$package/lib/$flint_name" "$package/lib/$gmp_name" "$package/lib/$mpfr_name"
+  strip --strip-unneeded "$package/libexec/centl" \
+    "$package/libexec/centl-physics" "$package/libexec/centl-sci" \
+    "$package/libexec/centl-mirage" "$package/lib/$flint_name" \
+    "$package/lib/$gmp_name" "$package/lib/$mpfr_name"
 fi
 
 cp "$project_root/LICENSE" "$package/licenses/CENTL-Apache-2.0"
@@ -273,16 +211,10 @@ GMP $gmp_version
 MPFR $mpfr_version
   $mpfr_source_url
   sha256 $mpfr_source_sha256
-
-The Windows executables statically link these native libraries. The matching
-CENTL source and build scripts above are the Corresponding Application Code
-needed to rebuild and relink them with compatible modified libraries.
 EOF
 
 printf '%s\n' "$version" > "$package/VERSION"
 
-# Build identity manifest for release audit. Omit a commit unless release
-# automation supplied an immutable source identifier.
 build_commit=${CENTL_BUILD_COMMIT:-${SOURCE_COMMIT:-${GITHUB_SHA:-}}}
 if command -v sha256sum >/dev/null 2>&1; then
   generated_core_hash=$(
@@ -317,12 +249,13 @@ json_escape() {
   printf '  "schema": 1,\n'
   printf '  "kind": "centl_build_manifest",\n'
   printf '  "semantic_version": "%s",\n' "$(json_escape "$version")"
-  printf '  "platform": "%s",\n' "$(json_escape "$platform")"
-  printf '  "architecture": "%s",\n' "$(json_escape "$architecture")"
+  printf '  "platform": "%s",\n' "$platform"
+  printf '  "architecture": "%s",\n' "$architecture"
   if [ -n "$build_commit" ]; then
     printf '  "commit": "%s",\n' "$(json_escape "$build_commit")"
   fi
   printf '  "generated_core_hash": "%s",\n' "$(json_escape "$generated_core_hash")"
+  printf '  "commands": ["centl", "centl-physics", "centl-sci", "centl-mirage"],\n'
   printf '  "verification": {"command": "%s", "result": "%s"},\n' \
     "$(json_escape "${CENTL_VERIFICATION_COMMAND:-make verify}")" \
     "$(json_escape "${CENTL_VERIFICATION_RESULT:-not_attested}")"
@@ -336,33 +269,35 @@ json_escape() {
   printf '  "protocol_version": 1\n'
   printf '}\n'
 } > "$package/BUILD_MANIFEST.json"
+
 cat > "$package/README" <<EOF
 CENTL $version for $platform_name $architecture
 
 Run bin/centl for the mathematical kernel, bin/centl-physics for the exact-first
-physics engine, and bin/centl-sci for the natural-language scientific problem
-interpreter. The bundled native libraries are loaded only for CENTL. Use
-bin/centl --serve for stateful JSON Lines or --mcp for a local MCP server.
-CENTL-SCi can run deterministic supported problems without a model; semantic
-problems require an explicitly configured local model backend. License texts are
-in licenses; source and relinking references are in COMPONENT-SOURCES. Project
-licensing, NOTICE, trademark, and third-party policy files are included beside
-this README. Use bin/centl check FILE with --receipt to retain an audit record;
-BUILD_MANIFEST.json records the package build identity.
+physics engine, bin/centl-sci for the scientific interaction surface, and
+bin/centl-mirage for the local MIRAGE self-development bootstrap. The bundled
+native libraries are private to this CENTL release. Use bin/centl --serve for
+stateful JSON Lines or --mcp for a local MCP server. CENTL-SCi deterministic
+supported problems do not require a model. License texts are in licenses; source
+references are in COMPONENT-SOURCES; BUILD_MANIFEST.json records the package
+identity and exported command surface.
 EOF
 
 find "$package" -type d -exec chmod 755 {} +
 find "$package" -type f -exec chmod 644 {} +
 chmod 755 "$package/bin/centl" "$package/bin/centl-physics" \
-  "$package/bin/centl-sci" "$package/libexec/centl" \
-  "$package/libexec/centl-physics" "$package/libexec/centl-sci"
+  "$package/bin/centl-sci" "$package/bin/centl-mirage" \
+  "$package/libexec/centl" "$package/libexec/centl-physics" \
+  "$package/libexec/centl-sci" "$package/libexec/centl-mirage"
 
 "$package/bin/centl" '0.1 + 0.2' | grep -qx '3/10' ||
-  fail "packaged executable failed its smoke test"
+  fail "packaged CENTL executable failed its smoke test"
 "$package/bin/centl-physics" convert 100 cm m | grep -qx '1' ||
-  fail "packaged physics executable failed its smoke test"
+  fail "packaged CENTL Physics executable failed its smoke test"
 "$package/bin/centl-sci" 'What is 0.1 plus 0.2?' | grep -qx '3/10' ||
   fail "packaged CENTL-SCi executable failed its smoke test"
+"$package/bin/centl-mirage" --version | grep -Fqx 'CENTL-MIRAGE development bootstrap' ||
+  fail "packaged CENTL-MIRAGE executable failed its smoke test"
 
 mkdir -p "$output_directory"
 asset="centl-$platform-$architecture.tar.gz"
