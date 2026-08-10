@@ -164,6 +164,12 @@ let render_package_validation name =
       | Ok validation -> Centl_sci_package.render_validation validation
       end
 
+let render_workspace_audit () =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before auditing it."
+  | Some workspace -> Centl_sci_audit.collect workspace |> Centl_sci_audit.render
+
 let render_export target =
   match Centl_sci_workspace.default () with
   | None ->
@@ -213,6 +219,10 @@ let render plan =
       ]
   then
     "Available CENTL / CENTL-SCi capabilities:\n" ^ Centl_sci_capabilities.render_all ()
+  else if
+    List.mem request
+      [ "audit workspace"; "workspace audit"; "validate workspace"; "check workspace" ]
+  then render_workspace_audit ()
   else if List.mem request [ "export workspace"; "export my workspace" ] then
     render_export None
   else
