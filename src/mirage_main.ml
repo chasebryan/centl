@@ -58,6 +58,13 @@ let candidates_with obligations_path graph obligations =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
+let materialization_with candidates_path candidates =
+  match Centl_sci_mirage_materialize.construct candidates_path candidates with
+  | Ok result -> result
+  | Error message ->
+      prerr_endline ("centl-mirage: " ^ message);
+      exit 2
+
 let readiness_with candidates_path obligations candidates =
   match
     Centl_sci_mirage_readiness.construct candidates_path obligations candidates
@@ -75,15 +82,15 @@ let execution_plan_with readiness_path readiness =
       exit 2
 
 let record_candidate_phase result goal_path graph obligations_path obligations
-    candidates_path candidates readiness_path readiness execution_plan_path
-    execution_plan =
+    candidates_path candidates materialization_path materialization readiness_path
+    readiness execution_plan_path execution_plan =
   Centl_sci_workspace.atomic_write_json result.Centl_sci_mirage.active_path
     (`Assoc
       [
         ("schema_version", `Int 1);
         ("system", `String "CENTL-MIRAGE");
         ("status", `String "active");
-        ("phase", `String "candidate_evidence_execution_planned");
+        ("phase", `String "candidate_materialization_and_evidence_planned");
         ( "next_phase",
           `String
             (if obligations.Centl_sci_mirage_obligation.blocked_cells = [] then
@@ -96,6 +103,7 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ("goal_graph", `String goal_path);
         ("evidence_obligations", `String obligations_path);
         ("candidate_transactions", `String candidates_path);
+        ("candidate_materialization", `String materialization_path);
         ("candidate_evidence_readiness", `String readiness_path);
         ("candidate_evidence_execution_plan", `String execution_plan_path);
         ("workspace_revision", `Int result.revision);
@@ -107,6 +115,8 @@ let record_candidate_phase result goal_path graph obligations_path obligations
           `Int (List.length obligations.Centl_sci_mirage_obligation.obligations) );
         ( "candidate_transaction_count",
           `Int (List.length candidates.Centl_sci_mirage_candidate.candidates) );
+        ( "materialization_item_count",
+          `Int (List.length materialization.Centl_sci_mirage_materialize.items) );
         ( "readiness_candidate_count",
           `Int (List.length readiness.Centl_sci_mirage_readiness.candidates) );
         ( "execution_plan_candidate_count",
@@ -119,6 +129,7 @@ let record_candidate_phase result goal_path graph obligations_path obligations
             (List.map
                (fun id -> `Int id)
                obligations.Centl_sci_mirage_obligation.blocked_cells) );
+        ("candidate_source_activated", `Bool false);
         ("evidence_execution_performed", `Bool false);
         ("workspace_mutated", `Bool false);
         ("assurance_promoted", `Bool false);
@@ -133,6 +144,9 @@ let start path =
   let candidates_path, candidates =
     candidates_with obligations_path graph obligations
   in
+  let materialization_path, materialization =
+    materialization_with candidates_path candidates
+  in
   let readiness_path, readiness =
     readiness_with candidates_path obligations candidates
   in
@@ -140,8 +154,8 @@ let start path =
     execution_plan_with readiness_path readiness
   in
   record_candidate_phase result goal_path graph obligations_path obligations
-    candidates_path candidates readiness_path readiness execution_plan_path
-    execution_plan;
+    candidates_path candidates materialization_path materialization readiness_path
+    readiness execution_plan_path execution_plan;
   print_endline (Centl_sci_mirage.render_ingest result);
   Printf.printf "Goal graph: %s\n%s\n" goal_path
     (Centl_sci_mirage_goal.render graph);
@@ -149,6 +163,8 @@ let start path =
     (Centl_sci_mirage_obligation.render obligations);
   Printf.printf "Candidate transactions: %s\n%s\n" candidates_path
     (Centl_sci_mirage_candidate.render candidates);
+  Printf.printf "Candidate materialization: %s\n%s\n" materialization_path
+    (Centl_sci_mirage_materialize.render materialization);
   Printf.printf "Candidate evidence readiness: %s\n%s\n" readiness_path
     (Centl_sci_mirage_readiness.render readiness);
   Printf.printf "Candidate evidence execution plan: %s\n%s\n" execution_plan_path
@@ -158,7 +174,7 @@ let start path =
       "MIRAGE staged only non-mutating candidate transactions and halted before synthesis for blocked source cells."
   else
     print_endline
-      "MIRAGE staged candidate transactions and a deterministic plan for their unresolved evidence obligations. The plan has not been executed; no candidate is admissible yet."
+      "MIRAGE staged candidate transactions, conservatively materialized only candidates supported by deterministic local lowering, and planned unresolved evidence work. No candidate source was activated and no candidate is admissible yet."
 
 let status () =
   let workspace = workspace_or_exit () in
