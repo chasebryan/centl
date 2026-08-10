@@ -1,0 +1,151 @@
+name: FCF public release export
+
+on:
+  pull_request:
+    paths:
+      - "scripts/publication-export"
+      - "scripts/release-preserve"
+      - "docs/PUBLICATION.md"
+      - ".github/workflows/publication-export.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/publication-export"
+      - "scripts/release-preserve"
+      - "docs/PUBLICATION.md"
+      - ".github/workflows/publication-export.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Verify public-only export boundary
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install signing verifier
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends signify-openbsd
+
+      - name: Check shell syntax
+        run: |
+          sh -n scripts/release-preserve
+          sh -n scripts/publication-export
+
+      - name: Build preservation mirror with private material
+        run: |
+          root="$RUNNER_TEMP/publication-export"
+          mirror="$root/mirror"
+          mkdir -p \
+            "$mirror/project" \
+            "$mirror/models/private" \
+            "$mirror/capsule" \
+            "$mirror/opam" \
+            "$mirror/julia" \
+            "$mirror/recovery"
+          printf '%s\n' "$GITHUB_SHA" > "$mirror/project/SOURCE-COMMIT"
+          printf 'PRIVATE MODEL BYTES\n' > "$mirror/models/private/model.gguf"
+          printf 'PRIVATE OCI BYTES\n' > "$mirror/capsule/centl-build-capsule.oci.tar"
+          printf 'PRIVATE OPAM STATE\n' > "$mirror/opam/private-cache"
+          printf 'PRIVATE JULIA STATE\n' > "$mirror/julia/private-depot"
+          printf 'PRIVATE RECOVERY STATE\n' > "$mirror/recovery/private-driver"
+
+          unsigned="$root/unsigned"
+          mkdir -p "$unsigned"
+          printf 'synthetic unsigned public release\n' \
+            > "$unsigned/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$unsigned/centl-linux-x86_64.tar.gz" \
+            > "$unsigned/centl-linux-x86_64.tar.gz.sha256"
+          CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            sh scripts/release-preserve "$mirror" 9.9.8 "$unsigned"
+
+          keys="$root/keys"
+          signed="$root/signed"
+          mkdir -p "$keys" "$signed"
+          signify-openbsd -G -n \
+            -c 'CENTL CI publication key - not production' \
+            -p "$keys/test.pub" \
+            -s "$keys/test.sec"
+          printf 'synthetic signed public release\n' \
+            > "$signed/centl-linux-x86_64.tar.gz"
+          python3 scripts/integrity.py hash \
+            "$signed/centl-linux-x86_64.tar.gz" \
+            > "$signed/centl-linux-x86_64.tar.gz.sha256"
+          FCF_SIGNIFY_SECRET_KEY="$keys/test.sec" \
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+            sh scripts/release-sign "$signed"
+          FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
+          CENTL_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            sh scripts/release-preserve "$mirror" 9.9.9 "$signed"
+
+          test -f "$mirror/releases/v9.9.9/SIGNING-PUBLIC-KEY"
+          python3 scripts/integrity.py verify \
+            "$mirror/releases/v9.9.9/SIGNING-PUBLIC-KEY.sha256" \
+            --root "$mirror/releases/v9.9.9"
+          FCF_SIGNIFY_PUBLIC_KEY="$mirror/releases/v9.9.9/SIGNING-PUBLIC-KEY" \
+            sh scripts/release-verify "$mirror/releases/v9.9.9"
+          sh scripts/mirror-receipt verify "$mirror"
+
+          printf '%s\n' "$root" > "$RUNNER_TEMP/publication-root"
+
+      - name: Export only verified public release material
+        run: |
+          root=$(cat "$RUNNER_TEMP/publication-root")
+          mirror="$root/mirror"
+          public="$root/public"
+
+          sh scripts/publication-export "$mirror" "$public"
+
+          test -f "$public/v9.9.8/centl-linux-x86_64.tar.gz"
+          test -f "$public/v9.9.9/centl-linux-x86_64.tar.gz"
+          test -f "$public/v9.9.9/SIGNING-PUBLIC-KEY"
+          test -f "$public/PUBLICATION-SOURCE"
+          grep -Fqx '9.9.8' "$public/VERSIONS"
+          grep -Fqx '9.9.9' "$public/VERSIONS"
+
+          for private in models capsule opam julia recovery project git artifacts sci-runtime; do
+            test ! -e "$public/$private"
+          done
+          ! grep -R -F 'PRIVATE MODEL BYTES' "$public"
+          ! grep -R -F 'PRIVATE OCI BYTES' "$public"
+          ! grep -R -F 'PRIVATE OPAM STATE' "$public"
+
+          python3 scripts/integrity.py verify \
+            "$public/PUBLIC-SHA256SUMS.sha256" --root "$public"
+          python3 scripts/integrity.py tree-verify \
+            "$public/PUBLIC-SHA256SUMS" --root "$public" \
+            --ignore PUBLIC-SHA256SUMS \
+            --ignore PUBLIC-SHA256SUMS.sha256
+          FCF_SIGNIFY_PUBLIC_KEY="$public/v9.9.9/SIGNING-PUBLIC-KEY" \
+            sh scripts/release-verify "$public/v9.9.9"
+
+          python3 scripts/integrity.py hash "$public/PUBLIC-SHA256SUMS" \
+            > "$root/public-before.sha256"
+
+      - name: Refuse publication from a corrupted private mirror
+        run: |
+          root=$(cat "$RUNNER_TEMP/publication-root")
+          mirror="$root/mirror"
+          public="$root/public"
+          printf 'tamper\n' >> "$mirror/models/private/model.gguf"
+
+          if sh scripts/publication-export "$mirror" "$public"; then
+            echo 'publication unexpectedly accepted a corrupted preservation mirror' >&2
+            exit 1
+          fi
+
+          python3 scripts/integrity.py verify "$root/public-before.sha256" \
+            --root "$public"
+          python3 scripts/integrity.py tree-verify \
+            "$public/PUBLIC-SHA256SUMS" --root "$public" \
+            --ignore PUBLIC-SHA256SUMS \
+            --ignore PUBLIC-SHA256SUMS.sha256
