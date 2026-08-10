@@ -1,0 +1,44 @@
+name: CARAVAN Phase 1 laboratory
+
+on:
+  pull_request:
+    paths:
+      - 'caravan/**'
+      - 'docs/CARAVAN-PHASE1.md'
+      - 'scripts/caravan-phase1-check'
+      - 'tests/test_caravan_phase1.py'
+      - 'tests/test_caravan_identity.py'
+      - '.github/workflows/caravan-phase1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caravan-phase1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  laboratory:
+    name: Identity, integrity, and coordinator gates
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Create isolated Python environment
+        run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
+
+      - name: Install pinned Phase 1 dependency
+        run: |
+          "$RUNNER_TEMP/caravan-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
+
+      - name: Run CARAVAN Phase 1 checks
+        env:
+          PYTHON: ${{ runner.temp }}/caravan-venv/bin/python
+        run: sh scripts/caravan-phase1-check
