@@ -2,7 +2,8 @@
 set -eu
 
 repository="chasebryan/centl"
-release_version="latest"
+default_release_version="0.14.0"
+release_version=${CENTL_RELEASE_VERSION:-$default_release_version}
 release_base_url=${CENTL_RELEASE_BASE_URL:-}
 archive_path=""
 prefix=${CENTL_PREFIX:-}
@@ -14,15 +15,16 @@ Install a prebuilt CENTL release on GNU/Linux.
 
 Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [--archive PATH] [--no-path]
 
-  --version VERSION          install a specific release (default: latest)
+  --version VERSION          install a specific release (default: 0.14.0; use latest explicitly if desired)
   --release-base-url URL     use URL/vVERSION as the release directory
-                             (HTTPS or file://; requires explicit --version)
+                             (HTTPS or file://; latest is not accepted)
   --prefix PATH              install below PATH (default: ~/.local)
   --archive PATH             install and verify a local Linux release archive
   --no-path                  do not update a shell startup file when PATH needs setup
   --help                     show this help
 
 Environment:
+  CENTL_RELEASE_VERSION      release version to install (default: 0.14.0)
   CENTL_RELEASE_BASE_URL     same as --release-base-url
   CENTL_PREFIX               same as --prefix
 EOF
@@ -72,6 +74,14 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+[ -n "$release_version" ] || fail "the requested release version cannot be empty"
+if [ "$release_version" != latest ]; then
+  requested_release=${release_version#v}
+  case "$requested_release" in
+    ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested release version is invalid" ;;
+  esac
+fi
+
 [ -n "$prefix" ] || {
   [ -n "${HOME:-}" ] || fail "HOME is not set; use --prefix PATH"
   prefix="$HOME/.local"
@@ -95,11 +105,7 @@ if [ -n "$release_base_url" ]; then
     *) fail "the release base URL must use https:// or file://" ;;
   esac
   [ "$release_version" != latest ] ||
-    fail "a custom release base URL requires an explicit --version"
-  requested_release=${release_version#v}
-  case "$requested_release" in
-    ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested release version is invalid" ;;
-  esac
+    fail "a custom release base URL requires an exact --version"
 fi
 
 case $(uname -s) in
@@ -148,9 +154,11 @@ else
   printf 'Downloading CENTL %s for %s-%s...\n' \
     "$release_version" "$platform" "$architecture"
   curl --fail --silent --show-error --location \
-    "$base_url/$asset" --output "$archive"
+    "$base_url/$asset" --output "$archive" ||
+    fail "CENTL $release_version release archive is not available at the configured release source"
   curl --fail --silent --show-error --location \
-    "$base_url/$asset.sha256" --output "$checksum"
+    "$base_url/$asset.sha256" --output "$checksum" ||
+    fail "CENTL $release_version release checksum is not available at the configured release source"
 fi
 
 expected=$(awk 'NR == 1 { print $1 }' "$checksum")
@@ -171,11 +179,6 @@ fi
 
 command -v tar >/dev/null 2>&1 || fail "tar is required to install CENTL"
 
-# The supported release package contains directories and ordinary files only.
-# Reject links and special archive members before extraction so an authenticated
-# but malformed archive cannot use link traversal or device/FIFO semantics to
-# escape the staging directory. The subsequent path/layout validation is a
-# separate invariant and remains required.
 tar -tvzf "$archive" | while IFS= read -r listing; do
   entry_type=${listing%"${listing#?}"}
   case "$entry_type" in
@@ -218,6 +221,15 @@ if [ -e "$package/bin/centl-sci" ] || [ -e "$package/libexec/centl-sci" ]; then
   sci_available=true
 fi
 
+mirage_available=false
+if [ -e "$package/bin/centl-mirage" ] || [ -e "$package/libexec/centl-mirage" ]; then
+  [ -x "$package/bin/centl-mirage" ] ||
+    fail "the release contains an invalid CENTL-MIRAGE launcher"
+  [ -x "$package/libexec/centl-mirage" ] ||
+    fail "the release contains an invalid CENTL-MIRAGE executable"
+  mirage_available=true
+fi
+
 version=$(sed -n '1p' "$package/VERSION")
 case "$version" in
   ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the release version is invalid" ;;
@@ -234,6 +246,7 @@ bin_directory="$prefix/bin"
 command_path="$bin_directory/centl"
 physics_command_path="$bin_directory/centl-physics"
 sci_command_path="$bin_directory/centl-sci"
+mirage_command_path="$bin_directory/centl-mirage"
 
 if [ -e "$command_path" ] && [ ! -L "$command_path" ]; then
   fail "$command_path already exists and is not a symbolic link"
@@ -246,14 +259,16 @@ if [ "$sci_available" = true ] && \
    [ -e "$sci_command_path" ] && [ ! -L "$sci_command_path" ]; then
   fail "$sci_command_path already exists and is not a symbolic link"
 fi
+if [ "$mirage_available" = true ] && \
+   [ -e "$mirage_command_path" ] && [ ! -L "$mirage_command_path" ]; then
+  fail "$mirage_command_path already exists and is not a symbolic link"
+fi
 
 mkdir -p "$versions" "$bin_directory"
 if [ -e "$target" ]; then
   fail "CENTL $version is already installed at $target"
 fi
 
-# Copy onto the destination filesystem, validate there, then activate with one
-# rename. An interrupted copy cannot become the active CENTL installation.
 staging=$(mktemp -d "$versions/.centl-$version.XXXXXXXX")
 cp -R "$package/." "$staging/"
 if ! runtime_version=$("$staging/bin/centl" --version 2>&1); then
@@ -282,6 +297,14 @@ if [ "$sci_available" = true ]; then
   printf '%s\n' "$sci_repl_smoke" | grep -Fqx 'Free for science.' ||
     fail "the CENTL-SCi REPL did not report its scientific identity"
 fi
+if [ "$mirage_available" = true ]; then
+  if ! mirage_smoke=$("$staging/bin/centl-mirage" --version 2>&1); then
+    fail "the CENTL-MIRAGE executable cannot run on this system: $mirage_smoke"
+  fi
+  [ "$mirage_smoke" = 'CENTL-MIRAGE development bootstrap' ] ||
+    fail "the CENTL-MIRAGE executable failed its identity smoke test"
+fi
+
 mv "$staging" "$target"
 staging=""
 ln -sfn "$target/bin/centl" "$command_path"
@@ -290,6 +313,9 @@ if [ "$physics_available" = true ]; then
 fi
 if [ "$sci_available" = true ]; then
   ln -sfn "$target/bin/centl-sci" "$sci_command_path"
+fi
+if [ "$mirage_available" = true ]; then
+  ln -sfn "$target/bin/centl-mirage" "$mirage_command_path"
 fi
 
 path_profile=""
@@ -324,6 +350,11 @@ if [ "$physics_available" = true ]; then
 fi
 if [ "$sci_available" = true ]; then
   printf 'Scientific command: %s\n' "$sci_command_path"
+fi
+if [ "$mirage_available" = true ]; then
+  printf 'MIRAGE command: %s\n' "$mirage_command_path"
+fi
+if [ "$sci_available" = true ]; then
   printf '\nCENTL-SCi is ready.\n'
   if [ "$path_active" = true ]; then
     printf 'Start: centl-sci\n'
