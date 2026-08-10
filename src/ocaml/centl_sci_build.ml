@@ -284,6 +284,75 @@ let undo () =
               revision = Some revision;
             })
 
+let create_package name =
+  workspace_result (fun workspace ->
+      snapshot_or_message workspace (fun () ->
+          match
+            Centl_sci_package.create workspace ~name
+              ~summary:"Local CENTL package created through BUILD mode"
+          with
+          | Error message -> Handled { message; changed = false; revision = None }
+          | Ok package ->
+              Handled
+                {
+                  message =
+                    Centl_sci_package.render package
+                    ^ "\nPackages group downstream extensions; they do not change extension assurance.";
+                  changed = true;
+                  revision = Some package.workspace_revision;
+                }))
+
+let list_packages () =
+  workspace_result (fun workspace ->
+      Handled
+        {
+          message = Centl_sci_package.render_list workspace;
+          changed = false;
+          revision = Some (Centl_sci_workspace.read_revision workspace);
+        })
+
+let show_package name =
+  workspace_result (fun workspace ->
+      match Centl_sci_package.read workspace name with
+      | Error message -> Handled { message; changed = false; revision = None }
+      | Ok package ->
+          Handled
+            {
+              message = Centl_sci_package.render package;
+              changed = false;
+              revision = Some package.workspace_revision;
+            })
+
+let add_extension_to_package ~extension_name ~package_name =
+  workspace_result (fun workspace ->
+      snapshot_or_message workspace (fun () ->
+          match
+            Centl_sci_package.add_extension workspace ~package_name ~extension_name
+          with
+          | Error message -> Handled { message; changed = false; revision = None }
+          | Ok package ->
+              Handled
+                {
+                  message =
+                    Centl_sci_package.render package
+                    ^ "\nPackage membership does not promote or alter the extension's assurance level.";
+                  changed = true;
+                  revision = Some package.workspace_revision;
+                }))
+
+let parse_package_membership rest =
+  let lower = String.lowercase_ascii rest in
+  match Centl_sci_interaction.find_substring ~needle:" to package " lower with
+  | None -> None
+  | Some index ->
+      let extension_name = String.sub rest 0 index |> String.trim in
+      let package_name =
+        String.sub rest (index + 12) (String.length rest - index - 12)
+        |> String.trim
+      in
+      if extension_name = "" || package_name = "" then None
+      else Some (extension_name, package_name)
+
 let split_name_target text =
   match String.index_opt text ' ' with
   | None -> None
@@ -371,10 +440,12 @@ let handle_direct trimmed lower =
   then
     workspace_result (fun workspace ->
         let extensions = Centl_sci_extensions.render_list workspace in
+        let packages = Centl_sci_package.render_list workspace in
         Handled
           {
             message =
-              Centl_sci_workspace.describe workspace ^ "\n\nLocal changes:\n" ^ extensions;
+              Centl_sci_workspace.describe workspace ^ "\n\nLocal extensions:\n"
+              ^ extensions ^ "\n\nLocal packages:\n" ^ packages;
             changed = false;
             revision = Some (Centl_sci_workspace.read_revision workspace);
           })
@@ -389,6 +460,8 @@ let handle_direct trimmed lower =
             changed = false;
             revision = Some (Centl_sci_workspace.read_revision workspace);
           })
+  else if List.mem lower [ "packages"; "list packages"; "show packages"; ":packages" ] then
+    list_packages ()
   else if
     List.mem lower [ "initialize workspace"; "init workspace"; "create workspace" ]
   then
@@ -421,38 +494,71 @@ let handle_direct trimmed lower =
       ]
   then prepare_upstream ()
   else
-    match drop_prefix_ci "scaffold python adapter " trimmed with
-    | Some rest when rest <> "" -> scaffold Centl_sci_scaffold.Python_adapter rest
+    match drop_prefix_ci "create package " trimmed with
+    | Some name when name <> "" -> create_package name
     | _ ->
-        begin match drop_prefix_ci "scaffold native extension " trimmed with
-        | Some rest when rest <> "" -> scaffold Centl_sci_scaffold.Native_extension rest
+        begin match drop_prefix_ci "show package " trimmed with
+        | Some name when name <> "" -> show_package name
         | _ ->
-            begin match drop_prefix_ci "create function " trimmed with
-            | Some source when source <> "" -> create_function ~replace:false source
+            begin match drop_prefix_ci "add extension " trimmed with
+            | Some rest when rest <> "" ->
+                begin match parse_package_membership rest with
+                | Some (extension_name, package_name) ->
+                    add_extension_to_package ~extension_name ~package_name
+                | None ->
+                    Handled
+                      {
+                        message =
+                          "Package composition syntax: `add extension EXTENSION to package PACKAGE`.";
+                        changed = false;
+                        revision = None;
+                      }
+                end
             | _ ->
-                begin match drop_prefix_ci "modify function " trimmed with
-                | Some source when source <> "" -> create_function ~replace:true source
+                begin match drop_prefix_ci "scaffold python adapter " trimmed with
+                | Some rest when rest <> "" ->
+                    scaffold Centl_sci_scaffold.Python_adapter rest
                 | _ ->
-                    begin match drop_prefix_ci "create value " trimmed with
-                    | Some source when source <> "" -> create_value ~replace:false source
+                    begin match drop_prefix_ci "scaffold native extension " trimmed with
+                    | Some rest when rest <> "" ->
+                        scaffold Centl_sci_scaffold.Native_extension rest
                     | _ ->
-                        begin match drop_prefix_ci "modify value " trimmed with
-                        | Some source when source <> "" -> create_value ~replace:true source
+                        begin match drop_prefix_ci "create function " trimmed with
+                        | Some source when source <> "" ->
+                            create_function ~replace:false source
                         | _ ->
-                            begin match drop_prefix_ci "inspect " trimmed with
-                            | Some name when name <> "" -> inspect_extension name
+                            begin match drop_prefix_ci "modify function " trimmed with
+                            | Some source when source <> "" ->
+                                create_function ~replace:true source
                             | _ ->
-                                begin match drop_prefix_ci "disable " trimmed with
-                                | Some name when name <> "" -> set_extension_enabled name false
+                                begin match drop_prefix_ci "create value " trimmed with
+                                | Some source when source <> "" ->
+                                    create_value ~replace:false source
                                 | _ ->
-                                    begin match drop_prefix_ci "enable " trimmed with
-                                    | Some name when name <> "" -> set_extension_enabled name true
+                                    begin match drop_prefix_ci "modify value " trimmed with
+                                    | Some source when source <> "" ->
+                                        create_value ~replace:true source
                                     | _ ->
-                                        begin match drop_prefix_ci "remove " trimmed with
-                                        | Some name when name <> "" -> remove_extension name
+                                        begin match drop_prefix_ci "inspect " trimmed with
+                                        | Some name when name <> "" -> inspect_extension name
                                         | _ ->
-                                            if trimmed = "" then Not_handled
-                                            else render_plan trimmed
+                                            begin match drop_prefix_ci "disable " trimmed with
+                                            | Some name when name <> "" ->
+                                                set_extension_enabled name false
+                                            | _ ->
+                                                begin match drop_prefix_ci "enable " trimmed with
+                                                | Some name when name <> "" ->
+                                                    set_extension_enabled name true
+                                                | _ ->
+                                                    begin match drop_prefix_ci "remove " trimmed with
+                                                    | Some name when name <> "" ->
+                                                        remove_extension name
+                                                    | _ ->
+                                                        if trimmed = "" then Not_handled
+                                                        else render_plan trimmed
+                                                    end
+                                                end
+                                            end
                                         end
                                     end
                                 end
