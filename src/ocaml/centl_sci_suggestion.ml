@@ -66,6 +66,7 @@ let structural ~mode input cursor =
     let normalized = Centl_sci_interaction.normalize mode input in
     let lower = String.lowercase_ascii normalized in
     let classification = Centl_sci_intent.classify ~mode normalized in
+    let mechanics_missing = Centl_sci_interaction.mechanics_missing lower in
     let make display slots explanation =
       Some
         {
@@ -87,6 +88,10 @@ let structural ~mode input cursor =
       when not (String.contains lower '=') && not (contains " equals " lower) ->
         make " equals [right side] for [variable]" [ "right side"; "variable" ]
           "equation-solving grammar is incomplete"
+    | Centl_sci_intent.Differentiation
+      when not (contains " with respect to " lower) && not (contains " wrt " lower) ->
+        make " with respect to [variable]" [ "variable" ]
+          "differentiation grammar is missing a differentiation variable"
     | Centl_sci_intent.Integration
       when not (contains " from " lower)
            && not (contains " with respect to " lower) ->
@@ -96,6 +101,11 @@ let structural ~mode input cursor =
       when not (contains " to " lower) && not (contains " into " lower) ->
         make " to [unit]" [ "target unit" ]
           "unit conversion is missing a target unit"
+    | Centl_sci_intent.Physics_simulation when mechanics_missing <> [] ->
+        make
+          (" [missing: " ^ String.concat ", " mechanics_missing ^ "]")
+          mechanics_missing
+          "particle-simulation grammar is missing required typed fields"
     | Centl_sci_intent.Program_creation
       when mode = Centl_sci_interaction.Build && not (String.contains lower '=') ->
         make " = [expression]" [ "implementation expression" ]
