@@ -1,4 +1,5 @@
 type action = {
+  action_id : string;
   candidate_id : string;
   obligation_id : string;
   kind : string;
@@ -16,10 +17,30 @@ type report = {
   blocked_cells : int list;
 }
 
-let action_of_check candidate_id (check : Centl_sci_mirage_readiness.check) =
+let action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id
+    ~kind =
+  `Assoc
+    [
+      ("identity_schema_version", `Int 1);
+      ("candidate_id", `String candidate_id);
+      ("transaction_fingerprint", `String transaction_fingerprint);
+      ("obligation_id", `String obligation_id);
+      ("kind", `String kind);
+    ]
+  |> Yojson.Safe.to_string
+
+let action_id ~candidate_id ~transaction_fingerprint ~obligation_id ~kind =
+  action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id ~kind
+  |> Centl_sha256.hex_string
+
+let action_of_check candidate_id transaction_fingerprint
+    (check : Centl_sci_mirage_readiness.check) =
   if check.state = Centl_sci_mirage_readiness.Execution_required then
     Some
       {
+        action_id =
+          action_id ~candidate_id ~transaction_fingerprint
+            ~obligation_id:check.obligation_id ~kind:check.kind;
         candidate_id;
         obligation_id = check.obligation_id;
         kind = check.kind;
@@ -32,7 +53,9 @@ let plan_candidate (candidate : Centl_sci_mirage_readiness.candidate_readiness) 
     candidate_id = candidate.candidate_id;
     transaction_fingerprint = candidate.transaction_fingerprint;
     actions =
-      List.filter_map (action_of_check candidate.candidate_id) candidate.checks;
+      List.filter_map
+        (action_of_check candidate.candidate_id candidate.transaction_fingerprint)
+        candidate.checks;
   }
 
 let build (readiness : Centl_sci_mirage_readiness.report) =
@@ -44,6 +67,8 @@ let build (readiness : Centl_sci_mirage_readiness.report) =
 let action_to_json (action : action) =
   `Assoc
     [
+      ("action_id_algorithm", `String "sha256");
+      ("action_id", `String action.action_id);
       ("candidate_id", `String action.candidate_id);
       ("obligation_id", `String action.obligation_id);
       ("kind", `String action.kind);
@@ -61,13 +86,16 @@ let candidate_to_json (candidate : candidate_plan) =
 let to_json (report : report) =
   `Assoc
     [
-      ("schema_version", `Int 1);
+      ("schema_version", `Int 2);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_plan");
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
       ("execution_performed", `Bool false);
       ("workspace_mutated", `Bool false);
       ("assurance_promoted", `Bool false);
+      ( "action_identity_semantics",
+        `String
+          "action IDs bind candidate transaction identity to one unresolved evidence obligation; identity is not evidence that the action executed or passed" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -95,6 +123,7 @@ let render (report : report) =
     [
       "CENTL-MIRAGE evidence execution plan";
       "planned actions: " ^ string_of_int actions;
+      "action identities: deterministic and transaction-bound";
       "execution performed: no";
       "workspace mutated: no";
       "assurance promoted: no";
