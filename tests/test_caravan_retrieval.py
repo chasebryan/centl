@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from caravan.catalog import ChunkRecord
-from caravan.content import ArtifactIdentity, ContentStore
+from caravan.content import DEFAULT_CHUNK_SIZE, ArtifactIdentity, ContentStore
 from caravan.coordinator import CoordinatorState
 from caravan.retrieval import RetrievalError, retrieve_verified
 
@@ -130,6 +130,53 @@ class CaravanRetrievalTests(unittest.TestCase):
                     expected=identity,
                     chunks=chunks,
                     fetchers={"reordered": lambda _ticket: BytesIO(b"efghabcd")},
+                    max_attempts=1,
+                )
+            self.assertEqual(store.total_bytes(), 0)
+
+    def test_store_capacity_is_enforced_before_fetcher_runs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-caravan-capacity-") as temp:
+            root = Path(temp)
+            data = b"12345"
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            store = ContentStore(root / "store", max_bytes=4)
+            identity = ArtifactIdentity(hashlib.sha256(data).hexdigest(), len(data))
+            chunks = (ChunkRecord(0, len(data), hashlib.sha256(data).hexdigest()),)
+            called = False
+
+            def fetcher(_ticket):
+                nonlocal called
+                called = True
+                return BytesIO(data)
+
+            with self.assertRaisesRegex(RetrievalError, "does not fit CARAVAN store limits"):
+                retrieve_verified(
+                    coordinator,
+                    store,
+                    expected=identity,
+                    chunks=chunks,
+                    fetchers={"unused": fetcher},
+                    max_attempts=1,
+                )
+            self.assertFalse(called)
+            self.assertEqual(store.total_bytes(), 0)
+
+    def test_oversized_authenticated_chunk_is_rejected_before_fetch(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-caravan-chunk-limit-") as temp:
+            root = Path(temp)
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            store = ContentStore(root / "store", max_bytes=DEFAULT_CHUNK_SIZE * 2)
+            length = DEFAULT_CHUNK_SIZE + 1
+            identity = ArtifactIdentity("0" * 64, length)
+            chunks = (ChunkRecord(0, length, "0" * 64),)
+
+            with self.assertRaisesRegex(RetrievalError, "chunk length exceeds"):
+                retrieve_verified(
+                    coordinator,
+                    store,
+                    expected=identity,
+                    chunks=chunks,
+                    fetchers={},
                     max_attempts=1,
                 )
             self.assertEqual(store.total_bytes(), 0)
