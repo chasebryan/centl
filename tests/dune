@@ -116,6 +116,11 @@
  (libraries centl_lib alcotest))
 
 (test
+ (name test_sci_revisions)
+ (modules test_sci_revisions)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sci_extensions)
  (modules test_sci_extensions)
  (libraries centl_lib alcotest unix yojson))
