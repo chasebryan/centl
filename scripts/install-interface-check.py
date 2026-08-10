@@ -13,7 +13,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "install"
-VERSION = "0.0.0-install-test"
+VERSION = "0.14.0"
 
 
 def write_executable(path: Path, text: str) -> None:
@@ -31,7 +31,7 @@ def build_fake_release(work: Path) -> Path:
     centl = """#!/bin/sh
 set -eu
 if [ "${1:-}" = "--version" ]; then
-  printf 'centl %s\\n' '0.0.0-install-test'
+  printf 'centl %s\\n' '0.14.0'
 elif [ "${1:-}" = "0.1 + 0.2" ]; then
   printf '3/10\\n'
 else
@@ -53,7 +53,7 @@ set -eu
 if [ "${1:-}" = "What is 0.1 plus 0.2?" ]; then
   printf '3/10\\n'
 elif [ "${1:-}" = "--repl" ]; then
-  printf 'CENTL-SCi v0.0.1-Camelus\\n'
+  printf 'CENTL-SCi v0.0.2-Caramels\\n'
   printf 'Free for science.\\n\\n'
   printf '> '
   IFS= read -r command || true
@@ -63,11 +63,25 @@ else
   exit 2
 fi
 """
+    mirage = """#!/bin/sh
+set -eu
+if [ "${1:-}" = "--version" ]; then
+  printf 'CENTL-MIRAGE development bootstrap\\n'
+else
+  printf 'fake centl-mirage: unsupported test input\\n' >&2
+  exit 2
+fi
+"""
 
+    commands = {
+        "centl": centl,
+        "centl-physics": physics,
+        "centl-sci": sci,
+        "centl-mirage": mirage,
+    }
     for directory in ("bin", "libexec"):
-        write_executable(package / directory / "centl", centl)
-        write_executable(package / directory / "centl-physics", physics)
-        write_executable(package / directory / "centl-sci", sci)
+        for command, text in commands.items():
+            write_executable(package / directory / command, text)
 
     archive = work / "centl-linux-x86_64.tar.gz"
     with tarfile.open(archive, "w:gz") as output:
@@ -81,6 +95,10 @@ fi
 
 def run() -> None:
     subprocess.run(["sh", "-n", str(INSTALLER)], check=True)
+
+    help_text = subprocess.check_output(["sh", str(INSTALLER), "--help"], text=True)
+    if "default: 0.14.0" not in help_text:
+        raise SystemExit("installer help does not bind the default release to v0.14.0")
 
     with tempfile.TemporaryDirectory(prefix="centl-install-check-") as temporary:
         work = Path(temporary)
@@ -106,35 +124,46 @@ def run() -> None:
         )
 
         prefix = home / ".local"
-        sci_command = prefix / "bin" / "centl-sci"
-        physics_command = prefix / "bin" / "centl-physics"
-        centl_command = prefix / "bin" / "centl"
-        for command in (centl_command, physics_command, sci_command):
+        commands = {
+            "centl": prefix / "bin" / "centl",
+            "centl-physics": prefix / "bin" / "centl-physics",
+            "centl-sci": prefix / "bin" / "centl-sci",
+            "centl-mirage": prefix / "bin" / "centl-mirage",
+        }
+        for name, command in commands.items():
             if not command.is_symlink():
-                raise SystemExit(f"installer did not activate {command}")
+                raise SystemExit(f"installer did not activate {name}: {command}")
 
         sci_output = subprocess.check_output(
-            [str(sci_command), "What is 0.1 plus 0.2?"], text=True
+            [str(commands["centl-sci"]), "What is 0.1 plus 0.2?"], text=True
         ).strip()
         if sci_output != "3/10":
             raise SystemExit(f"installed CENTL-SCi returned {sci_output!r}")
 
         repl = subprocess.run(
-            [str(sci_command), "--repl"],
+            [str(commands["centl-sci"]), "--repl"],
             input=":exit\n",
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=True,
         ).stdout
-        if "CENTL-SCi v0.0.1-Camelus" not in repl or "Free for science." not in repl:
+        if "CENTL-SCi v0.0.2-Caramels" not in repl or "Free for science." not in repl:
             raise SystemExit(f"installed CENTL-SCi REPL did not initialize correctly:\n{repl}")
+
+        mirage_output = subprocess.check_output(
+            [str(commands["centl-mirage"]), "--version"], text=True
+        ).strip()
+        if mirage_output != "CENTL-MIRAGE development bootstrap":
+            raise SystemExit(f"installed CENTL-MIRAGE returned {mirage_output!r}")
 
         output = completed.stdout
         for expected in (
+            "Installed CENTL 0.14.0",
             "CENTL-SCi is ready.",
             "Open a new terminal and run: centl-sci",
             "Scientific command:",
+            "MIRAGE command:",
         ):
             if expected not in output:
                 raise SystemExit(f"installer output omitted {expected!r}\n{output}")
@@ -148,8 +177,6 @@ def run() -> None:
         if str(prefix / "bin") not in profile:
             raise SystemExit("installer PATH setup omitted the command directory")
 
-        # Headless CI, containers, and service environments may not export SHELL.
-        # The installer must still complete and fall back to the POSIX profile.
         headless_home = work / "headless-home"
         headless_home.mkdir()
         headless_env = env.copy()
@@ -168,15 +195,14 @@ def run() -> None:
         headless_profile = headless_home / ".profile"
         if not (headless_prefix / "bin" / "centl-sci").is_symlink():
             raise SystemExit("installer did not activate CENTL-SCi without SHELL")
+        if not (headless_prefix / "bin" / "centl-mirage").is_symlink():
+            raise SystemExit("installer did not activate CENTL-MIRAGE without SHELL")
         if not headless_profile.is_file():
             raise SystemExit("installer did not use .profile when SHELL was unset")
         headless_text = headless_profile.read_text(encoding="utf-8")
         if f"# CENTL PATH: {headless_prefix / 'bin'}" not in headless_text:
             raise SystemExit("headless installer PATH setup omitted the CENTL marker")
 
-        # FCF/static hosting uses the preservation layout RELEASE_ROOT/vVERSION/.
-        # Exercise it hermetically through file:// so this regression never
-        # depends on GitHub or another HTTP service.
         static_root = work / "static-releases"
         static_version = static_root / f"v{VERSION}"
         static_version.mkdir(parents=True)
@@ -212,13 +238,15 @@ def run() -> None:
         )
         if not (static_prefix / "bin" / "centl-sci").is_symlink():
             raise SystemExit("static release-root install did not activate CENTL-SCi")
+        if not (static_prefix / "bin" / "centl-mirage").is_symlink():
+            raise SystemExit("static release-root install did not activate CENTL-MIRAGE")
 
-        # A generic static root has no implicit latest alias. Requiring an exact
-        # version keeps the FCF/static contract deterministic and host-neutral.
         latest = subprocess.run(
             [
                 "sh",
                 str(INSTALLER),
+                "--version",
+                "latest",
                 "--release-base-url",
                 static_root.as_uri(),
                 "--prefix",
@@ -231,8 +259,8 @@ def run() -> None:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        if latest.returncode == 0 or "requires an explicit --version" not in latest.stderr:
-            raise SystemExit("custom release root unexpectedly accepted implicit latest")
+        if latest.returncode == 0 or "requires an exact --version" not in latest.stderr:
+            raise SystemExit("custom release root unexpectedly accepted latest")
 
         insecure = subprocess.run(
             [
