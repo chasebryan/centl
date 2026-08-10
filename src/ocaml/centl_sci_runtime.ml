@@ -50,14 +50,6 @@ let starts_at text index needle =
   && index + needle_length <= String.length text
   && String.sub text index needle_length = needle
 
-(*
-   The semantic IR preserves the model's original equation text for auditing,
-   but CENTL syntax requires explicit multiplication. Lower only the narrow,
-   unambiguous coefficient/parenthesized-factor cases involving the declared
-   solve variable, e.g. 5x -> 5*x and (1/2)x -> (1/2)*x. Do not attempt a
-   general implicit-multiplication parser here; anything else remains CENTL's
-   responsibility to accept or reject.
-*)
 let normalize_polynomial_side ~variable text =
   let variable_length = String.length variable in
   if variable_length = 0 then text
@@ -150,12 +142,16 @@ let classify executor response =
           end
       end
 
-let execute_plan plan =
+let execute_plan ?core_state plan =
   let line = Yojson.Safe.to_string plan.request in
   let response =
     match plan.executor with
     | Core ->
-        let state = Centl_protocol.create () in
+        let state =
+          match core_state with
+          | Some value -> value
+          | None -> Centl_protocol.create ()
+        in
         Centl_protocol.handle_line state line
     | Physics ->
         let state = Centl_physics_protocol.create () in
@@ -163,11 +159,11 @@ let execute_plan plan =
   in
   (response, classify plan.executor response)
 
-let execute ir =
+let execute ?core_state ir =
   match plan ir with
   | None -> { ir; plan = None; response = None; status = Unsupported }
   | Some execution_plan ->
-      let response, status = execute_plan execution_plan in
+      let response, status = execute_plan ?core_state execution_plan in
       { ir; plan = Some execution_plan; response = Some response; status }
 
 let plan_json plan =
@@ -180,7 +176,7 @@ let plan_json plan =
 let to_json ~problem outcome =
   let fields =
     [
-      ("sci_version", `String "0.0.1");
+      ("sci_version", `String "0.0.2-Caramels");
       ("problem", `String problem);
       ("status", `String (status_text outcome.status));
       ("interpretation", Centl_sci_ir.to_json outcome.ir);
