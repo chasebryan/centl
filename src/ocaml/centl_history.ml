@@ -122,7 +122,7 @@ let lstat path =
   try Some (Unix.lstat path)
   with Unix.Unix_error (Unix.ENOENT, _, _) -> None
 
-let same_file left right =
+let same_file (left : Unix.stats) (right : Unix.stats) =
   left.Unix.st_dev = right.Unix.st_dev && left.Unix.st_ino = right.Unix.st_ino
 
 let require_owned_regular path metadata =
