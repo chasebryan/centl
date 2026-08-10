@@ -75,6 +75,11 @@
  (modules test_sci_contrib)
  (libraries centl_lib alcotest unix yojson))
 
+(test
+ (name test_sci_human_variation)
+ (modules test_sci_human_variation)
+ (libraries centl_lib alcotest))
+
 (executable
  (name sci_fake_curl)
  (modules sci_fake_curl))
