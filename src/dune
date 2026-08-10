@@ -58,6 +58,8 @@
   Centl_sci_runtime
   Centl_sci_present
   Centl_sci_contrib
+  Centl_sci_interaction
+  Centl_sci_app
   Centl_physics
   Centl_physics_collision
   Centl_physics_world
