@@ -1,4 +1,4 @@
-type origin = Verified_core | Physics_engine | Local_extension
+type origin = Verified_core | Physics_engine | Local_extension | Local_package
 
 type capability = {
   name : string;
@@ -13,6 +13,7 @@ let origin_text = function
   | Verified_core -> "verified/core CENTL"
   | Physics_engine -> "deterministic CENTL Physics"
   | Local_extension -> "local downstream extension"
+  | Local_package -> "local downstream package"
 
 let builtins =
   [
@@ -53,22 +54,40 @@ let score request_words capability =
     (fun total phrase -> if phrase_matches request_words phrase then total + 1 else total)
     0 phrases
 
+let local_extension_capabilities workspace =
+  Centl_sci_extensions.list workspace
+  |> List.map (fun manifest ->
+         {
+           name = manifest.name;
+           aliases = [];
+           category = "local-extension";
+           origin = Local_extension;
+           assurance = manifest.assurance;
+           summary =
+             Printf.sprintf "%s (%s, kind=%s)" manifest.summary
+               (if manifest.enabled then "enabled" else "disabled") manifest.kind;
+         })
+
+let local_package_capabilities workspace =
+  Centl_sci_package.list workspace
+  |> List.map (fun package ->
+         {
+           name = package.name;
+           aliases = package.extensions;
+           category = "local-package";
+           origin = Local_package;
+           assurance = "composition-only; member assurance preserved";
+           summary =
+             Printf.sprintf "%s (%d extension%s)" package.summary
+               (List.length package.extensions)
+               (if List.length package.extensions = 1 then "" else "s");
+         })
+
 let local_capabilities () =
   match Centl_sci_workspace.default () with
   | None -> []
   | Some workspace ->
-      Centl_sci_extensions.list workspace
-      |> List.map (fun manifest ->
-             {
-               name = manifest.name;
-               aliases = [];
-               category = "local";
-               origin = Local_extension;
-               assurance = manifest.assurance;
-               summary =
-                 Printf.sprintf "%s (%s)" manifest.summary
-                   (if manifest.enabled then "enabled" else "disabled");
-             })
+      local_extension_capabilities workspace @ local_package_capabilities workspace
 
 let all () = builtins @ local_capabilities ()
 
