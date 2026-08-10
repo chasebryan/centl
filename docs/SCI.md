@@ -92,9 +92,29 @@ Caramels currently has typed deterministic paths for:
 | `uniform_gravity_particle` | physics | typed CENTL Physics `simulate_particle` |
 | `unsupported` | either/outside scope | no fabricated computation |
 
-The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, and factoring requests into existing native CENTL expressions instead of creating separate implementations.
+The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, factoring, and approximation requests into existing native CENTL expressions instead of creating separate implementations.
 
 The optional local-model schema now admits the same Caramels constant and uniform-gravity classes. Model output still passes through the independent typed IR validator before execution.
+
+## Deterministic approximation
+
+Caramels lowers explicit approximation requests into CENTL's existing bounded-enclosure operation rather than inventing a second numerical evaluator.
+
+Examples:
+
+```text
+MATH> approximate pi
+MATH> approximate sqrt(2) to 30 significant digits
+```
+
+These lower to native forms such as:
+
+```text
+approx(pi)
+approx(sqrt(2), 30)
+```
+
+CENTL remains responsible for the numerical contract: requested digits must be justified by the returned enclosure, and unresolved precision remains visible rather than being replaced by guessed decimal output.
 
 ## Exact physical constants
 
@@ -233,7 +253,7 @@ Generated text does not bypass the existing parser boundary.
 
 ## Reuse before invention
 
-Generic BUILD planning searches a capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces and downstream extensions.
+Generic BUILD planning searches a capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces, Caramels runtime mechanisms, downstream extensions, and local packages.
 
 Useful inspection forms include:
 
@@ -242,7 +262,10 @@ BUILD> capabilities
 BUILD> show capability integration
 BUILD> validate NAME
 BUILD> validate package NAME
+BUILD> audit workspace
 ```
+
+The inventory includes reusable Caramels capabilities such as workspace audit, structural extension validation, package validation, reversible workspace portability, and English-to-CENTL extension generation.
 
 The goal is to answer questions such as:
 
@@ -312,6 +335,8 @@ A locally generated capability is never silently presented as verified CENTL cor
 
 `validate NAME` performs structural checks appropriate to the extension kind. Structural validation does not upgrade assurance to verified core.
 
+Native extensions are revalidated before activation. A missing, unparsable, non-definition, or non-native source cannot be enabled through the native CENTL definition loader.
+
 ## Packages
 
 Local packages group downstream extensions without creating a separate package-level assurance claim.
@@ -356,11 +381,19 @@ BUILD> export workspace
 BUILD> export workspace /path/to/bundle
 ```
 
+A validated reversible import is also live through BUILD:
+
+```text
+BUILD> import workspace /path/to/bundle
+```
+
 The bundle includes downstream extension manifests, native modules, packages, tests, data, and generated scaffolds. It excludes verified core, history, undo snapshots, prior exports, and local workspace identity/configuration.
 
-A validated reversible importer is implemented internally. It validates bundle metadata, extension manifests, structural extension checks, package membership, and activation policy before mutation, then snapshots the existing downstream workspace before replacing downstream surfaces.
+Import validates bundle metadata, rejects symlinks/unsupported filesystem objects, validates extension manifests and structural extension checks, checks package membership and activation policy, and snapshots the existing downstream workspace **before mutation**. Only then are downstream surfaces replaced.
 
-**BUILD import activation remains intentionally gated in the current branch** until the dispatcher can reload the active downstream core session in the same operation. A current `import workspace PATH` BUILD request therefore reports that boundary and does not mutate state. This avoids a half-imported live session.
+A successful BUILD import returns `changed=true`; the existing CENTL-SCi app path then rebuilds the active downstream core session and reloads enabled native definitions immediately. The prior downstream state remains available through `undo`.
+
+Verified CENTL core, workspace identity, configuration, and history are not replaced by import.
 
 ## External and native extension scaffolds
 
@@ -415,7 +448,7 @@ The first implementation pass prioritizes complete end-to-end Linux functionalit
 
 ## Human-variation gate
 
-Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains **405 prompt variants** spanning mathematics, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.
+Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains **435 prompt variants** spanning mathematics, approximation, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.
 
 The corpus varies:
 
