@@ -90,7 +90,7 @@ let plan request =
             "keep external results visibly outside verified-core assurance";
           ],
           [ "external code is not allowed to masquerade as verified CENTL computation" ],
-          [ "exact adapter ABI and dependency policy remain first-pass implementation work" ] )
+          [ "exact adapter ABI and dependency policy remain Caramels implementation work" ] )
     | Native_extension ->
         ( [ "generated workspace area"; "native-extension assurance category" ],
           [
@@ -112,7 +112,7 @@ let plan request =
             "record that the local system diverges from upstream";
           ],
           [ "core self-modification must not bypass upstream-grade engineering gates" ],
-          [ "first-pass BUILD planning does not auto-apply arbitrary core patches" ] )
+          [ "Caramels planning does not auto-apply arbitrary trusted-core patches" ] )
     | Upstream_contribution ->
         ( [ "workspace manifests"; "workspace revisions"; "upstream reference repository" ],
           [
@@ -133,14 +133,61 @@ let bullets title values =
   if values = [] then []
   else title :: List.map (fun value -> "  - " ^ value) values
 
+let drop_prefix_ci prefix text =
+  let trimmed = String.trim text in
+  let lowered = String.lowercase_ascii trimmed in
+  let prefix_lower = String.lowercase_ascii prefix in
+  if String.starts_with ~prefix:prefix_lower lowered then
+    Some
+      (String.sub trimmed (String.length prefix)
+         (String.length trimmed - String.length prefix)
+      |> String.trim)
+  else None
+
+let render_validation name =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before validating an extension."
+  | Some workspace ->
+      begin match Centl_sci_validate.validate workspace name with
+      | Error message -> "Extension validation failed: " ^ message
+      | Ok report -> Centl_sci_validate.render report
+      end
+
 let render plan =
-  String.concat "\n"
-    ([
-       "BUILD plan";
-       "  request: " ^ plan.request;
-       "  implementation layer: " ^ layer_text plan.layer;
-     ]
-    @ bullets "  existing/reusable capabilities:" plan.reusable_capabilities
-    @ bullets "  proposed first-pass steps:" plan.proposed_steps
-    @ bullets "  trust/assurance:" plan.trust_notes
-    @ bullets "  unresolved:" plan.unresolved)
+  let request = lower plan.request in
+  if
+    List.mem request
+      [
+        "capabilities";
+        "show capabilities";
+        "list capabilities";
+        "what can centl do";
+        "what can you do";
+      ]
+  then
+    "Available CENTL / CENTL-SCi capabilities:\n" ^ Centl_sci_capabilities.render_all ()
+  else
+    match drop_prefix_ci "show capability " plan.request with
+    | Some query when query <> "" ->
+        "Capability matches for `" ^ query ^ "`:\n"
+        ^ Centl_sci_capabilities.render_matches query
+    | _ ->
+        begin match drop_prefix_ci "validate extension " plan.request with
+        | Some name when name <> "" -> render_validation name
+        | _ ->
+            begin match drop_prefix_ci "validate " plan.request with
+            | Some name when name <> "" -> render_validation name
+            | _ ->
+                String.concat "\n"
+                  ([
+                     "BUILD plan";
+                     "  request: " ^ plan.request;
+                     "  implementation layer: " ^ layer_text plan.layer;
+                   ]
+                  @ bullets "  existing/reusable capabilities:" plan.reusable_capabilities
+                  @ bullets "  proposed Caramels steps:" plan.proposed_steps
+                  @ bullets "  trust/assurance:" plan.trust_notes
+                  @ bullets "  unresolved:" plan.unresolved)
+            end
+        end
