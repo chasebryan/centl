@@ -1,5 +1,6 @@
 """CENTL CARAVAN Phase 1 laboratory package."""
 
+from .catalog import AuthenticatedCatalog, CatalogArtifact, CatalogError, TufCatalogClient
 from .content import ArtifactIdentity, ContentStore, IntegrityError
 from .coordinator import CoordinatorState, CoordinatorError
 from .enrollment import register_accepted_carrier
@@ -28,4 +29,8 @@ __all__ = [
     "verify_policy_receipt",
     "write_policy_receipt",
     "register_accepted_carrier",
+    "AuthenticatedCatalog",
+    "CatalogArtifact",
+    "CatalogError",
+    "TufCatalogClient",
 ]
