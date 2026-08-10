@@ -92,6 +92,29 @@ let test_symlink_is_rejected_before_copy () =
       Centl_sci_portable.validate_bundle bundle
       |> expect_rejected "contains a symlink")
 
+let test_import_preserves_reload_signal () =
+  let root = temp_dir "centl-caramels-import-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let bundle = make_bundle root in
+      let active =
+        Centl_sci_workspace.make ~name:"active" (Filename.concat root "active")
+      in
+      Centl_sci_workspace.ensure active;
+      match Centl_sci_portable.import active bundle with
+      | Error message -> Alcotest.fail message
+      | Ok result ->
+          Alcotest.(check bool) "import reports changed" true result.changed;
+          Alcotest.(check bool) "import reports revision" true
+            (Option.is_some result.revision);
+          begin match Centl_sci_extensions.read_manifest active "tau" with
+          | Error message -> Alcotest.fail message
+          | Ok manifest ->
+              Alcotest.(check bool) "imported extension remains enabled" true
+                manifest.enabled
+          end)
+
 let () =
   Alcotest.run "CENTL-SCi Caramels portability"
     [
@@ -103,5 +126,7 @@ let () =
             test_absolute_manifest_source_is_rejected;
           Alcotest.test_case "reject symlink" `Quick
             test_symlink_is_rejected_before_copy;
+          Alcotest.test_case "import preserves reload signal" `Quick
+            test_import_preserves_reload_signal;
         ] );
     ]
