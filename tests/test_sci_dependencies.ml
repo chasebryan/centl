@@ -89,6 +89,22 @@ let test_external_and_opaque_dependencies_are_preserved () =
       Alcotest.(check bool) "opaque dependency preserved" true
         (List.mem ("reader", [ "legacy-runtime" ]) report.opaque_dependencies))
 
+let test_extension_listing_orders_local_dependencies_first () =
+  let root = temp_dir "centl-caramels-dependency-order-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make root in
+      write_manifest workspace ~name:"alpha" ~enabled:true
+        ~dependencies:[ "extension:zeta" ];
+      write_manifest workspace ~name:"zeta" ~enabled:true ~dependencies:[];
+      let names =
+        Centl_sci_extensions.list workspace
+        |> List.map (fun manifest -> manifest.Centl_sci_extensions.name)
+      in
+      Alcotest.(check (list string)) "dependency precedes dependent"
+        [ "zeta"; "alpha" ] names)
+
 let () =
   Alcotest.run "CENTL-SCi Caramels dependencies"
     [
@@ -101,5 +117,7 @@ let () =
           Alcotest.test_case "cycle" `Quick test_cycle_is_rejected;
           Alcotest.test_case "external/opaque provenance" `Quick
             test_external_and_opaque_dependencies_are_preserved;
+          Alcotest.test_case "dependency-aware extension order" `Quick
+            test_extension_listing_orders_local_dependencies_first;
         ] );
     ]
