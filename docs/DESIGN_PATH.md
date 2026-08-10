@@ -96,9 +96,15 @@ faithfully captures an ambiguous natural-language request.
 
 ## Licensing decision
 
-This path assumes the existing `AGPL-3.0-or-later` license remains in place.
-No relicensing, dual-licensing, or product work aimed at satisfying a specific
-company's open-source policy is included in this path.
+FCF-owned CENTL software is licensed under `Apache-2.0` to maximize practical
+adoption while preserving the freedom to use, study, modify, redistribute,
+embed, and fork the system. Project documentation, branding, third-party
+components, and model artifacts follow the separate terms defined in
+[`LICENSING.md`](../LICENSING.md) and [`.reuse/dep5`](../.reuse/dep5).
+
+This design path does not create component-specific commercial licenses or a
+dual-license split. Licensing remains a project-level policy rather than a
+product feature or provider accommodation.
 
 ## Primary users and jobs
 
@@ -875,7 +881,8 @@ Raw requests for more calculator functions do not automatically determine it.
   deterministic contract releases.
 - Choosing the CENTL Math AI model, provider, prompt, storage, UI, or deployment
   architecture in this document.
-- Relicensing or dual-licensing work.
+- Component-specific dual-licensing or proprietary exceptions that fragment the
+  project-wide licensing policy.
 
 ## Risks and controls
 

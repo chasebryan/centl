@@ -1,0 +1,130 @@
+schema = 1
+project = "CENTL"
+generated = "2026-08-10"
+policy = "THIRD_PARTY_NOTICES.md"
+
+# SPDX expressions are recorded only when the current pinned upstream metadata
+# or authoritative upstream licensing statement has been verified. NOASSERTION
+# is deliberate: it means consumers must use the packaged upstream license text
+# and provenance for that component rather than infer a license from this file.
+
+[[component]]
+name = "F*"
+version = "2026.07.05"
+scope = "verification"
+spdx = "Apache-2.0"
+source = "https://github.com/FStarLang/FStar"
+
+[[component]]
+name = "Z3"
+version = "4.13.3"
+scope = "verification"
+spdx = "NOASSERTION"
+source = "https://github.com/Z3Prover/z3"
+
+[[component]]
+name = "OCaml"
+version = "4.14.1"
+scope = "runtime"
+spdx = "LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception"
+source = "https://github.com/ocaml/ocaml"
+
+[[component]]
+name = "Dune"
+version = "3.24.1"
+scope = "build"
+spdx = "NOASSERTION"
+source = "https://github.com/ocaml/dune"
+
+[[component]]
+name = "Zarith"
+version = "1.14"
+scope = "runtime"
+spdx = "LGPL-2.0-only WITH OCaml-LGPL-linking-exception"
+source = "https://github.com/ocaml/Zarith"
+
+[[component]]
+name = "Yojson"
+version = "2.2.2"
+scope = "runtime"
+spdx = "BSD-3-Clause"
+source = "https://github.com/ocaml-community/yojson"
+
+[[component]]
+name = "FLINT"
+version = "3.0.1"
+scope = "runtime"
+spdx = "LGPL-2.1-or-later"
+source = "https://github.com/flintlib/flint"
+
+[[component]]
+name = "GMP"
+version = "6.3.0"
+scope = "runtime"
+spdx = "LGPL-3.0-or-later OR GPL-2.0-or-later"
+source = "https://gmplib.org/"
+
+[[component]]
+name = "MPFR"
+version = "4.2.2"
+scope = "runtime"
+spdx = "LGPL-3.0-or-later"
+source = "https://www.mpfr.org/"
+
+[[component]]
+name = "Alcotest"
+version = "1.9.1"
+scope = "test"
+spdx = "NOASSERTION"
+source = "https://github.com/mirage/alcotest"
+
+[[component]]
+name = "QCheck"
+version = "0.91"
+scope = "test"
+spdx = "NOASSERTION"
+source = "https://github.com/c-cube/qcheck"
+
+[[component]]
+name = "OCamlFormat"
+version = "0.29.0"
+scope = "development"
+spdx = "NOASSERTION"
+source = "https://github.com/ocaml-ppx/ocamlformat"
+
+[[component]]
+name = "Julia"
+version = "1.12.6"
+scope = "laboratory"
+spdx = "NOASSERTION"
+source = "https://github.com/JuliaLang/julia"
+
+[[component]]
+name = "Nemo"
+version = "0.56.1"
+scope = "laboratory"
+spdx = "NOASSERTION"
+source = "https://github.com/Nemocas/Nemo.jl"
+
+[[component]]
+name = "JSON3"
+version = "1.14.3"
+scope = "laboratory"
+spdx = "NOASSERTION"
+source = "https://github.com/quinnj/JSON3.jl"
+
+[[component]]
+name = "llama.cpp-compatible runtime"
+version = "external"
+scope = "optional-model-runtime"
+spdx = "NOASSERTION"
+source = "https://github.com/ggerganov/llama.cpp"
+notes = "Not silently bundled or relicensed; exact runtime provenance controls."
+
+[[component]]
+name = "CENTL-SCi model weights"
+version = "external"
+scope = "optional-model-artifact"
+spdx = "NOASSERTION"
+source = "model provenance record"
+notes = "Model weights are separate artifacts and are never covered merely by CENTL's Apache-2.0 software grant."

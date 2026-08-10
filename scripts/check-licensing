@@ -1,0 +1,66 @@
+#!/bin/sh
+set -eu
+
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+fail() {
+  printf 'centl licensing: %s\n' "$1" >&2
+  exit 1
+}
+
+require_file() {
+  [ -f "$project_root/$1" ] || fail "missing required licensing file: $1"
+}
+
+for path in \
+  LICENSE \
+  NOTICE \
+  LICENSING.md \
+  TRADEMARKS.md \
+  THIRD_PARTY_NOTICES.md \
+  third-party.toml \
+  DCO.md \
+  .reuse/dep5 \
+  LICENSES/Apache-2.0.txt \
+  LICENSES/CC-BY-4.0.txt \
+  LICENSES/LicenseRef-FCF-Branding.txt \
+  LICENSES/LicenseRef-DCO-1.1.txt
+do
+  require_file "$path"
+done
+
+grep -qx 'Apache License' "$project_root/LICENSE" ||
+  fail "root LICENSE is not Apache-2.0"
+grep -qx 'Version 2.0, January 2004' "$project_root/LICENSE" ||
+  fail "root LICENSE does not identify Apache License 2.0"
+grep -Fqx 'license: "Apache-2.0"' "$project_root/centl.opam" ||
+  fail "centl.opam does not declare Apache-2.0"
+
+grep -Fq 'License: Apache-2.0' "$project_root/.reuse/dep5" ||
+  fail ".reuse/dep5 does not define the Apache-2.0 software default"
+grep -Fq 'License: CC-BY-4.0' "$project_root/.reuse/dep5" ||
+  fail ".reuse/dep5 does not define the documentation license"
+grep -Fq 'License: LicenseRef-FCF-Branding' "$project_root/.reuse/dep5" ||
+  fail ".reuse/dep5 does not define the branding boundary"
+
+grep -Fq 'CENTL-Apache-2.0' "$project_root/scripts/package-release" ||
+  fail "POSIX release package does not ship the Apache license under the expected name"
+grep -Fq 'CENTL-Apache-2.0' "$project_root/scripts/package-release.ps1" ||
+  fail "Windows release package does not ship the Apache license under the expected name"
+
+for path in \
+  centl.opam \
+  README.md \
+  site/centl.html \
+  docs/ONBOARDING.md \
+  docs/DESIGN_PATH.md \
+  scripts/package-release \
+  scripts/package-release.ps1
+do
+  if grep -Eiq 'CENTL-AGPL|SPDX-License-Identifier:[[:space:]]*AGPL|license:[[:space:]]*"AGPL' \
+      "$project_root/$path"; then
+    fail "stale active AGPL declaration remains in $path"
+  fi
+done
+
+printf 'centl licensing: ok\n'

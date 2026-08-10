@@ -8,7 +8,7 @@ approximation, and reports unsupported or indeterminate work honestly.
 """
 maintainer: "chasebryan@users.noreply.github.com"
 authors: "Chase Bryan"
-license: "AGPL-3.0-or-later"
+license: "Apache-2.0"
 homepage: "https://github.com/chasebryan/centl"
 bug-reports: "https://github.com/chasebryan/centl/issues"
 dev-repo: "git+https://github.com/chasebryan/centl.git"

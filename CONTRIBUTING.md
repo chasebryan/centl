@@ -163,6 +163,35 @@ part of the normal pull-request path rather than an optional release-only step.
 Full native packaging remains on `main`, version tags, and manual
 release-workflow runs.
 
+## Developer Certificate of Origin
+
+CENTL uses the **Developer Certificate of Origin 1.1** rather than a contributor
+license agreement or copyright assignment. Every contribution must be signed off
+by the contributor to certify that they have the right to submit it under the
+license applicable to the contributed path.
+
+Sign commits with:
+
+```sh
+git commit -s
+```
+
+This adds a line of the form:
+
+```text
+Signed-off-by: Your Name <you@example.com>
+```
+
+Use your real contribution identity and an email address you are authorized to
+use. The complete certificate is in [`DCO.md`](DCO.md). By contributing, you are
+not assigning your copyright to FCF; you are certifying the provenance and
+licensing authority described by the DCO.
+
+Software contributions are normally accepted under `Apache-2.0`. Documentation
+and other paths may use the license identified in [`LICENSING.md`](LICENSING.md)
+and [`.reuse/dep5`](.reuse/dep5). Do not remove or overwrite valid third-party
+license notices.
+
 ## Math contracts (0.12 foundation)
 
 Local claim checking without a full release:

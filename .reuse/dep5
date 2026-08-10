@@ -1,0 +1,28 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: CENTL
+Source: https://github.com/chasebryan/centl
+
+Files: *
+Copyright: 2026 Chase Bryan and contributors
+License: Apache-2.0
+
+Files: README.md
+ CHANGELOG.md
+ CONTRIBUTING.md
+ SECURITY.md
+ CENTL-TODO.md
+ LICENSING.md
+ TRADEMARKS.md
+ THIRD_PARTY_NOTICES.md
+ docs/*
+Copyright: 2026 Chase Bryan and contributors
+License: CC-BY-4.0
+
+Files: assets/branding/*
+ site/assets/*
+Copyright: 2026 Chase Bryan
+License: LicenseRef-FCF-Branding
+
+Files: DCO.md
+Copyright: 2004, 2006 The Linux Foundation and its contributors
+License: LicenseRef-DCO-1.1
