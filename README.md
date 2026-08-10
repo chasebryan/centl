@@ -15,9 +15,10 @@ It is a scientific interpreter, not a general chatbot.
 
 ## Install
 
-Linux is the reference platform. Native releases bundle the runtime components
-needed to run CENTL; a compiler, OCaml, Dune, OPAM, F*, GMP, MPFR, and FLINT do
-not need to be installed separately.
+CENTL currently supports **GNU/Linux only**. Linux is the reference development,
+validation, packaging, and release platform. Native releases bundle the runtime
+components needed to run CENTL; a compiler, OCaml, Dune, OPAM, F*, GMP, MPFR,
+and FLINT do not need to be installed separately.
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
@@ -31,10 +32,10 @@ terminal once. Then start the live scientific interface with:
 centl-sci
 ```
 
-The intended first-run experience is simply:
+The intended Caramels first-run experience is simply:
 
 ```text
-CENTL-SCi v0.0.1-Camelus
+CENTL-SCi v0.0.2-Caramels
 Free for science.
 
 > What is 0.1 plus 0.2?
@@ -51,8 +52,10 @@ upward at 20 m/s under `g = 9.8 m/s^2`, neglecting drag. CENTL keeps the nonzero
 flight time exact as `200/49` seconds instead of turning it into an arbitrary
 floating-point decimal.
 
-For complete installation details, offline archives, macOS, and the experimental
-Windows path, see [docs/INSTALL.md](docs/INSTALL.md).
+For complete Linux installation details and offline archives, see
+[docs/INSTALL.md](docs/INSTALL.md). macOS and Windows are currently unsupported;
+see [docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for the platform
+policy.
 
 ## What gets installed
 
@@ -99,7 +102,7 @@ verdict: verified (closed_exact_rational via closed_rational_comparison); compar
 
 ## CENTL-SCi
 
-![CENTL-SCi v0.0.1-Camelus — Free Computation Foundation](assets/branding/centl-sci-v0.0.1-camelus-banner.png)
+![CENTL-SCi v0.0.2-Caramels — Free Computation Foundation](assets/branding/centl-sci-v0.0.2-caramels-banner.svg)
 
 CENTL-SCi uses a conservative deterministic interpreter first. Current admitted
 fast paths include exact arithmetic, single-variable polynomial equations,
@@ -133,7 +136,7 @@ supported domains and known boundaries are documented in
 ## Developers
 
 A native release is recommended for ordinary use. Development from source uses
-the pinned toolchain and verified F* extraction path:
+the pinned toolchain and verified F* extraction path on Linux:
 
 ```sh
 scripts/bootstrap-opam
