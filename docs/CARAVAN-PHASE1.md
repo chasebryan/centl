@@ -21,22 +21,25 @@ Carrier count, reputation, or majority never rewrites an expected content hash.
 
 ## 2. Authenticated catalog profile
 
-The Phase 1 secure-metadata implementation target is **python-tuf 7.0.0**, the
-Python reference implementation of The Update Framework (TUF), using the TUF 1.0
-metadata model and JSON wire format.
+Phase 1 uses **python-tuf 7.0.0** and the TUF 1.0 JSON metadata model. The
+laboratory now implements a complete root -> timestamp -> snapshot -> targets
+verification path around the CARAVAN application catalog.
 
 The carrier/downloader side needs verification only. Repository/key-generation
 code is laboratory/FCF tooling and is not part of the normal volunteer runtime.
 The initial trusted root must come from the authenticated CARAVAN agent/release
-bootstrap rather than from a volunteer carrier.
+bootstrap rather than from a volunteer carrier. There is no trust-on-first-carrier
+mode.
 
-CARAVAN-specific target metadata will carry a distribution classification. Only
-`public-approved` targets are eligible for volunteer advertisement or routing.
-`revoked`, `pending-review`, and `fcf-preservation-only` targets are not eligible.
+The authenticated TUF target is `caravan/catalog-v1.json`. Its strict CARAVAN
+schema carries distribution classification, content identity, exact length, and
+ordered chunk identities. Only `public-approved` targets are eligible for
+volunteer advertisement or routing. `revoked` entries may be retained in
+coordinator state only to disable a known identity; `pending-review` and
+`fcf-preservation-only` targets never enter volunteer routing.
 
-The initial coordinator code already accepts only a catalog object that has
-crossed an authentication boundary; direct carrier advertisements cannot create
-catalog entries.
+Direct carrier advertisements cannot create catalog entries or rewrite an
+expected content hash. See `CARAVAN-CATALOG.md` for the exact boundary.
 
 ## 3. Content identity
 
@@ -65,12 +68,10 @@ length
 sha256
 ```
 
-The final chunk may be shorter. Chunk verification supplements rather than
-replaces mandatory whole-artifact length and SHA-256 verification.
-
-The canonical signed chunk-manifest serialization remains a later Phase 1 task;
-the content-store implementation already emits deterministic ordered chunk
-records for the verifier tests.
+The final chunk may be shorter. CARAVAN's authenticated catalog requires the
+chunk sequence to be ordered, contiguous, and to cover the exact declared file
+length. Non-final chunks must be exactly 4 MiB. Chunk verification supplements
+rather than replaces mandatory whole-artifact length and SHA-256 verification.
 
 ## 5. Content store
 
@@ -227,8 +228,9 @@ The authorized local-laboratory sequence is:
 2. SQLite coordinator state, availability counters, quarantine and replay-safe
    retrieval tickets — implemented;
 3. Ed25519 carrier identity and accepted-policy receipt — implemented;
-4. python-tuf authenticated catalog and test repository — next;
-5. outbound-only carrier/coordinator transport;
+4. python-tuf authenticated catalog and test repository — implemented, pending
+   full branch CI/dependency-review validation;
+5. outbound-only carrier/coordinator transport — next;
 6. two-carrier verified retrieval with automatic fallback;
 7. hostile carrier and malformed-transfer suite;
 8. one-command local laboratory runner.
