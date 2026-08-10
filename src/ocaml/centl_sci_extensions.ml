@@ -1,10 +1,15 @@
 type manifest = {
   name : string;
+  kind : string;
   enabled : bool;
   assurance : string;
   source : string;
   summary : string;
+  provenance : string;
+  dependencies : string list;
+  tests : string list;
   workspace_revision : int;
+  recorded_at_unix : float option;
 }
 
 type error = string
@@ -22,6 +27,24 @@ let bool_field name json =
 let int_field name json =
   match assoc name json with Some (`Int value) -> Some value | _ -> None
 
+let float_field name json =
+  match assoc name json with
+  | Some (`Float value) -> Some value
+  | Some (`Int value) -> Some (float_of_int value)
+  | _ -> None
+
+let string_list_field name json =
+  match assoc name json with
+  | Some (`List values) ->
+      let rec loop acc = function
+        | [] -> Some (List.rev acc)
+        | `String value :: rest -> loop (value :: acc) rest
+        | _ -> None
+      in
+      loop [] values
+  | None -> Some []
+  | _ -> None
+
 let read_json path =
   try Ok (Yojson.Safe.from_file path)
   with Sys_error message | Yojson.Json_error message -> Error message
@@ -33,10 +56,28 @@ let manifest_of_json json =
       string_field "assurance" json,
       string_field "source" json,
       string_field "summary" json,
-      int_field "workspace_revision" json )
+      int_field "workspace_revision" json,
+      string_list_field "dependencies" json,
+      string_list_field "tests" json )
   with
-  | Some name, Some enabled, Some assurance, Some source, Some summary, Some revision ->
-      Ok { name; enabled; assurance; source; summary; workspace_revision = revision }
+  | Some name, Some enabled, Some assurance, Some source, Some summary,
+    Some revision, Some dependencies, Some tests ->
+      Ok
+        {
+          name;
+          kind = Option.value ~default:"native_centl" (string_field "kind" json);
+          enabled;
+          assurance;
+          source;
+          summary;
+          provenance =
+            Option.value ~default:"legacy/local manifest"
+              (string_field "provenance" json);
+          dependencies;
+          tests;
+          workspace_revision = revision;
+          recorded_at_unix = float_field "recorded_at_unix" json;
+        }
   | _ -> Error "invalid extension manifest"
 
 let read_manifest workspace name =
@@ -55,19 +96,31 @@ let list workspace =
     |> List.filter (fun name -> Filename.check_suffix name ".json")
     |> List.filter_map (fun filename ->
            let name = Filename.chop_suffix filename ".json" in
-           match read_manifest workspace name with Ok value -> Some value | Error _ -> None)
+           match read_manifest workspace name with
+           | Ok value -> Some value
+           | Error _ -> None)
     |> List.sort (fun left right -> String.compare left.name right.name)
+
+let strings values = `List (List.map (fun value -> `String value) values)
 
 let to_json manifest ~revision =
   `Assoc
     [
-      ("schema_version", `Int 1);
+      ("schema_version", `Int 2);
       ("name", `String manifest.name);
+      ("kind", `String manifest.kind);
       ("enabled", `Bool manifest.enabled);
       ("assurance", `String manifest.assurance);
       ("source", `String manifest.source);
       ("summary", `String manifest.summary);
+      ("provenance", `String manifest.provenance);
+      ("dependencies", strings manifest.dependencies);
+      ("tests", strings manifest.tests);
       ("workspace_revision", `Int revision);
+      ( "recorded_at_unix",
+        match manifest.recorded_at_unix with
+        | None -> `Float (Unix.gettimeofday ())
+        | Some value -> `Float value );
     ]
 
 let write_json path json =
@@ -97,10 +150,11 @@ let set_enabled workspace name enabled =
       with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
 let source_path workspace manifest =
-  if Filename.is_relative manifest.source then Filename.concat workspace.root manifest.source
+  if Filename.is_relative manifest.source then
+    Filename.concat workspace.Centl_sci_workspace.root manifest.source
   else manifest.source
 
-let trash_dir workspace = Filename.concat workspace.generated "removed"
+let trash_dir workspace = Filename.concat workspace.Centl_sci_workspace.generated "removed"
 
 let remove workspace name =
   match read_manifest workspace name with
@@ -117,7 +171,7 @@ let remove workspace name =
           Filename.concat (trash_dir workspace) (name ^ suffix ^ ".json")
         in
         Unix.rename manifest_path archived_manifest;
-        if Sys.file_exists source then
+        if Sys.file_exists source && not (Sys.is_directory source) then
           Unix.rename source
             (Filename.concat (trash_dir workspace)
                (name ^ suffix ^ Filename.extension source));
@@ -125,12 +179,23 @@ let remove workspace name =
       with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
 
 let render_manifest manifest =
+  let dependencies =
+    if manifest.dependencies = [] then "none"
+    else String.concat ", " manifest.dependencies
+  in
+  let tests =
+    if manifest.tests = [] then "none" else String.concat ", " manifest.tests
+  in
   String.concat "\n"
     [
       "Extension: " ^ manifest.name;
+      "  kind: " ^ manifest.kind;
       "  enabled: " ^ string_of_bool manifest.enabled;
       "  assurance: " ^ manifest.assurance;
       "  source: " ^ manifest.source;
+      "  provenance: " ^ manifest.provenance;
+      "  dependencies: " ^ dependencies;
+      "  tests: " ^ tests;
       "  workspace revision: " ^ string_of_int manifest.workspace_revision;
       "  summary: " ^ manifest.summary;
     ]
@@ -141,6 +206,7 @@ let render_list workspace =
   | values ->
       values
       |> List.map (fun item ->
-             Printf.sprintf "%s  [%s]  %s" item.name
-               (if item.enabled then "enabled" else "disabled") item.assurance)
+             Printf.sprintf "%s  [%s]  %s  <%s>" item.name
+               (if item.enabled then "enabled" else "disabled") item.assurance
+               item.kind)
       |> String.concat "\n"
