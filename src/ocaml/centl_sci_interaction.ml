@@ -142,6 +142,13 @@ let physics_completions =
 
 let build_completions =
   [
+    "create function";
+    "create value";
+    "initialize workspace";
+    "inspect workspace";
+    "modify function";
+    "modify value";
+    "show workspace";
     "add";
     "create";
     "disable";
@@ -173,8 +180,12 @@ let clarification mode normalized =
   else
     match mode with
     | Build ->
-        Some
-          "BUILD mode is active. The interaction/workspace foundation is being wired now; this request is recognized as a system-construction intent but automatic source modification is not enabled in this milestone yet."
+        begin match Centl_sci_build.handle normalized with
+        | Centl_sci_build.Handled handled -> Some handled.message
+        | Centl_sci_build.Not_handled ->
+            Some
+              "I understand this as a BUILD request, but this construction class is not implemented yet. Current Linux-first BUILD support can initialize or inspect the local workspace and create/modify parser-valid CENTL values and functions."
+        end
     | Math | Hybrid
       when starts_with_any [ "solve "; "find x "; "find the roots "; "roots of " ] lower
            && not (String.contains lower '=')
