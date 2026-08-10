@@ -98,6 +98,47 @@ let test_symlink_is_rejected_before_copy () =
       Centl_sci_portable.validate_bundle bundle
       |> expect_rejected "contains a symlink")
 
+let test_workspace_rejects_symlinked_managed_directory () =
+  let root = temp_dir "centl-caramels-workspace-dir-symlink-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace_root = Filename.concat root "workspace" in
+      Unix.mkdir workspace_root 0o700;
+      let outside = Filename.concat root "outside-config" in
+      Unix.mkdir outside 0o700;
+      Unix.symlink outside (Filename.concat workspace_root "config");
+      let workspace = Centl_sci_workspace.make workspace_root in
+      begin
+        try
+          Centl_sci_workspace.ensure workspace;
+          Alcotest.fail "workspace unexpectedly accepted a symlinked managed directory"
+        with
+        | Sys_error message ->
+            Alcotest.(check bool) "managed directory symlink rejection" true
+              (Option.is_some
+                 (Centl_sci_interaction.find_substring ~needle:"symbolic-link" message))
+      end;
+      Alcotest.(check int) "outside directory untouched" 0 (Array.length (Sys.readdir outside)))
+
+let test_atomic_json_write_ignores_predictable_tmp_symlink () =
+  let root = temp_dir "centl-caramels-atomic-symlink-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let directory = Filename.concat root "state" in
+      Centl_sci_workspace.ensure_directory directory;
+      let outside = Filename.concat root "outside.json" in
+      write_text outside "sentinel\n";
+      let target = Filename.concat directory "state.json" in
+      Unix.symlink outside (target ^ ".tmp");
+      Centl_sci_workspace.atomic_write_json target (`Assoc [ ("ok", `Bool true) ]);
+      Alcotest.(check string) "predictable tmp symlink target untouched" "sentinel\n"
+        (read_text outside);
+      let target_stat = Unix.lstat target in
+      Alcotest.(check bool) "atomic target is regular" true
+        (target_stat.Unix.st_kind = Unix.S_REG))
+
 let test_snapshot_rejects_symlinked_workspace_state () =
   let root = temp_dir "centl-caramels-snapshot-symlink-" in
   Fun.protect
@@ -257,6 +298,10 @@ let () =
             test_absolute_manifest_source_is_rejected;
           Alcotest.test_case "reject symlink" `Quick
             test_symlink_is_rejected_before_copy;
+          Alcotest.test_case "workspace directory rejects symlink" `Quick
+            test_workspace_rejects_symlinked_managed_directory;
+          Alcotest.test_case "atomic write ignores predictable tmp symlink" `Quick
+            test_atomic_json_write_ignores_predictable_tmp_symlink;
           Alcotest.test_case "snapshot rejects symlink" `Quick
             test_snapshot_rejects_symlinked_workspace_state;
           Alcotest.test_case "snapshot root rejects symlink" `Quick
