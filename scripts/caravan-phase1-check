@@ -4,11 +4,18 @@ set -eu
 PYTHON=${PYTHON:-python3}
 
 "$PYTHON" - <<'PY'
-import cryptography
-if cryptography.__version__ != "50.0.0":
-    raise SystemExit(
-        f"CARAVAN Phase 1 requires cryptography 50.0.0, got {cryptography.__version__}"
-    )
+from importlib.metadata import version
+
+required = {
+    "cryptography": "50.0.0",
+    "tuf": "7.0.0",
+}
+for package, expected in required.items():
+    actual = version(package)
+    if actual != expected:
+        raise SystemExit(
+            f"CARAVAN Phase 1 requires {package} {expected}, got {actual}"
+        )
 PY
 
 "$PYTHON" -m py_compile \
@@ -18,11 +25,15 @@ PY
   caravan/identity.py \
   caravan/policy.py \
   caravan/enrollment.py \
+  caravan/catalog.py \
+  caravan/tuf_lab.py \
   tests/test_caravan_phase1.py \
   tests/test_caravan_identity.py \
-  tests/test_caravan_enrollment.py
+  tests/test_caravan_enrollment.py \
+  tests/test_caravan_tuf_catalog.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
   tests/test_caravan_identity.py \
-  tests/test_caravan_enrollment.py
+  tests/test_caravan_enrollment.py \
+  tests/test_caravan_tuf_catalog.py
