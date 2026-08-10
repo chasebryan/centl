@@ -44,6 +44,7 @@ jobs:
         run: |
           python3 -m py_compile scripts/integrity.py scripts/supply-chain-check.py
           sh -n scripts/supply-chain
+          sh -n scripts/mirror-receipt
           sh -n scripts/release-sign
           sh -n scripts/release-verify
           sh -n scripts/offline-rebuild
@@ -95,6 +96,43 @@ jobs:
 
           FCF_SIGNIFY_PUBLIC_KEY="$keys/test.pub" \
             sh scripts/release-verify "$release"
+
+          # Whole-mirror receipts must prove exact tree membership, regular-file
+          # bytes, and symbolic-link target strings.
+          mirror_a="$root/mirror-a"
+          mirror_b="$root/mirror-b"
+          mkdir -p "$mirror_a/artifacts" "$mirror_a/models/example"
+          printf 'artifact bytes\n' > "$mirror_a/artifacts/example.tar.gz"
+          printf 'model bytes\n' > "$mirror_a/models/example/model.gguf"
+          ln -s ../../artifacts/example.tar.gz \
+            "$mirror_a/models/example/artifact-link"
+          sh scripts/mirror-receipt create "$mirror_a"
+          cp -a "$mirror_a" "$mirror_b"
+          sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"
+
+          printf 'tamper\n' >> "$mirror_b/artifacts/example.tar.gz"
+          if sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"; then
+            echo 'tampered mirror copy unexpectedly verified' >&2
+            exit 1
+          fi
+
+          rm -rf "$mirror_b"
+          cp -a "$mirror_a" "$mirror_b"
+          printf 'unexpected\n' > "$mirror_b/EXTRA"
+          if sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"; then
+            echo 'mirror copy with an unexpected file unexpectedly verified' >&2
+            exit 1
+          fi
+
+          rm -rf "$mirror_b"
+          cp -a "$mirror_a" "$mirror_b"
+          rm "$mirror_b/models/example/artifact-link"
+          ln -s ../../artifacts/different.tar.gz \
+            "$mirror_b/models/example/artifact-link"
+          if sh scripts/mirror-receipt compare "$mirror_a" "$mirror_b"; then
+            echo 'mirror copy with a changed symlink target unexpectedly verified' >&2
+            exit 1
+          fi
 
       - name: Install pinned F*
         run: |

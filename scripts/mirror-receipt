@@ -1,0 +1,134 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+command=${1:-}
+primary=${2:-}
+secondary=${3:-}
+manifest_name=MIRROR-SHA256SUMS
+manifest_hash_name=MIRROR-SHA256SUMS.sha256
+symlink_name=MIRROR-SYMLINKS
+symlink_hash_name=MIRROR-SYMLINKS.sha256
+
+fail() {
+  printf 'centl mirror-receipt: %s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  sh scripts/mirror-receipt create MIRROR_DIR
+  sh scripts/mirror-receipt verify MIRROR_DIR
+  sh scripts/mirror-receipt compare PRIMARY_MIRROR SECONDARY_COPY
+
+Regular-file bytes are covered by MIRROR-SHA256SUMS. Symbolic-link target strings
+are covered separately by MIRROR-SYMLINKS so valid package/runtime link layouts
+are preserved without dereferencing links outside the mirror. Unexpected regular
+files, missing files, unexpected links, changed link targets, and unsupported
+special filesystem objects are rejected by strict verification.
+EOF
+}
+
+need_dir() {
+  [ -n "$1" ] || fail "mirror directory is required"
+  [ -d "$1" ] || fail "mirror directory not found: $1"
+}
+
+canonical_dir() {
+  CDPATH= cd -- "$1" && pwd
+}
+
+verify_one() {
+  root=$1
+  manifest="$root/$manifest_name"
+  manifest_hash="$root/$manifest_hash_name"
+  symlinks="$root/$symlink_name"
+  symlinks_hash="$root/$symlink_hash_name"
+
+  [ -f "$manifest" ] || fail "mirror receipt missing: $manifest"
+  [ -f "$manifest_hash" ] || fail "mirror receipt checksum missing: $manifest_hash"
+  [ -f "$symlinks" ] || fail "mirror symlink receipt missing: $symlinks"
+  [ -f "$symlinks_hash" ] || fail "mirror symlink receipt checksum missing: $symlinks_hash"
+
+  python3 "$repo_root/scripts/integrity.py" verify "$manifest_hash" --root "$root"
+  python3 "$repo_root/scripts/integrity.py" verify "$symlinks_hash" --root "$root"
+  python3 "$repo_root/scripts/integrity.py" tree-verify "$manifest" \
+    --root "$root" \
+    --ignore "$manifest_name" \
+    --ignore "$manifest_hash_name" \
+    --ignore "$symlink_name" \
+    --ignore "$symlink_hash_name"
+  python3 "$repo_root/scripts/integrity.py" symlink-verify "$symlinks" \
+    --root "$root"
+}
+
+case "$command" in
+  create)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    need_dir "$primary"
+    primary=$(canonical_dir "$primary")
+    manifest="$primary/$manifest_name"
+    manifest_hash="$primary/$manifest_hash_name"
+    symlinks="$primary/$symlink_name"
+    symlinks_hash="$primary/$symlink_hash_name"
+
+    rm -f "$manifest" "$manifest_hash" "$symlinks" "$symlinks_hash"
+    python3 "$repo_root/scripts/integrity.py" tree-manifest \
+      --root "$primary" --output "$manifest"
+    python3 "$repo_root/scripts/integrity.py" symlink-manifest \
+      --root "$primary" --output "$symlinks"
+    python3 "$repo_root/scripts/integrity.py" hash "$manifest" > "$manifest_hash"
+    python3 "$repo_root/scripts/integrity.py" hash "$symlinks" > "$symlinks_hash"
+    verify_one "$primary"
+    printf 'FCF mirror receipt created and verified: %s\n' "$primary"
+    ;;
+  verify)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    need_dir "$primary"
+    primary=$(canonical_dir "$primary")
+    verify_one "$primary"
+    printf 'FCF mirror receipt verification: PASS (%s)\n' "$primary"
+    ;;
+  compare)
+    [ "$#" -eq 3 ] || { usage >&2; exit 2; }
+    need_dir "$primary"
+    need_dir "$secondary"
+    primary=$(canonical_dir "$primary")
+    secondary=$(canonical_dir "$secondary")
+
+    verify_one "$primary"
+    for receipt in \
+      "$manifest_name" "$manifest_hash_name" "$symlink_name" "$symlink_hash_name"
+    do
+      [ -f "$secondary/$receipt" ] || fail "secondary copy is missing $receipt"
+      cmp -s "$primary/$receipt" "$secondary/$receipt" ||
+        fail "secondary receipt differs from primary: $receipt"
+    done
+
+    python3 "$repo_root/scripts/integrity.py" verify \
+      "$secondary/$manifest_hash_name" --root "$secondary"
+    python3 "$repo_root/scripts/integrity.py" verify \
+      "$secondary/$symlink_hash_name" --root "$secondary"
+    python3 "$repo_root/scripts/integrity.py" tree-verify \
+      "$primary/$manifest_name" \
+      --root "$secondary" \
+      --ignore "$manifest_name" \
+      --ignore "$manifest_hash_name" \
+      --ignore "$symlink_name" \
+      --ignore "$symlink_hash_name"
+    python3 "$repo_root/scripts/integrity.py" symlink-verify \
+      "$primary/$symlink_name" --root "$secondary"
+
+    printf 'FCF mirror copy verification: PASS\n'
+    printf 'primary=%s\n' "$primary"
+    printf 'secondary=%s\n' "$secondary"
+    ;;
+  -h|--help|help|'')
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
