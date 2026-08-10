@@ -113,12 +113,12 @@ let collect workspace =
     warnings;
   }
 
-let healthy report = report.warnings = []
+let healthy (report : t) = report.warnings = []
 
-let render report =
+let render (report : t) =
   let extension_lines =
     report.extensions
-    |> List.map (fun extension ->
+    |> List.map (fun (extension : extension_entry) ->
            Printf.sprintf "  - %s — %s — %s — assurance=%s" extension.name
              (if extension.enabled then "enabled" else "disabled")
              (if extension.structurally_valid then "valid" else "invalid")
@@ -126,7 +126,7 @@ let render report =
   in
   let package_lines =
     report.packages
-    |> List.map (fun package ->
+    |> List.map (fun (package : package_entry) ->
            Printf.sprintf "  - %s — %s — members=%d" package.name
              (if package.valid then "valid" else "invalid") package.members)
   in
@@ -150,8 +150,8 @@ let render report =
         "Assurance note: workspace health is structural consistency, not a trust score.";
       ])
 
-let to_json report =
-  let extension_json extension =
+let to_json (report : t) =
+  let extension_json (extension : extension_entry) =
     `Assoc
       [
         ("name", `String extension.name);
@@ -162,7 +162,7 @@ let to_json report =
         ("notes", `List (List.map (fun note -> `String note) extension.notes));
       ]
   in
-  let package_json package =
+  let package_json (package : package_entry) =
     `Assoc
       [
         ("name", `String package.name);
