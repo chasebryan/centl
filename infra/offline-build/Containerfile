@@ -1,4 +1,4 @@
-FROM ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
+FROM docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GMP_VERSION=6.3.0
@@ -76,7 +76,7 @@ RUN set -eux; \
 RUN set -eux; \
     mkdir -p /opt/fcf-capsule; \
     { \
-      printf 'base=ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f\n'; \
+      printf 'base=docker.io/library/ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f\n'; \
       printf 'ocaml=%s\n' "$OCAML_VERSION"; \
       printf 'julia=%s\n' "$JULIA_VERSION"; \
       printf 'gmp=%s\n' "$GMP_VERSION"; \
