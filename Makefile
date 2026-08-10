@@ -84,8 +84,12 @@ supply-chain-snapshot-julia:
 	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
 	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
 
-supply-chain-preserve: integrity-source supply-chain-check
+supply-chain-preserve:
 	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
+	git diff --quiet -- && git diff --cached --quiet -- || { \
+		echo "tracked worktree must be clean before preservation" >&2; exit 2; \
+	}
+	$(MAKE) integrity-source supply-chain-check
 	@if [ -n "$(MODEL)" ]; then \
 		sh scripts/supply-chain sync "$(MIRROR)" "$(MODEL)"; \
 	else \
@@ -95,7 +99,8 @@ supply-chain-preserve: integrity-source supply-chain-check
 	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
 	mkdir -p "$(MIRROR)/project"
 	cp "$(INTEGRITY_MANIFEST)" "$(MIRROR)/project/SOURCE-SHA256SUMS"
-	cp "$(INTEGRITY_MANIFEST).sha256" "$(MIRROR)/project/SOURCE-SHA256SUMS.sha256"
+	$(PYTHON) scripts/integrity.py hash "$(MIRROR)/project/SOURCE-SHA256SUMS" \
+		> "$(MIRROR)/project/SOURCE-SHA256SUMS.sha256"
 	git rev-parse HEAD > "$(MIRROR)/project/SOURCE-COMMIT"
 	sh scripts/supply-chain audit "$(MIRROR)"
 
