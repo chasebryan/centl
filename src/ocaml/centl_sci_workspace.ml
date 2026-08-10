@@ -100,6 +100,9 @@ let layout workspace =
     workspace.generated;
   ]
 
+let same_directory (left : Unix.stats) (right : Unix.stats) =
+  left.Unix.st_dev = right.Unix.st_dev && left.Unix.st_ino = right.Unix.st_ino
+
 let require_managed_directory path =
   match lstat path with
   | Some stat when stat.Unix.st_kind = Unix.S_DIR ->
@@ -108,7 +111,19 @@ let require_managed_directory path =
       if stat.Unix.st_perm land 0o022 <> 0 then
         raise
           (Sys_error
-             ("workspace directory must not be group/other writable: " ^ path))
+             ("workspace directory must not be group/other writable: " ^ path));
+      Unix.chmod path 0o700;
+      begin match lstat path with
+      | Some verified
+        when verified.Unix.st_kind = Unix.S_DIR
+             && same_directory stat verified
+             && verified.Unix.st_uid = Unix.geteuid ()
+             && verified.Unix.st_perm land 0o077 = 0 -> ()
+      | _ ->
+          raise
+            (Sys_error
+               ("workspace directory permissions changed during validation: " ^ path))
+      end
   | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
       raise (Sys_error ("refusing symbolic-link workspace directory: " ^ path))
   | Some _ -> raise (Sys_error ("workspace path is not a directory: " ^ path))
