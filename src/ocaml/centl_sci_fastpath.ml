@@ -97,6 +97,24 @@ let unsupported_ir reason =
   | Ok ir -> Some ir
   | Error _ -> None
 
+let verification_ir left relation right =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "mathematics");
+           ("problem_class", `String "verification_claim");
+           ("operation", `String "verify");
+           ("assumptions", `List []);
+           ("left", `String left);
+           ("relation", `String relation);
+           ("right", `String right);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
 let split_once_ci needle text =
   let lower = String.lowercase_ascii text in
   match find_substring ~needle:(String.lowercase_ascii needle) lower with
@@ -109,6 +127,58 @@ let split_once_ci needle text =
         |> String.trim
       in
       Some (left, right)
+
+let closed_verification problem =
+  let cleaned = trim_terminal problem in
+  let body =
+    match drop_prefix_ci "verify whether " cleaned with
+    | Some value -> Some value
+    | None ->
+        begin match drop_prefix_ci "check whether " cleaned with
+        | Some value -> Some value
+        | None -> drop_prefix_ci "verify " cleaned
+        end
+  in
+  match body with
+  | None -> None
+  | Some body when body = "" -> None
+  | Some body ->
+      let lower = String.lowercase_ascii body in
+      if
+        find_substring ~needle:" for all " lower <> None
+        || find_substring ~needle:" assuming " lower <> None
+        || find_substring ~needle:" under the assumption " lower <> None
+      then None
+      else
+        let relations =
+          [
+            (" is greater than or equal to ", "greater_or_equal");
+            (" greater than or equal to ", "greater_or_equal");
+            (" is less than or equal to ", "less_or_equal");
+            (" less than or equal to ", "less_or_equal");
+            (" is not equal to ", "not_equal");
+            (" not equal to ", "not_equal");
+            (" is equal to ", "equal");
+            (" equals ", "equal");
+            (" equal to ", "equal");
+            (">=", "greater_or_equal");
+            ("<=", "less_or_equal");
+            ("!=", "not_equal");
+            ("=", "equal");
+            (">", "greater_than");
+            ("<", "less_than");
+          ]
+        in
+        let rec choose = function
+          | [] -> None
+          | (needle, relation) :: rest ->
+              begin match split_once_ci needle body with
+              | Some (left, right) when left <> "" && right <> "" ->
+                  verification_ir left relation right
+              | _ -> choose rest
+              end
+        in
+        choose relations
 
 let symbolic_transform problem =
   let cleaned = trim_terminal problem in
@@ -500,18 +570,22 @@ let interpret problem =
           begin match physical_constant problem with
           | Some _ as result -> result
           | None ->
-              begin match polynomial_equation problem with
+              begin match closed_verification problem with
               | Some _ as result -> result
               | None ->
-                  begin match Centl_sci_spoken_poly.interpret problem with
+                  begin match polynomial_equation problem with
                   | Some _ as result -> result
                   | None ->
-                      begin match symbolic_transform problem with
+                      begin match Centl_sci_spoken_poly.interpret problem with
                       | Some _ as result -> result
                       | None ->
-                          begin match approximation problem with
+                          begin match symbolic_transform problem with
                           | Some _ as result -> result
-                          | None -> exact_expression problem
+                          | None ->
+                              begin match approximation problem with
+                              | Some _ as result -> result
+                              | None -> exact_expression problem
+                              end
                           end
                       end
                   end
