@@ -105,8 +105,6 @@ meaning. Model weights remain separate artifacts and are never silently download
 See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
 [docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.
 
-![CENTL-MIRAGE — a camel appearing through desert heat haze](assets/branding/centl-mirage.png)
-
 ## CENTL-MIRAGE
 
 **Mathematical Introspective Recursive Autonomous Growth Engine**
