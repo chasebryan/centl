@@ -122,6 +122,38 @@ while preserving explicit provenance and consent for optional semantic models.
 See [docs/SCI.md](docs/SCI.md) for the architecture and evidence boundary and
 [docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for platform policy.
 
+## CENTL CARAVAN
+
+![CENTL CARAVAN — Content-Addressed Resilient Artifact Verification and Availability Network](assets/branding/fcf-centl-caravan.png)
+
+**Content-Addressed Resilient Artifact Verification and Availability Network**
+
+CENTL CARAVAN is the FCF's developing volunteer preservation and distribution
+layer for `public-approved` CENTL artifacts. Ordinary Linux machines can
+contribute bounded storage, bandwidth, and availability without becoming content
+authorities.
+
+> A carrier may provide bytes, but a carrier may never define which bytes are trusted.
+
+CARAVAN treats volunteer carriers as untrusted storage and transport. Artifact
+identity comes from FCF-authenticated metadata, exact byte lengths, and standard
+SHA-256 content identities; bad bytes are rejected rather than made trustworthy
+by mirror reputation or peer majority.
+
+The normal carrier design is unprivileged and outbound-only: no root or sudo,
+public listening port, or router configuration should be required. The default
+download path uses FCF relay infrastructure so volunteer carriers do not receive
+a downloader's direct network address. The public FCF site is intended to expose
+aggregate network health — available caravans, protected artifacts, and verified
+replicas — without publishing volunteer endpoints or identities.
+
+CARAVAN is now in its documented local-laboratory implementation phase. The
+public volunteer network is **not yet operational**. See
+[docs/CARAVAN.md](docs/CARAVAN.md),
+[docs/CARAVAN-THREAT-MODEL.md](docs/CARAVAN-THREAT-MODEL.md),
+[docs/CARAVAN-HOST-POLICY.md](docs/CARAVAN-HOST-POLICY.md), and
+[docs/CARAVAN-ROLLOUT.md](docs/CARAVAN-ROLLOUT.md).
+
 ## Physics
 
 CENTL Physics provides exact rational unit conversion, SI dimensional analysis,
@@ -150,6 +182,10 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 ## Documentation
 
 - [CENTL-SCi](docs/SCI.md)
+- [CENTL CARAVAN](docs/CARAVAN.md)
+- [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
+- [CARAVAN volunteer host policy](docs/CARAVAN-HOST-POLICY.md)
+- [CARAVAN rollout](docs/CARAVAN-ROLLOUT.md)
 - [Installation](docs/INSTALL.md)
 - [Syntax](docs/SYNTAX.md)
 - [Mathematics](docs/MATHEMATICS.md)
