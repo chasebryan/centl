@@ -121,6 +121,38 @@ let bundle_header path =
       | _ -> Error "workspace bundle metadata is not a recognized Caramels bundle"
     with Yojson.Json_error message | Sys_error message -> Error message
 
+let rec reject_symlinks path =
+  try
+    let stat = Unix.lstat path in
+    match stat.Unix.st_kind with
+    | Unix.S_LNK -> Error ("workspace bundle contains a symlink: " ^ path)
+    | Unix.S_DIR ->
+        let entries = Sys.readdir path |> Array.to_list in
+        let rec loop = function
+          | [] -> Ok ()
+          | name :: rest ->
+              begin match reject_symlinks (Filename.concat path name) with
+              | Ok () -> loop rest
+              | Error _ as error -> error
+              end
+        in
+        loop entries
+    | Unix.S_REG -> Ok ()
+    | _ -> Error ("workspace bundle contains an unsupported filesystem object: " ^ path)
+  with Unix.Unix_error (_, _, message) | Sys_error message -> Error message
+
+let safe_relative_source source =
+  let source = String.trim source in
+  source <> ""
+  && Filename.is_relative source
+  && not (String.contains source '\\')
+  &&
+  let components = String.split_on_char '/' source in
+  components <> []
+  && List.for_all
+       (fun component -> component <> "" && component <> "." && component <> "..")
+       components
+
 let manifest_names workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.extensions) then Ok []
   else
@@ -134,6 +166,11 @@ let manifest_names workspace =
           let name = Filename.chop_suffix filename ".json" in
           begin match Centl_sci_extensions.read_manifest workspace name with
           | Error message -> Error ("invalid extension manifest " ^ filename ^ ": " ^ message)
+          | Ok manifest when not (safe_relative_source manifest.source) ->
+              Error
+                (Printf.sprintf
+                   "bundle extension %s has a source path outside the normalized relative bundle namespace: %s"
+                   manifest.name manifest.source)
           | Ok manifest when manifest.enabled && manifest.kind <> "native_centl" ->
               Error
                 (Printf.sprintf
@@ -190,19 +227,25 @@ let validate_bundle path =
   if not (Sys.file_exists path) || not (Sys.is_directory path) then
     Error ("workspace bundle directory does not exist: " ^ path)
   else
-    match bundle_header path with
+    match reject_symlinks path with
     | Error _ as error -> error
     | Ok () ->
-        let bundle_workspace = Centl_sci_workspace.make ~name:"import-bundle" path in
-        begin match manifest_names bundle_workspace with
+        begin match bundle_header path with
         | Error _ as error -> error
-        | Ok names ->
-            begin match validate_extensions bundle_workspace names with
+        | Ok () ->
+            let bundle_workspace =
+              Centl_sci_workspace.make ~name:"import-bundle" path
+            in
+            begin match manifest_names bundle_workspace with
             | Error _ as error -> error
-            | Ok () ->
-                begin match validate_packages bundle_workspace names with
+            | Ok names ->
+                begin match validate_extensions bundle_workspace names with
                 | Error _ as error -> error
-                | Ok () -> Ok ()
+                | Ok () ->
+                    begin match validate_packages bundle_workspace names with
+                    | Error _ as error -> error
+                    | Ok () -> Ok ()
+                    end
                 end
             end
         end
