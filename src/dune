@@ -38,6 +38,7 @@
   Centl_iteration
   Centl_syntax
   Centl_history
+  Centl_editor
   Centl_engine
   Centl_version
   Centl_build
