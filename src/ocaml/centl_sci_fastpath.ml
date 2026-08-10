@@ -242,6 +242,52 @@ let exact_expression problem =
       then None
       else native_ir expression
 
+let parse_positive_digits text =
+  let text = String.trim text in
+  match int_of_string_opt text with
+  | Some value when value >= 1 && value <= 1_000 -> Some value
+  | _ -> None
+
+let strip_digit_suffix text =
+  let lower = String.lowercase_ascii (String.trim text) in
+  let suffixes = [ " significant digits"; " digits" ] in
+  let rec choose = function
+    | [] -> None
+    | suffix :: rest ->
+        if String.ends_with ~suffix lower then
+          let raw =
+            String.sub text 0 (String.length text - String.length suffix)
+            |> String.trim
+          in
+          Option.map (fun digits -> digits) (parse_positive_digits raw)
+        else choose rest
+  in
+  choose suffixes
+
+let approximation problem =
+  let cleaned = trim_terminal problem in
+  let body =
+    match drop_prefix_ci "approximate " cleaned with
+    | Some value -> Some value
+    | None ->
+        begin match drop_prefix_ci "approximation of " cleaned with
+        | Some value -> Some value
+        | None -> drop_prefix_ci "give an approximation of " cleaned
+        end
+  in
+  match body with
+  | None -> None
+  | Some body when body = "" -> None
+  | Some body ->
+      begin match split_once_ci " to " body with
+      | Some (expression, precision) when expression <> "" ->
+          begin match strip_digit_suffix precision with
+          | Some digits -> native_ir (Printf.sprintf "approx(%s, %d)" expression digits)
+          | None -> native_ir ("approx(" ^ body ^ ")")
+          end
+      | _ -> native_ir ("approx(" ^ body ^ ")")
+      end
+
 let canonical_unit text =
   match String.lowercase_ascii (String.trim text) with
   | "m" | "meter" | "meters" | "metre" | "metres" -> Some "m"
@@ -462,7 +508,11 @@ let interpret problem =
                   | None ->
                       begin match symbolic_transform problem with
                       | Some _ as result -> result
-                      | None -> exact_expression problem
+                      | None ->
+                          begin match approximation problem with
+                          | Some _ as result -> result
+                          | None -> exact_expression problem
+                          end
                       end
                   end
               end
