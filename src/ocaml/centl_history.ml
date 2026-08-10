@@ -118,7 +118,27 @@ let close_noerr descriptor =
 let set_private_file_mode ?(fchmod = Unix.fchmod) ~win32 descriptor =
   if not win32 then fchmod descriptor 0o600
 
+let lstat path =
+  try Some (Unix.lstat path)
+  with Unix.Unix_error (Unix.ENOENT, _, _) -> None
+
+let same_file left right =
+  left.Unix.st_dev = right.Unix.st_dev && left.Unix.st_ino = right.Unix.st_ino
+
+let require_owned_regular path metadata =
+  if metadata.Unix.st_kind <> Unix.S_REG then
+    raise (Sys_error (path ^ " is not a regular file"));
+  if not Sys.win32 && metadata.Unix.st_uid <> Unix.geteuid () then
+    raise (Sys_error (path ^ " is not owned by the current user"))
+
 let read_file storage =
+  let expected =
+    match lstat storage.path with
+    | None -> raise (Sys_error (storage.path ^ " does not exist"))
+    | Some metadata ->
+        require_owned_regular storage.path metadata;
+        metadata
+  in
   let descriptor =
     Unix.openfile storage.path [ Unix.O_RDONLY; Unix.O_SHARE_DELETE ] 0
   in
@@ -126,9 +146,12 @@ let read_file storage =
     ~finally:(fun () -> close_noerr descriptor)
     (fun () ->
       let metadata = Unix.fstat descriptor in
+      require_owned_regular storage.path metadata;
+      if not (same_file expected metadata) then
+        raise (Sys_error "history file changed while it was being opened");
+      set_private_file_mode ~win32:Sys.win32 descriptor;
       if
-        metadata.st_kind <> Unix.S_REG
-        || metadata.st_size < 0
+        metadata.st_size < 0
         || metadata.st_size > max serialized_overhead storage.limits.max_bytes
       then []
       else
@@ -170,8 +193,25 @@ let rec ensure_directory directory =
 let prepare_directory path =
   let directory = Filename.dirname path in
   ensure_directory directory;
-  (if String.lowercase_ascii (Filename.basename directory) = "centl" then
-     try Unix.chmod directory 0o700 with Unix.Unix_error _ -> ());
+  let metadata = Unix.lstat directory in
+  if metadata.Unix.st_kind = Unix.S_LNK then
+    raise (Sys_error ("refusing symbolic-link history directory: " ^ directory));
+  if metadata.Unix.st_kind <> Unix.S_DIR then
+    raise (Sys_error (directory ^ " is not a directory"));
+  if not Sys.win32 then begin
+    if metadata.Unix.st_uid <> Unix.geteuid () then
+      raise (Sys_error ("history directory is not owned by the current user: " ^ directory));
+    if String.lowercase_ascii (Filename.basename directory) = "centl" then
+      Unix.chmod directory 0o700;
+    let verified = Unix.lstat directory in
+    if
+      verified.Unix.st_kind <> Unix.S_DIR
+      || not (same_file metadata verified)
+      || verified.Unix.st_uid <> Unix.geteuid ()
+      || verified.Unix.st_perm land 0o022 <> 0
+    then
+      raise (Sys_error ("unsafe history directory: " ^ directory))
+  end;
   directory
 
 let write_all descriptor contents =
@@ -242,15 +282,40 @@ let atomic_write path contents =
       committed := true;
       sync_directory directory)
 
+let validate_lock_path lock_path descriptor expected =
+  let opened = Unix.fstat descriptor in
+  require_owned_regular lock_path opened;
+  begin match expected with
+  | Some metadata when not (same_file metadata opened) ->
+      raise (Sys_error "history lock changed while it was being opened")
+  | Some _ -> ()
+  | None ->
+      begin match lstat lock_path with
+      | Some metadata ->
+          require_owned_regular lock_path metadata;
+          if not (same_file metadata opened) then
+            raise (Sys_error "history lock changed while it was being created")
+      | None -> raise (Sys_error "history lock disappeared while it was being created")
+      end
+  end
+
 let with_storage_lock storage action =
   let directory = prepare_directory storage.path in
   let lock_path = Filename.concat directory "history.lock" in
+  let expected =
+    match lstat lock_path with
+    | None -> None
+    | Some metadata ->
+        require_owned_regular lock_path metadata;
+        Some metadata
+  in
   let descriptor =
     Unix.openfile lock_path [ Unix.O_RDWR; Unix.O_CREAT ] 0o600
   in
   Fun.protect
     ~finally:(fun () -> close_noerr descriptor)
     (fun () ->
+      validate_lock_path lock_path descriptor expected;
       set_private_file_mode ~win32:Sys.win32 descriptor;
       Unix.lockf descriptor Unix.F_LOCK 0;
       action ())
