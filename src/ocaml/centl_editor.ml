@@ -4,6 +4,11 @@ type result =
   | End_of_input
   | Interrupted
 
+type ghost = {
+  display : string;
+  accept : string option;
+}
+
 let write text =
   output_string stdout text;
   flush stdout
@@ -11,10 +16,15 @@ let write text =
 let save_cursor = "\027[s"
 let restore_cursor = "\027[u"
 
-let redraw ~prompt ~text ~cursor =
-  write (restore_cursor ^ "\027[J" ^ prompt ^ text);
-  if cursor < String.length text then
-    write (restore_cursor ^ prompt ^ String.sub text 0 cursor)
+let redraw ?ghost ~prompt ~text ~cursor =
+  let suffix =
+    match ghost with
+    | Some value when cursor = String.length text && value.display <> "" ->
+        "\027[2m" ^ value.display ^ "\027[0m"
+    | _ -> ""
+  in
+  write (restore_cursor ^ "\027[J" ^ prompt ^ text ^ suffix);
+  write (restore_cursor ^ prompt ^ String.sub text 0 cursor)
 
 let identifier_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
@@ -46,7 +56,7 @@ let replace_span text start finish replacement =
   String.sub text 0 start ^ replacement
   ^ String.sub text finish (String.length text - finish)
 
-let complete ~prompt ~candidates ~max_bytes text cursor =
+let complete ~prompt ~candidates ~max_bytes ~redraw_current text cursor =
   let start, finish = completion_span !text !cursor in
   let prefix = String.sub !text start (!cursor - start) in
   let matches =
@@ -63,7 +73,7 @@ let complete ~prompt ~candidates ~max_bytes text cursor =
     else begin
       text := next;
       cursor := start + String.length replacement;
-      redraw ~prompt ~text:!text ~cursor:!cursor;
+      redraw_current ();
       true
     end
   in
@@ -76,9 +86,9 @@ let complete ~prompt ~candidates ~max_bytes text cursor =
       let shared = List.fold_left common_prefix first rest in
       if String.length shared > String.length prefix then apply shared
       else begin
-        redraw ~prompt ~text:!text ~cursor:!cursor;
+        redraw_current ();
         write ("\r\n" ^ String.concat "  " matches ^ "\r\n" ^ save_cursor);
-        redraw ~prompt ~text:!text ~cursor:!cursor;
+        redraw_current ();
         false
       end
 
@@ -89,7 +99,7 @@ let read_canonical ~prompt ~max_bytes =
   | Centl_protocol.Oversized -> Input_limit_exceeded
   | Centl_protocol.End -> End_of_input
 
-let read_raw ~prompt ~history ~candidates ~max_bytes
+let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
     (original : Unix.terminal_io) =
   let raw =
     {
@@ -118,6 +128,10 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
       let history_index = ref (Array.length entries) in
       let draft = ref "" in
       let byte = Bytes.create 1 in
+      let current_ghost () = suggest !text !cursor in
+      let redraw_current () =
+        redraw ?ghost:(current_ghost ()) ~prompt ~text:!text ~cursor:!cursor
+      in
       let rec read_byte () =
         try
           if Unix.read Unix.stdin byte 0 1 = 0 then None
@@ -135,7 +149,7 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
           text := value;
           cursor := String.length value;
           overflowed := false;
-          redraw ~prompt ~text:!text ~cursor:!cursor
+          redraw_current ()
         end
       in
       let older () =
@@ -164,7 +178,20 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             String.sub !text 0 !cursor ^ String.make 1 c
             ^ String.sub !text !cursor (String.length !text - !cursor);
           incr cursor;
-          redraw ~prompt ~text:!text ~cursor:!cursor
+          redraw_current ()
+        end
+      in
+      let insert_text value =
+        let next =
+          String.sub !text 0 !cursor ^ value
+          ^ String.sub !text !cursor (String.length !text - !cursor)
+        in
+        if String.length next > max_bytes then write "\007"
+        else begin
+          text := next;
+          cursor := !cursor + String.length value;
+          overflowed := false;
+          redraw_current ()
         end
       in
       let backspace () =
@@ -174,7 +201,7 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             ^ String.sub !text !cursor (String.length !text - !cursor);
           decr cursor;
           overflowed := false;
-          redraw ~prompt ~text:!text ~cursor:!cursor
+          redraw_current ()
         end
       in
       let delete () =
@@ -184,7 +211,7 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             ^ String.sub !text (!cursor + 1)
                 (String.length !text - !cursor - 1);
           overflowed := false;
-          redraw ~prompt ~text:!text ~cursor:!cursor
+          redraw_current ()
         end
       in
       let submit () =
@@ -213,16 +240,16 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             | Some 'B' -> newer ()
             | Some 'C' when !cursor < String.length !text ->
                 incr cursor;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | Some 'D' when !cursor > 0 ->
                 decr cursor;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | Some 'H' ->
                 cursor := 0;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | Some 'F' ->
                 cursor := String.length !text;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | Some '3' -> if escape_read () = Some '~' then delete ()
             | _ -> ()
             end
@@ -230,13 +257,21 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             begin match escape_read () with
             | Some 'H' ->
                 cursor := 0;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | Some 'F' ->
                 cursor := String.length !text;
-                redraw ~prompt ~text:!text ~cursor:!cursor
+                redraw_current ()
             | _ -> ()
             end
         | _ -> ()
+      in
+      let tab () =
+        match current_ghost () with
+        | Some { accept = Some value; _ } when !cursor = String.length !text ->
+            insert_text value
+        | _ ->
+            ignore
+              (complete ~prompt ~candidates ~max_bytes ~redraw_current text cursor)
       in
       let rec loop () =
         match input () with
@@ -253,14 +288,14 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             loop ()
         | '\001' ->
             cursor := 0;
-            redraw ~prompt ~text:!text ~cursor:!cursor;
+            redraw_current ();
             loop ()
         | '\005' ->
             cursor := String.length !text;
-            redraw ~prompt ~text:!text ~cursor:!cursor;
+            redraw_current ();
             loop ()
         | '\t' ->
-            ignore (complete ~prompt ~candidates ~max_bytes text cursor);
+            tab ();
             loop ()
         | '\016' ->
             older ();
@@ -275,7 +310,7 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
             text := String.sub !text !cursor (String.length !text - !cursor);
             cursor := 0;
             overflowed := false;
-            redraw ~prompt ~text:!text ~cursor:!cursor;
+            redraw_current ();
             loop ()
         | '\027' ->
             escape ();
@@ -287,9 +322,10 @@ let read_raw ~prompt ~history ~candidates ~max_bytes
         | exception End_of_file -> end_of_input ()
       in
       write (save_cursor ^ prompt);
+      redraw_current ();
       loop ())
 
-let read_line ~prompt ~history ~candidates ~max_bytes =
+let read_line ?(suggest = fun _ _ -> None) ~prompt ~history ~candidates ~max_bytes =
   if
     Sys.win32
     || not (Unix.isatty Unix.stdout)
@@ -297,6 +333,7 @@ let read_line ~prompt ~history ~candidates ~max_bytes =
   then read_canonical ~prompt ~max_bytes
   else
     try
-      read_raw ~prompt ~history ~candidates ~max_bytes (Unix.tcgetattr Unix.stdin)
+      read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
+        (Unix.tcgetattr Unix.stdin)
     with Unix.Unix_error _ | Invalid_argument _ ->
       read_canonical ~prompt ~max_bytes
