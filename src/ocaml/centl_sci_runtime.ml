@@ -116,6 +116,18 @@ let plan = function
                 ("to_unit", `String to_unit);
               ];
         }
+  | Centl_sci_ir.Physical_constant data ->
+      Some
+        {
+          executor = Physics;
+          request =
+            `Assoc
+              [
+                ("version", `Int 1);
+                ("action", `String "constant");
+                ("symbol", `String data.symbol);
+              ];
+        }
   | Centl_sci_ir.Uniform_gravity_particle data ->
       Some
         {
