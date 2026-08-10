@@ -65,6 +65,7 @@
   Centl_sci_snapshot
   Centl_sci_extensions
   Centl_sci_build_plan
+  Centl_sci_scaffold
   Centl_sci_build
   Centl_sci_evidence
   Centl_sci_session
