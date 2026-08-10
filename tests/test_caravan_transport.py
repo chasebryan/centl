@@ -87,6 +87,72 @@ class SessionTests(unittest.TestCase):
             with self.assertRaises(SessionError):
                 sessions.authenticate(session.token, now=15)
 
+    def test_pending_challenges_are_globally_and_per_carrier_bounded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            identity_a = CarrierIdentity.create(root / "identity-a")
+            identity_b = CarrierIdentity.create(root / "identity-b")
+            _register(coordinator, identity_a)
+            _register(coordinator, identity_b)
+            sessions = SessionAuthority(
+                coordinator,
+                max_pending_challenges=2,
+                max_challenges_per_node=1,
+            )
+
+            sessions.issue_challenge(identity_a.node_id, now=10)
+            with self.assertRaisesRegex(SessionError, "for carrier"):
+                sessions.issue_challenge(identity_a.node_id, now=10)
+            sessions.issue_challenge(identity_b.node_id, now=10)
+
+            identity_c = CarrierIdentity.create(root / "identity-c")
+            _register(coordinator, identity_c)
+            with self.assertRaisesRegex(SessionError, "too many pending carrier"):
+                sessions.issue_challenge(identity_c.node_id, now=10)
+
+    def test_active_session_count_is_bounded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator = CoordinatorState(root / "coordinator.sqlite")
+            identity = CarrierIdentity.create(root / "identity")
+            _register(coordinator, identity)
+            sessions = SessionAuthority(
+                coordinator,
+                max_pending_challenges=2,
+                max_challenges_per_node=2,
+                max_active_sessions=1,
+            )
+
+            first = sessions.issue_challenge(identity.node_id, now=10)
+            first_payload = session_proof_payload(
+                identity.node_id,
+                first.challenge_id,
+                first.challenge,
+            )
+            sessions.complete_challenge(
+                node_id=identity.node_id,
+                challenge_id=first.challenge_id,
+                challenge=first.challenge,
+                signature=identity.sign(first_payload),
+                now=10,
+            )
+
+            second = sessions.issue_challenge(identity.node_id, now=10)
+            second_payload = session_proof_payload(
+                identity.node_id,
+                second.challenge_id,
+                second.challenge,
+            )
+            with self.assertRaisesRegex(SessionError, "too many active carrier sessions"):
+                sessions.complete_challenge(
+                    node_id=identity.node_id,
+                    challenge_id=second.challenge_id,
+                    challenge=second.challenge,
+                    signature=identity.sign(second_payload),
+                    now=10,
+                )
+
 
 class OutboundTransportTests(unittest.TestCase):
     def test_carrier_connects_outbound_heartbeats_advertises_and_polls(self) -> None:
