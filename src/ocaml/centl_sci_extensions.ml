@@ -148,7 +148,9 @@ let read_text path =
       (Fun.protect
          ~finally:(fun () -> close_in_noerr channel)
          (fun () -> really_input_string channel (in_channel_length channel)))
-  with Sys_error message | End_of_file -> Error message
+  with
+  | Sys_error message -> Error message
+  | End_of_file -> Error ("unexpected end of file while reading extension source: " ^ path)
 
 let validate_native_activation workspace manifest =
   let path = source_path workspace manifest in
