@@ -9,7 +9,7 @@ let candidate ~id ~strategy ~source_requirement ~capability_inputs =
       ~assurance ~mutates_workspace
   in
   {
-    Centl_sci_mirage_candidate.id;
+    Centl_sci_mirage_candidate.id = id;
     cell_id = 1;
     source_requirement;
     strategy;
