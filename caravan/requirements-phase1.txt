@@ -1,3 +1,4 @@
 # Phase 1 laboratory Python dependencies.
 # These pins are not yet part of a public CARAVAN agent release.
 cryptography==50.0.0
+tuf==7.0.0
