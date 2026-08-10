@@ -189,7 +189,9 @@ let canonicalize_root_request text =
   | None -> text
   | Some body ->
       let lower_body = String.lowercase_ascii body in
-      if String.contains body '=' || find_substring ~needle:" equals " lower_body <> None
+      if
+        String.contains body '='
+        || find_substring ~needle:" equals " lower_body <> None
       then "solve " ^ body
       else "solve " ^ body ^ " equals zero"
 
@@ -198,8 +200,11 @@ let canonicalize_conversion text =
   | None -> text
   | Some body ->
       let lower = String.lowercase_ascii body in
-      if find_substring ~needle:" into " lower <> None || find_substring ~needle:" to " lower <> None
-      then "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
+      if
+        find_substring ~needle:" into " lower <> None
+        || find_substring ~needle:" to " lower <> None
+      then
+        "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
       else text
 
 let canonicalize_common_intent text =
@@ -245,6 +250,8 @@ let session_commands =
 
 let math_completions =
   [
+    "approx";
+    "approximate";
     "calculate";
     "compute";
     "differentiate";
@@ -261,13 +268,16 @@ let math_completions =
 
 let physics_completions =
   [
+    "N_A";
     "calculate";
     "compute";
     "constant";
     "convert";
     "dt";
     "force";
+    "g0";
     "gravity";
+    "k_B";
     "mass";
     "position";
     "simulate";
@@ -277,25 +287,31 @@ let physics_completions =
 
 let build_completions =
   [
-    "function";
-    "value";
-    "workspace";
-    "extensions";
+    "adapter";
+    "add";
+    "capabilities";
     "create";
+    "disable";
+    "enable";
+    "export";
+    "extend";
+    "extensions";
+    "function";
+    "import";
     "initialize";
     "inspect";
     "modify";
-    "show";
-    "add";
-    "disable";
-    "enable";
-    "extend";
-    "remove";
-    "undo";
-    "scaffold";
+    "package";
+    "packages";
     "prepare";
+    "remove";
+    "scaffold";
+    "show";
+    "undo";
     "upstream";
-    "adapter";
+    "validate";
+    "value";
+    "workspace";
   ]
 
 let completion_candidates mode =
@@ -312,10 +328,16 @@ let starts_with_any prefixes text =
   List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
 
 let mechanics_missing lower =
-  if not (starts_with_any [ "simulate particle"; "simulate a particle"; "simulate the particle" ] lower) then []
+  if
+    not
+      (starts_with_any
+         [ "simulate particle"; "simulate a particle"; "simulate the particle" ]
+         lower)
+  then []
   else
     [ "mass"; "position"; "velocity"; "gravity"; "dt"; "steps" ]
-    |> List.filter (fun field -> find_substring ~needle:(field ^ " ") lower = None)
+    |> List.filter (fun field ->
+           find_substring ~needle:(field ^ " ") lower = None)
 
 let clarification mode normalized =
   let lower = String.lowercase_ascii normalized in
@@ -325,7 +347,7 @@ let clarification mode normalized =
     match mode with
     | Build ->
         Some
-          "BUILD requests can create or modify local CENTL definitions, inspect and revise the workspace, scaffold external/native extensions, prepare contribution artifacts, or produce a first-pass implementation plan. State the capability or change you want."
+          "BUILD can inspect capabilities; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
     | (Phys | Hybrid) when missing_mechanics <> [] ->
         Some
           ("I understand this as a uniform-gravity particle simulation, but required fields are missing: "
@@ -333,19 +355,28 @@ let clarification mode normalized =
           ^ ". Supply mass, position, velocity, gravity, dt, and steps. Example: "
           ^ "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10")
     | (Phys | Hybrid)
-      when starts_with_any [ "simulate particle"; "simulate a particle"; "simulate the particle" ] lower ->
+      when
+        starts_with_any
+          [ "simulate particle"; "simulate a particle"; "simulate the particle" ]
+          lower ->
         Some
           "I recognize a particle-simulation request, but its typed fields could not be parsed safely. Use explicit vector forms such as position (0,0,10) m and velocity (1,0,0) m/s; CENTL-SCi will not invent missing physical values."
     | Math | Hybrid
-      when starts_with_any [ "solve "; "find x "; "find the roots "; "roots of " ] lower
-           && not (String.contains lower '=')
-           && find_substring ~needle:" equals " lower = None ->
+      when
+        starts_with_any
+          [ "solve "; "find x "; "find the roots "; "roots of " ]
+          lower
+        && not (String.contains lower '=')
+        && find_substring ~needle:" equals " lower = None ->
         Some
           "I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0."
     | Math | Hybrid
-      when starts_with_any [ "differentiate "; "derivative of "; "take the derivative of " ] lower
-           && find_substring ~needle:" with respect to " lower = None
-           && find_substring ~needle:" wrt " lower = None ->
+      when
+        starts_with_any
+          [ "differentiate "; "derivative of "; "take the derivative of " ]
+          lower
+        && find_substring ~needle:" with respect to " lower = None
+        && find_substring ~needle:" wrt " lower = None ->
         Some
           "I understand this as differentiation, but the differentiation variable is missing. For example: differentiate x^3 with respect to x."
     | Math | Hybrid
@@ -355,7 +386,7 @@ let clarification mode normalized =
           "I understand this as integration, but the integration variable is missing. For example: integrate x^2 with respect to x."
     | Math | Hybrid when String.starts_with ~prefix:"find " lower ->
         Some
-          "I understand the expression, but the requested operation is ambiguous. Specify whether you want to solve, simplify, differentiate, integrate, evaluate, or verify it."
+          "I understand the expression, but the requested operation is ambiguous. Specify whether you want to solve, simplify, differentiate, integrate, approximate, evaluate, or verify it."
     | Phys | Hybrid
       when String.starts_with ~prefix:"convert " lower
            && find_substring ~needle:" to " lower = None ->
