@@ -60,8 +60,13 @@
   Centl_sci_contrib
   Centl_sci_interaction
   Centl_sci_intent
+  Centl_sci_suggestion
   Centl_sci_workspace
+  Centl_sci_extensions
+  Centl_sci_build_plan
   Centl_sci_build
+  Centl_sci_evidence
+  Centl_sci_session
   Centl_sci_app
   Centl_physics
   Centl_physics_collision
