@@ -201,11 +201,21 @@ class ContentStore:
         return total
 
     def _check_capacity_for(self, incoming_bytes: int) -> None:
+        if incoming_bytes < 0:
+            raise ValueError("incoming byte count must be non-negative")
+        if incoming_bytes > self.max_bytes:
+            raise IntegrityError("artifact exceeds CARAVAN storage limit")
         if self.total_bytes() + incoming_bytes > self.max_bytes:
             raise IntegrityError("CARAVAN storage limit would be exceeded")
         free = shutil.disk_usage(self.root).free
-        if free - incoming_bytes < self.min_free_bytes:
+        if free < incoming_bytes or free - incoming_bytes < self.min_free_bytes:
             raise IntegrityError("CARAVAN minimum free-disk reserve would be violated")
+
+    def ensure_capacity(self, incoming_bytes: int) -> None:
+        """Reject a transfer before temporary bytes can violate store limits."""
+
+        self._assert_internal_directories()
+        self._check_capacity_for(incoming_bytes)
 
     def import_file(
         self,
