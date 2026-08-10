@@ -88,8 +88,7 @@ let safe_lexical_corrections =
 
 let normalize_lexical text =
   List.fold_left
-    (fun current (needle, replacement) ->
-      replace_all ~needle ~replacement current)
+    (fun current (needle, replacement) -> replace_all ~needle ~replacement current)
     text safe_lexical_corrections
 
 let drop_prefix_ci prefix text =
@@ -125,9 +124,7 @@ let canonicalize_root_request text =
   | None -> text
   | Some body ->
       let lower_body = String.lowercase_ascii body in
-      if
-        String.contains body '='
-        || find_substring ~needle:" equals " lower_body <> None
+      if String.contains body '=' || find_substring ~needle:" equals " lower_body <> None
       then "solve " ^ body
       else "solve " ^ body ^ " equals zero"
 
@@ -136,28 +133,28 @@ let canonicalize_conversion text =
   | None -> text
   | Some body ->
       let lower = String.lowercase_ascii body in
-      if
-        find_substring ~needle:" into " lower <> None
-        || find_substring ~needle:" to " lower <> None
-      then
-        "convert "
-        ^ replace_all ~needle:" into " ~replacement:" to " body
+      if find_substring ~needle:" into " lower <> None || find_substring ~needle:" to " lower <> None
+      then "convert " ^ replace_all ~needle:" into " ~replacement:" to " body
       else text
 
 let canonicalize_common_intent text =
   text |> canonicalize_root_request |> canonicalize_conversion
 
 let normalize mode text =
-  let normalized =
-    text |> normalize_unicode |> normalize_lexical |> collapse_spaces
-  in
-  match mode with Build -> normalized | Math | Phys | Hybrid -> canonicalize_common_intent normalized
+  let normalized = text |> normalize_unicode |> normalize_lexical |> collapse_spaces in
+  match mode with
+  | Build -> normalized
+  | Math | Phys | Hybrid -> canonicalize_common_intent normalized
 
 let session_commands =
   [
     ":help";
     ":history";
     ":clear-history";
+    ":last";
+    ":result";
+    ":results";
+    ":recall";
     ":mode";
     ":mode math";
     ":mode physics";
@@ -167,6 +164,13 @@ let session_commands =
     ":details off";
     ":explain on";
     ":explain off";
+    ":changes";
+    ":extensions";
+    ":inspect";
+    ":disable";
+    ":enable";
+    ":remove";
+    ":undo";
     ":quit";
     ":exit";
   ]
@@ -183,6 +187,7 @@ let math_completions =
     "integrate";
     "simplify";
     "solve";
+    "substitute";
     "verify";
   ]
 
@@ -190,11 +195,15 @@ let physics_completions =
   [
     "calculate";
     "compute";
+    "constant";
     "convert";
+    "dt";
     "force";
+    "gravity";
     "mass";
     "position";
     "simulate";
+    "steps";
     "velocity";
   ]
 
@@ -203,6 +212,7 @@ let build_completions =
     "function";
     "value";
     "workspace";
+    "extensions";
     "create";
     "initialize";
     "inspect";
@@ -214,6 +224,10 @@ let build_completions =
     "extend";
     "remove";
     "undo";
+    "scaffold";
+    "prepare";
+    "upstream";
+    "adapter";
   ]
 
 let completion_candidates mode =
@@ -229,18 +243,31 @@ let completion_candidates mode =
 let starts_with_any prefixes text =
   List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
 
+let mechanics_missing lower =
+  if not (starts_with_any [ "simulate particle"; "simulate a particle"; "simulate the particle" ] lower) then []
+  else
+    [ "mass"; "position"; "velocity"; "gravity"; "dt"; "steps" ]
+    |> List.filter (fun field -> find_substring ~needle:(field ^ " ") lower = None)
+
 let clarification mode normalized =
   let lower = String.lowercase_ascii normalized in
   if lower = "" then None
   else
+    let missing_mechanics = mechanics_missing lower in
     match mode with
     | Build ->
-        begin match Centl_sci_build.handle normalized with
-        | Centl_sci_build.Handled handled -> Some handled.message
-        | Centl_sci_build.Not_handled ->
-            Some
-              "I understand this as a BUILD request, but this construction class is not implemented yet. Current Linux-first BUILD support can initialize or inspect the local workspace and create/modify parser-valid CENTL values and functions."
-        end
+        Some
+          "BUILD requests can create or modify local CENTL definitions, inspect and revise the workspace, scaffold external/native extensions, prepare contribution artifacts, or produce a first-pass implementation plan. State the capability or change you want."
+    | (Phys | Hybrid) when missing_mechanics <> [] ->
+        Some
+          ("I understand this as a uniform-gravity particle simulation, but required fields are missing: "
+          ^ String.concat ", " missing_mechanics
+          ^ ". Supply mass, position, velocity, gravity, dt, and steps. Example: "
+          ^ "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10")
+    | (Phys | Hybrid)
+      when starts_with_any [ "simulate particle"; "simulate a particle"; "simulate the particle" ] lower ->
+        Some
+          "I recognize a particle-simulation request, but its typed fields could not be parsed safely. Use explicit vector forms such as position (0,0,10) m and velocity (1,0,0) m/s; CENTL-SCi will not invent missing physical values."
     | Math | Hybrid
       when starts_with_any [ "solve "; "find x "; "find the roots "; "roots of " ] lower
            && not (String.contains lower '=')
@@ -248,7 +275,17 @@ let clarification mode normalized =
         Some
           "I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0."
     | Math | Hybrid
-      when String.starts_with ~prefix:"find " lower ->
+      when starts_with_any [ "differentiate "; "derivative of "; "take the derivative of " ] lower
+           && find_substring ~needle:" with respect to " lower = None
+           && find_substring ~needle:" wrt " lower = None ->
+        Some
+          "I understand this as differentiation, but the differentiation variable is missing. For example: differentiate x^3 with respect to x."
+    | Math | Hybrid
+      when starts_with_any [ "integrate "; "integral of " ] lower
+           && find_substring ~needle:" with respect to " lower = None ->
+        Some
+          "I understand this as integration, but the integration variable is missing. For example: integrate x^2 with respect to x."
+    | Math | Hybrid when String.starts_with ~prefix:"find " lower ->
         Some
           "I understand the expression, but the requested operation is ambiguous. Specify whether you want to solve, simplify, differentiate, integrate, evaluate, or verify it."
     | Phys | Hybrid
