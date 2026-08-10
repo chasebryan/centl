@@ -16,17 +16,38 @@ type report = {
   blocked_cells : int list;
 }
 
+type snapshot_evidence =
+  | Snapshot_not_required
+  | Snapshot_ready of string
+  | Snapshot_failed of string
+
 let receipt_state_text = function
   | Passed -> "passed"
   | Pending -> "pending"
   | Blocked -> "blocked"
 
-let execute_action workspace (action : Centl_sci_mirage_execution_plan.action) =
+let action_requires_snapshot (action : Centl_sci_mirage_execution_plan.action) =
+  action.executor = "workspace_snapshot" && action.precondition = "before_activation"
+
+let prepare_snapshot workspace (plan : Centl_sci_mirage_execution_plan.report) =
+  let required =
+    List.exists
+      (fun (candidate : Centl_sci_mirage_execution_plan.candidate_plan) ->
+        List.exists action_requires_snapshot candidate.actions)
+      plan.candidates
+  in
+  if not required then Snapshot_not_required
+  else
+    match Centl_sci_snapshot.create workspace with
+    | Ok path -> Snapshot_ready path
+    | Error message -> Snapshot_failed message
+
+let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
   match action.executor with
   | "workspace_snapshot" when action.precondition = "before_activation" ->
       begin
-        match Centl_sci_snapshot.create workspace with
-        | Ok path ->
+        match snapshot with
+        | Snapshot_ready path ->
             {
               action_id = action.action_id;
               candidate_id = action.candidate_id;
@@ -35,10 +56,10 @@ let execute_action workspace (action : Centl_sci_mirage_execution_plan.action) =
               executor = action.executor;
               state = Passed;
               evidence =
-                "a reversible local workspace snapshot was created before candidate activation";
+                "a reversible local workspace snapshot was created once for this evidence cycle before candidate activation and is shared by all rollback obligations in the cycle";
               snapshot_path = Some path;
             }
-        | Error message ->
+        | Snapshot_failed message ->
             {
               action_id = action.action_id;
               candidate_id = action.candidate_id;
@@ -47,6 +68,17 @@ let execute_action workspace (action : Centl_sci_mirage_execution_plan.action) =
               executor = action.executor;
               state = Blocked;
               evidence = "workspace snapshot failed: " ^ message;
+              snapshot_path = None;
+            }
+        | Snapshot_not_required ->
+            {
+              action_id = action.action_id;
+              candidate_id = action.candidate_id;
+              obligation_id = action.obligation_id;
+              kind = action.kind;
+              executor = action.executor;
+              state = Blocked;
+              evidence = "workspace snapshot action was not included in the prepared evidence cycle";
               snapshot_path = None;
             }
       end
@@ -77,13 +109,14 @@ let execute_action workspace (action : Centl_sci_mirage_execution_plan.action) =
         snapshot_path = None;
       }
 
-let execute_candidate workspace
+let execute_candidate snapshot
     (candidate : Centl_sci_mirage_execution_plan.candidate_plan) =
-  List.map (execute_action workspace) candidate.actions
+  List.map (execute_action snapshot) candidate.actions
 
 let execute workspace (plan : Centl_sci_mirage_execution_plan.report) =
+  let snapshot = prepare_snapshot workspace plan in
   {
-    receipts = List.concat_map (execute_candidate workspace) plan.candidates;
+    receipts = List.concat_map (execute_candidate snapshot) plan.candidates;
     blocked_cells = plan.blocked_cells;
   }
 
@@ -104,7 +137,7 @@ let receipt_to_json (receipt : receipt) =
 let to_json (report : report) =
   `Assoc
     [
-      ("schema_version", `Int 1);
+      ("schema_version", `Int 2);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_receipts");
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
@@ -112,7 +145,7 @@ let to_json (report : report) =
       ("assurance_promoted", `Bool false);
       ( "execution_semantics",
         `String
-          "a passed receipt records only the named evidence action; it does not imply candidate admissibility, mathematical correctness, regression success, activation, or verified-core status" );
+          "a passed receipt records only the named evidence action; rollback obligations in one evidence cycle share at most one newly created workspace snapshot; no receipt implies candidate admissibility, mathematical correctness, regression success, activation, or verified-core status" );
       ("receipts", `List (List.map receipt_to_json report.receipts));
     ]
 
@@ -147,6 +180,7 @@ let render (report : report) =
       "passed actions: " ^ string_of_int passed;
       "pending actions: " ^ string_of_int pending;
       "blocked actions: " ^ string_of_int blocked;
+      "workspace snapshots created per evidence cycle: at most one";
       "candidate source activated: no";
       "assurance promoted: no";
     ]
