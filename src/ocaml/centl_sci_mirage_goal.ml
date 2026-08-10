@@ -172,8 +172,15 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
     in Some { cell_id = cell.id; status; capability_matches = match_names; reason }
 
 let nearest_objective (cells : spec_cell list) before_id =
-  cells |> List.filter (fun cell -> cell.id < before_id && match String.uppercase_ascii cell.kind with
-    | "DIRECTIVE" | "INVARIANT" -> true | _ -> false) |> List.rev |> List.hd_opt
+  let candidates =
+    cells |> List.filter (fun cell ->
+      cell.id < before_id && match String.uppercase_ascii cell.kind with
+      | "DIRECTIVE" | "INVARIANT" -> true
+      | _ -> false)
+  in
+  match List.rev candidates with
+  | [] -> None
+  | value :: _ -> Some value
 
 let cell_edges (cells : spec_cell list) =
   cells |> List.filter_map (fun cell -> match String.uppercase_ascii cell.kind with
