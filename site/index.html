@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Free Computation Foundation: free software, scientific computation, documentation, releases, and preserved resources.">
+  <title>Free Computation Foundation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
+    <div class="title"><h1>Free Computation Foundation</h1><p>Free for science.</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">Mirrors / pub</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/latest">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">Support development</a></li>
+      </ul>
+    </nav>
+    <main>
+      <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
+
+      <h2>What this site is</h2>
+      <p>This is the public index for software developed under the Free Computation Foundation. It is intentionally small, static, readable, and usable without JavaScript.</p>
+      <p>FCF uses this site to make project documentation, source code, releases, checksums, graphical resources, and preservation mirrors easy to locate. CENTL is the first project published here.</p>
+
+      <h2>Current project</h2>
+      <table class="status">
+        <tr><th>Project</th><th>Status</th><th>Purpose</th></tr>
+        <tr><td><a href="centl.html"><strong>CENTL</strong></a></td><td>0.12.0 stable</td><td>Exact-first mathematics and physics computation and verification.</td></tr>
+        <tr><td><strong>CENTL-SCi</strong></td><td>0.0.1-Camelus stable interface</td><td>Local scientific problem interpreter for mathematics and physics; not a general chatbot.</td></tr>
+      </table>
+
+      <h2>Install CENTL</h2>
+      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
+sh install
+centl-sci</code></pre>
+      <p>The native installer verifies the release checksum and performs smoke checks before activation. Linux is the reference platform.</p>
+
+      <h2>Software preservation</h2>
+      <p>FCF is building an upstream-loss-resistant preservation layer for CENTL and the external sources needed to build and verify it. The public <a href="mirrors.html">mirror index</a> distinguishes material that is actually preserved from material that is only referenced upstream.</p>
+      <div class="notice"><strong>Rule:</strong> a dependency is not called mirrored until FCF has the bytes, an immutable identity, and an integrity record. Links alone are not preservation.</div>
+
+      <h2>Why simple HTML?</h2>
+      <p>The foundation site should remain useful when fashionable web stacks disappear. Static files are cheap to preserve, easy to audit, fast to load, and simple to move to another HTTPS server when FCF has its own domain and infrastructure.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · No client-side framework required.</footer>
+</div>
+</body>
+</html>

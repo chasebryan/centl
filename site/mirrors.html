@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="FCF preservation mirror status and public distribution index."><title>Mirrors / pub — Free Computation Foundation</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="shell"><header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>Mirrors / pub</h1><p>Preserved bytes, immutable identities, and public distribution.</p></div></header>
+<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">Mirrors / pub</a></li><li><a href="docs.html">Documentation</a></li></ul></nav>
+<main><h2>Mirror policy</h2><p>FCF preservation is designed around a simple rule: a URL is not a backup. A resource is considered preserved only when FCF controls a copy of the bytes and records an immutable identity such as a full Git commit or SHA-256 digest.</p>
+<div class="notice"><strong>Current public state:</strong> this HTTPS directory is live infrastructure for indexing FCF-hosted material. The complete CENTL dependency preservation set is being established separately and must pass its integrity/provenance checks before this page labels those artifacts as mirrored.</div>
+<p><strong>Browse:</strong> <a href="pub/">Index of /pub</a></p>
+<h2>CENTL preservation set</h2><table class="directory"><tr><th>Resource class</th><th>Public status</th><th>Identity expectation</th></tr><tr><td>CENTL source</td><td>Canonical repository available</td><td>Git commit + source checksum manifest</td></tr><tr><td>CENTL native releases</td><td>Available from GitHub Releases</td><td>Release archive SHA-256</td></tr><tr><td>Build/toolchain sources</td><td>Preservation work in progress</td><td>Immutable archive SHA-256 or full Git commit</td></tr><tr><td>CENTL-SCi model weights</td><td>Not served by this Pages site</td><td>Exact GGUF SHA-256 + provenance</td></tr><tr><td>Development caches/environments</td><td>Preservation work in progress</td><td>Snapshot manifest + source commit</td></tr></table>
+<h2>Planned public hierarchy</h2><pre><code>/pub/
+  centl/
+    releases/
+    source/
+    toolchain/
+    models/
+    manifests/
+  SHA256SUMS</code></pre><p>The exact backing store may move as FCF infrastructure grows. The site structure is intentionally independent of that storage decision so a future domain can preserve stable paths.</p>
+<h2>Integrity is not authentication</h2><p>SHA-256 detects byte changes when the expected digest is already trusted. It does not, by itself, prove who published the expected digest. FCF should authenticate checksum manifests with an established signing system rather than inventing a new hash or signature scheme.</p>
+<h2>Canonical source</h2><p>Until an item is explicitly marked mirrored here, use the <a href="https://github.com/chasebryan/centl">CENTL repository</a> and <a href="https://github.com/chasebryan/centl/releases/latest">official releases</a> as the distribution source.</p>
+</main></div><footer>Free Computation Foundation · Preservation status is stated conservatively.</footer></div></body></html>
