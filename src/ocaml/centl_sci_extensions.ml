@@ -136,6 +136,47 @@ let write_json path json =
       flush channel);
   Unix.rename temporary path
 
+let source_path workspace manifest =
+  if Filename.is_relative manifest.source then
+    Filename.concat workspace.Centl_sci_workspace.root manifest.source
+  else manifest.source
+
+let read_text path =
+  try
+    let channel = open_in_bin path in
+    Ok
+      (Fun.protect
+         ~finally:(fun () -> close_in_noerr channel)
+         (fun () -> really_input_string channel (in_channel_length channel)))
+  with Sys_error message | End_of_file -> Error message
+
+let validate_native_activation workspace manifest =
+  let path = source_path workspace manifest in
+  if not (Sys.file_exists path) then
+    Error ("native extension source is missing: " ^ path)
+  else if Sys.is_directory path then
+    Error ("native extension source is a directory: " ^ path)
+  else
+    match read_text path with
+    | Error message -> Error message
+    | Ok source ->
+        begin match Centl_parser.parse_statement_located source with
+        | Error error ->
+            Error
+              (Printf.sprintf
+                 "native extension %s cannot be enabled because its source does not parse at byte %d: %s"
+                 manifest.name error.position error.message)
+        | Ok located ->
+            begin match located.statement with
+            | Centl_parser.Define_value _ | Centl_parser.Define_function _ -> Ok ()
+            | Centl_parser.Evaluate _ | Centl_parser.Assert _ ->
+                Error
+                  (Printf.sprintf
+                     "native extension %s cannot be enabled because its source is not a value/function definition"
+                     manifest.name)
+            end
+        end
+
 let set_enabled workspace name enabled =
   match read_manifest workspace name with
   | Error message -> Error message
@@ -145,19 +186,21 @@ let set_enabled workspace name enabled =
            "local extension %s has kind %s. Caramels will not route it through the native CENTL definition loader; implement and validate its explicit runtime boundary before activation."
            manifest.name manifest.kind)
   | Ok manifest ->
-      try
-        Centl_sci_workspace.ensure workspace;
-        let revision = Centl_sci_workspace.bump_revision workspace in
-        let updated = { manifest with enabled; workspace_revision = revision } in
-        write_json (Centl_sci_workspace.manifest_path workspace name)
-          (to_json updated ~revision);
-        Ok updated
-      with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
-
-let source_path workspace manifest =
-  if Filename.is_relative manifest.source then
-    Filename.concat workspace.Centl_sci_workspace.root manifest.source
-  else manifest.source
+      let activation_check =
+        if enabled then validate_native_activation workspace manifest else Ok ()
+      in
+      begin match activation_check with
+      | Error _ as error -> error
+      | Ok () ->
+          try
+            Centl_sci_workspace.ensure workspace;
+            let revision = Centl_sci_workspace.bump_revision workspace in
+            let updated = { manifest with enabled; workspace_revision = revision } in
+            write_json (Centl_sci_workspace.manifest_path workspace name)
+              (to_json updated ~revision);
+            Ok updated
+          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+      end
 
 let trash_dir workspace = Filename.concat workspace.Centl_sci_workspace.generated "removed"
 
