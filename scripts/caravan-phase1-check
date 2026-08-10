@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+PYTHON=${PYTHON:-python3}
+
+"$PYTHON" -m py_compile \
+  caravan/__init__.py \
+  caravan/content.py \
+  caravan/coordinator.py \
+  tests/test_caravan_phase1.py
+
+PYTHONPATH=. "$PYTHON" -m unittest -v tests/test_caravan_phase1.py
