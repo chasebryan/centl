@@ -26,12 +26,20 @@ let test_example_executes_deterministically () =
           | Some text ->
               Alcotest.(check bool) "final z appears" true
                 (Option.is_some
-                   (Centl_sci_interaction.find_substring ~needle:"9/2" text));
-              Alcotest.(check bool) "integrator appears" true
-                (Option.is_some
-                   (Centl_sci_interaction.find_substring
-                      ~needle:"symplectic_euler" text))
-          end
+                   (Centl_sci_interaction.find_substring ~needle:"9/2" text))
+          end;
+          begin match Centl_sci_runtime.assoc_field "physics" response with
+          | Some physics ->
+              Alcotest.(check (option string)) "structured integrator"
+                (Some "symplectic_euler")
+                (Centl_sci_runtime.string_field "integrator" physics)
+          | None -> fail "missing structured physics result"
+          end;
+          let details = Centl_sci_present.details outcome in
+          Alcotest.(check bool) "details explain integrator" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"symplectic Euler" details))
       end
 
 let test_missing_fields_clarifies () =
