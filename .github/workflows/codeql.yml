@@ -45,7 +45,43 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-extended
 
-      - name: Analyze
+      - name: Analyze without implicit upload
         uses: github/codeql-action/analyze@d1ba80a13dd99fba24a470575428917156a28b43 # v4.37.5
         with:
+          category: /language:${{ matrix.language }}
+          output: codeql-sarif
+          upload: never
+          upload-database: false
+
+      - name: Require zero CodeQL findings
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = sorted(Path("codeql-sarif").glob("*.sarif"))
+          if not files:
+              raise SystemExit("CodeQL produced no SARIF file")
+
+          findings = []
+          for path in files:
+              document = json.loads(path.read_text(encoding="utf-8"))
+              for run in document.get("runs", []):
+                  for result in run.get("results", []):
+                      rule = result.get("ruleId", "unknown-rule")
+                      message = result.get("message", {}).get("text", "")
+                      findings.append((path.name, rule, message))
+
+          print(f"CodeQL findings for ${{ matrix.language }}: {len(findings)}")
+          for path, rule, message in findings:
+              print(f"{path}: {rule}: {message}")
+          if findings:
+              raise SystemExit(1)
+          PY
+
+      - name: Upload CodeQL SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@d1ba80a13dd99fba24a470575428917156a28b43 # v4.37.5
+        with:
+          sarif_file: codeql-sarif
           category: /language:${{ matrix.language }}
