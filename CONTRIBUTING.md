@@ -33,6 +33,9 @@ sudo apt-get install --yes \
   libzstd1 make opam pkg-config tar
 ```
 
+Release packaging builds the exact GMP, MPFR, and FLINT versions in
+`toolchain.lock`; the distro packages above are the faster development setup.
+
 ## Install the pinned F* verifier
 
 The workflow uses the F* release and checksum below. Install it into a local
