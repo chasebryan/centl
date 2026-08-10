@@ -10,6 +10,10 @@ let require_real_directory path =
   | Some _ -> raise (Sys_error ("workspace path is not a directory: " ^ path))
   | None -> raise (Sys_error ("workspace directory is unavailable: " ^ path))
 
+let unlink_if_present path =
+  try Unix.unlink path
+  with Unix.Unix_error (Unix.ENOENT, _, _) -> ()
+
 let copy_file source target =
   let input_channel = open_in_bin source in
   let output_channel = open_out_bin target in
@@ -103,7 +107,7 @@ let write_pointer workspace path =
         flush channel);
     Unix.rename temporary target
   with exn ->
-    (try Sys.remove temporary with Sys_error _ -> ());
+    unlink_if_present temporary;
     raise exn
 
 let read_pointer workspace =
@@ -123,11 +127,7 @@ let read_pointer workspace =
 
 let clear_pointer_if workspace expected =
   match read_pointer workspace with
-  | Some path when path = expected ->
-      begin
-        try Sys.remove (pointer_path workspace)
-        with Sys_error _ -> ()
-      end
+  | Some path when path = expected -> unlink_if_present (pointer_path workspace)
   | _ -> ()
 
 let copy_workspace_surface workspace path =
@@ -175,9 +175,7 @@ let prune_other_snapshots root keep =
   Sys.readdir root
   |> Array.iter (fun name ->
          let path = Filename.concat root name in
-         if path <> keep then
-           try remove_tree path
-           with Sys_error _ | Unix.Unix_error (_, _, _) -> ())
+         if path <> keep then remove_tree path)
 
 let create workspace =
   try
@@ -191,14 +189,16 @@ let create workspace =
     begin
       try copy_workspace_surface workspace path
       with exn ->
-        (try remove_tree path with _ -> ());
+        remove_tree path;
         raise exn
     end;
     write_pointer workspace path;
     (* Undo is intentionally one-level. Once the new snapshot is durable and
        pointed to, older snapshot directories are no longer reachable through
        the product surface and are pruned to keep repeated BUILD/MIRAGE cycles
-       from accumulating duplicate workspace copies indefinitely. *)
+       from accumulating duplicate workspace copies indefinitely. Cleanup
+       failures are surfaced to the caller rather than silently weakening that
+       bound; the pointer already names the newly completed valid snapshot. *)
     prune_other_snapshots root path;
     Ok path
   with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
