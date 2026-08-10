@@ -50,6 +50,22 @@
    %{dep:sci_fake_model.exe}
    (run %{test}))))
 
+(executable
+ (name sci_fake_external_adapter)
+ (modules sci_fake_external_adapter)
+ (libraries yojson))
+
+(test
+ (name test_sci_external)
+ (modules test_sci_external)
+ (deps sci_fake_external_adapter.exe)
+ (libraries centl_lib alcotest yojson)
+ (action
+  (setenv
+   CENTL_SCI_FAKE_EXTERNAL_ADAPTER
+   %{dep:sci_fake_external_adapter.exe}
+   (run %{test}))))
+
 (test
  (name test_sci_fastpath)
  (modules test_sci_fastpath)
