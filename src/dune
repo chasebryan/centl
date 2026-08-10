@@ -57,6 +57,7 @@
   Centl_sci_llama
   Centl_sci_server
   Centl_sci_runtime
+  Centl_sci_external
   Centl_sci_present
   Centl_sci_contrib
   Centl_sci_interaction
