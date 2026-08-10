@@ -64,9 +64,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          opam init --bare --disable-sandboxing
-          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
-          opam install --switch=centl --deps-only --with-test --assume-depexts .
+          opam init --bare --disable-sandboxing --yes
+          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
+          opam install --switch=centl --deps-only --with-test --assume-depexts --yes .
 
       - name: Verify F* source
         run: opam exec --switch=centl -- make verify
