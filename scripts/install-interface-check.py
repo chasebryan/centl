@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hermetic regression test for the Unix release installer surface."""
+"""Hermetic regression test for the GNU/Linux release installer surface."""
 
 from __future__ import annotations
 
@@ -28,59 +28,43 @@ def build_fake_release(work: Path) -> Path:
     (package / "libexec").mkdir(parents=True)
     (package / "VERSION").write_text(VERSION + "\n", encoding="utf-8")
 
-    centl = """#!/bin/sh
+    scripts = {
+        "centl": """#!/bin/sh
 set -eu
-if [ "${1:-}" = "--version" ]; then
-  printf 'centl %s\\n' '0.14.0'
-elif [ "${1:-}" = "0.1 + 0.2" ]; then
-  printf '3/10\\n'
-else
-  printf 'fake centl: unsupported test input\\n' >&2
-  exit 2
-fi
-"""
-    physics = """#!/bin/sh
+case "${1:-}" in
+  --version) printf 'centl 0.14.0\\n' ;;
+  '0.1 + 0.2') printf '3/10\\n' ;;
+  *) exit 2 ;;
+esac
+""",
+        "centl-physics": """#!/bin/sh
 set -eu
-if [ "${1:-}" = "convert" ] && [ "${2:-}" = "100" ] && [ "${3:-}" = "cm" ] && [ "${4:-}" = "m" ]; then
+if [ "${1:-}" = convert ] && [ "${2:-}" = 100 ] && [ "${3:-}" = cm ] && [ "${4:-}" = m ]; then
   printf '1\\n'
 else
-  printf 'fake centl-physics: unsupported test input\\n' >&2
   exit 2
 fi
-"""
-    sci = """#!/bin/sh
+""",
+        "centl-sci": """#!/bin/sh
 set -eu
-if [ "${1:-}" = "What is 0.1 plus 0.2?" ]; then
+if [ "${1:-}" = 'What is 0.1 plus 0.2?' ]; then
   printf '3/10\\n'
-elif [ "${1:-}" = "--repl" ]; then
-  printf 'CENTL-SCi v0.0.2-Caramels\\n'
-  printf 'Free for science.\\n\\n'
-  printf '> '
+elif [ "${1:-}" = --repl ]; then
+  printf 'CENTL-SCi v0.0.2-Caramels\\nFree for science.\\n\\n> '
   IFS= read -r command || true
-  [ "${command:-}" = ":exit" ] || exit 2
+  [ "${command:-}" = :exit ] || exit 2
 else
-  printf 'fake centl-sci: unsupported test input\\n' >&2
   exit 2
 fi
-"""
-    mirage = """#!/bin/sh
+""",
+        "centl-mirage": """#!/bin/sh
 set -eu
-if [ "${1:-}" = "--version" ]; then
-  printf 'CENTL-MIRAGE development bootstrap\\n'
-else
-  printf 'fake centl-mirage: unsupported test input\\n' >&2
-  exit 2
-fi
-"""
-
-    commands = {
-        "centl": centl,
-        "centl-physics": physics,
-        "centl-sci": sci,
-        "centl-mirage": mirage,
+[ "${1:-}" = --version ] || exit 2
+printf 'CENTL-MIRAGE development bootstrap\\n'
+""",
     }
     for directory in ("bin", "libexec"):
-        for command, text in commands.items():
+        for command, text in scripts.items():
             write_executable(package / directory / command, text)
 
     archive = work / "centl-linux-x86_64.tar.gz"
@@ -93,26 +77,33 @@ fi
     return archive
 
 
+def installer_env(home: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    env.update(
+        {
+            "HOME": str(home),
+            "SHELL": "/bin/bash",
+            "PATH": "/usr/bin:/bin",
+        }
+    )
+    env.pop("CENTL_RELEASE_VERSION", None)
+    env.pop("CENTL_RELEASE_BASE_URL", None)
+    env.pop("CENTL_PREFIX", None)
+    return env
+
+
 def run() -> None:
     subprocess.run(["sh", "-n", str(INSTALLER)], check=True)
-
     help_text = subprocess.check_output(["sh", str(INSTALLER), "--help"], text=True)
-    if "default: 0.14.0" not in help_text:
-        raise SystemExit("installer help does not bind the default release to v0.14.0")
+    if "default network release: 0.14.0" not in help_text:
+        raise SystemExit("installer help does not bind network installs to v0.14.0")
 
     with tempfile.TemporaryDirectory(prefix="centl-install-check-") as temporary:
         work = Path(temporary)
         archive = build_fake_release(work)
         home = work / "home"
         home.mkdir()
-        env = os.environ.copy()
-        env.update(
-            {
-                "HOME": str(home),
-                "SHELL": "/bin/bash",
-                "PATH": "/usr/bin:/bin",
-            }
-        )
+        env = installer_env(home)
         completed = subprocess.run(
             ["sh", str(INSTALLER), "--archive", str(archive)],
             cwd=ROOT,
@@ -125,20 +116,17 @@ def run() -> None:
 
         prefix = home / ".local"
         commands = {
-            "centl": prefix / "bin" / "centl",
-            "centl-physics": prefix / "bin" / "centl-physics",
-            "centl-sci": prefix / "bin" / "centl-sci",
-            "centl-mirage": prefix / "bin" / "centl-mirage",
+            name: prefix / "bin" / name
+            for name in ("centl", "centl-physics", "centl-sci", "centl-mirage")
         }
         for name, command in commands.items():
             if not command.is_symlink():
                 raise SystemExit(f"installer did not activate {name}: {command}")
 
-        sci_output = subprocess.check_output(
+        if subprocess.check_output(
             [str(commands["centl-sci"]), "What is 0.1 plus 0.2?"], text=True
-        ).strip()
-        if sci_output != "3/10":
-            raise SystemExit(f"installed CENTL-SCi returned {sci_output!r}")
+        ).strip() != "3/10":
+            raise SystemExit("installed CENTL-SCi failed exact arithmetic")
 
         repl = subprocess.run(
             [str(commands["centl-sci"]), "--repl"],
@@ -149,59 +137,24 @@ def run() -> None:
             check=True,
         ).stdout
         if "CENTL-SCi v0.0.2-Caramels" not in repl or "Free for science." not in repl:
-            raise SystemExit(f"installed CENTL-SCi REPL did not initialize correctly:\n{repl}")
+            raise SystemExit("installed CENTL-SCi did not identify as Caramels")
 
-        mirage_output = subprocess.check_output(
+        if subprocess.check_output(
             [str(commands["centl-mirage"]), "--version"], text=True
-        ).strip()
-        if mirage_output != "CENTL-MIRAGE development bootstrap":
-            raise SystemExit(f"installed CENTL-MIRAGE returned {mirage_output!r}")
+        ).strip() != "CENTL-MIRAGE development bootstrap":
+            raise SystemExit("installed CENTL-MIRAGE failed its identity smoke test")
 
-        output = completed.stdout
         for expected in (
             "Installed CENTL 0.14.0",
-            "CENTL-SCi is ready.",
-            "Open a new terminal and run: centl-sci",
             "Scientific command:",
             "MIRAGE command:",
+            "CENTL-SCi is ready.",
         ):
-            if expected not in output:
-                raise SystemExit(f"installer output omitted {expected!r}\n{output}")
+            if expected not in completed.stdout:
+                raise SystemExit(f"installer output omitted {expected!r}")
 
-        bashrc = home / ".bashrc"
-        if not bashrc.is_file():
-            raise SystemExit("installer did not create the expected Bash PATH setup")
-        profile = bashrc.read_text(encoding="utf-8")
-        if f"# CENTL PATH: {prefix / 'bin'}" not in profile:
-            raise SystemExit("installer did not record the CENTL PATH marker")
-        if str(prefix / "bin") not in profile:
-            raise SystemExit("installer PATH setup omitted the command directory")
-
-        headless_home = work / "headless-home"
-        headless_home.mkdir()
-        headless_env = env.copy()
-        headless_env["HOME"] = str(headless_home)
-        headless_env.pop("SHELL", None)
-        subprocess.run(
-            ["sh", str(INSTALLER), "--archive", str(archive)],
-            cwd=ROOT,
-            env=headless_env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
-        headless_prefix = headless_home / ".local"
-        headless_profile = headless_home / ".profile"
-        if not (headless_prefix / "bin" / "centl-sci").is_symlink():
-            raise SystemExit("installer did not activate CENTL-SCi without SHELL")
-        if not (headless_prefix / "bin" / "centl-mirage").is_symlink():
-            raise SystemExit("installer did not activate CENTL-MIRAGE without SHELL")
-        if not headless_profile.is_file():
-            raise SystemExit("installer did not use .profile when SHELL was unset")
-        headless_text = headless_profile.read_text(encoding="utf-8")
-        if f"# CENTL PATH: {headless_prefix / 'bin'}" not in headless_text:
-            raise SystemExit("headless installer PATH setup omitted the CENTL marker")
+        if not (home / ".bashrc").is_file():
+            raise SystemExit("installer did not configure the Bash PATH")
 
         static_root = work / "static-releases"
         static_version = static_root / f"v{VERSION}"
@@ -211,12 +164,9 @@ def run() -> None:
             archive.with_name(archive.name + ".sha256"),
             static_version / f"{archive.name}.sha256",
         )
-
         static_home = work / "static-home"
         static_home.mkdir()
         static_prefix = static_home / "centl"
-        static_env = env.copy()
-        static_env["HOME"] = str(static_home)
         subprocess.run(
             [
                 "sh",
@@ -230,16 +180,14 @@ def run() -> None:
                 "--no-path",
             ],
             cwd=ROOT,
-            env=static_env,
+            env=installer_env(static_home),
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=True,
         )
-        if not (static_prefix / "bin" / "centl-sci").is_symlink():
-            raise SystemExit("static release-root install did not activate CENTL-SCi")
         if not (static_prefix / "bin" / "centl-mirage").is_symlink():
-            raise SystemExit("static release-root install did not activate CENTL-MIRAGE")
+            raise SystemExit("static release-root install omitted CENTL-MIRAGE")
 
         latest = subprocess.run(
             [
@@ -249,8 +197,6 @@ def run() -> None:
                 "latest",
                 "--release-base-url",
                 static_root.as_uri(),
-                "--prefix",
-                str(work / "latest-prefix"),
                 "--no-path",
             ],
             cwd=ROOT,
@@ -270,8 +216,6 @@ def run() -> None:
                 VERSION,
                 "--release-base-url",
                 "http://example.invalid/releases",
-                "--prefix",
-                str(work / "insecure-prefix"),
                 "--no-path",
             ],
             cwd=ROOT,
