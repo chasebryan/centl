@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
 CHUNK = 1024 * 1024
@@ -25,7 +25,7 @@ KNOWN_VECTORS = (
 )
 
 
-def die(message: str) -> "NoReturn":
+def die(message: str) -> NoReturn:
     raise SystemExit(f"centl integrity: {message}")
 
 
@@ -49,12 +49,13 @@ def validate_relative_name(name: str) -> Path:
     return path
 
 
-def self_test() -> None:
+def self_test(*, announce: bool) -> None:
     for payload, expected in KNOWN_VECTORS:
         actual = hashlib.sha256(payload).hexdigest()
         if actual != expected:
             die(f"SHA-256 known-answer test failed: expected {expected}, got {actual}")
-    print("SHA-256 implementation: OK (known-answer tests passed)")
+    if announce:
+        print("SHA-256 implementation: OK (known-answer tests passed)")
 
 
 def tracked_paths() -> list[str]:
@@ -108,9 +109,10 @@ def parse_manifest(manifest: Path) -> list[tuple[str, str]]:
     return entries
 
 
-def verify_manifest(manifest: Path, root: Path) -> None:
+def verify_manifest(manifest: Path, root: Path, *, verbose: bool = False) -> None:
     failures = 0
-    for expected, name in parse_manifest(manifest):
+    entries = parse_manifest(manifest)
+    for expected, name in entries:
         path = root / name
         if path.is_symlink() or not path.is_file():
             print(f"MISSING {name}", file=sys.stderr)
@@ -120,15 +122,11 @@ def verify_manifest(manifest: Path, root: Path) -> None:
         if actual != expected:
             print(f"FAILED {name}: expected {expected}, got {actual}", file=sys.stderr)
             failures += 1
-        else:
+        elif verbose:
             print(f"OK {name}")
     if failures:
         die(f"{failures} SHA-256 verification failure(s)")
-    print(f"SHA-256 manifest verified: {manifest}")
-
-
-def verify_checksum_file(checksum_file: Path, root: Path) -> None:
-    verify_manifest(checksum_file, root)
+    print(f"SHA-256 manifest verified: {manifest} ({len(entries)} files)")
 
 
 def hash_command(path: Path) -> None:
@@ -149,22 +147,23 @@ def main() -> int:
     verify = sub.add_parser("verify", help="verify a conventional SHA256SUMS manifest")
     verify.add_argument("manifest", type=Path)
     verify.add_argument("--root", type=Path, default=ROOT)
+    verify.add_argument("--verbose", action="store_true")
 
     one = sub.add_parser("hash", help="print the SHA-256 of one regular file")
     one.add_argument("path", type=Path)
 
     args = parser.parse_args()
     if args.command == "self-test":
-        self_test()
+        self_test(announce=True)
     elif args.command == "source-manifest":
-        self_test()
+        self_test(announce=False)
         create_source_manifest(args.output)
         verify_manifest(args.output, ROOT)
     elif args.command == "verify":
-        self_test()
-        verify_checksum_file(args.manifest, args.root)
+        self_test(announce=False)
+        verify_manifest(args.manifest, args.root, verbose=args.verbose)
     elif args.command == "hash":
-        self_test()
+        self_test(announce=False)
         hash_command(args.path)
     else:
         parser.error("unknown command")
