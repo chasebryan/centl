@@ -54,6 +54,10 @@ let test_plan_contains_pending_work () =
                  not
                    (String.equal action.Centl_sci_mirage_execution_plan.precondition
                       "explicit_executor_required"))
+               candidate.actions);
+          Alcotest.(check bool) "known obligations have supported executors" true
+            (List.for_all
+               (fun action -> action.Centl_sci_mirage_execution_plan.executor_supported)
                candidate.actions)
       | _ -> Alcotest.fail "expected one candidate")
 
@@ -82,6 +86,17 @@ let test_execution_contracts_are_explicit () =
   in
   Alcotest.(check string) "rollback executor" "workspace_snapshot" rollback_executor;
   Alcotest.(check string) "rollback precondition" "before_activation" rollback_precondition
+
+let test_unsupported_executor_is_blocked () =
+  let executor, precondition =
+    Centl_sci_mirage_execution_plan.execution_contract "future_unimplemented_evidence"
+  in
+  let supported, reason = Centl_sci_mirage_execution_plan.executor_support executor in
+  Alcotest.(check string) "unsupported executor" "unsupported_evidence_executor" executor;
+  Alcotest.(check string) "explicit executor precondition" "explicit_executor_required"
+    precondition;
+  Alcotest.(check bool) "unsupported executor is not runnable" false supported;
+  Alcotest.(check bool) "blocking reason is retained" true (Option.is_some reason)
 
 let test_artifact_denies_execution () =
   let root = temp_dir "centl-mirage-plan-file-" in
@@ -116,7 +131,11 @@ let test_artifact_denies_execution () =
           Alcotest.(check bool) "executor persisted" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
-                  ~needle:"\"executor\":\"candidate_parser_or_build\"" text)))
+                  ~needle:"\"executor\":\"candidate_parser_or_build\"" text));
+          Alcotest.(check bool) "executor support persisted" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"\"executor_supported\":true" text)))
 
 let () =
   Alcotest.run "CENTL-MIRAGE execution plan"
@@ -128,6 +147,8 @@ let () =
             test_action_identity_is_deterministic_and_transaction_bound;
           Alcotest.test_case "execution contracts are explicit" `Quick
             test_execution_contracts_are_explicit;
+          Alcotest.test_case "unsupported executors remain blocked" `Quick
+            test_unsupported_executor_is_blocked;
           Alcotest.test_case "artifact does not claim execution" `Quick
             test_artifact_denies_execution;
         ] );
