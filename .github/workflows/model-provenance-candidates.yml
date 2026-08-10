@@ -1,0 +1,132 @@
+name: CENTL-SCi model provenance candidates
+
+on:
+  pull_request:
+    paths:
+      - "scripts/model-provenance-candidates.py"
+      - "supply-chain/model-provenance/*.candidates"
+      - "docs/MODEL-PROVENANCE-CANDIDATES.md"
+      - ".github/workflows/model-provenance-candidates.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/model-provenance-candidates.py"
+      - "supply-chain/model-provenance/*.candidates"
+      - "docs/MODEL-PROVENANCE-CANDIDATES.md"
+      - ".github/workflows/model-provenance-candidates.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Match GGUF origins only by exact SHA-256
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out CENTL
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check matcher syntax and production ledger shape
+        run: |
+          python3 -m py_compile scripts/model-provenance-candidates.py
+          ledger='supply-chain/model-provenance/Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf.candidates'
+          test -s "$ledger"
+          awk -F '|' '
+            /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+            NF != 3 { exit 1 }
+            length($1) != 64 || $1 !~ /^[0-9a-f]+$/ { exit 1 }
+            $2 !~ /^https:\/\// { exit 1 }
+            { count++ }
+            END { exit !(count >= 1) }
+          ' "$ledger"
+
+      - name: Prove unmatched bytes stay unresolved
+        run: |
+          mirror="$RUNNER_TEMP/unmatched-mirror"
+          model_name='Qwen_Qwen3-4B-Instruct-2507-Q4_K_M.gguf'
+          mkdir -p "$mirror/models"
+          model="$RUNNER_TEMP/$model_name"
+          printf 'synthetic bytes that are not a published candidate\n' > "$model"
+          digest=$(sha256sum "$model" | awk '{ print $1 }')
+          model_dir="$mirror/models/$digest"
+          mkdir -p "$model_dir"
+          cp "$model" "$model_dir/$model_name"
+          {
+            printf 'sha256=%s\n' "$digest"
+            printf 'file=%s\n' "$model_name"
+            printf 'bytes=%s\n' "$(wc -c < "$model" | tr -d ' ')"
+          } > "$model_dir/MANIFEST"
+          printf '%s\n' "$digest" > "$mirror/models/ACTIVE.sha256"
+
+          output=$(python3 scripts/model-provenance-candidates.py "$mirror")
+          printf '%s\n' "$output"
+          printf '%s\n' "$output" | grep -Fqx 'match=none'
+
+          if python3 scripts/model-provenance-candidates.py \
+               "$mirror" --output "$RUNNER_TEMP/should-not-exist.provenance"; then
+            echo 'matcher unexpectedly emitted provenance for unmatched bytes' >&2
+            exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/should-not-exist.provenance"
+
+      - name: Prove exact SHA match emits a verified-origin sidecar
+        run: |
+          testroot="$RUNNER_TEMP/matcher-root"
+          mkdir -p "$testroot/scripts" "$testroot/supply-chain/model-provenance"
+          cp scripts/model-provenance-candidates.py \
+            "$testroot/scripts/model-provenance-candidates.py"
+
+          model_name='Synthetic_Model-Q4_K_M.gguf'
+          model="$RUNNER_TEMP/$model_name"
+          printf 'exact synthetic candidate bytes\n' > "$model"
+          digest=$(sha256sum "$model" | awk '{ print $1 }')
+
+          cat > "$testroot/supply-chain/model-provenance/$model_name.provenance" <<EOF
+          schema=1
+          file_name=$model_name
+          base_model_id=example/Synthetic-Model
+          base_model_source=https://example.invalid/Synthetic-Model
+          base_model_license=Apache-2.0
+          quantization=Q4_K_M
+          quantized_source_status=unverified
+          quantized_source_repository=-
+          quantized_source_file=-
+          quantized_source_sha256=-
+          redistribution_status=not-approved
+          note=Synthetic test catalog entry.
+          EOF
+          sed -i 's/^          //' \
+            "$testroot/supply-chain/model-provenance/$model_name.provenance"
+
+          cat > "$testroot/supply-chain/model-provenance/$model_name.candidates" <<EOF
+          # sha256|repository|file
+          $digest|https://example.invalid/Synthetic-GGUF|$model_name
+          EOF
+          sed -i 's/^          //' \
+            "$testroot/supply-chain/model-provenance/$model_name.candidates"
+
+          mirror="$RUNNER_TEMP/exact-mirror"
+          model_dir="$mirror/models/$digest"
+          mkdir -p "$model_dir"
+          cp "$model" "$model_dir/$model_name"
+          {
+            printf 'sha256=%s\n' "$digest"
+            printf 'file=%s\n' "$model_name"
+            printf 'bytes=%s\n' "$(wc -c < "$model" | tr -d ' ')"
+          } > "$model_dir/MANIFEST"
+          printf '%s\n' "$digest" > "$mirror/models/ACTIVE.sha256"
+
+          sidecar="$RUNNER_TEMP/matched.provenance"
+          output=$(python3 "$testroot/scripts/model-provenance-candidates.py" \
+            "$mirror" --require-match --output "$sidecar")
+          printf '%s\n' "$output"
+          printf '%s\n' "$output" | grep -Fqx 'match=exact-sha256'
+          grep -Fqx 'quantized_source_status=verified' "$sidecar"
+          grep -Fqx "quantized_source_sha256=$digest" "$sidecar"
+          grep -Fqx 'quantized_source_repository=https://example.invalid/Synthetic-GGUF' "$sidecar"
+          grep -Fqx "quantized_source_file=$model_name" "$sidecar"
+          grep -Fqx 'redistribution_status=not-approved' "$sidecar"
