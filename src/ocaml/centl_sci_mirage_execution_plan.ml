@@ -3,6 +3,8 @@ type action = {
   candidate_id : string;
   obligation_id : string;
   kind : string;
+  executor : string;
+  precondition : string;
   state : string;
 }
 
@@ -17,15 +19,30 @@ type report = {
   blocked_cells : int list;
 }
 
+let execution_contract kind =
+  match kind with
+  | "candidate_parses" -> ("candidate_parser_or_build", "candidate_materialized")
+  | "mandatory_regression" ->
+      ("deterministic_regression_gate", "candidate_materialized")
+  | "rollback_available" -> ("workspace_snapshot", "before_activation")
+  | "reuse_attempted" -> ("capability_discovery", "candidate_staged")
+  | "core_validation" -> ("relevant_core_validation", "candidate_materialized")
+  | "clarification_required" | "conflict_resolution_required" | "policy_boundary" ->
+      ("human_resolution", "blocking_requirement_resolved")
+  | _ -> ("unsupported_evidence_executor", "explicit_executor_required")
+
 let action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id
     ~kind =
+  let executor, precondition = execution_contract kind in
   `Assoc
     [
-      ("identity_schema_version", `Int 1);
+      ("identity_schema_version", `Int 2);
       ("candidate_id", `String candidate_id);
       ("transaction_fingerprint", `String transaction_fingerprint);
       ("obligation_id", `String obligation_id);
       ("kind", `String kind);
+      ("executor", `String executor);
+      ("precondition", `String precondition);
     ]
   |> Yojson.Safe.to_string
 
@@ -36,6 +53,7 @@ let action_id ~candidate_id ~transaction_fingerprint ~obligation_id ~kind =
 let action_of_check candidate_id transaction_fingerprint
     (check : Centl_sci_mirage_readiness.check) =
   if check.state = Centl_sci_mirage_readiness.Execution_required then
+    let executor, precondition = execution_contract check.kind in
     Some
       {
         action_id =
@@ -44,6 +62,8 @@ let action_of_check candidate_id transaction_fingerprint
         candidate_id;
         obligation_id = check.obligation_id;
         kind = check.kind;
+        executor;
+        precondition;
         state = "planned";
       }
   else None
@@ -72,6 +92,8 @@ let action_to_json (action : action) =
       ("candidate_id", `String action.candidate_id);
       ("obligation_id", `String action.obligation_id);
       ("kind", `String action.kind);
+      ("executor", `String action.executor);
+      ("precondition", `String action.precondition);
       ("state", `String action.state);
     ]
 
@@ -86,7 +108,7 @@ let candidate_to_json (candidate : candidate_plan) =
 let to_json (report : report) =
   `Assoc
     [
-      ("schema_version", `Int 2);
+      ("schema_version", `Int 3);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_plan");
       ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
@@ -95,7 +117,10 @@ let to_json (report : report) =
       ("assurance_promoted", `Bool false);
       ( "action_identity_semantics",
         `String
-          "action IDs bind candidate transaction identity to one unresolved evidence obligation; identity is not evidence that the action executed or passed" );
+          "action IDs bind candidate transaction identity, unresolved evidence obligation, executor, and precondition; identity is not evidence that the action executed or passed" );
+      ( "execution_contract_semantics",
+        `String
+          "executor names identify the required local validation mechanism; preconditions must hold before execution and no executor is represented as having run in this artifact" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -123,7 +148,7 @@ let render (report : report) =
     [
       "CENTL-MIRAGE evidence execution plan";
       "planned actions: " ^ string_of_int actions;
-      "action identities: deterministic and transaction-bound";
+      "action identities: deterministic, transaction-bound, and executor-bound";
       "execution performed: no";
       "workspace mutated: no";
       "assurance promoted: no";
