@@ -56,6 +56,20 @@ let test_physics_completion_surface () =
         (List.mem candidate completions))
     [ "constant"; "k_B"; "N_A"; "g0"; "simulate" ]
 
+let capability_names query =
+  Centl_sci_capabilities.search query |> List.map (fun capability -> capability.name)
+
+let test_caramels_capability_discovery () =
+  Alcotest.(check bool) "import reuses portability" true
+    (List.mem "workspace portability" (capability_names "import workspace bundle"));
+  Alcotest.(check bool) "audit reuses workspace audit" true
+    (List.mem "workspace audit" (capability_names "audit workspace"));
+  Alcotest.(check bool) "function creation reuses English-to-CENTL" true
+    (List.mem "English-to-CENTL extension"
+       (capability_names "create function for a local extension"));
+  Alcotest.(check bool) "approximation reuses verified approximation" true
+    (List.mem "approx" (capability_names "approximate to significant digits"))
+
 let () =
   Alcotest.run "CENTL-SCi Caramels interaction"
     [
@@ -76,5 +90,10 @@ let () =
             test_build_completion_surface;
           Alcotest.test_case "physics surface" `Quick
             test_physics_completion_surface;
+        ] );
+      ( "capabilities",
+        [
+          Alcotest.test_case "Caramels runtime discovery" `Quick
+            test_caramels_capability_discovery;
         ] );
     ]
