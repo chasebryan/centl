@@ -164,7 +164,15 @@ try {
     }
 
     Copy-Item -LiteralPath (Join-Path $ProjectRoot "LICENSE") `
-        -Destination (Join-Path $Licenses "CENTL-AGPL-3.0-or-later")
+        -Destination (Join-Path $Licenses "CENTL-Apache-2.0")
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "NOTICE") `
+        -Destination (Join-Path $Package "NOTICE")
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "LICENSING.md") `
+        -Destination (Join-Path $Package "LICENSING.md")
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "TRADEMARKS.md") `
+        -Destination (Join-Path $Package "TRADEMARKS.md")
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "THIRD_PARTY_NOTICES.md") `
+        -Destination (Join-Path $Package "THIRD_PARTY_NOTICES.md")
     Copy-License (Join-Path $Licenses "FLINT-LGPL-2.1-or-later") @($env:CENTL_FLINT_LICENSE)
     Copy-License (Join-Path $Licenses "GMP-LGPL-3.0-or-later") @(
         $env:CENTL_GMP_LGPL_LICENSE, $env:CENTL_GMP_LICENSE)
@@ -294,9 +302,10 @@ interpreter. Required native libraries are included beside the executables. Use
 centl.exe --serve for stateful JSON Lines or --mcp for a local MCP server.
 CENTL-SCi can run deterministic supported problems without a model; semantic
 problems require an explicitly configured local model backend. License texts are
-in licenses; source and relinking references are in COMPONENT-SOURCES.txt. Use
-centl.exe check FILE with --receipt to retain an audit record;
-BUILD_MANIFEST.json records the package build identity.
+in licenses; source and relinking references are in COMPONENT-SOURCES.txt.
+Project licensing, NOTICE, trademark, and third-party policy files are included
+beside this README. Use centl.exe check FILE with --receipt to retain an audit
+record; BUILD_MANIFEST.json records the package build identity.
 "@
     $Readme.TrimStart() | Set-Content -LiteralPath (Join-Path $Package "README.txt") -Encoding UTF8
 
