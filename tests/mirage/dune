@@ -19,6 +19,11 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_mirage_materialize)
+ (modules test_sci_mirage_materialize)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sci_mirage_readiness)
  (modules test_sci_mirage_readiness)
  (libraries centl_lib alcotest unix yojson))
