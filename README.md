@@ -2,23 +2,27 @@
 
 # CENTL
 
+**Exact-first mathematics, physics, and scientific computation for GNU/Linux.**
+
 > Good maths should be free.
 
-CENTL is an exact-first mathematics and physics system built to avoid
-manufacturing numerical certainty. Exact values stay exact, approximations carry
-explicit bounds, and unsupported work remains visible instead of being replaced
-by a plausible-looking answer.
+CENTL is built around a simple rule: **never manufacture mathematical certainty**.
+Exact values remain exact, approximations carry explicit justification, invalid or
+unsupported work stays visible, and semantic tooling is never allowed to overrule
+the mathematical evidence produced by CENTL itself.
 
-**CENTL-SCi** is the simplest way to use it: enter one mathematics or physics
-problem at a time and let CENTL perform the admitted computation and verification.
-It is a scientific interpreter, not a general chatbot.
+CENTL combines four closely related pieces:
 
-## Install
+| Surface | Purpose |
+| --- | --- |
+| `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
+| `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
+| `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
+| **CENTL CARAVAN** | Content-addressed preservation, verification, and availability for approved CENTL artifacts |
 
-CENTL currently supports **GNU/Linux only**. Linux is the reference development,
-validation, packaging, and release platform. Native releases bundle the runtime
-components needed to run CENTL; a compiler, OCaml, Dune, OPAM, F*, GMP, MPFR,
-and FLINT do not need to be installed separately.
+## Quick start
+
+CENTL is developed, validated, packaged, and released for **GNU/Linux**.
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
@@ -26,65 +30,13 @@ sh install
 ```
 
 If the installer adds `~/.local/bin` to your shell configuration, open a new
-terminal once. Then start the live scientific interface with:
+terminal once. Then launch the scientific interface:
 
 ```sh
 centl-sci
 ```
 
-The intended Caramels first-run experience is simply:
-
-```text
-CENTL-SCi v0.0.2-Caramels
-Free for science.
-
-> What is 0.1 plus 0.2?
-3/10
-> Solve x squared minus 5x plus 6 equals zero.
-x = 2 or x = 3
-> Solve -4.9*t^2 + 20*t = 0 for t.
-t = 0 or t = 200/49
->
-```
-
-The last equation can represent idealized vertical motion for an object launched
-upward at 20 m/s under `g = 9.8 m/s^2`, neglecting drag. CENTL keeps the nonzero
-flight time exact as `200/49` seconds instead of turning it into an arbitrary
-floating-point decimal.
-
-For complete Linux installation details and offline archives, see
-[docs/INSTALL.md](docs/INSTALL.md). macOS and Windows are currently unsupported;
-see [docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for the platform
-policy.
-
-## What gets installed
-
-Current native packages expose three commands:
-
-- `centl-sci` — live answer-first scientific interpreter;
-- `centl` — exact calculator, language, verification, JSON, and MCP interfaces;
-- `centl-physics` — exact-first typed physics operations and services.
-
-The installer verifies the release checksum, stages and smoke-tests the package
-before activation, validates CENTL exact arithmetic, validates a physics unit
-conversion, validates CENTL-SCi exact arithmetic, and then activates the command
-launchers atomically.
-
-## Why CENTL
-
-CENTL follows a small set of rules:
-
-- integers, fractions, and decimal literals are exact values;
-- exact results remain exact for as long as the admitted mathematics permits;
-- requested approximations return justified enclosures rather than unqualified
-  floating-point guesses;
-- mathematical and physical dimension errors fail explicitly;
-- unsupported or unresolved operations remain unsupported or unresolved;
-- semantic model output is untrusted and cannot overrule CENTL's mathematical
-  evidence;
-- every unqualified printed digit must be justified.
-
-For example:
+Or use the exact command surfaces directly:
 
 ```sh
 centl '0.1 + 0.2'
@@ -100,74 +52,135 @@ verdict: verified (closed_exact_rational via closed_rational_comparison); compar
 1
 ```
 
-## CENTL-SCi
+The native installer verifies its release checksum, stages and smoke-tests the
+package before activation, validates exact arithmetic and physics conversion, and
+activates the command launchers atomically.
+
+For full installation details and offline archives, see
+[docs/INSTALL.md](docs/INSTALL.md).
 
 ![CENTL-SCi v0.0.2-Caramels — Free Computation Foundation](assets/branding/centl-sci-v0.0.2-caramels-banner.svg)
 
-CENTL-SCi uses a conservative deterministic interpreter first. Current admitted
-fast paths include exact arithmetic, single-variable polynomial equations,
-spoken polynomial forms, and exact unit conversion. These paths are local and do
-not require a language model.
+## CENTL-SCi — v0.0.2-Caramels
 
-A separately configured local semantic model can interpret problems that require
-more language understanding, but it is never the mathematical authority. Model
-output must pass the closed Problem IR validator and is then lowered into CENTL
-or CENTL Physics. A model cannot manufacture a result that CENTL did not
-establish.
+**Caramels** is the current CENTL-SCi interaction generation: a local scientific
+interface for expressing mathematics and physics in ordinary language while
+keeping CENTL's exact and verified machinery in control of the answer.
 
-Model weights remain separate artifacts and are not silently downloaded by the
-installer. This keeps the deterministic scientific runtime immediately usable
-while preserving explicit provenance and consent for optional semantic models.
+A typical session is intentionally small:
 
-See [docs/SCI.md](docs/SCI.md) for the architecture and evidence boundary and
-[docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for platform policy.
+```text
+CENTL-SCi v0.0.2-Caramels
+Free for science.
 
-## CENTL CARAVAN
+> What is 0.1 plus 0.2?
+3/10
+> Solve x squared minus 5x plus 6 equals zero.
+x = 2 or x = 3
+> Solve -4.9*t^2 + 20*t = 0 for t.
+t = 0 or t = 200/49
+>
+```
+
+The final result remains `200/49` rather than being silently collapsed into an
+arbitrary floating-point decimal.
+
+Caramels provides:
+
+- deterministic fast paths for exact arithmetic, equations, algebraic transforms,
+  certified approximation, units, constants, and supported mechanics;
+- `MATH>`, `PHYS>`, `HYBRID>`, and `BUILD>` interaction modes;
+- evidence-backed interpretation and explanation rather than opaque answer text;
+- clarification when a problem is underspecified instead of invented values;
+- persistent user workspaces, revisions, snapshots, extension packages, and
+  dependency-aware activation;
+- a user-owned BUILD surface for extending CENTL without silently redefining the
+  verified core;
+- optional local semantic-model interpretation behind a closed validation boundary.
+
+A local language model, when configured, is an **interpreter of intent — not a
+mathematical authority**. Model output must pass CENTL-SCi's typed problem boundary
+and is lowered into CENTL or CENTL Physics before a result can inherit mathematical
+meaning. Model weights remain separate artifacts and are never silently downloaded.
+
+See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
+[docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.
 
 ![CENTL CARAVAN — Content-Addressed Resilient Artifact Verification and Availability Network](assets/branding/fcf-centl-caravan.png)
 
+## CENTL CARAVAN
+
 **Content-Addressed Resilient Artifact Verification and Availability Network**
 
-CENTL CARAVAN is the FCF's developing volunteer preservation and distribution
-layer for `public-approved` CENTL artifacts. Ordinary Linux machines can
-contribute bounded storage, bandwidth, and availability without becoming content
-authorities.
+CENTL CARAVAN is the preservation and availability layer for approved CENTL and
+FCF artifacts. It is designed so ordinary Linux machines can contribute bounded
+storage and bandwidth without becoming authorities over the content they carry.
 
 > A carrier may provide bytes, but a carrier may never define which bytes are trusted.
 
-CARAVAN treats volunteer carriers as untrusted storage and transport. Artifact
-identity comes from FCF-authenticated metadata, exact byte lengths, and standard
-SHA-256 content identities; bad bytes are rejected rather than made trustworthy
-by mirror reputation or peer majority.
+CARAVAN separates **availability** from **authority**. Artifact identity is bound
+to authenticated metadata, exact byte lengths, and cryptographic content identity;
+a carrier can replicate an artifact, but it cannot redefine the artifact that
+CENTL expects.
 
-The normal carrier design is unprivileged and outbound-only: no root or sudo,
-public listening port, or router configuration should be required. The default
-download path uses FCF relay infrastructure so volunteer carriers do not receive
-a downloader's direct network address. The public FCF site is intended to expose
-aggregate network health — available caravans, protected artifacts, and verified
-replicas — without publishing volunteer endpoints or identities.
+The design keeps carriers deliberately narrow:
 
-CARAVAN is now in its documented local-laboratory implementation phase. The
-public volunteer network is **not yet operational**. See
+- content-addressed, integrity-checked storage and retrieval;
+- unprivileged operation with bounded resource use;
+- outbound-oriented participation rather than requiring a public server role;
+- quarantine and withdrawal paths for unhealthy or incorrect replicas;
+- privacy boundaries that do not require publishing volunteer endpoints or identities;
+- aggregate availability accounting for protected artifacts and verified replicas.
+
+CARAVAN is part of the broader FCF effort to preserve the software, dependencies,
+models, and scientific artifacts CENTL depends on rather than assuming upstream
+availability will exist forever.
+
+Architecture and policy are documented in
 [docs/CARAVAN.md](docs/CARAVAN.md),
 [docs/CARAVAN-THREAT-MODEL.md](docs/CARAVAN-THREAT-MODEL.md),
 [docs/CARAVAN-HOST-POLICY.md](docs/CARAVAN-HOST-POLICY.md), and
 [docs/CARAVAN-ROLLOUT.md](docs/CARAVAN-ROLLOUT.md).
 
-## Physics
+## The numerical contract
+
+CENTL's behavior is intentionally conservative:
+
+- integers, fractions, and decimal literals are exact values;
+- exact results remain exact for as long as the admitted mathematics permits;
+- requested approximations return justified enclosures rather than unqualified
+  floating-point guesses;
+- mathematical and physical dimension errors fail explicitly;
+- unsupported or unresolved operations remain unsupported or unresolved;
+- generated, external, or model-produced semantics cannot promote themselves to
+  verified CENTL core;
+- every unqualified printed digit must be justified.
+
+## CENTL Physics
 
 CENTL Physics provides exact rational unit conversion, SI dimensional analysis,
 3D vector and particle operations, force and gravity evaluation, energy and
 momentum diagnostics, bounded collision/contact reasoning, and narrow exact
 event-aware mechanics contracts.
 
-It deliberately does not claim a general-purpose physics simulator. Exact
-supported domains and known boundaries are documented in
-[docs/PHYSICS.md](docs/PHYSICS.md).
+It does not pretend to be a universal physics simulator. Supported domains and
+known boundaries are documented explicitly in [docs/PHYSICS.md](docs/PHYSICS.md).
 
-## Developers
+## Linux-first platform policy
 
-A native release is recommended for ordinary use. Development from source uses
+GNU/Linux is the sole reference platform for current development, CI, packaging,
+validation, installation, and release work. macOS and Windows are not active
+support targets.
+
+Historical portability code may remain in the repository where retaining it is
+less disruptive than deleting it, but current CENTL engineering is intentionally
+focused on one environment that can be tested, reproduced, and improved quickly.
+See [docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for the platform
+policy.
+
+## Development
+
+Native releases are recommended for ordinary use. Development from source uses
 the pinned toolchain and verified F* extraction path on Linux:
 
 ```sh
@@ -182,9 +195,10 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 ## Documentation
 
 - [CENTL-SCi](docs/SCI.md)
+- [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
 - [CENTL CARAVAN](docs/CARAVAN.md)
 - [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
-- [CARAVAN volunteer host policy](docs/CARAVAN-HOST-POLICY.md)
+- [CARAVAN host policy](docs/CARAVAN-HOST-POLICY.md)
 - [CARAVAN rollout](docs/CARAVAN-ROLLOUT.md)
 - [Installation](docs/INSTALL.md)
 - [Syntax](docs/SYNTAX.md)
@@ -204,4 +218,4 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 
 Developed under the **Free Computation Foundation**.
 
-> Free for science.
+> **Free for science.**
