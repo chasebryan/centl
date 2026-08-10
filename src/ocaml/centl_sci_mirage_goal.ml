@@ -136,7 +136,8 @@ let capability_matches workspace request =
   |> List.filter (fun (score, _) -> score > 0)
   |> List.sort (fun (left_score, left) (right_score, right) ->
        let by_score = compare right_score left_score in
-       if by_score <> 0 then by_score else String.compare left.name right.name)
+       if by_score <> 0 then by_score
+       else String.compare left.Centl_sci_capabilities.name right.Centl_sci_capabilities.name)
   |> List.map snd
 
 let is_alias_request text =
@@ -191,7 +192,8 @@ let capability_edges workspace (cells : spec_cell list) =
   cells |> List.filter (fun cell -> match String.uppercase_ascii cell.kind with
     | "DIRECTIVE" | "INVARIANT" -> true | _ -> false)
   |> List.concat_map (fun cell -> capability_matches workspace cell.text |> List.map (fun capability ->
-       { source = cell_node_id cell.id; target = capability_node_id capability.name;
+       { source = cell_node_id cell.id;
+         target = capability_node_id capability.Centl_sci_capabilities.name;
          kind = Candidate_satisfied_by }))
 
 let cell_nodes (cells : spec_cell list) = List.map (fun cell ->
@@ -199,9 +201,11 @@ let cell_nodes (cells : spec_cell list) = List.map (fun cell ->
 
 let capability_nodes workspace (cells : spec_cell list) =
   cells |> List.concat_map (fun cell -> capability_matches workspace cell.text)
-  |> List.sort_uniq (fun left right -> String.compare left.Centl_sci_capabilities.name right.name)
-  |> List.map (fun capability -> { id = capability_node_id capability.name; kind = Capability;
-       label = Centl_sci_capabilities.render capability; source_cell = None })
+  |> List.sort_uniq (fun left right ->
+       String.compare left.Centl_sci_capabilities.name right.Centl_sci_capabilities.name)
+  |> List.map (fun capability ->
+       { id = capability_node_id capability.Centl_sci_capabilities.name; kind = Capability;
+         label = Centl_sci_capabilities.render capability; source_cell = None })
 
 let build workspace (cells : spec_cell list) =
   let conflicts = conflicts cells in
