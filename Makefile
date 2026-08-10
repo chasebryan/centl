@@ -3,6 +3,7 @@ JULIA ?= julia
 OPAM ?= opam
 PYTHON ?= python3
 OPAM_SWITCH ?= centl
+INTEGRITY_MANIFEST ?= _build/integrity/SHA256SUMS
 DUNE ?= $(shell \
 	if command -v dune >/dev/null 2>&1; then command -v dune; \
 	elif command -v opam >/dev/null 2>&1; then \
@@ -26,12 +27,13 @@ SCI_ASSIMILATION_FAST_REPEATS ?= 5
 SCI_ASSIMILATION_MODEL_REPEATS ?= 1
 SCI_ASSIMILATION_ARGS ?=
 
-.PHONY: all format format-fix fmt lint quality install-interface-check supply-chain-check \
-	supply-chain-sync supply-chain-audit supply-chain-snapshot-opam \
-	supply-chain-snapshot-julia supply-chain-preserve verify extract native-build \
-	native-test adversarial-test fuzz-test metamorphic-test sanitizer-test \
-	performance-test hardening-test differential-test sci-model-test sci-interface-check \
-	sci-assimilate sci-assimilate-full sci-assimilate-publish build test release clean
+.PHONY: all format format-fix fmt lint quality install-interface-check integrity-self-test \
+	integrity-source supply-chain-check supply-chain-sync supply-chain-audit \
+	supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-preserve \
+	verify extract native-build native-test adversarial-test fuzz-test metamorphic-test \
+	sanitizer-test performance-test hardening-test differential-test sci-model-test \
+	sci-interface-check sci-assimilate sci-assimilate-full sci-assimilate-publish \
+	build test release clean
 
 all: build
 
@@ -50,6 +52,14 @@ lint:
 
 install-interface-check:
 	$(PYTHON) scripts/install-interface-check.py
+
+integrity-self-test:
+	$(PYTHON) scripts/integrity.py self-test
+
+integrity-source: integrity-self-test
+	mkdir -p "$(dir $(INTEGRITY_MANIFEST))"
+	$(PYTHON) scripts/integrity.py source-manifest --output "$(INTEGRITY_MANIFEST)"
+	$(PYTHON) scripts/integrity.py hash "$(INTEGRITY_MANIFEST)" > "$(INTEGRITY_MANIFEST).sha256"
 
 supply-chain-check:
 	$(PYTHON) scripts/supply-chain-check.py
@@ -74,9 +84,9 @@ supply-chain-snapshot-julia:
 	test -n "$(MIRROR)" || { echo "MIRROR=/path/to/centl-mirror is required" >&2; exit 2; }
 	JULIA="$(JULIA)" sh scripts/supply-chain snapshot-julia "$(MIRROR)"
 
-supply-chain-preserve: supply-chain-check supply-chain-sync supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-audit
+supply-chain-preserve: integrity-source supply-chain-check supply-chain-sync supply-chain-snapshot-opam supply-chain-snapshot-julia supply-chain-audit
 
-quality: format lint install-interface-check supply-chain-check
+quality: format lint install-interface-check integrity-source supply-chain-check
 
 verify:
 	mkdir -p $(FSTAR_CACHE)
