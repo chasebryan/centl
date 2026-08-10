@@ -8,11 +8,41 @@ type t =
       variable : string;
       equation_assumptions : string list;
     }
+  | Verification_claim of {
+      left : string;
+      relation : string;
+      right : string;
+      verification_assumptions : string list;
+    }
   | Unit_conversion of {
       value : string;
       from_unit : string;
       to_unit : string;
       conversion_assumptions : string list;
+    }
+  | Physical_constant of {
+      symbol : string;
+      constant_assumptions : string list;
+    }
+  | Uniform_gravity_particle of {
+      mass_value : string;
+      mass_unit : string;
+      position_x : string;
+      position_y : string;
+      position_z : string;
+      position_unit : string;
+      velocity_x : string;
+      velocity_y : string;
+      velocity_z : string;
+      velocity_unit : string;
+      gravity_x : string;
+      gravity_y : string;
+      gravity_z : string;
+      gravity_unit : string;
+      dt_value : string;
+      dt_unit : string;
+      steps : int;
+      mechanics_assumptions : string list;
     }
   | Unsupported of {
       unsupported_reason : string;
@@ -135,6 +165,9 @@ let require_common fields ~domain ~problem_class ~operation =
       fail "invalid_ir" ("operation must be " ^ operation)
     else assumptions_field fields
 
+let validate_value field value = validate_text ~field ~max_bytes:max_value_bytes value
+let validate_unit field value = validate_text ~field ~max_bytes:max_unit_bytes value
+
 let parse_exact_expression fields =
   let allowed = "expression" :: common_fields in
   let* () = check_fields allowed fields in
@@ -162,25 +195,45 @@ let parse_polynomial_equation fields =
     let* left = string_field "left" fields in
     let* right = string_field "right" fields in
     let* variable = string_field "variable" fields in
-    let* left =
-      validate_text ~field:"left" ~max_bytes:max_model_text_bytes left
-    in
-    let* right =
-      validate_text ~field:"right" ~max_bytes:max_model_text_bytes right
-    in
+    let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
+    let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
     let* variable = validate_text ~field:"variable" ~max_bytes:64 variable in
     if not (valid_identifier variable) then
       fail "invalid_ir" "variable must be a CENTL identifier"
-    else if
-      contains_any left [ ','; '='; ';' ]
-      || contains_any right [ ','; '='; ';' ]
-    then
+    else if contains_any left [ ','; '='; ';' ] || contains_any right [ ','; '='; ';' ] then
       fail "invalid_ir"
         "equation sides may not contain commas, equality signs, or semicolons"
     else
       Ok
         (Polynomial_equation
            { left; right; variable; equation_assumptions = assumptions })
+
+let supported_verification_relation = function
+  | "equal" | "not_equal" | "less_than" | "less_or_equal"
+  | "greater_than" | "greater_or_equal" -> true
+  | _ -> false
+
+let parse_verification_claim fields =
+  let allowed = [ "left"; "relation"; "right" ] @ common_fields in
+  let* () = check_fields allowed fields in
+  let* assumptions =
+    require_common fields ~domain:"mathematics"
+      ~problem_class:"verification_claim" ~operation:"verify"
+  in
+  let* left = string_field "left" fields in
+  let* relation = string_field "relation" fields in
+  let* right = string_field "right" fields in
+  let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
+  let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
+  if not (supported_verification_relation relation) then
+    fail "invalid_ir" "unsupported verification relation"
+  else if assumptions <> [] then
+    fail "invalid_ir"
+      "Caramels closed verification claims do not admit interpreter assumptions"
+  else
+    Ok
+      (Verification_claim
+         { left; relation; right; verification_assumptions = assumptions })
 
 let parse_unit_conversion fields =
   let allowed = [ "value"; "from_unit"; "to_unit" ] @ common_fields in
@@ -192,16 +245,93 @@ let parse_unit_conversion fields =
   let* value = string_field "value" fields in
   let* from_unit = string_field "from_unit" fields in
   let* to_unit = string_field "to_unit" fields in
-  let* value = validate_text ~field:"value" ~max_bytes:max_value_bytes value in
-  let* from_unit =
-    validate_text ~field:"from_unit" ~max_bytes:max_unit_bytes from_unit
-  in
-  let* to_unit =
-    validate_text ~field:"to_unit" ~max_bytes:max_unit_bytes to_unit
-  in
+  let* value = validate_value "value" value in
+  let* from_unit = validate_unit "from_unit" from_unit in
+  let* to_unit = validate_unit "to_unit" to_unit in
   Ok
     (Unit_conversion
        { value; from_unit; to_unit; conversion_assumptions = assumptions })
+
+let supported_constant_symbol = function
+  | "c" | "h" | "e" | "k_B" | "N_A" | "g0" -> true
+  | _ -> false
+
+let parse_physical_constant fields =
+  let* () = check_fields ("symbol" :: common_fields) fields in
+  let* assumptions =
+    require_common fields ~domain:"physics" ~problem_class:"physical_constant"
+      ~operation:"constant"
+  in
+  let* symbol = string_field "symbol" fields in
+  let* symbol = validate_text ~field:"symbol" ~max_bytes:32 symbol in
+  if supported_constant_symbol symbol then
+    Ok (Physical_constant { symbol; constant_assumptions = assumptions })
+  else
+    fail "invalid_ir"
+      "physical constant is outside the exact defining/conventional Caramels catalog"
+
+let parse_uniform_gravity_particle fields =
+  let specific =
+    [
+      "mass_value"; "mass_unit";
+      "position_x"; "position_y"; "position_z"; "position_unit";
+      "velocity_x"; "velocity_y"; "velocity_z"; "velocity_unit";
+      "gravity_x"; "gravity_y"; "gravity_z"; "gravity_unit";
+      "dt_value"; "dt_unit"; "steps";
+    ]
+  in
+  let* () = check_fields (specific @ common_fields) fields in
+  let* assumptions =
+    require_common fields ~domain:"physics"
+      ~problem_class:"uniform_gravity_particle" ~operation:"simulate"
+  in
+  let* mass_value = string_field "mass_value" fields in
+  let* mass_unit = string_field "mass_unit" fields in
+  let* position_x = string_field "position_x" fields in
+  let* position_y = string_field "position_y" fields in
+  let* position_z = string_field "position_z" fields in
+  let* position_unit = string_field "position_unit" fields in
+  let* velocity_x = string_field "velocity_x" fields in
+  let* velocity_y = string_field "velocity_y" fields in
+  let* velocity_z = string_field "velocity_z" fields in
+  let* velocity_unit = string_field "velocity_unit" fields in
+  let* gravity_x = string_field "gravity_x" fields in
+  let* gravity_y = string_field "gravity_y" fields in
+  let* gravity_z = string_field "gravity_z" fields in
+  let* gravity_unit = string_field "gravity_unit" fields in
+  let* dt_value = string_field "dt_value" fields in
+  let* dt_unit = string_field "dt_unit" fields in
+  let* steps = int_field "steps" fields in
+  let* mass_value = validate_value "mass_value" mass_value in
+  let* mass_unit = validate_unit "mass_unit" mass_unit in
+  let* position_x = validate_value "position_x" position_x in
+  let* position_y = validate_value "position_y" position_y in
+  let* position_z = validate_value "position_z" position_z in
+  let* position_unit = validate_unit "position_unit" position_unit in
+  let* velocity_x = validate_value "velocity_x" velocity_x in
+  let* velocity_y = validate_value "velocity_y" velocity_y in
+  let* velocity_z = validate_value "velocity_z" velocity_z in
+  let* velocity_unit = validate_unit "velocity_unit" velocity_unit in
+  let* gravity_x = validate_value "gravity_x" gravity_x in
+  let* gravity_y = validate_value "gravity_y" gravity_y in
+  let* gravity_z = validate_value "gravity_z" gravity_z in
+  let* gravity_unit = validate_unit "gravity_unit" gravity_unit in
+  let* dt_value = validate_value "dt_value" dt_value in
+  let* dt_unit = validate_unit "dt_unit" dt_unit in
+  if steps <= 0 then fail "invalid_ir" "steps must be positive"
+  else if steps > 100_000 then
+    fail "resource_limit" "steps exceed the physics protocol limit"
+  else
+    Ok
+      (Uniform_gravity_particle
+         {
+           mass_value; mass_unit;
+           position_x; position_y; position_z; position_unit;
+           velocity_x; velocity_y; velocity_z; velocity_unit;
+           gravity_x; gravity_y; gravity_z; gravity_unit;
+           dt_value; dt_unit; steps;
+           mechanics_assumptions = assumptions;
+         })
 
 let parse_unsupported fields =
   let allowed = "reason" :: common_fields in
@@ -211,9 +341,7 @@ let parse_unsupported fields =
       ~operation:"unsupported"
   in
   let* reason = string_field "reason" fields in
-  let* reason =
-    validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason
-  in
+  let* reason = validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason in
   Ok
     (Unsupported
        { unsupported_reason = reason; unsupported_assumptions = assumptions })
@@ -223,7 +351,10 @@ let of_json = function
       begin match List.assoc_opt "problem_class" fields with
       | Some (`String "exact_expression") -> parse_exact_expression fields
       | Some (`String "polynomial_equation") -> parse_polynomial_equation fields
+      | Some (`String "verification_claim") -> parse_verification_claim fields
       | Some (`String "unit_conversion") -> parse_unit_conversion fields
+      | Some (`String "physical_constant") -> parse_physical_constant fields
+      | Some (`String "uniform_gravity_particle") -> parse_uniform_gravity_particle fields
       | Some (`String "unsupported") -> parse_unsupported fields
       | Some (`String value) ->
           fail "unsupported_problem_class" ("unsupported problem_class " ^ value)
@@ -243,24 +374,33 @@ let of_string text =
 let assumptions = function
   | Exact_expression value -> value.exact_assumptions
   | Polynomial_equation value -> value.equation_assumptions
+  | Verification_claim value -> value.verification_assumptions
   | Unit_conversion value -> value.conversion_assumptions
+  | Physical_constant value -> value.constant_assumptions
+  | Uniform_gravity_particle value -> value.mechanics_assumptions
   | Unsupported value -> value.unsupported_assumptions
 
 let domain = function
-  | Exact_expression _ | Polynomial_equation _ -> "mathematics"
-  | Unit_conversion _ -> "physics"
+  | Exact_expression _ | Polynomial_equation _ | Verification_claim _ -> "mathematics"
+  | Unit_conversion _ | Physical_constant _ | Uniform_gravity_particle _ -> "physics"
   | Unsupported _ -> "unsupported"
 
 let problem_class = function
   | Exact_expression _ -> "exact_expression"
   | Polynomial_equation _ -> "polynomial_equation"
+  | Verification_claim _ -> "verification_claim"
   | Unit_conversion _ -> "unit_conversion"
+  | Physical_constant _ -> "physical_constant"
+  | Uniform_gravity_particle _ -> "uniform_gravity_particle"
   | Unsupported _ -> "unsupported"
 
 let operation = function
   | Exact_expression _ -> "compute"
   | Polynomial_equation _ -> "solve"
+  | Verification_claim _ -> "verify"
   | Unit_conversion _ -> "convert"
+  | Physical_constant _ -> "constant"
+  | Uniform_gravity_particle _ -> "simulate"
   | Unsupported _ -> "unsupported"
 
 let strings values = `List (List.map (fun value -> `String value) values)
@@ -277,9 +417,7 @@ let to_json value =
   in
   match value with
   | Exact_expression data ->
-      `Assoc
-        (common data.exact_assumptions
-        @ [ ("expression", `String data.expression) ])
+      `Assoc (common data.exact_assumptions @ [ ("expression", `String data.expression) ])
   | Polynomial_equation data ->
       `Assoc
         (common data.equation_assumptions
@@ -289,6 +427,14 @@ let to_json value =
             ("right", `String data.right);
             ("variable", `String data.variable);
           ])
+  | Verification_claim data ->
+      `Assoc
+        (common data.verification_assumptions
+        @ [
+            ("left", `String data.left);
+            ("relation", `String data.relation);
+            ("right", `String data.right);
+          ])
   | Unit_conversion data ->
       `Assoc
         (common data.conversion_assumptions
@@ -296,6 +442,31 @@ let to_json value =
             ("value", `String data.value);
             ("from_unit", `String data.from_unit);
             ("to_unit", `String data.to_unit);
+          ])
+  | Physical_constant data ->
+      `Assoc
+        (common data.constant_assumptions @ [ ("symbol", `String data.symbol) ])
+  | Uniform_gravity_particle data ->
+      `Assoc
+        (common data.mechanics_assumptions
+        @ [
+            ("mass_value", `String data.mass_value);
+            ("mass_unit", `String data.mass_unit);
+            ("position_x", `String data.position_x);
+            ("position_y", `String data.position_y);
+            ("position_z", `String data.position_z);
+            ("position_unit", `String data.position_unit);
+            ("velocity_x", `String data.velocity_x);
+            ("velocity_y", `String data.velocity_y);
+            ("velocity_z", `String data.velocity_z);
+            ("velocity_unit", `String data.velocity_unit);
+            ("gravity_x", `String data.gravity_x);
+            ("gravity_y", `String data.gravity_y);
+            ("gravity_z", `String data.gravity_z);
+            ("gravity_unit", `String data.gravity_unit);
+            ("dt_value", `String data.dt_value);
+            ("dt_unit", `String data.dt_unit);
+            ("steps", `Int data.steps);
           ])
   | Unsupported data ->
       `Assoc

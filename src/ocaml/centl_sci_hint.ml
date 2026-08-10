@@ -3,6 +3,8 @@ type t =
   | Exact_expression
   | Polynomial_equation
   | Unit_conversion
+  | Physical_constant
+  | Uniform_gravity_particle
   | Unsupported of string
 
 let contains ~needle text =
@@ -17,6 +19,37 @@ let contains ~needle text =
   loop 0
 
 let starts prefix text = String.starts_with ~prefix text
+
+let contains_any needles text =
+  List.exists (fun needle -> contains ~needle text) needles
+
+let exact_constant_request problem =
+  contains_any
+    [
+      "speed of light";
+      "planck constant";
+      "planck's constant";
+      "elementary charge";
+      "boltzmann constant";
+      "avogadro constant";
+      "avogadro's constant";
+      "standard gravity";
+      "standard acceleration of gravity";
+      "constant c";
+      "constant h";
+      "constant k_b";
+      "constant n_a";
+      "constant g0";
+    ]
+    problem
+
+let complete_uniform_gravity_request problem =
+  (starts "simulate particle" problem
+  || starts "simulate a particle" problem
+  || starts "simulate the particle" problem)
+  && List.for_all
+       (fun marker -> contains ~needle:marker problem)
+       [ "mass "; "position "; "velocity "; "gravity "; "dt "; "steps " ]
 
 let classify problem =
   let problem = String.trim problem |> String.lowercase_ascii in
@@ -35,7 +68,7 @@ let classify problem =
     contains ~needle:"but also assume" problem
     || contains ~needle:"contradict" problem
   in
-  let mechanics =
+  let unsupported_mechanics =
     contains ~needle:"dropped from" problem
     || contains ~needle:"air resistance" problem
     || contains ~needle:"before impact" problem
@@ -46,10 +79,12 @@ let classify problem =
     || starts "who is " problem
   in
   if contradictory then Unsupported "contradictory request"
-  else if mechanics then
+  else if complete_uniform_gravity_request problem then Uniform_gravity_particle
+  else if exact_constant_request problem then Physical_constant
+  else if unsupported_mechanics then
     if contains ~needle:"spring" problem then
       Unsupported "missing physics parameters or unsupported mechanics"
-    else Unsupported "mechanics outside CENTL-SCi v0.0.1"
+    else Unsupported "mechanics outside the admitted Caramels request classes"
   else if general_knowledge then
     Unsupported "general knowledge outside CENTL-SCi"
   else if
@@ -70,6 +105,8 @@ let text = function
   | Exact_expression -> "exact_expression"
   | Polynomial_equation -> "polynomial_equation"
   | Unit_conversion -> "unit_conversion"
+  | Physical_constant -> "physical_constant"
+  | Uniform_gravity_particle -> "uniform_gravity_particle"
   | Unsupported _ -> "unsupported"
 
 let reason_hint = function Unsupported reason -> Some reason | _ -> None

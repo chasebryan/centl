@@ -68,6 +68,7 @@ def main() -> int:
         env.pop("CENTL_SCI_SERVER_URL", None)
         env["XDG_CONFIG_HOME"] = str(root / "config")
         env["XDG_STATE_HOME"] = str(root / "state")
+        env["CENTL_WORKSPACE"] = str(root / "workspace")
 
         cases = [
             (["What is 0.1 plus 0.2?"], "3/10\n"),
@@ -76,6 +77,9 @@ def main() -> int:
                 "x = 2 or x = 3\n",
             ),
             (["Convert 2.5 kilometers to meters."], "2500 m\n"),
+            (["What is 2 × 3?"], "6\n"),
+            (["--mode", "math", "roots of x squared minus 5x plus 6"], "x = 2 or x = 3\n"),
+            (["--mode", "physics", "change 2.5 kilometers into meters"], "2500 m\n"),
         ]
         for arguments, expected in cases:
             require_clean(
@@ -107,6 +111,22 @@ def main() -> int:
         )
         passed += 1
 
+        explain = run(
+            executable,
+            ["--explain", "What is 0.1 plus 0.2?"],
+            input_text=None,
+            timeout=args.timeout,
+            env=env,
+        )
+        require_clean(
+            explain,
+            "3/10\n\nDetails:\n"
+            "  Exact result\n"
+            "  Method: exact arithmetic\n"
+            "  Verified by CENTL\n",
+        )
+        passed += 1
+
         machine = run(
             executable,
             ["--json", "What is 0.1 plus 0.2?"],
@@ -126,7 +146,7 @@ def main() -> int:
 
         repl = run(
             executable,
-            ["--repl"],
+            ["--repl", "--no-history"],
             input_text=(
                 "What is 0.1 plus 0.2?\n"
                 "Convert 2.5 kilometers to meters.\n"
@@ -137,17 +157,44 @@ def main() -> int:
         )
         require_clean(
             repl,
-            "CENTL-SCi v0.0.1-Camelus\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
-            "> 3/10\n"
-            "> 2500 m\n"
-            "> ",
+            "HYBRID> 3/10\n"
+            "HYBRID> 2500 m\n"
+            "HYBRID> ",
+        )
+        passed += 1
+
+        modes = run(
+            executable,
+            ["--repl", "--no-history"],
+            input_text=(
+                ":mode math\n"
+                "What is 0.1 plus 0.2?\n"
+                ":mode physics\n"
+                "Convert 2.5 kilometers to meters.\n"
+                ":mode hybrid\n"
+                ":exit\n"
+            ),
+            timeout=args.timeout,
+            env=env,
+        )
+        require_clean(
+            modes,
+            "CENTL-SCi v0.0.2-dev\n"
+            "Free for science.\n\n"
+            "HYBRID> Mode: math\n"
+            "MATH> 3/10\n"
+            "MATH> Mode: physics\n"
+            "PHYS> 2500 m\n"
+            "PHYS> Mode: hybrid\n"
+            "HYBRID> ",
         )
         passed += 1
 
         recovery = run(
             executable,
-            ["--repl"],
+            ["--repl", "--no-history"],
             input_text=(
                 "This is not a supported scientific problem.\n"
                 "What is 0.1 plus 0.2?\n"
@@ -158,27 +205,43 @@ def main() -> int:
         )
         require_clean(
             recovery,
-            "CENTL-SCi v0.0.1-Camelus\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
-            "> CENTL-SCi cannot solve this problem yet.\n"
-            "> 3/10\n"
-            "> ",
+            "HYBRID> CENTL-SCi cannot solve this problem yet.\n"
+            "HYBRID> 3/10\n"
+            "HYBRID> ",
+        )
+        passed += 1
+
+        clarification = run(
+            executable,
+            ["--repl", "--no-history"],
+            input_text="solve x squared plus 4\n:quit\n",
+            timeout=args.timeout,
+            env=env,
+        )
+        require_clean(
+            clarification,
+            "CENTL-SCi v0.0.2-dev\n"
+            "Free for science.\n\n"
+            "HYBRID> I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0.\n"
+            "HYBRID> ",
         )
         passed += 1
 
         eof = run(
             executable,
-            ["--repl"],
+            ["--repl", "--no-history"],
             input_text="What is 0.1 plus 0.2?\n",
             timeout=args.timeout,
             env=env,
         )
         require_clean(
             eof,
-            "CENTL-SCi v0.0.1-Camelus\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
-            "> 3/10\n"
-            "> \n",
+            "HYBRID> 3/10\n"
+            "HYBRID> ",
         )
         passed += 1
 

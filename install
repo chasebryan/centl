@@ -10,7 +10,7 @@ configure_path=true
 
 usage() {
   cat <<'EOF'
-Install a prebuilt CENTL release.
+Install a prebuilt CENTL release on GNU/Linux.
 
 Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [--archive PATH] [--no-path]
 
@@ -18,7 +18,7 @@ Usage: ./install [--version VERSION] [--release-base-url URL] [--prefix PATH] [-
   --release-base-url URL     use URL/vVERSION as the release directory
                              (HTTPS or file://; requires explicit --version)
   --prefix PATH              install below PATH (default: ~/.local)
-  --archive PATH             install and verify a local release archive
+  --archive PATH             install and verify a local Linux release archive
   --no-path                  do not update a shell startup file when PATH needs setup
   --help                     show this help
 
@@ -104,18 +104,14 @@ fi
 
 case $(uname -s) in
   Linux) platform=linux ;;
-  Darwin) platform=macos ;;
-  *) fail "prebuilt releases support Linux and macOS; use install.ps1 on Windows" ;;
+  Darwin) fail "macOS is currently unsupported; CENTL native releases are GNU/Linux only" ;;
+  *) fail "CENTL native releases currently support GNU/Linux only" ;;
 esac
 
 case $(uname -m) in
   x86_64|amd64) architecture=x86_64 ;;
-  arm64|aarch64) architecture=arm64 ;;
-  *) fail "prebuilt releases do not support this architecture: $(uname -m)" ;;
+  *) fail "Linux prebuilt releases currently support x86_64 only: $(uname -m)" ;;
 esac
-
-[ "$platform" != linux ] || [ "$architecture" = x86_64 ] ||
-  fail "Linux prebuilt releases currently support x86_64 only"
 
 asset="centl-${platform}-${architecture}.tar.gz"
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-install.XXXXXXXX")

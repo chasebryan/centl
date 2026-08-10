@@ -1,38 +1,35 @@
 # CENTL-SCi platform support
 
-Linux is the reference platform for CENTL-SCi. During the early development
-series, Linux is the primary development and release-blocking target.
+CENTL and CENTL-SCi currently support **GNU/Linux only**.
 
-Windows support is experimental and best-effort during the early development
-series. Windows-specific failures do not block scientific feature development
-unless they indicate a cross-platform correctness or safety problem.
+Linux is the reference platform, the primary development environment, the native
+release target, and the only release-blocking platform for the Caramels series.
+Build, test, packaging, installer, filesystem, local-model, workspace, extension,
+and self-extension behavior are specified and validated against Linux.
 
-This policy is an engineering-resource decision, not opposition to Windows.
-Supporting Windows can consume substantial development time through
-platform-specific build behavior, dependency management, packaging, CI,
-filesystem differences, installer maintenance, and portability work. For an
-early scientific project, those costs must be balanced against work on
-mathematical correctness, physics capability, verification, performance, and the
-scientific interface.
+macOS and Windows are currently **unsupported**. They may continue to work in
+parts of the codebase because CENTL avoids unnecessary platform lock-in where
+portable code is natural, but the project makes no compatibility, packaging,
+installer, CI, or release promise for either operating system. Failures that are
+specific to macOS or Windows do not block Linux development or a CENTL release.
 
-CENTL-SCi intends to retain Windows support where practical, but Windows-specific
-work must not dictate the pace of scientific development. Additional engineering
-resources or sponsorship could make sustained Windows support substantially more
-practical without diverting effort from scientific advancement.
+This is an engineering-scope decision. CENTL-SCi increasingly depends on
+operating-system-sensitive behavior including persistent terminal interaction,
+subprocess execution, local model hosting, native extension loading, workspace
+mutation, snapshots, symlink and path safety, packaging, and installation.
+Defining one reference operating environment lets those contracts be implemented
+and tested rigorously without multiplying platform-specific work while the
+scientific system is still developing rapidly.
 
-macOS remains a supported native target where the existing portable runtime and
-release pipeline remain practical.
+Shared code should remain portable when doing so is simple and does not weaken or
+complicate the Linux implementation. The project should not add abstraction,
+compatibility branches, CI jobs, packaging machinery, or release gates solely to
+preserve hypothetical macOS or Windows support.
 
-The support hierarchy is:
+Support for another operating system may be reintroduced later from a stable
+CENTL specification when there is a concrete user need and enough engineering
+capacity to maintain it honestly. Until then, the support hierarchy is simply:
 
-1. **Linux — reference platform:** primary development, full validation, and
-   release-blocking correctness target.
-2. **macOS — supported native platform:** maintained where the portable build and
-   release path remains practical.
-3. **Windows x86_64 — experimental/best-effort:** supported when practical;
-   Windows-only failures are non-blocking unless they reveal a shared correctness
-   or safety defect.
-
-The project should continue avoiding unnecessary platform lock-in in shared code.
-The distinction is between portability as a design goal and platform-specific
-work as a release requirement.
+1. **GNU/Linux — supported reference platform.**
+2. **macOS — unsupported.**
+3. **Windows — unsupported.**

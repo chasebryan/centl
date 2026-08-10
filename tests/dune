@@ -66,6 +66,11 @@
  (libraries centl_lib alcotest))
 
 (test
+ (name test_sci_interaction)
+ (modules test_sci_interaction)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_sci_lowering)
  (modules test_sci_lowering)
  (libraries centl_lib alcotest yojson))
@@ -73,6 +78,66 @@
 (test
  (name test_sci_contrib)
  (modules test_sci_contrib)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_human_variation)
+ (modules test_sci_human_variation)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_suggestion)
+ (modules test_sci_suggestion)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_session)
+ (modules test_sci_session)
+ (libraries centl_lib alcotest unix))
+
+(test
+ (name test_sci_mechanics)
+ (modules test_sci_mechanics)
+ (libraries centl_lib alcotest yojson))
+
+(test
+ (name test_sci_codegen)
+ (modules test_sci_codegen)
+ (libraries centl_lib alcotest yojson))
+
+(test
+ (name test_sci_capabilities)
+ (modules test_sci_capabilities)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_assurance)
+ (modules test_sci_assurance)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_revisions)
+ (modules test_sci_revisions)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_dependencies)
+ (modules test_sci_dependencies)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_extensions)
+ (modules test_sci_extensions)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_workspace)
+ (modules test_sci_workspace)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_portable)
+ (modules test_sci_portable)
  (libraries centl_lib alcotest unix yojson))
 
 (executable

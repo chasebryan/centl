@@ -43,8 +43,7 @@ let replace_all ~needle ~replacement text =
           find_substring ~needle
             (String.sub text offset (String.length text - offset))
         with
-        | None ->
-            Buffer.add_substring buffer text offset (String.length text - offset)
+        | None -> Buffer.add_substring buffer text offset (String.length text - offset)
         | Some relative ->
             let index = offset + relative in
             Buffer.add_substring buffer text offset (index - offset);
@@ -64,6 +63,199 @@ let drop_prefix_ci prefix text =
       |> String.trim)
   else None
 
+let native_ir expression =
+  if String.trim expression = "" then None
+  else
+    match
+      Centl_sci_ir.of_json
+        (`Assoc
+           [
+             ("schema_version", `Int 1);
+             ("domain", `String "mathematics");
+             ("problem_class", `String "exact_expression");
+             ("operation", `String "compute");
+             ("assumptions", `List []);
+             ("expression", `String expression);
+           ])
+    with
+    | Ok ir -> Some ir
+    | Error _ -> None
+
+let unsupported_ir reason =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "unsupported");
+           ("problem_class", `String "unsupported");
+           ("operation", `String "unsupported");
+           ("assumptions", `List []);
+           ("reason", `String reason);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
+let verification_ir left relation right =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "mathematics");
+           ("problem_class", `String "verification_claim");
+           ("operation", `String "verify");
+           ("assumptions", `List []);
+           ("left", `String left);
+           ("relation", `String relation);
+           ("right", `String right);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
+let split_once_ci needle text =
+  let lower = String.lowercase_ascii text in
+  match find_substring ~needle:(String.lowercase_ascii needle) lower with
+  | None -> None
+  | Some index ->
+      let left = String.sub text 0 index |> String.trim in
+      let right =
+        String.sub text (index + String.length needle)
+          (String.length text - index - String.length needle)
+        |> String.trim
+      in
+      Some (left, right)
+
+let closed_verification problem =
+  let cleaned = trim_terminal problem in
+  let body =
+    match drop_prefix_ci "verify whether " cleaned with
+    | Some value -> Some value
+    | None ->
+        begin match drop_prefix_ci "check whether " cleaned with
+        | Some value -> Some value
+        | None -> drop_prefix_ci "verify " cleaned
+        end
+  in
+  match body with
+  | None -> None
+  | Some body when body = "" -> None
+  | Some body ->
+      let lower = String.lowercase_ascii body in
+      if
+        find_substring ~needle:" for all " lower <> None
+        || find_substring ~needle:" assuming " lower <> None
+        || find_substring ~needle:" under the assumption " lower <> None
+      then None
+      else
+        let relations =
+          [
+            (" is greater than or equal to ", "greater_or_equal");
+            (" greater than or equal to ", "greater_or_equal");
+            (" is less than or equal to ", "less_or_equal");
+            (" less than or equal to ", "less_or_equal");
+            (" is not equal to ", "not_equal");
+            (" not equal to ", "not_equal");
+            (" is equal to ", "equal");
+            (" equals ", "equal");
+            (" equal to ", "equal");
+            (">=", "greater_or_equal");
+            ("<=", "less_or_equal");
+            ("!=", "not_equal");
+            ("=", "equal");
+            (">", "greater_than");
+            ("<", "less_than");
+          ]
+        in
+        let rec choose = function
+          | [] -> None
+          | (needle, relation) :: rest ->
+              begin match split_once_ci needle body with
+              | Some (left, right) when left <> "" && right <> "" ->
+                  verification_ir left relation right
+              | _ -> choose rest
+              end
+        in
+        choose relations
+
+let symbolic_transform problem =
+  let cleaned = trim_terminal problem in
+  let unary name prefix =
+    match drop_prefix_ci prefix cleaned with
+    | Some body when body <> "" -> native_ir (name ^ "(" ^ body ^ ")")
+    | _ -> None
+  in
+  let differentiation body =
+    match split_once_ci " with respect to " body with
+    | Some (expression, variable) when expression <> "" && variable <> "" ->
+        native_ir (Printf.sprintf "diff(%s, %s)" expression variable)
+    | _ ->
+        begin match split_once_ci " wrt " body with
+        | Some (expression, variable) when expression <> "" && variable <> "" ->
+            native_ir (Printf.sprintf "diff(%s, %s)" expression variable)
+        | _ -> None
+        end
+  in
+  let integration body =
+    match split_once_ci " with respect to " body with
+    | Some (expression, variable) when expression <> "" && variable <> "" ->
+        begin match split_once_ci " from " expression with
+        | None -> native_ir (Printf.sprintf "integrate(%s, %s)" expression variable)
+        | Some (integrand, range) ->
+            begin match split_once_ci " to " range with
+            | Some (lower, upper)
+              when integrand <> "" && lower <> "" && upper <> "" ->
+                native_ir
+                  (Printf.sprintf "integrate(%s, %s = %s, %s)" integrand variable lower upper)
+            | _ -> None
+            end
+        end
+    | _ -> None
+  in
+  let substitution body =
+    match split_once_ci " into " body with
+    | Some (binding, expression) when binding <> "" && expression <> "" ->
+        native_ir (Printf.sprintf "substitute(%s, %s)" expression binding)
+    | _ -> None
+  in
+  match unary "simplify" "simplify " with
+  | Some _ as value -> value
+  | None ->
+      begin match unary "expand" "expand " with
+      | Some _ as value -> value
+      | None ->
+          begin match unary "factor" "factor " with
+          | Some _ as value -> value
+          | None ->
+              begin match drop_prefix_ci "differentiate " cleaned with
+              | Some body -> differentiation body
+              | None ->
+                  begin match drop_prefix_ci "derivative of " cleaned with
+                  | Some body -> differentiation body
+                  | None ->
+                      begin match drop_prefix_ci "take the derivative of " cleaned with
+                      | Some body -> differentiation body
+                      | None ->
+                          begin match drop_prefix_ci "integrate " cleaned with
+                          | Some body -> integration body
+                          | None ->
+                              begin match drop_prefix_ci "integral of " cleaned with
+                              | Some body -> integration body
+                              | None ->
+                                  begin match drop_prefix_ci "substitute " cleaned with
+                                  | Some body -> substitution body
+                                  | None -> None
+                                  end
+                              end
+                          end
+                      end
+                  end
+              end
+          end
+      end
+
 let is_numeric_char = function
   | '0' .. '9' | '+' | '-' | '.' | '/' | 'e' | 'E' -> true
   | _ -> false
@@ -75,14 +267,11 @@ let numeric_token text =
 
 let arithmetic_char = function
   | '0' .. '9'
-  | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | 'e' | 'E' ->
-      true
+  | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | 'e' | 'E' -> true
   | _ -> false
 
 let contains_operator text =
-  String.exists
-    (function '+' | '-' | '*' | '/' | '^' -> true | _ -> false)
-    text
+  String.exists (function '+' | '-' | '*' | '/' | '^' -> true | _ -> false) text
 
 let normalize_arithmetic text =
   String.lowercase_ascii text
@@ -107,9 +296,7 @@ let exact_expression problem =
             | None ->
                 begin match drop_prefix_ci "evaluate " cleaned with
                 | Some value -> Some value
-                | None ->
-                    if String.for_all arithmetic_char cleaned then Some cleaned
-                    else None
+                | None -> if String.for_all arithmetic_char cleaned then Some cleaned else None
                 end
             end
         end
@@ -120,33 +307,62 @@ let exact_expression problem =
       let expression = normalize_arithmetic candidate in
       if
         expression = ""
-        || (not (String.for_all arithmetic_char expression))
+        || not (String.for_all arithmetic_char expression)
         || not (contains_operator expression)
       then None
-      else
-        begin match
-          Centl_sci_ir.of_json
-            (`Assoc
-               [
-                 ("schema_version", `Int 1);
-                 ("domain", `String "mathematics");
-                 ("problem_class", `String "exact_expression");
-                 ("operation", `String "compute");
-                 ("assumptions", `List []);
-                 ("expression", `String expression);
-               ])
-        with
-        | Ok ir -> Some ir
-        | Error _ -> None
+      else native_ir expression
+
+let parse_positive_digits text =
+  let text = String.trim text in
+  match int_of_string_opt text with
+  | Some value when value >= 1 && value <= 1_000 -> Some value
+  | _ -> None
+
+let strip_digit_suffix text =
+  let lower = String.lowercase_ascii (String.trim text) in
+  let suffixes = [ " significant digits"; " digits" ] in
+  let rec choose = function
+    | [] -> None
+    | suffix :: rest ->
+        if String.ends_with ~suffix lower then
+          let raw =
+            String.sub text 0 (String.length text - String.length suffix)
+            |> String.trim
+          in
+          Option.map (fun digits -> digits) (parse_positive_digits raw)
+        else choose rest
+  in
+  choose suffixes
+
+let approximation problem =
+  let cleaned = trim_terminal problem in
+  let body =
+    match drop_prefix_ci "approximate " cleaned with
+    | Some value -> Some value
+    | None ->
+        begin match drop_prefix_ci "approximation of " cleaned with
+        | Some value -> Some value
+        | None -> drop_prefix_ci "give an approximation of " cleaned
         end
+  in
+  match body with
+  | None -> None
+  | Some body when body = "" -> None
+  | Some body ->
+      begin match split_once_ci " to " body with
+      | Some (expression, precision) when expression <> "" ->
+          begin match strip_digit_suffix precision with
+          | Some digits -> native_ir (Printf.sprintf "approx(%s, %d)" expression digits)
+          | None -> native_ir ("approx(" ^ body ^ ")")
+          end
+      | _ -> native_ir ("approx(" ^ body ^ ")")
+      end
 
 let canonical_unit text =
   match String.lowercase_ascii (String.trim text) with
   | "m" | "meter" | "meters" | "metre" | "metres" -> Some "m"
-  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" ->
-      Some "cm"
-  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" ->
-      Some "mm"
+  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" -> Some "cm"
+  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" -> Some "mm"
   | "km" | "kilometer" | "kilometers" | "kilometre" | "kilometres" -> Some "km"
   | "s" | "second" | "seconds" -> Some "s"
   | "ms" | "millisecond" | "milliseconds" -> Some "ms"
@@ -159,11 +375,9 @@ let canonical_unit text =
   | "mol" | "mole" | "moles" -> Some "mol"
   | "cd" | "candela" | "candelas" -> Some "cd"
   | "m/s" | "meter per second" | "meters per second" | "metre per second"
-  | "metres per second" ->
-      Some "m/s"
+  | "metres per second" -> Some "m/s"
   | "m/s^2" | "meter per second squared" | "meters per second squared"
-  | "metre per second squared" | "metres per second squared" ->
-      Some "m/s^2"
+  | "metre per second squared" | "metres per second squared" -> Some "m/s^2"
   | "n" | "newton" | "newtons" -> Some "N"
   | "j" | "joule" | "joules" -> Some "J"
   | "pa" | "pascal" | "pascals" -> Some "Pa"
@@ -219,12 +433,81 @@ let unit_conversion problem =
           end
       end
 
+let constant_ir symbol =
+  match
+    Centl_sci_ir.of_json
+      (`Assoc
+         [
+           ("schema_version", `Int 1);
+           ("domain", `String "physics");
+           ("problem_class", `String "physical_constant");
+           ("operation", `String "constant");
+           ("assumptions", `List []);
+           ("symbol", `String symbol);
+         ])
+  with
+  | Ok ir -> Some ir
+  | Error _ -> None
+
+let constant_body text =
+  let prefixes =
+    [
+      "what is the value of the ";
+      "what is the value of ";
+      "what is the ";
+      "what is ";
+      "give me the value of the ";
+      "give me the value of ";
+      "give me the ";
+      "give me ";
+      "lookup the ";
+      "lookup ";
+      "look up the ";
+      "look up ";
+      "physical constant ";
+      "constant ";
+      "value of the ";
+      "value of ";
+    ]
+  in
+  let rec choose = function
+    | [] -> text
+    | prefix :: rest ->
+        begin match drop_prefix_ci prefix text with
+        | Some body when body <> "" -> body
+        | _ -> choose rest
+        end
+  in
+  choose prefixes |> String.trim |> String.lowercase_ascii
+
+let physical_constant problem =
+  let cleaned = trim_terminal problem in
+  let body = constant_body cleaned in
+  let symbol =
+    match body with
+    | "c" | "speed of light" | "speed of light in vacuum" -> Some "c"
+    | "h" | "planck constant" | "planck's constant" -> Some "h"
+    | "e" | "elementary charge" -> Some "e"
+    | "k_b" | "boltzmann constant" -> Some "k_B"
+    | "n_a" | "avogadro constant" | "avogadro's constant" -> Some "N_A"
+    | "g0" | "standard gravity" | "standard acceleration of gravity" -> Some "g0"
+    | _ -> None
+  in
+  match symbol with
+  | Some symbol -> constant_ir symbol
+  | None ->
+      let lower = String.lowercase_ascii cleaned in
+      if
+        find_substring ~needle:"newtonian gravitational constant" lower <> None
+        || find_substring ~needle:"gravitational constant g" lower <> None
+      then
+        unsupported_ir
+          "the measured Newtonian gravitational constant is outside the exact defining/conventional CENTL Physics constant catalog"
+      else None
+
 let equation_char = function
-  | 'a' .. 'z'
-  | 'A' .. 'Z'
-  | '0' .. '9'
-  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' ->
-      true
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'
+  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' -> true
   | _ -> false
 
 let polynomial_equation problem =
@@ -252,7 +535,7 @@ let polynomial_equation problem =
               in
               if
                 left = "" || right = "" || variable = ""
-                || (not (String.for_all equation_char left))
+                || not (String.for_all equation_char left)
                 || not (String.for_all equation_char right)
               then None
               else
@@ -278,14 +561,34 @@ let polynomial_equation problem =
       end
 
 let interpret problem =
-  match unit_conversion problem with
+  match Centl_sci_mechanics.interpret problem with
   | Some _ as result -> result
   | None ->
-      begin match polynomial_equation problem with
+      begin match unit_conversion problem with
       | Some _ as result -> result
       | None ->
-          begin match Centl_sci_spoken_poly.interpret problem with
+          begin match physical_constant problem with
           | Some _ as result -> result
-          | None -> exact_expression problem
+          | None ->
+              begin match closed_verification problem with
+              | Some _ as result -> result
+              | None ->
+                  begin match polynomial_equation problem with
+                  | Some _ as result -> result
+                  | None ->
+                      begin match Centl_sci_spoken_poly.interpret problem with
+                      | Some _ as result -> result
+                      | None ->
+                          begin match symbolic_transform problem with
+                          | Some _ as result -> result
+                          | None ->
+                              begin match approximation problem with
+                              | Some _ as result -> result
+                              | None -> exact_expression problem
+                              end
+                          end
+                      end
+                  end
+              end
           end
       end
