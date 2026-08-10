@@ -53,7 +53,7 @@ Free for science.
 Additional installer options:
 
 ```sh
-sh install --version 0.12.0
+sh install --version 0.13.0
 sh install --prefix "$HOME/software"
 sh install --no-path
 ```
@@ -71,7 +71,7 @@ that FCF preservation uses:
 
 ```text
 RELEASE_ROOT/
-  v0.12.0/
+  v0.13.0/
     centl-linux-x86_64.tar.gz
     centl-linux-x86_64.tar.gz.sha256
 ```
@@ -87,7 +87,7 @@ Example:
 
 ```sh
 sh install \
-  --version 0.12.0 \
+  --version 0.13.0 \
   --release-base-url https://downloads.example.org/centl/releases
 ```
 
@@ -95,7 +95,7 @@ The equivalent environment form is:
 
 ```sh
 CENTL_RELEASE_BASE_URL=https://downloads.example.org/centl/releases \
-  sh install --version 0.12.0
+  sh install --version 0.13.0
 ```
 
 A custom release root requires an **explicit version**. CENTL does not require a
@@ -202,5 +202,5 @@ dune exec centl-sci
 Maintainers package an already-tested native Linux build with:
 
 ```sh
-make release VERSION=0.12.0
+make release VERSION=0.13.0
 ```

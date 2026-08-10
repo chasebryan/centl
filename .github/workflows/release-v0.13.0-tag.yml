@@ -9,39 +9,53 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   tag:
     name: Create v0.13.0 tag
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
+      (github.event.workflow_run.event == 'push' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Check out validated main commit
+      - name: Check out validated commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: true
 
-      - name: Require exact v0.13.0 release state
+      - name: Require exact current-main v0.13.0 release state
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          validated_sha='${{ github.event.workflow_run.head_sha }}'
+          test "$(git rev-parse HEAD)" = "$validated_sha"
           test "$(cat src/ocaml/centl_version.ml)" = 'let value = "0.13.0"'
+          main_sha=$(git ls-remote origin refs/heads/main | cut -f1)
+          test "$validated_sha" = "$main_sha"
 
       - name: Create release tag once
+        id: tag
         shell: bash
         run: |
           set -euo pipefail
           if git ls-remote --exit-code --tags origin refs/tags/v0.13.0 >/dev/null 2>&1; then
             echo 'v0.13.0 already exists; nothing to do.'
+            echo 'created=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git tag -a v0.13.0 -m 'CENTL v0.13.0'
           git push origin refs/tags/v0.13.0
+          echo 'created=true' >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch tagged native publication
+        if: steps.tag.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh workflow run release.yml --ref v0.13.0
