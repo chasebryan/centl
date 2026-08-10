@@ -93,8 +93,7 @@ let normalize_lexical text =
     text safe_lexical_corrections
 
 let normalize _mode text =
-  text |> normalize_unicode |> String.lowercase_ascii |> normalize_lexical
-  |> collapse_spaces
+  text |> normalize_unicode |> normalize_lexical |> collapse_spaces
 
 let session_commands =
   [
@@ -169,25 +168,26 @@ let starts_with_any prefixes text =
   List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
 
 let clarification mode normalized =
-  if normalized = "" then None
+  let lower = String.lowercase_ascii normalized in
+  if lower = "" then None
   else
     match mode with
     | Build ->
         Some
           "BUILD mode is active. The interaction/workspace foundation is being wired now; this request is recognized as a system-construction intent but automatic source modification is not enabled in this milestone yet."
     | Math | Hybrid
-      when starts_with_any [ "solve "; "find x "; "find the roots "; "roots of " ] normalized
-           && not (String.contains normalized '=')
-           && find_substring ~needle:" equals " normalized = None ->
+      when starts_with_any [ "solve "; "find x "; "find the roots "; "roots of " ] lower
+           && not (String.contains lower '=')
+           && find_substring ~needle:" equals " lower = None ->
         Some
           "I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0."
     | Math | Hybrid
-      when String.starts_with ~prefix:"find " normalized ->
+      when String.starts_with ~prefix:"find " lower ->
         Some
           "I understand the expression, but the requested operation is ambiguous. Specify whether you want to solve, simplify, differentiate, integrate, evaluate, or verify it."
     | Phys | Hybrid
-      when String.starts_with ~prefix:"convert " normalized
-           && find_substring ~needle:" to " normalized = None ->
+      when String.starts_with ~prefix:"convert " lower
+           && find_substring ~needle:" to " lower = None ->
         Some
           "I understand this as a unit-conversion request, but the target unit is missing. For example: convert 25 kilometers to meters."
     | _ -> None
