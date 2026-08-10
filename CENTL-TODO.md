@@ -11,7 +11,7 @@ This is a working checklist. Product sequencing and release themes live in
 - [x] Make formatting, compiler checks, package linting, and pin consistency
   part of `make quality`.
 - [x] Keep pull-request validation to one Linux verify/test/differential job;
-  reserve all-platform native packaging for `main`, tags, and manual runs.
+  reserve native Linux packaging for `main`, tags, and manual runs.
 - [x] Run the seeded Julia/Nemo differential suite in pull-request CI.
 - [x] Cancel superseded branch workflow runs while preserving tagged releases.
 - [x] Exercise GMP with a large exact integer in the Core 2 compatibility smoke
@@ -34,15 +34,26 @@ This is a working checklist. Product sequencing and release themes live in
 - [x] Discharge every F* zero-difference soundness obligation before enabling
   `verified_core` polynomial equality.
 - [x] Finish bounded, replayable receipts with resolved session dependencies.
-- [x] Add release `BUILD_MANIFEST.json` identity validation across every
-  platform.
-- [ ] Run the all-platform RC workflow and confirm all four manifests pass the
-  cross-platform identity gate.
+- [x] Add release `BUILD_MANIFEST.json` identity validation for the supported
+  Linux native package.
 - [x] Validate the reusable `centl-check` GitHub Action and passing
   example contracts.
-- [ ] Publish the final 0.12.0 tag after RC validation with stamped release
-  identity and the conformance CI gate.
+- [x] Publish stable 0.12.0 with stamped release identity and the conformance CI
+  gate.
 - [ ] Pilot three external contract repositories.
+
+## CENTL-SCi Caramels
+
+- [x] Establish GNU/Linux as the supported reference platform and sole
+  release-blocking operating system.
+- [x] Implement deterministic scientific interpretation, explanation, and
+  representative human-variation assimilation gates.
+- [x] Implement user-owned BUILD workspaces, extension/package lifecycle,
+  dependency validation, assurance inspection, bounded undo, and portability.
+- [x] Implement validated workspace import with same-operation active-session
+  reload and rollback on post-validation copy failure.
+- [ ] Stabilize an executable ABI/activation boundary for generated external and
+  native scaffolds when a concrete backend integration requires it.
 
 Keep this file limited to actionable near-term work; remove or check items when
 the implementation lands instead of duplicating completed CI or setup tasks.
