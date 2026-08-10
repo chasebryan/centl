@@ -86,7 +86,16 @@ let read_manifest workspace name =
   else
     match read_json path with
     | Error message -> Error message
-    | Ok json -> manifest_of_json json
+    | Ok json ->
+        begin match manifest_of_json json with
+        | Error _ as error -> error
+        | Ok manifest when manifest.name <> name ->
+            Error
+              (Printf.sprintf
+                 "extension manifest identity mismatch: file %s.json declares name %s"
+                 name manifest.name)
+        | Ok manifest -> Ok manifest
+        end
 
 let local_dependency_name dependency =
   let dependency = String.trim dependency in
