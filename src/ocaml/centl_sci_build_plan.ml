@@ -170,6 +170,13 @@ let render_workspace_audit () =
       "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before auditing it."
   | Some workspace -> Centl_sci_audit.collect workspace |> Centl_sci_audit.render
 
+let render_dependencies () =
+  match Centl_sci_workspace.default () with
+  | None ->
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before inspecting dependencies."
+  | Some workspace ->
+      Centl_sci_dependencies.validate workspace |> Centl_sci_dependencies.render
+
 let render_assurance name =
   match Centl_sci_workspace.default () with
   | None ->
@@ -248,6 +255,10 @@ let render plan =
   else if
     List.mem request [ "assurance"; "show assurance"; "assurance levels"; "show assurance levels" ]
   then Centl_sci_assurance.render_catalog ()
+  else if
+    List.mem request
+      [ "dependencies"; "show dependencies"; "dependency graph"; "show dependency graph" ]
+  then render_dependencies ()
   else if
     List.mem request [ "revisions"; "show revisions"; "revision history"; "show revision history" ]
   then render_revisions ()
