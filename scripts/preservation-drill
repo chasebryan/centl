@@ -124,6 +124,12 @@ run_step "supply-chain mirror audit" \
   sh "$repo_root/scripts/supply-chain" audit "$primary" ||
   abort_drill $? "supply-chain mirror audit"
 
+if [ -f "$primary/models/ACTIVE.sha256" ]; then
+  run_step "active model provenance" \
+    python3 "$repo_root/scripts/model-provenance.py" verify "$primary" ||
+    abort_drill $? "active model provenance"
+fi
+
 run_step "primary whole-mirror receipt" \
   sh "$repo_root/scripts/mirror-receipt" verify "$primary" ||
   abort_drill $? "primary whole-mirror receipt"
