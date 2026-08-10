@@ -14,7 +14,9 @@ let make_reports workspace cells =
   let graph = Centl_sci_mirage_goal.build workspace cells in
   let obligations = Centl_sci_mirage_obligation.build graph in
   let candidates = Centl_sci_mirage_candidate.build graph obligations in
-  obligations, candidates, Centl_sci_mirage_readiness.build obligations candidates
+  let materialization = Centl_sci_mirage_materialize.build candidates in
+  obligations, candidates, materialization,
+  Centl_sci_mirage_readiness.build obligations candidates materialization
 
 let only_readiness report =
   match report.Centl_sci_mirage_readiness.candidates with
@@ -36,7 +38,7 @@ let test_extension_keeps_execution_gates_pending () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
-      let _, _, report =
+      let _, _, _, report =
         make_reports workspace
           [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
       in
@@ -53,6 +55,33 @@ let test_extension_keeps_execution_gates_pending () =
         "structurally_established"
         (Centl_sci_mirage_readiness.state_text trust.state))
 
+let test_materialized_parser_success_is_consumed () =
+  let root = temp_dir "centl-mirage-readiness-parser-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let _, _, materialization, report =
+        make_reports workspace
+          [ cell 1 "DIRECTIVE" "create a value named mirage_tau equal to 2*pi" ]
+      in
+      let item =
+        match materialization.Centl_sci_mirage_materialize.items with
+        | [ item ] -> item
+        | _ -> Alcotest.fail "expected one materialization item"
+      in
+      Alcotest.(check bool) "parser actually executed" true item.parser_validated;
+      let candidate = only_readiness report in
+      let parse = find_check "candidate_parses" candidate in
+      Alcotest.(check string) "successful parser evidence consumed"
+        "structurally_established"
+        (Centl_sci_mirage_readiness.state_text parse.state);
+      let regression = find_check "mandatory_regression" candidate in
+      Alcotest.(check string) "regression remains pending" "execution_required"
+        (Centl_sci_mirage_readiness.state_text regression.state);
+      Alcotest.(check bool) "candidate still needs evidence execution" true
+        candidate.execution_required)
+
 let test_composition_records_reuse_as_structural_only () =
   let root = temp_dir "centl-mirage-readiness-compose-" in
   Fun.protect
@@ -60,7 +89,7 @@ let test_composition_records_reuse_as_structural_only () =
     (fun () ->
       let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
       Centl_sci_workspace.ensure workspace;
-      let _, _, report =
+      let _, _, _, report =
         make_reports workspace
           [ cell 1 "DIRECTIVE" "Allow users to differentiate symbolic expressions" ]
       in
@@ -78,7 +107,7 @@ let test_blocked_cell_never_acquires_readiness_candidate () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
-      let _, _, report =
+      let _, _, _, report =
         make_reports workspace
           [ cell 1 "QUESTION" "Which interpolation basis should be exposed?" ]
       in
@@ -98,9 +127,11 @@ let test_construct_persists_non_admissibility () =
       in
       let obligations = Centl_sci_mirage_obligation.build graph in
       let candidates = Centl_sci_mirage_candidate.build graph obligations in
+      let materialization = Centl_sci_mirage_materialize.build candidates in
       match
         Centl_sci_mirage_readiness.construct
           (Filename.concat root "design.candidates.json") obligations candidates
+          materialization
       with
       | Error message -> Alcotest.fail message
       | Ok (path, _) ->
@@ -115,7 +146,11 @@ let test_construct_persists_non_admissibility () =
           Alcotest.(check bool) "workspace remains untouched" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
-                  ~needle:"\"workspace_mutated\":false" text)))
+                  ~needle:"\"workspace_mutated\":false" text));
+          Alcotest.(check bool) "materialization semantics persisted" true
+            (Option.is_some
+               (Centl_sci_interaction.find_substring
+                  ~needle:"\"materialization_evidence_semantics\"" text)))
 
 let () =
   Alcotest.run "CENTL-MIRAGE evidence readiness"
@@ -124,6 +159,8 @@ let () =
         [
           Alcotest.test_case "extension keeps executable gates pending" `Quick
             test_extension_keeps_execution_gates_pending;
+          Alcotest.test_case "materialized parser evidence is consumed" `Quick
+            test_materialized_parser_success_is_consumed;
           Alcotest.test_case "composition reuse is structural evidence" `Quick
             test_composition_records_reuse_as_structural_only;
           Alcotest.test_case "blocked source creates no readiness candidate" `Quick
