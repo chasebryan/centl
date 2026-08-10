@@ -113,7 +113,9 @@ let ensure_workspace_metadata workspace =
            ("owner_model", `String "user-owned-downstream");
            ("upstream_project", `String "centl");
            ("created_by", `String "CENTL-SCi v0.0.2-Caramels");
-           ("assurance_policy", `String "local extensions never silently inherit verified-core assurance");
+           ( "assurance_policy",
+             `String
+               "local extensions never silently inherit verified-core assurance" );
          ])
 
 let ensure workspace =
@@ -193,9 +195,8 @@ let valid_extension_name name =
 
 let strings values = `List (List.map (fun value -> `String value) values)
 
-let write_manifest workspace ~name ~enabled ~assurance ~source ~summary
-    ?(kind = "native_centl") ?(provenance = "local BUILD request")
-    ?(dependencies = []) ?(tests = []) () =
+let write_manifest_detailed workspace ~name ~enabled ~assurance ~source ~summary
+    ~kind ~provenance ~dependencies ~tests =
   if not (valid_extension_name name) then
     Error "extension names may contain only letters, digits, '.', '-', and '_'"
   else
@@ -222,6 +223,11 @@ let write_manifest workspace ~name ~enabled ~assurance ~source ~summary
       atomic_write_json (manifest_path workspace name) json;
       Ok revision
     with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+
+let write_manifest workspace ~name ~enabled ~assurance ~source ~summary =
+  write_manifest_detailed workspace ~name ~enabled ~assurance ~source ~summary
+    ~kind:"native_centl" ~provenance:"local BUILD request" ~dependencies:[]
+    ~tests:[]
 
 let to_json workspace =
   `Assoc
