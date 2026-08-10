@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Coverage-guided fuzz target for CARAVAN content-addressing invariants."""
+"""Coverage-guided fuzz target for CARAVAN content-addressing invariants.
+
+The target intentionally imports ``caravan/content.py`` as a standalone module.
+That file is the boundary under test and has no third-party runtime dependency;
+loading the package initializer would import unrelated TUF catalog machinery and
+would make this focused content fuzzer depend on code it does not exercise.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +17,7 @@ import tempfile
 import atheris
 
 with atheris.instrument_imports():
-    from caravan.content import ArtifactIdentity, chunk_manifest, hash_file
+    from content import ArtifactIdentity, chunk_manifest, hash_file
 
 
 def _check_identity(provider: atheris.FuzzedDataProvider) -> None:
