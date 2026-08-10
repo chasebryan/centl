@@ -59,26 +59,36 @@ let split_parameters text =
 let validate_source expected source =
   match Centl_parser.parse_statement_located source with
   | Error error ->
-      Needs_clarification
+      Error
         (Printf.sprintf
            "I generated a CENTL definition, but it does not parse at byte %d: %s. Make the implementation expression more explicit."
            error.position error.message)
   | Ok located ->
       begin match (expected, located.statement) with
-      | `Function, Centl_parser.Define_function _ -> Generated source
-      | `Value, Centl_parser.Define_value _ -> Generated source
-      | `Function, _ ->
-          Needs_clarification "The generated source is not a CENTL function definition."
-      | `Value, _ ->
-          Needs_clarification "The generated source is not a CENTL value definition."
+      | `Function, Centl_parser.Define_function _ -> Ok source
+      | `Value, Centl_parser.Define_value _ -> Ok source
+      | `Function, _ -> Error "The generated source is not a CENTL function definition."
+      | `Value, _ -> Error "The generated source is not a CENTL value definition."
       end
 
 let parse_function ~replace text =
   let prefixes =
     if replace then
-      [ "modify a function named "; "modify function named "; "change a function named "; "change function named " ]
+      [
+        "modify a function named ";
+        "modify function named ";
+        "change a function named ";
+        "change function named ";
+      ]
     else
-      [ "create a function named "; "create function named "; "make a function named "; "make function named "; "add a function named "; "add function named " ]
+      [
+        "create a function named ";
+        "create function named ";
+        "make a function named ";
+        "make function named ";
+        "add a function named ";
+        "add function named ";
+      ]
   in
   let rec body = function
     | [] -> None
@@ -95,8 +105,9 @@ let parse_function ~replace text =
       | None ->
           Needs_clarification
             "A generated function needs a name, parameter list, and implementation. Example: create a function named kinetic_energy that takes mass and velocity and computes 1/2 * mass * velocity^2"
-      | Some (name, tail) when not (valid_identifier name) ->
-          Needs_clarification ("`" ^ name ^ "` is not a valid CENTL function identifier.")
+      | Some (name, _) when not (valid_identifier name) ->
+          Needs_clarification
+            ("`" ^ name ^ "` is not a valid CENTL function identifier.")
       | Some (name, tail) ->
           let implementation =
             match split_at_ci " and computes " tail with
@@ -109,19 +120,23 @@ let parse_function ~replace text =
                 "The function parameters were recognized, but its implementation is missing. Use `and computes ...` or `and returns ...`."
           | Some (parameters_text, expression) ->
               let parameters = split_parameters parameters_text in
-              if parameters = [] || List.exists (fun value -> not (valid_identifier value)) parameters then
-                Needs_clarification "One or more function parameters are not valid CENTL identifiers."
+              if
+                parameters = []
+                || List.exists (fun value -> not (valid_identifier value)) parameters
+              then
+                Needs_clarification
+                  "One or more function parameters are not valid CENTL identifiers."
               else if String.trim expression = "" then
-                Needs_clarification "The generated function needs a non-empty implementation expression."
+                Needs_clarification
+                  "The generated function needs a non-empty implementation expression."
               else
                 let source =
                   Printf.sprintf "%s(%s) = %s" name
                     (String.concat ", " parameters) (String.trim expression)
                 in
                 begin match validate_source `Function source with
-                | Generated source -> Generated (Function { replace; source })
-                | Needs_clarification message -> Needs_clarification message
-                | Not_generated -> Not_generated
+                | Ok source -> Generated (Function { replace; source })
+                | Error message -> Needs_clarification message
                 end
           end
       end
@@ -129,9 +144,21 @@ let parse_function ~replace text =
 let parse_value ~replace text =
   let prefixes =
     if replace then
-      [ "modify a value named "; "modify value named "; "change a value named "; "change value named " ]
+      [
+        "modify a value named ";
+        "modify value named ";
+        "change a value named ";
+        "change value named ";
+      ]
     else
-      [ "create a value named "; "create value named "; "make a value named "; "make value named "; "add a value named "; "add value named " ]
+      [
+        "create a value named ";
+        "create value named ";
+        "make a value named ";
+        "make value named ";
+        "add a value named ";
+        "add value named ";
+      ]
   in
   let rec body = function
     | [] -> None
@@ -157,16 +184,16 @@ let parse_value ~replace text =
       | None ->
           Needs_clarification
             "A generated value needs a name and expression. Example: create a value named tau equal to 2*pi"
-      | Some (name, expression) when not (valid_identifier name) ->
-          Needs_clarification ("`" ^ name ^ "` is not a valid CENTL value identifier.")
-      | Some (name, expression) when String.trim expression = "" ->
+      | Some (name, _) when not (valid_identifier name) ->
+          Needs_clarification
+            ("`" ^ name ^ "` is not a valid CENTL value identifier.")
+      | Some (_, expression) when String.trim expression = "" ->
           Needs_clarification "The generated value needs a non-empty expression."
       | Some (name, expression) ->
           let source = name ^ " = " ^ String.trim expression in
           begin match validate_source `Value source with
-          | Generated source -> Generated (Value { replace; source })
-          | Needs_clarification message -> Needs_clarification message
-          | Not_generated -> Not_generated
+          | Ok source -> Generated (Value { replace; source })
+          | Error message -> Needs_clarification message
           end
       end
 
