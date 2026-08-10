@@ -154,6 +154,32 @@ let render_validation name =
       | Ok report -> Centl_sci_validate.render report
       end
 
+let generic_text plan =
+  String.concat "\n"
+    ([
+       "BUILD plan";
+       "  request: " ^ plan.request;
+       "  implementation layer: " ^ layer_text plan.layer;
+     ]
+    @ bullets "  existing/reusable capabilities:" plan.reusable_capabilities
+    @ bullets "  proposed Caramels steps:" plan.proposed_steps
+    @ bullets "  trust/assurance:" plan.trust_notes
+    @ bullets "  unresolved:" plan.unresolved)
+
+let render_core_plan plan =
+  let summary = generic_text plan in
+  match Centl_sci_workspace.default () with
+  | None -> summary ^ "\n  artifact: not persisted because no local workspace is available"
+  | Some workspace ->
+      begin match Centl_sci_core_plan.persist workspace plan with
+      | Error message -> summary ^ "\n  artifact error: " ^ message
+      | Ok artifact ->
+          summary
+          ^ "\n  persisted downstream plan: " ^ artifact.markdown_path
+          ^ "\n  machine plan: " ^ artifact.json_path
+          ^ "\n  note: no trusted-core source was edited or published"
+      end
+
 let render plan =
   let request = lower plan.request in
   if
@@ -179,15 +205,9 @@ let render plan =
             begin match drop_prefix_ci "validate " plan.request with
             | Some name when name <> "" -> render_validation name
             | _ ->
-                String.concat "\n"
-                  ([
-                     "BUILD plan";
-                     "  request: " ^ plan.request;
-                     "  implementation layer: " ^ layer_text plan.layer;
-                   ]
-                  @ bullets "  existing/reusable capabilities:" plan.reusable_capabilities
-                  @ bullets "  proposed Caramels steps:" plan.proposed_steps
-                  @ bullets "  trust/assurance:" plan.trust_notes
-                  @ bullets "  unresolved:" plan.unresolved)
+                begin match plan.layer with
+                | Core_patch -> render_core_plan plan
+                | _ -> generic_text plan
+                end
             end
         end
