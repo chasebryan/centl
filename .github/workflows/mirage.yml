@@ -1,0 +1,62 @@
+name: MIRAGE bootstrap validation
+
+on:
+  pull_request:
+    paths:
+      - 'src/ocaml/centl_sha256.ml'
+      - 'src/ocaml/centl_sci_mirage.ml'
+      - 'src/ocaml/centl_sci_mirage_goal.ml'
+      - 'src/mirage_main.ml'
+      - 'src/dune'
+      - 'tests/mirage/**'
+      - 'docs/CENTL-MIRAGE.md'
+      - '.github/workflows/mirage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirage-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    name: Compile and test local MIRAGE bootstrap
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            opam m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Create pinned OCaml switch
+        run: |
+          opam init --bare --disable-sandboxing -y
+          opam switch create centl-mirage ocaml-base-compiler.4.14.1 -y
+
+      - name: Install pinned CENTL dependencies
+        run: |
+          eval "$(opam env --switch=centl-mirage --set-switch)"
+          opam install . --deps-only --with-test -y
+
+      - name: Compile MIRAGE executable
+        run: |
+          eval "$(opam env --switch=centl-mirage --set-switch)"
+          dune build src/mirage_main.exe
+
+      - name: Run dedicated MIRAGE tests
+        run: |
+          eval "$(opam env --switch=centl-mirage --set-switch)"
+          dune runtest tests/mirage
+
+      - name: Check patch whitespace
+        run: git diff --check HEAD^
