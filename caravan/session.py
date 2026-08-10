@@ -23,6 +23,7 @@ SESSION_PROOF_SCHEMA = "centl-caravan-session-proof-v1"
 DEFAULT_MAX_PENDING_CHALLENGES = 1024
 DEFAULT_MAX_CHALLENGES_PER_NODE = 8
 DEFAULT_MAX_ACTIVE_SESSIONS = 4096
+DEFAULT_MAX_SESSIONS_PER_NODE = 16
 
 
 class SessionError(RuntimeError):
@@ -85,19 +86,28 @@ class SessionAuthority:
         max_pending_challenges: int = DEFAULT_MAX_PENDING_CHALLENGES,
         max_challenges_per_node: int = DEFAULT_MAX_CHALLENGES_PER_NODE,
         max_active_sessions: int = DEFAULT_MAX_ACTIVE_SESSIONS,
+        max_sessions_per_node: int = DEFAULT_MAX_SESSIONS_PER_NODE,
     ) -> None:
         if challenge_ttl <= 0 or session_ttl <= 0:
             raise ValueError("session TTL values must be positive")
-        if max_pending_challenges <= 0 or max_challenges_per_node <= 0 or max_active_sessions <= 0:
+        if (
+            max_pending_challenges <= 0
+            or max_challenges_per_node <= 0
+            or max_active_sessions <= 0
+            or max_sessions_per_node <= 0
+        ):
             raise ValueError("session resource limits must be positive")
         if max_challenges_per_node > max_pending_challenges:
             raise ValueError("per-node challenge limit cannot exceed global challenge limit")
+        if max_sessions_per_node > max_active_sessions:
+            raise ValueError("per-node session limit cannot exceed global session limit")
         self.coordinator = coordinator
         self.challenge_ttl = float(challenge_ttl)
         self.session_ttl = float(session_ttl)
         self.max_pending_challenges = int(max_pending_challenges)
         self.max_challenges_per_node = int(max_challenges_per_node)
         self.max_active_sessions = int(max_active_sessions)
+        self.max_sessions_per_node = int(max_sessions_per_node)
         self._challenges: dict[str, _ChallengeState] = {}
         self._sessions: dict[str, _SessionState] = {}
         self._lock = threading.Lock()
@@ -208,6 +218,11 @@ class SessionAuthority:
         expires_at = timestamp + self.session_ttl
         with self._lock:
             self._purge_locked(timestamp)
+            active_for_node = sum(
+                1 for value in self._sessions.values() if value.node_id == node_id
+            )
+            if active_for_node >= self.max_sessions_per_node:
+                raise SessionError("too many active sessions for carrier")
             if len(self._sessions) >= self.max_active_sessions:
                 raise SessionError("too many active carrier sessions")
             self._sessions[token_hash] = _SessionState(node_id, expires_at)
