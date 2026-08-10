@@ -11,7 +11,6 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import stat
-from typing import Iterable
 from urllib.parse import urlparse
 
 from tuf.api import exceptions as tuf_exceptions
@@ -129,6 +128,8 @@ def _parse_chunks(value: object, *, artifact_length: int) -> tuple[ChunkRecord, 
 
 
 def parse_catalog_bytes(data: bytes) -> AuthenticatedCatalog:
+    if not isinstance(data, bytes):
+        raise TypeError("catalog data must be bytes")
     if len(data) > MAX_CATALOG_BYTES:
         raise CatalogError("CARAVAN catalog exceeds laboratory size limit")
     try:
@@ -161,13 +162,15 @@ def parse_catalog_bytes(data: bytes) -> AuthenticatedCatalog:
         artifact_id = item["artifact_id"]
         length = item["length"]
         distribution = item["distribution"]
+        if not isinstance(artifact_id, str):
+            raise CatalogError("artifact_id must be a string")
         if not isinstance(length, int) or isinstance(length, bool) or length < 0:
             raise CatalogError("artifact length must be a non-negative integer")
         if not isinstance(distribution, str) or distribution not in DISTRIBUTION_CLASSES:
             raise CatalogError("artifact distribution class is not recognized")
         try:
             identity = ArtifactIdentity.parse(artifact_id, length)
-        except (TypeError, ValueError) as exc:
+        except ValueError as exc:
             raise CatalogError("artifact_id is not a valid SHA-256 content identity") from exc
         if identity.artifact_id in seen_ids:
             raise CatalogError("duplicate artifact content identity")
@@ -181,13 +184,15 @@ def parse_catalog_bytes(data: bytes) -> AuthenticatedCatalog:
     return AuthenticatedCatalog(version, tuple(artifacts))
 
 
-def _require_safe_cache_directory(path: Path) -> None:
+def _require_safe_cache_directory(path: Path, *, create: bool) -> None:
     if path.exists() or path.is_symlink():
         info = os.lstat(path)
         if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
-            raise CatalogError("TUF cache root must be a real directory")
-    else:
-        path.mkdir(parents=True, mode=0o700)
+            raise CatalogError(f"unsafe TUF cache directory: {path}")
+        return
+    if not create:
+        raise CatalogError(f"missing TUF cache directory: {path}")
+    path.mkdir(parents=True, mode=0o700)
 
 
 def _validate_base_url(url: str, *, allow_loopback_http: bool) -> None:
@@ -221,11 +226,11 @@ class TufCatalogClient:
         _validate_base_url(metadata_base_url, allow_loopback_http=allow_loopback_http)
         _validate_base_url(target_base_url, allow_loopback_http=allow_loopback_http)
         root = Path(cache_root)
-        _require_safe_cache_directory(root)
+        _require_safe_cache_directory(root, create=True)
         metadata_dir = root / "metadata"
         target_dir = root / "targets"
-        metadata_dir.mkdir(mode=0o700, exist_ok=True)
-        target_dir.mkdir(mode=0o700, exist_ok=True)
+        _require_safe_cache_directory(metadata_dir, create=True)
+        _require_safe_cache_directory(target_dir, create=True)
         self._updater = Updater(
             str(metadata_dir),
             metadata_base_url,
