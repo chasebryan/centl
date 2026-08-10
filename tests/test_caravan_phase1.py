@@ -55,6 +55,33 @@ class ContentStoreTests(unittest.TestCase):
             with self.assertRaises(IntegrityError):
                 ContentStore(root_link, max_bytes=1000)
 
+    def test_store_lock_is_private_regular_and_symlink_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "cargo.bin"
+            source.write_bytes(b"lock boundary")
+            store = ContentStore(root / "store", max_bytes=1000)
+            store.import_file(source)
+
+            lock_path = store.root / ".store.lock"
+            info = os.lstat(lock_path)
+            self.assertTrue(stat.S_ISREG(info.st_mode))
+            self.assertEqual(stat.S_IMODE(info.st_mode), 0o600)
+            self.assertEqual(stat.S_IMODE(os.lstat(store.root).st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE(os.lstat(store.root / "tmp").st_mode), 0o700)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "cargo.bin"
+            source.write_bytes(b"lock symlink")
+            store = ContentStore(root / "store", max_bytes=1000)
+            outside = root / "outside-lock"
+            outside.write_bytes(b"outside")
+            (store.root / ".store.lock").symlink_to(outside)
+            with self.assertRaises(IntegrityError):
+                store.import_file(source)
+            self.assertEqual(outside.read_bytes(), b"outside")
+
     def test_storage_limit_and_chunk_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
