@@ -1,132 +1,120 @@
 type scaffold_kind = Python_adapter | Native_extension
 
-let safe_name name =
-  let name = String.trim name in
-  Centl_sci_workspace.valid_extension_name name
+let kind_text = function
+  | Python_adapter -> "python_adapter"
+  | Native_extension -> "native_extension"
+
+let assurance = function
+  | Python_adapter -> "external_backend"
+  | Native_extension -> "unverified_generated_extension"
 
 let write_text_file path text =
-  let temporary = path ^ ".tmp" in
-  let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
-  in
+  let channel = open_out_bin path in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
-    (fun () -> output_string channel text; flush channel);
-  Unix.rename temporary path
+    (fun () -> output_string channel text)
 
-let scaffold_root workspace =
-  Filename.concat workspace.Centl_sci_workspace.generated "scaffolds"
-
-let python_adapter_stub name target =
-  String.concat "\n"
-    [
-      "#!/usr/bin/env python3";
-      "\"\"\"Generated inactive CENTL-SCi adapter scaffold.";
-      "";
-      "This file is not trusted or enabled by generation alone.";
-      "Implement the narrow contract, test it, then explicitly enable the extension.";
-      "\"\"\"";
-      "import json";
-      "import sys";
-      "";
-      "ADAPTER_NAME = " ^ Printf.sprintf "%S" name;
-      "TARGET = " ^ Printf.sprintf "%S" target;
-      "";
-      "def handle(request):";
-      "    return {";
-      "        \"ok\": False,";
-      "        \"error\": {";
-      "            \"code\": \"adapter_unimplemented\",";
-      "            \"message\": f\"{ADAPTER_NAME} has not been implemented or validated\",";
-      "        },";
-      "    }";
-      "";
-      "for raw in sys.stdin:";
-      "    raw = raw.strip()";
-      "    if not raw:";
-      "        continue";
-      "    try:";
-      "        request = json.loads(raw)";
-      "        response = handle(request)";
-      "    except Exception as exc:";
-      "        response = {\"ok\": False, \"error\": {\"code\": \"adapter_error\", \"message\": str(exc)}}";
-      "    print(json.dumps(response, separators=(\",\", \":\")), flush=True)";
-      "";
-    ]
-
-let python_test_stub name =
-  String.concat "\n"
-    [
-      "# Generated first-pass test placeholder for " ^ name;
-      "# Replace with contract and adversarial tests before enabling the adapter.";
-      "def test_adapter_is_not_silently_trusted():";
-      "    assert True";
-      "";
-    ]
-
-let native_stub name target =
-  String.concat "\n"
-    [
-      "(* Generated inactive CENTL-SCi native extension scaffold.";
-      "   Name: " ^ name;
-      "   Target: " ^ target;
-      "   This source is unverified generated code and is not linked automatically. *)";
-      "";
-      "type request = Yojson.Safe.t";
-      "type response = Yojson.Safe.t";
-      "";
-      "let handle (_request : request) : response =";
-      "  `Assoc";
-      "    [";
-      "      (\"ok\", `Bool false);";
-      "      (\"error\", `Assoc [ (\"code\", `String \"extension_unimplemented\");";
-      "                              (\"message\", `String \"generated native extension is not implemented or validated\") ]);";
-      "    ]";
-      "";
-    ]
-
-let create workspace ~kind ~name ~target =
-  if not (safe_name name) then Error "invalid scaffold name"
+let scaffold workspace ~kind ~name ~target ~summary =
+  if not (Centl_sci_workspace.valid_extension_name name) then
+    Error "extension names may contain only letters, digits, '.', '-', and '_'"
   else
+    let kind_text = kind_text kind in
+    let assurance = assurance kind in
+    let root = Filename.concat workspace.Centl_sci_workspace.generated ("scaffolds/" ^ name) in
+    let source_file, test_file, source_text, test_text =
+      match kind with
+      | Python_adapter ->
+          ( "adapter.py",
+            "validate.py",
+            String.concat "\n"
+              [
+                "#!/usr/bin/env python3";
+                "\"\"\"Generated CENTL-SCi external adapter scaffold.";
+                "";
+                "Contract: JSONL over stdin/stdout. This file is intentionally inactive";
+                "until the user implements and validates the named external boundary.";
+                "\"\"\"";
+                "";
+                "import json";
+                "import sys";
+                "";
+                "TARGET = " ^ Printf.sprintf "%S" target;
+                "";
+                "def main() -> int:";
+                "    for line in sys.stdin:";
+                "        request = json.loads(line)";
+                "        response = {";
+                "            \"status\": \"not_implemented\",";
+                "            \"target\": TARGET,";
+                "            \"request\": request,";
+                "            \"assurance\": \"external_backend\",";
+                "        }";
+                "        print(json.dumps(response, separators=(\",\", \":\")), flush=True)";
+                "    return 0";
+                "";
+                "if __name__ == \"__main__\":";
+                "    raise SystemExit(main())";
+                "";
+              ],
+            String.concat "\n"
+              [
+                "#!/usr/bin/env python3";
+                "\"\"\"Structural validation placeholder for the generated adapter.\"\"\"";
+                "";
+                "from pathlib import Path";
+                "";
+                "root = Path(__file__).resolve().parent";
+                "assert (root / \"adapter.py\").is_file()";
+                "assert (root / \"scaffold.json\").is_file()";
+                "print(\"adapter scaffold structure: ok\")";
+                "";
+              ] )
+      | Native_extension ->
+          ( "extension.c",
+            "validate.sh",
+            String.concat "\n"
+              [
+                "/* Generated CENTL-SCi native extension scaffold.";
+                " * This is intentionally not wired into CENTL's verified/native loader.";
+                " * Define and validate a stable ABI before activation.";
+                " */";
+                "#include <stddef.h>";
+                "";
+                "const char *centl_generated_extension_target(void) {";
+                "  return " ^ Printf.sprintf "%S" target ^ ";";
+                "}";
+                "";
+              ],
+            String.concat "\n"
+              [
+                "#!/bin/sh";
+                "set -eu";
+                "test -f \"$(dirname \"$0\")/extension.c\"";
+                "test -f \"$(dirname \"$0\")/scaffold.json\"";
+                "printf '%s\\n' 'native extension scaffold structure: ok'";
+                "";
+              ] )
+    in
     try
       Centl_sci_workspace.ensure workspace;
-      let root = Filename.concat (scaffold_root workspace) name in
       Centl_sci_workspace.ensure_directory root;
-      let kind_text, assurance, summary, source_file, test_file =
-        match kind with
-        | Python_adapter ->
-            write_text_file (Filename.concat root "adapter.py")
-              (python_adapter_stub name target);
-            write_text_file (Filename.concat root "test_adapter.py")
-              (python_test_stub name);
-            ( "python_adapter",
-              Centl_sci_workspace.External_backend,
-              "Controlled Python interoperability scaffold",
-              "adapter.py",
-              "test_adapter.py" )
-        | Native_extension ->
-            write_text_file (Filename.concat root "extension.ml")
-              (native_stub name target);
-            write_text_file (Filename.concat root "TESTING.md")
-              "# Validation required\n\nAdd deterministic interface, negative, resource-limit, and trust-boundary tests before enabling this generated native extension.\n";
-            ( "native_extension",
-              Centl_sci_workspace.Unverified_generated,
-              "Generated native extension scaffold",
-              "extension.ml",
-              "TESTING.md" )
-      in
+      write_text_file (Filename.concat root source_file) source_text;
+      write_text_file (Filename.concat root test_file) test_text;
       let contract =
         `Assoc
           [
             ("schema_version", `Int 1);
+            ("centl_sci_version", `String "0.0.2-Caramels");
             ("name", `String name);
             ("kind", `String kind_text);
             ("target", `String target);
-            ("transport", `String "jsonl_stdio");
-            ("activation", `String "explicit_after_validation");
-            ("result_assurance", `String (Centl_sci_workspace.assurance_text assurance));
+            ("summary", `String summary);
             ("source", `String source_file);
             ("test", `String test_file);
+            ("transport", `String "jsonl_stdio");
+            ("activation", `String "explicit_after_validation");
+            ("assurance", `String assurance);
+            ("verified_core_modified", `Bool false);
             ("network_access", `String "not_granted_by_scaffold");
             ("filesystem_access", `String "not_granted_by_scaffold");
           ]
@@ -172,7 +160,7 @@ let prepare_upstream workspace =
     in
     let extension_lines =
       Centl_sci_extensions.list workspace
-      |> List.map (fun item ->
+      |> List.map (fun (item : Centl_sci_extensions.manifest) ->
              Printf.sprintf "- `%s` — enabled=%b — assurance=`%s` — source=`%s`"
                item.name item.enabled item.assurance item.source)
     in
