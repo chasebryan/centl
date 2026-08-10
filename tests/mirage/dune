@@ -34,6 +34,11 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_mirage_evidence)
+ (modules test_sci_mirage_evidence)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sha256)
  (modules test_sha256)
  (libraries centl_lib alcotest))
