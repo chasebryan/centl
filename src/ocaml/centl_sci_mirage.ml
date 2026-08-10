@@ -264,7 +264,7 @@ let active_path workspace = Filename.concat (mirage_dir workspace) "active.json"
 let render_list title values =
   match values with
   | [] -> [ title ^ ": none" ]
-  | values -> title ^ ":" :: List.map (fun value -> "  - " ^ value) values
+  | values -> (title ^ ":") :: List.map (fun value -> "  - " ^ value) values
 
 let render_plan ~source_path ~source_digest cells entries =
   let header =
