@@ -2,17 +2,18 @@
 
 ## Supported Versions
 
-Security fixes are made for the latest stable minor series and the current
-`main` branch.
+Security fixes are made for the latest published stable minor series and the
+current `main` branch.
 
 | Version | Supported |
 | --- | --- |
-| 0.14.x | Yes |
+| 0.12.x | Yes |
 | `main` | Yes |
-| 0.12.x and earlier | No |
+| 0.11.x and earlier | No |
 
-The unreleased 0.13.0 development line is superseded by 0.14.0 and is not a
-separate supported release series.
+The unreleased 0.13.0 development line is not a separate supported release
+series. v0.14.0 is currently an Oasis candidate; when it is formally published,
+the supported stable series moves to 0.14.x under this latest-stable policy.
 
 ## Reporting a Vulnerability
 
@@ -43,8 +44,8 @@ timing must be treated as attacker controlled.
 CARAVAN Phase 1 adds an explicitly bounded local laboratory transport. Plain
 HTTP is allowed only for explicit loopback laboratory operation; non-loopback
 catalog/transport endpoints require the documented authenticated/HTTPS
-boundaries. Oasis does not authorize arbitrary public volunteer enrollment or a
-production public carrier listener.
+boundaries. Oasis qualification does not authorize arbitrary public volunteer
+enrollment or a production public carrier listener.
 
 MIRAGE ingests user-provided local documents and creates provenance, graph,
 evidence-obligation, and candidate-transaction artifacts. User document text
@@ -118,9 +119,10 @@ published releases.
 - CARAVAN retrieval capabilities must remain scoped, expiring, and replay-safe;
   carrier identity proof and policy acceptance must be verified before
   enrollment/use at the relevant boundary.
-- Archives must be checksum verified, reject unsafe paths and layouts, and be
-  staged and validated before activation. A checksum hosted beside an archive
-  detects corruption but is not an independent signature against repository or
+- Archives must be checksum verified, reject unsafe paths/layouts, reject link
+  and unsupported special-entry semantics before extraction, and be staged and
+  validated before activation. A checksum hosted beside an archive detects
+  corruption but is not an independent signature against repository or
   release-account compromise.
 - Repository workflows must use least-privilege tokens, immutable action pins
   with accurate version annotations, reviewed dependency changes, and protected
@@ -189,8 +191,8 @@ this policy.
 
 ## Oasis security gate
 
-A v0.14.x release is not considered ready merely because normal unit tests pass.
-The release commit must also satisfy the repository's dependency/security
-analysis and relevant component-specific validation, and no known unresolved
-release-blocking security finding may be intentionally hidden by weakening a
-checker solely to obtain a green release.
+A release is not considered Oasis-ready merely because normal unit tests pass.
+The candidate must also satisfy the repository's dependency/security analysis,
+relevant component-specific validation, installer/release integrity checks, and
+no known unresolved release-blocking security finding may be intentionally
+hidden by weakening a checker solely to obtain a green release.
