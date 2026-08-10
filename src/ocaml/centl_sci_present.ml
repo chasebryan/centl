@@ -127,15 +127,21 @@ let missing_information_text outcome =
         Some "More information is required to solve this problem."
       else None
 
+let unsupported_text outcome =
+  match missing_information_text outcome with
+  | Some text -> text
+  | None ->
+      begin match unsupported_reason outcome.Centl_sci_runtime.ir with
+      | Some reason when String.trim reason <> "" ->
+          "CENTL-SCi cannot establish this request: " ^ String.trim reason ^ "."
+      | _ -> "CENTL-SCi cannot solve this problem yet."
+      end
+
 let human outcome =
   match outcome.Centl_sci_runtime.status with
   | Centl_sci_runtime.Established -> established_text outcome
   | Centl_sci_runtime.Unresolved -> "CENTL could not establish a complete result."
-  | Centl_sci_runtime.Unsupported ->
-      begin match missing_information_text outcome with
-      | Some text -> text
-      | None -> "CENTL-SCi cannot solve this problem yet."
-      end
+  | Centl_sci_runtime.Unsupported -> unsupported_text outcome
   | Centl_sci_runtime.Failed -> "CENTL could not establish a result."
 
 let response_exact outcome =
@@ -164,6 +170,8 @@ let method_text = function
   | Centl_sci_ir.Exact_expression _ -> Some "CENTL exact/symbolic computation"
   | Centl_sci_ir.Polynomial_equation _ -> Some "CENTL polynomial equation solving"
   | Centl_sci_ir.Unit_conversion _ -> Some "CENTL Physics unit conversion"
+  | Centl_sci_ir.Physical_constant _ ->
+      Some "CENTL Physics exact defining/conventional constant lookup"
   | Centl_sci_ir.Uniform_gravity_particle _ ->
       Some "CENTL Physics uniform-gravity particle simulation (symplectic Euler)"
   | Centl_sci_ir.Unsupported _ -> None
