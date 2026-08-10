@@ -73,6 +73,7 @@
   Centl_sci_scaffold
   Centl_sci_codegen
   Centl_sci_validate
+  Centl_sci_audit
   Centl_sci_portable
   Centl_sci_build
   Centl_sci_evidence
