@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -172,6 +173,87 @@ def run() -> None:
         headless_text = headless_profile.read_text(encoding="utf-8")
         if f"# CENTL PATH: {headless_prefix / 'bin'}" not in headless_text:
             raise SystemExit("headless installer PATH setup omitted the CENTL marker")
+
+        # FCF/static hosting uses the preservation layout RELEASE_ROOT/vVERSION/.
+        # Exercise it hermetically through file:// so this regression never
+        # depends on GitHub or another HTTP service.
+        static_root = work / "static-releases"
+        static_version = static_root / f"v{VERSION}"
+        static_version.mkdir(parents=True)
+        shutil.copy2(archive, static_version / archive.name)
+        shutil.copy2(
+            archive.with_name(archive.name + ".sha256"),
+            static_version / f"{archive.name}.sha256",
+        )
+
+        static_home = work / "static-home"
+        static_home.mkdir()
+        static_prefix = static_home / "centl"
+        static_env = env.copy()
+        static_env["HOME"] = str(static_home)
+        subprocess.run(
+            [
+                "sh",
+                str(INSTALLER),
+                "--version",
+                VERSION,
+                "--release-base-url",
+                static_root.as_uri(),
+                "--prefix",
+                str(static_prefix),
+                "--no-path",
+            ],
+            cwd=ROOT,
+            env=static_env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        if not (static_prefix / "bin" / "centl-sci").is_symlink():
+            raise SystemExit("static release-root install did not activate CENTL-SCi")
+
+        # A generic static root has no implicit latest alias. Requiring an exact
+        # version keeps the FCF/static contract deterministic and host-neutral.
+        latest = subprocess.run(
+            [
+                "sh",
+                str(INSTALLER),
+                "--release-base-url",
+                static_root.as_uri(),
+                "--prefix",
+                str(work / "latest-prefix"),
+                "--no-path",
+            ],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if latest.returncode == 0 or "requires an explicit --version" not in latest.stderr:
+            raise SystemExit("custom release root unexpectedly accepted implicit latest")
+
+        insecure = subprocess.run(
+            [
+                "sh",
+                str(INSTALLER),
+                "--version",
+                VERSION,
+                "--release-base-url",
+                "http://example.invalid/releases",
+                "--prefix",
+                str(work / "insecure-prefix"),
+                "--no-path",
+            ],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if insecure.returncode == 0 or "must use https:// or file://" not in insecure.stderr:
+            raise SystemExit("installer unexpectedly accepted an insecure release base URL")
 
     print("CENTL installer interface check: PASS")
 

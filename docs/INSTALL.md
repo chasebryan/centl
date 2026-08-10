@@ -60,6 +60,89 @@ sh install --no-path
 `--no-path` leaves shell startup files untouched. The installer will print the
 exact command directory that must be added manually.
 
+## FCF or other static release hosts
+
+GitHub Releases remains the default network source for compatibility, but the
+installer does not require GitHub's URL layout.
+
+A host-neutral release root may expose the same immutable version directories
+that FCF preservation uses:
+
+```text
+RELEASE_ROOT/
+  v0.12.0/
+    centl-linux-x86_64.tar.gz
+    centl-linux-x86_64.tar.gz.sha256
+    centl-macos-x86_64.tar.gz
+    centl-macos-x86_64.tar.gz.sha256
+    centl-macos-arm64.tar.gz
+    centl-macos-arm64.tar.gz.sha256
+    centl-windows-x86_64.zip
+    centl-windows-x86_64.zip.sha256
+```
+
+The exact files present depend on the release/platform matrix. The important URL
+contract is simply:
+
+```text
+<release-base-url>/v<VERSION>/<asset>
+<release-base-url>/v<VERSION>/<asset>.sha256
+```
+
+On Linux/macOS:
+
+```sh
+sh install \
+  --version 0.12.0 \
+  --release-base-url https://downloads.example.org/centl/releases
+```
+
+The equivalent environment form is:
+
+```sh
+CENTL_RELEASE_BASE_URL=https://downloads.example.org/centl/releases \
+  sh install --version 0.12.0
+```
+
+On Windows:
+
+```powershell
+.\install.ps1 `
+  -Version 0.12.0 `
+  -ReleaseBaseUrl https://downloads.example.org/centl/releases
+```
+
+or:
+
+```powershell
+$env:CENTL_RELEASE_BASE_URL = 'https://downloads.example.org/centl/releases'
+.\install.ps1 -Version 0.12.0
+```
+
+A custom release root requires an **explicit version**. CENTL does not require a
+host to implement GitHub's `latest/download` redirect semantics. This keeps an
+FCF/static host simple and makes the selected immutable version visible to the
+operator.
+
+Custom network roots must use HTTPS. `file://` roots are also accepted for local
+static mirrors and hermetic/offline use. Plain HTTP is deliberately rejected
+because an attacker able to replace both an archive and its adjacent checksum
+would defeat checksum-only transport verification.
+
+`--archive`/`-Archive` and a custom release root are mutually exclusive; choose
+one source explicitly.
+
+No FCF hostname is hard-coded in CENTL. The eventual public artifact host may
+move without changing the installer or the cryptographic identity of preserved
+release bytes. FCF can publish its verified `releases/` preservation subtree as a
+static HTTPS hierarchy matching this contract.
+
+The native installer currently verifies the adjacent release SHA-256 before
+execution. Authenticated FCF release manifests (`SHA256SUMS` + `SHA256SUMS.sig`)
+are a separate publisher-authentication layer documented in
+[RELEASE-SIGNING.md](RELEASE-SIGNING.md); SHA-256 and signature authentication
+remain distinct properties.
+
 ## Windows
 
 Windows support is currently experimental and best-effort for CENTL-SCi. The
@@ -105,6 +188,10 @@ sh install --archive ./centl-macos-arm64.tar.gz
 
 Offline installation performs the same checksum, staging, runtime, and command
 smoke checks as a downloaded release.
+
+For a directory containing multiple preserved versions, `file://` plus an
+explicit version can also use the static release-root contract instead of naming
+one archive manually.
 
 ## Optional semantic model
 
