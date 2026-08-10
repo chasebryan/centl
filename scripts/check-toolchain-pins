@@ -4,6 +4,9 @@ set -eu
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$repository_root"
 
+qualification_workflow=.github/workflows/oasis-qualification.yml
+release_workflow=.github/workflows/release.yml
+
 lock_value() {
   awk -v wanted_section="$1" -v wanted_key="$2" '
     $0 == "[" wanted_section "]" { in_section = 1; next }
@@ -22,6 +25,10 @@ require_text() {
   file=$1
   expected=$2
   description=$3
+  if [ ! -f "$file" ]; then
+    printf '%s is required for toolchain pin validation\n' "$file" >&2
+    exit 1
+  fi
   if ! grep -Fq -- "$expected" "$file"; then
     printf '%s is not synchronized with toolchain.lock: %s\n' \
       "$file" "$description" >&2
@@ -87,11 +94,10 @@ require_text .ocamlformat "version=$ocamlformat" \
   "OCamlFormat must be pinned to $ocamlformat"
 require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
   "OCamlFormat must be documented as $ocamlformat"
-require_text .github/workflows/ci.yml "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
-require_text .github/workflows/release.yml "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
-for workflow in .github/workflows/ci.yml .github/workflows/release.yml; do
+
+for workflow in "$qualification_workflow" "$release_workflow"; do
+  require_text "$workflow" "FSTAR_VERSION: \"$fstar\"" \
+    "F* must be pinned to $fstar"
   require_text "$workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
     "F* commit must be pinned to $fstar_commit"
   require_text "$workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
@@ -99,6 +105,7 @@ for workflow in .github/workflows/ci.yml .github/workflows/release.yml; do
   require_text "$workflow" "Z3_VERSION: \"$z3\"" \
     "Z3 must be pinned to $z3"
 done
+
 fstar_commit_short=$(printf '%.7s' "$fstar_commit")
 require_text docs/TOOLCHAIN.md "| F* | $fstar (\`$fstar_commit_short\`) |" \
   "F* release and commit must be documented"
@@ -106,12 +113,10 @@ require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
   "Z3 must be documented as $z3"
 require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
-require_text .github/workflows/ci.yml "version: \"$julia\"" \
-  "Julia must be pinned to $julia"
-require_text .github/workflows/release.yml "version: \"$julia\"" \
-  "release Julia must be pinned to $julia"
 
-require_unique_workflow_pin .github/workflows/ci.yml ocaml-base-compiler "$ocaml"
+require_text "$release_workflow" "version: \"$julia\"" \
+  "release Julia must be pinned to $julia"
+require_unique_workflow_pin "$qualification_workflow" ocaml-base-compiler "$ocaml"
 for pin in \
   "ocaml-base-compiler:$ocaml" \
   "dune:$dune" \
@@ -122,7 +127,7 @@ for pin in \
   "ocamlformat:$ocamlformat"; do
   package=${pin%%:*}
   version=${pin#*:}
-  require_unique_workflow_pin .github/workflows/release.yml "$package" "$version"
+  require_unique_workflow_pin "$release_workflow" "$package" "$version"
 done
 
 for pin in \
@@ -133,10 +138,10 @@ for pin in \
   remainder=${pin#*:}
   version=${remainder%%:*}
   checksum=${remainder#*:}
-  require_text .github/workflows/release.yml \
+  require_text "$release_workflow" \
     "${variable}_VERSION: \"$version\"" \
     "$variable must be pinned to $version"
-  require_text .github/workflows/release.yml \
+  require_text "$release_workflow" \
     "${variable}_SHA256: \"$checksum\"" \
     "$variable checksum must be pinned to $checksum"
 done
@@ -179,4 +184,4 @@ manifest_version() {
   exit 1
 }
 
-printf '%s\n' 'Toolchain manifests and workflows are synchronized.'
+printf '%s\n' 'Toolchain manifests and active workflows are synchronized.'
