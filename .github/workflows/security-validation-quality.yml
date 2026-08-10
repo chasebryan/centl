@@ -46,80 +46,69 @@ jobs:
         continue-on-error: true
         run: opam exec -- dune build @fmt
 
-      - name: Source lint
-        id: lint
+      - name: Dune checks
+        id: dune_checks
         continue-on-error: true
-        run: python3 scripts/lint-source.py
+        run: opam exec -- dune build @check
 
-      - name: License headers
-        id: licenses
+      - name: Opam lint
+        id: opam_lint
         continue-on-error: true
-        run: python3 scripts/check-license-headers.py
+        run: opam lint centl.opam
+
+      - name: Toolchain pins
+        id: toolchain_pins
+        continue-on-error: true
+        run: scripts/check-toolchain-pins
+
+      - name: Licensing
+        id: licensing
+        continue-on-error: true
+        run: sh scripts/check-licensing
 
       - name: Install interface
         id: install_interface
         continue-on-error: true
         run: python3 scripts/install-interface-check.py
 
-      - name: Architecture
-        id: architecture
+      - name: Integrity self-test and source manifest
+        id: integrity
         continue-on-error: true
-        run: python3 scripts/check-architecture.py
+        run: |
+          python3 scripts/integrity.py self-test
+          mkdir -p _build/integrity
+          python3 scripts/integrity.py source-manifest --output _build/integrity/SHA256SUMS
+          python3 scripts/integrity.py hash _build/integrity/SHA256SUMS > _build/integrity/SHA256SUMS.sha256
 
-      - name: Feed hygiene
-        id: feed_hygiene
+      - name: Supply-chain check
+        id: supply_chain
         continue-on-error: true
-        run: python3 scripts/check-feed-hygiene.py
-
-      - name: Repository hygiene
-        id: repo_hygiene
-        continue-on-error: true
-        run: python3 scripts/check-repo-hygiene.py
-
-      - name: Dependency integrity
-        id: dependency_integrity
-        continue-on-error: true
-        run: python3 scripts/check-dependency-integrity.py
-
-      - name: Formal trust
-        id: formal_trust
-        continue-on-error: true
-        run: python3 scripts/check-formal-trust.py
-
-      - name: Security boundaries
-        id: security_boundaries
-        continue-on-error: true
-        run: python3 scripts/check-security-boundaries.py
+        run: python3 scripts/supply-chain-check.py
 
       - name: Require every quality component
         if: always()
         env:
           FORMATTING: ${{ steps.formatting.outcome }}
-          LINT: ${{ steps.lint.outcome }}
-          LICENSES: ${{ steps.licenses.outcome }}
+          DUNE_CHECKS: ${{ steps.dune_checks.outcome }}
+          OPAM_LINT: ${{ steps.opam_lint.outcome }}
+          TOOLCHAIN_PINS: ${{ steps.toolchain_pins.outcome }}
+          LICENSING: ${{ steps.licensing.outcome }}
           INSTALL_INTERFACE: ${{ steps.install_interface.outcome }}
-          ARCHITECTURE: ${{ steps.architecture.outcome }}
-          FEED_HYGIENE: ${{ steps.feed_hygiene.outcome }}
-          REPO_HYGIENE: ${{ steps.repo_hygiene.outcome }}
-          DEPENDENCY_INTEGRITY: ${{ steps.dependency_integrity.outcome }}
-          FORMAL_TRUST: ${{ steps.formal_trust.outcome }}
-          SECURITY_BOUNDARIES: ${{ steps.security_boundaries.outcome }}
+          INTEGRITY: ${{ steps.integrity.outcome }}
+          SUPPLY_CHAIN: ${{ steps.supply_chain.outcome }}
         run: |
           set -euo pipefail
           printf '%-24s %s\n' \
             formatting "$FORMATTING" \
-            lint "$LINT" \
-            licenses "$LICENSES" \
+            dune-checks "$DUNE_CHECKS" \
+            opam-lint "$OPAM_LINT" \
+            toolchain-pins "$TOOLCHAIN_PINS" \
+            licensing "$LICENSING" \
             install-interface "$INSTALL_INTERFACE" \
-            architecture "$ARCHITECTURE" \
-            feed-hygiene "$FEED_HYGIENE" \
-            repo-hygiene "$REPO_HYGIENE" \
-            dependency-integrity "$DEPENDENCY_INTEGRITY" \
-            formal-trust "$FORMAL_TRUST" \
-            security-boundaries "$SECURITY_BOUNDARIES"
+            integrity "$INTEGRITY" \
+            supply-chain "$SUPPLY_CHAIN"
           for result in \
-            "$FORMATTING" "$LINT" "$LICENSES" "$INSTALL_INTERFACE" \
-            "$ARCHITECTURE" "$FEED_HYGIENE" "$REPO_HYGIENE" \
-            "$DEPENDENCY_INTEGRITY" "$FORMAL_TRUST" "$SECURITY_BOUNDARIES"; do
+            "$FORMATTING" "$DUNE_CHECKS" "$OPAM_LINT" "$TOOLCHAIN_PINS" \
+            "$LICENSING" "$INSTALL_INTERFACE" "$INTEGRITY" "$SUPPLY_CHAIN"; do
             test "$result" = success
           done
