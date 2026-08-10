@@ -105,6 +105,11 @@
  (modules test_sci_workspace)
  (libraries centl_lib alcotest unix yojson))
 
+(test
+ (name test_sci_portable)
+ (modules test_sci_portable)
+ (libraries centl_lib alcotest unix yojson))
+
 (executable
  (name sci_fake_curl)
  (modules sci_fake_curl))
