@@ -21,6 +21,18 @@ let with_temp_directory action =
 let history_path root =
   Filename.concat (Filename.concat root "centl") "history.json"
 
+let write_text path text =
+  let output = open_out_bin path in
+  Fun.protect
+    ~finally:(fun () -> close_out_noerr output)
+    (fun () -> output_string output text)
+
+let read_text path =
+  let input = open_in_bin path in
+  Fun.protect
+    ~finally:(fun () -> close_in_noerr input)
+    (fun () -> really_input_string input (in_channel_length input))
+
 let check_entries label expected history =
   Alcotest.(check (list string)) label expected (Centl_history.entries history)
 
@@ -165,6 +177,65 @@ let corruption_and_io_tolerance () =
       Centl_history.clear history;
       check_entries "clear tolerates storage failure" [] history)
 
+let symlinked_history_file_is_not_followed () =
+  if not Sys.win32 then
+    with_temp_directory (fun root ->
+        let directory = Filename.concat root "centl" in
+        Unix.mkdir directory 0o700;
+        let outside = Filename.concat root "outside-history.json" in
+        let outside_contents =
+          "{\"version\":1,\"entries\":[\"outside-secret\"]}\n"
+        in
+        write_text outside outside_contents;
+        let path = Filename.concat directory "history.json" in
+        Unix.symlink outside path;
+        let history = Centl_history.create ~path () in
+        check_entries "symlink target is not imported" [] history;
+        Centl_history.add history "local-only";
+        check_entries "unsafe persistence falls back to local state" [ "local-only" ]
+          history;
+        Alcotest.(check string) "outside history remains untouched" outside_contents
+          (read_text outside);
+        Alcotest.(check bool) "history symlink replaced by regular state" true
+          ((Unix.lstat path).st_kind = Unix.S_REG))
+
+let symlinked_history_directory_is_not_used () =
+  if not Sys.win32 then
+    with_temp_directory (fun root ->
+        let outside = Filename.concat root "outside-state" in
+        Unix.mkdir outside 0o700;
+        let directory = Filename.concat root "centl" in
+        Unix.symlink outside directory;
+        let path = Filename.concat directory "history.json" in
+        let history = Centl_history.create ~path () in
+        Centl_history.add history "local-only";
+        check_entries "symlinked directory keeps history local" [ "local-only" ]
+          history;
+        Alcotest.(check bool) "outside directory receives no history" false
+          (Sys.file_exists (Filename.concat outside "history.json")))
+
+let symlinked_history_lock_is_not_followed () =
+  if not Sys.win32 then
+    with_temp_directory (fun root ->
+        let directory = Filename.concat root "centl" in
+        Unix.mkdir directory 0o700;
+        let outside = Filename.concat root "outside-lock-target" in
+        let sentinel = "sentinel-lock-target\n" in
+        write_text outside sentinel;
+        Unix.chmod outside 0o640;
+        let lock = Filename.concat directory "history.lock" in
+        Unix.symlink outside lock;
+        let path = Filename.concat directory "history.json" in
+        let history = Centl_history.create ~path () in
+        Centl_history.add history "local-only";
+        check_entries "symlinked lock keeps history local" [ "local-only" ] history;
+        Alcotest.(check string) "lock target content remains untouched" sentinel
+          (read_text outside);
+        Alcotest.(check int) "lock target mode remains untouched" 0o640
+          ((Unix.stat outside).st_perm land 0o777);
+        Alcotest.(check bool) "unsafe lock prevents persistent write" false
+          (Sys.file_exists path))
+
 let unknown_version_migration () =
   with_temp_directory (fun root ->
       let path = history_path root in
@@ -254,6 +325,12 @@ let run_tests () =
             stale_processes_merge_and_clear;
           Alcotest.test_case "corruption and I/O tolerance" `Quick
             corruption_and_io_tolerance;
+          Alcotest.test_case "reject symlinked history file" `Quick
+            symlinked_history_file_is_not_followed;
+          Alcotest.test_case "reject symlinked history directory" `Quick
+            symlinked_history_directory_is_not_used;
+          Alcotest.test_case "reject symlinked history lock" `Quick
+            symlinked_history_lock_is_not_followed;
           Alcotest.test_case "unknown-version migration" `Quick
             unknown_version_migration;
           Alcotest.test_case "concurrent processes" `Quick
