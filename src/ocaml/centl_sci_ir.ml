@@ -14,6 +14,10 @@ type t =
       to_unit : string;
       conversion_assumptions : string list;
     }
+  | Physical_constant of {
+      symbol : string;
+      constant_assumptions : string list;
+    }
   | Uniform_gravity_particle of {
       mass_value : string;
       mass_unit : string;
@@ -222,6 +226,24 @@ let parse_unit_conversion fields =
     (Unit_conversion
        { value; from_unit; to_unit; conversion_assumptions = assumptions })
 
+let supported_constant_symbol = function
+  | "c" | "h" | "e" | "k_B" | "N_A" | "g0" -> true
+  | _ -> false
+
+let parse_physical_constant fields =
+  let* () = check_fields ("symbol" :: common_fields) fields in
+  let* assumptions =
+    require_common fields ~domain:"physics" ~problem_class:"physical_constant"
+      ~operation:"constant"
+  in
+  let* symbol = string_field "symbol" fields in
+  let* symbol = validate_text ~field:"symbol" ~max_bytes:32 symbol in
+  if supported_constant_symbol symbol then
+    Ok (Physical_constant { symbol; constant_assumptions = assumptions })
+  else
+    fail "invalid_ir"
+      "physical constant is outside the exact defining/conventional Caramels catalog"
+
 let parse_uniform_gravity_particle fields =
   let specific =
     [
@@ -271,7 +293,8 @@ let parse_uniform_gravity_particle fields =
   let* dt_value = validate_value "dt_value" dt_value in
   let* dt_unit = validate_unit "dt_unit" dt_unit in
   if steps <= 0 then fail "invalid_ir" "steps must be positive"
-  else if steps > 100_000 then fail "resource_limit" "steps exceed the physics protocol limit"
+  else if steps > 100_000 then
+    fail "resource_limit" "steps exceed the physics protocol limit"
   else
     Ok
       (Uniform_gravity_particle
@@ -305,6 +328,7 @@ let of_json = function
       | Some (`String "exact_expression") -> parse_exact_expression fields
       | Some (`String "polynomial_equation") -> parse_polynomial_equation fields
       | Some (`String "unit_conversion") -> parse_unit_conversion fields
+      | Some (`String "physical_constant") -> parse_physical_constant fields
       | Some (`String "uniform_gravity_particle") -> parse_uniform_gravity_particle fields
       | Some (`String "unsupported") -> parse_unsupported fields
       | Some (`String value) ->
@@ -326,18 +350,20 @@ let assumptions = function
   | Exact_expression value -> value.exact_assumptions
   | Polynomial_equation value -> value.equation_assumptions
   | Unit_conversion value -> value.conversion_assumptions
+  | Physical_constant value -> value.constant_assumptions
   | Uniform_gravity_particle value -> value.mechanics_assumptions
   | Unsupported value -> value.unsupported_assumptions
 
 let domain = function
   | Exact_expression _ | Polynomial_equation _ -> "mathematics"
-  | Unit_conversion _ | Uniform_gravity_particle _ -> "physics"
+  | Unit_conversion _ | Physical_constant _ | Uniform_gravity_particle _ -> "physics"
   | Unsupported _ -> "unsupported"
 
 let problem_class = function
   | Exact_expression _ -> "exact_expression"
   | Polynomial_equation _ -> "polynomial_equation"
   | Unit_conversion _ -> "unit_conversion"
+  | Physical_constant _ -> "physical_constant"
   | Uniform_gravity_particle _ -> "uniform_gravity_particle"
   | Unsupported _ -> "unsupported"
 
@@ -345,6 +371,7 @@ let operation = function
   | Exact_expression _ -> "compute"
   | Polynomial_equation _ -> "solve"
   | Unit_conversion _ -> "convert"
+  | Physical_constant _ -> "constant"
   | Uniform_gravity_particle _ -> "simulate"
   | Unsupported _ -> "unsupported"
 
@@ -382,6 +409,9 @@ let to_json value =
             ("from_unit", `String data.from_unit);
             ("to_unit", `String data.to_unit);
           ])
+  | Physical_constant data ->
+      `Assoc
+        (common data.constant_assumptions @ [ ("symbol", `String data.symbol) ])
   | Uniform_gravity_particle data ->
       `Assoc
         (common data.mechanics_assumptions
