@@ -15,6 +15,8 @@ let seeds =
     { mode = Math; prompt = "expand (x + 1)^3" };
     { mode = Math; prompt = "factor x^2 - 1" };
     { mode = Math; prompt = "substitute x = 3 into x^2 + 1" };
+    { mode = Math; prompt = "approximate pi" };
+    { mode = Math; prompt = "approximate sqrt(2) to 30 significant digits" };
     { mode = Hybrid; prompt = "what is 1/3 + 2/7" };
     { mode = Hybrid; prompt = "calculate (12 + 4) / 8" };
     { mode = Phys; prompt = "convert 25 kilometers to meters" };
