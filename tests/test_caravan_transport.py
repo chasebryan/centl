@@ -276,6 +276,13 @@ class OutboundTransportTests(unittest.TestCase):
                 worker.join(timeout=3)
                 self.assertFalse(worker.is_alive())
                 self.assertEqual(poll_errors, [])
+
+                # The client can finish reading the response just before the
+                # server thread executes its release finally block. Synchronize
+                # on the server-side lifecycle before asserting cleanup.
+                idle_deadline = time.monotonic() + 2.0
+                while service.active_requests != 0 and time.monotonic() < idle_deadline:
+                    time.sleep(0.01)
                 self.assertEqual(service.active_requests, 0)
                 client.heartbeat(load=0, capacity=1)
 
