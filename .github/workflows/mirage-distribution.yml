@@ -10,21 +10,20 @@ permissions:
   contents: write
 
 concurrency:
-  group: centl-mirage-distribution
-  cancel-in-progress: true
-
-env:
-  NATIVE_PREFIX: ${{ runner.temp }}/centl-native
-  PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-  LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-  LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-  C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+  group: centl-distribution-writer
+  cancel-in-progress: false
 
 jobs:
   publish:
     name: Build and publish Mirage channel
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
+      PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
+      LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+      LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+      C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
     steps:
       - name: Check out Mirage
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -62,6 +61,12 @@ jobs:
           make release VERSION="$version"
           (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
 
+          mkdir -p "$RUNNER_TEMP/mirage-package"
+          cp dist/centl-linux-x86_64.tar.gz \
+            "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz"
+          cp dist/centl-linux-x86_64.tar.gz.sha256 \
+            "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz.sha256"
+
       - name: Publish rolling and addressable Mirage bytes
         shell: bash
         run: |
@@ -76,8 +81,10 @@ jobs:
             build_dir="channels/mirage/builds/$GITHUB_SHA"
             latest_dir="channels/mirage/latest"
             mkdir -p "$build_dir" "$latest_dir"
-            cp dist/centl-linux-x86_64.tar.gz "$build_dir/centl-linux-x86_64.tar.gz"
-            cp dist/centl-linux-x86_64.tar.gz.sha256 "$build_dir/centl-linux-x86_64.tar.gz.sha256"
+            cp "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz" \
+              "$build_dir/centl-linux-x86_64.tar.gz"
+            cp "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz.sha256" \
+              "$build_dir/centl-linux-x86_64.tar.gz.sha256"
             printf '%s\n' "$GITHUB_SHA" > "$build_dir/SOURCE-COMMIT"
             printf '%s\n' "$VERSION" > "$build_dir/VERSION"
 
