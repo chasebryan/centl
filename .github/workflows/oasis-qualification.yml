@@ -30,35 +30,10 @@ env:
   PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
 
 jobs:
-  convergence-start:
-    name: Publish convergence start
-    if: github.event_name == 'push'
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      statuses: write
-    steps:
-      - name: Mark exact SHA pending
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          payload=$(printf '{"state":"pending","context":"centl/oasis-convergence","description":"CENTL Oasis convergence running","target_url":"%s"}' "$target")
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            --data "$payload" >/dev/null
-
   engine-self-test:
     name: Adversarial engine self-test
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-
     steps:
       - name: Check out Oasis candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,10 +47,14 @@ jobs:
             scripts/oasis_engine.py \
             scripts/oasis-toolchain-check.py \
             scripts/oasis-metadata-check.py \
+            scripts/oasis_required_checks.py \
+            scripts/oasis-security-state.py \
             tests/test_oasis.py \
-            tests/test_oasis_metadata.py
+            tests/test_oasis_metadata.py \
+            tests/test_oasis_required_checks.py \
+            tests/test_oasis_security_state.py
 
-      - name: Run adversarial Oasis-engine tests
+      - name: Run adversarial Oasis tests
         run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
 
       - name: Validate live repository gate plan
@@ -94,7 +73,6 @@ jobs:
       C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
-
     steps:
       - name: Check out Oasis candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -108,80 +86,8 @@ jobs:
             build-essential ca-certificates curl git libzstd1 m4 make opam patch \
             pkg-config python3 python3-venv tar xz-utils
 
-      - name: Build checksum-pinned native numerical stack
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$NATIVE_PREFIX"
-
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/gmp.tar.xz"
-          printf '%s  %s\n' "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz" | sha256sum --check
-          tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
-          baseline_build=$(sh ./configfsf.guess)
-          case "$baseline_build" in
-            x86_64-*-linux-gnu) ;;
-            *) printf 'unexpected GMP build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
-          esac
-          ABI=64 CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --build="$baseline_build" --prefix="$NATIVE_PREFIX" \
-            --disable-static --enable-shared --enable-fat
-          grep -qx '#define WANT_FAT_BINARY 1' config.h
-          make --jobs=2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/mpfr.tar.xz"
-          printf '%s  %s\n' "$MPFR_SHA256" "$RUNNER_TEMP/mpfr.tar.xz" | sha256sum --check
-          tar -xf "$RUNNER_TEMP/mpfr.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/mpfr-${MPFR_VERSION}"
-          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --disable-static --enable-shared
-          make --jobs=2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
-            --output "$RUNNER_TEMP/flint.tar.gz"
-          printf '%s  %s\n' "$FLINT_SHA256" "$RUNNER_TEMP/flint.tar.gz" | sha256sum --check
-          tar -xzf "$RUNNER_TEMP/flint.tar.gz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
-          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --with-mpfr="$NATIVE_PREFIX"
-          make --jobs=2
-          make install
-
-      - name: Install checksum-pinned F* and Z3
-        shell: bash
-        run: |
-          set -euo pipefail
-          archive="$RUNNER_TEMP/fstar.tar.gz"
-          root="$RUNNER_TEMP/fstar"
-          curl --fail --silent --show-error --location \
-            "https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz" \
-            --output "$archive"
-          printf '%s  %s\n' "$FSTAR_SHA256" "$archive" | sha256sum --check
-          mkdir -p "$root"
-          tar -xzf "$archive" -C "$root"
-          fstar=$(find "$root" -type f -path '*/bin/fstar.exe' -print -quit)
-          test -n "$fstar"
-          "$fstar" --version | grep -F "commit=${FSTAR_COMMIT}"
-          z3=$("$fstar" --locate_z3 "$Z3_VERSION")
-          "$z3" --version | grep -F "Z3 version ${Z3_VERSION}"
-          printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
-
-      - name: Install pinned OCaml dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          opam init --bare --disable-sandboxing --yes
-          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
-          opam install --switch=centl --deps-only --with-test --assume-depexts --yes .
+      - name: Bootstrap pinned proof and native toolchain
+        run: sh scripts/oasis-ci-bootstrap
 
       - name: Set up pinned Julia
         uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
@@ -208,6 +114,14 @@ jobs:
           "$RUNNER_TEMP/oasis-venv/bin/python" scripts/oasis.py \
             --root "$PWD" --no-repair --keep-going
 
+      - name: Preserve exact qualified release candidate
+        if: success() && github.event_name == 'push'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-release-${{ github.sha }}
+          path: dist/*
+          if-no-files-found: error
+
       - name: Preserve Oasis evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -216,38 +130,22 @@ jobs:
           path: _build/oasis/**
           if-no-files-found: warn
 
-  convergence-status:
-    name: Publish convergence status
-    needs:
-      - engine-self-test
-      - qualify
-    if: always() && github.event_name == 'push'
+  release-security:
+    name: Release security state
+    needs: qualify
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       contents: read
-      statuses: write
+      security-events: read
     steps:
-      - name: Publish exact-SHA Oasis result
+      - name: Check out qualified Oasis head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require clear release-blocking GitHub security state
         env:
-          SELF_TEST_RESULT: ${{ needs.engine-self-test.result }}
-          QUALIFY_RESULT: ${{ needs.qualify.result }}
           GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          state=failure
-          description='CENTL Oasis convergence failed'
-          if [ "$SELF_TEST_RESULT" = success ] && [ "$QUALIFY_RESULT" = success ]; then
-            state=success
-            description='CENTL Oasis convergence passed'
-          fi
-          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          payload=$(printf '{"state":"%s","context":"centl/oasis-convergence","description":"%s","target_url":"%s"}' \
-            "$state" "$description" "$target")
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
-            --data "$payload" >/dev/null
+        run: python3 scripts/oasis-security-state.py --root "$PWD"
