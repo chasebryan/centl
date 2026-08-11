@@ -13,6 +13,19 @@ concurrency:
   group: centl-distribution-writer
   cancel-in-progress: false
 
+env:
+  FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
+  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
+  GMP_VERSION: "6.3.0"
+  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
+  MPFR_VERSION: "4.2.2"
+  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
+  FLINT_VERSION: "3.0.1"
+  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
+
 jobs:
   publish:
     name: Build and publish Mirage channel
