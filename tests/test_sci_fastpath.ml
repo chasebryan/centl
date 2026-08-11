@@ -12,65 +12,6 @@ let test_exact_decimal_language () =
       Alcotest.(check string) "expression" "0.1 + 0.2" data.expression
   | _ -> Alcotest.fail "expected exact_expression fast-path IR"
 
-let expect_expression problem expected =
-  match Centl_sci_fastpath.interpret problem |> require_some problem with
-  | Centl_sci_ir.Exact_expression data ->
-      Alcotest.(check string) problem expected data.expression
-  | _ -> Alcotest.fail ("expected exact_expression for " ^ problem)
-
-let expect_response_text problem expected =
-  let ir = Centl_sci_fastpath.interpret problem |> require_some problem in
-  let outcome = Centl_sci_runtime.execute ir in
-  Alcotest.(check string)
-    "status" "established"
-    (Centl_sci_runtime.status_text outcome.status);
-  match outcome.response with
-  | Some response ->
-      begin match Centl_sci_runtime.result_text response with
-      | Some actual -> Alcotest.(check string) problem expected actual
-      | None -> Alcotest.fail "missing result text"
-      end
-  | None -> Alcotest.fail "expected CENTL response"
-
-let test_concrete_factorial_language () =
-  expect_expression "What is ten factorial?" "factorial(10)"
-
-let test_concrete_fibonacci_language () =
-  expect_expression "What is the tenth Fibonacci number?" "fibonacci(10)"
-
-let test_concrete_gcd_language () =
-  expect_expression "Find the greatest common divisor of 84 and 30."
-    "gcd(84, 30)"
-
-let test_concrete_choose_language () =
-  expect_expression "Choose 3 from 10." "choose(10, 3)"
-
-let test_concrete_geometry_language () =
-  expect_expression "What is the area of a circle with radius 3?"
-    "circle_area(3)"
-
-let test_concrete_triangle_geometry_language () =
-  expect_expression "Find the area of a triangle with base 6 and height 4."
-    "triangle_area(6, 4)"
-
-let test_concrete_point_geometry_language () =
-  expect_expression "Find the distance between (0, 0) and (3, 4)."
-    "distance(0, 0, 3, 4)"
-
-let test_concrete_sequence_language () =
-  expect_expression "List the squares from 1 to 5." "sequence(k^2, k = 1, 5)"
-
-let test_concrete_product_language () =
-  expect_expression "Product of integers from 1 through 5."
-    "product(k, k = 1, 5)"
-
-let test_concrete_first_fibonacci_language () =
-  expect_expression "First 5 Fibonacci numbers."
-    "sequence(fibonacci(k), k = 1, 5)"
-
-let test_direct_core_call_language () =
-  expect_expression "fibonacci(10)" "fibonacci(10)"
-
 let test_approximation_language () =
   match
     Centl_sci_fastpath.interpret "Approximate pi."
@@ -191,21 +132,6 @@ let test_spoken_equation_infers_leading_variable () =
       Alcotest.(check string) "variable" "x" data.variable
   | _ -> Alcotest.fail "expected polynomial_equation fast-path IR"
 
-let test_unicode_power_equation () =
-  let normalized =
-    Centl_sci_interaction.normalize Centl_sci_interaction.Math
-      "Solve x² minus 5x plus 6 equals zero."
-  in
-  match
-    Centl_sci_fastpath.interpret normalized
-    |> require_some "unicode power polynomial equation"
-  with
-  | Centl_sci_ir.Polynomial_equation data ->
-      Alcotest.(check string) "left" "x^2 - 5*x + 6" data.left;
-      Alcotest.(check string) "right" "0" data.right;
-      Alcotest.(check string) "variable" "x" data.variable
-  | _ -> Alcotest.fail "expected polynomial_equation fast-path IR"
-
 let test_ambiguous_spoken_equation_defers_to_model () =
   Alcotest.(check bool)
     "ambiguous language is not overclaimed" true
@@ -242,12 +168,6 @@ let test_fast_path_executes_exactly () =
       | _ -> Alcotest.fail "missing CENTL value"
       end
   | Some _ -> Alcotest.fail "expected structured CENTL response"
-
-let test_concrete_fibonacci_executes_exactly () =
-  expect_response_text "What is the tenth Fibonacci number?" "55"
-
-let test_concrete_geometry_executes_exactly () =
-  expect_response_text "What is the area of a circle with radius 3?" "9 * pi"
 
 let verification_outcome problem =
   let ir = Centl_sci_fastpath.interpret problem |> require_some problem in
@@ -332,28 +252,6 @@ let () =
         [
           Alcotest.test_case "exact decimal language" `Quick
             test_exact_decimal_language;
-          Alcotest.test_case "concrete factorial language" `Quick
-            test_concrete_factorial_language;
-          Alcotest.test_case "concrete fibonacci language" `Quick
-            test_concrete_fibonacci_language;
-          Alcotest.test_case "concrete gcd language" `Quick
-            test_concrete_gcd_language;
-          Alcotest.test_case "concrete choose language" `Quick
-            test_concrete_choose_language;
-          Alcotest.test_case "concrete geometry language" `Quick
-            test_concrete_geometry_language;
-          Alcotest.test_case "concrete triangle geometry language" `Quick
-            test_concrete_triangle_geometry_language;
-          Alcotest.test_case "concrete point geometry language" `Quick
-            test_concrete_point_geometry_language;
-          Alcotest.test_case "concrete sequence language" `Quick
-            test_concrete_sequence_language;
-          Alcotest.test_case "concrete product language" `Quick
-            test_concrete_product_language;
-          Alcotest.test_case "concrete first fibonacci language" `Quick
-            test_concrete_first_fibonacci_language;
-          Alcotest.test_case "direct core call language" `Quick
-            test_direct_core_call_language;
           Alcotest.test_case "default approximation" `Quick
             test_approximation_language;
           Alcotest.test_case "explicit approximation precision" `Quick
@@ -374,8 +272,6 @@ let () =
           Alcotest.test_case "spoken equation" `Quick test_spoken_equation;
           Alcotest.test_case "spoken equation infers leading variable" `Quick
             test_spoken_equation_infers_leading_variable;
-          Alcotest.test_case "unicode power equation" `Quick
-            test_unicode_power_equation;
           Alcotest.test_case "ambiguous spoken equation defers" `Quick
             test_ambiguous_spoken_equation_defers_to_model;
           Alcotest.test_case "general knowledge defers" `Quick
@@ -385,10 +281,6 @@ let () =
         [
           Alcotest.test_case "exact result" `Quick
             test_fast_path_executes_exactly;
-          Alcotest.test_case "concrete fibonacci result" `Quick
-            test_concrete_fibonacci_executes_exactly;
-          Alcotest.test_case "concrete geometry result" `Quick
-            test_concrete_geometry_executes_exactly;
           Alcotest.test_case "verification verified" `Quick
             test_verification_executes_verified;
           Alcotest.test_case "verification refuted" `Quick

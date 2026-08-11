@@ -1,4 +1,4 @@
-# CENTL-SCi v0.0.2-Caramels+ — BUILD mode
+# CENTL-SCi v0.0.2-Caramels — BUILD mode
 
 Status: development-branch reference for the Caramels downstream self-extension surface.
 

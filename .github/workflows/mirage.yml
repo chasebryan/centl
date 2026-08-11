@@ -1,7 +1,10 @@
-name: MIRAGE bootstrap validation
+# Development-oriented MIRAGE validation. This is intentionally lighter than Oasis qualification.
+name: MIRAGE development validation
 
 on:
   pull_request:
+    branches:
+      - mirage
     paths:
       - 'src/ocaml/centl_sha256.ml'
       - 'src/ocaml/centl_sci_mirage.ml'
@@ -12,6 +15,22 @@ on:
       - 'src/dune'
       - 'tests/mirage/**'
       - 'docs/CENTL-MIRAGE.md'
+      - 'docs/RELEASE-POLICY.md'
+      - '.github/workflows/mirage.yml'
+  push:
+    branches:
+      - mirage
+    paths:
+      - 'src/ocaml/centl_sha256.ml'
+      - 'src/ocaml/centl_sci_mirage.ml'
+      - 'src/ocaml/centl_sci_mirage_goal.ml'
+      - 'src/ocaml/centl_sci_mirage_obligation.ml'
+      - 'src/ocaml/centl_sci_mirage_candidate.ml'
+      - 'src/mirage_main.ml'
+      - 'src/dune'
+      - 'tests/mirage/**'
+      - 'docs/CENTL-MIRAGE.md'
+      - 'docs/RELEASE-POLICY.md'
       - '.github/workflows/mirage.yml'
   workflow_dispatch:
 
@@ -29,7 +48,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Check out source
+      - name: Check out development source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

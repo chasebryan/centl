@@ -52,7 +52,7 @@ let test_request_contract () =
     (String.length prompt < 1_024);
   Alcotest.(check bool)
     "Caramels class is fixed" true
-    (String.starts_with ~prefix:"CENTL-SCi v0.0.2-Caramels+" prompt
+    (String.starts_with ~prefix:"CENTL-SCi v0.0.2-Caramels" prompt
     && String.contains prompt 'p');
   Alcotest.(check bool) "equality is split" true (String.contains prompt '=');
   Alcotest.(check bool)

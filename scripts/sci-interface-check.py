@@ -104,10 +104,10 @@ def main() -> int:
         require_clean(
             details,
             "x = 2 or x = 3\n\nDetails:\n"
-            "  Exact result within the admitted deterministic model\n"
+            "  Exact result\n"
             "  Variable: x\n"
-            "  Method: CENTL polynomial equation solving\n"
-            "  Established by the authoritative CENTL execution path\n",
+            "  Method: polynomial equation solving\n"
+            "  Verified by CENTL\n",
         )
         passed += 1
 
@@ -120,37 +120,10 @@ def main() -> int:
         )
         require_clean(
             explain,
-            "3/10\n\n"
-            "Explanation\n"
-            "  Understood as:\n"
-            "    What is 0.1 plus 0.2?\n"
-            "  Mode:\n"
-            "    hybrid\n"
-            "  Intent:\n"
-            "    arithmetic\n"
-            "  Typed problem:\n"
-            "    domain=mathematics, class=exact_expression, operation=compute\n"
-            "  Interpreter assumptions:\n"
-            "    none introduced\n"
-            "  Interpretation path:\n"
-            "    fast\n"
-            "  Authoritative executor:\n"
-            "    centl\n"
-            "  Executor request:\n"
-            '    {"version":1,"op":"compute","expression":"0.1 + 0.2","limits":{"max_source_bytes":8192,"max_expression_nodes":20000,"max_exact_bits":262144,"max_integer_iterations":10000,"max_result_bytes":262144,"max_precision_digits":256,"max_working_bits":4096}}\n'
-            "  Status:\n"
-            "    established\n"
-            "  Workspace revision:\n"
-            "    0\n"
-            "  Evidence events:\n"
-            "    - normalized: What is 0.1 plus 0.2?\n"
-            "    - intent: arithmetic: calculation phrase\n"
-            "    - typed_ir: mathematics/exact_expression/compute\n"
-            "    - assumptions: none introduced by the interpreter\n"
-            "    - routed: authoritative executor: centl\n"
-            "    - executed: established\n"
-            "  Result:\n"
-            "    3/10\n",
+            "3/10\n\nDetails:\n"
+            "  Exact result\n"
+            "  Method: exact arithmetic\n"
+            "  Verified by CENTL\n",
         )
         passed += 1
 
@@ -184,7 +157,7 @@ def main() -> int:
         )
         require_clean(
             repl,
-            "CENTL-SCi v0.0.2-Caramels+\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
             "HYBRID> 3/10\n"
             "HYBRID> 2500 m\n"
@@ -208,7 +181,7 @@ def main() -> int:
         )
         require_clean(
             modes,
-            "CENTL-SCi v0.0.2-Caramels+\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
             "HYBRID> Mode: math\n"
             "MATH> 3/10\n"
@@ -232,9 +205,9 @@ def main() -> int:
         )
         require_clean(
             recovery,
-            "CENTL-SCi v0.0.2-Caramels+\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
-            "HYBRID> I understand this as a request that needs semantic interpretation, but no local semantic model is configured.\n"
+            "HYBRID> CENTL-SCi cannot solve this problem yet.\n"
             "HYBRID> 3/10\n"
             "HYBRID> ",
         )
@@ -249,7 +222,7 @@ def main() -> int:
         )
         require_clean(
             clarification,
-            "CENTL-SCi v0.0.2-Caramels+\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
             "HYBRID> I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0.\n"
             "HYBRID> ",
@@ -265,7 +238,7 @@ def main() -> int:
         )
         require_clean(
             eof,
-            "CENTL-SCi v0.0.2-Caramels+\n"
+            "CENTL-SCi v0.0.2-dev\n"
             "Free for science.\n\n"
             "HYBRID> 3/10\n"
             "HYBRID> ",

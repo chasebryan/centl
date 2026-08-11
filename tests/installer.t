@@ -47,6 +47,14 @@
   centl install: release checksum verification failed
   [1]
 
+  $ mkdir -p linked-release/centl
+  $ ln -s ../../outside linked-release/centl/escape
+  $ tar -czf linked.tar.gz -C linked-release centl
+  $ sha256sum linked.tar.gz > linked.tar.gz.sha256
+  $ HOME="$PWD/home" SHELL=/bin/bash ../install --archive "$PWD/linked.tar.gz" --prefix "$PWD/linked" 2>&1
+  centl install: the release archive contains a link or unsupported filesystem entry
+  [1]
+
   $ mkdir -p occupied/bin
   $ touch occupied/bin/centl
   $ HOME="$PWD/home" SHELL=/bin/bash ../install --archive "$PWD/centl-linux-x86_64.tar.gz" --prefix "$PWD/occupied" 2>&1

@@ -56,9 +56,6 @@ let contains_any needles text =
 let starts prefixes text =
   List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
 
-let exact_or_starts prefix text =
-  text = prefix || String.starts_with ~prefix:(prefix ^ " ") text
-
 let constant_phrase input =
   contains_any
     [
@@ -73,9 +70,7 @@ let constant_phrase input =
       "standard acceleration of gravity";
     ]
     input
-  || List.exists
-       (fun prefix -> exact_or_starts prefix input)
-       [ "constant"; "physical constant"; "lookup constant" ]
+  || starts [ "constant "; "physical constant "; "lookup constant " ] input
 
 let classify ~mode input =
   let input = lower input in
@@ -98,7 +93,6 @@ let classify ~mode input =
               "packages";
             ]
             input
-          || input = "validate"
         then result System_inspection High "BUILD inspection/validation verb"
         else if starts [ "create "; "write "; "make "; "scaffold " ] input then
           result Program_creation High "BUILD creation verb"
@@ -132,94 +126,6 @@ let classify ~mode input =
             "conversion phrase with source/target units"
         else if constant_phrase input then
           result Constant_lookup High "known physical-constant lookup phrase"
-        else if
-          starts
-            [
-              "area ";
-              "area of ";
-              "circumference ";
-              "perimeter ";
-              "volume ";
-              "surface area ";
-              "hypotenuse ";
-              "distance between ";
-              "distance from ";
-              "find distance between ";
-              "find distance from ";
-              "find the distance between ";
-              "find the distance from ";
-              "slope between ";
-              "slope from ";
-              "find slope between ";
-              "find slope from ";
-              "find the slope between ";
-              "find the slope from ";
-              "what is the area ";
-              "find the area ";
-              "calculate the area ";
-            ]
-            input
-          || contains_any
-               [
-                 " area of a circle";
-                 " area of a rectangle";
-                 " area of a triangle";
-                 " volume of a sphere";
-                 " radius ";
-               ]
-               input
-        then result Geometry High "supported geometry phrase"
-        else if
-          starts
-            [
-              "sequence ";
-              "sequence of ";
-              "list ";
-              "show ";
-              "first ";
-              "sum of ";
-              "sum ";
-              "product of ";
-              "product ";
-            ]
-            input
-          || contains_any
-               [
-                 " fibonacci";
-                 " factorials";
-                 " squares";
-                 " cubes";
-                 " finite series";
-               ]
-               input
-        then result Sequence High "supported finite sequence phrase"
-        else if starts [ "recurrence " ] input || contains " recurrence" input
-        then result Recurrence High "recurrence phrase"
-        else if
-          starts
-            [
-              "factorial ";
-              "factorial of ";
-              "fibonacci ";
-              "fibonacci of ";
-              "gcd ";
-              "gcd of ";
-              "lcm ";
-              "lcm of ";
-              "choose ";
-              "permutations ";
-            ]
-            input
-          || contains_any
-               [
-                 " factorial";
-                 " fibonacci number";
-                 " greatest common divisor";
-                 " least common multiple";
-                 " choose ";
-               ]
-               input
-        then result Arithmetic High "supported concrete arithmetic phrase"
         else if
           starts
             [

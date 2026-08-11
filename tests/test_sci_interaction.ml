@@ -61,27 +61,6 @@ let test_build_completion_surface () =
       "validate";
     ]
 
-let test_math_completion_surface () =
-  let completions =
-    Centl_sci_interaction.completion_candidates Centl_sci_interaction.Math
-  in
-  List.iter
-    (fun candidate ->
-      Alcotest.(check bool)
-        (candidate ^ " completion")
-        true
-        (List.mem candidate completions))
-    [
-      "factorial";
-      "fibonacci";
-      "gcd";
-      "geometry";
-      "sequence";
-      "sum";
-      "product";
-      "distance";
-    ]
-
 let test_physics_completion_surface () =
   let completions =
     Centl_sci_interaction.completion_candidates Centl_sci_interaction.Phys
@@ -124,17 +103,7 @@ let test_caramels_capability_discovery () =
        (capability_names "create function for a local extension"));
   Alcotest.(check bool)
     "approximation reuses verified approximation" true
-    (List.mem "approx" (capability_names "approximate to significant digits"));
-  Alcotest.(check bool)
-    "concrete math is discoverable" true
-    (List.mem "concrete mathematics"
-       (capability_names "tenth fibonacci number"));
-  Alcotest.(check bool)
-    "geometry is discoverable" true
-    (List.mem "geometry" (capability_names "area of a circle"));
-  Alcotest.(check bool)
-    "finite sequences are discoverable" true
-    (List.mem "finite sequences" (capability_names "list squares from 1 to 5"))
+    (List.mem "approx" (capability_names "approximate to significant digits"))
 
 let () =
   Alcotest.run "CENTL-SCi Caramels interaction"
@@ -154,7 +123,6 @@ let () =
         [
           Alcotest.test_case "BUILD surface" `Quick
             test_build_completion_surface;
-          Alcotest.test_case "math surface" `Quick test_math_completion_surface;
           Alcotest.test_case "physics surface" `Quick
             test_physics_completion_surface;
         ] );

@@ -5,3 +5,7 @@ compile_commands.json
 *.checked
 *.hints
 lab/sci-contributions/private/
+
+# Python generated files
+__pycache__/
+*.py[cod]

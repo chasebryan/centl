@@ -10,10 +10,6 @@ validation, packaging, installer, and release platform for CENTL-SCi and the
 Caramels series. macOS and Windows are unsupported and are not release-blocking
 targets.
 
-The public release line is `CENTL OASIS`. `CENTL MIRAGE` is the experimental
-development line. Feature names such as `CENTL-SCi`, `Caramels+`, and
-`CENTL-CARAVAN` remain subsystem names under the CENTL umbrella.
-
 ## Linux
 
 ```sh
@@ -26,7 +22,8 @@ The installer:
 1. requires GNU/Linux and the supported Linux architecture;
 2. downloads the requested native release, or accepts an offline archive;
 3. verifies the archive SHA-256 checksum before extraction;
-4. rejects unsafe archive paths;
+4. rejects unsafe archive paths/layouts and rejects symlink, hard-link, device,
+   FIFO, and other unsupported archive member types before extraction;
 5. stages the package under the user installation prefix;
 6. runs `centl --version` as a runtime check;
 7. smoke-tests exact physics unit conversion when CENTL Physics is present;
@@ -48,7 +45,7 @@ centl-sci
 A Caramels CENTL-SCi package should begin:
 
 ```text
-CENTL-SCi v0.0.2-Caramels+
+CENTL-SCi v0.0.2-Caramels
 Free for science.
 
 >
@@ -57,7 +54,7 @@ Free for science.
 Additional installer options:
 
 ```sh
-sh install --version 0.13.0
+sh install --version 0.14.0
 sh install --prefix "$HOME/software"
 sh install --no-path
 ```
@@ -75,7 +72,7 @@ that FCF preservation uses:
 
 ```text
 RELEASE_ROOT/
-  v0.13.0/
+  v0.14.0/
     centl-linux-x86_64.tar.gz
     centl-linux-x86_64.tar.gz.sha256
 ```
@@ -91,7 +88,7 @@ Example:
 
 ```sh
 sh install \
-  --version 0.13.0 \
+  --version 0.14.0 \
   --release-base-url https://downloads.example.org/centl/releases
 ```
 
@@ -99,7 +96,7 @@ The equivalent environment form is:
 
 ```sh
 CENTL_RELEASE_BASE_URL=https://downloads.example.org/centl/releases \
-  sh install --version 0.13.0
+  sh install --version 0.14.0
 ```
 
 A custom release root requires an **explicit version**. CENTL does not require a
@@ -143,8 +140,8 @@ Keep a Linux archive and its adjacent `.sha256` file together.
 sh install --archive ./centl-linux-x86_64.tar.gz
 ```
 
-Offline installation performs the same checksum, staging, runtime, and command
-smoke checks as a downloaded release.
+Offline installation performs the same checksum, archive-structure, staging,
+runtime, and command smoke checks as a downloaded release.
 
 For a directory containing multiple preserved versions, `file://` plus an
 explicit version can also use the static release-root contract instead of naming
@@ -163,12 +160,6 @@ CENTL-SCi Problem IR boundary before CENTL or CENTL Physics performs any admitte
 computation. See [SCI.md](SCI.md) for model configuration and the trust boundary.
 
 ## Release contract
-
-The current release vocabulary is:
-
-- `CENTL` for the product umbrella;
-- `OASIS` for the stable release line;
-- `MIRAGE` for the experimental line.
 
 Native packages built from the current release path contain:
 
@@ -212,5 +203,5 @@ dune exec centl-sci
 Maintainers package an already-tested native Linux build with:
 
 ```sh
-make release VERSION=0.13.0
+make release VERSION=0.14.0
 ```

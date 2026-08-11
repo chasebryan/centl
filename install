@@ -38,12 +38,6 @@ shell_quote() {
   printf "'%s'" "$escaped"
 }
 
-exported_shell_path() {
-  if export -p | grep -Eq '^(export SHELL=|declare -x SHELL=)'; then
-    printf '%s\n' "${SHELL:-}"
-  fi
-}
-
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --version)
@@ -175,8 +169,21 @@ else
 fi
 [ "$actual" = "$expected" ] || fail "release checksum verification failed"
 
-extracted="$temporary/extracted"
-mkdir "$extracted"
+command -v tar >/dev/null 2>&1 || fail "tar is required to install CENTL"
+
+# The supported release package contains directories and ordinary files only.
+# Reject links and special archive members before extraction so an authenticated
+# but malformed archive cannot use link traversal or device/FIFO semantics to
+# escape the staging directory. The subsequent path/layout validation is a
+# separate invariant and remains required.
+tar -tvzf "$archive" | while IFS= read -r listing; do
+  entry_type=${listing%"${listing#?}"}
+  case "$entry_type" in
+    -|d) ;;
+    *) fail "the release archive contains a link or unsupported filesystem entry" ;;
+  esac
+done
+
 tar -tzf "$archive" | while IFS= read -r member; do
   case "$member" in
     /*|../*|*/../*|*/..) fail "the release archive contains an unsafe path" ;;
@@ -184,7 +191,10 @@ tar -tzf "$archive" | while IFS= read -r member; do
     *) fail "the release archive has an unexpected layout" ;;
   esac
 done
-tar -xzf "$archive" -C "$extracted"
+
+extracted="$temporary/extracted"
+mkdir "$extracted"
+tar --no-same-owner --no-same-permissions -xzf "$archive" -C "$extracted"
 package="$extracted/centl"
 [ -x "$package/bin/centl" ] || fail "the release contains no CENTL launcher"
 [ -x "$package/libexec/centl" ] || fail "the release contains no CENTL executable"
@@ -289,7 +299,7 @@ case ":${PATH:-}:" in
 esac
 
 if [ "$path_active" = false ] && [ "$configure_path" = true ] && [ -n "${HOME:-}" ]; then
-  shell_path=$(exported_shell_path)
+  shell_path=${SHELL:-}
   shell_name=${shell_path##*/}
   case "$shell_name" in
     bash) profile="$HOME/.bashrc" ;;

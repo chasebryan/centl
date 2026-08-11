@@ -61,17 +61,28 @@ let make ?(name = "default") root =
 
 let default () = Option.map make (default_root ())
 
+let lstat path =
+  try Some (Unix.lstat path) with Unix.Unix_error (Unix.ENOENT, _, _) -> None
+
 let rec ensure_directory path =
   if path = "" || path = Filename.dirname path then ()
-  else if Sys.file_exists path then
-    begin if not (Sys.is_directory path) then
-      raise (Sys_error (path ^ " is not a directory"))
-    end
-  else begin
-    ensure_directory (Filename.dirname path);
-    try Unix.mkdir path 0o700
-    with Unix.Unix_error (Unix.EEXIST, _, _) when Sys.is_directory path -> ()
-  end
+  else
+    match lstat path with
+    | Some stat when stat.Unix.st_kind = Unix.S_DIR -> ()
+    | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+        raise (Sys_error ("refusing symbolic-link directory: " ^ path))
+    | Some _ -> raise (Sys_error (path ^ " is not a directory"))
+    | None ->
+        ensure_directory (Filename.dirname path);
+        begin try Unix.mkdir path 0o700
+        with Unix.Unix_error (Unix.EEXIST, _, _) ->
+          begin match lstat path with
+          | Some stat when stat.Unix.st_kind = Unix.S_DIR -> ()
+          | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+              raise (Sys_error ("refusing symbolic-link directory: " ^ path))
+          | _ -> raise (Sys_error (path ^ " is not a directory"))
+          end
+        end
 
 let layout workspace =
   [
@@ -86,43 +97,76 @@ let layout workspace =
     workspace.generated;
   ]
 
-let atomic_write_json path json =
-  let temporary = path ^ ".tmp" in
-  let channel =
-    open_out_gen
-      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
-      0o600 temporary
+let require_managed_directory path =
+  match lstat path with
+  | Some stat when stat.Unix.st_kind = Unix.S_DIR ->
+      if stat.Unix.st_uid <> Unix.geteuid () then
+        raise
+          (Sys_error
+             ("workspace directory is not owned by the current user: " ^ path));
+      if stat.Unix.st_perm land 0o022 <> 0 then
+        raise
+          (Sys_error
+             ("workspace directory must not be group/other writable: " ^ path))
+  | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+      raise (Sys_error ("refusing symbolic-link workspace directory: " ^ path))
+  | Some _ -> raise (Sys_error ("workspace path is not a directory: " ^ path))
+  | None -> raise (Sys_error ("workspace directory is unavailable: " ^ path))
+
+let with_atomic_output path write =
+  let directory = Filename.dirname path in
+  ensure_directory directory;
+  let prefix = Filename.basename path ^ ".tmp-" in
+  let temporary, channel =
+    Filename.open_temp_file ~temp_dir:directory prefix ""
   in
-  Fun.protect
-    ~finally:(fun () -> close_out_noerr channel)
-    (fun () ->
+  Unix.chmod temporary 0o600;
+  try
+    Fun.protect
+      ~finally:(fun () -> close_out_noerr channel)
+      (fun () ->
+        write channel;
+        flush channel;
+        Unix.fsync (Unix.descr_of_out_channel channel));
+    Unix.rename temporary path
+  with exn ->
+    (try Sys.remove temporary with Sys_error _ -> ());
+    raise exn
+
+let atomic_write_json path json =
+  with_atomic_output path (fun channel ->
       Yojson.Safe.pretty_to_channel channel json;
-      output_char channel '\n';
-      flush channel);
-  Unix.rename temporary path
+      output_char channel '\n')
 
 let workspace_metadata_path workspace =
   Filename.concat workspace.root "workspace.json"
 
 let ensure_workspace_metadata workspace =
   let path = workspace_metadata_path workspace in
-  if not (Sys.file_exists path) then
-    atomic_write_json path
-      (`Assoc
-         [
-           ("schema_version", `Int 1);
-           ("workspace_name", `String workspace.name);
-           ("owner_model", `String "user-owned-downstream");
-           ("upstream_project", `String "centl");
-           ("created_by", `String "CENTL-SCi v0.0.2-Caramels+");
-           ( "assurance_policy",
-             `String
-               "local extensions never silently inherit verified-core assurance"
-           );
-         ])
+  match lstat path with
+  | None ->
+      atomic_write_json path
+        (`Assoc
+           [
+             ("schema_version", `Int 1);
+             ("workspace_name", `String workspace.name);
+             ("owner_model", `String "user-owned-downstream");
+             ("upstream_project", `String "centl");
+             ("created_by", `String "CENTL-SCi v0.0.2-Caramels");
+             ( "assurance_policy",
+               `String
+                 "local extensions never silently inherit verified-core \
+                  assurance" );
+           ])
+  | Some stat when stat.Unix.st_kind = Unix.S_REG -> ()
+  | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+      raise (Sys_error ("refusing symbolic-link workspace metadata: " ^ path))
+  | Some _ ->
+      raise (Sys_error ("workspace metadata is not a regular file: " ^ path))
 
 let ensure workspace =
   List.iter ensure_directory (layout workspace);
+  List.iter require_managed_directory (layout workspace);
   ensure_workspace_metadata workspace
 
 let revision_path workspace = Filename.concat workspace.config "revision"
@@ -131,15 +175,24 @@ let revision_log_path workspace =
   Filename.concat workspace.history "revisions.jsonl"
 
 let read_revision workspace =
-  try
-    let channel = open_in (revision_path workspace) in
-    Fun.protect
-      ~finally:(fun () -> close_in_noerr channel)
-      (fun () ->
-        match int_of_string_opt (input_line channel |> String.trim) with
-        | Some value when value >= 0 -> value
-        | _ -> 0)
-  with Sys_error _ | End_of_file -> 0
+  let path = revision_path workspace in
+  match lstat path with
+  | None -> 0
+  | Some stat when stat.Unix.st_kind = Unix.S_REG ->
+      begin try
+        let channel = open_in path in
+        Fun.protect
+          ~finally:(fun () -> close_in_noerr channel)
+          (fun () ->
+            match int_of_string_opt (input_line channel |> String.trim) with
+            | Some value when value >= 0 -> value
+            | _ -> 0)
+      with Sys_error _ | End_of_file -> 0
+      end
+  | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+      raise (Sys_error ("refusing symbolic-link workspace revision: " ^ path))
+  | Some _ ->
+      raise (Sys_error ("workspace revision is not a regular file: " ^ path))
 
 let write_all channel text =
   output_string channel text;
@@ -148,24 +201,21 @@ let write_all channel text =
 let write_revision workspace revision =
   ensure workspace;
   let path = revision_path workspace in
-  let temporary = path ^ ".tmp" in
-  let channel =
-    open_out_gen
-      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
-      0o600 temporary
-  in
-  Fun.protect
-    ~finally:(fun () -> close_out_noerr channel)
-    (fun () -> write_all channel (string_of_int revision ^ "\n"));
-  Unix.rename temporary path
+  with_atomic_output path (fun channel ->
+      write_all channel (string_of_int revision ^ "\n"))
 
 let record_revision workspace revision =
   ensure workspace;
+  let path = revision_log_path workspace in
+  begin match lstat path with
+  | None -> ()
+  | Some stat when stat.Unix.st_kind = Unix.S_REG -> ()
+  | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+      raise (Sys_error ("refusing symbolic-link revision log: " ^ path))
+  | Some _ -> raise (Sys_error ("revision log is not a regular file: " ^ path))
+  end;
   let channel =
-    open_out_gen
-      [ Open_wronly; Open_creat; Open_append; Open_text ]
-      0o600
-      (revision_log_path workspace)
+    open_out_gen [ Open_wronly; Open_creat; Open_append; Open_text ] 0o600 path
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
@@ -175,7 +225,7 @@ let record_revision workspace revision =
           [
             ("revision", `Int revision);
             ("timestamp_unix", `Float (Unix.gettimeofday ()));
-            ("actor", `String "CENTL-SCi v0.0.2-Caramels+");
+            ("actor", `String "CENTL-SCi v0.0.2-Caramels");
             ("scope", `String "local-downstream-workspace");
           ]
       in

@@ -132,30 +132,6 @@ let test_conversion_runtime () =
   Alcotest.(check string) "exact conversion" "1" (string "result" physics);
   Alcotest.(check bool) "exact" true (bool "exact" physics)
 
-let test_runtime_cache_is_warm_and_revision_aware () =
-  let cache = Centl_sci_runtime.create_cache ~capacity:4 () in
-  let core_state = Centl_protocol.create () in
-  let ir =
-    parse
-      {|{"schema_version":1,"domain":"mathematics","problem_class":"exact_expression","operation":"compute","assumptions":[],"expression":"1 + 1"}|}
-  in
-  ignore (Centl_sci_runtime.execute_cached ~cache ~core_state ir);
-  ignore (Centl_sci_runtime.execute_cached ~cache ~core_state ir);
-  let hits, misses, entries = Centl_sci_runtime.cache_stats cache in
-  Alcotest.(check int) "warm hit" 1 hits;
-  Alcotest.(check int) "cold miss" 1 misses;
-  Alcotest.(check int) "cached entry" 1 entries;
-  let defined =
-    Centl_protocol.handle_line core_state
-      {|{"version":1,"op":"define","expression":"cache_probe = 2"}|}
-  in
-  Alcotest.(check bool) "definition accepted" true (bool "ok" defined);
-  ignore (Centl_sci_runtime.execute_cached ~cache ~core_state ir);
-  let hits, misses, entries = Centl_sci_runtime.cache_stats cache in
-  Alcotest.(check int) "revision keeps prior hit count" 1 hits;
-  Alcotest.(check int) "revision miss" 2 misses;
-  Alcotest.(check int) "revision-distinct entries" 2 entries
-
 let test_unsupported_has_no_execution () =
   let ir =
     parse
@@ -246,8 +222,6 @@ let () =
           Alcotest.test_case "exact computation" `Quick test_compute_runtime;
           Alcotest.test_case "equation solve" `Quick test_solve_runtime;
           Alcotest.test_case "unit conversion" `Quick test_conversion_runtime;
-          Alcotest.test_case "runtime cache revision awareness" `Quick
-            test_runtime_cache_is_warm_and_revision_aware;
           Alcotest.test_case "unsupported" `Quick
             test_unsupported_has_no_execution;
         ] );

@@ -42,7 +42,7 @@ let test_status_collects_local_state () =
       | Ok _ -> ()
       end;
       let status = Centl_sci_status.collect () in
-      Alcotest.(check string) "version" "0.0.2-Caramels+" status.version;
+      Alcotest.(check string) "version" "0.0.2-Caramels" status.version;
       Alcotest.(check (option string))
         "workspace" (Some root) status.workspace_root;
       Alcotest.(check bool)
@@ -55,7 +55,7 @@ let test_status_collects_local_state () =
 let test_status_json_never_promotes_assurance () =
   let status : Centl_sci_status.t =
     {
-      version = "0.0.2-Caramels+";
+      version = "0.0.2-Caramels";
       platform = "unix/linux-reference";
       workspace_root = None;
       workspace_revision = None;
@@ -77,7 +77,7 @@ let test_status_json_never_promotes_assurance () =
 let test_status_render_names_gates () =
   let status : Centl_sci_status.t =
     {
-      version = "0.0.2-Caramels+";
+      version = "0.0.2-Caramels";
       platform = "unix/linux-reference";
       workspace_root = None;
       workspace_revision = None;

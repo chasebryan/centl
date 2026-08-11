@@ -5,6 +5,12 @@ native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is
 optional for ordinary development but required before merging mathematical
 changes.
 
+CENTL uses three long-lived branches with different responsibilities. Read
+[`docs/RELEASE-POLICY.md`](docs/RELEASE-POLICY.md) before choosing a pull-request
+target. In short: experimental work normally matures on `mirage`, only qualified
+stable work belongs on `oasis`, and `main` is the comprehensive developer/research
+distribution rather than the stable-product authority.
+
 If any part of that stack is unfamiliar, start with the
 [manual contributor onboarding](docs/ONBOARDING.md). It provides a staged OCaml,
 F*, rigorous-numerics, protocol, testing, and source-code curriculum with
@@ -153,15 +159,28 @@ make differential-test
 The suite compares CENTL's structured exact results with Nemo. Its random cases
 use fixed seeds, so failures are reproducible.
 
-## Pull requests
+## Pull requests and branch targets
 
-Open pull requests against `main`. Include the behavior being changed and the
-commands used to validate it. Pull requests run one fast Linux verification,
-quality, native-test, and Julia/Nemo job. Because `make quality` includes the
-integrity gate, source SHA-256 verification and preservation-pin consistency are
-part of the normal pull-request path rather than an optional release-only step.
-Full native packaging remains on `main`, version tags, and manual
-release-workflow runs.
+Choose the target branch according to the maturity and purpose of the change:
+
+- **`mirage`** is the normal target for experimental features, prototypes,
+  research, speculative mathematics, architecture exploration, and other work
+  that is not yet claiming stable-product quality.
+- **`oasis`** is for release hardening, qualification repairs, and deliberately
+  prepared promotions that are ready to satisfy the complete Oasis gate.
+- **`main`** is for repository-wide integration, documentation, tooling, or work
+  whose purpose is the comprehensive developer/research distribution.
+
+Do not target `oasis` merely to develop a feature. A change that originates in
+Mirage must satisfy the full Oasis qualification when it is promoted, regardless
+of what lighter development checks it previously passed.
+
+Include the behavior being changed and the commands used to validate it in every
+pull request. CI is branch-aware: Mirage receives development-oriented checks,
+Oasis receives the complete release qualification gate, and main receives
+integration checks appropriate to the comprehensive source tree. Oasis-only
+release qualification is intentionally not a universal requirement for every
+branch.
 
 ## Developer Certificate of Origin
 

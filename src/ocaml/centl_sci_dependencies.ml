@@ -224,7 +224,7 @@ let to_json report =
   `Assoc
     [
       ("schema_version", `Int 1);
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("valid", `Bool report.valid);
       ( "issues",
         `List (List.map (fun issue -> `String (issue_text issue)) report.issues)

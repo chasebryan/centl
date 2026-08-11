@@ -2,21 +2,19 @@ name: Installer release-source independence
 
 on:
   pull_request:
+    branches:
+      - oasis
     paths:
       - "install"
-      - "install.ps1"
       - "scripts/install-interface-check.py"
-      - "scripts/install-interface-check.ps1"
       - "docs/INSTALL.md"
       - ".github/workflows/installer-release-source.yml"
   push:
     branches:
-      - main
+      - oasis
     paths:
       - "install"
-      - "install.ps1"
       - "scripts/install-interface-check.py"
-      - "scripts/install-interface-check.ps1"
       - "docs/INSTALL.md"
       - ".github/workflows/installer-release-source.yml"
 
@@ -24,8 +22,8 @@ permissions:
   contents: read
 
 jobs:
-  unix:
-    name: Test Unix static release root
+  linux:
+    name: Test GNU/Linux static release root
     runs-on: ubuntu-24.04
     steps:
       - name: Check out CENTL
@@ -34,15 +32,3 @@ jobs:
           persist-credentials: false
       - name: Exercise installer
         run: python3 scripts/install-interface-check.py
-
-  windows:
-    name: Test Windows static release root
-    runs-on: windows-2022
-    steps:
-      - name: Check out CENTL
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Exercise installer
-        shell: pwsh
-        run: .\scripts\install-interface-check.ps1

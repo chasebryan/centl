@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Require the mandatory hosted Oasis checks to exist, be authentic, and succeed.
+"""Require mandatory hosted Oasis checks to exist, be authentic, and succeed.
 
-The general final-state gate rejects visible failures, but a release cannot earn
-Oasis status merely because GitHub returned an empty, incomplete, or look-alike
-check set. This module fail-closes on the checks produced by the authoritative
-Oasis qualification workflow and requires the newest run of each check to be a
+A release cannot earn Oasis status merely because GitHub returned an empty,
+incomplete, or look-alike check set. This module fail-closes on the authoritative
+qualification and security jobs and requires the newest run of each check to be a
 completed success for the exact candidate commit, reported by GitHub Actions.
 """
 
@@ -21,6 +20,7 @@ from typing import Sequence
 REQUIRED_CHECKS = (
     "Adversarial engine self-test",
     "Full stable-product convergence",
+    "Release security state",
 )
 REQUIRED_APP_SLUG = "github-actions"
 

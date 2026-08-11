@@ -21,7 +21,7 @@ let collect () =
   match Centl_sci_workspace.default () with
   | None ->
       {
-        version = "0.0.2-Caramels+";
+        version = "0.0.2-Caramels";
         platform = platform ();
         workspace_root = None;
         workspace_revision = None;
@@ -40,28 +40,23 @@ let collect () =
       let extensions = Centl_sci_extensions.list workspace in
       let enabled_native_extensions =
         extensions
-        |> List.filter (fun (extension : Centl_sci_extensions.manifest) ->
+        |> List.filter (fun extension ->
             extension.Centl_sci_extensions.enabled
             && extension.kind = "native_centl")
-        |> List.map (fun (extension : Centl_sci_extensions.manifest) ->
-            extension.name)
+        |> List.map (fun extension -> extension.name)
       in
       let disabled_extensions =
         extensions
-        |> List.filter (fun (extension : Centl_sci_extensions.manifest) ->
-            not extension.enabled)
+        |> List.filter (fun extension -> not extension.enabled)
         |> List.length
       in
       let audit = Centl_sci_audit.collect workspace in
       {
-        version = "0.0.2-Caramels+";
+        version = "0.0.2-Caramels";
         platform = platform ();
         workspace_root = Some workspace.root;
         workspace_revision = Some (Centl_sci_workspace.read_revision workspace);
-        workspace_health =
-          Some
-            (if Centl_sci_audit.healthy audit then "healthy"
-             else "attention_required");
+        workspace_health = Some (Centl_sci_audit.health audit);
         enabled_native_extensions;
         disabled_extensions;
         packages = List.length (Centl_sci_package.list workspace);

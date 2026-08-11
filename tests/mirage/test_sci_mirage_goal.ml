@@ -110,6 +110,39 @@ let test_gap_analysis_prefers_existing_composition () =
             "diff capability matched" true
             (List.mem "diff" gap.capability_matches))
 
+let test_explicit_native_definition_requires_staging () =
+  let root = temp_dir "centl-mirage-native-definition-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
+      Centl_sci_workspace.ensure workspace;
+      let graph =
+        Centl_sci_mirage_goal.build workspace
+          [
+            {
+              Centl_sci_mirage_goal.id = 1;
+              kind = "DIRECTIVE";
+              text = "create a value named mirage_tau equal to 2*pi";
+              start_line = 1;
+              end_line = 1;
+            };
+          ]
+      in
+      match find_gap 1 graph with
+      | None -> Alcotest.fail "expected a gap classification"
+      | Some gap ->
+          Alcotest.(check string)
+            "a requested new binding is not mistaken for an already satisfied \
+             composition"
+            "EXTENSION_REQUIRED"
+            (Centl_sci_mirage_goal.gap_status_text gap.status);
+          Alcotest.(check bool)
+            "generation capability may still be reused" true
+            (List.mem "English-to-CENTL extension" gap.capability_matches))
+
 let test_unknown_capability_requires_extension () =
   let root = temp_dir "centl-mirage-extension-" in
   Fun.protect
@@ -182,6 +215,8 @@ let () =
             test_unrelated_negative_requirement_does_not_conflict;
           Alcotest.test_case "reuse existing capability" `Quick
             test_gap_analysis_prefers_existing_composition;
+          Alcotest.test_case "explicit native definition" `Quick
+            test_explicit_native_definition_requires_staging;
           Alcotest.test_case "unknown capability" `Quick
             test_unknown_capability_requires_extension;
           Alcotest.test_case "persist graph" `Quick

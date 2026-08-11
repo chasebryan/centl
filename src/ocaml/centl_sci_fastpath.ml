@@ -589,33 +589,27 @@ let interpret problem =
   match Centl_sci_mechanics.interpret problem with
   | Some _ as result -> result
   | None ->
-      begin match Centl_sci_concrete.interpret problem with
+      begin match unit_conversion problem with
       | Some _ as result -> result
       | None ->
-          begin match unit_conversion problem with
+          begin match physical_constant problem with
           | Some _ as result -> result
           | None ->
-              begin match physical_constant problem with
+              begin match closed_verification problem with
               | Some _ as result -> result
               | None ->
-                  begin match closed_verification problem with
+                  begin match polynomial_equation problem with
                   | Some _ as result -> result
                   | None ->
-                      begin match polynomial_equation problem with
+                      begin match Centl_sci_spoken_poly.interpret problem with
                       | Some _ as result -> result
                       | None ->
-                          begin match
-                            Centl_sci_spoken_poly.interpret problem
-                          with
+                          begin match symbolic_transform problem with
                           | Some _ as result -> result
                           | None ->
-                              begin match symbolic_transform problem with
+                              begin match approximation problem with
                               | Some _ as result -> result
-                              | None ->
-                                  begin match approximation problem with
-                                  | Some _ as result -> result
-                                  | None -> exact_expression problem
-                                  end
+                              | None -> exact_expression problem
                               end
                           end
                       end

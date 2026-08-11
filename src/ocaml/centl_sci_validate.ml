@@ -150,7 +150,7 @@ let to_json report =
   `Assoc
     [
       ("schema_version", `Int 1);
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("name", `String report.name);
       ("kind", `String report.kind);
       ("valid", `Bool report.valid);

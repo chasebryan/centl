@@ -12,10 +12,9 @@ receipts, stamped build identity, and the reusable `centl-check` Action are
 published. Protocol version 1 remains stable with documented compatibility
 operations.
 
-CENTL-SCi `v0.0.2-Caramels+` is the active interaction/self-extension
-development line. `CENTL OASIS` is the stable release line and `CENTL MIRAGE`
-is the experimental line. GNU/Linux is the supported reference platform and the
-only release-blocking operating system for this series.
+CENTL-SCi `v0.0.2-Caramels` is the active interaction/self-extension development
+line. GNU/Linux is the supported reference platform and the only release-blocking
+operating system for this series.
 
 ## 0. Foundation
 

@@ -52,7 +52,8 @@ release/security state required by the engine.
 
 An empty hosted check set is a failure. A pending, skipped, neutral, failed, or
 look-alike mandatory check is a failure. Mandatory hosted checks must be produced
-by GitHub Actions and link to an Actions run.
+by GitHub Actions and link to an Actions run. For v0.14.0, the hosted proof also
+includes the dedicated release-security state check.
 
 ## Automatic repair boundary
 
@@ -74,7 +75,7 @@ version-specific Oasis status must agree. The engine refuses to infer which one 
 "probably" correct. This prevents a partial promotion from acquiring a release
 identity that the stable tree has not earned.
 
-## Evidence
+## Evidence and publication
 
 Candidate evidence is written beneath:
 
@@ -82,6 +83,10 @@ Candidate evidence is written beneath:
 _build/oasis/<run-id>/
 ```
 
-The directory contains the atomic JSON report and complete gate logs. A final
-Oasis declaration should retain the exact commit identity together with the
+The hosted qualification also preserves the exact release archive produced by a
+successful `oasis` push. Tag publication is allowed to consume those already
+qualified bytes only after exact branch, tag, hosted-check, and release-state
+identity is proven. The release workflow does not perform a new publication build.
+
+A final Oasis declaration should retain the exact commit identity together with the
 applicable hosted and local evidence.

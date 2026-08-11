@@ -187,7 +187,7 @@ let to_json (report : t) =
   `Assoc
     [
       ("schema_version", `Int 1);
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("workspace", `String report.workspace_root);
       ("revision", `Int report.revision);
       ( "health",
