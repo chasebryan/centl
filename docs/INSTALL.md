@@ -10,10 +10,14 @@ validation, packaging, installer, and release platform for CENTL-SCi and the
 Caramels series. macOS and Windows are unsupported and are not release-blocking
 targets.
 
+For stable-product installation, the authoritative installer source is the
+`oasis` branch. Published release archives are the exact bytes that completed
+the Oasis qualification and publication gate for their release commit.
+
 ## Linux
 
 ```sh
-curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install
 ```
 
