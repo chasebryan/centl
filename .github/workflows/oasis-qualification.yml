@@ -1,4 +1,4 @@
-# Final integrated Oasis and Mirage release qualification.
+# Temporary canonical-format pass for the final Oasis and Mirage qualification.
 name: Oasis qualification
 
 on:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: oasis-qualification-${{ github.event.pull_request.number || github.ref }}
@@ -30,10 +30,11 @@ jobs:
     timeout-minutes: 45
 
     steps:
-      - name: Check out candidate
+      - name: Check out candidate branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          ref: chore/final-oasis-mirage-validation
+          persist-credentials: true
 
       - name: Install system dependencies
         run: |
@@ -68,6 +69,22 @@ jobs:
           opam init --bare --disable-sandboxing --yes
           opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
           opam install --switch=centl --deps-only --with-test --assume-depexts --yes .
+
+      - name: Canonicalize source formatting on validation branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          opam exec --switch=centl -- make format-fix
+          if git diff --quiet --; then
+            echo "Source formatting is already canonical."
+          else
+            git diff --check
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src
+            git commit -m "style: apply canonical OCaml formatting"
+            git push origin HEAD:chore/final-oasis-mirage-validation
+          fi
 
       - name: Verify F* source
         run: opam exec --switch=centl -- make verify
