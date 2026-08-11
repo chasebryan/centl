@@ -117,8 +117,10 @@ let bundle_header path =
         (assoc "schema_version" json, assoc "format" json, assoc "includes_verified_core" json)
       with
       | Some (`Int 1), Some (`String "centl-caramels-workspace-bundle"),
-        Some (`Bool false) -> Ok ()
-      | _ -> Error "workspace bundle metadata is not a recognized Caramels bundle"
+        Some (`Bool false) ->
+          Ok ()
+      | _ ->
+          Error "workspace bundle metadata is not a recognized Caramels bundle"
     with Yojson.Json_error message | Sys_error message -> Error message
 
 let rec reject_symlinks path =
@@ -138,7 +140,9 @@ let rec reject_symlinks path =
         in
         loop entries
     | Unix.S_REG -> Ok ()
-    | _ -> Error ("workspace bundle contains an unsupported filesystem object: " ^ path)
+    | _ ->
+        Error
+          ("workspace bundle contains an unsupported filesystem object: " ^ path)
   with Unix.Unix_error (_, _, message) | Sys_error message -> Error message
 
 let safe_relative_source source =
@@ -165,13 +169,15 @@ let manifest_names workspace =
       | filename :: rest ->
           let name = Filename.chop_suffix filename ".json" in
           begin match Centl_sci_extensions.read_manifest workspace name with
-          | Error message -> Error ("invalid extension manifest " ^ filename ^ ": " ^ message)
+          | Error message ->
+              Error ("invalid extension manifest " ^ filename ^ ": " ^ message)
           | Ok manifest when not (safe_relative_source manifest.source) ->
               Error
                 (Printf.sprintf
                    "bundle extension %s has a source path outside the normalized relative bundle namespace: %s"
                    manifest.name manifest.source)
-          | Ok manifest when manifest.enabled && manifest.kind <> "native_centl" ->
+          | Ok manifest when manifest.enabled && manifest.kind <> "native_centl"
+            ->
               Error
                 (Printf.sprintf
                    "bundle extension %s is enabled but has non-native kind %s; Caramels will not import it as active"
@@ -186,7 +192,8 @@ let validate_extensions workspace names =
     | [] -> Ok ()
     | name :: rest ->
         begin match Centl_sci_validate.validate workspace name with
-        | Error message -> Error ("could not validate extension " ^ name ^ ": " ^ message)
+        | Error message ->
+            Error ("could not validate extension " ^ name ^ ": " ^ message)
         | Ok report when report.valid -> loop rest
         | Ok report ->
             Error
@@ -233,7 +240,7 @@ let validate_packages workspace extension_names =
   loop (package_names workspace)
 
 let validate_bundle path =
-  if not (Sys.file_exists path) || not (Sys.is_directory path) then
+  if (not (Sys.file_exists path)) || not (Sys.is_directory path) then
     Error ("workspace bundle directory does not exist: " ^ path)
   else
     match reject_symlinks path with
@@ -254,7 +261,9 @@ let validate_bundle path =
                     begin match validate_dependencies bundle_workspace with
                     | Error _ as error -> error
                     | Ok () ->
-                        begin match validate_packages bundle_workspace names with
+                        begin match
+                          validate_packages bundle_workspace names
+                        with
                         | Error _ as error -> error
                         | Ok () -> Ok ()
                         end
@@ -285,10 +294,14 @@ let import workspace path =
     Error "workspace import source must not be the active workspace itself"
   else
     match validate_bundle path with
-    | Error message -> Error ("workspace import rejected before mutation: " ^ message)
+    | Error message ->
+        Error ("workspace import rejected before mutation: " ^ message)
     | Ok () ->
         begin match Centl_sci_snapshot.create workspace with
-        | Error message -> Error ("could not snapshot the current workspace before import: " ^ message)
+        | Error message ->
+            Error
+              ("could not snapshot the current workspace before import: "
+             ^ message)
         | Ok snapshot ->
             try
               replace_surface workspace path;
@@ -297,7 +310,7 @@ let import workspace path =
                 {
                   message =
                     Printf.sprintf
-                      "Imported a validated Caramels downstream workspace bundle.\nSource: %s\nWorkspace revision: %d\nThe previous downstream state is available through `undo`.\nVerified CENTL core, workspace identity, history, and configuration were not replaced."
+                      "Imported a validated Caramels downstream workspace bundle.\nSource: %s\nWorkspace revision: %d\nThe previous downstream state is available through `undo`.\nVerified CENTL core, workspace identity, configuration, and history are not replaced by import."
                       path revision;
                   changed = true;
                   revision = Some revision;
@@ -307,12 +320,15 @@ let import workspace path =
               | Ok revision ->
                   Error
                     (Printf.sprintf
-                       "workspace import failed during mutation and was rolled back without advancing the workspace revision (still %d): %s"
+                       "workspace import failed during mutation and was rolled \
+                        back without advancing the workspace revision (still \
+                        %d): %s"
                        revision message)
               | Error rollback_message ->
                   Error
                     (Printf.sprintf
-                       "workspace import failed during mutation: %s; automatic rollback also failed: %s"
+                       "workspace import failed during mutation: %s; automatic \
+                        rollback also failed: %s"
                        message rollback_message)
               end
         end
