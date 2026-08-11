@@ -278,7 +278,7 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
             "the existing BUILD planner identifies this objective as a trusted/core implementation change" )
       | _ when explicitly_materializable_request cell.text ->
           ( Extension_required,
-            "the objective requests a concrete native CENTL definition that MIRAGE can stage deterministically; capability overlap supplies implementation machinery or ingredients but does not satisfy the requested new binding" )
+            "the objective requests a concrete native CENTL definition that MIRAGE can stage deterministically; capability overlap supplies implementation machinery or ingredients but does not satisfy the request" )
       | _ when is_alias_request cell.text && matches <> [] ->
           ( Alias_or_wrapper,
             "existing capabilities appear reusable; the requested semantic delta is primarily naming or wrapping" )
@@ -445,18 +445,17 @@ let analyze workspace spec_path =
   match read_spec spec_path with
   | Error _ as error -> error
   | Ok json ->
-      begin
-        match parse_cells json with
-        | Error _ as error -> error
-        | Ok cells ->
-            let graph = build workspace cells in
-            let path = output_path spec_path in
-            begin
-              try
-                Centl_sci_workspace.atomic_write_json path (to_json graph);
-                Ok (path, graph)
-              with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
-            end
+      begin match parse_cells json with
+      | Error _ as error -> error
+      | Ok cells ->
+          let graph = build workspace cells in
+          let path = output_path spec_path in
+          begin try
+            Centl_sci_workspace.atomic_write_json path (to_json graph);
+            Ok (path, graph)
+          with Sys_error message | Unix.Unix_error (_, _, message) ->
+            Error message
+          end
       end
 
 let render_gap (gap : gap) =
