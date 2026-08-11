@@ -10,17 +10,15 @@ CENTL is exact-first mathematics, physics, and scientific computation for GNU/Li
 
 ## Current release status
 
-**CENTL v0.14.0 is an Oasis candidate.**
-
-This branch contains the integrated v0.14.0 consolidation baseline and is undergoing the complete Oasis qualification process. The declaration
-
 > **CENTL v0.14.0 is an Oasis release.**
 
-is deliberately withheld until the exact final `oasis` commit has passed every applicable verification, hardening, security, packaging, installation, hosted-proof, release-identity, and publication gate.
+This is the first CENTL release prepared under the complete repeatable Oasis standard: repository reconciliation, stable-boundary review, mathematical verification, deterministic and adversarial testing, security convergence, package and installer validation, exact hosted proof, and publication of the already-qualified release bytes.
+
+The declaration belongs to the exact source commit that passes the final Oasis gate. This release branch is intentionally tested **before** it becomes authoritative; it may be promoted to `oasis` only without changing that green SHA. The `v0.14.0` tag and published archive must then bind to that same commit.
 
 Oasis is not a codename or a SemVer suffix. It is a repeatable quality classification. Stable tags remain ordinary versions such as `v0.14.0`.
 
-See [The CENTL Oasis Release Standard](docs/OASIS.md) and [CENTL release and branch policy](docs/RELEASE-POLICY.md).
+See [The CENTL Oasis Release Standard](docs/OASIS.md), [Oasis promotion](docs/OASIS-PROMOTION.md), and [CENTL release and branch policy](docs/RELEASE-POLICY.md).
 
 ## What `oasis` means
 
@@ -138,7 +136,7 @@ The public qualification command is:
 
 The engine is fail-closed. It checks the executing pinned toolchain, release-metadata coherence, F* verification and fresh extraction identity, formatting and repository quality, source integrity and supply-chain pins, native and Python suites, mandatory sanitizer-backed hardening, fuzz/metamorphic/performance coverage, Julia/Nemo differential validation, CENTL-SCi interface behavior, release packaging, hostile archive structure, isolated installation, and durable evidence generation.
 
-Final release identity additionally requires the exact authoritative `oasis` head, successful mandatory hosted Oasis checks, the exact SemVer tag, and the final release-state checks defined by project policy.
+The final v0.14.0 release path additionally requires authentic successful hosted jobs named `Adversarial engine self-test`, `Full stable-product convergence`, and `Release security state` on the **exact final SHA**. The same successful run preserves the archive that is eligible for publication. The release latch refuses to rebuild substitute bytes.
 
 A green badge alone is not an Oasis declaration if known release-blocking work remains.
 
@@ -167,8 +165,10 @@ Contribution targeting is defined in [CONTRIBUTING.md](CONTRIBUTING.md) and [doc
 ## Documentation
 
 - [Oasis release standard](docs/OASIS.md)
+- [Oasis convergence engine](docs/OASIS-ENGINE.md)
+- [Oasis promotion and publication](docs/OASIS-PROMOTION.md)
 - [Branch and release policy](docs/RELEASE-POLICY.md)
-- [v0.14.0 release candidate notes](docs/releases/0.14.0.md)
+- [v0.14.0 release notes](docs/releases/0.14.0.md)
 - [Repository map](docs/REPOSITORY-MAP.md)
 - [Security policy and threat boundaries](SECURITY.md)
 - [Installation](docs/INSTALL.md)
