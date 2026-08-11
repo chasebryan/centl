@@ -122,6 +122,29 @@ jobs:
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$CANDIDATE_SHA" \
             --data "$payload" >/dev/null
 
+  security-preflight:
+    name: Release security access and state preflight
+    needs: start
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: read
+      vulnerability-alerts: read
+    steps:
+      - name: Check out trusted security control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Require trusted control-plane identity
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Require release security APIs are readable and clear
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OASIS_SECRET_SCANNING_TOKEN: ${{ secrets.OASIS_SECRET_SCANNING_TOKEN }}
+        run: python3 .github/scripts/oasis-security-state.py
+
   caravan:
     name: Identity, integrity, catalog, policy, and outbound transport gates
     needs: start
@@ -190,6 +213,7 @@ jobs:
     name: Candidate full stable-product convergence
     needs:
       - start
+      - security-preflight
       - caravan
       - self-test
     runs-on: ubuntu-24.04
@@ -267,20 +291,22 @@ jobs:
     permissions:
       contents: read
       security-events: read
+      vulnerability-alerts: read
     env:
       HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
     steps:
-      - name: Check out exact candidate SHA
+      - name: Check out trusted security control plane
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ needs.start.outputs.candidate_sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Require checkout identity
-        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - name: Require trusted control-plane identity
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
       - name: Require clear release-blocking GitHub security state
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/oasis-security-state.py --root "$PWD"
+          OASIS_SECRET_SCANNING_TOKEN: ${{ secrets.OASIS_SECRET_SCANNING_TOKEN }}
+        run: python3 .github/scripts/oasis-security-state.py
 
   attest:
     name: Attest exact-SHA Oasis results
@@ -289,6 +315,7 @@ jobs:
       - start
       - caravan
       - self-test
+      - security-preflight
       - converge
       - security
     runs-on: ubuntu-24.04
@@ -299,6 +326,7 @@ jobs:
     env:
       HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
       SELF_RESULT: ${{ needs.self-test.result }}
+      SECURITY_PREFLIGHT_RESULT: ${{ needs.security-preflight.result }}
       CONVERGE_RESULT: ${{ needs.converge.result }}
       SECURITY_RESULT: ${{ needs.security.result }}
     steps:
@@ -338,10 +366,14 @@ jobs:
               --data "$payload" >/dev/null
           }
           post_check "Adversarial engine self-test" "$SELF_RESULT"
+          post_check "Release security preflight" "$SECURITY_PREFLIGHT_RESULT"
           post_check "Full stable-product convergence" "$CONVERGE_RESULT"
           post_check "Release security state" "$SECURITY_RESULT"
 
-          if [ "$SELF_RESULT" = success ] && [ "$CONVERGE_RESULT" = success ] && [ "$SECURITY_RESULT" = success ]; then
+          if [ "$SELF_RESULT" = success ] && \
+             [ "$SECURITY_PREFLIGHT_RESULT" = success ] && \
+             [ "$CONVERGE_RESULT" = success ] && \
+             [ "$SECURITY_RESULT" = success ]; then
             state=success
             description="Exact-SHA Oasis qualification passed"
           else
@@ -358,5 +390,6 @@ jobs:
             --data "$payload" >/dev/null
 
           test "$SELF_RESULT" = success
+          test "$SECURITY_PREFLIGHT_RESULT" = success
           test "$CONVERGE_RESULT" = success
           test "$SECURITY_RESULT" = success
