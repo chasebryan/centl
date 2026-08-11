@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - oasis
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
     paths:
       - "install"
       - "scripts/install-interface-check.py"
@@ -24,11 +29,249 @@ permissions:
 jobs:
   linux:
     name: Test GNU/Linux static release root
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out CENTL
+      - name: Check out exact proposed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Exercise installer
         run: python3 scripts/install-interface-check.py
+
+  finalize-oasis:
+    name: Finalize qualified Oasis release
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+      statuses: write
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out exact qualified SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mark publication pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"pending","context":"centl/oasis-publication","description":"Qualified Oasis publication running","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null
+
+      - name: Require exact final Oasis identity and proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+
+          version=$(sed -n 's/^let value = "\([^"]*\)"$/\1/p' src/ocaml/centl_version.ml)
+          test -n "$version"
+          printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
+          printf 'TAG=v%s\n' "$version" >> "$GITHUB_ENV"
+
+          oasis_sha=$(git ls-remote origin refs/heads/oasis | awk 'NR == 1 { print $1 }')
+          if [ "$oasis_sha" != "$HEAD_SHA" ]; then
+            printf 'qualified PR head %s is not exact origin/oasis %s\n' \
+              "$HEAD_SHA" "${oasis_sha:-<missing>}" >&2
+            exit 1
+          fi
+
+          python3 scripts/oasis_required_checks.py --root "$PWD"
+
+          open_prs=$(gh api \
+            "repos/$GITHUB_REPOSITORY/pulls?state=open&base=oasis&per_page=100" \
+            --jq 'length')
+          if [ "$open_prs" != 0 ]; then
+            printf '%s open pull request(s) still target oasis\n' "$open_prs" >&2
+            exit 1
+          fi
+
+      - name: Resolve exact successful qualification artifact
+        id: qualification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/caravan-phase1.yml/runs?head_sha=$HEAD_SHA&event=pull_request&status=success&per_page=50" \
+            --jq '.workflow_runs[0].id // empty')
+          if [ -z "$run_id" ]; then
+            printf 'no successful exact-SHA Oasis qualification run exists for %s\n' "$HEAD_SHA" >&2
+            exit 1
+          fi
+
+          artifact_name="oasis-release-$HEAD_SHA"
+          artifact_count=$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts?per_page=100" \
+            --jq "[.artifacts[] | select(.name == \"$artifact_name\" and .expired == false)] | length")
+          if [ "$artifact_count" != 1 ]; then
+            printf 'expected exactly one unexpired %s artifact, found %s\n' \
+              "$artifact_name" "$artifact_count" >&2
+            exit 1
+          fi
+
+          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+          printf 'artifact_name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+
+      - name: Download exact qualified release bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.qualification.outputs.run_id }}
+          ARTIFACT_NAME: ${{ steps.qualification.outputs.artifact_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualified dist
+          gh run download "$RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "$ARTIFACT_NAME" \
+            --dir qualified
+
+          archive=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz' -print -quit)
+          checksum=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz.sha256' -print -quit)
+          test -n "$archive"
+          test -n "$checksum"
+          cp "$archive" dist/centl-linux-x86_64.tar.gz
+          cp "$checksum" dist/centl-linux-x86_64.tar.gz.sha256
+
+      - name: Revalidate qualified artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import tarfile
+
+          archive = pathlib.Path("dist/centl-linux-x86_64.tar.gz")
+          with tarfile.open(archive, "r:gz") as package:
+              version_member = package.extractfile("centl/VERSION")
+              manifest_member = package.extractfile("centl/BUILD_MANIFEST.json")
+              if version_member is None or manifest_member is None:
+                  raise SystemExit("qualified archive lacks release identity metadata")
+              packaged_version = version_member.read(256).decode("utf-8", "strict").strip()
+              manifest = json.loads(manifest_member.read())
+
+          if packaged_version != os.environ["VERSION"]:
+              raise SystemExit("qualified archive version mismatch")
+          if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
+              raise SystemExit("invalid qualified build manifest")
+          if manifest.get("semantic_version") != os.environ["VERSION"]:
+              raise SystemExit("qualified build-manifest version mismatch")
+          if manifest.get("commit") != os.environ["HEAD_SHA"]:
+              raise SystemExit("qualified build-manifest commit mismatch")
+          if (manifest.get("platform"), manifest.get("architecture")) != ("linux", "x86_64"):
+              raise SystemExit("qualified release target is not GNU/Linux x86_64")
+          if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
+              raise SystemExit("qualified verification attestation mismatch")
+          PY
+
+      - name: Create exact SemVer tag if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing=$(git ls-remote origin "refs/tags/$TAG" | awk 'NR == 1 { print $1 }')
+          if [ -n "$existing" ]; then
+            if [ "$existing" != "$HEAD_SHA" ]; then
+              printf '%s already points to %s, expected %s\n' "$TAG" "$existing" "$HEAD_SHA" >&2
+              exit 1
+            fi
+          else
+            gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/tags/$TAG" \
+              -f sha="$HEAD_SHA" >/dev/null
+          fi
+
+      - name: Publish exact qualified bytes if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              dist/centl-linux-x86_64.tar.gz \
+              dist/centl-linux-x86_64.tar.gz.sha256 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "CENTL $TAG" \
+              --notes-file "docs/releases/$VERSION.md"
+          fi
+
+      - name: Reverify published bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p published
+          gh release download "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'centl-linux-x86_64.tar.gz' \
+            --pattern 'centl-linux-x86_64.tar.gz.sha256' \
+            --dir published
+          (cd published && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
+          test "$(sha256sum dist/centl-linux-x86_64.tar.gz | awk '{print $1}')" = \
+               "$(sha256sum published/centl-linux-x86_64.tar.gz | awk '{print $1}')"
+
+      - name: Mark Oasis publication successful
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"success","context":"centl/oasis-publication","description":"Qualified Oasis release published and reverified","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null
+
+      - name: Mark Oasis publication failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"failure","context":"centl/oasis-publication","description":"Qualified Oasis publication failed","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null
