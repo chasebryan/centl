@@ -11,10 +11,31 @@ Exact values remain exact, approximations carry explicit justification, invalid 
 unsupported work stays visible, and semantic tooling is never allowed to overrule
 the mathematical evidence produced by CENTL itself.
 
-**Current consolidation candidate: CENTL v0.14.0.** It integrates the validated
-post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory into one
-reviewed baseline. The intermediate v0.13.0 development line was not formally
-published as a stable release.
+## Stable product authority
+
+This `main` branch is the **complete developer and research distribution** of CENTL.
+It contains the comprehensive codebase and may include experimental or
+Mirage-originated work that has not yet earned stable-product status.
+
+The [`oasis`](https://github.com/chasebryan/centl/tree/oasis) branch is the
+authoritative source for CENTL's standard product: stable release identity,
+recommended capabilities, supported installation claims, release qualification,
+and other flagship product statements come from Oasis.
+
+The [`mirage`](https://github.com/chasebryan/centl/tree/mirage) branch is the
+laboratory for active development, experiments, research, prototypes, and new
+features. Mirage intentionally does **not** have to satisfy every Oasis-only
+release gate while that work is still being developed.
+
+> **Oasis is a promotion state, not a property of every commit.**
+
+See [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md) for the canonical branch and
+release policy.
+
+**Current main-line consolidation candidate: CENTL v0.14.0.** It integrates the
+validated post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory
+into one reviewed developer/research baseline. The intermediate v0.13.0 development
+line was not formally published as a stable release.
 
 v0.14.0 is being qualified for an **Oasis declaration**. Oasis is not a codename:
 it is a repeatable release classification reserved for a CENTL release that has
@@ -33,12 +54,16 @@ CENTL combines five closely related pieces:
 
 ## Quick start
 
-CENTL is developed, validated, packaged, and released for **GNU/Linux**.
+For the standard product, install from the authoritative **Oasis** branch. CENTL is
+developed, validated, packaged, and released for **GNU/Linux**.
 
 ```sh
-curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install
 ```
+
+Developers and researchers who intentionally want the comprehensive tree should
+clone `main`; experimental work should be expected there and on `mirage`.
 
 If the installer adds `~/.local/bin` to your shell configuration, open a new
 terminal once. Then launch the scientific interface:
@@ -272,8 +297,9 @@ policy.
 
 ## Development
 
-Native releases are recommended for ordinary use. Development from source uses
-the pinned toolchain and verified F* extraction path on Linux:
+Native Oasis releases are recommended for ordinary use. Development and research
+from the complete `main` tree use the pinned toolchain and verified F* extraction
+path on Linux:
 
 ```sh
 scripts/bootstrap-opam
@@ -282,13 +308,15 @@ make test
 ```
 
 Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[CONTRIBUTING.md](CONTRIBUTING.md). Branch targeting and promotion rules are defined
+in [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
 
 The supported source-tree organization is documented in
 [docs/REPOSITORY-MAP.md](docs/REPOSITORY-MAP.md).
 
 ## Documentation
 
+- [Branch and release policy](docs/RELEASE-POLICY.md)
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
 - [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
