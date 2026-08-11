@@ -31,6 +31,30 @@ env:
   PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
 
 jobs:
+  convergence-start:
+    name: Publish convergence start
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Mark exact SHA pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"pending","context":"centl/oasis-convergence","description":"CENTL Oasis convergence running","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            --data "$payload" >/dev/null
+
   engine-self-test:
     name: Adversarial engine self-test
     runs-on: ubuntu-24.04
@@ -218,8 +242,9 @@ jobs:
             state=success
             description='CENTL Oasis convergence passed'
           fi
-          payload=$(printf '{"state":"%s","context":"centl/oasis-convergence","description":"%s"}' \
-            "$state" "$description")
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"%s","context":"centl/oasis-convergence","description":"%s","target_url":"%s"}' \
+            "$state" "$description" "$target")
           curl --fail --silent --show-error \
             --request POST \
             --header "Accept: application/vnd.github+json" \
