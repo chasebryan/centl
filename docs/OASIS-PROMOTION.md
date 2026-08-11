@@ -15,6 +15,8 @@ The full convergence runs the pinned proof/native/OCaml/Julia-Nemo/CARAVAN toolc
 
 A missing, skipped, neutral, pending, failed, or look-alike mandatory hosted check is not qualification.
 
+Once the final candidate is conflict-free, its qualifying synchronization is treated as the freeze point: no further source edit is admissible without creating a new candidate SHA and restarting the complete gate.
+
 ## 2. Unchanged promotion to `oasis`
 
 The final declaration candidate is not squash-merged or rebased after qualification. Once every mandatory exact-SHA check is successful, the authoritative `oasis` ref is fast-forwarded to the already-qualified commit **without changing its SHA**.
