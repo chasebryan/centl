@@ -4,7 +4,7 @@ Oasis promotion is deliberately bound to one exact source identity from final ca
 
 ## 1. Exact candidate proof
 
-A pull request targeting `oasis` enters the default-branch CARAVAN/Oasis qualification workflow when its relevant stable-boundary paths are changed. For an Oasis-targeted PR, that workflow checks out the **literal pull-request head SHA**, not GitHub's synthetic merge commit, and requires:
+A pull request targeting `oasis` enters the hardened exact-SHA target qualification path. The trusted workflow definition lives on the repository default branch, admits only a same-repository candidate authored by the repository owner, and executes candidate code with read-only repository permissions. For the Oasis candidate it checks out the **literal pull-request head SHA**, not GitHub's synthetic merge commit, and requires:
 
 - `Identity, integrity, catalog, policy, and outbound transport gates`;
 - `Adversarial engine self-test`;
@@ -12,6 +12,8 @@ A pull request targeting `oasis` enters the default-branch CARAVAN/Oasis qualifi
 - `Release security state`.
 
 The full convergence runs the pinned proof/native/OCaml/Julia-Nemo/CARAVAN toolchain and stamps the release build with that exact PR-head SHA. A successful run preserves the exact release archive, checksum, and Oasis evidence under artifact names containing the same source identity.
+
+Write authority is separated from candidate execution: only a post-qualification attestation job, which does not check out or execute candidate code, may publish the mandatory exact-SHA GitHub check attestations and final qualification status.
 
 A missing, skipped, neutral, pending, failed, or look-alike mandatory hosted check is not qualification.
 
