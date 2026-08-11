@@ -1,0 +1,70 @@
+# Oasis-only canonical-format qualification support.
+name: Oasis qualification
+
+on:
+  pull_request:
+    branches:
+      - oasis
+  push:
+    branches:
+      - oasis
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oasis-qualification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Require canonical source formatting
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out Oasis candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned formatter toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends git make m4 opam
+          opam init --bare --disable-sandboxing --yes
+          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
+          opam install --switch=centl --yes dune.3.24.1 ocamlformat.0.29.0
+
+      - name: Compute canonical formatting patch
+        id: format
+        shell: bash
+        run: |
+          set -euo pipefail
+          opam exec --switch=centl -- make format-fix
+          git diff --check
+          git diff --binary -- src > format.patch
+          git diff --stat -- src
+          if test -s format.patch; then
+            echo "has_diff=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            echo "Oasis candidate source formatting is canonical."
+          fi
+
+      - name: Preserve formatting repair patch
+        if: steps.format.outputs.has_diff == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-format-patch-${{ github.sha }}
+          path: format.patch
+          if-no-files-found: error
+
+      - name: Reject non-canonical Oasis candidate
+        if: steps.format.outputs.has_diff == 'true'
+        shell: bash
+        run: |
+          echo "Oasis candidates must already be canonically formatted. Apply the uploaded patch or run make format-fix locally."
+          exit 1
