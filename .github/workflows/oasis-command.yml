@@ -1,0 +1,27 @@
+name: Oasis command channel
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  ping:
+    name: Oasis command ping
+    if: >-
+      github.event.comment.user.login == github.repository_owner &&
+      github.event.comment.body == '/oasis-ping'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Acknowledge command channel
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }}/comments" \
+            -f body="Oasis command channel active. run=$GITHUB_RUN_ID" >/dev/null
