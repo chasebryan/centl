@@ -38,7 +38,8 @@ let native_definition workspace manifest =
         begin match Centl_parser.parse_statement_located source with
         | Error error ->
             Error
-              (Printf.sprintf "native CENTL source does not parse at byte %d: %s"
+              (Printf.sprintf
+                 "native CENTL source does not parse at byte %d: %s"
                  error.position error.message)
         | Ok located ->
             begin match located.statement with
@@ -50,7 +51,8 @@ let native_definition workspace manifest =
                     "manifest assurance remains downstream/local";
                   ]
             | Centl_parser.Evaluate _ | Centl_parser.Assert _ ->
-                Error "native extension source is not a value/function definition"
+                Error
+                  "native extension source is not a value/function definition"
             end
         end
 
@@ -89,7 +91,9 @@ let scaffold workspace manifest =
                 "activation remains explicit after validation";
                 "structural validation does not grant verified-core assurance";
               ]
-      | _ -> Error "scaffold contract is incomplete or inconsistent with its manifest"
+      | _ ->
+          Error
+            "scaffold contract is incomplete or inconsistent with its manifest"
     with Yojson.Json_error message | Sys_error message -> Error message
 
 let validate workspace name =
@@ -100,7 +104,9 @@ let validate workspace name =
         match manifest.kind with
         | "native_centl" -> native_definition workspace manifest
         | "python_adapter" | "native_extension" -> scaffold workspace manifest
-        | other -> Error ("unsupported extension kind for Caramels validation: " ^ other)
+        | other ->
+            Error
+              ("unsupported extension kind for Caramels validation: " ^ other)
       in
       begin match result with
       | Error message ->
