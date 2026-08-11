@@ -271,7 +271,7 @@ class IdentityTests(OasisTestCase):
             "tracked_dirty": False,
             "tracked_changes": [],
         }
-        with mock.patch.object(OASIS, "run_capture", return_value=""):
+        with mock.patch.object(OASIS._engine, "run_capture", return_value=""):
             failures = OASIS.final_identity_checks(
                 self.root, "0.13.0", state, "oasis"
             )
@@ -293,7 +293,7 @@ class IdentityTests(OasisTestCase):
                 return f"{head}\trefs/tags/v0.13.0"
             raise AssertionError(argv)
 
-        with mock.patch.object(OASIS, "run_capture", side_effect=fake_capture):
+        with mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture):
             failures = OASIS.final_identity_checks(
                 self.root, "0.13.0", state, "oasis"
             )
@@ -322,9 +322,9 @@ class GitHubGateTests(OasisTestCase):
             raise AssertionError(endpoint)
 
         with mock.patch.object(
-            OASIS, "github_repo_slug", return_value="chasebryan/centl"
-        ), mock.patch.object(OASIS, "run_capture", side_effect=fake_capture), mock.patch.object(
-            OASIS, "gh_json", side_effect=fake_json
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
         ):
             failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
         self.assertTrue(any("code-scanning" in item for item in failures))
@@ -342,9 +342,9 @@ class GitHubGateTests(OasisTestCase):
             return []
 
         with mock.patch.object(
-            OASIS, "github_repo_slug", return_value="chasebryan/centl"
-        ), mock.patch.object(OASIS, "run_capture", side_effect=fake_capture), mock.patch.object(
-            OASIS, "gh_json", side_effect=fake_json
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
         ):
             failures = OASIS.github_release_checks(self.root, "b" * 40, "oasis")
         self.assertTrue(any("#123" in item for item in failures))
