@@ -488,14 +488,14 @@ def final_identity_checks(root: Path, version: str, state: dict[str, object]) ->
     failures: list[str] = []
     if state["tracked_dirty"]:
         failures.append("tracked worktree is not clean")
-    if state["branch"] != "main":
-        failures.append(f"final qualification requires main, found {state['branch']}")
+    if state["branch"] != "oasis":
+        failures.append(f"final qualification requires oasis, found {state['branch']}")
     head = str(state["head"])
     try:
-        remote_main = run_capture(root, ("git", "ls-remote", "origin", "refs/heads/main"), 60)
-        remote_sha = remote_main.split()[0] if remote_main else ""
+        remote_oasis = run_capture(root, ("git", "ls-remote", "origin", "refs/heads/oasis"), 60)
+        remote_sha = remote_oasis.split()[0] if remote_oasis else ""
         if remote_sha != head:
-            failures.append(f"HEAD {head} is not exact origin/main {remote_sha or '<missing>'}")
+            failures.append(f"HEAD {head} is not exact origin/oasis {remote_sha or '<missing>'}")
     except OasisError as exc:
         failures.append(str(exc))
 
@@ -553,7 +553,7 @@ def github_release_checks(root: Path, head: str) -> list[str]:
                     "--state",
                     "open",
                     "--base",
-                    "main",
+                    "oasis",
                     "--limit",
                     "100",
                     "--json",
@@ -565,7 +565,7 @@ def github_release_checks(root: Path, head: str) -> list[str]:
         )
         if prs:
             numbers = ", ".join(f"#{item.get('number')}" for item in prs)
-            failures.append(f"open pull requests still target main: {numbers}")
+            failures.append(f"open pull requests still target oasis: {numbers}")
     except (OasisError, json.JSONDecodeError) as exc:
         failures.append(f"cannot verify open pull requests: {exc}")
 
@@ -636,7 +636,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--final",
         action="store_true",
-        help="also require exact main/tag identity and release-blocking GitHub state to be green",
+        help="also require exact oasis/tag identity and release-blocking GitHub state to be green",
     )
     p.add_argument("--plan", action="store_true", help="print the gate plan without executing it")
     p.add_argument("--report", type=Path, help="explicit JSON evidence report path")
@@ -666,7 +666,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("- release      release-archive    internal structural/checksum validation")
         print("- release      install-smoke      isolated installed-binary smoke probes")
         if args.final:
-            print("- identity     final-main/github exact main/tag plus GitHub release blockers")
+            print("- identity     final-oasis/github exact oasis/tag plus GitHub release blockers")
         return 0
 
     try:
@@ -758,7 +758,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 file=sys.stderr,
             )
         for item in final_failures:
-            print(f"[oasis] FAIL final-main: {item}", file=sys.stderr)
+            print(f"[oasis] FAIL final-oasis: {item}", file=sys.stderr)
         print("[oasis] OASIS QUALIFICATION: FAIL", file=sys.stderr)
         return 1
 
