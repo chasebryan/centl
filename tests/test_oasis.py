@@ -223,10 +223,58 @@ class EvidenceTests(OasisTestCase):
         self.assertEqual(leftovers, [])
 
 
+class IdentityTests(OasisTestCase):
+    def test_final_identity_requires_oasis_branch(self) -> None:
+        head = "a" * 40
+        state = {
+            "head": head,
+            "branch": "main",
+            "tracked_dirty": False,
+            "tracked_changes": [],
+        }
+
+        def fake_capture(root: Path, argv, timeout=30):
+            if "refs/heads/oasis" in argv:
+                return f"{head}\trefs/heads/oasis"
+            if any(str(item).startswith("refs/tags/v0.14.0") for item in argv):
+                return f"{head}\trefs/tags/v0.14.0"
+            raise AssertionError(f"unexpected command: {argv}")
+
+        with mock.patch.object(OASIS, "run_capture", side_effect=fake_capture):
+            failures = OASIS.final_identity_checks(self.root, "0.14.0", state)
+
+        self.assertTrue(any("requires oasis" in item for item in failures))
+        self.assertFalse(any("origin/oasis" in item for item in failures))
+
+    def test_final_identity_accepts_exact_oasis_branch_identity(self) -> None:
+        head = "c" * 40
+        state = {
+            "head": head,
+            "branch": "oasis",
+            "tracked_dirty": False,
+            "tracked_changes": [],
+        }
+
+        def fake_capture(root: Path, argv, timeout=30):
+            if "refs/heads/oasis" in argv:
+                return f"{head}\trefs/heads/oasis"
+            if any(str(item).startswith("refs/tags/v0.14.0") for item in argv):
+                return f"{head}\trefs/tags/v0.14.0"
+            raise AssertionError(f"unexpected command: {argv}")
+
+        with mock.patch.object(OASIS, "run_capture", side_effect=fake_capture):
+            failures = OASIS.final_identity_checks(self.root, "0.14.0", state)
+
+        self.assertEqual(failures, [])
+
+
 class GitHubGateTests(OasisTestCase):
     def test_high_security_alerts_block_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):
+                self.assertIn("--base", argv)
+                base_index = argv.index("--base")
+                self.assertEqual(argv[base_index + 1], "oasis")
                 return "[]"
             raise AssertionError(f"unexpected command: {argv}")
 
@@ -248,6 +296,9 @@ class GitHubGateTests(OasisTestCase):
     def test_open_pr_blocks_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):
+                self.assertIn("--base", argv)
+                base_index = argv.index("--base")
+                self.assertEqual(argv[base_index + 1], "oasis")
                 return '[{"number":123,"title":"unfinished","headRefName":"feature"}]'
             raise AssertionError(f"unexpected command: {argv}")
 
@@ -261,6 +312,7 @@ class GitHubGateTests(OasisTestCase):
         ), mock.patch.object(OASIS, "gh_json", side_effect=fake_json):
             failures = OASIS.github_release_checks(self.root, "b" * 40)
         self.assertTrue(any("#123" in item for item in failures))
+        self.assertTrue(any("target oasis" in item for item in failures))
 
 
 if __name__ == "__main__":
