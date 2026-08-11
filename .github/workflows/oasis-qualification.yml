@@ -149,3 +149,43 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/oasis-security-state.py --root "$PWD"
+
+  convergence-status:
+    name: Publish Oasis convergence status
+    needs:
+      - engine-self-test
+      - qualify
+      - release-security
+    if: always() && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish exact-SHA result
+        env:
+          SELF_TEST_RESULT: ${{ needs.engine-self-test.result }}
+          QUALIFY_RESULT: ${{ needs.qualify.result }}
+          SECURITY_RESULT: ${{ needs.release-security.result }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          state=failure
+          description='CENTL Oasis convergence failed'
+          if [ "$SELF_TEST_RESULT" = success ] && \
+             [ "$QUALIFY_RESULT" = success ] && \
+             [ "$SECURITY_RESULT" = success ]; then
+            state=success
+            description='CENTL Oasis convergence passed'
+          fi
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"%s","context":"centl/oasis-convergence","description":"%s","target_url":"%s"}' \
+            "$state" "$description" "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            --data "$payload" >/dev/null
