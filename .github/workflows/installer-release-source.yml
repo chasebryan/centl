@@ -2,6 +2,8 @@ name: Installer release-source independence
 
 on:
   pull_request:
+    branches:
+      - oasis
     paths:
       - "install"
       - "scripts/install-interface-check.py"
@@ -9,7 +11,7 @@ on:
       - ".github/workflows/installer-release-source.yml"
   push:
     branches:
-      - main
+      - oasis
     paths:
       - "install"
       - "scripts/install-interface-check.py"
