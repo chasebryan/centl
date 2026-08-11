@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: centl-foundation-distribution
+  group: centl-distribution-writer
   cancel-in-progress: false
 
 jobs:
@@ -119,16 +119,16 @@ jobs:
             "channels/oasis/v$FOUNDATION_VERSION/$ASSET.sha256"
           printf '%s\n' "$FOUNDATION_VERSION" > channels/oasis/LATEST
           printf '%s\n' "$FOUNDATION_SHA" > "channels/oasis/v$FOUNDATION_VERSION/SOURCE-COMMIT"
-          cat > README.md <<'EOF'
-# CENTL distribution
-
-This branch is a machine-oriented distribution surface, not a development branch.
-
-- `channels/oasis/` contains immutable qualified Oasis release bytes.
-- `channels/mirage/` may contain rolling Mirage development builds.
-
-The canonical source release history begins at `v0.14.0`.
-EOF
+          printf '%s\n' \
+            '# CENTL distribution' \
+            '' \
+            'This branch is a machine-oriented distribution surface, not a development branch.' \
+            '' \
+            '- `channels/oasis/` contains immutable qualified Oasis release bytes.' \
+            '- `channels/mirage/` may contain rolling Mirage development builds.' \
+            '' \
+            'The canonical source release history begins at `v0.14.0`.' \
+            > README.md
 
           git add README.md channels/oasis
           if git diff --cached --quiet; then
