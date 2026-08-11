@@ -7,13 +7,13 @@ current `main` branch.
 
 | Version | Supported |
 | --- | --- |
-| 0.12.x | Yes |
+| 0.14.x | Yes |
 | `main` | Yes |
-| 0.11.x and earlier | No |
+| 0.12.x and earlier | No |
 
-The unreleased 0.13.0 development line is not a separate supported release
-series. v0.14.0 is currently an Oasis candidate; when it is formally published,
-the supported stable series moves to 0.14.x under this latest-stable policy.
+The 0.13.0 development line was never published as a separate stable release.
+CENTL v0.14.0 is the current Oasis stable baseline and the supported stable series
+is therefore 0.14.x under this latest-stable policy.
 
 ## Reporting a Vulnerability
 
@@ -191,8 +191,9 @@ this policy.
 
 ## Oasis security gate
 
-A release is not considered Oasis-ready merely because normal unit tests pass.
-The candidate must also satisfy the repository's dependency/security analysis,
-relevant component-specific validation, installer/release integrity checks, and
-no known unresolved release-blocking security finding may be intentionally
-hidden by weakening a checker solely to obtain a green release.
+An Oasis release is not justified merely because normal unit tests pass. The
+exact release SHA must also satisfy the repository's dependency/security
+analysis, relevant component-specific validation, installer/release integrity
+checks, and the dedicated hosted `Release security state` gate. No known
+release-blocking security finding may be intentionally hidden by weakening a
+checker solely to obtain a green release.
