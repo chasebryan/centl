@@ -104,6 +104,41 @@ let test_json_denies_activation_and_promotion () =
   Alcotest.(check bool) "assurance promotion" false
     (json |> member "assurance_promoted" |> to_bool)
 
+let test_construct_persists_transaction_bound_assessment () =
+  let action = action (String.make 64 '7') in
+  let receipt =
+    Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
+      "deterministic regression gate passed" None
+  in
+  let evidence_path = Filename.temp_file "centl-mirage-admission" ".evidence.json" in
+  let admission_path = Centl_sci_mirage_admission.output_path evidence_path in
+  Fun.protect
+    ~finally:(fun () ->
+      if Sys.file_exists evidence_path then Sys.remove evidence_path;
+      if Sys.file_exists admission_path then Sys.remove admission_path)
+    (fun () ->
+      match
+        Centl_sci_mirage_admission.construct evidence_path (plan action [])
+          (evidence receipt)
+      with
+      | Error message -> Alcotest.fail message
+      | Ok (path, report) ->
+          Alcotest.(check string) "derived path" admission_path path;
+          Alcotest.(check bool) "artifact exists" true (Sys.file_exists path);
+          let json = Yojson.Safe.from_file path in
+          let open Yojson.Safe.Util in
+          Alcotest.(check string) "artifact kind" "candidate_admission_assessment"
+            (json |> member "artifact_kind" |> to_string);
+          Alcotest.(check int) "admissible count" 1
+            (json |> member "admissible_candidate_count" |> to_int);
+          Alcotest.(check bool) "source activation" false
+            (json |> member "candidate_source_activated" |> to_bool);
+          Alcotest.(check bool) "assurance promotion" false
+            (json |> member "assurance_promoted" |> to_bool);
+          let candidate = only_candidate report in
+          Alcotest.(check string) "transaction fingerprint"
+            (String.make 64 'a') candidate.transaction_fingerprint)
+
 let () =
   Alcotest.run "CENTL-SCi MIRAGE admission"
     [
@@ -116,5 +151,7 @@ let () =
           Alcotest.test_case "source block" `Quick test_source_block_prevents_admission;
           Alcotest.test_case "non activation" `Quick
             test_json_denies_activation_and_promotion;
+          Alcotest.test_case "persist assessment" `Quick
+            test_construct_persists_transaction_bound_assessment;
         ] );
     ]
