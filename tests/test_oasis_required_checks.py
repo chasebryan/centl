@@ -16,13 +16,27 @@ sys.modules[SPEC.name] = CHECKS
 SPEC.loader.exec_module(CHECKS)
 
 
-def run(name: str, *, ident: int, status: str = "completed", conclusion: str | None = "success"):
-    return {
+def run(
+    name: str,
+    *,
+    ident: int,
+    status: str = "completed",
+    conclusion: str | None = "success",
+    app_slug: str | None = "github-actions",
+    details_url: str | None = None,
+):
+    if details_url is None:
+        details_url = f"https://github.com/chasebryan/centl/actions/runs/{ident}/job/1"
+    payload = {
         "id": ident,
         "name": name,
         "status": status,
         "conclusion": conclusion,
+        "details_url": details_url,
     }
+    if app_slug is not None:
+        payload["app"] = {"slug": app_slug}
+    return payload
 
 
 class RequiredHostedCheckTests(unittest.TestCase):
@@ -43,48 +57,31 @@ class RequiredHostedCheckTests(unittest.TestCase):
         self.assertEqual(len(failures), len(CHECKS.REQUIRED_CHECKS))
         self.assertTrue(all("missing" in item for item in failures))
 
-    def test_missing_qualification_and_security_checks_fail(self) -> None:
-        failures = CHECKS.required_check_failures(
-            {"check_runs": [run("Adversarial engine self-test", ident=1)]}
-        )
-        self.assertEqual(
-            failures,
-            [
-                "mandatory Oasis check is missing: Full stable-product convergence",
-                "mandatory Oasis check is missing: Release security state",
-            ],
-        )
-
     def test_missing_security_check_fails(self) -> None:
-        failures = CHECKS.required_check_failures(
-            {
-                "check_runs": [
-                    run("Adversarial engine self-test", ident=1),
-                    run("Full stable-product convergence", ident=2),
-                ]
-            }
+        payload = {
+            "check_runs": [
+                run("Adversarial engine self-test", ident=1),
+                run("Full stable-product convergence", ident=2),
+            ]
+        }
+        self.assertEqual(
+            CHECKS.required_check_failures(payload),
+            ["mandatory Oasis check is missing: Release security state"],
         )
-        self.assertEqual(failures, ["mandatory Oasis check is missing: Release security state"])
 
     def test_skipped_mandatory_check_is_not_success(self) -> None:
         payload = self.good_payload()
         payload["check_runs"][1] = run(
-            "Full stable-product convergence",
-            ident=20,
-            conclusion="skipped",
+            "Full stable-product convergence", ident=20, conclusion="skipped"
         )
-        failures = CHECKS.required_check_failures(payload)
-        self.assertTrue(any("skipped" in item for item in failures))
+        self.assertTrue(any("skipped" in item for item in CHECKS.required_check_failures(payload)))
 
     def test_neutral_security_check_is_not_success(self) -> None:
         payload = self.good_payload()
         payload["check_runs"][2] = run(
-            "Release security state",
-            ident=20,
-            conclusion="neutral",
+            "Release security state", ident=20, conclusion="neutral"
         )
-        failures = CHECKS.required_check_failures(payload)
-        self.assertTrue(any("neutral" in item for item in failures))
+        self.assertTrue(any("neutral" in item for item in CHECKS.required_check_failures(payload)))
 
     def test_pending_mandatory_check_is_not_success(self) -> None:
         payload = self.good_payload()
@@ -94,8 +91,9 @@ class RequiredHostedCheckTests(unittest.TestCase):
             status="in_progress",
             conclusion=None,
         )
-        failures = CHECKS.required_check_failures(payload)
-        self.assertTrue(any("in_progress" in item for item in failures))
+        self.assertTrue(
+            any("in_progress" in item for item in CHECKS.required_check_failures(payload))
+        )
 
     def test_newest_attempt_controls_result(self) -> None:
         payload = self.good_payload()
@@ -105,8 +103,36 @@ class RequiredHostedCheckTests(unittest.TestCase):
                 run("Full stable-product convergence", ident=5, conclusion="success"),
             ]
         )
-        failures = CHECKS.required_check_failures(payload)
-        self.assertTrue(any("failure" in item for item in failures))
+        self.assertTrue(any("failure" in item for item in CHECKS.required_check_failures(payload)))
+
+    def test_lookalike_check_from_other_app_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][2] = run(
+            "Release security state", ident=31, app_slug="untrusted-check-app"
+        )
+        self.assertTrue(
+            any("unexpected provenance" in item for item in CHECKS.required_check_failures(payload))
+        )
+
+    def test_missing_app_identity_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][0] = run(
+            "Adversarial engine self-test", ident=32, app_slug=None
+        )
+        self.assertTrue(
+            any("app:<missing>" in item for item in CHECKS.required_check_failures(payload))
+        )
+
+    def test_non_actions_details_url_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][1] = run(
+            "Full stable-product convergence",
+            ident=33,
+            details_url="https://example.invalid/result/33",
+        )
+        self.assertTrue(
+            any("invalid Actions details URL" in item for item in CHECKS.required_check_failures(payload))
+        )
 
     def test_malformed_payload_fails_closed(self) -> None:
         self.assertTrue(CHECKS.required_check_failures(None))
