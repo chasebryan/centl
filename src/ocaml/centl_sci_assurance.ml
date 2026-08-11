@@ -12,7 +12,8 @@ let catalog =
       title = "Verified extension";
       establishes =
         [
-          "the extension has an explicit verification basis recorded by its integration path";
+          "the extension has an explicit verification basis recorded by its \
+           integration path";
           "its verified claims are limited to that recorded basis";
         ];
       does_not_establish =
@@ -26,8 +27,10 @@ let catalog =
       title = "Validated native extension";
       establishes =
         [
-          "the native extension passed the validation gates declared for that local integration";
-          "the extension has an explicit native boundary rather than being treated as core";
+          "the native extension passed the validation gates declared for that \
+           local integration";
+          "the extension has an explicit native boundary rather than being \
+           treated as core";
         ];
       does_not_establish =
         [
@@ -41,7 +44,8 @@ let catalog =
       establishes =
         [
           "the downstream extension is local/user-owned";
-          "the extension has at least the structural/local testing basis recorded by the workspace";
+          "the extension has at least the structural/local testing basis \
+           recorded by the workspace";
         ];
       does_not_establish =
         [
@@ -61,7 +65,8 @@ let catalog =
       does_not_establish =
         [
           "that external results were established by verified CENTL core";
-          "that the external dependency is trustworthy merely because it is connected";
+          "that the external dependency is trustworthy merely because it is \
+           connected";
         ];
     };
     {
@@ -73,11 +78,7 @@ let catalog =
           "its experimental status is not hidden from inspection";
         ];
       does_not_establish =
-        [
-          "stability";
-          "validation completeness";
-          "verified-core assurance";
-        ];
+        [ "stability"; "validation completeness"; "verified-core assurance" ];
     };
     {
       label = "unverified_generated_extension";
@@ -105,17 +106,16 @@ let bullets values =
 
 let render_description description =
   String.concat "\n"
-    ([
-       description.title ^ " (`" ^ description.label ^ "`)";
-       "  Establishes:";
-     ]
+    ([ description.title ^ " (`" ^ description.label ^ "`)"; "  Establishes:" ]
     @ bullets description.establishes
     @ [ "  Does not establish:" ]
     @ bullets description.does_not_establish)
 
 let render_catalog () =
   String.concat "\n\n" (List.map render_description catalog)
-  ^ "\n\nAssurance categories are not a single numeric ranking. They describe different evidence and trust boundaries."
+  ^ "\n\n\
+     Assurance categories are not a single numeric ranking. They describe \
+     different evidence and trust boundaries."
 
 let render_manifest manifest =
   let header =
@@ -135,8 +135,10 @@ let render_manifest manifest =
         String.concat "\n"
           [
             "Unknown/legacy assurance label (`" ^ manifest.assurance ^ "`)";
-            "  This label is preserved for provenance, but Caramels does not infer additional guarantees from an unknown assurance category.";
+            "  This label is preserved for provenance, but Caramels does not \
+             infer additional guarantees from an unknown assurance category.";
           ]
   in
   String.concat "\n" header ^ "\n\n" ^ description
-  ^ "\n\nThis inspection does not change the extension or promote its assurance."
+  ^ "\n\n\
+     This inspection does not change the extension or promote its assurance."

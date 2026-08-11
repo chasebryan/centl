@@ -20,10 +20,7 @@ type t =
       to_unit : string;
       conversion_assumptions : string list;
     }
-  | Physical_constant of {
-      symbol : string;
-      constant_assumptions : string list;
-    }
+  | Physical_constant of { symbol : string; constant_assumptions : string list }
   | Uniform_gravity_particle of {
       mass_value : string;
       mass_unit : string;
@@ -165,8 +162,11 @@ let require_common fields ~domain ~problem_class ~operation =
       fail "invalid_ir" ("operation must be " ^ operation)
     else assumptions_field fields
 
-let validate_value field value = validate_text ~field ~max_bytes:max_value_bytes value
-let validate_unit field value = validate_text ~field ~max_bytes:max_unit_bytes value
+let validate_value field value =
+  validate_text ~field ~max_bytes:max_value_bytes value
+
+let validate_unit field value =
+  validate_text ~field ~max_bytes:max_unit_bytes value
 
 let parse_exact_expression fields =
   let allowed = "expression" :: common_fields in
@@ -195,12 +195,19 @@ let parse_polynomial_equation fields =
     let* left = string_field "left" fields in
     let* right = string_field "right" fields in
     let* variable = string_field "variable" fields in
-    let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
-    let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
+    let* left =
+      validate_text ~field:"left" ~max_bytes:max_model_text_bytes left
+    in
+    let* right =
+      validate_text ~field:"right" ~max_bytes:max_model_text_bytes right
+    in
     let* variable = validate_text ~field:"variable" ~max_bytes:64 variable in
     if not (valid_identifier variable) then
       fail "invalid_ir" "variable must be a CENTL identifier"
-    else if contains_any left [ ','; '='; ';' ] || contains_any right [ ','; '='; ';' ] then
+    else if
+      contains_any left [ ','; '='; ';' ]
+      || contains_any right [ ','; '='; ';' ]
+    then
       fail "invalid_ir"
         "equation sides may not contain commas, equality signs, or semicolons"
     else
@@ -209,8 +216,9 @@ let parse_polynomial_equation fields =
            { left; right; variable; equation_assumptions = assumptions })
 
 let supported_verification_relation = function
-  | "equal" | "not_equal" | "less_than" | "less_or_equal"
-  | "greater_than" | "greater_or_equal" -> true
+  | "equal" | "not_equal" | "less_than" | "less_or_equal" | "greater_than"
+  | "greater_or_equal" ->
+      true
   | _ -> false
 
 let parse_verification_claim fields =
@@ -223,8 +231,12 @@ let parse_verification_claim fields =
   let* left = string_field "left" fields in
   let* relation = string_field "relation" fields in
   let* right = string_field "right" fields in
-  let* left = validate_text ~field:"left" ~max_bytes:max_model_text_bytes left in
-  let* right = validate_text ~field:"right" ~max_bytes:max_model_text_bytes right in
+  let* left =
+    validate_text ~field:"left" ~max_bytes:max_model_text_bytes left
+  in
+  let* right =
+    validate_text ~field:"right" ~max_bytes:max_model_text_bytes right
+  in
   if not (supported_verification_relation relation) then
     fail "invalid_ir" "unsupported verification relation"
   else if assumptions <> [] then
@@ -268,16 +280,29 @@ let parse_physical_constant fields =
     Ok (Physical_constant { symbol; constant_assumptions = assumptions })
   else
     fail "invalid_ir"
-      "physical constant is outside the exact defining/conventional Caramels catalog"
+      "physical constant is outside the exact defining/conventional Caramels \
+       catalog"
 
 let parse_uniform_gravity_particle fields =
   let specific =
     [
-      "mass_value"; "mass_unit";
-      "position_x"; "position_y"; "position_z"; "position_unit";
-      "velocity_x"; "velocity_y"; "velocity_z"; "velocity_unit";
-      "gravity_x"; "gravity_y"; "gravity_z"; "gravity_unit";
-      "dt_value"; "dt_unit"; "steps";
+      "mass_value";
+      "mass_unit";
+      "position_x";
+      "position_y";
+      "position_z";
+      "position_unit";
+      "velocity_x";
+      "velocity_y";
+      "velocity_z";
+      "velocity_unit";
+      "gravity_x";
+      "gravity_y";
+      "gravity_z";
+      "gravity_unit";
+      "dt_value";
+      "dt_unit";
+      "steps";
     ]
   in
   let* () = check_fields (specific @ common_fields) fields in
@@ -325,11 +350,23 @@ let parse_uniform_gravity_particle fields =
     Ok
       (Uniform_gravity_particle
          {
-           mass_value; mass_unit;
-           position_x; position_y; position_z; position_unit;
-           velocity_x; velocity_y; velocity_z; velocity_unit;
-           gravity_x; gravity_y; gravity_z; gravity_unit;
-           dt_value; dt_unit; steps;
+           mass_value;
+           mass_unit;
+           position_x;
+           position_y;
+           position_z;
+           position_unit;
+           velocity_x;
+           velocity_y;
+           velocity_z;
+           velocity_unit;
+           gravity_x;
+           gravity_y;
+           gravity_z;
+           gravity_unit;
+           dt_value;
+           dt_unit;
+           steps;
            mechanics_assumptions = assumptions;
          })
 
@@ -341,7 +378,9 @@ let parse_unsupported fields =
       ~operation:"unsupported"
   in
   let* reason = string_field "reason" fields in
-  let* reason = validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason in
+  let* reason =
+    validate_text ~field:"reason" ~max_bytes:max_reason_bytes reason
+  in
   Ok
     (Unsupported
        { unsupported_reason = reason; unsupported_assumptions = assumptions })
@@ -354,7 +393,8 @@ let of_json = function
       | Some (`String "verification_claim") -> parse_verification_claim fields
       | Some (`String "unit_conversion") -> parse_unit_conversion fields
       | Some (`String "physical_constant") -> parse_physical_constant fields
-      | Some (`String "uniform_gravity_particle") -> parse_uniform_gravity_particle fields
+      | Some (`String "uniform_gravity_particle") ->
+          parse_uniform_gravity_particle fields
       | Some (`String "unsupported") -> parse_unsupported fields
       | Some (`String value) ->
           fail "unsupported_problem_class" ("unsupported problem_class " ^ value)
@@ -381,8 +421,10 @@ let assumptions = function
   | Unsupported value -> value.unsupported_assumptions
 
 let domain = function
-  | Exact_expression _ | Polynomial_equation _ | Verification_claim _ -> "mathematics"
-  | Unit_conversion _ | Physical_constant _ | Uniform_gravity_particle _ -> "physics"
+  | Exact_expression _ | Polynomial_equation _ | Verification_claim _ ->
+      "mathematics"
+  | Unit_conversion _ | Physical_constant _ | Uniform_gravity_particle _ ->
+      "physics"
   | Unsupported _ -> "unsupported"
 
 let problem_class = function
@@ -417,7 +459,9 @@ let to_json value =
   in
   match value with
   | Exact_expression data ->
-      `Assoc (common data.exact_assumptions @ [ ("expression", `String data.expression) ])
+      `Assoc
+        (common data.exact_assumptions
+        @ [ ("expression", `String data.expression) ])
   | Polynomial_equation data ->
       `Assoc
         (common data.equation_assumptions

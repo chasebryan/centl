@@ -65,7 +65,7 @@ let rec strip_markup text =
   let text = String.trim text in
   if String.length text >= 2 then
     match text.[0] with
-    | '#' | '-' | '*' | '>' when text.[1] = ' ' ->
+    | ('#' | '-' | '*' | '>') when text.[1] = ' ' ->
         strip_markup (String.sub text 2 (String.length text - 2))
     | _ -> text
   else text
@@ -119,9 +119,9 @@ let classify text =
 let is_list_item text =
   let text = String.trim text in
   let length = String.length text in
-  (length >= 2
+  length >= 2
   && (text.[0] = '-' || text.[0] = '*' || text.[0] = '>')
-  && text.[1] = ' ')
+  && text.[1] = ' '
   ||
   let rec digits index =
     if index >= length then false
@@ -154,9 +154,12 @@ let paragraphs content =
         else if is_list_item trimmed then
           let acc = flush current_start current_lines (line_no - 1) acc in
           loop (line_no + 1) (line_no + 1) []
-            ((line_no, line_no, trimmed) :: acc) rest
+            ((line_no, line_no, trimmed) :: acc)
+            rest
         else
-          let start_line = if current_lines = [] then line_no else current_start in
+          let start_line =
+            if current_lines = [] then line_no else current_start
+          in
           loop (line_no + 1) start_line (line :: current_lines) acc rest
   in
   loop 1 1 [] [] lines
@@ -164,13 +167,13 @@ let paragraphs content =
 let cells_of_text content =
   paragraphs content
   |> List.mapi (fun index (start_line, end_line, text) ->
-         {
-           id = index + 1;
-           kind = classify text;
-           text = String.trim text;
-           start_line;
-           end_line;
-         })
+      {
+        id = index + 1;
+        kind = classify text;
+        text = String.trim text;
+        start_line;
+        end_line;
+      })
 
 let json_strings values = `List (List.map (fun value -> `String value) values)
 
@@ -216,12 +219,15 @@ let plan_entry_to_json entry =
     ]
 
 let count_kind kind cells =
-  List.fold_left (fun total cell -> if cell.kind = kind then total + 1 else total) 0 cells
+  List.fold_left
+    (fun total cell -> if cell.kind = kind then total + 1 else total)
+    0 cells
 
 let read_file path =
   try
     if not (Sys.file_exists path) then Error ("document does not exist: " ^ path)
-    else if Sys.is_directory path then Error ("document path is a directory: " ^ path)
+    else if Sys.is_directory path then
+      Error ("document path is a directory: " ^ path)
     else
       let channel = open_in_bin path in
       Fun.protect
@@ -230,7 +236,9 @@ let read_file path =
           let length = in_channel_length channel in
           if length > max_document_bytes then
             Error
-              (Printf.sprintf "document is %d bytes; MIRAGE currently admits at most %d bytes"
+              (Printf.sprintf
+                 "document is %d bytes; MIRAGE currently admits at most %d \
+                  bytes"
                  length max_document_bytes)
           else Ok (really_input_string channel length))
   with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
@@ -238,7 +246,9 @@ let read_file path =
 let write_text path content =
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
@@ -257,8 +267,12 @@ let unquote path =
     else path
   else path
 
-let mirage_dir workspace = Filename.concat workspace.Centl_sci_workspace.generated "mirage"
-let library_dir workspace = Filename.concat workspace.Centl_sci_workspace.root "library"
+let mirage_dir workspace =
+  Filename.concat workspace.Centl_sci_workspace.generated "mirage"
+
+let library_dir workspace =
+  Filename.concat workspace.Centl_sci_workspace.root "library"
+
 let active_path workspace = Filename.concat (mirage_dir workspace) "active.json"
 
 let render_list title values =
@@ -276,7 +290,8 @@ let render_plan ~source_path ~source_digest cells entries =
       "Specification cells: " ^ string_of_int (List.length cells) ^ "  ";
       "Implementation objectives: " ^ string_of_int (List.length entries) ^ "  ";
       "";
-      "The original source remains authoritative. Every objective below retains its source cell ID.";
+      "The original source remains authoritative. Every objective below \
+       retains its source cell ID.";
       "";
     ]
   in
@@ -305,7 +320,9 @@ let render_plan ~source_path ~source_digest cells entries =
     [
       "## Next MIRAGE phase";
       "";
-      "Build a typed goal graph, compare every objective against the active capability graph, and derive explicit capability gaps before any code mutation.";
+      "Build a typed goal graph, compare every objective against the active \
+       capability graph, and derive explicit capability gaps before any code \
+       mutation.";
       "";
       "No remote AI service was required to create this cycle.";
       "";
@@ -354,7 +371,7 @@ let ingest workspace path =
   let path = unquote path in
   match read_file path with
   | Error _ as error -> error
-  | Ok content ->
+  | Ok content -> (
       try
         Centl_sci_workspace.ensure workspace;
         let library = library_dir workspace in
@@ -363,24 +380,32 @@ let ingest workspace path =
         Centl_sci_workspace.ensure_directory generated;
         let source_digest = Centl_sha256.hex_string content in
         let basename =
-          match Filename.basename path with "" | "." | ".." -> "design.txt" | value -> value
+          match Filename.basename path with
+          | "" | "." | ".." -> "design.txt"
+          | value -> value
         in
         let stored_path =
           Filename.concat library (source_digest ^ "-" ^ basename)
         in
-        let spec_path = Filename.concat generated (source_digest ^ ".spec.json") in
-        let plan_path = Filename.concat generated (source_digest ^ ".plan.md") in
+        let spec_path =
+          Filename.concat generated (source_digest ^ ".spec.json")
+        in
+        let plan_path =
+          Filename.concat generated (source_digest ^ ".plan.md")
+        in
         let cells = cells_of_text content in
         let entries = List.filter_map plan_entry cells in
         write_text stored_path content;
         Centl_sci_workspace.atomic_write_json spec_path
-          (spec_json ~original_path:path ~stored_path ~source_digest cells entries);
+          (spec_json ~original_path:path ~stored_path ~source_digest cells
+             entries);
         write_text plan_path
           (render_plan ~source_path:stored_path ~source_digest cells entries);
         let revision = Centl_sci_workspace.bump_revision workspace in
         let active_path = active_path workspace in
         Centl_sci_workspace.atomic_write_json active_path
-          (active_json ~source_digest ~stored_path ~spec_path ~plan_path ~revision);
+          (active_json ~source_digest ~stored_path ~spec_path ~plan_path
+             ~revision);
         Ok
           {
             source_digest;
@@ -392,7 +417,8 @@ let ingest workspace path =
             cell_count = List.length cells;
             objective_count = List.length entries;
           }
-      with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+      with Sys_error message | Unix.Unix_error (_, _, message) ->
+        Error message)
 
 let render_ingest result =
   String.concat "\n"
@@ -423,4 +449,5 @@ let status workspace =
           (fun () -> really_input_string channel (in_channel_length channel))
       in
       "CENTL-MIRAGE active cycle:\n" ^ content
-    with Sys_error message -> "CENTL-MIRAGE status could not be read: " ^ message
+    with Sys_error message ->
+      "CENTL-MIRAGE status could not be read: " ^ message

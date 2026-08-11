@@ -53,7 +53,8 @@ let test_model_style_equation_executes () =
   | None -> Alcotest.fail "expected CENTL response"
 
 let test_verification_schema_and_lowering () =
-  Alcotest.(check bool) "canonical schema includes verification_claim" true
+  Alcotest.(check bool)
+    "canonical schema includes verification_claim" true
     (Option.is_some
        (Centl_sci_interaction.find_substring ~needle:"verification_claim"
           Centl_sci_ir.json_schema));
@@ -66,7 +67,9 @@ let test_verification_schema_and_lowering () =
   | Some plan ->
       Alcotest.(check string) "op" "verify" (string "op" plan.request);
       Alcotest.(check string) "left" "0.1 + 0.2" (string "left" plan.request);
-      Alcotest.(check string) "relation" "equal" (string "relation" plan.request);
+      Alcotest.(check string)
+        "relation" "equal"
+        (string "relation" plan.request);
       Alcotest.(check string) "right" "3/10" (string "right" plan.request)
 
 let test_verification_rejects_inferred_assumptions () =
@@ -76,10 +79,11 @@ let test_verification_rejects_inferred_assumptions () =
   with
   | Error error ->
       Alcotest.(check string) "error class" "invalid_ir" error.code;
-      Alcotest.(check bool) "closed-claim boundary is explicit" true
+      Alcotest.(check bool)
+        "closed-claim boundary is explicit" true
         (Option.is_some
-           (Centl_sci_interaction.find_substring ~needle:"closed verification claims"
-              error.message))
+           (Centl_sci_interaction.find_substring
+              ~needle:"closed verification claims" error.message))
   | Ok _ -> Alcotest.fail "verification_claim must reject inferred assumptions"
 
 let test_model_unit_names_execute () =

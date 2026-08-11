@@ -9,7 +9,7 @@ let candidate ~id ~strategy ~source_requirement ~capability_inputs =
       ~assurance ~mutates_workspace
   in
   {
-    Centl_sci_mirage_candidate.id = id;
+    Centl_sci_mirage_candidate.id;
     cell_id = 1;
     source_requirement;
     strategy;
@@ -29,14 +29,19 @@ let test_deterministic_native_source_materializes () =
       ~capability_inputs:[]
   in
   let item = Centl_sci_mirage_materialize.materialize_candidate value in
-  Alcotest.(check string) "materialized state" "materialized_source"
+  Alcotest.(check string)
+    "materialized state" "materialized_source"
     (Centl_sci_mirage_materialize.state_text item.state);
-  Alcotest.(check bool) "authoritative parser accepted source" true
-    item.parser_validated;
+  Alcotest.(check bool)
+    "authoritative parser accepted source" true item.parser_validated;
   Alcotest.(check bool) "source retained" true (Option.is_some item.source);
-  Alcotest.(check bool) "source digest retained" true
-    (match item.source_sha256 with Some value -> String.length value = 64 | None -> false);
-  Alcotest.(check int) "materialization identity length" 64
+  Alcotest.(check bool)
+    "source digest retained" true
+    (match item.source_sha256 with
+    | Some value -> String.length value = 64
+    | None -> false);
+  Alcotest.(check int)
+    "materialization identity length" 64
     (String.length item.materialization_fingerprint)
 
 let test_unknown_requirement_is_blocked_not_guessed () =
@@ -47,7 +52,8 @@ let test_unknown_requirement_is_blocked_not_guessed () =
       ~capability_inputs:[]
   in
   let item = Centl_sci_mirage_materialize.materialize_candidate value in
-  Alcotest.(check string) "blocked state" "blocked"
+  Alcotest.(check string)
+    "blocked state" "blocked"
     (Centl_sci_mirage_materialize.state_text item.state);
   Alcotest.(check bool) "no invented source" true (Option.is_none item.source);
   Alcotest.(check bool) "no parser claim" false item.parser_validated
@@ -60,9 +66,12 @@ let test_existing_composition_stays_declarative () =
       ~capability_inputs:[ "exact_rational" ]
   in
   let item = Centl_sci_mirage_materialize.materialize_candidate value in
-  Alcotest.(check string) "declarative state" "declarative_reuse"
+  Alcotest.(check string)
+    "declarative state" "declarative_reuse"
     (Centl_sci_mirage_materialize.state_text item.state);
-  Alcotest.(check bool) "no unnecessary generated source" true (Option.is_none item.source);
+  Alcotest.(check bool)
+    "no unnecessary generated source" true
+    (Option.is_none item.source);
   Alcotest.(check bool) "syntax not falsely claimed" false item.parser_validated
 
 let test_core_patch_never_auto_materializes () =
@@ -73,17 +82,22 @@ let test_core_patch_never_auto_materializes () =
       ~capability_inputs:[]
   in
   let item = Centl_sci_mirage_materialize.materialize_candidate value in
-  Alcotest.(check string) "core candidate blocked" "blocked"
+  Alcotest.(check string)
+    "core candidate blocked" "blocked"
     (Centl_sci_mirage_materialize.state_text item.state);
-  Alcotest.(check bool) "core source not invented" true (Option.is_none item.source)
+  Alcotest.(check bool)
+    "core source not invented" true
+    (Option.is_none item.source)
 
 let test_artifact_denies_activation_and_promotion () =
-  let root = Filename.temp_file "centl-mirage-materialize-" ".candidates.json" in
+  let root =
+    Filename.temp_file "centl-mirage-materialize-" ".candidates.json"
+  in
   let output = Centl_sci_mirage_materialize.output_path root in
   Fun.protect
     ~finally:(fun () ->
       (try Sys.remove root with _ -> ());
-      (try Sys.remove output with _ -> ()))
+      try Sys.remove output with _ -> ())
     (fun () ->
       let value =
         candidate ~id:"candidate:cell:1:downstream_extension"
@@ -98,15 +112,18 @@ let test_artifact_denies_activation_and_promotion () =
       | Error message -> Alcotest.fail message
       | Ok (path, _) ->
           let text = Yojson.Safe.from_file path |> Yojson.Safe.to_string in
-          Alcotest.(check bool) "workspace not mutated" true
+          Alcotest.(check bool)
+            "workspace not mutated" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"\"workspace_mutated\":false" text));
-          Alcotest.(check bool) "candidate not activated" true
+          Alcotest.(check bool)
+            "candidate not activated" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"\"candidate_activated\":false" text));
-          Alcotest.(check bool) "assurance not promoted" true
+          Alcotest.(check bool)
+            "assurance not promoted" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"\"assurance_promoted\":false" text)))

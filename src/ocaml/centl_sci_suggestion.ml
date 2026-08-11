@@ -85,50 +85,64 @@ let structural ~mode input cursor =
     in
     match classification.intent with
     | Centl_sci_intent.Equation_solving
-      when not (String.contains lower '=') && not (contains " equals " lower) ->
-        make " equals [right side] for [variable]" [ "right side"; "variable" ]
+      when (not (String.contains lower '=')) && not (contains " equals " lower)
+      ->
+        make " equals [right side] for [variable]"
+          [ "right side"; "variable" ]
           "equation-solving grammar is incomplete"
     | Centl_sci_intent.Differentiation
-      when not (contains " with respect to " lower) && not (contains " wrt " lower) ->
+      when (not (contains " with respect to " lower))
+           && not (contains " wrt " lower) ->
         make " with respect to [variable]" [ "variable" ]
           "differentiation grammar is missing a differentiation variable"
     | Centl_sci_intent.Integration
-      when not (contains " from " lower)
+      when (not (contains " from " lower))
            && not (contains " with respect to " lower) ->
         make " with respect to [variable]" [ "variable" ]
           "integration grammar is missing an integration variable or bounds"
     | Centl_sci_intent.Approximation
-      when not (contains " digits" lower) && not (contains " significant digits" lower) ->
-        make " to [digits] significant digits" [ "optional digit target" ]
-          "CENTL can use its default justified-digit target, or you can request an explicit 1..1000 digit target"
+      when (not (contains " digits" lower))
+           && not (contains " significant digits" lower) ->
+        make " to [digits] significant digits"
+          [ "optional digit target" ]
+          "CENTL can use its default justified-digit target, or you can \
+           request an explicit 1..1000 digit target"
     | Centl_sci_intent.Verification
-      when not (String.contains lower '=') && not (contains " equals " lower) ->
+      when (not (String.contains lower '=')) && not (contains " equals " lower)
+      ->
         make " [left claim] = [right claim]" [ "claim relation" ]
           "verification needs an explicit mathematical relation"
     | Centl_sci_intent.Unit_conversion
-      when not (contains " to " lower) && not (contains " into " lower) ->
+      when (not (contains " to " lower)) && not (contains " into " lower) ->
         make " to [unit]" [ "target unit" ]
           "unit conversion is missing a target unit"
     | Centl_sci_intent.Constant_lookup
-      when lower = "constant" || lower = "physical constant"
+      when lower = "constant"
+           || lower = "physical constant"
            || lower = "lookup constant" ->
-        make ~alternatives:[ "c"; "h"; "e"; "k_B"; "N_A"; "g0" ]
+        make
+          ~alternatives:[ "c"; "h"; "e"; "k_B"; "N_A"; "g0" ]
           " [c | h | e | k_B | N_A | g0]" [ "exact catalog symbol" ]
-          "Caramels exposes only the exact defining/conventional CENTL Physics constant catalog through this route"
+          "Caramels exposes only the exact defining/conventional CENTL Physics \
+           constant catalog through this route"
     | Centl_sci_intent.Physics_simulation when mechanics_missing <> [] ->
         make
           (" [missing: " ^ String.concat ", " mechanics_missing ^ "]")
           mechanics_missing
           "particle-simulation grammar is missing required typed fields"
     | Centl_sci_intent.Program_creation
-      when mode = Centl_sci_interaction.Build && not (String.contains lower '=') ->
-        make " = [expression]" [ "implementation expression" ]
+      when mode = Centl_sci_interaction.Build && not (String.contains lower '=')
+      ->
+        make " = [expression]"
+          [ "implementation expression" ]
           "BUILD creation request is missing an implementation body"
     | Centl_sci_intent.System_inspection
       when mode = Centl_sci_interaction.Build
-           && (lower = "validate" || lower = "validate extension"
+           && (lower = "validate"
+              || lower = "validate extension"
               || lower = "validate package") ->
-        make " [name]" [ "extension or package name" ]
+        make " [name]"
+          [ "extension or package name" ]
           "BUILD validation needs a local object name"
     | _ -> None
 
@@ -140,5 +154,4 @@ let suggest ~mode input cursor =
 let ghost ~mode input cursor =
   match suggest ~mode input cursor with
   | None -> None
-  | Some suggestion ->
-      Some (suggestion.display_text, suggestion.safe_to_accept)
+  | Some suggestion -> Some (suggestion.display_text, suggestion.safe_to_accept)

@@ -12,10 +12,7 @@ type item = {
   materialization_fingerprint : string;
 }
 
-type report = {
-  items : item list;
-  blocked_cells : int list;
-}
+type report = { items : item list; blocked_cells : int list }
 
 let state_text = function
   | Materialized_source -> "materialized_source"
@@ -23,12 +20,15 @@ let state_text = function
   | Blocked -> "blocked"
 
 let generated_source = function
-  | Centl_sci_codegen.Generated (Centl_sci_codegen.Function { source; _ }) -> Some source
-  | Centl_sci_codegen.Generated (Centl_sci_codegen.Value { source; _ }) -> Some source
-  | Centl_sci_codegen.Not_generated | Centl_sci_codegen.Needs_clarification _ -> None
+  | Centl_sci_codegen.Generated (Centl_sci_codegen.Function { source; _ }) ->
+      Some source
+  | Centl_sci_codegen.Generated (Centl_sci_codegen.Value { source; _ }) ->
+      Some source
+  | Centl_sci_codegen.Not_generated | Centl_sci_codegen.Needs_clarification _ ->
+      None
 
-let materialization_identity_material ~candidate_id ~transaction_fingerprint ~strategy
-    ~state ~source_sha256 ~parser_validated ~rationale =
+let materialization_identity_material ~candidate_id ~transaction_fingerprint
+    ~strategy ~state ~source_sha256 ~parser_validated ~rationale =
   `Assoc
     [
       ("identity_schema_version", `Int 1);
@@ -36,19 +36,23 @@ let materialization_identity_material ~candidate_id ~transaction_fingerprint ~st
       ("transaction_fingerprint", `String transaction_fingerprint);
       ("strategy", `String strategy);
       ("state", `String (state_text state));
-      ("source_sha256", match source_sha256 with None -> `Null | Some value -> `String value);
+      ( "source_sha256",
+        match source_sha256 with None -> `Null | Some value -> `String value );
       ("parser_validated", `Bool parser_validated);
       ("rationale", `String rationale);
     ]
   |> Yojson.Safe.to_string
 
 let make_item candidate state source parser_validated rationale =
-  let strategy = Centl_sci_mirage_candidate.strategy_text candidate.Centl_sci_mirage_candidate.strategy in
+  let strategy =
+    Centl_sci_mirage_candidate.strategy_text
+      candidate.Centl_sci_mirage_candidate.strategy
+  in
   let source_sha256 = Option.map Centl_sha256.hex_string source in
   let materialization_fingerprint =
     materialization_identity_material ~candidate_id:candidate.id
-      ~transaction_fingerprint:candidate.transaction_fingerprint ~strategy ~state
-      ~source_sha256 ~parser_validated ~rationale
+      ~transaction_fingerprint:candidate.transaction_fingerprint ~strategy
+      ~state ~source_sha256 ~parser_validated ~rationale
     |> Centl_sha256.hex_string
   in
   {
@@ -64,21 +68,28 @@ let make_item candidate state source parser_validated rationale =
   }
 
 let materialize_generated candidate =
-  match Centl_sci_codegen.generate candidate.Centl_sci_mirage_candidate.source_requirement with
+  match
+    Centl_sci_codegen.generate
+      candidate.Centl_sci_mirage_candidate.source_requirement
+  with
   | Centl_sci_codegen.Generated change ->
       begin match generated_source (Centl_sci_codegen.Generated change) with
       | None ->
           make_item candidate Blocked None false
-            "the deterministic SCi generator returned no materializable CENTL source"
+            "the deterministic SCi generator returned no materializable CENTL \
+             source"
       | Some source ->
           begin match Centl_parser.parse_statement_located source with
           | Ok _ ->
               make_item candidate Materialized_source (Some source) true
-                "deterministic SCi code generation produced CENTL source and the authoritative parser accepted it; the source is staged only and has not been activated"
+                "deterministic SCi code generation produced CENTL source and \
+                 the authoritative parser accepted it; the source is staged \
+                 only and has not been activated"
           | Error error ->
               make_item candidate Blocked (Some source) false
                 (Printf.sprintf
-                   "generated CENTL source failed authoritative parsing at byte %d: %s"
+                   "generated CENTL source failed authoritative parsing at \
+                    byte %d: %s"
                    error.position error.message)
           end
       end
@@ -87,22 +98,28 @@ let materialize_generated candidate =
         ("deterministic materialization requires clarification: " ^ message)
   | Centl_sci_codegen.Not_generated ->
       make_item candidate Blocked None false
-        "the existing deterministic SCi generator cannot lower this requirement without guessing"
+        "the existing deterministic SCi generator cannot lower this \
+         requirement without guessing"
 
 let materialize_candidate candidate =
   match candidate.Centl_sci_mirage_candidate.strategy with
   | Centl_sci_mirage_candidate.Compose_existing ->
       if candidate.capability_inputs = [] then
         make_item candidate Blocked None false
-          "composition was selected but no existing capability inputs are available"
+          "composition was selected but no existing capability inputs are \
+           available"
       else
         make_item candidate Declarative_reuse None false
-          "the candidate is a non-mutating composition of already identified capabilities; no new source is required at this stage"
+          "the candidate is a non-mutating composition of already identified \
+           capabilities; no new source is required at this stage"
   | Centl_sci_mirage_candidate.Alias_or_wrapper
-  | Centl_sci_mirage_candidate.Downstream_extension -> materialize_generated candidate
+  | Centl_sci_mirage_candidate.Downstream_extension ->
+      materialize_generated candidate
   | Centl_sci_mirage_candidate.Isolated_core_patch ->
       make_item candidate Blocked None false
-        "MIRAGE does not synthesize or apply verified-core patches from an underspecified requirement; an isolated core candidate needs an explicit implementation before core validation can begin"
+        "MIRAGE does not synthesize or apply verified-core patches from an \
+         underspecified requirement; an isolated core candidate needs an \
+         explicit implementation before core validation can begin"
 
 let build (candidates : Centl_sci_mirage_candidate.report) =
   {
@@ -117,8 +134,12 @@ let item_to_json item =
       ("transaction_fingerprint", `String item.transaction_fingerprint);
       ("strategy", `String item.strategy);
       ("state", `String (state_text item.state));
-      ("source", match item.source with None -> `Null | Some value -> `String value);
-      ("source_sha256", match item.source_sha256 with None -> `Null | Some value -> `String value);
+      ( "source",
+        match item.source with None -> `Null | Some value -> `String value );
+      ( "source_sha256",
+        match item.source_sha256 with
+        | None -> `Null
+        | Some value -> `String value );
       ("parser_validated", `Bool item.parser_validated);
       ("rationale", `String item.rationale);
       ("materialization_fingerprint_algorithm", `String "sha256");
@@ -131,14 +152,18 @@ let to_json report =
       ("schema_version", `Int 1);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_materialization");
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("workspace_mutated", `Bool false);
       ("candidate_activated", `Bool false);
       ("assurance_promoted", `Bool false);
       ("network_required", `Bool false);
       ( "materialization_semantics",
         `String
-          "materialization may stage deterministic CENTL source or a declarative reuse plan; parser acceptance establishes syntax only and does not establish mathematical correctness, regression success, activation safety, or verified-core assurance" );
+          "materialization may stage deterministic CENTL source or a \
+           declarative reuse plan; parser acceptance establishes syntax only \
+           and does not establish mathematical correctness, regression \
+           success, activation safety, or verified-core assurance" );
       ("items", `List (List.map item_to_json report.items));
     ]
 
@@ -160,12 +185,14 @@ let construct candidates_path candidates =
 let render report =
   let materialized =
     List.fold_left
-      (fun total item -> if item.state = Materialized_source then total + 1 else total)
+      (fun total item ->
+        if item.state = Materialized_source then total + 1 else total)
       0 report.items
   in
   let declarative =
     List.fold_left
-      (fun total item -> if item.state = Declarative_reuse then total + 1 else total)
+      (fun total item ->
+        if item.state = Declarative_reuse then total + 1 else total)
       0 report.items
   in
   let blocked =

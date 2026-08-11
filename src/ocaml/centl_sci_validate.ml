@@ -47,7 +47,8 @@ let native_definition workspace manifest =
                 Ok
                   [
                     "manifest resolves to an existing source file";
-                    "source parses as one native CENTL value/function definition";
+                    "source parses as one native CENTL value/function \
+                     definition";
                     "manifest assurance remains downstream/local";
                   ]
             | Centl_parser.Evaluate _ | Centl_parser.Assert _ ->
@@ -141,7 +142,8 @@ let render report =
      ]
     @ List.map (fun check -> "  - " ^ check) report.checks
     @ [
-        "Assurance note: structural validation does not grant verified-core assurance.";
+        "Assurance note: structural validation does not grant verified-core \
+         assurance.";
       ])
 
 let to_json report =

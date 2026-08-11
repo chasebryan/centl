@@ -23,7 +23,8 @@ let state_text = function
   | Pending -> "pending"
   | Blocked -> "blocked"
 
-let receipts_for_candidate (evidence : Centl_sci_mirage_evidence.report) candidate_id =
+let receipts_for_candidate (evidence : Centl_sci_mirage_evidence.report)
+    candidate_id =
   List.filter
     (fun (receipt : Centl_sci_mirage_evidence.receipt) ->
       String.equal receipt.candidate_id candidate_id)
@@ -51,8 +52,7 @@ let receipt_matches_action_contract
   && receipt_fingerprint_valid receipt
 
 let exact_action_coverage
-    (candidate : Centl_sci_mirage_execution_plan.candidate_plan)
-    receipts =
+    (candidate : Centl_sci_mirage_execution_plan.candidate_plan) receipts =
   let actions =
     List.sort
       (fun (left : Centl_sci_mirage_execution_plan.action) right ->
@@ -70,7 +70,8 @@ let exact_action_coverage
 
 let receipt_counts receipts =
   List.fold_left
-    (fun (passed, pending, blocked) (receipt : Centl_sci_mirage_evidence.receipt) ->
+    (fun (passed, pending, blocked)
+         (receipt : Centl_sci_mirage_evidence.receipt) ->
       match receipt.state with
       | Centl_sci_mirage_evidence.Passed -> (passed + 1, pending, blocked)
       | Centl_sci_mirage_evidence.Pending -> (passed, pending + 1, blocked)
@@ -86,22 +87,28 @@ let assess_candidate blocked_cells evidence
   let state, rationale =
     if blocked_cells <> [] then
       ( Blocked,
-        "source-level MIRAGE blockers remain unresolved; candidate admission is prohibited" )
+        "source-level MIRAGE blockers remain unresolved; candidate admission \
+         is prohibited" )
     else if expected = 0 then
       ( Pending,
-        "the candidate has no executable evidence actions in this cycle; MIRAGE does not infer admission from structural readiness alone" )
+        "the candidate has no executable evidence actions in this cycle; \
+         MIRAGE does not infer admission from structural readiness alone" )
     else if not exact_coverage then
       ( Blocked,
-        "evidence receipts do not exactly and integrity-validly match the transaction-bound planned action contracts" )
+        "evidence receipts do not exactly and integrity-validly match the \
+         transaction-bound planned action contracts" )
     else if blocked > 0 then
       (Blocked, "one or more mandatory evidence actions are explicitly blocked")
     else if pending > 0 then
-      (Pending, "one or more mandatory evidence actions remain pending execution")
+      ( Pending,
+        "one or more mandatory evidence actions remain pending execution" )
     else if passed = expected then
       ( Admissible,
-        "every transaction-bound planned evidence action has an integrity-valid passed receipt matching its action contract for this cycle; this permits only downstream admission consideration, not activation or assurance promotion" )
-    else
-      (Pending, "mandatory evidence accounting is incomplete")
+        "every transaction-bound planned evidence action has an \
+         integrity-valid passed receipt matching its action contract for this \
+         cycle; this permits only downstream admission consideration, not \
+         activation or assurance promotion" )
+    else (Pending, "mandatory evidence accounting is incomplete")
   in
   {
     candidate_id = candidate.candidate_id;
@@ -114,7 +121,8 @@ let assess_candidate blocked_cells evidence
     exact_action_coverage = exact_coverage;
     receipt_fingerprints =
       List.map
-        (fun (receipt : Centl_sci_mirage_evidence.receipt) -> receipt.receipt_fingerprint)
+        (fun (receipt : Centl_sci_mirage_evidence.receipt) ->
+          receipt.receipt_fingerprint)
         receipts;
     rationale;
   }
@@ -122,7 +130,8 @@ let assess_candidate blocked_cells evidence
 let assess (plan : Centl_sci_mirage_execution_plan.report)
     (evidence : Centl_sci_mirage_evidence.report) =
   {
-    candidates = List.map (assess_candidate plan.blocked_cells evidence) plan.candidates;
+    candidates =
+      List.map (assess_candidate plan.blocked_cells evidence) plan.candidates;
     blocked_cells = plan.blocked_cells;
   }
 
@@ -138,7 +147,9 @@ let candidate_to_json (candidate : candidate_admission) =
       ("blocked_action_count", `Int candidate.blocked_action_count);
       ("exact_action_coverage", `Bool candidate.exact_action_coverage);
       ( "receipt_fingerprints",
-        `List (List.map (fun value -> `String value) candidate.receipt_fingerprints) );
+        `List
+          (List.map (fun value -> `String value) candidate.receipt_fingerprints)
+      );
       ("candidate_source_activated", `Bool false);
       ("assurance_promoted", `Bool false);
       ("rationale", `String candidate.rationale);
@@ -147,7 +158,8 @@ let candidate_to_json (candidate : candidate_admission) =
 let to_json (report : report) =
   let admissible_count =
     List.fold_left
-      (fun total candidate -> if candidate.state = Admissible then total + 1 else total)
+      (fun total candidate ->
+        if candidate.state = Admissible then total + 1 else total)
       0 report.candidates
   in
   `Assoc
@@ -157,12 +169,18 @@ let to_json (report : report) =
       ("artifact_kind", `String "candidate_admission_assessment");
       ("candidate_count", `Int (List.length report.candidates));
       ("admissible_candidate_count", `Int admissible_count);
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("candidate_source_activated", `Bool false);
       ("assurance_promoted", `Bool false);
       ( "admission_semantics",
         `String
-          "admissible means only that every transaction-bound action planned for the candidate in this evidence cycle has exact receipt coverage, a matching action contract, a valid receipt fingerprint, and a passed state with no source-level blockers; it does not activate source, promote assurance, prove verified-core correctness, or replace an explicit activation policy" );
+          "admissible means only that every transaction-bound action planned \
+           for the candidate in this evidence cycle has exact receipt \
+           coverage, a matching action contract, a valid receipt fingerprint, \
+           and a passed state with no source-level blockers; it does not \
+           activate source, promote assurance, prove verified-core \
+           correctness, or replace an explicit activation policy" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 

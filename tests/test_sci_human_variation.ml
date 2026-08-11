@@ -1,7 +1,4 @@
-type seed = {
-  mode : Centl_sci_interaction.mode;
-  prompt : string;
-}
+type seed = { mode : Centl_sci_interaction.mode; prompt : string }
 
 let seeds =
   [
@@ -32,7 +29,8 @@ let seeds =
     {
       mode = Phys;
       prompt =
-        "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10";
+        "simulate a particle with mass 2 kg, position (0,0,10) m, velocity \
+         (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10";
     };
     { mode = Math; prompt = "solve x squared plus 4" };
     { mode = Math; prompt = "find x squared plus 4" };
@@ -43,7 +41,8 @@ let seeds =
     {
       mode = Build;
       prompt =
-        "create function kinetic_energy(mass, velocity) = 1/2 * mass * velocity^2";
+        "create function kinetic_energy(mass, velocity) = 1/2 * mass * \
+         velocity^2";
     };
   ]
 
@@ -60,10 +59,12 @@ let titlecase text =
 
 let typo text =
   text
-  |> Centl_sci_interaction.replace_all ~needle:"integrate" ~replacement:"intergrate"
+  |> Centl_sci_interaction.replace_all ~needle:"integrate"
+       ~replacement:"intergrate"
   |> Centl_sci_interaction.replace_all ~needle:"squared" ~replacement:"squred"
   |> Centl_sci_interaction.replace_all ~needle:"equals" ~replacement:"equls"
-  |> Centl_sci_interaction.replace_all ~needle:"kilometers" ~replacement:"kilomters"
+  |> Centl_sci_interaction.replace_all ~needle:"kilometers"
+       ~replacement:"kilomters"
 
 let styles =
   [
@@ -93,8 +94,9 @@ let corpus =
     seeds
 
 let test_corpus_size () =
-  Alcotest.(check bool) "Caramels corpus contains at least 250 human variations"
-    true (List.length corpus >= 250 && List.length corpus <= 500)
+  Alcotest.(check bool)
+    "Caramels corpus contains at least 250 human variations" true
+    (List.length corpus >= 250 && List.length corpus <= 500)
 
 let test_normalization_never_erases_nonempty_input () =
   List.iter
@@ -107,8 +109,9 @@ let test_known_typos_recover () =
   let normalized =
     Centl_sci_interaction.normalize Math "INTERGRATE x SQURED where x EQULS 2"
   in
-  Alcotest.(check string) "known safe lexical corrections"
-    "integrate x squared where x equals 2" (String.lowercase_ascii normalized)
+  Alcotest.(check string)
+    "known safe lexical corrections" "integrate x squared where x equals 2"
+    (String.lowercase_ascii normalized)
 
 let useful_interpretation mode prompt =
   let normalized = Centl_sci_interaction.normalize mode prompt in
@@ -116,7 +119,8 @@ let useful_interpretation mode prompt =
   | Build ->
       let classification = Centl_sci_intent.classify ~mode normalized in
       classification.intent <> Centl_sci_intent.Unknown
-      || Centl_sci_codegen.generate normalized <> Centl_sci_codegen.Not_generated
+      || Centl_sci_codegen.generate normalized
+         <> Centl_sci_codegen.Not_generated
   | Math | Phys | Hybrid ->
       Option.is_some (Centl_sci_fastpath.interpret normalized)
       || Option.is_some (Centl_sci_interaction.clarification mode normalized)
@@ -129,10 +133,11 @@ let test_useful_interpretation_rate () =
       0 corpus
   in
   let total = List.length corpus in
-  let rate = (float_of_int useful /. float_of_int total) *. 100.0 in
+  let rate = float_of_int useful /. float_of_int total *. 100.0 in
   if rate < 95.0 then
     Alcotest.failf
-      "Caramels human-variation gate: %.2f%% useful interpretations/clarifications (%d/%d), target >= 95%%"
+      "Caramels human-variation gate: %.2f%% useful \
+       interpretations/clarifications (%d/%d), target >= 95%%"
       rate useful total
 
 let () =
@@ -143,7 +148,8 @@ let () =
           Alcotest.test_case "size" `Quick test_corpus_size;
           Alcotest.test_case "normalization preserves input" `Quick
             test_normalization_never_erases_nonempty_input;
-          Alcotest.test_case "known typo recovery" `Quick test_known_typos_recover;
+          Alcotest.test_case "known typo recovery" `Quick
+            test_known_typos_recover;
           Alcotest.test_case "95 percent useful interpretation" `Quick
             test_useful_interpretation_rate;
         ] );

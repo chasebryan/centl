@@ -10,7 +10,11 @@ type node_kind =
   | Context_note
   | Capability
 
-type edge_kind = Refines | Constrains | Conflicts_with | Candidate_satisfied_by
+type edge_kind =
+  | Refines
+  | Constrains
+  | Conflicts_with
+  | Candidate_satisfied_by
 
 type gap_status =
   | Satisfied
@@ -79,27 +83,30 @@ let gap_status_text = function
   | Conflicting -> "CONFLICTING"
   | Unsupported_by_policy -> "UNSUPPORTED_BY_POLICY"
 
-let assoc_field name = function `Assoc fields -> List.assoc_opt name fields | _ -> None
+let assoc_field name = function
+  | `Assoc fields -> List.assoc_opt name fields
+  | _ -> None
 
 let int_field name json =
   match assoc_field name json with Some (`Int value) -> Some value | _ -> None
 
 let string_field name json =
-  match assoc_field name json with Some (`String value) -> Some value | _ -> None
+  match assoc_field name json with
+  | Some (`String value) -> Some value
+  | _ -> None
 
 let parse_cell = function
   | `Assoc _ as json ->
-      begin
-        match
-          ( int_field "id" json,
-            string_field "kind" json,
-            string_field "text" json,
-            int_field "start_line" json,
-            int_field "end_line" json )
-        with
-        | Some id, Some kind, Some text, Some start_line, Some end_line ->
-            Ok { id; kind; text; start_line; end_line }
-        | _ -> Error "MIRAGE specification cell is missing required fields"
+      begin match
+        ( int_field "id" json,
+          string_field "kind" json,
+          string_field "text" json,
+          int_field "start_line" json,
+          int_field "end_line" json )
+      with
+      | Some id, Some kind, Some text, Some start_line, Some end_line ->
+          Ok { id; kind; text; start_line; end_line }
+      | _ -> Error "MIRAGE specification cell is missing required fields"
       end
   | _ -> Error "MIRAGE specification cell must be an object"
 
@@ -109,10 +116,9 @@ let parse_cells json =
       let rec loop acc = function
         | [] -> Ok (List.rev acc)
         | value :: rest ->
-            begin
-              match parse_cell value with
-              | Error _ as error -> error
-              | Ok cell -> loop (cell :: acc) rest
+            begin match parse_cell value with
+            | Error _ as error -> error
+            | Ok cell -> loop (cell :: acc) rest
             end
       in
       loop [] values
@@ -136,12 +142,17 @@ let contains needle text =
   Option.is_some (Centl_sci_interaction.find_substring ~needle text)
 
 let negative_phrases =
-  [ "must not"; "shall not"; "should not"; "do not"; "don't"; "never"; "without" ]
+  [
+    "must not"; "shall not"; "should not"; "do not"; "don't"; "never"; "without";
+  ]
 
 let polarity (cell : spec_cell) =
   if String.uppercase_ascii cell.kind = "NON_GOAL" then Negative
-  else if List.exists (fun phrase -> contains phrase (lower cell.text)) negative_phrases then
-    Negative
+  else if
+    List.exists
+      (fun phrase -> contains phrase (lower cell.text))
+      negative_phrases
+  then Negative
   else Positive
 
 let stop_words =
@@ -180,12 +191,15 @@ let semantic_tokens text =
   |> List.sort_uniq String.compare
 
 let intersection left right =
-  List.filter (fun value -> List.mem value right) left |> List.sort_uniq String.compare
+  List.filter (fun value -> List.mem value right) left
+  |> List.sort_uniq String.compare
 
 let overlap_coefficient left right =
   let denominator = min (List.length left) (List.length right) in
   if denominator = 0 then 0.0
-  else float_of_int (List.length (intersection left right)) /. float_of_int denominator
+  else
+    float_of_int (List.length (intersection left right))
+    /. float_of_int denominator
 
 let hard_cell (cell : spec_cell) =
   match String.uppercase_ascii cell.kind with
@@ -193,12 +207,14 @@ let hard_cell (cell : spec_cell) =
   | _ -> false
 
 let likely_conflict (left : spec_cell) (right : spec_cell) =
-  hard_cell left && hard_cell right && polarity left <> polarity right
+  hard_cell left && hard_cell right
+  && polarity left <> polarity right
   &&
   let left_tokens = semantic_tokens left.text in
   let right_tokens = semantic_tokens right.text in
   let shared = intersection left_tokens right_tokens in
-  List.length shared >= 2 && overlap_coefficient left_tokens right_tokens >= 0.75
+  List.length shared >= 2
+  && overlap_coefficient left_tokens right_tokens >= 0.75
 
 let conflicts (cells : spec_cell list) =
   let rec outer acc = function
@@ -207,7 +223,8 @@ let conflicts (cells : spec_cell list) =
         let acc =
           List.fold_left
             (fun acc right ->
-              if likely_conflict left right then (left.id, right.id) :: acc else acc)
+              if likely_conflict left right then (left.id, right.id) :: acc
+              else acc)
             acc rest
         in
         outer acc rest
@@ -222,14 +239,15 @@ let capability_set workspace =
 let capability_matches workspace request =
   let request_words = Centl_sci_capabilities.words request in
   capability_set workspace
-  |> List.map (fun capability -> (Centl_sci_capabilities.score request_words capability, capability))
+  |> List.map (fun capability ->
+      (Centl_sci_capabilities.score request_words capability, capability))
   |> List.filter (fun (score, _) -> score > 0)
   |> List.sort (fun (left_score, left) (right_score, right) ->
-         let by_score = compare right_score left_score in
-         if by_score <> 0 then by_score
-         else
-           String.compare left.Centl_sci_capabilities.name
-             right.Centl_sci_capabilities.name)
+      let by_score = compare right_score left_score in
+      if by_score <> 0 then by_score
+      else
+        String.compare left.Centl_sci_capabilities.name
+          right.Centl_sci_capabilities.name)
   |> List.map snd
 
 let is_alias_request text =
@@ -241,7 +259,8 @@ let is_alias_request text =
 let explicitly_materializable_request text =
   match Centl_sci_codegen.generate text with
   | Centl_sci_codegen.Generated _ -> true
-  | Centl_sci_codegen.Not_generated | Centl_sci_codegen.Needs_clarification _ -> false
+  | Centl_sci_codegen.Not_generated | Centl_sci_codegen.Needs_clarification _ ->
+      false
 
 let cell_is_conflicting conflict_pairs id =
   List.exists (fun (left, right) -> left = id || right = id) conflict_pairs
@@ -263,31 +282,45 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
         cell_id = cell.id;
         status = Conflicting;
         capability_matches = [];
-        reason = "a conservatively matched hard requirement has opposite polarity";
+        reason =
+          "a conservatively matched hard requirement has opposite polarity";
       }
   else
     let matches = capability_matches workspace cell.text in
     let match_names =
-      List.map (fun capability -> capability.Centl_sci_capabilities.name) matches
+      List.map
+        (fun capability -> capability.Centl_sci_capabilities.name)
+        matches
     in
     let plan = Centl_sci_build_plan.plan cell.text in
     let status, reason =
       match plan.layer with
       | Centl_sci_build_plan.Core_patch ->
           ( Core_change_required,
-            "the existing BUILD planner identifies this objective as a trusted/core implementation change" )
+            "the existing BUILD planner identifies this objective as a \
+             trusted/core implementation change" )
       | _ when explicitly_materializable_request cell.text ->
           ( Extension_required,
+<<<<<<< HEAD
             "the objective requests a concrete native CENTL definition that MIRAGE can stage deterministically; capability overlap supplies implementation machinery or ingredients but does not satisfy the request" )
+=======
+            "the objective requests a concrete native CENTL definition that \
+             MIRAGE can stage deterministically; capability overlap supplies \
+             implementation machinery or ingredients but does not satisfy the \
+             requested new binding" )
+>>>>>>> origin/main
       | _ when is_alias_request cell.text && matches <> [] ->
           ( Alias_or_wrapper,
-            "existing capabilities appear reusable; the requested semantic delta is primarily naming or wrapping" )
+            "existing capabilities appear reusable; the requested semantic \
+             delta is primarily naming or wrapping" )
       | _ when matches <> [] ->
           ( Composable,
-            "one or more existing capabilities overlap the objective; MIRAGE must attempt composition before synthesis" )
+            "one or more existing capabilities overlap the objective; MIRAGE \
+             must attempt composition before synthesis" )
       | _ ->
           ( Extension_required,
-            "no existing capability matched strongly enough to justify treating the objective as already available" )
+            "no existing capability matched strongly enough to justify \
+             treating the objective as already available" )
     in
     Some { cell_id = cell.id; status; capability_matches = match_names; reason }
 
@@ -295,37 +328,37 @@ let nearest_objective (cells : spec_cell list) before_id =
   let candidates =
     cells
     |> List.filter (fun (cell : spec_cell) ->
-           cell.id < before_id
-           &&
-           match String.uppercase_ascii cell.kind with
-           | "DIRECTIVE" | "INVARIANT" -> true
-           | _ -> false)
+        cell.id < before_id
+        &&
+        match String.uppercase_ascii cell.kind with
+        | "DIRECTIVE" | "INVARIANT" -> true
+        | _ -> false)
   in
   match List.rev candidates with [] -> None | value :: _ -> Some value
 
 let cell_edges (cells : spec_cell list) =
   cells
   |> List.filter_map (fun (cell : spec_cell) ->
-         match String.uppercase_ascii cell.kind with
-         | "ACCEPTANCE" | "EXAMPLE" ->
-             Option.map
-               (fun (objective : spec_cell) ->
-                 {
-                   source = cell_node_id cell.id;
-                   target = cell_node_id objective.id;
-                   kind = Refines;
-                 })
-               (nearest_objective cells cell.id)
-         | "NON_GOAL" ->
-             Option.map
-               (fun (objective : spec_cell) ->
-                 {
-                   source = cell_node_id cell.id;
-                   target = cell_node_id objective.id;
-                   kind = Constrains;
-                 })
-               (nearest_objective cells cell.id)
-         | _ -> None)
+      match String.uppercase_ascii cell.kind with
+      | "ACCEPTANCE" | "EXAMPLE" ->
+          Option.map
+            (fun (objective : spec_cell) ->
+              {
+                source = cell_node_id cell.id;
+                target = cell_node_id objective.id;
+                kind = Refines;
+              })
+            (nearest_objective cells cell.id)
+      | "NON_GOAL" ->
+          Option.map
+            (fun (objective : spec_cell) ->
+              {
+                source = cell_node_id cell.id;
+                target = cell_node_id objective.id;
+                kind = Constrains;
+              })
+            (nearest_objective cells cell.id)
+      | _ -> None)
 
 let conflict_edges pairs =
   List.map
@@ -340,17 +373,17 @@ let conflict_edges pairs =
 let capability_edges workspace (cells : spec_cell list) =
   cells
   |> List.filter (fun (cell : spec_cell) ->
-         match String.uppercase_ascii cell.kind with
-         | "DIRECTIVE" | "INVARIANT" -> true
-         | _ -> false)
+      match String.uppercase_ascii cell.kind with
+      | "DIRECTIVE" | "INVARIANT" -> true
+      | _ -> false)
   |> List.concat_map (fun (cell : spec_cell) ->
-         capability_matches workspace cell.text
-         |> List.map (fun capability ->
-                {
-                  source = cell_node_id cell.id;
-                  target = capability_node_id capability.Centl_sci_capabilities.name;
-                  kind = Candidate_satisfied_by;
-                }))
+      capability_matches workspace cell.text
+      |> List.map (fun capability ->
+          {
+            source = cell_node_id cell.id;
+            target = capability_node_id capability.Centl_sci_capabilities.name;
+            kind = Candidate_satisfied_by;
+          }))
 
 let cell_nodes (cells : spec_cell list) =
   List.map
@@ -365,24 +398,26 @@ let cell_nodes (cells : spec_cell list) =
 
 let capability_nodes workspace (cells : spec_cell list) =
   cells
-  |> List.concat_map (fun (cell : spec_cell) -> capability_matches workspace cell.text)
+  |> List.concat_map (fun (cell : spec_cell) ->
+      capability_matches workspace cell.text)
   |> List.sort_uniq (fun left right ->
-         String.compare left.Centl_sci_capabilities.name
-           right.Centl_sci_capabilities.name)
+      String.compare left.Centl_sci_capabilities.name
+        right.Centl_sci_capabilities.name)
   |> List.map (fun capability ->
-         {
-           id = capability_node_id capability.Centl_sci_capabilities.name;
-           kind = Capability;
-           label = Centl_sci_capabilities.render capability;
-           source_cell = None;
-         })
+      {
+        id = capability_node_id capability.Centl_sci_capabilities.name;
+        kind = Capability;
+        label = Centl_sci_capabilities.render capability;
+        source_cell = None;
+      })
 
 let build workspace (cells : spec_cell list) =
   let conflicts = conflicts cells in
   let gaps = List.filter_map (gap_for_cell workspace conflicts) cells in
   let nodes = cell_nodes cells @ capability_nodes workspace cells in
   let edges =
-    cell_edges cells @ conflict_edges conflicts @ capability_edges workspace cells
+    cell_edges cells @ conflict_edges conflicts
+    @ capability_edges workspace cells
   in
   { nodes; edges; gaps; conflicts }
 
@@ -392,7 +427,8 @@ let node_to_json (node : node) =
       ("id", `String node.id);
       ("kind", `String (node_kind_text node.kind));
       ("label", `String node.label);
-      ("source_cell", match node.source_cell with None -> `Null | Some id -> `Int id);
+      ( "source_cell",
+        match node.source_cell with None -> `Null | Some id -> `Int id );
     ]
 
 let edge_to_json (edge : edge) =
@@ -432,12 +468,12 @@ let to_json (graph : graph) =
 let read_spec path =
   try Ok (Yojson.Safe.from_file path) with
   | Sys_error message -> Error message
-  | Yojson.Json_error message -> Error ("invalid MIRAGE specification IR: " ^ message)
+  | Yojson.Json_error message ->
+      Error ("invalid MIRAGE specification IR: " ^ message)
 
 let output_path spec_path =
   if String.ends_with ~suffix:".spec.json" spec_path then
-    String.sub spec_path 0
-      (String.length spec_path - String.length ".spec.json")
+    String.sub spec_path 0 (String.length spec_path - String.length ".spec.json")
     ^ ".goals.json"
   else spec_path ^ ".goals.json"
 
@@ -465,7 +501,8 @@ let render_gap (gap : gap) =
     | values -> String.concat ", " values
   in
   Printf.sprintf "cell %d: %s — matches: %s — %s" gap.cell_id
-    (gap_status_text gap.status) matches gap.reason
+    (gap_status_text gap.status)
+    matches gap.reason
 
 let render (graph : graph) =
   let lines =

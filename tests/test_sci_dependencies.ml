@@ -4,8 +4,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let write_manifest workspace ~name ~enabled ~dependencies =
   match
@@ -18,7 +17,8 @@ let write_manifest workspace ~name ~enabled ~dependencies =
   | Ok _ -> ()
   | Error message -> Alcotest.fail message
 
-let has_issue predicate report = List.exists predicate report.Centl_sci_dependencies.issues
+let has_issue predicate report =
+  List.exists predicate report.Centl_sci_dependencies.issues
 
 let contains needle text =
   Option.is_some (Centl_sci_interaction.find_substring ~needle text)
@@ -32,12 +32,15 @@ let test_missing_local_dependency () =
       write_manifest workspace ~name:"alpha" ~enabled:true
         ~dependencies:[ "extension:beta" ];
       let report = Centl_sci_dependencies.validate workspace in
-      Alcotest.(check bool) "missing local dependency invalidates graph" false report.valid;
-      Alcotest.(check bool) "missing dependency is reported" true
+      Alcotest.(check bool)
+        "missing local dependency invalidates graph" false report.valid;
+      Alcotest.(check bool)
+        "missing dependency is reported" true
         (has_issue
            (function
              | Centl_sci_dependencies.Missing_extension
-                 { extension = "alpha"; dependency = "beta" } -> true
+                 { extension = "alpha"; dependency = "beta" } ->
+                 true
              | _ -> false)
            report))
 
@@ -51,12 +54,15 @@ let test_disabled_dependency_is_warning_not_structural_failure () =
       write_manifest workspace ~name:"alpha" ~enabled:true
         ~dependencies:[ "extension:beta" ];
       let report = Centl_sci_dependencies.validate workspace in
-      Alcotest.(check bool) "inactive target does not corrupt graph structure" true report.valid;
-      Alcotest.(check bool) "inactive dependency remains visible" true
+      Alcotest.(check bool)
+        "inactive target does not corrupt graph structure" true report.valid;
+      Alcotest.(check bool)
+        "inactive dependency remains visible" true
         (has_issue
            (function
              | Centl_sci_dependencies.Inactive_extension
-                 { extension = "alpha"; dependency = "beta" } -> true
+                 { extension = "alpha"; dependency = "beta" } ->
+                 true
              | _ -> false)
            report))
 
@@ -72,7 +78,8 @@ let test_cycle_is_rejected () =
         ~dependencies:[ "extension:alpha" ];
       let report = Centl_sci_dependencies.validate workspace in
       Alcotest.(check bool) "cycle invalidates graph" false report.valid;
-      Alcotest.(check bool) "cycle is reported" true
+      Alcotest.(check bool)
+        "cycle is reported" true
         (has_issue
            (function Centl_sci_dependencies.Cycle _ -> true | _ -> false)
            report))
@@ -86,10 +93,13 @@ let test_external_and_opaque_dependencies_are_preserved () =
       write_manifest workspace ~name:"reader" ~enabled:false
         ~dependencies:[ "external:astropy"; "legacy-runtime" ];
       let report = Centl_sci_dependencies.validate workspace in
-      Alcotest.(check bool) "external provenance is not falsely validated" true report.valid;
-      Alcotest.(check bool) "external dependency preserved" true
+      Alcotest.(check bool)
+        "external provenance is not falsely validated" true report.valid;
+      Alcotest.(check bool)
+        "external dependency preserved" true
         (List.mem ("reader", [ "astropy" ]) report.external_dependencies);
-      Alcotest.(check bool) "opaque dependency preserved" true
+      Alcotest.(check bool)
+        "opaque dependency preserved" true
         (List.mem ("reader", [ "legacy-runtime" ]) report.opaque_dependencies))
 
 let test_extension_listing_orders_local_dependencies_first () =
@@ -105,8 +115,8 @@ let test_extension_listing_orders_local_dependencies_first () =
         Centl_sci_extensions.list workspace
         |> List.map (fun manifest -> manifest.Centl_sci_extensions.name)
       in
-      Alcotest.(check (list string)) "dependency precedes dependent"
-        [ "zeta"; "alpha" ] names)
+      Alcotest.(check (list string))
+        "dependency precedes dependent" [ "zeta"; "alpha" ] names)
 
 let test_manifest_identity_mismatch_is_rejected () =
   let root = temp_dir "centl-caramels-manifest-identity-" in
@@ -123,7 +133,8 @@ let test_manifest_identity_mismatch_is_rejected () =
             `Assoc
               (List.map
                  (fun (field, value) ->
-                   if field = "name" then (field, `String "beta") else (field, value))
+                   if field = "name" then (field, `String "beta")
+                   else (field, value))
                  fields)
         | _ -> Alcotest.fail "test manifest must be an object"
       in
@@ -131,12 +142,13 @@ let test_manifest_identity_mismatch_is_rejected () =
       begin match Centl_sci_extensions.read_manifest workspace "alpha" with
       | Ok _ -> Alcotest.fail "manifest identity mismatch unexpectedly accepted"
       | Error message ->
-          Alcotest.(check bool) "identity mismatch refusal" true
+          Alcotest.(check bool)
+            "identity mismatch refusal" true
             (contains "file alpha.json declares name beta" message)
       end;
       let manifests, errors = Centl_sci_extensions.scan workspace in
-      Alcotest.(check int) "mismatched identity not executable" 0
-        (List.length manifests);
+      Alcotest.(check int)
+        "mismatched identity not executable" 0 (List.length manifests);
       Alcotest.(check int) "identity error retained" 1 (List.length errors))
 
 let test_activation_rejects_missing_local_dependency () =
@@ -151,12 +163,15 @@ let test_activation_rejects_missing_local_dependency () =
       | Error message -> Alcotest.fail message
       | Ok manifest ->
           begin match
-            Centl_sci_extensions.validate_local_dependencies_for_activation workspace
-              manifest
+            Centl_sci_extensions.validate_local_dependencies_for_activation
+              workspace manifest
           with
-          | Ok () -> Alcotest.fail "activation dependency validation unexpectedly succeeded"
+          | Ok () ->
+              Alcotest.fail
+                "activation dependency validation unexpectedly succeeded"
           | Error message ->
-              Alcotest.(check bool) "missing dependency refusal" true
+              Alcotest.(check bool)
+                "missing dependency refusal" true
                 (contains "required local extension beta is missing" message)
           end)
 
@@ -173,12 +188,15 @@ let test_activation_rejects_disabled_local_dependency () =
       | Error message -> Alcotest.fail message
       | Ok manifest ->
           begin match
-            Centl_sci_extensions.validate_local_dependencies_for_activation workspace
-              manifest
+            Centl_sci_extensions.validate_local_dependencies_for_activation
+              workspace manifest
           with
-          | Ok () -> Alcotest.fail "disabled dependency unexpectedly allowed activation"
+          | Ok () ->
+              Alcotest.fail
+                "disabled dependency unexpectedly allowed activation"
           | Error message ->
-              Alcotest.(check bool) "disabled dependency refusal" true
+              Alcotest.(check bool)
+                "disabled dependency refusal" true
                 (contains "required local extension beta is disabled" message)
           end)
 
@@ -195,10 +213,12 @@ let test_disabling_required_extension_is_rejected () =
       begin match Centl_sci_extensions.set_enabled workspace "alpha" false with
       | Ok _ -> Alcotest.fail "required extension was unexpectedly disabled"
       | Error message ->
-          Alcotest.(check bool) "dependent refusal" true
+          Alcotest.(check bool)
+            "dependent refusal" true
             (contains "required by enabled local extension beta" message)
       end;
-      Alcotest.(check int) "refusal does not mutate revision" revision
+      Alcotest.(check int)
+        "refusal does not mutate revision" revision
         (Centl_sci_workspace.read_revision workspace))
 
 let test_removing_required_extension_is_rejected () =
@@ -214,12 +234,15 @@ let test_removing_required_extension_is_rejected () =
       begin match Centl_sci_extensions.remove workspace "alpha" with
       | Ok _ -> Alcotest.fail "required extension was unexpectedly removed"
       | Error message ->
-          Alcotest.(check bool) "dependent refusal" true
+          Alcotest.(check bool)
+            "dependent refusal" true
             (contains "required by enabled local extension beta" message)
       end;
-      Alcotest.(check int) "refusal does not mutate revision" revision
+      Alcotest.(check int)
+        "refusal does not mutate revision" revision
         (Centl_sci_workspace.read_revision workspace);
-      Alcotest.(check bool) "manifest remains present" true
+      Alcotest.(check bool)
+        "manifest remains present" true
         (Sys.file_exists (Centl_sci_workspace.manifest_path workspace "alpha")))
 
 let () =

@@ -39,8 +39,8 @@ let test_verification_language () =
       Alcotest.(check string) "left" "0.1 + 0.2" data.left;
       Alcotest.(check string) "relation" "equal" data.relation;
       Alcotest.(check string) "right" "3/10" data.right;
-      Alcotest.(check (list string)) "no inferred assumptions" []
-        data.verification_assumptions
+      Alcotest.(check (list string))
+        "no inferred assumptions" [] data.verification_assumptions
   | _ -> Alcotest.fail "expected verification_claim fast-path IR"
 
 let test_verification_inequality_language () =
@@ -85,11 +85,13 @@ let test_exact_constant_symbol_language () =
 
 let test_measured_constant_is_explicitly_outside_catalog () =
   match
-    Centl_sci_fastpath.interpret "What is the Newtonian gravitational constant G?"
+    Centl_sci_fastpath.interpret
+      "What is the Newtonian gravitational constant G?"
     |> require_some "measured Newtonian gravitational constant boundary"
   with
   | Centl_sci_ir.Unsupported data ->
-      Alcotest.(check bool) "measured boundary is explicit" true
+      Alcotest.(check bool)
+        "measured boundary is explicit" true
         (Option.is_some
            (Centl_sci_interaction.find_substring ~needle:"measured Newtonian"
               data.unsupported_reason))
@@ -173,24 +175,30 @@ let verification_outcome problem =
 
 let test_verification_executes_verified () =
   let outcome = verification_outcome "Verify 0.1 + 0.2 equals 3/10." in
-  Alcotest.(check string) "status" "established"
+  Alcotest.(check string)
+    "status" "established"
     (Centl_sci_runtime.status_text outcome.status);
-  Alcotest.(check string) "human verdict" "Verified."
+  Alcotest.(check string)
+    "human verdict" "Verified."
     (Centl_sci_present.human outcome)
 
 let test_verification_executes_refuted () =
   let outcome = verification_outcome "Verify 2 + 2 equals 5." in
-  Alcotest.(check string) "status" "established"
+  Alcotest.(check string)
+    "status" "established"
     (Centl_sci_runtime.status_text outcome.status);
-  Alcotest.(check string) "human verdict" "Refuted."
+  Alcotest.(check string)
+    "human verdict" "Refuted."
     (Centl_sci_present.human outcome)
 
 let test_verification_unknown_remains_visible () =
   let outcome = verification_outcome "Verify x + 1 equals 2." in
-  Alcotest.(check string) "status" "unresolved"
+  Alcotest.(check string)
+    "status" "unresolved"
     (Centl_sci_runtime.status_text outcome.status);
   let rendered = Centl_sci_present.human outcome in
-  Alcotest.(check bool) "unknown verifier verdict is visible" true
+  Alcotest.(check bool)
+    "unknown verifier verdict is visible" true
     (String.starts_with ~prefix:"Unknown" rendered)
 
 let test_exact_constant_executes () =
@@ -199,13 +207,15 @@ let test_exact_constant_executes () =
     |> require_some "speed of light"
   in
   let outcome = Centl_sci_runtime.execute ir in
-  Alcotest.(check string) "status" "established"
+  Alcotest.(check string)
+    "status" "established"
     (Centl_sci_runtime.status_text outcome.status);
   match outcome.response with
   | Some response ->
       begin match Centl_sci_runtime.result_text response with
       | Some text ->
-          Alcotest.(check bool) "exact c value appears" true
+          Alcotest.(check bool)
+            "exact c value appears" true
             (Option.is_some
                (Centl_sci_interaction.find_substring ~needle:"299792458" text))
       | None -> Alcotest.fail "missing constant result text"

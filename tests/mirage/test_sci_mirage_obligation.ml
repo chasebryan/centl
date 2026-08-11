@@ -4,8 +4,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let cell id kind text : Centl_sci_mirage_goal.spec_cell =
   { id; kind; text; start_line = id; end_line = id }
@@ -20,21 +19,28 @@ let test_extension_obligations_keep_assurance_honest () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       let graph =
         Centl_sci_mirage_goal.build workspace
           [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
       in
       let report = Centl_sci_mirage_obligation.build graph in
-      Alcotest.(check bool) "candidate is not pre-blocked" true
+      Alcotest.(check bool)
+        "candidate is not pre-blocked" true
         (report.blocked_cells = []);
-      Alcotest.(check bool) "parser/build validation required" true
+      Alcotest.(check bool)
+        "parser/build validation required" true
         (has_kind Centl_sci_mirage_obligation.Candidate_parses report);
-      Alcotest.(check bool) "regression evidence required" true
+      Alcotest.(check bool)
+        "regression evidence required" true
         (has_kind Centl_sci_mirage_obligation.Mandatory_regression report);
-      Alcotest.(check bool) "rollback required" true
+      Alcotest.(check bool)
+        "rollback required" true
         (has_kind Centl_sci_mirage_obligation.Rollback_available report);
-      Alcotest.(check bool) "trust boundary stays explicit" true
+      Alcotest.(check bool)
+        "trust boundary stays explicit" true
         (has_kind Centl_sci_mirage_obligation.Trust_boundary_explicit report))
 
 let test_ambiguity_blocks_synthesis () =
@@ -42,15 +48,18 @@ let test_ambiguity_blocks_synthesis () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       let graph =
         Centl_sci_mirage_goal.build workspace
           [ cell 1 "QUESTION" "Which interpolation basis should be exposed?" ]
       in
       let report = Centl_sci_mirage_obligation.build graph in
-      Alcotest.(check (list int)) "question blocks its source cell" [ 1 ]
-        report.blocked_cells;
-      Alcotest.(check bool) "clarification obligation emitted" true
+      Alcotest.(check (list int))
+        "question blocks its source cell" [ 1 ] report.blocked_cells;
+      Alcotest.(check bool)
+        "clarification obligation emitted" true
         (has_kind Centl_sci_mirage_obligation.Clarification_required report))
 
 let test_composition_requires_reuse_attempt () =
@@ -58,14 +67,20 @@ let test_composition_requires_reuse_attempt () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let graph =
         Centl_sci_mirage_goal.build workspace
-          [ cell 1 "DIRECTIVE" "Allow users to differentiate symbolic expressions" ]
+          [
+            cell 1 "DIRECTIVE"
+              "Allow users to differentiate symbolic expressions";
+          ]
       in
       let report = Centl_sci_mirage_obligation.build graph in
-      Alcotest.(check bool) "reuse obligation emitted" true
+      Alcotest.(check bool)
+        "reuse obligation emitted" true
         (has_kind Centl_sci_mirage_obligation.Reuse_attempted report))
 
 let test_construct_persists_machine_readable_report () =
@@ -73,7 +88,9 @@ let test_construct_persists_machine_readable_report () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       let graph =
         Centl_sci_mirage_goal.build workspace
           [ cell 1 "DIRECTIVE" "Implement quasar_flux_tensorization" ]
@@ -82,12 +99,12 @@ let test_construct_persists_machine_readable_report () =
       match Centl_sci_mirage_obligation.construct goal_path graph with
       | Error message -> Alcotest.fail message
       | Ok (path, report) ->
-          Alcotest.(check bool) "obligations artifact exists" true
-            (Sys.file_exists path);
-          Alcotest.(check string) "artifact suffix" "design.obligations.json"
-            (Filename.basename path);
-          Alcotest.(check bool) "artifact contains obligations" true
-            (report.obligations <> []))
+          Alcotest.(check bool)
+            "obligations artifact exists" true (Sys.file_exists path);
+          Alcotest.(check string)
+            "artifact suffix" "design.obligations.json" (Filename.basename path);
+          Alcotest.(check bool)
+            "artifact contains obligations" true (report.obligations <> []))
 
 let () =
   Alcotest.run "CENTL-MIRAGE evidence obligations"
