@@ -1,72 +1,56 @@
 ![Free Computation Foundation — FCF and camel banner](assets/branding/fcf-centl-banner.png)
 
-# CENTL
+# CENTL OASIS
 
-**Exact-first mathematics, physics, and scientific computation for GNU/Linux.**
+**The authoritative standard-product line for CENTL.**
 
 > Good maths should be free.
 
-CENTL is built around a simple rule: **never manufacture mathematical certainty**.
-Exact values remain exact, approximations carry explicit justification, invalid or
-unsupported work stays visible, and semantic tooling is never allowed to overrule
-the mathematical evidence produced by CENTL itself.
+CENTL is exact-first mathematics, physics, and scientific computation for GNU/Linux. Its governing numerical rule is simple: **never manufacture mathematical certainty**. Exact values remain exact, approximations carry explicit justification, unsupported work remains visible, and untrusted semantic tooling cannot promote its own claims into verified CENTL mathematics.
 
-## Stable product authority
+## Current release status
 
-This `main` branch is the **complete developer and research distribution** of CENTL.
-It contains the comprehensive codebase and may include experimental or
-Mirage-originated work that has not yet earned stable-product status.
+**CENTL v0.14.0 is an Oasis candidate.**
 
-The [`oasis`](https://github.com/chasebryan/centl/tree/oasis) branch is the
-authoritative source for CENTL's standard product: stable release identity,
-recommended capabilities, supported installation claims, release qualification,
-and other flagship product statements come from Oasis.
+This branch contains the integrated v0.14.0 consolidation baseline and is undergoing the complete Oasis qualification process. The declaration
 
-The [`mirage`](https://github.com/chasebryan/centl/tree/mirage) branch is the
-laboratory for active development, experiments, research, prototypes, and new
-features. Mirage intentionally does **not** have to satisfy every Oasis-only
-release gate while that work is still being developed.
+> **CENTL v0.14.0 is an Oasis release.**
+
+is deliberately withheld until the exact final `oasis` commit has passed every applicable verification, hardening, security, packaging, installation, hosted-proof, release-identity, and publication gate.
+
+Oasis is not a codename or a SemVer suffix. It is a repeatable quality classification. Stable tags remain ordinary versions such as `v0.14.0`.
+
+See [The CENTL Oasis Release Standard](docs/OASIS.md) and [CENTL release and branch policy](docs/RELEASE-POLICY.md).
+
+## What `oasis` means
+
+The lowercase `oasis` branch is CENTL's authoritative standard-product branch. Stable release identity, recommended installation, supported product claims, and public release declarations come from this branch.
+
+The other long-lived branches deliberately have different jobs:
+
+- [`mirage`](https://github.com/chasebryan/centl/tree/mirage) is the development and research laboratory for new features, experiments, speculative mathematics, architecture work, and self-development research.
+- [`main`](https://github.com/chasebryan/centl/tree/main) is the comprehensive developer and research distribution and may contain integrated experimental material that has not earned Oasis assurance.
 
 > **Oasis is a promotion state, not a property of every commit.**
 
-See [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md) for the canonical branch and
-release policy.
+## Standard native product
 
-**Current main-line consolidation candidate: CENTL v0.14.0.** It integrates the
-validated post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory
-into one reviewed developer/research baseline. The intermediate v0.13.0 development
-line was not formally published as a stable release.
+The v0.14.0 standard GNU/Linux release archive installs three supported command surfaces:
 
-v0.14.0 is being qualified for an **Oasis declaration**. Oasis is not a codename:
-it is a repeatable release classification reserved for a CENTL release that has
-been reconciled, organized, hardened, validated, and established as a cohesive
-stable baseline. The declaration is withheld until those gates are complete.
+- `centl` — exact calculator, numerical language, verification engine, JSON protocol, and MCP interface;
+- `centl-physics` — exact-first typed physics operations, units, vectors, mechanics, and diagnostics;
+- `centl-sci` — answer-first mathematics and physics interaction with user-owned extension workflows.
 
-CENTL combines five closely related pieces:
+The native release target is **GNU/Linux x86_64**. Historical macOS and Windows implementation material may remain in repository history, but it is not part of the active Oasis release promise.
 
-| Surface | Purpose |
-| --- | --- |
-| `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
-| `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
-| `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
-| **CENTL-MIRAGE** | Local introspective self-development bootstrap for specification ingestion, capability analysis, staged materialization, and evidence planning |
-| **CENTL CARAVAN** | Content-addressed authenticated preservation and availability system, included in v0.14.0 as a bounded Phase 1 local laboratory |
-
-## Quick start
-
-For the standard product, install from the authoritative **Oasis** branch. CENTL is
-developed, validated, packaged, and released for **GNU/Linux**.
+Install the standard product from the authoritative line:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install
 ```
 
-Developers and researchers who intentionally want the comprehensive tree should
-clone `main`; experimental work should be expected there and on `mirage`.
-
-If the installer adds `~/.local/bin` to your shell configuration, open a new
-terminal once. Then launch the scientific interface:
+Then start the scientific interface:
 
 ```sh
 centl-sci
@@ -81,6 +65,8 @@ centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
 centl-physics convert 100 cm m
 ```
 
+Expected exact-first results include:
+
 ```text
 3/10
 x in {2, 3}
@@ -88,243 +74,105 @@ verdict: verified (closed_exact_rational via closed_rational_comparison); compar
 1
 ```
 
-The native installer verifies its release checksum, stages and smoke-tests the
-package before activation, validates exact arithmetic and physics conversion, and
-activates the command launchers atomically.
+The installer verifies the release checksum, rejects unsafe archive structure, stages the package away from the active installation, smoke-tests the installed commands, and only then activates the new version.
 
-For full installation details and offline archives, see
-[docs/INSTALL.md](docs/INSTALL.md).
+See [Installation](docs/INSTALL.md) for the complete supported path.
 
-## CENTL-SCi — v0.0.2-Caramels
+## CENTL-SCi v0.0.2-Caramels
 
-**Caramels** is the current CENTL-SCi interaction generation: a local scientific
-interface for expressing mathematics and physics in ordinary language while
-keeping CENTL's exact and verified machinery in control of the answer.
+Caramels is the current scientific interaction generation. It lets users express supported mathematics and physics in ordinary language while CENTL's deterministic and verified machinery remains the authority for the result.
 
-A typical session is intentionally small:
+It includes deterministic exact fast paths, evidence-backed presentation, clarification for underspecified requests, persistent user workspaces and revisions, controlled BUILD/self-extension workflows, and an optional local semantic model behind a closed validation boundary.
 
-```text
-CENTL-SCi v0.0.2-Caramels
-Free for science.
+A local model is an interpreter of intent, **not a mathematical authority**. Generated or external semantics cannot promote themselves into verified CENTL core.
 
-> What is 0.1 plus 0.2?
-3/10
-> Solve x squared minus 5x plus 6 equals zero.
-x = 2 or x = 3
-> Solve -4.9*t^2 + 20*t = 0 for t.
-t = 0 or t = 200/49
->
-```
+See [CENTL-SCi](docs/SCI.md) and [Caramels BUILD](docs/CARAMELS-BUILD.md).
 
-The final result remains `200/49` rather than being silently collapsed into an
-arbitrary floating-point decimal.
+## CENTL-MIRAGE boundary
 
-Caramels provides:
+CENTL-MIRAGE, the **Mathematical Introspective Recursive Autonomous Growth Engine**, is present in the v0.14.0 source baseline as a bounded local self-development bootstrap.
 
-- deterministic fast paths for exact arithmetic, equations, algebraic transforms,
-  certified approximation, units, constants, and supported mechanics;
-- `MATH>`, `PHYS>`, `HYBRID>`, and `BUILD>` interaction modes;
-- evidence-backed interpretation and explanation rather than opaque answer text;
-- clarification when a problem is underspecified instead of invented values;
-- persistent user workspaces, revisions, snapshots, extension packages, and
-  dependency-aware activation;
-- a user-owned BUILD surface for extending CENTL without silently redefining the
-  verified core;
-- optional local semantic-model interpretation behind a closed validation boundary.
+The admitted v0.14.0 boundary includes specification ingestion, SHA-256 provenance, typed goal/capability analysis, conflict and gap detection, deterministic candidate materialization where supported, parser evidence, evidence obligations and plans, readiness/admission/review artifacts, and non-mutating candidate transactions.
 
-A local language model, when configured, is an **interpreter of intent — not a
-mathematical authority**. Model output must pass CENTL-SCi's typed problem boundary
-and is lowered into CENTL or CENTL Physics before a result can inherit mathematical
-meaning. Model weights remain separate artifacts and are never silently downloaded.
+MIRAGE does **not** gain verified-core authority merely because its source is present on Oasis. Generated candidates remain untrusted until they cross the applicable parser, type/dimension, regression, rollback, trust, and verification boundaries. v0.14.0 does not claim autonomous promotion of generated source into the verified core.
 
-See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
-[docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.
+The standard v0.14.0 native archive does not install `centl-mirage` as one of the three public release commands listed above. MIRAGE remains an explicitly bounded source/laboratory capability for this release unless a later independently qualified release promotes that command surface.
 
-## CENTL-MIRAGE
+See [CENTL-MIRAGE](docs/CENTL-MIRAGE.md).
 
-**Mathematical Introspective Recursive Autonomous Growth Engine**
+## CENTL CARAVAN Phase 1 boundary
 
-CENTL-MIRAGE is the local self-development architecture for CENTL-SCi. Its purpose
-is to let a user describe a system, capability, mathematical workflow, or design in
-ordinary language and let CENTL turn that intent into an explicit, inspectable,
-reversible development process without requiring a paid or remote AI service.
+CENTL CARAVAN is included in the v0.14.0 source baseline as a **Phase 1 local laboratory** for authenticated, content-addressed artifact preservation and availability.
 
-MIRAGE is not a chatbot that is trusted to rewrite source code. It is a recursive
-engineering architecture built around CENTL's existing rule that claims require
-evidence. The long-term cycle is:
+Its governing invariant is:
 
-```text
-INGEST
-  -> NORMALIZE
-  -> BUILD GOAL GRAPH
-  -> INTROSPECT CAPABILITIES
-  -> COMPUTE GAPS
-  -> SYNTHESIZE CANDIDATES
-  -> CONSTRUCT OBLIGATIONS
-  -> VERIFY / SEARCH FOR COUNTEREXAMPLES
-  -> COMPARE WITH BASELINE
-  -> ACCEPT OR REJECT
-  -> RECORD REVISION + EVIDENCE
-  -> RECOMPUTE GAPS
-```
+> **A carrier may provide bytes, but a carrier may never define which bytes are trusted.**
 
-The v0.14.0 bootstrap implements the controlled front half of that architecture. A
-user document remains attributable source material. MIRAGE preserves provenance,
-lowers the document into a Specification IR, constructs a typed goal/capability
-graph, detects conflicts, and first asks whether an existing CENTL capability can
-satisfy the request through composition before creating anything new.
+The laboratory includes bounded content-addressed storage, deterministic chunk identities, Ed25519 carrier identity, signed policy acceptance, TUF-authenticated catalogs, outbound-only laboratory transport, capacity and resource ceilings, verified multi-carrier retrieval, and bad-carrier quarantine/fallback behavior.
 
-MIRAGE constructs explicit evidence obligations and stages a non-mutating candidate
-transaction describing the smallest currently justified strategy. Where a request
-maps to supported deterministic CENTL generation, MIRAGE can materialize the exact
-candidate source, bind it to the transaction with SHA-256 identity, and run the
-authoritative parser against that staged source. Parser success establishes syntax
-only; it does not establish mathematical correctness, regression success, activation
-safety, or verified-core assurance.
+This is **not** authorization for arbitrary public volunteer enrollment or a production public carrier network. Public deployment, abuse operations, privacy/telemetry policy, and production rollout remain outside the v0.14.0 Oasis product boundary.
 
-A readiness artifact consumes that transaction-bound structural evidence, and an
-execution-plan artifact names the still-required evidence mechanisms and their
-preconditions. These artifacts explicitly retain `workspace_mutated=false`,
-`execution_performed=false`, and `assurance_promoted=false`. Ambiguous, conflicting,
-unsupported, or policy-blocked goals do not become guessed source edits.
+CARAVAN is not installed as a command in the standard v0.14.0 native archive.
 
-Candidate changes are admitted only after explicit engineering and assurance gates.
-The architecture separates hard admissibility from preference: parsing, type and
-dimension safety, invariants, regressions, provenance, trust boundaries, and
-rollback requirements come before any candidate is scored or preferred. Among
-admissible candidates, MIRAGE favors the smallest semantic delta, stronger evidence,
-native CENTL mechanisms, lower dependency surface, and preserved behavior.
+See [CARAVAN](docs/CARAVAN.md), [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md), and [CARAVAN rollout](docs/CARAVAN-ROLLOUT.md).
 
-The local command surface includes `centl-mirage start PATH`, `ingest`, `analyze`,
-and `status`. Actual autonomous source mutation, CEGIS/equality-saturation execution,
-semantic behavioral fingerprints, evidence execution, and monotone autonomous
-acceptance/rejection remain later MIRAGE layers.
+## Numerical contract
 
-A local semantic model may propose interpretations, programs, tests, names, or
-refactorings, but it never confers mathematical or engineering authority. Its output
-must cross the same CENTL parsing, validation, testing, regression, and verification
-boundaries as every other candidate.
-
-MIRAGE autonomy is local. It does not imply automatic network publication, and a
-user-provided document is always treated as data rather than executable authority.
-
-See [docs/CENTL-MIRAGE.md](docs/CENTL-MIRAGE.md) for the full architecture and the
-implemented v0.14.0 boundary.
-
-## CENTL CARAVAN
-
-**Content-Addressed Resilient Artifact Verification and Availability Network**
-
-v0.14.0 includes the completed **CARAVAN Phase 1 local laboratory**. It is a bounded,
-reproducible environment for protecting and retrieving approved CENTL/FCF artifacts;
-it is **not** authorization for arbitrary public volunteer enrollment.
-
-CARAVAN is designed as the preservation and availability layer for approved CENTL
-and FCF artifacts, so ordinary Linux machines can contribute bounded storage and
-bandwidth without becoming authorities over the content they carry.
-
-> A carrier may provide bytes, but a carrier may never define which bytes are trusted.
-
-CARAVAN separates **availability** from **authority**. Artifact identity is bound
-to authenticated metadata, exact byte lengths, cryptographic whole-file identity,
-and deterministic chunk identities. A carrier can replicate an artifact, but it
-cannot redefine the artifact that CENTL expects.
-
-The Phase 1 laboratory includes:
-
-- content-addressed immutable storage with integrity-checked promotion;
-- exact whole-file SHA-256 plus deterministic 4 MiB chunk records;
-- Ed25519 pseudonymous carrier identity and live proof of possession;
-- signed policy-acceptance receipts without host/user identity fields;
-- TUF-authenticated artifact catalogs with an independently supplied trust root;
-- outbound-only laboratory carrier/coordinator sessions with bounded bodies,
-  challenge/session populations, polling, concurrency, reconnect behavior, and
-  resource use;
-- pre-transfer storage-capacity enforcement and authenticated chunk-size limits;
-- short-lived, artifact/carrier-bound, single-use retrieval capabilities;
-- verified multi-carrier retrieval with automatic quarantine and fallback when a
-  carrier supplies incorrect bytes;
-- hostile-transfer rejection for corruption, ordering errors, truncation,
-  appended bytes, and invalid authenticated chunk layouts;
-- explicit `join`, `status`, and `leave` lifecycle plus a reproducible local lab.
-
-Production relay deployment, public enrollment, final privacy/telemetry policy,
-abuse operations, and the other public-network rollout gates remain separate work.
-CARAVAN does not claim global anonymity or protection against every traffic-analysis
-adversary.
-
-Architecture and policy are documented in
-[docs/CARAVAN.md](docs/CARAVAN.md),
-[docs/CARAVAN-THREAT-MODEL.md](docs/CARAVAN-THREAT-MODEL.md),
-[docs/CARAVAN-HOST-POLICY.md](docs/CARAVAN-HOST-POLICY.md), and
-[docs/CARAVAN-ROLLOUT.md](docs/CARAVAN-ROLLOUT.md).
-
-## The numerical contract
-
-CENTL's behavior is intentionally conservative:
+CENTL's stable behavior is intentionally conservative:
 
 - integers, fractions, and decimal literals are exact values;
 - exact results remain exact for as long as the admitted mathematics permits;
-- requested approximations return justified enclosures rather than unqualified
-  floating-point guesses;
+- requested approximations return justified enclosures rather than unqualified floating-point guesses;
 - mathematical and physical dimension errors fail explicitly;
 - unsupported or unresolved operations remain unsupported or unresolved;
-- generated, external, or model-produced semantics cannot promote themselves to
-  verified CENTL core;
+- generated, external, or model-produced semantics cannot promote themselves to verified CENTL core;
 - every unqualified printed digit must be justified.
 
-## CENTL Physics
+## Oasis qualification
 
-CENTL Physics provides exact rational unit conversion, SI dimensional analysis,
-3D vector and particle operations, force and gravity evaluation, energy and
-momentum diagnostics, bounded collision/contact reasoning, and narrow exact
-event-aware mechanics contracts.
-
-It does not pretend to be a universal physics simulator. Supported domains and
-known boundaries are documented explicitly in [docs/PHYSICS.md](docs/PHYSICS.md).
-
-## Linux-first platform policy
-
-GNU/Linux is the sole reference platform for current development, CI, packaging,
-validation, installation, and release work. macOS and Windows are not active
-support targets.
-
-Historical portability code may remain in the repository where retaining it is
-less disruptive than deleting it, but current CENTL engineering is intentionally
-focused on one environment that can be tested, reproduced, and improved quickly.
-See [docs/SCI_PLATFORM_SUPPORT.md](docs/SCI_PLATFORM_SUPPORT.md) for the platform
-policy.
-
-## Development
-
-Native Oasis releases are recommended for ordinary use. Development and research
-from the complete `main` tree use the pinned toolchain and verified F* extraction
-path on Linux:
+The public qualification command is:
 
 ```sh
-scripts/bootstrap-opam
-eval "$(opam env --switch=centl)"
-make test
+./scripts/oasis
 ```
 
-Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
-[CONTRIBUTING.md](CONTRIBUTING.md). Branch targeting and promotion rules are defined
-in [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
+The engine is fail-closed. It checks the executing pinned toolchain, release-metadata coherence, F* verification and fresh extraction identity, formatting and repository quality, source integrity and supply-chain pins, native and Python suites, mandatory sanitizer-backed hardening, fuzz/metamorphic/performance coverage, Julia/Nemo differential validation, CENTL-SCi interface behavior, release packaging, hostile archive structure, isolated installation, and durable evidence generation.
 
-The supported source-tree organization is documented in
-[docs/REPOSITORY-MAP.md](docs/REPOSITORY-MAP.md).
+Final release identity additionally requires the exact authoritative `oasis` head, successful mandatory hosted Oasis checks, the exact SemVer tag, and the final release-state checks defined by project policy.
+
+A green badge alone is not an Oasis declaration if known release-blocking work remains.
+
+## Development flow
+
+The ordinary maturity path is:
+
+```text
+feature / research work
+         |
+         v
+      mirage
+         |
+         | stabilize + satisfy the complete Oasis gate
+         v
+       oasis
+         |
+         v
+ stable release / tag
+```
+
+`main` remains the integrated developer/research distribution rather than another maturity rung.
+
+Contribution targeting is defined in [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
 
 ## Documentation
 
+- [Oasis release standard](docs/OASIS.md)
 - [Branch and release policy](docs/RELEASE-POLICY.md)
-- [CENTL-SCi](docs/SCI.md)
-- [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
-- [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
-- [CENTL CARAVAN](docs/CARAVAN.md)
-- [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
-- [CARAVAN host policy](docs/CARAVAN-HOST-POLICY.md)
-- [CARAVAN rollout](docs/CARAVAN-ROLLOUT.md)
+- [v0.14.0 release candidate notes](docs/releases/0.14.0.md)
+- [Repository map](docs/REPOSITORY-MAP.md)
+- [Security policy and threat boundaries](SECURITY.md)
 - [Installation](docs/INSTALL.md)
+- [CENTL-SCi](docs/SCI.md)
 - [Syntax](docs/SYNTAX.md)
 - [Mathematics](docs/MATHEMATICS.md)
 - [Numerical contract](docs/NUMERICS.md)
@@ -333,20 +181,14 @@ The supported source-tree organization is documented in
 - [Machine protocol](docs/PROTOCOL.md)
 - [MCP adapter](docs/MCP.md)
 - [Architecture](docs/DESIGN.md)
-- [Repository map](docs/REPOSITORY-MAP.md)
-- [v0.14.0 release notes](docs/releases/0.14.0.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 
 ## License
 
-FCF-owned CENTL software is licensed under the **Apache License 2.0** (`Apache-2.0`).
-Project documentation is licensed under **CC BY 4.0** where identified, while
-official FCF/CENTL branding is governed separately so forks remain free without
-being mistaken for official releases.
+FCF-owned CENTL software is licensed under the **Apache License 2.0** (`Apache-2.0`). Project documentation is licensed under **CC BY 4.0** where identified, while official FCF/CENTL branding is governed separately so forks remain free without being mistaken for official releases.
 
-See [LICENSING.md](LICENSING.md), [TRADEMARKS.md](TRADEMARKS.md), and
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the complete license map.
+See [LICENSING.md](LICENSING.md), [TRADEMARKS.md](TRADEMARKS.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Developed under the **Free Computation Foundation**.
 
