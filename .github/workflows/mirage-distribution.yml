@@ -10,15 +10,21 @@ permissions:
   contents: write
 
 concurrency:
-  group: centl-mirage-distribution
-  cancel-in-progress: true
+  group: centl-distribution-writer
+  cancel-in-progress: false
 
 env:
-  NATIVE_PREFIX: ${{ runner.temp }}/centl-native
-  PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-  LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-  LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-  C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+  FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
+  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
+  GMP_VERSION: "6.3.0"
+  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
+  MPFR_VERSION: "4.2.2"
+  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
+  FLINT_VERSION: "3.0.1"
+  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
 
 jobs:
   publish:
@@ -30,6 +36,18 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Configure runner paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf 'NATIVE_PREFIX=%s/centl-native\n' "$RUNNER_TEMP"
+            printf 'PKG_CONFIG_PATH=%s/centl-native/lib/pkgconfig\n' "$RUNNER_TEMP"
+            printf 'LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'LD_LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'C_INCLUDE_PATH=%s/centl-native/include\n' "$RUNNER_TEMP"
+          } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
         run: |
@@ -62,6 +80,12 @@ jobs:
           make release VERSION="$version"
           (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
 
+          mkdir -p "$RUNNER_TEMP/mirage-package"
+          cp dist/centl-linux-x86_64.tar.gz \
+            "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz"
+          cp dist/centl-linux-x86_64.tar.gz.sha256 \
+            "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz.sha256"
+
       - name: Publish rolling and addressable Mirage bytes
         shell: bash
         run: |
@@ -76,8 +100,10 @@ jobs:
             build_dir="channels/mirage/builds/$GITHUB_SHA"
             latest_dir="channels/mirage/latest"
             mkdir -p "$build_dir" "$latest_dir"
-            cp dist/centl-linux-x86_64.tar.gz "$build_dir/centl-linux-x86_64.tar.gz"
-            cp dist/centl-linux-x86_64.tar.gz.sha256 "$build_dir/centl-linux-x86_64.tar.gz.sha256"
+            cp "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz" \
+              "$build_dir/centl-linux-x86_64.tar.gz"
+            cp "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz.sha256" \
+              "$build_dir/centl-linux-x86_64.tar.gz.sha256"
             printf '%s\n' "$GITHUB_SHA" > "$build_dir/SOURCE-COMMIT"
             printf '%s\n' "$VERSION" > "$build_dir/VERSION"
 
