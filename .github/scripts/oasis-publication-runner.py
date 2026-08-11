@@ -20,6 +20,8 @@ if spec is None or spec.loader is None:
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
+_reopened_drafts: set[int] = set()
+
 
 def _release_id(upload_url: str) -> int:
     base = upload_url.split("{", 1)[0]
@@ -43,9 +45,57 @@ def _find_named_asset(self, release_id: int, name: str):
     return matches[0] if matches else None
 
 
+def _ensure_uploadable_release(self, release_id: int) -> None:
+    release = self.json("GET", f"/repos/{self.repo}/releases/{release_id}")
+    if not isinstance(release, dict):
+        raise module.LatchError("cannot read release state before asset upload")
+    if release.get("draft"):
+        _reopened_drafts.add(release_id)
+        return
+    if not release.get("immutable"):
+        return
+
+    print(
+        f"release {release_id} is immutable with missing qualified assets; "
+        "requesting supported API transition back to draft"
+    )
+    try:
+        reopened = self.json(
+            "PATCH",
+            f"/repos/{self.repo}/releases/{release_id}",
+            {"draft": True, "make_latest": "false"},
+        )
+    except module.LatchError as exc:
+        raise module.LatchError(
+            "published immutable release cannot be returned to draft through the "
+            f"GitHub Releases API: {exc}"
+        ) from exc
+    if not isinstance(reopened, dict) or not reopened.get("draft"):
+        raise module.LatchError(
+            "GitHub accepted release update request but did not return the release to draft"
+        )
+    _reopened_drafts.add(release_id)
+    print(f"release {release_id} returned to draft for exact-byte attachment")
+
+
+def _publish_recovered_draft(self, release_id: int) -> None:
+    if release_id not in _reopened_drafts:
+        return
+    published = self.json(
+        "PATCH",
+        f"/repos/{self.repo}/releases/{release_id}",
+        {"draft": False, "prerelease": False, "make_latest": "true"},
+    )
+    if not isinstance(published, dict) or published.get("draft"):
+        raise module.LatchError("recovered release did not republish successfully")
+    print(f"republished release {release_id} after exact-byte attachment")
+    _reopened_drafts.discard(release_id)
+
+
 def curl_upload_asset(self, upload_url: str, name: str, data: bytes, content_type: str):
     base = upload_url.split("{", 1)[0]
     release_id = _release_id(upload_url)
+    _ensure_uploadable_release(self, release_id)
     url = base + "?" + urllib.parse.urlencode({"name": name})
 
     with tempfile.NamedTemporaryFile(prefix="centl-upload-", delete=False) as payload:
@@ -115,6 +165,8 @@ def curl_upload_asset(self, upload_url: str, name: str, data: bytes, content_typ
                         raise module.LatchError(
                             f"release asset {name} upload returned non-object JSON"
                         )
+                    if name.startswith("oasis-evidence-"):
+                        _publish_recovered_draft(self, release_id)
                     return asset
 
                 if status != 422:
@@ -145,6 +197,8 @@ def curl_upload_asset(self, upload_url: str, name: str, data: bytes, content_typ
                         f"reusing existing fully uploaded release asset {name} "
                         f"({size} bytes); digest verification follows"
                     )
+                    if name.startswith("oasis-evidence-"):
+                        _publish_recovered_draft(self, release_id)
                     return existing
 
                 if attempt == 2:
