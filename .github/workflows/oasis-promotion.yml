@@ -62,11 +62,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
-      PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-      LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
     steps:
@@ -74,6 +69,18 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Configure runner paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf 'NATIVE_PREFIX=%s/centl-native\n' "$RUNNER_TEMP"
+            printf 'PKG_CONFIG_PATH=%s/centl-native/lib/pkgconfig\n' "$RUNNER_TEMP"
+            printf 'LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'LD_LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'C_INCLUDE_PATH=%s/centl-native/include\n' "$RUNNER_TEMP"
+          } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
         run: |
