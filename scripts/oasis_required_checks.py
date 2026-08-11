@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Require the mandatory hosted Oasis checks to exist and succeed.
 
-The general final-state gate rejects visible failures, but a release cannot earn
-Oasis status merely because GitHub returned an empty or incomplete check set.
-This module fail-closes on the two checks produced by the authoritative Oasis
-qualification workflow and requires the newest run of each check to be a
-completed success for the exact candidate commit.
+A release cannot earn Oasis status merely because GitHub returned an empty or
+incomplete check set. This module fail-closes on the authoritative qualification
+and security jobs and requires the newest run of each check to be a completed
+success for the exact candidate commit.
 """
 
 from __future__ import annotations
@@ -21,6 +20,7 @@ from typing import Sequence
 REQUIRED_CHECKS = (
     "Adversarial engine self-test",
     "Full stable-product convergence",
+    "Release security state",
 )
 
 
