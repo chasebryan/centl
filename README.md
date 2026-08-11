@@ -11,6 +11,16 @@ Exact values remain exact, approximations carry explicit justification, invalid 
 unsupported work stays visible, and semantic tooling is never allowed to overrule
 the mathematical evidence produced by CENTL itself.
 
+**Current consolidation candidate: CENTL v0.14.0.** It integrates the validated
+post-v0.12 work, CENTL-MIRAGE, and the CARAVAN Phase 1 local laboratory into one
+reviewed baseline. The intermediate v0.13.0 development line was not formally
+published as a stable release.
+
+v0.14.0 is being qualified for an **Oasis declaration**. Oasis is not a codename:
+it is a repeatable release classification reserved for a CENTL release that has
+been reconciled, organized, hardened, validated, and established as a cohesive
+stable baseline. The declaration is withheld until those gates are complete.
+
 CENTL combines five closely related pieces:
 
 | Surface | Purpose |
@@ -18,8 +28,8 @@ CENTL combines five closely related pieces:
 | `centl` | Exact calculator, numerical language, verification engine, JSON protocol, and MCP interface |
 | `centl-sci` | Answer-first mathematics and physics interpreter with user-owned extension workflows |
 | `centl-physics` | Exact-first typed physics operations, units, vectors, mechanics, and diagnostics |
-| **CENTL-MIRAGE** | Local introspective self-development architecture for specification ingestion, synthesis, validation, and recursive improvement |
-| **CENTL CARAVAN** | Planned content-addressed preservation, verification, and availability network for approved CENTL artifacts |
+| **CENTL-MIRAGE** | Local introspective self-development bootstrap for specification ingestion, capability analysis, staged materialization, and evidence planning |
+| **CENTL CARAVAN** | Content-addressed authenticated preservation and availability system, included in v0.14.0 as a bounded Phase 1 local laboratory |
 
 ## Quick start
 
@@ -115,8 +125,8 @@ ordinary language and let CENTL turn that intent into an explicit, inspectable,
 reversible development process without requiring a paid or remote AI service.
 
 MIRAGE is not a chatbot that is trusted to rewrite source code. It is a recursive
-engineering loop built around CENTL's existing rule that claims require evidence.
-The intended cycle is:
+engineering architecture built around CENTL's existing rule that claims require
+evidence. The long-term cycle is:
 
 ```text
 INGEST
@@ -133,10 +143,25 @@ INGEST
   -> RECOMPUTE GAPS
 ```
 
-A user document remains attributable source material. MIRAGE preserves provenance,
+The v0.14.0 bootstrap implements the controlled front half of that architecture. A
+user document remains attributable source material. MIRAGE preserves provenance,
 lowers the document into a Specification IR, constructs a typed goal/capability
 graph, detects conflicts, and first asks whether an existing CENTL capability can
 satisfy the request through composition before creating anything new.
+
+MIRAGE constructs explicit evidence obligations and stages a non-mutating candidate
+transaction describing the smallest currently justified strategy. Where a request
+maps to supported deterministic CENTL generation, MIRAGE can materialize the exact
+candidate source, bind it to the transaction with SHA-256 identity, and run the
+authoritative parser against that staged source. Parser success establishes syntax
+only; it does not establish mathematical correctness, regression success, activation
+safety, or verified-core assurance.
+
+A readiness artifact consumes that transaction-bound structural evidence, and an
+execution-plan artifact names the still-required evidence mechanisms and their
+preconditions. These artifacts explicitly retain `workspace_mutated=false`,
+`execution_performed=false`, and `assurance_promoted=false`. Ambiguous, conflicting,
+unsupported, or policy-blocked goals do not become guessed source edits.
 
 Candidate changes are admitted only after explicit engineering and assurance gates.
 The architecture separates hard admissibility from preference: parsing, type and
@@ -145,13 +170,10 @@ rollback requirements come before any candidate is scored or preferred. Among
 admissible candidates, MIRAGE favors the smallest semantic delta, stronger evidence,
 native CENTL mechanisms, lower dependency surface, and preserved behavior.
 
-The active MIRAGE development work includes local design-document ingestion,
-provenance-preserving specification cells, Structure Library persistence, goal and
-capability graphs, deterministic conflict detection, capability-gap analysis, and
-commands such as `centl-mirage start PATH`, `ingest`, `analyze`, and `status`.
-Later layers extend this into candidate transactions, explicit evidence obligations,
-CEGIS and equality-saturation synthesis, semantic behavioral fingerprints, and
-monotone autonomous acceptance or rejection.
+The local command surface includes `centl-mirage start PATH`, `ingest`, `analyze`,
+and `status`. Actual autonomous source mutation, CEGIS/equality-saturation execution,
+semantic behavioral fingerprints, evidence execution, and monotone autonomous
+acceptance/rejection remain later MIRAGE layers.
 
 A local semantic model may propose interpretations, programs, tests, names, or
 refactorings, but it never confers mathematical or engineering authority. Its output
@@ -161,13 +183,16 @@ boundaries as every other candidate.
 MIRAGE autonomy is local. It does not imply automatic network publication, and a
 user-provided document is always treated as data rather than executable authority.
 
+See [docs/CENTL-MIRAGE.md](docs/CENTL-MIRAGE.md) for the full architecture and the
+implemented v0.14.0 boundary.
+
 ## CENTL CARAVAN
 
 **Content-Addressed Resilient Artifact Verification and Availability Network**
 
-CENTL CARAVAN is a **future release line and is not part of CENTL v0.13.0**.
-Its architecture and local laboratory work are being developed separately from the
-v0.13.0 release boundary.
+v0.14.0 includes the completed **CARAVAN Phase 1 local laboratory**. It is a bounded,
+reproducible environment for protecting and retrieving approved CENTL/FCF artifacts;
+it is **not** authorization for arbitrary public volunteer enrollment.
 
 CARAVAN is designed as the preservation and availability layer for approved CENTL
 and FCF artifacts, so ordinary Linux machines can contribute bounded storage and
@@ -176,22 +201,32 @@ bandwidth without becoming authorities over the content they carry.
 > A carrier may provide bytes, but a carrier may never define which bytes are trusted.
 
 CARAVAN separates **availability** from **authority**. Artifact identity is bound
-to authenticated metadata, exact byte lengths, and cryptographic content identity;
-a carrier can replicate an artifact, but it cannot redefine the artifact that
-CENTL expects.
+to authenticated metadata, exact byte lengths, cryptographic whole-file identity,
+and deterministic chunk identities. A carrier can replicate an artifact, but it
+cannot redefine the artifact that CENTL expects.
 
-The design keeps carriers deliberately narrow:
+The Phase 1 laboratory includes:
 
-- content-addressed, integrity-checked storage and retrieval;
-- unprivileged operation with bounded resource use;
-- outbound-oriented participation rather than requiring a public server role;
-- quarantine and withdrawal paths for unhealthy or incorrect replicas;
-- privacy boundaries that do not require publishing volunteer endpoints or identities;
-- aggregate availability accounting for protected artifacts and verified replicas.
+- content-addressed immutable storage with integrity-checked promotion;
+- exact whole-file SHA-256 plus deterministic 4 MiB chunk records;
+- Ed25519 pseudonymous carrier identity and live proof of possession;
+- signed policy-acceptance receipts without host/user identity fields;
+- TUF-authenticated artifact catalogs with an independently supplied trust root;
+- outbound-only laboratory carrier/coordinator sessions with bounded bodies,
+  challenge/session populations, polling, concurrency, reconnect behavior, and
+  resource use;
+- pre-transfer storage-capacity enforcement and authenticated chunk-size limits;
+- short-lived, artifact/carrier-bound, single-use retrieval capabilities;
+- verified multi-carrier retrieval with automatic quarantine and fallback when a
+  carrier supplies incorrect bytes;
+- hostile-transfer rejection for corruption, ordering errors, truncation,
+  appended bytes, and invalid authenticated chunk layouts;
+- explicit `join`, `status`, and `leave` lifecycle plus a reproducible local lab.
 
-CARAVAN is part of the broader FCF effort to preserve the software, dependencies,
-models, and scientific artifacts CENTL depends on rather than assuming upstream
-availability will exist forever.
+Production relay deployment, public enrollment, final privacy/telemetry policy,
+abuse operations, and the other public-network rollout gates remain separate work.
+CARAVAN does not claim global anonymity or protection against every traffic-analysis
+adversary.
 
 Architecture and policy are documented in
 [docs/CARAVAN.md](docs/CARAVAN.md),
@@ -249,11 +284,14 @@ make test
 Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
+The supported source-tree organization is documented in
+[docs/REPOSITORY-MAP.md](docs/REPOSITORY-MAP.md).
+
 ## Documentation
 
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
-- CENTL-MIRAGE — full architecture is under active development in the MIRAGE branch
+- [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
 - [CENTL CARAVAN](docs/CARAVAN.md)
 - [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
 - [CARAVAN host policy](docs/CARAVAN-HOST-POLICY.md)
@@ -267,6 +305,8 @@ Contributor setup is documented in [docs/ONBOARDING.md](docs/ONBOARDING.md) and
 - [Machine protocol](docs/PROTOCOL.md)
 - [MCP adapter](docs/MCP.md)
 - [Architecture](docs/DESIGN.md)
+- [Repository map](docs/REPOSITORY-MAP.md)
+- [v0.14.0 release notes](docs/releases/0.14.0.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 

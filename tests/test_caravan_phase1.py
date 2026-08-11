@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import stat
 import tempfile
 import unittest
 
@@ -54,6 +55,33 @@ class ContentStoreTests(unittest.TestCase):
             with self.assertRaises(IntegrityError):
                 ContentStore(root_link, max_bytes=1000)
 
+    def test_store_lock_is_private_regular_and_symlink_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "cargo.bin"
+            source.write_bytes(b"lock boundary")
+            store = ContentStore(root / "store", max_bytes=1000)
+            store.import_file(source)
+
+            lock_path = store.root / ".store.lock"
+            info = os.lstat(lock_path)
+            self.assertTrue(stat.S_ISREG(info.st_mode))
+            self.assertEqual(stat.S_IMODE(info.st_mode), 0o600)
+            self.assertEqual(stat.S_IMODE(os.lstat(store.root).st_mode), 0o700)
+            self.assertEqual(stat.S_IMODE(os.lstat(store.root / "tmp").st_mode), 0o700)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "cargo.bin"
+            source.write_bytes(b"lock symlink")
+            store = ContentStore(root / "store", max_bytes=1000)
+            outside = root / "outside-lock"
+            outside.write_bytes(b"outside")
+            (store.root / ".store.lock").symlink_to(outside)
+            with self.assertRaises(IntegrityError):
+                store.import_file(source)
+            self.assertEqual(outside.read_bytes(), b"outside")
+
     def test_storage_limit_and_chunk_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -81,6 +109,35 @@ class CoordinatorTests(unittest.TestCase):
             catalog_version=1,
         )
         return state
+
+    def _registered_carrier(self, state: CoordinatorState, *, now: float = 100) -> None:
+        state.register_carrier(
+            "node-a",
+            public_identity="pub-a",
+            policy_version="v1",
+            agent_version="0.1",
+            now=now,
+        )
+        state.heartbeat("node-a", load=0.1, capacity=1000, now=now)
+        state.advertise_replica("node-a", self.ARTIFACT, now=now)
+
+    def test_database_is_private_regular_and_symlink_path_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            database = root / "coordinator.sqlite"
+            CoordinatorState(database)
+            info = os.lstat(database)
+            self.assertTrue(stat.S_ISREG(info.st_mode))
+            self.assertEqual(stat.S_IMODE(info.st_mode), 0o600)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            real = root / "real.sqlite"
+            real.write_bytes(b"")
+            link = root / "coordinator.sqlite"
+            link.symlink_to(real)
+            with self.assertRaises(CoordinatorError):
+                CoordinatorState(link)
 
     def test_counts_include_only_fresh_eligible_carriers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -118,11 +175,7 @@ class CoordinatorTests(unittest.TestCase):
     def test_ticket_is_bound_short_lived_and_single_use(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state = self._coordinator(Path(tmp))
-            state.register_carrier(
-                "node-a", public_identity="pub-a", policy_version="v1", agent_version="0.1", now=100
-            )
-            state.heartbeat("node-a", load=0.1, capacity=1000, now=100)
-            state.advertise_replica("node-a", self.ARTIFACT, now=100)
+            self._registered_carrier(state)
             ticket = state.issue_ticket(self.ARTIFACT, ttl=5, now=101)
             self.assertEqual(ticket.node_id, "node-a")
             state.consume_ticket(ticket.token, node_id="node-a", artifact_id=self.ARTIFACT, now=102)
@@ -132,6 +185,36 @@ class CoordinatorTests(unittest.TestCase):
             later = state.issue_ticket(self.ARTIFACT, ttl=1, now=103)
             with self.assertRaises(CoordinatorError):
                 state.consume_ticket(later.token, node_id="node-a", artifact_id=self.ARTIFACT, now=105)
+
+    def test_pending_ticket_population_and_ttl_are_bounded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            state = CoordinatorState(
+                root / "coordinator.sqlite",
+                heartbeat_ttl=10,
+                max_pending_tickets=2,
+                max_ticket_ttl=5,
+            )
+            state.apply_authenticated_catalog(
+                [(self.ARTIFACT, 123, "public-approved")],
+                catalog_version=1,
+            )
+            self._registered_carrier(state)
+            first = state.issue_ticket(self.ARTIFACT, ttl=5, now=101)
+            state.issue_ticket(self.ARTIFACT, ttl=5, now=101)
+            with self.assertRaises(CoordinatorError):
+                state.issue_ticket(self.ARTIFACT, ttl=5, now=101)
+            with self.assertRaises(ValueError):
+                state.issue_ticket(self.ARTIFACT, ttl=6, now=101)
+
+            state.consume_ticket(first.token, node_id="node-a", artifact_id=self.ARTIFACT, now=102)
+            replacement = state.issue_ticket(self.ARTIFACT, ttl=5, now=102)
+            self.assertEqual(replacement.node_id, "node-a")
+
+            # At a later logical time, expired pending rows are purged before
+            # enforcing the population ceiling, allowing fresh bounded state.
+            fresh = state.issue_ticket(self.ARTIFACT, ttl=1, now=107)
+            self.assertEqual(fresh.node_id, "node-a")
 
     def test_quarantine_removes_carrier_from_routing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

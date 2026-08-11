@@ -8,11 +8,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import os
 import secrets
 import sqlite3
+import stat
 import time
 from pathlib import Path
 from typing import Iterable
+
+MAX_PENDING_TICKETS = 4096
+MAX_TICKET_TTL = 300.0
 
 
 class CoordinatorError(RuntimeError):
@@ -27,6 +32,51 @@ def _validate_artifact_id(artifact_id: str) -> str:
     if len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest):
         raise ValueError("artifact id must contain a 64-character lowercase SHA-256")
     return artifact_id
+
+
+def _prepare_database_path(database: str | Path) -> str:
+    """Create or validate the coordinator database without following a final symlink."""
+
+    value = str(database)
+    if value == ":memory:":
+        return value
+
+    path = Path(database)
+    parent = path.parent
+    if parent.exists() or parent.is_symlink():
+        info = os.lstat(parent)
+        if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+            raise CoordinatorError("CARAVAN coordinator database parent must be a real directory")
+        if stat.S_IMODE(info.st_mode) & 0o022:
+            raise CoordinatorError("CARAVAN coordinator database parent must not be group/other writable")
+    else:
+        parent.mkdir(parents=True, mode=0o700)
+
+    flags = os.O_RDWR
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+
+    if path.exists() or path.is_symlink():
+        try:
+            fd = os.open(path, flags)
+        except OSError as exc:
+            raise CoordinatorError("unsafe CARAVAN coordinator database path") from exc
+    else:
+        try:
+            fd = os.open(path, flags | os.O_CREAT | os.O_EXCL, 0o600)
+        except OSError as exc:
+            raise CoordinatorError("could not create CARAVAN coordinator database safely") from exc
+
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise CoordinatorError("CARAVAN coordinator database must be a regular file")
+        os.fchmod(fd, 0o600)
+    finally:
+        os.close(fd)
+    return str(path)
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,11 +102,19 @@ class CoordinatorState:
         database: str | Path,
         *,
         heartbeat_ttl: float = 45.0,
+        max_pending_tickets: int = MAX_PENDING_TICKETS,
+        max_ticket_ttl: float = MAX_TICKET_TTL,
     ) -> None:
         if heartbeat_ttl <= 0:
             raise ValueError("heartbeat_ttl must be positive")
-        self.database = str(database)
+        if max_pending_tickets <= 0:
+            raise ValueError("max_pending_tickets must be positive")
+        if max_ticket_ttl <= 0:
+            raise ValueError("max_ticket_ttl must be positive")
+        self.database = _prepare_database_path(database)
         self.heartbeat_ttl = float(heartbeat_ttl)
+        self.max_pending_tickets = int(max_pending_tickets)
+        self.max_ticket_ttl = float(max_ticket_ttl)
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
@@ -112,6 +170,10 @@ class CoordinatorState:
                 );
                 """
             )
+
+    @staticmethod
+    def _purge_expired_tickets(db: sqlite3.Connection, now: float) -> None:
+        db.execute("DELETE FROM tickets WHERE expires_at < ?", (now,))
 
     def apply_authenticated_catalog(
         self,
@@ -327,11 +389,20 @@ class CoordinatorState:
         now: float | None = None,
     ) -> RetrievalTicket:
         _validate_artifact_id(artifact_id)
-        if ttl <= 0:
-            raise ValueError("ticket ttl must be positive")
+        if ttl <= 0 or ttl > self.max_ticket_ttl:
+            raise ValueError(
+                f"ticket ttl must be positive and no greater than {self.max_ticket_ttl:g} seconds"
+            )
         timestamp = time.time() if now is None else float(now)
         cutoff = self._fresh_cutoff(timestamp)
         with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            self._purge_expired_tickets(db, timestamp)
+            pending = db.execute(
+                "SELECT COUNT(*) AS count FROM tickets WHERE used = 0"
+            ).fetchone()["count"]
+            if int(pending) >= self.max_pending_tickets:
+                raise CoordinatorError("CARAVAN pending retrieval-ticket limit reached")
             target = db.execute(
                 "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
             ).fetchone()
@@ -368,17 +439,23 @@ class CoordinatorState:
         now: float | None = None,
     ) -> None:
         _validate_artifact_id(artifact_id)
+        if not isinstance(token, str) or not token:
+            raise CoordinatorError("retrieval ticket token is required")
+        try:
+            token_hash = hashlib.sha256(token.encode("ascii")).hexdigest()
+        except UnicodeEncodeError as exc:
+            raise CoordinatorError("retrieval ticket token must be ASCII") from exc
         timestamp = time.time() if now is None else float(now)
-        token_hash = hashlib.sha256(token.encode("ascii")).hexdigest()
         cutoff = self._fresh_cutoff(timestamp)
         with self._connect() as db:
             db.execute("BEGIN IMMEDIATE")
+            self._purge_expired_tickets(db, timestamp)
             ticket = db.execute(
                 "SELECT node_id, artifact_id, expires_at, used FROM tickets WHERE token_hash = ?",
                 (token_hash,),
             ).fetchone()
             if ticket is None:
-                raise CoordinatorError("unknown retrieval ticket")
+                raise CoordinatorError("unknown or expired retrieval ticket")
             if ticket["used"]:
                 raise CoordinatorError("retrieval ticket replay rejected")
             if ticket["expires_at"] < timestamp:
@@ -390,4 +467,8 @@ class CoordinatorState:
             ).fetchone()
             if carrier is None or carrier["state"] != "active" or carrier["last_seen"] < cutoff:
                 raise CoordinatorError("retrieval ticket carrier is no longer eligible")
-            db.execute("UPDATE tickets SET used = 1 WHERE token_hash = ?", (token_hash,))
+            # Deletion is the durable one-use transition: replay remains rejected
+            # as an unknown ticket without retaining consumed ticket rows forever.
+            deleted = db.execute("DELETE FROM tickets WHERE token_hash = ?", (token_hash,)).rowcount
+            if deleted != 1:
+                raise CoordinatorError("retrieval ticket could not be consumed atomically")
