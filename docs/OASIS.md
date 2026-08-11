@@ -24,6 +24,32 @@ An Oasis declaration marks the opposite condition: a deliberately chosen point w
 
 It is therefore a **convergence declaration**, not a marketing nickname.
 
+## Executable convergence engine
+
+The repository provides `scripts/oasis.py` as the executable implementation of the local Oasis gate.
+
+For the normal candidate convergence pass, run:
+
+```bash
+python3 scripts/oasis.py
+```
+
+The command performs the one intentionally safe automatic repair currently allowed by the Oasis process, canonical source formatting, and then runs the complete local qualification plan. It fails closed on missing tools, proof failures, stale generated F* extraction, quality failures, unit or component failures, sanitizer unavailability, hardening failures, differential-test failures, release-package failures, unsafe archive structure, checksum mismatch, or installed-binary smoke-test failure.
+
+It does **not** rewrite tests, weaken security policy, disable failing gates, silently accept skipped required checks, merge branches, close pull requests, create tags, or declare an unresolved repository green.
+
+The final publication identity pass is stricter:
+
+```bash
+python3 scripts/oasis.py --final --no-repair
+```
+
+`--final` additionally requires the checked commit to be clean `main`, exactly match `origin/main`, exactly match the current `vX.Y.Z` tag, have no open pull requests targeting `main`, have no non-green commit checks, have no open high/critical code-scanning or Dependabot alerts, and have no open secret-scanning alerts visible to the authenticated GitHub CLI.
+
+Each run writes an atomic JSON evidence record plus SHA-256-addressed gate logs beneath `_build/oasis/`. The evidence distinguishes candidate qualification from final-main qualification. A local candidate pass is therefore useful convergence evidence, but it is not allowed to impersonate the final release declaration.
+
+The engine itself is adversarially tested in `tests/test_oasis.py`, including command failure, timeout, missing-tool, stale-extraction ordering, mandatory-sanitizer, checksum corruption, path-traversal, absolute-path, symlink, missing-package-member, wrong-version, evidence-atomicity, open-PR, and release-blocking security-alert cases.
+
 ## Oasis gate
 
 A release qualifies only when every applicable requirement below is satisfied or explicitly documented as non-applicable.
