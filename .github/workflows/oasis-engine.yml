@@ -1,0 +1,48 @@
+name: Oasis engine
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/oasis.py"
+      - "tests/test_oasis.py"
+      - "docs/OASIS.md"
+      - ".github/workflows/oasis-engine.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/oasis.py"
+      - "tests/test_oasis.py"
+      - "docs/OASIS.md"
+      - ".github/workflows/oasis-engine.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oasis-engine-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  self-test:
+    name: Adversarial self-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile engine and tests
+        run: python3 -m py_compile scripts/oasis.py tests/test_oasis.py
+
+      - name: Run adversarial Oasis-engine tests
+        run: python3 -m unittest tests.test_oasis
+
+      - name: Validate repository gate plan
+        run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
