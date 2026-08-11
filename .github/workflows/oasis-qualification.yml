@@ -41,13 +41,18 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Compile engine, pin checker, and tests
+      - name: Compile engine, policy gates, and tests
         run: |
           python3 -m py_compile \
-            scripts/oasis.py scripts/oasis-toolchain-check.py tests/test_oasis.py
+            scripts/oasis.py \
+            scripts/oasis_engine.py \
+            scripts/oasis-toolchain-check.py \
+            scripts/oasis-metadata-check.py \
+            tests/test_oasis.py \
+            tests/test_oasis_metadata.py
 
-      - name: Run adversarial engine tests
-        run: python3 -m unittest tests.test_oasis
+      - name: Run adversarial Oasis-engine tests
+        run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
 
       - name: Validate live repository gate plan
         run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
