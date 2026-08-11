@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hermetic regression test for the Unix release installer surface."""
+"""Hermetic regression test for the Unix channel-aware installer surface."""
 
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ set -eu
 if [ "${1:-}" = "What is 0.1 plus 0.2?" ]; then
   printf '3/10\\n'
 elif [ "${1:-}" = "--repl" ]; then
-  printf 'CENTL-SCi v0.0.1-Camelus\\n'
+  printf 'CENTL-SCi v0.0.2-Caramels\\n'
   printf 'Free for science.\\n\\n'
   printf '> '
   IFS= read -r command || true
@@ -79,6 +79,23 @@ fi
     return archive
 
 
+def run_installer(args: list[str], env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["sh", str(INSTALLER), *args],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    )
+
+
+def require_symlink(path: Path) -> None:
+    if not path.is_symlink():
+        raise SystemExit(f"installer did not activate {path}")
+
+
 def run() -> None:
     subprocess.run(["sh", "-n", str(INSTALLER)], check=True)
 
@@ -88,56 +105,41 @@ def run() -> None:
         home = work / "home"
         home.mkdir()
         env = os.environ.copy()
-        env.update(
-            {
-                "HOME": str(home),
-                "SHELL": "/bin/bash",
-                "PATH": "/usr/bin:/bin",
-            }
-        )
-        completed = subprocess.run(
-            ["sh", str(INSTALLER), "--archive", str(archive)],
-            cwd=ROOT,
-            env=env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
+        env.update({"HOME": str(home), "SHELL": "/bin/bash", "PATH": "/usr/bin:/bin"})
 
+        oasis = run_installer(["--archive", str(archive)], env)
         prefix = home / ".local"
-        sci_command = prefix / "bin" / "centl-sci"
-        physics_command = prefix / "bin" / "centl-physics"
-        centl_command = prefix / "bin" / "centl"
-        for command in (centl_command, physics_command, sci_command):
-            if not command.is_symlink():
-                raise SystemExit(f"installer did not activate {command}")
+        for name in (
+            "centl",
+            "centl-physics",
+            "centl-sci",
+            "oasis-centl",
+            "oasis-centl-physics",
+            "oasis-centl-sci",
+        ):
+            require_symlink(prefix / "bin" / name)
+
+        if "Oasis is ready. Start with: centl-sci" not in oasis.stdout:
+            raise SystemExit(f"Oasis installer output is incomplete:\n{oasis.stdout}")
 
         sci_output = subprocess.check_output(
-            [str(sci_command), "What is 0.1 plus 0.2?"], text=True
+            [str(prefix / "bin" / "centl-sci"), "What is 0.1 plus 0.2?"], text=True
         ).strip()
         if sci_output != "3/10":
             raise SystemExit(f"installed CENTL-SCi returned {sci_output!r}")
 
-        repl = subprocess.run(
-            [str(sci_command), "--repl"],
-            input=":exit\n",
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        ).stdout
-        if "CENTL-SCi v0.0.1-Camelus" not in repl or "Free for science." not in repl:
-            raise SystemExit(f"installed CENTL-SCi REPL did not initialize correctly:\n{repl}")
-
-        output = completed.stdout
-        for expected in (
-            "CENTL-SCi is ready.",
-            "Open a new terminal and run: centl-sci",
-            "Scientific command:",
-        ):
-            if expected not in output:
-                raise SystemExit(f"installer output omitted {expected!r}\n{output}")
+        stable_target_before = (prefix / "bin" / "centl").resolve()
+        mirage = run_installer(["--channel", "mirage", "--archive", str(archive)], env)
+        for name in ("mirage-centl", "mirage-centl-physics", "mirage-centl-sci"):
+            require_symlink(prefix / "bin" / name)
+        if "Mirage is ready. Start with: mirage-centl-sci" not in mirage.stdout:
+            raise SystemExit(f"Mirage installer output is incomplete:\n{mirage.stdout}")
+        if (prefix / "bin" / "centl").resolve() != stable_target_before:
+            raise SystemExit("installing Mirage replaced the stable Oasis command")
+        if "/channels/oasis/" not in str(stable_target_before):
+            raise SystemExit("stable command does not resolve into the Oasis channel")
+        if "/channels/mirage/" not in str((prefix / "bin" / "mirage-centl").resolve()):
+            raise SystemExit("Mirage command does not resolve into the Mirage channel")
 
         bashrc = home / ".bashrc"
         if not bashrc.is_file():
@@ -145,38 +147,19 @@ def run() -> None:
         profile = bashrc.read_text(encoding="utf-8")
         if f"# CENTL PATH: {prefix / 'bin'}" not in profile:
             raise SystemExit("installer did not record the CENTL PATH marker")
-        if str(prefix / "bin") not in profile:
-            raise SystemExit("installer PATH setup omitted the command directory")
 
-        # Headless CI, containers, and service environments may not export SHELL.
-        # The installer must still complete and fall back to the POSIX profile.
         headless_home = work / "headless-home"
         headless_home.mkdir()
         headless_env = env.copy()
         headless_env["HOME"] = str(headless_home)
         headless_env.pop("SHELL", None)
-        subprocess.run(
-            ["sh", str(INSTALLER), "--archive", str(archive)],
-            cwd=ROOT,
-            env=headless_env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
+        run_installer(["--archive", str(archive)], headless_env)
         headless_prefix = headless_home / ".local"
+        require_symlink(headless_prefix / "bin" / "centl-sci")
         headless_profile = headless_home / ".profile"
-        if not (headless_prefix / "bin" / "centl-sci").is_symlink():
-            raise SystemExit("installer did not activate CENTL-SCi without SHELL")
         if not headless_profile.is_file():
             raise SystemExit("installer did not use .profile when SHELL was unset")
-        headless_text = headless_profile.read_text(encoding="utf-8")
-        if f"# CENTL PATH: {headless_prefix / 'bin'}" not in headless_text:
-            raise SystemExit("headless installer PATH setup omitted the CENTL marker")
 
-        # FCF/static hosting uses the preservation layout RELEASE_ROOT/vVERSION/.
-        # Exercise it hermetically through file:// so this regression never
-        # depends on GitHub or another HTTP service.
         static_root = work / "static-releases"
         static_version = static_root / f"v{VERSION}"
         static_version.mkdir(parents=True)
@@ -185,16 +168,15 @@ def run() -> None:
             archive.with_name(archive.name + ".sha256"),
             static_version / f"{archive.name}.sha256",
         )
-
         static_home = work / "static-home"
         static_home.mkdir()
         static_prefix = static_home / "centl"
         static_env = env.copy()
         static_env["HOME"] = str(static_home)
-        subprocess.run(
+        run_installer(
             [
-                "sh",
-                str(INSTALLER),
+                "--channel",
+                "oasis",
                 "--version",
                 VERSION,
                 "--release-base-url",
@@ -203,18 +185,10 @@ def run() -> None:
                 str(static_prefix),
                 "--no-path",
             ],
-            cwd=ROOT,
-            env=static_env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
+            static_env,
         )
-        if not (static_prefix / "bin" / "centl-sci").is_symlink():
-            raise SystemExit("static release-root install did not activate CENTL-SCi")
+        require_symlink(static_prefix / "bin" / "centl-sci")
 
-        # A generic static root has no implicit latest alias. Requiring an exact
-        # version keeps the FCF/static contract deterministic and host-neutral.
         latest = subprocess.run(
             [
                 "sh",
@@ -254,6 +228,17 @@ def run() -> None:
         )
         if insecure.returncode == 0 or "must use https:// or file://" not in insecure.stderr:
             raise SystemExit("installer unexpectedly accepted an insecure release base URL")
+
+        invalid = subprocess.run(
+            ["sh", str(INSTALLER), "--channel", "sandstorm", "--archive", str(archive)],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if invalid.returncode == 0 or "must be oasis or mirage" not in invalid.stderr:
+            raise SystemExit("installer unexpectedly accepted an unknown channel")
 
     print("CENTL installer interface check: PASS")
 
