@@ -43,10 +43,17 @@ grep -Fq 'License: CC-BY-4.0' "$project_root/.reuse/dep5" ||
 grep -Fq 'License: LicenseRef-FCF-Branding' "$project_root/.reuse/dep5" ||
   fail ".reuse/dep5 does not define the branding boundary"
 
-grep -Fq 'CENTL-Apache-2.0' "$project_root/scripts/package-release" ||
+# The stable GNU/Linux entry point is intentionally a policy wrapper around the
+# retained POSIX packaging implementation. Verify both halves of that contract:
+# the wrapper must delegate to the implementation, and the implementation must
+# actually place the Apache license in the release archive under the public name.
+grep -Fq 'exec "$script_dir/package-release-legacy" "$@"' \
+    "$project_root/scripts/package-release" ||
+  fail "POSIX release wrapper does not delegate to package-release-legacy"
+grep -Fq 'CENTL-Apache-2.0' "$project_root/scripts/package-release-legacy" ||
   fail "POSIX release package does not ship the Apache license under the expected name"
 grep -Fq 'CENTL-Apache-2.0' "$project_root/scripts/package-release.ps1" ||
-  fail "Windows release package does not ship the Apache license under the expected name"
+  fail "Windows archival release package does not ship the Apache license under the expected name"
 
 for path in \
   centl.opam \
@@ -55,6 +62,7 @@ for path in \
   docs/ONBOARDING.md \
   docs/DESIGN_PATH.md \
   scripts/package-release \
+  scripts/package-release-legacy \
   scripts/package-release.ps1
 do
   if grep -Eiq 'CENTL-AGPL|SPDX-License-Identifier:[[:space:]]*AGPL|license:[[:space:]]*"AGPL' \
