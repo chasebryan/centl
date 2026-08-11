@@ -16,13 +16,27 @@ sys.modules[SPEC.name] = CHECKS
 SPEC.loader.exec_module(CHECKS)
 
 
-def run(name: str, *, ident: int, status: str = "completed", conclusion: str | None = "success"):
-    return {
+def run(
+    name: str,
+    *,
+    ident: int,
+    status: str = "completed",
+    conclusion: str | None = "success",
+    app_slug: str | None = "github-actions",
+    details_url: str | None = None,
+):
+    if details_url is None:
+        details_url = f"https://github.com/chasebryan/centl/actions/runs/{ident}/job/1"
+    payload = {
         "id": ident,
         "name": name,
         "status": status,
         "conclusion": conclusion,
+        "details_url": details_url,
     }
+    if app_slug is not None:
+        payload["app"] = {"slug": app_slug}
+    return payload
 
 
 class RequiredHostedCheckTests(unittest.TestCase):
@@ -46,7 +60,10 @@ class RequiredHostedCheckTests(unittest.TestCase):
         failures = CHECKS.required_check_failures(
             {"check_runs": [run("Adversarial engine self-test", ident=1)]}
         )
-        self.assertEqual(failures, ["mandatory Oasis check is missing: Full stable-product convergence"])
+        self.assertEqual(
+            failures,
+            ["mandatory Oasis check is missing: Full stable-product convergence"],
+        )
 
     def test_skipped_mandatory_check_is_not_success(self) -> None:
         payload = self.good_payload()
@@ -89,6 +106,36 @@ class RequiredHostedCheckTests(unittest.TestCase):
         )
         failures = CHECKS.required_check_failures(payload)
         self.assertTrue(any("failure" in item for item in failures))
+
+    def test_lookalike_check_from_other_app_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][1] = run(
+            "Full stable-product convergence",
+            ident=21,
+            app_slug="untrusted-check-app",
+        )
+        failures = CHECKS.required_check_failures(payload)
+        self.assertTrue(any("unexpected provenance" in item for item in failures))
+
+    def test_missing_app_identity_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][0] = run(
+            "Adversarial engine self-test",
+            ident=22,
+            app_slug=None,
+        )
+        failures = CHECKS.required_check_failures(payload)
+        self.assertTrue(any("app:<missing>" in item for item in failures))
+
+    def test_non_actions_details_url_is_rejected(self) -> None:
+        payload = self.good_payload()
+        payload["check_runs"][0] = run(
+            "Adversarial engine self-test",
+            ident=23,
+            details_url="https://example.invalid/result/23",
+        )
+        failures = CHECKS.required_check_failures(payload)
+        self.assertTrue(any("invalid Actions details URL" in item for item in failures))
 
     def test_malformed_payload_fails_closed(self) -> None:
         self.assertTrue(CHECKS.required_check_failures(None))

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Require the mandatory hosted Oasis checks to exist and succeed.
+"""Require the mandatory hosted Oasis checks to exist, be authentic, and succeed.
 
 The general final-state gate rejects visible failures, but a release cannot earn
-Oasis status merely because GitHub returned an empty or incomplete check set.
-This module fail-closes on the two checks produced by the authoritative Oasis
-qualification workflow and requires the newest run of each check to be a
-completed success for the exact candidate commit.
+Oasis status merely because GitHub returned an empty, incomplete, or look-alike
+check set. This module fail-closes on the checks produced by the authoritative
+Oasis qualification workflow and requires the newest run of each check to be a
+completed success for the exact candidate commit, reported by GitHub Actions.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ REQUIRED_CHECKS = (
     "Adversarial engine self-test",
     "Full stable-product convergence",
 )
+REQUIRED_APP_SLUG = "github-actions"
 
 
 class HostedCheckError(RuntimeError):
@@ -73,6 +74,14 @@ def newest_by_name(runs: list[object]) -> dict[str, dict[str, object]]:
     return newest
 
 
+def check_app_slug(item: dict[str, object]) -> str | None:
+    app = item.get("app")
+    if not isinstance(app, dict):
+        return None
+    slug = app.get("slug")
+    return slug if isinstance(slug, str) else None
+
+
 def required_check_failures(payload: object) -> list[str]:
     if not isinstance(payload, dict):
         return ["GitHub check-runs response is not an object"]
@@ -87,6 +96,22 @@ def required_check_failures(payload: object) -> list[str]:
         if item is None:
             failures.append(f"mandatory Oasis check is missing: {name}")
             continue
+
+        app_slug = check_app_slug(item)
+        if app_slug != REQUIRED_APP_SLUG:
+            failures.append(
+                f"mandatory Oasis check has unexpected provenance: "
+                f"{name}=app:{app_slug or '<missing>'}"
+            )
+            continue
+
+        details_url = item.get("details_url")
+        if not isinstance(details_url, str) or "/actions/runs/" not in details_url:
+            failures.append(
+                f"mandatory Oasis check has invalid Actions details URL: {name}"
+            )
+            continue
+
         status = item.get("status")
         conclusion = item.get("conclusion")
         if status != "completed" or conclusion != "success":
