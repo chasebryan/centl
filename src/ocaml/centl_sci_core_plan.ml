@@ -10,13 +10,16 @@ let root workspace =
 let write_text path text =
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
     (fun () ->
       output_string channel text;
-      if text = "" || text.[String.length text - 1] <> '\n' then output_char channel '\n';
+      if text = "" || text.[String.length text - 1] <> '\n' then
+        output_char channel '\n';
       flush channel);
   Unix.rename temporary path
 
@@ -53,7 +56,10 @@ let persist workspace ~request ~implementation_layer ~reusable_capabilities
     Centl_sci_workspace.atomic_write_json json_path json;
     let section title values =
       if values = [] then [ "## " ^ title; ""; "- None"; "" ]
-      else [ "## " ^ title; "" ] @ List.map (fun value -> "- " ^ value) values @ [ "" ]
+      else
+        [ "## " ^ title; "" ]
+        @ List.map (fun value -> "- " ^ value) values
+        @ [ "" ]
     in
     let markdown =
       String.concat "\n"
@@ -66,7 +72,9 @@ let persist workspace ~request ~implementation_layer ~reusable_capabilities
            "";
            "Implementation layer: " ^ implementation_layer;
            "";
-           "This artifact plans a downstream change only. It does not edit trusted core source, run Git, publish upstream, or confer verified-core assurance.";
+           "This artifact plans a downstream change only. It does not edit \
+            trusted core source, run Git, publish upstream, or confer \
+            verified-core assurance.";
            "";
          ]
         @ section "Reusable capabilities" reusable_capabilities

@@ -12,10 +12,7 @@ type receipt = {
   receipt_fingerprint : string;
 }
 
-type report = {
-  receipts : receipt list;
-  blocked_cells : int list;
-}
+type report = { receipts : receipt list; blocked_cells : int list }
 
 type snapshot_evidence =
   | Snapshot_not_required
@@ -39,7 +36,8 @@ let receipt_fingerprint_material ~action_id ~candidate_id ~obligation_id ~kind
       ("executor", `String executor);
       ("state", `String (receipt_state_text state));
       ("evidence", `String evidence);
-      ("snapshot_path", match snapshot_path with None -> `Null | Some path -> `String path);
+      ( "snapshot_path",
+        match snapshot_path with None -> `Null | Some path -> `String path );
     ]
   |> Yojson.Safe.to_string
 
@@ -48,7 +46,8 @@ let make_receipt action state evidence snapshot_path =
   let receipt_fingerprint =
     receipt_fingerprint_material ~action_id:action.action_id
       ~candidate_id:action.candidate_id ~obligation_id:action.obligation_id
-      ~kind:action.kind ~executor:action.executor ~state ~evidence ~snapshot_path
+      ~kind:action.kind ~executor:action.executor ~state ~evidence
+      ~snapshot_path
     |> Centl_sha256.hex_string
   in
   {
@@ -74,10 +73,12 @@ let receipt_counts (report : report) =
 
 let evidence_complete (report : report) =
   let _, pending, blocked = receipt_counts report in
-  report.receipts <> [] && pending = 0 && blocked = 0 && report.blocked_cells = []
+  report.receipts <> [] && pending = 0 && blocked = 0
+  && report.blocked_cells = []
 
 let action_requires_snapshot (action : Centl_sci_mirage_execution_plan.action) =
-  action.executor = "workspace_snapshot" && action.precondition = "before_activation"
+  action.executor = "workspace_snapshot"
+  && action.precondition = "before_activation"
 
 let prepare_snapshot workspace (plan : Centl_sci_mirage_execution_plan.report) =
   let required =
@@ -95,18 +96,22 @@ let prepare_snapshot workspace (plan : Centl_sci_mirage_execution_plan.report) =
 let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
   match action.executor with
   | "workspace_snapshot" when action.precondition = "before_activation" ->
-      begin
-        match snapshot with
-        | Snapshot_ready path ->
-            make_receipt action Passed
-              "a reversible local workspace snapshot was created once for this evidence cycle before candidate activation and is shared by all rollback obligations in the cycle"
-              (Some path)
-        | Snapshot_failed message ->
-            make_receipt action Blocked ("workspace snapshot failed: " ^ message) None
-        | Snapshot_not_required ->
-            make_receipt action Blocked
-              "workspace snapshot action was not included in the prepared evidence cycle"
-              None
+      begin match snapshot with
+      | Snapshot_ready path ->
+          make_receipt action Passed
+            "a reversible local workspace snapshot was created once for this \
+             evidence cycle before candidate activation and is shared by all \
+             rollback obligations in the cycle"
+            (Some path)
+      | Snapshot_failed message ->
+          make_receipt action Blocked
+            ("workspace snapshot failed: " ^ message)
+            None
+      | Snapshot_not_required ->
+          make_receipt action Blocked
+            "workspace snapshot action was not included in the prepared \
+             evidence cycle"
+            None
       end
   | _ when not action.executor_supported ->
       make_receipt action Blocked
@@ -116,7 +121,8 @@ let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
         None
   | _ ->
       make_receipt action Pending
-        "the executor contract is known, but this MIRAGE phase does not yet execute that validation mechanism"
+        "the executor contract is known, but this MIRAGE phase does not yet \
+         execute that validation mechanism"
         None
 
 let execute_candidate snapshot
@@ -140,7 +146,10 @@ let receipt_to_json (receipt : receipt) =
       ("executor", `String receipt.executor);
       ("state", `String (receipt_state_text receipt.state));
       ("evidence", `String receipt.evidence);
-      ("snapshot_path", match receipt.snapshot_path with None -> `Null | Some path -> `String path);
+      ( "snapshot_path",
+        match receipt.snapshot_path with
+        | None -> `Null
+        | Some path -> `String path );
       ("receipt_fingerprint_algorithm", `String "sha256");
       ("receipt_fingerprint", `String receipt.receipt_fingerprint);
     ]
@@ -152,19 +161,29 @@ let to_json (report : report) =
       ("schema_version", `Int 4);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_receipts");
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("passed_action_count", `Int passed);
       ("pending_action_count", `Int pending);
       ("blocked_action_count", `Int blocked);
       ("evidence_complete", `Bool (evidence_complete report));
       ("candidate_source_activated", `Bool false);
       ("assurance_promoted", `Bool false);
-      ("receipt_identity_semantics",
-       `String
-         "each receipt fingerprint binds the planned action identity to the recorded executor, state, evidence text, and snapshot path; the fingerprint protects receipt identity but does not itself establish that an executor result is mathematically correct");
-      ("execution_semantics",
-       `String
-         "a passed receipt records only the named evidence action; evidence_complete means every action emitted in this execution cycle passed and no source cells are blocked, but it does not imply candidate admissibility, mathematical correctness beyond those named obligations, activation, or verified-core status; rollback obligations in one evidence cycle share at most one newly created workspace snapshot");
+      ( "receipt_identity_semantics",
+        `String
+          "each receipt fingerprint binds the planned action identity to the \
+           recorded executor, state, evidence text, and snapshot path; the \
+           fingerprint protects receipt identity but does not itself establish \
+           that an executor result is mathematically correct" );
+      ( "execution_semantics",
+        `String
+          "a passed receipt records only the named evidence action; \
+           evidence_complete means every action emitted in this execution \
+           cycle passed and no source cells are blocked, but it does not imply \
+           candidate admissibility, mathematical correctness beyond those \
+           named obligations, activation, or verified-core status; rollback \
+           obligations in one evidence cycle share at most one newly created \
+           workspace snapshot" );
       ("receipts", `List (List.map receipt_to_json report.receipts));
     ]
 
@@ -191,7 +210,8 @@ let render (report : report) =
       "passed actions: " ^ string_of_int passed;
       "pending actions: " ^ string_of_int pending;
       "blocked actions: " ^ string_of_int blocked;
-      "evidence cycle complete: " ^ (if evidence_complete report then "yes" else "no");
+      ("evidence cycle complete: "
+      ^ if evidence_complete report then "yes" else "no");
       "receipt identities: deterministic SHA-256 over action-bound outcomes";
       "workspace snapshots created per evidence cycle: at most one";
       "candidate source activated: no";

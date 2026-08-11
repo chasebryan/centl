@@ -4,8 +4,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let test_revision_history_tracks_workspace () =
   let root = temp_dir "centl-caramels-revisions-" in
@@ -21,7 +20,8 @@ let test_revision_history_tracks_workspace () =
       | Error message -> Alcotest.fail message
       | Ok history ->
           Alcotest.(check int) "current revision" 3 history.current_revision;
-          Alcotest.(check int) "three ledger entries" 3
+          Alcotest.(check int)
+            "three ledger entries" 3
             (List.length history.entries);
           Alcotest.(check bool) "not truncated" false history.truncated;
           begin match history.entries with
@@ -46,15 +46,18 @@ let test_revision_history_is_bounded () =
       | Error message -> Alcotest.fail message
       | Ok history ->
           Alcotest.(check int) "current revision" 105 history.current_revision;
-          Alcotest.(check int) "bounded entries" 100
+          Alcotest.(check int)
+            "bounded entries" 100
             (List.length history.entries);
           Alcotest.(check bool) "truncated" true history.truncated;
           begin match history.entries with
-          | first :: _ -> Alcotest.(check int) "oldest retained" 6 first.revision
+          | first :: _ ->
+              Alcotest.(check int) "oldest retained" 6 first.revision
           | [] -> Alcotest.fail "expected bounded entries"
           end;
           begin match List.rev history.entries with
-          | last :: _ -> Alcotest.(check int) "newest retained" 105 last.revision
+          | last :: _ ->
+              Alcotest.(check int) "newest retained" 105 last.revision
           | [] -> Alcotest.fail "expected bounded entries"
           end)
 
@@ -66,7 +69,8 @@ let test_revision_json_reports_bound () =
   | `Assoc fields ->
       begin match List.assoc_opt "max_entries" fields with
       | Some (`Int value) ->
-          Alcotest.(check int) "max entries" Centl_sci_revisions.max_entries value
+          Alcotest.(check int)
+            "max entries" Centl_sci_revisions.max_entries value
       | _ -> Alcotest.fail "revision JSON missing max_entries"
       end
   | _ -> Alcotest.fail "revision history JSON must be an object"

@@ -4,10 +4,7 @@ type result =
   | End_of_input
   | Interrupted
 
-type ghost = {
-  display : string;
-  accept : string option;
-}
+type ghost = { display : string; accept : string option }
 
 let write text =
   output_string stdout text;
@@ -208,8 +205,7 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
         if !cursor < String.length !text then begin
           text :=
             String.sub !text 0 !cursor
-            ^ String.sub !text (!cursor + 1)
-                (String.length !text - !cursor - 1);
+            ^ String.sub !text (!cursor + 1) (String.length !text - !cursor - 1);
           overflowed := false;
           redraw_current ()
         end
@@ -271,7 +267,8 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
             insert_text value
         | _ ->
             ignore
-              (complete ~prompt ~candidates ~max_bytes ~redraw_current text cursor)
+              (complete ~prompt ~candidates ~max_bytes ~redraw_current text
+                 cursor)
       in
       let rec loop () =
         match input () with
@@ -328,7 +325,7 @@ let read_raw ~prompt ~history ~candidates ~suggest ~max_bytes
 let read_line ~suggest ~prompt ~history ~candidates ~max_bytes =
   if
     Sys.win32
-    || not (Unix.isatty Unix.stdout)
+    || (not (Unix.isatty Unix.stdout))
     || Sys.getenv_opt "TERM" = Some "dumb"
   then read_canonical ~prompt ~max_bytes
   else

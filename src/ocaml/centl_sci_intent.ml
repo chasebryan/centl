@@ -21,12 +21,7 @@ type t =
   | Unknown
 
 type confidence = High | Medium | Low
-
-type classification = {
-  intent : t;
-  confidence : confidence;
-  evidence : string;
-}
+type classification = { intent : t; confidence : confidence; evidence : string }
 
 let text = function
   | Arithmetic -> "arithmetic"
@@ -55,8 +50,11 @@ let lower text = String.lowercase_ascii (String.trim text)
 let contains needle text =
   Option.is_some (Centl_sci_interaction.find_substring ~needle text)
 
-let contains_any needles text = List.exists (fun needle -> contains needle text) needles
-let starts prefixes text = List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
+let contains_any needles text =
+  List.exists (fun needle -> contains needle text) needles
+
+let starts prefixes text =
+  List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
 
 let constant_phrase input =
   contains_any
@@ -98,8 +96,11 @@ let classify ~mode input =
         then result System_inspection High "BUILD inspection/validation verb"
         else if starts [ "create "; "write "; "make "; "scaffold " ] input then
           result Program_creation High "BUILD creation verb"
-        else if starts [ "add "; "extend "; "install "; "integrate "; "prepare " ] input then
-          result System_extension High "BUILD extension verb"
+        else if
+          starts
+            [ "add "; "extend "; "install "; "integrate "; "prepare " ]
+            input
+        then result System_extension High "BUILD extension verb"
         else if
           starts
             [
@@ -118,8 +119,11 @@ let classify ~mode input =
     | _ ->
         if
           starts [ "convert "; "change "; "how many " ] input
-          && (contains " to " input || contains " into " input || contains " in " input)
-        then result Unit_conversion High "conversion phrase with source/target units"
+          && (contains " to " input || contains " into " input
+            || contains " in " input)
+        then
+          result Unit_conversion High
+            "conversion phrase with source/target units"
         else if constant_phrase input then
           result Constant_lookup High "known physical-constant lookup phrase"
         else if
@@ -136,23 +140,36 @@ let classify ~mode input =
         then result Equation_solving High "equation-solving phrase"
         else if
           starts
-            [ "differentiate "; "derivative of "; "take the derivative"; "find dy/dx" ]
+            [
+              "differentiate ";
+              "derivative of ";
+              "take the derivative";
+              "find dy/dx";
+            ]
             input
         then result Differentiation High "differentiation phrase"
-        else if starts [ "integrate "; "integral of "; "find the integral" ] input then
-          result Integration High "integration phrase"
+        else if
+          starts [ "integrate "; "integral of "; "find the integral" ] input
+        then result Integration High "integration phrase"
         else if starts [ "simplify "; "reduce " ] input then
           result Simplification High "simplification phrase"
-        else if starts [ "substitute "; "plug "; "replace " ] input && contains " into " input then
-          result Substitution High "substitution phrase"
-        else if starts [ "approx "; "approximate "; "decimal "; "estimate " ] input then
-          result Approximation High "approximation phrase"
-        else if starts [ "verify "; "check whether "; "prove whether "; "assert " ] input then
-          result Verification High "verification phrase"
+        else if
+          starts [ "substitute "; "plug "; "replace " ] input
+          && contains " into " input
+        then result Substitution High "substitution phrase"
+        else if
+          starts [ "approx "; "approximate "; "decimal "; "estimate " ] input
+        then result Approximation High "approximation phrase"
+        else if
+          starts
+            [ "verify "; "check whether "; "prove whether "; "assert " ]
+            input
+        then result Verification High "verification phrase"
         else if starts [ "simulate "; "step "; "evolve " ] input then
           result Physics_simulation Medium "simulation verb"
-        else if starts [ "calculate "; "compute "; "evaluate "; "what is " ] input then
-          result Arithmetic Medium "calculation phrase"
+        else if
+          starts [ "calculate "; "compute "; "evaluate "; "what is " ] input
+        then result Arithmetic Medium "calculation phrase"
         else if starts [ "find " ] input then
           result Unknown Medium "ambiguous find request"
         else result Unknown Low "no deterministic intent match"
@@ -160,7 +177,8 @@ let classify ~mode input =
 let strip_prefix prefix text =
   if String.starts_with ~prefix text then
     Some
-      (String.sub text (String.length prefix) (String.length text - String.length prefix)
+      (String.sub text (String.length prefix)
+         (String.length text - String.length prefix)
       |> String.trim)
   else None
 
@@ -170,10 +188,12 @@ let canonicalize classification input =
   match classification.intent with
   | Unit_conversion ->
       let normalized =
-        Centl_sci_interaction.replace_all_ci ~needle:" into " ~replacement:" to " trimmed
+        Centl_sci_interaction.replace_all_ci ~needle:" into "
+          ~replacement:" to " trimmed
       in
       begin match strip_prefix "change " (lower normalized) with
-      | Some _ -> "convert " ^ String.sub normalized 7 (String.length normalized - 7)
+      | Some _ ->
+          "convert " ^ String.sub normalized 7 (String.length normalized - 7)
       | None -> normalized
       end
   | Equation_solving ->
@@ -204,7 +224,7 @@ let canonicalize classification input =
       in
       begin match root_body with
       | Some body
-        when not (String.contains body '=')
+        when (not (String.contains body '='))
              && not (contains " equals " (lower body)) ->
           "solve " ^ body ^ " equals zero"
       | Some body -> "solve " ^ body

@@ -27,7 +27,8 @@ let state_text = function
 
 let obligation_for_id (obligations : Centl_sci_mirage_obligation.report) id =
   List.find_opt
-    (fun obligation -> String.equal obligation.Centl_sci_mirage_obligation.id id)
+    (fun obligation ->
+      String.equal obligation.Centl_sci_mirage_obligation.id id)
     obligations.obligations
 
 let materialization_for_candidate
@@ -44,22 +45,30 @@ let candidate_parse_readiness materialization =
          = Centl_sci_mirage_materialize.Materialized_source
          && item.parser_validated ->
       ( Structurally_established,
-        "candidate materialization produced CENTL source and the authoritative parser accepted that exact staged source; this establishes syntax only, not mathematical correctness or regression success" )
+        "candidate materialization produced CENTL source and the authoritative \
+         parser accepted that exact staged source; this establishes syntax \
+         only, not mathematical correctness or regression success" )
   | Some item
     when item.Centl_sci_mirage_materialize.state
          = Centl_sci_mirage_materialize.Declarative_reuse ->
       ( Structurally_established,
-        "the candidate is a declarative composition of existing capabilities and introduces no generated CENTL source requiring a parser gate at this stage" )
+        "the candidate is a declarative composition of existing capabilities \
+         and introduces no generated CENTL source requiring a parser gate at \
+         this stage" )
   | Some item
-    when item.Centl_sci_mirage_materialize.state = Centl_sci_mirage_materialize.Blocked ->
+    when item.Centl_sci_mirage_materialize.state
+         = Centl_sci_mirage_materialize.Blocked ->
       ( Execution_required,
-        "candidate materialization is blocked; no successful authoritative parser result exists for an activatable source candidate" )
+        "candidate materialization is blocked; no successful authoritative \
+         parser result exists for an activatable source candidate" )
   | Some _ ->
       ( Execution_required,
-        "candidate materialization does not contain a successful authoritative parser result" )
+        "candidate materialization does not contain a successful authoritative \
+         parser result" )
   | None ->
       ( Execution_required,
-        "no transaction-bound candidate materialization record is available for parser readiness" )
+        "no transaction-bound candidate materialization record is available \
+         for parser readiness" )
 
 let check_of_obligation (candidate : Centl_sci_mirage_candidate.candidate)
     materialization (obligation : Centl_sci_mirage_obligation.obligation) =
@@ -68,30 +77,44 @@ let check_of_obligation (candidate : Centl_sci_mirage_candidate.candidate)
     match obligation.kind with
     | Provenance_complete ->
         ( Structurally_established,
-          "candidate identity is bound to the originating specification cell; runtime revision attribution remains an activation concern" )
+          "candidate identity is bound to the originating specification cell; \
+           runtime revision attribution remains an activation concern" )
     | Reuse_attempted
-      when (match candidate.strategy with
+      when match candidate.strategy with
            | Centl_sci_mirage_candidate.Compose_existing
            | Centl_sci_mirage_candidate.Alias_or_wrapper ->
                candidate.capability_inputs <> []
            | Centl_sci_mirage_candidate.Downstream_extension
-           | Centl_sci_mirage_candidate.Isolated_core_patch -> false) ->
+           | Centl_sci_mirage_candidate.Isolated_core_patch ->
+               false ->
         ( Structurally_established,
-          "the staged candidate is explicitly based on matched existing capabilities" )
+          "the staged candidate is explicitly based on matched existing \
+           capabilities" )
     | Trust_boundary_explicit ->
         ( Structurally_established,
-          "the staged candidate carries an explicit non-promotion assurance statement" )
+          "the staged candidate carries an explicit non-promotion assurance \
+           statement" )
     | Candidate_parses -> candidate_parse_readiness materialization
     | Mandatory_regression ->
-        (Execution_required, "the relevant deterministic regression gates have not yet been executed")
+        ( Execution_required,
+          "the relevant deterministic regression gates have not yet been \
+           executed" )
     | Rollback_available ->
-        (Execution_required, "a reversible pre-activation workspace snapshot must still be established")
+        ( Execution_required,
+          "a reversible pre-activation workspace snapshot must still be \
+           established" )
     | Reuse_attempted ->
-        (Execution_required, "reuse/composition evidence is not yet sufficient for this candidate")
+        ( Execution_required,
+          "reuse/composition evidence is not yet sufficient for this candidate"
+        )
     | Core_validation ->
-        (Execution_required, "full relevant core verification and regression gates have not yet been executed")
+        ( Execution_required,
+          "full relevant core verification and regression gates have not yet \
+           been executed" )
     | Clarification_required | Conflict_resolution_required | Policy_boundary ->
-        (Execution_required, "this blocking obligation must be resolved before a candidate may advance")
+        ( Execution_required,
+          "this blocking obligation must be resolved before a candidate may \
+           advance" )
   in
   {
     obligation_id = obligation.id;
@@ -109,10 +132,10 @@ let readiness_for_candidate obligations materialization
   let checks =
     candidate.obligation_ids
     |> List.filter_map (fun id ->
-           match obligation_for_id obligations id with
-           | None -> None
-           | Some obligation ->
-               Some (check_of_obligation candidate materialization obligation))
+        match obligation_for_id obligations id with
+        | None -> None
+        | Some obligation ->
+            Some (check_of_obligation candidate materialization obligation))
   in
   let execution_required =
     List.exists (fun check -> check.state = Execution_required) checks
@@ -165,15 +188,21 @@ let to_json report =
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_readiness");
       ("candidate_count", `Int (List.length report.candidates));
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("workspace_mutated", `Bool false);
       ("assurance_promoted", `Bool false);
       ( "materialization_evidence_semantics",
         `String
-          "readiness consumes transaction-bound candidate materialization evidence; an authoritative parser success establishes syntax only, while blocked or missing materialization keeps parser readiness pending" );
+          "readiness consumes transaction-bound candidate materialization \
+           evidence; an authoritative parser success establishes syntax only, \
+           while blocked or missing materialization keeps parser readiness \
+           pending" );
       ( "admissibility_semantics",
         `String
-          "readiness is not full validation; candidates remain inadmissible until every remaining mandatory execution obligation is actually discharged" );
+          "readiness is not full validation; candidates remain inadmissible \
+           until every remaining mandatory execution obligation is actually \
+           discharged" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -203,8 +232,10 @@ let render report =
       "CENTL-MIRAGE candidate evidence readiness";
       "candidates: " ^ string_of_int (List.length report.candidates);
       "candidates requiring execution: " ^ string_of_int execution_required;
-      "materialization parser evidence: consumed when transaction-bound and successful";
+      "materialization parser evidence: consumed when transaction-bound and \
+       successful";
       "workspace mutated: no";
       "assurance promoted: no";
-      "admissible candidates: none until mandatory execution obligations are discharged";
+      "admissible candidates: none until mandatory execution obligations are \
+       discharged";
     ]

@@ -1,9 +1,4 @@
-type handled = {
-  message : string;
-  changed : bool;
-  revision : int option;
-}
-
+type handled = { message : string; changed : bool; revision : int option }
 type result = Handled of handled | Not_handled
 
 let drop_prefix_ci prefix text =
@@ -23,7 +18,8 @@ let workspace_result action =
       Handled
         {
           message =
-            "CENTL-SCi cannot determine a local workspace because HOME is unavailable. Set CENTL_WORKSPACE to an explicit directory.";
+            "CENTL-SCi cannot determine a local workspace because HOME is \
+             unavailable. Set CENTL_WORKSPACE to an explicit directory.";
           changed = false;
           revision = None;
         }
@@ -32,13 +28,16 @@ let workspace_result action =
 let write_text_file path text =
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
     (fun () ->
       output_string channel text;
-      if text = "" || text.[String.length text - 1] <> '\n' then output_char channel '\n';
+      if text = "" || text.[String.length text - 1] <> '\n' then
+        output_char channel '\n';
       flush channel);
   Unix.rename temporary path
 
@@ -48,7 +47,8 @@ let snapshot_or_message workspace action =
   | Error message ->
       Handled
         {
-          message = "Could not create the reversible workspace snapshot: " ^ message;
+          message =
+            "Could not create the reversible workspace snapshot: " ^ message;
           changed = false;
           revision = None;
         }
@@ -61,7 +61,8 @@ let create_function ~replace source =
             {
               message =
                 Printf.sprintf
-                  "I recognized a function-extension request, but the generated CENTL definition is invalid at byte %d: %s"
+                  "I recognized a function-extension request, but the \
+                   generated CENTL definition is invalid at byte %d: %s"
                   error.position error.message;
               changed = false;
               revision = None;
@@ -69,13 +70,17 @@ let create_function ~replace source =
       | Ok located ->
           begin match located.statement with
           | Centl_parser.Define_function (name, _, _) ->
-              let path = Filename.concat workspace.modules_dir (name ^ ".centl") in
+              let path =
+                Filename.concat workspace.modules_dir (name ^ ".centl")
+              in
               if Sys.file_exists path && not replace then
                 Handled
                   {
                     message =
                       Printf.sprintf
-                        "Local function %s already exists at %s. Use a modification request rather than silently replacing it."
+                        "Local function %s already exists at %s. Use a \
+                         modification request rather than silently replacing \
+                         it."
                         name path;
                     changed = false;
                     revision = None;
@@ -87,15 +92,18 @@ let create_function ~replace source =
                       write_text_file path source;
                       begin match
                         Centl_sci_workspace.write_manifest workspace ~name
-                          ~enabled:true ~assurance:Centl_sci_workspace.Locally_tested
+                          ~enabled:true
+                          ~assurance:Centl_sci_workspace.Locally_tested
                           ~source:("modules/" ^ name ^ ".centl")
-                          ~summary:"Local CENTL function created through BUILD mode"
+                          ~summary:
+                            "Local CENTL function created through BUILD mode"
                       with
                       | Error message ->
                           Handled
                             {
                               message =
-                                "The CENTL source was written, but its extension manifest could not be recorded: "
+                                "The CENTL source was written, but its \
+                                 extension manifest could not be recorded: "
                                 ^ message;
                               changed = true;
                               revision = None;
@@ -105,7 +113,14 @@ let create_function ~replace source =
                             {
                               message =
                                 Printf.sprintf
-                                  "Created local CENTL function %s.\nGenerated/validated source: %s\nSource file: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
+                                  "Created local CENTL function %s.\n\
+                                   Generated/validated source: %s\n\
+                                   Source file: %s\n\
+                                   Workspace revision: %d\n\
+                                   Assurance: locally tested extension (not \
+                                   verified core).\n\
+                                   The extension is enabled and will be loaded \
+                                   into the active downstream CENTL session."
                                   name source path revision;
                               changed = true;
                               revision = Some revision;
@@ -113,18 +128,20 @@ let create_function ~replace source =
                       end
                     with
                     | Sys_error message | Unix.Unix_error (_, _, message) ->
-                        Handled
-                          {
-                            message = "Could not write the local extension: " ^ message;
-                            changed = false;
-                            revision = None;
-                          })
+                      Handled
+                        {
+                          message =
+                            "Could not write the local extension: " ^ message;
+                          changed = false;
+                          revision = None;
+                        })
           | Centl_parser.Define_value (name, _) ->
               Handled
                 {
                   message =
                     Printf.sprintf
-                      "%s is a value definition, not a function definition. Use `create value %s = ...` for that extension class."
+                      "%s is a value definition, not a function definition. \
+                       Use `create value %s = ...` for that extension class."
                       source name;
                   changed = false;
                   revision = None;
@@ -133,7 +150,8 @@ let create_function ~replace source =
               Handled
                 {
                   message =
-                    "The proposed extension parses as an expression or assertion rather than a function definition.";
+                    "The proposed extension parses as an expression or \
+                     assertion rather than a function definition.";
                   changed = false;
                   revision = None;
                 }
@@ -147,7 +165,8 @@ let create_value ~replace source =
             {
               message =
                 Printf.sprintf
-                  "I recognized a value-extension request, but the CENTL definition is invalid at byte %d: %s"
+                  "I recognized a value-extension request, but the CENTL \
+                   definition is invalid at byte %d: %s"
                   error.position error.message;
               changed = false;
               revision = None;
@@ -155,13 +174,17 @@ let create_value ~replace source =
       | Ok located ->
           begin match located.statement with
           | Centl_parser.Define_value (name, _) ->
-              let path = Filename.concat workspace.modules_dir (name ^ ".centl") in
+              let path =
+                Filename.concat workspace.modules_dir (name ^ ".centl")
+              in
               if Sys.file_exists path && not replace then
                 Handled
                   {
                     message =
                       Printf.sprintf
-                        "Local value %s already exists at %s. Use a modification request rather than silently replacing it."
+                        "Local value %s already exists at %s. Use a \
+                         modification request rather than silently replacing \
+                         it."
                         name path;
                     changed = false;
                     revision = None;
@@ -173,15 +196,18 @@ let create_value ~replace source =
                       write_text_file path source;
                       begin match
                         Centl_sci_workspace.write_manifest workspace ~name
-                          ~enabled:true ~assurance:Centl_sci_workspace.Locally_tested
+                          ~enabled:true
+                          ~assurance:Centl_sci_workspace.Locally_tested
                           ~source:("modules/" ^ name ^ ".centl")
-                          ~summary:"Local CENTL value created through BUILD mode"
+                          ~summary:
+                            "Local CENTL value created through BUILD mode"
                       with
                       | Error message ->
                           Handled
                             {
                               message =
-                                "The CENTL source was written, but its extension manifest could not be recorded: "
+                                "The CENTL source was written, but its \
+                                 extension manifest could not be recorded: "
                                 ^ message;
                               changed = true;
                               revision = None;
@@ -191,7 +217,14 @@ let create_value ~replace source =
                             {
                               message =
                                 Printf.sprintf
-                                  "Created local CENTL value %s.\nGenerated/validated source: %s\nSource file: %s\nWorkspace revision: %d\nAssurance: locally tested extension (not verified core).\nThe extension is enabled and will be loaded into the active downstream CENTL session."
+                                  "Created local CENTL value %s.\n\
+                                   Generated/validated source: %s\n\
+                                   Source file: %s\n\
+                                   Workspace revision: %d\n\
+                                   Assurance: locally tested extension (not \
+                                   verified core).\n\
+                                   The extension is enabled and will be loaded \
+                                   into the active downstream CENTL session."
                                   name source path revision;
                               changed = true;
                               revision = Some revision;
@@ -199,18 +232,20 @@ let create_value ~replace source =
                       end
                     with
                     | Sys_error message | Unix.Unix_error (_, _, message) ->
-                        Handled
-                          {
-                            message = "Could not write the local extension: " ^ message;
-                            changed = false;
-                            revision = None;
-                          })
+                      Handled
+                        {
+                          message =
+                            "Could not write the local extension: " ^ message;
+                          changed = false;
+                          revision = None;
+                        })
           | Centl_parser.Define_function (name, _, _) ->
               Handled
                 {
                   message =
                     Printf.sprintf
-                      "%s is a function definition, not a value definition. Use `create function %s` instead."
+                      "%s is a function definition, not a value definition. \
+                       Use `create function %s` instead."
                       source name;
                   changed = false;
                   revision = None;
@@ -219,7 +254,8 @@ let create_value ~replace source =
               Handled
                 {
                   message =
-                    "The proposed extension parses as an expression or assertion rather than a value definition.";
+                    "The proposed extension parses as an expression or \
+                     assertion rather than a value definition.";
                   changed = false;
                   revision = None;
                 }
@@ -241,13 +277,15 @@ let set_extension_enabled name enabled =
   workspace_result (fun workspace ->
       snapshot_or_message workspace (fun () ->
           match Centl_sci_extensions.set_enabled workspace name enabled with
-          | Error message -> Handled { message; changed = false; revision = None }
+          | Error message ->
+              Handled { message; changed = false; revision = None }
           | Ok manifest ->
               Handled
                 {
                   message =
                     Printf.sprintf "%s local extension %s.\n%s"
-                      (if enabled then "Enabled" else "Disabled") name
+                      (if enabled then "Enabled" else "Disabled")
+                      name
                       (Centl_sci_extensions.render_manifest manifest);
                   changed = true;
                   revision = Some manifest.workspace_revision;
@@ -257,13 +295,18 @@ let remove_extension name =
   workspace_result (fun workspace ->
       snapshot_or_message workspace (fun () ->
           match Centl_sci_extensions.remove workspace name with
-          | Error message -> Handled { message; changed = false; revision = None }
+          | Error message ->
+              Handled { message; changed = false; revision = None }
           | Ok revision ->
               Handled
                 {
                   message =
                     Printf.sprintf
-                      "Removed local extension %s from the active workspace and archived its files for recovery.\nWorkspace revision: %d\nUse `undo` to restore the immediately previous workspace snapshot."
+                      "Removed local extension %s from the active workspace \
+                       and archived its files for recovery.\n\
+                       Workspace revision: %d\n\
+                       Use `undo` to restore the immediately previous \
+                       workspace snapshot."
                       name revision;
                   changed = true;
                   revision = Some revision;
@@ -278,7 +321,10 @@ let undo () =
             {
               message =
                 Printf.sprintf
-                  "Restored the previous local workspace snapshot.\nWorkspace revision: %d\nEnabled extensions will be reloaded into the active downstream session."
+                  "Restored the previous local workspace snapshot.\n\
+                   Workspace revision: %d\n\
+                   Enabled extensions will be reloaded into the active \
+                   downstream session."
                   revision;
               changed = true;
               revision = Some revision;
@@ -291,13 +337,16 @@ let create_package name =
             Centl_sci_package.create workspace ~name
               ~summary:"Local CENTL package created through BUILD mode"
           with
-          | Error message -> Handled { message; changed = false; revision = None }
+          | Error message ->
+              Handled { message; changed = false; revision = None }
           | Ok package ->
               Handled
                 {
                   message =
                     Centl_sci_package.render package
-                    ^ "\nPackages group downstream extensions; they do not change extension assurance.";
+                    ^ "\n\
+                       Packages group downstream extensions; they do not \
+                       change extension assurance.";
                   changed = true;
                   revision = Some package.workspace_revision;
                 }))
@@ -327,15 +376,19 @@ let add_extension_to_package ~extension_name ~package_name =
   workspace_result (fun workspace ->
       snapshot_or_message workspace (fun () ->
           match
-            Centl_sci_package.add_extension workspace ~package_name ~extension_name
+            Centl_sci_package.add_extension workspace ~package_name
+              ~extension_name
           with
-          | Error message -> Handled { message; changed = false; revision = None }
+          | Error message ->
+              Handled { message; changed = false; revision = None }
           | Ok package ->
               Handled
                 {
                   message =
                     Centl_sci_package.render package
-                    ^ "\nPackage membership does not promote or alter the extension's assurance level.";
+                    ^ "\n\
+                       Package membership does not promote or alter the \
+                       extension's assurance level.";
                   changed = true;
                   revision = Some package.workspace_revision;
                 }))
@@ -359,7 +412,8 @@ let split_name_target text =
   | Some index ->
       let name = String.sub text 0 index |> String.trim in
       let target =
-        String.sub text (index + 1) (String.length text - index - 1) |> String.trim
+        String.sub text (index + 1) (String.length text - index - 1)
+        |> String.trim
       in
       if name = "" || target = "" then None else Some (name, target)
 
@@ -369,7 +423,8 @@ let scaffold kind rest =
       Handled
         {
           message =
-            "A scaffold needs a local name and a target. Example: `scaffold python adapter telescope_reader astropy`.";
+            "A scaffold needs a local name and a target. Example: `scaffold \
+             python adapter telescope_reader astropy`.";
           changed = false;
           revision = None;
         }
@@ -377,16 +432,24 @@ let scaffold kind rest =
       workspace_result (fun workspace ->
           snapshot_or_message workspace (fun () ->
               match Centl_sci_scaffold.create workspace ~kind ~name ~target with
-              | Error message -> Handled { message; changed = false; revision = None }
+              | Error message ->
+                  Handled { message; changed = false; revision = None }
               | Ok (root, revision) ->
                   Handled
                     {
                       message =
                         Printf.sprintf
-                          "Created inactive %s scaffold %s.\nTarget: %s\nPath: %s\nWorkspace revision: %d\nThe scaffold is intentionally not activated or represented as verified core."
+                          "Created inactive %s scaffold %s.\n\
+                           Target: %s\n\
+                           Path: %s\n\
+                           Workspace revision: %d\n\
+                           The scaffold is intentionally not activated or \
+                           represented as verified core."
                           (match kind with
-                          | Centl_sci_scaffold.Python_adapter -> "Python adapter"
-                          | Centl_sci_scaffold.Native_extension -> "native extension")
+                          | Centl_sci_scaffold.Python_adapter ->
+                              "Python adapter"
+                          | Centl_sci_scaffold.Native_extension ->
+                              "native extension")
                           name target root revision;
                       changed = true;
                       revision = Some revision;
@@ -400,7 +463,8 @@ let prepare_upstream () =
           Handled
             {
               message =
-                "Prepared a local upstream-contribution review artifact.\nPath: " ^ path
+                "Prepared a local upstream-contribution review artifact.\n\
+                 Path: " ^ path
                 ^ "\nNo branch, commit, push, or publication was performed.";
               changed = false;
               revision = Some (Centl_sci_workspace.read_revision workspace);
@@ -432,7 +496,8 @@ let generated_change input =
   | Centl_sci_codegen.Not_generated -> None
   | Centl_sci_codegen.Needs_clarification message ->
       Some (Handled { message; changed = false; revision = None })
-  | Centl_sci_codegen.Generated (Centl_sci_codegen.Function { replace; source }) ->
+  | Centl_sci_codegen.Generated (Centl_sci_codegen.Function { replace; source })
+    ->
       Some (create_function ~replace source)
   | Centl_sci_codegen.Generated (Centl_sci_codegen.Value { replace; source }) ->
       Some (create_value ~replace source)
@@ -456,8 +521,9 @@ let handle_direct trimmed lower =
         Handled
           {
             message =
-              Centl_sci_workspace.describe workspace ^ "\n\nLocal extensions:\n"
-              ^ extensions ^ "\n\nLocal packages:\n" ^ packages;
+              Centl_sci_workspace.describe workspace
+              ^ "\n\nLocal extensions:\n" ^ extensions ^ "\n\nLocal packages:\n"
+              ^ packages;
             changed = false;
             revision = Some (Centl_sci_workspace.read_revision workspace);
           })
@@ -472,10 +538,12 @@ let handle_direct trimmed lower =
             changed = false;
             revision = Some (Centl_sci_workspace.read_revision workspace);
           })
-  else if List.mem lower [ "packages"; "list packages"; "show packages"; ":packages" ] then
-    list_packages ()
   else if
-    List.mem lower [ "initialize workspace"; "init workspace"; "create workspace" ]
+    List.mem lower [ "packages"; "list packages"; "show packages"; ":packages" ]
+  then list_packages ()
+  else if
+    List.mem lower
+      [ "initialize workspace"; "init workspace"; "create workspace" ]
   then
     workspace_result (fun workspace ->
         try
@@ -495,8 +563,8 @@ let handle_direct trimmed lower =
               changed = false;
               revision = None;
             })
-  else if List.mem lower [ "undo"; "undo last change"; "undo the last change" ] then
-    undo ()
+  else if List.mem lower [ "undo"; "undo last change"; "undo the last change" ]
+  then undo ()
   else if
     List.mem lower
       [
@@ -524,53 +592,86 @@ let handle_direct trimmed lower =
                         Handled
                           {
                             message =
-                              "Package composition syntax: `add extension EXTENSION to package PACKAGE`.";
+                              "Package composition syntax: `add extension \
+                               EXTENSION to package PACKAGE`.";
                             changed = false;
                             revision = None;
                           }
                     end
                 | _ ->
-                    begin match drop_prefix_ci "scaffold python adapter " trimmed with
+                    begin match
+                      drop_prefix_ci "scaffold python adapter " trimmed
+                    with
                     | Some rest when rest <> "" ->
                         scaffold Centl_sci_scaffold.Python_adapter rest
                     | _ ->
-                        begin match drop_prefix_ci "scaffold native extension " trimmed with
+                        begin match
+                          drop_prefix_ci "scaffold native extension " trimmed
+                        with
                         | Some rest when rest <> "" ->
                             scaffold Centl_sci_scaffold.Native_extension rest
                         | _ ->
-                            begin match drop_prefix_ci "create function " trimmed with
+                            begin match
+                              drop_prefix_ci "create function " trimmed
+                            with
                             | Some source when source <> "" ->
                                 create_function ~replace:false source
                             | _ ->
-                                begin match drop_prefix_ci "modify function " trimmed with
+                                begin match
+                                  drop_prefix_ci "modify function " trimmed
+                                with
                                 | Some source when source <> "" ->
                                     create_function ~replace:true source
                                 | _ ->
-                                    begin match drop_prefix_ci "create value " trimmed with
+                                    begin match
+                                      drop_prefix_ci "create value " trimmed
+                                    with
                                     | Some source when source <> "" ->
                                         create_value ~replace:false source
                                     | _ ->
-                                        begin match drop_prefix_ci "modify value " trimmed with
+                                        begin match
+                                          drop_prefix_ci "modify value " trimmed
+                                        with
                                         | Some source when source <> "" ->
                                             create_value ~replace:true source
                                         | _ ->
-                                            begin match drop_prefix_ci "inspect " trimmed with
-                                            | Some name when name <> "" -> inspect_extension name
+                                            begin match
+                                              drop_prefix_ci "inspect " trimmed
+                                            with
+                                            | Some name when name <> "" ->
+                                                inspect_extension name
                                             | _ ->
-                                                begin match drop_prefix_ci "disable " trimmed with
+                                                begin match
+                                                  drop_prefix_ci "disable "
+                                                    trimmed
+                                                with
                                                 | Some name when name <> "" ->
-                                                    set_extension_enabled name false
+                                                    set_extension_enabled name
+                                                      false
                                                 | _ ->
-                                                    begin match drop_prefix_ci "enable " trimmed with
-                                                    | Some name when name <> "" ->
-                                                        set_extension_enabled name true
+                                                    begin match
+                                                      drop_prefix_ci "enable "
+                                                        trimmed
+                                                    with
+                                                    | Some name when name <> ""
+                                                      ->
+                                                        set_extension_enabled
+                                                          name true
                                                     | _ ->
-                                                        begin match drop_prefix_ci "remove " trimmed with
-                                                        | Some name when name <> "" ->
-                                                            remove_extension name
+                                                        begin match
+                                                          drop_prefix_ci
+                                                            "remove " trimmed
+                                                        with
+                                                        | Some name
+                                                          when name <> "" ->
+                                                            remove_extension
+                                                              name
                                                         | _ ->
-                                                            if trimmed = "" then Not_handled
-                                                            else render_plan trimmed
+                                                            if trimmed = "" then
+                                                              Not_handled
+                                                            else
+                                                              render_plan
+                                                                trimmed
                                                         end
                                                     end
                                                 end

@@ -4,8 +4,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let write_text path text =
   Centl_sci_workspace.ensure_directory (Filename.dirname path);
@@ -22,7 +21,8 @@ let read_text path =
 
 let create_native_value workspace =
   Centl_sci_workspace.ensure workspace;
-  write_text (Filename.concat workspace.Centl_sci_workspace.modules_dir "tau.centl")
+  write_text
+    (Filename.concat workspace.Centl_sci_workspace.modules_dir "tau.centl")
     "tau = 2*pi\n";
   match
     Centl_sci_workspace.write_manifest workspace ~name:"tau" ~enabled:true
@@ -54,9 +54,9 @@ let replace_assoc name value = function
 let expect_rejected needle = function
   | Ok () -> Alcotest.fail "bundle validation unexpectedly succeeded"
   | Error message ->
-      Alcotest.(check bool) "rejection reason" true
-        (Option.is_some
-           (Centl_sci_interaction.find_substring ~needle message))
+      Alcotest.(check bool)
+        "rejection reason" true
+        (Option.is_some (Centl_sci_interaction.find_substring ~needle message))
 
 let test_manifest_traversal_is_rejected () =
   let root = temp_dir "centl-caramels-traversal-" in
@@ -64,7 +64,9 @@ let test_manifest_traversal_is_rejected () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let bundle = make_bundle root in
-      let manifest_path = Filename.concat (Filename.concat bundle "extensions") "tau.json" in
+      let manifest_path =
+        Filename.concat (Filename.concat bundle "extensions") "tau.json"
+      in
       let manifest = Yojson.Safe.from_file manifest_path in
       Centl_sci_workspace.atomic_write_json manifest_path
         (replace_assoc "source" (`String "../outside.centl") manifest);
@@ -77,7 +79,9 @@ let test_absolute_manifest_source_is_rejected () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let bundle = make_bundle root in
-      let manifest_path = Filename.concat (Filename.concat bundle "extensions") "tau.json" in
+      let manifest_path =
+        Filename.concat (Filename.concat bundle "extensions") "tau.json"
+      in
       let manifest = Yojson.Safe.from_file manifest_path in
       Centl_sci_workspace.atomic_write_json manifest_path
         (replace_assoc "source" (`String "/tmp/outside.centl") manifest);
@@ -109,17 +113,20 @@ let test_workspace_rejects_symlinked_managed_directory () =
       Unix.mkdir outside 0o700;
       Unix.symlink outside (Filename.concat workspace_root "config");
       let workspace = Centl_sci_workspace.make workspace_root in
-      begin
-        try
-          Centl_sci_workspace.ensure workspace;
-          Alcotest.fail "workspace unexpectedly accepted a symlinked managed directory"
-        with
-        | Sys_error message ->
-            Alcotest.(check bool) "managed directory symlink rejection" true
-              (Option.is_some
-                 (Centl_sci_interaction.find_substring ~needle:"symbolic-link" message))
+      begin try
+        Centl_sci_workspace.ensure workspace;
+        Alcotest.fail
+          "workspace unexpectedly accepted a symlinked managed directory"
+      with Sys_error message ->
+        Alcotest.(check bool)
+          "managed directory symlink rejection" true
+          (Option.is_some
+             (Centl_sci_interaction.find_substring ~needle:"symbolic-link"
+                message))
       end;
-      Alcotest.(check int) "outside directory untouched" 0 (Array.length (Sys.readdir outside)))
+      Alcotest.(check int)
+        "outside directory untouched" 0
+        (Array.length (Sys.readdir outside)))
 
 let test_atomic_json_write_ignores_predictable_tmp_symlink () =
   let root = temp_dir "centl-caramels-atomic-symlink-" in
@@ -132,11 +139,14 @@ let test_atomic_json_write_ignores_predictable_tmp_symlink () =
       write_text outside "sentinel\n";
       let target = Filename.concat directory "state.json" in
       Unix.symlink outside (target ^ ".tmp");
-      Centl_sci_workspace.atomic_write_json target (`Assoc [ ("ok", `Bool true) ]);
-      Alcotest.(check string) "predictable tmp symlink target untouched" "sentinel\n"
+      Centl_sci_workspace.atomic_write_json target
+        (`Assoc [ ("ok", `Bool true) ]);
+      Alcotest.(check string)
+        "predictable tmp symlink target untouched" "sentinel\n"
         (read_text outside);
       let target_stat = Unix.lstat target in
-      Alcotest.(check bool) "atomic target is regular" true
+      Alcotest.(check bool)
+        "atomic target is regular" true
         (target_stat.Unix.st_kind = Unix.S_REG))
 
 let test_snapshot_rejects_symlinked_workspace_state () =
@@ -144,35 +154,46 @@ let test_snapshot_rejects_symlinked_workspace_state () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let outside = Filename.concat root "outside.txt" in
       write_text outside "outside\n";
       Unix.symlink outside (Filename.concat workspace.data "escape-link");
       begin match Centl_sci_snapshot.create workspace with
-      | Ok _ -> Alcotest.fail "snapshot unexpectedly followed symlinked workspace state"
+      | Ok _ ->
+          Alcotest.fail
+            "snapshot unexpectedly followed symlinked workspace state"
       | Error message ->
-          Alcotest.(check bool) "snapshot symlink rejection" true
+          Alcotest.(check bool)
+            "snapshot symlink rejection" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"symlinked workspace state" message))
       end;
-      Alcotest.(check string) "outside file untouched" "outside\n" (read_text outside))
+      Alcotest.(check string)
+        "outside file untouched" "outside\n" (read_text outside))
 
 let test_snapshot_rejects_symlinked_snapshot_root () =
   let root = temp_dir "centl-caramels-snapshot-root-symlink-" in
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let outside = Filename.concat root "outside-snapshots" in
       Unix.mkdir outside 0o700;
       Unix.symlink outside (Centl_sci_snapshot.snapshot_root workspace);
       begin match Centl_sci_snapshot.create workspace with
-      | Ok _ -> Alcotest.fail "snapshot unexpectedly accepted a symlinked snapshot root"
+      | Ok _ ->
+          Alcotest.fail
+            "snapshot unexpectedly accepted a symlinked snapshot root"
       | Error message ->
-          Alcotest.(check bool) "snapshot-root symlink rejection" true
+          Alcotest.(check bool)
+            "snapshot-root symlink rejection" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"symlinked snapshot root" message))
@@ -183,7 +204,9 @@ let test_snapshot_rollback_does_not_advance_revision () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let state = Filename.concat workspace.data "state.txt" in
       write_text state "before\n";
@@ -197,18 +220,23 @@ let test_snapshot_rollback_does_not_advance_revision () =
       begin match Centl_sci_snapshot.rollback workspace snapshot with
       | Error message -> Alcotest.fail message
       | Ok revision ->
-          Alcotest.(check int) "rollback revision unchanged" revision_before revision
+          Alcotest.(check int)
+            "rollback revision unchanged" revision_before revision
       end;
-      Alcotest.(check int) "workspace revision unchanged" revision_before
+      Alcotest.(check int)
+        "workspace revision unchanged" revision_before
         (Centl_sci_workspace.read_revision workspace);
-      Alcotest.(check string) "snapshot surface restored" "before\n" (read_text state))
+      Alcotest.(check string)
+        "snapshot surface restored" "before\n" (read_text state))
 
 let test_snapshot_retains_only_latest_undo_state () =
   let root = temp_dir "centl-caramels-snapshot-bounded-" in
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let state = Filename.concat workspace.data "state.txt" in
       write_text state "first\n";
@@ -223,29 +251,38 @@ let test_snapshot_retains_only_latest_undo_state () =
         | Ok path -> path
         | Error message -> Alcotest.fail message
       in
-      Alcotest.(check bool) "new snapshot retained" true (Sys.file_exists second);
+      Alcotest.(check bool)
+        "new snapshot retained" true (Sys.file_exists second);
       Alcotest.(check bool) "old snapshot pruned" false (Sys.file_exists first);
-      Alcotest.(check int) "only one snapshot retained" 1
-        (Array.length (Sys.readdir (Centl_sci_snapshot.snapshot_root workspace)));
+      Alcotest.(check int)
+        "only one snapshot retained" 1
+        (Array.length
+           (Sys.readdir (Centl_sci_snapshot.snapshot_root workspace)));
       begin match Centl_sci_snapshot.restore_last workspace with
       | Error message -> Alcotest.fail message
       | Ok _ -> ()
       end;
-      Alcotest.(check string) "latest undo state restored" "second\n" (read_text state))
+      Alcotest.(check string)
+        "latest undo state restored" "second\n" (read_text state))
 
 let test_snapshot_rollback_rejects_outside_path () =
   let root = temp_dir "centl-caramels-snapshot-outside-" in
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let outside = Filename.concat root "outside-snapshot" in
       Unix.mkdir outside 0o700;
       begin match Centl_sci_snapshot.rollback workspace outside with
-      | Ok _ -> Alcotest.fail "rollback unexpectedly accepted an unmanaged snapshot path"
+      | Ok _ ->
+          Alcotest.fail
+            "rollback unexpectedly accepted an unmanaged snapshot path"
       | Error message ->
-          Alcotest.(check bool) "outside rollback rejected" true
+          Alcotest.(check bool)
+            "outside rollback rejected" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
                   ~needle:"outside the managed snapshot root" message))
@@ -257,10 +294,14 @@ let test_dependency_invalid_bundle_is_rejected () =
     ~finally:(fun () -> cleanup root)
     (fun () ->
       let bundle = make_bundle root in
-      let manifest_path = Filename.concat (Filename.concat bundle "extensions") "tau.json" in
+      let manifest_path =
+        Filename.concat (Filename.concat bundle "extensions") "tau.json"
+      in
       let manifest = Yojson.Safe.from_file manifest_path in
       Centl_sci_workspace.atomic_write_json manifest_path
-        (replace_assoc "dependencies" (`List [ `String "extension:missing" ]) manifest);
+        (replace_assoc "dependencies"
+           (`List [ `String "extension:missing" ])
+           manifest);
       Centl_sci_portable.validate_bundle bundle
       |> expect_rejected "dependency graph is not activation-ready")
 
@@ -278,13 +319,14 @@ let test_import_preserves_reload_signal () =
       | Error message -> Alcotest.fail message
       | Ok result ->
           Alcotest.(check bool) "import reports changed" true result.changed;
-          Alcotest.(check bool) "import reports revision" true
+          Alcotest.(check bool)
+            "import reports revision" true
             (Option.is_some result.revision);
           begin match Centl_sci_extensions.read_manifest active "tau" with
           | Error message -> Alcotest.fail message
           | Ok manifest ->
-              Alcotest.(check bool) "imported extension remains enabled" true
-                manifest.enabled
+              Alcotest.(check bool)
+                "imported extension remains enabled" true manifest.enabled
           end)
 
 let () =
@@ -300,8 +342,8 @@ let () =
             test_symlink_is_rejected_before_copy;
           Alcotest.test_case "workspace directory rejects symlink" `Quick
             test_workspace_rejects_symlinked_managed_directory;
-          Alcotest.test_case "atomic write ignores predictable tmp symlink" `Quick
-            test_atomic_json_write_ignores_predictable_tmp_symlink;
+          Alcotest.test_case "atomic write ignores predictable tmp symlink"
+            `Quick test_atomic_json_write_ignores_predictable_tmp_symlink;
           Alcotest.test_case "snapshot rejects symlink" `Quick
             test_snapshot_rejects_symlinked_workspace_state;
           Alcotest.test_case "snapshot root rejects symlink" `Quick

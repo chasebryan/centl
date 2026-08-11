@@ -104,8 +104,8 @@ let missing_fields input =
       ("steps", "steps ");
     ]
     |> List.filter_map (fun (name, marker) ->
-           if Option.is_some (find_substring ~needle:marker lower) then None
-           else Some name)
+        if Option.is_some (find_substring ~needle:marker lower) then None
+        else Some name)
 
 let interpret input =
   if not (looks_like_request input) then None
@@ -120,7 +120,8 @@ let interpret input =
         section ~from_marker:"dt " ~to_marker:"steps " text lower,
         trailing ~marker:"steps " text lower )
     with
-    | Some mass, Some position, Some velocity, Some gravity, Some dt, Some steps ->
+    | Some mass, Some position, Some velocity, Some gravity, Some dt, Some steps
+      ->
         begin match
           ( parse_quantity mass,
             parse_vector position,
@@ -129,11 +130,12 @@ let interpret input =
             parse_quantity dt,
             parse_steps steps )
         with
-        | Some (mass_value, mass_unit),
-          Some (position_x, position_y, position_z, position_unit),
-          Some (velocity_x, velocity_y, velocity_z, velocity_unit),
-          Some (gravity_x, gravity_y, gravity_z, gravity_unit),
-          Some (dt_value, dt_unit), Some steps ->
+        | ( Some (mass_value, mass_unit),
+            Some (position_x, position_y, position_z, position_unit),
+            Some (velocity_x, velocity_y, velocity_z, velocity_unit),
+            Some (gravity_x, gravity_y, gravity_z, gravity_unit),
+            Some (dt_value, dt_unit),
+            Some steps ) ->
             begin match
               Centl_sci_ir.of_json
                 (`Assoc
@@ -170,4 +172,5 @@ let interpret input =
     | _ -> None
 
 let example =
-  "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10"
+  "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) \
+   m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10"

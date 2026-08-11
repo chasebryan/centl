@@ -32,7 +32,8 @@ let collect () =
         gated =
           [
             "BUILD workspace operations require HOME or CENTL_WORKSPACE";
-            "live workspace import activation remains gated until same-command core-session reload is wired";
+            "live workspace import activation remains gated until same-command \
+             core-session reload is wired";
           ];
       }
   | Some workspace ->
@@ -40,8 +41,8 @@ let collect () =
       let enabled_native_extensions =
         extensions
         |> List.filter (fun extension ->
-               extension.Centl_sci_extensions.enabled
-               && extension.kind = "native_centl")
+            extension.Centl_sci_extensions.enabled
+            && extension.kind = "native_centl")
         |> List.map (fun extension -> extension.name)
       in
       let disabled_extensions =
@@ -61,8 +62,10 @@ let collect () =
         packages = List.length (Centl_sci_package.list workspace);
         gated =
           [
-            "live workspace import activation remains gated until same-command core-session reload is wired";
-            "main centl calculator shared-editor migration remains a separate integration item";
+            "live workspace import activation remains gated until same-command \
+             core-session reload is wired";
+            "main centl calculator shared-editor migration remains a separate \
+             integration item";
           ];
       }
 
@@ -81,16 +84,18 @@ let render status =
        "  workspace: " ^ option_text status.workspace_root;
        "  workspace revision: " ^ int_option_text status.workspace_revision;
        "  workspace health: " ^ option_text status.workspace_health;
-       "  enabled native extensions: "
-       ^ (if status.enabled_native_extensions = [] then "none"
-          else String.concat ", " status.enabled_native_extensions);
+       ("  enabled native extensions: "
+       ^
+       if status.enabled_native_extensions = [] then "none"
+       else String.concat ", " status.enabled_native_extensions);
        "  disabled extensions: " ^ string_of_int status.disabled_extensions;
        "  local packages: " ^ string_of_int status.packages;
        "  deliberately gated:";
      ]
     @ List.map (fun item -> "    - " ^ item) status.gated
     @ [
-        "  assurance note: status reports local state and structural health; it does not promote downstream assurance.";
+        "  assurance note: status reports local state and structural health; \
+         it does not promote downstream assurance.";
       ])
 
 let to_json status =
@@ -101,11 +106,17 @@ let to_json status =
       ("version", `String status.version);
       ("platform", `String status.platform);
       ( "workspace_root",
-        match status.workspace_root with None -> `Null | Some value -> `String value );
+        match status.workspace_root with
+        | None -> `Null
+        | Some value -> `String value );
       ( "workspace_revision",
-        match status.workspace_revision with None -> `Null | Some value -> `Int value );
+        match status.workspace_revision with
+        | None -> `Null
+        | Some value -> `Int value );
       ( "workspace_health",
-        match status.workspace_health with None -> `Null | Some value -> `String value );
+        match status.workspace_health with
+        | None -> `Null
+        | Some value -> `String value );
       ("enabled_native_extensions", strings status.enabled_native_extensions);
       ("disabled_extensions", `Int status.disabled_extensions);
       ("packages", `Int status.packages);

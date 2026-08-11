@@ -3,13 +3,17 @@ let contains needle text =
 
 let test_catalog_is_not_numeric_ranking () =
   let rendered = Centl_sci_assurance.render_catalog () in
-  Alcotest.(check bool) "locally tested documented" true
+  Alcotest.(check bool)
+    "locally tested documented" true
     (contains "locally_tested_extension" rendered);
-  Alcotest.(check bool) "external backend documented" true
+  Alcotest.(check bool)
+    "external backend documented" true
     (contains "external_backend" rendered);
-  Alcotest.(check bool) "generated documented" true
+  Alcotest.(check bool)
+    "generated documented" true
     (contains "unverified_generated_extension" rendered);
-  Alcotest.(check bool) "not a numeric ranking" true
+  Alcotest.(check bool)
+    "not a numeric ranking" true
     (contains "not a single numeric ranking" rendered)
 
 let test_local_manifest_does_not_claim_core () =
@@ -29,11 +33,14 @@ let test_local_manifest_does_not_claim_core () =
     }
   in
   let rendered = Centl_sci_assurance.render_manifest manifest in
-  Alcotest.(check bool) "provenance visible" true
+  Alcotest.(check bool)
+    "provenance visible" true
     (contains "generated from a downstream BUILD request" rendered);
-  Alcotest.(check bool) "verified core explicitly excluded" true
+  Alcotest.(check bool)
+    "verified core explicitly excluded" true
     (contains "verified-core assurance" rendered);
-  Alcotest.(check bool) "inspection does not promote" true
+  Alcotest.(check bool)
+    "inspection does not promote" true
     (contains "does not change the extension or promote its assurance" rendered)
 
 let test_unknown_assurance_is_preserved_without_inference () =
@@ -53,9 +60,11 @@ let test_unknown_assurance_is_preserved_without_inference () =
     }
   in
   let rendered = Centl_sci_assurance.render_manifest manifest in
-  Alcotest.(check bool) "unknown label preserved" true
+  Alcotest.(check bool)
+    "unknown label preserved" true
     (contains "legacy_custom_label" rendered);
-  Alcotest.(check bool) "no inferred guarantee" true
+  Alcotest.(check bool)
+    "no inferred guarantee" true
     (contains "does not infer additional guarantees" rendered)
 
 let () =
