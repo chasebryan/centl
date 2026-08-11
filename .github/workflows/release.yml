@@ -1,306 +1,115 @@
 name: Native releases
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - main
     tags:
       - "v*"
 
 concurrency:
-  group: native-release-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'push' && github.ref_type != 'tag' }}
+  group: oasis-release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
-env:
-  FSTAR_VERSION: "2026.07.05"
-  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
-  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
-  Z3_VERSION: "4.13.3"
-  GMP_VERSION: "6.3.0"
-  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
-  MPFR_VERSION: "4.2.2"
-  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
-  FLINT_VERSION: "3.0.1"
-  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
-  OCAML_VERSION: "4.14.1"
-  CENTL_VERIFICATION_COMMAND: "make verify"
-  CENTL_VERIFICATION_RESULT: "passed"
-  SOURCE_DATE_EPOCH: "315532800"
-
 jobs:
-  verify:
-    name: Verify F* source
+  publish:
+    name: Publish qualified Oasis release
     runs-on: ubuntu-24.04
-    container: ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
-    env:
-      DEBIAN_FRONTEND: noninteractive
-
-    steps:
-      - name: Install checkout and verification prerequisites
-        run: |
-          apt-get update
-          apt-get install --yes --no-install-recommends \
-            ca-certificates curl git libzstd1 make tar
-
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Require a Git worktree
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git rev-parse --is-inside-work-tree | grep -Fqx true
-          git ls-files --error-unmatch .github/workflows/release.yml
-
-      - name: Install pinned F*
-        run: |
-          archive="$RUNNER_TEMP/fstar.tar.gz"
-          curl --fail --silent --show-error --location \
-            "https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz" \
-            --output "$archive"
-          printf '%s  %s\n' "$FSTAR_SHA256" "$archive" | sha256sum --check
-          mkdir -p "$RUNNER_TEMP/fstar"
-          tar -xzf "$archive" -C "$RUNNER_TEMP/fstar"
-          fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
-          test -n "$fstar"
-          "$fstar" --version | grep -F "commit=${FSTAR_COMMIT}"
-          z3=$("$fstar" --locate_z3 "$Z3_VERSION")
-          "$z3" --version | grep -F "Z3 version ${Z3_VERSION}"
-          printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
-
-      - name: Verify and extract OCaml
-        run: |
-          make extract
-          git ls-files --error-unmatch \
-            src/generated/Centl_Gcd.ml src/generated/Centl_Core.ml \
-            src/generated/Centl_PolynomialSoundness.ml
-          git diff --exit-code -- src/generated
-          mkdir -p release-input/licenses
-          fstar=$(find "$RUNNER_TEMP/fstar" -type f -path '*/bin/fstar.exe' -print -quit)
-          cp "$(dirname "$fstar")/../LICENSE" release-input/licenses/FSTAR
-
-      - name: Preserve verified source
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: verified-ocaml
-          path: |
-            src/generated/Centl_Gcd.ml
-            src/generated/Centl_Core.ml
-            src/generated/Centl_PolynomialSoundness.ml
-            release-input/licenses/FSTAR
-          if-no-files-found: error
-
-  linux-x86_64:
-    name: Linux x86_64
-    needs: verify
-    runs-on: ubuntu-24.04
-    container: ubuntu:22.04@sha256:3b06811b2afd352be909dd088a004166d665dc76d38b13eada33522a9d915c6f
-    env:
-      DEBIAN_FRONTEND: noninteractive
-      NATIVE_PREFIX: /opt/centl-native
-      OPAMROOT: /opt/centl-opam
-      OPAMYES: "1"
-      PKG_CONFIG_PATH: /opt/centl-native/lib/pkgconfig
-      LIBRARY_PATH: /opt/centl-native/lib
-      LD_LIBRARY_PATH: /opt/centl-native/lib
-      C_INCLUDE_PATH: /opt/centl-native/include
-      PORTABLE_X86_CFLAGS: -O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic
-    outputs:
-      version: ${{ steps.package.outputs.version }}
-
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Restore verified OCaml
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: verified-ocaml
-          path: .
-
-      - name: Install native build prerequisites
-        run: |
-          apt-get update
-          apt-get install --yes --no-install-recommends \
-            build-essential ca-certificates curl git m4 opam patch pkg-config python3 qemu-user xz-utils
-
-      - name: Build pinned native libraries
-        run: |
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/gmp.tar.xz"
-          printf '%s  %s\n' "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz" | sha256sum --check
-          tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
-          baseline_build=$(sh ./configfsf.guess)
-          case "$baseline_build" in
-            x86_64-*-linux-gnu) ;;
-            *) printf 'unexpected GMP package build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
-          esac
-          ABI=64 CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --build="$baseline_build" --prefix="$NATIVE_PREFIX" \
-            --disable-static --enable-shared --enable-fat
-          grep -qx '#define WANT_FAT_BINARY 1' config.h
-          make --jobs=2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
-            --output "$RUNNER_TEMP/mpfr.tar.xz"
-          printf '%s  %s\n' "$MPFR_SHA256" "$RUNNER_TEMP/mpfr.tar.xz" | sha256sum --check
-          tar -xf "$RUNNER_TEMP/mpfr.tar.xz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/mpfr-${MPFR_VERSION}"
-          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --disable-static --enable-shared
-          make --jobs=2
-          make install
-
-          curl --fail --silent --show-error --location \
-            "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
-            --output "$RUNNER_TEMP/flint.tar.gz"
-          printf '%s  %s\n' "$FLINT_SHA256" "$RUNNER_TEMP/flint.tar.gz" | sha256sum --check
-          tar -xzf "$RUNNER_TEMP/flint.tar.gz" -C "$RUNNER_TEMP"
-          cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
-          CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
-            --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
-            --with-mpfr="$NATIVE_PREFIX"
-          make --jobs=2
-          make install
-
-      - name: Install pinned OCaml tools
-        run: |
-          opam init --bare --disable-sandboxing
-          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
-          opam install --switch=centl --assume-depexts \
-            alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
-            yojson.2.2.2 zarith.1.14
-
-      - name: Set up pinned Julia
-        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
-        with:
-          version: "1.12.6"
-
-      - name: Instantiate pinned Nemo environment
-        env:
-          JULIA_PKG_PRECOMPILE_AUTO: "0"
-        run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
-
-      - name: Run independent differential publication gate
-        env:
-          JULIA_NUM_THREADS: "1"
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          export CFLAGS="$PORTABLE_X86_CFLAGS"
-          opam exec --switch=centl -- make native-build
-          CENTL_BIN="$GITHUB_WORKSPACE/_build/default/src/main.exe" \
-            julia --startup-file=no --project=lab/julia lab/julia/differential.jl
-
-      - name: Test, package, and install CENTL
-        id: package
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          export CFLAGS="$PORTABLE_X86_CFLAGS"
-          opam exec --switch=centl -- make quality
-          opam exec --switch=centl -- make native-test
-          reported=$(opam exec --switch=centl -- _build/default/src/main.exe --version)
-          version=${reported#centl }
-          test -n "$version"
-          if [ "$GITHUB_REF_TYPE" = tag ]; then
-            test "v$version" = "$GITHUB_REF_NAME"
-          fi
-          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
-          license_sources="$RUNNER_TEMP/centl-opam-license-sources"
-          mkdir -p "$license_sources"
-          opam source --switch=centl --dir="$license_sources/ocaml" \
-            ocaml-base-compiler.4.14.1
-          opam source --switch=centl --dir="$license_sources/zarith" zarith.1.14
-          opam source --switch=centl --dir="$license_sources/yojson" yojson.2.2.2
-          CENTL_FLINT_LICENSE="$RUNNER_TEMP/flint-${FLINT_VERSION}/LICENSE" \
-          CENTL_GMP_LGPL_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYING.LESSERv3" \
-          CENTL_GMP_GPL3_LICENSE="$RUNNER_TEMP/gmp-${GMP_VERSION}/COPYINGv3" \
-          CENTL_MPFR_LGPL_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING.LESSER" \
-          CENTL_MPFR_GPL3_LICENSE="$RUNNER_TEMP/mpfr-${MPFR_VERSION}/COPYING" \
-          CENTL_FSTAR_LICENSE="$GITHUB_WORKSPACE/release-input/licenses/FSTAR" \
-          CENTL_OCAML_LICENSE="$license_sources/ocaml/LICENSE" \
-          CENTL_ZARITH_LICENSE="$license_sources/zarith/LICENSE" \
-          CENTL_YOJSON_LICENSE="$license_sources/yojson/LICENSE.md" \
-            scripts/package-release "$version"
-          install_root=$(mktemp -d)
-          sh install --archive "$PWD/dist/centl-linux-x86_64.tar.gz" \
-            --prefix "$install_root"
-          "$install_root/bin/centl" '0.1 + 0.2' | grep -qx '3/10'
-          installed_launcher=$(readlink -f "$install_root/bin/centl")
-          installed_release_root=$(CDPATH= cd -- "$(dirname -- "$installed_launcher")/.." && pwd)
-          qemu-x86_64 -cpu core2duo \
-            -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
-            "$installed_release_root/libexec/centl" '2^256' \
-            | grep -qx '115792089237316195423570985008687907853269984665640564039457584007913129639936'
-          qemu-x86_64 -cpu core2duo \
-            -E "LD_LIBRARY_PATH=$installed_release_root/lib" \
-            "$installed_release_root/libexec/centl" 'approx(sqrt(2), 12)' \
-            | grep -Fqx '≈ [1.41421356237, 1.41421356238]'
-          printf '%s\n' \
-            '{"version":1,"expression":"r = 3"}' \
-            '{"version":1,"expression":"circle_area(r)"}' \
-            | "$install_root/bin/centl" --serve \
-            > "$RUNNER_TEMP/centl-serve.jsonl"
-          grep -q '"text":"9 \* pi"' "$RUNNER_TEMP/centl-serve.jsonl"
-          printf '%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-test","version":"1"}}}' \
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"centl_calculate","arguments":{"expression":"0.1 + 0.2"}}}' \
-            | "$install_root/bin/centl" --mcp \
-            > "$RUNNER_TEMP/centl-mcp.jsonl"
-          grep -q '"text":"3/10"' "$RUNNER_TEMP/centl-mcp.jsonl"
-
-      - name: Validate reusable contract action
-        uses: ./.github/actions/centl-check
-        with:
-          path: examples/contracts/math-contracts.centl
-          receipt: release-input/centl-check-receipt.json
-          centl-bin: _build/default/src/main.exe
-          upload-receipt: "false"
-
-      - name: Preserve Linux release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: centl-linux-x86_64
-          path: dist/*
-          if-no-files-found: error
-
-  release:
-    name: Complete Linux native release
-    needs:
-      - linux-x86_64
-    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     permissions:
-      contents: read
-    outputs:
-      version: ${{ needs.linux-x86_64.outputs.version }}
-
+      actions: read
+      contents: write
     steps:
-      - name: Collect Linux release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - name: Check out tagged source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          name: centl-linux-x86_64
-          path: dist
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Validate Linux release
+      - name: Require exact qualified Oasis identity
         env:
-          VERSION: ${{ needs.linux-x86_64.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          asset=centl-linux-x86_64.tar.gz
-          test -s "dist/$asset"
-          test -s "dist/$asset.sha256"
-          (cd dist && sha256sum --check "$asset.sha256")
+          set -euo pipefail
+          version=$(sed -n 's/^let value = "\([^"]*\)"$/\1/p' src/ocaml/centl_version.ml)
+          test -n "$version"
+          test "v$version" = "$GITHUB_REF_NAME"
+
+          oasis_sha=$(git ls-remote origin refs/heads/oasis | awk 'NR == 1 { print $1 }')
+          test -n "$oasis_sha"
+          if [ "$oasis_sha" != "$GITHUB_SHA" ]; then
+            printf 'tagged commit %s is not exact origin/oasis %s\n' "$GITHUB_SHA" "$oasis_sha" >&2
+            exit 1
+          fi
+
+          python3 scripts/oasis_required_checks.py --root "$PWD"
+
+          open_prs=$(gh api \
+            "repos/$GITHUB_REPOSITORY/pulls?state=open&base=oasis&per_page=100" \
+            --jq 'length')
+          if [ "$open_prs" != 0 ]; then
+            printf '%s open pull request(s) still target oasis\n' "$open_prs" >&2
+            exit 1
+          fi
+
+          printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
+
+      - name: Resolve successful Oasis qualification run
+        id: qualification
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/oasis-qualification.yml/runs?head_sha=$GITHUB_SHA&event=push&status=success&per_page=20" \
+            --jq '.workflow_runs[0].id // empty')
+          if [ -z "$run_id" ]; then
+            printf 'no successful Oasis qualification push run exists for %s\n' "$GITHUB_SHA" >&2
+            exit 1
+          fi
+
+          artifact_name="oasis-release-$GITHUB_SHA"
+          artifact_count=$(gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts?per_page=100" \
+            --jq "[.artifacts[] | select(.name == \"$artifact_name\" and .expired == false)] | length")
+          if [ "$artifact_count" != 1 ]; then
+            printf 'expected exactly one unexpired %s artifact, found %s\n' \
+              "$artifact_name" "$artifact_count" >&2
+            exit 1
+          fi
+
+          printf 'run_id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+          printf 'artifact_name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+
+      - name: Download exact qualified release bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.qualification.outputs.run_id }}
+          ARTIFACT_NAME: ${{ steps.qualification.outputs.artifact_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qualified dist
+          gh run download "$RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "$ARTIFACT_NAME" \
+            --dir qualified
+
+          archive=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz' -print -quit)
+          checksum=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz.sha256' -print -quit)
+          test -n "$archive"
+          test -n "$checksum"
+          cp "$archive" dist/centl-linux-x86_64.tar.gz
+          cp "$checksum" dist/centl-linux-x86_64.tar.gz.sha256
+
+      - name: Revalidate qualified artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
           python3 - <<'PY'
           import json
           import os
@@ -309,59 +118,47 @@ jobs:
 
           archive = pathlib.Path("dist/centl-linux-x86_64.tar.gz")
           with tarfile.open(archive, "r:gz") as package:
-              member = package.extractfile("centl/BUILD_MANIFEST.json")
-              if member is None:
-                  raise SystemExit("missing build manifest in Linux release")
-              manifest = json.loads(member.read())
+              version_member = package.extractfile("centl/VERSION")
+              manifest_member = package.extractfile("centl/BUILD_MANIFEST.json")
+              if version_member is None or manifest_member is None:
+                  raise SystemExit("qualified archive lacks release identity metadata")
+              packaged_version = version_member.read(256).decode("utf-8", "strict").strip()
+              manifest = json.loads(manifest_member.read())
 
+          if packaged_version != os.environ["VERSION"]:
+              raise SystemExit("qualified archive version mismatch")
           if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
-              raise SystemExit("invalid Linux build manifest schema")
-          if (manifest.get("platform"), manifest.get("architecture")) != ("linux", "x86_64"):
-              raise SystemExit("unexpected Linux release target")
+              raise SystemExit("invalid qualified build manifest")
           if manifest.get("semantic_version") != os.environ["VERSION"]:
-              raise SystemExit("Linux release version mismatch")
+              raise SystemExit("qualified build-manifest version mismatch")
           if manifest.get("commit") != os.environ["GITHUB_SHA"]:
-              raise SystemExit("Linux release commit mismatch")
+              raise SystemExit("qualified build-manifest commit mismatch")
+          if (manifest.get("platform"), manifest.get("architecture")) != ("linux", "x86_64"):
+              raise SystemExit("qualified release target is not GNU/Linux x86_64")
           if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
-              raise SystemExit("Linux verification attestation mismatch")
-          if len(manifest.get("generated_core_hash", "")) != 64:
-              raise SystemExit("invalid generated-core hash in Linux release")
+              raise SystemExit("qualified verification attestation mismatch")
           PY
 
-      - name: Preserve complete Linux release
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: centl-${{ needs.linux-x86_64.outputs.version }}-linux-release
-          path: dist/*
-          if-no-files-found: error
-
-  publish:
-    name: Publish tagged release
-    if: github.ref_type == 'tag'
-    needs:
-      - release
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-
-    steps:
-      - name: Collect validated release
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: centl-${{ needs.release.outputs.version }}-linux-release
-          path: dist
-
-      - name: Publish tagged release
+      - name: Publish qualified tagged release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.release.outputs.version }}
+        shell: bash
         run: |
-          test "v$VERSION" = "$GITHUB_REF_NAME"
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            printf 'release %s already exists; refusing to overwrite it\n' "$GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+
           prerelease=()
           case "$VERSION" in
             *-*) prerelease=(--prerelease) ;;
           esac
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --repo "$GITHUB_REPOSITORY" --generate-notes \
-            "${prerelease[@]}" \
-            --title "CENTL $VERSION"
+
+          gh release create "$GITHUB_REF_NAME" \
+            dist/centl-linux-x86_64.tar.gz \
+            dist/centl-linux-x86_64.tar.gz.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "CENTL $VERSION" \
+            --notes-file "docs/releases/$VERSION.md" \
+            "${prerelease[@]}"
