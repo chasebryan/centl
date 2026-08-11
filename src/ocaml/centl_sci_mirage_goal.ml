@@ -301,10 +301,14 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
              trusted/core implementation change" )
       | _ when explicitly_materializable_request cell.text ->
           ( Extension_required,
+<<<<<<< HEAD
+            "the objective requests a concrete native CENTL definition that MIRAGE can stage deterministically; capability overlap supplies implementation machinery or ingredients but does not satisfy the request" )
+=======
             "the objective requests a concrete native CENTL definition that \
              MIRAGE can stage deterministically; capability overlap supplies \
              implementation machinery or ingredients but does not satisfy the \
              requested new binding" )
+>>>>>>> origin/main
       | _ when is_alias_request cell.text && matches <> [] ->
           ( Alias_or_wrapper,
             "existing capabilities appear reusable; the requested semantic \
