@@ -37,19 +37,6 @@ require_opam_pin() {
     "$package must be pinned to $version"
 }
 
-require_unique_workflow_pin() {
-  file=$1
-  package=$2
-  version=$3
-  pins=$(grep -Eo "${package}\.[0-9][0-9A-Za-z.+_~-]*" "$file" \
-    | sort -u || true)
-  if [ "$pins" != "$package.$version" ]; then
-    printf '%s has inconsistent %s pins; expected only %s.%s, found: %s\n' \
-      "$file" "$package" "$package" "$version" "${pins:-none}" >&2
-    exit 1
-  fi
-}
-
 ocaml=$(lock_value runtime ocaml)
 dune=$(lock_value runtime dune)
 zarith=$(lock_value runtime zarith)
@@ -67,11 +54,10 @@ fstar=$(lock_value verification fstar)
 fstar_commit=$(lock_value verification fstar_commit)
 fstar_sha256=$(lock_value verification fstar_sha256)
 z3=$(lock_value verification z3)
-julia=$(lock_value laboratory julia)
 nemo=$(lock_value laboratory nemo)
 json3=$(lock_value laboratory json3)
 
-release_workflow=.github/workflows/release.yml
+bootstrap=scripts/oasis-ci-bootstrap
 
 require_opam_pin ocaml "$ocaml"
 require_opam_pin dune "$dune"
@@ -89,14 +75,6 @@ require_text .ocamlformat "version=$ocamlformat" \
   "OCamlFormat must be pinned to $ocamlformat"
 require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
   "OCamlFormat must be documented as $ocamlformat"
-require_text "$release_workflow" "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
-require_text "$release_workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
-  "F* commit must be pinned to $fstar_commit"
-require_text "$release_workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
-  "F* archive checksum must be pinned to $fstar_sha256"
-require_text "$release_workflow" "Z3_VERSION: \"$z3\"" \
-  "Z3 must be pinned to $z3"
 fstar_commit_short=$(printf '%.7s' "$fstar_commit")
 require_text docs/TOOLCHAIN.md "| F* | $fstar (\`$fstar_commit_short\`) |" \
   "F* release and commit must be documented"
@@ -104,45 +82,24 @@ require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
   "Z3 must be documented as $z3"
 require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
-require_text "$release_workflow" "version: \"$julia\"" \
-  "release Julia must be pinned to $julia"
 
-# The exact-SHA Oasis qualification workflow is a trusted control-plane file on
-# the default branch and intentionally does not live in release candidates.
-# Candidate quality therefore validates the candidate-owned bootstrap and
-# release surfaces; the hosted qualification run validates the control plane.
-require_text scripts/oasis-ci-bootstrap "ocaml-base-compiler.$ocaml" \
+# The publication workflow consumes already-qualified bytes and intentionally
+# does not build CENTL. Build/proof pins therefore belong to the candidate-owned
+# Oasis bootstrap and are bound to toolchain.lock at runtime by the Oasis engine.
+# Keep this static gate focused on the surface that actually consumes them.
+require_text "$bootstrap" "ocaml-base-compiler.$ocaml" \
   "Oasis OCaml bootstrap must be pinned to $ocaml"
-for pin in \
-  "ocaml-base-compiler:$ocaml" \
-  "dune:$dune" \
-  "zarith:$zarith" \
-  "yojson:$yojson" \
-  "alcotest:$alcotest" \
-  "qcheck:$qcheck" \
-  "ocamlformat:$ocamlformat"; do
-  package=${pin%%:*}
-  version=${pin#*:}
-  require_unique_workflow_pin "$release_workflow" "$package" "$version"
+for variable in \
+  GMP_VERSION GMP_SHA256 \
+  MPFR_VERSION MPFR_SHA256 \
+  FLINT_VERSION FLINT_SHA256 \
+  FSTAR_VERSION FSTAR_COMMIT FSTAR_SHA256 \
+  Z3_VERSION; do
+  require_text "$bootstrap" ": \"\${$variable:?$variable is required}\"" \
+    "Oasis bootstrap must require $variable from the trusted qualification environment"
 done
 
-for pin in \
-  "GMP:$gmp:$gmp_sha256" \
-  "MPFR:$mpfr:$mpfr_sha256" \
-  "FLINT:$flint:$flint_sha256"; do
-  variable=${pin%%:*}
-  remainder=${pin#*:}
-  version=${remainder%%:*}
-  checksum=${remainder#*:}
-  require_text "$release_workflow" \
-    "${variable}_VERSION: \"$version\"" \
-    "$variable must be pinned to $version"
-  require_text "$release_workflow" \
-    "${variable}_SHA256: \"$checksum\"" \
-    "$variable checksum must be pinned to $checksum"
-done
-
-for package_script in scripts/package-release scripts/package-release.ps1; do
+for package_script in scripts/package-release-legacy scripts/package-release.ps1; do
   require_text "$package_script" "FLINT $flint" \
     "FLINT source references must use $flint"
   require_text "$package_script" "GMP $gmp" \
@@ -180,4 +137,4 @@ manifest_version() {
   exit 1
 }
 
-printf '%s\n' 'Toolchain manifests and candidate-owned release surfaces are synchronized.'
+printf '%s\n' 'Toolchain manifests and candidate-owned build/proof surfaces are synchronized.'
