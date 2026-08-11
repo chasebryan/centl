@@ -107,11 +107,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
-      PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-      LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
       CENTL_BUILD_COMMIT: ${{ github.event.pull_request.head.sha }}
@@ -124,6 +119,18 @@ jobs:
 
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Configure runner paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf 'NATIVE_PREFIX=%s/centl-native\n' "$RUNNER_TEMP"
+            printf 'PKG_CONFIG_PATH=%s/centl-native/lib/pkgconfig\n' "$RUNNER_TEMP"
+            printf 'LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'LD_LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'C_INCLUDE_PATH=%s/centl-native/include\n' "$RUNNER_TEMP"
+          } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
         run: |
