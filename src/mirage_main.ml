@@ -89,6 +89,15 @@ let evidence_with workspace execution_plan_path execution_plan =
       prerr_endline ("centl-mirage: " ^ message);
       exit 2
 
+let admission_with evidence_path execution_plan evidence =
+  match
+    Centl_sci_mirage_admission.construct evidence_path execution_plan evidence
+  with
+  | Ok result -> result
+  | Error message ->
+      prerr_endline ("centl-mirage: " ^ message);
+      exit 2
+
 let receipt_counts (evidence : Centl_sci_mirage_evidence.report) =
   List.fold_left
     (fun (passed, pending, blocked) (receipt : Centl_sci_mirage_evidence.receipt) ->
@@ -98,24 +107,43 @@ let receipt_counts (evidence : Centl_sci_mirage_evidence.report) =
       | Centl_sci_mirage_evidence.Blocked -> (passed, pending, blocked + 1))
     (0, 0, 0) evidence.receipts
 
+let admission_counts (admission : Centl_sci_mirage_admission.report) =
+  List.fold_left
+    (fun (admissible, pending, blocked)
+         (candidate : Centl_sci_mirage_admission.candidate_admission) ->
+      match candidate.state with
+      | Centl_sci_mirage_admission.Admissible ->
+          (admissible + 1, pending, blocked)
+      | Centl_sci_mirage_admission.Pending ->
+          (admissible, pending + 1, blocked)
+      | Centl_sci_mirage_admission.Blocked ->
+          (admissible, pending, blocked + 1))
+    (0, 0, 0) admission.candidates
+
 let record_candidate_phase result goal_path graph obligations_path obligations
     candidates_path candidates materialization_path materialization readiness_path
-    readiness execution_plan_path execution_plan evidence_path evidence =
+    readiness execution_plan_path execution_plan evidence_path evidence admission_path
+    admission =
   let evidence_passed, evidence_pending, evidence_blocked = receipt_counts evidence in
+  let admission_admissible, admission_pending, admission_blocked =
+    admission_counts admission
+  in
   Centl_sci_workspace.atomic_write_json result.Centl_sci_mirage.active_path
     (`Assoc
       [
-        ("schema_version", `Int 2);
+        ("schema_version", `Int 3);
         ("system", `String "CENTL-MIRAGE");
         ("status", `String "active");
-        ("phase", `String "candidate_evidence_execution_started");
+        ("phase", `String "candidate_admission_assessed");
         ( "next_phase",
           `String
             (if obligations.Centl_sci_mirage_obligation.blocked_cells <> [] then
                "resolve_blocking_requirements"
              else if evidence_blocked > 0 then "resolve_blocked_evidence"
              else if evidence_pending > 0 then "execute_remaining_candidate_evidence"
-             else "recompute_candidate_readiness") );
+             else if admission_blocked > 0 then "resolve_candidate_admission"
+             else if admission_pending > 0 then "reassess_candidate_admission"
+             else "review_admissible_candidates") );
         ("source_digest", `String result.source_digest);
         ("source_stored_path", `String result.stored_path);
         ("specification_ir", `String result.spec_path);
@@ -127,6 +155,7 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ("candidate_evidence_readiness", `String readiness_path);
         ("candidate_evidence_execution_plan", `String execution_plan_path);
         ("candidate_evidence_receipts", `String evidence_path);
+        ("candidate_admission_assessment", `String admission_path);
         ("workspace_revision", `Int result.revision);
         ("goal_nodes", `Int (List.length graph.Centl_sci_mirage_goal.nodes));
         ("goal_edges", `Int (List.length graph.edges));
@@ -147,6 +176,10 @@ let record_candidate_phase result goal_path graph obligations_path obligations
         ("evidence_passed_count", `Int evidence_passed);
         ("evidence_pending_count", `Int evidence_pending);
         ("evidence_blocked_count", `Int evidence_blocked);
+        ("admission_candidate_count", `Int (List.length admission.candidates));
+        ("admission_admissible_count", `Int admission_admissible);
+        ("admission_pending_count", `Int admission_pending);
+        ("admission_blocked_count", `Int admission_blocked);
         ( "candidate_blocked",
           `Bool (obligations.Centl_sci_mirage_obligation.blocked_cells <> []) );
         ( "blocked_cells",
@@ -185,9 +218,13 @@ let start path =
   let evidence_path, evidence =
     evidence_with workspace execution_plan_path execution_plan
   in
+  let admission_path, admission =
+    admission_with evidence_path execution_plan evidence
+  in
   record_candidate_phase result goal_path graph obligations_path obligations
     candidates_path candidates materialization_path materialization readiness_path
-    readiness execution_plan_path execution_plan evidence_path evidence;
+    readiness execution_plan_path execution_plan evidence_path evidence admission_path
+    admission;
   print_endline (Centl_sci_mirage.render_ingest result);
   Printf.printf "Goal graph: %s\n%s\n" goal_path
     (Centl_sci_mirage_goal.render graph);
@@ -203,12 +240,14 @@ let start path =
     (Centl_sci_mirage_execution_plan.render execution_plan);
   Printf.printf "Candidate evidence receipts: %s\n%s\n" evidence_path
     (Centl_sci_mirage_evidence.render evidence);
+  Printf.printf "Candidate admission assessment: %s\n%s\n" admission_path
+    (Centl_sci_mirage_admission.render admission);
   if obligations.blocked_cells <> [] then
     print_endline
-      "MIRAGE staged only non-mutating candidate transactions and halted candidate synthesis for blocked source cells. Evidence execution does not override those source-level blocks."
+      "MIRAGE staged only non-mutating candidate transactions and halted candidate synthesis for blocked source cells. Evidence execution and admission assessment do not override those source-level blocks."
   else
     print_endline
-      "MIRAGE staged candidate transactions, conservatively materialized only deterministic local lowering, consumed parser evidence, created reversible pre-activation workspace snapshots where required, and left unexecuted validators explicitly pending. No candidate source was activated and no assurance was promoted."
+      "MIRAGE staged candidate transactions, conservatively materialized only deterministic local lowering, consumed parser evidence, created reversible pre-activation workspace snapshots where required, left unexecuted validators explicitly pending, and assessed admission only from exact transaction-bound evidence receipts. No candidate source was activated and no assurance was promoted."
 
 let status () =
   let workspace = workspace_or_exit () in
