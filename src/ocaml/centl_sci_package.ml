@@ -14,11 +14,7 @@ type member_state = {
   assurance : string option;
 }
 
-type validation = {
-  package : t;
-  members : member_state list;
-  valid : bool;
-}
+type validation = { package : t; members : member_state list; valid : bool }
 
 let package_dir workspace name =
   Filename.concat workspace.Centl_sci_workspace.packages name
@@ -84,13 +80,16 @@ let write workspace (package : t) =
         ("schema_version", `Int 1);
         ("name", `String package.name);
         ("version", `String package.version);
-        ("extensions", `List (List.map (fun value -> `String value) package.extensions));
+        ( "extensions",
+          `List (List.map (fun value -> `String value) package.extensions) );
         ("summary", `String package.summary);
         ("workspace_revision", `Int package.workspace_revision);
         ("provenance", `String "local user-owned CENTL package");
       ]
   in
-  Centl_sci_workspace.atomic_write_json (manifest_path workspace package.name) json
+  Centl_sci_workspace.atomic_write_json
+    (manifest_path workspace package.name)
+    json
 
 let create workspace ~name ~summary =
   if not (Centl_sci_workspace.valid_extension_name name) then
@@ -121,7 +120,7 @@ let add_extension workspace ~package_name ~extension_name =
       begin match read workspace package_name with
       | Error message -> Error message
       | Ok package when List.mem extension_name package.extensions -> Ok package
-      | Ok package ->
+      | Ok package -> (
           try
             let revision = Centl_sci_workspace.bump_revision workspace in
             let updated =
@@ -135,16 +134,21 @@ let add_extension workspace ~package_name ~extension_name =
             in
             write workspace updated;
             Ok updated
-          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+          with Sys_error message | Unix.Unix_error (_, _, message) ->
+            Error message)
       end
 
 let list workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.packages) then []
   else
-    Sys.readdir workspace.packages |> Array.to_list
+    Sys.readdir workspace.packages
+    |> Array.to_list
     |> List.filter_map (fun name ->
-           match read workspace name with Ok package -> Some package | Error _ -> None)
-    |> List.sort (fun (left : t) (right : t) -> String.compare left.name right.name)
+        match read workspace name with
+        | Ok package -> Some package
+        | Error _ -> None)
+    |> List.sort (fun (left : t) (right : t) ->
+        String.compare left.name right.name)
 
 let member_state workspace name =
   match Centl_sci_extensions.read_manifest workspace name with
@@ -171,7 +175,10 @@ let render_member (member : member_state) =
   if not member.present then member.name ^ " — missing"
   else
     let enabled =
-      match member.enabled with Some true -> "enabled" | Some false -> "disabled" | None -> "unknown"
+      match member.enabled with
+      | Some true -> "enabled"
+      | Some false -> "disabled"
+      | None -> "unknown"
     in
     let kind = Option.value ~default:"unknown" member.kind in
     let assurance = Option.value ~default:"unknown" member.assurance in
@@ -183,13 +190,15 @@ let render_validation (validation : validation) =
     ([
        "Package validation: " ^ validation.package.name;
        "  membership valid: " ^ string_of_bool validation.valid;
-       "  package-level assurance: none (member assurance is preserved individually)";
+       "  package-level assurance: none (member assurance is preserved \
+        individually)";
        "  members:";
      ]
     @
-    (match validation.members with
+    match validation.members with
     | [] -> [ "    - none" ]
-    | members -> List.map (fun member -> "    - " ^ render_member member) members))
+    | members ->
+        List.map (fun member -> "    - " ^ render_member member) members)
 
 let render (package : t) =
   String.concat "\n"
@@ -197,8 +206,10 @@ let render (package : t) =
       "Package: " ^ package.name;
       "  version: " ^ package.version;
       "  workspace revision: " ^ string_of_int package.workspace_revision;
-      "  extensions: "
-      ^ (if package.extensions = [] then "none" else String.concat ", " package.extensions);
+      ("  extensions: "
+      ^
+      if package.extensions = [] then "none"
+      else String.concat ", " package.extensions);
       "  summary: " ^ package.summary;
     ]
 
@@ -208,6 +219,6 @@ let render_list workspace =
   | packages ->
       packages
       |> List.map (fun (package : t) ->
-             Printf.sprintf "%s  %s  (%d extensions)" package.name package.version
-               (List.length package.extensions))
+          Printf.sprintf "%s  %s  (%d extensions)" package.name package.version
+            (List.length package.extensions))
       |> String.concat "\n"

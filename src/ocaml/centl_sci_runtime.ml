@@ -105,7 +105,9 @@ let plan = function
       Some { executor = Core; request = core_request data.expression }
   | Centl_sci_ir.Polynomial_equation data ->
       let left = normalize_polynomial_side ~variable:data.variable data.left in
-      let right = normalize_polynomial_side ~variable:data.variable data.right in
+      let right =
+        normalize_polynomial_side ~variable:data.variable data.right
+      in
       let expression =
         Printf.sprintf "solve((%s) = (%s), %s)" left right data.variable
       in
@@ -220,8 +222,10 @@ let classify executor response =
           | Some _ -> Unresolved
           | None ->
               begin match resolution_status response with
-              | Some ("computed" | "transformed" | "unchanged_proved") -> Established
-              | Some ("residual" | "unsupported" | "indeterminate") -> Unresolved
+              | Some ("computed" | "transformed" | "unchanged_proved") ->
+                  Established
+              | Some ("residual" | "unsupported" | "indeterminate") ->
+                  Unresolved
               | Some _ | None -> Unresolved
               end
           end
@@ -275,8 +279,10 @@ let to_json ~problem outcome =
 
 let vector_text json =
   match
-    (string_field "x" json, string_field "y" json, string_field "z" json,
-     string_field "unit" json)
+    ( string_field "x" json,
+      string_field "y" json,
+      string_field "z" json,
+      string_field "unit" json )
   with
   | Some x, Some y, Some z, Some unit_symbol ->
       Some (Printf.sprintf "(%s, %s, %s) %s" x y z unit_symbol)
@@ -284,17 +290,21 @@ let vector_text json =
 
 let simulation_text physics =
   match
-    (string_field "kind" physics, string_field "integrator" physics,
-     assoc_field "final" physics)
+    ( string_field "kind" physics,
+      string_field "integrator" physics,
+      assoc_field "final" physics )
   with
   | Some "particle_simulation", Some integrator, Some final ->
-      begin match (assoc_field "position" final, assoc_field "velocity" final) with
+      begin match
+        (assoc_field "position" final, assoc_field "velocity" final)
+      with
       | Some position, Some velocity ->
           begin match (vector_text position, vector_text velocity) with
           | Some position_text, Some velocity_text ->
               Some
                 (Printf.sprintf
-                   "Final position %s; final velocity %s; discrete integrator: %s"
+                   "Final position %s; final velocity %s; discrete integrator: \
+                    %s"
                    position_text velocity_text integrator)
           | _ -> None
           end

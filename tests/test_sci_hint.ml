@@ -51,15 +51,18 @@ let test_question_unit_conversion () =
     (is_unit "How many meters are exactly 12.5 centimeters?")
 
 let test_exact_constant () =
-  Alcotest.(check bool) "exact physical constant" true
+  Alcotest.(check bool)
+    "exact physical constant" true
     (is_constant "What is the speed of light in vacuum?")
 
 let test_exact_constant_symbol () =
-  Alcotest.(check bool) "exact physical constant symbol" true
+  Alcotest.(check bool)
+    "exact physical constant symbol" true
     (is_constant "constant k_B")
 
 let test_explicit_uniform_gravity () =
-  Alcotest.(check bool) "typed uniform-gravity request" true
+  Alcotest.(check bool)
+    "typed uniform-gravity request" true
     (is_uniform_gravity
        "simulate a particle with mass 2 kg, position (0,0,10) m, velocity \
         (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10")

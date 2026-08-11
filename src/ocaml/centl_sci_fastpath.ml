@@ -43,7 +43,8 @@ let replace_all ~needle ~replacement text =
           find_substring ~needle
             (String.sub text offset (String.length text - offset))
         with
-        | None -> Buffer.add_substring buffer text offset (String.length text - offset)
+        | None ->
+            Buffer.add_substring buffer text offset (String.length text - offset)
         | Some relative ->
             let index = offset + relative in
             Buffer.add_substring buffer text offset (index - offset);
@@ -122,7 +123,8 @@ let split_once_ci needle text =
   | Some index ->
       let left = String.sub text 0 index |> String.trim in
       let right =
-        String.sub text (index + String.length needle)
+        String.sub text
+          (index + String.length needle)
           (String.length text - index - String.length needle)
         |> String.trim
       in
@@ -202,13 +204,15 @@ let symbolic_transform problem =
     match split_once_ci " with respect to " body with
     | Some (expression, variable) when expression <> "" && variable <> "" ->
         begin match split_once_ci " from " expression with
-        | None -> native_ir (Printf.sprintf "integrate(%s, %s)" expression variable)
+        | None ->
+            native_ir (Printf.sprintf "integrate(%s, %s)" expression variable)
         | Some (integrand, range) ->
             begin match split_once_ci " to " range with
             | Some (lower, upper)
               when integrand <> "" && lower <> "" && upper <> "" ->
                 native_ir
-                  (Printf.sprintf "integrate(%s, %s = %s, %s)" integrand variable lower upper)
+                  (Printf.sprintf "integrate(%s, %s = %s, %s)" integrand
+                     variable lower upper)
             | _ -> None
             end
         end
@@ -235,16 +239,22 @@ let symbolic_transform problem =
                   begin match drop_prefix_ci "derivative of " cleaned with
                   | Some body -> differentiation body
                   | None ->
-                      begin match drop_prefix_ci "take the derivative of " cleaned with
+                      begin match
+                        drop_prefix_ci "take the derivative of " cleaned
+                      with
                       | Some body -> differentiation body
                       | None ->
                           begin match drop_prefix_ci "integrate " cleaned with
                           | Some body -> integration body
                           | None ->
-                              begin match drop_prefix_ci "integral of " cleaned with
+                              begin match
+                                drop_prefix_ci "integral of " cleaned
+                              with
                               | Some body -> integration body
                               | None ->
-                                  begin match drop_prefix_ci "substitute " cleaned with
+                                  begin match
+                                    drop_prefix_ci "substitute " cleaned
+                                  with
                                   | Some body -> substitution body
                                   | None -> None
                                   end
@@ -267,11 +277,14 @@ let numeric_token text =
 
 let arithmetic_char = function
   | '0' .. '9'
-  | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | 'e' | 'E' -> true
+  | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | 'e' | 'E' ->
+      true
   | _ -> false
 
 let contains_operator text =
-  String.exists (function '+' | '-' | '*' | '/' | '^' -> true | _ -> false) text
+  String.exists
+    (function '+' | '-' | '*' | '/' | '^' -> true | _ -> false)
+    text
 
 let normalize_arithmetic text =
   String.lowercase_ascii text
@@ -296,7 +309,9 @@ let exact_expression problem =
             | None ->
                 begin match drop_prefix_ci "evaluate " cleaned with
                 | Some value -> Some value
-                | None -> if String.for_all arithmetic_char cleaned then Some cleaned else None
+                | None ->
+                    if String.for_all arithmetic_char cleaned then Some cleaned
+                    else None
                 end
             end
         end
@@ -307,7 +322,7 @@ let exact_expression problem =
       let expression = normalize_arithmetic candidate in
       if
         expression = ""
-        || not (String.for_all arithmetic_char expression)
+        || (not (String.for_all arithmetic_char expression))
         || not (contains_operator expression)
       then None
       else native_ir expression
@@ -352,7 +367,8 @@ let approximation problem =
       begin match split_once_ci " to " body with
       | Some (expression, precision) when expression <> "" ->
           begin match strip_digit_suffix precision with
-          | Some digits -> native_ir (Printf.sprintf "approx(%s, %d)" expression digits)
+          | Some digits ->
+              native_ir (Printf.sprintf "approx(%s, %d)" expression digits)
           | None -> native_ir ("approx(" ^ body ^ ")")
           end
       | _ -> native_ir ("approx(" ^ body ^ ")")
@@ -361,8 +377,10 @@ let approximation problem =
 let canonical_unit text =
   match String.lowercase_ascii (String.trim text) with
   | "m" | "meter" | "meters" | "metre" | "metres" -> Some "m"
-  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" -> Some "cm"
-  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" -> Some "mm"
+  | "cm" | "centimeter" | "centimeters" | "centimetre" | "centimetres" ->
+      Some "cm"
+  | "mm" | "millimeter" | "millimeters" | "millimetre" | "millimetres" ->
+      Some "mm"
   | "km" | "kilometer" | "kilometers" | "kilometre" | "kilometres" -> Some "km"
   | "s" | "second" | "seconds" -> Some "s"
   | "ms" | "millisecond" | "milliseconds" -> Some "ms"
@@ -375,9 +393,11 @@ let canonical_unit text =
   | "mol" | "mole" | "moles" -> Some "mol"
   | "cd" | "candela" | "candelas" -> Some "cd"
   | "m/s" | "meter per second" | "meters per second" | "metre per second"
-  | "metres per second" -> Some "m/s"
+  | "metres per second" ->
+      Some "m/s"
   | "m/s^2" | "meter per second squared" | "meters per second squared"
-  | "metre per second squared" | "metres per second squared" -> Some "m/s^2"
+  | "metre per second squared" | "metres per second squared" ->
+      Some "m/s^2"
   | "n" | "newton" | "newtons" -> Some "N"
   | "j" | "joule" | "joules" -> Some "J"
   | "pa" | "pascal" | "pascals" -> Some "Pa"
@@ -490,7 +510,8 @@ let physical_constant problem =
     | "e" | "elementary charge" -> Some "e"
     | "k_b" | "boltzmann constant" -> Some "k_B"
     | "n_a" | "avogadro constant" | "avogadro's constant" -> Some "N_A"
-    | "g0" | "standard gravity" | "standard acceleration of gravity" -> Some "g0"
+    | "g0" | "standard gravity" | "standard acceleration of gravity" ->
+        Some "g0"
     | _ -> None
   in
   match symbol with
@@ -502,12 +523,16 @@ let physical_constant problem =
         || find_substring ~needle:"gravitational constant g" lower <> None
       then
         unsupported_ir
-          "the measured Newtonian gravitational constant is outside the exact defining/conventional CENTL Physics constant catalog"
+          "the measured Newtonian gravitational constant is outside the exact \
+           defining/conventional CENTL Physics constant catalog"
       else None
 
 let equation_char = function
-  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'
-  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' -> true
+  | 'a' .. 'z'
+  | 'A' .. 'Z'
+  | '0' .. '9'
+  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' ->
+      true
   | _ -> false
 
 let polynomial_equation problem =
@@ -535,7 +560,7 @@ let polynomial_equation problem =
               in
               if
                 left = "" || right = "" || variable = ""
-                || not (String.for_all equation_char left)
+                || (not (String.for_all equation_char left))
                 || not (String.for_all equation_char right)
               then None
               else

@@ -11,7 +11,8 @@ type report = {
   omitted_candidate_count : int;
 }
 
-let fingerprint_material candidate_id transaction_fingerprint receipt_fingerprints =
+let fingerprint_material candidate_id transaction_fingerprint
+    receipt_fingerprints =
   String.concat "\n"
     ([ "CENTL-MIRAGE-REVIEW-v1"; candidate_id; transaction_fingerprint ]
     @ List.sort String.compare receipt_fingerprints)
@@ -19,8 +20,8 @@ let fingerprint_material candidate_id transaction_fingerprint receipt_fingerprin
 let review_of_admission
     (candidate : Centl_sci_mirage_admission.candidate_admission) =
   let review_fingerprint =
-    fingerprint_material candidate.candidate_id candidate.transaction_fingerprint
-      candidate.receipt_fingerprints
+    fingerprint_material candidate.candidate_id
+      candidate.transaction_fingerprint candidate.receipt_fingerprints
     |> Centl_sha256.hex_string
   in
   {
@@ -29,7 +30,8 @@ let review_of_admission
     receipt_fingerprints = candidate.receipt_fingerprints;
     review_fingerprint;
     decision_required =
-      "explicit human acceptance is required before any activation mechanism may be considered";
+      "explicit human acceptance is required before any activation mechanism \
+       may be considered";
   }
 
 let prepare (admission : Centl_sci_mirage_admission.report) =
@@ -37,13 +39,17 @@ let prepare (admission : Centl_sci_mirage_admission.report) =
     List.filter_map
       (fun (candidate : Centl_sci_mirage_admission.candidate_admission) ->
         match candidate.state with
-        | Centl_sci_mirage_admission.Admissible -> Some (review_of_admission candidate)
-        | Centl_sci_mirage_admission.Pending | Centl_sci_mirage_admission.Blocked -> None)
+        | Centl_sci_mirage_admission.Admissible ->
+            Some (review_of_admission candidate)
+        | Centl_sci_mirage_admission.Pending
+        | Centl_sci_mirage_admission.Blocked ->
+            None)
       admission.candidates
   in
   {
     candidates;
-    omitted_candidate_count = List.length admission.candidates - List.length candidates;
+    omitted_candidate_count =
+      List.length admission.candidates - List.length candidates;
   }
 
 let candidate_to_json candidate =
@@ -52,7 +58,9 @@ let candidate_to_json candidate =
       ("candidate_id", `String candidate.candidate_id);
       ("transaction_fingerprint", `String candidate.transaction_fingerprint);
       ( "receipt_fingerprints",
-        `List (List.map (fun value -> `String value) candidate.receipt_fingerprints) );
+        `List
+          (List.map (fun value -> `String value) candidate.receipt_fingerprints)
+      );
       ("review_fingerprint", `String candidate.review_fingerprint);
       ("decision_required", `String candidate.decision_required);
       ("human_accepted", `Bool false);
@@ -73,7 +81,10 @@ let to_json report =
       ("assurance_promoted", `Bool false);
       ( "review_semantics",
         `String
-          "this manifest exposes only candidates already assessed admissible for explicit human review; review fingerprints bind transaction and evidence receipt identities, but do not establish mathematical correctness, activate source, or promote assurance" );
+          "this manifest exposes only candidates already assessed admissible \
+           for explicit human review; review fingerprints bind transaction and \
+           evidence receipt identities, but do not establish mathematical \
+           correctness, activate source, or promote assurance" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -97,7 +108,8 @@ let render report =
     [
       "CENTL-MIRAGE candidate review manifest";
       "review candidates: " ^ string_of_int (List.length report.candidates);
-      "omitted non-admissible candidates: " ^ string_of_int report.omitted_candidate_count;
+      "omitted non-admissible candidates: "
+      ^ string_of_int report.omitted_candidate_count;
       "human acceptance required: yes";
       "candidate source activated: no";
       "assurance promoted: no";

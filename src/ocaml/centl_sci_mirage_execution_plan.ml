@@ -16,10 +16,7 @@ type candidate_plan = {
   actions : action list;
 }
 
-type report = {
-  candidates : candidate_plan list;
-  blocked_cells : int list;
-}
+type report = { candidates : candidate_plan list; blocked_cells : int list }
 
 let execution_contract kind =
   match kind with
@@ -29,24 +26,26 @@ let execution_contract kind =
   | "rollback_available" -> ("workspace_snapshot", "before_activation")
   | "reuse_attempted" -> ("capability_discovery", "candidate_staged")
   | "core_validation" -> ("relevant_core_validation", "candidate_materialized")
-  | "clarification_required" | "conflict_resolution_required" | "policy_boundary" ->
+  | "clarification_required" | "conflict_resolution_required"
+  | "policy_boundary" ->
       ("human_resolution", "blocking_requirement_resolved")
   | _ -> ("unsupported_evidence_executor", "explicit_executor_required")
 
 let executor_support executor =
   match executor with
-  | "candidate_parser_or_build"
-  | "deterministic_regression_gate"
-  | "workspace_snapshot"
-  | "capability_discovery"
-  | "relevant_core_validation" -> (true, None)
+  | "candidate_parser_or_build" | "deterministic_regression_gate"
+  | "workspace_snapshot" | "capability_discovery" | "relevant_core_validation"
+    ->
+      (true, None)
   | "human_resolution" ->
       (false, Some "requires an explicit human product or policy decision")
   | _ ->
-      (false, Some "no local MIRAGE evidence executor is defined for this obligation")
+      ( false,
+        Some "no local MIRAGE evidence executor is defined for this obligation"
+      )
 
-let action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id
-    ~kind =
+let action_identity_material ~candidate_id ~transaction_fingerprint
+    ~obligation_id ~kind =
   let executor, precondition = execution_contract kind in
   let executor_supported, blocking_reason = executor_support executor in
   `Assoc
@@ -60,12 +59,14 @@ let action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_
       ("precondition", `String precondition);
       ("executor_supported", `Bool executor_supported);
       ( "blocking_reason",
-        match blocking_reason with None -> `Null | Some value -> `String value );
+        match blocking_reason with None -> `Null | Some value -> `String value
+      );
     ]
   |> Yojson.Safe.to_string
 
 let action_id ~candidate_id ~transaction_fingerprint ~obligation_id ~kind =
-  action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id ~kind
+  action_identity_material ~candidate_id ~transaction_fingerprint ~obligation_id
+    ~kind
   |> Centl_sha256.hex_string
 
 let action_of_check candidate_id transaction_fingerprint
@@ -89,13 +90,15 @@ let action_of_check candidate_id transaction_fingerprint
       }
   else None
 
-let plan_candidate (candidate : Centl_sci_mirage_readiness.candidate_readiness) =
+let plan_candidate (candidate : Centl_sci_mirage_readiness.candidate_readiness)
+    =
   {
     candidate_id = candidate.candidate_id;
     transaction_fingerprint = candidate.transaction_fingerprint;
     actions =
       List.filter_map
-        (action_of_check candidate.candidate_id candidate.transaction_fingerprint)
+        (action_of_check candidate.candidate_id
+           candidate.transaction_fingerprint)
         candidate.checks;
   }
 
@@ -117,7 +120,9 @@ let action_to_json (action : action) =
       ("precondition", `String action.precondition);
       ("executor_supported", `Bool action.executor_supported);
       ( "blocking_reason",
-        match action.blocking_reason with None -> `Null | Some value -> `String value );
+        match action.blocking_reason with
+        | None -> `Null
+        | Some value -> `String value );
       ("state", `String action.state);
     ]
 
@@ -135,16 +140,22 @@ let to_json (report : report) =
       ("schema_version", `Int 4);
       ("system", `String "CENTL-MIRAGE");
       ("artifact_kind", `String "candidate_evidence_execution_plan");
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("execution_performed", `Bool false);
       ("workspace_mutated", `Bool false);
       ("assurance_promoted", `Bool false);
       ( "action_identity_semantics",
         `String
-          "action IDs bind candidate transaction identity, unresolved evidence obligation, executor, precondition, and executor-support state; identity is not evidence that the action executed or passed" );
+          "action IDs bind candidate transaction identity, unresolved evidence \
+           obligation, executor, precondition, and executor-support state; \
+           identity is not evidence that the action executed or passed" );
       ( "execution_contract_semantics",
         `String
-          "executor names identify the required local validation mechanism; preconditions must hold before execution, unsupported executors remain explicitly blocked, and no executor is represented as having run in this artifact" );
+          "executor names identify the required local validation mechanism; \
+           preconditions must hold before execution, unsupported executors \
+           remain explicitly blocked, and no executor is represented as having \
+           run in this artifact" );
       ("candidates", `List (List.map candidate_to_json report.candidates));
     ]
 
@@ -166,7 +177,9 @@ let construct readiness_path readiness =
 let render (report : report) =
   let actions =
     report.candidates
-    |> List.fold_left (fun total candidate -> total + List.length candidate.actions) 0
+    |> List.fold_left
+         (fun total candidate -> total + List.length candidate.actions)
+         0
   in
   let unsupported =
     report.candidates
@@ -174,7 +187,8 @@ let render (report : report) =
          (fun total candidate ->
            total
            + List.fold_left
-               (fun count action -> if action.executor_supported then count else count + 1)
+               (fun count action ->
+                 if action.executor_supported then count else count + 1)
                0 candidate.actions)
          0
   in

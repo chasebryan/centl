@@ -46,10 +46,10 @@ let add session ~input ~normalized ~mode ~intent ~result ~details
   session.results <- trim session.max_results (record :: session.results);
   record
 
-let last session = match session.results with value :: _ -> Some value | [] -> None
+let last session =
+  match session.results with value :: _ -> Some value | [] -> None
 
 let all session = List.rev session.results
-
 let find session id = List.find_opt (fun item -> item.id = id) session.results
 
 let render record =

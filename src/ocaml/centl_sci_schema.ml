@@ -149,7 +149,8 @@ let grammar root = "root ::= " ^ root ^ "\n" ^ grammar_rules
 
 let llama_grammar =
   grammar
-    "exact-expression | polynomial-equation | unit-conversion | physical-constant | uniform-gravity-particle | unsupported"
+    "exact-expression | polynomial-equation | unit-conversion | \
+     physical-constant | uniform-gravity-particle | unsupported"
 
 let exact_expression_grammar = grammar "exact-expression"
 let polynomial_equation_grammar = grammar "polynomial-equation"

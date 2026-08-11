@@ -60,8 +60,14 @@ let manifest_of_json json =
       string_list_field "dependencies" json,
       string_list_field "tests" json )
   with
-  | Some name, Some enabled, Some assurance, Some source, Some summary,
-    Some revision, Some dependencies, Some tests ->
+  | ( Some name,
+      Some enabled,
+      Some assurance,
+      Some source,
+      Some summary,
+      Some revision,
+      Some dependencies,
+      Some tests ) ->
       Ok
         {
           name;
@@ -92,7 +98,8 @@ let read_manifest workspace name =
         | Ok manifest when manifest.name <> name ->
             Error
               (Printf.sprintf
-                 "extension manifest identity mismatch: file %s.json declares name %s"
+                 "extension manifest identity mismatch: file %s.json declares \
+                  name %s"
                  name manifest.name)
         | Ok manifest -> Ok manifest
         end
@@ -113,7 +120,9 @@ let order_by_local_dependencies manifests =
   let manifests =
     List.sort (fun left right -> String.compare left.name right.name) manifests
   in
-  let by_name = List.map (fun manifest -> (manifest.name, manifest)) manifests in
+  let by_name =
+    List.map (fun manifest -> (manifest.name, manifest)) manifests
+  in
   let state = Hashtbl.create (List.length manifests) in
   let ordered = ref [] in
   let rec visit manifest =
@@ -126,9 +135,9 @@ let order_by_local_dependencies manifests =
         |> List.filter_map local_dependency_name
         |> List.sort_uniq String.compare
         |> List.iter (fun name ->
-               match List.assoc_opt name by_name with
-               | Some dependency -> visit dependency
-               | None -> ());
+            match List.assoc_opt name by_name with
+            | Some dependency -> visit dependency
+            | None -> ());
         Hashtbl.replace state manifest.name `Done;
         ordered := manifest :: !ordered
   in
@@ -152,7 +161,8 @@ let scan workspace =
           | Ok value -> (value :: manifests, errors)
           | Error message ->
               ( manifests,
-                (Printf.sprintf "invalid extension manifest %s: %s" filename message)
+                Printf.sprintf "invalid extension manifest %s: %s" filename
+                  message
                 :: errors ))
         ([], []) filenames
     in
@@ -164,11 +174,10 @@ let manifest_errors workspace = snd (scan workspace)
 let enabled_dependents workspace name =
   list workspace
   |> List.filter (fun manifest ->
-         manifest.enabled
-         && manifest.name <> name
-         && List.exists
-              (fun dependency -> local_dependency_name dependency = Some name)
-              manifest.dependencies)
+      manifest.enabled && manifest.name <> name
+      && List.exists
+           (fun dependency -> local_dependency_name dependency = Some name)
+           manifest.dependencies)
   |> List.map (fun manifest -> manifest.name)
   |> List.sort_uniq String.compare
 
@@ -178,7 +187,8 @@ let validate_no_enabled_dependents workspace name =
   | dependents ->
       Error
         (Printf.sprintf
-           "local extension %s is required by enabled local extension%s %s; disable or update the dependent extension%s first"
+           "local extension %s is required by enabled local extension%s %s; \
+            disable or update the dependent extension%s first"
            name
            (if List.length dependents = 1 then "" else "s")
            (String.concat ", " dependents)
@@ -209,7 +219,9 @@ let to_json manifest ~revision =
 let write_json path json =
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
@@ -233,7 +245,8 @@ let read_text path =
          (fun () -> really_input_string channel (in_channel_length channel)))
   with
   | Sys_error message -> Error message
-  | End_of_file -> Error ("unexpected end of file while reading extension source: " ^ path)
+  | End_of_file ->
+      Error ("unexpected end of file while reading extension source: " ^ path)
 
 let validate_native_activation workspace manifest =
   let path = source_path workspace manifest in
@@ -249,15 +262,18 @@ let validate_native_activation workspace manifest =
         | Error error ->
             Error
               (Printf.sprintf
-                 "native extension %s cannot be enabled because its source does not parse at byte %d: %s"
+                 "native extension %s cannot be enabled because its source \
+                  does not parse at byte %d: %s"
                  manifest.name error.position error.message)
         | Ok located ->
             begin match located.statement with
-            | Centl_parser.Define_value _ | Centl_parser.Define_function _ -> Ok ()
+            | Centl_parser.Define_value _ | Centl_parser.Define_function _ ->
+                Ok ()
             | Centl_parser.Evaluate _ | Centl_parser.Assert _ ->
                 Error
                   (Printf.sprintf
-                     "native extension %s cannot be enabled because its source is not a value/function definition"
+                     "native extension %s cannot be enabled because its source \
+                      is not a value/function definition"
                      manifest.name)
             end
         end
@@ -273,24 +289,28 @@ let validate_local_dependencies_for_activation workspace manifest =
     | dependency :: _ when dependency = manifest.name ->
         Error
           (Printf.sprintf
-             "local extension %s cannot be enabled because it declares itself as a local dependency"
+             "local extension %s cannot be enabled because it declares itself \
+              as a local dependency"
              manifest.name)
     | dependency :: rest ->
         begin match read_manifest workspace dependency with
         | Error _ ->
             Error
               (Printf.sprintf
-                 "local extension %s cannot be enabled because required local extension %s is missing"
+                 "local extension %s cannot be enabled because required local \
+                  extension %s is missing"
                  manifest.name dependency)
         | Ok target when not target.enabled ->
             Error
               (Printf.sprintf
-                 "local extension %s cannot be enabled because required local extension %s is disabled"
+                 "local extension %s cannot be enabled because required local \
+                  extension %s is disabled"
                  manifest.name dependency)
         | Ok target when target.kind <> "native_centl" ->
             Error
               (Printf.sprintf
-                 "local extension %s cannot be enabled because required local extension %s has non-native kind %s"
+                 "local extension %s cannot be enabled because required local \
+                  extension %s has non-native kind %s"
                  manifest.name dependency target.kind)
         | Ok _ -> loop rest
         end
@@ -303,30 +323,38 @@ let set_enabled workspace name enabled =
   | Ok manifest when enabled && manifest.kind <> "native_centl" ->
       Error
         (Printf.sprintf
-           "local extension %s has kind %s. Caramels will not route it through the native CENTL definition loader; implement and validate its explicit runtime boundary before activation."
+           "local extension %s has kind %s. Caramels will not route it through \
+            the native CENTL definition loader; implement and validate its \
+            explicit runtime boundary before activation."
            manifest.name manifest.kind)
   | Ok manifest ->
       let activation_check =
         if enabled then
           match validate_native_activation workspace manifest with
           | Error _ as error -> error
-          | Ok () -> validate_local_dependencies_for_activation workspace manifest
+          | Ok () ->
+              validate_local_dependencies_for_activation workspace manifest
         else validate_no_enabled_dependents workspace manifest.name
       in
       begin match activation_check with
       | Error _ as error -> error
-      | Ok () ->
+      | Ok () -> (
           try
             Centl_sci_workspace.ensure workspace;
             let revision = Centl_sci_workspace.bump_revision workspace in
-            let updated = { manifest with enabled; workspace_revision = revision } in
-            write_json (Centl_sci_workspace.manifest_path workspace name)
+            let updated =
+              { manifest with enabled; workspace_revision = revision }
+            in
+            write_json
+              (Centl_sci_workspace.manifest_path workspace name)
               (to_json updated ~revision);
             Ok updated
-          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+          with Sys_error message | Unix.Unix_error (_, _, message) ->
+            Error message)
       end
 
-let trash_dir workspace = Filename.concat workspace.Centl_sci_workspace.generated "removed"
+let trash_dir workspace =
+  Filename.concat workspace.Centl_sci_workspace.generated "removed"
 
 let remove workspace name =
   match read_manifest workspace name with
@@ -334,13 +362,15 @@ let remove workspace name =
   | Ok manifest ->
       begin match validate_no_enabled_dependents workspace manifest.name with
       | Error _ as error -> error
-      | Ok () ->
+      | Ok () -> (
           try
             Centl_sci_workspace.ensure workspace;
             Centl_sci_workspace.ensure_directory (trash_dir workspace);
             let revision = Centl_sci_workspace.bump_revision workspace in
             let suffix = Printf.sprintf ".r%d" revision in
-            let manifest_path = Centl_sci_workspace.manifest_path workspace name in
+            let manifest_path =
+              Centl_sci_workspace.manifest_path workspace name
+            in
             let source = source_path workspace manifest in
             let archived_manifest =
               Filename.concat (trash_dir workspace) (name ^ suffix ^ ".json")
@@ -351,7 +381,8 @@ let remove workspace name =
                 (Filename.concat (trash_dir workspace)
                    (name ^ suffix ^ Filename.extension source));
             Ok revision
-          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+          with Sys_error message | Unix.Unix_error (_, _, message) ->
+            Error message)
       end
 
 let render_manifest manifest =
@@ -382,7 +413,7 @@ let render_list workspace =
   | values ->
       values
       |> List.map (fun item ->
-             Printf.sprintf "%s  [%s]  %s  <%s>" item.name
-               (if item.enabled then "enabled" else "disabled") item.assurance
-               item.kind)
+          Printf.sprintf "%s  [%s]  %s  <%s>" item.name
+            (if item.enabled then "enabled" else "disabled")
+            item.assurance item.kind)
       |> String.concat "\n"
