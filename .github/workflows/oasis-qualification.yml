@@ -192,3 +192,38 @@ jobs:
           name: oasis-evidence-${{ github.sha }}
           path: _build/oasis/**
           if-no-files-found: warn
+
+  convergence-status:
+    name: Publish convergence status
+    needs:
+      - engine-self-test
+      - qualify
+    if: always() && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish exact-SHA Oasis result
+        env:
+          SELF_TEST_RESULT: ${{ needs.engine-self-test.result }}
+          QUALIFY_RESULT: ${{ needs.qualify.result }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          state=failure
+          description='CENTL Oasis convergence failed'
+          if [ "$SELF_TEST_RESULT" = success ] && [ "$QUALIFY_RESULT" = success ]; then
+            state=success
+            description='CENTL Oasis convergence passed'
+          fi
+          payload=$(printf '{"state":"%s","context":"centl/oasis-convergence","description":"%s"}' \
+            "$state" "$description")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            --data "$payload" >/dev/null
