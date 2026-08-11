@@ -75,7 +75,8 @@ let test_physics_completion_surface () =
 
 let capability_names query =
   Centl_sci_capabilities.search query
-  |> List.map (fun capability -> capability.name)
+  |> List.map (fun (capability : Centl_sci_capabilities.capability) ->
+      capability.name)
 
 let test_caramels_capability_discovery () =
   Alcotest.(check bool)
