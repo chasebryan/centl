@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - release/v0.14.0-oasis-candidate
   pull_request:
     branches:
       - main
+      - release/v0.14.0-oasis-candidate
   schedule:
     - cron: "53 8 * * 2"
   workflow_dispatch:
