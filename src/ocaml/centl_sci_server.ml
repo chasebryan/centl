@@ -105,7 +105,7 @@ let prompt hint problem =
          conservative: unsupported is correct when required information is \
          missing or the problem is outside the admitted Caramels classes."
   in
-  "CENTL-SCi v0.0.2-Caramels+. Produce one JSON IR. " ^ contract
+  "CENTL-SCi v0.0.2-Caramels. Produce one JSON IR. " ^ contract
   ^ " Always schema_version=1 and assumptions (normally []). Problem: "
   ^ Yojson.Safe.to_string (`String problem)
 

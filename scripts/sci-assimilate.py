@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Batch qualification and assimilation harness for CENTL-SCi v0.0.2-Caramels+."""
+"""Batch qualification and assimilation harness for CENTL-SCi v0.0.1."""
 
 from __future__ import annotations
 
@@ -235,10 +235,9 @@ def run_product_case(
     if mode == "defer":
         result = run([str(centl_sci), "--json", problem], timeout=timeout)
         stderr = str(result.get("stderr") or "")
-        defer_codes = ("semantic_inference_required", "clarification_required")
         passed = (
             result["returncode"] == 2
-            and any(code in stderr for code in defer_codes)
+            and "requires semantic inference" in stderr
             and not str(result.get("stdout") or "").strip()
         )
         return {
@@ -249,9 +248,7 @@ def run_product_case(
             "elapsed_seconds": result["elapsed_seconds"],
             "mismatches": []
             if passed
-            else [
-                "expected deterministic layer to defer or clarify without producing an answer"
-            ],
+            else ["expected deterministic layer to defer without producing an answer"],
             "returncode": result["returncode"],
             "stderr": stderr.strip(),
         }
@@ -704,7 +701,7 @@ def main() -> int:
     report = {
         "schema_version": 1,
         "report_kind": "centl-sci-assimilation",
-        "sci_version": "0.0.2-Caramels+",
+        "sci_version": "0.0.1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "git": {
             "commit": git_text("rev-parse", "HEAD"),

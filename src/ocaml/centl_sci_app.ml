@@ -7,12 +7,12 @@ type interpreter_error = {
   diagnostic : string;
 }
 
-let sci_version = "0.0.2-Caramels+"
+let sci_version = "0.0.2-Caramels"
 
 let usage =
   "Usage: centl-sci [--mode MODE] [--server-url URL | --model MODEL.gguf] \
-   [--details | --explain | --json] [--repl | --serve] 'mathematics, physics, \
-   or BUILD request'"
+   [--details | --explain | --json] [--repl] 'mathematics, physics, or BUILD \
+   request'"
 
 let env_or default name =
   match Sys.getenv_opt name with
@@ -249,12 +249,10 @@ let main () =
   let explain_output = ref false in
   let force_model = ref false in
   let force_repl = ref false in
-  let force_serve = ref false in
   let persistent_history = ref true in
   let initial_mode = ref Centl_sci_interaction.Hybrid in
   let anonymous = ref [] in
   let core_state = ref (Centl_protocol.create ()) in
-  let execution_cache = Centl_sci_runtime.create_cache () in
   print_workspace_warnings (reload_core core_state);
   let set_mode value =
     match Centl_sci_interaction.parse_mode value with
@@ -287,9 +285,6 @@ let main () =
         Arg.Set force_repl,
         "start the live scientific problem interpreter even when stdin is not \
          a TTY" );
-      ( "--serve",
-        Arg.Set force_serve,
-        "run a persistent JSONL SCI service on stdin/stdout" );
       ( "--no-history",
         Arg.Clear persistent_history,
         "do not load or save durable CENTL-SCi input history" );
@@ -349,12 +344,6 @@ let main () =
   if !json_output && (!details_output || !explain_output) then begin
     Printf.eprintf
       "centl-sci: --details/--explain and --json are mutually exclusive\n";
-    exit 2
-  end;
-  if !force_serve && (!json_output || !details_output || !explain_output) then begin
-    Printf.eprintf
-      "centl-sci: --serve is already structured JSONL and does not accept \
-       --json, --details, or --explain\n";
     exit 2
   end;
   let model_interpret problem =
@@ -452,10 +441,7 @@ let main () =
     match interpret mode problem with
     | Error error -> Error error
     | Ok (source, ir, normalized, classification) ->
-        let outcome =
-          Centl_sci_runtime.execute_cached ~cache:execution_cache
-            ~core_state:!core_state ir
-        in
+        let outcome = Centl_sci_runtime.execute ~core_state:!core_state ir in
         let contribution =
           match backend_text source with
           | None ->
@@ -495,10 +481,8 @@ let main () =
         false
     | Centl_sci_build.Handled handled ->
         print_endline handled.message;
-        if handled.changed then begin
-          Centl_sci_runtime.clear_cache execution_cache;
-          print_workspace_warnings (reload_core core_state)
-        end;
+        if handled.changed then
+          print_workspace_warnings (reload_core core_state);
         handled.changed
   in
   let run_one problem =
@@ -525,127 +509,6 @@ let main () =
           | Centl_sci_runtime.Failed -> exit 1
           | _ -> ()
           end
-  in
-  let envelope ?id fields =
-    `Assoc
-      (("version", `Int 1)
-      ::
-      (match id with
-      | None -> fields
-      | Some value -> ("id", value) :: fields))
-  in
-  let jsonl_error ?id code message =
-    envelope ?id
-      [
-        ("ok", `Bool false);
-        ( "error",
-          `Assoc [ ("code", `String code); ("message", `String message) ] );
-      ]
-  in
-  let jsonl_id fields =
-    match List.assoc_opt "id" fields with
-    | None -> Ok None
-    | Some ((`String _ | `Int _ | `Intlit _) as id) -> Ok (Some id)
-    | Some _ -> Error "id must be a string or integer"
-  in
-  let jsonl_mode fields =
-    match List.assoc_opt "mode" fields with
-    | None -> Ok !initial_mode
-    | Some (`String value) -> Centl_sci_interaction.parse_mode value
-    | Some _ -> Error "mode must be a string"
-  in
-  let jsonl_problem fields =
-    match List.assoc_opt "problem" fields with
-    | Some (`String value) when String.trim value <> "" ->
-        Ok (String.trim value)
-    | Some (`String _) -> Error "problem must not be empty"
-    | Some _ -> Error "problem must be a string"
-    | None -> Error "missing problem"
-  in
-  let handle_jsonl_request json =
-    match json with
-    | `Assoc fields ->
-        begin match jsonl_id fields with
-        | Error message -> jsonl_error "invalid_request" message
-        | Ok id ->
-            begin match List.assoc_opt "version" fields with
-            | Some (`Int 1) ->
-                begin match (jsonl_mode fields, jsonl_problem fields) with
-                | Error message, _ | _, Error message ->
-                    jsonl_error ?id "invalid_request" message
-                | Ok mode, Ok problem ->
-                    if
-                      mode = Centl_sci_interaction.Build
-                      || looks_like_build_request problem
-                    then
-                      jsonl_error ?id "build_not_supported"
-                        "BUILD requests are interactive workspace mutations; \
-                         use one-shot mode or the human REPL for BUILD."
-                    else
-                      begin match execute_problem mode problem with
-                      | Error error ->
-                          jsonl_error ?id error.diagnostic
-                            (human_error ~details:true error)
-                      | Ok (source, outcome, normalized, classification) ->
-                          let result =
-                            Centl_sci_runtime.to_json ~problem outcome
-                            |> with_interpreter_path source
-                          in
-                          envelope ?id
-                            [
-                              ( "ok",
-                                `Bool
-                                  (outcome.Centl_sci_runtime.status
-                                 <> Centl_sci_runtime.Failed) );
-                              ("source", `String (source_text source));
-                              ("normalized", `String normalized);
-                              ( "intent",
-                                `String
-                                  (Centl_sci_intent.text classification.intent)
-                              );
-                              ( "status",
-                                `String
-                                  (Centl_sci_runtime.status_text outcome.status)
-                              );
-                              ( "human",
-                                `String (Centl_sci_present.human outcome) );
-                              ( "details",
-                                `String (Centl_sci_present.details outcome) );
-                              ("result", result);
-                            ]
-                      end
-                end
-            | Some (`Int _) ->
-                jsonl_error ?id "invalid_request"
-                  "unsupported JSONL request version"
-            | Some _ -> jsonl_error ?id "invalid_request" "version must be 1"
-            | None -> jsonl_error ?id "invalid_request" "missing version"
-            end
-        end
-    | _ -> jsonl_error "invalid_request" "request must be a JSON object"
-  in
-  let run_jsonl_server () =
-    let emit json =
-      Yojson.Safe.to_string json |> print_endline;
-      flush stdout
-    in
-    let rec loop () =
-      match input_line stdin with
-      | line ->
-          let line = String.trim line in
-          if line = "" then loop ()
-          else begin
-            let response =
-              try Yojson.Safe.from_string line |> handle_jsonl_request
-              with Yojson.Json_error message ->
-                jsonl_error "invalid_json" message
-            in
-            emit response;
-            loop ()
-          end
-      | exception End_of_file -> ()
-    in
-    loop ()
   in
   let repl () =
     print_endline ("CENTL-SCi v" ^ sci_version);
@@ -845,42 +708,29 @@ let main () =
     loop ()
   in
   let arguments = List.rev !anonymous in
-  if !force_serve then begin
-    if !force_repl then begin
-      Printf.eprintf "centl-sci: --serve and --repl are mutually exclusive\n";
+  match arguments with
+  | _ :: _ when !force_repl ->
+      Printf.eprintf "centl-sci: --repl does not accept a one-shot problem\n";
       exit 2
-    end;
-    if arguments <> [] then begin
-      Printf.eprintf "centl-sci: --serve reads JSONL requests from stdin\n";
-      exit 2
-    end;
-    run_jsonl_server ()
-  end
-  else
-    match arguments with
-    | _ :: _ when !force_repl ->
-        Printf.eprintf "centl-sci: --repl does not accept a one-shot problem\n";
+  | _ :: _ as values -> String.concat " " values |> String.trim |> run_one
+  | [] when !force_repl ->
+      if !json_output then begin
+        Printf.eprintf "centl-sci: --json is not available in the human REPL\n";
         exit 2
-    | _ :: _ as values -> String.concat " " values |> String.trim |> run_one
-    | [] when !force_repl ->
-        if !json_output then begin
-          Printf.eprintf
-            "centl-sci: --json is not available in the human REPL\n";
+      end;
+      repl ()
+  | [] when stdin_is_tty () ->
+      if !json_output then begin
+        Printf.eprintf
+          "centl-sci: --json requires a problem or non-interactive standard \
+           input\n";
+        exit 2
+      end;
+      repl ()
+  | [] ->
+      begin match read_stdin_problem () with
+      | Error message ->
+          Printf.eprintf "centl-sci: %s\n" message;
           exit 2
-        end;
-        repl ()
-    | [] when stdin_is_tty () ->
-        if !json_output then begin
-          Printf.eprintf
-            "centl-sci: --json requires a problem or non-interactive standard \
-             input\n";
-          exit 2
-        end;
-        repl ()
-    | [] ->
-        begin match read_stdin_problem () with
-        | Error message ->
-            Printf.eprintf "centl-sci: %s\n" message;
-            exit 2
-        | Ok problem -> run_one problem
-        end
+      | Ok problem -> run_one problem
+      end

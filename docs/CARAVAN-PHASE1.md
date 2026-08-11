@@ -2,6 +2,8 @@
 
 Status: **implemented local laboratory; not a public volunteer network protocol**.
 
+For CENTL v0.14.0 Oasis, CARAVAN Phase 1 is admitted as a bounded source/laboratory capability. It is **not** installed as a public native command and does not expand the stable release promise into a public carrier network.
+
 CENTL CARAVAN is the **Content-Addressed Resilient Artifact Verification and Availability Network**. Phase 1 establishes the local, reproducible laboratory boundary required before any private pilot or public volunteer enrollment.
 
 > A carrier may provide bytes, but a carrier may never define which bytes are trusted.

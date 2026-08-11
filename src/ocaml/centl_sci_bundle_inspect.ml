@@ -110,7 +110,7 @@ let to_json bundle =
   `Assoc
     [
       ("schema_version", `Int 1);
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("path", `String bundle.path);
       ( "source_revision",
         match bundle.source_revision with

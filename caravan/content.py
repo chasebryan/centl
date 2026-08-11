@@ -7,18 +7,21 @@ catalog logic.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 import errno
+import fcntl
 import hashlib
 import os
 from pathlib import Path
 import shutil
 import stat
 import tempfile
-from typing import BinaryIO
+from typing import BinaryIO, Iterator
 
 READ_SIZE = 1024 * 1024
 DEFAULT_CHUNK_SIZE = 4 * 1024 * 1024
+STORE_LOCK_NAME = ".store.lock"
 
 
 class IntegrityError(RuntimeError):
@@ -170,6 +173,57 @@ class ContentStore:
             info = os.lstat(path)
             if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
                 raise IntegrityError(f"unsafe CARAVAN store directory: {path}")
+            os.chmod(path, 0o700, follow_symlinks=False)
+
+    def _lock_fd(self) -> int:
+        path = self.root / STORE_LOCK_NAME
+        flags = os.O_RDWR | os.O_CREAT
+        if hasattr(os, "O_CLOEXEC"):
+            flags |= os.O_CLOEXEC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            fd = os.open(path, flags, 0o600)
+        except OSError as exc:
+            if exc.errno in {errno.ELOOP, errno.EMLINK}:
+                raise IntegrityError("CARAVAN store lock must not be a symbolic link") from exc
+            raise
+        try:
+            info = os.fstat(fd)
+            if not stat.S_ISREG(info.st_mode):
+                raise IntegrityError("CARAVAN store lock must be a regular file")
+            os.fchmod(fd, 0o600)
+            return fd
+        except Exception:
+            os.close(fd)
+            raise
+
+    @contextmanager
+    def _exclusive_lock(self) -> Iterator[None]:
+        self._assert_internal_directories()
+        fd = self._lock_fd()
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            finally:
+                os.close(fd)
+
+    @contextmanager
+    def transfer_guard(self, incoming_bytes: int) -> Iterator[None]:
+        """Serialize temporary transfer admission and immutable promotion.
+
+        GNU/Linux is the supported CARAVAN platform. An owner-only ``flock``
+        keeps concurrent local import/retrieval operations from all passing the
+        same capacity check and collectively exceeding the configured store
+        ceiling or free-disk reserve.
+        """
+
+        with self._exclusive_lock():
+            self._check_capacity_for(incoming_bytes)
+            yield
 
     def _object_path(self, digest: str) -> Path:
         identity = ArtifactIdentity(digest, 0)
@@ -178,6 +232,7 @@ class ContentStore:
             info = os.lstat(shard)
             if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
                 raise IntegrityError(f"unsafe object shard: {shard}")
+            os.chmod(shard, 0o700, follow_symlinks=False)
         else:
             shard.mkdir(mode=0o700)
         return shard / identity.sha256
@@ -200,28 +255,35 @@ class ContentStore:
                 total += info.st_size
         return total
 
-    def _check_capacity_for(self, incoming_bytes: int) -> None:
+    def _check_object_capacity(self, incoming_bytes: int) -> None:
+        if incoming_bytes < 0:
+            raise ValueError("incoming byte count must be non-negative")
+        if incoming_bytes > self.max_bytes:
+            raise IntegrityError("artifact exceeds CARAVAN storage limit")
         if self.total_bytes() + incoming_bytes > self.max_bytes:
             raise IntegrityError("CARAVAN storage limit would be exceeded")
+
+    def _check_free_capacity(self, incoming_bytes: int) -> None:
         free = shutil.disk_usage(self.root).free
-        if free - incoming_bytes < self.min_free_bytes:
+        if free < incoming_bytes or free - incoming_bytes < self.min_free_bytes:
             raise IntegrityError("CARAVAN minimum free-disk reserve would be violated")
 
-    def import_file(
+    def _check_capacity_for(self, incoming_bytes: int) -> None:
+        self._check_object_capacity(incoming_bytes)
+        self._check_free_capacity(incoming_bytes)
+
+    def ensure_capacity(self, incoming_bytes: int) -> None:
+        """Reject a transfer before temporary bytes can violate store limits."""
+
+        with self._exclusive_lock():
+            self._check_capacity_for(incoming_bytes)
+
+    def _import_file_locked(
         self,
-        source: os.PathLike[str] | str,
+        source_path: Path,
         *,
-        expected: ArtifactIdentity | None = None,
+        expected: ArtifactIdentity | None,
     ) -> ArtifactIdentity:
-        """Copy a regular file into immutable storage and return its identity.
-
-        Bytes are hashed from the already-open source descriptor while they are
-        copied. Promotion uses a same-filesystem hard link so an existing object
-        is never silently replaced.
-        """
-
-        self._assert_internal_directories()
-        source_path = Path(source)
         source_fd, source_info = _open_regular_nofollow(source_path)
         self._check_capacity_for(source_info.st_size)
 
@@ -250,7 +312,10 @@ class ContentStore:
                     f"got {identity.artifact_id}/{identity.length}"
                 )
 
-            self._check_capacity_for(length)
+            # The temporary copy already consumes its disk blocks. Re-check the
+            # immutable-object ceiling under the same lock, but do not subtract
+            # the same bytes from free space twice before hard-link promotion.
+            self._check_object_capacity(length)
             destination = self._object_path(identity.sha256)
             try:
                 os.link(tmp_path, destination, follow_symlinks=False)
@@ -270,6 +335,29 @@ class ContentStore:
                     os.close(fd)
                 except OSError:
                     pass
+
+    def import_file(
+        self,
+        source: os.PathLike[str] | str,
+        *,
+        expected: ArtifactIdentity | None = None,
+        _lock_held: bool = False,
+    ) -> ArtifactIdentity:
+        """Copy a regular file into immutable storage and return its identity.
+
+        Bytes are hashed from the already-open source descriptor while they are
+        copied. Promotion uses a same-filesystem hard link so an existing object
+        is never silently replaced. Normal callers are serialized by the store
+        lock; CARAVAN retrieval passes ``_lock_held=True`` only while inside the
+        store's ``transfer_guard``.
+        """
+
+        source_path = Path(source)
+        if _lock_held:
+            self._assert_internal_directories()
+            return self._import_file_locked(source_path, expected=expected)
+        with self._exclusive_lock():
+            return self._import_file_locked(source_path, expected=expected)
 
     def verify(self, identity: ArtifactIdentity) -> ArtifactIdentity:
         path = self._object_path(identity.sha256)

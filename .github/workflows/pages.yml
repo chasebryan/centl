@@ -32,7 +32,7 @@ jobs:
       - name: Configure Pages
         id: pages
         continue-on-error: true
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: First-time Pages enablement notice
         if: steps.pages.outcome != 'success'

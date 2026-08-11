@@ -19,6 +19,36 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_mirage_materialize)
+ (modules test_sci_mirage_materialize)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_readiness)
+ (modules test_sci_mirage_readiness)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_execution_plan)
+ (modules test_sci_mirage_execution_plan)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_evidence)
+ (modules test_sci_mirage_evidence)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_admission)
+ (modules test_sci_mirage_admission)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_review)
+ (modules test_sci_mirage_review)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sha256)
  (modules test_sha256)
  (libraries centl_lib alcotest))

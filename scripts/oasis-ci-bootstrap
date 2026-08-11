@@ -1,0 +1,91 @@
+#!/bin/sh
+set -eu
+
+: "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+: "${NATIVE_PREFIX:?NATIVE_PREFIX is required}"
+: "${GMP_VERSION:?GMP_VERSION is required}"
+: "${GMP_SHA256:?GMP_SHA256 is required}"
+: "${MPFR_VERSION:?MPFR_VERSION is required}"
+: "${MPFR_SHA256:?MPFR_SHA256 is required}"
+: "${FLINT_VERSION:?FLINT_VERSION is required}"
+: "${FLINT_SHA256:?FLINT_SHA256 is required}"
+: "${FSTAR_VERSION:?FSTAR_VERSION is required}"
+: "${FSTAR_COMMIT:?FSTAR_COMMIT is required}"
+: "${FSTAR_SHA256:?FSTAR_SHA256 is required}"
+: "${Z3_VERSION:?Z3_VERSION is required}"
+
+PORTABLE_X86_CFLAGS=${PORTABLE_X86_CFLAGS:--O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic}
+mkdir -p "$NATIVE_PREFIX"
+
+fetch_checked() {
+  url=$1
+  digest=$2
+  output=$3
+  curl --fail --silent --show-error --location "$url" --output "$output"
+  printf '%s  %s\n' "$digest" "$output" | sha256sum --check
+}
+
+fetch_checked \
+  "https://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.xz" \
+  "$GMP_SHA256" "$RUNNER_TEMP/gmp.tar.xz"
+tar -xf "$RUNNER_TEMP/gmp.tar.xz" -C "$RUNNER_TEMP"
+cd "$RUNNER_TEMP/gmp-${GMP_VERSION}"
+baseline_build=$(sh ./configfsf.guess)
+case "$baseline_build" in
+  x86_64-*-linux-gnu) ;;
+  *) printf 'unexpected GMP build tuple: %s\n' "$baseline_build" >&2; exit 1 ;;
+esac
+ABI=64 CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+  --build="$baseline_build" --prefix="$NATIVE_PREFIX" \
+  --disable-static --enable-shared --enable-fat
+grep -qx '#define WANT_FAT_BINARY 1' config.h
+make --jobs=2
+make install
+
+fetch_checked \
+  "https://ftp.gnu.org/gnu/mpfr/mpfr-${MPFR_VERSION}.tar.xz" \
+  "$MPFR_SHA256" "$RUNNER_TEMP/mpfr.tar.xz"
+tar -xf "$RUNNER_TEMP/mpfr.tar.xz" -C "$RUNNER_TEMP"
+cd "$RUNNER_TEMP/mpfr-${MPFR_VERSION}"
+CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+  --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+  --disable-static --enable-shared
+make --jobs=2
+make install
+
+fetch_checked \
+  "https://github.com/flintlib/flint/releases/download/v${FLINT_VERSION}/flint-${FLINT_VERSION}.tar.gz" \
+  "$FLINT_SHA256" "$RUNNER_TEMP/flint.tar.gz"
+tar -xzf "$RUNNER_TEMP/flint.tar.gz" -C "$RUNNER_TEMP"
+cd "$RUNNER_TEMP/flint-${FLINT_VERSION}"
+CFLAGS="$PORTABLE_X86_CFLAGS" ./configure \
+  --prefix="$NATIVE_PREFIX" --with-gmp="$NATIVE_PREFIX" \
+  --with-mpfr="$NATIVE_PREFIX"
+make --jobs=2
+make install
+
+fstar_archive="$RUNNER_TEMP/fstar.tar.gz"
+fstar_root="$RUNNER_TEMP/fstar"
+fetch_checked \
+  "https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz" \
+  "$FSTAR_SHA256" "$fstar_archive"
+mkdir -p "$fstar_root"
+tar -xzf "$fstar_archive" -C "$fstar_root"
+fstar=$(find "$fstar_root" -type f -path '*/bin/fstar.exe' -print -quit)
+test -n "$fstar"
+"$fstar" --version | grep -F "commit=${FSTAR_COMMIT}"
+z3=$("$fstar" --locate_z3 "$Z3_VERSION")
+"$z3" --version | grep -F "Z3 version ${Z3_VERSION}"
+if [ -n "${GITHUB_PATH:-}" ]; then
+  printf '%s\n' "$(dirname "$fstar")" >> "$GITHUB_PATH"
+else
+  printf 'GITHUB_PATH is required for hosted Oasis qualification\n' >&2
+  exit 1
+fi
+
+cd "${GITHUB_WORKSPACE:-$(pwd)}"
+opam init --bare --disable-sandboxing --yes
+if ! opam switch list --short | grep -Fqx centl; then
+  opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
+fi
+opam install --switch=centl --deps-only --with-test --assume-depexts --yes .

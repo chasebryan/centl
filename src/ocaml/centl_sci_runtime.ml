@@ -9,25 +9,6 @@ type outcome = {
   status : status;
 }
 
-type cache_entry = { key : string; outcome : outcome }
-
-type cache = {
-  capacity : int;
-  mutable entries : cache_entry list;
-  mutable hits : int;
-  mutable misses : int;
-}
-
-let create_cache ?(capacity = 32) () =
-  { capacity = max 1 capacity; entries = []; hits = 0; misses = 0 }
-
-let clear_cache cache =
-  cache.entries <- [];
-  cache.hits <- 0;
-  cache.misses <- 0
-
-let cache_stats cache = (cache.hits, cache.misses, List.length cache.entries)
-
 let status_text = function
   | Established -> "established"
   | Unresolved -> "unresolved"
@@ -274,47 +255,6 @@ let execute ?core_state ir =
       let response, status = execute_plan ?core_state execution_plan in
       { ir; plan = Some execution_plan; response = Some response; status }
 
-let cache_key ?core_state ir =
-  let revision =
-    match plan ir with
-    | Some { executor = Core; _ } ->
-        begin match core_state with
-        | Some state ->
-            Centl_engine.session_revision (Centl_protocol.session state)
-        | None -> 0
-        end
-    | _ -> 0
-  in
-  Yojson.Safe.to_string
-    (`Assoc
-       [
-         ("revision", `Int revision); ("interpretation", Centl_sci_ir.to_json ir);
-       ])
-
-let execute_cached ?core_state ~cache ir =
-  let key = cache_key ?core_state ir in
-  match List.find_opt (fun entry -> entry.key = key) cache.entries with
-  | Some entry ->
-      cache.hits <- cache.hits + 1;
-      cache.entries <-
-        entry :: List.filter (fun value -> value.key <> key) cache.entries;
-      entry.outcome
-  | None ->
-      cache.misses <- cache.misses + 1;
-      let outcome = execute ?core_state ir in
-      let entry = { key; outcome } in
-      cache.entries <-
-        entry
-        :: ( cache.entries |> List.filter (fun value -> value.key <> key)
-           |> fun values ->
-             let rec take count acc = function
-               | [] -> List.rev acc
-               | _ when count <= 0 -> List.rev acc
-               | value :: rest -> take (count - 1) (value :: acc) rest
-             in
-             take (cache.capacity - 1) [] values );
-      outcome
-
 let plan_json plan =
   `Assoc
     [
@@ -325,7 +265,7 @@ let plan_json plan =
 let to_json ~problem outcome =
   let fields =
     [
-      ("sci_version", `String "0.0.2-Caramels+");
+      ("sci_version", `String "0.0.2-Caramels");
       ("problem", `String problem);
       ("status", `String (status_text outcome.status));
       ("interpretation", Centl_sci_ir.to_json outcome.ir);

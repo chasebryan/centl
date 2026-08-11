@@ -2,47 +2,425 @@ name: Installer release-source independence
 
 on:
   pull_request:
+    branches:
+      - oasis
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
     paths:
       - "install"
-      - "install.ps1"
       - "scripts/install-interface-check.py"
-      - "scripts/install-interface-check.ps1"
       - "docs/INSTALL.md"
       - ".github/workflows/installer-release-source.yml"
   push:
     branches:
-      - main
+      - oasis
     paths:
       - "install"
-      - "install.ps1"
       - "scripts/install-interface-check.py"
-      - "scripts/install-interface-check.ps1"
       - "docs/INSTALL.md"
       - ".github/workflows/installer-release-source.yml"
 
 permissions:
   contents: read
 
+concurrency:
+  group: installer-oasis-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action || 'push' }}
+  cancel-in-progress: false
+
+env:
+  FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
+  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
+  GMP_VERSION: "6.3.0"
+  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
+  MPFR_VERSION: "4.2.2"
+  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
+  FLINT_VERSION: "3.0.1"
+  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
+  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
 jobs:
-  unix:
-    name: Test Unix static release root
+  linux:
+    name: Test GNU/Linux static release root
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out CENTL
+      - name: Check out exact proposed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Require pull-request checkout identity
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
       - name: Exercise installer
         run: python3 scripts/install-interface-check.py
 
-  windows:
-    name: Test Windows static release root
-    runs-on: windows-2022
+  caravan:
+    name: CARAVAN Phase 1 laboratory
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
     steps:
-      - name: Check out CENTL
+      - name: Check out exact proposed Oasis SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-      - name: Exercise installer
-        shell: pwsh
-        run: .\scripts\install-interface-check.ps1
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+      - name: Create isolated Python environment
+        run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
+      - name: Install pinned Phase 1 dependencies
+        run: |
+          "$RUNNER_TEMP/caravan-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
+      - name: Run CARAVAN Phase 1 checks
+        env:
+          PYTHON: ${{ runner.temp }}/caravan-venv/bin/python
+        run: sh scripts/caravan-phase1-check
+
+  oasis-self-test:
+    name: Adversarial engine self-test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact proposed Oasis SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+      - name: Compile Oasis policy surfaces
+        run: |
+          python3 -m py_compile \
+            scripts/oasis.py \
+            scripts/oasis_engine.py \
+            scripts/oasis-toolchain-check.py \
+            scripts/oasis-metadata-check.py \
+            scripts/oasis_required_checks.py \
+            scripts/oasis-security-state.py \
+            tests/test_oasis.py \
+            tests/test_oasis_metadata.py \
+            tests/test_oasis_required_checks.py \
+            tests/test_oasis_security_state.py
+      - name: Run adversarial Oasis policy tests
+        run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
+      - name: Validate complete candidate plan
+        run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
+
+  oasis-converge:
+    name: Full stable-product convergence
+    if: github.event_name == 'pull_request'
+    needs:
+      - linux
+      - caravan
+      - oasis-self-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
+      PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
+      LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+      LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+      C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+      JULIA_NUM_THREADS: "1"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+      CENTL_BUILD_COMMIT: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out exact proposed Oasis SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl git libzstd1 m4 make opam patch \
+            pkg-config python3 python3-venv tar xz-utils
+      - name: Bootstrap pinned proof and native toolchain
+        run: sh scripts/oasis-ci-bootstrap
+      - name: Set up pinned Julia
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
+        with:
+          version: "1.12.6"
+      - name: Instantiate pinned independent oracle
+        run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
+      - name: Create isolated Oasis Python environment
+        run: python3 -m venv "$RUNNER_TEMP/oasis-venv"
+      - name: Install pinned CARAVAN dependencies
+        run: |
+          "$RUNNER_TEMP/oasis-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
+      - name: Execute complete exact-SHA Oasis convergence
+        env:
+          OPAM_SWITCH: centl
+        run: |
+          "$RUNNER_TEMP/oasis-venv/bin/python" scripts/oasis.py \
+            --root "$PWD" --no-repair --keep-going
+      - name: Preserve exact qualified release bytes
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-release-${{ github.event.pull_request.head.sha }}
+          path: dist/*
+          if-no-files-found: error
+      - name: Preserve Oasis convergence evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-evidence-${{ github.event.pull_request.head.sha }}
+          path: _build/oasis/**
+          if-no-files-found: warn
+
+  oasis-security:
+    name: Release security state
+    if: github.event_name == 'pull_request'
+    needs: oasis-converge
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - name: Check out exact proposed Oasis SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+      - name: Require clear release-blocking GitHub security state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/oasis-security-state.py --root "$PWD"
+
+  finalize-oasis:
+    name: Finalize qualified Oasis release
+    needs:
+      - linux
+      - caravan
+      - oasis-self-test
+      - oasis-converge
+      - oasis-security
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+      statuses: write
+    env:
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      INSTALL_RESULT: ${{ needs.linux.result }}
+      CARAVAN_RESULT: ${{ needs.caravan.result }}
+      SELF_TEST_RESULT: ${{ needs.oasis-self-test.result }}
+      CONVERGENCE_RESULT: ${{ needs.oasis-converge.result }}
+      SECURITY_RESULT: ${{ needs.oasis-security.result }}
+    steps:
+      - name: Check out exact qualified SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Mark publication pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"pending","context":"centl/oasis-publication","description":"Qualified Oasis publication running","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null
+
+      - name: Require successful authoritative closed-event gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$INSTALL_RESULT" = success
+          test "$CARAVAN_RESULT" = success
+          test "$SELF_TEST_RESULT" = success
+          test "$CONVERGENCE_RESULT" = success
+          test "$SECURITY_RESULT" = success
+
+      - name: Require exact final Oasis identity and hosted proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          version=$(sed -n 's/^let value = "\([^"]*\)"$/\1/p' src/ocaml/centl_version.ml)
+          test -n "$version"
+          printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
+          printf 'TAG=v%s\n' "$version" >> "$GITHUB_ENV"
+
+          oasis_sha=$(git ls-remote origin refs/heads/oasis | awk 'NR == 1 { print $1 }')
+          if [ "$oasis_sha" != "$HEAD_SHA" ]; then
+            printf 'qualified PR head %s is not exact origin/oasis %s\n' \
+              "$HEAD_SHA" "${oasis_sha:-<missing>}" >&2
+            exit 1
+          fi
+
+          python3 scripts/oasis_required_checks.py --root "$PWD"
+
+          open_prs=$(gh api \
+            "repos/$GITHUB_REPOSITORY/pulls?state=open&base=oasis&per_page=100" \
+            --jq 'length')
+          if [ "$open_prs" != 0 ]; then
+            printf '%s open pull request(s) still target oasis\n' "$open_prs" >&2
+            exit 1
+          fi
+
+      - name: Download exact qualified release bytes from this run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: oasis-release-${{ github.event.pull_request.head.sha }}
+          path: qualified
+
+      - name: Revalidate qualified artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          archive=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz' -print -quit)
+          checksum=$(find qualified -type f -name 'centl-linux-x86_64.tar.gz.sha256' -print -quit)
+          test -n "$archive"
+          test -n "$checksum"
+          cp "$archive" dist/centl-linux-x86_64.tar.gz
+          cp "$checksum" dist/centl-linux-x86_64.tar.gz.sha256
+          (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import tarfile
+
+          archive = pathlib.Path("dist/centl-linux-x86_64.tar.gz")
+          with tarfile.open(archive, "r:gz") as package:
+              version_member = package.extractfile("centl/VERSION")
+              manifest_member = package.extractfile("centl/BUILD_MANIFEST.json")
+              if version_member is None or manifest_member is None:
+                  raise SystemExit("qualified archive lacks release identity metadata")
+              packaged_version = version_member.read(256).decode("utf-8", "strict").strip()
+              manifest = json.loads(manifest_member.read())
+
+          if packaged_version != os.environ["VERSION"]:
+              raise SystemExit("qualified archive version mismatch")
+          if manifest.get("schema") != 1 or manifest.get("kind") != "centl_build_manifest":
+              raise SystemExit("invalid qualified build manifest")
+          if manifest.get("semantic_version") != os.environ["VERSION"]:
+              raise SystemExit("qualified build-manifest version mismatch")
+          if manifest.get("commit") != os.environ["HEAD_SHA"]:
+              raise SystemExit("qualified build-manifest commit mismatch")
+          if (manifest.get("platform"), manifest.get("architecture")) != ("linux", "x86_64"):
+              raise SystemExit("qualified release target is not GNU/Linux x86_64")
+          if manifest.get("verification") != {"command": "make verify", "result": "passed"}:
+              raise SystemExit("qualified verification attestation mismatch")
+          PY
+
+      - name: Create exact SemVer tag if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing=$(git ls-remote origin "refs/tags/$TAG" | awk 'NR == 1 { print $1 }')
+          if [ -n "$existing" ]; then
+            test "$existing" = "$HEAD_SHA"
+          else
+            gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/tags/$TAG" \
+              -f sha="$HEAD_SHA" >/dev/null
+          fi
+
+      - name: Publish exact qualified bytes if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              dist/centl-linux-x86_64.tar.gz \
+              dist/centl-linux-x86_64.tar.gz.sha256 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "CENTL $TAG" \
+              --notes-file "docs/releases/$VERSION.md"
+          fi
+
+      - name: Reverify published bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p published
+          gh release download "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'centl-linux-x86_64.tar.gz' \
+            --pattern 'centl-linux-x86_64.tar.gz.sha256' \
+            --dir published
+          (cd published && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
+          test "$(sha256sum dist/centl-linux-x86_64.tar.gz | awk '{print $1}')" = \
+               "$(sha256sum published/centl-linux-x86_64.tar.gz | awk '{print $1}')"
+
+      - name: Mark Oasis publication successful
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"success","context":"centl/oasis-publication","description":"Qualified Oasis release published and reverified","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null
+
+      - name: Mark Oasis publication failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          payload=$(printf '{"state":"failure","context":"centl/oasis-publication","description":"Qualified Oasis publication failed","target_url":"%s"}' "$target")
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            --data "$payload" >/dev/null

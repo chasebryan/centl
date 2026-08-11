@@ -31,6 +31,15 @@ for promotion to the stable-product branch.
 
 The canonical policy is [docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
 
+## Oasis is the baseline
+
+The current Mirage line begins from the post-`v0.14.0` Oasis source. Each newly
+declared Oasis release becomes the next baseline from which Mirage development
+continues. Mirage may then diverge forward again with experimental work.
+
+This keeps the development branch adventurous without allowing it to drift onto
+an obsolete stable foundation.
+
 ## Branch model
 
 CENTL has three long-lived branches:
@@ -59,6 +68,9 @@ feature / research work
          v
  stable release / tag
 ```
+
+After each new Oasis release, Mirage is reconciled onto that new Oasis baseline
+and the development cycle begins again.
 
 `main` is the integrated distribution view, not another maturity stage.
 
@@ -94,6 +106,27 @@ It is **not** intended to answer the stronger release question:
 > Is this exact state ready to be called an Oasis release?
 
 That question belongs to `oasis`.
+
+## Install Mirage
+
+Mirage is an opt-in development installation and can live beside Oasis without
+replacing the stable commands.
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+sh install --channel mirage
+```
+
+The Mirage channel provides:
+
+```text
+mirage-centl
+mirage-centl-physics
+mirage-centl-sci
+```
+
+If Oasis is also installed, `centl`, `centl-physics`, and `centl-sci` continue to
+refer only to Oasis.
 
 ## Working on Mirage
 
@@ -131,11 +164,11 @@ Subsystem-specific experiments may have additional commands documented under
 
 ## Want the standard product instead?
 
-Use the authoritative Oasis branch rather than Mirage:
+Use Oasis explicitly:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
-sh install
+sh install --channel oasis
 ```
 
 Mirage should not be presented to ordinary users as the stable installation line.
@@ -145,6 +178,7 @@ Mirage should not be presented to ordinary users as the stable installation line
 Development documentation evolves with the branch. Important starting points
 include:
 
+- [Installation and channels](docs/INSTALL.md)
 - [Branch and release policy](docs/RELEASE-POLICY.md)
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)

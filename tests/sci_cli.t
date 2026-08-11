@@ -58,12 +58,8 @@
 
   $ ../src/sci_main.exe --json 'What is 0.1 plus 0.2?' | grep -F '"interpreter_path": "fast"' >/dev/null
 
-  $ printf '%s\n' '{"version":1,"id":"a","problem":"What is ten factorial?"}' '{"version":1,"id":"b","problem":"Find the distance between (0, 0) and (3, 4)."}' | ../src/sci_main.exe --serve | grep -F '"sci_version":"0.0.2-Caramels+"' >/dev/null
-
-  $ printf '%s\n' '{"version":1,"id":"a","problem":"What is ten factorial?"}' | ../src/sci_main.exe --serve | grep -F '"human":"3628800"' >/dev/null
-
   $ printf '%s\n' 'What is 0.1 plus 0.2?' 'Convert 2.5 kilometers to meters.' ':exit' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'
-  CENTL-SCi v0.0.2-Caramels+
+  CENTL-SCi v0.0.2-Caramels
   Free for science.
   
   HYBRID> 3/10
@@ -71,7 +67,7 @@
   HYBRID>
 
   $ printf '%s\n' ':mode math' 'What is 0.1 plus 0.2?' ':mode physics' 'Convert 2.5 kilometers to meters.' ':mode build' ':mode' ':exit' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'
-  CENTL-SCi v0.0.2-Caramels+
+  CENTL-SCi v0.0.2-Caramels
   Free for science.
   
   HYBRID> Mode: math
@@ -83,7 +79,7 @@
   BUILD>
 
   $ printf '%s\n' ':details on' 'What is 0.1 plus 0.2?' ':details off' ':exit' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'
-  CENTL-SCi v0.0.2-Caramels+
+  CENTL-SCi v0.0.2-Caramels
   Free for science.
   
   HYBRID> Scientific details on.
@@ -97,14 +93,14 @@
   HYBRID>
 
   $ printf '%s\n' 'solve x squared plus 4' ':quit' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'
-  CENTL-SCi v0.0.2-Caramels+
+  CENTL-SCi v0.0.2-Caramels
   Free for science.
   
   HYBRID> I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0.
   HYBRID>
 
   $ printf '%s\n' 'What is 0.1 plus 0.2?' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'
-  CENTL-SCi v0.0.2-Caramels+
+  CENTL-SCi v0.0.2-Caramels
   Free for science.
   
   HYBRID> 3/10

@@ -43,21 +43,6 @@ let test_builtin_integration_reuse () =
        (fun capability -> capability.Centl_sci_capabilities.name = "integrate")
        matches)
 
-let test_builtin_concrete_math_reuse () =
-  let names query =
-    Centl_sci_capabilities.search query
-    |> List.map (fun capability -> capability.Centl_sci_capabilities.name)
-  in
-  Alcotest.(check bool)
-    "fibonacci capability found" true
-    (List.mem "concrete mathematics" (names "tenth fibonacci number"));
-  Alcotest.(check bool)
-    "sequence capability found" true
-    (List.mem "finite sequences" (names "product of integers from 1 to 5"));
-  Alcotest.(check bool)
-    "geometry capability found" true
-    (List.mem "geometry" (names "distance between two points"))
-
 let test_local_package_is_reusable_composition () =
   let root = temp_dir "centl-caramels-capability-" in
   Fun.protect
@@ -105,8 +90,6 @@ let () =
             test_builtin_constant_reuse;
           Alcotest.test_case "integration reuse" `Quick
             test_builtin_integration_reuse;
-          Alcotest.test_case "concrete math reuse" `Quick
-            test_builtin_concrete_math_reuse;
           Alcotest.test_case "local package composition" `Quick
             test_local_package_is_reusable_composition;
         ] );

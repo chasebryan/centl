@@ -1,0 +1,106 @@
+name: Mirage rolling distribution
+
+on:
+  push:
+    branches:
+      - mirage
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: centl-mirage-distribution
+  cancel-in-progress: true
+
+env:
+  NATIVE_PREFIX: ${{ runner.temp }}/centl-native
+  PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
+  LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+  LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
+  C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
+
+jobs:
+  publish:
+    name: Build and publish Mirage channel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out Mirage
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl git libzstd1 m4 make opam patch \
+            pkg-config python3 tar xz-utils
+
+      - name: Bootstrap pinned proof and native toolchain
+        run: sh scripts/oasis-ci-bootstrap
+
+      - name: Run Mirage installability baseline
+        env:
+          OPAM_SWITCH: centl
+        run: |
+          set -euo pipefail
+          make test
+          python3 scripts/install-interface-check.py
+
+      - name: Build native Mirage package
+        env:
+          OPAM_SWITCH: centl
+          CENTL_BUILD_COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^let value = "\([^"]*\)"$/\1/p' src/ocaml/centl_version.ml)
+          test -n "$version"
+          printf 'VERSION=%s\n' "$version" >> "$GITHUB_ENV"
+          make release VERSION="$version"
+          (cd dist && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
+
+      - name: Publish rolling and addressable Mirage bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4; do
+            git fetch origin distribution
+            git switch --force-create distribution origin/distribution
+
+            build_dir="channels/mirage/builds/$GITHUB_SHA"
+            latest_dir="channels/mirage/latest"
+            mkdir -p "$build_dir" "$latest_dir"
+            cp dist/centl-linux-x86_64.tar.gz "$build_dir/centl-linux-x86_64.tar.gz"
+            cp dist/centl-linux-x86_64.tar.gz.sha256 "$build_dir/centl-linux-x86_64.tar.gz.sha256"
+            printf '%s\n' "$GITHUB_SHA" > "$build_dir/SOURCE-COMMIT"
+            printf '%s\n' "$VERSION" > "$build_dir/VERSION"
+
+            rm -rf "$latest_dir"
+            mkdir -p "$latest_dir"
+            cp "$build_dir/centl-linux-x86_64.tar.gz" "$latest_dir/centl-linux-x86_64.tar.gz"
+            cp "$build_dir/centl-linux-x86_64.tar.gz.sha256" "$latest_dir/centl-linux-x86_64.tar.gz.sha256"
+            printf '%s\n' "$GITHUB_SHA" > "$latest_dir/SOURCE-COMMIT"
+            printf '%s\n' "$VERSION" > "$latest_dir/VERSION"
+            printf '%s\n' "$GITHUB_SHA" > channels/mirage/LATEST
+
+            git add channels/mirage
+            if git diff --cached --quiet; then
+              echo 'Mirage distribution already matches this build.'
+              exit 0
+            fi
+            git commit -m "dist(mirage): publish $GITHUB_SHA"
+            if git push origin HEAD:distribution; then
+              exit 0
+            fi
+            echo "distribution branch moved; retrying ($attempt/4)" >&2
+            git reset --hard "origin/distribution"
+            sleep $((attempt * 2))
+          done
+          echo 'could not update distribution branch after retries' >&2
+          exit 1

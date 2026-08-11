@@ -25,6 +25,7 @@ from .session import SessionAuthority, SessionError, session_proof_payload
 MAX_REQUEST_BYTES = 64 * 1024
 MAX_RESPONSE_BYTES = 64 * 1024
 MAX_LAB_POLL_SECONDS = 2.0
+MAX_CONCURRENT_REQUESTS = 32
 
 
 class TransportError(RuntimeError):
@@ -66,18 +67,69 @@ def _require_exact_fields(value: object, expected: set[str]) -> dict[str, Any]:
 
 class _CoordinatorHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
+    request_queue_size = MAX_CONCURRENT_REQUESTS
 
     def __init__(
         self,
         server_address: tuple[str, int],
         coordinator: CoordinatorState,
         sessions: SessionAuthority,
+        *,
+        max_concurrent_requests: int = MAX_CONCURRENT_REQUESTS,
     ) -> None:
         if server_address[0] != "127.0.0.1":
             raise TransportError("Phase 1 coordinator HTTP service is loopback-only")
+        if max_concurrent_requests <= 0:
+            raise ValueError("max_concurrent_requests must be positive")
         self.coordinator = coordinator
         self.sessions = sessions
+        self.max_concurrent_requests = int(max_concurrent_requests)
+        self._active_requests = 0
+        self._active_requests_lock = threading.Lock()
         super().__init__(server_address, _CoordinatorHandler)
+
+    @property
+    def active_requests(self) -> int:
+        with self._active_requests_lock:
+            return self._active_requests
+
+    def _reserve_request(self) -> bool:
+        with self._active_requests_lock:
+            if self._active_requests >= self.max_concurrent_requests:
+                return False
+            self._active_requests += 1
+            return True
+
+    def _release_request(self) -> None:
+        with self._active_requests_lock:
+            if self._active_requests > 0:
+                self._active_requests -= 1
+
+    def process_request(self, request, client_address) -> None:
+        if not self._reserve_request():
+            try:
+                request.sendall(
+                    b"HTTP/1.1 503 Service Unavailable\r\n"
+                    b"Content-Length: 0\r\n"
+                    b"Cache-Control: no-store\r\n"
+                    b"Connection: close\r\n\r\n"
+                )
+            except OSError:
+                pass
+            finally:
+                self.shutdown_request(request)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self._release_request()
+            raise
+
+    def process_request_thread(self, request, client_address) -> None:
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._release_request()
 
 
 class _CoordinatorHandler(BaseHTTPRequestHandler):
@@ -250,15 +302,25 @@ class CoordinatorLabService:
         *,
         sessions: SessionAuthority | None = None,
         port: int = 0,
+        max_concurrent_requests: int = MAX_CONCURRENT_REQUESTS,
     ) -> None:
         self.sessions = sessions or SessionAuthority(coordinator)
-        self._server = _CoordinatorHTTPServer(("127.0.0.1", port), coordinator, self.sessions)
+        self._server = _CoordinatorHTTPServer(
+            ("127.0.0.1", port),
+            coordinator,
+            self.sessions,
+            max_concurrent_requests=max_concurrent_requests,
+        )
         self._thread: threading.Thread | None = None
 
     @property
     def base_url(self) -> str:
         host, port = self._server.server_address[:2]
         return f"http://{host}:{port}"
+
+    @property
+    def active_requests(self) -> int:
+        return self._server.active_requests
 
     def start(self) -> "CoordinatorLabService":
         if self._thread is not None:

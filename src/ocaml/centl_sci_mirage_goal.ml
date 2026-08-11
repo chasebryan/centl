@@ -256,6 +256,12 @@ let is_alias_request text =
     (fun token -> contains token text)
     [ "alias"; "wrapper"; "shortcut"; "synonym"; "rename" ]
 
+let explicitly_materializable_request text =
+  match Centl_sci_codegen.generate text with
+  | Centl_sci_codegen.Generated _ -> true
+  | Centl_sci_codegen.Not_generated | Centl_sci_codegen.Needs_clarification _ ->
+      false
+
 let cell_is_conflicting conflict_pairs id =
   List.exists (fun (left, right) -> left = id || right = id) conflict_pairs
 
@@ -293,6 +299,12 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
           ( Core_change_required,
             "the existing BUILD planner identifies this objective as a \
              trusted/core implementation change" )
+      | _ when explicitly_materializable_request cell.text ->
+          ( Extension_required,
+            "the objective requests a concrete native CENTL definition that \
+             MIRAGE can stage deterministically; capability overlap supplies \
+             implementation machinery or ingredients but does not satisfy the \
+             requested new binding" )
       | _ when is_alias_request cell.text && matches <> [] ->
           ( Alias_or_wrapper,
             "existing capabilities appear reusable; the requested semantic \

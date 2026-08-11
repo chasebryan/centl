@@ -53,7 +53,7 @@ let bundle_metadata workspace =
     [
       ("schema_version", `Int 1);
       ("format", `String "centl-caramels-workspace-bundle");
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("workspace_name", `String workspace.Centl_sci_workspace.name);
       ("source_revision", `Int (Centl_sci_workspace.read_revision workspace));
       ("created_at_unix", `Float (Unix.gettimeofday ()));

@@ -82,42 +82,16 @@ let compact_coefficient ~variable token =
     if String.sub token offset variable_length <> variable then None
     else canonical_number (String.sub token 0 offset)
 
-let compact_square_coefficient ~variable token =
-  let suffix = variable ^ "^2" in
-  let token_length = String.length token in
-  let suffix_length = String.length suffix in
-  if suffix_length = 0 || token_length <= suffix_length then None
-  else
-    let offset = token_length - suffix_length in
-    if String.sub token offset suffix_length <> suffix then None
-    else canonical_number (String.sub token 0 offset)
-
-let variable_from_power_token token =
-  let suffix = "^2" in
-  if String.ends_with ~suffix token then
-    let base =
-      String.sub token 0 (String.length token - String.length suffix)
-    in
-    if valid_identifier base then Some base
-    else
-      let rec first_identifier index =
-        if index >= String.length base then None
-        else
-          match base.[index] with
-          | 'a' .. 'z' | 'A' .. 'Z' | '_' ->
-              let candidate =
-                String.sub base index (String.length base - index)
-              in
-              if valid_identifier candidate then Some candidate else None
-          | _ -> first_identifier (index + 1)
-      in
-      first_identifier 0
+let power_two_variable token =
+  if String.ends_with ~suffix:"^2" token then
+    let variable = String.sub token 0 (String.length token - 2) in
+    if valid_identifier variable then Some variable else None
   else None
 
 let parse_term ~variable = function
+  | token :: rest when token = variable ^ "^2" -> Some (token, rest)
   | token :: "squared" :: rest when token = variable ->
       Some (variable ^ "^2", rest)
-  | token :: rest when token = variable ^ "^2" -> Some (variable ^ "^2", rest)
   | token :: rest when token = variable -> Some (variable, rest)
   | coefficient :: token :: "squared" :: rest
     when token = variable && Option.is_some (canonical_number coefficient) ->
@@ -138,12 +112,6 @@ let parse_term ~variable = function
   | token :: "squared" :: rest
     when Option.is_some (compact_coefficient ~variable token) ->
       let coefficient = Option.get (compact_coefficient ~variable token) in
-      Some (coefficient ^ "*" ^ variable ^ "^2", rest)
-  | token :: rest
-    when Option.is_some (compact_square_coefficient ~variable token) ->
-      let coefficient =
-        Option.get (compact_square_coefficient ~variable token)
-      in
       Some (coefficient ^ "*" ^ variable ^ "^2", rest)
   | token :: rest when Option.is_some (compact_coefficient ~variable token) ->
       let coefficient = Option.get (compact_coefficient ~variable token) in
@@ -183,7 +151,7 @@ let parse_expression ~variable text =
 let infer_leading_variable body =
   match words body with
   | variable :: _ when valid_identifier variable -> Some variable
-  | token :: _ -> variable_from_power_token token
+  | token :: _ -> power_two_variable token
   | _ -> None
 
 let interpret problem =

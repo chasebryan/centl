@@ -293,36 +293,18 @@ let session_commands =
 
 let math_completions =
   [
-    "area";
     "approx";
     "approximate";
     "calculate";
-    "choose";
-    "circle";
     "compute";
-    "distance";
     "differentiate";
     "derivative";
     "evaluate";
     "expand";
     "factor";
-    "factorial";
-    "fibonacci";
-    "gcd";
-    "geometry";
-    "hypotenuse";
     "integrate";
-    "lcm";
-    "list";
-    "permutations";
-    "product";
-    "recurrence";
-    "sequence";
     "simplify";
-    "slope";
     "solve";
-    "squares";
-    "sum";
     "substitute";
     "verify";
   ]

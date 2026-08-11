@@ -1,6 +1,6 @@
 # CENTL-SCi
 
-Status: active development toward **CENTL-SCi `v0.0.2-Caramels+`**. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.
+Status: active development toward **CENTL-SCi `v0.0.2-Caramels`**. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.
 
 **CENTL-SCi means Specific CENTL Interpreter.** It is developed as part of CENTL under the Free Computation Foundation.
 
@@ -93,23 +93,7 @@ Caramels currently has typed deterministic paths for:
 | `uniform_gravity_particle` | physics | typed CENTL Physics `simulate_particle` |
 | `unsupported` | either/outside scope | no fabricated computation |
 
-The deterministic natural-language surface also lowers supported concrete mathematics, finite sequences, geometry, differentiation, integration, substitution, simplification, expansion, factoring, and approximation requests into existing native CENTL expressions instead of creating separate implementations.
-
-Caramels+ includes a first concrete-mathematics grammar for requests such as factorials, Fibonacci numbers, gcd/lcm, combinations, finite sums/products/sequences, and supported geometry formulas. These routes produce ordinary `exact_expression` IR and still rely on CENTL core execution for the result.
-
-Repeated SCI execution in an interactive process uses a bounded in-process cache keyed by the exact interpreted IR and the CENTL core session revision. Workspace reloads and core-session definitions invalidate stale entries by changing the revision or clearing the cache.
-
-## Persistent JSONL service
-
-`centl-sci --serve` runs a persistent JSONL service on stdin/stdout for agent and tool integrations that need low-latency repeated calls without restarting the process. Requests are newline-delimited JSON objects:
-
-```json
-{"version":1,"id":"a","mode":"hybrid","problem":"What is ten factorial?"}
-```
-
-`mode` is optional and accepts the same `math`, `physics`, or `hybrid` values as the CLI. Responses are newline-delimited JSON objects that preserve the optional `id`, expose `ok`, `source`, `normalized`, `intent`, `status`, `human`, `details`, and embed the same reproducible structured result emitted by one-shot `--json`.
-
-The service keeps the CENTL core session and SCI execution cache alive for the life of the process. BUILD requests are rejected in `--serve` mode because they are interactive workspace mutations that can print lifecycle output and require the existing one-shot or human REPL workflow.
+The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, factoring, and approximation requests into existing native CENTL expressions instead of creating separate implementations.
 
 The canonical SCI JSON schema includes the closed `verification_claim` class. The optional local-model GBNF remains deliberately narrower in this Caramels slice: model generation admits exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. Supported closed verification phrasing is handled deterministically rather than delegated to the model.
 
@@ -564,7 +548,7 @@ The reference local model boundaries remain `llama-cli` and loopback `llama-serv
 
 The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.
 
-## Development sequence for `v0.0.2-Caramels+`
+## Development sequence for `v0.0.2-Caramels`
 
 Caramels is intentionally being developed in passes:
 

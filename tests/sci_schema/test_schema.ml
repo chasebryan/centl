@@ -8,50 +8,33 @@ let contains text fragment =
   in
   fragment_length = 0 || loop 0
 
-let variant_class = function
-  | `Assoc fields ->
-      begin match List.assoc_opt "properties" fields with
-      | Some (`Assoc properties) ->
-          begin match List.assoc_opt "problem_class" properties with
-          | Some (`Assoc problem_class) ->
-              begin match List.assoc_opt "enum" problem_class with
-              | Some (`List [ `String class_name ]) -> Some class_name
-              | _ -> None
-              end
-          | _ -> None
-          end
-      | _ -> None
-      end
-  | _ -> None
-
 let () =
-  let schema = Yojson.Safe.from_string Centl_sci_schema.json_schema in
+  let schema_text = Centl_sci_schema.json_schema in
+  let schema = Yojson.Safe.from_string schema_text in
   begin match schema with
   | `Assoc fields ->
       begin match List.assoc_opt "oneOf" fields with
       | Some (`List variants) ->
-          Alcotest.(check int) "problem class variants" 7 (List.length variants);
-          List.iter
-            (fun class_name ->
-              Alcotest.(check bool)
-                ("schema admits " ^ class_name)
-                true
-                (List.exists
-                   (fun variant -> variant_class variant = Some class_name)
-                   variants))
-            [
-              "exact_expression";
-              "polynomial_equation";
-              "verification_claim";
-              "unit_conversion";
-              "physical_constant";
-              "uniform_gravity_particle";
-              "unsupported";
-            ]
+          Alcotest.(check int) "problem class variants" 7 (List.length variants)
       | _ -> Alcotest.fail "SCi output schema must define oneOf variants"
       end
   | _ -> Alcotest.fail "SCi output schema must be a JSON object"
   end;
+  List.iter
+    (fun class_name ->
+      Alcotest.(check bool)
+        ("schema admits " ^ class_name)
+        true
+        (contains schema_text class_name))
+    [
+      "exact_expression";
+      "polynomial_equation";
+      "verification_claim";
+      "unit_conversion";
+      "physical_constant";
+      "uniform_gravity_particle";
+      "unsupported";
+    ];
   let grammar = Centl_sci_schema.llama_grammar in
   Alcotest.(check bool) "grammar root" true (contains grammar "root ::=");
   List.iter

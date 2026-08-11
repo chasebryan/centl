@@ -113,7 +113,7 @@ let to_json history =
   `Assoc
     [
       ("schema_version", `Int 1);
-      ("centl_sci_version", `String "0.0.2-Caramels+");
+      ("centl_sci_version", `String "0.0.2-Caramels");
       ("current_revision", `Int history.current_revision);
       ("entries", `List (List.map entry_json history.entries));
       ("truncated", `Bool history.truncated);
