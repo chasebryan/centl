@@ -1,6 +1,12 @@
 name: Oasis exact-SHA target qualification
 
 on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact CENTL release candidate commit SHA to qualify
+        required: true
+        type: string
   pull_request_target:
     branches:
       - oasis
@@ -13,11 +19,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: oasis-target-${{ github.event.pull_request.number }}
+  group: oasis-target-${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
-  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  HEAD_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.event.pull_request.head.sha }}
   FSTAR_VERSION: "2026.07.05"
   FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
   FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
@@ -34,13 +40,33 @@ jobs:
   start:
     name: Establish trusted Oasis candidate identity
     if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.user.login == github.repository_owner
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.user.login == github.repository_owner)
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       statuses: write
     steps:
+      - name: Validate candidate SHA shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$HEAD_SHA" in
+            [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]) ;;
+            *) printf 'candidate_sha must be a full lowercase 40-hex commit SHA\n' >&2; exit 1 ;;
+          esac
+      - name: Require candidate commit exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" >/dev/null
       - name: Mark exact-SHA qualification pending
         env:
           GH_TOKEN: ${{ github.token }}
@@ -67,7 +93,7 @@ jobs:
       - name: Check out exact candidate SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ env.HEAD_SHA }}
           persist-credentials: false
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
@@ -95,7 +121,7 @@ jobs:
       - name: Check out exact candidate SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ env.HEAD_SHA }}
           persist-credentials: false
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
@@ -135,12 +161,12 @@ jobs:
       C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
-      CENTL_BUILD_COMMIT: ${{ github.event.pull_request.head.sha }}
+      CENTL_BUILD_COMMIT: ${{ env.HEAD_SHA }}
     steps:
       - name: Check out exact candidate SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ env.HEAD_SHA }}
           persist-credentials: false
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
@@ -176,14 +202,14 @@ jobs:
         if: success()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: oasis-release-${{ github.event.pull_request.head.sha }}
+          name: oasis-release-${{ env.HEAD_SHA }}
           path: dist/*
           if-no-files-found: error
       - name: Preserve Oasis convergence evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: oasis-evidence-${{ github.event.pull_request.head.sha }}
+          name: oasis-evidence-${{ env.HEAD_SHA }}
           path: _build/oasis/**
           if-no-files-found: warn
 
@@ -199,7 +225,7 @@ jobs:
       - name: Check out exact candidate SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ env.HEAD_SHA }}
           persist-credentials: false
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
