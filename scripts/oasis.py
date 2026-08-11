@@ -2,8 +2,8 @@
 """Public CENTL Oasis entry point.
 
 The large execution core lives in oasis_engine.py. This front door owns policy
-composition so mandatory repository-coherence gates cannot be skipped by the
-normal command surface.
+composition so mandatory repository-coherence and hosted-proof gates cannot be
+skipped by the normal command surface.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import oasis_engine as _engine
+import oasis_required_checks as _required_checks
 
 # Re-export the engine API so adversarial unit tests can exercise the public
 # entry point rather than a private implementation file.
@@ -50,8 +51,37 @@ def build_plan(version: str, switch: str = "centl") -> list[Gate]:
 _engine.build_plan = build_plan
 
 
+def _root_from_argv(argv: list[str]) -> Path:
+    root = Path.cwd()
+    for index, item in enumerate(argv):
+        if item == "--root" and index + 1 < len(argv):
+            root = Path(argv[index + 1])
+        elif item.startswith("--root="):
+            root = Path(item.split("=", 1)[1])
+    return root.resolve()
+
+
 def main(argv=None) -> int:
-    return _engine.main(argv)
+    args = list(sys.argv[1:] if argv is None else argv)
+
+    # A final Oasis declaration requires positive evidence that the mandatory
+    # hosted qualification checks exist and succeeded. Do this before the local
+    # final engine so an empty, skipped, neutral, or still-running hosted check
+    # set can never be mistaken for release proof. --plan remains side-effect
+    # free and does not query GitHub.
+    if "--final" in args and "--plan" not in args:
+        try:
+            head, failures = _required_checks.check(_root_from_argv(args))
+        except _required_checks.HostedCheckError as exc:
+            print(f"[oasis] PRECHECK FAILED: mandatory hosted checks: {exc}", file=sys.stderr)
+            return 2
+        if failures:
+            for failure in failures:
+                print(f"[oasis] PRECHECK FAILED: {failure}", file=sys.stderr)
+            return 1
+        print(f"[oasis] mandatory hosted checks successful for {head}")
+
+    return _engine.main(args)
 
 
 if __name__ == "__main__":
