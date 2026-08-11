@@ -60,7 +60,22 @@ activates the command launchers atomically.
 For full installation details and offline archives, see
 [docs/INSTALL.md](docs/INSTALL.md).
 
-## CENTL-SCi — v0.0.2-Caramels
+## Release and branch naming
+
+CENTL uses one product umbrella, two release lines, and at most three
+long-lived branches. The canonical policy lives in
+[docs/RELEASE-POLICY.md](docs/RELEASE-POLICY.md).
+
+- `CENTL` is the product name.
+- `OASIS` is the stable release line.
+- `MIRAGE` is the experimental and development line.
+- Feature names such as `CENTL-SCi`, `CENTL-MIRAGE`, `CENTL-CARAVAN`, and
+  `Caramels+` remain subsystem names under the CENTL umbrella.
+- Long-lived branches are capped at `main`, `oasis`, and `mirage`.
+- Public release names may use `CENTL vX.Y.Z` or `CENTL OASIS vX.Y.Z` when the
+  line needs to be explicit.
+
+## CENTL-SCi — v0.0.2-Caramels+
 
 **Caramels** is the current CENTL-SCi interaction generation: a local scientific
 interface for expressing mathematics and physics in ordinary language while
@@ -69,7 +84,7 @@ keeping CENTL's exact and verified machinery in control of the answer.
 A typical session is intentionally small:
 
 ```text
-CENTL-SCi v0.0.2-Caramels
+CENTL-SCi v0.0.2-Caramels+
 Free for science.
 
 > What is 0.1 plus 0.2?
@@ -86,8 +101,11 @@ arbitrary floating-point decimal.
 
 Caramels provides:
 
-- deterministic fast paths for exact arithmetic, equations, algebraic transforms,
-  certified approximation, units, constants, and supported mechanics;
+- deterministic fast paths for exact arithmetic, concrete mathematics, finite
+  sequences, geometry, equations, algebraic transforms, certified approximation,
+  units, constants, and supported mechanics;
+- a warm in-process SCI execution cache for repeated interactive requests, keyed
+  by exact IR plus core session revision;
 - `MATH>`, `PHYS>`, `HYBRID>`, and `BUILD>` interaction modes;
 - evidence-backed interpretation and explanation rather than opaque answer text;
 - clarification when a problem is underspecified instead of invented values;
@@ -101,6 +119,12 @@ A local language model, when configured, is an **interpreter of intent — not a
 mathematical authority**. Model output must pass CENTL-SCi's typed problem boundary
 and is lowered into CENTL or CENTL Physics before a result can inherit mathematical
 meaning. Model weights remain separate artifacts and are never silently downloaded.
+
+For agent/tool integration, `centl-sci --serve` runs a persistent JSONL service
+on stdin/stdout. Each request is a JSON object with `version: 1`, optional `id`,
+and a `problem` string; each response includes the human answer, normalized
+intent, SCI status, and reproducible structured result. The process keeps the
+core session and SCI cache warm across requests.
 
 See [docs/SCI.md](docs/SCI.md) for the interaction architecture and
 [docs/CARAMELS-BUILD.md](docs/CARAMELS-BUILD.md) for the self-extension model.

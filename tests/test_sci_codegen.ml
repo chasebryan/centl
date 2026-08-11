@@ -1,11 +1,13 @@
 let test_function_generation () =
   let input =
-    "create a function named kinetic_energy that takes mass and velocity and computes 1/2 * mass * velocity^2"
+    "create a function named kinetic_energy that takes mass and velocity and \
+     computes 1/2 * mass * velocity^2"
   in
   match Centl_sci_codegen.generate input with
   | Centl_sci_codegen.Generated
       (Centl_sci_codegen.Function { replace = false; source }) ->
-      Alcotest.(check string) "native source"
+      Alcotest.(check string)
+        "native source"
         "kinetic_energy(mass, velocity) = 1/2 * mass * velocity^2" source
   | _ -> Alcotest.fail "expected generated function"
 
@@ -17,9 +19,7 @@ let test_value_generation () =
   | _ -> Alcotest.fail "expected generated value"
 
 let test_modify_generation () =
-  let input =
-    "modify a function named square that takes x and returns x^2"
-  in
+  let input = "modify a function named square that takes x and returns x^2" in
   match Centl_sci_codegen.generate input with
   | Centl_sci_codegen.Generated
       (Centl_sci_codegen.Function { replace = true; source }) ->
@@ -28,8 +28,7 @@ let test_modify_generation () =
 
 let test_change_ir_json () =
   let request =
-    Centl_sci_change_ir.native_definition
-      ~action:Centl_sci_change_ir.Create
+    Centl_sci_change_ir.native_definition ~action:Centl_sci_change_ir.Create
       ~target_kind:Centl_sci_change_ir.Function ~name:"f" ~parameters:[ "x" ]
       ~implementation:"x + 1"
   in

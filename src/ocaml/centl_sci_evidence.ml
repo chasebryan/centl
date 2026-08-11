@@ -1,7 +1,4 @@
-type event = {
-  kind : string;
-  detail : string;
-}
+type event = { kind : string; detail : string }
 
 type t = {
   input : string;
@@ -52,20 +49,24 @@ let collect ~input ~normalized ~mode ~interpreter_path ~outcome
   let events =
     [
       event "normalized" normalized;
-      event "intent" (Centl_sci_intent.text intent.intent ^ ": " ^ intent.evidence);
+      event "intent"
+        (Centl_sci_intent.text intent.intent ^ ": " ^ intent.evidence);
       event "typed_ir"
         (Printf.sprintf "%s/%s/%s" (Centl_sci_ir.domain ir)
-           (Centl_sci_ir.problem_class ir) (Centl_sci_ir.operation ir));
+           (Centl_sci_ir.problem_class ir)
+           (Centl_sci_ir.operation ir));
     ]
-    @
-    (match assumptions with
-    | [] -> [ event "assumptions" "none introduced by the interpreter" ]
-    | values -> [ event "assumptions" (String.concat "; " values) ])
-    @
-    (match executor with
-    | None -> [ event "deferred" "no authoritative executor plan was available" ]
-    | Some value -> [ event "routed" ("authoritative executor: " ^ value) ])
-    @ [ event "executed" (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status) ]
+    @ (match assumptions with
+      | [] -> [ event "assumptions" "none introduced by the interpreter" ]
+      | values -> [ event "assumptions" (String.concat "; " values) ])
+    @ (match executor with
+      | None ->
+          [ event "deferred" "no authoritative executor plan was available" ]
+      | Some value -> [ event "routed" ("authoritative executor: " ^ value) ])
+    @ [
+        event "executed"
+          (Centl_sci_runtime.status_text outcome.Centl_sci_runtime.status);
+      ]
   in
   {
     input;
@@ -86,7 +87,9 @@ let collect ~input ~normalized ~mode ~interpreter_path ~outcome
   }
 
 let render evidence =
-  let executor = match evidence.executor with None -> "none" | Some value -> value in
+  let executor =
+    match evidence.executor with None -> "none" | Some value -> value
+  in
   let execution_request =
     match evidence.execution_request with None -> "none" | Some value -> value
   in

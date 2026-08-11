@@ -1,6 +1,5 @@
 let lstat path =
-  try Some (Unix.lstat path)
-  with Unix.Unix_error (Unix.ENOENT, _, _) -> None
+  try Some (Unix.lstat path) with Unix.Unix_error (Unix.ENOENT, _, _) -> None
 
 let copy_file source target =
   let input_channel = open_in_bin source in
@@ -32,13 +31,17 @@ let rec copy_tree source target =
           Centl_sci_workspace.ensure_directory target;
           Sys.readdir source
           |> Array.iter (fun name ->
-                 copy_tree (Filename.concat source name) (Filename.concat target name))
+              copy_tree
+                (Filename.concat source name)
+                (Filename.concat target name))
       | Unix.S_LNK ->
-          raise (Sys_error ("refusing to copy symlinked workspace state: " ^ source))
+          raise
+            (Sys_error ("refusing to copy symlinked workspace state: " ^ source))
       | _ ->
           raise
             (Sys_error
-               ("refusing to copy unsupported workspace filesystem object: " ^ source))
+               ("refusing to copy unsupported workspace filesystem object: "
+              ^ source))
       end
 
 let rec remove_tree path =
@@ -54,7 +57,8 @@ let rec remove_tree path =
       | _ ->
           raise
             (Sys_error
-               ("refusing to remove unsupported workspace filesystem object: " ^ path))
+               ("refusing to remove unsupported workspace filesystem object: "
+              ^ path))
       end
 
 let clear_directory directory =
@@ -64,9 +68,13 @@ let clear_directory directory =
       begin match stat.Unix.st_kind with
       | Unix.S_DIR ->
           Sys.readdir directory
-          |> Array.iter (fun name -> remove_tree (Filename.concat directory name))
+          |> Array.iter (fun name ->
+              remove_tree (Filename.concat directory name))
       | Unix.S_LNK ->
-          raise (Sys_error ("refusing to traverse symlinked workspace directory: " ^ directory))
+          raise
+            (Sys_error
+               ("refusing to traverse symlinked workspace directory: "
+              ^ directory))
       | _ ->
           raise (Sys_error ("workspace path is not a directory: " ^ directory))
       end
@@ -100,9 +108,7 @@ let read_pointer workspace =
 let clear_pointer_if workspace expected =
   match read_pointer workspace with
   | Some path when path = expected ->
-      begin
-        try Sys.remove (pointer_path workspace)
-        with Sys_error _ -> ()
+      begin try Sys.remove (pointer_path workspace) with Sys_error _ -> ()
       end
   | _ -> ()
 
@@ -124,7 +130,8 @@ let create workspace =
     let stamp = Int64.of_float (Unix.gettimeofday () *. 1_000_000.) in
     let path =
       Filename.concat root
-        (Printf.sprintf "r%d-%Ld" (Centl_sci_workspace.read_revision workspace)
+        (Printf.sprintf "r%d-%Ld"
+           (Centl_sci_workspace.read_revision workspace)
            stamp)
     in
     Centl_sci_workspace.ensure_directory path;
@@ -145,7 +152,8 @@ let restore_surface workspace path =
   copy_tree (Filename.concat path "packages") workspace.packages;
   copy_tree (Filename.concat path "tests") workspace.tests;
   copy_tree (Filename.concat path "data") workspace.data;
-  copy_tree (Filename.concat path "generated-scaffolds")
+  copy_tree
+    (Filename.concat path "generated-scaffolds")
     (scaffolds_root workspace)
 
 let rollback workspace path =
@@ -155,29 +163,32 @@ let rollback workspace path =
     | None -> Error "the workspace rollback snapshot is unavailable"
     | Some stat when stat.Unix.st_kind <> Unix.S_DIR ->
         Error "the workspace rollback snapshot is not a directory"
-    | Some _ ->
+    | Some _ -> (
         try
           Centl_sci_workspace.ensure workspace;
           restore_surface workspace path;
           clear_pointer_if workspace path;
           Ok (Centl_sci_workspace.read_revision workspace)
-        with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+        with Sys_error message | Unix.Unix_error (_, _, message) ->
+          Error message)
 
 let restore_last workspace =
   match read_pointer workspace with
   | None -> Error "no reversible workspace snapshot is available"
-  | Some path when path = "" -> Error "the recorded workspace snapshot is unavailable"
+  | Some path when path = "" ->
+      Error "the recorded workspace snapshot is unavailable"
   | Some path ->
       begin match lstat path with
       | None -> Error "the recorded workspace snapshot is unavailable"
       | Some stat when stat.Unix.st_kind <> Unix.S_DIR ->
           Error "the recorded workspace snapshot is not a directory"
-      | Some _ ->
+      | Some _ -> (
           try
             Centl_sci_workspace.ensure workspace;
             restore_surface workspace path;
             let revision = Centl_sci_workspace.bump_revision workspace in
             clear_pointer_if workspace path;
             Ok revision
-          with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+          with Sys_error message | Unix.Unix_error (_, _, message) ->
+            Error message)
       end

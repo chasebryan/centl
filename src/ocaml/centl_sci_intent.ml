@@ -21,12 +21,7 @@ type t =
   | Unknown
 
 type confidence = High | Medium | Low
-
-type classification = {
-  intent : t;
-  confidence : confidence;
-  evidence : string;
-}
+type classification = { intent : t; confidence : confidence; evidence : string }
 
 let text = function
   | Arithmetic -> "arithmetic"
@@ -55,8 +50,14 @@ let lower text = String.lowercase_ascii (String.trim text)
 let contains needle text =
   Option.is_some (Centl_sci_interaction.find_substring ~needle text)
 
-let contains_any needles text = List.exists (fun needle -> contains needle text) needles
-let starts prefixes text = List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
+let contains_any needles text =
+  List.exists (fun needle -> contains needle text) needles
+
+let starts prefixes text =
+  List.exists (fun prefix -> String.starts_with ~prefix text) prefixes
+
+let exact_or_starts prefix text =
+  text = prefix || String.starts_with ~prefix:(prefix ^ " ") text
 
 let constant_phrase input =
   contains_any
@@ -72,7 +73,9 @@ let constant_phrase input =
       "standard acceleration of gravity";
     ]
     input
-  || starts [ "constant "; "physical constant "; "lookup constant " ] input
+  || List.exists
+       (fun prefix -> exact_or_starts prefix input)
+       [ "constant"; "physical constant"; "lookup constant" ]
 
 let classify ~mode input =
   let input = lower input in
@@ -95,11 +98,15 @@ let classify ~mode input =
               "packages";
             ]
             input
+          || input = "validate"
         then result System_inspection High "BUILD inspection/validation verb"
         else if starts [ "create "; "write "; "make "; "scaffold " ] input then
           result Program_creation High "BUILD creation verb"
-        else if starts [ "add "; "extend "; "install "; "integrate "; "prepare " ] input then
-          result System_extension High "BUILD extension verb"
+        else if
+          starts
+            [ "add "; "extend "; "install "; "integrate "; "prepare " ]
+            input
+        then result System_extension High "BUILD extension verb"
         else if
           starts
             [
@@ -118,10 +125,101 @@ let classify ~mode input =
     | _ ->
         if
           starts [ "convert "; "change "; "how many " ] input
-          && (contains " to " input || contains " into " input || contains " in " input)
-        then result Unit_conversion High "conversion phrase with source/target units"
+          && (contains " to " input || contains " into " input
+            || contains " in " input)
+        then
+          result Unit_conversion High
+            "conversion phrase with source/target units"
         else if constant_phrase input then
           result Constant_lookup High "known physical-constant lookup phrase"
+        else if
+          starts
+            [
+              "area ";
+              "area of ";
+              "circumference ";
+              "perimeter ";
+              "volume ";
+              "surface area ";
+              "hypotenuse ";
+              "distance between ";
+              "distance from ";
+              "find distance between ";
+              "find distance from ";
+              "find the distance between ";
+              "find the distance from ";
+              "slope between ";
+              "slope from ";
+              "find slope between ";
+              "find slope from ";
+              "find the slope between ";
+              "find the slope from ";
+              "what is the area ";
+              "find the area ";
+              "calculate the area ";
+            ]
+            input
+          || contains_any
+               [
+                 " area of a circle";
+                 " area of a rectangle";
+                 " area of a triangle";
+                 " volume of a sphere";
+                 " radius ";
+               ]
+               input
+        then result Geometry High "supported geometry phrase"
+        else if
+          starts
+            [
+              "sequence ";
+              "sequence of ";
+              "list ";
+              "show ";
+              "first ";
+              "sum of ";
+              "sum ";
+              "product of ";
+              "product ";
+            ]
+            input
+          || contains_any
+               [
+                 " fibonacci";
+                 " factorials";
+                 " squares";
+                 " cubes";
+                 " finite series";
+               ]
+               input
+        then result Sequence High "supported finite sequence phrase"
+        else if starts [ "recurrence " ] input || contains " recurrence" input
+        then result Recurrence High "recurrence phrase"
+        else if
+          starts
+            [
+              "factorial ";
+              "factorial of ";
+              "fibonacci ";
+              "fibonacci of ";
+              "gcd ";
+              "gcd of ";
+              "lcm ";
+              "lcm of ";
+              "choose ";
+              "permutations ";
+            ]
+            input
+          || contains_any
+               [
+                 " factorial";
+                 " fibonacci number";
+                 " greatest common divisor";
+                 " least common multiple";
+                 " choose ";
+               ]
+               input
+        then result Arithmetic High "supported concrete arithmetic phrase"
         else if
           starts
             [
@@ -136,23 +234,36 @@ let classify ~mode input =
         then result Equation_solving High "equation-solving phrase"
         else if
           starts
-            [ "differentiate "; "derivative of "; "take the derivative"; "find dy/dx" ]
+            [
+              "differentiate ";
+              "derivative of ";
+              "take the derivative";
+              "find dy/dx";
+            ]
             input
         then result Differentiation High "differentiation phrase"
-        else if starts [ "integrate "; "integral of "; "find the integral" ] input then
-          result Integration High "integration phrase"
+        else if
+          starts [ "integrate "; "integral of "; "find the integral" ] input
+        then result Integration High "integration phrase"
         else if starts [ "simplify "; "reduce " ] input then
           result Simplification High "simplification phrase"
-        else if starts [ "substitute "; "plug "; "replace " ] input && contains " into " input then
-          result Substitution High "substitution phrase"
-        else if starts [ "approx "; "approximate "; "decimal "; "estimate " ] input then
-          result Approximation High "approximation phrase"
-        else if starts [ "verify "; "check whether "; "prove whether "; "assert " ] input then
-          result Verification High "verification phrase"
+        else if
+          starts [ "substitute "; "plug "; "replace " ] input
+          && contains " into " input
+        then result Substitution High "substitution phrase"
+        else if
+          starts [ "approx "; "approximate "; "decimal "; "estimate " ] input
+        then result Approximation High "approximation phrase"
+        else if
+          starts
+            [ "verify "; "check whether "; "prove whether "; "assert " ]
+            input
+        then result Verification High "verification phrase"
         else if starts [ "simulate "; "step "; "evolve " ] input then
           result Physics_simulation Medium "simulation verb"
-        else if starts [ "calculate "; "compute "; "evaluate "; "what is " ] input then
-          result Arithmetic Medium "calculation phrase"
+        else if
+          starts [ "calculate "; "compute "; "evaluate "; "what is " ] input
+        then result Arithmetic Medium "calculation phrase"
         else if starts [ "find " ] input then
           result Unknown Medium "ambiguous find request"
         else result Unknown Low "no deterministic intent match"
@@ -160,7 +271,8 @@ let classify ~mode input =
 let strip_prefix prefix text =
   if String.starts_with ~prefix text then
     Some
-      (String.sub text (String.length prefix) (String.length text - String.length prefix)
+      (String.sub text (String.length prefix)
+         (String.length text - String.length prefix)
       |> String.trim)
   else None
 
@@ -170,10 +282,12 @@ let canonicalize classification input =
   match classification.intent with
   | Unit_conversion ->
       let normalized =
-        Centl_sci_interaction.replace_all_ci ~needle:" into " ~replacement:" to " trimmed
+        Centl_sci_interaction.replace_all_ci ~needle:" into "
+          ~replacement:" to " trimmed
       in
       begin match strip_prefix "change " (lower normalized) with
-      | Some _ -> "convert " ^ String.sub normalized 7 (String.length normalized - 7)
+      | Some _ ->
+          "convert " ^ String.sub normalized 7 (String.length normalized - 7)
       | None -> normalized
       end
   | Equation_solving ->
@@ -204,7 +318,7 @@ let canonicalize classification input =
       in
       begin match root_body with
       | Some body
-        when not (String.contains body '=')
+        when (not (String.contains body '='))
              && not (contains " equals " (lower body)) ->
           "solve " ^ body ^ " equals zero"
       | Some body -> "solve " ^ body

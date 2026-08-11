@@ -1,5 +1,12 @@
 type action = Create | Modify
-type target_kind = Value | Function | Module | Adapter | Native_extension | Core_patch
+
+type target_kind =
+  | Value
+  | Function
+  | Module
+  | Adapter
+  | Native_extension
+  | Core_patch
 
 type t = {
   action : action;
@@ -24,25 +31,22 @@ let target_kind_text = function
   | Core_patch -> "core_patch"
 
 let valid_identifier name =
-  let first = function
-    | 'a' .. 'z' | 'A' .. 'Z' | '_' -> true
-    | _ -> false
-  in
+  let first = function 'a' .. 'z' | 'A' .. 'Z' | '_' -> true | _ -> false in
   let rest = function
     | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
     | _ -> false
   in
-  String.length name > 0
-  && first name.[0]
-  && String.for_all rest name
+  String.length name > 0 && first name.[0] && String.for_all rest name
 
 let validate change =
   if not (valid_identifier change.name) then Error "invalid target identifier"
-  else if List.exists (fun value -> not (valid_identifier value)) change.parameters then
-    Error "invalid parameter identifier"
+  else if
+    List.exists (fun value -> not (valid_identifier value)) change.parameters
+  then Error "invalid parameter identifier"
   else
     match (change.target_kind, change.implementation) with
-    | (Value | Function), None -> Error "native CENTL value/function needs an implementation"
+    | (Value | Function), None ->
+        Error "native CENTL value/function needs an implementation"
     | Function, Some _ when change.parameters = [] ->
         Error "function change needs at least one parameter"
     | _ -> Ok change
@@ -73,7 +77,9 @@ let to_json change =
       ("name", `String change.name);
       ("parameters", strings change.parameters);
       ( "implementation",
-        match change.implementation with None -> `Null | Some value -> `String value );
+        match change.implementation with
+        | None -> `Null
+        | Some value -> `String value );
       ("dependencies", strings change.dependencies);
       ("tests", strings change.tests);
       ("requested_assurance", `String change.requested_assurance);

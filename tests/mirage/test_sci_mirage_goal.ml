@@ -8,8 +8,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let cell id kind text =
   `Assoc
@@ -30,26 +29,54 @@ let spec cells =
     ]
 
 let find_gap id graph =
-  List.find_opt (fun gap -> gap.Centl_sci_mirage_goal.cell_id = id) graph.Centl_sci_mirage_goal.gaps
+  List.find_opt
+    (fun gap -> gap.Centl_sci_mirage_goal.cell_id = id)
+    graph.Centl_sci_mirage_goal.gaps
 
 let test_opposite_hard_requirements_conflict () =
   let left : Centl_sci_mirage_goal.spec_cell =
-    { id = 1; kind = "DIRECTIVE"; text = "Add a network dependency for model inference"; start_line = 1; end_line = 1 }
+    {
+      id = 1;
+      kind = "DIRECTIVE";
+      text = "Add a network dependency for model inference";
+      start_line = 1;
+      end_line = 1;
+    }
   in
   let right : Centl_sci_mirage_goal.spec_cell =
-    { id = 2; kind = "NON_GOAL"; text = "Do not add a network dependency for model inference"; start_line = 2; end_line = 2 }
+    {
+      id = 2;
+      kind = "NON_GOAL";
+      text = "Do not add a network dependency for model inference";
+      start_line = 2;
+      end_line = 2;
+    }
   in
-  Alcotest.(check bool) "opposite matching requirements conflict" true
+  Alcotest.(check bool)
+    "opposite matching requirements conflict" true
     (Centl_sci_mirage_goal.likely_conflict left right)
 
 let test_unrelated_negative_requirement_does_not_conflict () =
   let left : Centl_sci_mirage_goal.spec_cell =
-    { id = 1; kind = "DIRECTIVE"; text = "Add exact polynomial interpolation"; start_line = 1; end_line = 1 }
+    {
+      id = 1;
+      kind = "DIRECTIVE";
+      text = "Add exact polynomial interpolation";
+      start_line = 1;
+      end_line = 1;
+    }
   in
   let right : Centl_sci_mirage_goal.spec_cell =
-    { id = 2; kind = "NON_GOAL"; text = "Do not add a network dependency"; start_line = 2; end_line = 2 }
+    {
+      id = 2;
+      kind = "NON_GOAL";
+      text = "Do not add a network dependency";
+      start_line = 2;
+      end_line = 2;
+    }
   in
-  Alcotest.(check bool) "unrelated constraints stay separate" false
+  Alcotest.(check bool)
+    "unrelated constraints stay separate" false
     (Centl_sci_mirage_goal.likely_conflict left right)
 
 let test_gap_analysis_prefers_existing_composition () =
@@ -57,7 +84,9 @@ let test_gap_analysis_prefers_existing_composition () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       Centl_sci_workspace.ensure workspace;
       let graph =
         Centl_sci_mirage_goal.build workspace
@@ -74,9 +103,11 @@ let test_gap_analysis_prefers_existing_composition () =
       match find_gap 1 graph with
       | None -> Alcotest.fail "expected a gap classification"
       | Some gap ->
-          Alcotest.(check string) "reuse before synthesis" "COMPOSABLE"
+          Alcotest.(check string)
+            "reuse before synthesis" "COMPOSABLE"
             (Centl_sci_mirage_goal.gap_status_text gap.status);
-          Alcotest.(check bool) "diff capability matched" true
+          Alcotest.(check bool)
+            "diff capability matched" true
             (List.mem "diff" gap.capability_matches))
 
 let test_unknown_capability_requires_extension () =
@@ -84,7 +115,9 @@ let test_unknown_capability_requires_extension () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       let graph =
         Centl_sci_mirage_goal.build workspace
           [
@@ -100,7 +133,8 @@ let test_unknown_capability_requires_extension () =
       match find_gap 1 graph with
       | None -> Alcotest.fail "expected a gap classification"
       | Some gap ->
-          Alcotest.(check string) "unknown objective is not fabricated" "EXTENSION_REQUIRED"
+          Alcotest.(check string)
+            "unknown objective is not fabricated" "EXTENSION_REQUIRED"
             (Centl_sci_mirage_goal.gap_status_text gap.status))
 
 let test_spec_analysis_persists_graph () =
@@ -108,7 +142,9 @@ let test_spec_analysis_persists_graph () =
   Fun.protect
     ~finally:(fun () -> cleanup root)
     (fun () ->
-      let workspace = Centl_sci_workspace.make (Filename.concat root "workspace") in
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
       let spec_path = Filename.concat root "design.spec.json" in
       write_json spec_path
         (spec
@@ -120,12 +156,15 @@ let test_spec_analysis_persists_graph () =
       match Centl_sci_mirage_goal.analyze workspace spec_path with
       | Error message -> Alcotest.fail message
       | Ok (path, graph) ->
-          Alcotest.(check bool) "goal graph persisted" true (Sys.file_exists path);
-          Alcotest.(check bool) "question becomes ambiguity" true
+          Alcotest.(check bool)
+            "goal graph persisted" true (Sys.file_exists path);
+          Alcotest.(check bool)
+            "question becomes ambiguity" true
             (match find_gap 3 graph with
             | Some gap -> gap.status = Centl_sci_mirage_goal.Ambiguous
             | None -> false);
-          Alcotest.(check bool) "acceptance refines prior objective" true
+          Alcotest.(check bool)
+            "acceptance refines prior objective" true
             (List.exists
                (fun edge ->
                  edge.Centl_sci_mirage_goal.kind = Centl_sci_mirage_goal.Refines

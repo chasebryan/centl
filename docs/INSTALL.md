@@ -10,6 +10,10 @@ validation, packaging, installer, and release platform for CENTL-SCi and the
 Caramels series. macOS and Windows are unsupported and are not release-blocking
 targets.
 
+The public release line is `CENTL OASIS`. `CENTL MIRAGE` is the experimental
+development line. Feature names such as `CENTL-SCi`, `Caramels+`, and
+`CENTL-CARAVAN` remain subsystem names under the CENTL umbrella.
+
 ## Linux
 
 ```sh
@@ -44,7 +48,7 @@ centl-sci
 A Caramels CENTL-SCi package should begin:
 
 ```text
-CENTL-SCi v0.0.2-Caramels
+CENTL-SCi v0.0.2-Caramels+
 Free for science.
 
 >
@@ -159,6 +163,12 @@ CENTL-SCi Problem IR boundary before CENTL or CENTL Physics performs any admitte
 computation. See [SCI.md](SCI.md) for model configuration and the trust boundary.
 
 ## Release contract
+
+The current release vocabulary is:
+
+- `CENTL` for the product umbrella;
+- `OASIS` for the stable release line;
+- `MIRAGE` for the experimental line.
 
 Native packages built from the current release path contain:
 

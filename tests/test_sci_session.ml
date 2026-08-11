@@ -1,10 +1,12 @@
 let add session id ~revision =
   ignore
-    (Centl_sci_session.add session ~input:("input " ^ string_of_int id)
+    (Centl_sci_session.add session
+       ~input:("input " ^ string_of_int id)
        ~normalized:("normalized " ^ string_of_int id)
        ~mode:Centl_sci_interaction.Hybrid ~intent:"arithmetic"
        ~result:("result " ^ string_of_int id)
-       ~details:("details " ^ string_of_int id) ~workspace_revision:revision)
+       ~details:("details " ^ string_of_int id)
+       ~workspace_revision:revision)
 
 let test_result_order_and_last () =
   let session = Centl_sci_session.create () in
@@ -14,8 +16,8 @@ let test_result_order_and_last () =
   | None -> Alcotest.fail "expected last result"
   | Some record ->
       Alcotest.(check int) "last id" 2 record.id;
-      Alcotest.(check (option int)) "last revision" (Some 5)
-        record.workspace_revision
+      Alcotest.(check (option int))
+        "last revision" (Some 5) record.workspace_revision
   end;
   match Centl_sci_session.all session with
   | [ first; second ] ->
@@ -28,17 +30,22 @@ let test_bounded_retention () =
   add session 1 ~revision:None;
   add session 2 ~revision:None;
   add session 3 ~revision:None;
-  Alcotest.(check bool) "oldest evicted" true
+  Alcotest.(check bool)
+    "oldest evicted" true
     (Option.is_none (Centl_sci_session.find session 1));
-  Alcotest.(check bool) "second retained" true
+  Alcotest.(check bool)
+    "second retained" true
     (Option.is_some (Centl_sci_session.find session 2));
-  Alcotest.(check bool) "third retained" true
+  Alcotest.(check bool)
+    "third retained" true
     (Option.is_some (Centl_sci_session.find session 3));
   match Centl_sci_session.all session with
   | [ second; third ] ->
       Alcotest.(check int) "bounded first" 2 second.id;
       Alcotest.(check int) "bounded second" 3 third.id
-  | _ -> Alcotest.fail "bounded result session should retain the two newest records"
+  | _ ->
+      Alcotest.fail
+        "bounded result session should retain the two newest records"
 
 let test_render_preserves_provenance () =
   let session = Centl_sci_session.create () in
@@ -49,11 +56,13 @@ let test_render_preserves_provenance () =
     | None -> Alcotest.fail "missing result record"
   in
   let rendered = Centl_sci_session.render record in
-  Alcotest.(check bool) "revision rendered" true
+  Alcotest.(check bool)
+    "revision rendered" true
     (Option.is_some
        (Centl_sci_interaction.find_substring ~needle:"workspace revision: 17"
           rendered));
-  Alcotest.(check bool) "normalization rendered" true
+  Alcotest.(check bool)
+    "normalization rendered" true
     (Option.is_some
        (Centl_sci_interaction.find_substring ~needle:"normalized: normalized 1"
           rendered))

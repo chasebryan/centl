@@ -39,10 +39,10 @@ let test_details () =
     "details"
     "x = 2 or x = 3\n\n\
      Details:\n\
-    \  Exact result\n\
+    \  Exact result within the admitted deterministic model\n\
     \  Variable: x\n\
-    \  Method: polynomial equation solving\n\
-    \  Verified by CENTL"
+    \  Method: CENTL polynomial equation solving\n\
+    \  Established by the authoritative CENTL execution path"
     (Centl_sci_present.details outcome)
 
 let test_missing_information () =
@@ -61,7 +61,8 @@ let test_unsupported () =
       {|{"schema_version":1,"domain":"unsupported","problem_class":"unsupported","operation":"unsupported","assumptions":[],"reason":"mechanics class not yet admitted"}|}
   in
   Alcotest.(check string)
-    "unsupported" "CENTL-SCi cannot solve this problem yet."
+    "unsupported"
+    "CENTL-SCi cannot establish this request: mechanics class not yet admitted."
     (Centl_sci_present.human outcome)
 
 let test_failed () =

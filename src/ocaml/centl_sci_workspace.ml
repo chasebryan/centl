@@ -63,15 +63,14 @@ let default () = Option.map make (default_root ())
 
 let rec ensure_directory path =
   if path = "" || path = Filename.dirname path then ()
-  else if Sys.file_exists path then begin
-    if not (Sys.is_directory path) then
+  else if Sys.file_exists path then
+    begin if not (Sys.is_directory path) then
       raise (Sys_error (path ^ " is not a directory"))
-  end
+    end
   else begin
     ensure_directory (Filename.dirname path);
     try Unix.mkdir path 0o700
-    with
-    | Unix.Unix_error (Unix.EEXIST, _, _) when Sys.is_directory path -> ()
+    with Unix.Unix_error (Unix.EEXIST, _, _) when Sys.is_directory path -> ()
   end
 
 let layout workspace =
@@ -90,7 +89,9 @@ let layout workspace =
 let atomic_write_json path json =
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
@@ -100,7 +101,8 @@ let atomic_write_json path json =
       flush channel);
   Unix.rename temporary path
 
-let workspace_metadata_path workspace = Filename.concat workspace.root "workspace.json"
+let workspace_metadata_path workspace =
+  Filename.concat workspace.root "workspace.json"
 
 let ensure_workspace_metadata workspace =
   let path = workspace_metadata_path workspace in
@@ -112,10 +114,11 @@ let ensure_workspace_metadata workspace =
            ("workspace_name", `String workspace.name);
            ("owner_model", `String "user-owned-downstream");
            ("upstream_project", `String "centl");
-           ("created_by", `String "CENTL-SCi v0.0.2-Caramels");
+           ("created_by", `String "CENTL-SCi v0.0.2-Caramels+");
            ( "assurance_policy",
              `String
-               "local extensions never silently inherit verified-core assurance" );
+               "local extensions never silently inherit verified-core assurance"
+           );
          ])
 
 let ensure workspace =
@@ -123,7 +126,9 @@ let ensure workspace =
   ensure_workspace_metadata workspace
 
 let revision_path workspace = Filename.concat workspace.config "revision"
-let revision_log_path workspace = Filename.concat workspace.history "revisions.jsonl"
+
+let revision_log_path workspace =
+  Filename.concat workspace.history "revisions.jsonl"
 
 let read_revision workspace =
   try
@@ -145,7 +150,9 @@ let write_revision workspace revision =
   let path = revision_path workspace in
   let temporary = path ^ ".tmp" in
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_trunc; Open_text ] 0o600 temporary
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_trunc; Open_text ]
+      0o600 temporary
   in
   Fun.protect
     ~finally:(fun () -> close_out_noerr channel)
@@ -155,7 +162,9 @@ let write_revision workspace revision =
 let record_revision workspace revision =
   ensure workspace;
   let channel =
-    open_out_gen [ Open_wronly; Open_creat; Open_append; Open_text ] 0o600
+    open_out_gen
+      [ Open_wronly; Open_creat; Open_append; Open_text ]
+      0o600
       (revision_log_path workspace)
   in
   Fun.protect
@@ -166,7 +175,7 @@ let record_revision workspace revision =
           [
             ("revision", `Int revision);
             ("timestamp_unix", `Float (Unix.gettimeofday ()));
-            ("actor", `String "CENTL-SCi v0.0.2-Caramels");
+            ("actor", `String "CENTL-SCi v0.0.2-Caramels+");
             ("scope", `String "local-downstream-workspace");
           ]
       in
@@ -185,8 +194,7 @@ let manifest_path workspace name =
 
 let valid_extension_name name =
   let length = String.length name in
-  length > 0
-  && length <= 96
+  length > 0 && length <= 96
   && String.for_all
        (function
          | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '-' | '_' | '.' -> true

@@ -38,6 +38,12 @@ shell_quote() {
   printf "'%s'" "$escaped"
 }
 
+exported_shell_path() {
+  if export -p | grep -Eq '^(export SHELL=|declare -x SHELL=)'; then
+    printf '%s\n' "${SHELL:-}"
+  fi
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --version)
@@ -283,7 +289,7 @@ case ":${PATH:-}:" in
 esac
 
 if [ "$path_active" = false ] && [ "$configure_path" = true ] && [ -n "${HOME:-}" ]; then
-  shell_path=${SHELL:-}
+  shell_path=$(exported_shell_path)
   shell_name=${shell_path##*/}
   case "$shell_name" in
     bash) profile="$HOME/.bashrc" ;;

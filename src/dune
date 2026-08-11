@@ -50,6 +50,7 @@
   Centl_sci_schema
   Centl_sci_ir
   Centl_sci_units
+  Centl_sci_concrete
   Centl_sci_spoken_poly
   Centl_sci_mechanics
   Centl_sci_fastpath
@@ -86,6 +87,7 @@
   Centl_sci_build
   Centl_sci_evidence
   Centl_sci_session
+  Centl_sci_status
   Centl_sci_app
   Centl_physics
   Centl_physics_collision

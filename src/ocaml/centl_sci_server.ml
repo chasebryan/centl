@@ -66,7 +66,8 @@ let grammar_for_hint = function
   | Centl_sci_hint.Polynomial_equation ->
       Centl_sci_poly_grammar.polynomial_equation_grammar
   | Centl_sci_hint.Unit_conversion -> Centl_sci_schema.unit_conversion_grammar
-  | Centl_sci_hint.Physical_constant -> Centl_sci_schema.physical_constant_grammar
+  | Centl_sci_hint.Physical_constant ->
+      Centl_sci_schema.physical_constant_grammar
   | Centl_sci_hint.Uniform_gravity_particle ->
       Centl_sci_schema.uniform_gravity_particle_grammar
   | Centl_sci_hint.Unsupported _ -> Centl_sci_schema.unsupported_grammar
@@ -86,14 +87,15 @@ let prompt hint problem =
          to_unit. Prefer canonical CENTL unit symbols such as cm, m, s, kg, N, \
          J, Pa, Hz, W, and V."
     | Centl_sci_hint.Physical_constant ->
-        "Required class: physical_constant. Choose only one exact catalog symbol: \
-         c, h, e, k_B, N_A, or g0. Do not invent or approximate a measured \
-         constant that is absent from this exact catalog."
+        "Required class: physical_constant. Choose only one exact catalog \
+         symbol: c, h, e, k_B, N_A, or g0. Do not invent or approximate a \
+         measured constant that is absent from this exact catalog."
     | Centl_sci_hint.Uniform_gravity_particle ->
-        "Required class: uniform_gravity_particle. Extract every supplied mass, \
-         position vector, velocity vector, gravity vector, timestep, unit, and \
-         positive step count exactly as stated. Do not invent missing physical \
-         parameters or replace the supplied discrete model with an analytic one."
+        "Required class: uniform_gravity_particle. Extract every supplied \
+         mass, position vector, velocity vector, gravity vector, timestep, \
+         unit, and positive step count exactly as stated. Do not invent \
+         missing physical parameters or replace the supplied discrete model \
+         with an analytic one."
     | Centl_sci_hint.Unsupported reason ->
         "Required class: unsupported. Do not compute. Give a short reason \
          consistent with this routing hint: " ^ reason ^ "."
@@ -103,7 +105,7 @@ let prompt hint problem =
          conservative: unsupported is correct when required information is \
          missing or the problem is outside the admitted Caramels classes."
   in
-  "CENTL-SCi v0.0.2-Caramels. Produce one JSON IR. " ^ contract
+  "CENTL-SCi v0.0.2-Caramels+. Produce one JSON IR. " ^ contract
   ^ " Always schema_version=1 and assumptions (normally []). Problem: "
   ^ Yojson.Safe.to_string (`String problem)
 
@@ -179,8 +181,8 @@ let matches_hint hint ir =
       true
   | Centl_sci_hint.Unit_conversion, Centl_sci_ir.Unit_conversion _ -> true
   | Centl_sci_hint.Physical_constant, Centl_sci_ir.Physical_constant _ -> true
-  | Centl_sci_hint.Uniform_gravity_particle,
-    Centl_sci_ir.Uniform_gravity_particle _ ->
+  | ( Centl_sci_hint.Uniform_gravity_particle,
+      Centl_sci_ir.Uniform_gravity_particle _ ) ->
       true
   | Centl_sci_hint.Unsupported _, Centl_sci_ir.Unsupported _ -> true
   | _ -> false

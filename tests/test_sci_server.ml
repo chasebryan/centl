@@ -52,7 +52,7 @@ let test_request_contract () =
     (String.length prompt < 1_024);
   Alcotest.(check bool)
     "Caramels class is fixed" true
-    (String.starts_with ~prefix:"CENTL-SCi v0.0.2-Caramels" prompt
+    (String.starts_with ~prefix:"CENTL-SCi v0.0.2-Caramels+" prompt
     && String.contains prompt 'p');
   Alcotest.(check bool) "equality is split" true (String.contains prompt '=');
   Alcotest.(check bool)
@@ -84,21 +84,24 @@ let test_constant_request_contract () =
   Alcotest.(check string)
     "constant grammar" Centl_sci_schema.physical_constant_grammar
     (string "grammar" request);
-  Alcotest.(check bool) "constant prompt names exact catalog" true
+  Alcotest.(check bool)
+    "constant prompt names exact catalog" true
     (String.length (string "prompt" request) > 0)
 
 let test_uniform_gravity_request_contract () =
   let problem =
-    "simulate a particle with mass 2 kg, position (0,0,10) m, velocity \
-     (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10"
+    "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) \
+     m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10"
   in
   let config = Centl_sci_server.default ~base_url:"http://localhost:8080" () in
   let request = Centl_sci_server.request_json config problem in
   Alcotest.(check string)
     "mechanics grammar" Centl_sci_schema.uniform_gravity_particle_grammar
     (string "grammar" request);
-  Alcotest.(check bool) "problem remains encoded data" true
-    (String.ends_with ~suffix:(Yojson.Safe.to_string (`String problem))
+  Alcotest.(check bool)
+    "problem remains encoded data" true
+    (String.ends_with
+       ~suffix:(Yojson.Safe.to_string (`String problem))
        (string "prompt" request))
 
 let test_unsupported_request_contract () =

@@ -19,10 +19,7 @@ type obligation = {
   claim : string;
 }
 
-type report = {
-  obligations : obligation list;
-  blocked_cells : int list;
-}
+type report = { obligations : obligation list; blocked_cells : int list }
 
 let kind_text = function
   | Candidate_parses -> "candidate_parses"
@@ -49,13 +46,17 @@ let make ~cell_id ~kind ~blocks_candidate claim =
 let common_candidate_obligations cell_id =
   [
     make ~cell_id ~kind:Candidate_parses ~blocks_candidate:false
-      "the candidate must pass the authoritative parser/build validation for its implementation layer";
+      "the candidate must pass the authoritative parser/build validation for \
+       its implementation layer";
     make ~cell_id ~kind:Mandatory_regression ~blocks_candidate:false
-      "the candidate must pass the relevant deterministic regression gates before activation";
+      "the candidate must pass the relevant deterministic regression gates \
+       before activation";
     make ~cell_id ~kind:Provenance_complete ~blocks_candidate:false
-      "the candidate must retain attribution to the source requirement and resulting workspace revision";
+      "the candidate must retain attribution to the source requirement and \
+       resulting workspace revision";
     make ~cell_id ~kind:Rollback_available ~blocks_candidate:false
-      "a reversible workspace state must exist before the candidate can be activated";
+      "a reversible workspace state must exist before the candidate can be \
+       activated";
   ]
 
 let obligations_for_gap (gap : Centl_sci_mirage_goal.gap) =
@@ -66,42 +67,51 @@ let obligations_for_gap (gap : Centl_sci_mirage_goal.gap) =
       common_candidate_obligations cell_id
       @ [
           make ~cell_id ~kind:Reuse_attempted ~blocks_candidate:false
-            "MIRAGE must attempt composition from the matched existing capabilities before synthesizing a new implementation";
+            "MIRAGE must attempt composition from the matched existing \
+             capabilities before synthesizing a new implementation";
         ]
   | Centl_sci_mirage_goal.Alias_or_wrapper ->
       common_candidate_obligations cell_id
       @ [
           make ~cell_id ~kind:Reuse_attempted ~blocks_candidate:false
-            "the candidate must preserve the existing capability semantics and limit the delta to the requested alias or wrapper behavior";
+            "the candidate must preserve the existing capability semantics and \
+             limit the delta to the requested alias or wrapper behavior";
         ]
   | Centl_sci_mirage_goal.Extension_required ->
       common_candidate_obligations cell_id
       @ [
           make ~cell_id ~kind:Trust_boundary_explicit ~blocks_candidate:false
-            "the new downstream extension must carry an explicit local assurance boundary and must not inherit verified-core assurance";
+            "the new downstream extension must carry an explicit local \
+             assurance boundary and must not inherit verified-core assurance";
         ]
   | Centl_sci_mirage_goal.Core_change_required ->
       common_candidate_obligations cell_id
       @ [
           make ~cell_id ~kind:Trust_boundary_explicit ~blocks_candidate:false
-            "the core-change candidate must identify any changed trust boundary without promoting generated code to verified-core assurance";
+            "the core-change candidate must identify any changed trust \
+             boundary without promoting generated code to verified-core \
+             assurance";
           make ~cell_id ~kind:Core_validation ~blocks_candidate:false
-            "the isolated core candidate must pass the full relevant core verification and regression gates before admission";
+            "the isolated core candidate must pass the full relevant core \
+             verification and regression gates before admission";
         ]
   | Centl_sci_mirage_goal.Ambiguous ->
       [
         make ~cell_id ~kind:Clarification_required ~blocks_candidate:true
-          "candidate synthesis is blocked until the unresolved source question is answered without inventing missing intent";
+          "candidate synthesis is blocked until the unresolved source question \
+           is answered without inventing missing intent";
       ]
   | Centl_sci_mirage_goal.Conflicting ->
       [
         make ~cell_id ~kind:Conflict_resolution_required ~blocks_candidate:true
-          "candidate synthesis is blocked until the conflicting hard requirements are explicitly resolved";
+          "candidate synthesis is blocked until the conflicting hard \
+           requirements are explicitly resolved";
       ]
   | Centl_sci_mirage_goal.Unsupported_by_policy ->
       [
         make ~cell_id ~kind:Policy_boundary ~blocks_candidate:true
-          "candidate synthesis is blocked by an explicit policy boundary and cannot be bypassed by the generator";
+          "candidate synthesis is blocked by an explicit policy boundary and \
+           cannot be bypassed by the generator";
       ]
 
 let build (graph : Centl_sci_mirage_goal.graph) =
@@ -133,13 +143,15 @@ let to_json report =
       ("artifact_kind", `String "evidence_obligations");
       ("obligation_count", `Int (List.length report.obligations));
       ("candidate_blocked", `Bool (report.blocked_cells <> []));
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("obligations", `List (List.map obligation_to_json report.obligations));
     ]
 
 let output_path goal_path =
   if String.ends_with ~suffix:".goals.json" goal_path then
-    String.sub goal_path 0 (String.length goal_path - String.length ".goals.json")
+    String.sub goal_path 0
+      (String.length goal_path - String.length ".goals.json")
     ^ ".obligations.json"
   else goal_path ^ ".obligations.json"
 

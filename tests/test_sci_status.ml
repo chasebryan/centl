@@ -4,8 +4,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let write_text path text =
   Centl_sci_workspace.ensure_directory (Filename.dirname path);
@@ -16,7 +15,8 @@ let write_text path text =
 
 let add_native workspace =
   Centl_sci_workspace.ensure workspace;
-  write_text (Filename.concat workspace.Centl_sci_workspace.modules_dir "tau.centl")
+  write_text
+    (Filename.concat workspace.Centl_sci_workspace.modules_dir "tau.centl")
     "tau = 2*pi\n";
   match
     Centl_sci_workspace.write_manifest workspace ~name:"tau" ~enabled:true
@@ -42,19 +42,20 @@ let test_status_collects_local_state () =
       | Ok _ -> ()
       end;
       let status = Centl_sci_status.collect () in
-      Alcotest.(check string) "version" "0.0.2-Caramels" status.version;
-      Alcotest.(check (option string)) "workspace" (Some root)
-        status.workspace_root;
-      Alcotest.(check bool) "tau enabled" true
+      Alcotest.(check string) "version" "0.0.2-Caramels+" status.version;
+      Alcotest.(check (option string))
+        "workspace" (Some root) status.workspace_root;
+      Alcotest.(check bool)
+        "tau enabled" true
         (List.mem "tau" status.enabled_native_extensions);
       Alcotest.(check int) "one package" 1 status.packages;
-      Alcotest.(check (option string)) "health" (Some "healthy")
-        status.workspace_health)
+      Alcotest.(check (option string))
+        "health" (Some "healthy") status.workspace_health)
 
 let test_status_json_never_promotes_assurance () =
   let status : Centl_sci_status.t =
     {
-      version = "0.0.2-Caramels";
+      version = "0.0.2-Caramels+";
       platform = "unix/linux-reference";
       workspace_root = None;
       workspace_revision = None;
@@ -76,7 +77,7 @@ let test_status_json_never_promotes_assurance () =
 let test_status_render_names_gates () =
   let status : Centl_sci_status.t =
     {
-      version = "0.0.2-Caramels";
+      version = "0.0.2-Caramels+";
       platform = "unix/linux-reference";
       workspace_root = None;
       workspace_revision = None;
@@ -88,11 +89,13 @@ let test_status_render_names_gates () =
     }
   in
   let rendered = Centl_sci_status.render status in
-  Alcotest.(check bool) "gate visible" true
+  Alcotest.(check bool)
+    "gate visible" true
     (Option.is_some
        (Centl_sci_interaction.find_substring ~needle:"live import remains gated"
           rendered));
-  Alcotest.(check bool) "no assurance promotion" true
+  Alcotest.(check bool)
+    "no assurance promotion" true
     (Option.is_some
        (Centl_sci_interaction.find_substring
           ~needle:"does not promote downstream assurance" rendered))
@@ -106,6 +109,7 @@ let () =
             test_status_collects_local_state;
           Alcotest.test_case "JSON assurance boundary" `Quick
             test_status_json_never_promotes_assurance;
-          Alcotest.test_case "render gates" `Quick test_status_render_names_gates;
+          Alcotest.test_case "render gates" `Quick
+            test_status_render_names_gates;
         ] );
     ]

@@ -71,7 +71,10 @@ def main() -> int:
         payload.get("report_kind") == "centl-sci-assimilation",
         "unexpected report_kind",
     )
-    require(payload.get("sci_version") == "0.0.1", "unexpected sci_version")
+    require(
+        payload.get("sci_version") == "0.0.2-Caramels+",
+        "unexpected sci_version",
+    )
 
     git = payload.get("git")
     require(isinstance(git, dict), "report.git must be an object")

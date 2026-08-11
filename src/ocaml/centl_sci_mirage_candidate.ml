@@ -17,10 +17,7 @@ type candidate = {
   mutates_workspace : bool;
 }
 
-type report = {
-  candidates : candidate list;
-  blocked_cells : int list;
-}
+type report = { candidates : candidate list; blocked_cells : int list }
 
 let strategy_text = function
   | Compose_existing -> "compose_existing"
@@ -35,24 +32,29 @@ let strategy_of_gap_status = function
   | Centl_sci_mirage_goal.Alias_or_wrapper -> Some Alias_or_wrapper
   | Centl_sci_mirage_goal.Extension_required -> Some Downstream_extension
   | Centl_sci_mirage_goal.Core_change_required -> Some Isolated_core_patch
-  | Centl_sci_mirage_goal.Satisfied
-  | Centl_sci_mirage_goal.Ambiguous
+  | Centl_sci_mirage_goal.Satisfied | Centl_sci_mirage_goal.Ambiguous
   | Centl_sci_mirage_goal.Conflicting
-  | Centl_sci_mirage_goal.Unsupported_by_policy -> None
+  | Centl_sci_mirage_goal.Unsupported_by_policy ->
+      None
 
 let assurance_text = function
   | Compose_existing ->
-      "planned composition only; matched capabilities retain their own assurance and no new assurance is inferred"
+      "planned composition only; matched capabilities retain their own \
+       assurance and no new assurance is inferred"
   | Alias_or_wrapper ->
-      "planned wrapper only; existing capability semantics must be preserved and no assurance is promoted"
+      "planned wrapper only; existing capability semantics must be preserved \
+       and no assurance is promoted"
   | Downstream_extension ->
-      "planned local downstream extension; generated code is unverified until its mandatory obligations are discharged"
+      "planned local downstream extension; generated code is unverified until \
+       its mandatory obligations are discharged"
   | Isolated_core_patch ->
-      "planned isolated core candidate; generated code is not verified core unless the full relevant core gates establish that claim"
+      "planned isolated core candidate; generated code is not verified core \
+       unless the full relevant core gates establish that claim"
 
 let obligations_for_cell (report : Centl_sci_mirage_obligation.report) cell_id =
   report.obligations
-  |> List.filter (fun obligation -> obligation.Centl_sci_mirage_obligation.cell_id = cell_id)
+  |> List.filter (fun obligation ->
+      obligation.Centl_sci_mirage_obligation.cell_id = cell_id)
   |> List.map (fun obligation -> obligation.Centl_sci_mirage_obligation.id)
 
 let candidate_of_gap obligations (gap : Centl_sci_mirage_goal.gap) =
@@ -61,7 +63,9 @@ let candidate_of_gap obligations (gap : Centl_sci_mirage_goal.gap) =
   | Some strategy ->
       Some
         {
-          id = Printf.sprintf "candidate:cell:%d:%s" gap.cell_id (strategy_text strategy);
+          id =
+            Printf.sprintf "candidate:cell:%d:%s" gap.cell_id
+              (strategy_text strategy);
           cell_id = gap.cell_id;
           strategy;
           state = Planned;
@@ -76,7 +80,8 @@ let build (graph : Centl_sci_mirage_goal.graph)
   let blocked_cells = obligations.blocked_cells in
   let candidates =
     graph.gaps
-    |> List.filter (fun gap -> not (List.mem gap.Centl_sci_mirage_goal.cell_id blocked_cells))
+    |> List.filter (fun gap ->
+        not (List.mem gap.Centl_sci_mirage_goal.cell_id blocked_cells))
     |> List.filter_map (candidate_of_gap obligations)
   in
   { candidates; blocked_cells }
@@ -104,7 +109,8 @@ let to_json report =
       ("artifact_kind", `String "candidate_transactions");
       ("candidate_count", `Int (List.length report.candidates));
       ("candidate_blocked", `Bool (report.blocked_cells <> []));
-      ("blocked_cells", `List (List.map (fun id -> `Int id) report.blocked_cells));
+      ( "blocked_cells",
+        `List (List.map (fun id -> `Int id) report.blocked_cells) );
       ("workspace_mutated", `Bool false);
       ("assurance_promoted", `Bool false);
       ("candidates", `List (List.map candidate_to_json report.candidates));

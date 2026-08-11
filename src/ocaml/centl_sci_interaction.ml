@@ -63,7 +63,8 @@ let replace_all_ci ~needle ~replacement text =
           String.sub lower_text offset (String.length lower_text - offset)
         in
         match find_substring ~needle:lower_needle remaining_lower with
-        | None -> Buffer.add_substring output text offset (String.length text - offset)
+        | None ->
+            Buffer.add_substring output text offset (String.length text - offset)
         | Some relative ->
             let index = offset + relative in
             Buffer.add_substring output text offset (index - offset);
@@ -218,7 +219,8 @@ let canonicalize_how_many_conversion text =
         | Some index ->
             let target = String.sub body 0 index |> String.trim in
             let source =
-              String.sub body (index + String.length marker)
+              String.sub body
+                (index + String.length marker)
                 (String.length body - index - String.length marker)
               |> String.trim |> strip_sentence_terminal
             in
@@ -233,9 +235,7 @@ let canonicalize_how_many_conversion text =
       begin match split " are in " with
       | Some value -> value
       | None ->
-          begin match split " are " with
-          | Some value -> value
-          | None -> text
+          begin match split " are " with Some value -> value | None -> text
           end
       end
 
@@ -246,8 +246,7 @@ let canonicalize_conversion text =
       if
         find_substring ~needle:" into " lower <> None
         || find_substring ~needle:" to " lower <> None
-      then
-        "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
+      then "convert " ^ replace_all_ci ~needle:" into " ~replacement:" to " body
       else text
   | None -> canonicalize_how_many_conversion text
 
@@ -294,18 +293,36 @@ let session_commands =
 
 let math_completions =
   [
+    "area";
     "approx";
     "approximate";
     "calculate";
+    "choose";
+    "circle";
     "compute";
+    "distance";
     "differentiate";
     "derivative";
     "evaluate";
     "expand";
     "factor";
+    "factorial";
+    "fibonacci";
+    "gcd";
+    "geometry";
+    "hypotenuse";
     "integrate";
+    "lcm";
+    "list";
+    "permutations";
+    "product";
+    "recurrence";
+    "sequence";
     "simplify";
+    "slope";
     "solve";
+    "squares";
+    "sum";
     "substitute";
     "verify";
   ]
@@ -385,7 +402,7 @@ let mechanics_missing lower =
   else
     [ "mass"; "position"; "velocity"; "gravity"; "dt"; "steps" ]
     |> List.filter (fun field ->
-           find_substring ~needle:(field ^ " ") lower = None)
+        find_substring ~needle:(field ^ " ") lower = None)
 
 let verification_relation_present lower =
   String.exists (function '=' | '<' | '>' -> true | _ -> false) lower
@@ -407,64 +424,91 @@ let clarification mode normalized =
     match mode with
     | Build ->
         Some
-          "BUILD can inspect capabilities and assurance; audit the workspace; read revision history; create, modify, validate, package, enable, disable, remove, and undo downstream extensions; scaffold external/native integrations; export or import a workspace; prepare upstream contribution artifacts; or plan deeper CENTL changes. State the capability or change you want."
+          "BUILD can inspect capabilities and assurance; audit the workspace; \
+           read revision history; create, modify, validate, package, enable, \
+           disable, remove, and undo downstream extensions; scaffold \
+           external/native integrations; export or import a workspace; prepare \
+           upstream contribution artifacts; or plan deeper CENTL changes. \
+           State the capability or change you want."
     | (Phys | Hybrid) when missing_mechanics <> [] ->
         Some
-          ("I understand this as a uniform-gravity particle simulation, but required fields are missing: "
+          ("I understand this as a uniform-gravity particle simulation, but \
+            required fields are missing: "
           ^ String.concat ", " missing_mechanics
-          ^ ". Supply mass, position, velocity, gravity, dt, and steps. Example: "
-          ^ "simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10")
+          ^ ". Supply mass, position, velocity, gravity, dt, and steps. \
+             Example: "
+          ^ "simulate a particle with mass 2 kg, position (0,0,10) m, velocity \
+             (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10")
     | (Phys | Hybrid)
-      when
-        starts_with_any
-          [ "simulate particle"; "simulate a particle"; "simulate the particle" ]
-          lower ->
+      when starts_with_any
+             [
+               "simulate particle";
+               "simulate a particle";
+               "simulate the particle";
+             ]
+             lower ->
         Some
-          "I recognize a particle-simulation request, but its typed fields could not be parsed safely. Use explicit vector forms such as position (0,0,10) m and velocity (1,0,0) m/s; CENTL-SCi will not invent missing physical values."
-    | Math | Hybrid
-      when
-        starts_with_any [ "verify "; "verify whether "; "check whether " ] lower
-        &&
-        (find_substring ~needle:" for all " lower <> None
-        || find_substring ~needle:" assuming " lower <> None
-        || find_substring ~needle:" under the assumption " lower <> None) ->
+          "I recognize a particle-simulation request, but its typed fields \
+           could not be parsed safely. Use explicit vector forms such as \
+           position (0,0,10) m and velocity (1,0,0) m/s; CENTL-SCi will not \
+           invent missing physical values."
+    | (Math | Hybrid)
+      when starts_with_any
+             [ "verify "; "verify whether "; "check whether " ]
+             lower
+           && (find_substring ~needle:" for all " lower <> None
+              || find_substring ~needle:" assuming " lower <> None
+              || find_substring ~needle:" under the assumption " lower <> None)
+      ->
         Some
-          "I understand this as mathematical claim verification. This Caramels slice routes closed claims only; quantified variables and free-form assumptions are not inferred. Use an explicit closed claim such as: verify 0.1 + 0.2 equals 3/10."
-    | Math | Hybrid
-      when
-        starts_with_any [ "verify "; "verify whether "; "check whether " ] lower
-        && not (verification_relation_present lower) ->
+          "I understand this as mathematical claim verification. This Caramels \
+           slice routes closed claims only; quantified variables and free-form \
+           assumptions are not inferred. Use an explicit closed claim such as: \
+           verify 0.1 + 0.2 equals 3/10."
+    | (Math | Hybrid)
+      when starts_with_any
+             [ "verify "; "verify whether "; "check whether " ]
+             lower
+           && not (verification_relation_present lower) ->
         Some
-          "I understand this as mathematical claim verification, but an explicit relation and both sides are required. For example: verify 0.1 + 0.2 equals 3/10."
-    | Math | Hybrid
-      when
-        starts_with_any
-          [ "solve "; "find x "; "find the roots "; "roots of " ]
-          lower
-        && not (String.contains lower '=')
-        && find_substring ~needle:" equals " lower = None ->
+          "I understand this as mathematical claim verification, but an \
+           explicit relation and both sides are required. For example: verify \
+           0.1 + 0.2 equals 3/10."
+    | (Math | Hybrid)
+      when starts_with_any
+             [ "solve "; "find x "; "find the roots "; "roots of " ]
+             lower
+           && (not (String.contains lower '='))
+           && find_substring ~needle:" equals " lower = None ->
         Some
-          "I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0."
-    | Math | Hybrid
-      when
-        starts_with_any
-          [ "differentiate "; "derivative of "; "take the derivative of " ]
-          lower
-        && find_substring ~needle:" with respect to " lower = None
-        && find_substring ~needle:" wrt " lower = None ->
+          "I understand this as an equation-solving request, but the equation \
+           relation or right-hand side is missing. Try, for example: solve x \
+           squared plus 4 equals 0."
+    | (Math | Hybrid)
+      when starts_with_any
+             [ "differentiate "; "derivative of "; "take the derivative of " ]
+             lower
+           && find_substring ~needle:" with respect to " lower = None
+           && find_substring ~needle:" wrt " lower = None ->
         Some
-          "I understand this as differentiation, but the differentiation variable is missing. For example: differentiate x^3 with respect to x."
-    | Math | Hybrid
+          "I understand this as differentiation, but the differentiation \
+           variable is missing. For example: differentiate x^3 with respect to \
+           x."
+    | (Math | Hybrid)
       when starts_with_any [ "integrate "; "integral of " ] lower
            && find_substring ~needle:" with respect to " lower = None ->
         Some
-          "I understand this as integration, but the integration variable is missing. For example: integrate x^2 with respect to x."
-    | Math | Hybrid when String.starts_with ~prefix:"find " lower ->
+          "I understand this as integration, but the integration variable is \
+           missing. For example: integrate x^2 with respect to x."
+    | (Math | Hybrid) when String.starts_with ~prefix:"find " lower ->
         Some
-          "I understand the expression, but the requested operation is ambiguous. Specify whether you want to solve, simplify, differentiate, integrate, approximate, evaluate, or verify it."
-    | Phys | Hybrid
+          "I understand the expression, but the requested operation is \
+           ambiguous. Specify whether you want to solve, simplify, \
+           differentiate, integrate, approximate, evaluate, or verify it."
+    | (Phys | Hybrid)
       when String.starts_with ~prefix:"convert " lower
            && find_substring ~needle:" to " lower = None ->
         Some
-          "I understand this as a unit-conversion request, but the target unit is missing. For example: convert 25 kilometers to meters."
+          "I understand this as a unit-conversion request, but the target unit \
+           is missing. For example: convert 25 kilometers to meters."
     | _ -> None

@@ -11,8 +11,7 @@ let temp_dir prefix =
   Unix.mkdir path 0o700;
   path
 
-let cleanup path =
-  try Centl_sci_snapshot.remove_tree path with _ -> ()
+let cleanup path = try Centl_sci_snapshot.remove_tree path with _ -> ()
 
 let with_workspace_env root action =
   let previous = Sys.getenv_opt "CENTL_WORKSPACE" in
@@ -50,8 +49,8 @@ let test_native_extension_validation () =
       | Ok report ->
           Alcotest.(check bool) "structurally valid" true report.valid;
           Alcotest.(check string) "kind" "native_centl" report.kind;
-          Alcotest.(check string) "assurance preserved"
-            "locally_tested_extension" report.assurance)
+          Alcotest.(check string)
+            "assurance preserved" "locally_tested_extension" report.assurance)
 
 let test_invalid_native_extension_is_not_promoted () =
   let root = temp_dir "centl-caramels-invalid-" in
@@ -64,8 +63,8 @@ let test_invalid_native_extension_is_not_promoted () =
       | Error message -> Alcotest.fail message
       | Ok report ->
           Alcotest.(check bool) "invalid definition rejected" false report.valid;
-          Alcotest.(check string) "assurance unchanged"
-            "locally_tested_extension" report.assurance)
+          Alcotest.(check string)
+            "assurance unchanged" "locally_tested_extension" report.assurance)
 
 let test_generated_adapter_cannot_enter_native_loader () =
   let root = temp_dir "centl-caramels-adapter-" in
@@ -75,7 +74,8 @@ let test_generated_adapter_cannot_enter_native_loader () =
       let workspace = Centl_sci_workspace.make root in
       begin match
         Centl_sci_scaffold.create workspace
-          ~kind:Centl_sci_scaffold.Python_adapter ~name:"reader" ~target:"astropy"
+          ~kind:Centl_sci_scaffold.Python_adapter ~name:"reader"
+          ~target:"astropy"
       with
       | Error message -> Alcotest.fail message
       | Ok _ -> ()
@@ -84,16 +84,21 @@ let test_generated_adapter_cannot_enter_native_loader () =
       | Error message -> Alcotest.fail message
       | Ok manifest ->
           Alcotest.(check string) "adapter kind" "python_adapter" manifest.kind;
-          Alcotest.(check bool) "scaffold starts disabled" false manifest.enabled
+          Alcotest.(check bool)
+            "scaffold starts disabled" false manifest.enabled
       end;
       match Centl_sci_extensions.set_enabled workspace "reader" true with
       | Error message ->
-          Alcotest.(check bool) "native loader refusal is explicit" true
+          Alcotest.(check bool)
+            "native loader refusal is explicit" true
             (Option.is_some
                (Centl_sci_interaction.find_substring
-                  ~needle:"will not route it through the native CENTL definition loader"
+                  ~needle:
+                    "will not route it through the native CENTL definition \
+                     loader"
                   message))
-      | Ok _ -> Alcotest.fail "Python adapter scaffold must not enter native loader")
+      | Ok _ ->
+          Alcotest.fail "Python adapter scaffold must not enter native loader")
 
 let test_package_validation_preserves_member_assurance () =
   let root = temp_dir "centl-caramels-package-" in
@@ -123,8 +128,9 @@ let test_package_validation_preserves_member_assurance () =
           begin match validation.members with
           | [ member ] ->
               Alcotest.(check string) "member" "tau" member.name;
-              Alcotest.(check (option string)) "member assurance"
-                (Some "locally_tested_extension") member.assurance
+              Alcotest.(check (option string))
+                "member assurance" (Some "locally_tested_extension")
+                member.assurance
           | _ -> Alcotest.fail "expected one package member"
           end)
 
@@ -139,7 +145,8 @@ let test_workspace_audit_reports_invalid_local_state () =
       let audit = Centl_sci_audit.collect workspace in
       Alcotest.(check int) "two extensions" 2 (List.length audit.extensions);
       Alcotest.(check bool) "audit records warning" true (audit.warnings <> []);
-      Alcotest.(check bool) "broken extension named in warning" true
+      Alcotest.(check bool)
+        "broken extension named in warning" true
         (List.exists
            (fun warning ->
              Option.is_some
@@ -150,7 +157,9 @@ let test_workspace_audit_reports_invalid_local_state () =
       | `Assoc fields ->
           begin match List.assoc_opt "verified_core_modified" fields with
           | Some (`Bool false) -> ()
-          | _ -> Alcotest.fail "workspace audit must state verified_core_modified=false"
+          | _ ->
+              Alcotest.fail
+                "workspace audit must state verified_core_modified=false"
           end
       | _ -> Alcotest.fail "workspace audit JSON must be an object")
 
@@ -161,13 +170,18 @@ let test_workspace_audit_surfaces_malformed_manifest () =
     (fun () ->
       let workspace = Centl_sci_workspace.make root in
       Centl_sci_workspace.ensure workspace;
-      write_text (Centl_sci_workspace.manifest_path workspace "broken") "{not-json\n";
+      write_text
+        (Centl_sci_workspace.manifest_path workspace "broken")
+        "{not-json\n";
       let audit = Centl_sci_audit.collect workspace in
-      Alcotest.(check int) "malformed manifest is not a usable extension" 0
+      Alcotest.(check int)
+        "malformed manifest is not a usable extension" 0
         (List.length audit.extensions);
-      Alcotest.(check int) "manifest error is retained" 1
+      Alcotest.(check int)
+        "manifest error is retained" 1
         (List.length audit.manifest_errors);
-      Alcotest.(check bool) "manifest error reaches warnings" true
+      Alcotest.(check bool)
+        "manifest error reaches warnings" true
         (List.exists
            (fun warning ->
              Option.is_some
@@ -178,7 +192,9 @@ let test_workspace_audit_surfaces_malformed_manifest () =
       | `Assoc fields ->
           begin match List.assoc_opt "manifest_errors" fields with
           | Some (`List [ `String _ ]) -> ()
-          | _ -> Alcotest.fail "audit JSON must preserve malformed manifest evidence"
+          | _ ->
+              Alcotest.fail
+                "audit JSON must preserve malformed manifest evidence"
           end
       | _ -> Alcotest.fail "workspace audit JSON must be an object")
 
@@ -210,29 +226,38 @@ let test_export_import_and_undo () =
       | Error message -> Alcotest.fail message
       | Ok exported ->
           Alcotest.(check bool) "export is read-only" false exported.changed;
-          Alcotest.(check bool) "bundle metadata exists" true
+          Alcotest.(check bool)
+            "bundle metadata exists" true
             (Sys.file_exists (Filename.concat bundle "bundle.json"))
       end;
       begin match Centl_sci_portable.import target bundle with
       | Error message -> Alcotest.fail message
       | Ok imported ->
-          Alcotest.(check bool) "import changes downstream state" true imported.changed;
-          Alcotest.(check bool) "imported tau source exists" true
+          Alcotest.(check bool)
+            "import changes downstream state" true imported.changed;
+          Alcotest.(check bool)
+            "imported tau source exists" true
             (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"));
-          Alcotest.(check bool) "old source replaced" false
-            (Sys.file_exists (Filename.concat target.modules_dir "old_value.centl"));
+          Alcotest.(check bool)
+            "old source replaced" false
+            (Sys.file_exists
+               (Filename.concat target.modules_dir "old_value.centl"));
           begin match Centl_sci_package.validate target "science" with
           | Error message -> Alcotest.fail message
           | Ok validation ->
-              Alcotest.(check bool) "imported package validates" true validation.valid
+              Alcotest.(check bool)
+                "imported package validates" true validation.valid
           end
       end;
       begin match Centl_sci_snapshot.restore_last target with
       | Error message -> Alcotest.fail message
       | Ok _ ->
-          Alcotest.(check bool) "undo restores old source" true
-            (Sys.file_exists (Filename.concat target.modules_dir "old_value.centl"));
-          Alcotest.(check bool) "undo removes imported source" false
+          Alcotest.(check bool)
+            "undo restores old source" true
+            (Sys.file_exists
+               (Filename.concat target.modules_dir "old_value.centl"));
+          Alcotest.(check bool)
+            "undo removes imported source" false
             (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"))
       end)
 
@@ -255,12 +280,17 @@ let test_build_import_dispatches_as_mutation () =
           | Centl_sci_build.Not_handled ->
               Alcotest.fail "BUILD must recognize workspace import"
           | Centl_sci_build.Handled handled ->
-              Alcotest.(check bool) "BUILD marks import as changed" true handled.changed;
-              Alcotest.(check bool) "BUILD import has revision" true
+              Alcotest.(check bool)
+                "BUILD marks import as changed" true handled.changed;
+              Alcotest.(check bool)
+                "BUILD import has revision" true
                 (Option.is_some handled.revision);
-              Alcotest.(check bool) "imported source is active workspace state" true
-                (Sys.file_exists (Filename.concat target.modules_dir "tau.centl"));
-              Alcotest.(check bool) "replaced downstream source is gone" false
+              Alcotest.(check bool)
+                "imported source is active workspace state" true
+                (Sys.file_exists
+                   (Filename.concat target.modules_dir "tau.centl"));
+              Alcotest.(check bool)
+                "replaced downstream source is gone" false
                 (Sys.file_exists
                    (Filename.concat target.modules_dir "old_value.centl"))))
 

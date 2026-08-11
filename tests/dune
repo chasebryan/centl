@@ -71,6 +71,11 @@
  (libraries centl_lib alcotest))
 
 (test
+ (name test_sci_intent)
+ (modules test_sci_intent)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_sci_lowering)
  (modules test_sci_lowering)
  (libraries centl_lib alcotest yojson))
@@ -89,6 +94,11 @@
  (name test_sci_suggestion)
  (modules test_sci_suggestion)
  (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_status)
+ (modules test_sci_status)
+ (libraries centl_lib alcotest unix))
 
 (test
  (name test_sci_session)

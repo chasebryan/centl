@@ -1,9 +1,4 @@
-type result = {
-  message : string;
-  changed : bool;
-  revision : int option;
-}
-
+type result = { message : string; changed : bool; revision : int option }
 type command = Export of string option | Import of string
 
 let drop_prefix_ci prefix text =
@@ -47,7 +42,8 @@ let default_export_path workspace =
   let stamp = Int64.of_float (Unix.gettimeofday () *. 1_000_000.) in
   Filename.concat root
     (Printf.sprintf "caramels-r%d-%Ld"
-       (Centl_sci_workspace.read_revision workspace) stamp)
+       (Centl_sci_workspace.read_revision workspace)
+       stamp)
 
 let copy_if_exists source target =
   if Sys.file_exists source then Centl_sci_snapshot.copy_tree source target
@@ -57,7 +53,7 @@ let bundle_metadata workspace =
     [
       ("schema_version", `Int 1);
       ("format", `String "centl-caramels-workspace-bundle");
-      ("centl_sci_version", `String "0.0.2-Caramels");
+      ("centl_sci_version", `String "0.0.2-Caramels+");
       ("workspace_name", `String workspace.Centl_sci_workspace.name);
       ("source_revision", `Int (Centl_sci_workspace.read_revision workspace));
       ("created_at_unix", `Float (Unix.gettimeofday ()));
@@ -65,7 +61,8 @@ let bundle_metadata workspace =
       ("includes_verified_core", `Bool false);
       ( "assurance_policy",
         `String
-          "extension assurance is preserved; export/import never promotes local or generated code to verified core" );
+          "extension assurance is preserved; export/import never promotes \
+           local or generated code to verified core" );
     ]
 
 let export workspace target =
@@ -90,13 +87,19 @@ let export workspace target =
       copy_if_exists workspace.data (Filename.concat target "data");
       copy_if_exists (scaffolds_root workspace)
         (Filename.concat (Filename.concat target "generated") "scaffolds");
-      Centl_sci_workspace.atomic_write_json (Filename.concat target "bundle.json")
+      Centl_sci_workspace.atomic_write_json
+        (Filename.concat target "bundle.json")
         (bundle_metadata workspace);
       Ok
         {
           message =
-            "Exported the user-owned Caramels workspace bundle.\nPath: " ^ target
-            ^ "\nIncluded: extension manifests, native modules, packages, tests, data, and generated scaffolds.\nExcluded: verified CENTL core, history, undo snapshots, prior exports, and local workspace identity/configuration.";
+            "Exported the user-owned Caramels workspace bundle.\nPath: "
+            ^ target
+            ^ "\n\
+               Included: extension manifests, native modules, packages, tests, \
+               data, and generated scaffolds.\n\
+               Excluded: verified CENTL core, history, undo snapshots, prior \
+               exports, and local workspace identity/configuration.";
           changed = false;
           revision = Some (Centl_sci_workspace.read_revision workspace);
         }
@@ -109,16 +112,22 @@ let assoc name = function
 
 let bundle_header path =
   let metadata = Filename.concat path "bundle.json" in
-  if not (Sys.file_exists metadata) then Error "workspace bundle is missing bundle.json"
+  if not (Sys.file_exists metadata) then
+    Error "workspace bundle is missing bundle.json"
   else
     try
       let json = Yojson.Safe.from_file metadata in
       match
-        (assoc "schema_version" json, assoc "format" json, assoc "includes_verified_core" json)
+        ( assoc "schema_version" json,
+          assoc "format" json,
+          assoc "includes_verified_core" json )
       with
-      | Some (`Int 1), Some (`String "centl-caramels-workspace-bundle"),
-        Some (`Bool false) -> Ok ()
-      | _ -> Error "workspace bundle metadata is not a recognized Caramels bundle"
+      | ( Some (`Int 1),
+          Some (`String "centl-caramels-workspace-bundle"),
+          Some (`Bool false) ) ->
+          Ok ()
+      | _ ->
+          Error "workspace bundle metadata is not a recognized Caramels bundle"
     with Yojson.Json_error message | Sys_error message -> Error message
 
 let rec reject_symlinks path =
@@ -138,26 +147,30 @@ let rec reject_symlinks path =
         in
         loop entries
     | Unix.S_REG -> Ok ()
-    | _ -> Error ("workspace bundle contains an unsupported filesystem object: " ^ path)
+    | _ ->
+        Error
+          ("workspace bundle contains an unsupported filesystem object: " ^ path)
   with Unix.Unix_error (_, _, message) | Sys_error message -> Error message
 
 let safe_relative_source source =
   let source = String.trim source in
   source <> ""
   && Filename.is_relative source
-  && not (String.contains source '\\')
+  && (not (String.contains source '\\'))
   &&
   let components = String.split_on_char '/' source in
   components <> []
   && List.for_all
-       (fun component -> component <> "" && component <> "." && component <> "..")
+       (fun component ->
+         component <> "" && component <> "." && component <> "..")
        components
 
 let manifest_names workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.extensions) then Ok []
   else
     let files =
-      Sys.readdir workspace.extensions |> Array.to_list
+      Sys.readdir workspace.extensions
+      |> Array.to_list
       |> List.filter (fun name -> Filename.check_suffix name ".json")
     in
     let rec loop acc = function
@@ -165,16 +178,20 @@ let manifest_names workspace =
       | filename :: rest ->
           let name = Filename.chop_suffix filename ".json" in
           begin match Centl_sci_extensions.read_manifest workspace name with
-          | Error message -> Error ("invalid extension manifest " ^ filename ^ ": " ^ message)
+          | Error message ->
+              Error ("invalid extension manifest " ^ filename ^ ": " ^ message)
           | Ok manifest when not (safe_relative_source manifest.source) ->
               Error
                 (Printf.sprintf
-                   "bundle extension %s has a source path outside the normalized relative bundle namespace: %s"
+                   "bundle extension %s has a source path outside the \
+                    normalized relative bundle namespace: %s"
                    manifest.name manifest.source)
-          | Ok manifest when manifest.enabled && manifest.kind <> "native_centl" ->
+          | Ok manifest when manifest.enabled && manifest.kind <> "native_centl"
+            ->
               Error
                 (Printf.sprintf
-                   "bundle extension %s is enabled but has non-native kind %s; Caramels will not import it as active"
+                   "bundle extension %s is enabled but has non-native kind %s; \
+                    Caramels will not import it as active"
                    manifest.name manifest.kind)
           | Ok _ -> loop (name :: acc) rest
           end
@@ -186,12 +203,13 @@ let validate_extensions workspace names =
     | [] -> Ok ()
     | name :: rest ->
         begin match Centl_sci_validate.validate workspace name with
-        | Error message -> Error ("could not validate extension " ^ name ^ ": " ^ message)
+        | Error message ->
+            Error ("could not validate extension " ^ name ^ ": " ^ message)
         | Ok report when report.valid -> loop rest
         | Ok report ->
             Error
               ("extension " ^ name ^ " failed structural validation: "
-             ^ String.concat "; " report.checks)
+              ^ String.concat "; " report.checks)
         end
   in
   loop names
@@ -203,7 +221,8 @@ let validate_dependencies workspace =
   | issues ->
       Error
         ("extension dependency graph is not activation-ready: "
-        ^ String.concat "; " (List.map Centl_sci_dependencies.issue_text issues))
+        ^ String.concat "; " (List.map Centl_sci_dependencies.issue_text issues)
+        )
 
 let package_names workspace =
   if not (Sys.file_exists workspace.Centl_sci_workspace.packages) then []
@@ -224,7 +243,8 @@ let validate_packages workspace extension_names =
             | Some extension ->
                 Error
                   (Printf.sprintf
-                     "package %s references extension %s, which is absent from the bundle"
+                     "package %s references extension %s, which is absent from \
+                      the bundle"
                      package.name extension)
             | None -> loop rest
             end
@@ -233,7 +253,7 @@ let validate_packages workspace extension_names =
   loop (package_names workspace)
 
 let validate_bundle path =
-  if not (Sys.file_exists path) || not (Sys.is_directory path) then
+  if (not (Sys.file_exists path)) || not (Sys.is_directory path) then
     Error ("workspace bundle directory does not exist: " ^ path)
   else
     match reject_symlinks path with
@@ -254,7 +274,9 @@ let validate_bundle path =
                     begin match validate_dependencies bundle_workspace with
                     | Error _ as error -> error
                     | Ok () ->
-                        begin match validate_packages bundle_workspace names with
+                        begin match
+                          validate_packages bundle_workspace names
+                        with
                         | Error _ as error -> error
                         | Ok () -> Ok ()
                         end
@@ -264,7 +286,9 @@ let validate_bundle path =
         end
 
 let replace_surface workspace bundle =
-  let bundle_workspace = Centl_sci_workspace.make ~name:"import-bundle" bundle in
+  let bundle_workspace =
+    Centl_sci_workspace.make ~name:"import-bundle" bundle
+  in
   Centl_sci_snapshot.clear_directory workspace.Centl_sci_workspace.extensions;
   Centl_sci_snapshot.clear_directory workspace.modules_dir;
   Centl_sci_snapshot.clear_directory workspace.packages;
@@ -285,11 +309,15 @@ let import workspace path =
     Error "workspace import source must not be the active workspace itself"
   else
     match validate_bundle path with
-    | Error message -> Error ("workspace import rejected before mutation: " ^ message)
+    | Error message ->
+        Error ("workspace import rejected before mutation: " ^ message)
     | Ok () ->
         begin match Centl_sci_snapshot.create workspace with
-        | Error message -> Error ("could not snapshot the current workspace before import: " ^ message)
-        | Ok snapshot ->
+        | Error message ->
+            Error
+              ("could not snapshot the current workspace before import: "
+             ^ message)
+        | Ok snapshot -> (
             try
               replace_surface workspace path;
               let revision = Centl_sci_workspace.bump_revision workspace in
@@ -297,7 +325,14 @@ let import workspace path =
                 {
                   message =
                     Printf.sprintf
-                      "Imported a validated Caramels downstream workspace bundle.\nSource: %s\nWorkspace revision: %d\nThe previous downstream state is available through `undo`.\nVerified CENTL core, workspace identity, history, and configuration were not replaced."
+                      "Imported a validated Caramels downstream workspace \
+                       bundle.\n\
+                       Source: %s\n\
+                       Workspace revision: %d\n\
+                       The previous downstream state is available through \
+                       `undo`.\n\
+                       Verified CENTL core, workspace identity, history, and \
+                       configuration were not replaced."
                       path revision;
                   changed = true;
                   revision = Some revision;
@@ -307,14 +342,17 @@ let import workspace path =
               | Ok revision ->
                   Error
                     (Printf.sprintf
-                       "workspace import failed during mutation and was rolled back without advancing the workspace revision (still %d): %s"
+                       "workspace import failed during mutation and was rolled \
+                        back without advancing the workspace revision (still \
+                        %d): %s"
                        revision message)
               | Error rollback_message ->
                   Error
                     (Printf.sprintf
-                       "workspace import failed during mutation: %s; automatic rollback also failed: %s"
+                       "workspace import failed during mutation: %s; automatic \
+                        rollback also failed: %s"
                        message rollback_message)
-              end
+              end)
         end
 
 let execute workspace = function

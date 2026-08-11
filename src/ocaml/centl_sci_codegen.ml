@@ -2,7 +2,10 @@ type change =
   | Function of { replace : bool; source : string }
   | Value of { replace : bool; source : string }
 
-type result = Generated of change | Not_generated | Needs_clarification of string
+type result =
+  | Generated of change
+  | Not_generated
+  | Needs_clarification of string
 
 let lower text = String.lowercase_ascii (String.trim text)
 
@@ -16,7 +19,8 @@ let split_at_ci needle text =
   | Some index ->
       let left = String.sub text 0 index |> String.trim in
       let right =
-        String.sub text (index + String.length needle)
+        String.sub text
+          (index + String.length needle)
           (String.length text - index - String.length needle)
         |> String.trim
       in
@@ -50,14 +54,17 @@ let validate_source expected source =
   | Error error ->
       Error
         (Printf.sprintf
-           "I generated a CENTL definition, but it does not parse at byte %d: %s. Make the implementation expression more explicit."
+           "I generated a CENTL definition, but it does not parse at byte %d: \
+            %s. Make the implementation expression more explicit."
            error.position error.message)
   | Ok located ->
       begin match (expected, located.statement) with
       | `Function, Centl_parser.Define_function _ -> Ok source
       | `Value, Centl_parser.Define_value _ -> Ok source
-      | `Function, _ -> Error "The generated source is not a CENTL function definition."
-      | `Value, _ -> Error "The generated source is not a CENTL value definition."
+      | `Function, _ ->
+          Error "The generated source is not a CENTL function definition."
+      | `Value, _ ->
+          Error "The generated source is not a CENTL value definition."
       end
 
 let generate_native ~replace ~target_kind ~name ~parameters ~implementation =
@@ -69,7 +76,8 @@ let generate_native ~replace ~target_kind ~name ~parameters ~implementation =
       ~implementation
   in
   match Centl_sci_change_ir.to_centl_source request with
-  | Error message -> Needs_clarification ("Invalid change request: " ^ message ^ ".")
+  | Error message ->
+      Needs_clarification ("Invalid change request: " ^ message ^ ".")
   | Ok source ->
       let expected =
         match target_kind with
@@ -81,7 +89,8 @@ let generate_native ~replace ~target_kind ~name ~parameters ~implementation =
       | Error message -> Needs_clarification message
       | Ok source ->
           begin match target_kind with
-          | Centl_sci_change_ir.Function -> Generated (Function { replace; source })
+          | Centl_sci_change_ir.Function ->
+              Generated (Function { replace; source })
           | Centl_sci_change_ir.Value -> Generated (Value { replace; source })
           | _ -> Not_generated
           end
@@ -120,7 +129,9 @@ let parse_function ~replace text =
       begin match split_at_ci " that takes " request with
       | None ->
           Needs_clarification
-            "A generated function needs a name, parameter list, and implementation. Example: create a function named kinetic_energy that takes mass and velocity and computes 1/2 * mass * velocity^2"
+            "A generated function needs a name, parameter list, and \
+             implementation. Example: create a function named kinetic_energy \
+             that takes mass and velocity and computes 1/2 * mass * velocity^2"
       | Some (name, _) when not (valid_identifier name) ->
           Needs_clarification
             ("`" ^ name ^ "` is not a valid CENTL function identifier.")
@@ -133,21 +144,28 @@ let parse_function ~replace text =
           begin match implementation with
           | None ->
               Needs_clarification
-                "The function parameters were recognized, but its implementation is missing. Use `and computes ...` or `and returns ...`."
+                "The function parameters were recognized, but its \
+                 implementation is missing. Use `and computes ...` or `and \
+                 returns ...`."
           | Some (parameters_text, expression) ->
               let parameters = split_parameters parameters_text in
               if
                 parameters = []
-                || List.exists (fun value -> not (valid_identifier value)) parameters
+                || List.exists
+                     (fun value -> not (valid_identifier value))
+                     parameters
               then
                 Needs_clarification
-                  "One or more function parameters are not valid CENTL identifiers."
+                  "One or more function parameters are not valid CENTL \
+                   identifiers."
               else if String.trim expression = "" then
                 Needs_clarification
-                  "The generated function needs a non-empty implementation expression."
+                  "The generated function needs a non-empty implementation \
+                   expression."
               else
-                generate_native ~replace ~target_kind:Centl_sci_change_ir.Function
-                  ~name ~parameters ~implementation:(String.trim expression)
+                generate_native ~replace
+                  ~target_kind:Centl_sci_change_ir.Function ~name ~parameters
+                  ~implementation:(String.trim expression)
           end
       end
 
@@ -193,15 +211,17 @@ let parse_value ~replace text =
       begin match assignment with
       | None ->
           Needs_clarification
-            "A generated value needs a name and expression. Example: create a value named tau equal to 2*pi"
+            "A generated value needs a name and expression. Example: create a \
+             value named tau equal to 2*pi"
       | Some (name, _) when not (valid_identifier name) ->
           Needs_clarification
             ("`" ^ name ^ "` is not a valid CENTL value identifier.")
       | Some (_, expression) when String.trim expression = "" ->
-          Needs_clarification "The generated value needs a non-empty expression."
+          Needs_clarification
+            "The generated value needs a non-empty expression."
       | Some (name, expression) ->
-          generate_native ~replace ~target_kind:Centl_sci_change_ir.Value
-            ~name ~parameters:[] ~implementation:(String.trim expression)
+          generate_native ~replace ~target_kind:Centl_sci_change_ir.Value ~name
+            ~parameters:[] ~implementation:(String.trim expression)
       end
 
 let generate text =

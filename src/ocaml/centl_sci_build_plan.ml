@@ -30,16 +30,19 @@ let contains needle text =
 
 let classify request =
   let text = lower request in
-  if contains "upstream" text || contains "contribution" text then Upstream_contribution
+  if contains "upstream" text || contains "contribution" text then
+    Upstream_contribution
   else if
-    contains "equation solver" text || contains "parser" text
-    || contains "runtime" text || contains "centl internals" text
+    contains "equation solver" text
+    || contains "parser" text || contains "runtime" text
+    || contains "centl internals" text
     || contains "core" text
   then Core_patch
   else if
     contains "rust" text || contains "ocaml" text
     || contains " c " (" " ^ text ^ " ")
-    || contains "native backend" text || contains "sparse matrix" text
+    || contains "native backend" text
+    || contains "sparse matrix" text
   then Native_extension
   else if
     contains "python" text || contains "package" text || contains "sensor" text
@@ -54,15 +57,21 @@ let classify request =
 let plan request =
   let layer = classify request in
   let discovered =
-    Centl_sci_capabilities.search request |> List.map Centl_sci_capabilities.render
+    Centl_sci_capabilities.search request
+    |> List.map Centl_sci_capabilities.render
   in
   let reusable_capabilities, proposed_steps, trust_notes, unresolved =
     match layer with
     | Declarative ->
-        ( [ "workspace manifests"; "CENTL parser"; "existing unit/constant machinery where applicable" ],
+        ( [
+            "workspace manifests";
+            "CENTL parser";
+            "existing unit/constant machinery where applicable";
+          ],
           [
             "inspect built-in and active workspace capabilities";
-            "express the change as a local declarative/native CENTL definition where possible";
+            "express the change as a local declarative/native CENTL definition \
+             where possible";
             "validate the declaration";
             "record provenance and workspace revision";
             "activate only in the downstream workspace";
@@ -78,7 +87,10 @@ let plan request =
             "write the module and manifest";
             "make the capability visible to completion and session execution";
           ],
-          [ "generated source remains a local extension until separately verified" ],
+          [
+            "generated source remains a local extension until separately \
+             verified";
+          ],
           [] )
     | External_adapter ->
         ( [ "workspace package metadata"; "external-backend assurance category" ],
@@ -89,8 +101,14 @@ let plan request =
             "generate adapter scaffolding and tests";
             "keep external results visibly outside verified-core assurance";
           ],
-          [ "external code is not allowed to masquerade as verified CENTL computation" ],
-          [ "exact adapter ABI and dependency policy remain Caramels implementation work" ] )
+          [
+            "external code is not allowed to masquerade as verified CENTL \
+             computation";
+          ],
+          [
+            "exact adapter ABI and dependency policy remain Caramels \
+             implementation work";
+          ] )
     | Native_extension ->
         ( [ "generated workspace area"; "native-extension assurance category" ],
           [
@@ -100,7 +118,10 @@ let plan request =
             "generate tests and interface metadata";
             "register the extension in the local workspace";
           ],
-          [ "native generated code requires explicit validation before activation" ],
+          [
+            "native generated code requires explicit validation before \
+             activation";
+          ],
           [ "the stable native extension ABI is not frozen in Caramels" ] )
     | Core_patch ->
         ( [ "existing source tree"; "tests"; "verification/build gates" ],
@@ -111,10 +132,20 @@ let plan request =
             "run the quality gates relevant to the touched layer";
             "record that the local system diverges from upstream";
           ],
-          [ "core self-modification must not bypass upstream-grade engineering gates" ],
-          [ "Caramels planning does not auto-apply arbitrary trusted-core patches" ] )
+          [
+            "core self-modification must not bypass upstream-grade engineering \
+             gates";
+          ],
+          [
+            "Caramels planning does not auto-apply arbitrary trusted-core \
+             patches";
+          ] )
     | Upstream_contribution ->
-        ( [ "workspace manifests"; "workspace revisions"; "upstream reference repository" ],
+        ( [
+            "workspace manifests";
+            "workspace revisions";
+            "upstream reference repository";
+          ],
           [
             "isolate selected downstream changes";
             "identify upstream compatibility concerns";
@@ -122,12 +153,22 @@ let plan request =
             "prepare a branch/patch summary for human review";
           ],
           [ "publishing upstream remains an explicit user choice" ],
-          [ "automatic Git publication is outside the local runtime trust boundary" ] )
+          [
+            "automatic Git publication is outside the local runtime trust \
+             boundary";
+          ] )
   in
   let reusable_capabilities =
     List.sort_uniq String.compare (discovered @ reusable_capabilities)
   in
-  { layer; request; reusable_capabilities; proposed_steps; trust_notes; unresolved }
+  {
+    layer;
+    request;
+    reusable_capabilities;
+    proposed_steps;
+    trust_notes;
+    unresolved;
+  }
 
 let bullets title values =
   if values = [] then []
@@ -147,7 +188,8 @@ let drop_prefix_ci prefix text =
 let render_validation name =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before validating an extension."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before validating an extension."
   | Some workspace ->
       begin match Centl_sci_validate.validate workspace name with
       | Error message -> "Extension validation failed: " ^ message
@@ -157,7 +199,8 @@ let render_validation name =
 let render_package_validation name =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before validating a package."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before validating a package."
   | Some workspace ->
       begin match Centl_sci_package.validate workspace name with
       | Error message -> "Package validation failed: " ^ message
@@ -167,20 +210,24 @@ let render_package_validation name =
 let render_workspace_audit () =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before auditing it."
-  | Some workspace -> Centl_sci_audit.collect workspace |> Centl_sci_audit.render
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before auditing it."
+  | Some workspace ->
+      Centl_sci_audit.collect workspace |> Centl_sci_audit.render
 
 let render_dependencies () =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before inspecting dependencies."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before inspecting dependencies."
   | Some workspace ->
       Centl_sci_dependencies.validate workspace |> Centl_sci_dependencies.render
 
 let render_assurance name =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before inspecting extension assurance."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before inspecting extension assurance."
   | Some workspace ->
       begin match Centl_sci_extensions.read_manifest workspace name with
       | Error message -> "Assurance inspection failed: " ^ message
@@ -190,7 +237,8 @@ let render_assurance name =
 let render_revisions () =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before reading revision history."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before reading revision history."
   | Some workspace ->
       begin match Centl_sci_revisions.read workspace with
       | Error message -> "Revision history could not be read: " ^ message
@@ -200,7 +248,8 @@ let render_revisions () =
 let render_export target =
   match Centl_sci_workspace.default () with
   | None ->
-      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or HOME before exporting it."
+      "CENTL-SCi cannot locate the local workspace. Set CENTL_WORKSPACE or \
+       HOME before exporting it."
   | Some workspace ->
       begin match Centl_sci_portable.export workspace target with
       | Error message -> "Workspace export failed: " ^ message
@@ -222,7 +271,9 @@ let generic_text plan =
 let render_core_plan plan =
   let summary = generic_text plan in
   match Centl_sci_workspace.default () with
-  | None -> summary ^ "\n  artifact: not persisted because no local workspace is available"
+  | None ->
+      summary
+      ^ "\n  artifact: not persisted because no local workspace is available"
   | Some workspace ->
       begin match
         Centl_sci_core_plan.persist workspace ~request:plan.request
@@ -233,8 +284,7 @@ let render_core_plan plan =
       with
       | Error message -> summary ^ "\n  artifact error: " ^ message
       | Ok artifact ->
-          summary
-          ^ "\n  persisted downstream plan: " ^ artifact.markdown_path
+          summary ^ "\n  persisted downstream plan: " ^ artifact.markdown_path
           ^ "\n  machine plan: " ^ artifact.json_path
           ^ "\n  note: no trusted-core source was edited or published"
       end
@@ -251,20 +301,43 @@ let render plan =
         "what can you do";
       ]
   then
-    "Available CENTL / CENTL-SCi capabilities:\n" ^ Centl_sci_capabilities.render_all ()
+    "Available CENTL / CENTL-SCi capabilities:\n"
+    ^ Centl_sci_capabilities.render_all ()
   else if
-    List.mem request [ "assurance"; "show assurance"; "assurance levels"; "show assurance levels" ]
+    List.mem request
+      [
+        "assurance";
+        "show assurance";
+        "assurance levels";
+        "show assurance levels";
+      ]
   then Centl_sci_assurance.render_catalog ()
   else if
     List.mem request
-      [ "dependencies"; "show dependencies"; "dependency graph"; "show dependency graph" ]
+      [
+        "dependencies";
+        "show dependencies";
+        "dependency graph";
+        "show dependency graph";
+      ]
   then render_dependencies ()
   else if
-    List.mem request [ "revisions"; "show revisions"; "revision history"; "show revision history" ]
+    List.mem request
+      [
+        "revisions";
+        "show revisions";
+        "revision history";
+        "show revision history";
+      ]
   then render_revisions ()
   else if
     List.mem request
-      [ "audit workspace"; "workspace audit"; "validate workspace"; "check workspace" ]
+      [
+        "audit workspace";
+        "workspace audit";
+        "validate workspace";
+        "check workspace";
+      ]
   then render_workspace_audit ()
   else if List.mem request [ "export workspace"; "export my workspace" ] then
     render_export None
@@ -281,19 +354,30 @@ let render plan =
                 begin match drop_prefix_ci "show assurance " plan.request with
                 | Some name when name <> "" -> render_assurance name
                 | _ ->
-                    begin match drop_prefix_ci "show capability " plan.request with
+                    begin match
+                      drop_prefix_ci "show capability " plan.request
+                    with
                     | Some query when query <> "" ->
                         "Capability matches for `" ^ query ^ "`:\n"
                         ^ Centl_sci_capabilities.render_matches query
                     | _ ->
-                        begin match drop_prefix_ci "validate package " plan.request with
-                        | Some name when name <> "" -> render_package_validation name
+                        begin match
+                          drop_prefix_ci "validate package " plan.request
+                        with
+                        | Some name when name <> "" ->
+                            render_package_validation name
                         | _ ->
-                            begin match drop_prefix_ci "validate extension " plan.request with
-                            | Some name when name <> "" -> render_validation name
+                            begin match
+                              drop_prefix_ci "validate extension " plan.request
+                            with
+                            | Some name when name <> "" ->
+                                render_validation name
                             | _ ->
-                                begin match drop_prefix_ci "validate " plan.request with
-                                | Some name when name <> "" -> render_validation name
+                                begin match
+                                  drop_prefix_ci "validate " plan.request
+                                with
+                                | Some name when name <> "" ->
+                                    render_validation name
                                 | _ ->
                                     begin match plan.layer with
                                     | Core_patch -> render_core_plan plan

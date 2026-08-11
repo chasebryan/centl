@@ -50,6 +50,15 @@ require_unique_workflow_pin() {
   fi
 }
 
+require_optional_text() {
+  file=$1
+  expected=$2
+  description=$3
+  if [ -f "$file" ]; then
+    require_text "$file" "$expected" "$description"
+  fi
+}
+
 ocaml=$(lock_value runtime ocaml)
 dune=$(lock_value runtime dune)
 zarith=$(lock_value runtime zarith)
@@ -87,11 +96,12 @@ require_text .ocamlformat "version=$ocamlformat" \
   "OCamlFormat must be pinned to $ocamlformat"
 require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
   "OCamlFormat must be documented as $ocamlformat"
-require_text .github/workflows/ci.yml "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
 require_text .github/workflows/release.yml "FSTAR_VERSION: \"$fstar\"" \
   "F* must be pinned to $fstar"
-for workflow in .github/workflows/ci.yml .github/workflows/release.yml; do
+require_optional_text .github/workflows/ci.yml "FSTAR_VERSION: \"$fstar\"" \
+  "F* must be pinned to $fstar"
+for workflow in .github/workflows/release.yml .github/workflows/ci.yml; do
+  [ -f "$workflow" ] || continue
   require_text "$workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
     "F* commit must be pinned to $fstar_commit"
   require_text "$workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
@@ -106,12 +116,18 @@ require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
   "Z3 must be documented as $z3"
 require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
-require_text .github/workflows/ci.yml "version: \"$julia\"" \
+require_optional_text .github/workflows/ci.yml "version: \"$julia\"" \
   "Julia must be pinned to $julia"
 require_text .github/workflows/release.yml "version: \"$julia\"" \
   "release Julia must be pinned to $julia"
 
-require_unique_workflow_pin .github/workflows/ci.yml ocaml-base-compiler "$ocaml"
+for workflow in .github/workflows/release.yml .github/workflows/mirage.yml \
+  .github/workflows/ci.yml; do
+  [ -f "$workflow" ] || continue
+  if grep -Fq "ocaml-base-compiler." "$workflow"; then
+    require_unique_workflow_pin "$workflow" ocaml-base-compiler "$ocaml"
+  fi
+done
 for pin in \
   "ocaml-base-compiler:$ocaml" \
   "dune:$dune" \
