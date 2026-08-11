@@ -1,0 +1,46 @@
+name: Installer channels
+
+on:
+  pull_request:
+    paths:
+      - install
+      - scripts/install-interface-check.py
+      - docs/INSTALL.md
+      - docs/RELEASE-POLICY.md
+      - .github/workflows/installer-channels.yml
+  push:
+    branches:
+      - oasis
+      - mirage
+      - main
+    paths:
+      - install
+      - scripts/install-interface-check.py
+      - docs/INSTALL.md
+      - docs/RELEASE-POLICY.md
+      - .github/workflows/installer-channels.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-channels-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interface:
+    name: Oasis and Mirage installer coexistence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate POSIX shell syntax
+        run: sh -n install
+
+      - name: Run hermetic installer interface regression
+        run: python3 scripts/install-interface-check.py
