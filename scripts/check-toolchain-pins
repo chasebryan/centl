@@ -71,7 +71,6 @@ julia=$(lock_value laboratory julia)
 nemo=$(lock_value laboratory nemo)
 json3=$(lock_value laboratory json3)
 
-oasis_workflow=.github/workflows/oasis-target-qualification.yml
 release_workflow=.github/workflows/release.yml
 
 require_opam_pin ocaml "$ocaml"
@@ -90,18 +89,14 @@ require_text .ocamlformat "version=$ocamlformat" \
   "OCamlFormat must be pinned to $ocamlformat"
 require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
   "OCamlFormat must be documented as $ocamlformat"
-require_text "$oasis_workflow" "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
 require_text "$release_workflow" "FSTAR_VERSION: \"$fstar\"" \
   "F* must be pinned to $fstar"
-for workflow in "$oasis_workflow" "$release_workflow"; do
-  require_text "$workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
-    "F* commit must be pinned to $fstar_commit"
-  require_text "$workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
-    "F* archive checksum must be pinned to $fstar_sha256"
-  require_text "$workflow" "Z3_VERSION: \"$z3\"" \
-    "Z3 must be pinned to $z3"
-done
+require_text "$release_workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
+  "F* commit must be pinned to $fstar_commit"
+require_text "$release_workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
+  "F* archive checksum must be pinned to $fstar_sha256"
+require_text "$release_workflow" "Z3_VERSION: \"$z3\"" \
+  "Z3 must be pinned to $z3"
 fstar_commit_short=$(printf '%.7s' "$fstar_commit")
 require_text docs/TOOLCHAIN.md "| F* | $fstar (\`$fstar_commit_short\`) |" \
   "F* release and commit must be documented"
@@ -109,13 +104,15 @@ require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
   "Z3 must be documented as $z3"
 require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
-require_text "$oasis_workflow" "version: \"$julia\"" \
-  "Oasis Julia must be pinned to $julia"
 require_text "$release_workflow" "version: \"$julia\"" \
   "release Julia must be pinned to $julia"
 
+# The exact-SHA Oasis qualification workflow is a trusted control-plane file on
+# the default branch and intentionally does not live in release candidates.
+# Candidate quality therefore validates the candidate-owned bootstrap and
+# release surfaces; the hosted qualification run validates the control plane.
 require_text scripts/oasis-ci-bootstrap "ocaml-base-compiler.$ocaml" \
-  "Oasis OCaml must be pinned to $ocaml"
+  "Oasis OCaml bootstrap must be pinned to $ocaml"
 for pin in \
   "ocaml-base-compiler:$ocaml" \
   "dune:$dune" \
@@ -137,14 +134,12 @@ for pin in \
   remainder=${pin#*:}
   version=${remainder%%:*}
   checksum=${remainder#*:}
-  for workflow in "$oasis_workflow" "$release_workflow"; do
-    require_text "$workflow" \
-      "${variable}_VERSION: \"$version\"" \
-      "$variable must be pinned to $version"
-    require_text "$workflow" \
-      "${variable}_SHA256: \"$checksum\"" \
-      "$variable checksum must be pinned to $checksum"
-  done
+  require_text "$release_workflow" \
+    "${variable}_VERSION: \"$version\"" \
+    "$variable must be pinned to $version"
+  require_text "$release_workflow" \
+    "${variable}_SHA256: \"$checksum\"" \
+    "$variable checksum must be pinned to $checksum"
 done
 
 for package_script in scripts/package-release scripts/package-release.ps1; do
@@ -185,4 +180,4 @@ manifest_version() {
   exit 1
 }
 
-printf '%s\n' 'Toolchain manifests and workflows are synchronized.'
+printf '%s\n' 'Toolchain manifests and candidate-owned release surfaces are synchronized.'
