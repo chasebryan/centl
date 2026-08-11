@@ -75,8 +75,42 @@ let test_receipt_identity_mismatch_blocks () =
     (Centl_sci_mirage_admission.state_text candidate.state);
   Alcotest.(check bool) "exact coverage" false candidate.exact_action_coverage
 
-let test_source_block_prevents_admission () =
+let test_receipt_contract_mismatch_blocks () =
+  let action = action (String.make 64 '4') in
+  let receipt =
+    Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
+      "deterministic regression gate passed" None
+  in
+  let altered =
+    { receipt with executor = "unrelated_executor" }
+  in
+  let candidate =
+    Centl_sci_mirage_admission.assess (plan action []) (evidence altered)
+    |> only_candidate
+  in
+  Alcotest.(check string) "state" "blocked"
+    (Centl_sci_mirage_admission.state_text candidate.state);
+  Alcotest.(check bool) "exact coverage" false candidate.exact_action_coverage
+
+let test_stale_receipt_fingerprint_blocks () =
   let action = action (String.make 64 '5') in
+  let receipt =
+    Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
+      "deterministic regression gate passed" None
+  in
+  let altered =
+    { receipt with evidence = "evidence changed after receipt identity was computed" }
+  in
+  let candidate =
+    Centl_sci_mirage_admission.assess (plan action []) (evidence altered)
+    |> only_candidate
+  in
+  Alcotest.(check string) "state" "blocked"
+    (Centl_sci_mirage_admission.state_text candidate.state);
+  Alcotest.(check bool) "exact coverage" false candidate.exact_action_coverage
+
+let test_source_block_prevents_admission () =
+  let action = action (String.make 64 '6') in
   let receipt =
     Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
       "deterministic regression gate passed" None
@@ -89,7 +123,7 @@ let test_source_block_prevents_admission () =
     (Centl_sci_mirage_admission.state_text candidate.state)
 
 let test_json_denies_activation_and_promotion () =
-  let action = action (String.make 64 '6') in
+  let action = action (String.make 64 '7') in
   let receipt =
     Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
       "deterministic regression gate passed" None
@@ -99,13 +133,14 @@ let test_json_denies_activation_and_promotion () =
     |> Centl_sci_mirage_admission.to_json
   in
   let open Yojson.Safe.Util in
+  Alcotest.(check int) "schema version" 2 (json |> member "schema_version" |> to_int);
   Alcotest.(check bool) "source activation" false
     (json |> member "candidate_source_activated" |> to_bool);
   Alcotest.(check bool) "assurance promotion" false
     (json |> member "assurance_promoted" |> to_bool)
 
 let test_construct_persists_transaction_bound_assessment () =
-  let action = action (String.make 64 '7') in
+  let action = action (String.make 64 '8') in
   let receipt =
     Centl_sci_mirage_evidence.make_receipt action Centl_sci_mirage_evidence.Passed
       "deterministic regression gate passed" None
@@ -129,6 +164,8 @@ let test_construct_persists_transaction_bound_assessment () =
           let open Yojson.Safe.Util in
           Alcotest.(check string) "artifact kind" "candidate_admission_assessment"
             (json |> member "artifact_kind" |> to_string);
+          Alcotest.(check int) "schema version" 2
+            (json |> member "schema_version" |> to_int);
           Alcotest.(check int) "admissible count" 1
             (json |> member "admissible_candidate_count" |> to_int);
           Alcotest.(check bool) "source activation" false
@@ -148,6 +185,10 @@ let () =
           Alcotest.test_case "pending" `Quick test_pending_stays_pending;
           Alcotest.test_case "identity mismatch" `Quick
             test_receipt_identity_mismatch_blocks;
+          Alcotest.test_case "contract mismatch" `Quick
+            test_receipt_contract_mismatch_blocks;
+          Alcotest.test_case "stale fingerprint" `Quick
+            test_stale_receipt_fingerprint_blocks;
           Alcotest.test_case "source block" `Quick test_source_block_prevents_admission;
           Alcotest.test_case "non activation" `Quick
             test_json_denies_activation_and_promotion;
