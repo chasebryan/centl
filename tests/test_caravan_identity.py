@@ -7,6 +7,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest import mock
 
 from caravan.identity import (
     CarrierIdentity,
@@ -50,11 +51,24 @@ class CarrierIdentityTests(unittest.TestCase):
             identity_root = root / "identity"
             CarrierIdentity.create(identity_root)
 
-            os.chmod(identity_root / "identity.pem", 0o644)
-            with self.assertRaises(IdentityError):
-                CarrierIdentity.load(identity_root)
+            # Exercise the unsafe-permission rejection without ever making the
+            # real private key accessible to group/other on the test machine.
+            private_path = identity_root / "identity.pem"
+            real_lstat = os.lstat
+            private_info = real_lstat(private_path)
+            fields = list(private_info)
+            fields[0] = private_info.st_mode | stat.S_IRGRP
+            unsafe_private_info = os.stat_result(fields)
 
-            os.chmod(identity_root / "identity.pem", 0o600)
+            def lstat_with_unsafe_private(path: os.PathLike[str] | str) -> os.stat_result:
+                if Path(path) == private_path:
+                    return unsafe_private_info
+                return real_lstat(path)
+
+            with mock.patch("caravan.identity.os.lstat", side_effect=lstat_with_unsafe_private):
+                with self.assertRaises(IdentityError):
+                    CarrierIdentity.load(identity_root)
+
             real = root / "real"
             real.mkdir(mode=0o700)
             link = root / "identity-link"

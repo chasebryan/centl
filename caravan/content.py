@@ -319,7 +319,8 @@ class ContentStore:
             destination = self._object_path(identity.sha256)
             try:
                 os.link(tmp_path, destination, follow_symlinks=False)
-                os.chmod(destination, 0o444, follow_symlinks=False)
+                # CARAVAN objects are immutable and private to the local owner.
+                os.chmod(destination, 0o400, follow_symlinks=False)
             except FileExistsError:
                 existing = self.verify(identity)
                 if existing != identity:

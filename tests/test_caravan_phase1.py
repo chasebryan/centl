@@ -21,7 +21,9 @@ class ContentStoreTests(unittest.TestCase):
             identity = store.import_file(source, expected=expected)
             self.assertEqual(identity, expected)
             stored = store.path_for_verified(identity)
-            os.chmod(stored, 0o644)
+            # Make the owner able to mutate the immutable object for this
+            # negative test without granting any group/other access.
+            os.chmod(stored, 0o600)
             stored.write_bytes(b"X" + stored.read_bytes()[1:])
             with self.assertRaises(IntegrityError):
                 store.verify(identity)
