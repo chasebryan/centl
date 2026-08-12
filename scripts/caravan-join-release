@@ -90,8 +90,15 @@ for file in "$repo_root"/caravan/*.py "$repo_root/caravan/requirements-phase1.tx
   [ -f "$file" ] || fail "CARAVAN payload file missing: $file"
   cp "$file" "$stage/payload/caravan/$(basename "$file")"
 done
-cp "$repo_root/docs/CARAVAN-HOST-POLICY.md" "$stage/payload/docs/CARAVAN-HOST-POLICY.md"
-cp "$repo_root/docs/CARAVAN-THREAT-MODEL.md" "$stage/payload/docs/CARAVAN-THREAT-MODEL.md"
+for doc in \
+  CARAVAN-HOST-POLICY.md \
+  CARAVAN-THREAT-MODEL.md \
+  CARAVAN-JOIN-MANUAL.md \
+  CARAVAN-CENSUS.md \
+  CARAVAN-JOIN-RELEASE.md; do
+  [ -f "$repo_root/docs/$doc" ] || fail "CARAVAN release documentation missing: $doc"
+  cp "$repo_root/docs/$doc" "$stage/payload/docs/$doc"
+done
 cp "$repo_root/LICENSE" "$stage/payload/LICENSE"
 
 python3 - "$stage/RELEASE.json" "$VERSION" "$source_commit" "$key_sha" <<'PY'
@@ -107,6 +114,11 @@ data = {
     "mutable_repository_script_is_official": False,
     "automatic_self_update": False,
     "normal_carrier_requires_root": False,
+    "normal_carrier_requires_systemd": False,
+    "mission_selection": ["source", "releases", "semantic", "recovery"],
+    "mission_authority": "authenticated-fcf-public-approved-only",
+    "census_publication": "aggregate-only",
+    "public_node_listing": False,
     "public_network_enrollment": "disabled-until-production-protocol-release",
 }
 Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
