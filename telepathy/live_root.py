@@ -57,34 +57,62 @@ class LiveObject:
 class LiveRoot:
     """Read-only view of one CARAVAN publication generation.
 
-    The configured `current` path may itself be CARAVAN's root-owned atomic
-    symlink. Every object beneath the resolved generation must be a root-owned
-    (or explicitly configured owner), immutable regular file reached only
-    through immutable, non-symlink directories.
+    The configured root may be CARAVAN's atomic ``current`` symlink or a direct
+    generation path. Its parent is the trusted live anchor. The selected
+    generation must remain beneath that anchor, and every object beneath the
+    generation must satisfy the immutable publication contract.
     """
 
     root: Path
     required_uid: int | None = None
 
     @staticmethod
-    def _safe_mode(mode: int) -> bool:
+    def _immutable_mode(mode: int) -> bool:
         return mode & 0o222 == 0
 
-    def _require_owner_and_mode(self, st: os.stat_result, *, label: str) -> None:
+    @staticmethod
+    def _trusted_anchor_mode(mode: int) -> bool:
+        return mode & 0o022 == 0
+
+    def _require_owner(self, st: os.stat_result, *, label: str) -> None:
         if self.required_uid is not None and st.st_uid != self.required_uid:
             raise LiveRootError(f"{label} owner does not match publication policy")
-        if not self._safe_mode(st.st_mode):
+
+    def _require_immutable(self, st: os.stat_result, *, label: str) -> None:
+        self._require_owner(st, label=label)
+        if not self._immutable_mode(st.st_mode):
             raise LiveRootError(f"{label} is writable")
 
     def _resolved_generation(self) -> Path:
         try:
+            anchor = self.root.parent.resolve(strict=True)
+            anchor_stat = anchor.stat()
+            pointer_stat = self.root.lstat()
             generation = self.root.resolve(strict=True)
-            st = generation.stat()
+            generation_stat = generation.stat()
         except OSError as exc:
             raise LiveRootError("CARAVAN live generation is unavailable") from exc
-        if not stat.S_ISDIR(st.st_mode):
+
+        if not stat.S_ISDIR(anchor_stat.st_mode):
+            raise LiveRootError("CARAVAN live anchor is not a directory")
+        self._require_owner(anchor_stat, label="live anchor")
+        if not self._trusted_anchor_mode(anchor_stat.st_mode):
+            raise LiveRootError("live anchor is group/other writable")
+
+        self._require_owner(pointer_stat, label="live selector")
+        if not (stat.S_ISLNK(pointer_stat.st_mode) or stat.S_ISDIR(pointer_stat.st_mode)):
+            raise LiveRootError("live selector is neither a symlink nor directory")
+
+        try:
+            relative = generation.relative_to(anchor)
+        except ValueError as exc:
+            raise LiveRootError("CARAVAN live generation escapes the live anchor") from exc
+        if not relative.parts:
+            raise LiveRootError("CARAVAN live selector resolves to the anchor itself")
+
+        if not stat.S_ISDIR(generation_stat.st_mode):
             raise LiveRootError("CARAVAN live generation is not a directory")
-        self._require_owner_and_mode(st, label="live generation")
+        self._require_immutable(generation_stat, label="live generation")
         return generation
 
     @staticmethod
@@ -113,7 +141,7 @@ class LiveRoot:
                 raise LiveRootError("live object is unavailable") from exc
             if stat.S_ISLNK(st.st_mode):
                 raise LiveRootError("symbolic links are forbidden inside live generation")
-            self._require_owner_and_mode(st, label="live object")
+            self._require_immutable(st, label="live object")
             if index < len(parts) - 1:
                 if not stat.S_ISDIR(st.st_mode):
                     raise LiveRootError("live path component is not a directory")
