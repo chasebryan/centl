@@ -88,8 +88,11 @@ for path in \
   "$repo_root/scripts/caravan-public-origin-source-guard.py" \
   "$repo_root/scripts/caravan-public-origin-activate-gate" \
   "$repo_root/scripts/caravan-public-origin-firewall" \
+  "$repo_root/scripts/caravan-public-origin-cert-deploy" \
   "$repo_root/scripts/caravan-public-origin-audit" \
   "$infra/fcf-caravan-firewall.service" \
+  "$infra/fcf-caravan-cert-renew.service" \
+  "$infra/fcf-caravan-cert-renew.timer" \
   "$infra/fcf-caravan-ingest.service" \
   "$infra/fcf-caravan-ingest.timer" \
   "$infra/fcf-caravan-candidate.service" \
@@ -218,7 +221,7 @@ systemctl is-active ufw > "$preinstall_backup/ufw-active" 2>&1 || true
 rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf 2>/dev/null || true
 for dir in /etc/nginx/sites-enabled /etc/nginx/conf.d; do
   [ -d "$dir" ] || continue
-  unrelated=$(find "$dir" -mindepth 1 -maxdepth 1 -type f \
+  unrelated=$(find "$dir" -mindepth 1 -maxdepth 1 \
     ! -name 'fcf-caravan.conf' ! -name 'fcf-caravan' -print -quit 2>/dev/null || true)
   [ -z "$unrelated" ] || fail "unrelated nginx configuration exists: $unrelated"
 done
@@ -252,6 +255,7 @@ for script in \
   caravan-public-origin-source-guard.py \
   caravan-public-origin-activate-gate \
   caravan-public-origin-firewall \
+  caravan-public-origin-cert-deploy \
   caravan-public-origin-audit \
   caravan-linux-platform; do
   install -o root -g root -m 0755 "$repo_root/scripts/$script" "/usr/local/libexec/fcf-caravan/$script"
@@ -266,6 +270,7 @@ install -o root -g root -m 0644 "$repo_root/scripts/integrity.py" /usr/local/lib
 
 for unit in \
   fcf-caravan-firewall.service \
+  fcf-caravan-cert-renew.service fcf-caravan-cert-renew.timer \
   fcf-caravan-ingest.service fcf-caravan-ingest.timer \
   fcf-caravan-candidate.service fcf-caravan-candidate.timer \
   fcf-caravan-activate.service fcf-caravan-activate.timer; do
@@ -433,10 +438,12 @@ fi
 
 say "[8/9] Qualifying public TLS..."
 certbot certonly --non-interactive --agree-tos --email "$EMAIL" \
-  --webroot -w /var/lib/letsencrypt -d "$DOMAIN"
+  --webroot -w /var/lib/letsencrypt -d "$DOMAIN" \
+  --deploy-hook /usr/local/libexec/fcf-caravan/caravan-public-origin-cert-deploy
 render_nginx "$infra/nginx-fcf-caravan.conf.in" "$site"
 nginx -t >/dev/null 2>&1 || fail "final nginx TLS configuration failed validation"
 systemctl restart nginx
+systemctl enable --now fcf-caravan-cert-renew.timer >/dev/null
 
 say "[9/9] Throwing rocks at the tent..."
 /usr/local/libexec/fcf-caravan/caravan-public-origin-audit
