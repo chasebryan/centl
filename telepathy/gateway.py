@@ -33,9 +33,9 @@ def _require_loopback_literal(host: str, *, field: str) -> None:
     try:
         address = ipaddress.ip_address(host)
     except ValueError as exc:
-        raise ValueError(f"{field} must be a loopback IP literal") from exc
-    if not address.is_loopback:
-        raise ValueError(f"{field} must be loopback-only")
+        raise ValueError(f"{field} must be an IPv4 loopback literal") from exc
+    if not isinstance(address, ipaddress.IPv4Address) or not address.is_loopback:
+        raise ValueError(f"{field} must be an IPv4 loopback literal")
 
 
 def _require_port(port: int, *, field: str) -> None:
@@ -68,7 +68,12 @@ class _TelepathyHTTPServer(ThreadingHTTPServer):
     request_queue_size = 16
     allow_reuse_address = True
 
-    def __init__(self, server_address: tuple[str, int], handler: type[BaseHTTPRequestHandler], max_workers: int) -> None:
+    def __init__(
+        self,
+        server_address: tuple[str, int],
+        handler: type[BaseHTTPRequestHandler],
+        max_workers: int,
+    ) -> None:
         self._worker_slots = threading.BoundedSemaphore(max_workers)
         super().__init__(server_address, handler)
 
@@ -135,24 +140,35 @@ class TelepathyGateway:
                     self.wfile.write(body)
 
             def _request_shape_allowed(self) -> bool:
-                if self.headers.get("Transfer-Encoding") is not None:
+                transfer_values = self.headers.get_all("Transfer-Encoding", []) or []
+                if transfer_values:
                     self._deny(400, "transfer-encoded requests are forbidden")
                     return False
-                if self.headers.get("Expect") is not None:
+
+                expect_values = self.headers.get_all("Expect", []) or []
+                if expect_values:
                     self._deny(400, "expectation requests are forbidden")
                     return False
-                length = self.headers.get("Content-Length")
-                if length is not None:
+
+                length_values = self.headers.get_all("Content-Length", []) or []
+                if len(length_values) > 1:
+                    self._deny(400, "ambiguous content length is forbidden")
+                    return False
+                if length_values:
                     try:
-                        parsed = int(length, 10)
+                        parsed = int(length_values[0], 10)
                     except ValueError:
                         self._deny(400, "invalid content length")
                         return False
                     if parsed != 0:
                         self._deny(400, "request bodies are forbidden")
                         return False
-                range_value = self.headers.get("Range")
-                if range_value is not None and _SINGLE_RANGE.fullmatch(range_value.strip()) is None:
+
+                range_values = self.headers.get_all("Range", []) or []
+                if len(range_values) > 1:
+                    self._deny(400, "multiple range headers are forbidden")
+                    return False
+                if range_values and _SINGLE_RANGE.fullmatch(range_values[0].strip()) is None:
                     self._deny(400, "only one canonical byte range is permitted")
                     return False
                 return True
