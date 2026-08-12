@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from http.client import HTTPConnection
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import os
 from pathlib import Path
 import socket
@@ -32,84 +31,54 @@ def free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def make_live_root(base: Path, *, writable_index: bool = False, symlink_index: bool = False) -> Path:
-    live = base / "live"
-    generation = live / "generations" / "20260812T110000Z-1"
-    source = generation / "source"
-    source.mkdir(parents=True)
-    (generation / "index.html").write_bytes(b"fcf caravan\n")
-    if symlink_index:
-        (source / "INDEX.json").symlink_to("/etc/passwd")
-    else:
-        (source / "INDEX.json").write_bytes(b'{"schema":"test"}\n')
-
-    for path in (generation / "index.html", source / "INDEX.json"):
-        if not path.is_symlink():
-            path.chmod(0o644 if writable_index and path.name == "INDEX.json" else 0o444)
-    source.chmod(0o555)
-    generation.chmod(0o555)
-    (live / "current").symlink_to(Path("generations") / generation.name)
-    return live / "current"
+def freeze_tree(root: Path) -> None:
+    for path in sorted(root.rglob("*"), key=lambda item: len(item.parts), reverse=True):
+        if path.is_symlink():
+            continue
+        path.chmod(0o555 if path.is_dir() else 0o444)
+    root.chmod(0o555)
 
 
-class OriginHandler(BaseHTTPRequestHandler):
-    calls: list[tuple[str, str]] = []
-    last_headers: dict[str, str] = {}
+def make_generation(base: Path, name: str, *, marker: bytes) -> Path:
+    generation = base / name
+    for directory in ("source", "caravan", "releases/v0.14.0", "semantic"):
+        (generation / directory).mkdir(parents=True, exist_ok=True)
 
-    def log_message(self, _format: str, *args: object) -> None:
-        return
+    files = {
+        "index.html": marker,
+        "robots.txt": b"User-agent: *\nDisallow: /\n",
+        "status.json": b'{"status":"approved"}\n',
+        "SHA256SUMS": b"0" * 64 + b"  index.html\n",
+        "source/INDEX.json": b'{"source":"approved"}\n',
+        "source/centl-main.tar.gz": b"main-source",
+        "source/centl-oasis.tar.gz": b"oasis-source",
+        "source/centl-mirage.tar.gz": b"mirage-source",
+        "caravan/catalog-v1.json": b'{"catalog":"approved"}\n',
+        "caravan/CATALOG-STATUS": b"authenticated-by-fcf\n",
+        "caravan/INGEST-STATUS.json": b'{"ingest":"approved"}\n',
+        "releases/v0.14.0/centl.tar.gz": b"0123456789abcdef",
+        "semantic/catalog.json": b'{"semantic":"approved"}\n',
+    }
+    for relative, content in files.items():
+        (generation / relative).write_bytes(content)
 
-    def _record(self) -> None:
-        type(self).calls.append((self.command, self.path))
-        type(self).last_headers = {key.lower(): value for key, value in self.headers.items()}
-
-    def do_GET(self) -> None:
-        self._record()
-        if self.path == "/releases/redirect":
-            self.send_response(302)
-            self.send_header("Location", "https://example.invalid/")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
-        body = b"approved-caravan-cargo\n"
-        self.send_response(200)
-        self.send_header("Content-Type", "application/octet-stream")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("X-Origin-Secret", "must-not-cross")
-        self.end_headers()
-        self.wfile.write(body)
-
-    def do_HEAD(self) -> None:
-        self._record()
-        self.send_response(200)
-        self.send_header("Content-Length", "0")
-        self.end_headers()
-
-    def do_POST(self) -> None:
-        self._record()
-        self.send_response(500)
-        self.end_headers()
+    freeze_tree(generation)
+    return generation
 
 
-class RunningOrigin:
-    def __init__(self) -> None:
-        OriginHandler.calls = []
-        OriginHandler.last_headers = {}
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), OriginHandler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+def point_current(base: Path, generation: Path) -> Path:
+    current = base / "current"
+    current.unlink(missing_ok=True)
+    current.symlink_to(generation, target_is_directory=True)
+    return current
 
-    @property
-    def port(self) -> int:
-        return int(self.server.server_address[1])
 
-    def __enter__(self) -> "RunningOrigin":
-        self.thread.start()
-        return self
-
-    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
-        self.server.shutdown()
-        self.thread.join(timeout=2.0)
-        self.server.server_close()
+def gateway_config(current: Path, *, listen_port: int) -> GatewayConfig:
+    return GatewayConfig(
+        listen_port=listen_port,
+        live_root=current,
+        live_root_uid=os.getuid(),
+    )
 
 
 class EmptyTCPHandler(socketserver.BaseRequestHandler):
@@ -205,31 +174,32 @@ class PolicyTests(unittest.TestCase):
             with self.assertRaises(PolicyError, msg=target):
                 self.policy.authorize("GET", target)
 
-    def test_gateway_config_requires_loopback_literals(self) -> None:
+    def test_gateway_config_requires_loopback_and_absolute_live_root(self) -> None:
         with self.assertRaises(ValueError):
             GatewayConfig(listen_host="0.0.0.0")
         with self.assertRaises(ValueError):
-            GatewayConfig(upstream_host="192.0.2.10")
-        with self.assertRaises(ValueError):
-            GatewayConfig(upstream_host="localhost")
+            GatewayConfig(listen_host="localhost")
         with self.assertRaises(ValueError):
             GatewayConfig(listen_host="::1")
+        with self.assertRaises(ValueError):
+            GatewayConfig(live_root=Path("relative/current"))
+        with self.assertRaises(ValueError):
+            GatewayConfig(live_root_uid=-1)
 
 
 class GatewayTests(unittest.TestCase):
-    def test_allowed_read_reaches_only_fixed_origin_and_strips_headers(self) -> None:
-        with RunningOrigin() as origin:
+    def test_allowed_read_comes_only_from_activated_live_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            marker = b"approved-caravan-cargo\n"
+            current = point_current(base, make_generation(base, "generation-1", marker=marker))
             gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(
-                    listen_port=gateway_port,
-                    upstream_port=origin.port,
-                )
-            ):
+
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
                 conn.request(
                     "GET",
-                    "/source/INDEX.json",
+                    "/",
                     headers={
                         "Host": "attacker.invalid",
                         "Authorization": "Bearer secret",
@@ -242,33 +212,50 @@ class GatewayTests(unittest.TestCase):
                 conn.close()
 
             self.assertEqual(response.status, 200)
-            self.assertEqual(body, b"approved-caravan-cargo\n")
-            self.assertEqual(OriginHandler.calls, [("GET", "/source/INDEX.json")])
-            self.assertNotIn("authorization", OriginHandler.last_headers)
-            self.assertNotIn("x-forwarded-for", OriginHandler.last_headers)
-            self.assertNotEqual(OriginHandler.last_headers.get("host"), "attacker.invalid")
-            self.assertNotIn("x-origin-secret", headers)
+            self.assertEqual(body, marker)
+            self.assertEqual(headers.get("x-content-type-options"), "nosniff")
+            self.assertEqual(headers.get("x-frame-options"), "DENY")
+            self.assertNotIn("authorization", headers)
+            self.assertNotIn("x-forwarded-for", headers)
 
-    def test_denied_method_never_reaches_origin(self) -> None:
-        with RunningOrigin() as origin:
+    def test_denied_method_and_path_do_not_touch_public_cargo(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            current = point_current(
+                base,
+                make_generation(base, "generation-1", marker=b"immutable\n"),
+            )
+            status_path = current.resolve() / "status.json"
+            before = status_path.read_bytes()
             gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(listen_port=gateway_port, upstream_port=origin.port)
-            ):
+
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
                 conn.request("POST", "/status.json")
                 response = conn.getresponse()
                 response.read()
                 conn.close()
-            self.assertEqual(response.status, 405)
-            self.assertEqual(OriginHandler.calls, [])
+                self.assertEqual(response.status, 405)
 
-    def test_request_body_and_multiple_range_are_rejected(self) -> None:
-        with RunningOrigin() as origin:
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/etc/passwd")
+                response = conn.getresponse()
+                response.read()
+                conn.close()
+                self.assertEqual(response.status, 403)
+
+            self.assertEqual(status_path.read_bytes(), before)
+
+    def test_request_body_multiple_range_and_unsatisfiable_range_are_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            current = point_current(
+                base,
+                make_generation(base, "generation-1", marker=b"immutable\n"),
+            )
             gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(listen_port=gateway_port, upstream_port=origin.port)
-            ):
+
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
                 conn.request("GET", "/status.json", body=b"x")
                 response = conn.getresponse()
@@ -282,96 +269,112 @@ class GatewayTests(unittest.TestCase):
                 response.read()
                 self.assertEqual(response.status, 400)
                 conn.close()
-            self.assertEqual(OriginHandler.calls, [])
 
-    def test_upstream_redirect_is_not_relayed(self) -> None:
-        with RunningOrigin() as origin:
-            gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(listen_port=gateway_port, upstream_port=origin.port)
-            ):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("GET", "/releases/redirect")
+                conn.request("GET", "/status.json", headers={"Range": "bytes=999-1000"})
                 response = conn.getresponse()
                 response.read()
                 headers = {key.lower(): value for key, value in response.getheaders()}
+                self.assertEqual(response.status, 416)
+                self.assertIn("content-range", headers)
                 conn.close()
-            self.assertEqual(response.status, 502)
-            self.assertNotIn("location", headers)
 
-
-class LiveRootGatewayTests(unittest.TestCase):
-    def test_atomic_current_symlink_serves_immutable_generation(self) -> None:
+    def test_single_range_head_and_etag_revalidation(self) -> None:
         with tempfile.TemporaryDirectory() as td:
-            current = make_live_root(Path(td))
+            base = Path(td)
+            current = point_current(
+                base,
+                make_generation(base, "generation-1", marker=b"immutable\n"),
+            )
             gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(
-                    listen_port=gateway_port,
-                    live_root=current,
-                    live_root_uid=os.geteuid(),
-                )
-            ):
-                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("GET", "/source/INDEX.json")
-                response = conn.getresponse()
-                body = response.read()
-                self.assertEqual(response.status, 200)
-                self.assertEqual(body, b'{"schema":"test"}\n')
-                self.assertEqual(response.getheader("Accept-Ranges"), "bytes")
-                conn.close()
 
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("GET", "/source/INDEX.json", headers={"Range": "bytes=0-7"})
+                conn.request(
+                    "GET",
+                    "/releases/v0.14.0/centl.tar.gz",
+                    headers={"Range": "bytes=2-5"},
+                )
                 response = conn.getresponse()
                 body = response.read()
+                headers = {key.lower(): value for key, value in response.getheaders()}
+                conn.close()
                 self.assertEqual(response.status, 206)
-                self.assertEqual(body, b'{"schema')
-                self.assertEqual(response.getheader("Content-Range"), "bytes 0-7/18")
-                conn.close()
+                self.assertEqual(body, b"2345")
+                self.assertEqual(headers.get("content-range"), "bytes 2-5/16")
 
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("HEAD", "/source/INDEX.json")
+                conn.request("HEAD", "/releases/v0.14.0/centl.tar.gz")
                 response = conn.getresponse()
+                body = response.read()
+                head_headers = {key.lower(): value for key, value in response.getheaders()}
+                conn.close()
                 self.assertEqual(response.status, 200)
-                self.assertEqual(response.read(), b"")
+                self.assertEqual(body, b"")
+                self.assertEqual(head_headers.get("content-length"), "16")
+
+                etag = head_headers["etag"]
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request(
+                    "GET",
+                    "/releases/v0.14.0/centl.tar.gz",
+                    headers={"If-None-Match": etag},
+                )
+                response = conn.getresponse()
+                body = response.read()
+                conn.close()
+                self.assertEqual(response.status, 304)
+                self.assertEqual(body, b"")
+
+    def test_writable_objects_and_internal_symlinks_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            generation = make_generation(base, "generation-1", marker=b"immutable\n")
+
+            writable = generation / "semantic" / "writable.bin"
+            (generation / "semantic").chmod(0o755)
+            writable.write_bytes(b"must-not-serve")
+            writable.chmod(0o644)
+            (generation / "semantic").chmod(0o555)
+
+            link = generation / "releases" / "escape"
+            (generation / "releases").chmod(0o755)
+            link.symlink_to("/etc/passwd")
+            (generation / "releases").chmod(0o555)
+
+            current = point_current(base, generation)
+            gateway_port = free_port()
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
+                for path in ("/semantic/writable.bin", "/releases/escape"):
+                    conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                    conn.request("GET", path)
+                    response = conn.getresponse()
+                    response.read()
+                    conn.close()
+                    self.assertEqual(response.status, 404, msg=path)
+
+    def test_atomic_current_switch_changes_generation_without_reconfiguring_daemon(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            first = make_generation(base, "generation-1", marker=b"first\n")
+            second = make_generation(base, "generation-2", marker=b"second\n")
+            current = point_current(base, first)
+            gateway_port = free_port()
+
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/")
+                response = conn.getresponse()
+                self.assertEqual(response.read(), b"first\n")
                 conn.close()
 
-    def test_live_root_rejects_symlink_object(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            current = make_live_root(Path(td), symlink_index=True)
-            gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(
-                    listen_port=gateway_port,
-                    live_root=current,
-                    live_root_uid=os.geteuid(),
-                )
-            ):
-                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("GET", "/source/INDEX.json")
-                response = conn.getresponse()
-                response.read()
-                conn.close()
-            self.assertEqual(response.status, 404)
+                point_current(base, second)
 
-    def test_live_root_rejects_writable_object(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            current = make_live_root(Path(td), writable_index=True)
-            gateway_port = free_port()
-            with TelepathyGateway(
-                GatewayConfig(
-                    listen_port=gateway_port,
-                    live_root=current,
-                    live_root_uid=os.geteuid(),
-                )
-            ):
                 conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
-                conn.request("GET", "/source/INDEX.json")
+                conn.request("GET", "/")
                 response = conn.getresponse()
-                response.read()
+                self.assertEqual(response.read(), b"second\n")
                 conn.close()
-            self.assertEqual(response.status, 404)
 
 
 class TorCarrierTests(unittest.TestCase):
@@ -484,6 +487,8 @@ class NamingAndCLITests(unittest.TestCase):
         )
         self.assertEqual(serve_help.returncode, 0, msg=serve_help.stderr)
         self.assertIn("--caravan-live-root", serve_help.stdout)
+        self.assertNotIn("--upstream-host", serve_help.stdout)
+        self.assertNotIn("--upstream-port", serve_help.stdout)
 
 
 if __name__ == "__main__":
