@@ -1,0 +1,32 @@
+name: Semantic origin
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/model-origin-export.py'
+      - 'tests/test_model_origin_export.py'
+      - 'docs/SEMANTIC-ORIGIN.md'
+      - '.github/workflows/semantic-origin.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Fail-closed semantic publication
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Compile exporter and tests
+        run: |
+          python3 -m py_compile \
+            scripts/model-origin-export.py \
+            tests/test_model_origin_export.py
+
+      - name: Run semantic-origin adversarial tests
+        run: python3 -m unittest discover -s tests -p 'test_model_origin_export.py'
