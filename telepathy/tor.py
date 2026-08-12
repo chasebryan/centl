@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from http.client import HTTPConnection, HTTPException
 import ipaddress
 import os
 from pathlib import Path
 import re
 import shutil
 import signal
-import socket
 import subprocess
 import time
 
@@ -21,14 +21,20 @@ def _require_loopback_literal(host: str) -> None:
     try:
         address = ipaddress.ip_address(host)
     except ValueError as exc:
-        raise ValueError("telepathy_host must be a loopback IP literal") from exc
-    if not address.is_loopback:
-        raise ValueError("telepathy_host must be loopback-only")
+        raise ValueError("telepathy_host must be an IPv4 loopback literal") from exc
+    if not isinstance(address, ipaddress.IPv4Address) or not address.is_loopback:
+        raise ValueError("telepathy_host must be an IPv4 loopback literal")
 
 
 def _require_port(port: int, *, field: str) -> None:
     if not 1 <= port <= 65535:
         raise ValueError(f"{field} must be between 1 and 65535")
+
+
+def _require_torrc_safe_path(path: Path, *, field: str) -> None:
+    value = str(path)
+    if any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in value):
+        raise ValueError(f"{field} contains a control character unsafe for torrc")
 
 
 @dataclass(frozen=True)
@@ -45,6 +51,7 @@ class TorOnionConfig:
         _require_loopback_literal(self.telepathy_host)
         _require_port(self.telepathy_port, field="telepathy_port")
         _require_port(self.virtual_port, field="virtual_port")
+        _require_torrc_safe_path(self.state_dir, field="state_dir")
         if self.startup_timeout <= 0:
             raise ValueError("startup_timeout must be positive")
         if self.gateway_probe_timeout <= 0:
@@ -193,16 +200,29 @@ class TorOnionCarrier:
         return hostname
 
     def _require_gateway(self) -> None:
+        connection = HTTPConnection(
+            self.config.telepathy_host,
+            self.config.telepathy_port,
+            timeout=self.config.gateway_probe_timeout,
+        )
         try:
-            with socket.create_connection(
-                (self.config.telepathy_host, self.config.telepathy_port),
-                timeout=self.config.gateway_probe_timeout,
-            ):
-                pass
-        except OSError as exc:
+            connection.request("HEAD", "/")
+            response = connection.getresponse()
+            response.read()
+            server = response.getheader("Server") or ""
+            if response.status != 200 or not server.startswith("fcf-telepathyd/"):
+                raise CarrierError(
+                    "loopback target is not a healthy fcf-telepathyd gateway; "
+                    "refusing to publish"
+                )
+        except CarrierError:
+            raise
+        except (OSError, TimeoutError, HTTPException) as exc:
             raise CarrierError(
                 "fcf-telepathyd loopback gateway is not reachable; refusing to publish"
             ) from exc
+        finally:
+            connection.close()
 
     def probe(self) -> CarrierStatus:
         binary = self._tor_binary()
