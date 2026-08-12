@@ -5,17 +5,15 @@
   $ mkdir -p home
 
   $ HOME="$PWD/home" SHELL=/bin/bash ../install --archive "$PWD/centl-linux-x86_64.tar.gz" --prefix "$PWD/prefix"
-  Installed CENTL 0.0.0-test at $TESTCASE_ROOT/prefix/share/centl/versions/0.0.0-test
-  Command: $TESTCASE_ROOT/prefix/bin/centl
-  Physics command: $TESTCASE_ROOT/prefix/bin/centl-physics
-  Scientific command: $TESTCASE_ROOT/prefix/bin/centl-sci
-  
-  CENTL-SCi is ready.
+  Installed CENTL oasis channel, build 0.0.0-test at $TESTCASE_ROOT/prefix/share/centl/channels/oasis/0.0.0-test
+  Channel command: $TESTCASE_ROOT/prefix/bin/oasis-centl
+  Channel physics command: $TESTCASE_ROOT/prefix/bin/oasis-centl-physics
+  Channel scientific command: $TESTCASE_ROOT/prefix/bin/oasis-centl-sci
+  Stable command: $TESTCASE_ROOT/prefix/bin/centl
   PATH configured in $TESTCASE_ROOT/home/.bashrc for new shells.
-  Open a new terminal and run: centl-sci
-  Or start now with:
-    export PATH='$TESTCASE_ROOT/prefix/bin':"$PATH"
-    centl-sci
+  Open a new terminal to use the installed commands.
+  
+  Oasis is ready. Start with: centl-sci
 
   $ "$PWD/prefix/bin/centl" numbers are exact
   centl fixture numbers are exact
@@ -33,7 +31,7 @@
   > 
 
   $ HOME="$PWD/home" SHELL=/bin/bash ../install --archive "$PWD/centl-linux-x86_64.tar.gz" --prefix "$PWD/prefix" 2>&1
-  centl install: CENTL 0.0.0-test is already installed at $TESTCASE_ROOT/prefix/share/centl/versions/0.0.0-test
+  centl install: CENTL oasis build 0.0.0-test is already installed at $TESTCASE_ROOT/prefix/share/centl/channels/oasis/0.0.0-test
   [1]
 
   $ HOME="$PWD/home" SHELL=/bin/bash ../install --archive "$PWD/centl-linux-x86_64.tar.gz" --version 9.9.9 --prefix "$PWD/other" 2>&1

@@ -82,9 +82,13 @@ let compact_coefficient ~variable token =
     if String.sub token offset variable_length <> variable then None
     else canonical_number (String.sub token 0 offset)
 
+let powered_variable ~variable token =
+  token = variable ^ "^2" || token = variable ^ "^3"
+
 let parse_term ~variable = function
   | token :: "squared" :: rest when token = variable ->
       Some (variable ^ "^2", rest)
+  | token :: rest when powered_variable ~variable token -> Some (token, rest)
   | token :: rest when token = variable -> Some (variable, rest)
   | coefficient :: token :: "squared" :: rest
     when token = variable && Option.is_some (canonical_number coefficient) ->
@@ -141,9 +145,23 @@ let parse_expression ~variable text =
       | None -> None
       end
 
+let identifier_before_power token =
+  let power_suffixes = [ "^2"; "^3" ] in
+  let rec choose = function
+    | [] -> None
+    | suffix :: rest ->
+        if String.ends_with ~suffix token then
+          let length = String.length token - String.length suffix in
+          let candidate = String.sub token 0 length in
+          if valid_identifier candidate then Some candidate else None
+        else choose rest
+  in
+  choose power_suffixes
+
 let infer_leading_variable body =
   match words body with
   | variable :: _ when valid_identifier variable -> Some variable
+  | powered :: _ -> identifier_before_power powered
   | _ -> None
 
 let interpret problem =
