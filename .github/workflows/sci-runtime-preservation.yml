@@ -45,6 +45,9 @@ jobs:
           grep -F 'git clone --quiet /mirror/project/centl.bundle' scripts/capsule-run
           grep -F 'cp "$repo_root/scripts/capsule-run" "$recovery_dir/capsule-run"' scripts/capsule-build
           grep -F 'current_commit" = "$mirror_source_commit' scripts/capsule-build
+          grep -F 'libgmp-dev' infra/offline-build/Containerfile
+          grep -F "pkg-config --modversion gmp" infra/offline-build/Containerfile
+          grep -F "opam list --switch=centl --installed --short" infra/offline-build/Containerfile
           grep -F -- "-DCMAKE_CXX_FLAGS='-march=x86-64 -mtune=generic'" infra/offline-build/Containerfile
           grep -F -- '-DGGML_SSE42=OFF' infra/offline-build/Containerfile
           grep -F -- '-DGGML_AVX=OFF' infra/offline-build/Containerfile
@@ -54,11 +57,27 @@ jobs:
           grep -F -- '-DGGML_F16C=OFF' infra/offline-build/Containerfile
           grep -F 'qemu-x86_64 -cpu Conroe' infra/offline-build/Containerfile
 
-      - name: Install reference compiler tools
+      - name: Install reference compiler and opam tools
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
-            build-essential cmake git qemu-user
+            build-essential cmake git libgmp-dev opam qemu-user
+
+      - name: Prove exact capsule opam package set resolves
+        env:
+          OPAMROOT: ${{ runner.temp }}/centl-opam-smoke
+          OPAMYES: "1"
+        run: |
+          set -eux
+          dpkg-query -W -f='${Status}\n' libgmp-dev | grep -Fqx 'install ok installed'
+          opam init --bare --disable-sandboxing
+          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2
+          opam install --switch=centl --assume-depexts \
+            alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
+            yojson.2.2.2 zarith.1.14
+          for package in alcotest dune ocamlformat qcheck yojson zarith; do
+            opam list --switch=centl --installed --short | grep -Fqx "$package"
+          done
 
       - name: Build exact pinned llama-cli target
         run: |
