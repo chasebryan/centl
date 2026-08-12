@@ -11,6 +11,12 @@ on:
       - 'src/ocaml/centl_sci_mirage_goal.ml'
       - 'src/ocaml/centl_sci_mirage_obligation.ml'
       - 'src/ocaml/centl_sci_mirage_candidate.ml'
+      - 'src/ocaml/centl_sci_mirage_materialize.ml'
+      - 'src/ocaml/centl_sci_mirage_readiness.ml'
+      - 'src/ocaml/centl_sci_mirage_execution_plan.ml'
+      - 'src/ocaml/centl_sci_mirage_evidence.ml'
+      - 'src/ocaml/centl_sci_mirage_admission.ml'
+      - 'src/ocaml/centl_sci_mirage_review.ml'
       - 'src/mirage_main.ml'
       - 'src/dune'
       - 'tests/mirage/**'
@@ -26,6 +32,12 @@ on:
       - 'src/ocaml/centl_sci_mirage_goal.ml'
       - 'src/ocaml/centl_sci_mirage_obligation.ml'
       - 'src/ocaml/centl_sci_mirage_candidate.ml'
+      - 'src/ocaml/centl_sci_mirage_materialize.ml'
+      - 'src/ocaml/centl_sci_mirage_readiness.ml'
+      - 'src/ocaml/centl_sci_mirage_execution_plan.ml'
+      - 'src/ocaml/centl_sci_mirage_evidence.ml'
+      - 'src/ocaml/centl_sci_mirage_admission.ml'
+      - 'src/ocaml/centl_sci_mirage_review.ml'
       - 'src/mirage_main.ml'
       - 'src/dune'
       - 'tests/mirage/**'
@@ -77,3 +89,158 @@ jobs:
 
       - name: Check patch whitespace
         run: git diff --check HEAD^
+
+  publish-channel:
+    name: Publish installable Mirage channel
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/mirage'
+    needs: bootstrap
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    concurrency:
+      group: centl-distribution-writer
+      cancel-in-progress: false
+    env:
+      FSTAR_VERSION: '2026.07.05'
+      FSTAR_SHA256: '23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4'
+      ASSET: centl-linux-x86_64.tar.gz
+
+    steps:
+      - name: Check out exact Mirage source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential ca-certificates curl m4 opam pkg-config tar \
+            libflint-dev libgmp-dev libmpfr-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install pinned CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Build and test development product
+        run: |
+          set -euo pipefail
+          opam exec -- dune build \
+            src/main.exe src/physics_main.exe src/sci_main.exe src/mirage_main.exe
+          opam exec -- dune runtest tests/mirage
+          test "$(opam exec -- _build/default/src/main.exe '0.1 + 0.2')" = '3/10'
+
+      - name: Obtain F* license for package notices
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/fstar.tar.gz"
+          curl --fail --silent --show-error --location \
+            "https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz" \
+            --output "$archive"
+          printf '%s  %s\n' "$FSTAR_SHA256" "$archive" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/fstar"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/fstar"
+          license=$(find "$RUNNER_TEMP/fstar" -type f -name LICENSE -print -quit)
+          test -n "$license"
+          printf 'CENTL_FSTAR_LICENSE=%s\n' "$license" >> "$GITHUB_ENV"
+
+      - name: Package Mirage development build
+        run: |
+          set -euo pipefail
+          reported=$(opam exec -- _build/default/src/main.exe --version)
+          version=${reported#centl }
+          test -n "$version"
+          mkdir -p "$RUNNER_TEMP/mirage-package"
+          CENTL_FSTAR_LICENSE="$CENTL_FSTAR_LICENSE" \
+            opam exec -- scripts/package-release "$version" "$RUNNER_TEMP/mirage-package"
+
+          unpack="$RUNNER_TEMP/mirage-unpack"
+          mkdir -p "$unpack"
+          tar -xzf "$RUNNER_TEMP/mirage-package/$ASSET" -C "$unpack"
+          cp scripts/release-launcher "$unpack/centl/bin/centl-mirage"
+          cp _build/default/src/mirage_main.exe "$unpack/centl/libexec/centl-mirage"
+          chmod 755 "$unpack/centl/bin/centl-mirage" "$unpack/centl/libexec/centl-mirage"
+          printf '%s\n' 'mirage' > "$unpack/centl/CHANNEL"
+          printf '%s\n' "$GITHUB_SHA" > "$unpack/centl/SOURCE-COMMIT"
+          printf '%s\n' \
+            'This is a rolling CENTL Mirage development build.' \
+            'It is not an Oasis release and does not inherit Oasis qualification.' \
+            > "$unpack/centl/MIRAGE-NOTICE"
+
+          rm -f "$RUNNER_TEMP/mirage-package/$ASSET" \
+            "$RUNNER_TEMP/mirage-package/$ASSET.sha256"
+          tar -czf "$RUNNER_TEMP/mirage-package/$ASSET" -C "$unpack" centl
+          sha256sum "$RUNNER_TEMP/mirage-package/$ASSET" \
+            > "$RUNNER_TEMP/mirage-package/$ASSET.sha256"
+          printf '%s\n' "$version" > "$RUNNER_TEMP/mirage-package/VERSION"
+
+      - name: Smoke-test channel installer locally
+        run: |
+          set -euo pipefail
+          prefix="$RUNNER_TEMP/mirage-install"
+          sh install --channel mirage \
+            --archive "$RUNNER_TEMP/mirage-package/$ASSET" \
+            --prefix "$prefix" --no-path
+          test "$("$prefix/bin/mirage-centl" '0.1 + 0.2')" = '3/10'
+          test "$("$prefix/bin/mirage-centl-sci" 'What is 0.1 plus 0.2?')" = '3/10'
+          installed=$(readlink -f "$prefix/bin/mirage-centl")
+          root=$(CDPATH= cd -- "$(dirname -- "$installed")/.." && pwd)
+          test -x "$root/bin/centl-mirage"
+          "$root/bin/centl-mirage" --help >/dev/null
+
+      - name: Publish rolling and immutable Mirage channel paths
+        run: |
+          set -euo pipefail
+          version=$(cat "$RUNNER_TEMP/mirage-package/VERSION")
+          build_id="$GITHUB_SHA"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin distribution
+          git switch --force-create distribution origin/distribution
+
+          build_dir="channels/mirage/builds/$build_id"
+          latest_dir="channels/mirage/latest"
+          test ! -e "$build_dir" || {
+            echo "Mirage build $build_id is already published."
+            exit 0
+          }
+          rm -rf "$latest_dir"
+          mkdir -p "$build_dir" "$latest_dir"
+          for directory in "$build_dir" "$latest_dir"; do
+            cp "$RUNNER_TEMP/mirage-package/$ASSET" "$directory/$ASSET"
+            cp "$RUNNER_TEMP/mirage-package/$ASSET.sha256" "$directory/$ASSET.sha256"
+            printf '%s\n' "$GITHUB_SHA" > "$directory/SOURCE-COMMIT"
+            printf '%s\n' "$version" > "$directory/VERSION"
+            printf '%s\n' 'mirage' > "$directory/CHANNEL"
+          done
+          printf '%s\n' "$build_id" > channels/mirage/LATEST
+
+          git add channels/mirage
+          git commit -m "dist: publish Mirage build ${GITHUB_SHA::12}"
+          git push origin HEAD:distribution
+
+      - name: Verify public Mirage bytes
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/distribution/channels/mirage/latest"
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location \
+              "$base/$ASSET.sha256" --output "$RUNNER_TEMP/public.sha256"; then
+              break
+            fi
+            test "$attempt" -lt 12 || exit 1
+            sleep 5
+          done
+          expected=$(awk 'NR == 1 {print $1}' "$RUNNER_TEMP/public.sha256")
+          curl --fail --silent --show-error --location \
+            "$base/$ASSET" --output "$RUNNER_TEMP/public.tar.gz"
+          actual=$(sha256sum "$RUNNER_TEMP/public.tar.gz" | awk '{print $1}')
+          test "$actual" = "$expected"
