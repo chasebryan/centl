@@ -237,7 +237,6 @@ class CaravanPublicOriginTests(unittest.TestCase):
         activate = ACTIVATE_UNIT.read_text(encoding="utf-8")
         for text in (ingest, candidate, activate):
             self.assertIn("ProtectSystem=strict", text)
-        for text in (ingest, candidate, activate):
             self.assertIn("PrivateNetwork=yes", text)
         self.assertIn("User=fcf-caravan", candidate)
         self.assertNotIn("PRESERVATION_ROOT", candidate)
@@ -245,8 +244,12 @@ class CaravanPublicOriginTests(unittest.TestCase):
         self.assertIn("ReadOnlyPaths=/var/lib/fcf-caravan/approved", activate)
 
         installer = INSTALL.read_text(encoding="utf-8")
-        public_block = installer.split("cat > /etc/fcf-caravan/public-origin.env", 1)[1].split("EOF_ENV", 1)[0]
-        ingest_block = installer.split("cat > /etc/fcf-caravan/ingest.env", 1)[1].split("EOF_ENV", 1)[0]
+        public_marker = "cat > /etc/fcf-caravan/public-origin.env <<EOF_ENV\n"
+        ingest_marker = "cat > /etc/fcf-caravan/ingest.env <<EOF_ENV\n"
+        self.assertIn(public_marker, installer)
+        self.assertIn(ingest_marker, installer)
+        public_block = installer.split(public_marker, 1)[1].split("\nEOF_ENV", 1)[0]
+        ingest_block = installer.split(ingest_marker, 1)[1].split("\nEOF_ENV", 1)[0]
         self.assertNotIn("PRESERVATION_ROOT", public_block)
         self.assertIn("PRESERVATION_ROOT", ingest_block)
         self.assertIn("SOURCE_AUTHORIZATION", ingest_block)
