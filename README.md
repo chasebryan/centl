@@ -211,6 +211,14 @@ user-provided document is always treated as data rather than executable authorit
 See [docs/CENTL-MIRAGE.md](docs/CENTL-MIRAGE.md) for the full architecture and the
 implemented v0.14.0 boundary.
 
+**Try the full demonstration:**
+[CENTL-MIRAGE Full Demonstration Guide](https://github.com/chasebryan/centl/blob/mirage/docs/MIRAGE-DEMONSTRATION.md)
+
+The guide walks through the current MIRAGE development pipeline from a human-written
+scientific specification through provenance-preserving Specification IR, goal and
+capability analysis, evidence obligations, candidate materialization, assurance
+boundaries, reversible downstream extension, and contradiction handling.
+
 ## CENTL CARAVAN
 
 **Content-Addressed Resilient Artifact Verification and Availability Network**
@@ -320,6 +328,7 @@ The supported source-tree organization is documented in
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
 - [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
+- [CENTL-MIRAGE Full Demonstration Guide](https://github.com/chasebryan/centl/blob/mirage/docs/MIRAGE-DEMONSTRATION.md)
 - [CENTL CARAVAN](docs/CARAVAN.md)
 - [CARAVAN threat model](docs/CARAVAN-THREAT-MODEL.md)
 - [CARAVAN host policy](docs/CARAVAN-HOST-POLICY.md)
