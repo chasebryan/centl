@@ -2,40 +2,106 @@
 from __future__ import annotations
 
 import argparse
+import json
+import os
 from pathlib import Path
 import signal
 import sys
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from telepathy.carrier import CarrierStatus
 from telepathy.gateway import GatewayConfig, TelepathyGateway
 from telepathy.tor import TorOnionCarrier, TorOnionConfig
+
+
+def _default_state_dir() -> Path:
+    base = os.environ.get("XDG_STATE_HOME")
+    if base:
+        return Path(base).expanduser() / "fcf-telepathyd"
+    return Path.home() / ".local" / "state" / "fcf-telepathyd"
+
+
+def _status_json(status: CarrierStatus) -> str:
+    return json.dumps(
+        {
+            "carrier": status.carrier,
+            "available": status.available,
+            "published": status.published,
+            "endpoint": status.endpoint,
+            "pid": status.pid,
+            "detail": status.detail,
+        },
+        sort_keys=True,
+    )
+
+
+def _add_carrier_options(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--carrier", choices=("tor-onion",), default="tor-onion")
+    parser.add_argument("--telepathy-host", default="127.0.0.1")
+    parser.add_argument("--telepathy-port", type=int, default=8790)
+    parser.add_argument("--virtual-port", type=int, default=80)
+    parser.add_argument("--tor-binary", default="tor")
+    parser.add_argument("--state-dir", type=Path, default=_default_state_dir())
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fcf-telepathyd",
-        description="FCF Telepathy policy gateway (codename telepathic-camel)",
+        description="FCF carrier-independent policy gateway for CARAVAN",
     )
-    parser.add_argument("--listen-host", default="127.0.0.1")
-    parser.add_argument("--listen-port", type=int, default=8790)
-    parser.add_argument("--upstream-host", default="127.0.0.1")
-    parser.add_argument("--upstream-port", type=int, default=8787)
-    parser.add_argument("--state-dir", type=Path, default=Path(".telepathy"))
-    parser.add_argument(
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    serve = commands.add_parser("serve", help="run the loopback Telepathy gateway")
+    serve.add_argument("--listen-host", default="127.0.0.1")
+    serve.add_argument("--listen-port", type=int, default=8790)
+    serve.add_argument("--upstream-host", default="127.0.0.1")
+    serve.add_argument("--upstream-port", type=int, default=8787)
+    serve.add_argument("--state-dir", type=Path, default=_default_state_dir())
+    serve.add_argument(
         "--carrier",
         choices=("none", "tor-onion"),
         default="none",
-        help="optional replaceable carrier beneath the Telepathy gateway",
+        help="optional replaceable carrier beneath the policy gateway",
     )
-    parser.add_argument(
+    serve.add_argument("--virtual-port", type=int, default=80)
+    serve.add_argument("--tor-binary", default="tor")
+    serve.add_argument(
         "--publish",
         action="store_true",
         help="publish the selected carrier after the loopback gateway starts",
     )
+
+    carrier = commands.add_parser("carrier", help="inspect or control a carrier")
+    carrier.add_argument("action", choices=("probe", "publish", "status", "withdraw"))
+    _add_carrier_options(carrier)
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = _parser().parse_args(argv)
+def _carrier_from_args(args: argparse.Namespace) -> TorOnionCarrier:
+    if args.carrier != "tor-onion":
+        raise SystemExit(f"unsupported carrier: {args.carrier}")
+    return TorOnionCarrier(
+        TorOnionConfig(
+            telepathy_host=args.telepathy_host,
+            telepathy_port=args.telepathy_port,
+            virtual_port=args.virtual_port,
+            tor_binary=args.tor_binary,
+            state_dir=args.state_dir / "tor",
+        )
+    )
+
+
+def _carrier_command(args: argparse.Namespace) -> int:
+    implementation = _carrier_from_args(args)
+    status = getattr(implementation, args.action)()
+    print(_status_json(status))
+    return 0
+
+
+def _serve(args: argparse.Namespace) -> int:
     if args.publish and args.carrier == "none":
         raise SystemExit("--publish requires a carrier")
 
@@ -49,28 +115,32 @@ def main(argv: list[str] | None = None) -> int:
     )
     carrier: TorOnionCarrier | None = None
 
-    def stop(_signum: int, _frame: object) -> None:
-        gateway.close()
+    def terminate(_signum: int, _frame: object) -> None:
+        raise SystemExit(0)
 
-    signal.signal(signal.SIGTERM, stop)
-    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, terminate)
 
     try:
         gateway.start()
         host, port = gateway.address
-        print(f"fcf-telepathyd: telepathic-camel listening on {host}:{port}")
+        print(f"fcf-telepathyd: listening on {host}:{port}", flush=True)
 
         if args.carrier == "tor-onion":
             carrier = TorOnionCarrier(
                 TorOnionConfig(
                     telepathy_host=host,
                     telepathy_port=port,
+                    virtual_port=args.virtual_port,
+                    tor_binary=args.tor_binary,
                     state_dir=args.state_dir / "tor",
                 )
             )
             if args.publish:
                 published = carrier.publish()
-                print(f"fcf-telepathyd: tor-onion published {published.endpoint}")
+                print(
+                    f"fcf-telepathyd: tor-onion published {published.endpoint}",
+                    flush=True,
+                )
 
         gateway.serve_forever()
         return 0
@@ -80,9 +150,21 @@ def main(argv: list[str] | None = None) -> int:
         if carrier is not None and args.publish:
             try:
                 carrier.withdraw()
-            except Exception as exc:  # shutdown must still close the gateway
-                print(f"fcf-telepathyd: carrier withdraw failed: {exc}", file=sys.stderr)
+            except Exception as exc:
+                print(
+                    f"fcf-telepathyd: carrier withdraw failed: {exc}",
+                    file=sys.stderr,
+                )
         gateway.close()
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.command == "carrier":
+        return _carrier_command(args)
+    if args.command == "serve":
+        return _serve(args)
+    raise SystemExit("unsupported fcf-telepathyd command")
 
 
 if __name__ == "__main__":
