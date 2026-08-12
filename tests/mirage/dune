@@ -62,6 +62,7 @@
   ../../telepathy/__init__.py
   ../../telepathy/carrier.py
   ../../telepathy/gateway.py
+  ../../telepathy/live_root.py
   ../../telepathy/policy.py
   ../../telepathy/tor.py)
  (action
