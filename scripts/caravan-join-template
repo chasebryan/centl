@@ -88,6 +88,7 @@ PY
 
 STORAGE_GIB=10
 UPLOAD_MIBPS=4
+MISSIONS=""
 ASSUME_YES=0
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
@@ -99,10 +100,16 @@ usage() {
 Usage: ./join-caravan [options]
 
 Options:
+  --missions LIST       preservation missions: source,releases,semantic,recovery or all
   --storage-gib N       local CARAVAN storage ceiling (default: 10 GiB)
   --upload-mibps N      future outbound serving rate ceiling (default: 4 MiB/s)
   -y, --yes             accept the displayed local configuration
   -h, --help            show this help
+
+When --missions is omitted in an interactive terminal, the installer asks which
+parts of the FCF preservation mission this carrier will support. Mission choice
+never authorizes arbitrary local content; it filters authenticated FCF
+public-approved catalog objects only.
 
 This release configures a rootless carrier home. Public enrollment/network
 serving remains disabled until an authenticated FCF enrollment endpoint and
@@ -112,6 +119,7 @@ TXT
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --missions) [ "$#" -ge 2 ] || fail "--missions needs a value"; MISSIONS=$2; shift 2 ;;
     --storage-gib) [ "$#" -ge 2 ] || fail "--storage-gib needs a value"; STORAGE_GIB=$2; shift 2 ;;
     --upload-mibps) [ "$#" -ge 2 ] || fail "--upload-mibps needs a value"; UPLOAD_MIBPS=$2; shift 2 ;;
     -y|--yes) ASSUME_YES=1; shift ;;
@@ -126,6 +134,57 @@ done
 [ "$STORAGE_GIB" -le 4096 ] || fail "storage ceiling exceeds safe installer maximum"
 [ "$UPLOAD_MIBPS" -le 1024 ] || fail "upload-rate ceiling exceeds safe installer maximum"
 
+normalize_missions() {
+  python3 - "$1" <<'PY'
+import sys
+allowed = ("source", "releases", "semantic", "recovery")
+raw = sys.argv[1]
+if raw == "all":
+    print(",".join(allowed))
+    raise SystemExit(0)
+parts = raw.split(",") if raw else []
+if not parts or any(not part for part in parts):
+    raise SystemExit("FCF CARAVAN join: at least one preservation mission is required")
+unknown = sorted(set(parts) - set(allowed))
+if unknown:
+    raise SystemExit("FCF CARAVAN join: unknown preservation mission(s): " + ",".join(unknown))
+print(",".join(item for item in allowed if item in set(parts)))
+PY
+}
+
+if [ -z "$MISSIONS" ]; then
+  [ -t 0 ] || fail "non-interactive configuration requires --missions"
+  printf '\nChoose the pieces of the FCF preservation mission this camel will carry.\n'
+  printf 'Only authenticated public-approved cargo can ever enter these classes.\n\n'
+  selected=""
+  ask_mission() {
+    key=$1
+    description=$2
+    printf '  Support %-9s — %s? [y/N] ' "$key" "$description"
+    read -r answer
+    case "$answer" in
+      y|Y|yes|YES)
+        if [ -z "$selected" ]; then selected=$key; else selected="$selected,$key"; fi
+        ;;
+    esac
+  }
+  ask_mission source "approved CENTL source snapshots"
+  ask_mission releases "signed FCF/CENTL release artifacts"
+  ask_mission semantic "redistribution-approved semantic artifacts"
+  ask_mission recovery "public-approved recovery/toolchain artifacts"
+  [ -n "$selected" ] || fail "no preservation mission selected"
+  MISSIONS=$selected
+fi
+MISSIONS=$(normalize_missions "$MISSIONS")
+
+package_manager="capability-present"
+for candidate in apt-get dnf yum zypper pacman apk xbps-install emerge nix; do
+  if command -v "$candidate" >/dev/null 2>&1; then
+    package_manager=$candidate
+    break
+  fi
+done
+
 cat <<TXT
 
 ╭────────────────────────────────────────────────────────────╮
@@ -133,17 +192,21 @@ cat <<TXT
 ╰────────────────────────────────────────────────────────────╯
 
 Authenticated release: $RELEASE_VERSION
+Preservation missions: $MISSIONS
 Storage ceiling:       $STORAGE_GIB GiB
 Upload-rate ceiling:   $UPLOAD_MIBPS MiB/s
+Linux package family:  $package_manager
 Privilege model:       rootless
 Inbound ports:         none
 Arbitrary file hosting:none
 Proxy/tunnel service:  none
+Public node listing:   none
+Census publication:    aggregate counts only (production enrollment)
 
 The carrier store is content-addressed and is intended to accept only artifacts
 admitted by authenticated FCF catalog metadata. Your home files are not cargo.
 This installer does not expose a directory, create an upload endpoint, or open a
-public listening socket.
+public listening socket. Mission selection is a filter, never publication authority.
 TXT
 
 if [ "$ASSUME_YES" -eq 0 ]; then
@@ -178,20 +241,33 @@ find "$stage" -type d -exec chmod 0555 {} +
 mv -- "$stage" "$install_root"
 trap - EXIT HUP INT TERM
 
-mkdir -p -m 0700 "$data_root/store" "$state_root/identity"
-python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" <<'PY'
+mkdir -p -m 0700 "$data_root/store" "$state_root/identity" "$state_root/census"
+python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" "$MISSIONS" "$package_manager" <<'PY'
 import json
 import sys
 from pathlib import Path
-out, version, storage, upload = sys.argv[1:]
+out, version, storage, upload, missions, package_manager = sys.argv[1:]
 data = {
-    "schema": "fcf-caravan-carrier-config-v1",
+    "schema": "fcf-caravan-carrier-config-v2",
     "release_version": version,
     "network_mode": "disabled-until-authenticated-enrollment",
     "inbound_listen": False,
     "arbitrary_content": False,
     "storage_limit_gib": int(storage),
     "upload_limit_mibps": int(upload),
+    "missions": missions.split(","),
+    "mission_authority": "authenticated-fcf-public-approved-only",
+    "platform": {
+        "package_manager_hint": package_manager,
+        "systemd_required": False,
+    },
+    "census": {
+        "mode": "aggregate-only",
+        "heartbeat": "disabled-until-authenticated-enrollment",
+        "public_node_listing": False,
+        "public_ip_addresses": False,
+        "public_hostnames": False,
+    },
 }
 Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
@@ -205,8 +281,12 @@ Welcome to the Free Computation Foundation caravan! 🐪
 Release $RELEASE_VERSION is installed read-only at:
   $install_root
 
+Preservation missions:
+  $MISSIONS
+
 This machine is PREPARED, not publicly enrolled yet. No inbound port was opened,
-no arbitrary data was accepted, and no background network service was started.
-When FCF promotes the authenticated carrier protocol to a signed public release,
-the same immutable-release mechanism will perform explicit enrollment.
+no arbitrary data was accepted, no public machine identity was published, and no
+background network service was started. When FCF promotes the authenticated
+carrier protocol to a signed public release, the same immutable-release mechanism
+will perform explicit enrollment and privacy-minimized aggregate census reporting.
 TXT
