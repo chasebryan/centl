@@ -8,6 +8,8 @@ Individual preserved dependency objects are called **crates**.
 
 The Chest exists so an Oasis-capable build does not depend on a third-party release host, mutable URL, certificate path, package index, model hub, or repository being reachable at build time.
 
+The Chest is a concrete subsystem of the broader [Free Computation Foundation Preservation Plan](FCF-PRESERVATION-PLAN.md). It is intentionally narrower than that Foundation-wide mission: the Chest concentrates on build and recovery dependencies, while the preservation plan also covers operating systems, kernels, toolchains, documentation, books, historical material, boot/firmware projects, standards, and other reconstruction-critical knowledge.
+
 ## Core contract
 
 A crate is admitted only when FCF can bind all of the following to one immutable identity:
@@ -51,6 +53,8 @@ The initial Chest should cover every redistributable input needed by the CENTL p
 The FCF preservation origin is authoritative for Chest admission. CARAVAN may distribute approved crates by immutable content identity, but a volunteer carrier cannot nominate arbitrary content, alter a crate, or convert the Chest into general-purpose file hosting.
 
 Volunteer mission selection may allow a camel to carry dependency/recovery crates, subject to CARAVAN policy, storage limits, licensing, and authenticated catalog membership.
+
+The same authority/availability separation applies to the wider FCF preservation mission: the Foundation decides what is admitted and under which redistribution class; CARAVAN only replicates objects that policy has made eligible for distribution.
 
 ## Privacy and safety
 
