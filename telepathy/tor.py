@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import ipaddress
+import os
 from pathlib import Path
 import re
 import shutil
@@ -147,7 +148,7 @@ class TorOnionCarrier:
             pass
 
         try:
-            signal.kill(pid, 0)
+            os.kill(pid, 0)
         except ProcessLookupError:
             return False
         except PermissionError:
@@ -313,7 +314,7 @@ class TorOnionCarrier:
                 "refusing to signal a process not verified as this Tor instance"
             )
         try:
-            signal.kill(pid, signal.SIGTERM)
+            os.kill(pid, signal.SIGTERM)
         except ProcessLookupError:
             return
 
