@@ -9,7 +9,8 @@ on:
       - 'scripts/caravan-public-origin-*'
       - 'scripts/caravan-join-*'
       - 'infra/caravan-public-origin/**'
-      - 'tests/test_caravan_public_origin.py'
+      - 'tests/test_caravan_public_origin*.py'
+      - 'tests/test_caravan_join_release.py'
       - '.github/workflows/caravan-public-origin.yml'
 
 permissions:
@@ -57,6 +58,8 @@ jobs:
               raise SystemExit('ingest does not fail closed without preservation authority')
           if 'PrivateNetwork=yes' not in unit or 'IPAddressDeny=any' not in unit:
               raise SystemExit('candidate compiler is not networkless')
+          if 'RestrictAddressFamilies=AF_UNIX' not in unit:
+              raise SystemExit('candidate compiler retains unnecessary network address families')
           print('closed-world-source-policy: PASS')
           PY
 
