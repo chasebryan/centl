@@ -1,0 +1,128 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+umask 077
+
+fail() {
+  printf 'fcf caravan source authorization: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+need git
+need python3
+need sha256sum
+need readlink
+
+MIRROR=""
+OUTPUT="/etc/fcf-caravan/source-authorization.json"
+MAIN=""
+OASIS=""
+MIRAGE=""
+ASSUME_YES=0
+
+usage() {
+  cat <<'TXT'
+Usage:
+  sudo caravan-public-origin-authorize-source \
+    --preservation-root /srv/centl-mirror \
+    --main COMMIT --oasis COMMIT --mirage COMMIT [--yes]
+
+The authorization is bound to the exact SHA-256 identity of the finalized FCF
+preservation receipt. If the mirror changes, publication freezes until a new
+authorization is created deliberately.
+TXT
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --preservation-root) [ "$#" -ge 2 ] || fail "missing preservation root"; MIRROR=$2; shift 2 ;;
+    --output) [ "$#" -ge 2 ] || fail "missing output path"; OUTPUT=$2; shift 2 ;;
+    --main) [ "$#" -ge 2 ] || fail "missing main commit"; MAIN=$2; shift 2 ;;
+    --oasis) [ "$#" -ge 2 ] || fail "missing oasis commit"; OASIS=$2; shift 2 ;;
+    --mirage) [ "$#" -ge 2 ] || fail "missing mirage commit"; MIRAGE=$2; shift 2 ;;
+    -y|--yes) ASSUME_YES=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+[ "$(id -u)" -eq 0 ] || fail "run with sudo/root"
+[ -n "$MIRROR" ] || fail "--preservation-root is required"
+[ -n "$MAIN" ] && [ -n "$OASIS" ] && [ -n "$MIRAGE" ] ||
+  fail "--main, --oasis, and --mirage are all required"
+case "$MIRROR" in /*) ;; *) fail "preservation root must be absolute" ;; esac
+MIRROR=$(readlink -f -- "$MIRROR")
+[ -d "$MIRROR" ] && [ ! -L "$MIRROR" ] || fail "unsafe preservation root"
+[ -f "$MIRROR/MIRROR-SHA256SUMS" ] || fail "mirror is not finalized"
+[ -f "$MIRROR/MIRROR-SHA256SUMS.sha256" ] || fail "mirror receipt checksum missing"
+[ -f "$MIRROR/project/centl.bundle" ] && [ ! -L "$MIRROR/project/centl.bundle" ] ||
+  fail "preserved CENTL bundle is missing"
+
+for value in "$MAIN" "$OASIS" "$MIRAGE"; do
+  case "$value" in
+    [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*) ;;
+    *) fail "commit ids must be lowercase hexadecimal" ;;
+  esac
+  [ "${#value}" -eq 40 ] || [ "${#value}" -eq 64 ] || fail "commit ids must be 40 or 64 hex characters"
+done
+
+(
+  cd "$MIRROR"
+  sha256sum -c MIRROR-SHA256SUMS.sha256 >/dev/null
+) || fail "mirror receipt checksum failed"
+
+# Clone only from the already-preserved bundle. No network source is consulted.
+tmp=$(mktemp -d)
+trap 'rm -rf -- "$tmp"' EXIT HUP INT TERM
+git -c protocol.file.allow=always clone --mirror --no-local \
+  "$MIRROR/project/centl.bundle" "$tmp/centl.git" >/dev/null 2>&1 ||
+  fail "preserved CENTL bundle could not be opened"
+for pair in "main:$MAIN" "oasis:$OASIS" "mirage:$MIRAGE"; do
+  branch=${pair%%:*}
+  commit=${pair#*:}
+  git --git-dir="$tmp/centl.git" cat-file -e "$commit^{commit}" 2>/dev/null ||
+    fail "$branch commit $commit is not present in the preserved bundle"
+done
+
+receipt_sha=$(sha256sum "$MIRROR/MIRROR-SHA256SUMS" | awk '{print $1}')
+
+printf '\nFCF CARAVAN source authorization\n\n'
+printf 'Preservation receipt: %s\n' "$receipt_sha"
+printf 'main:   %s\n' "$MAIN"
+printf 'oasis:  %s\n' "$OASIS"
+printf 'mirage: %s\n' "$MIRAGE"
+printf '\nThis action makes only these exact preserved commits eligible for public\nCARAVAN source export. A later mirror mutation invalidates this authorization.\n'
+
+if [ "$ASSUME_YES" -eq 0 ]; then
+  [ -t 0 ] || fail "non-interactive authorization requires --yes"
+  printf '\nAuthorize these exact preserved source commits? [y/N] '
+  read -r answer
+  case "$answer" in y|Y|yes|YES) ;; *) fail "authorization cancelled" ;; esac
+fi
+
+install -d -o root -g root -m 0755 "$(dirname "$OUTPUT")"
+tmpout="${OUTPUT}.new.$$"
+python3 - "$tmpout" "$receipt_sha" "$MAIN" "$OASIS" "$MIRAGE" <<'PY'
+import json
+import sys
+from pathlib import Path
+out, receipt, main, oasis, mirage = sys.argv[1:]
+data = {
+    "schema": "fcf-caravan-source-authorization-v1",
+    "repository": "chasebryan/centl",
+    "mirror_receipt_sha256": receipt,
+    "branches": {"main": main, "oasis": oasis, "mirage": mirage},
+}
+Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
+chown root:root "$tmpout"
+chmod 0600 "$tmpout"
+mv -f -- "$tmpout" "$OUTPUT"
+
+printf '\nfcf caravan source authorization: PASS\n'
+printf 'authorization=%s\n' "$OUTPUT"
+printf 'authorization_sha256=%s\n' "$(sha256sum "$OUTPUT" | awk '{print $1}')"

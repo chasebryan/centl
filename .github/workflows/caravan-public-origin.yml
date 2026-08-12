@@ -1,0 +1,67 @@
+name: CARAVAN public origin
+
+on:
+  pull_request:
+    paths:
+      - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
+      - 'docs/CARAVAN-JOIN-RELEASE.md'
+      - 'scripts/caravan-linux-platform'
+      - 'scripts/caravan-public-origin-*'
+      - 'scripts/caravan-join-*'
+      - 'infra/caravan-public-origin/**'
+      - 'tests/test_caravan_public_origin*.py'
+      - 'tests/test_caravan_join_release.py'
+      - '.github/workflows/caravan-public-origin.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caravan-public-origin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+jobs:
+  public-origin-boundary:
+    name: Public-origin closed-world boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact proposed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Prove publisher has no mutable-source network authority
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          candidate = Path('scripts/caravan-public-origin-candidate.py').read_text()
+          ingest = Path('scripts/caravan-public-origin-ingest').read_text()
+          unit = Path('infra/caravan-public-origin/fcf-caravan-candidate.service').read_text()
+          forbidden = (
+              'github.com/chasebryan/centl.git',
+              'refs/remotes/origin/',
+              'git fetch',
+              'refs/pull',
+          )
+          for token in forbidden:
+              if token in candidate:
+                  raise SystemExit(f'candidate retains mutable source authority: {token}')
+          if 'FCF_CARAVAN_PRESERVATION_ROOT is required' not in ingest:
+              raise SystemExit('ingest does not fail closed without preservation authority')
+          if 'PrivateNetwork=yes' not in unit or 'IPAddressDeny=any' not in unit:
+              raise SystemExit('candidate compiler is not networkless')
+          if 'RestrictAddressFamilies=AF_UNIX' not in unit:
+              raise SystemExit('candidate compiler retains unnecessary network address families')
+          print('closed-world-source-policy: PASS')
+          PY
+
+      - name: Run public-origin adversarial gate
+        run: sh scripts/caravan-public-origin-check

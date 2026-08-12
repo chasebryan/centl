@@ -1,0 +1,19 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+fail() {
+  printf 'fcf caravan certificate deploy: %s\n' "$*" >&2
+  exit 1
+}
+
+[ "$(id -u)" -eq 0 ] || fail "must run as root"
+command -v nginx >/dev/null 2>&1 || fail "nginx is required"
+command -v systemctl >/dev/null 2>&1 || fail "systemctl is required"
+
+# Certbot invokes deploy hooks only after successful certificate issuance or
+# renewal. Refuse to reload a broken configuration even then.
+nginx -t >/dev/null 2>&1 || fail "nginx configuration failed validation after certificate renewal"
+systemctl reload nginx
+systemctl is-active --quiet nginx || fail "nginx is not active after certificate deployment"
+
+printf 'fcf caravan certificate deploy: PASS\n'

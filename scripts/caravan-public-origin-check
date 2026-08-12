@@ -1,0 +1,53 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$root"
+
+for script in \
+  scripts/caravan-linux-platform \
+  scripts/caravan-public-origin-install \
+  scripts/caravan-public-origin-ingest \
+  scripts/caravan-public-origin-authorize-source \
+  scripts/caravan-public-origin-firewall \
+  scripts/caravan-public-origin-cert-deploy \
+  scripts/caravan-public-origin-audit \
+  scripts/caravan-public-origin-activate-gate \
+  scripts/caravan-join-template \
+  scripts/caravan-join-release \
+  scripts/caravan-join-verify; do
+  bash -n "$script"
+done
+
+python3 -m py_compile \
+  scripts/caravan-public-origin-candidate.py \
+  scripts/caravan-public-origin-source-export.py \
+  scripts/caravan-public-origin-activate.py \
+  scripts/caravan-public-origin-source-guard.py \
+  tests/test_caravan_public_origin.py \
+  tests/test_caravan_public_origin_metadata.py \
+  tests/test_caravan_join_release.py
+
+out=$(mktemp)
+trap 'rm -f "$out"' EXIT HUP INT TERM
+: > "$out"
+failed=0
+for pattern in \
+  test_caravan_public_origin.py \
+  test_caravan_public_origin_metadata.py \
+  test_caravan_join_release.py; do
+  if ! python3 -m unittest discover -s tests -p "$pattern" >>"$out" 2>&1; then
+    failed=1
+  fi
+done
+if [ "$failed" -ne 0 ]; then
+  cat "$out" >&2
+  message=$(tail -n 60 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
+  printf '::error title=CARAVAN public-origin/join adversarial gate::%s\n' "$message"
+  exit 1
+fi
+cat "$out"
+rm -f "$out"
+trap - EXIT HUP INT TERM
+
+printf 'CENTL CARAVAN public-origin and join-release gate: PASS\n'

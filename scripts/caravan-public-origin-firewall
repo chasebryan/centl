@@ -1,0 +1,29 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+CONF=${FCF_CARAVAN_NFTABLES_CONF:-/etc/fcf-caravan/nftables.conf}
+
+fail() {
+  printf 'fcf caravan firewall: %s\n' "$*" >&2
+  exit 1
+}
+
+[ "$(id -u)" -eq 0 ] || fail "must run as root"
+command -v nft >/dev/null 2>&1 || fail "nft is required"
+[ -f "$CONF" ] && [ ! -L "$CONF" ] || fail "firewall policy is missing or unsafe"
+
+grep -Eq '^[[:space:]]*flush ruleset[[:space:]]*$' "$CONF" ||
+  fail "dedicated-host policy must replace the complete nftables ruleset"
+
+# nft validates and then commits the batch transaction atomically. There is no
+# deliberate delete-first window where the host temporarily loses its filter.
+nft -c -f "$CONF" >/dev/null
+nft -f "$CONF"
+
+rules=$(nft list table inet fcf_caravan)
+printf '%s\n' "$rules" | grep -Fq 'hook input' || fail "input base chain missing"
+printf '%s\n' "$rules" | grep -Fq 'policy drop' || fail "default-drop policy missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 80 accept' || fail "ACME HTTP rule missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 443 accept' || fail "HTTPS rule missing"
+
+printf 'fcf caravan firewall: PASS\n'

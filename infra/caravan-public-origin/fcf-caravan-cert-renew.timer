@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule FCF CARAVAN certificate renewal
+
+[Timer]
+OnCalendar=*-*-* 03:31:00
+RandomizedDelaySec=2h
+Persistent=true
+Unit=fcf-caravan-cert-renew.service
+
+[Install]
+WantedBy=timers.target
