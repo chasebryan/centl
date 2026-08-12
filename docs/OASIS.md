@@ -1,55 +1,42 @@
 # The CENTL Oasis Release Standard
 
-**Status:** project release policy  
-**Applies to:** CENTL stable-product qualification on the `oasis` branch  
+**Status:** active project release standard  
+**Applies to:** stable-product qualification on the `oasis` branch  
 **SemVer effect:** none
 
 ## Definition
 
-An **Oasis release** is a CENTL release that has been deliberately reconciled,
-organized, hardened, validated, and established as a cohesive stable baseline.
+An **Oasis release** is a CENTL release that has been deliberately reconciled, organized, hardened, validated, and established as a cohesive stable baseline.
 
-The Oasis declaration is not a version suffix or marketing codename. The lowercase
-`oasis` branch is the repository's authoritative standard-product branch and is
-named for the qualification line defined by this document.
+Oasis is not a version suffix and not a codename. It is a **quality declaration attached to an exact release identity**.
 
-Oasis quality is deliberately **not** imposed on every branch or every commit.
-Development can remain fluid on `mirage`, and `main` can carry the comprehensive
-research and developer distribution without pretending that every integrated
-experiment is release-ready.
-
-Before qualification, a proposed stable release may be called an **Oasis
-candidate**. The declaration itself uses this form:
+The canonical declaration is:
 
 > **CENTL vX.Y.Z is an Oasis release.**
 
-The Git tag remains ordinary Semantic Versioning, for example `v0.14.0`.
+The Git tag remains ordinary Semantic Versioning, such as `v0.14.0`.
 
-The canonical branch roles are defined in
-[`RELEASE-POLICY.md`](RELEASE-POLICY.md). This document defines the stricter
-standard that must be satisfied when work is promoted into the stable-product
-line.
+**CENTL v0.14.0 is the first published Oasis release.**
 
-## Why the declaration exists
+## Why Oasis exists
 
-CENTL develops quickly across mathematics, physics, CENTL-SCi, MIRAGE, CARAVAN,
-preservation infrastructure, packaging, and repository automation. Individual
-feature merges can be useful while the broader system still contains unfinished
-research, incomplete integrations, security debt, or unresolved release work.
+CENTL develops across mathematics, physics, CENTL-SCi, MIRAGE, CARAVAN, preservation infrastructure, packaging, verification, and release automation. Useful development can move quickly without every experimental commit satisfying the complete stable-release standard.
 
-Requiring every development state to be Oasis-ready would make the experimental
-line unnecessarily rigid and would blur the distinction between research and
-product promises.
+Oasis marks the opposite condition: a deliberately chosen convergence point where the supported product, its source identity, its documentation, its security posture, its tests, and its published bytes have been brought into one defensible state.
 
-An Oasis declaration marks the opposite condition: a deliberately chosen point
-where the intended stable product has been brought into one understood,
-reproducible, and defensible state.
+The governing rule is:
 
-It is therefore a **convergence declaration and promotion state**.
+> **Oasis is a promotion state, not a property of every commit.**
 
 ## Branch relationship
 
-The ordinary maturity path is:
+CENTL has three long-lived branches:
+
+- **`oasis`** is the authoritative stable-product branch and the only long-lived branch required to satisfy the complete Oasis qualification standard;
+- **`mirage`** is the development and research laboratory where features, prototypes, experiments, and incomplete work normally mature;
+- **`main`** is the complete developer/research distribution and integration view and may contain work newer than the stable product.
+
+The normal maturity path is:
 
 ```text
 feature / research work
@@ -57,7 +44,7 @@ feature / research work
          v
       mirage
          |
-         | stabilize + satisfy the complete Oasis gate
+         | stabilize + satisfy Oasis qualification
          v
        oasis
          |
@@ -65,201 +52,141 @@ feature / research work
  stable release / tag
 ```
 
-`main` is not another maturity rung. It is the complete developer and research
-distribution and may contain both stable Oasis material and integrated experimental
-facilities.
+`main` is an integration view, not another maturity rung.
 
-The governing rule is:
+See [`RELEASE-POLICY.md`](RELEASE-POLICY.md) for the canonical branch rules.
 
-> **Oasis is a promotion state, not a property of every commit.**
+## What earns the declaration
 
-## Executable convergence engine
+An Oasis release must satisfy the applicable requirements below on the exact source identity that will be published.
 
-The comprehensive repository provides `scripts/oasis.py` as the executable
-implementation of the local Oasis gate. The engine may be developed and tested in
-the broader source tree before its own changes are promoted to `oasis`.
+### 1. Stable product boundary
 
-For a normal candidate convergence pass, run:
-
-```bash
-python3 scripts/oasis.py
-```
-
-The command performs the one intentionally safe automatic repair currently allowed
-by the Oasis process, canonical source formatting, and then runs the complete local
-qualification plan. It fails closed on missing tools, proof failures, stale
-generated F* extraction, quality failures, unit or component failures, sanitizer
-unavailability, hardening failures, differential-test failures, release-package
-failures, unsafe archive structure, checksum mismatch, or installed-binary
-smoke-test failure.
-
-It does **not** rewrite tests, weaken security policy, disable failing gates,
-silently accept skipped required checks, merge branches, close pull requests,
-create tags, or declare an unresolved repository green.
-
-The final publication identity pass is stricter:
-
-```bash
-python3 scripts/oasis.py --final --no-repair
-```
-
-`--final` requires the checked commit to be clean `oasis`, exactly match
-`origin/oasis`, exactly match the current `vX.Y.Z` tag, have no unresolved pull
-requests targeting `oasis`, have no non-green commit checks, have no open
-high/critical code-scanning or Dependabot alerts, and have no open secret-scanning
-alerts visible to the authenticated GitHub CLI.
-
-Each run writes an atomic JSON evidence record plus SHA-256-addressed gate logs
-beneath `_build/oasis/`. The evidence distinguishes candidate qualification from
-final-Oasis qualification. A local candidate pass is useful convergence evidence,
-but it cannot impersonate the final release declaration.
-
-The engine is adversarially tested in `tests/test_oasis.py`, including command
-failure, timeout, missing-tool, stale-extraction ordering, mandatory sanitizer,
-checksum corruption, path traversal, absolute paths, symlinks, missing package
-members, wrong versions, evidence atomicity, exact Oasis branch identity, Oasis PR
-targeting, and release-blocking security-alert cases.
-
-## Oasis gate
-
-A release qualifies only when every applicable requirement below is satisfied or
-explicitly documented as non-applicable.
-
-### 1. Stable release boundary
-
-- The intended stable features are present on the reviewed Oasis candidate commit.
-- Partially integrated or superseded implementation paths are removed, retired, or
-  clearly outside the supported stable boundary.
-- Component documentation describes what is actually shipped rather than Mirage
-  plans or future intent.
-- Experimental systems are labeled honestly and cannot inherit verified or stable
-  assurance merely because they also exist in `main`.
+- Supported command surfaces and capabilities are explicit.
+- Experimental source does not silently inherit stable assurance.
+- Partially integrated or superseded paths are removed, retired, or clearly outside the supported product.
+- Platform support claims match the actual release boundary.
 
 ### 2. Repository coherence
 
-- The authoritative version, changelog, release notes, Oasis-facing README claims,
-  platform policy, and package metadata agree.
-- Obsolete one-shot release or repair automation is removed from the active stable
-  path.
-- Temporary generated debris and abandoned active-state artifacts are removed or
-  intentionally preserved outside the supported runtime boundary.
-- Pull requests targeting `oasis` that could affect the release are reconciled.
-- Historical branches may remain when they preserve unique work. Historical ref
-  count alone does not defeat Oasis qualification.
+- Version metadata, changelog, release notes, README, installer, package metadata, and platform policy agree.
+- Obsolete one-shot release machinery is removed from the active path.
+- Temporary debris and abandoned active-state artifacts are removed or deliberately preserved outside the runtime boundary.
+- Pull requests capable of changing the candidate are reconciled before final publication.
 
-### 3. Security convergence
+### 3. Mathematical and verification integrity
 
-- No known unresolved **release-blocking** security finding remains.
-- Security findings are repaired at source rather than hidden by weakening a gate
-  solely to obtain green CI.
-- GitHub Actions use appropriate least-privilege permissions and immutable action
-  identities.
-- Installer, archive, update, publication, dependency, and artifact-authentication
-  boundaries have been reviewed for the release.
-- Shipped filesystem, process, parser, protocol, native-library, model, MIRAGE, and
-  CARAVAN trust boundaries have been reviewed to the extent applicable.
-- Resource ceilings exist at attacker-controlled or potentially hostile input
-  boundaries where exhaustion is a realistic failure mode.
+- Required deterministic, unit, integration, regression, and protocol tests pass.
+- Applicable F* verification and fresh extraction checks pass.
+- Mathematical changes receive the required independent differential validation.
+- Exactness, approximation, enclosure, proof, and assurance claims remain distinguishable and defensible.
+- Generated or model-produced semantics cannot promote their own authority.
 
-An Oasis declaration is not a claim that the release is free of every possible
-vulnerability. It means the project completed its defined release security review
-and is not knowingly concealing a release-blocking defect.
+### 4. Security convergence
 
-### 4. Validation convergence
+- No known unresolved release-blocking security finding is hidden or ignored.
+- Relevant native, parser, filesystem, protocol, resource, installer, release, MIRAGE, CARAVAN, and supply-chain boundaries are reviewed.
+- Mandatory hardening checks such as sanitizers, fuzzing, adversarial tests, metamorphic tests, or performance/resource checks run where the release plan requires them.
+- GitHub Actions and publication paths use appropriate least privilege and immutable identities where required.
+- Security findings are repaired at source rather than suppressed merely to obtain a green result.
 
-- Required unit, integration, regression, component, and protocol tests pass on the
-  final Oasis candidate.
-- Relevant mathematical and F* verification gates pass.
-- Required differential, sanitizer, fuzz, or negative tests pass where the release
-  process defines them.
-- Dependency review passes.
-- GitHub Actions security analysis passes.
-- Component-specific gates such as MIRAGE and CARAVAN pass when those components
-  are included in the stable product.
-- A clean supported-platform build succeeds from the pinned toolchain and
-  dependency state.
+An Oasis declaration is not a claim of invulnerability. It is evidence that the defined release security review was completed for the declared boundary.
 
 ### 5. Installation and release integrity
 
-- The supported release package can be built from the reviewed Oasis commit.
-- Package identity and version metadata match the release.
-- Release archives pass checksum and structural validation.
-- Archive extraction rejects unsafe paths and unsupported filesystem semantics
-  before activation.
-- Installation occurs through a staged, validated activation path.
-- Installed command surfaces pass the required smoke tests.
-- Any stronger release-authentication mechanism required by the active signing
-  policy is satisfied before claiming that stronger authentication property.
+- The release package is built from the reviewed source identity.
+- Archive structure and exact membership are validated.
+- Checksums and embedded build identity agree with the qualified artifact.
+- Unsafe archive paths, links, or special entries are rejected before activation.
+- Installation stages and smoke-tests the package before replacing active software.
+- Publication does not substitute a new build for already-qualified bytes.
 
-### 6. Documentation and trust honesty
+### 6. Documentation honesty
 
-- Public stable-product documentation does not overstate implemented capability,
-  platform support, network deployment, proof strength, or assurance.
-- Generated, external, model-produced, laboratory, and local-extension results
-  remain visibly separated from verified-core claims.
-- Mirage and other experimental capabilities are identified as experimental until
-  promoted through the Oasis gate.
-- Deferred work is named as deferred instead of being silently implied complete.
-- Release notes state the important security and operational boundaries a user
-  needs to understand.
+- Public documentation describes what is actually stable and shipped.
+- Experimental or later main-line work is labeled as such.
+- Deferred work is named as deferred.
+- Platform, network, model, proof, and assurance claims are not broader than the evidence.
+- Stable installation instructions come from the `oasis` authority rather than a mutable experimental branch.
 
-### 7. Final-Oasis identity
+### 7. Exact final identity
 
-- The exact final candidate commit is reviewed and green.
-- That candidate is the exact head of `oasis` and matches `origin/oasis`.
-- Required Oasis and release workflows pass for that commit.
-- No unresolved pull request targeting `oasis` remains capable of changing the
-  release candidate unexpectedly.
-- The release tag points to the intended reviewed Oasis commit.
+The declaration belongs only to the exact release identity that passed qualification.
 
-Only then is the Oasis declaration made.
+The final publication path must bind together:
 
-`main` may subsequently integrate or expose the same stable state as part of the
-complete developer/research distribution, but `main` does not become the authority
-for the Oasis declaration by doing so.
+- the qualified source commit;
+- the `oasis` branch identity;
+- the intended `vX.Y.Z` tag;
+- the mandatory hosted checks and their provenance;
+- the qualified release artifact and checksum;
+- the published release bytes.
 
-## Evidence record
+A tag never authorizes a substitute build.
 
-The release issue or equivalent release record should preserve enough evidence to
-explain why the declaration was justified, including the exact Oasis commit
-identity and the applicable gate results.
+## The executable Oasis gate
 
-Oasis is intentionally evidence-based. A green badge alone is insufficient if
-known release-blocking work remains unresolved. Conversely, unfinished Mirage work
-or irrelevant historical branch clutter does not invalidate a qualified Oasis
-release when that work lies outside the stable release boundary.
+The repository provides `scripts/oasis.py` as the local convergence engine.
+
+A normal candidate pass is:
+
+```sh
+python3 scripts/oasis.py
+```
+
+The engine performs the safe repair actions explicitly allowed by policy and runs the local qualification plan. It fails closed on missing required tools, proof failure, stale extraction, quality failure, required hardening failure, differential failure, package failure, unsafe archive structure, integrity failure, or installed-binary smoke-test failure.
+
+It does **not** rewrite tests, weaken security policy, merge branches, close pull requests, create a release tag, or declare unresolved work green.
+
+A final identity pass uses:
+
+```sh
+python3 scripts/oasis.py --final --no-repair
+```
+
+Final qualification additionally requires the exact Oasis branch/tag/repository identity and applicable hosted security/release state defined by the current release machinery.
+
+Each run writes machine-readable evidence beneath `_build/oasis/`.
+
+## Stable release authority
+
+Public stable claims are derived from `oasis`.
+
+That includes:
+
+- recommended stable version;
+- supported platforms;
+- installed command surfaces;
+- stable capability claims;
+- release qualification status;
+- ordinary installation instructions.
+
+`main` can expose newer MIRAGE, CARAVAN, semantic-origin, research, or integration work, but repository presence alone does not expand the Oasis promise.
+
+## v0.14.0
+
+**CENTL v0.14.0 is an Oasis release.**
+
+It is the first release published under this standard and the stable successor to v0.12.0. The v0.13.0 development line was not published as a stable release.
+
+The standard v0.14.0 native release boundary is GNU/Linux x86_64 and installs:
+
+- `centl`;
+- `centl-sci`;
+- `centl-physics`.
+
+The source baseline contains bounded MIRAGE and CARAVAN work, but those systems do not become public installed commands merely by being present in source.
 
 ## Independence between releases
 
 Oasis status does not automatically carry forward.
 
-If `v0.14.0` is an Oasis release, `v0.15.0` begins as a future Oasis candidate. It
-receives the declaration only after its own convergence process completes on the
-`oasis` line.
+If v0.14.0 is an Oasis release, a later v0.15.0 begins as a future candidate and earns its own declaration only after its own exact source and publication identity satisfy the then-current Oasis gate.
 
-This allows CENTL to move quickly in Mirage between convergence points without
-pretending every intermediate development state is equally solidified.
+This allows development to remain fluid without diluting the meaning of a convergence declaration.
 
 ## After publication
 
-An Oasis declaration records the release's qualification state at publication. A
-later-discovered vulnerability does not rewrite history, but it must be handled
-through the normal security policy, advisories, fixes, and supported-version
-decisions.
+An Oasis declaration records the evidence-backed state at publication. A later-discovered vulnerability does not erase history, but it must be handled through the normal security, advisory, remediation, and supported-version process.
 
-A later release may supersede an earlier Oasis release. The word **Oasis** does not
-mean permanently supported, invulnerable, or mathematically complete.
-
-## v0.14.0
-
-CENTL v0.14.0 is the first release being deliberately qualified under this
-standard.
-
-Until every applicable gate is complete on the authoritative Oasis candidate, its
-status is:
-
-> **Oasis candidate**
-
-When qualification closes, the project may replace that candidate status with:
-
-> **CENTL v0.14.0 is an Oasis release.**
+Oasis means **qualified at the declared boundary**. It does not mean permanently supported, mathematically complete, or immune to future discoveries.
