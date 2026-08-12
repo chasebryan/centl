@@ -6,6 +6,7 @@ cd "$root"
 
 for script in \
   scripts/caravan-linux-platform \
+  scripts/caravan-preserve \
   scripts/caravan-public-origin-install \
   scripts/caravan-public-origin-ingest \
   scripts/caravan-public-origin-authorize-source \
@@ -27,7 +28,8 @@ python3 -m py_compile \
   tests/test_caravan_public_origin.py \
   tests/test_caravan_public_origin_metadata.py \
   tests/test_caravan_public_origin_cert.py \
-  tests/test_caravan_join_release.py
+  tests/test_caravan_join_release.py \
+  tests/test_caravan_preserve_driver.py
 
 out=$(mktemp)
 trap 'rm -f "$out"' EXIT HUP INT TERM
@@ -37,7 +39,8 @@ for pattern in \
   test_caravan_public_origin.py \
   test_caravan_public_origin_metadata.py \
   test_caravan_public_origin_cert.py \
-  test_caravan_join_release.py; do
+  test_caravan_join_release.py \
+  test_caravan_preserve_driver.py; do
   if ! python3 -m unittest discover -s tests -p "$pattern" >>"$out" 2>&1; then
     failed=1
   fi
@@ -52,4 +55,4 @@ cat "$out"
 rm -f "$out"
 trap - EXIT HUP INT TERM
 
-printf 'CENTL CARAVAN public-origin and join-release gate: PASS\n'
+printf 'CENTL CARAVAN public-origin, preservation, and join-release gate: PASS\n'
