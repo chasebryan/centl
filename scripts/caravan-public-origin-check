@@ -10,6 +10,7 @@ for script in \
   scripts/caravan-public-origin-ingest \
   scripts/caravan-public-origin-authorize-source \
   scripts/caravan-public-origin-firewall \
+  scripts/caravan-public-origin-cert-deploy \
   scripts/caravan-public-origin-audit \
   scripts/caravan-public-origin-activate-gate \
   scripts/caravan-join-template \
