@@ -26,9 +26,27 @@ fcf_linux_package_manager() {
   return 1
 }
 
+# Debian-family systems intentionally install the OpenBSD-compatible implementation
+# as /usr/bin/signify-openbsd instead of /usr/bin/signify. Normalize that packaging
+# difference only inside the current CARAVAN installer shell. Downstream CENTL
+# verification scripts independently accept either executable name.
+fcf_linux_normalize_signify_command() {
+  if command -v signify >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v signify-openbsd >/dev/null 2>&1; then
+    signify() {
+      command signify-openbsd "$@"
+    }
+    return 0
+  fi
+  return 1
+}
+
 fcf_linux_origin_commands_present() {
   local cmd
-  for cmd in certbot curl find git gzip nft nginx python3 signify ss systemctl useradd; do
+  fcf_linux_normalize_signify_command || return 1
+  for cmd in certbot curl find git gzip nft nginx python3 ss systemctl useradd; do
     command -v "$cmd" >/dev/null 2>&1 || return 1
   done
 }
