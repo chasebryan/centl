@@ -42,21 +42,26 @@ class InstallerTests(unittest.TestCase):
         self.assertIn("systemctl restart fcf-telepathyd.service", text)
         self.assertNotIn("systemctl enable --now", text)
 
-    def test_custom_live_root_rewrites_every_default_selector_reference(self) -> None:
+    def test_custom_live_root_renders_selector_and_read_only_anchor(self) -> None:
         installer = INSTALLER.read_text(encoding="utf-8")
         unit = UNIT.read_text(encoding="utf-8")
-        default = "/srv/fcf-caravan-live/current"
-        self.assertGreaterEqual(unit.count(default), 4)
+        self.assertIn('LIVE_ANCHOR=$(dirname -- "$LIVE_ROOT")', installer)
         self.assertIn(
-            'sed "s#/srv/fcf-caravan-live/current#$LIVE_ROOT#g"',
+            '[ "$LIVE_ANCHOR" != "/" ] || fail "CARAVAN live root must have a dedicated parent directory"',
             installer,
         )
         self.assertIn(
-            '*[!A-Za-z0-9._/+:-]*) fail "CARAVAN live root contains unsupported characters"',
+            '-e "s#@FCF_CARAVAN_LIVE_ROOT@#$LIVE_ROOT#g"',
             installer,
         )
-        self.assertIn(f"ReadOnlyPaths={default}", unit)
-        self.assertNotIn("ReadOnlyPaths=/srv/fcf-caravan-live\n", unit)
+        self.assertIn(
+            '-e "s#@FCF_CARAVAN_LIVE_ANCHOR@#$LIVE_ANCHOR#g"',
+            installer,
+        )
+        self.assertIn("grep -q '@FCF_CARAVAN_'", installer)
+        self.assertGreaterEqual(unit.count("@FCF_CARAVAN_LIVE_ROOT@"), 3)
+        self.assertEqual(unit.count("ReadOnlyPaths=@FCF_CARAVAN_LIVE_ANCHOR@"), 1)
+        self.assertNotIn("ReadOnlyPaths=@FCF_CARAVAN_LIVE_ROOT@", unit)
 
     def test_installer_only_disables_tor_it_installed(self) -> None:
         text = INSTALLER.read_text(encoding="utf-8")
@@ -79,13 +84,19 @@ class SystemdUnitTests(unittest.TestCase):
         self.assertRegex(self.text, r"(?m)^AmbientCapabilities=$")
         self.assertIn("UMask=0077", self.text)
 
-    def test_service_reads_caravan_and_writes_only_private_state(self) -> None:
+    def test_service_reads_caravan_anchor_and_writes_only_private_state(self) -> None:
         self.assertIn("ProtectSystem=strict", self.text)
         self.assertIn("ProtectHome=true", self.text)
-        self.assertIn("ReadOnlyPaths=/srv/fcf-caravan-live/current", self.text)
+        self.assertIn("ReadOnlyPaths=@FCF_CARAVAN_LIVE_ANCHOR@", self.text)
         self.assertIn("StateDirectory=fcf-telepathyd", self.text)
         self.assertIn("StateDirectoryMode=0700", self.text)
-        self.assertIn("--caravan-live-root /srv/fcf-caravan-live/current", self.text)
+        self.assertIn("--caravan-live-root @FCF_CARAVAN_LIVE_ROOT@", self.text)
+
+    def test_atomic_selector_is_not_used_as_sandbox_mount(self) -> None:
+        self.assertIn("ConditionPathExists=@FCF_CARAVAN_LIVE_ROOT@", self.text)
+        self.assertIn("ExecStartPre=/usr/bin/test -r @FCF_CARAVAN_LIVE_ROOT@/status.json", self.text)
+        self.assertNotIn("ReadOnlyPaths=@FCF_CARAVAN_LIVE_ROOT@", self.text)
+        self.assertIn("atomic `current` selector", self.text)
 
     def test_service_keeps_publication_listener_loopback(self) -> None:
         self.assertIn("--listen-host 127.0.0.1", self.text)
