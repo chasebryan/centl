@@ -11,7 +11,10 @@ for script in \
   scripts/caravan-public-origin-authorize-source \
   scripts/caravan-public-origin-firewall \
   scripts/caravan-public-origin-audit \
-  scripts/caravan-public-origin-activate-gate; do
+  scripts/caravan-public-origin-activate-gate \
+  scripts/caravan-join-template \
+  scripts/caravan-join-release \
+  scripts/caravan-join-verify; do
   bash -n "$script"
 done
 
@@ -20,18 +23,19 @@ python3 -m py_compile \
   scripts/caravan-public-origin-source-export.py \
   scripts/caravan-public-origin-activate.py \
   scripts/caravan-public-origin-source-guard.py \
-  tests/test_caravan_public_origin.py
+  tests/test_caravan_public_origin.py \
+  tests/test_caravan_join_release.py
 
 out=$(mktemp)
 trap 'rm -f "$out"' EXIT HUP INT TERM
-if ! python3 -m unittest discover -s tests -p 'test_caravan_public_origin.py' >"$out" 2>&1; then
+if ! python3 -m unittest discover -s tests -p 'test_caravan_*.py' >"$out" 2>&1; then
   cat "$out" >&2
-  message=$(tail -n 40 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
-  printf '::error title=CARAVAN public-origin adversarial gate::%s\n' "$message"
+  message=$(tail -n 50 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
+  printf '::error title=CARAVAN public-origin/join adversarial gate::%s\n' "$message"
   exit 1
 fi
 cat "$out"
 rm -f "$out"
 trap - EXIT HUP INT TERM
 
-printf 'CENTL CARAVAN public-origin gate: PASS\n'
+printf 'CENTL CARAVAN public-origin and join-release gate: PASS\n'
