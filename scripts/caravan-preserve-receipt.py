@@ -22,8 +22,13 @@ RECEIPT_FILES = {
     "MIRROR-SYMLINKS.sha256",
 }
 
+# Keep this set synchronized with every mirror path intentionally mutated by the
+# driver's source-only refresh. `snapshot-centl` writes both the bundle and its
+# human-readable HEAD marker; the driver then refreshes the source commit and
+# integrity receipts. No other mirror drift is accepted here.
 ALLOWED_SOURCE_REFRESH = {
     "project/centl.bundle",
+    "project/CENTL_HEAD",
     "project/SOURCE-COMMIT",
     "project/SOURCE-SHA256SUMS",
     "project/SOURCE-SHA256SUMS.sha256",
@@ -65,9 +70,9 @@ def main() -> int:
             + ", ".join(sorted(missing_allowed))
         )
 
-    # Compare exact regular-file membership after removing only the four source
-    # files that the manual first-node workflow was known to refresh and the
-    # receipt documents that mirror-receipt deliberately excludes from itself.
+    # Compare exact regular-file membership after removing only the source files
+    # that the manual first-node workflow was known to refresh and the receipt
+    # documents that mirror-receipt deliberately excludes from itself.
     actual_regular, _ = integrity.walk_tree(root)
     actual = set(actual_regular) - RECEIPT_FILES - ALLOWED_SOURCE_REFRESH
     expected_names = set(expected) - ALLOWED_SOURCE_REFRESH
