@@ -122,14 +122,9 @@ let bundle_header path =
           assoc "format" json,
           assoc "includes_verified_core" json )
       with
-<<<<<<< HEAD
-      | Some (`Int 1), Some (`String "centl-caramels-workspace-bundle"),
-        Some (`Bool false) ->
-=======
       | ( Some (`Int 1),
           Some (`String "centl-caramels-workspace-bundle"),
           Some (`Bool false) ) ->
->>>>>>> origin/main
           Ok ()
       | _ ->
           Error "workspace bundle metadata is not a recognized Caramels bundle"
@@ -322,11 +317,7 @@ let import workspace path =
             Error
               ("could not snapshot the current workspace before import: "
              ^ message)
-<<<<<<< HEAD
-        | Ok snapshot ->
-=======
         | Ok snapshot -> (
->>>>>>> origin/main
             try
               replace_surface workspace path;
               let revision = Centl_sci_workspace.bump_revision workspace in
@@ -334,9 +325,6 @@ let import workspace path =
                 {
                   message =
                     Printf.sprintf
-<<<<<<< HEAD
-                      "Imported a validated Caramels downstream workspace bundle.\nSource: %s\nWorkspace revision: %d\nThe previous downstream state is available through `undo`.\nVerified CENTL core, workspace identity, configuration, and history are not replaced by import."
-=======
                       "Imported a validated Caramels downstream workspace \
                        bundle.\n\
                        Source: %s\n\
@@ -345,7 +333,6 @@ let import workspace path =
                        `undo`.\n\
                        Verified CENTL core, workspace identity, history, and \
                        configuration were not replaced."
->>>>>>> origin/main
                       path revision;
                   changed = true;
                   revision = Some revision;

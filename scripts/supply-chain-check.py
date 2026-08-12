@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -14,10 +15,50 @@ SCI_ENGINE = ROOT / "docs" / "SCI-ENGINE.md"
 
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
+MERGE_LEFT = b"<" * 7 + b" "
+MERGE_MIDDLE = b"=" * 7
+MERGE_RIGHT = b">" * 7 + b" "
 
 
 def fail(message: str) -> None:
     raise SystemExit(f"supply-chain check: {message}")
+
+
+def conflict_markers(root: Path) -> list[str]:
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z"],
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    failures: list[str] = []
+    for raw_name in result.stdout.split(b"\0"):
+        if not raw_name:
+            continue
+        relative = Path(raw_name.decode("utf-8", "surrogateescape"))
+        path = root / relative
+        if not path.is_file() or path.is_symlink():
+            continue
+        data = path.read_bytes()
+        if b"\0" in data:
+            continue
+        for number, raw_line in enumerate(data.splitlines(), 1):
+            line = raw_line.rstrip(b"\r")
+            if (
+                line.startswith(MERGE_LEFT)
+                or line == MERGE_MIDDLE
+                or line.startswith(MERGE_RIGHT)
+            ):
+                failures.append(f"{relative}:{number}")
+    return failures
+
+
+def require_no_conflict_markers(root: Path = ROOT) -> None:
+    failures = conflict_markers(root)
+    if failures:
+        rendered = ", ".join(failures[:20])
+        if len(failures) > 20:
+            rendered += f", ... ({len(failures) - 20} more)"
+        fail(f"unresolved merge-conflict markers in tracked files: {rendered}")
 
 
 def parse_toolchain() -> dict[str, dict[str, str]]:
@@ -89,6 +130,7 @@ def require_artifact(
 
 
 def main() -> int:
+    require_no_conflict_markers()
     rows = parse_lock()
     toolchain = parse_toolchain()
     verification = toolchain["verification"]
