@@ -12,14 +12,12 @@ fail() {
 command -v nft >/dev/null 2>&1 || fail "nft is required"
 [ -f "$CONF" ] && [ ! -L "$CONF" ] || fail "firewall policy is missing or unsafe"
 
-# Validate the complete candidate policy before touching the active FCF table.
-nft -c -f "$CONF" >/dev/null
+grep -Eq '^[[:space:]]*flush ruleset[[:space:]]*$' "$CONF" ||
+  fail "dedicated-host policy must replace the complete nftables ruleset"
 
-# The FCF table is intentionally isolated. Unrelated rulesets are not imported
-# into the CARAVAN policy and are not relied upon for its deny-by-default boundary.
-if nft list table inet fcf_caravan >/dev/null 2>&1; then
-  nft delete table inet fcf_caravan
-fi
+# nft validates and then commits the batch transaction atomically. There is no
+# deliberate delete-first window where the host temporarily loses its filter.
+nft -c -f "$CONF" >/dev/null
 nft -f "$CONF"
 
 rules=$(nft list table inet fcf_caravan)
