@@ -70,6 +70,9 @@ let constant_phrase input =
       "standard acceleration of gravity";
     ]
     input
+  || input = "constant"
+  || input = "physical constant"
+  || input = "lookup constant"
   || starts [ "constant "; "physical constant "; "lookup constant " ] input
 
 let classify ~mode input =
@@ -80,19 +83,20 @@ let classify ~mode input =
     match mode with
     | Centl_sci_interaction.Build ->
         if
-          starts
-            [
-              "show ";
-              "inspect ";
-              "list ";
-              "why ";
-              "validate ";
-              "capabilities";
-              "workspace";
-              "extensions";
-              "packages";
-            ]
-            input
+          input = "validate"
+          || starts
+               [
+                 "show ";
+                 "inspect ";
+                 "list ";
+                 "why ";
+                 "validate ";
+                 "capabilities";
+                 "workspace";
+                 "extensions";
+                 "packages";
+               ]
+               input
         then result System_inspection High "BUILD inspection/validation verb"
         else if starts [ "create "; "write "; "make "; "scaffold " ] input then
           result Program_creation High "BUILD creation verb"
