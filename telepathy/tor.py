@@ -162,6 +162,23 @@ class TorOnionCarrier:
             return True
         return True
 
+    @staticmethod
+    def _reap_if_child(pid: int) -> None:
+        """Best-effort reap when the managed PID is our child.
+
+        Normal `serve --publish` lifecycle uses the stored Popen handle and
+        waits directly. Recovery may instead discover the same managed process
+        through the persisted PID. In a same-process recovery test that PID is
+        still our child; reaping it avoids leaving a zombie/test-harness warning.
+        After a real daemon restart it is not our child, so waitpid safely
+        raises ChildProcessError and no action is taken.
+        """
+
+        try:
+            os.waitpid(pid, os.WNOHANG)
+        except (ChildProcessError, OSError):
+            return
+
     def _pid_is_ours(self, pid: int) -> bool:
         """Verify a persisted PID before ever signaling it.
 
@@ -279,6 +296,7 @@ class TorOnionCarrier:
                 "the managed Tor process is already running without a published onion"
             )
         if current_pid is not None:
+            self._reap_if_child(current_pid)
             self.config.pid_path.unlink(missing_ok=True)
 
         binary = self._tor_binary()
@@ -328,6 +346,7 @@ class TorOnionCarrier:
 
     def _stop_owned_pid(self, pid: int) -> None:
         if not self._pid_alive(pid):
+            self._reap_if_child(pid)
             return
         if not self._pid_is_ours(pid):
             raise CarrierError(
@@ -336,6 +355,7 @@ class TorOnionCarrier:
         try:
             os.kill(pid, signal.SIGTERM)
         except ProcessLookupError:
+            self._reap_if_child(pid)
             return
 
         deadline = time.monotonic() + 5.0
@@ -343,6 +363,7 @@ class TorOnionCarrier:
             time.sleep(0.05)
         if self._pid_alive(pid):
             raise CarrierError("Tor process did not stop after SIGTERM")
+        self._reap_if_child(pid)
 
     def withdraw(self) -> CarrierStatus:
         if self._process is not None and self._process.poll() is None:
