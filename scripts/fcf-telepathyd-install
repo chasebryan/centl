@@ -65,6 +65,11 @@ case "$LIVE_ROOT" in /*) ;; *) fail "CARAVAN live root must be absolute" ;; esac
 case "$LIVE_ROOT" in
   *[!A-Za-z0-9._/+:-]*) fail "CARAVAN live root contains unsupported characters" ;;
 esac
+LIVE_ANCHOR=$(dirname -- "$LIVE_ROOT")
+[ "$LIVE_ANCHOR" != "/" ] || fail "CARAVAN live root must have a dedicated parent directory"
+case "$LIVE_ANCHOR" in
+  *[!A-Za-z0-9._/+:-]*) fail "CARAVAN live anchor contains unsupported characters" ;;
+esac
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 unit_source="$repo_root/infra/fcf-telepathyd/fcf-telepathyd.service"
@@ -82,7 +87,7 @@ for path in \
   [ -f "$path" ] || fail "required repository file missing: $path"
 done
 
-for command in awk getent grep install mktemp python3 sed seq sleep stat systemctl tr useradd; do
+for command in awk dirname getent grep install mktemp python3 sed seq sleep stat systemctl tr useradd; do
   need "$command"
 done
 
@@ -145,7 +150,13 @@ done
 install -d -o root -g root -m 0755 /etc/systemd/system
 unit_tmp=$(mktemp)
 trap 'rm -f "$unit_tmp"' EXIT
-sed "s#/srv/fcf-caravan-live/current#$LIVE_ROOT#g" "$unit_source" > "$unit_tmp"
+sed \
+  -e "s#@FCF_CARAVAN_LIVE_ROOT@#$LIVE_ROOT#g" \
+  -e "s#@FCF_CARAVAN_LIVE_ANCHOR@#$LIVE_ANCHOR#g" \
+  "$unit_source" > "$unit_tmp"
+if grep -q '@FCF_CARAVAN_' "$unit_tmp"; then
+  fail "fcf-telepathyd service template contains an unresolved CARAVAN placeholder"
+fi
 install -o root -g root -m 0644 "$unit_tmp" /etc/systemd/system/fcf-telepathyd.service
 
 say "[5/7] Verifying service sandbox..."
