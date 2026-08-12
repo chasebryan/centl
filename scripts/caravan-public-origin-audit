@@ -45,7 +45,7 @@ esac
 [ -d "$LIVE_ROOT/$target" ] || fail "live generation target is missing"
 [ ! -L "$LIVE_ROOT/$target" ] || fail "live generation itself is a symlink"
 
-site=/etc/nginx/sites-enabled/fcf-caravan
+site=/etc/nginx/conf.d/fcf-caravan.conf
 [ -f "$site" ] && [ ! -L "$site" ] || fail "installed nginx site must be a regular file"
 if grep -Eiq '(^|[[:space:]])(proxy_pass|fastcgi_pass|uwsgi_pass|scgi_pass|dav_methods|auth_request)[[:space:]]' "$site"; then
   fail "dynamic/proxy/upload-capable nginx directive found"
@@ -55,8 +55,12 @@ grep -Fq 'location / {' "$site" || fail "default-deny location missing"
 grep -Fq 'access_log off;' "$site" || fail "access-log minimization missing"
 grep -Fq 'max_ranges 1;' "$site" || fail "range-abuse bound missing"
 
-unrelated=$(find /etc/nginx/sites-enabled -mindepth 1 -maxdepth 1 ! -name fcf-caravan -print -quit 2>/dev/null || true)
-[ -z "$unrelated" ] || fail "unrelated nginx site is enabled: $unrelated"
+for dir in /etc/nginx/conf.d /etc/nginx/sites-enabled; do
+  [ -d "$dir" ] || continue
+  unrelated=$(find "$dir" -mindepth 1 -maxdepth 1 \
+    ! -name fcf-caravan.conf ! -name fcf-caravan -print -quit 2>/dev/null || true)
+  [ -z "$unrelated" ] || fail "unrelated nginx configuration is enabled: $unrelated"
+done
 
 user_shell=$(getent passwd fcf-caravan | awk -F: '{print $7}')
 case "$user_shell" in */nologin|*/false) ;; *) fail "fcf-caravan service account has an interactive shell" ;; esac
