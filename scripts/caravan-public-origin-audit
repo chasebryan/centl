@@ -32,9 +32,16 @@ case "$DOMAIN" in *[!A-Za-z0-9.-]*|'') fail "unsafe domain" ;; esac
 nginx -t >/dev/null 2>&1 || fail "nginx configuration test failed"
 systemctl is-active --quiet nginx || fail "nginx is not active"
 systemctl is-active --quiet fcf-caravan-firewall.service || fail "FCF firewall is not active"
-for timer in fcf-caravan-ingest.timer fcf-caravan-candidate.timer fcf-caravan-activate.timer; do
+for timer in \
+  fcf-caravan-ingest.timer \
+  fcf-caravan-candidate.timer \
+  fcf-caravan-activate.timer \
+  fcf-caravan-cert-renew.timer; do
   systemctl is-enabled --quiet "$timer" || fail "$timer is not enabled"
 done
+cert_hook=/usr/local/libexec/fcf-caravan/caravan-public-origin-cert-deploy
+[ -f "$cert_hook" ] && [ -x "$cert_hook" ] && [ ! -L "$cert_hook" ] ||
+  fail "certificate deploy hook is missing or unsafe"
 
 current="$LIVE_ROOT/current"
 [ -L "$current" ] || fail "live current pointer is missing"
