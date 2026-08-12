@@ -32,7 +32,7 @@ jobs:
   public-origin-boundary:
     name: Public-origin closed-world boundary
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Check out exact proposed SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -42,6 +42,46 @@ jobs:
 
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Set up pinned Julia for preservation smoke proof
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
+        with:
+          version: "1.12.6"
+
+      - name: Prove Julia loads from read-only preserved bytes with writable scratch cache
+        run: |
+          set -eu
+          preserved="$RUNNER_TEMP/julia-preserved"
+          scratch="$RUNNER_TEMP/julia-scratch"
+          project="$RUNNER_TEMP/julia-project"
+          probe="$preserved/Probe"
+          mkdir -p "$probe/src" "$scratch" "$project"
+          cat > "$probe/Project.toml" <<'EOF'
+          name = "Probe"
+          uuid = "91cc9a97-c50d-4e7f-93bc-335c507d1d29"
+          version = "0.1.0"
+          EOF
+          cat > "$probe/src/Probe.jl" <<'EOF'
+          module Probe
+          answer() = 42
+          end
+          EOF
+          cat > "$project/Project.toml" <<'EOF'
+          [deps]
+          Probe = "91cc9a97-c50d-4e7f-93bc-335c507d1d29"
+          EOF
+          PROBE="$probe" JULIA_DEPOT_PATH="$preserved" \
+            julia --startup-file=no --project="$project" -e \
+            'using Pkg; Pkg.develop(path=ENV["PROBE"])'
+          rm -rf "$preserved/compiled"
+          chmod -R a-w "$preserved"
+          SCRATCH="$scratch" JULIA_DEPOT_PATH="$scratch:$preserved" \
+            JULIA_PKG_OFFLINE=true JULIA_PKG_PRECOMPILE_AUTO=0 \
+            julia --startup-file=no --project="$project" -e \
+            'using Probe; @assert Probe.answer() == 42; @assert first(DEPOT_PATH) == ENV["SCRATCH"]'
+          test -d "$scratch/compiled"
+          test ! -e "$preserved/compiled"
+          printf 'read-only-julia-preservation-overlay: PASS\n'
 
       - name: Prove publisher has no mutable-source network authority
         run: |
