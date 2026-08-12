@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from http.client import HTTPConnection
+from http.client import HTTPConnection, HTTPException
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import ipaddress
+import re
 import threading
 from typing import ClassVar
 
@@ -12,7 +13,6 @@ from .policy import PolicyError, PublicReadPolicy
 
 _SAFE_REQUEST_HEADERS = {
     "accept",
-    "accept-encoding",
     "if-modified-since",
     "if-none-match",
     "range",
@@ -26,6 +26,7 @@ _SAFE_RESPONSE_HEADERS = {
     "etag",
     "last-modified",
 }
+_SINGLE_RANGE = re.compile(r"bytes=(?:[0-9]+-[0-9]*|-[0-9]+)\Z")
 
 
 def _require_loopback_literal(host: str, *, field: str) -> None:
@@ -49,6 +50,7 @@ class GatewayConfig:
     upstream_host: str = "127.0.0.1"
     upstream_port: int = 8787
     upstream_timeout: float = 10.0
+    max_workers: int = 32
 
     def __post_init__(self) -> None:
         _require_loopback_literal(self.listen_host, field="listen_host")
@@ -57,12 +59,36 @@ class GatewayConfig:
         _require_port(self.upstream_port, field="upstream_port")
         if self.upstream_timeout <= 0:
             raise ValueError("upstream_timeout must be positive")
+        if not 1 <= self.max_workers <= 256:
+            raise ValueError("max_workers must be between 1 and 256")
 
 
 class _TelepathyHTTPServer(ThreadingHTTPServer):
     daemon_threads = True
     request_queue_size = 16
     allow_reuse_address = True
+
+    def __init__(self, server_address: tuple[str, int], handler: type[BaseHTTPRequestHandler], max_workers: int) -> None:
+        self._worker_slots = threading.BoundedSemaphore(max_workers)
+        super().__init__(server_address, handler)
+
+    def process_request(self, request: object, client_address: object) -> None:
+        if not self._worker_slots.acquire(blocking=False):
+            try:
+                request.close()  # type: ignore[attr-defined]
+            finally:
+                return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self._worker_slots.release()
+            raise
+
+    def process_request_thread(self, request: object, client_address: object) -> None:
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._worker_slots.release()
 
 
 class TelepathyGateway:
@@ -94,8 +120,6 @@ class TelepathyGateway:
             sys_version = ""
 
             def log_message(self, _format: str, *args: object) -> None:
-                # Do not emit requester addresses through BaseHTTPRequestHandler's
-                # default access log. Operational logging is added separately.
                 return
 
             def _deny(self, status: int, message: str) -> None:
@@ -104,16 +128,43 @@ class TelepathyGateway:
                 self.send_header("Content-Type", "text/plain; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
                 self.send_header("Cache-Control", "no-store")
+                self.send_header("Connection", "close")
                 self.end_headers()
+                self.close_connection = True
                 if self.command != "HEAD":
                     self.wfile.write(body)
 
+            def _request_shape_allowed(self) -> bool:
+                if self.headers.get("Transfer-Encoding") is not None:
+                    self._deny(400, "transfer-encoded requests are forbidden")
+                    return False
+                if self.headers.get("Expect") is not None:
+                    self._deny(400, "expectation requests are forbidden")
+                    return False
+                length = self.headers.get("Content-Length")
+                if length is not None:
+                    try:
+                        parsed = int(length, 10)
+                    except ValueError:
+                        self._deny(400, "invalid content length")
+                        return False
+                    if parsed != 0:
+                        self._deny(400, "request bodies are forbidden")
+                        return False
+                range_value = self.headers.get("Range")
+                if range_value is not None and _SINGLE_RANGE.fullmatch(range_value.strip()) is None:
+                    self._deny(400, "only one canonical byte range is permitted")
+                    return False
+                return True
+
             def _forward(self) -> None:
+                if not self._request_shape_allowed():
+                    return
                 try:
                     path = policy.authorize(self.command, self.path)
                 except PolicyError as exc:
                     status = 405 if "method not permitted" in str(exc) else 403
-                    self._deny(status, "telepathy policy denied request")
+                    self._deny(status, "fcf-telepathyd policy denied request")
                     return
 
                 request_headers = {
@@ -130,19 +181,25 @@ class TelepathyGateway:
                 try:
                     connection.request(self.command, path, headers=request_headers)
                     response = connection.getresponse()
+                    if 300 <= response.status < 400 and response.status != 304:
+                        response.read()
+                        self._deny(502, "upstream redirects are forbidden")
+                        return
+
                     self.send_response(response.status)
                     for key, value in response.getheaders():
                         if key.lower() in _SAFE_RESPONSE_HEADERS:
                             self.send_header(key, value)
-                    self.send_header("X-FCF-Telepathy", "telepathic-camel")
+                    self.send_header("Connection", "close")
                     self.end_headers()
+                    self.close_connection = True
                     if self.command != "HEAD":
                         while True:
                             chunk = response.read(64 * 1024)
                             if not chunk:
                                 break
                             self.wfile.write(chunk)
-                except (OSError, TimeoutError):
+                except (OSError, TimeoutError, HTTPException):
                     if not self.wfile.closed:
                         try:
                             self._deny(502, "CARAVAN loopback endpoint unavailable")
@@ -165,10 +222,11 @@ class TelepathyGateway:
 
     def start(self) -> "TelepathyGateway":
         if self._server is not None:
-            raise RuntimeError("Telepathy gateway is already running")
+            raise RuntimeError("fcf-telepathyd gateway is already running")
         self._server = _TelepathyHTTPServer(
             (self.config.listen_host, self.config.listen_port),
             self._handler_type(),
+            self.config.max_workers,
         )
         return self
 
