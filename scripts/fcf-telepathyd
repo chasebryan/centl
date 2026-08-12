@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import signal
+import sys
+
+from telepathy.gateway import GatewayConfig, TelepathyGateway
+from telepathy.tor import TorOnionCarrier, TorOnionConfig
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="fcf-telepathyd",
+        description="FCF Telepathy policy gateway (codename telepathic-camel)",
+    )
+    parser.add_argument("--listen-host", default="127.0.0.1")
+    parser.add_argument("--listen-port", type=int, default=8790)
+    parser.add_argument("--upstream-host", default="127.0.0.1")
+    parser.add_argument("--upstream-port", type=int, default=8787)
+    parser.add_argument("--state-dir", type=Path, default=Path(".telepathy"))
+    parser.add_argument(
+        "--carrier",
+        choices=("none", "tor-onion"),
+        default="none",
+        help="optional replaceable carrier beneath the Telepathy gateway",
+    )
+    parser.add_argument(
+        "--publish",
+        action="store_true",
+        help="publish the selected carrier after the loopback gateway starts",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    if args.publish and args.carrier == "none":
+        raise SystemExit("--publish requires a carrier")
+
+    gateway = TelepathyGateway(
+        GatewayConfig(
+            listen_host=args.listen_host,
+            listen_port=args.listen_port,
+            upstream_host=args.upstream_host,
+            upstream_port=args.upstream_port,
+        )
+    )
+    carrier: TorOnionCarrier | None = None
+
+    def stop(_signum: int, _frame: object) -> None:
+        gateway.close()
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+
+    try:
+        gateway.start()
+        host, port = gateway.address
+        print(f"fcf-telepathyd: telepathic-camel listening on {host}:{port}")
+
+        if args.carrier == "tor-onion":
+            carrier = TorOnionCarrier(
+                TorOnionConfig(
+                    telepathy_host=host,
+                    telepathy_port=port,
+                    state_dir=args.state_dir / "tor",
+                )
+            )
+            if args.publish:
+                published = carrier.publish()
+                print(f"fcf-telepathyd: tor-onion published {published.endpoint}")
+
+        gateway.serve_forever()
+        return 0
+    except KeyboardInterrupt:
+        return 130
+    finally:
+        if carrier is not None and args.publish:
+            try:
+                carrier.withdraw()
+            except Exception as exc:  # shutdown must still close the gateway
+                print(f"fcf-telepathyd: carrier withdraw failed: {exc}", file=sys.stderr)
+        gateway.close()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
