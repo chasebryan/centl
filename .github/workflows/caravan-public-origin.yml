@@ -9,6 +9,7 @@ on:
       - 'docs/CARAVAN-PRESERVATION-DRIVER.md'
       - 'scripts/caravan-linux-platform'
       - 'scripts/caravan-preserve'
+      - 'scripts/offline-rebuild'
       - 'scripts/caravan-public-origin-*'
       - 'scripts/caravan-join-*'
       - 'infra/caravan-public-origin/**'
