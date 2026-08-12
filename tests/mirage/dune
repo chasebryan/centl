@@ -67,3 +67,13 @@
   ../../telepathy/tor.py)
  (action
   (run python3 %{dep:../test_fcf_telepathyd.py})))
+
+(rule
+ (alias runtest)
+ (deps
+  ../test_fcf_telepathyd_install.py
+  ../../scripts/fcf-telepathyd-install
+  ../../infra/fcf-telepathyd/fcf-telepathyd.service
+  ../../docs/FCF-TELEPATHYD-DEPLOY.md)
+ (action
+  (run python3 %{dep:../test_fcf_telepathyd_install.py})))
