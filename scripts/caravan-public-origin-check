@@ -24,20 +24,24 @@ python3 -m py_compile \
   scripts/caravan-public-origin-activate.py \
   scripts/caravan-public-origin-source-guard.py \
   tests/test_caravan_public_origin.py \
+  tests/test_caravan_public_origin_metadata.py \
   tests/test_caravan_join_release.py
 
 out=$(mktemp)
 trap 'rm -f "$out"' EXIT HUP INT TERM
 : > "$out"
 failed=0
-for pattern in test_caravan_public_origin.py test_caravan_join_release.py; do
+for pattern in \
+  test_caravan_public_origin.py \
+  test_caravan_public_origin_metadata.py \
+  test_caravan_join_release.py; do
   if ! python3 -m unittest discover -s tests -p "$pattern" >>"$out" 2>&1; then
     failed=1
   fi
 done
 if [ "$failed" -ne 0 ]; then
   cat "$out" >&2
-  message=$(tail -n 50 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
+  message=$(tail -n 60 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
   printf '::error title=CARAVAN public-origin/join adversarial gate::%s\n' "$message"
   exit 1
 fi
