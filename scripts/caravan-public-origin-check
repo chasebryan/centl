@@ -29,6 +29,7 @@ python3 -m py_compile \
   tests/test_caravan_public_origin.py \
   tests/test_caravan_public_origin_metadata.py \
   tests/test_caravan_public_origin_ingest.py \
+  tests/test_caravan_public_origin_source_guard.py \
   tests/test_caravan_public_origin_cert.py \
   tests/test_caravan_join_release.py \
   tests/test_caravan_preserve_driver.py
@@ -41,6 +42,7 @@ for pattern in \
   test_caravan_public_origin.py \
   test_caravan_public_origin_metadata.py \
   test_caravan_public_origin_ingest.py \
+  test_caravan_public_origin_source_guard.py \
   test_caravan_public_origin_cert.py \
   test_caravan_join_release.py \
   test_caravan_preserve_driver.py; do

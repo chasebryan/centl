@@ -2,6 +2,7 @@
 """Independent networkless source-archive guard for CARAVAN activation."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -12,7 +13,8 @@ from typing import NoReturn
 
 BRANCHES = ("main", "oasis", "mirage")
 BUILD_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[0-9]+$")
-HEX40 = re.compile(r"^[0-9a-f]{40}$")
+HEX40_OR_64 = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
 TOKEN_PATTERNS = (
     re.compile(rb"github_pat_[A-Za-z0-9_]{40,}"),
     re.compile(rb"gh[pousr]_[A-Za-z0-9]{36,}"),
@@ -45,6 +47,16 @@ SENSITIVE_SUFFIXES = (".kdbx", ".p12", ".pem", ".pfx")
 
 def die(message: str) -> NoReturn:
     raise SystemExit(f"fcf caravan source guard: {message}")
+
+
+def sha256(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        die(f"unsafe source file: {path}")
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while block := handle.read(1024 * 1024):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def safe_rel(value: str) -> PurePosixPath:
@@ -145,24 +157,40 @@ def main() -> int:
         index = json.loads((source / "INDEX.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise SystemExit("fcf caravan source guard: invalid source index") from exc
-    if (
-        not isinstance(index, dict)
-        or set(index) != {"schema", "branches"}
-        or index["schema"] != "centl-fcf-source-index-v1"
-        or not isinstance(index["branches"], dict)
-        or set(index["branches"]) != set(BRANCHES)
-    ):
-        die("source index schema/branch set mismatch")
+
+    required = {
+        "schema",
+        "repository",
+        "mirror_receipt_sha256",
+        "authorization_sha256",
+        "branches",
+    }
+    if not isinstance(index, dict) or set(index) != required:
+        die("source index fields do not match v2 schema")
+    if index["schema"] != "centl-fcf-source-index-v2":
+        die("unsupported source index schema")
+    if index["repository"] != "chasebryan/centl":
+        die("unexpected source repository identity")
+    for key in ("mirror_receipt_sha256", "authorization_sha256"):
+        if not isinstance(index[key], str) or not HEX64.fullmatch(index[key]):
+            die(f"source index {key} is invalid")
+    if not isinstance(index["branches"], dict) or set(index["branches"]) != set(BRANCHES):
+        die("source index branch set mismatch")
 
     for branch in BRANCHES:
         item = index["branches"][branch]
-        if not isinstance(item, dict) or set(item) != {"commit", "archive"}:
+        if not isinstance(item, dict) or set(item) != {"commit", "archive", "sha256"}:
             die(f"source index entry invalid: {branch}")
-        if not isinstance(item["commit"], str) or not HEX40.fullmatch(item["commit"]):
+        if not isinstance(item["commit"], str) or not HEX40_OR_64.fullmatch(item["commit"]):
             die(f"source commit identity invalid: {branch}")
         if item["archive"] != f"centl-{branch}.tar.gz":
             die(f"source archive name invalid: {branch}")
-        guard_archive(source / item["archive"], branch)
+        if not isinstance(item["sha256"], str) or not HEX64.fullmatch(item["sha256"]):
+            die(f"source archive digest invalid: {branch}")
+        archive = source / item["archive"]
+        if sha256(archive) != item["sha256"]:
+            die(f"source archive digest mismatch: {branch}")
+        guard_archive(archive, branch)
 
     print(f"fcf caravan source guard: PASS\ncandidate={build_id}")
     return 0
