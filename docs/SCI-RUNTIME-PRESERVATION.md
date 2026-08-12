@@ -56,6 +56,7 @@ product surfaces.
 The build explicitly disables:
 
 - host-specific `GGML_NATIVE` tuning;
+- SSE4.2, AVX, AVX2, BMI2, FMA, and F16C compile-time requirements;
 - OpenMP;
 - BLAS;
 - llamafile integration;
@@ -65,6 +66,27 @@ The build explicitly disables:
 - OpenSSL integration;
 - subprocess support; and
 - LLGuidance.
+
+The C and C++ compiler baseline is also explicitly pinned to:
+
+```text
+-march=x86-64 -mtune=generic
+```
+
+This is deliberate. `GGML_NATIVE=OFF` by itself is not an old-CPU portability
+contract: upstream ggml can still default-enable post-Core-2 x86 instruction
+sets when native tuning is disabled. The FCF capsule therefore refuses to rely
+on those upstream defaults.
+
+The recovery runtime is executed under QEMU's `Conroe` CPU model during both the
+capsule image build and the dedicated runtime-preservation CI gate. `Conroe`
+represents the Core 2 generation and lacks AVX-era extensions. A binary that
+requires AVX, AVX2, BMI2, FMA, F16C, or SSE4.2 therefore fails the gate instead
+of becoming a preserved recovery artifact.
+
+This gate exists because the first physical FCF CARAVAN public-origin pilot is a
+ThinkPad X200. The preservation capsule must remain usable on that old x86-64
+class instead of silently inheriting the instruction set of a modern build host.
 
 `LLAMA_BUILD_SERVER` remains enabled because the pinned upstream CMake graph builds
 `llama-cli` through the CLI/server implementation subtree. The final requested
@@ -94,6 +116,12 @@ centl-mirror/
     LLAMA-COMMIT
     LLAMA-BUILD-NUMBER
     LLAMA-VERSION
+```
+
+The capsule identity records the runtime CPU baseline as:
+
+```text
+llama_cpu_baseline=x86-64-conroe-compatible
 ```
 
 The exported standalone `llama-cli` bytes are useful evidence and an additional
@@ -143,8 +171,10 @@ recoverable merely because some unrelated `llama-cli` happens to be installed.
 ## Claim boundary
 
 This layer establishes recoverability for the current Linux x86_64 reference
-model/runtime pair. It does not claim that the exported CLI binary is universally
-portable across arbitrary Linux distributions or CPUs.
+model/runtime pair and now enforces a Core-2-era CPU execution floor for the
+preserved `llama-cli`. It does not claim that the exported CLI binary is
+universally portable across arbitrary Linux distributions, kernels, libc ABIs,
+or non-x86 architectures.
 
 That is why the SHA-protected OCI capsule is preserved alongside the binary and
 why the recovery test executes inside that capsule.
