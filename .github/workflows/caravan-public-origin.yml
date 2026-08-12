@@ -4,14 +4,10 @@ on:
   pull_request:
     paths:
       - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
-      - 'scripts/caravan-public-origin-install'
-      - 'scripts/caravan-public-origin-ingest'
-      - 'scripts/caravan-public-origin-candidate.py'
-      - 'scripts/caravan-public-origin-activate.py'
-      - 'scripts/caravan-public-origin-source-guard.py'
-      - 'scripts/caravan-public-origin-activate-gate'
-      - 'scripts/caravan-public-origin-audit'
-      - 'scripts/caravan-public-origin-check'
+      - 'docs/CARAVAN-JOIN-RELEASE.md'
+      - 'scripts/caravan-linux-platform'
+      - 'scripts/caravan-public-origin-*'
+      - 'scripts/caravan-join-*'
       - 'infra/caravan-public-origin/**'
       - 'tests/test_caravan_public_origin.py'
       - '.github/workflows/caravan-public-origin.yml'
@@ -28,7 +24,7 @@ env:
 
 jobs:
   public-origin-boundary:
-    name: Public-origin deny-by-default boundary
+    name: Public-origin closed-world boundary
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -41,32 +37,28 @@ jobs:
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
 
-      - name: Validate public source policy against proposed and production trees
+      - name: Prove publisher has no mutable-source network authority
         run: |
-          git -c protocol.file.allow=never -c protocol.ext.allow=never fetch --force --no-tags origin \
-            '+refs/heads/main:refs/remotes/origin/main' \
-            '+refs/heads/oasis:refs/remotes/origin/oasis' \
-            '+refs/heads/mirage:refs/remotes/origin/mirage'
           python3 - <<'PY'
-          import importlib.util
           from pathlib import Path
-          spec = importlib.util.spec_from_file_location(
-              "caravan_public_origin_candidate",
-              "scripts/caravan-public-origin-candidate.py",
+          candidate = Path('scripts/caravan-public-origin-candidate.py').read_text()
+          ingest = Path('scripts/caravan-public-origin-ingest').read_text()
+          unit = Path('infra/caravan-public-origin/fcf-caravan-candidate.service').read_text()
+          forbidden = (
+              'github.com/chasebryan/centl.git',
+              'refs/remotes/origin/',
+              'git fetch',
+              'refs/pull',
           )
-          assert spec is not None and spec.loader is not None
-          module = importlib.util.module_from_spec(spec)
-          spec.loader.exec_module(module)
-          repo = Path(".git")
-          for ref in (
-              "HEAD",
-              "refs/remotes/origin/main",
-              "refs/remotes/origin/oasis",
-              "refs/remotes/origin/mirage",
-          ):
-              module.validate_ref(repo, ref)
-              print("public-source-policy: PASS", ref)
+          for token in forbidden:
+              if token in candidate:
+                  raise SystemExit(f'candidate retains mutable source authority: {token}')
+          if 'FCF_CARAVAN_PRESERVATION_ROOT is required' not in ingest:
+              raise SystemExit('ingest does not fail closed without preservation authority')
+          if 'PrivateNetwork=yes' not in unit or 'IPAddressDeny=any' not in unit:
+              raise SystemExit('candidate compiler is not networkless')
+          print('closed-world-source-policy: PASS')
           PY
 
-      - name: Run public-origin security gate
+      - name: Run public-origin adversarial gate
         run: sh scripts/caravan-public-origin-check
