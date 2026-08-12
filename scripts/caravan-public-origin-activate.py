@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Networkless root activation gate for an FCF CARAVAN public origin.
 
-The networked candidate builder is not trusted with the live web root. A ready
-candidate is atomically moved into a root-controlled inbox, frozen, copied without
-following symlinks, independently verified, cross-checked against the root-owned
-approved preservation export, and only then activated.
+The candidate compiler cannot write the live web root. Activation seizes a ready
+candidate into a root-only inbox, freezes it, independently verifies every public
+object, compares all FCF-approved cargo byte-for-byte with the root-owned approved
+store, and only then switches the live generation.
 """
 from __future__ import annotations
 
@@ -49,9 +49,11 @@ def die(message: str) -> NoReturn:
 
 
 def sha256(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        die(f"unsafe file: {path}")
     digest = hashlib.sha256()
     with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
+        while block := handle.read(1024 * 1024):
             digest.update(block)
     return digest.hexdigest()
 
@@ -129,12 +131,10 @@ def verify_sha_manifest(root: Path, name: str, *, exclude: set[str]) -> None:
 
 
 def verify_approved(root: Path) -> None:
-    if not root.exists():
-        return
     require_safe_tree(root)
     manifest = root / "APPROVED-SHA256SUMS"
     receipt = root / "APPROVED-SHA256SUMS.sha256"
-    if not manifest.is_file() or not receipt.is_file():
+    if not manifest.is_file() or not receipt.is_file() or manifest.is_symlink() or receipt.is_symlink():
         die("approved store exists without complete receipts")
     parts = receipt.read_text(encoding="utf-8").strip().split()
     if len(parts) != 2 or parts[1].lstrip("*") != "APPROVED-SHA256SUMS":
@@ -171,22 +171,35 @@ def verify_source_index(root: Path) -> dict[str, dict[str, str]]:
     entries = list(source.iterdir())
     if any(p.is_dir() for p in entries) or {p.name for p in entries if p.is_file()} != expected:
         die("source directory membership is not exact")
-    data = json.loads((source / "INDEX.json").read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or set(data) != {"schema", "branches"}:
+    try:
+        data = json.loads((source / "INDEX.json").read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SystemExit("fcf caravan activation: invalid source index JSON") from exc
+    required = {
+        "schema", "repository", "mirror_receipt_sha256", "authorization_sha256", "branches"
+    }
+    if not isinstance(data, dict) or set(data) != required:
         die("source index fields do not match schema")
-    if data["schema"] != "centl-fcf-source-index-v1":
-        die("unsupported source index schema")
+    if data["schema"] != "centl-fcf-source-index-v2" or data["repository"] != "chasebryan/centl":
+        die("unsupported source index identity")
+    for key in ("mirror_receipt_sha256", "authorization_sha256"):
+        if not isinstance(data[key], str) or not HEX64.fullmatch(data[key]):
+            die(f"source index {key} invalid")
     branches = data["branches"]
     if not isinstance(branches, dict) or set(branches) != set(BRANCHES):
         die("source index must contain exactly main/oasis/mirage")
     for branch in BRANCHES:
         item = branches[branch]
-        if not isinstance(item, dict) or set(item) != {"commit", "archive"}:
+        if not isinstance(item, dict) or set(item) != {"commit", "archive", "sha256"}:
             die(f"source index entry invalid: {branch}")
         if not isinstance(item["commit"], str) or not HEX40_OR_64.fullmatch(item["commit"]):
             die(f"source index commit invalid: {branch}")
         if item["archive"] != f"centl-{branch}.tar.gz":
             die(f"source index archive invalid: {branch}")
+        if not isinstance(item["sha256"], str) or not HEX64.fullmatch(item["sha256"]):
+            die(f"source index digest invalid: {branch}")
+        if sha256(source / item["archive"]) != item["sha256"]:
+            die(f"source archive digest differs from source index: {branch}")
     return branches
 
 
@@ -236,23 +249,33 @@ def verify_source_archive(path: Path, branch: str) -> None:
 
 
 def verify_status(root: Path) -> None:
-    data = json.loads((root / "status.json").read_text(encoding="utf-8"))
+    try:
+        data = json.loads((root / "status.json").read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError, FileNotFoundError) as exc:
+        raise SystemExit("fcf caravan activation: invalid node status") from exc
     required = {
         "schema", "node_id", "mode", "generated_at", "source_branches",
-        "preservation_ingest", "uploads", "proxying", "arbitrary_paths",
+        "preservation_ingest", "source_authorization_sha256", "mirror_receipt_sha256",
+        "uploads", "proxying", "arbitrary_paths",
     }
     if not isinstance(data, dict) or set(data) != required:
         die("status fields do not match schema")
-    if data["schema"] != "fcf-caravan-public-origin-status-v1" or data["mode"] != "fcf-owned-public-origin":
+    if data["schema"] != "fcf-caravan-public-origin-status-v2" or data["mode"] != "fcf-owned-public-origin":
         die("unexpected node status schema/mode")
     if not isinstance(data["node_id"], str) or not NODE_ID.fullmatch(data["node_id"]):
         die("unsafe node id in status")
+    for key in ("source_authorization_sha256", "mirror_receipt_sha256"):
+        if not isinstance(data[key], str) or not HEX64.fullmatch(data[key]):
+            die(f"invalid status {key}")
     if data["uploads"] is not False or data["proxying"] is not False or data["arbitrary_paths"] is not False:
         die("candidate attempts to enable forbidden service capabilities")
 
 
 def verify_catalog(root: Path) -> None:
-    data = json.loads((root / "caravan" / "catalog-v1.json").read_text(encoding="utf-8"))
+    try:
+        data = json.loads((root / "caravan" / "catalog-v1.json").read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError, FileNotFoundError) as exc:
+        raise SystemExit("fcf caravan activation: invalid CARAVAN catalog") from exc
     if not isinstance(data, dict) or set(data) != {"schema", "catalog_version", "artifacts"}:
         die("catalog fields do not match schema")
     if data["schema"] != "centl-caravan-catalog-v1":
@@ -338,6 +361,7 @@ def verify_generation(root: Path, approved: Path) -> None:
     verify_status(root)
     verify_catalog(root)
     verify_approved(approved)
+    compare_tree(root / "source", approved / "source", "source export")
     compare_tree(root / "releases", approved / "releases", "release export")
     compare_tree(root / "semantic", approved / "semantic", "semantic export")
     candidate_ingest = root / "caravan" / "INGEST-STATUS.json"
@@ -348,6 +372,26 @@ def verify_generation(root: Path, approved: Path) -> None:
         die("ingest status differs from approved store")
 
 
+def relax_for_delete(root: Path) -> None:
+    if not root.exists():
+        return
+    for base, dirs, files in os.walk(root, topdown=False, followlinks=False):
+        for name in files:
+            try:
+                os.chmod(Path(base) / name, 0o600, follow_symlinks=False)
+            except OSError:
+                pass
+        for name in dirs:
+            try:
+                os.chmod(Path(base) / name, 0o700, follow_symlinks=False)
+            except OSError:
+                pass
+    try:
+        os.chmod(root, 0o700, follow_symlinks=False)
+    except OSError:
+        pass
+
+
 def main() -> int:
     if os.geteuid() != 0:
         die("activation must run as root")
@@ -355,12 +399,16 @@ def main() -> int:
     approved = Path(os.environ.get("FCF_CARAVAN_APPROVED_ROOT", "/var/lib/fcf-caravan/approved"))
     inbox = Path(os.environ.get("FCF_CARAVAN_ACTIVATION_INBOX", "/var/lib/fcf-caravan/activation-inbox"))
     live = Path(os.environ.get("FCF_CARAVAN_LIVE_ROOT", "/srv/fcf-caravan-live"))
-    keep = int(os.environ.get("FCF_CARAVAN_KEEP_LIVE", "3"))
+    try:
+        keep = int(os.environ.get("FCF_CARAVAN_KEEP_LIVE", "3"))
+    except ValueError:
+        die("live retention must be an integer")
     if keep < 2 or keep > 20:
         die("live retention must be between 2 and 20")
-    for root in (candidates, inbox, live):
+    for root in (candidates, approved, inbox, live):
         if root.is_symlink():
             die(f"root must not be a symlink: {root}")
+    require_safe_tree(approved)
     inbox.mkdir(parents=True, mode=0o700, exist_ok=True)
     live.mkdir(parents=True, mode=0o755, exist_ok=True)
     (live / "generations").mkdir(mode=0o755, exist_ok=True)
@@ -412,34 +460,16 @@ def main() -> int:
         for old in generations[keep:]:
             if old == final:
                 continue
-            for base, dirs, files in os.walk(old, topdown=False, followlinks=False):
-                for name in files:
-                    os.chmod(Path(base) / name, 0o600, follow_symlinks=False)
-                for name in dirs:
-                    os.chmod(Path(base) / name, 0o700, follow_symlinks=False)
-            os.chmod(old, 0o700, follow_symlinks=False)
+            relax_for_delete(old)
             shutil.rmtree(old)
         print(f"fcf caravan activation: PASS\ngeneration={build_id}")
         return 0
     finally:
         if stage.exists():
+            relax_for_delete(stage)
             shutil.rmtree(stage, ignore_errors=True)
         if claimed.exists():
-            for base, dirs, files in os.walk(claimed, topdown=False, followlinks=False):
-                for name in files:
-                    try:
-                        os.chmod(Path(base) / name, 0o600, follow_symlinks=False)
-                    except OSError:
-                        pass
-                for name in dirs:
-                    try:
-                        os.chmod(Path(base) / name, 0o700, follow_symlinks=False)
-                    except OSError:
-                        pass
-            try:
-                os.chmod(claimed, 0o700, follow_symlinks=False)
-            except OSError:
-                pass
+            relax_for_delete(claimed)
             shutil.rmtree(claimed, ignore_errors=True)
 
 
