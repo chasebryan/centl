@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Build an unprivileged, non-live FCF CARAVAN public-origin candidate."""
+"""Compile a non-live public CARAVAN candidate from root-approved FCF cargo.
+
+The candidate compiler has no source-network authority. It reads only the
+root-owned approved store produced by the networkless preservation ingest gate.
+"""
 from __future__ import annotations
 
 import datetime as dt
-import gzip
 import hashlib
 import json
 import os
@@ -11,46 +14,27 @@ from pathlib import Path, PurePosixPath
 import re
 import shutil
 import stat
-import subprocess
 import sys
 import time
+from typing import NoReturn
 
 CHUNK = 4 * 1024 * 1024
-OFFICIAL_SOURCE = "https://github.com/chasebryan/centl.git"
 BRANCHES = ("main", "oasis", "mirage")
-TOKEN_PATTERNS = (
-    re.compile(rb"github_pat_[A-Za-z0-9_]{40,}"),
-    re.compile(rb"gh[pousr]_[A-Za-z0-9]{36,}"),
-    re.compile(rb"AKIA[0-9A-Z]{16}"),
-    re.compile(rb"sk-proj-[A-Za-z0-9_-]{20,}"),
-    re.compile(rb"xox[baprs]-[A-Za-z0-9-]{20,}"),
-)
-PRIVATE_KEY = re.compile(
-    rb"-----BEGIN (?:OPENSSH |RSA |EC |DSA )?PRIVATE KEY-----[\s\S]{100,}"
-    rb"-----END (?:OPENSSH |RSA |EC |DSA )?PRIVATE KEY-----"
-)
-SENSITIVE_NAMES = {
-    ".env", ".env.local", ".env.production", "id_rsa", "id_dsa", "id_ecdsa",
-    "id_ed25519", "credentials", "credentials.json", "secrets.json", "secrets.yml",
-    "secrets.yaml", "authorized_keys", "known_hosts",
-}
-SENSITIVE_SUFFIXES = (".pem", ".p12", ".pfx", ".kdbx")
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
 
 
-def die(msg: str) -> "NoReturn":
-    raise SystemExit(f"fcf caravan candidate: {msg}")
+def die(message: str) -> NoReturn:
+    raise SystemExit(f"fcf caravan candidate: {message}")
 
 
-def env(name: str, default: str = "") -> str:
-    return os.environ.get(name, default)
-
-
-def git(repo: Path, *args: str, capture: bool = True) -> bytes:
-    cmd = ["git", "-c", "core.hooksPath=/dev/null", f"--git-dir={repo}", *args]
-    if capture:
-        return subprocess.check_output(cmd, timeout=600)
-    subprocess.run(cmd, check=True, timeout=600)
-    return b""
+def sha256(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        die(f"unsafe file: {path}")
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while block := handle.read(1024 * 1024):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def safe_tree(root: Path) -> None:
@@ -59,119 +43,91 @@ def safe_tree(root: Path) -> None:
     for base, dirs, files in os.walk(root, followlinks=False):
         current = Path(base)
         for name in dirs + files:
-            p = current / name
-            mode = os.lstat(p).st_mode
+            path = current / name
+            mode = os.lstat(path).st_mode
             if stat.S_ISLNK(mode) or not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
-                die(f"symlink/special file rejected: {p}")
+                die(f"symlink/special file rejected: {path}")
 
 
-def validate_ref(repo: Path, ref: str) -> None:
-    if git(repo, "cat-file", "-t", ref).strip() != b"commit":
-        die(f"{ref} is not a commit")
-    entries = git(repo, "ls-tree", "-r", "-z", "-l", ref).split(b"\0")
-    count = 0
-    for entry in entries:
-        if not entry:
-            continue
-        count += 1
-        if count > 100_000:
-            die(f"{ref}: source tree exceeds file ceiling")
-        try:
-            meta, raw_path = entry.split(b"\t", 1)
-            mode, typ, oid, raw_size = meta.split()
-            path = raw_path.decode("utf-8", "strict")
-            size = int(raw_size)
-        except Exception as exc:
-            raise SystemExit(f"fcf caravan candidate: malformed tree entry in {ref}") from exc
-        if mode not in {b"100644", b"100755"} or typ != b"blob":
-            die(f"{ref}: non-regular source entry rejected: {path}")
-        p = PurePosixPath(path)
-        if (not path or path.startswith("/") or "\\" in path or
-                any(part in {"", ".", ".."} for part in p.parts) or
-                any(ord(ch) < 32 or ord(ch) == 127 for ch in path)):
-            die(f"{ref}: unsafe source path rejected")
-        base = p.name.casefold()
-        if base in SENSITIVE_NAMES or base.endswith(SENSITIVE_SUFFIXES):
-            die(f"{ref}: sensitive filename rejected: {path}")
-        if size > 512 * 1024 * 1024:
-            die(f"{ref}: oversized source blob rejected: {path}")
-        if size <= 8 * 1024 * 1024:
-            data = git(repo, "cat-file", "blob", oid.decode())
-            if PRIVATE_KEY.search(data) or any(pat.search(data) for pat in TOKEN_PATTERNS):
-                die(f"{ref}: credential-like material rejected: {path}")
+def safe_rel(value: str) -> PurePosixPath:
+    if not value or value.startswith("/") or "\\" in value:
+        die("unsafe approved manifest path")
+    path = PurePosixPath(value)
+    if any(part in {"", ".", ".."} for part in path.parts):
+        die("unsafe approved manifest path segment")
+    return path
 
 
-def sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for block in iter(lambda: f.read(1024 * 1024), b""):
-            h.update(block)
-    return h.hexdigest()
-
-
-def verify_manifest(root: Path, manifest: str, receipt: str) -> None:
-    m = root / manifest
-    r = root / receipt
-    if not m.is_file() and not r.is_file():
-        return
-    if not m.is_file() or not r.is_file() or m.is_symlink() or r.is_symlink():
-        die("approved ingest receipt is incomplete or unsafe")
-    receipt_parts = r.read_text(encoding="utf-8").strip().split()
-    if len(receipt_parts) != 2 or receipt_parts[1].lstrip("*") != manifest:
-        die("approved ingest manifest receipt has unexpected form")
-    if sha256(m) != receipt_parts[0]:
-        die("approved ingest manifest checksum mismatch")
-
+def verify_manifest(root: Path) -> None:
+    safe_tree(root)
+    manifest = root / "APPROVED-SHA256SUMS"
+    receipt = root / "APPROVED-SHA256SUMS.sha256"
+    if manifest.is_symlink() or receipt.is_symlink() or not manifest.is_file() or not receipt.is_file():
+        die("approved store is missing complete receipts")
+    parts = receipt.read_text(encoding="utf-8").strip().split()
+    if len(parts) != 2 or parts[1].lstrip("*") != "APPROVED-SHA256SUMS":
+        die("approved receipt-of-receipt has unexpected form")
+    if not HEX64.fullmatch(parts[0]) or sha256(manifest) != parts[0]:
+        die("approved receipt-of-receipt mismatch")
     listed: set[str] = set()
-    for line in m.read_text(encoding="utf-8").splitlines():
-        parts = line.split(None, 1)
-        if len(parts) != 2:
-            die("approved ingest manifest contains a malformed line")
-        digest, rel = parts
-        rel = rel.strip().lstrip("*")
+    for raw in manifest.read_text(encoding="utf-8").splitlines():
+        fields = raw.split(None, 1)
+        if len(fields) != 2 or not HEX64.fullmatch(fields[0]):
+            die("malformed approved manifest")
+        rel = fields[1].strip().lstrip("*")
         if rel.startswith("./"):
             rel = rel[2:]
-        posix = PurePosixPath(rel)
-        if (not rel or rel.startswith("/") or "\\" in rel or
-                any(part in {"", ".", ".."} for part in posix.parts)):
-            die("approved ingest manifest contains an unsafe path")
-        if not re.fullmatch(r"[0-9a-f]{64}", digest):
-            die("approved ingest manifest contains an invalid SHA-256")
+        posix = safe_rel(rel)
         if rel in listed:
-            die(f"approved ingest manifest duplicates path: {rel}")
-        listed.add(rel)
+            die("duplicate approved manifest path")
         obj = root.joinpath(*posix.parts)
-        if not obj.is_file() or obj.is_symlink() or sha256(obj) != digest:
-            die(f"approved ingest object failed verification: {rel}")
-
+        if obj.is_symlink() or not obj.is_file() or sha256(obj) != fields[0]:
+            die(f"approved object failed verification: {rel}")
+        listed.add(rel)
     actual = {
         p.relative_to(root).as_posix()
         for p in root.rglob("*")
-        if p.is_file() and p.name not in {manifest, receipt}
+        if p.is_file() and p.name not in {"APPROVED-SHA256SUMS", "APPROVED-SHA256SUMS.sha256"}
     }
-    if actual != listed:
-        missing = sorted(listed - actual)
-        extra = sorted(actual - listed)
-        detail = []
-        if missing:
-            detail.append(f"missing={missing[:3]}")
-        if extra:
-            detail.append(f"extra={extra[:3]}")
-        die("approved ingest exact-membership failure: " + ", ".join(detail))
+    if listed != actual:
+        die("approved store exact-membership failure")
 
 
-def archive(repo: Path, ref: str, prefix: str, out: Path) -> None:
-    proc = subprocess.Popen(
-        ["git", "-c", "core.hooksPath=/dev/null", f"--git-dir={repo}",
-         "archive", "--format=tar", f"--prefix={prefix}/", ref],
-        stdout=subprocess.PIPE,
-    )
-    assert proc.stdout is not None
-    with out.open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
-        while block := proc.stdout.read(1024 * 1024):
-            gz.write(block)
-    if proc.wait() != 0 or out.stat().st_size == 0:
-        die(f"source archive failed: {ref}")
+def verify_source_index(source: Path) -> dict[str, object]:
+    safe_tree(source)
+    expected = {"INDEX.json", *(f"centl-{branch}.tar.gz" for branch in BRANCHES)}
+    names = {p.name for p in source.iterdir() if p.is_file()}
+    if names != expected or any(p.is_dir() for p in source.iterdir()):
+        die("approved source export membership is not exact")
+    try:
+        data = json.loads((source / "INDEX.json").read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SystemExit("fcf caravan candidate: invalid approved source index") from exc
+    required = {
+        "schema", "repository", "mirror_receipt_sha256", "authorization_sha256", "branches"
+    }
+    if not isinstance(data, dict) or set(data) != required:
+        die("approved source index fields do not match schema")
+    if data["schema"] != "centl-fcf-source-index-v2" or data["repository"] != "chasebryan/centl":
+        die("approved source index identity is invalid")
+    for key in ("mirror_receipt_sha256", "authorization_sha256"):
+        if not isinstance(data[key], str) or not HEX64.fullmatch(data[key]):
+            die(f"approved source index {key} is invalid")
+    branches = data["branches"]
+    if not isinstance(branches, dict) or set(branches) != set(BRANCHES):
+        die("approved source index must contain exactly main/oasis/mirage")
+    for branch in BRANCHES:
+        item = branches[branch]
+        if not isinstance(item, dict) or set(item) != {"commit", "archive", "sha256"}:
+            die(f"approved source index entry invalid: {branch}")
+        if item["archive"] != f"centl-{branch}.tar.gz":
+            die(f"approved source archive name invalid: {branch}")
+        if not isinstance(item["sha256"], str) or not HEX64.fullmatch(item["sha256"]):
+            die(f"approved source digest invalid: {branch}")
+        archive = source / item["archive"]
+        if sha256(archive) != item["sha256"]:
+            die(f"approved source archive digest mismatch: {branch}")
+    return data
 
 
 def make_catalog(root: Path, version: int) -> None:
@@ -180,155 +136,164 @@ def make_catalog(root: Path, version: int) -> None:
         base = root / top
         if not base.is_dir():
             continue
-        for p in sorted(x for x in base.rglob("*") if x.is_file()):
-            rel = p.relative_to(root).as_posix()
+        for path in sorted(p for p in base.rglob("*") if p.is_file()):
+            rel = path.relative_to(root).as_posix()
             whole = hashlib.sha256()
-            chunks, offset, length = [], 0, 0
-            with p.open("rb") as f:
-                while block := f.read(CHUNK):
+            chunks = []
+            offset = 0
+            length = 0
+            with path.open("rb") as handle:
+                while block := handle.read(CHUNK):
                     whole.update(block)
-                    chunks.append({"offset": offset, "length": len(block),
-                                   "sha256": hashlib.sha256(block).hexdigest()})
+                    chunks.append({
+                        "offset": offset,
+                        "length": len(block),
+                        "sha256": hashlib.sha256(block).hexdigest(),
+                    })
                     offset += len(block)
                     length += len(block)
-            artifacts.append({"logical_path": rel,
-                              "artifact_id": f"sha256:{whole.hexdigest()}",
-                              "length": length, "distribution": "public-approved",
-                              "chunks": chunks})
-    data = {"schema": "centl-caravan-catalog-v1", "catalog_version": version,
-            "artifacts": artifacts}
+            artifacts.append({
+                "logical_path": rel,
+                "artifact_id": f"sha256:{whole.hexdigest()}",
+                "length": length,
+                "distribution": "public-approved",
+                "chunks": chunks,
+            })
     (root / "caravan" / "catalog-v1.json").write_text(
-        json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        json.dumps(
+            {"schema": "centl-caravan-catalog-v1", "catalog_version": version, "artifacts": artifacts},
+            indent=2,
+            sort_keys=True,
+        ) + "\n",
+        encoding="utf-8",
+    )
     (root / "caravan" / "CATALOG-STATUS").write_text(
         "authentication=requires-independent-tuf-target\n"
-        "authority=fcf-publication-pipeline\n", encoding="utf-8")
+        "authority=fcf-publication-pipeline\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
-    node = env("FCF_CARAVAN_NODE_ID")
-    source_url = env("FCF_CARAVAN_SOURCE_REPO_URL", OFFICIAL_SOURCE)
-    state = Path(env("FCF_CARAVAN_STATE_ROOT", "/var/lib/fcf-caravan/source-state"))
-    approved = Path(env("FCF_CARAVAN_APPROVED_ROOT", "/var/lib/fcf-caravan/approved"))
-    candidates = Path(env("FCF_CARAVAN_CANDIDATE_ROOT", "/var/lib/fcf-caravan/candidates"))
-    keep_candidates_raw = env("FCF_CARAVAN_KEEP_CANDIDATES", "2")
-    try:
-        keep_candidates = int(keep_candidates_raw)
-    except ValueError:
-        die("candidate retention must be an integer")
-    if keep_candidates < 2 or keep_candidates > 20:
-        die("candidate retention must be between 2 and 20")
+    node = os.environ.get("FCF_CARAVAN_NODE_ID", "")
+    approved = Path(os.environ.get("FCF_CARAVAN_APPROVED_ROOT", "/var/lib/fcf-caravan/approved"))
+    candidates = Path(os.environ.get("FCF_CARAVAN_CANDIDATE_ROOT", "/var/lib/fcf-caravan/candidates"))
+    state = Path(os.environ.get("FCF_CARAVAN_STATE_ROOT", "/var/lib/fcf-caravan/source-state"))
+    keep_raw = os.environ.get("FCF_CARAVAN_KEEP_CANDIDATES", "2")
     if not node or not re.fullmatch(r"[A-Za-z0-9._-]+", node):
         die("unsafe/missing node id")
-    if source_url != OFFICIAL_SOURCE:
-        die("source repository is not the fixed CENTL public source")
-    for root in (state, candidates):
+    try:
+        keep = int(keep_raw)
+    except ValueError:
+        die("candidate retention must be an integer")
+    if keep < 2 or keep > 20:
+        die("candidate retention must be between 2 and 20")
+    for root in (candidates, state):
         if root.is_symlink():
-            die(f"root must not be symlink: {root}")
+            die(f"root must not be a symlink: {root}")
         root.mkdir(parents=True, exist_ok=True)
+    if approved.is_symlink() or not approved.is_dir():
+        die("root-approved publication store is missing")
 
-    repo = state / "source.git"
-    if not repo.exists():
-        subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "init", "--bare", str(repo)], check=True)
-        git(repo, "remote", "add", "origin", source_url, capture=False)
-    elif git(repo, "remote", "get-url", "origin").decode().strip() != source_url:
-        die("source remote changed; refusing retarget")
-    refspecs = [f"+refs/heads/{b}:refs/remotes/origin/{b}" for b in BRANCHES]
-    subprocess.run(["git", "-c", "core.hooksPath=/dev/null", "-c", "protocol.file.allow=never",
-                    "-c", "protocol.ext.allow=never", f"--git-dir={repo}", "fetch", "--force",
-                    "--prune", "--no-tags", "origin", *refspecs], check=True, timeout=600,
-                   env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
-    commits = {}
-    for branch in BRANCHES:
-        ref = f"refs/remotes/origin/{branch}"
-        validate_ref(repo, ref)
-        commits[branch] = git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
+    verify_manifest(approved)
+    source_index = verify_source_index(approved / "source")
 
     build_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ") + f"-{os.getpid()}"
     build = candidates / f".build-{build_id}"
     if build.exists():
         shutil.rmtree(build)
-    (build / "source").mkdir(parents=True)
-    (build / "caravan").mkdir()
+    build.mkdir()
     try:
-        index = {"schema": "centl-fcf-source-index-v1", "branches": {}}
-        for branch in BRANCHES:
-            name = f"centl-{branch}.tar.gz"
-            archive(repo, f"refs/remotes/origin/{branch}", f"centl-{branch}", build / "source" / name)
-            index["branches"][branch] = {"commit": commits[branch], "archive": name}
-        (build / "source" / "INDEX.json").write_text(
-            json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        shutil.copytree(approved / "source", build / "source")
+        for name in ("releases", "semantic"):
+            if (approved / name).is_dir():
+                shutil.copytree(approved / name, build / name)
+        (build / "caravan").mkdir()
+        if (approved / "INGEST-STATUS.json").is_file():
+            shutil.copy2(approved / "INGEST-STATUS.json", build / "caravan" / "INGEST-STATUS.json")
 
-        if approved.is_dir():
-            safe_tree(approved)
-            verify_manifest(approved, "APPROVED-SHA256SUMS", "APPROVED-SHA256SUMS.sha256")
-            for name in ("releases", "semantic"):
-                if (approved / name).is_dir():
-                    shutil.copytree(approved / name, build / name)
-            if (approved / "INGEST-STATUS.json").is_file():
-                shutil.copy2(approved / "INGEST-STATUS.json", build / "caravan" / "INGEST-STATUS.json")
-
-        vf = state / "catalog-version"
+        version_path = state / "catalog-version"
         try:
-            last = int(vf.read_text(encoding="ascii").strip())
+            last = int(version_path.read_text(encoding="ascii").strip())
         except (FileNotFoundError, ValueError):
             last = 0
         version = max(last + 1, int(time.time()))
-        vf.write_text(f"{version}\n", encoding="ascii")
+        version_path.write_text(f"{version}\n", encoding="ascii")
         make_catalog(build, version)
 
         ingest = None
-        ip = build / "caravan" / "INGEST-STATUS.json"
-        if ip.is_file():
-            ingest = json.loads(ip.read_text(encoding="utf-8"))
-        status = {"schema": "fcf-caravan-public-origin-status-v1", "node_id": node,
-                  "mode": "fcf-owned-public-origin",
-                  "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
-                  "source_branches": index["branches"], "preservation_ingest": ingest,
-                  "uploads": False, "proxying": False, "arbitrary_paths": False}
-        (build / "status.json").write_text(json.dumps(status, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        ingest_path = build / "caravan" / "INGEST-STATUS.json"
+        if ingest_path.is_file():
+            ingest = json.loads(ingest_path.read_text(encoding="utf-8"))
+        status = {
+            "schema": "fcf-caravan-public-origin-status-v2",
+            "node_id": node,
+            "mode": "fcf-owned-public-origin",
+            "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+            "source_branches": source_index["branches"],
+            "preservation_ingest": ingest,
+            "source_authorization_sha256": source_index["authorization_sha256"],
+            "mirror_receipt_sha256": source_index["mirror_receipt_sha256"],
+            "uploads": False,
+            "proxying": False,
+            "arbitrary_paths": False,
+        }
+        (build / "status.json").write_text(
+            json.dumps(status, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         (build / "index.html").write_text(
             f"<!doctype html><meta charset=utf-8><title>FCF CARAVAN · {node}</title>"
             "<style>body{max-width:850px;margin:4rem auto;padding:0 1rem;font:18px/1.5 system-ui;background:#111;color:#eee}a{color:#f3c66b}</style>"
             f"<h1>FCF CARAVAN 🐪</h1><p><b>{node}</b> is an FCF-owned public CENTL origin.</p>"
-            "<p>No uploads. No proxying. No arbitrary filesystem paths.</p><ul>"
+            "<p>Every served cargo object crossed the FCF preservation and publication boundary. "
+            "No uploads. No proxying. No arbitrary filesystem paths.</p><ul>"
             "<li><a href=/source/centl-main.tar.gz>main source</a></li>"
             "<li><a href=/source/centl-oasis.tar.gz>Oasis source</a></li>"
             "<li><a href=/source/centl-mirage.tar.gz>Mirage source</a></li>"
+            "<li><a href=/source/INDEX.json>source authorization index</a></li>"
             "<li><a href=/caravan/catalog-v1.json>CARAVAN catalog</a></li>"
-            "<li><a href=/status.json>status</a></li><li><a href=/SHA256SUMS>SHA-256 receipt</a></li></ul>"
-            "<p>Good maths should be free.</p>", encoding="utf-8")
+            "<li><a href=/status.json>node status</a></li>"
+            "<li><a href=/SHA256SUMS>public-tree receipt</a></li></ul>"
+            "<p>Good maths should be free.</p>",
+            encoding="utf-8",
+        )
 
         safe_tree(build)
-        files = sorted(p for p in build.rglob("*") if p.is_file() and p.name != "SHA256SUMS")
-        with (build / "SHA256SUMS").open("w", encoding="utf-8", newline="\n") as f:
-            for p in files:
-                f.write(f"{sha256(p)}  {p.relative_to(build).as_posix()}\n")
+        files = sorted(
+            p for p in build.rglob("*") if p.is_file() and p.name != "SHA256SUMS"
+        )
+        manifest = "".join(f"{sha256(p)}  {p.relative_to(build).as_posix()}\n" for p in files)
+        (build / "SHA256SUMS").write_text(manifest, encoding="utf-8")
         safe_tree(build)
-        for p in build.rglob("*"):
-            os.chmod(p, 0o555 if p.is_dir() else 0o444, follow_symlinks=False)
-        os.chmod(build, 0o555)
+        for path in build.rglob("*"):
+            if path.is_file():
+                path.chmod(0o444)
+        for path in sorted((p for p in build.rglob("*") if p.is_dir()), reverse=True):
+            path.chmod(0o555)
+        build.chmod(0o555)
+
         final = candidates / build_id
-        build.rename(final)
-        tmp_ready = candidates / ".READY.new"
-        tmp_ready.write_text(build_id + "\n", encoding="ascii")
-        os.replace(tmp_ready, candidates / "READY")
+        os.rename(build, final)
+        ready = candidates / ".READY.new"
+        ready.write_text(build_id + "\n", encoding="ascii")
+        os.replace(ready, candidates / "READY")
 
         generations = sorted(
-            (p for p in candidates.iterdir() if p.is_dir() and not p.name.startswith(".build-")),
-            key=lambda p: p.name, reverse=True,
+            (p for p in candidates.iterdir() if p.is_dir() and not p.name.startswith(".")),
+            key=lambda p: p.name,
+            reverse=True,
         )
-        for old in generations[keep_candidates:]:
-            if old.name == build_id or old.is_symlink():
+        for old in generations[keep:]:
+            if old == final:
                 continue
-            for item in old.rglob("*"):
-                if item.is_dir():
-                    os.chmod(item, 0o755, follow_symlinks=False)
-                elif item.is_file():
-                    os.chmod(item, 0o644, follow_symlinks=False)
-            os.chmod(old, 0o755, follow_symlinks=False)
+            for base, dirs, files_old in os.walk(old, topdown=False, followlinks=False):
+                for name in files_old:
+                    os.chmod(Path(base) / name, 0o600)
+                for name in dirs:
+                    os.chmod(Path(base) / name, 0o700)
+            os.chmod(old, 0o700)
             shutil.rmtree(old)
-
-        print(f"fcf caravan candidate: PASS\ncandidate={build_id}")
+        print(f"fcf caravan candidate: PASS\ngeneration={build_id}")
         return 0
     finally:
         if build.exists():
