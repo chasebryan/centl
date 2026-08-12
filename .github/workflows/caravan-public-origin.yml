@@ -53,9 +53,8 @@ jobs:
           set -eu
           preserved="$RUNNER_TEMP/julia-preserved"
           scratch="$RUNNER_TEMP/julia-scratch"
-          project="$RUNNER_TEMP/julia-project"
-          probe="$preserved/Probe"
-          mkdir -p "$probe/src" "$scratch" "$project"
+          probe="$preserved/packages/Probe"
+          mkdir -p "$probe/src" "$scratch"
           cat > "$probe/Project.toml" <<'EOF'
           name = "Probe"
           uuid = "91cc9a97-c50d-4e7f-93bc-335c507d1d29"
@@ -66,18 +65,13 @@ jobs:
           answer() = 42
           end
           EOF
-          cat > "$project/Project.toml" <<'EOF'
-          [deps]
-          Probe = "91cc9a97-c50d-4e7f-93bc-335c507d1d29"
-          EOF
-          PROBE="$probe" JULIA_DEPOT_PATH="$preserved" \
-            julia --startup-file=no --project="$project" -e \
-            'using Pkg; Pkg.develop(path=ENV["PROBE"])'
-          rm -rf "$preserved/compiled"
           chmod -R a-w "$preserved"
-          SCRATCH="$scratch" JULIA_DEPOT_PATH="$scratch:$preserved" \
-            JULIA_PKG_OFFLINE=true JULIA_PKG_PRECOMPILE_AUTO=0 \
-            julia --startup-file=no --project="$project" -e \
+          SCRATCH="$scratch" \
+            JULIA_DEPOT_PATH="$scratch:$preserved" \
+            JULIA_LOAD_PATH="$preserved/packages:@stdlib" \
+            JULIA_PKG_OFFLINE=true \
+            JULIA_PKG_PRECOMPILE_AUTO=0 \
+            julia --startup-file=no -e \
             'using Probe; @assert Probe.answer() == 42; @assert first(DEPOT_PATH) == ENV["SCRATCH"]'
           test -d "$scratch/compiled"
           test ! -e "$preserved/compiled"
