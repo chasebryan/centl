@@ -4,12 +4,20 @@ set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$root"
 
-bash -n scripts/caravan-public-origin-install
-bash -n scripts/caravan-public-origin-ingest
-bash -n scripts/caravan-public-origin-audit
-bash -n scripts/caravan-public-origin-activate-gate
+for script in \
+  scripts/caravan-linux-platform \
+  scripts/caravan-public-origin-install \
+  scripts/caravan-public-origin-ingest \
+  scripts/caravan-public-origin-authorize-source \
+  scripts/caravan-public-origin-firewall \
+  scripts/caravan-public-origin-audit \
+  scripts/caravan-public-origin-activate-gate; do
+  bash -n "$script"
+done
+
 python3 -m py_compile \
   scripts/caravan-public-origin-candidate.py \
+  scripts/caravan-public-origin-source-export.py \
   scripts/caravan-public-origin-activate.py \
   scripts/caravan-public-origin-source-guard.py \
   tests/test_caravan_public_origin.py
@@ -18,7 +26,7 @@ out=$(mktemp)
 trap 'rm -f "$out"' EXIT HUP INT TERM
 if ! python3 -m unittest discover -s tests -p 'test_caravan_public_origin.py' >"$out" 2>&1; then
   cat "$out" >&2
-  message=$(tail -n 30 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
+  message=$(tail -n 40 "$out" | tr '\n\r' '  ' | sed 's/%/%25/g; s/:/%3A/g')
   printf '::error title=CARAVAN public-origin adversarial gate::%s\n' "$message"
   exit 1
 fi
