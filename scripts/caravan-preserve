@@ -1,0 +1,317 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mirror=${FCF_CARAVAN_PRESERVATION_ROOT:-/srv/centl-mirror}
+auto_update=1
+force_full=${FCF_CARAVAN_PRESERVE_FORCE_FULL:-0}
+seal_mirror=${FCF_CARAVAN_PRESERVE_SEAL:-1}
+phase="initialization"
+completed=0
+lock_dir=""
+
+fail() {
+  printf 'FCF CARAVAN preservation: %s\n' "$*" >&2
+  exit 1
+}
+
+note() {
+  printf '\n==> %s\n' "$*"
+}
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/caravan-preserve [OPTIONS]
+
+Resumable FCF CARAVAN preservation driver.
+
+Default behavior:
+  * update a clean checkout to origin/main with a fast-forward only
+  * reuse an existing preservation mirror and OCI recovery capsule
+  * refresh only the CENTL source snapshot when the capsule already exists
+  * run the full no-network recovery proof
+  * create and independently verify the whole-mirror receipt only after PASS
+
+Options:
+  --mirror PATH   preservation mirror (default: /srv/centl-mirror)
+  --full          force a full dependency snapshot and capsule rebuild
+  --no-update     use the current checkout without contacting origin/main
+  --no-seal       run recovery proof but leave the mirror deliberately unsealed
+  -h, --help      show this help
+
+After this script has been installed once, a failed preservation cycle is resumed
+by running the same command again. Expensive preserved cargo is not deleted.
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --mirror)
+      [ "$#" -ge 2 ] || fail "--mirror requires a path"
+      mirror=$2
+      shift 2
+      ;;
+    --full)
+      force_full=1
+      shift
+      ;;
+    --no-update)
+      auto_update=0
+      shift
+      ;;
+    --no-seal)
+      seal_mirror=0
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      fail "unknown option: $1"
+      ;;
+  esac
+done
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+tracked_clean() {
+  git -C "$repo_root" diff --quiet -- &&
+    git -C "$repo_root" diff --cached --quiet --
+}
+
+# Update before taking the local preservation lock. If the update changed this
+# driver, exec the freshly checked-out copy instead of continuing with code that
+# is no longer the repository's current preservation policy.
+if [ "$auto_update" -eq 1 ]; then
+  phase="updating main"
+  need git
+  tracked_clean || fail "tracked worktree is dirty; preservation refuses to overwrite local changes"
+  git -C "$repo_root" switch main >/dev/null
+  git -C "$repo_root" fetch origin main
+  git -C "$repo_root" merge --ff-only origin/main
+
+  if [ "${FCF_CARAVAN_PRESERVE_REEXECED:-0}" != 1 ]; then
+    export FCF_CARAVAN_PRESERVE_REEXECED=1
+    export FCF_CARAVAN_PRESERVATION_ROOT="$mirror"
+    export FCF_CARAVAN_PRESERVE_FORCE_FULL="$force_full"
+    export FCF_CARAVAN_PRESERVE_SEAL="$seal_mirror"
+    exec "$repo_root/scripts/caravan-preserve" --no-update
+  fi
+fi
+
+need git
+need make
+need python3
+need podman
+tracked_clean || fail "tracked worktree must be clean before preservation"
+
+mkdir -p "$repo_root/_build"
+lock_dir="$repo_root/_build/caravan-preserve.lock"
+if ! mkdir "$lock_dir" 2>/dev/null; then
+  stale_pid=$(sed -n '1p' "$lock_dir/pid" 2>/dev/null || true)
+  case "$stale_pid" in
+    ''|*[!0-9]*) stale_pid= ;;
+  esac
+  if [ -n "$stale_pid" ] && kill -0 "$stale_pid" 2>/dev/null; then
+    fail "another preservation cycle is already running as PID $stale_pid"
+  fi
+  rm -rf "$lock_dir"
+  mkdir "$lock_dir" || fail "could not acquire preservation lock"
+fi
+printf '%s\n' "$$" > "$lock_dir/pid"
+
+on_exit() {
+  status=$?
+  [ -n "$lock_dir" ] && rm -rf "$lock_dir"
+  if [ "$status" -ne 0 ] && [ "$completed" -ne 1 ]; then
+    printf '\n╭────────────────────────────────────────────────────────────╮\n' >&2
+    printf '│              CARAVAN PRESERVATION PAUSED                  │\n' >&2
+    printf '╰────────────────────────────────────────────────────────────╯\n' >&2
+    printf 'phase: %s\n' "$phase" >&2
+    printf 'mirror: %s\n' "$mirror" >&2
+    printf 'Nothing was intentionally discarded. After the repository is repaired,\n' >&2
+    printf 'run the SAME command again: scripts/caravan-preserve\n' >&2
+  fi
+  exit "$status"
+}
+trap on_exit EXIT
+trap 'exit 130' HUP INT TERM
+
+current_commit=$(git -C "$repo_root" rev-parse HEAD)
+current_branch=$(git -C "$repo_root" symbolic-ref --short -q HEAD || true)
+[ "$current_branch" = main ] || fail "preservation must run from main (current branch: ${current_branch:-detached})"
+
+printf '\nFCF CARAVAN PRESERVATION DRIVER\n'
+printf 'source: %s\n' "$current_commit"
+printf 'mirror: %s\n' "$mirror"
+
+if [ ! -d "$mirror" ]; then
+  phase="creating preservation mirror"
+  note "Creating first preservation mirror"
+  if ! mkdir -p "$mirror" 2>/dev/null; then
+    if command -v sudo >/dev/null 2>&1; then
+      sudo install -d -o "$(id -u)" -g "$(id -g)" -m 0750 "$mirror"
+    else
+      fail "cannot create $mirror and sudo is unavailable"
+    fi
+  fi
+  force_full=1
+fi
+mirror=$(CDPATH= cd -- "$mirror" && pwd) || fail "mirror is not accessible: $mirror"
+[ -w "$mirror" ] || fail "mirror is not writable: $mirror"
+
+manifest_name=MIRROR-SHA256SUMS
+manifest_hash_name=MIRROR-SHA256SUMS.sha256
+symlink_name=MIRROR-SYMLINKS
+symlink_hash_name=MIRROR-SYMLINKS.sha256
+
+controlled_source_stale_receipt() {
+  # During the manual bring-up of the first CARAVAN node, source refreshes were
+  # performed after capsule-build had already sealed the mirror. Accept that
+  # specific interrupted state only when the old receipt itself is authentic
+  # and every path outside the four source-refresh files still matches exactly.
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/$manifest_hash_name" --root "$mirror" >/dev/null 2>&1 || return 1
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$mirror/$symlink_hash_name" --root "$mirror" >/dev/null 2>&1 || return 1
+  python3 "$repo_root/scripts/integrity.py" tree-verify \
+    "$mirror/$manifest_name" --root "$mirror" \
+    --ignore "$manifest_name" \
+    --ignore "$manifest_hash_name" \
+    --ignore "$symlink_name" \
+    --ignore "$symlink_hash_name" \
+    --ignore project/centl.bundle \
+    --ignore project/SOURCE-SHA256SUMS \
+    --ignore project/SOURCE-SHA256SUMS.sha256 \
+    --ignore project/SOURCE-COMMIT >/dev/null 2>&1 || return 1
+  python3 "$repo_root/scripts/integrity.py" symlink-verify \
+    "$mirror/$symlink_name" --root "$mirror" >/dev/null 2>&1
+}
+
+unseal_for_cycle() {
+  present=0
+  for receipt in "$manifest_name" "$manifest_hash_name" "$symlink_name" "$symlink_hash_name"; do
+    [ -f "$mirror/$receipt" ] && present=$((present + 1))
+  done
+  [ "$present" -ne 0 ] || return 0
+  [ "$present" -eq 4 ] || fail "mirror has a partial whole-mirror receipt set; refusing ambiguous mutation"
+
+  phase="verifying previous mirror seal"
+  if sh "$repo_root/scripts/mirror-receipt" verify "$mirror" >/dev/null 2>&1; then
+    note "Previous whole-mirror receipt verified"
+  elif controlled_source_stale_receipt; then
+    note "Previous receipt is stale only on the known source-refresh surfaces; recovering the interrupted cycle"
+  else
+    fail "existing mirror receipt is invalid outside the controlled source-refresh surfaces"
+  fi
+
+  backup="$repo_root/_build/caravan-preserve-receipts/$(date +%s)-$current_commit"
+  mkdir -p "$backup"
+  for receipt in "$manifest_name" "$manifest_hash_name" "$symlink_name" "$symlink_hash_name"; do
+    cp "$mirror/$receipt" "$backup/$receipt"
+  done
+  rm -f \
+    "$mirror/$manifest_name" "$mirror/$manifest_hash_name" \
+    "$mirror/$symlink_name" "$mirror/$symlink_hash_name"
+  note "Mirror deliberately unsealed for this controlled preservation cycle"
+}
+
+unseal_for_cycle
+
+capsule_ready=1
+for required in \
+  capsule/centl-build-capsule.oci.tar \
+  capsule/centl-build-capsule.oci.tar.sha256 \
+  capsule/IMAGE-REF \
+  recovery/capsule-run \
+  sci-runtime/llama-cli
+do
+  [ -f "$mirror/$required" ] || capsule_ready=0
+done
+[ "$capsule_ready" -eq 1 ] || force_full=1
+
+find_julia() {
+  if command -v julia >/dev/null 2>&1; then
+    command -v julia
+  elif [ -x "$HOME/.local/bin/julia" ]; then
+    printf '%s\n' "$HOME/.local/bin/julia"
+  else
+    return 1
+  fi
+}
+
+if [ "$force_full" -eq 1 ]; then
+  phase="full dependency preservation"
+  note "Full preservation required; existing downloads and package caches will be reused"
+  need opam
+  julia_cmd=$(find_julia) || fail "Julia is required for a full preservation cycle"
+  if ! opam switch list --short 2>/dev/null | grep -Fqx centl; then
+    note "Preparing pinned CENTL opam switch"
+    sh "$repo_root/scripts/bootstrap-opam"
+  fi
+  make -C "$repo_root" supply-chain-preserve \
+    MIRROR="$mirror" JULIA="$julia_cmd"
+
+  phase="building recovery capsule"
+  note "Building/rebuilding the saved OCI recovery capsule"
+  make -C "$repo_root" capsule-build MIRROR="$mirror"
+else
+  phase="refreshing CENTL source snapshot"
+  note "Reusing dependency cargo and recovery capsule; refreshing CENTL source only"
+  make -C "$repo_root" integrity-source
+  python3 "$repo_root/scripts/supply-chain-check.py"
+  sh "$repo_root/scripts/supply-chain" snapshot-centl "$mirror"
+  mkdir -p "$mirror/project"
+
+  source_manifest="$mirror/project/SOURCE-SHA256SUMS"
+  source_manifest_tmp="$source_manifest.tmp.$$"
+  cp "$repo_root/_build/integrity/SHA256SUMS" "$source_manifest_tmp"
+  mv "$source_manifest_tmp" "$source_manifest"
+
+  source_hash="$mirror/project/SOURCE-SHA256SUMS.sha256"
+  source_hash_tmp="$source_hash.tmp.$$"
+  python3 "$repo_root/scripts/integrity.py" hash "$source_manifest" > "$source_hash_tmp"
+  mv "$source_hash_tmp" "$source_hash"
+
+  source_commit="$mirror/project/SOURCE-COMMIT"
+  source_commit_tmp="$source_commit.tmp.$$"
+  printf '%s\n' "$current_commit" > "$source_commit_tmp"
+  mv "$source_commit_tmp" "$source_commit"
+
+  sh "$repo_root/scripts/supply-chain" audit "$mirror"
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$source_hash" --root "$mirror/project"
+  python3 "$repo_root/scripts/integrity.py" verify \
+    "$source_manifest" --root "$repo_root"
+fi
+
+phase="no-network recovery proof"
+note "Running saved capsule with networking disabled"
+make -C "$repo_root" capsule-run MIRROR="$mirror"
+
+if [ "$seal_mirror" -eq 1 ]; then
+  phase="sealing whole preservation mirror"
+  note "Creating whole-mirror receipt only after the recovery proof passed"
+  sh "$repo_root/scripts/mirror-receipt" create "$mirror"
+  sh "$repo_root/scripts/mirror-receipt" verify "$mirror"
+else
+  note "Recovery proof passed; --no-seal requested, so the mirror remains deliberately unsealed"
+fi
+
+completed=1
+printf '\n╭────────────────────────────────────────────────────────────╮\n'
+printf '│              FCF CARAVAN PRESERVATION PASS                │\n'
+printf '╰────────────────────────────────────────────────────────────╯\n'
+printf '🐪 Cargo preserved.\n'
+printf '🔒 No-network recovery proved.\n'
+if [ "$seal_mirror" -eq 1 ]; then
+  printf '📦 Whole-mirror receipt sealed and verified.\n'
+fi
+printf 'source_commit=%s\n' "$current_commit"
+printf 'mirror=%s\n' "$mirror"
+printf '\nFrom now on, resume/update this machine with one command:\n'
+printf '  scripts/caravan-preserve\n'
