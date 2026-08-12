@@ -6,12 +6,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DRIVER = ROOT / "scripts" / "caravan-preserve"
+RECEIPT_HELPER = ROOT / "scripts" / "caravan-preserve-receipt.py"
 
 
 class CaravanPreserveDriverTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.text = DRIVER.read_text(encoding="utf-8")
+        cls.receipt_text = RECEIPT_HELPER.read_text(encoding="utf-8")
 
     def test_driver_is_executable_and_shell_syntax_is_valid(self):
         self.assertTrue(os.access(DRIVER, os.X_OK), "driver must be executable")
@@ -35,24 +37,45 @@ class CaravanPreserveDriverTests(unittest.TestCase):
             "sci-runtime/llama-cli",
         ):
             self.assertIn(required, text)
-        self.assertIn('note "Reusing dependency cargo and recovery capsule; refreshing CENTL source only"', text)
-        self.assertIn('sh "$repo_root/scripts/supply-chain" snapshot-centl "$mirror"', text)
+        self.assertIn(
+            'note "Reusing dependency cargo and recovery capsule; refreshing CENTL source only"',
+            text,
+        )
+        self.assertIn(
+            'sh "$repo_root/scripts/supply-chain" snapshot-centl "$mirror"', text
+        )
 
     def test_stale_receipt_adoption_is_narrow_and_authenticated(self):
-        text = self.text
-        self.assertIn('python3 "$repo_root/scripts/integrity.py" verify', text)
-        self.assertIn('--ignore project/centl.bundle', text)
-        self.assertIn('--ignore project/SOURCE-SHA256SUMS', text)
-        self.assertIn('--ignore project/SOURCE-SHA256SUMS.sha256', text)
-        self.assertIn('--ignore project/SOURCE-COMMIT', text)
-        self.assertIn('symlink-verify', text)
-        self.assertIn('invalid outside the controlled source-refresh surfaces', text)
+        driver = self.text
+        helper = self.receipt_text
+        self.assertIn(
+            'python3 "$repo_root/scripts/caravan-preserve-receipt.py" "$mirror"',
+            driver,
+        )
+        for path in (
+            "project/centl.bundle",
+            "project/SOURCE-SHA256SUMS",
+            "project/SOURCE-SHA256SUMS.sha256",
+            "project/SOURCE-COMMIT",
+        ):
+            self.assertIn(path, helper)
+        self.assertIn("integrity.verify_manifest(manifest_hash, root)", helper)
+        self.assertIn("integrity.verify_manifest(symlinks_hash, root)", helper)
+        self.assertIn("integrity.verify_symlink_manifest", helper)
+        self.assertIn("mirror drift exists outside controlled source refresh", helper)
+        self.assertIn(
+            "invalid outside the controlled source-refresh surfaces", driver
+        )
 
     def test_no_network_recovery_precedes_whole_mirror_seal(self):
         text = self.text
         run_pos = text.index('make -C "$repo_root" capsule-run MIRROR="$mirror"')
-        create_pos = text.index('sh "$repo_root/scripts/mirror-receipt" create "$mirror"')
-        verify_pos = text.index('sh "$repo_root/scripts/mirror-receipt" verify "$mirror"', create_pos)
+        create_pos = text.index(
+            'sh "$repo_root/scripts/mirror-receipt" create "$mirror"'
+        )
+        verify_pos = text.index(
+            'sh "$repo_root/scripts/mirror-receipt" verify "$mirror"', create_pos
+        )
         self.assertLess(run_pos, create_pos)
         self.assertLess(create_pos, verify_pos)
 
@@ -61,7 +84,7 @@ class CaravanPreserveDriverTests(unittest.TestCase):
         self.assertIn("CARAVAN PRESERVATION PAUSED", text)
         self.assertIn("run the SAME command again: scripts/caravan-preserve", text)
         self.assertNotIn('rm -rf "$mirror"', text)
-        self.assertNotIn('rm -rf /srv/centl-mirror', text)
+        self.assertNotIn("rm -rf /srv/centl-mirror", text)
 
     def test_success_contract_is_explicit(self):
         text = self.text
