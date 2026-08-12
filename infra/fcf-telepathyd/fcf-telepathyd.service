@@ -1,0 +1,50 @@
+[Unit]
+Description=FCF Telepathy Tor carrier for CARAVAN
+Documentation=https://github.com/chasebryan/centl/blob/mirage/docs/FCF-TELEPATHY.md
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/srv/fcf-caravan-live/current
+
+[Service]
+Type=simple
+User=fcf-telepathyd
+Group=fcf-telepathyd
+WorkingDirectory=/var/lib/fcf-telepathyd
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStartPre=/usr/bin/test -r /srv/fcf-caravan-live/current/status.json
+ExecStart=/usr/local/libexec/fcf-telepathyd/fcf-telepathyd serve --listen-host 127.0.0.1 --listen-port 8790 --caravan-live-root /srv/fcf-caravan-live/current --carrier tor-onion --publish --state-dir /var/lib/fcf-telepathyd
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=15s
+KillMode=mixed
+UMask=0077
+
+# The service gets network access only because Tor must build outbound circuits.
+# The local publication listener itself remains fixed to IPv4 loopback.
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/srv/fcf-caravan-live
+StateDirectory=fcf-telepathyd
+StateDirectoryMode=0700
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
+LockPersonality=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
