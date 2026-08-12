@@ -29,8 +29,12 @@ LockPersonality=yes
 SystemCallArchitectures=native
 CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE
 AmbientCapabilities=
-ReadOnlyPaths=/var/lib/fcf-caravan/approved /run/lock/fcf-caravan-publication.lock
-ReadWritePaths=/var/lib/fcf-caravan/candidates /var/lib/fcf-caravan/activation-inbox /srv/fcf-caravan-live
+# Candidate claiming uses rename(2) from candidates/ into activation-inbox/.
+# Both paths must therefore remain inside one writable mount namespace. Keep the
+# common /var/lib/fcf-caravan parent writable for that atomic handoff, then mask
+# every non-handoff state subtree read-only again below it.
+ReadOnlyPaths=/var/lib/fcf-caravan/approved /var/lib/fcf-caravan/source-state /var/lib/fcf-caravan/ingest-work /run/lock/fcf-caravan-publication.lock
+ReadWritePaths=/var/lib/fcf-caravan /srv/fcf-caravan-live
 TasksMax=64
 MemoryMax=1G
 Nice=10
