@@ -138,6 +138,8 @@ CARAVAN is the preservation and availability architecture for approved CENTL and
 
 Artifact authority comes from authenticated FCF metadata and exact content identity. Carriers contribute availability, not truth.
 
+CARAVAN is also the distribution layer for the broader **FCF preservation mission**. That long-term mission explicitly considers Linux, Linux-libre, Trisquel GNU/Linux, OpenBSD, FreeBSD, the GNU developer toolchain, FSF/GNU books and documentation, boot/firmware projects, historical source, and the reconstruction evidence needed to keep free computing understandable and recoverable. Preservation does not automatically grant redistribution rights; only policy-approved material may become public CARAVAN cargo.
+
 The v0.14.0 Oasis boundary includes the bounded Phase 1 local laboratory. Main-line development also contains later enrollment, census, public-origin, and rollout work, but **public volunteer network enrollment remains gated until the corresponding release and operational requirements are satisfied**.
 
 ### Joining the CARAVAN is a contribution
@@ -146,7 +148,7 @@ Supporting CENTL does not require writing code or sending money. **Running a CAR
 
 Participation is designed to remain voluntary, resource-capped, rootless for ordinary carriers, reversible, and unable to redefine trusted artifact identity. Until public enrollment is opened for the relevant release channel, users can still help by testing the join path, reviewing the protocol and policy, and preparing compatible carrier systems.
 
-See [CENTL CARAVAN](docs/CARAVAN.md), [Joining the CARAVAN manually](docs/CARAVAN-JOIN-MANUAL.md), [CARAVAN Host Policy](docs/CARAVAN-HOST-POLICY.md), and [CARAVAN Threat Model](docs/CARAVAN-THREAT-MODEL.md).
+See [CENTL CARAVAN](docs/CARAVAN.md), [FCF Preservation Plan](docs/FCF-PRESERVATION-PLAN.md), [Joining the CARAVAN manually](docs/CARAVAN-JOIN-MANUAL.md), [CARAVAN Host Policy](docs/CARAVAN-HOST-POLICY.md), and [CARAVAN Threat Model](docs/CARAVAN-THREAT-MODEL.md).
 
 ## Support CENTL
 
@@ -206,6 +208,7 @@ Contributor setup and the manual learning path are documented in [CONTRIBUTING.m
 - [Caramels BUILD](docs/CARAMELS-BUILD.md)
 - [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
 - [CENTL CARAVAN](docs/CARAVAN.md)
+- [FCF Preservation Plan](docs/FCF-PRESERVATION-PLAN.md)
 - [CARAVAN join manual](docs/CARAVAN-JOIN-MANUAL.md)
 - [Oasis release standard](docs/OASIS.md)
 - [Release and branch policy](docs/RELEASE-POLICY.md)
