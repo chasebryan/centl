@@ -353,6 +353,38 @@ class GatewayTests(unittest.TestCase):
                     conn.close()
                     self.assertEqual(response.status, 404, msg=path)
 
+    def test_live_selector_cannot_escape_or_use_untrusted_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory() as outside_td:
+            base = Path(td)
+            outside = make_generation(
+                Path(outside_td), "outside-generation", marker=b"must-not-serve\n"
+            )
+            current = point_current(base, outside)
+            gateway_port = free_port()
+
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/")
+                response = conn.getresponse()
+                response.read()
+                conn.close()
+                self.assertEqual(response.status, 404)
+
+            inside = make_generation(base, "inside-generation", marker=b"inside\n")
+            point_current(base, inside)
+            base.chmod(0o777)
+            try:
+                gateway_port = free_port()
+                with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
+                    conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                    conn.request("GET", "/")
+                    response = conn.getresponse()
+                    response.read()
+                    conn.close()
+                    self.assertEqual(response.status, 404)
+            finally:
+                base.chmod(0o700)
+
     def test_atomic_current_switch_changes_generation_without_reconfiguring_daemon(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
