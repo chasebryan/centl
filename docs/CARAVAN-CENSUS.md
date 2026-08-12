@@ -2,7 +2,7 @@
 
 Status: protocol contract for the production volunteer rollout. The public coordinator and live census endpoint are not yet enabled.
 
-CARAVAN needs to know whether the preservation network is alive without turning its volunteers into a public tracking directory. The census therefore counts carriers centrally while publishing only aggregate numbers.
+CARAVAN needs to know whether the preservation network is alive without turning its volunteers into a public tracking directory. The census therefore counts carriers centrally and publishes **aggregate counts only**.
 
 The public-facing names are intentionally simple:
 
