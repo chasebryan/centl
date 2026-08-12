@@ -1,0 +1,62 @@
+name: Toolchain pin synchronization
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/check-toolchain-pins'
+      - 'toolchain.lock'
+      - 'centl.opam'
+      - '.ocamlformat'
+      - 'docs/TOOLCHAIN.md'
+      - 'CONTRIBUTING.md'
+      - 'lab/julia/Manifest.toml'
+      - 'scripts/package-release'
+      - 'scripts/package-release.ps1'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/oasis-target-qualification.yml'
+      - '.github/workflows/oasis-qualification.yml'
+      - '.github/workflows/toolchain-pins.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/check-toolchain-pins'
+      - 'toolchain.lock'
+      - 'centl.opam'
+      - '.ocamlformat'
+      - 'docs/TOOLCHAIN.md'
+      - 'CONTRIBUTING.md'
+      - 'lab/julia/Manifest.toml'
+      - 'scripts/package-release'
+      - 'scripts/package-release.ps1'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/oasis-target-qualification.yml'
+      - '.github/workflows/oasis-qualification.yml'
+      - '.github/workflows/toolchain-pins.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: toolchain-pins-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Require synchronized active pin surfaces
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check shell syntax
+        run: sh -n scripts/check-toolchain-pins
+
+      - name: Verify active toolchain pin surfaces
+        run: sh scripts/check-toolchain-pins

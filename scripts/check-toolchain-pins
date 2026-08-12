@@ -22,6 +22,10 @@ require_text() {
   file=$1
   expected=$2
   description=$3
+  [ -f "$file" ] || {
+    printf 'required toolchain pin surface is missing: %s\n' "$file" >&2
+    exit 1
+  }
   if ! grep -Fq -- "$expected" "$file"; then
     printf '%s is not synchronized with toolchain.lock: %s\n' \
       "$file" "$description" >&2
@@ -41,6 +45,10 @@ require_unique_workflow_pin() {
   file=$1
   package=$2
   version=$3
+  [ -f "$file" ] || {
+    printf 'required toolchain pin surface is missing: %s\n' "$file" >&2
+    exit 1
+  }
   pins=$(grep -Eo "${package}\.[0-9][0-9A-Za-z.+_~-]*" "$file" \
     | sort -u || true)
   if [ "$pins" != "$package.$version" ]; then
@@ -71,6 +79,12 @@ julia=$(lock_value laboratory julia)
 nemo=$(lock_value laboratory nemo)
 json3=$(lock_value laboratory json3)
 
+# The old generic ci.yml workflow was retired when qualification was split into
+# explicit release and exact-SHA Oasis surfaces. Keep the checker bound to the
+# active workflows rather than to a historical filename.
+verification_workflows=".github/workflows/oasis-target-qualification.yml .github/workflows/release.yml"
+formatter_workflow=.github/workflows/oasis-qualification.yml
+
 require_opam_pin ocaml "$ocaml"
 require_opam_pin dune "$dune"
 require_opam_pin zarith "$zarith"
@@ -87,11 +101,9 @@ require_text .ocamlformat "version=$ocamlformat" \
   "OCamlFormat must be pinned to $ocamlformat"
 require_text docs/TOOLCHAIN.md "| OCamlFormat | $ocamlformat |" \
   "OCamlFormat must be documented as $ocamlformat"
-require_text .github/workflows/ci.yml "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
-require_text .github/workflows/release.yml "FSTAR_VERSION: \"$fstar\"" \
-  "F* must be pinned to $fstar"
-for workflow in .github/workflows/ci.yml .github/workflows/release.yml; do
+for workflow in $verification_workflows; do
+  require_text "$workflow" "FSTAR_VERSION: \"$fstar\"" \
+    "F* must be pinned to $fstar"
   require_text "$workflow" "FSTAR_COMMIT: \"$fstar_commit\"" \
     "F* commit must be pinned to $fstar_commit"
   require_text "$workflow" "FSTAR_SHA256: \"$fstar_sha256\"" \
@@ -106,12 +118,12 @@ require_text docs/TOOLCHAIN.md "| Z3 | $z3 |" \
   "Z3 must be documented as $z3"
 require_text CONTRIBUTING.md "FSTAR_SHA256=$fstar_sha256" \
   "the contributor F* checksum must match $fstar_sha256"
-require_text .github/workflows/ci.yml "version: \"$julia\"" \
-  "Julia must be pinned to $julia"
-require_text .github/workflows/release.yml "version: \"$julia\"" \
-  "release Julia must be pinned to $julia"
+for workflow in $verification_workflows; do
+  require_text "$workflow" "version: \"$julia\"" \
+    "Julia must be pinned to $julia"
+done
 
-require_unique_workflow_pin .github/workflows/ci.yml ocaml-base-compiler "$ocaml"
+require_unique_workflow_pin "$formatter_workflow" ocaml-base-compiler "$ocaml"
 for pin in \
   "ocaml-base-compiler:$ocaml" \
   "dune:$dune" \
@@ -179,4 +191,4 @@ manifest_version() {
   exit 1
 }
 
-printf '%s\n' 'Toolchain manifests and workflows are synchronized.'
+printf '%s\n' 'Toolchain manifests and active workflows are synchronized.'
