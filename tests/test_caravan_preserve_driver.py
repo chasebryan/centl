@@ -54,6 +54,7 @@ class CaravanPreserveDriverTests(unittest.TestCase):
         )
         for path in (
             "project/centl.bundle",
+            "project/CENTL_HEAD",
             "project/SOURCE-SHA256SUMS",
             "project/SOURCE-SHA256SUMS.sha256",
             "project/SOURCE-COMMIT",
@@ -66,6 +67,14 @@ class CaravanPreserveDriverTests(unittest.TestCase):
         self.assertIn(
             "invalid outside the controlled source-refresh surfaces", driver
         )
+
+    def test_source_refresh_allowlist_matches_snapshot_centl_outputs(self):
+        helper = self.receipt_text
+        supply_chain = (ROOT / "scripts" / "supply-chain").read_text(encoding="utf-8")
+        self.assertIn('"project/centl.bundle"', helper)
+        self.assertIn('"project/CENTL_HEAD"', helper)
+        self.assertIn('"$mirror_dir/project/centl.bundle"', supply_chain)
+        self.assertIn('"$mirror_dir/project/CENTL_HEAD"', supply_chain)
 
     def test_no_network_recovery_precedes_whole_mirror_seal(self):
         text = self.text
