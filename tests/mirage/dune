@@ -59,6 +59,10 @@
   ../test_fcf_telepathyd.py
   ../../scripts/fcf-telepathyd
   ../../docs/FCF-TELEPATHY.md
-  (source_tree ../../telepathy))
+  ../../telepathy/__init__.py
+  ../../telepathy/carrier.py
+  ../../telepathy/gateway.py
+  ../../telepathy/policy.py
+  ../../telepathy/tor.py)
  (action
   (run python3 %{dep:../test_fcf_telepathyd.py})))
