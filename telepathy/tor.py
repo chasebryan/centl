@@ -87,7 +87,6 @@ class TorOnionCarrier:
         return shutil.which(self.config.tor_binary)
 
     def render_torrc(self) -> str:
-        state_dir = self.config.state_dir.resolve()
         hidden_service_dir = self.config.hidden_service_dir.resolve()
         data_dir = self.config.data_dir.resolve()
         log_path = self.config.log_path.resolve()
@@ -136,6 +135,17 @@ class TorOnionCarrier:
 
     @staticmethod
     def _pid_alive(pid: int) -> bool:
+        stat_path = Path("/proc") / str(pid) / "stat"
+        try:
+            stat = stat_path.read_text(encoding="ascii", errors="replace")
+            closing = stat.rfind(")")
+            if closing != -1:
+                fields = stat[closing + 2 :].split()
+                if fields and fields[0] == "Z":
+                    return False
+        except OSError:
+            pass
+
         try:
             signal.kill(pid, 0)
         except ProcessLookupError:
@@ -157,7 +167,11 @@ class TorOnionCarrier:
             raw = cmdline_path.read_bytes()
         except OSError:
             return False
-        argv = [part.decode("utf-8", errors="surrogateescape") for part in raw.split(b"\0") if part]
+        argv = [
+            part.decode("utf-8", errors="surrogateescape")
+            for part in raw.split(b"\0")
+            if part
+        ]
         expected_torrc = str(self.config.torrc_path.resolve())
         binary = self._tor_binary()
         if binary is None:
@@ -240,7 +254,9 @@ class TorOnionCarrier:
             current = self.status()
             if current.published:
                 return current
-            raise CarrierError("the managed Tor process is already running without a published onion")
+            raise CarrierError(
+                "the managed Tor process is already running without a published onion"
+            )
         if current_pid is not None:
             self.config.pid_path.unlink(missing_ok=True)
 
@@ -293,7 +309,9 @@ class TorOnionCarrier:
         if not self._pid_alive(pid):
             return
         if not self._pid_is_ours(pid):
-            raise CarrierError("refusing to signal a process not verified as this Tor instance")
+            raise CarrierError(
+                "refusing to signal a process not verified as this Tor instance"
+            )
         try:
             signal.kill(pid, signal.SIGTERM)
         except ProcessLookupError:
