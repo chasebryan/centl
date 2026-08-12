@@ -14,6 +14,7 @@ for script in \
   scripts/caravan-public-origin-cert-deploy \
   scripts/caravan-public-origin-audit \
   scripts/caravan-public-origin-activate-gate \
+  scripts/fcf-telepathy \
   scripts/caravan-join-template \
   scripts/caravan-join-release \
   scripts/caravan-join-verify; do
@@ -32,6 +33,7 @@ python3 -m py_compile \
   tests/test_caravan_public_origin_source_guard.py \
   tests/test_caravan_public_origin_mount_namespace.py \
   tests/test_caravan_public_origin_cert.py \
+  tests/test_fcf_telepathy.py \
   tests/test_caravan_join_release.py \
   tests/test_caravan_preserve_driver.py
 
@@ -46,6 +48,7 @@ for pattern in \
   test_caravan_public_origin_source_guard.py \
   test_caravan_public_origin_mount_namespace.py \
   test_caravan_public_origin_cert.py \
+  test_fcf_telepathy.py \
   test_caravan_join_release.py \
   test_caravan_preserve_driver.py; do
   if ! python3 -m unittest discover -s tests -p "$pattern" >>"$out" 2>&1; then
@@ -62,4 +65,4 @@ cat "$out"
 rm -f "$out"
 trap - EXIT HUP INT TERM
 
-printf 'CENTL CARAVAN public-origin, preservation, and join-release gate: PASS\n'
+printf 'CENTL CARAVAN public-origin, preservation, Telepathy, and join-release gate: PASS\n'
