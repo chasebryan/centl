@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import os
 from pathlib import Path
 import socket
 import socketserver
@@ -29,6 +30,26 @@ def free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind(("127.0.0.1", 0))
         return int(sock.getsockname()[1])
+
+
+def make_live_root(base: Path, *, writable_index: bool = False, symlink_index: bool = False) -> Path:
+    live = base / "live"
+    generation = live / "generations" / "20260812T110000Z-1"
+    source = generation / "source"
+    source.mkdir(parents=True)
+    (generation / "index.html").write_bytes(b"fcf caravan\n")
+    if symlink_index:
+        (source / "INDEX.json").symlink_to("/etc/passwd")
+    else:
+        (source / "INDEX.json").write_bytes(b'{"schema":"test"}\n')
+
+    for path in (generation / "index.html", source / "INDEX.json"):
+        if not path.is_symlink():
+            path.chmod(0o644 if writable_index and path.name == "INDEX.json" else 0o444)
+    source.chmod(0o555)
+    generation.chmod(0o555)
+    (live / "current").symlink_to(Path("generations") / generation.name)
+    return live / "current"
 
 
 class OriginHandler(BaseHTTPRequestHandler):
@@ -191,6 +212,8 @@ class PolicyTests(unittest.TestCase):
             GatewayConfig(upstream_host="192.0.2.10")
         with self.assertRaises(ValueError):
             GatewayConfig(upstream_host="localhost")
+        with self.assertRaises(ValueError):
+            GatewayConfig(listen_host="::1")
 
 
 class GatewayTests(unittest.TestCase):
@@ -277,6 +300,80 @@ class GatewayTests(unittest.TestCase):
             self.assertNotIn("location", headers)
 
 
+class LiveRootGatewayTests(unittest.TestCase):
+    def test_atomic_current_symlink_serves_immutable_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            current = make_live_root(Path(td))
+            gateway_port = free_port()
+            with TelepathyGateway(
+                GatewayConfig(
+                    listen_port=gateway_port,
+                    live_root=current,
+                    live_root_uid=os.geteuid(),
+                )
+            ):
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/source/INDEX.json")
+                response = conn.getresponse()
+                body = response.read()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(body, b'{"schema":"test"}\n')
+                self.assertEqual(response.getheader("Accept-Ranges"), "bytes")
+                conn.close()
+
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/source/INDEX.json", headers={"Range": "bytes=0-7"})
+                response = conn.getresponse()
+                body = response.read()
+                self.assertEqual(response.status, 206)
+                self.assertEqual(body, b'{"schema')
+                self.assertEqual(response.getheader("Content-Range"), "bytes 0-7/18")
+                conn.close()
+
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("HEAD", "/source/INDEX.json")
+                response = conn.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.read(), b"")
+                conn.close()
+
+    def test_live_root_rejects_symlink_object(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            current = make_live_root(Path(td), symlink_index=True)
+            gateway_port = free_port()
+            with TelepathyGateway(
+                GatewayConfig(
+                    listen_port=gateway_port,
+                    live_root=current,
+                    live_root_uid=os.geteuid(),
+                )
+            ):
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/source/INDEX.json")
+                response = conn.getresponse()
+                response.read()
+                conn.close()
+            self.assertEqual(response.status, 404)
+
+    def test_live_root_rejects_writable_object(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            current = make_live_root(Path(td), writable_index=True)
+            gateway_port = free_port()
+            with TelepathyGateway(
+                GatewayConfig(
+                    listen_port=gateway_port,
+                    live_root=current,
+                    live_root_uid=os.geteuid(),
+                )
+            ):
+                conn = HTTPConnection("127.0.0.1", gateway_port, timeout=2.0)
+                conn.request("GET", "/source/INDEX.json")
+                response = conn.getresponse()
+                response.read()
+                conn.close()
+            self.assertEqual(response.status, 404)
+
+
 class TorCarrierTests(unittest.TestCase):
     def test_config_is_private_single_service_and_no_socks_proxy(self) -> None:
         with tempfile.TemporaryDirectory() as td:
@@ -330,8 +427,6 @@ class TorCarrierTests(unittest.TestCase):
             deadline = time.monotonic() + 2.0
             while published.pid is not None and deadline > time.monotonic():
                 try:
-                    import os
-
                     os.kill(published.pid, 0)
                 except ProcessLookupError:
                     break
@@ -378,6 +473,17 @@ class NamingAndCLITests(unittest.TestCase):
         self.assertIn("fcf-telepathyd", result.stdout)
         self.assertIn("carrier", result.stdout)
         self.assertIn("serve", result.stdout)
+
+        serve_help = subprocess.run(
+            [sys.executable, str(SCRIPT), "serve", "--help"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(serve_help.returncode, 0, msg=serve_help.stderr)
+        self.assertIn("--caravan-live-root", serve_help.stdout)
 
 
 if __name__ == "__main__":
