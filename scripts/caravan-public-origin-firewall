@@ -1,0 +1,31 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+CONF=${FCF_CARAVAN_NFTABLES_CONF:-/etc/fcf-caravan/nftables.conf}
+
+fail() {
+  printf 'fcf caravan firewall: %s\n' "$*" >&2
+  exit 1
+}
+
+[ "$(id -u)" -eq 0 ] || fail "must run as root"
+command -v nft >/dev/null 2>&1 || fail "nft is required"
+[ -f "$CONF" ] && [ ! -L "$CONF" ] || fail "firewall policy is missing or unsafe"
+
+# Validate the complete candidate policy before touching the active FCF table.
+nft -c -f "$CONF" >/dev/null
+
+# The FCF table is intentionally isolated. Unrelated rulesets are not imported
+# into the CARAVAN policy and are not relied upon for its deny-by-default boundary.
+if nft list table inet fcf_caravan >/dev/null 2>&1; then
+  nft delete table inet fcf_caravan
+fi
+nft -f "$CONF"
+
+rules=$(nft list table inet fcf_caravan)
+printf '%s\n' "$rules" | grep -Fq 'hook input' || fail "input base chain missing"
+printf '%s\n' "$rules" | grep -Fq 'policy drop' || fail "default-drop policy missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 80 accept' || fail "ACME HTTP rule missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 443 accept' || fail "HTTPS rule missing"
+
+printf 'fcf caravan firewall: PASS\n'
