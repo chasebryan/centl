@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Free Computation Foundation: free software, scientific computation, documentation, releases, semantic-model distribution, and preserved resources.">
+  <meta name="description" content="Free Computation Foundation: free scientific software, exact computation, preservation, documentation, releases, and CARAVAN infrastructure.">
   <title>Free Computation Foundation</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -34,34 +34,35 @@
       <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
 
       <h2>What this site is</h2>
-      <p>This is the public index for software developed under the Free Computation Foundation. It is intentionally small, static, readable, and usable without JavaScript.</p>
-      <p>FCF uses this site to make project documentation, source code, releases, checksums, semantic-model distribution, graphical resources, and preservation provisioners easy to locate. CENTL is the first project published here.</p>
+      <p>This is the public index for software developed under the Free Computation Foundation. It is intentionally small, static, readable, and useful without a client-side framework.</p>
+      <p>FCF uses this site to make source code, releases, checksums, documentation, preservation resources, semantic artifacts, and project infrastructure easy to locate. CENTL is the first project published here.</p>
 
       <h2>Current project</h2>
       <table class="status">
         <tr><th>Project</th><th>Status</th><th>Purpose</th></tr>
-        <tr><td><a href="centl.html"><strong>CENTL</strong></a></td><td>v0.14.0 Oasis candidate</td><td>Exact-first mathematics, physics, computation, and verification.</td></tr>
-        <tr><td><strong>CENTL-SCi</strong></td><td>Local semantic runtime</td><td>Scientific problem interpretation with semantic output kept outside the mathematical trust boundary.</td></tr>
-        <tr><td><strong>CENTL-MIRAGE</strong></td><td>Development / experimental</td><td>Local self-development, specification ingestion, staged candidates, and evidence planning.</td></tr>
-        <tr><td><strong>CENTL CARAVAN</strong></td><td>Phase 1 laboratory</td><td>Content-addressed authenticated preservation and availability.</td></tr>
+        <tr><td><a href="centl.html"><strong>CENTL</strong></a></td><td>v0.14.0 · Oasis release</td><td>Exact-first mathematics, physics, scientific computation, and verification.</td></tr>
+        <tr><td><strong>CENTL-SCi</strong></td><td>v0.0.2-Caramels</td><td>Local scientific interaction with semantic interpretation kept behind CENTL's mathematical trust boundary.</td></tr>
+        <tr><td><strong>CENTL-MIRAGE</strong></td><td>Source / research</td><td>Local specification ingestion, capability analysis, staged candidate materialization, and evidence planning.</td></tr>
+        <tr><td><strong>CENTL CARAVAN</strong></td><td>Phase 1 stable source boundary; later rollout work in development</td><td>Content-addressed authenticated preservation and availability.</td></tr>
       </table>
 
       <h2>Install CENTL</h2>
-      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
+      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install
 centl-sci</code></pre>
-      <p>The native installer verifies release integrity and performs smoke checks before activation. GNU/Linux is the reference platform and active release target.</p>
+      <p>The current stable product is CENTL v0.14.0, the first published Oasis release. GNU/Linux x86_64 is the active stable release boundary. The installer validates release identity and integrity and smoke-tests the package before activation.</p>
 
-      <h2>Direct semantic distribution</h2>
-      <p>FCF is making the reference semantic layer distributable without a hosted inference API or model hub in the runtime path. An approved model can be exported from the Foundation preservation store as a content-addressed <strong>FCF Semantic Origin</strong>, then replicated by CARAVAN without changing which bytes CENTL trusts.</p>
-      <div class="notice"><strong>Current state:</strong> the publication contract and fail-closed export tooling are implemented. The current Q4_K_M artifact is still redistribution-blocked until its exact quantized provenance is verified and public redistribution is explicitly approved. The public FCF model origin is being provisioned.</div>
+      <h2>Support the project</h2>
+      <p>Code is only one kind of contribution. Testing, mathematical review, documentation, preservation, and infrastructure all help keep free scientific software useful.</p>
+      <p><strong>Joining CARAVAN is itself a form of support.</strong> As public enrollment opens through qualified rollout channels, a carrier can contribute bounded storage, bandwidth, and availability to preserve approved FCF material. Until then, users can help test the signed join path, carrier policy, platform compatibility, and failure handling.</p>
+      <p>Financial sponsorship is available through GitHub Sponsors, but the Foundation does not define support only in dollars. A machine preserving exact approved bytes can be just as materially useful as a patch.</p>
 
       <h2>Preservation and The Bazaar</h2>
-      <p>FCF is building an upstream-loss-resistant preservation and distribution layer for CENTL, including source, releases, build inputs, semantic models, and recovery material. <a href="mirrors.html">The Bazaar</a> is the human-readable directory of FCF origins and CARAVAN provisioners.</p>
-      <div class="notice"><strong>Rule:</strong> a dependency is not called preserved or publicly provisioned until FCF has the bytes, an immutable identity, an integrity record, and the right publication state. Links alone are not preservation.</div>
+      <p>FCF is building an upstream-loss-resistant preservation and distribution layer for CENTL, including source, releases, build inputs, semantic artifacts, and recovery material. <a href="mirrors.html">The Bazaar</a> is the human-readable directory for FCF origins and preservation resources.</p>
+      <div class="notice"><strong>Rule:</strong> a dependency is not called preserved or publicly provisioned merely because a link exists. FCF must possess the bytes, an immutable identity, an integrity record, and the appropriate publication state.</div>
 
       <h2>Why simple HTML?</h2>
-      <p>The foundation site should remain useful when fashionable web stacks disappear. Static files are cheap to preserve, easy to audit, fast to load, and simple to move to another HTTPS server when FCF has its own domain and infrastructure.</p>
+      <p>The Foundation site should remain useful after fashionable web stacks disappear. Static files are cheap to preserve, easy to audit, fast to load, and simple to move to another HTTPS server.</p>
     </main>
   </div>
   <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · No client-side framework required.</footer>
