@@ -17,6 +17,18 @@ case "$case_name" in
   *) fail "usage: raw-repl BINARY {edit|limit|partial-escape}" ;;
 esac
 
+# The limit case deliberately drives the complete 32 KiB editor boundary
+# through a pseudo-terminal. CENTL reads and echoes raw TTY input one byte at a
+# time, so the proof is materially slower on preservation-class hardware such
+# as the ThinkPad X200 than on hosted CI. Keep a watchdog for genuine hangs,
+# but do not turn host speed into a product correctness requirement.
+watchdog_seconds=${CENTL_RAW_REPL_WATCHDOG_SECONDS:-120}
+case "$watchdog_seconds" in
+  ''|*[!0-9]*) fail "CENTL_RAW_REPL_WATCHDOG_SECONDS must be a positive integer" ;;
+esac
+[ "$watchdog_seconds" -gt 0 ] ||
+  fail "CENTL_RAW_REPL_WATCHDOG_SECONDS must be a positive integer"
+
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-raw-repl.XXXXXXXX")
 input=$temporary/input
 output=$temporary/output
@@ -35,7 +47,7 @@ trap cleanup EXIT HUP INT TERM
 mkfifo "$input"
 exec 3<>"$input"
 session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
-timeout -k 2s 15s script -qefc "$session_command" /dev/null \
+timeout -k 5s "${watchdog_seconds}s" script -qefc "$session_command" /dev/null \
   <&3 3<&- >"$output" &
 session_pid=$!
 
@@ -73,6 +85,11 @@ wait "$session_pid"
 status=$?
 set -e
 session_pid=""
+case "$status" in
+  124|137)
+    fail "PTY watchdog expired after ${watchdog_seconds}s while running $case_name"
+    ;;
+esac
 [ "$status" -eq 0 ] || fail "calculator session exited with status $status"
 
 case "$case_name" in
