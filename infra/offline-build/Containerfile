@@ -24,7 +24,7 @@ ENV NATIVE_PREFIX=/opt/centl-native \
     CENTL_SCI_LLAMA_CLI=/opt/centl-sci/bin/llama-cli
 
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-      build-essential ca-certificates cmake curl git libzstd1 m4 make opam patch \
+      build-essential ca-certificates cmake curl git libgmp-dev libzstd1 m4 make opam patch \
       pkg-config python3 qemu-user signify-openbsd tar util-linux xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
@@ -123,12 +123,21 @@ RUN set -eux; \
       | xargs -I{} grep -F '{}' /opt/centl-sci/LLAMA-VERSION; \
     rm -rf /tmp/llama-src /tmp/llama-build /tmp/centl-capsule/llama.cpp.tar
 
+# opam's zarith package depends on conf-gmp, whose Debian/Ubuntu depext contract
+# requires libgmp-dev to be present even though the actual compiler/linker path
+# below prefers the FCF-preserved GMP under /opt/centl-native via the ENV above.
+# Keep the distro depext satisfied and independently prove zarith resolves to the
+# preserved GMP search path instead of weakening opam's dependency checks.
 RUN set -eux; \
+    dpkg-query -W -f='${Status}\n' libgmp-dev | grep -Fqx 'install ok installed'; \
+    pkg-config --modversion gmp | grep -F "$GMP_VERSION"; \
     opam init --bare --disable-sandboxing; \
     opam switch create centl "ocaml-base-compiler.${OCAML_VERSION}" --jobs=2; \
     opam install --switch=centl --assume-depexts \
       alcotest.1.9.1 dune.3.24.1 ocamlformat.0.29.0 qcheck.0.91 \
       yojson.2.2.2 zarith.1.14; \
+    opam list --switch=centl --installed --short \
+      | grep -Fqx 'zarith'; \
     opam clean --switch=centl --logs --repo-cache
 
 RUN set -eux; \
