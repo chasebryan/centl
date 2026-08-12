@@ -71,6 +71,20 @@
 (rule
  (alias runtest)
  (deps
+  ../test_fcf_telepathyd_startup.py
+  ../../scripts/fcf-telepathyd
+  ../../telepathy/__init__.py
+  ../../telepathy/carrier.py
+  ../../telepathy/gateway.py
+  ../../telepathy/live_root.py
+  ../../telepathy/policy.py
+  ../../telepathy/tor.py)
+ (action
+  (run python3 %{dep:../test_fcf_telepathyd_startup.py})))
+
+(rule
+ (alias runtest)
+ (deps
   ../test_fcf_telepathyd_install.py
   ../../scripts/fcf-telepathyd-install
   ../../infra/fcf-telepathyd/fcf-telepathyd.service

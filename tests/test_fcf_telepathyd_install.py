@@ -70,6 +70,24 @@ class InstallerTests(unittest.TestCase):
         self.assertIn('if [ "$TOR_INSTALLED_BY_US" -eq 1 ]; then', text)
         self.assertIn("tor@default.service", text)
 
+    def test_activation_waits_for_identified_gateway_readiness(self) -> None:
+        text = INSTALLER.read_text(encoding="utf-8")
+        self.assertIn("deadline = time.monotonic() + 15.0", text)
+        self.assertIn("while time.monotonic() < deadline:", text)
+        self.assertIn('server.startswith("fcf-telepathyd/")', text)
+        self.assertIn(
+            "local Telepathy verification failed after readiness wait",
+            text,
+        )
+
+    def test_installer_runs_startup_order_regression_gate(self) -> None:
+        text = INSTALLER.read_text(encoding="utf-8")
+        self.assertIn("tests/test_fcf_telepathyd_startup.py", text)
+        self.assertIn(
+            'python3 "$repo_root/tests/test_fcf_telepathyd_startup.py"',
+            text,
+        )
+
 
 class SystemdUnitTests(unittest.TestCase):
     def setUp(self) -> None:

@@ -83,6 +83,7 @@ for path in \
   "$repo_root/telepathy/policy.py" \
   "$repo_root/telepathy/tor.py" \
   "$repo_root/tests/test_fcf_telepathyd.py" \
+  "$repo_root/tests/test_fcf_telepathyd_startup.py" \
   "$unit_source"; do
   [ -f "$path" ] || fail "required repository file missing: $path"
 done
@@ -114,6 +115,8 @@ install_tor() {
 
 say "[1/7] Verifying source-tree Telepathy gates..."
 python3 "$repo_root/tests/test_fcf_telepathyd.py" || fail "fcf-telepathyd tests failed"
+python3 "$repo_root/tests/test_fcf_telepathyd_startup.py" ||
+  fail "fcf-telepathyd startup regression test failed"
 
 say "[2/7] Verifying activated CARAVAN live generation..."
 [ -e "$LIVE_ROOT" ] || fail "CARAVAN live root is missing: $LIVE_ROOT"
@@ -204,19 +207,30 @@ systemctl is-active --quiet fcf-telepathyd.service || {
 
 python3 - <<'PY'
 from http.client import HTTPConnection
+import time
 
-conn = HTTPConnection("127.0.0.1", 8790, timeout=3.0)
-try:
-    conn.request("HEAD", "/status.json")
-    response = conn.getresponse()
-    response.read()
-    server = response.getheader("Server") or ""
-    if response.status != 200 or not server.startswith("fcf-telepathyd/"):
-        raise SystemExit(
-            f"local Telepathy verification failed: status={response.status} server={server!r}"
-        )
-finally:
-    conn.close()
+deadline = time.monotonic() + 15.0
+last_error = "gateway did not become ready"
+
+while time.monotonic() < deadline:
+    conn = HTTPConnection("127.0.0.1", 8790, timeout=1.0)
+    try:
+        conn.request("HEAD", "/status.json")
+        response = conn.getresponse()
+        response.read()
+        server = response.getheader("Server") or ""
+        if response.status == 200 and server.startswith("fcf-telepathyd/"):
+            break
+        last_error = f"status={response.status} server={server!r}"
+    except OSError as exc:
+        last_error = repr(exc)
+    finally:
+        conn.close()
+    time.sleep(0.1)
+else:
+    raise SystemExit(
+        f"local Telepathy verification failed after readiness wait: {last_error}"
+    )
 PY
 
 hostname_path="$STATE_DIR/tor/hidden-service/hostname"

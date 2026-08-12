@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import signal
 import sys
+import threading
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -124,14 +125,15 @@ def _serve(args: argparse.Namespace) -> int:
         )
     )
     carrier: TorOnionCarrier | None = None
+    stop_requested = threading.Event()
 
     def terminate(_signum: int, _frame: object) -> None:
-        raise SystemExit(0)
+        stop_requested.set()
 
     signal.signal(signal.SIGTERM, terminate)
 
     try:
-        gateway.start()
+        gateway.start_background()
         host, port = gateway.address
         print(f"fcf-telepathyd: listening on {host}:{port}", flush=True)
         print(
@@ -157,7 +159,7 @@ def _serve(args: argparse.Namespace) -> int:
                     flush=True,
                 )
 
-        gateway.serve_forever()
+        stop_requested.wait()
         return 0
     except KeyboardInterrupt:
         return 130
