@@ -52,3 +52,18 @@
  (name test_sha256)
  (modules test_sha256)
  (libraries centl_lib alcotest))
+
+(rule
+ (alias runtest)
+ (deps
+  ../test_fcf_telepathyd.py
+  ../../scripts/fcf-telepathyd
+  ../../docs/FCF-TELEPATHY.md
+  ../../telepathy/__init__.py
+  ../../telepathy/carrier.py
+  ../../telepathy/gateway.py
+  ../../telepathy/live_root.py
+  ../../telepathy/policy.py
+  ../../telepathy/tor.py)
+ (action
+  (run python3 %{dep:../test_fcf_telepathyd.py})))
