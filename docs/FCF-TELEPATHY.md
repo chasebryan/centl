@@ -12,7 +12,7 @@ Software: **`fcf-telepathyd`**
 
 The daemon and operator command are both `fcf-telepathyd`. There is no separate Telepathy control executable.
 
-The initial command surface is:
+The command surface is:
 
 ```text
 fcf-telepathyd serve
@@ -81,15 +81,19 @@ A realm describes who operates the road. It does not change the FCF trust root.
 
 The first first-class carrier is `tor-onion`.
 
-The initial publishing topology is:
+The production-path topology is now:
 
 ```text
-FCF preservation / approved state
+FCF preservation / authorization
             |
             v
-CARAVAN live publication
-127.0.0.1:8787
+CARAVAN networkless activation
             |
+            v
+/srv/fcf-caravan-live/current
+root-owned immutable approved generation
+            |
+            | read-only
             v
 fcf-telepathyd policy gateway
 127.0.0.1:8790
@@ -101,7 +105,11 @@ Tor v3 onion service
 Tor network
 ```
 
-The CARAVAN endpoint remains bound to loopback. `fcf-telepathyd` also binds to loopback. Tor maps an onion-service virtual port to the `fcf-telepathyd` loopback listener.
+The earlier `127.0.0.1:8787` assumption is retained only as an optional laboratory HTTP backend. The actual CARAVAN public-origin implementation activates a root-owned immutable generation at `/srv/fcf-caravan-live/current`; production `fcf-telepathyd` can consume that approved generation directly instead of requiring another local web server.
+
+This keeps nginx, public TCP 80/443, router configuration, DNS, and public TLS outside the Tor publication path. They can continue to serve a direct/public CARAVAN role independently when available.
+
+`fcf-telepathyd` itself remains loopback-only. Tor maps one onion-service virtual port to that loopback listener.
 
 Tor's documented onion-service model uses `HiddenServiceDir` for service state and keys and `HiddenServicePort` to map the onion virtual port to a local service. Tor creates the v3 onion hostname in the hidden-service directory. The service keys must remain private.
 
@@ -110,6 +118,34 @@ Upstream references:
 - https://community.torproject.org/onion-services/setup/
 - https://spec.torproject.org/rend-spec-v3
 - https://spec.torproject.org/address-spec
+
+## CARAVAN live-generation backend
+
+The preferred deployment backend is explicit:
+
+```text
+--caravan-live-root /srv/fcf-caravan-live/current
+```
+
+It is read-only and deliberately depends on CARAVAN's existing activation invariants rather than recreating publication authority inside Telepathy.
+
+The backend:
+
+- allows CARAVAN's atomic top-level `current` symlink to select the active generation;
+- resolves that pointer to one generation for each request;
+- requires the resolved generation and every traversed object to have the configured trusted owner (UID 0 in the command-line deployment path);
+- rejects any write bit on the resolved generation, intermediate directories, or served file;
+- rejects symbolic links anywhere inside the generation;
+- requires intermediate components to be directories and the final object to be a regular file;
+- verifies the opened file still has the device/inode identity that was inspected before streaming;
+- reads only paths already admitted by the Telepathy public-read policy; and
+- never receives a filesystem path from the requester outside that fixed policy surface.
+
+CARAVAN activation already freezes live generations as root-owned `0555` directories and `0444` files before switching the `current` pointer. `fcf-telepathyd` independently checks the properties it depends on before serving an object.
+
+The daemon should run unprivileged. It needs read access to the public CARAVAN live generation and write access only to its own private carrier state directory.
+
+The private preservation mirror is never a Telepathy root.
 
 ## Gateway capability surface
 
@@ -145,16 +181,31 @@ The implementation rejects:
 
 - POST, PUT, DELETE, PATCH, TRACE, CONNECT, and other unsupported methods;
 - request bodies and transfer-encoded requests;
+- ambiguous duplicate content lengths or range headers;
 - absolute-form proxy targets;
 - query- or fragment-driven routing;
 - percent-encoded routing;
 - traversal, backslashes, control characters, and non-canonical paths;
-- non-loopback listener or upstream addresses;
+- non-IPv4-loopback listener or laboratory upstream addresses;
 - arbitrary Host or forwarding headers from the requester;
 - multiple/non-canonical byte ranges; and
-- upstream redirects that could turn the fixed origin into an external navigation primitive.
+- laboratory-upstream redirects that could turn the fixed origin into an external navigation primitive.
 
-The upstream address is local operator configuration. It is never selected from an incoming request.
+Incoming requests cannot choose the CARAVAN live root, an upstream address, or another local service.
+
+The direct live-root backend implements bounded single byte ranges and `HEAD` without introducing a general filesystem server.
+
+## Laboratory HTTP backend
+
+For isolated tests and development, `fcf-telepathyd` can still forward to a fixed IPv4 loopback HTTP origin:
+
+```sh
+python3 scripts/fcf-telepathyd serve \
+  --upstream-host 127.0.0.1 \
+  --upstream-port 8787
+```
+
+This is not the preferred X200 production path. It exists so the transport boundary can be tested against synthetic origins and future explicitly managed loopback services.
 
 ## Tor carrier isolation
 
@@ -174,37 +225,35 @@ A persisted Tor PID is not trusted by itself. Linux can recycle PIDs, so `fcf-te
 
 Stopping Tor does not delete the onion-service keys. Reusing the same protected state directory therefore preserves the carrier address across ordinary restarts. Those carrier keys still do not become FCF identity keys.
 
-## Operator flow
+## X200 operator path
 
-Probe for Tor:
+First prove Tor is installed and visible:
 
 ```sh
 python3 scripts/fcf-telepathyd carrier probe
 ```
 
-Run the policy gateway without publishing a carrier:
+Then prove that CARAVAN has an activated live generation:
 
 ```sh
-python3 scripts/fcf-telepathyd serve \
-  --listen-host 127.0.0.1 \
-  --listen-port 8790 \
-  --upstream-host 127.0.0.1 \
-  --upstream-port 8787
+test -L /srv/fcf-caravan-live/current
+test -r /srv/fcf-caravan-live/current/status.json
 ```
 
-Run the gateway and publish the Tor onion carrier in one process-owned lifecycle:
+Start the complete Tor publication path with one command:
 
 ```sh
 python3 scripts/fcf-telepathyd serve \
-  --upstream-host 127.0.0.1 \
-  --upstream-port 8787 \
+  --caravan-live-root /srv/fcf-caravan-live/current \
   --carrier tor-onion \
   --publish
 ```
 
-The combined `serve --publish` path is preferred because the daemon that started Tor also owns its child-process handle and withdraws it during normal shutdown.
+The daemon prints the generated v3 `.onion` endpoint after Tor publishes it.
 
-Standalone carrier publication is also available for controlled operator workflows:
+The combined `serve --publish` path is preferred because the daemon that started Tor owns its child-process handle and withdraws it during normal shutdown.
+
+Standalone carrier lifecycle controls remain available for controlled operator workflows:
 
 ```sh
 python3 scripts/fcf-telepathyd carrier publish
@@ -212,25 +261,27 @@ python3 scripts/fcf-telepathyd carrier status
 python3 scripts/fcf-telepathyd carrier withdraw
 ```
 
-Standalone publication refuses to proceed unless the configured loopback gateway is already reachable.
+Standalone publication refuses to proceed unless the configured loopback Telepathy gateway is already reachable.
 
 ## Today milestone: TELEPATHY I-TOR
 
 The Mirage milestone is demonstrably complete when all of these are true:
 
 1. `fcf-telepathyd` is the only Telepathy software/command name.
-2. The gateway starts only on a loopback listener.
-3. Its upstream is a fixed loopback CARAVAN endpoint.
-4. GET/HEAD for approved paths reach that endpoint.
-5. Unsupported verbs cannot reach the endpoint.
-6. Absolute proxy targets, encoded routing, traversal, queries, request bodies, and unsafe ranges are rejected.
-7. Client-supplied forwarding/authorization headers cannot escape the gateway filter.
-8. Tor configuration uses a private dedicated state directory and v3 onion service.
-9. Tor publication refuses a dead `fcf-telepathyd` gateway.
-10. A fake/offline Tor process can prove publish, status, persistence, and withdrawal behavior in tests without Internet access.
-11. A stale or unrelated PID cannot be killed through the carrier state file.
-12. CI executes the `fcf-telepathyd` tests for Mirage changes.
-13. Public deployment remains an explicit FCF operator action. CI never publishes a real onion service.
+2. The network listener starts only on IPv4 loopback.
+3. Production mode reads only an activated root-owned immutable CARAVAN live generation.
+4. The CARAVAN `current` pointer may change atomically without making internal generation symlinks acceptable.
+5. GET/HEAD for approved paths can read approved live objects.
+6. Unsupported verbs cannot reach a backend.
+7. Absolute proxy targets, encoded routing, traversal, queries, request bodies, ambiguous framing, and unsafe ranges are rejected.
+8. Client-supplied forwarding/authorization headers cannot escape the laboratory gateway filter.
+9. Writable, wrong-owner, symlink, non-regular, or missing live-generation objects fail closed.
+10. Tor configuration uses a private dedicated state directory and v3 onion service.
+11. Tor publication refuses a dead `fcf-telepathyd` gateway.
+12. A fake/offline Tor process can prove publish, status, persistence, and withdrawal behavior in tests without Internet access.
+13. A stale or unrelated PID cannot be killed through the carrier state file.
+14. CI executes the `fcf-telepathyd` tests through the existing Mirage test gate.
+15. Public deployment remains an explicit FCF operator action. CI never publishes a real onion service.
 
 This milestone is intentionally smaller than a sovereign network. It produces a useful federated road while preserving the escape hatch.
 
@@ -242,7 +293,7 @@ Direct CARAVAN networking. Pure path, dependent on local router/public-ingress a
 
 ### TELEPATHY I
 
-FCF identity, capability policy, carrier firewall, fixed loopback CARAVAN bridge.
+FCF identity, capability policy, carrier firewall, and constrained CARAVAN publication bridge.
 
 ### TELEPATHY I-TOR
 
@@ -271,7 +322,7 @@ emergency:  explicitly approved borrowed carrier
 
 ## Separation from CARAVAN transport
 
-CARAVAN's volunteer carrier protocol remains outbound-oriented. `fcf-telepathyd` is a constrained publication boundary for an explicitly configured FCF CARAVAN endpoint; it does not silently turn volunteer CARAVAN carriers into public servers.
+CARAVAN's volunteer carrier protocol remains outbound-oriented. `fcf-telepathyd` is a constrained publication boundary for an explicitly configured FCF CARAVAN live generation; it does not silently turn volunteer CARAVAN carriers into public servers.
 
 ```text
 CARAVAN:        preservation, artifact identity, verification, replication
