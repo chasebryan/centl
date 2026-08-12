@@ -28,6 +28,7 @@ python3 -m py_compile \
   scripts/caravan-public-origin-source-guard.py \
   tests/test_caravan_public_origin.py \
   tests/test_caravan_public_origin_metadata.py \
+  tests/test_caravan_public_origin_ingest.py \
   tests/test_caravan_public_origin_cert.py \
   tests/test_caravan_join_release.py \
   tests/test_caravan_preserve_driver.py
@@ -39,6 +40,7 @@ failed=0
 for pattern in \
   test_caravan_public_origin.py \
   test_caravan_public_origin_metadata.py \
+  test_caravan_public_origin_ingest.py \
   test_caravan_public_origin_cert.py \
   test_caravan_join_release.py \
   test_caravan_preserve_driver.py; do

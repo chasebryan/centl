@@ -77,8 +77,20 @@ source_authorization_sha256=$(sha256sum "$SOURCE_AUTHORIZATION" | awk '{print $1
 "$TOOLS_ROOT/scripts/caravan-public-origin-source-export.py" \
   "$PRESERVATION_ROOT" "$SOURCE_AUTHORIZATION" "$build/source" >/dev/null
 
-"$TOOLS_ROOT/scripts/publication-export" "$PRESERVATION_ROOT" "$build/releases" >/dev/null
-releases_published=true
+# Releases are an optional publication class. A preservation snapshot that has
+# never admitted a public release is still valid source authority. If a releases
+# path exists and contains anything, however, the strict publication exporter
+# must validate it; malformed or non-publishable release state remains fatal.
+releases_published=false
+releases_root="$PRESERVATION_ROOT/releases"
+if [ -e "$releases_root" ] || [ -L "$releases_root" ]; then
+  [ -d "$releases_root" ] && [ ! -L "$releases_root" ] ||
+    fail "preservation releases path is not a normal directory"
+  if find "$releases_root" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+    "$TOOLS_ROOT/scripts/publication-export" "$PRESERVATION_ROOT" "$build/releases" >/dev/null
+    releases_published=true
+  fi
+fi
 
 semantic_published=false
 semantic_status=not-configured
