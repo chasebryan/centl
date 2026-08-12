@@ -42,6 +42,11 @@ class LiveObject:
             not stat.S_ISREG(opened.st_mode)
             or opened.st_dev != expected.st_dev
             or opened.st_ino != expected.st_ino
+            or opened.st_mode != expected.st_mode
+            or opened.st_uid != expected.st_uid
+            or opened.st_gid != expected.st_gid
+            or opened.st_size != expected.st_size
+            or opened.st_mtime_ns != expected.st_mtime_ns
         ):
             handle.close()
             raise LiveRootError("live object changed during open")
