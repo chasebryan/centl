@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from http.client import HTTPConnection, HTTPException
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import ipaddress
 from pathlib import Path
@@ -13,21 +12,6 @@ from .live_root import LiveRoot, LiveRootError
 from .policy import PolicyError, PublicReadPolicy
 
 
-_SAFE_REQUEST_HEADERS = {
-    "accept",
-    "if-modified-since",
-    "if-none-match",
-    "range",
-}
-_SAFE_RESPONSE_HEADERS = {
-    "accept-ranges",
-    "cache-control",
-    "content-length",
-    "content-range",
-    "content-type",
-    "etag",
-    "last-modified",
-}
 _SINGLE_RANGE = re.compile(r"bytes=(?:[0-9]+-[0-9]*|-[0-9]+)\Z")
 
 
@@ -46,10 +30,8 @@ def _require_port(port: int, *, field: str) -> None:
 
 
 def _range_span(value: str, size: int) -> tuple[int, int] | None:
-    """Return inclusive byte span, or None when the canonical range is unsatisfiable."""
+    """Return an inclusive byte span, or None when the range is unsatisfiable."""
 
-    if not value.startswith("bytes="):
-        return None
     spec = value[6:]
     if spec.startswith("-"):
         suffix = int(spec[1:])
@@ -72,24 +54,19 @@ def _range_span(value: str, size: int) -> tuple[int, int] | None:
 class GatewayConfig:
     listen_host: str = "127.0.0.1"
     listen_port: int = 8790
-    upstream_host: str = "127.0.0.1"
-    upstream_port: int = 8787
-    upstream_timeout: float = 10.0
+    live_root: Path = Path("/srv/fcf-caravan-live/current")
+    live_root_uid: int | None = 0
     max_workers: int = 32
-    live_root: Path | None = None
-    live_root_uid: int | None = None
 
     def __post_init__(self) -> None:
         _require_loopback_literal(self.listen_host, field="listen_host")
-        _require_loopback_literal(self.upstream_host, field="upstream_host")
         _require_port(self.listen_port, field="listen_port")
-        _require_port(self.upstream_port, field="upstream_port")
-        if self.upstream_timeout <= 0:
-            raise ValueError("upstream_timeout must be positive")
-        if not 1 <= self.max_workers <= 256:
-            raise ValueError("max_workers must be between 1 and 256")
+        if not self.live_root.is_absolute():
+            raise ValueError("live_root must be an absolute path")
         if self.live_root_uid is not None and self.live_root_uid < 0:
             raise ValueError("live_root_uid must be a non-negative uid")
+        if not 1 <= self.max_workers <= 256:
+            raise ValueError("max_workers must be between 1 and 256")
 
 
 class _TelepathyHTTPServer(ThreadingHTTPServer):
@@ -126,7 +103,7 @@ class _TelepathyHTTPServer(ThreadingHTTPServer):
 
 
 class TelepathyGateway:
-    """Fixed-destination, read-only gateway between a carrier and CARAVAN."""
+    """Read-only carrier edge over one activated CARAVAN live generation."""
 
     def __init__(
         self,
@@ -146,12 +123,10 @@ class TelepathyGateway:
         return str(host), int(port)
 
     def _handler_type(self) -> type[BaseHTTPRequestHandler]:
-        config = self.config
         policy = self.policy
-        live_root = (
-            LiveRoot(config.live_root, required_uid=config.live_root_uid)
-            if config.live_root is not None
-            else None
+        live_root = LiveRoot(
+            self.config.live_root,
+            required_uid=self.config.live_root_uid,
         )
 
         class Handler(BaseHTTPRequestHandler):
@@ -161,12 +136,19 @@ class TelepathyGateway:
             def log_message(self, _format: str, *args: object) -> None:
                 return
 
+            def _common_security_headers(self) -> None:
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Referrer-Policy", "no-referrer")
+                self.send_header("X-Frame-Options", "DENY")
+                self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
+
             def _deny(self, status: int, message: str) -> None:
                 body = (message + "\n").encode("utf-8")
                 self.send_response(status)
                 self.send_header("Content-Type", "text/plain; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
                 self.send_header("Cache-Control", "no-store")
+                self._common_security_headers()
                 self.send_header("Connection", "close")
                 self.end_headers()
                 self.close_connection = True
@@ -208,7 +190,6 @@ class TelepathyGateway:
                 return True
 
             def _serve_live_root(self, path: str) -> None:
-                assert live_root is not None
                 try:
                     obj = live_root.resolve(path)
                     handle = obj.open()
@@ -217,16 +198,30 @@ class TelepathyGateway:
                     return
 
                 try:
+                    if_none_match = self.headers.get("If-None-Match")
+                    if if_none_match is not None and not self.headers.get("Range"):
+                        candidates = {item.strip() for item in if_none_match.split(",")}
+                        if "*" in candidates or obj.etag in candidates:
+                            self.send_response(304)
+                            self.send_header("ETag", obj.etag)
+                            self.send_header("Cache-Control", "no-cache")
+                            self._common_security_headers()
+                            self.send_header("Connection", "close")
+                            self.end_headers()
+                            self.close_connection = True
+                            return
+
                     start = 0
                     end = obj.size - 1
                     status = 200
-                    range_values = self.headers.get_all("Range", []) or []
-                    if range_values:
-                        span = _range_span(range_values[0].strip(), obj.size)
+                    range_value = self.headers.get("Range")
+                    if range_value is not None:
+                        span = _range_span(range_value.strip(), obj.size)
                         if span is None:
                             self.send_response(416)
                             self.send_header("Content-Range", f"bytes */{obj.size}")
                             self.send_header("Content-Length", "0")
+                            self._common_security_headers()
                             self.send_header("Connection", "close")
                             self.end_headers()
                             self.close_connection = True
@@ -234,7 +229,7 @@ class TelepathyGateway:
                         start, end = span
                         status = 206
 
-                    length = 0 if obj.size == 0 else end - start + 1
+                    length = obj.size if status == 200 else end - start + 1
                     self.send_response(status)
                     self.send_header("Content-Type", obj.content_type)
                     self.send_header("Content-Length", str(length))
@@ -242,9 +237,8 @@ class TelepathyGateway:
                     self.send_header("ETag", obj.etag)
                     self.send_header("Cache-Control", "no-cache")
                     if status == 206:
-                        self.send_header(
-                            "Content-Range", f"bytes {start}-{end}/{obj.size}"
-                        )
+                        self.send_header("Content-Range", f"bytes {start}-{end}/{obj.size}")
+                    self._common_security_headers()
                     self.send_header("Connection", "close")
                     self.end_headers()
                     self.close_connection = True
@@ -264,49 +258,7 @@ class TelepathyGateway:
                 finally:
                     handle.close()
 
-            def _forward_http(self, path: str) -> None:
-                request_headers = {
-                    key: value
-                    for key, value in self.headers.items()
-                    if key.lower() in _SAFE_REQUEST_HEADERS
-                }
-
-                connection = HTTPConnection(
-                    config.upstream_host,
-                    config.upstream_port,
-                    timeout=config.upstream_timeout,
-                )
-                try:
-                    connection.request(self.command, path, headers=request_headers)
-                    response = connection.getresponse()
-                    if 300 <= response.status < 400 and response.status != 304:
-                        response.read()
-                        self._deny(502, "upstream redirects are forbidden")
-                        return
-
-                    self.send_response(response.status)
-                    for key, value in response.getheaders():
-                        if key.lower() in _SAFE_RESPONSE_HEADERS:
-                            self.send_header(key, value)
-                    self.send_header("Connection", "close")
-                    self.end_headers()
-                    self.close_connection = True
-                    if self.command != "HEAD":
-                        while True:
-                            chunk = response.read(64 * 1024)
-                            if not chunk:
-                                break
-                            self.wfile.write(chunk)
-                except (OSError, TimeoutError, HTTPException):
-                    if not self.wfile.closed:
-                        try:
-                            self._deny(502, "CARAVAN loopback endpoint unavailable")
-                        except (BrokenPipeError, ConnectionResetError):
-                            pass
-                finally:
-                    connection.close()
-
-            def _forward(self) -> None:
+            def _handle(self) -> None:
                 if not self._request_shape_allowed():
                     return
                 try:
@@ -315,21 +267,17 @@ class TelepathyGateway:
                     status = 405 if "method not permitted" in str(exc) else 403
                     self._deny(status, "fcf-telepathyd policy denied request")
                     return
+                self._serve_live_root(path)
 
-                if live_root is not None:
-                    self._serve_live_root(path)
-                else:
-                    self._forward_http(path)
-
-            do_GET = _forward
-            do_HEAD = _forward
-            do_POST = _forward
-            do_PUT = _forward
-            do_DELETE = _forward
-            do_PATCH = _forward
-            do_OPTIONS = _forward
-            do_TRACE = _forward
-            do_CONNECT = _forward
+            do_GET = _handle
+            do_HEAD = _handle
+            do_POST = _handle
+            do_PUT = _handle
+            do_DELETE = _handle
+            do_PATCH = _handle
+            do_OPTIONS = _handle
+            do_TRACE = _handle
+            do_CONNECT = _handle
 
         return Handler
 
