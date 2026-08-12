@@ -1,7 +1,6 @@
 [Unit]
-Description=FCF CARAVAN unprivileged public-origin candidate builder
-After=network-online.target fcf-caravan-ingest.service
-Wants=network-online.target
+Description=FCF CARAVAN unprivileged public-origin candidate compiler
+After=fcf-caravan-ingest.service
 ConditionPathExists=/etc/fcf-caravan/public-origin.env
 
 [Service]
@@ -12,6 +11,8 @@ EnvironmentFile=/etc/fcf-caravan/public-origin.env
 ExecStart=/usr/bin/flock --exclusive /run/lock/fcf-caravan-publication.lock /usr/local/libexec/fcf-caravan/caravan-public-origin-candidate.py
 UMask=0022
 NoNewPrivileges=yes
+PrivateNetwork=yes
+IPAddressDeny=any
 PrivateTmp=yes
 PrivateDevices=yes
 ProtectSystem=strict
@@ -27,7 +28,7 @@ RestrictSUIDSGID=yes
 LockPersonality=yes
 MemoryDenyWriteExecute=yes
 SystemCallArchitectures=native
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictAddressFamilies=AF_UNIX
 CapabilityBoundingSet=
 AmbientCapabilities=
 ReadOnlyPaths=/var/lib/fcf-caravan/approved /run/lock/fcf-caravan-publication.lock
