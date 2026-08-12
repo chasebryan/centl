@@ -71,6 +71,13 @@ ENV PATH=/opt/julia/bin:${PATH}
 # Build the qualified CENTL-SCi inference runtime from the exact source commit
 # exported by scripts/capsule-build from the FCF Git mirror. No model or runtime
 # source is downloaded during this build step.
+#
+# GGML_NATIVE=OFF alone is not a sufficient old-x86 portability contract:
+# upstream ggml can still default-enable SSE4.2/AVX/AVX2/BMI2/FMA/F16C when
+# native tuning is disabled. The FCF recovery capsule therefore pins the
+# compiler to the original x86-64 baseline and explicitly disables those newer
+# ISA extensions. The resulting CLI is then executed under QEMU's Conroe/Core 2
+# CPU model before the image is accepted.
 COPY llama.cpp.tar /tmp/centl-capsule/llama.cpp.tar
 RUN set -eux; \
     test -n "$LLAMA_COMMIT"; \
@@ -79,8 +86,16 @@ RUN set -eux; \
     tar -xf /tmp/centl-capsule/llama.cpp.tar -C /tmp/llama-src; \
     cmake -S /tmp/llama-src/llama.cpp -B /tmp/llama-build \
       -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_FLAGS='-march=x86-64 -mtune=generic' \
+      -DCMAKE_CXX_FLAGS='-march=x86-64 -mtune=generic' \
       -DBUILD_SHARED_LIBS=OFF \
       -DGGML_NATIVE=OFF \
+      -DGGML_SSE42=OFF \
+      -DGGML_AVX=OFF \
+      -DGGML_AVX2=OFF \
+      -DGGML_BMI2=OFF \
+      -DGGML_FMA=OFF \
+      -DGGML_F16C=OFF \
       -DGGML_OPENMP=OFF \
       -DGGML_BLAS=OFF \
       -DGGML_LLAMAFILE=OFF \
@@ -99,6 +114,10 @@ RUN set -eux; \
     cmake --build /tmp/llama-build --target llama-cli --parallel 2; \
     install -m 0755 /tmp/llama-build/bin/llama-cli /opt/centl-sci/bin/llama-cli; \
     /opt/centl-sci/bin/llama-cli --version > /opt/centl-sci/LLAMA-VERSION 2>&1; \
+    qemu-x86_64 -cpu Conroe /opt/centl-sci/bin/llama-cli --version \
+      > /tmp/centl-sci-conroe-version 2>&1; \
+    cmp /opt/centl-sci/LLAMA-VERSION /tmp/centl-sci-conroe-version; \
+    rm -f /tmp/centl-sci-conroe-version; \
     grep -F "$LLAMA_BUILD_NUMBER" /opt/centl-sci/LLAMA-VERSION; \
     printf '%s' "$LLAMA_COMMIT" | cut -c1-9 \
       | xargs -I{} grep -F '{}' /opt/centl-sci/LLAMA-VERSION; \
@@ -123,6 +142,7 @@ RUN set -eux; \
       printf 'flint=%s\n' "$FLINT_VERSION"; \
       printf 'llama_commit=%s\n' "$LLAMA_COMMIT"; \
       printf 'llama_build_number=%s\n' "$LLAMA_BUILD_NUMBER"; \
+      printf 'llama_cpu_baseline=x86-64-conroe-compatible\n'; \
       opam --version | sed 's/^/opam=/'; \
       gcc --version | sed -n '1s/^/cc=/p'; \
       cmake --version | sed -n '1s/^/cmake=/p'; \
