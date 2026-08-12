@@ -4,6 +4,8 @@ Status: implemented release/authentication contract; public volunteer enrollment
 
 The command that turns an ordinary user's Linux account into a CARAVAN carrier is a security-critical bootstrap boundary. It must **not** be treated as a mutable shell script whose current contents on `main`, a website, a gist, a CDN, or an AI-generated answer automatically become authoritative.
 
+The complete manual joining procedure is in `CARAVAN-JOIN-MANUAL.md`. The privacy-preserving carrier-count protocol is in `CARAVAN-CENSUS.md`.
+
 ## Governing rule
 
 An official `join-caravan` installer exists only as a **versioned FCF-signed release artifact**.
@@ -55,6 +57,8 @@ A join release has all of these identities:
 
 The release archive is deterministic with normalized ordering, timestamps, ownership metadata, and gzip timestamp handling.
 
+The release metadata also records the allowed preservation mission classes, the fact that mission selection has no publication authority, that a normal carrier does not require systemd, and that census publication is aggregate-only.
+
 ## Signing-key separation
 
 The CARAVAN join signing key should be a **dedicated FCF signing identity**, separate from ordinary CI credentials and preferably separate from unrelated service credentials.
@@ -95,7 +99,7 @@ fcf-caravan-join-1.0.0/
   SHA256SUMS.sig
 ```
 
-The archive itself contains another signed exact-membership manifest and the rendered `join-caravan` script.
+The archive itself contains another signed exact-membership manifest, the rendered `join-caravan` script, CARAVAN runtime payload, the host/threat policy, the manual joining guide, and the census privacy contract.
 
 ## Independent verification
 
@@ -141,21 +145,80 @@ The old release remains available for rollback until policy says it can be remov
 
 When the production TUF update path is activated, the join/carrier package itself must become an authenticated TUF target as well. TUF adds rollback/freeze and role-delegation protections; it does not make mutable branch bytes authoritative.
 
+## Preservation mission selection
+
+The join release asks the user which parts of the FCF preservation mission they want to support.
+
+The fixed mission vocabulary is:
+
+```text
+source
+releases
+semantic
+recovery
+```
+
+`all` is a convenience selector for all four.
+
+Mission selection is a local eligibility filter only. It never permits a carrier to nominate arbitrary bytes. Every accepted object still has to be present in authenticated FCF metadata with `public-approved` distribution authority.
+
+The interactive installer asks about each mission. Non-interactive installation requires an explicit `--missions` value.
+
+Examples:
+
+```sh
+./join-caravan --missions source,releases --storage-gib 25
+./join-caravan --missions semantic --storage-gib 100
+./join-caravan --missions all --storage-gib 250
+```
+
+## Linux portability contract
+
+The user-facing goal is one cohesive Linux `join-caravan` entry point across major distribution families.
+
+The implementation is capability-first. It must not reject a machine solely because its distribution name is unfamiliar when the required capabilities already exist.
+
+The compatibility target includes apt, dnf/yum, zypper, pacman, apk, xbps, emerge, and capability-present/declarative environments such as NixOS.
+
+The ordinary volunteer role does not require systemd. Service integration must adapt to the host environment rather than weakening the separate FCF public-origin sandbox.
+
+Before `1.0.0`, every claimed Linux family needs automated clean-environment tests and real-host smoke coverage. Documentation claims are not substitutes for tested portability.
+
 ## Rootless carrier installation
 
 The normal volunteer-carrier path is intentionally different from the FCF-owned public-origin server.
 
 `join-caravan` refuses `sudo`. It installs versioned release bytes read-only beneath the user's local library tree and keeps writable configuration/state in separate owner-only directories.
 
-The prepared configuration currently records:
+The prepared configuration records:
 
+- selected preservation missions;
 - storage ceiling;
 - outbound upload-rate ceiling;
 - no inbound listener;
-- no arbitrary-content capability; and
+- no arbitrary-content capability;
+- no public node/IP/hostname listing;
+- aggregate-only census policy; and
 - network enrollment disabled until the production authenticated carrier protocol is released.
 
-Public enrollment will be enabled only after the CARAVAN rollout gates for coordinator transport, authenticated catalog/TUF state, policy acceptance, revocation, resource bounds, privacy, and withdrawal are complete.
+Public enrollment will be enabled only after the CARAVAN rollout gates for coordinator transport, authenticated catalog/TUF state, policy acceptance, revocation, resource bounds, privacy, census, and withdrawal are complete.
+
+## Privacy-preserving census
+
+A production carrier is counted without becoming a public directory entry.
+
+The coordinator keeps a private high-entropy enrollment credential/handle only for authentication, state transition, revocation, and Active/Lost counting. The public census contains aggregate counts only.
+
+The initial public website vocabulary is:
+
+```text
+Active Camels 🐪
+Lost Camels 🐪
+```
+
+No public roster, IP address, hostname, username, email address, hardware serial, or geolocation is part of the census contract.
+
+The detailed state machine, heartbeat timing, retention, withdrawal, and k-anonymity policy are defined in `CARAVAN-CENSUS.md`.
 
 ## Abuse invariant
 
