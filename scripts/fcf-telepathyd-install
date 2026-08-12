@@ -7,6 +7,7 @@ ENABLE_NOW=0
 LIVE_ROOT=/srv/fcf-caravan-live/current
 STATE_DIR=/var/lib/fcf-telepathyd
 SERVICE_USER=fcf-telepathyd
+TOR_INSTALLED_BY_US=0
 
 fail() {
   printf '\nfcf-telepathyd installer: %s\n' "$*" >&2
@@ -61,7 +62,9 @@ done
 
 [ "$(id -u)" -eq 0 ] || fail "run with sudo/root"
 case "$LIVE_ROOT" in /*) ;; *) fail "CARAVAN live root must be absolute" ;; esac
-case "$LIVE_ROOT" in *$'\n'*|*$'\r'*|*$'\t'*) fail "CARAVAN live root contains control whitespace" ;; esac
+case "$LIVE_ROOT" in
+  *[!A-Za-z0-9._/+:-]*) fail "CARAVAN live root contains unsupported characters" ;;
+esac
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 unit_source="$repo_root/infra/fcf-telepathyd/fcf-telepathyd.service"
@@ -79,7 +82,7 @@ for path in \
   [ -f "$path" ] || fail "required repository file missing: $path"
 done
 
-for command in getent install python3 sed stat systemctl useradd; do
+for command in awk getent grep install mktemp python3 sed seq sleep stat systemctl tr useradd; do
   need "$command"
 done
 
@@ -101,6 +104,7 @@ install_tor() {
     fail "Tor is missing and no supported package manager was found; install Tor first"
   fi
   command -v tor >/dev/null 2>&1 || fail "Tor installation did not provide a tor executable"
+  TOR_INSTALLED_BY_US=1
 }
 
 say "[1/7] Verifying source-tree Telepathy gates..."
@@ -114,6 +118,12 @@ owner=$(stat -Lc '%u' -- "$LIVE_ROOT")
 
 say "[3/7] Preparing Tor..."
 install_tor
+if [ "$TOR_INSTALLED_BY_US" -eq 1 ]; then
+  # Package installation may auto-start the distribution's general Tor instance.
+  # fcf-telepathyd launches its own dedicated Tor process with SocksPort 0, so do
+  # not leave a second instance that this installer created running beside it.
+  systemctl disable --now tor.service tor@default.service >/dev/null 2>&1 || true
+fi
 
 say "[4/7] Installing unprivileged daemon account and files..."
 if ! getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
@@ -135,8 +145,7 @@ done
 install -d -o root -g root -m 0755 /etc/systemd/system
 unit_tmp=$(mktemp)
 trap 'rm -f "$unit_tmp"' EXIT
-sed "s#--caravan-live-root /srv/fcf-caravan-live/current#--caravan-live-root $LIVE_ROOT#" \
-  "$unit_source" > "$unit_tmp"
+sed "s#/srv/fcf-caravan-live/current#$LIVE_ROOT#g" "$unit_source" > "$unit_tmp"
 install -o root -g root -m 0644 "$unit_tmp" /etc/systemd/system/fcf-telepathyd.service
 
 say "[5/7] Verifying service sandbox..."
