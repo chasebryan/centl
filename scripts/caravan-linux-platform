@@ -28,7 +28,7 @@ fcf_linux_package_manager() {
 
 fcf_linux_origin_commands_present() {
   local cmd
-  for cmd in certbot curl find git gzip nft nginx python3 signify ss systemctl; do
+  for cmd in certbot curl find git gzip nft nginx python3 signify ss systemctl useradd; do
     command -v "$cmd" >/dev/null 2>&1 || return 1
   done
 }
@@ -50,28 +50,28 @@ fcf_linux_install_origin_dependencies() {
       apt-get update
       apt-get install -y --no-install-recommends \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python3 signify-openbsd util-linux
+        nftables passwd python3 signify-openbsd util-linux
       ;;
     dnf)
       dnf install -y \
         ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
-        nftables python3 signify util-linux
+        nftables python3 shadow-utils signify util-linux
       ;;
     yum)
       yum install -y \
         ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
-        nftables python3 signify util-linux
+        nftables python3 shadow-utils signify util-linux
       ;;
     zypper)
       zypper --non-interactive refresh
       zypper --non-interactive install \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python3 signify util-linux
+        nftables python3 shadow signify util-linux
       ;;
     pacman)
       pacman -Sy --needed --noconfirm \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python signify util-linux
+        nftables python shadow signify util-linux
       ;;
     *)
       fcf_linux_fail "unsupported package manager: $manager"
