@@ -1,0 +1,72 @@
+name: CARAVAN public origin
+
+on:
+  pull_request:
+    paths:
+      - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
+      - 'scripts/caravan-public-origin-install'
+      - 'scripts/caravan-public-origin-ingest'
+      - 'scripts/caravan-public-origin-candidate.py'
+      - 'scripts/caravan-public-origin-activate.py'
+      - 'scripts/caravan-public-origin-source-guard.py'
+      - 'scripts/caravan-public-origin-activate-gate'
+      - 'scripts/caravan-public-origin-audit'
+      - 'scripts/caravan-public-origin-check'
+      - 'infra/caravan-public-origin/**'
+      - 'tests/test_caravan_public_origin.py'
+      - '.github/workflows/caravan-public-origin.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caravan-public-origin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+jobs:
+  public-origin-boundary:
+    name: Public-origin deny-by-default boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact proposed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Validate public source policy against proposed and production trees
+        run: |
+          git -c protocol.file.allow=never -c protocol.ext.allow=never fetch --force --no-tags origin \
+            '+refs/heads/main:refs/remotes/origin/main' \
+            '+refs/heads/oasis:refs/remotes/origin/oasis' \
+            '+refs/heads/mirage:refs/remotes/origin/mirage'
+          python3 - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location(
+              "caravan_public_origin_candidate",
+              "scripts/caravan-public-origin-candidate.py",
+          )
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          repo = Path(".git")
+          for ref in (
+              "HEAD",
+              "refs/remotes/origin/main",
+              "refs/remotes/origin/oasis",
+              "refs/remotes/origin/mirage",
+          ):
+              module.validate_ref(repo, ref)
+              print("public-source-policy: PASS", ref)
+          PY
+
+      - name: Run public-origin security gate
+        run: sh scripts/caravan-public-origin-check
