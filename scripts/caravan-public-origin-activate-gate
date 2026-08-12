@@ -1,0 +1,32 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+LOCK=${FCF_CARAVAN_PUBLICATION_LOCK:-/run/lock/fcf-caravan-publication.lock}
+GUARD=${FCF_CARAVAN_SOURCE_GUARD:-/usr/local/libexec/fcf-caravan/caravan-public-origin-source-guard.py}
+ACTIVATE=${FCF_CARAVAN_ACTIVATOR:-/usr/local/libexec/fcf-caravan/caravan-public-origin-activate.py}
+
+[ "$(id -u)" -eq 0 ] || {
+  printf 'fcf caravan activation gate: root required\n' >&2
+  exit 1
+}
+[ -f "$LOCK" ] && [ ! -L "$LOCK" ] || {
+  printf 'fcf caravan activation gate: publication lock is missing/unsafe\n' >&2
+  exit 1
+}
+[ -x "$GUARD" ] || {
+  printf 'fcf caravan activation gate: source guard is missing\n' >&2
+  exit 1
+}
+[ -x "$ACTIVATE" ] || {
+  printf 'fcf caravan activation gate: activator is missing\n' >&2
+  exit 1
+}
+
+# The systemd activation sandbox exposes the lock file read-only. Linux flock(2)
+# permits an exclusive advisory lock on a read-only descriptor, so no writable
+# handle is necessary at the root activation boundary.
+exec 9<"$LOCK"
+flock -x 9
+"$GUARD"
+"$ACTIVATE"
+printf 'fcf caravan activation gate: PASS\n'
