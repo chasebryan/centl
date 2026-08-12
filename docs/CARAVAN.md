@@ -42,6 +42,41 @@ The intended properties are:
 - FCF release and artifact authentication remains authoritative;
 - preservation can survive the disappearance of an individual host or provider.
 
+## FCF preservation doctrine
+
+CARAVAN is one layer of the broader [Free Computation Foundation Preservation Plan](FCF-PRESERVATION-PLAN.md).
+
+FCF preservation is intentionally broader than CENTL and broader than CARAVAN's current implementation. The Foundation's long-term preservation scope includes important free operating systems and kernels, development toolchains, historical source, documentation, books, manuals, specifications, boot and firmware projects, package ecosystems, and the reconstruction evidence required to make those materials useful in the future.
+
+The initial strategic targets include **Linux, Linux-libre, Trisquel GNU/Linux, OpenBSD, FreeBSD, the GNU developer toolchain and foundational utilities, and FSF/GNU books and documentation under their applicable rights**, together with CENTL and the software required to build and recover it.
+
+CARAVAN does not decide what deserves preservation. The authority path is:
+
+```text
+upstream artifact or corpus
+          |
+          v
+FCF preservation admission
+ provenance / rights / identity
+          |
+          v
+FCF preservation catalog
+     |               |
+     |               +--> preservation-only holdings
+     |
+     +--> public-approved objects
+                  |
+                  v
+               CARAVAN
+        distributed availability
+```
+
+This separation keeps preservation curation, legal/redistribution decisions, and artifact authority out of the hands of individual carriers.
+
+A preserved object may be retained by FCF without being eligible for public CARAVAN distribution. Public CARAVAN eligibility requires an explicit redistribution class and authenticated catalog membership. Possession alone never implies publication permission.
+
+The preservation plan also distinguishes policy domains from implemented CARAVAN mission values. Future mission classes for systems, toolchains, knowledge, historical releases, or other preservation corpora must be introduced through a versioned protocol and rollout change rather than being implied by documentation before the software supports them.
+
 ## Joining CARAVAN is support
 
 **Operating a CARAVAN carrier is itself a contribution to CENTL and the Free Computation Foundation.**
@@ -160,6 +195,8 @@ Current mission classes include:
 
 Mission selection is a filter over FCF-approved catalog content. It never grants a carrier authority to add an arbitrary URL, local file, digest, or unpublished artifact to the network.
 
+The broader FCF preservation domains do not automatically become protocol mission strings. That mapping must remain explicit and versioned as CARAVAN evolves.
+
 ## Redistribution classes
 
 Not every preserved FCF artifact is eligible for volunteer distribution.
@@ -173,7 +210,7 @@ CARAVAN distinguishes at least:
 
 Absence of explicit public approval means **not eligible for volunteer distribution**.
 
-This is especially important for third-party model weights, datasets, dependencies, and other artifacts whose right to use may differ from the right to redistribute.
+This is especially important for third-party model weights, datasets, dependencies, books, manuals, standards, historical archives, and other artifacts whose right to possess or preserve may differ from the right to redistribute.
 
 ## Downloader privacy
 
@@ -224,6 +261,8 @@ Those distinctions are part of CARAVAN's security model, not disclaimers to be r
 
 Start here, then use the document matching the task:
 
+- [`FCF-PRESERVATION-PLAN.md`](FCF-PRESERVATION-PLAN.md): Foundation-wide preservation doctrine, scope, admission, verification, and recovery policy;
+- [`FCF-DEPENDENCY-CHEST.md`](FCF-DEPENDENCY-CHEST.md): immutable dependency/recovery crates used by CENTL and related FCF systems;
 - [`CARAVAN-PHASE1.md`](CARAVAN-PHASE1.md): admitted Phase 1 laboratory boundary;
 - [`CARAVAN-JOIN-MANUAL.md`](CARAVAN-JOIN-MANUAL.md): manual carrier preparation and join procedure;
 - [`CARAVAN-JOIN-RELEASE.md`](CARAVAN-JOIN-RELEASE.md): signed join-release contract;
@@ -237,6 +276,6 @@ Start here, then use the document matching the task:
 
 ## Final invariant
 
-CARAVAN exists to make FCF software harder to lose without making it easier to counterfeit.
+CARAVAN exists to make FCF software and preservation-approved free-computing heritage harder to lose without making it easier to counterfeit or unlawfully redistribute.
 
 > **Availability may be distributed. Authority remains explicit.**
