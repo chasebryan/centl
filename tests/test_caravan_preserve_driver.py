@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DRIVER = ROOT / "scripts" / "caravan-preserve"
 RECEIPT_HELPER = ROOT / "scripts" / "caravan-preserve-receipt.py"
+OFFLINE_REBUILD = ROOT / "scripts" / "offline-rebuild"
 
 
 class CaravanPreserveDriverTests(unittest.TestCase):
@@ -14,10 +15,12 @@ class CaravanPreserveDriverTests(unittest.TestCase):
     def setUpClass(cls):
         cls.text = DRIVER.read_text(encoding="utf-8")
         cls.receipt_text = RECEIPT_HELPER.read_text(encoding="utf-8")
+        cls.offline_rebuild_text = OFFLINE_REBUILD.read_text(encoding="utf-8")
 
     def test_driver_is_executable_and_shell_syntax_is_valid(self):
         self.assertTrue(os.access(DRIVER, os.X_OK), "driver must be executable")
         subprocess.run(["sh", "-n", str(DRIVER)], check=True)
+        subprocess.run(["sh", "-n", str(OFFLINE_REBUILD)], check=True)
 
     def test_default_path_updates_main_and_reexecs_fresh_policy(self):
         text = self.text
@@ -75,6 +78,17 @@ class CaravanPreserveDriverTests(unittest.TestCase):
         self.assertIn('"project/CENTL_HEAD"', helper)
         self.assertIn('"$mirror_dir/project/centl.bundle"', supply_chain)
         self.assertIn('"$mirror_dir/project/CENTL_HEAD"', supply_chain)
+
+    def test_offline_julia_uses_writable_scratch_before_preserved_depot(self):
+        text = self.offline_rebuild_text
+        self.assertIn('julia_scratch="$work/julia-depot"', text)
+        self.assertIn('mkdir -p "$julia_scratch"', text)
+        self.assertIn(
+            'export JULIA_DEPOT_PATH="$julia_scratch:$mirror/julia/depot"', text
+        )
+        self.assertNotIn('export JULIA_DEPOT_PATH="$mirror/julia/depot"', text)
+        self.assertIn("export JULIA_PKG_OFFLINE=true", text)
+        self.assertIn("export JULIA_PKG_PRECOMPILE_AUTO=0", text)
 
     def test_no_network_recovery_precedes_whole_mirror_seal(self):
         text = self.text

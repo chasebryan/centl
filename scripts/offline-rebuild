@@ -101,10 +101,14 @@ switch=${CENTL_OPAM_SWITCH:-centl}
 opam switch list --short | grep -Fqx "$switch" ||
   fail "FCF build capsule is missing opam switch $switch"
 
-# Use the preserved Julia/Nemo depot. No instantiate/update operation is allowed
-# during this gate.
+# Use the authenticated preserved Julia/Nemo depot as the read-only source of
+# package/artifact bytes, but put a disposable writable depot first. Julia may
+# need to create machine/path-specific precompile caches and pidfiles while
+# loading Nemo. Those writes must never mutate the preservation mirror.
 [ -d "$mirror/julia/depot" ] || fail "preserved Julia depot is missing"
-export JULIA_DEPOT_PATH="$mirror/julia/depot"
+julia_scratch="$work/julia-depot"
+mkdir -p "$julia_scratch"
+export JULIA_DEPOT_PATH="$julia_scratch:$mirror/julia/depot"
 export JULIA_PKG_OFFLINE=true
 export JULIA_PKG_PRECOMPILE_AUTO=0
 export JULIA_NUM_THREADS=1
@@ -138,7 +142,7 @@ if [ -f "$mirror/models/ACTIVE.sha256" ]; then
   [ -f "$model_manifest" ] || fail "active model MANIFEST is missing"
   model_name=$(sed -n 's/^file=//p' "$model_manifest" | sed -n '1p')
   case "$model_name" in
-    ''|*/*|*..*|*'\'*) fail "unsafe active model filename" ;;
+    ''|*/*|*..*|*'\\'*) fail "unsafe active model filename" ;;
   esac
   model="$model_dir/$model_name"
   [ -f "$model" ] && [ ! -L "$model" ] || fail "active model bytes are missing"
