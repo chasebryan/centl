@@ -26,15 +26,17 @@ fcf_linux_package_manager() {
   return 1
 }
 
-fcf_linux_install_origin_dependencies() {
-  # If everything is already present, unusual distributions can still use the
-  # installer without a recognized package manager.
-  local missing=0
+fcf_linux_origin_commands_present() {
   local cmd
-  for cmd in certbot curl find git gzip nft nginx python3 ss systemctl; do
-    command -v "$cmd" >/dev/null 2>&1 || missing=1
+  for cmd in certbot curl find git gzip nft nginx python3 signify ss systemctl; do
+    command -v "$cmd" >/dev/null 2>&1 || return 1
   done
-  [ "$missing" -eq 0 ] && return 0
+}
+
+fcf_linux_install_origin_dependencies() {
+  # If everything is already present, an otherwise unrecognized distribution can
+  # still use the installer. CARAVAN depends on capabilities, not distro branding.
+  fcf_linux_origin_commands_present && return 0
 
   local manager
   manager=$(fcf_linux_package_manager) || {
@@ -48,28 +50,28 @@ fcf_linux_install_origin_dependencies() {
       apt-get update
       apt-get install -y --no-install-recommends \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python3 util-linux
+        nftables python3 signify-openbsd util-linux
       ;;
     dnf)
       dnf install -y \
         ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
-        nftables python3 util-linux
+        nftables python3 signify util-linux
       ;;
     yum)
       yum install -y \
         ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
-        nftables python3 util-linux
+        nftables python3 signify util-linux
       ;;
     zypper)
       zypper --non-interactive refresh
       zypper --non-interactive install \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python3 util-linux
+        nftables python3 signify util-linux
       ;;
     pacman)
       pacman -Sy --needed --noconfirm \
         ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
-        nftables python util-linux
+        nftables python signify util-linux
       ;;
     *)
       fcf_linux_fail "unsupported package manager: $manager"
@@ -77,16 +79,8 @@ fcf_linux_install_origin_dependencies() {
       ;;
   esac
 
-  for cmd in certbot curl find git gzip nft nginx python3 ss systemctl; do
-    command -v "$cmd" >/dev/null 2>&1 || {
-      fcf_linux_fail "dependency installation did not provide $cmd"
-      return 1
-    }
-  done
-}
-
-fcf_linux_nginx_site_dir() {
-  # Normalize distro nginx packaging into the Debian-style directory used by the
-  # security audit. The installer creates this include if the distro lacks it.
-  printf '%s\n' /etc/nginx/sites-enabled
+  fcf_linux_origin_commands_present || {
+    fcf_linux_fail "dependency installation completed but one or more required commands are still absent"
+    return 1
+  }
 }
