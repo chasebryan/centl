@@ -170,9 +170,12 @@ def archive(repo: Path, commit: str, branch: str, out: Path) -> None:
         stdout=subprocess.PIPE,
     )
     assert proc.stdout is not None
-    with out.open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
-        while block := proc.stdout.read(1024 * 1024):
-            gz.write(block)
+    try:
+        with out.open("wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
+            while block := proc.stdout.read(1024 * 1024):
+                gz.write(block)
+    finally:
+        proc.stdout.close()
     if proc.wait() != 0 or not out.is_file() or out.stat().st_size == 0:
         die(f"failed to archive authorized {branch} source")
 
@@ -217,7 +220,7 @@ def export(mirror: Path, authorization: Path, output: Path) -> None:
             (output / "INDEX.json").write_text(
                 json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
             )
-        except Exception:
+        except BaseException:
             shutil.rmtree(output, ignore_errors=True)
             raise
 
