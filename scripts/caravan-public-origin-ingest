@@ -31,14 +31,34 @@ case "$SEMANTIC_MODE" in auto|off|require) ;; *) fail "semantic mode must be aut
 [ -x "$TOOLS_ROOT/scripts/publication-export" ] || fail "installed publication-export tool missing"
 [ -x "$TOOLS_ROOT/scripts/model-origin-export.py" ] || fail "installed model-origin-export tool missing"
 
-mkdir -p "$WORK_ROOT" "$(dirname "$APPROVED_ROOT")"
-[ ! -L "$WORK_ROOT" ] || fail "ingest work root must not be a symbolic link"
+parent=$(dirname "$APPROVED_ROOT")
+mkdir -p "$parent" "$WORK_ROOT"
+[ -d "$parent" ] && [ ! -L "$parent" ] || fail "approved parent is not a normal directory"
+[ -d "$WORK_ROOT" ] && [ ! -L "$WORK_ROOT" ] || fail "ingest work root must be a normal directory"
 [ ! -L "$APPROVED_ROOT" ] || fail "approved root must not be a symbolic link"
 
-build="$WORK_ROOT/.approved-new-$$"
-rm -rf -- "$build"
+# Stage beside APPROVED_ROOT so the final rename is guaranteed to stay on the
+# same filesystem. WORK_ROOT is retained for future bounded scratch work, but it
+# is deliberately not the atomic publication boundary.
+build="$parent/.approved-new-$$"
+backup="$parent/.approved-old-$$"
+rm -rf -- "$build" "$backup"
 mkdir -p "$build"
-cleanup() { rm -rf -- "$build" 2>/dev/null || true; }
+
+cleanup() {
+  if [ -e "$build" ]; then
+    chmod -R u+w "$build" 2>/dev/null || true
+    rm -rf -- "$build" 2>/dev/null || true
+  fi
+  if [ -e "$backup" ]; then
+    if [ ! -e "$APPROVED_ROOT" ]; then
+      mv -- "$backup" "$APPROVED_ROOT" 2>/dev/null || true
+    else
+      chmod -R u+w "$backup" 2>/dev/null || true
+      rm -rf -- "$backup" 2>/dev/null || true
+    fi
+  fi
+}
 trap cleanup EXIT HUP INT TERM
 
 mirror_present=false
@@ -133,19 +153,25 @@ PY
 find "$build" -type f -exec chmod 0444 {} +
 find "$build" -type d -exec chmod 0555 {} +
 
-parent=$(dirname "$APPROVED_ROOT")
-backup="$parent/.approved-old-$$"
-rm -rf -- "$backup"
 if [ -e "$APPROVED_ROOT" ]; then
   [ -d "$APPROVED_ROOT" ] && [ ! -L "$APPROVED_ROOT" ] || fail "existing approved root is unsafe"
   mv -- "$APPROVED_ROOT" "$backup"
 fi
-mv -- "$build" "$APPROVED_ROOT"
-trap - EXIT HUP INT TERM
+
+if ! mv -- "$build" "$APPROVED_ROOT"; then
+  if [ -e "$backup" ] && [ ! -e "$APPROVED_ROOT" ]; then
+    mv -- "$backup" "$APPROVED_ROOT" 2>/dev/null || true
+  fi
+  fail "atomic approved-store promotion failed"
+fi
+build=""
+
 if [ -d "$backup" ]; then
   chmod -R u+w "$backup" 2>/dev/null || true
   rm -rf -- "$backup"
 fi
+backup=""
+trap - EXIT HUP INT TERM
 
 printf 'fcf caravan preservation ingest: PASS\n'
 printf 'mirror_verified=%s\n' "$mirror_present"
