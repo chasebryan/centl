@@ -6,6 +6,7 @@ on:
       - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
       - 'docs/CARAVAN-JOIN-RELEASE.md'
       - 'docs/CARAVAN-JOIN-MANUAL.md'
+      - 'docs/CARAVAN-PRESERVATION-DRIVER.md'
       - 'scripts/caravan-linux-platform'
       - 'scripts/caravan-preserve'
       - 'scripts/caravan-public-origin-*'
