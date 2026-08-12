@@ -1,0 +1,67 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+fail() {
+  printf 'FCF CARAVAN join verify: %s\n' "$*" >&2
+  exit 1
+}
+need() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
+
+RELEASE_DIR=${1:-}
+TRUSTED_KEY=${2:-}
+[ -n "$RELEASE_DIR" ] && [ -n "$TRUSTED_KEY" ] || {
+  printf 'Usage: %s RELEASE_DIRECTORY TRUSTED_FCF_JOIN_PUBLIC_KEY\n' "$0" >&2
+  exit 2
+}
+for cmd in signify sha256sum tar python3; do need "$cmd"; done
+
+RELEASE_DIR=$(readlink -f -- "$RELEASE_DIR")
+TRUSTED_KEY=$(readlink -f -- "$TRUSTED_KEY")
+[ -d "$RELEASE_DIR" ] && [ ! -L "$RELEASE_DIR" ] || fail "release directory is missing or unsafe"
+[ -f "$TRUSTED_KEY" ] && [ ! -L "$TRUSTED_KEY" ] || fail "trusted public key is missing or unsafe"
+[ -f "$RELEASE_DIR/FCF-CARAVAN-JOIN.pub" ] || fail "release public key missing"
+cmp -s "$TRUSTED_KEY" "$RELEASE_DIR/FCF-CARAVAN-JOIN.pub" || fail "release public key does not match the separately trusted FCF key"
+
+(
+  cd "$RELEASE_DIR"
+  [ -f SHA256SUMS ] && [ ! -L SHA256SUMS ] || fail "outer SHA256SUMS missing"
+  [ -f SHA256SUMS.sig ] && [ ! -L SHA256SUMS.sig ] || fail "outer signature missing"
+  signify -V -q -p "$TRUSTED_KEY" -x SHA256SUMS.sig -m SHA256SUMS || fail "outer FCF signature failed"
+  sha256sum -c SHA256SUMS >/dev/null || fail "outer release checksum failed"
+)
+
+archive=$(find "$RELEASE_DIR" -mindepth 1 -maxdepth 1 -type f -name 'fcf-caravan-join-*.tar.gz' -print)
+[ "$(printf '%s\n' "$archive" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] || fail "expected exactly one join archive"
+
+tmp=$(mktemp -d)
+trap 'rm -rf -- "$tmp"' EXIT HUP INT TERM
+python3 - "$archive" <<'PY'
+from pathlib import PurePosixPath
+import sys
+import tarfile
+archive = sys.argv[1]
+with tarfile.open(archive, "r:gz") as tf:
+    for member in tf.getmembers():
+        p = PurePosixPath(member.name)
+        if (
+            not member.name or member.name.startswith("/") or "\\" in member.name
+            or any(part in {"", ".", ".."} for part in p.parts)
+            or member.issym() or member.islnk()
+            or not (member.isfile() or member.isdir())
+        ):
+            raise SystemExit(f"unsafe join archive member: {member.name}")
+PY
+tar -xzf "$archive" -C "$tmp" --no-same-owner --no-same-permissions
+inner=$(find "$tmp" -mindepth 1 -maxdepth 1 -type d -name 'fcf-caravan-join-*' -print)
+[ "$(printf '%s\n' "$inner" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] || fail "inner release root is ambiguous"
+
+(
+  cd "$inner"
+  cmp -s FCF-CARAVAN-JOIN.pub "$TRUSTED_KEY" || fail "inner release key differs from trusted FCF key"
+  signify -V -q -p "$TRUSTED_KEY" -x SHA256SUMS.sig -m SHA256SUMS || fail "inner FCF signature failed"
+  sha256sum -c SHA256SUMS >/dev/null || fail "inner release checksum failed"
+)
+
+printf 'FCF CARAVAN join verify: PASS\n'
+printf 'archive_sha256=%s\n' "$(sha256sum "$archive" | awk '{print $1}')"
+printf 'trusted_key_sha256=%s\n' "$(sha256sum "$TRUSTED_KEY" | awk '{print $1}')"
