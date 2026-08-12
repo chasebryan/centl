@@ -1,7 +1,6 @@
 """FCF Telepathy transport boundary.
 
-`fcf-telepathyd`, codename `telepathic-camel`, keeps FCF trust above every
-replaceable carrier implementation.
+`fcf-telepathyd` keeps FCF trust above every replaceable carrier implementation.
 """
 
 from .carrier import CarrierError, CarrierStatus
