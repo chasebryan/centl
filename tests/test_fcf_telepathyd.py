@@ -390,6 +390,11 @@ class TorCarrierTests(unittest.TestCase):
             self.assertNotIn("ExitRelay", torrc)
             self.assertNotIn("ORPort", torrc)
 
+        with self.assertRaises(ValueError):
+            TorOnionConfig(telepathy_host="::1")
+        with self.assertRaises(ValueError):
+            TorOnionConfig(state_dir=Path("/tmp/fcf\nSocksPort 9050"))
+
     def test_publish_requires_live_gateway(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             fake = Path(td) / "tor"
@@ -405,27 +410,50 @@ class TorCarrierTests(unittest.TestCase):
             with self.assertRaises(CarrierError):
                 carrier.publish()
 
-    @unittest.skipUnless(Path("/proc/self/cmdline").exists(), "Linux /proc identity check required")
-    def test_fake_tor_publish_status_and_withdraw_offline(self) -> None:
-        with tempfile.TemporaryDirectory() as td, RunningTCP() as gateway:
+    def test_publish_refuses_an_unidentified_loopback_service(self) -> None:
+        with tempfile.TemporaryDirectory() as td, RunningTCP() as not_telepathy:
             fake = Path(td) / "tor"
             write_fake_tor(fake)
+            carrier = TorOnionCarrier(
+                TorOnionConfig(
+                    telepathy_port=not_telepathy.port,
+                    tor_binary=str(fake),
+                    state_dir=Path(td) / "state",
+                    gateway_probe_timeout=0.5,
+                )
+            )
+            with self.assertRaises(CarrierError):
+                carrier.publish()
+
+    @unittest.skipUnless(Path("/proc/self/cmdline").exists(), "Linux /proc identity check required")
+    def test_fake_tor_publish_status_and_withdraw_offline(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            base = Path(td)
+            current = point_current(
+                base,
+                make_generation(base, "generation-1", marker=b"carrier-ready\n"),
+            )
+            gateway_port = free_port()
+            fake = base / "tor"
+            write_fake_tor(fake)
             config = TorOnionConfig(
-                telepathy_port=gateway.port,
+                telepathy_port=gateway_port,
                 tor_binary=str(fake),
-                state_dir=Path(td) / "state",
+                state_dir=base / "state",
                 startup_timeout=3.0,
             )
-            first = TorOnionCarrier(config)
-            published = first.publish()
-            self.assertTrue(published.published)
-            self.assertEqual(published.endpoint, "a" * 56 + ".onion")
 
-            recovered = TorOnionCarrier(config)
-            status = recovered.status()
-            self.assertTrue(status.published)
-            self.assertEqual(status.pid, published.pid)
-            recovered.withdraw()
+            with TelepathyGateway(gateway_config(current, listen_port=gateway_port)):
+                first = TorOnionCarrier(config)
+                published = first.publish()
+                self.assertTrue(published.published)
+                self.assertEqual(published.endpoint, "a" * 56 + ".onion")
+
+                recovered = TorOnionCarrier(config)
+                status = recovered.status()
+                self.assertTrue(status.published)
+                self.assertEqual(status.pid, published.pid)
+                recovered.withdraw()
 
             deadline = time.monotonic() + 2.0
             while published.pid is not None and deadline > time.monotonic():
