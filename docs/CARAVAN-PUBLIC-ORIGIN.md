@@ -4,127 +4,105 @@ Status: **FCF-owned public-origin pilot tooling implemented; public volunteer en
 
 The first CARAVAN public origin is intended for an FCF-controlled GNU/Linux host, beginning with the Trisquel ThinkPad X200 pilot machine.
 
-This role is intentionally different from a future volunteer carrier. An FCF-owned public origin may listen on public TCP 80/443 because it is Foundation-controlled infrastructure. A normal volunteer carrier remains rootless and outbound-only by default.
+This role is deliberately different from a future volunteer home carrier. An FCF-owned origin may listen publicly on TCP 80/443 because it is Foundation-controlled infrastructure. A normal volunteer carrier remains a separate, outbound-oriented role.
 
-The public-origin rule is:
+The public-origin rule is simple:
 
-> **If a byte did not cross the FCF preservation and explicit publication boundary, the public origin has no mechanism for serving it.**
+> The Internet sees only a root-owned publication-compiled CENTL tree. The private FCF preservation mirror is never a web root, and repository/network availability is never publication authority.
 
-The FCF preservation mirror itself is never a web root.
+## Closed-world publication model
 
-## Purpose
+The public origin has **no direct GitHub publication fallback**.
 
-The origin gives users a direct FCF source for explicitly authorized CENTL source snapshots and, when separately approved, preserved releases and semantic-model artifacts. It reduces download/runtime dependence on GitHub, model hubs, hosted inference providers, and other intermediaries without turning CARAVAN into general public infrastructure.
+GitHub may be one input used earlier when FCF creates a preservation snapshot, but the public node does not chase GitHub branches and does not decide that newly visible repository bytes are safe to publish. Source publication begins only after those bytes already exist inside a finalized FCF preservation mirror.
 
-The origin is **not**:
-
-- an upload host;
-- arbitrary storage;
-- a generic mirror;
-- a paste/file-drop service;
-- a reverse proxy;
-- a CONNECT tunnel;
-- a VPN or arbitrary relay;
-- a shell gateway;
-- CGI/FastCGI/uWSGI/SCGI hosting;
-- WebDAV storage;
-- a public Git smart-HTTP server;
-- an anonymous-content network; or
-- a public view of the FCF preservation filesystem.
-
-## Closed-world trust pipeline
+The trust pipeline is:
 
 ```text
 FCF preservation mirror
         |
         | strict whole-mirror receipt verification
-        | exact preserved project/centl.bundle
-        v
-root-owned source authorization
-(bound to exact MIRROR-SHA256SUMS SHA-256)
         |
-        | exact main / oasis / mirage commits only
-        v
-networkless root ingest
-        |
-        +-- source: preserved bundle + authorization -> source export
-        +-- releases: publication-export
-        +-- model: model-origin-export --check
-        v
-/var/lib/fcf-caravan/approved
-        |
-        | root-owned exact-membership receipt
-        v
-networkless unprivileged candidate compiler
-        user: fcf-caravan
-        |
-        | no source URL, no GitHub ref, no network
-        v
-/var/lib/fcf-caravan/candidates
-        |
-        | shared publication lock
-        v
-networkless root source guard
-        |
-        | independent archive secret/path scan
-        v
-networkless root activator
-        |
-        | seize + freeze candidate
-        | copy without following symlinks
-        | byte-compare source/release/model to approved store
-        | verify catalog/chunks/receipts
-        v
-/srv/fcf-caravan-live/current
-        |
-        | root-owned read-only static tree
-        v
-nginx GET/HEAD-only allowlist
-        |
-      Internet
+        +-----------------------------+
+        |                             |
+        | project/centl.bundle        | preserved releases / models
+        |                             |
+        | root operator authorization | existing publication contracts
+        | bound to exact mirror       |
+        | receipt + exact commits     |
+        |                             |
+        v                             v
+networkless source export       networkless release/model export
+        |                             |
+        +--------------+--------------+
+                       v
+          /var/lib/fcf-caravan/approved
+             root-owned, read-only,
+               exact SHA-256 receipt
+                       |
+                       | read-only
+                       v
+          networkless candidate compiler
+              user: fcf-caravan
+                       |
+                       v
+         /var/lib/fcf-caravan/candidates
+                       |
+                       | shared publication lock
+                       v
+             networkless root guards
+                       |
+                       | seize candidate into
+                       | root-only activation inbox
+                       | rescan source archives
+                       | verify catalog/chunks/receipts
+                       | compare approved bytes exactly
+                       v
+           /srv/fcf-caravan-live/current
+              root-owned, read-only
+                       |
+                       v
+                     nginx
+                       |
+                    Internet
 ```
 
-The network-facing HTTP server never sees the preservation mirror. The candidate compiler is also networkless: `PrivateNetwork=yes`, `IPAddressDeny=any`, and `RestrictAddressFamilies=AF_UNIX` are part of its systemd sandbox.
+No network-facing process is given a path that can turn arbitrary local files into public cargo.
 
-The ingest and activation services are networkless root services. Ingest may read the preservation mirror but can write only the CARAVAN publication staging area. Activation may write the live root but receives no network capability.
+## Source authorization
 
-## Public source contract
-
-CARAVAN does **not** publish source directly from GitHub.
-
-GitHub may be one way FCF originally acquired repository bytes for normal development/preservation, but it is not a live publication authority for the public origin.
-
-Public source must already exist inside:
+CENTL source is exported only from:
 
 ```text
 <FCF preservation mirror>/project/centl.bundle
 ```
 
-and that complete preservation mirror must pass the normal FCF whole-tree receipt check.
+The private Git bundle itself is **not** served.
 
-A second root-owned authorization file then names exactly three commits:
+Before source can cross the publication boundary, a root-owned authorization record must name exactly one preserved commit for each public branch role:
 
 ```text
 main
- oasis
+oasis
 mirage
 ```
 
-The authorization also records the SHA-256 of the mirror's `MIRROR-SHA256SUMS`. If any intentional preservation change causes that receipt identity to change, the old authorization becomes stale and source publication stops. The system does not automatically bless the new bytes.
+The authorization is also bound to the SHA-256 identity of the finalized mirror receipt.
 
-The explicit operator command is:
+This creates a useful fail-closed property:
 
-```sh
-sudo /usr/local/libexec/fcf-caravan/caravan-public-origin-authorize-source \
-  --preservation-root /srv/centl-mirror \
-  --main <commit> \
-  --oasis <commit> \
-  --mirage <commit>
-```
+1. FCF finalizes a preservation snapshot.
+2. The operator explicitly authorizes exact preserved `main`, `oasis`, and `mirage` commits.
+3. Source export is generated from those exact commits only.
+4. If the preservation mirror changes, its receipt identity changes.
+5. The old source authorization becomes stale.
+6. Automated publication freezes until the changed snapshot is deliberately reviewed and re-authorized.
 
-The normal installer can auto-resolve those three refs from the preserved bundle and displays the exact commits before authorization.
+A new file appearing in preservation therefore does **not** automatically become public.
 
-The resulting public source objects are:
+## Public source artifacts
+
+The public node exposes only snapshot archives and their authorization index:
 
 ```text
 /source/centl-main.tar.gz
@@ -133,68 +111,117 @@ The resulting public source objects are:
 /source/INDEX.json
 ```
 
-`INDEX.json` records the exact commit IDs, archive SHA-256 values, mirror-receipt SHA-256, and source-authorization SHA-256.
+`INDEX.json` binds each archive to:
 
-The preserved Git history bundle is not served.
+- the exact preserved commit;
+- its SHA-256 digest;
+- the exact FCF preservation receipt identity; and
+- the root-owned source-authorization identity.
 
-Before source can enter the approved tree, the source exporter rejects:
+No pull-request refs, miscellaneous branches, arbitrary refs, or complete Git history bundle are served.
 
-- symbolic-link entries;
+That is deliberate data minimization. CARAVAN provides intentionally approved source states, not every historical object that happened to exist in a repository.
+
+## Source safety scans
+
+Before an authorized source commit can become public, the source exporter rejects:
+
+- symbolic links;
 - Gitlinks/submodules and other non-regular entries;
-- unsafe/control-character paths;
-- common secret-bearing filenames;
+- absolute, traversal, malformed, or control-character paths;
+- common secret-bearing filenames such as `.env`, private-key filenames, credential files, and password databases;
 - private-key material;
 - high-specificity credential/token patterns;
-- oversized source blobs; and
-- source trees above the file-count ceiling.
+- oversized source objects; and
+- source trees above the configured file-count ceiling.
 
-The networkless root source guard and primary activator then parse the generated archives independently before live activation.
+The networkless root activation path independently reopens and rescans the resulting source archives before changing the live generation.
 
-## Why repository membership is not publication authority
-
-A file being committed to CENTL does not prove it was intended for public CARAVAN distribution.
-
-This distinction matters for accidental secrets, future research material, internal preservation objects, third-party bytes with redistribution constraints, or a compromised branch.
-
-The required sequence is therefore:
-
-```text
-repository/development state
-        -> FCF preservation
-        -> complete preservation receipt
-        -> explicit source/publication authorization
-        -> public export
-```
-
-Skipping a stage is a failure, not a convenience path.
+The public status metadata, source index, source archive hashes, source authorization identity, and preservation receipt identity must all agree. Metadata disagreement is an activation failure.
 
 ## Preserved release contract
 
 The preservation mirror is never recursively copied into the public tree.
 
-`scripts/caravan-public-origin-ingest` requires the normal FCF whole-mirror verification and then calls `scripts/publication-export`, which exports only release directories already admitted by the CENTL public-release contract.
+`scripts/caravan-public-origin-ingest` first requires the normal whole-mirror FCF receipt verification. It then uses the existing `scripts/publication-export` contract for preserved releases.
 
-The release exporter still refuses preservation-only classes such as raw dependency stores, Git mirrors, recovery capsules, opam/Julia state, and models without their separate public contract.
+That exporter deliberately excludes preservation-only classes such as raw dependency mirrors, Git mirrors, build capsules, recovery material, opam/Julia state, and other internal recovery objects.
 
-The resulting root-owned approved tree receives an exact-membership SHA-256 manifest. Extra unlisted files cause failure.
+Only release material that independently satisfies its public release contract can enter `/approved/releases`.
 
 ## Semantic model contract
 
-Semantic model publication remains independently fail-closed.
+Semantic publication remains fail-closed and separate from source authorization.
 
-The ingest service calls:
+The ingest service runs the existing semantic-origin check before model bytes can enter public cargo:
 
 ```text
 model-origin-export.py <mirror> --check
 ```
 
-before model bytes can enter the approved public tree. The exporter requires exact content identity, verified quantized provenance, recorded base-model identity/license, and an operator-reviewed redistribution status.
+The semantic exporter requires exact content identity, bound provenance, verified quantized-source identity, base-model licensing metadata, and explicit operator-reviewed redistribution approval.
 
-If the active model does not satisfy that contract, the model is absent. Source/release publication cannot weaken the model gate.
+If the preserved active model does not satisfy that contract, the model is simply absent from the public origin. Source and release availability do not weaken the model gate.
+
+## Exact approved store
+
+The networkless ingest stage produces:
+
+```text
+/var/lib/fcf-caravan/approved/
+  source/
+  releases/        # when public release exports exist
+  semantic/        # only when semantic redistribution gates pass
+  INGEST-STATUS.json
+  APPROVED-SHA256SUMS
+  APPROVED-SHA256SUMS.sha256
+```
+
+The manifest proves exact regular-file membership. An unexpected extra object is a failure, not additional cargo.
+
+The approved tree is root-owned and made read-only before promotion.
+
+## Candidate compiler
+
+The candidate compiler runs as the unprivileged `fcf-caravan` service account.
+
+It has:
+
+- `PrivateNetwork=yes`;
+- `IPAddressDeny=any`;
+- only `AF_UNIX` address-family access;
+- read-only access to the approved store;
+- no preservation-mirror path in its environment; and
+- no permission to write the live web root.
+
+It can only compile a candidate from the already approved tree.
+
+This is intentionally boring. The candidate builder has no upstream source authority at all.
+
+## Root activation
+
+The root activation service is also networkless.
+
+It:
+
+1. serializes publication with the shared publication lock;
+2. independently scans source archives;
+3. atomically moves the selected candidate into a root-only activation inbox;
+4. rejects links and special files;
+5. freezes the claimed candidate as root-owned read-only data;
+6. copies it into a root-owned staging generation without following symlinks;
+7. verifies the public-tree SHA-256 receipt;
+8. revalidates the source index and source archives;
+9. requires public status metadata to match the same source index and preservation authorization;
+10. verifies the aggregate CARAVAN catalog and every chunk record;
+11. compares source, release, and semantic trees byte-for-byte against the root-owned approved store; and
+12. only then atomically switches the live `current` pointer.
+
+A failed refresh leaves the previous known-good generation online.
 
 ## CARAVAN catalog
 
-Each generation contains:
+Each live generation contains:
 
 ```text
 /caravan/catalog-v1.json
@@ -202,157 +229,113 @@ Each generation contains:
 /caravan/INGEST-STATUS.json
 ```
 
-The aggregate catalog uses `centl-caravan-catalog-v1`, whole-file SHA-256 identities, exact byte lengths, `public-approved` distribution class, and ordered 4 MiB SHA-256 chunk records.
+The aggregate catalog uses:
 
-The catalog must exactly enumerate every file beneath the public `source`, `releases`, and `semantic` cargo roots.
+- schema `centl-caravan-catalog-v1`;
+- whole-file SHA-256 identities;
+- exact byte lengths;
+- distribution class `public-approved`; and
+- ordered 4 MiB SHA-256 chunk records.
 
-The raw catalog is not a trust anchor. `CATALOG-STATUS` explicitly says independent TUF authentication is required for network clients. A machine serving bytes never gains authority merely by serving a catalog file.
+The raw catalog is still not a trust anchor. `CATALOG-STATUS` records that independent TUF authentication is required for clients that consume CARAVAN metadata as authority.
+
+An origin can provide bytes. It does not gain the right to redefine trusted bytes merely because it is reachable.
 
 ## Abuse resistance
 
-Normal Internet requests have no route that can create content.
+The public origin is intentionally unsuitable for third-party content hosting.
 
-The installed nginx site:
+There is no supported operation that lets an Internet user create or select arbitrary served content:
 
-- permits only `GET` and `HEAD`;
-- has no reverse proxy directive;
-- has no FastCGI/uWSGI/SCGI path;
-- has no WebDAV methods;
-- has no upload endpoint;
-- has no arbitrary filesystem alias;
-- has directory indexing disabled;
-- exposes only fixed source paths, public metadata, and already-approved release/semantic subtrees;
-- defaults every other path to `404`;
-- rejects unknown virtual hosts;
-- bounds request bodies, connection count, request rate, byte rate, and HTTP ranges; and
-- disables normal access logging.
+- no uploads;
+- no WebDAV;
+- no CGI, FastCGI, uWSGI, or SCGI application path;
+- no reverse proxy;
+- no `CONNECT` tunnel;
+- no generic relay;
+- no arbitrary filesystem alias;
+- no Git smart-HTTP service;
+- no arbitrary Git ref lookup;
+- no directory listing; and
+- no network-visible preservation filesystem.
 
-The hostile audit probes mutation methods including POST/PUT/PATCH/DELETE, CONNECT, TRACE, and OPTIONS. It also probes `.git`, traversal encodings, `/etc/passwd`, `/proc/self/environ`, directory roots, and internal CARAVAN filesystem-looking paths.
+The final nginx site permits only `GET` and `HEAD`. It exposes exact metadata/source endpoints plus only the already approved release/semantic trees. Every unrelated path defaults to denial.
+
+Hostile qualification probes deliberately test mutation methods, `CONNECT`, `TRACE`, `OPTIONS`, traversal encodings, `.git`, `/etc/passwd`, `/proc/self/environ`, internal CARAVAN paths, directory roots, and unknown objects.
+
+No software can make exploitation mathematically impossible. The goal here is stronger and more practical: remove the useful generic-hosting primitives from the design, minimize the network surface, fail closed on publication ambiguity, and keep the operating system patched.
 
 ## Dedicated-host firewall
 
-The public-origin role uses a dedicated nftables policy instead of a distro-specific firewall frontend.
+The X200 pilot is treated as a dedicated public-origin host.
 
-Before changing the firewall, the installer saves the current nftables ruleset and relevant configuration state under a root-only backup directory.
+The installer backs up the previous firewall state and installs an nftables ruleset transactionally. The FCF ruleset:
 
-The FCF ruleset is then applied as one validated nft transaction. Its file begins with:
+- defaults inbound traffic to drop;
+- drops forwarding;
+- permits loopback and established/related traffic;
+- permits required ICMP/IPv6 ICMP;
+- permits public TCP 80/443;
+- preserves detected SSH administration ports with a rate limit; and
+- leaves outbound host traffic available for normal administration, package updates, DNS/NTP, and certificate operations.
 
-```text
-flush ruleset
-```
+The publication compiler and activation services remain networkless even though the host itself can perform ordinary outbound administration.
 
-and creates only the `inet fcf_caravan` table with:
+The installer does not install a third-party tunnel to bypass NAT, CGNAT, DNS, or ISP policy. Public reachability must be deliberately provisioned outside the CARAVAN trust boundary.
 
-- default-drop input;
-- loopback;
-- established/related traffic;
-- ICMP/ICMPv6;
-- TCP 80 for ACME/public HTTP redirect;
-- TCP 443 for HTTPS; and
-- detected SSH administration ports, if present.
+## Nginx boundary
 
-Forwarding defaults to drop. Output remains allowed so the host can perform DNS, package maintenance, ACME, and ordinary administration.
+The installed web surface is static and deny-by-default:
 
-Known competing firewall managers are disabled so they cannot later replace the FCF dedicated-host boundary.
+- `GET`/`HEAD` only;
+- unknown virtual hosts rejected;
+- directory auto-indexing disabled;
+- request bodies bounded;
+- connection/request/byte rates bounded;
+- only one HTTP range accepted;
+- access logging disabled by default;
+- warning/error logging retained for operations; and
+- security headers enabled.
 
-This is intentionally a **dedicated-host** policy. Do not install the FCF public-origin role on a machine that is supposed to remain a general web server, container host, VPN gateway, or unrelated application server.
+The live document root is a root-owned read-only generation. The private preservation mirror is never mounted as the nginx root.
 
-## Linux portability
+## Installation
 
-The public-origin installer depends on Linux capabilities and systemd hardening, not a particular distro label.
+The installer requires a finalized FCF preservation mirror. There is no source-only bypass.
 
-If dependencies are missing, it understands these package-manager families:
-
-- `apt-get` — Debian, Ubuntu, Trisquel and relatives;
-- `dnf` — Fedora and current RHEL-family systems;
-- `yum` — older RHEL-family systems;
-- `zypper` — openSUSE/SUSE family;
-- `pacman` — Arch family.
-
-If all required commands are already installed, an otherwise unrecognized distribution may still pass.
-
-The FCF-owned public-origin role currently requires **systemd** because `PrivateNetwork`, `ProtectSystem`, capability bounding, read/write path restrictions, and the isolated service-account model are security properties rather than packaging conveniences. An unsupported init system is rejected rather than receiving a weaker server.
-
-This does not constrain the future ordinary volunteer carrier to systemd; the volunteer role is rootless and has a separate release/install contract.
-
-## Data minimization
-
-The nginx origin has access logging disabled. Warning/error logging remains available for operational diagnosis.
-
-The public `status.json` exposes a pseudonymous node identity and publication identities, including the mirror receipt and source-authorization hashes. It does not expose usernames, the preservation path, private preservation contents, or a volunteer-home-network roster.
-
-## Candidate and activation safety
-
-A refresh never edits live cargo in place.
-
-Preservation ingest, candidate compilation, and activation share:
-
-```text
-/run/lock/fcf-caravan-publication.lock
-```
-
-The lock is recreated on boot by systemd-tmpfiles with only root and the `fcf-caravan` service group able to participate.
-
-The candidate compiler can write only its state/candidate directories and can read the root-approved tree. It cannot write the live web root.
-
-The root activation wrapper runs an independent source guard before the primary activator. The activator then:
-
-1. atomically moves the selected candidate into a root-only inbox;
-2. recursively rejects links/special files;
-3. makes the claimed tree root-owned and read-only;
-4. copies it into root-owned staging without following symlinks;
-5. verifies the complete public receipt;
-6. reparses every source archive;
-7. verifies the aggregate catalog and every chunk digest;
-8. verifies the approved-store receipt;
-9. byte-compares **source, releases, and semantic cargo** against the approved store; and
-10. atomically switches the live `current` symlink only after all checks pass.
-
-A failed refresh therefore leaves the previous known-good generation online.
-
-## Host installation
-
-From a trusted checkout containing this implementation:
+Interactive setup from a trusted CENTL checkout:
 
 ```sh
-sudo bash scripts/caravan-public-origin-install \
-  --domain <public-caravan-hostname> \
-  --email <tls-contact-address> \
-  --preservation-root /srv/centl-mirror
+sudo bash scripts/caravan-public-origin-install
 ```
 
-The installer normally resolves `main`, `oasis`, and `mirage` from the preserved bundle, displays their exact hashes, and asks for explicit publication authorization.
-
-For controlled non-interactive provisioning, the commits may be supplied explicitly:
+If `/srv/centl-mirror` exists and is finalized, it is selected automatically. Otherwise specify it explicitly:
 
 ```sh
 sudo bash scripts/caravan-public-origin-install \
   --domain <public-caravan-hostname> \
   --email <tls-contact-address> \
   --preservation-root /srv/centl-mirror \
-  --main <commit> \
-  --oasis <commit> \
-  --mirage <commit> \
   --yes
 ```
 
-There is no mode in which a missing preservation mirror causes the origin to fall back to GitHub.
+The installer normally resolves the preserved `main`, `oasis`, and `mirage` heads from the bundle and displays their exact commit IDs before authorization. Explicit `--main`, `--oasis`, and `--mirage` values are available when branch-head resolution is ambiguous.
 
-`--prepare-only` performs local hardening, authorization, ingest, candidate compilation, and activation without requesting public TLS. It prints `PREPARED`, not `SUCESS`.
+The preservation mirror must live outside normal user home directories. `/srv/centl-mirror` is the reference location.
 
 ## Public reachability and TLS
 
-A public DNS name must resolve to a route that reaches the host on TCP 80 and 443. The installer cannot safely guess or mutate a router, DNS provider, ISP account, or CGNAT arrangement.
+A public DNS name must route TCP 80/443 to the X200. The script does not guess or mutate arbitrary router, registrar, ISP, or CGNAT configuration.
 
-The script first exposes only the ACME HTTP challenge boundary, then uses Certbot HTTP-01 validation. If public validation fails, verified local cargo remains stored but the script does **not** print `SUCESS`.
+During qualification nginx exposes only the ACME HTTP challenge surface. Certbot obtains the certificate through HTTP-01. If real public certificate qualification fails, the machine does not receive the success declaration.
 
-After TLS is active, `scripts/caravan-public-origin-audit` performs certificate-valid HTTPS probes against loopback using the real hostname and audits nginx, systemd services/timers, content status, hostile methods/paths, and the dedicated nftables boundary.
+After TLS becomes active, the final hostile audit validates the HTTPS surface locally using the real hostname and certificate.
 
 ## Success contract
 
-The final banner is the last gate, not decoration.
+The final banner is a gate, not decoration.
 
-Only after preservation verification, explicit source authorization, source/release/model publication, root activation, firewall installation, TLS validation, nginx validation, timer setup, and hostile-surface audit pass does the script print:
+Only after preservation verification, exact source authorization, networkless publication, root activation, firewall installation, TLS qualification, nginx validation, timer setup, and hostile HTTP auditing all pass does the installer print:
 
 ```text
 SUCESS
@@ -363,21 +346,15 @@ A partial setup cannot reach that banner.
 
 ## Timers
 
-The installed pilot defaults remain conservative:
+The pilot defaults are intentionally conservative for an older X200:
 
-- preservation/publication ingest: every **6 hours**, with randomized delay;
-- networkless candidate compilation: every **1 hour**, with randomized delay;
-- root activation sweep: every **10 minutes**.
+- preservation ingest: every **6 hours**, with randomized delay;
+- candidate recompilation: every **1 hour**, with randomized delay;
+- activation sweep: every **10 minutes**.
 
-The most important timer behavior is fail-closed: if the preservation receipt changes while its source authorization remains old, ingest fails and the existing live generation stays online.
+These timers do **not** chase upstream GitHub state. They re-verify and recompile only the preservation-authorized snapshot already held by FCF.
 
-## Volunteer join releases
-
-The ordinary user's `join-caravan` command has a separate security contract in `docs/CARAVAN-JOIN-RELEASE.md`.
-
-The mutable repository contains only a release template. It deliberately refuses to act as an official installer. A usable join script is created only by an explicit versioned FCF signing action, and released versions are never overwritten in place.
-
-The volunteer role remains rootless, opens no inbound port, and does not become a public proxy or arbitrary host.
+If the mirror is intentionally changed and re-finalized, the existing source authorization becomes stale and automatic ingest stops until a new exact authorization is made.
 
 ## Validation
 
@@ -387,8 +364,8 @@ Repository-level validation is:
 sh scripts/caravan-public-origin-check
 ```
 
-CI proves the candidate compiler has no mutable-source network authority, then runs the public-origin and immutable join-release adversarial suites.
+CI additionally proves that the candidate compiler contains no mutable GitHub source authority, that ingest fails closed without preservation, that publication services are networkless, and that the adversarial public-origin test suite passes.
 
-The governing security posture is deliberately simple:
+The governing invariant is:
 
-> **Preservation is necessary but not sufficient. Explicit FCF publication authorization is necessary too. If either is missing or stale, the bytes do not cross the CARAVAN boundary.**
+> If bytes were not produced by an explicit FCF/CENTL preservation and publication path, they do not cross the CARAVAN public-origin boundary.
