@@ -1,0 +1,183 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+BACKEND_HOST=127.0.0.1
+BACKEND_PORT=8787
+NODE_NAME=${FCF_TELEPATHY_NODE_NAME:-fcf-caravan-001}
+NGINX_CONF=/etc/nginx/conf.d/fcf-telepathy.conf
+LIVE_ROOT=/srv/fcf-caravan-live/current
+
+fail() {
+  printf 'FCF-Telepathy: %s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'TXT'
+Usage: sudo scripts/fcf-telepathy <command> [options]
+
+Commands:
+  prepare                 install the loopback-only CARAVAN transport boundary
+  enroll [NODE]           authenticate this host to the Funnel transport
+  start                    publish the loopback boundary through HTTPS Funnel
+  stop                     disable the HTTPS Funnel
+  status                   show local and Funnel state
+  audit                    run hostile public checks against the Funnel URL
+
+FCF-Telepathy is transport only. It never reads the preservation mirror and
+never writes the CARAVAN approved, candidate, activation, or live-generation
+content. It can carry only bytes already present in the root-owned live tree.
+TXT
+}
+
+need_root() {
+  [ "$(id -u)" -eq 0 ] || fail "run this command with sudo/root"
+}
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+repo_root() {
+  CDPATH= cd -- "$(dirname -- "$0")/.." && pwd
+}
+
+require_live_generation() {
+  [ -L "$LIVE_ROOT" ] || fail "CARAVAN live pointer is missing; run the public-origin prepare gate first"
+  local target
+  target=$(readlink -f -- "$LIVE_ROOT")
+  case "$target" in
+    /srv/fcf-caravan-live/generations/*) ;;
+    *) fail "CARAVAN live pointer resolves outside the generation store" ;;
+  esac
+  [ -d "$target" ] || fail "CARAVAN live generation is missing"
+  [ "$(stat -c %u "$target")" -eq 0 ] || fail "CARAVAN live generation is not root-owned"
+  for required in \
+    index.html status.json SHA256SUMS source/INDEX.json \
+    caravan/catalog-v1.json caravan/CATALOG-STATUS caravan/INGEST-STATUS.json; do
+    [ -f "$target/$required" ] && [ ! -L "$target/$required" ] ||
+      fail "CARAVAN live generation lacks required object: $required"
+  done
+}
+
+install_boundary() {
+  need_root
+  need_cmd install
+  need_cmd nginx
+  need_cmd systemctl
+  require_live_generation
+  local root template
+  root=$(repo_root)
+  template="$root/infra/caravan-public-origin/nginx-fcf-telepathy.conf"
+  [ -f "$template" ] || fail "Telepathy nginx boundary is missing from the repository"
+  install -o root -g root -m 0644 "$template" "$NGINX_CONF"
+  nginx -t >/dev/null
+  systemctl reload nginx
+  curl -fsS "http://${BACKEND_HOST}:${BACKEND_PORT}/status.json" >/dev/null ||
+    fail "loopback CARAVAN transport boundary did not answer"
+  printf 'FCF-Telepathy boundary: PREPARED\nbackend=http://%s:%s\n' "$BACKEND_HOST" "$BACKEND_PORT"
+}
+
+tailscale_dns_name() {
+  tailscale status --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get("Self",{}).get("DNSName","").rstrip("."))'
+}
+
+enroll() {
+  need_root
+  need_cmd tailscale
+  local name=${1:-$NODE_NAME}
+  case "$name" in ''|*[!A-Za-z0-9._-]*) fail "unsafe Telepathy node name" ;; esac
+  tailscale up --hostname "$name"
+}
+
+start_funnel() {
+  need_root
+  need_cmd tailscale
+  need_cmd python3
+  need_cmd curl
+  require_live_generation
+  [ -f "$NGINX_CONF" ] || install_boundary
+  local dns
+  dns=$(tailscale_dns_name || true)
+  [ -n "$dns" ] || fail "Tailscale is not enrolled; run: sudo scripts/fcf-telepathy enroll"
+  tailscale funnel --bg --https=443 "http://${BACKEND_HOST}:${BACKEND_PORT}"
+  printf 'FCF-Telepathy: FUNNEL REQUESTED\npublic=https://%s/\n' "$dns"
+  printf 'Run: sudo scripts/fcf-telepathy audit\n'
+}
+
+stop_funnel() {
+  need_root
+  need_cmd tailscale
+  tailscale funnel --https=443 off || tailscale funnel reset
+  printf 'FCF-Telepathy: Funnel disabled\n'
+}
+
+show_status() {
+  need_cmd tailscale
+  printf 'FCF-Telepathy local boundary: '
+  if curl -fsS "http://${BACKEND_HOST}:${BACKEND_PORT}/status.json" >/dev/null 2>&1; then
+    printf 'ready\n'
+  else
+    printf 'not ready\n'
+  fi
+  tailscale status || true
+  tailscale funnel status || true
+  local dns
+  dns=$(tailscale_dns_name 2>/dev/null || true)
+  [ -z "$dns" ] || printf 'public=https://%s/\n' "$dns"
+}
+
+expect_code() {
+  local method=$1 url=$2 expected=$3
+  local code
+  code=$(curl -ksS -o /dev/null -w '%{http_code}' -X "$method" "$url")
+  [ "$code" = "$expected" ] || fail "$method $url returned $code, expected $expected"
+}
+
+audit_funnel() {
+  need_root
+  need_cmd tailscale
+  need_cmd curl
+  need_cmd python3
+  local dns base status
+  dns=$(tailscale_dns_name || true)
+  [ -n "$dns" ] || fail "Tailscale is not enrolled"
+  base="https://$dns"
+
+  curl -fsS "$base/status.json" -o /tmp/fcf-telepathy-status.$$
+  trap 'rm -f /tmp/fcf-telepathy-status.$$' EXIT HUP INT TERM
+  python3 - /tmp/fcf-telepathy-status.$$ <<'PY'
+import json, pathlib, sys
+obj = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if not isinstance(obj, dict):
+    raise SystemExit("status.json is not an object")
+PY
+  rm -f /tmp/fcf-telepathy-status.$$
+  trap - EXIT HUP INT TERM
+
+  expect_code GET "$base/" 200
+  expect_code HEAD "$base/source/INDEX.json" 200
+  expect_code POST "$base/" 405
+  expect_code PUT "$base/status.json" 405
+  expect_code DELETE "$base/source/INDEX.json" 405
+  expect_code GET "$base/.git/config" 404
+  expect_code GET "$base/etc/passwd" 404
+  expect_code GET "$base/proc/self/environ" 404
+  expect_code GET "$base/does-not-exist" 404
+
+  status=$(tailscale funnel status 2>&1 || true)
+  printf '%s\n' "$status"
+  printf '\nFCF-TELEPATHY PUBLIC TRANSPORT PASS\npublic=%s/\n' "$base"
+  printf 'CARAVAN trust remains rooted in the already-activated local generation.\n'
+}
+
+case "${1:-}" in
+  prepare) shift; [ "$#" -eq 0 ] || fail "prepare takes no arguments"; install_boundary ;;
+  enroll) shift; [ "$#" -le 1 ] || fail "enroll takes at most one node name"; enroll "${1:-$NODE_NAME}" ;;
+  start) shift; [ "$#" -eq 0 ] || fail "start takes no arguments"; start_funnel ;;
+  stop) shift; [ "$#" -eq 0 ] || fail "stop takes no arguments"; stop_funnel ;;
+  status) shift; [ "$#" -eq 0 ] || fail "status takes no arguments"; show_status ;;
+  audit) shift; [ "$#" -eq 0 ] || fail "audit takes no arguments"; audit_funnel ;;
+  -h|--help|help|'') usage ;;
+  *) fail "unknown command: $1" ;;
+esac
