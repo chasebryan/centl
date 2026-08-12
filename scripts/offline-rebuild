@@ -83,6 +83,11 @@ git -C "$source_dir" checkout --quiet --detach "$commit"
 python3 "$source_dir/scripts/integrity.py" verify \
   "$mirror/project/SOURCE-SHA256SUMS" --root "$source_dir"
 
+# Bind build provenance to the authenticated preservation identity before any
+# Dune invocation. The build-identity generator deliberately refuses to infer a
+# commit from Git, so an offline recovery must supply the verified SOURCE-COMMIT.
+export CENTL_BUILD_COMMIT="$commit"
+
 # Recover the verifier from preserved bytes, not from PATH or an upstream host.
 export CENTL_SUPPLY_CHAIN_OFFLINE=1
 export CENTL_SOURCE_MIRROR_DIR="$mirror"

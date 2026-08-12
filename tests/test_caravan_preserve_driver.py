@@ -90,6 +90,18 @@ class CaravanPreserveDriverTests(unittest.TestCase):
         self.assertIn("export JULIA_PKG_OFFLINE=true", text)
         self.assertIn("export JULIA_PKG_PRECOMPILE_AUTO=0", text)
 
+    def test_offline_build_identity_uses_authenticated_source_commit(self):
+        text = self.offline_rebuild_text
+        commit_pos = text.index("commit=$(sed -n '1p' \"$mirror/project/SOURCE-COMMIT\")")
+        export_pos = text.index('export CENTL_BUILD_COMMIT="$commit"')
+        first_dune_build_pos = text.index('opam exec --switch="$switch" -- make quality')
+        self.assertLess(commit_pos, export_pos)
+        self.assertLess(export_pos, first_dune_build_pos)
+        self.assertIn(
+            'fail "rebuilt binary reports commit $reported_commit, expected $commit"',
+            text,
+        )
+
     def test_no_network_recovery_precedes_whole_mirror_seal(self):
         text = self.text
         run_pos = text.index('make -C "$repo_root" capsule-run MIRROR="$mirror"')

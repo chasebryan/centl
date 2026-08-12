@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'src/ocaml/centl_version.ml'
+      - 'src/dune'
+      - 'scripts/offline-rebuild'
+      - 'scripts/write-build-identity'
       - 'tests/cli.t'
       - 'tests/**'
       - 'centl.opam'
@@ -15,6 +18,9 @@ on:
       - main
     paths:
       - 'src/ocaml/centl_version.ml'
+      - 'src/dune'
+      - 'scripts/offline-rebuild'
+      - 'scripts/write-build-identity'
       - 'tests/cli.t'
       - 'tests/**'
       - 'centl.opam'
@@ -70,6 +76,18 @@ jobs:
 
       - name: Install pinned CENTL test dependencies
         run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Prove immutable build commit reaches binary metadata
+        run: |
+          set -eu
+          expected=0123456789abcdef0123456789abcdef01234567
+          CENTL_BUILD_COMMIT="$expected" opam exec -- dune build src/main.exe
+          reported=$(
+            _build/default/src/main.exe --build-info \
+              | sed -n 's/^commit=//p'
+          )
+          test "$reported" = "$expected"
+          printf 'build-commit-identity: PASS (%s)\n' "$reported"
 
       - name: Run CLI and native test directory
         run: opam exec -- dune runtest tests
