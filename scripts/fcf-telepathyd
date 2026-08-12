@@ -17,6 +17,9 @@ from telepathy.gateway import GatewayConfig, TelepathyGateway
 from telepathy.tor import TorOnionCarrier, TorOnionConfig
 
 
+DEFAULT_CARAVAN_LIVE_ROOT = Path("/srv/fcf-caravan-live/current")
+
+
 def _default_state_dir() -> Path:
     base = os.environ.get("XDG_STATE_HOME")
     if base:
@@ -50,31 +53,21 @@ def _add_carrier_options(parser: argparse.ArgumentParser) -> None:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fcf-telepathyd",
-        description="FCF carrier-independent policy gateway for CARAVAN",
+        description="FCF carrier-independent read-only edge for CARAVAN",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
-    serve = commands.add_parser("serve", help="run the loopback Telepathy gateway")
+    serve = commands.add_parser("serve", help="serve activated CARAVAN cargo on loopback")
     serve.add_argument("--listen-host", default="127.0.0.1")
     serve.add_argument("--listen-port", type=int, default=8790)
     serve.add_argument(
         "--caravan-live-root",
         type=Path,
+        default=DEFAULT_CARAVAN_LIVE_ROOT,
         help=(
-            "serve the root-owned CARAVAN live generation directly; "
-            "intended production backend"
+            "root-owned immutable CARAVAN live generation "
+            f"(default: {DEFAULT_CARAVAN_LIVE_ROOT})"
         ),
-    )
-    serve.add_argument(
-        "--upstream-host",
-        default="127.0.0.1",
-        help="laboratory HTTP backend host when --caravan-live-root is absent",
-    )
-    serve.add_argument(
-        "--upstream-port",
-        type=int,
-        default=8787,
-        help="laboratory HTTP backend port when --caravan-live-root is absent",
     )
     serve.add_argument("--state-dir", type=Path, default=_default_state_dir())
     serve.add_argument(
@@ -126,10 +119,8 @@ def _serve(args: argparse.Namespace) -> int:
         GatewayConfig(
             listen_host=args.listen_host,
             listen_port=args.listen_port,
-            upstream_host=args.upstream_host,
-            upstream_port=args.upstream_port,
             live_root=args.caravan_live_root,
-            live_root_uid=0 if args.caravan_live_root is not None else None,
+            live_root_uid=0,
         )
     )
     carrier: TorOnionCarrier | None = None
@@ -143,18 +134,11 @@ def _serve(args: argparse.Namespace) -> int:
         gateway.start()
         host, port = gateway.address
         print(f"fcf-telepathyd: listening on {host}:{port}", flush=True)
-        if args.caravan_live_root is not None:
-            print(
-                "fcf-telepathyd: backend=caravan-live-root "
-                f"root={args.caravan_live_root}",
-                flush=True,
-            )
-        else:
-            print(
-                "fcf-telepathyd: backend=loopback-http "
-                f"origin={args.upstream_host}:{args.upstream_port}",
-                flush=True,
-            )
+        print(
+            "fcf-telepathyd: backend=caravan-live-root "
+            f"root={args.caravan_live_root}",
+            flush=True,
+        )
 
         if args.carrier == "tor-onion":
             carrier = TorOnionCarrier(
