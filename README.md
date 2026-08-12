@@ -24,6 +24,20 @@ Stable product authority lives on [`oasis`](https://github.com/chasebryan/centl/
 
 See [The CENTL Oasis Release Standard](docs/OASIS.md) and [Release and Branch Policy](docs/RELEASE-POLICY.md).
 
+## Next compass directive: Three Horizons
+
+CENTL is currently **GNU/Linux-first**, but that is not intended to be the final horizon.
+
+The project's next platform-level vision is **CENTL: Three Horizons**: work toward a future Oasis-qualified release set for **GNU/Linux, macOS, and Windows**, derived from one reviewed source lineage and held to the same numerical contract, trust boundaries, conformance expectations, and release identity.
+
+> **Different systems. Same mathematics.**
+
+The preferred horizon is the **late-December 2026 / New Year 2027** period. This is a compass directive, not a fixed release promise. The schedule, platform architecture matrix, packaging design, release number, and implementation details may change as the project learns. CENTL will not weaken an Oasis gate or publish an unqualified platform merely to meet a date.
+
+Mirage remains the rapid development laboratory during this period. Complete three-platform qualification becomes mandatory only for a release that actually claims the Three Horizons Oasis objective. Until such a release is earned, the current stable support declaration remains GNU/Linux only.
+
+See [CENTL: Three Horizons](docs/THREE-HORIZONS.md) and the [Roadmap](docs/ROADMAP.md).
+
 ## What CENTL contains
 
 | Surface | Purpose |
@@ -163,6 +177,8 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 CENTL development is intentionally **GNU/Linux-first**. macOS and Windows are not active support targets for current development, CI, packaging, validation, installation, or release work.
 
+That policy is the current engineering boundary, while [Three Horizons](docs/THREE-HORIZONS.md) defines the intended future direction toward an Oasis-qualified GNU/Linux, macOS, and Windows release set.
+
 From a development checkout:
 
 ```sh
@@ -193,6 +209,8 @@ Contributor setup and the manual learning path are documented in [CONTRIBUTING.m
 - [CARAVAN join manual](docs/CARAVAN-JOIN-MANUAL.md)
 - [Oasis release standard](docs/OASIS.md)
 - [Release and branch policy](docs/RELEASE-POLICY.md)
+- [Three Horizons compass directive](docs/THREE-HORIZONS.md)
+- [Platform support](docs/SCI_PLATFORM_SUPPORT.md)
 - [Repository map](docs/REPOSITORY-MAP.md)
 - [v0.14.0 release notes](docs/releases/0.14.0.md)
 - [Roadmap](docs/ROADMAP.md)
