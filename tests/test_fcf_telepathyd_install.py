@@ -42,16 +42,21 @@ class InstallerTests(unittest.TestCase):
         self.assertIn("systemctl restart fcf-telepathyd.service", text)
         self.assertNotIn("systemctl enable --now", text)
 
-    def test_custom_live_root_rewrites_all_unit_occurrences(self) -> None:
-        text = INSTALLER.read_text(encoding="utf-8")
+    def test_custom_live_root_rewrites_every_default_selector_reference(self) -> None:
+        installer = INSTALLER.read_text(encoding="utf-8")
+        unit = UNIT.read_text(encoding="utf-8")
+        default = "/srv/fcf-caravan-live/current"
+        self.assertGreaterEqual(unit.count(default), 4)
         self.assertIn(
             'sed "s#/srv/fcf-caravan-live/current#$LIVE_ROOT#g"',
-            text,
+            installer,
         )
         self.assertIn(
             '*[!A-Za-z0-9._/+:-]*) fail "CARAVAN live root contains unsupported characters"',
-            text,
+            installer,
         )
+        self.assertIn(f"ReadOnlyPaths={default}", unit)
+        self.assertNotIn("ReadOnlyPaths=/srv/fcf-caravan-live\n", unit)
 
     def test_installer_only_disables_tor_it_installed(self) -> None:
         text = INSTALLER.read_text(encoding="utf-8")
@@ -77,7 +82,7 @@ class SystemdUnitTests(unittest.TestCase):
     def test_service_reads_caravan_and_writes_only_private_state(self) -> None:
         self.assertIn("ProtectSystem=strict", self.text)
         self.assertIn("ProtectHome=true", self.text)
-        self.assertIn("ReadOnlyPaths=/srv/fcf-caravan-live", self.text)
+        self.assertIn("ReadOnlyPaths=/srv/fcf-caravan-live/current", self.text)
         self.assertIn("StateDirectory=fcf-telepathyd", self.text)
         self.assertIn("StateDirectoryMode=0700", self.text)
         self.assertIn("--caravan-live-root /srv/fcf-caravan-live/current", self.text)
