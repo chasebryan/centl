@@ -5,12 +5,15 @@ on:
     paths:
       - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
       - 'docs/CARAVAN-JOIN-RELEASE.md'
+      - 'docs/CARAVAN-JOIN-MANUAL.md'
       - 'scripts/caravan-linux-platform'
+      - 'scripts/caravan-preserve'
       - 'scripts/caravan-public-origin-*'
       - 'scripts/caravan-join-*'
       - 'infra/caravan-public-origin/**'
       - 'tests/test_caravan_public_origin*.py'
       - 'tests/test_caravan_join_release.py'
+      - 'tests/test_caravan_preserve_driver.py'
       - '.github/workflows/caravan-public-origin.yml'
 
 permissions:
