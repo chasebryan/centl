@@ -183,6 +183,7 @@ include:
 - [CENTL-SCi](docs/SCI.md)
 - [Caramels BUILD and self-extension](docs/CARAMELS-BUILD.md)
 - [CENTL-MIRAGE](docs/CENTL-MIRAGE.md)
+- [Full MIRAGE demonstration guide](docs/MIRAGE-DEMONSTRATION.md)
 - [CENTL CARAVAN](docs/CARAVAN.md)
 - [Syntax](docs/SYNTAX.md)
 - [Mathematics](docs/MATHEMATICS.md)
