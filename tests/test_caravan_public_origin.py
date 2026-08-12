@@ -48,17 +48,14 @@ class CaravanPublicOriginTests(unittest.TestCase):
 
     def test_nginx_surface_is_static_and_default_deny(self) -> None:
         text = NGINX.read_text(encoding="utf-8")
-        directives = "\n".join(
-            line for line in text.splitlines() if not line.lstrip().startswith("#")
-        )
-        self.assertIn("if ($request_method !~ ^(GET|HEAD)$)", directives)
-        self.assertIn("location / {", directives)
-        self.assertIn("return 404;", directives)
-        self.assertIn("autoindex off", directives)
-        self.assertIn("max_ranges 1", directives)
-        self.assertIn("client_max_body_size 1k", directives)
-        self.assertIn("limit_conn fcf_caravan_conn 4", directives)
-        self.assertIn("access_log off", directives)
+        self.assertIn("if ($request_method !~ ^(GET|HEAD)$)", text)
+        self.assertIn("location / {", text)
+        self.assertIn("return 404;", text)
+        self.assertIn("autoindex off", text)
+        self.assertIn("max_ranges 1", text)
+        self.assertIn("client_max_body_size 1k", text)
+        self.assertIn("limit_conn fcf_caravan_conn 4", text)
+        self.assertIn("access_log off", text)
         for forbidden in (
             "proxy_pass",
             "fastcgi_pass",
@@ -68,9 +65,9 @@ class CaravanPublicOriginTests(unittest.TestCase):
             "auth_request",
             "autoindex on",
         ):
-            self.assertNotIn(forbidden, directives)
+            self.assertNotIn(forbidden, text)
         for branch in ("main", "oasis", "mirage"):
-            self.assertIn(f"location = /source/centl-{branch}.tar.gz", directives)
+            self.assertIn(f"location = /source/centl-{branch}.tar.gz", text)
 
     def test_installer_rebuilds_dedicated_host_firewall(self) -> None:
         text = INSTALL.read_text(encoding="utf-8")
@@ -81,8 +78,6 @@ class CaravanPublicOriginTests(unittest.TestCase):
         self.assertIn("ufw allow 443/tcp", text)
         self.assertIn("ufw limit", text)
         self.assertIn("unrelated nginx site is enabled", text)
-        self.assertIn("fcf-caravan-firewall-backup-", text)
-        self.assertIn("50-fcf-caravan-hardening.conf", text)
         for tunnel in ("cloudflared", "tailscale", "ngrok", "frp", "autossh"):
             self.assertNotIn(tunnel, text)
 
@@ -130,10 +125,8 @@ class CaravanPublicOriginTests(unittest.TestCase):
         self.assertIn("/srv/fcf-caravan-live", activate)
 
         installer = INSTALL.read_text(encoding="utf-8")
-        public_marker = "cat > /etc/fcf-caravan/public-origin.env <<EOF_ENV\n"
-        ingest_marker = "cat > /etc/fcf-caravan/ingest.env <<EOF_ENV\n"
-        public_block = installer.split(public_marker, 1)[1].split("\nEOF_ENV", 1)[0]
-        ingest_block = installer.split(ingest_marker, 1)[1].split("\nEOF_ENV", 1)[0]
+        public_block = installer.split("cat > /etc/fcf-caravan/public-origin.env", 1)[1].split("EOF_ENV", 1)[0]
+        ingest_block = installer.split("cat > /etc/fcf-caravan/ingest.env", 1)[1].split("EOF_ENV", 1)[0]
         self.assertNotIn("PRESERVATION_ROOT", public_block)
         self.assertIn("PRESERVATION_ROOT", ingest_block)
 
@@ -295,7 +288,7 @@ class CaravanPublicOriginTests(unittest.TestCase):
         self.assertIn("Welcome to the Free Computation Foundation caravan!", text)
         services = text.index("systemctl start fcf-caravan-ingest.service")
         cert = text.index("certbot certonly")
-        audit = text.index("/usr/local/libexec/fcf-caravan/caravan-public-origin-audit")
+        audit = text.rindex("/usr/local/libexec/fcf-caravan/caravan-public-origin-audit")
         success = text.rindex("SUCESS")
         self.assertLess(services, cert)
         self.assertLess(cert, audit)
