@@ -126,7 +126,10 @@ printf '%s\n' "$$" > "$lock_dir/pid"
 
 on_exit() {
   status=$?
-  [ -n "$lock_dir" ] && rm -rf "$lock_dir"
+  trap - 0
+  if [ -n "$lock_dir" ]; then
+    rm -rf "$lock_dir"
+  fi
   if [ "$status" -ne 0 ] && [ "$completed" -ne 1 ]; then
     printf '\n╭────────────────────────────────────────────────────────────╮\n' >&2
     printf '│              CARAVAN PRESERVATION PAUSED                  │\n' >&2
@@ -138,7 +141,7 @@ on_exit() {
   fi
   exit "$status"
 }
-trap on_exit EXIT
+trap on_exit 0
 trap 'exit 130' HUP INT TERM
 
 current_commit=$(git -C "$repo_root" rev-parse HEAD)
@@ -170,26 +173,12 @@ symlink_name=MIRROR-SYMLINKS
 symlink_hash_name=MIRROR-SYMLINKS.sha256
 
 controlled_source_stale_receipt() {
-  # During the manual bring-up of the first CARAVAN node, source refreshes were
-  # performed after capsule-build had already sealed the mirror. Accept that
-  # specific interrupted state only when the old receipt itself is authentic
-  # and every path outside the four source-refresh files still matches exactly.
-  python3 "$repo_root/scripts/integrity.py" verify \
-    "$mirror/$manifest_hash_name" --root "$mirror" >/dev/null 2>&1 || return 1
-  python3 "$repo_root/scripts/integrity.py" verify \
-    "$mirror/$symlink_hash_name" --root "$mirror" >/dev/null 2>&1 || return 1
-  python3 "$repo_root/scripts/integrity.py" tree-verify \
-    "$mirror/$manifest_name" --root "$mirror" \
-    --ignore "$manifest_name" \
-    --ignore "$manifest_hash_name" \
-    --ignore "$symlink_name" \
-    --ignore "$symlink_hash_name" \
-    --ignore project/centl.bundle \
-    --ignore project/SOURCE-SHA256SUMS \
-    --ignore project/SOURCE-SHA256SUMS.sha256 \
-    --ignore project/SOURCE-COMMIT >/dev/null 2>&1 || return 1
-  python3 "$repo_root/scripts/integrity.py" symlink-verify \
-    "$mirror/$symlink_name" --root "$mirror" >/dev/null 2>&1
+  # Transitional recovery for the first X200 bring-up is intentionally narrow.
+  # The helper authenticates the old receipt documents, requires every regular
+  # file outside the four known source-refresh paths to match the old manifest,
+  # and requires the symlink tree to remain exact.
+  python3 "$repo_root/scripts/caravan-preserve-receipt.py" "$mirror" \
+    >/dev/null 2>&1
 }
 
 unseal_for_cycle() {
