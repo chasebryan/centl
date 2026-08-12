@@ -21,6 +21,7 @@ for script in \
 done
 
 python3 -m py_compile \
+  scripts/caravan-preserve-receipt.py \
   scripts/caravan-public-origin-candidate.py \
   scripts/caravan-public-origin-source-export.py \
   scripts/caravan-public-origin-activate.py \
