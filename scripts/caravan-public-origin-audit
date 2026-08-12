@@ -15,7 +15,7 @@ need nginx
 need systemctl
 need getent
 need python3
-need ufw
+need nft
 
 ENV_FILE=${FCF_CARAVAN_ENV_FILE:-/etc/fcf-caravan/public-origin.env}
 [ -r "$ENV_FILE" ] || fail "environment file is missing"
@@ -31,6 +31,7 @@ case "$DOMAIN" in *[!A-Za-z0-9.-]*|'') fail "unsafe domain" ;; esac
 
 nginx -t >/dev/null 2>&1 || fail "nginx configuration test failed"
 systemctl is-active --quiet nginx || fail "nginx is not active"
+systemctl is-active --quiet fcf-caravan-firewall.service || fail "FCF firewall is not active"
 for timer in fcf-caravan-ingest.timer fcf-caravan-candidate.timer fcf-caravan-activate.timer; do
   systemctl is-enabled --quiet "$timer" || fail "$timer is not enabled"
 done
@@ -60,6 +61,12 @@ unrelated=$(find /etc/nginx/sites-enabled -mindepth 1 -maxdepth 1 ! -name fcf-ca
 user_shell=$(getent passwd fcf-caravan | awk -F: '{print $7}')
 case "$user_shell" in */nologin|*/false) ;; *) fail "fcf-caravan service account has an interactive shell" ;; esac
 
+rules=$(nft list table inet fcf_caravan 2>/dev/null) || fail "FCF nftables table is missing"
+printf '%s\n' "$rules" | grep -Fq 'hook input' || fail "FCF nftables input chain missing"
+printf '%s\n' "$rules" | grep -Fq 'policy drop' || fail "FCF nftables default-drop policy missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 80 accept' || fail "HTTP rule missing"
+printf '%s\n' "$rules" | grep -Fq 'tcp dport 443 accept' || fail "HTTPS rule missing"
+
 base="https://$DOMAIN"
 resolve=(--resolve "$DOMAIN:443:127.0.0.1")
 code() {
@@ -85,6 +92,8 @@ for path in \
   '/etc/passwd' \
   '/%2e%2e/%2e%2e/etc/passwd' \
   '/source/%2e%2e/%2e%2e/etc/passwd' \
+  '/proc/self/environ' \
+  '/var/lib/fcf-caravan/approved/APPROVED-SHA256SUMS' \
   '/this-does-not-exist'; do
   result=$(code "$base$path")
   case "$result" in 2??) fail "forbidden probe $path returned HTTP $result" ;; esac
@@ -97,22 +106,26 @@ curl --silent --show-error --fail --connect-timeout 5 --max-time 30 \
 python3 - "$status_tmp" <<'PY'
 import json
 from pathlib import Path
+import re
 import sys
 try:
     data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 except (OSError, json.JSONDecodeError) as exc:
     raise SystemExit(f"status is not valid JSON: {exc}")
-if data.get("schema") != "fcf-caravan-public-origin-status-v1":
+if data.get("schema") != "fcf-caravan-public-origin-status-v2":
     raise SystemExit("status schema mismatch")
+if data.get("mode") != "fcf-owned-public-origin":
+    raise SystemExit("unexpected node mode")
 for key in ("uploads", "proxying", "arbitrary_paths"):
     if data.get(key) is not False:
         raise SystemExit(f"forbidden capability enabled: {key}")
+for key in ("source_authorization_sha256", "mirror_receipt_sha256"):
+    value = data.get(key)
+    if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+        raise SystemExit(f"missing/invalid preservation binding: {key}")
 PY
 rm -f "$status_tmp"
 trap - EXIT HUP INT TERM
-
-ufw status | grep -Fq 'Status: active' || fail "ufw is not active"
-ufw status verbose | grep -Fq 'Default: deny (incoming)' || fail "ufw incoming policy is not default-deny"
 
 printf 'fcf caravan public-origin audit: PASS\n'
 printf 'domain=%s\n' "$DOMAIN"
