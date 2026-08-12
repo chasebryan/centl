@@ -1,0 +1,212 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+# This file is a RELEASE TEMPLATE. The official release command replaces these
+# tokens. A mutable repository copy must never function as the official join
+# installer.
+RELEASE_VERSION='@FCF_CARAVAN_JOIN_VERSION@'
+RELEASE_KEY_SHA256='@FCF_CARAVAN_JOIN_KEY_SHA256@'
+
+fail() {
+  printf 'FCF CARAVAN join: %s\n' "$*" >&2
+  exit 1
+}
+
+case "$RELEASE_VERSION" in *@FCF_CARAVAN_JOIN_VERSION@*)
+  fail "this is the mutable development template, not an authenticated FCF join release"
+  ;;
+esac
+case "$RELEASE_KEY_SHA256" in *@FCF_CARAVAN_JOIN_KEY_SHA256@*)
+  fail "release trust identity was not rendered"
+  ;;
+esac
+
+[ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "CARAVAN carrier enrollment is Linux-only"
+[ "$(id -u)" -ne 0 ] || fail "normal CARAVAN carrier setup is rootless; do not run join-caravan with sudo"
+
+for cmd in sha256sum signify python3; do
+  command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required to verify this authenticated release"
+done
+
+release_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+[ -f "$release_root/SHA256SUMS" ] && [ ! -L "$release_root/SHA256SUMS" ] || fail "release manifest missing"
+[ -f "$release_root/SHA256SUMS.sig" ] && [ ! -L "$release_root/SHA256SUMS.sig" ] || fail "release signature missing"
+[ -f "$release_root/FCF-CARAVAN-JOIN.pub" ] && [ ! -L "$release_root/FCF-CARAVAN-JOIN.pub" ] || fail "FCF join public key missing"
+
+actual_key_sha=$(sha256sum "$release_root/FCF-CARAVAN-JOIN.pub" | awk '{print $1}')
+[ "$actual_key_sha" = "$RELEASE_KEY_SHA256" ] || fail "bundled FCF join key identity differs from this release"
+
+signify -V -q -p "$release_root/FCF-CARAVAN-JOIN.pub" \
+  -x "$release_root/SHA256SUMS.sig" -m "$release_root/SHA256SUMS" ||
+  fail "FCF release signature verification failed"
+
+python3 - "$release_root" <<'PY'
+from __future__ import annotations
+import hashlib
+import os
+from pathlib import Path, PurePosixPath
+import stat
+import sys
+root = Path(sys.argv[1])
+manifest = root / "SHA256SUMS"
+listed: dict[str, str] = {}
+for raw in manifest.read_text(encoding="utf-8").splitlines():
+    parts = raw.split(None, 1)
+    if len(parts) != 2:
+        raise SystemExit("FCF CARAVAN join: malformed release manifest")
+    digest, rel = parts
+    rel = rel.strip().lstrip("*")
+    if rel.startswith("./"):
+        rel = rel[2:]
+    path = PurePosixPath(rel)
+    if (
+        not rel or rel.startswith("/") or "\\" in rel
+        or any(part in {"", ".", ".."} for part in path.parts)
+        or len(digest) != 64 or any(ch not in "0123456789abcdef" for ch in digest)
+        or rel in listed
+    ):
+        raise SystemExit("FCF CARAVAN join: unsafe release manifest entry")
+    obj = root.joinpath(*path.parts)
+    try:
+        info = os.lstat(obj)
+    except FileNotFoundError as exc:
+        raise SystemExit(f"FCF CARAVAN join: release object missing: {rel}") from exc
+    if stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode):
+        raise SystemExit(f"FCF CARAVAN join: non-regular release object rejected: {rel}")
+    actual = hashlib.sha256(obj.read_bytes()).hexdigest()
+    if actual != digest:
+        raise SystemExit(f"FCF CARAVAN join: release checksum mismatch: {rel}")
+    listed[rel] = digest
+actual_files = {
+    p.relative_to(root).as_posix()
+    for p in root.rglob("*")
+    if p.is_file() and p.name not in {"SHA256SUMS", "SHA256SUMS.sig"}
+}
+if set(listed) != actual_files:
+    raise SystemExit("FCF CARAVAN join: release exact-membership check failed")
+PY
+
+STORAGE_GIB=10
+UPLOAD_MIBPS=4
+ASSUME_YES=0
+CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
+LIB_HOME=${FCF_CARAVAN_LIB_HOME:-$HOME/.local/lib}
+
+usage() {
+  cat <<'TXT'
+Usage: ./join-caravan [options]
+
+Options:
+  --storage-gib N       local CARAVAN storage ceiling (default: 10 GiB)
+  --upload-mibps N      future outbound serving rate ceiling (default: 4 MiB/s)
+  -y, --yes             accept the displayed local configuration
+  -h, --help            show this help
+
+This release configures a rootless carrier home. Public enrollment/network
+serving remains disabled until an authenticated FCF enrollment endpoint and
+production carrier protocol are included in an FCF-signed release.
+TXT
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --storage-gib) [ "$#" -ge 2 ] || fail "--storage-gib needs a value"; STORAGE_GIB=$2; shift 2 ;;
+    --upload-mibps) [ "$#" -ge 2 ] || fail "--upload-mibps needs a value"; UPLOAD_MIBPS=$2; shift 2 ;;
+    -y|--yes) ASSUME_YES=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+for value in "$STORAGE_GIB" "$UPLOAD_MIBPS"; do
+  case "$value" in ''|*[!0-9]*) fail "resource limits must be positive integers" ;; esac
+  [ "$value" -ge 1 ] || fail "resource limits must be positive"
+done
+[ "$STORAGE_GIB" -le 4096 ] || fail "storage ceiling exceeds safe installer maximum"
+[ "$UPLOAD_MIBPS" -le 1024 ] || fail "upload-rate ceiling exceeds safe installer maximum"
+
+cat <<TXT
+
+╭────────────────────────────────────────────────────────────╮
+│                  JOIN THE FCF CARAVAN                     │
+╰────────────────────────────────────────────────────────────╯
+
+Authenticated release: $RELEASE_VERSION
+Storage ceiling:       $STORAGE_GIB GiB
+Upload-rate ceiling:   $UPLOAD_MIBPS MiB/s
+Privilege model:       rootless
+Inbound ports:         none
+Arbitrary file hosting:none
+Proxy/tunnel service:  none
+
+The carrier store is content-addressed and is intended to accept only artifacts
+admitted by authenticated FCF catalog metadata. Your home files are not cargo.
+This installer does not expose a directory, create an upload endpoint, or open a
+public listening socket.
+TXT
+
+if [ "$ASSUME_YES" -eq 0 ]; then
+  [ -t 0 ] || fail "non-interactive configuration requires --yes"
+  printf '\nConfigure this machine as a prepared CARAVAN carrier? [y/N] '
+  read -r answer
+  case "$answer" in y|Y|yes|YES) ;; *) fail "cancelled" ;; esac
+fi
+
+config_root="$CONFIG_HOME/fcf-caravan"
+data_root="$DATA_HOME/fcf-caravan"
+state_root="$STATE_HOME/fcf-caravan"
+install_root="$LIB_HOME/fcf-caravan/releases/$RELEASE_VERSION"
+
+for root in "$config_root" "$data_root" "$state_root" "$(dirname "$install_root")"; do
+  if [ -e "$root" ] && [ -L "$root" ]; then
+    fail "refusing symbolic-link root: $root"
+  fi
+  mkdir -p -m 0700 "$root"
+done
+if [ -e "$install_root" ]; then
+  fail "release $RELEASE_VERSION is already installed; official releases are immutable in place"
+fi
+
+stage="${install_root}.new.$$"
+trap 'chmod -R u+w "$stage" 2>/dev/null || true; rm -rf -- "$stage" 2>/dev/null || true' EXIT HUP INT TERM
+mkdir -p -m 0700 "$stage"
+cp -a "$release_root/." "$stage/"
+find "$stage" -type l -print -quit | grep -q . && fail "release copy contains symbolic links"
+find "$stage" -type f -exec chmod 0444 {} +
+find "$stage" -type d -exec chmod 0555 {} +
+mv -- "$stage" "$install_root"
+trap - EXIT HUP INT TERM
+
+mkdir -p -m 0700 "$data_root/store" "$state_root/identity"
+python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" <<'PY'
+import json
+import sys
+from pathlib import Path
+out, version, storage, upload = sys.argv[1:]
+data = {
+    "schema": "fcf-caravan-carrier-config-v1",
+    "release_version": version,
+    "network_mode": "disabled-until-authenticated-enrollment",
+    "inbound_listen": False,
+    "arbitrary_content": False,
+    "storage_limit_gib": int(storage),
+    "upload_limit_mibps": int(upload),
+}
+Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
+chmod 0600 "$config_root/config.json"
+
+cat <<TXT
+
+CONFIGURED
+Welcome to the Free Computation Foundation caravan! 🐪
+
+Release $RELEASE_VERSION is installed read-only at:
+  $install_root
+
+This machine is PREPARED, not publicly enrolled yet. No inbound port was opened,
+no arbitrary data was accepted, and no background network service was started.
+When FCF promotes the authenticated carrier protocol to a signed public release,
+the same immutable-release mechanism will perform explicit enrollment.
+TXT
