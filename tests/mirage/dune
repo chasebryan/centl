@@ -77,3 +77,11 @@
   ../../docs/FCF-TELEPATHYD-DEPLOY.md)
  (action
   (run python3 %{dep:../test_fcf_telepathyd_install.py})))
+
+(rule
+ (alias runtest)
+ (deps
+  ../test_x200_camel_online.py
+  ../../scripts/x200-camel-online)
+ (action
+  (run python3 %{dep:../test_x200_camel_online.py})))
