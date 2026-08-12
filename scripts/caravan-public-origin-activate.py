@@ -155,16 +155,18 @@ def compare_tree(left: Path, right: Path, label: str) -> None:
         return
     require_safe_tree(left)
     require_safe_tree(right)
-    a = {p.relative_to(left).as_posix(): p for p in left.rglob("*") if p.is_file()}
-    b = {p.relative_to(right).as_posix(): p for p in right.rglob("*") if p.is_file()}
-    if set(a) != set(b):
+    left_files = {p.relative_to(left).as_posix(): p for p in left.rglob("*") if p.is_file()}
+    right_files = {p.relative_to(right).as_posix(): p for p in right.rglob("*") if p.is_file()}
+    if set(left_files) != set(right_files):
         die(f"{label} file membership differs from approved store")
-    for rel in sorted(a):
-        if a[rel].stat().st_size != b[rel].stat().st_size or sha256(a[rel]) != sha256(b[rel]):
+    for rel in sorted(left_files):
+        a = left_files[rel]
+        b = right_files[rel]
+        if a.stat().st_size != b.stat().st_size or sha256(a) != sha256(b):
             die(f"{label} bytes differ from approved store: {rel}")
 
 
-def verify_source_index(root: Path) -> dict[str, dict[str, str]]:
+def verify_source_index(root: Path) -> dict[str, object]:
     source = root / "source"
     require_safe_tree(source)
     expected = {"INDEX.json", *(f"centl-{branch}.tar.gz" for branch in BRANCHES)}
@@ -200,7 +202,7 @@ def verify_source_index(root: Path) -> dict[str, dict[str, str]]:
             die(f"source index digest invalid: {branch}")
         if sha256(source / item["archive"]) != item["sha256"]:
             die(f"source archive digest differs from source index: {branch}")
-    return branches
+    return data
 
 
 def verify_source_archive(path: Path, branch: str) -> None:
@@ -248,7 +250,19 @@ def verify_source_archive(path: Path, branch: str) -> None:
         die(f"{branch} source archive lacks expected CENTL markers")
 
 
-def verify_status(root: Path) -> None:
+def load_ingest_status(root: Path) -> object:
+    path = root / "caravan" / "INGEST-STATUS.json"
+    if not path.exists():
+        return None
+    if path.is_symlink() or not path.is_file():
+        die("ingest status is unsafe")
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SystemExit("fcf caravan activation: invalid ingest status JSON") from exc
+
+
+def verify_status(root: Path, source_index: dict[str, object]) -> None:
     try:
         data = json.loads((root / "status.json").read_text(encoding="utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError, FileNotFoundError) as exc:
@@ -267,6 +281,30 @@ def verify_status(root: Path) -> None:
     for key in ("source_authorization_sha256", "mirror_receipt_sha256"):
         if not isinstance(data[key], str) or not HEX64.fullmatch(data[key]):
             die(f"invalid status {key}")
+    if data["source_branches"] != source_index["branches"]:
+        die("public status source branches differ from source index")
+    if data["source_authorization_sha256"] != source_index["authorization_sha256"]:
+        die("public status source authorization differs from source index")
+    if data["mirror_receipt_sha256"] != source_index["mirror_receipt_sha256"]:
+        die("public status preservation receipt differs from source index")
+
+    ingest = load_ingest_status(root)
+    if data["preservation_ingest"] != ingest:
+        die("public status preservation metadata differs from ingest status")
+    if isinstance(ingest, dict):
+        if ingest.get("schema") != "fcf-caravan-approved-ingest-status-v2":
+            die("unexpected preservation ingest status schema")
+        if ingest.get("preservation_mirror_verified") is not True:
+            die("public generation does not report a verified preservation mirror")
+        if ingest.get("source_export_present") is not True:
+            die("public generation does not report an approved source export")
+        if ingest.get("source_authorization_sha256") != source_index["authorization_sha256"]:
+            die("ingest source authorization differs from source index")
+        if ingest.get("mirror_regular_receipt_sha256") != source_index["mirror_receipt_sha256"]:
+            die("ingest preservation receipt differs from source index")
+    else:
+        die("preservation ingest status is required")
+
     if data["uploads"] is not False or data["proxying"] is not False or data["arbitrary_paths"] is not False:
         die("candidate attempts to enable forbidden service capabilities")
 
@@ -352,18 +390,27 @@ def verify_generation(root: Path, approved: Path) -> None:
     caravan_names = {p.name for p in (root / "caravan").iterdir()}
     if not caravan_names <= {"catalog-v1.json", "CATALOG-STATUS", "INGEST-STATUS.json"}:
         die("unexpected CARAVAN metadata object")
-    if not {"catalog-v1.json", "CATALOG-STATUS"} <= caravan_names:
+    if not {"catalog-v1.json", "CATALOG-STATUS", "INGEST-STATUS.json"} <= caravan_names:
         die("required CARAVAN metadata missing")
+
     verify_sha_manifest(root, "SHA256SUMS", exclude={"SHA256SUMS"})
-    branches = verify_source_index(root)
+    source_index = verify_source_index(root)
+    branches = source_index["branches"]
+    if not isinstance(branches, dict):
+        die("source index branches became invalid")
     for branch in BRANCHES:
-        verify_source_archive(root / "source" / branches[branch]["archive"], branch)
-    verify_status(root)
+        item = branches[branch]
+        if not isinstance(item, dict):
+            die(f"source index entry became invalid: {branch}")
+        verify_source_archive(root / "source" / str(item["archive"]), branch)
+
+    verify_status(root, source_index)
     verify_catalog(root)
     verify_approved(approved)
     compare_tree(root / "source", approved / "source", "source export")
     compare_tree(root / "releases", approved / "releases", "release export")
     compare_tree(root / "semantic", approved / "semantic", "semantic export")
+
     candidate_ingest = root / "caravan" / "INGEST-STATUS.json"
     approved_ingest = approved / "INGEST-STATUS.json"
     if candidate_ingest.exists() != approved_ingest.exists():
