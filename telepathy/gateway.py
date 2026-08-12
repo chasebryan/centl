@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from http.client import HTTPConnection, HTTPException
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import ipaddress
+from pathlib import Path
 import re
 import threading
 from typing import ClassVar
 
+from .live_root import LiveRoot, LiveRootError
 from .policy import PolicyError, PublicReadPolicy
 
 
@@ -43,6 +45,29 @@ def _require_port(port: int, *, field: str) -> None:
         raise ValueError(f"{field} must be between 1 and 65535")
 
 
+def _range_span(value: str, size: int) -> tuple[int, int] | None:
+    """Return inclusive byte span, or None when the canonical range is unsatisfiable."""
+
+    if not value.startswith("bytes="):
+        return None
+    spec = value[6:]
+    if spec.startswith("-"):
+        suffix = int(spec[1:])
+        if suffix <= 0 or size <= 0:
+            return None
+        start = max(0, size - suffix)
+        return start, size - 1
+
+    start_text, end_text = spec.split("-", 1)
+    start = int(start_text)
+    if start >= size:
+        return None
+    end = size - 1 if not end_text else min(int(end_text), size - 1)
+    if end < start:
+        return None
+    return start, end
+
+
 @dataclass(frozen=True)
 class GatewayConfig:
     listen_host: str = "127.0.0.1"
@@ -51,6 +76,8 @@ class GatewayConfig:
     upstream_port: int = 8787
     upstream_timeout: float = 10.0
     max_workers: int = 32
+    live_root: Path | None = None
+    live_root_uid: int | None = None
 
     def __post_init__(self) -> None:
         _require_loopback_literal(self.listen_host, field="listen_host")
@@ -61,6 +88,8 @@ class GatewayConfig:
             raise ValueError("upstream_timeout must be positive")
         if not 1 <= self.max_workers <= 256:
             raise ValueError("max_workers must be between 1 and 256")
+        if self.live_root_uid is not None and self.live_root_uid < 0:
+            raise ValueError("live_root_uid must be a non-negative uid")
 
 
 class _TelepathyHTTPServer(ThreadingHTTPServer):
@@ -119,6 +148,11 @@ class TelepathyGateway:
     def _handler_type(self) -> type[BaseHTTPRequestHandler]:
         config = self.config
         policy = self.policy
+        live_root = (
+            LiveRoot(config.live_root, required_uid=config.live_root_uid)
+            if config.live_root is not None
+            else None
+        )
 
         class Handler(BaseHTTPRequestHandler):
             server_version: ClassVar[str] = "fcf-telepathyd/0.1-mirage"
@@ -173,16 +207,64 @@ class TelepathyGateway:
                     return False
                 return True
 
-            def _forward(self) -> None:
-                if not self._request_shape_allowed():
-                    return
+            def _serve_live_root(self, path: str) -> None:
+                assert live_root is not None
                 try:
-                    path = policy.authorize(self.command, self.path)
-                except PolicyError as exc:
-                    status = 405 if "method not permitted" in str(exc) else 403
-                    self._deny(status, "fcf-telepathyd policy denied request")
+                    obj = live_root.resolve(path)
+                    handle = obj.open()
+                except (LiveRootError, OSError):
+                    self._deny(404, "CARAVAN live object unavailable")
                     return
 
+                try:
+                    start = 0
+                    end = obj.size - 1
+                    status = 200
+                    range_values = self.headers.get_all("Range", []) or []
+                    if range_values:
+                        span = _range_span(range_values[0].strip(), obj.size)
+                        if span is None:
+                            self.send_response(416)
+                            self.send_header("Content-Range", f"bytes */{obj.size}")
+                            self.send_header("Content-Length", "0")
+                            self.send_header("Connection", "close")
+                            self.end_headers()
+                            self.close_connection = True
+                            return
+                        start, end = span
+                        status = 206
+
+                    length = 0 if obj.size == 0 else end - start + 1
+                    self.send_response(status)
+                    self.send_header("Content-Type", obj.content_type)
+                    self.send_header("Content-Length", str(length))
+                    self.send_header("Accept-Ranges", "bytes")
+                    self.send_header("ETag", obj.etag)
+                    self.send_header("Cache-Control", "no-cache")
+                    if status == 206:
+                        self.send_header(
+                            "Content-Range", f"bytes {start}-{end}/{obj.size}"
+                        )
+                    self.send_header("Connection", "close")
+                    self.end_headers()
+                    self.close_connection = True
+
+                    if self.command == "HEAD" or length == 0:
+                        return
+                    handle.seek(start)
+                    remaining = length
+                    while remaining > 0:
+                        chunk = handle.read(min(64 * 1024, remaining))
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        remaining -= len(chunk)
+                except (BrokenPipeError, ConnectionResetError):
+                    return
+                finally:
+                    handle.close()
+
+            def _forward_http(self, path: str) -> None:
                 request_headers = {
                     key: value
                     for key, value in self.headers.items()
@@ -223,6 +305,21 @@ class TelepathyGateway:
                             pass
                 finally:
                     connection.close()
+
+            def _forward(self) -> None:
+                if not self._request_shape_allowed():
+                    return
+                try:
+                    path = policy.authorize(self.command, self.path)
+                except PolicyError as exc:
+                    status = 405 if "method not permitted" in str(exc) else 403
+                    self._deny(status, "fcf-telepathyd policy denied request")
+                    return
+
+                if live_root is not None:
+                    self._serve_live_root(path)
+                else:
+                    self._forward_http(path)
 
             do_GET = _forward
             do_HEAD = _forward
