@@ -54,8 +54,8 @@ class LiveRoot:
 
     The configured `current` path may itself be CARAVAN's root-owned atomic
     symlink. Every object beneath the resolved generation must be a root-owned
-    (or explicitly configured owner), non-writable regular file reached only
-    through non-writable, non-symlink directories.
+    (or explicitly configured owner), immutable regular file reached only
+    through immutable, non-symlink directories.
     """
 
     root: Path
@@ -63,13 +63,13 @@ class LiveRoot:
 
     @staticmethod
     def _safe_mode(mode: int) -> bool:
-        return mode & 0o022 == 0
+        return mode & 0o222 == 0
 
     def _require_owner_and_mode(self, st: os.stat_result, *, label: str) -> None:
         if self.required_uid is not None and st.st_uid != self.required_uid:
             raise LiveRootError(f"{label} owner does not match publication policy")
         if not self._safe_mode(st.st_mode):
-            raise LiveRootError(f"{label} is group/other writable")
+            raise LiveRootError(f"{label} is writable")
 
     def _resolved_generation(self) -> Path:
         try:
