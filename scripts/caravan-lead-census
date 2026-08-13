@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 
 SCHEMA = "fcf-caravan-lead-census-v1"
@@ -87,17 +88,22 @@ def probe(origin: str, socks: str, timeout: int) -> bool:
         "-",
         f"http://{origin}/status.json",
     ]
-    try:
-        result = subprocess.run(
-            command,
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            timeout=timeout + 5,
-        )
-        document = json.loads(result.stdout.decode("utf-8"))
-    except (OSError, subprocess.SubprocessError, UnicodeDecodeError, json.JSONDecodeError):
-        return False
+    for attempt in range(3):
+        try:
+            result = subprocess.run(
+                command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                timeout=timeout + 5,
+            )
+            document = json.loads(result.stdout.decode("utf-8"))
+        except (OSError, subprocess.SubprocessError, UnicodeDecodeError, json.JSONDecodeError):
+            if attempt < 2:
+                time.sleep(5)
+                continue
+            return False
+        break
     if not isinstance(document, dict):
         return False
     return (
