@@ -8,6 +8,8 @@ on:
       - 'assets/branding/fcf-centl-banner.png'
       - 'assets/branding/centl-sci-v0.0.1-camelus-banner.png'
       - '.github/workflows/pages.yml'
+  schedule:
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -25,9 +27,38 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Tor client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends tor
+
+      - name: Start private Tor client
+        run: |
+          set -eu
+          tor_data="$RUNNER_TEMP/fcf-caravan-tor"
+          mkdir -m 700 "$tor_data"
+          tor --RunAsDaemon 1 --SocksPort 9050 --DataDirectory "$tor_data" --ClientOnly 1 --Log "notice file $RUNNER_TEMP/fcf-caravan-tor.log"
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl --silent --fail --max-time 2 --socks5-hostname 127.0.0.1:9050 --proxy "" --proto "=http" http://check.torproject.org/ >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Tor client did not become ready; preserving the prior census as stale/hungry." >&2
+            exit 1
+          fi
+
+      - name: Probe X200
+        run: |
+          python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:9050
 
       - name: Configure Pages
         id: pages
