@@ -94,6 +94,12 @@ class RetrievalTicket:
     expires_at: float
 
 
+@dataclass(frozen=True, slots=True)
+class CensusCounts:
+    active_camels: int
+    lost_camels: int
+
+
 class CoordinatorState:
     """SQLite-backed routing state with expiring presence and one-use tickets."""
 
@@ -295,6 +301,51 @@ class CoordinatorState:
 
     def _fresh_cutoff(self, now: float) -> float:
         return now - self.heartbeat_ttl
+
+    def census_counts(
+        self,
+        *,
+        now: float | None = None,
+        active_window: float = 1_800.0,
+        lost_after: float = 259_200.0,
+    ) -> CensusCounts:
+        """Return aggregate public census counts from authenticated carriers.
+
+        Active and Lost use the public CARAVAN windows. Withdrawn and
+        quarantined carriers are excluded rather than being presented as Lost.
+        """
+        if active_window <= 0:
+            raise ValueError("active_window must be positive")
+        if lost_after <= active_window:
+            raise ValueError("lost_after must exceed active_window")
+        timestamp = time.time() if now is None else float(now)
+        active_cutoff = timestamp - float(active_window)
+        lost_cutoff = timestamp - float(lost_after)
+        with self._connect() as db:
+            row = db.execute(
+                """SELECT
+                       SUM(
+                           CASE
+                               WHEN state = 'active'
+                                AND last_seen >= ?
+                                AND last_seen <= ?
+                               THEN 1 ELSE 0
+                           END
+                       ) AS active_count,
+                       SUM(
+                           CASE
+                               WHEN state = 'active'
+                                AND last_seen < ?
+                               THEN 1 ELSE 0
+                           END
+                       ) AS lost_count
+                   FROM carriers""",
+                (active_cutoff, timestamp, lost_cutoff),
+            ).fetchone()
+        return CensusCounts(
+            int(row["active_count"] or 0),
+            int(row["lost_count"] or 0),
+        )
 
     def network_stats(self, *, now: float | None = None) -> NetworkStats:
         timestamp = time.time() if now is None else float(now)

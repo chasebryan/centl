@@ -22,6 +22,7 @@ PY
   caravan/__init__.py \
   caravan/content.py \
   caravan/coordinator.py \
+  caravan/census.py \
   caravan/identity.py \
   caravan/policy.py \
   caravan/enrollment.py \
@@ -33,6 +34,7 @@ PY
   caravan/lifecycle.py \
   caravan/lab.py \
   tests/test_caravan_phase1.py \
+  tests/test_caravan_census.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_tuf_catalog.py \

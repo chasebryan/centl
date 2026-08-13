@@ -2,7 +2,8 @@
 
 from .catalog import AuthenticatedCatalog, CatalogArtifact, CatalogError, TufCatalogClient
 from .content import ArtifactIdentity, ContentStore, IntegrityError
-from .coordinator import CoordinatorState, CoordinatorError
+from .coordinator import CensusCounts, CoordinatorState, CoordinatorError
+from .census import CensusError, build_live_document, validate_public_document
 from .enrollment import register_accepted_carrier
 from .identity import CarrierIdentity, IdentityError
 from .lifecycle import CarrierStatus, LifecycleError, join, leave, status
@@ -20,8 +21,12 @@ __all__ = [
     "ArtifactIdentity",
     "ContentStore",
     "IntegrityError",
+    "CensusCounts",
     "CoordinatorState",
     "CoordinatorError",
+    "CensusError",
+    "build_live_document",
+    "validate_public_document",
     "CarrierIdentity",
     "IdentityError",
     "CarrierStatus",
