@@ -1,18 +1,21 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
+import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "scripts" / "caravan-join-template"
 RELEASE = ROOT / "scripts" / "caravan-join-release"
 VERIFY = ROOT / "scripts" / "caravan-join-verify"
+RENDER = ROOT / "scripts" / "caravan-render-bazaar"
 DOC = ROOT / "docs" / "CARAVAN-JOIN-RELEASE.md"
 MANUAL = ROOT / "docs" / "CARAVAN-JOIN-MANUAL.md"
 CENSUS = ROOT / "docs" / "CARAVAN-CENSUS.md"
 BAZAAR = ROOT / "site" / "mirrors.html"
-CENSUS_JS = ROOT / "site" / "caravan-census.js"
 
 
 class CaravanJoinReleaseTests(unittest.TestCase):
@@ -144,15 +147,61 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn("k = 10", text)
         self.assertIn("not \"unique people.\"", text)
 
-    def test_bazaar_census_widget_has_safe_unavailable_fallback(self) -> None:
+    def test_bazaar_census_template_is_server_rendered_and_privacy_preserving(self) -> None:
         html = BAZAAR.read_text(encoding="utf-8")
-        js = CENSUS_JS.read_text(encoding="utf-8")
         self.assertIn("Active Camels", html)
+        self.assertIn("Hungry Camels", html)
         self.assertIn("Lost Camels", html)
-        self.assertIn("caravan-census.js", html)
-        self.assertIn("census-v1.json", js)
-        self.assertIn("Census not live yet", js)
-        self.assertNotIn("innerHTML", js)
+        self.assertIn("__FCF_ACTIVE_CAMELS__", html)
+        self.assertIn("__FCF_HUNGRY_CAMELS__", html)
+        self.assertIn("__FCF_LOST_CAMELS__", html)
+        self.assertNotIn("caravan-census.js", html)
+        for forbidden in (
+            "volunteer IP addresses",
+            "hostnames",
+            "usernames",
+            "email addresses",
+            "locations",
+        ):
+            self.assertIn(forbidden, html)
+
+    def test_bazaar_renderer_replaces_all_census_placeholders(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            census = root / "census.json"
+            output = root / "mirrors.html"
+            census.write_text(
+                json.dumps(
+                    {
+                        "schema": "fcf-caravan-lead-census-v1",
+                        "status": "live",
+                        "generated_at": "2026-08-13T22:25:02+00:00",
+                        "probe": "healthy",
+                        "active_camels": 1,
+                        "hungry_camels": 0,
+                        "lost_camels": 0,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER),
+                    "--template",
+                    str(BAZAAR),
+                    "--census",
+                    str(census),
+                    "--output",
+                    str(output),
+                ],
+                check=True,
+            )
+            rendered = output.read_text(encoding="utf-8")
+            self.assertNotIn("__FCF_", rendered)
+            self.assertIn("<strong>1</strong>", rendered)
+            self.assertGreaterEqual(rendered.count("<strong>0</strong>"), 2)
+            self.assertIn("passed the latest Tor probe", rendered)
 
 
 if __name__ == "__main__":

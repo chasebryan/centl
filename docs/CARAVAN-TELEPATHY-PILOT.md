@@ -2,19 +2,15 @@
 
 Status: **implemented private-pilot path for the X200 first origin; not general public enrollment**.
 
-The X200 is Camel #1 and remains the FCF-owned origin. It publishes the activated,
-root-owned CARAVAN generation through the existing loopback-only `fcf-telepathyd`
-service and a Tor v3 onion service. Supporter machines are lesser volunteer camels:
-they seed selected `public-approved` artifacts from Camel #1, keep them in a
-user-owned content-addressed store, and may publish their selected subset through
-their own loopback-only Telepathy/Tor service.
+The X200 is Camel #1 and remains the FCF-owned lead origin. It publishes the activated, root-owned CARAVAN generation through the existing loopback-only `fcf-telepathyd` service and a Tor v3 onion service. Supporter machines are volunteer camels: they seed selected `public-approved` artifacts from Camel #1, keep them in a user-owned content-addressed store, and may publish their selected immutable subset through their own loopback-only Telepathy/Tor service.
 
-This path needs no router administration, port forwarding, public DNS, public TCP
-80/443, upload endpoint, proxy, or exposed home directory.
+This private-pilot path needs no router administration, port forwarding, public DNS, public TCP 80/443, upload endpoint, proxy, or exposed home directory.
+
+Public volunteer enrollment is governed separately by issue #167 and must remain closed until its production transport, authentication, resource, withdrawal, portability, and security gates pass.
 
 ## X200 operator: create an invite
 
-From the active Mirage checkout on Camel #1:
+From the active checkout on Camel #1:
 
 ```sh
 scripts/fcf-leadcaravan invite > /tmp/fcf-caravan-invite.json
@@ -26,16 +22,26 @@ The invite contains only:
 - the exact SHA-256 of the activated CARAVAN catalog; and
 - the exact SHA-256 and version of the accepted host policy.
 
-Transmit the invite through a channel the supporter already trusts. It is a
-bootstrap pin, not a replacement for the eventual signed FCF release/TUF trust
-root. The invite contains no carrier private key, username, local path, or
-hardware secret.
+Transmit the invite through a channel the supporter already trusts. It is a private-pilot bootstrap pin, not a replacement for the eventual signed FCF release/TUF trust root. The invite contains no carrier private key, username, local path, or hardware secret.
 
-## Supporter: join as a lesser camel
+## Supporter prerequisites
 
-Obtain the authenticated `joincaravan` release or run the checked-out command
-from this repository. After installing Tor and ensuring a local Tor SOCKS client
-is available on `127.0.0.1:9050`, run:
+The current private-pilot implementation expects:
+
+- Linux;
+- Python 3;
+- `curl`;
+- Tor with a SOCKS listener, by default `127.0.0.1:9050`;
+- OpenSSL; and
+- a working systemd user manager if the camel will be started immediately.
+
+The future production volunteer path is intentionally capability-first and is not permitted to require systemd merely because this private pilot currently uses a user service.
+
+## Supporter: join as a volunteer camel
+
+Use an authenticated private-pilot payload or a deliberately reviewed checkout. Do not present mutable branch bytes as an official public installer.
+
+Run:
 
 ```sh
 scripts/joincaravan join \
@@ -49,68 +55,63 @@ scripts/joincaravan join \
 
 The command:
 
-1. verifies the invite shape and local policy digest;
-2. reads the X200 status over Tor and requires the FCF-owned read-only boundary;
+1. validates the invite shape and the exact local policy digest;
+2. reads the X200 status over Tor and requires the FCF-owned read-only publication boundary;
 3. fetches the pinned catalog and rejects a digest mismatch;
-4. downloads only selected `public-approved` catalog objects;
-5. hashes each download and promotes it into immutable content-addressed storage;
-6. writes an owner-only Ed25519 identity and exact policy receipt;
-7. creates a read-only local CARAVAN generation; and
-8. starts a user-level `fcf-caravan.service` with a loopback listener and a
-   dedicated Tor v3 onion service.
+4. selects only requested `public-approved` catalog objects;
+5. verifies object length and SHA-256 before promotion into immutable content-addressed storage;
+6. creates an owner-only local carrier identity and exact policy receipt;
+7. creates a read-only local CARAVAN generation;
+8. writes a bounded, loopback-only Telepathy user service; and
+9. starts the supporter service unless `--no-start` was requested.
 
-The volunteer service can serve only its selected immutable generation. It cannot
-accept POST/PUT uploads, proxy requests, traverse paths, read the home directory,
-or alter the X200 origin.
+The volunteer service can serve only its selected immutable generation. It cannot accept POST/PUT uploads, proxy requests, arbitrary paths, or publish a volunteer home directory.
 
-Use `--no-start` to prepare without publishing a supporter onion yet:
+### Prepare without starting service
+
+Use `--no-start` when the machine should be seeded and configured but remain offline:
 
 ```sh
-scripts/joincaravan join --invite invite.json \
-  --missions source --accept-policy FCF-CARAVAN-HOST-v1 --yes --no-start
+scripts/joincaravan join \
+  --invite /path/to/fcf-caravan-invite.json \
+  --missions source \
+  --accept-policy FCF-CARAVAN-HOST-v1 \
+  --yes \
+  --no-start
 ```
 
-Inspect or withdraw locally:
+### Inspect or withdraw locally
 
 ```sh
 scripts/joincaravan status
 scripts/joincaravan leave
 ```
 
-`leave` stops the user service but retains verified cargo, the local identity, and
-the Tor identity so a later restart can preserve the supporter onion. Deletion is
-a separate operator decision.
-
-
-separate authenticated coordinator feature and are not falsely counted here.
-hardware detail, hostname, or IP address. Supporter-camel heartbeats remain a
-
-ot commit probe results to the repository. It publishes no roster, node ID,
-The monitor has read-only repository access and deploys a Pages artifact; it does
-
-  prove whether the camel is active or lost.
-- **Hungry** — the published probe document itself is stale, so the site cannot
-- **Lost** — a fresh probe ran and X200 was unreachable.
-- **Active** — the latest probe passed.
-
-	hrough Tor and publishes aggregate status only. Its three states are:
-The public Pages monitor probes the published X200 lead onion every five minutes
+`leave` stops and disables the private-pilot user service but retains verified cargo, the local carrier identity, and the Tor identity. Deleting retained state is a separate operator action.
 
 ## Public Camel monitor
+
+The public Pages monitor probes the published X200 lead onion through Tor and publishes aggregate status only.
+
+Its three public health states are:
+
+- **Active**: the latest probe passed.
+- **Hungry**: the monitor could not obtain a sufficiently fresh probe result, so current health cannot be proven.
+- **Lost**: a fresh probe ran and the X200 lead origin was unreachable.
+
+The monitor does not publish a volunteer roster, node ID, hardware detail, hostname, username, email address, IP address, or location. Supporter-camel enrollment and authenticated heartbeats remain a separate production coordinator feature and must not be falsely counted by the X200 probe alone.
+
 ## Security boundary
 
-The X200 onion hostname is public discovery data in this pilot. Security does not
-depend on hiding it. Security depends on:
+The X200 onion hostname is public discovery data in this pilot. Security does not depend on hiding it. Security depends on:
 
 - the invite pinning the exact catalog and policy bytes;
 - every artifact being checked against the catalog's exact length and SHA-256;
+- only authenticated catalog entries marked `public-approved` being eligible;
 - user-owned private identity state remaining owner-only;
 - the Telepathy gateway binding only to IPv4 loopback;
 - the local generation being immutable and symlink-free;
-- Tor mapping one virtual port to that loopback gateway; and
-- the public surface remaining read-only, catalog-bound, and non-proxying.
+- Tor carrying reachability without home-router port forwarding; and
+- the served surface remaining read-only, catalog-bound, and non-proxying.
 
-The private pilot does not yet claim a production coordinator, automatic public
-census heartbeat, public volunteer roster, downloader privacy relay, or general
-availability. Those remain separate Phase 2/3 deployment work. Public census data
-must remain aggregate-only.
+The private pilot does not claim a production coordinator, production TUF enrollment path, public volunteer roster, downloader privacy relay, or general availability. Those remain separately gated. Public census data must remain aggregate-only.
