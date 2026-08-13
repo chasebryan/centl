@@ -1,18 +1,22 @@
-"""Authenticated carrier identity-rotation proof for CARAVAN."""
+"""Authenticated carrier identity rotation for CARAVAN."""
 
 from __future__ import annotations
 
 import base64
 from dataclasses import dataclass, replace
 import json
+import sqlite3
+import time
 
+from .coordinator import CoordinatorState
 from .identity import CarrierIdentity, IdentityError, derive_node_id, verify_signature
+from .session import SessionAuthority
 
 ROTATION_SCHEMA = "fcf-caravan-identity-rotation-v1"
 
 
 class RotationError(RuntimeError):
-    """Raised when a carrier identity-rotation proof is invalid."""
+    """Raised when a carrier identity rotation is invalid."""
 
 
 def _encode(raw: bytes) -> str:
@@ -104,3 +108,69 @@ def verify_rotation_proof(proof: IdentityRotationProof) -> IdentityRotationProof
     except IdentityError as exc:
         raise RotationError("rotation signature verification failed") from exc
     return proof
+
+
+def apply_rotation(
+    coordinator: CoordinatorState,
+    sessions: SessionAuthority,
+    proof: IdentityRotationProof,
+    *,
+    now: float | None = None,
+) -> str:
+    """Atomically move an active carrier from the old key to the replacement key."""
+
+    verify_rotation_proof(proof)
+    timestamp = time.time() if now is None else float(now)
+    db = sqlite3.connect(coordinator.database)
+    db.row_factory = sqlite3.Row
+    try:
+        db.execute("PRAGMA foreign_keys = ON")
+        db.execute("BEGIN IMMEDIATE")
+        old = db.execute(
+            "SELECT * FROM carriers WHERE node_id = ?", (proof.old_node_id,)
+        ).fetchone()
+        if old is None or old["state"] != "active":
+            raise RotationError("old carrier must be actively enrolled")
+        if old["public_identity"] != proof.old_public_identity:
+            raise RotationError("old public identity does not match enrollment")
+        if db.execute(
+            "SELECT 1 FROM carriers WHERE node_id = ? OR public_identity = ?",
+            (proof.new_node_id, proof.new_public_identity),
+        ).fetchone() is not None:
+            raise RotationError("replacement carrier identity is already enrolled")
+
+        db.execute(
+            """INSERT INTO carriers(
+                   node_id, public_identity, policy_version, agent_version,
+                   state, last_seen, load, capacity
+               ) VALUES (?, ?, ?, ?, 'active', ?, ?, ?)""",
+            (
+                proof.new_node_id,
+                proof.new_public_identity,
+                old["policy_version"],
+                old["agent_version"],
+                timestamp,
+                old["load"],
+                old["capacity"],
+            ),
+        )
+        db.execute(
+            """INSERT INTO replicas(node_id, artifact_id, verified_at)
+               SELECT ?, artifact_id, verified_at FROM replicas WHERE node_id = ?""",
+            (proof.new_node_id, proof.old_node_id),
+        )
+        db.execute("DELETE FROM replicas WHERE node_id = ?", (proof.old_node_id,))
+        db.execute("DELETE FROM tickets WHERE node_id = ?", (proof.old_node_id,))
+        db.execute(
+            "UPDATE carriers SET state = 'withdrawn' WHERE node_id = ?",
+            (proof.old_node_id,),
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+    sessions.revoke_node(proof.old_node_id)
+    return proof.new_node_id
