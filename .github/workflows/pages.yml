@@ -42,10 +42,10 @@ jobs:
           set -eu
           tor_data="$RUNNER_TEMP/fcf-caravan-tor"
           mkdir -m 700 "$tor_data"
-          tor --RunAsDaemon 1 --SocksPort 9050 --DataDirectory "$tor_data" --ClientOnly 1 --Log "notice file $RUNNER_TEMP/fcf-caravan-tor.log"
+          tor --RunAsDaemon 1 --SocksPort 19050 --DataDirectory "$tor_data" --ClientOnly 1 --Log "notice file $RUNNER_TEMP/fcf-caravan-tor.log"
           ready=0
           for attempt in $(seq 1 60); do
-            if curl --silent --fail --max-time 2 --socks5-hostname 127.0.0.1:9050 --proxy "" --proto "=http" http://check.torproject.org/ >/dev/null 2>&1; then
+            if curl --silent --fail --max-time 2 --socks5-hostname 127.0.0.1:19050 --proxy "" --proto "=http" http://check.torproject.org/ >/dev/null 2>&1; then
               ready=1
               break
             fi
@@ -58,7 +58,7 @@ jobs:
 
       - name: Probe X200
         run: |
-          python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:9050
+          python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:19050
 
       - name: Configure Pages
         id: pages
