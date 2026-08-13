@@ -43,7 +43,16 @@ done
 [ -n "$OUTPUT" ] || fail "--output is required"
 printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || fail "version must be numeric SemVer X.Y.Z"
 
-for cmd in git gzip python3 sha256sum signify tar find sort; do need "$cmd"; done
+if ! command -v signify >/dev/null 2>&1; then
+  if command -v signify-openbsd >/dev/null 2>&1; then
+    signify() {
+      command signify-openbsd "$@"
+    }
+  else
+    fail "signify (or Debian's signify-openbsd) is required"
+  fi
+fi
+for cmd in git gzip python3 sha256sum tar find sort; do need "$cmd"; done
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "must run from a CENTL Git checkout"
