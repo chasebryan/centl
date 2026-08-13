@@ -52,13 +52,19 @@ jobs:
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then
-            echo "Tor client did not become ready; preserving the prior census as stale/hungry." >&2
-            exit 1
+            echo "Tor client did not become ready; publishing a Hungry result." >&2
+            echo "CARAVAN_TOR_READY=0" >> "$GITHUB_ENV"
+          else
+            echo "CARAVAN_TOR_READY=1" >> "$GITHUB_ENV"
           fi
 
       - name: Probe X200
         run: |
-          python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:19050
+          if [ "${CARAVAN_TOR_READY:-0}" = "1" ]; then
+            python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:19050
+          else
+            python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --stale
+          fi
 
       - name: Configure Pages
         id: pages
@@ -77,6 +83,7 @@ jobs:
           rm -rf _site
           mkdir -p _site/assets
           cp -a site/. _site/
+          python3 scripts/caravan-render-bazaar --template site/mirrors.html --census site/pub/centl/caravan/lead-census-v1.json --output _site/mirrors.html
           cp assets/branding/fcf-centl-banner.png _site/assets/fcf-centl-banner.png
           cp assets/branding/centl-sci-v0.0.1-camelus-banner.png _site/assets/centl-sci-v0.0.1-camelus-banner.png
 

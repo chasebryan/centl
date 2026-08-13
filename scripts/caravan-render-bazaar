@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+from html import escape
+import json
+from pathlib import Path
+import sys
+
+SCHEMA = "fcf-caravan-lead-census-v1"
+
+
+def fail(message: str) -> "NoReturn":
+    print(f"caravan-render-bazaar: {message}", file=sys.stderr)
+    raise SystemExit(2)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="caravan-render-bazaar",
+        description="Render the aggregate CARAVAN census into The Bazaar HTML",
+    )
+    parser.add_argument("--template", type=Path, required=True)
+    parser.add_argument("--census", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    return parser.parse_args()
+
+
+def read_census(path: Path) -> dict[str, object]:
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        fail(f"census is unreadable: {exc}")
+    if (
+        not isinstance(document, dict)
+        or document.get("schema") != SCHEMA
+        or document.get("status") != "live"
+    ):
+        fail("census does not match the live lead-census schema")
+    for field in ("active_camels", "hungry_camels", "lost_camels"):
+        value = document.get(field)
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            fail(f"census {field} is invalid")
+    generated_at = document.get("generated_at")
+    if not isinstance(generated_at, str) or not generated_at:
+        fail("census generated_at is invalid")
+    return document
+
+
+def status_text(document: dict[str, object]) -> str:
+    generated_at = escape(str(document["generated_at"]))
+    probe = document.get("probe")
+    if probe == "healthy":
+        return f"Updated {generated_at}. The X200 lead origin passed the latest Tor probe."
+    if probe == "monitor-stale":
+        return (
+            f"Updated {generated_at}. The monitor could not complete a fresh Tor probe; "
+            "the camel is treated as hungry until the next fresh result."
+        )
+    return (
+        f"Updated {generated_at}. The latest Tor probe could not reach the X200 lead origin; "
+        "the camel is treated as lost."
+    )
+
+
+def main() -> int:
+    args = parse_args()
+    document = read_census(args.census)
+    try:
+        template = args.template.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        fail(f"template is unreadable: {exc}")
+    values = {
+        "__FCF_ACTIVE_CAMELS__": str(document["active_camels"]),
+        "__FCF_HUNGRY_CAMELS__": str(document["hungry_camels"]),
+        "__FCF_LOST_CAMELS__": str(document["lost_camels"]),
+        "__FCF_CENSUS_STATUS__": status_text(document),
+    }
+    for token, value in values.items():
+        if token not in template:
+            fail(f"template is missing {token}")
+        template = template.replace(token, value)
+    if args.output.is_symlink():
+        fail("output must not be a symlink")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(template, encoding="utf-8")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

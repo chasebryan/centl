@@ -28,6 +28,7 @@ def parser() -> argparse.ArgumentParser:
     value.add_argument("--output", type=Path, required=True)
     value.add_argument("--socks", default="127.0.0.1:9050")
     value.add_argument("--timeout", type=int, default=45)
+    value.add_argument("--stale", action="store_true", help="publish Hungry when the monitor itself could not probe")
     return value
 
 
@@ -108,7 +109,9 @@ def probe(origin: str, socks: str, timeout: int) -> bool:
     )
 
 
-def write_document(path: Path, *, active: bool) -> None:
+def write_document(path: Path, *, active: bool, hungry: bool = False) -> None:
+    if active and hungry:
+        fail("active and hungry states are mutually exclusive")
     if path.is_symlink():
         fail("output path must not be a symlink")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -125,7 +128,7 @@ def write_document(path: Path, *, active: bool) -> None:
         "individual_nodes_public": False,
         "ip_addresses_public": False,
         "lead_origin_monitored": True,
-        "probe": "healthy" if active else "unreachable",
+        "probe": "healthy" if active else ("monitor-stale" if hungry else "unreachable"),
     }
     temporary = path.parent / f".{path.name}.new-{os.getpid()}"
     if temporary.exists() or temporary.is_symlink():
@@ -141,7 +144,10 @@ def write_document(path: Path, *, active: bool) -> None:
 def main() -> int:
     args = parser().parse_args()
     origin = read_origin(args.origin_file)
-    write_document(args.output, active=probe(origin, args.socks, args.timeout))
+    if args.stale:
+        write_document(args.output, active=False, hungry=True)
+    else:
+        write_document(args.output, active=probe(origin, args.socks, args.timeout))
     return 0
 
 
