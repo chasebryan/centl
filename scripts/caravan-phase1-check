@@ -42,6 +42,7 @@ PY
   tests/test_caravan_transport.py \
   tests/test_caravan_retrieval.py \
   tests/test_caravan_lifecycle.py \
+  tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
   tests/test_caravan_join_release.py
 
@@ -54,6 +55,7 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_transport.py \
   tests/test_caravan_retrieval.py \
   tests/test_caravan_lifecycle.py \
+  tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
   tests/test_caravan_join_release.py
 

@@ -8,12 +8,26 @@ on:
       - 'docs/CARAVAN-IDENTITY.md'
       - 'docs/CARAVAN-CATALOG.md'
       - 'docs/CARAVAN-TRANSPORT.md'
+      - 'docs/CARAVAN-TELEPATHY-PILOT.md'
+      - 'docs/CARAVAN-HOST-POLICY.md'
       - 'scripts/caravan-phase1-check'
+      - 'scripts/caravan-join-release'
+      - 'scripts/caravan-linux-platform'
+      - 'scripts/fcf-telepathyd'
+      - 'scripts/join-caravan'
+      - 'scripts/joincaravan'
+      - 'site/mirrors.html'
       - 'tests/test_caravan_phase1.py'
       - 'tests/test_caravan_identity.py'
       - 'tests/test_caravan_enrollment.py'
       - 'tests/test_caravan_tuf_catalog.py'
       - 'tests/test_caravan_transport.py'
+      - 'tests/test_caravan_retrieval.py'
+      - 'tests/test_caravan_lifecycle.py'
+      - 'tests/test_caravan_linux_platform.py'
+      - 'tests/test_caravan_census.py'
+      - 'tests/test_caravan_join_release.py'
+      - 'tests/test_join_caravan.py'
       - '.github/workflows/caravan-phase1.yml'
 
 permissions:
@@ -110,11 +124,6 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
-      NATIVE_PREFIX: ${{ runner.temp }}/centl-native
-      PKG_CONFIG_PATH: ${{ runner.temp }}/centl-native/lib/pkgconfig
-      LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      LD_LIBRARY_PATH: ${{ runner.temp }}/centl-native/lib
-      C_INCLUDE_PATH: ${{ runner.temp }}/centl-native/include
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
       CENTL_BUILD_COMMIT: ${{ github.event.pull_request.head.sha }}
@@ -127,6 +136,16 @@ jobs:
 
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Configure native prefix environment
+        run: |
+          {
+            echo "NATIVE_PREFIX=$RUNNER_TEMP/centl-native"
+            echo "PKG_CONFIG_PATH=$RUNNER_TEMP/centl-native/lib/pkgconfig"
+            echo "LIBRARY_PATH=$RUNNER_TEMP/centl-native/lib"
+            echo "LD_LIBRARY_PATH=$RUNNER_TEMP/centl-native/lib"
+            echo "C_INCLUDE_PATH=$RUNNER_TEMP/centl-native/include"
+          } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
         run: |
