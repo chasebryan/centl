@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'scripts/caravan-join-key-ceremony'
+      - 'scripts/caravan-join-template'
       - 'scripts/caravan-join-release'
       - 'scripts/caravan-join-verify'
       - 'docs/CARAVAN-JOIN-KEY-CEREMONY.md'
       - 'docs/CARAVAN-JOIN-RELEASE.md'
       - 'tests/test_caravan_key_ceremony.py'
       - 'tests/test_caravan_join_release.py'
+      - 'tests/test_caravan_signify_portability.py'
       - '.github/workflows/caravan-release-auth.yml'
 
 permissions:
@@ -28,6 +30,7 @@ jobs:
       - name: Validate shell surfaces
         run: |
           bash -n scripts/caravan-join-key-ceremony
+          bash -n scripts/caravan-join-template
           bash -n scripts/caravan-join-release
           bash -n scripts/caravan-join-verify
 
@@ -35,4 +38,5 @@ jobs:
         run: |
           python3 -m unittest -v \
             tests/test_caravan_key_ceremony.py \
-            tests/test_caravan_join_release.py
+            tests/test_caravan_join_release.py \
+            tests/test_caravan_signify_portability.py
