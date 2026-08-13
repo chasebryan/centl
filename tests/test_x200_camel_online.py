@@ -6,7 +6,8 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "x200-camel-online"
+SCRIPT = ROOT / "scripts" / "fcf-leadcaravan"
+COMPAT_SCRIPT = ROOT / "scripts" / "x200-camel-online"
 
 
 class X200CamelOnlineTests(unittest.TestCase):
@@ -32,6 +33,18 @@ class X200CamelOnlineTests(unittest.TestCase):
         self.assertEqual(help_result.returncode, 0, msg=help_result.stderr)
         for command in ("online", "status", "verify", "offline"):
             self.assertIn(command, help_result.stdout)
+
+    def test_legacy_alias_executes(self) -> None:
+        result = subprocess.run(
+            [str(COMPAT_SCRIPT), "--help"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("fcf-leadcaravan", result.stdout)
 
     def test_online_path_uses_landed_telepathyd_service(self) -> None:
         text = SCRIPT.read_text(encoding="utf-8")

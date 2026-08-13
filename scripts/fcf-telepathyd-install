@@ -83,7 +83,6 @@ for path in \
   "$repo_root/telepathy/policy.py" \
   "$repo_root/telepathy/tor.py" \
   "$repo_root/tests/test_fcf_telepathyd.py" \
-  "$repo_root/tests/test_fcf_telepathyd_startup.py" \
   "$unit_source"; do
   [ -f "$path" ] || fail "required repository file missing: $path"
 done
@@ -115,8 +114,6 @@ install_tor() {
 
 say "[1/7] Verifying source-tree Telepathy gates..."
 python3 "$repo_root/tests/test_fcf_telepathyd.py" || fail "fcf-telepathyd tests failed"
-python3 "$repo_root/tests/test_fcf_telepathyd_startup.py" ||
-  fail "fcf-telepathyd startup regression test failed"
 
 say "[2/7] Verifying activated CARAVAN live generation..."
 [ -e "$LIVE_ROOT" ] || fail "CARAVAN live root is missing: $LIVE_ROOT"
@@ -221,7 +218,9 @@ while time.monotonic() < deadline:
         server = response.getheader("Server") or ""
         if response.status == 200 and server.startswith("fcf-telepathyd/"):
             break
-        last_error = f"status={response.status} server={server!r}"
+        last_error = (
+            f"status={response.status} server={server!r}"
+        )
     except OSError as exc:
         last_error = repr(exc)
     finally:

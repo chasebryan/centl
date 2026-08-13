@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -d "$script_dir/../caravan" ]; then
+    root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+    PYTHONPATH="$root${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m caravan.join_caravan "$@"
+fi
+
+if [ -d "$script_dir/../payload/caravan" ]; then
+    PYTHONPATH="$script_dir/../payload${PYTHONPATH:+:$PYTHONPATH}" \
+        exec python3 -m caravan.join_caravan "$@"
+fi
+
+echo "join-caravan: runtime payload is missing" >&2
+exit 1
