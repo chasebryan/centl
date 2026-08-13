@@ -70,7 +70,14 @@ def _parser() -> argparse.ArgumentParser:
             f"(default: {DEFAULT_CARAVAN_LIVE_ROOT})"
         ),
     )
+    serve.add_argument(
+        "--live-root-uid",
+        type=int,
+        default=0,
+        help="required owner UID for the immutable live generation (default: 0)",
+    )
     serve.add_argument("--state-dir", type=Path, default=_default_state_dir())
+    serve.add_argument("--max-bytes-per-second", type=int, default=0, help="per-connection outbound serving cap; 0 means unlimited")
     serve.add_argument(
         "--carrier",
         choices=("none", "tor-onion"),
@@ -121,7 +128,8 @@ def _serve(args: argparse.Namespace) -> int:
             listen_host=args.listen_host,
             listen_port=args.listen_port,
             live_root=args.caravan_live_root,
-            live_root_uid=0,
+            live_root_uid=args.live_root_uid,
+            max_bytes_per_second=args.max_bytes_per_second,
         )
     )
     carrier: TorOnionCarrier | None = None

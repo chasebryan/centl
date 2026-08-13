@@ -13,9 +13,16 @@ from pathlib import Path, PurePosixPath
 import stat
 from urllib.parse import urlparse
 
-from tuf.api import exceptions as tuf_exceptions
-from tuf.ngclient.fetcher import FetcherInterface
-from tuf.ngclient.updater import Updater
+try:
+    from tuf.api import exceptions as tuf_exceptions
+    from tuf.ngclient.fetcher import FetcherInterface
+    from tuf.ngclient.updater import Updater
+except ModuleNotFoundError as exc:  # pragma: no cover - exercised on lean hosts
+    if exc.name is None or not (exc.name == "tuf" or exc.name.startswith("tuf.")):
+        raise
+    tuf_exceptions = None  # type: ignore[assignment]
+    FetcherInterface = object  # type: ignore[assignment,misc]
+    Updater = None  # type: ignore[assignment,misc]
 
 from .content import ArtifactIdentity, DEFAULT_CHUNK_SIZE
 
@@ -221,6 +228,10 @@ class TufCatalogClient:
         fetcher: FetcherInterface | None = None,
         allow_loopback_http: bool = False,
     ) -> None:
+        if Updater is None:
+            raise CatalogError(
+                "python-tuf is required for the TUF catalog refresh path"
+            )
         if not bootstrap_root:
             raise CatalogError("trusted bootstrap root bytes are required")
         _validate_base_url(metadata_base_url, allow_loopback_http=allow_loopback_http)

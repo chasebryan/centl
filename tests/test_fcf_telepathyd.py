@@ -185,6 +185,10 @@ class PolicyTests(unittest.TestCase):
             GatewayConfig(live_root=Path("relative/current"))
         with self.assertRaises(ValueError):
             GatewayConfig(live_root_uid=-1)
+        with self.assertRaises(ValueError):
+            GatewayConfig(max_bytes_per_second=-1)
+        with self.assertRaises(ValueError):
+            GatewayConfig(max_bytes_per_second=1024 * 1024 * 1024 + 1)
 
 
 class GatewayTests(unittest.TestCase):

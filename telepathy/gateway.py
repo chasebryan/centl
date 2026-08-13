@@ -6,6 +6,7 @@ import ipaddress
 from pathlib import Path
 import re
 import threading
+import time
 from typing import ClassVar
 
 from .live_root import LiveRoot, LiveRootError
@@ -57,6 +58,7 @@ class GatewayConfig:
     live_root: Path = Path("/srv/fcf-caravan-live/current")
     live_root_uid: int | None = 0
     max_workers: int = 32
+    max_bytes_per_second: int = 0
 
     def __post_init__(self) -> None:
         _require_loopback_literal(self.listen_host, field="listen_host")
@@ -67,6 +69,8 @@ class GatewayConfig:
             raise ValueError("live_root_uid must be a non-negative uid")
         if not 1 <= self.max_workers <= 256:
             raise ValueError("max_workers must be between 1 and 256")
+        if not 0 <= self.max_bytes_per_second <= 1024 * 1024 * 1024:
+            raise ValueError("max_bytes_per_second must be between 0 and 1 GiB/s")
 
 
 class _TelepathyHTTPServer(ThreadingHTTPServer):
@@ -124,6 +128,7 @@ class TelepathyGateway:
 
     def _handler_type(self) -> type[BaseHTTPRequestHandler]:
         policy = self.policy
+        max_bytes_per_second = self.config.max_bytes_per_second
         live_root = LiveRoot(
             self.config.live_root,
             required_uid=self.config.live_root_uid,
@@ -247,12 +252,20 @@ class TelepathyGateway:
                         return
                     handle.seek(start)
                     remaining = length
+                    sent = 0
+                    started = time.monotonic()
                     while remaining > 0:
                         chunk = handle.read(min(64 * 1024, remaining))
                         if not chunk:
                             break
                         self.wfile.write(chunk)
+                        sent += len(chunk)
                         remaining -= len(chunk)
+                        if max_bytes_per_second:
+                            target_elapsed = sent / max_bytes_per_second
+                            elapsed = time.monotonic() - started
+                            if target_elapsed > elapsed:
+                                time.sleep(target_elapsed - elapsed)
                 except (BrokenPipeError, ConnectionResetError):
                     return
                 finally:
