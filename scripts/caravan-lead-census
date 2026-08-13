@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+
+SCHEMA = "fcf-caravan-lead-census-v1"
+MAX_STATUS_BYTES = 64 * 1024
+
+
+def fail(message: str) -> "NoReturn":
+    print(f"caravan-lead-census: {message}", file=sys.stderr)
+    raise SystemExit(2)
+
+
+def parser() -> argparse.ArgumentParser:
+    value = argparse.ArgumentParser(
+        prog="caravan-lead-census",
+        description="Probe the public FCF lead origin and emit aggregate camel status",
+    )
+    value.add_argument("--origin-file", type=Path, required=True)
+    value.add_argument("--output", type=Path, required=True)
+    value.add_argument("--socks", default="127.0.0.1:9050")
+    value.add_argument("--timeout", type=int, default=45)
+    return value
+
+
+def read_origin(path: Path) -> str:
+    if path.is_symlink() or not path.is_file():
+        fail("origin file is missing or unsafe")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        fail(f"origin file is invalid: {exc}")
+    if not isinstance(data, dict) or set(data) != {"schema", "origin"}:
+        fail("origin file fields do not match the lead-origin schema")
+    if data["schema"] != "fcf-caravan-lead-origin-v1":
+        fail("unsupported lead-origin schema")
+    origin = data["origin"]
+    if (
+        not isinstance(origin, str)
+        or len(origin) != 62
+        or not origin.endswith(".onion")
+        or any(ch not in "abcdefghijklmnopqrstuvwxyz234567." for ch in origin)
+        or origin.count(".") != 1
+    ):
+        fail("origin is not a Tor v3 onion hostname")
+    return origin
+
+
+def probe(origin: str, socks: str, timeout: int) -> bool:
+    if ":" not in socks or any(ch.isspace() for ch in socks):
+        fail("SOCKS endpoint must be HOST:PORT")
+    try:
+        host, port = socks.rsplit(":", 1)
+        if not host or not 1 <= int(port) <= 65535:
+            raise ValueError
+    except ValueError:
+        fail("SOCKS endpoint must be HOST:PORT")
+    if not 1 <= timeout <= 300:
+        fail("timeout must be between 1 and 300 seconds")
+    command = [
+        "curl",
+        "--fail",
+        "--silent",
+        "--show-error",
+        "--proxy",
+        "",
+        "--proto",
+        "=http",
+        "--socks5-hostname",
+        f"{host}:{port}",
+        "--connect-timeout",
+        str(min(timeout, 20)),
+        "--max-time",
+        str(timeout),
+        "--max-filesize",
+        str(MAX_STATUS_BYTES),
+        "--output",
+        "-",
+        f"http://{origin}/status.json",
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=timeout + 5,
+        )
+        document = json.loads(result.stdout.decode("utf-8"))
+    except (OSError, subprocess.SubprocessError, UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    if not isinstance(document, dict):
+        return False
+    return (
+        document.get("schema") == "fcf-caravan-public-origin-status-v2"
+        and document.get("mode") == "fcf-owned-public-origin"
+        and document.get("uploads") is False
+        and document.get("proxying") is False
+        and document.get("arbitrary_paths") is False
+    )
+
+
+def write_document(path: Path, *, active: bool) -> None:
+    if path.is_symlink():
+        fail("output path must not be a symlink")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    document = {
+        "schema": SCHEMA,
+        "status": "live",
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "active_camels": 1 if active else 0,
+        "hungry_camels": 0,
+
+        "lost_camels": 0 if active else 1,
+        "active_window_seconds": 900,
+        "lost_after_seconds": 900,
+        "individual_nodes_public": False,
+        "ip_addresses_public": False,
+        "lead_origin_monitored": True,
+        "probe": "healthy" if active else "unreachable",
+    }
+    temporary = path.parent / f".{path.name}.new-{os.getpid()}"
+    if temporary.exists() or temporary.is_symlink():
+        fail("temporary output path already exists")
+    try:
+        temporary.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        temporary.chmod(0o644)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def main() -> int:
+    args = parser().parse_args()
+    origin = read_origin(args.origin_file)
+    write_document(args.output, active=probe(origin, args.socks, args.timeout))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

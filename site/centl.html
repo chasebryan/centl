@@ -1,74 +1,26 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="CENTL project information from the Free Computation Foundation.">
-  <title>CENTL — Free Computation Foundation</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="shell">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="CENTL project information from the Free Computation Foundation."><title>CENTL — Free Computation Foundation</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="shell">
 <header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>CENTL</h1><p>Exact-first mathematics, physics, and scientific computation.</p></div></header>
-<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">The Bazaar</a></li><li><a href="docs.html">Documentation</a></li></ul><h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">Source</a></li><li><a href="https://github.com/chasebryan/centl/releases/latest">Releases</a></li><li><a href="https://github.com/sponsors/chasebryan">Sponsor</a></li></ul></nav>
+<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">Mirrors / pub</a></li><li><a href="docs.html">Documentation</a></li></ul><h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">Source</a></li><li><a href="https://github.com/chasebryan/centl/releases/latest">Releases</a></li></ul></nav>
 <main>
-<h2>Overview</h2>
-<p>CENTL is an exact-first scientific computation system built around one refusal: it does not manufacture mathematical certainty. Exact values remain exact when the admitted mathematics permits it, approximations carry explicit evidence, unsupported work remains visible, and semantic tooling cannot overrule mathematical evidence.</p>
-<p><strong>Every unqualified printed digit must be justified.</strong></p>
-<p><strong>CENTL v0.14.0 is an Oasis release.</strong> Oasis is a repeatable quality declaration attached to an exact release identity. It is earned only after the source, tests, verification, security posture, packaging, documentation, and published bytes satisfy the release gate. Stable product authority lives on the <code>oasis</code> branch.</p>
-
-<h2>Systems</h2>
-<table class="status">
-<tr><th>Surface</th><th>Use</th></tr>
-<tr><td><code>centl</code></td><td>Exact calculator, numerical language, verification engine, JSON, and MCP interfaces.</td></tr>
-<tr><td><code>centl-sci</code></td><td>Local scientific interpreter with evidence-backed natural-language mathematics and physics.</td></tr>
-<tr><td><code>centl-physics</code></td><td>Exact-first typed physics operations, units, vectors, mechanics, and diagnostics.</td></tr>
-<tr><td>CENTL-MIRAGE</td><td>Local self-development architecture for specification ingestion, capability analysis, staged candidates, and evidence planning.</td></tr>
-<tr><td>CENTL CARAVAN</td><td>Content-addressed authenticated preservation and availability architecture. v0.14.0 includes the bounded Phase 1 local laboratory.</td></tr>
-</table>
-<p>The standard v0.14.0 native archive installs <code>centl</code>, <code>centl-sci</code>, and <code>centl-physics</code>. Source-tree MIRAGE and CARAVAN work does not silently expand the supported installed product.</p>
-
-<h2>Install</h2>
-<pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+<h2>Overview</h2><p>CENTL is an exact-first mathematics and physics system built to avoid manufacturing numerical certainty. Exact values remain exact when the admitted mathematics permits it, requested approximations carry justified bounds, and unsupported work remains visible.</p>
+<p><strong>CENTL v0.14.0 is currently an Oasis candidate.</strong> Oasis is a repeatable release declaration, not a codename: a release earns it only after the repository has been reconciled, organized, hardened, validated, and established as a cohesive stable baseline. See the <a href="https://github.com/chasebryan/centl/blob/main/docs/OASIS.md">Oasis release standard</a>.</p>
+<h2>Systems</h2><table class="status"><tr><th>Surface</th><th>Use</th></tr><tr><td><code>centl</code></td><td>Exact calculator, numerical language, verification, JSON, and MCP interfaces.</td></tr><tr><td><code>centl-sci</code></td><td>Answer-first local scientific interpreter and user-owned extension workflows.</td></tr><tr><td><code>centl-physics</code></td><td>Exact-first typed physics operations and services.</td></tr><tr><td>CENTL-MIRAGE</td><td>Local specification ingestion, capability analysis, staged candidate materialization, and evidence planning.</td></tr><tr><td>CENTL CARAVAN</td><td>Content-addressed authenticated preservation and availability; v0.14.0 includes the bounded Phase 1 local laboratory.</td></tr></table>
+<h2>Install</h2><pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
 sh install
-centl-sci</code></pre>
-<p>GNU/Linux x86_64 is the active stable release boundary. See the <a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">installation guide</a> for the full release and offline-recovery contract.</p>
-
-<h2>Numerical contract</h2>
-<ul>
-<li>Integers, fractions, and decimal literals are exact values.</li>
-<li>Exact results remain exact for as long as the admitted mathematics permits.</li>
-<li>Approximations return justified enclosures rather than unqualified floating-point guesses.</li>
-<li>Dimension errors and unsupported work fail explicitly.</li>
-<li>Generated, external, or semantic-model output cannot override mathematical evidence or promote its own assurance.</li>
-<li>Every unqualified printed digit must be justified.</li>
-</ul>
-
-<h2>CENTL-SCi and MIRAGE</h2>
-<p>CENTL-SCi v0.0.2-Caramels provides the current answer-first scientific interaction layer. It uses deterministic interpretation where possible and may use a local semantic model to interpret intent, but the model is not mathematical authority. Model-produced semantics must cross CENTL's typed and deterministic boundaries before a result can inherit mathematical meaning.</p>
-<p>MIRAGE extends the same trust discipline into self-development. User specifications are preserved as attributable input, candidate work is staged, evidence obligations are explicit, and generated material cannot grant itself verified-core authority.</p>
-
-<h2>CARAVAN</h2>
-<p>CARAVAN separates availability from authority. A carrier may preserve and supply approved bytes, but authenticated FCF metadata defines which exact content identity CENTL trusts.</p>
-<blockquote><p><strong>A carrier may provide bytes, but a carrier may never define which bytes are trusted.</strong></p></blockquote>
-<p><strong>Participating in CARAVAN is itself a way to support CENTL.</strong> As public enrollment opens through qualified rollout channels, volunteers can contribute bounded storage, bandwidth, and availability rather than source code or money. Ordinary carrier participation is designed to remain rootless, resource-capped, voluntary, and reversible.</p>
-<p>Public volunteer network enrollment remains gated today. Existing join tooling can prepare and validate carriers without silently activating public service. Later main-line enrollment and public-origin work does not automatically become part of the v0.14.0 Oasis promise.</p>
-
-<h2>Branches</h2>
-<ul>
-<li><code>oasis</code> is the authoritative stable-product branch.</li>
-<li><code>mirage</code> is the development and research laboratory.</li>
-<li><code>main</code> is the complete developer/research distribution and integration view.</li>
-</ul>
-
-<h2>Support and contribute</h2>
-<p>Code, testing, mathematical review, documentation, preservation, infrastructure, reproducible bug reports, and CARAVAN participation all count as meaningful project support. Financial sponsorship is also available through GitHub Sponsors.</p>
-<p>See <a href="https://github.com/chasebryan/centl/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> for the current contribution model.</p>
-
-<h2>License</h2>
-<p>FCF-owned CENTL software is licensed under <code>Apache-2.0</code>. Project documentation is <code>CC-BY-4.0</code> where identified; official names and branding remain separately governed so unofficial forks cannot imply FCF endorsement. See <a href="https://github.com/chasebryan/centl/blob/main/LICENSING.md">LICENSING.md</a>.</p>
-</main></div>
-<footer>Free Computation Foundation · CENTL · Free for science.</footer>
+centl-sci</code></pre><p>GNU/Linux is the supported reference platform and sole active release target. See the <a href="https://github.com/chasebryan/centl/blob/main/docs/INSTALL.md">installation guide</a> for offline archives and the release contract.</p>
+<h2>Numerical contract</h2><ul><li>Integers, fractions, and decimal literals are exact values.</li><li>Exact results remain exact for as long as supported mathematics permits.</li><li>Approximations return justified enclosures rather than unqualified floating-point guesses.</li><li>Dimension errors and unsupported work fail explicitly.</li><li>Generated, external, or semantic-model output is untrusted and cannot override mathematical evidence or promote its own assurance.</li><li>Every unqualified printed digit must be justified.</li></ul>
+<h2>CENTL-SCi and MIRAGE</h2><p>CENTL-SCi uses conservative deterministic interpretation first. A separately configured local semantic model can assist with language interpretation, but the model is not the mathematical authority. MIRAGE extends that principle into local self-development: source intent, staged material, evidence, and admission remain explicit and reversible rather than granting a model source-code authority.</p>
+<h2>CARAVAN</h2><p>CARAVAN separates availability from authority. Carriers may preserve and supply bytes, but authenticated metadata defines which bytes CENTL trusts. The v0.14.0 boundary is a local laboratory; arbitrary public volunteer enrollment remains a later rollout gate.</p>
+<h2>CARAVAN lead monitor</h2>
+<div class="caravan-census" data-caravan-census>
+  <div class="camel-count"><span>Active Camels 🐪</span><strong data-census-active>—</strong></div>
+  <div class="camel-count"><span>Hungry Camels 🐪</span><strong data-census-hungry>—</strong></div>
+  <div class="camel-count"><span>Lost Camels 🐪</span><strong data-census-lost>—</strong></div>
+  <p class="census-status" data-census-status>Checking the latest lead-origin probe…</p>
 </div>
-</body>
-</html>
+<p class="small">This aggregate monitor reports the FCF X200 lead origin. It publishes no node roster, hardware details, or IP addresses. Supporter-camel census enrollment will use the same aggregate surface when its authenticated coordinator is enabled.</p>
+<h2>License</h2><p>FCF-owned CENTL software is licensed under <code>Apache-2.0</code>. Project documentation is <code>CC-BY-4.0</code>; official names and branding remain separately protected so unofficial forks cannot imply FCF endorsement. See <a href="https://github.com/chasebryan/centl/blob/main/LICENSING.md">LICENSING.md</a>.</p>
+</main></div><footer>Free Computation Foundation · CENTL · Free for science.</footer></div><script src="caravan-census.js" defer></script>
+</body></html>

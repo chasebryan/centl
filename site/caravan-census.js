@@ -5,12 +5,14 @@
   if (!root) return;
 
   const active = root.querySelector("[data-census-active]");
+  const hungry = root.querySelector("[data-census-hungry]");
   const lost = root.querySelector("[data-census-lost]");
   const status = root.querySelector("[data-census-status]");
-  const endpoint = "/pub/centl/caravan/census-v1.json";
+  const endpoint = "/pub/centl/caravan/lead-census-v1.json";
 
   const setUnavailable = (message) => {
     active.textContent = "—";
+    hungry.textContent = "—";
     lost.textContent = "—";
     status.textContent = message;
   };
@@ -18,13 +20,17 @@
   const render = (data) => {
     if (
       !data ||
-      data.schema !== "fcf-caravan-census-v1" ||
+      data.schema !== "fcf-caravan-lead-census-v1" ||
       data.status !== "live" ||
       !Number.isSafeInteger(data.active_camels) ||
       data.active_camels < 0 ||
+      !Number.isSafeInteger(data.hungry_camels) ||
+      data.hungry_camels < 0 ||
       !Number.isSafeInteger(data.lost_camels) ||
       data.lost_camels < 0 ||
-      typeof data.generated_at !== "string"
+      typeof data.generated_at !== "string" ||
+      !Number.isSafeInteger(data.active_window_seconds) ||
+      data.active_window_seconds <= 0
     ) {
       setUnavailable("Census not live yet");
       return;
@@ -36,9 +42,19 @@
       return;
     }
 
+    const age = Date.now() - generated.getTime();
+    if (age > data.active_window_seconds * 1000) {
+      active.textContent = "0";
+      hungry.textContent = "1";
+      lost.textContent = "0";
+      status.textContent = "The lead-census data is stale; the camel is treated as hungry until a fresh probe arrives.";
+      return;
+    }
+
     active.textContent = String(data.active_camels);
+    hungry.textContent = String(data.hungry_camels);
     lost.textContent = String(data.lost_camels);
-    status.textContent = `Updated ${generated.toLocaleString()}. Active means a valid heartbeat within the published active window; Lost means beyond the loss threshold without withdrawal.`;
+    status.textContent = `Updated ${generated.toLocaleString()}. Active means the X200 lead origin passed the latest Tor probe; Lost means the latest probe could not reach it.`;
   };
 
   const refresh = async () => {
