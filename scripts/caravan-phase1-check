@@ -55,6 +55,8 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_census.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
+  tests/test_caravan_enrollment_protocol.py \
+  tests/test_caravan_resource_policy.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
   tests/test_caravan_retrieval.py \
