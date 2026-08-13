@@ -14,7 +14,7 @@ The intended role is:
 - outbound-only;
 - resource-bounded;
 - content-addressed;
-- limited to authenticated FCF \x60public-approved\x60 cargo;
+- limited to authenticated FCF `public-approved` cargo;
 - aggregate-only for the public census;
 - never a public web server or general-purpose storage service.
 
@@ -31,7 +31,7 @@ The X200 must never become:
 
 From the repository root, read:
 
-\x60\x60\x60text
+```text
 docs/CARAVAN-X200-CODEX-HANDOFF.md
 docs/CARAVAN-JOIN-MANUAL.md
 docs/CARAVAN-CENSUS.md
@@ -39,16 +39,16 @@ docs/CARAVAN-JOIN-RELEASE.md
 docs/CARAVAN-PHASE1.md
 scripts/caravan-join-verify
 scripts/caravan-join-template
-\x60\x60\x60
+```
 
 Also inspect the current production-enrollment gate:
 
-\x60\x60\x60text
+```text
 GitHub issue #167:
 https://github.com/chasebryan/centl/issues/167
-\x60\x60\x60
+```
 
-The mutable file \x60scripts/caravan-join-template\x60 is development source only. It is not an installer and must not be executed as the enrollment mechanism.
+The mutable file `scripts/caravan-join-template` is development source only. It is not an installer and must not be executed as the enrollment mechanism.
 
 ## 3. Current state and stop condition
 
@@ -56,9 +56,9 @@ The current repository design intentionally keeps public enrollment disabled unt
 
 The current expected network mode is:
 
-\x60\x60\x60text
+```text
 disabled-until-authenticated-enrollment
-\x60\x60\x60
+```
 
 Therefore, the normal action on the X200 today is preparation and audit only:
 
@@ -66,25 +66,25 @@ Therefore, the normal action on the X200 today is preparation and audit only:
 - do not start a CARAVAN background service;
 - do not send a heartbeat;
 - do not publish an enrollment token;
-- do not add the X200 to the website by editing \x60site/pub/centl/caravan/census-v1.json\x60;
-- do not write \x60active_camels: 1\x60 or any other guessed count;
+- do not add the X200 to the website by editing `site/pub/centl/caravan/census-v1.json`;
+- do not write `active_camels: 1` or any other guessed count;
 - do not create a new Cloudflare Worker, endpoint, schema, or authentication flow;
 - do not claim that the X200 is Active until the coordinator has accepted a real authenticated heartbeat.
 
 If no immutable FCF-signed join release and separately trusted FCF join public key are available, stop after the preflight audit and report:
 
-\x60\x60\x60text
+```text
 BLOCKED: no independently verifiable FCF CARAVAN join release is available.
 The X200 remains prepared-only; no public enrollment or census heartbeat was attempted.
-\x60\x60\x60
+```
 
 Do not manufacture a release key, replace a missing digest, or turn the mutable repository template into an official release.
 
 ## 4. Safe preflight audit
 
-Run the following as the ordinary X200 user. Do not use \x60sudo\x60 for the normal carrier path.
+Run the following as the ordinary X200 user. Do not use `sudo` for the normal carrier path.
 
-\x60\x60\x60sh
+```sh
 set -eu
 
 printf 'kernel='
@@ -105,18 +105,18 @@ done
 printf '\n'
 
 id -u
-\x60\x60\x60
+```
 
-The final \x60id -u\x60 must be non-zero. If it is zero, stop and do not run the carrier installer.
+The final `id -u` must be non-zero. If it is zero, stop and do not run the carrier installer.
 
 Check capabilities and local capacity without printing sensitive machine identity:
 
-\x60\x60\x60sh
+```sh
 command -v python3
 command -v sha256sum
 command -v signify || true
 df -h "$HOME"
-\x60\x60\x60
+```
 
 Do not include these values in a public report:
 
@@ -135,23 +135,23 @@ A private handoff report may state the Linux family, architecture, available sto
 
 Only use an official versioned release directory supplied through an FCF-controlled channel. It must have the form:
 
-\x60\x60\x60text
+```text
 fcf-caravan-join-X.Y.Z/
   fcf-caravan-join-X.Y.Z.tar.gz
   FCF-CARAVAN-JOIN.pub
   SHA256SUMS
   SHA256SUMS.sig
-\x60\x60\x60
+```
 
 The trusted FCF CARAVAN join public key must have been obtained independently of the release directory. Keep it outside the release directory.
 
 From a trusted checkout of this repository, verify the release:
 
-\x60\x60\x60sh
+```sh
 scripts/caravan-join-verify \
   /path/to/fcf-caravan-join-X.Y.Z \
   /path/to/separately-trusted/FCF-CARAVAN-JOIN.pub
-\x60\x60\x60
+```
 
 The verifier must pass all outer signature, exact-membership, extraction, and inner-manifest checks.
 
@@ -160,7 +160,7 @@ If verification fails, stop. Do not:
 - run the archive anyway;
 - re-download from an untrusted alternate location;
 - replace the expected public key;
-- edit \x60SHA256SUMS\x60;
+- edit `SHA256SUMS`;
 - replace a digest;
 - repair the release manually.
 
@@ -168,7 +168,7 @@ If verification fails, stop. Do not:
 
 After verification succeeds, extract it into a temporary directory and inspect its metadata:
 
-\x60\x60\x60sh
+```sh
 temporary_root="$(mktemp -d)"
 trap 'rm -rf -- "$temporary_root"' EXIT
 
@@ -178,7 +178,7 @@ tar -xzf /path/to/fcf-caravan-join-X.Y.Z/fcf-caravan-join-X.Y.Z.tar.gz \
 release_root="$temporary_root/fcf-caravan-join-X.Y.Z"
 cat "$release_root/RELEASE.json"
 "$release_root/join-caravan" --help
-\x60\x60\x60
+```
 
 Confirm that:
 
@@ -197,29 +197,29 @@ Use the verified release's own installer. Do not execute a copy from the mutable
 
 For an interactive preparation:
 
-\x60\x60\x60sh
+```sh
 "$release_root/join-caravan"
-\x60\x60\x60
+```
 
 For a reproducible preparation, choose missions with the X200 owner first. The documented mission vocabulary is:
 
-\x60\x60\x60text
+```text
 source
 releases
 semantic
 recovery
 all
-\x60\x60\x60
+```
 
 A conservative source/release preparation example is:
 
-\x60\x60\x60sh
+```sh
 "$release_root/join-caravan" \
   --missions source,releases \
   --storage-gib 25 \
   --upload-mibps 4 \
   --yes
-\x60\x60\x60
+```
 
 Use a different storage or bandwidth limit only when the X200 owner has chosen it. Mission selection is an eligibility filter; it does not authorize local files or arbitrary digests.
 
@@ -234,29 +234,29 @@ The installer must:
 - avoid starting public network service while enrollment is disabled;
 - record the disabled network mode explicitly.
 
-If the installer asks to use \x60sudo\x60, open an inbound port, expose a directory, enable a proxy/tunnel, or accept arbitrary files, stop.
+If the installer asks to use `sudo`, open an inbound port, expose a directory, enable a proxy/tunnel, or accept arbitrary files, stop.
 
 ## 8. Audit the prepared configuration
 
 The expected local paths are:
 
-\x60\x60\x60text
+```text
 ~/.config/fcf-caravan/config.json
 ~/.local/share/fcf-caravan/store/
 ~/.local/state/fcf-caravan/identity/
 ~/.local/state/fcf-caravan/census/
 ~/.local/lib/fcf-caravan/releases/
-\x60\x60\x60
+```
 
 Inspect the configuration:
 
-\x60\x60\x60sh
+```sh
 python3 -m json.tool "$HOME/.config/fcf-caravan/config.json"
-\x60\x60\x60
+```
 
 The configuration must show the existing contract values:
 
-\x60\x60\x60text
+```text
 network_mode = disabled-until-authenticated-enrollment
 inbound_listen = false
 arbitrary_content = false
@@ -266,13 +266,13 @@ public node listing = false
 public IP addresses = false
 public hostnames = false
 systemd required = false
-\x60\x60\x60
+```
 
 Check that the release directory is not writable by the carrier process:
 
-\x60\x60\x60sh
+```sh
 find "$HOME/.local/lib/fcf-caravan/releases" -maxdepth 3 -type f -print
-\x60\x60\x60
+```
 
 Do not alter release files in place. A changed release requires a new authenticated version.
 
@@ -290,14 +290,14 @@ When those conditions eventually hold, follow the later signed release and its d
 
 A production heartbeat must use the existing contract vocabulary:
 
-\x60\x60\x60json
+```json
 {
   "schema": "fcf-caravan-heartbeat-v1",
   "release_version": "X.Y.Z",
   "missions": ["source", "releases"],
   "protocol_version": 1
 }
-\x60\x60\x60
+```
 
 Authentication is separate from that payload. Never put the enrollment token, hostname, username, IP address, or location into the public heartbeat payload.
 
@@ -305,20 +305,20 @@ Authentication is separate from that payload. Never put the enrollment token, ho
 
 The website's public document is aggregate-only and must match:
 
-\x60\x60\x60text
+```text
 schema: fcf-caravan-census-v1
 Active: recent authenticated heartbeat within 1800 seconds
 Lost: enrolled carrier beyond 259200 seconds without withdrawal/revocation
 individual_nodes_public: false
 ip_addresses_public: false
-\x60\x60\x60
+```
 
 The public site may display:
 
-\x60\x60\x60text
+```text
 Active Camels 🐪
 Lost Camels 🐪
-\x60\x60\x60
+```
 
 It must not display:
 
@@ -338,7 +338,7 @@ A prepared X200 is not an Active Camel. A machine becomes Active only after the 
 
 At the end of this run, report to the X200 owner privately:
 
-\x60\x60\x60text
+```text
 X200 CARAVAN preparation
 ------------------------
 Linux family/architecture: <non-identifying value>
@@ -352,9 +352,9 @@ Public enrollment attempted: NO
 Public census heartbeat sent: NO
 Public node identity published: NO
 Blocking item: <exact reason, if any>
-\x60\x60\x60
+```
 
-Do not attach \x60config.json\x60, enrollment tokens, private identity files, logs containing source addresses, or machine-identifying data to a public issue, website, or chat.
+Do not attach `config.json`, enrollment tokens, private identity files, logs containing source addresses, or machine-identifying data to a public issue, website, or chat.
 
 ## 12. Completion definition
 
