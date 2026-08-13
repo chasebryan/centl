@@ -28,6 +28,7 @@ PY
   caravan/enrollment.py \
   caravan/enrollment_protocol.py \
   caravan/resource_policy.py \
+  caravan/rotation.py \
   caravan/catalog.py \
   caravan/tuf_lab.py \
   caravan/session.py \
@@ -42,6 +43,7 @@ PY
   tests/test_caravan_enrollment.py \
   tests/test_caravan_enrollment_protocol.py \
   tests/test_caravan_resource_policy.py \
+  tests/test_caravan_rotation.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
   tests/test_caravan_retrieval.py \
@@ -57,6 +59,7 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_enrollment.py \
   tests/test_caravan_enrollment_protocol.py \
   tests/test_caravan_resource_policy.py \
+  tests/test_caravan_rotation.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
   tests/test_caravan_retrieval.py \
