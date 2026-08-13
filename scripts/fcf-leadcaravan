@@ -1,0 +1,427 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+umask 077
+
+LIVE_ROOT=/srv/fcf-caravan-live/current
+STATE_DIR=/var/lib/fcf-telepathyd
+SOCKS=127.0.0.1:9050
+NO_UPDATE=0
+
+fail() {
+  printf '\nX200 CARAVAN: %s\n' "$*" >&2
+  exit 1
+}
+
+say() { printf '%s\n' "$*"; }
+need() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
+
+usage() {
+  cat <<'TXT'
+Usage:
+  scripts/fcf-leadcaravan online [--no-update] [--caravan-live-root PATH]
+  scripts/fcf-leadcaravan status
+  scripts/fcf-leadcaravan verify ONION [--socks HOST:PORT]
+  scripts/fcf-leadcaravan offline
+  scripts/fcf-leadcaravan invite [--origin ONION]
+
+Complete the first physical X200 CARAVAN Telepathy bring-up.
+
+Commands:
+  online    update Mirage, verify the activated CARAVAN generation, run the
+            fcf-telepathyd gates, install the hardened service, explicitly
+            activate the Tor v3 onion carrier, and print the onion hostname.
+
+  status    show the local fcf-telepathyd service, loopback gateway, and onion
+            carrier state without changing anything.
+
+  verify    from a SECOND Tor client/network context, prove the X200 onion can
+            serve status/source data, byte ranges, and still reject mutation
+            and forbidden paths. This is the final real-host qualification.
+
+  offline   stop and disable fcf-telepathyd without deleting CARAVAN cargo or
+            the onion-service identity keys.
+
+  invite    print a private-pilot invite for lesser supporter camels. The invite
+            pins the X200 onion origin and the exact approved catalog/policy
+            digests; it contains no private carrier key or local path.
+
+Options:
+  --no-update               do not fast-forward the checkout to origin/mirage
+  --caravan-live-root PATH  activated CARAVAN selector
+                            (default: /srv/fcf-caravan-live/current)
+  --socks HOST:PORT         Tor SOCKS endpoint for verify
+                            (default: 127.0.0.1:9050)
+
+The Tor path does not require public TCP 80/443, router port forwarding,
+Cloudflare DNS, or a public TLS certificate. Those remain separate direct-origin
+concerns. fcf-telepathyd publishes only the already-activated, root-owned,
+read-only CARAVAN live generation.
+TXT
+}
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+valid_onion() {
+  printf '%s\n' "$1" | grep -Eq '^[a-z2-7]{56}\.onion$'
+}
+
+valid_socks() {
+  value=$1
+  host=${value%:*}
+  port=${value##*:}
+  [ -n "$host" ] && [ "$host" != "$value" ] || return 1
+  case "$port" in ''|*[!0-9]*) return 1 ;; esac
+  [ "$port" -ge 1 ] && [ "$port" -le 65535 ]
+}
+
+require_clean_tracked_tree() {
+  git -C "$repo_root" diff --quiet -- || fail "tracked worktree has unstaged changes"
+  git -C "$repo_root" diff --cached --quiet -- || fail "tracked worktree has staged changes"
+}
+
+update_mirage() {
+  [ "$NO_UPDATE" -eq 0 ] || return 0
+  need git
+  require_clean_tracked_tree
+  git -C "$repo_root" switch mirage
+  git -C "$repo_root" fetch origin mirage
+  git -C "$repo_root" merge --ff-only origin/mirage
+
+  if [ "${FCF_X200_CAMEL_REEXECED:-0}" != 1 ]; then
+    export FCF_X200_CAMEL_REEXECED=1
+    exec "$repo_root/scripts/fcf-leadcaravan" online --no-update --caravan-live-root "$LIVE_ROOT"
+  fi
+}
+
+require_live_generation() {
+  [ -e "$LIVE_ROOT" ] || fail "CARAVAN live selector is missing: $LIVE_ROOT"
+  [ -r "$LIVE_ROOT/status.json" ] || fail "CARAVAN status.json is not readable"
+  [ -r "$LIVE_ROOT/source/INDEX.json" ] || fail "CARAVAN source index is not readable"
+
+  target=$(readlink -f -- "$LIVE_ROOT") || fail "CARAVAN live selector cannot be resolved"
+  [ -d "$target" ] || fail "CARAVAN live selector does not resolve to a directory"
+  owner=$(stat -Lc '%u' -- "$target")
+  [ "$owner" = 0 ] || fail "activated CARAVAN generation must be root-owned (uid=$owner)"
+
+  python3 - "$target" <<'PY'
+import os
+import sys
+
+path = sys.argv[1]
+st = os.stat(path)
+if st.st_mode & 0o222:
+    raise SystemExit(f"activated CARAVAN generation is writable: {oct(st.st_mode & 0o7777)}")
+PY
+}
+
+local_gateway_check() {
+  need curl
+  need mktemp
+  headers=$(mktemp)
+  code=$(curl -fsS -o /dev/null -D "$headers" -w '%{http_code}' -I \
+    --connect-timeout 3 --max-time 10 \
+    http://127.0.0.1:8790/status.json) || {
+      rm -f "$headers"
+      fail "local fcf-telepathyd gateway did not answer"
+    }
+  [ "$code" = 200 ] || {
+    rm -f "$headers"
+    fail "local status endpoint returned HTTP $code"
+  }
+  grep -qi '^Server: fcf-telepathyd/' "$headers" || {
+    rm -f "$headers"
+    fail "loopback port 8790 is not identifying itself as fcf-telepathyd"
+  }
+  curl -fsS -o /dev/null -I --connect-timeout 3 --max-time 10 \
+    http://127.0.0.1:8790/source/INDEX.json || {
+      rm -f "$headers"
+      fail "local source index is not readable through fcf-telepathyd"
+    }
+  rm -f "$headers"
+}
+
+read_onion() {
+  sudo test -r "$STATE_DIR/tor/hidden-service/hostname" || return 1
+  onion=$(sudo cat "$STATE_DIR/tor/hidden-service/hostname" 2>/dev/null | tr -d '\r\n') || return 1
+  valid_onion "$onion" || return 1
+  printf '%s\n' "$onion"
+}
+
+online() {
+  for command in curl git grep mktemp python3 readlink stat sudo systemctl tr; do need "$command"; done
+
+  say ""
+  say "╭────────────────────────────────────────────────────────────╮"
+  say "│            FCF CARAVAN · X200 TELEPATHY                  │"
+  say "╰────────────────────────────────────────────────────────────╯"
+  say ""
+  say "This resumes the X200 from the already-activated CARAVAN publication state."
+  say "No router port forwarding or public DNS is used by this path."
+  say ""
+
+  say "[1/6] Fast-forwarding the X200 to the current Mirage Telepathy implementation..."
+  update_mirage
+  require_clean_tracked_tree
+
+  for required in \
+    scripts/fcf-telepathyd \
+    scripts/fcf-telepathyd-install \
+    tests/test_fcf_telepathyd.py \
+    tests/test_fcf_telepathyd_install.py \
+    docs/FCF-TELEPATHY.md \
+    docs/FCF-TELEPATHYD-DEPLOY.md; do
+    [ -f "$repo_root/$required" ] || fail "Mirage Telepathy file is missing: $required"
+  done
+
+  say "[2/6] Verifying the activated CARAVAN live generation..."
+  require_live_generation
+  say "CARAVAN live generation: PASS"
+
+  say "[3/6] Running the Telepathy adversarial/deployment gates..."
+  python3 "$repo_root/tests/test_fcf_telepathyd.py"
+  python3 "$repo_root/tests/test_fcf_telepathyd_install.py"
+  say "Telepathy gates: PASS"
+
+  say "[4/6] Installing and explicitly activating the hardened fcf-telepathyd service..."
+  sudo bash "$repo_root/scripts/fcf-telepathyd-install" \
+    --caravan-live-root "$LIVE_ROOT" \
+    --enable-now
+
+  say "[5/6] Re-verifying the live local publication boundary..."
+  sudo systemctl is-active --quiet fcf-telepathyd.service ||
+    fail "fcf-telepathyd.service is not active"
+  sudo systemctl is-enabled --quiet fcf-telepathyd.service ||
+    fail "fcf-telepathyd.service is not enabled"
+  local_gateway_check
+  say "local gateway: PASS"
+
+  say "[6/6] Reading the Tor v3 carrier identity..."
+  onion=$(read_onion) || fail "a valid Tor v3 onion hostname was not created"
+
+  cat <<EOF
+
+╭────────────────────────────────────────────────────────────╮
+│            X200 TELEPATHY IS LOCALLY ACTIVE               │
+╰────────────────────────────────────────────────────────────╯
+
+service: fcf-telepathyd.service
+local:   http://127.0.0.1:8790
+onion:   http://$onion/
+
+The X200 has passed local publication and Tor onion bootstrap.
+
+ONE FINAL QUALIFICATION REMAINS:
+Run this repository script from a second machine / Tor client context:
+
+  scripts/fcf-leadcaravan verify $onion
+
+That remote Tor read is what turns "locally active" into a demonstrated
+end-to-end CARAVAN carrier. Do not use a public onion web gateway for that test.
+EOF
+}
+
+status_cmd() {
+  need curl
+  need sudo
+  need systemctl
+  need tr
+  printf 'service: '
+  if sudo systemctl is-active --quiet fcf-telepathyd.service; then
+    printf 'active\n'
+  else
+    printf 'inactive\n'
+  fi
+
+  printf 'gateway: '
+  if curl -fsS -o /dev/null -I --connect-timeout 2 --max-time 5 \
+    http://127.0.0.1:8790/status.json 2>/dev/null; then
+    printf 'http://127.0.0.1:8790 ready\n'
+  else
+    printf 'offline\n'
+  fi
+
+  if onion=$(read_onion 2>/dev/null); then
+    printf 'onion:   http://%s/\n' "$onion"
+  else
+    printf 'onion:   unavailable\n'
+  fi
+
+  sudo systemctl status --no-pager fcf-telepathyd.service || true
+}
+
+invite_cmd() {
+  for command in awk python3 sha256sum sudo tr; do need "$command"; done
+  require_live_generation
+  [ -r "$LIVE_ROOT/caravan/catalog-v1.json" ] ||
+    fail "activated CARAVAN catalog is missing"
+  policy_path="$repo_root/docs/CARAVAN-HOST-POLICY.md"
+  [ -r "$policy_path" ] || fail "CARAVAN host policy is missing"
+  if [ -n "${ORIGIN:-}" ]; then
+    valid_onion "$ORIGIN" || fail "invalid Tor v3 origin hostname"
+    onion=$ORIGIN
+  else
+    onion=$(read_onion) || fail "a valid Tor v3 onion hostname was not created"
+  fi
+  catalog_sha=$(sha256sum "$LIVE_ROOT/caravan/catalog-v1.json" | awk '{print $1}')
+  policy_sha=$(sha256sum "$policy_path" | awk '{print $1}')
+  python3 - "$onion" "$catalog_sha" "$policy_sha" <<'PY'
+import json
+import sys
+
+onion, catalog_sha, policy_sha = sys.argv[1:]
+print(json.dumps({
+    "schema": "fcf-caravan-telepathy-invite-v1",
+    "origin": onion,
+    "catalog_sha256": catalog_sha,
+    "policy_version": "FCF-CARAVAN-HOST-v1",
+    "policy_sha256": policy_sha,
+}, indent=2, sort_keys=True))
+PY
+}
+
+curl_tor_code() {
+  method=$1
+  url=$2
+  shift 2
+  common=(
+    --silent --show-error
+    --socks5-hostname "$socks_host:$socks_port"
+    --connect-timeout 20 --max-time 60
+    -o /dev/null -w '%{http_code}'
+  )
+  if [ "$method" = HEAD ]; then
+    curl "${common[@]}" --head "$@" "$url"
+  else
+    curl "${common[@]}" -X "$method" "$@" "$url"
+  fi
+}
+
+expect_remote_code() {
+  method=$1
+  path=$2
+  expected=$3
+  shift 3
+  code=$(curl_tor_code "$method" "http://$ONION$path" "$@") ||
+    fail "remote Tor request failed: $method $path"
+  [ "$code" = "$expected" ] ||
+    fail "remote $method $path returned HTTP $code, expected $expected"
+  printf '  %-6s %-34s %s\n' "$method" "$path" "$code"
+}
+
+verify_remote() {
+  [ -n "${ONION:-}" ] || fail "verify requires an onion hostname"
+  valid_onion "$ONION" || fail "invalid Tor v3 onion hostname: $ONION"
+  valid_socks "$SOCKS" || fail "invalid SOCKS endpoint: $SOCKS"
+  socks_host=${SOCKS%:*}
+  socks_port=${SOCKS##*:}
+  for command in curl mktemp python3; do need "$command"; done
+
+  say ""
+  say "FCF CARAVAN remote Tor qualification"
+  say "onion: http://$ONION/"
+  say "SOCKS: $SOCKS"
+  say ""
+
+  expect_remote_code GET /status.json 200
+  expect_remote_code HEAD /source/INDEX.json 200
+  expect_remote_code GET /source/INDEX.json 206 -H 'Range: bytes=0-63'
+  expect_remote_code POST /status.json 405
+  expect_remote_code GET /etc/passwd 403
+
+  status_body=$(mktemp)
+  curl --fail --silent --show-error \
+    --socks5-hostname "$socks_host:$socks_port" \
+    --connect-timeout 20 --max-time 60 \
+    "http://$ONION/status.json" > "$status_body" || {
+      rm -f "$status_body"
+      fail "could not retrieve remote status.json over Tor"
+    }
+  python3 - "$status_body" <<'PY'
+import json
+import pathlib
+import sys
+
+obj = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if not isinstance(obj, dict):
+    raise SystemExit("remote status.json is not a JSON object")
+PY
+  rm -f "$status_body"
+
+  cat <<EOF
+
+╭────────────────────────────────────────────────────────────╮
+│          REMOTE TOR QUALIFICATION: PASS                   │
+╰────────────────────────────────────────────────────────────╯
+
+The X200's activated CARAVAN generation is reachable through fcf-telepathyd
+from a real second Tor client context, including bounded range reads, while
+write methods and forbidden filesystem paths remain denied.
+
+Camel #1 has an end-to-end demonstrated carrier path:
+  http://$ONION/
+EOF
+}
+
+offline_cmd() {
+  need sudo
+  need systemctl
+  sudo systemctl disable --now fcf-telepathyd.service
+  cat <<'TXT'
+fcf-telepathyd is offline.
+CARAVAN preservation/live cargo was not deleted.
+Tor hidden-service keys were retained so a normal restart can preserve the onion address.
+TXT
+}
+
+command=${1:-}
+shift || true
+
+case "$command" in
+  online)
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --no-update) NO_UPDATE=1; shift ;;
+        --caravan-live-root) [ "$#" -ge 2 ] || fail "--caravan-live-root needs a value"; LIVE_ROOT=$2; shift 2 ;;
+        -h|--help) usage; exit 0 ;;
+        *) fail "unknown online option: $1" ;;
+      esac
+    done
+    case "$LIVE_ROOT" in /*) ;; *) fail "CARAVAN live root must be absolute" ;; esac
+    online
+    ;;
+  status)
+    [ "$#" -eq 0 ] || fail "status takes no arguments"
+    status_cmd
+    ;;
+  verify)
+    [ "$#" -ge 1 ] || fail "verify requires ONION"
+    ONION=$1
+    shift
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --socks) [ "$#" -ge 2 ] || fail "--socks needs HOST:PORT"; SOCKS=$2; shift 2 ;;
+        -h|--help) usage; exit 0 ;;
+        *) fail "unknown verify option: $1" ;;
+      esac
+    done
+    verify_remote
+    ;;
+  invite)
+    ORIGIN=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --origin) [ "$#" -ge 2 ] || fail "--origin needs ONION"; ORIGIN=$2; shift 2 ;;
+        -h|--help) usage; exit 0 ;;
+        *) fail "unknown invite option: $1" ;;
+      esac
+    done
+    invite_cmd
+    ;;
+  offline)
+    [ "$#" -eq 0 ] || fail "offline takes no arguments"
+    offline_cmd
+    ;;
+  -h|--help|help|'') usage ;;
+  *) fail "unknown command: $command" ;;
+esac

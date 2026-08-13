@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Free Computation Foundation: free scientific software, exact computation, preservation, documentation, releases, and CARAVAN infrastructure.">
+  <meta name="description" content="Free Computation Foundation: free software, scientific computation, documentation, releases, and preserved resources.">
   <title>Free Computation Foundation</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -20,7 +20,7 @@
         <li><a href="about.html">About FCF</a></li>
         <li><a href="centl.html">CENTL</a></li>
         <li><a href="software.html">Software</a></li>
-        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="mirrors.html">Mirrors / pub</a></li>
         <li><a href="docs.html">Documentation</a></li>
       </ul>
       <h2>External</h2>
@@ -34,38 +34,40 @@
       <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
 
       <h2>What this site is</h2>
-      <p>This is the public index for software developed under the Free Computation Foundation. It is intentionally small, static, readable, and useful without a client-side framework.</p>
-      <p>FCF uses this site to make source code, releases, checksums, documentation, preservation resources, semantic artifacts, and project infrastructure easy to locate. CENTL is the first project published here.</p>
+      <p>This is the public index for software developed under the Free Computation Foundation. It is intentionally small, static, readable, and usable without JavaScript.</p>
+      <p>FCF uses this site to make project documentation, source code, releases, checksums, graphical resources, and preservation mirrors easy to locate. CENTL is the first project published here.</p>
 
       <h2>Current project</h2>
       <table class="status">
         <tr><th>Project</th><th>Status</th><th>Purpose</th></tr>
-        <tr><td><a href="centl.html"><strong>CENTL</strong></a></td><td>v0.14.0 · Oasis release</td><td>Exact-first mathematics, physics, scientific computation, and verification.</td></tr>
-        <tr><td><strong>CENTL-SCi</strong></td><td>v0.0.2-Caramels</td><td>Local scientific interaction with semantic interpretation kept behind CENTL's mathematical trust boundary.</td></tr>
-        <tr><td><strong>CENTL-MIRAGE</strong></td><td>Source / research</td><td>Local specification ingestion, capability analysis, staged candidate materialization, and evidence planning.</td></tr>
-        <tr><td><strong>CENTL CARAVAN</strong></td><td>Phase 1 stable source boundary; later rollout work in development</td><td>Content-addressed authenticated preservation and availability.</td></tr>
+        <tr><td><a href="centl.html"><strong>CENTL</strong></a></td><td>0.12.0 stable</td><td>Exact-first mathematics and physics computation and verification.</td></tr>
+        <tr><td><strong>CENTL-SCi</strong></td><td>0.0.1-Camelus stable interface</td><td>Local scientific problem interpreter for mathematics and physics; not a general chatbot.</td></tr>
       </table>
 
+<h2>CARAVAN lead monitor</h2>
+<div class="caravan-census" data-caravan-census>
+  <div class="camel-count"><span>Active Camels 🐪</span><strong data-census-active>—</strong></div>
+  <div class="camel-count"><span>Hungry Camels 🐪</span><strong data-census-hungry>—</strong></div>
+  <div class="camel-count"><span>Lost Camels 🐪</span><strong data-census-lost>—</strong></div>
+  <p class="census-status" data-census-status>Checking the latest lead-origin probe…</p>
+</div>
+<p class="small">This aggregate monitor reports the FCF X200 lead origin. It publishes no node roster, hardware details, or IP addresses. Supporter-camel census enrollment will use the same aggregate surface when its authenticated coordinator is enabled.</p>
       <h2>Install CENTL</h2>
-      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install
 sh install
 centl-sci</code></pre>
-      <p>The current stable product is CENTL v0.14.0, the first published Oasis release. GNU/Linux x86_64 is the active stable release boundary. The installer validates release identity and integrity and smoke-tests the package before activation.</p>
+      <p>The native installer verifies the release checksum and performs smoke checks before activation. Linux is the reference platform.</p>
 
-      <h2>Support the project</h2>
-      <p>Code is only one kind of contribution. Testing, mathematical review, documentation, preservation, and infrastructure all help keep free scientific software useful.</p>
-      <p><strong>Joining CARAVAN is itself a form of support.</strong> As public enrollment opens through qualified rollout channels, a carrier can contribute bounded storage, bandwidth, and availability to preserve approved FCF material. Until then, users can help test the signed join path, carrier policy, platform compatibility, and failure handling.</p>
-      <p>Financial sponsorship is available through GitHub Sponsors, but the Foundation does not define support only in dollars. A machine preserving exact approved bytes can be just as materially useful as a patch.</p>
-
-      <h2>Preservation and The Bazaar</h2>
-      <p>FCF is building an upstream-loss-resistant preservation and distribution layer for CENTL, including source, releases, build inputs, semantic artifacts, and recovery material. <a href="mirrors.html">The Bazaar</a> is the human-readable directory for FCF origins and preservation resources.</p>
-      <div class="notice"><strong>Rule:</strong> a dependency is not called preserved or publicly provisioned merely because a link exists. FCF must possess the bytes, an immutable identity, an integrity record, and the appropriate publication state.</div>
+      <h2>Software preservation</h2>
+      <p>FCF is building an upstream-loss-resistant preservation layer for CENTL and the external sources needed to build and verify it. The public <a href="mirrors.html">mirror index</a> distinguishes material that is actually preserved from material that is only referenced upstream.</p>
+      <div class="notice"><strong>Rule:</strong> a dependency is not called mirrored until FCF has the bytes, an immutable identity, and an integrity record. Links alone are not preservation.</div>
 
       <h2>Why simple HTML?</h2>
-      <p>The Foundation site should remain useful after fashionable web stacks disappear. Static files are cheap to preserve, easy to audit, fast to load, and simple to move to another HTTPS server.</p>
+      <p>The foundation site should remain useful when fashionable web stacks disappear. Static files are cheap to preserve, easy to audit, fast to load, and simple to move to another HTTPS server when FCF has its own domain and infrastructure.</p>
     </main>
   </div>
   <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · No client-side framework required.</footer>
 </div>
+<script src="caravan-census.js" defer></script>
 </body>
 </html>
