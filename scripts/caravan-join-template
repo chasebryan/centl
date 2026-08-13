@@ -24,7 +24,19 @@ esac
 [ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "CARAVAN carrier enrollment is Linux-only"
 [ "$(id -u)" -ne 0 ] || fail "normal CARAVAN carrier setup is rootless; do not run join-caravan with sudo"
 
-for cmd in sha256sum signify python3; do
+# Debian-family packages install the OpenBSD-compatible implementation as
+# `signify-openbsd`. Normalize that packaging difference without requiring a
+# privileged symlink or mutating the host.
+if ! command -v signify >/dev/null 2>&1; then
+  if command -v signify-openbsd >/dev/null 2>&1; then
+    signify() {
+      command signify-openbsd "$@"
+    }
+  else
+    fail "signify (or Debian's signify-openbsd) is required to verify this authenticated release"
+  fi
+fi
+for cmd in sha256sum python3; do
   command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required to verify this authenticated release"
 done
 
