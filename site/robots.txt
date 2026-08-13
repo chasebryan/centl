@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://freecomputation.org/sitemap.xml
