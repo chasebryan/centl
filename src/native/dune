@@ -13,5 +13,5 @@
   %{env:CENTL_FLINT_LIBRARY=-lflint}
   %{env:CENTL_MPFR_LIBRARY=-lmpfr}
   %{env:CENTL_GMP_LIBRARY=-lgmp}
-  -lpthread
-  -lm))
+  %{env:CENTL_PTHREAD_LIBRARY=-lpthread}
+  %{env:CENTL_MATH_LIBRARY=-lm}))

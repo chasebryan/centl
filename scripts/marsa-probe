@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+printf 'harbor: CENTL Marsa\n'
+printf 'kernel: %s\n' "$(uname -s 2>/dev/null || printf unknown)"
+printf 'machine: %s\n' "$(uname -m 2>/dev/null || printf unknown)"
+if [ -n "${OS:-}" ]; then
+  printf 'os_env: %s\n' "$OS"
+fi
+if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists flint; then
+  printf 'flint: %s\n' "$(pkg-config --modversion flint)"
+else
+  printf 'flint: missing\n'
+fi
+printf 'oasis_prebuilt: linux-x86_64 only\n'
+printf 'assurance: not Oasis\n'

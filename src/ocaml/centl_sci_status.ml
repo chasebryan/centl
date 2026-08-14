@@ -10,12 +10,7 @@ type t = {
   gated : string list;
 }
 
-let platform () =
-  if Sys.win32 then "windows"
-  else
-    match Sys.os_type with
-    | "Unix" -> "unix/linux-reference"
-    | value -> String.lowercase_ascii value
+let platform () = Centl_platform.current_id ()
 
 let collect () =
   match Centl_sci_workspace.default () with

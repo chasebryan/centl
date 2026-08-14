@@ -5,6 +5,11 @@
  (libraries centl_lib alcotest qcheck zarith yojson))
 
 (test
+ (name test_platform)
+ (modules test_platform)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_adversarial)
  (modules test_adversarial)
  (libraries centl_lib alcotest qcheck zarith yojson))

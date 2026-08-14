@@ -35,7 +35,7 @@ SCI_ASSIMILATION_ARGS ?=
 	extract native-build native-test adversarial-test fuzz-test metamorphic-test \
 	sanitizer-test performance-test hardening-test differential-test sci-model-test \
 	sci-interface-check sci-assimilate sci-assimilate-full sci-assimilate-publish \
-	build test release clean
+	build test release clean marsa-probe
 
 all: build
 
@@ -132,6 +132,9 @@ release-verify:
 	test -n "$(FCF_SIGNIFY_PUBLIC_KEY)" || { echo "FCF_SIGNIFY_PUBLIC_KEY is required" >&2; exit 2; }
 	FCF_SIGNIFY_PUBLIC_KEY="$(FCF_SIGNIFY_PUBLIC_KEY)" \
 		sh scripts/release-verify "$(RELEASE_DIR)"
+
+marsa-probe:
+	sh scripts/marsa-probe
 
 quality: format lint licensing-check install-interface-check integrity-source supply-chain-check
 

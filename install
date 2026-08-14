@@ -11,7 +11,8 @@ configure_path=true
 
 usage() {
   cat <<'EOF'
-Install CENTL on GNU/Linux.
+Install CENTL. The Oasis prebuilt is GNU/Linux x86_64.
+macOS and Windows use the CENTL Marsa source harbor.
 
 Usage: ./install [--channel oasis|mirage] [--version VERSION]
                  [--release-base-url URL] [--prefix PATH]
@@ -139,14 +140,34 @@ fi
 
 case $(uname -s) in
   Linux) platform=linux ;;
-  Darwin) fail "macOS is currently unsupported; CENTL native releases are GNU/Linux only" ;;
-  *) fail "CENTL native releases currently support GNU/Linux only" ;;
+  Darwin) platform=macos ;;
+  MINGW*|MSYS*|CYGWIN*|Windows_NT) platform=windows ;;
+  *) fail "CENTL does not yet recognize this kernel: $(uname -s)" ;;
 esac
 
 case $(uname -m) in
   x86_64|amd64) architecture=x86_64 ;;
-  *) fail "Linux prebuilt releases currently support x86_64 only: $(uname -m)" ;;
+  arm64|aarch64) architecture=arm64 ;;
+  *) fail "this machine architecture is not a Marsa or Oasis target yet: $(uname -m)" ;;
 esac
+
+if [ "$platform" != linux ] || [ "$architecture" != x86_64 ]; then
+  cat <<EOF >&2
+centl install: no prebuilt $platform-$architecture Oasis archive.
+The published Oasis product remains GNU/Linux x86_64.
+
+To inhabit the Camp stay on this machine, use CENTL Marsa:
+
+  git clone https://github.com/chasebryan/centl.git
+  cd centl
+  git checkout CENTL-Marsa
+  sh scripts/marsa-bootstrap
+  make build
+
+CENTL Marsa is not Oasis. It does not replace v0.14.0.
+EOF
+  exit 2
+fi
 
 asset="centl-${platform}-${architecture}.tar.gz"
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-install.XXXXXXXX")

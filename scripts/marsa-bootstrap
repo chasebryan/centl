@@ -1,0 +1,53 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$root"
+
+fail() {
+  printf 'centl marsa: %s\n' "$1" >&2
+  exit 1
+}
+
+case $(uname -s) in
+  Darwin) family=macos ;;
+  Linux) family=linux ;;
+  MINGW*|MSYS*|CYGWIN*|Windows_NT) family=windows ;;
+  *) fail "unrecognized kernel $(uname -s)" ;;
+esac
+
+printf 'CENTL Marsa harbor on %s (%s)\n' "$family" "$(uname -m)"
+printf 'This is the Windows/macOS port of the Camp stay. It is not Oasis.\n'
+
+case "$family" in
+  macos)
+    command -v brew >/dev/null 2>&1 || fail "Homebrew is required on macOS"
+    brew list gmp >/dev/null 2>&1 || brew install gmp
+    brew list mpfr >/dev/null 2>&1 || brew install mpfr
+    brew list flint >/dev/null 2>&1 || brew install flint
+    brew list pkg-config >/dev/null 2>&1 || brew install pkg-config
+    brew list opam >/dev/null 2>&1 || brew install opam
+    ;;
+  windows)
+    command -v pacman >/dev/null 2>&1 ||
+      fail "use MSYS2 MinGW64 and install mingw-w64-x86_64-gmp mingw-w64-x86_64-mpfr mingw-w64-x86_64-flint opam"
+    pacman -S --needed --noconfirm \
+      mingw-w64-x86_64-gmp \
+      mingw-w64-x86_64-mpfr \
+      mingw-w64-x86_64-flint \
+      mingw-w64-x86_64-pkg-config \
+      mingw-w64-x86_64-gcc
+    ;;
+  linux)
+    printf 'Linux remains the Camp/Oasis reference. Marsa is for macOS and Windows.\n'
+    ;;
+esac
+
+if command -v pkg-config >/dev/null 2>&1; then
+  pkg-config --exists flint || fail "pkg-config cannot see flint"
+  printf 'flint: %s\n' "$(pkg-config --modversion flint)"
+fi
+
+printf 'Next: opam switch create . --deps-only --yes  (or eval an existing centl switch)\n'
+printf 'Then: make build\n'
+printf 'Oasis remains GNU/Linux x86_64. Marsa does not declare it.\n'

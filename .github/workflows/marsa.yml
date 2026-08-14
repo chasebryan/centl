@@ -1,0 +1,95 @@
+name: CENTL Marsa harbor
+
+on:
+  push:
+    branches:
+      - CENTL-Marsa
+    paths:
+      - "src/**"
+      - "install"
+      - "scripts/marsa-*"
+      - "docs/CENTL-MARSA.md"
+      - "docs/SCI_PLATFORM_SUPPORT.md"
+      - ".github/workflows/marsa.yml"
+      - "tests/test_platform.ml"
+      - "tests/test_marsa_install.py"
+  pull_request:
+    branches:
+      - CENTL-Marsa
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marsa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-probe:
+    name: Linux probe stays honest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Probe and installer still serve Linux
+        run: |
+          set -eu
+          sh scripts/marsa-probe
+          python3 tests/test_marsa_install.py
+
+  macos-libraries:
+    name: macOS FLINT harbor
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Homebrew numeric stack
+        run: |
+          set -eu
+          brew install gmp mpfr flint pkg-config
+          sh scripts/marsa-probe
+          pkg-config --libs flint gmp mpfr
+      - name: Link a FLINT probe
+        run: |
+          set -eu
+          cc -Wall -Wextra -Werror \
+            scripts/marsa-native-probe.c \
+            $(pkg-config --cflags --libs flint gmp mpfr) \
+            -o /tmp/centl-marsa-probe
+          /tmp/centl-marsa-probe
+
+  windows-libraries:
+    name: Windows MSYS2 FLINT harbor
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gmp
+            mingw-w64-x86_64-mpfr
+            mingw-w64-x86_64-flint
+      - name: Link a FLINT probe
+        run: |
+          set -eu
+          sh scripts/marsa-probe
+          gcc -Wall -Wextra \
+            scripts/marsa-native-probe.c \
+            $(pkg-config --cflags --libs flint gmp mpfr) \
+            -o /tmp/centl-marsa-probe
+          /tmp/centl-marsa-probe
