@@ -4,16 +4,98 @@ This page is deliberately narrow. It is for physicists who want to use CENTL and
 
 If that is you, you can ignore CARAVAN, networking, repository infrastructure, release engineering, and contributor workflows unless you later choose to explore them.
 
-## The 60-second route
+## Start here: choose your operating system 🐧 🍎 🪟
 
-Install the qualified Oasis product on GNU/Linux x86_64:
+CENTL currently has three scientist-facing operating-system paths. The physics and mathematics interfaces are the same after installation; what differs is how the software reaches your machine.
+
+| Platform | Current path | Assurance / distribution status |
+| --- | --- | --- |
+| 🐧 **GNU/Linux x86_64** | Oasis installer | Qualified stable CENTL product. This is the reference release path. |
+| 🍎 **macOS** | `CENTL-Marsa` | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
+| 🪟 **Windows** | `CENTL-Marsa` under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
+
+The distinction above is about release assurance, **not different physics**. Once installed, use the same `centl-physics`, `centl`, and `centl-sci` scientific commands on every platform.
+
+### 🐧 GNU/Linux x86_64 — qualified Oasis
+
+Install the qualified Oasis product:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install --channel oasis
 ```
 
-Check an exact unit conversion:
+The normal installed commands are:
+
+```text
+centl
+centl-physics
+centl-sci
+```
+
+For a physicist, `centl-physics` is the primary typed physics surface, `centl` supplies exact supporting mathematics, and `centl-sci` provides physics-first interpretation.
+
+### 🍎 macOS — CENTL Marsa
+
+macOS uses the `CENTL-Marsa` harbor, which builds the current Camp software locally. Homebrew is required; the Marsa bootstrap prepares GMP, MPFR, FLINT, `pkg-config`, and the OCaml/opam environment.
+
+```sh
+git clone https://github.com/chasebryan/centl.git
+cd centl
+git checkout CENTL-Marsa
+sh scripts/marsa-install
+```
+
+By default the commands are installed below `~/.local/bin`. If that directory is not already on your `PATH`, add it for the current shell with:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Marsa builds and installs the same public command names:
+
+```text
+centl
+centl-physics
+centl-sci
+```
+
+macOS Marsa is the Camp harbor, not an Oasis-qualified release.
+
+### 🪟 Windows — CENTL Marsa
+
+Windows currently uses `CENTL-Marsa` from an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. You need Git and `opam` available in that environment; the Marsa bootstrap uses `pacman` to prepare the MinGW GMP, MPFR, FLINT, compiler, build, and `pkg-config` dependencies.
+
+From the MSYS2 MinGW64 shell:
+
+```sh
+git clone https://github.com/chasebryan/centl.git
+cd centl
+git checkout CENTL-Marsa
+sh scripts/marsa-install
+```
+
+The installer copies the public commands as Windows executables under the selected prefix, normally `~/.local/bin`:
+
+```text
+centl.exe
+centl-physics.exe
+centl-sci.exe
+```
+
+MSYS2 resolves those through the ordinary command names once that directory is on `PATH`:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Windows support is presently a Marsa harbor/source-build path. The repository's Windows dependency/FLINT harbor is CI-checked, but the full Windows CENTL product job remains disabled until the OCaml/MinGW runtime and library toolchains are unified. Do not interpret a successful Windows source build as an Oasis declaration.
+
+For the detailed port status and harbor rules, see [CENTL Marsa](CENTL-MARSA.md).
+
+## Verify your physics installation
+
+On **GNU/Linux, macOS, or Windows/MSYS2**, check an exact unit conversion:
 
 ```sh
 centl-physics convert 100 cm m
@@ -238,13 +320,14 @@ If an operation lies outside the admitted physical model, CENTL should leave the
 
 ## Recommended physicist workflow
 
-1. **Use `centl-physics` first** for dimensioned physical operations with a direct supported interface.
-2. **Use `centl`** for the exact mathematics surrounding the physical model.
-3. **Use `centl-sci` in `PHYS` mode** when ordinary language is more natural than the formal interface.
-4. **Keep units and dimensions explicit.** Treat dimension mismatch as useful evidence, not an inconvenience to bypass.
-5. **Distinguish discrete integration from analytic evolution.** The integrator name is part of the result's meaning.
-6. **Treat `deferred`, unsupported, and unresolved outcomes as information.** They mark the current assurance boundary.
-7. **Use `--details` or `--explain`** when you need to inspect SCi's interpretation and execution path.
+1. **Choose the correct platform path first:** Oasis on GNU/Linux x86_64, Marsa on macOS or Windows.
+2. **Use `centl-physics` first** for dimensioned physical operations with a direct supported interface.
+3. **Use `centl`** for the exact mathematics surrounding the physical model.
+4. **Use `centl-sci` in `PHYS` mode** when ordinary language is more natural than the formal interface.
+5. **Keep units and dimensions explicit.** Treat dimension mismatch as useful evidence, not an inconvenience to bypass.
+6. **Distinguish discrete integration from analytic evolution.** The integrator name is part of the result's meaning.
+7. **Treat `deferred`, unsupported, and unresolved outcomes as information.** They mark the current assurance boundary.
+8. **Use `--details` or `--explain`** when you need to inspect SCi's interpretation and execution path.
 
 ## Read next, and only when you need it
 
@@ -252,6 +335,7 @@ If an operation lies outside the admitted physical model, CENTL should leave the
 - [Linear sphere contact contract](PHYSICS_LINEAR_CONTACT.md) — exact bounded continuous contact and event-step boundaries.
 - [CENTL-SCi](SCI.md) — physics-first natural-language interaction and evidence surfaces.
 - [Numerical contract](NUMERICS.md) — the exactness and approximation philosophy inherited from CENTL.
-- [Installation](INSTALL.md) — channels, offline installation, and source builds.
+- [Installation](INSTALL.md) — GNU/Linux Oasis/Mirage channels, offline installation, and source builds.
+- [CENTL Marsa](CENTL-MARSA.md) — macOS and Windows Camp harbor, dependencies, and assurance boundary.
 
 That is the complete starting map for a physicist. The rest of the repository can stay outside your working set until your physical work actually requires it.
