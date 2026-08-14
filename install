@@ -170,6 +170,12 @@ if [ -n "$archive_path" ]; then
     fail "checksum not found: $archive_path.sha256"
   cp "$archive_path" "$archive"
   cp "$archive_path.sha256" "$checksum"
+  if [ "$release_version" != latest ]; then
+    requested_release=${release_version#v}
+    case "$requested_release" in
+      ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested release version is invalid" ;;
+    esac
+  fi
 else
   command -v curl >/dev/null 2>&1 || fail "curl is required to download CENTL"
 
