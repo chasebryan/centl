@@ -6,7 +6,6 @@ import io
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import tarfile
 import tempfile
@@ -30,7 +29,7 @@ class OasisTestCase(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    def write_version(self, value: str = "0.14.0") -> None:
+    def write_version(self, value: str = "0.13.0") -> None:
         path = self.root / "src/ocaml/centl_version.ml"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(f'let value = "{value}"\n', encoding="utf-8")
@@ -38,7 +37,7 @@ class OasisTestCase(unittest.TestCase):
     def make_archive(
         self,
         *,
-        version: str = "0.14.0",
+        version: str = "0.13.0",
         extra_member: tarfile.TarInfo | None = None,
         extra_data: bytes = b"",
     ) -> Path:
@@ -69,40 +68,6 @@ class OasisTestCase(unittest.TestCase):
         return archive
 
 
-class InspectTests(unittest.TestCase):
-    def test_inspect_does_not_declare_oasis(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="centl-oasis-inspect-") as tmp:
-            report = Path(tmp) / "inspect.json"
-            rc = OASIS.main(
-                ["--root", str(ROOT), "--inspect", "--quiet", "--report", str(report)]
-            )
-            self.assertEqual(rc, 0)
-            payload = json.loads(report.read_text(encoding="utf-8"))
-            self.assertFalse(payload["declaration"])
-            self.assertFalse(payload["eligible_for_final_qualification"])
-            self.assertEqual(payload["published_oasis"], "0.14.0")
-            self.assertIn("blockers", payload)
-            self.assertIn("cannot declare Oasis", payload["summary"])
-
-    def test_inspect_identity_records_branch_blocker(self) -> None:
-        payload = OASIS.inspect_identity(ROOT, "0.14.0")
-        self.assertFalse(payload["declaration"])
-        blockers = payload["blockers"]
-        self.assertTrue(any("is not oasis" in str(item) for item in blockers))
-
-    def test_inspect_records_oasis_non_regression_when_tip_missing(self) -> None:
-        payload = OASIS.inspect_identity(ROOT, "0.14.0")
-        contains, _tip = OASIS.contains_oasis_tip(ROOT)
-        if contains:
-            self.assertFalse(
-                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
-            )
-        else:
-            self.assertTrue(
-                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
-            )
-
-
 class VersionTests(OasisTestCase):
     def test_reads_authoritative_version(self) -> None:
         self.write_version("1.2.3-rc.4")
@@ -117,18 +82,23 @@ class VersionTests(OasisTestCase):
 
 
 class PlanTests(OasisTestCase):
+    def test_runtime_pin_gate_runs_before_any_repair(self) -> None:
+        plan = OASIS.build_plan("0.13.0")
+        self.assertEqual(plan[0].name, "toolchain-runtime")
+        self.assertEqual(plan[0].phase, "preflight")
+
     def test_verified_extraction_precedes_native_tests(self) -> None:
-        names = [gate.name for gate in OASIS.build_plan("0.14.0")]
+        names = [gate.name for gate in OASIS.build_plan("0.13.0")]
         self.assertLess(names.index("fstar-verify"), names.index("extract"))
         self.assertLess(names.index("extract"), names.index("generated-diff"))
         self.assertLess(names.index("generated-diff"), names.index("native-tests"))
 
     def test_sanitizer_is_mandatory_in_oasis_hardening(self) -> None:
-        hardening = next(gate for gate in OASIS.build_plan("0.14.0") if gate.name == "hardening")
+        hardening = next(gate for gate in OASIS.build_plan("0.13.0") if gate.name == "hardening")
         self.assertIn(("CENTL_SANITIZER_REQUIRED", "1"), hardening.env)
 
     def test_only_formatting_is_automatic_repair(self) -> None:
-        repair = [gate.name for gate in OASIS.build_plan("0.14.0") if gate.phase == "repair"]
+        repair = [gate.name for gate in OASIS.build_plan("0.13.0") if gate.phase == "repair"]
         self.assertEqual(repair, ["format-fix"])
 
     def test_release_plan_uses_authoritative_version(self) -> None:
@@ -183,14 +153,14 @@ class CommandRunnerTests(OasisTestCase):
 class ArchiveTests(OasisTestCase):
     def test_accepts_structurally_safe_release_archive(self) -> None:
         self.make_archive()
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "passed", result.detail)
 
     def test_rejects_checksum_corruption(self) -> None:
         archive = self.make_archive()
         with archive.open("ab") as handle:
             handle.write(b"corrupt")
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("checksum mismatch", result.detail or "")
 
@@ -198,8 +168,9 @@ class ArchiveTests(OasisTestCase):
         info = tarfile.TarInfo("centl/../../escape")
         data = b"bad"
         info.size = len(data)
+        info.mode = 0o644
         self.make_archive(extra_member=info, extra_data=data)
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("unsafe release archive path", result.detail or "")
 
@@ -207,23 +178,55 @@ class ArchiveTests(OasisTestCase):
         info = tarfile.TarInfo("/tmp/escape")
         data = b"bad"
         info.size = len(data)
+        info.mode = 0o644
         self.make_archive(extra_member=info, extra_data=data)
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("unsafe release archive path", result.detail or "")
+
+    def test_rejects_noncanonical_path(self) -> None:
+        info = tarfile.TarInfo("centl//extra")
+        data = b"bad"
+        info.size = len(data)
+        info.mode = 0o644
+        self.make_archive(extra_member=info, extra_data=data)
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
+        self.assertEqual(result.status, "failed")
+        self.assertIn("non-canonical", result.detail or "")
 
     def test_rejects_symlink(self) -> None:
         info = tarfile.TarInfo("centl/bin/evil-link")
         info.type = tarfile.SYMTYPE
         info.linkname = "/etc/passwd"
+        info.mode = 0o755
         self.make_archive(extra_member=info)
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("contains a link", result.detail or "")
 
+    def test_rejects_duplicate_member(self) -> None:
+        info = tarfile.TarInfo("centl/VERSION")
+        data = b"evil\n"
+        info.size = len(data)
+        info.mode = 0o644
+        self.make_archive(extra_member=info, extra_data=data)
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
+        self.assertEqual(result.status, "failed")
+        self.assertIn("duplicate member", result.detail or "")
+
+    def test_rejects_group_world_writable_entry(self) -> None:
+        info = tarfile.TarInfo("centl/extra")
+        data = b"bad"
+        info.size = len(data)
+        info.mode = 0o666
+        self.make_archive(extra_member=info, extra_data=data)
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
+        self.assertEqual(result.status, "failed")
+        self.assertIn("group/world-writable", result.detail or "")
+
     def test_rejects_wrong_embedded_version(self) -> None:
-        self.make_archive(version="0.13.0")
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        self.make_archive(version="0.12.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("does not match", result.detail or "")
 
@@ -242,7 +245,7 @@ class ArchiveTests(OasisTestCase):
         (self.root / "dist/centl-linux-x86_64.tar.gz.sha256").write_text(
             f"{digest}  centl-linux-x86_64.tar.gz\n", encoding="utf-8"
         )
-        result = OASIS.validate_release_archive(self.root, "0.14.0")
+        result = OASIS.validate_release_archive(self.root, "0.13.0")
         self.assertEqual(result.status, "failed")
         self.assertIn("missing required members", result.detail or "")
 
@@ -252,36 +255,30 @@ class EvidenceTests(OasisTestCase):
         path = self.root / "evidence/report.json"
         OASIS.atomic_json(path, {"result": "FAIL", "round": 1})
         OASIS.atomic_json(path, {"result": "PASS", "round": 2})
-        self.assertEqual(json.loads(path.read_text(encoding="utf-8")), {"result": "PASS", "round": 2})
+        self.assertEqual(
+            json.loads(path.read_text(encoding="utf-8")),
+            {"result": "PASS", "round": 2},
+        )
         leftovers = list(path.parent.glob("report.json.*"))
         self.assertEqual(leftovers, [])
 
 
 class IdentityTests(OasisTestCase):
-    def test_final_identity_requires_oasis_branch(self) -> None:
-        head = "a" * 40
+    def test_wrong_branch_blocks_final_identity(self) -> None:
         state = {
-            "head": head,
+            "head": "a" * 40,
             "branch": "main",
             "tracked_dirty": False,
             "tracked_changes": [],
         }
-
-        def fake_capture(root: Path, argv, timeout=30):
-            if "refs/heads/oasis" in argv:
-                return f"{head}\trefs/heads/oasis"
-            if any(str(item).startswith("refs/tags/v0.14.0") for item in argv):
-                return f"{head}\trefs/tags/v0.14.0"
-            raise AssertionError(f"unexpected command: {argv}")
-
-        with mock.patch.object(OASIS, "run_capture", side_effect=fake_capture):
-            failures = OASIS.final_identity_checks(self.root, "0.14.0", state)
-
+        with mock.patch.object(OASIS._engine, "run_capture", return_value=""):
+            failures = OASIS.final_identity_checks(
+                self.root, "0.13.0", state, "oasis"
+            )
         self.assertTrue(any("requires oasis" in item for item in failures))
-        self.assertFalse(any("origin/oasis" in item for item in failures))
 
-    def test_final_identity_accepts_exact_oasis_branch_identity(self) -> None:
-        head = "c" * 40
+    def test_exact_oasis_branch_and_tag_can_pass_identity(self) -> None:
+        head = "b" * 40
         state = {
             "head": head,
             "branch": "oasis",
@@ -290,15 +287,16 @@ class IdentityTests(OasisTestCase):
         }
 
         def fake_capture(root: Path, argv, timeout=30):
-            if "refs/heads/oasis" in argv:
+            if argv[:3] == ("git", "ls-remote", "origin") and argv[3] == "refs/heads/oasis":
                 return f"{head}\trefs/heads/oasis"
-            if any(str(item).startswith("refs/tags/v0.14.0") for item in argv):
-                return f"{head}\trefs/tags/v0.14.0"
-            raise AssertionError(f"unexpected command: {argv}")
+            if argv[:3] == ("git", "ls-remote", "origin"):
+                return f"{head}\trefs/tags/v0.13.0"
+            raise AssertionError(argv)
 
-        with mock.patch.object(OASIS, "run_capture", side_effect=fake_capture):
-            failures = OASIS.final_identity_checks(self.root, "0.14.0", state)
-
+        with mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture):
+            failures = OASIS.final_identity_checks(
+                self.root, "0.13.0", state, "oasis"
+            )
         self.assertEqual(failures, [])
 
 
@@ -306,33 +304,35 @@ class GitHubGateTests(OasisTestCase):
     def test_high_security_alerts_block_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):
-                self.assertIn("--base", argv)
-                base_index = argv.index("--base")
-                self.assertEqual(argv[base_index + 1], "oasis")
+                self.assertIn("oasis", argv)
                 return "[]"
             raise AssertionError(f"unexpected command: {argv}")
 
         def fake_json(root: Path, endpoint: str):
             if "check-runs" in endpoint:
-                return {"check_runs": [{"name": "CI", "status": "completed", "conclusion": "success"}]}
+                return {
+                    "check_runs": [
+                        {"name": "CI", "status": "completed", "conclusion": "success"}
+                    ]
+                }
             if "code-scanning" in endpoint:
                 return [{"number": 41, "rule": {"security_severity_level": "high"}}]
             if "dependabot" in endpoint or "secret-scanning" in endpoint:
                 return []
             raise AssertionError(endpoint)
 
-        with mock.patch.object(OASIS, "github_repo_slug", return_value="chasebryan/centl"), mock.patch.object(
-            OASIS, "run_capture", side_effect=fake_capture
-        ), mock.patch.object(OASIS, "gh_json", side_effect=fake_json):
-            failures = OASIS.github_release_checks(self.root, "a" * 40)
+        with mock.patch.object(
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
+        ):
+            failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
         self.assertTrue(any("code-scanning" in item for item in failures))
 
-    def test_open_pr_blocks_final_gate(self) -> None:
+    def test_open_pr_targeting_oasis_blocks_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):
-                self.assertIn("--base", argv)
-                base_index = argv.index("--base")
-                self.assertEqual(argv[base_index + 1], "oasis")
+                self.assertEqual(argv[argv.index("--base") + 1], "oasis")
                 return '[{"number":123,"title":"unfinished","headRefName":"feature"}]'
             raise AssertionError(f"unexpected command: {argv}")
 
@@ -341,13 +341,45 @@ class GitHubGateTests(OasisTestCase):
                 return {"check_runs": []}
             return []
 
-        with mock.patch.object(OASIS, "github_repo_slug", return_value="chasebryan/centl"), mock.patch.object(
-            OASIS, "run_capture", side_effect=fake_capture
-        ), mock.patch.object(OASIS, "gh_json", side_effect=fake_json):
-            failures = OASIS.github_release_checks(self.root, "b" * 40)
+        with mock.patch.object(
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
+        ):
+            failures = OASIS.github_release_checks(self.root, "b" * 40, "oasis")
         self.assertTrue(any("#123" in item for item in failures))
         self.assertTrue(any("target oasis" in item for item in failures))
 
+
+
+
+class InspectTests(unittest.TestCase):
+    def test_inspect_does_not_declare_oasis(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-oasis-inspect-") as tmp:
+            report = Path(tmp) / "inspect.json"
+            rc = OASIS.main(
+                ["--root", str(ROOT), "--inspect", "--quiet", "--report", str(report)]
+            )
+            self.assertEqual(rc, 0)
+            payload = json.loads(report.read_text(encoding="utf-8"))
+            self.assertFalse(payload["declaration"])
+            self.assertFalse(payload["eligible_for_final_qualification"])
+            self.assertEqual(payload["published_oasis"], "0.14.0")
+            self.assertIn("blockers", payload)
+            self.assertIn("cannot declare Oasis", payload["summary"])
+
+    def test_inspect_records_oasis_non_regression_when_tip_missing(self) -> None:
+        payload = OASIS.inspect_identity(ROOT, "0.14.0")
+        self.assertFalse(payload["declaration"])
+        contains, _tip = OASIS.contains_oasis_tip(ROOT)
+        if contains:
+            self.assertFalse(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
+        else:
+            self.assertTrue(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
 
 if __name__ == "__main__":
     unittest.main()

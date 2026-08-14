@@ -42,6 +42,27 @@ A failure to satisfy an Oasis-only qualification check does not by itself make a
 Mirage experiment invalid. The strict standard becomes mandatory when work is
 proposed for promotion to `oasis`.
 
+#### Oasis is the Mirage baseline
+
+Every newly declared Oasis release becomes the new floor from which Mirage
+development continues. After an Oasis release is established, `mirage` must be
+reconciled onto that exact Oasis source baseline before new development proceeds.
+Mirage may then diverge forward again with experimental work.
+
+This rule is intentionally one-way:
+
+```text
+qualified Oasis baseline
+          |
+          +------> Mirage begins here
+                     |
+                     +--> experiments / research / new features
+```
+
+Mirage never makes an older stable baseline authoritative merely because it has
+unique development commits. Unique Mirage work should be replayed, merged, or
+otherwise reconciled on top of the new Oasis baseline when it remains useful.
+
 ### `main` — complete developer and research distribution
 
 `main` is the comprehensive source line for developers and researchers who want
@@ -77,6 +98,9 @@ feature/research work
  stable release/tag
 ```
 
+After a new Oasis release, the cycle restarts by making that Oasis commit the
+Mirage baseline.
+
 `main` is the integrated distribution view rather than a maturity rung. It can
 receive and expose both stable and experimental work according to repository
 integration needs.
@@ -102,6 +126,22 @@ Required security boundaries must never be bypassed merely for convenience. The
 lighter Mirage policy concerns release qualification and development friction, not
 permission to knowingly introduce dangerous behavior into shared infrastructure.
 
+## Installation channels
+
+Oasis and Mirage are separate install channels.
+
+- Oasis is the default user installation and owns the conventional `centl`,
+  `centl-physics`, and `centl-sci` commands.
+- Mirage is an opt-in development installation and uses `mirage-centl`,
+  `mirage-centl-physics`, and `mirage-centl-sci` so it can coexist with Oasis.
+- Installing Mirage must never silently replace the active Oasis commands.
+- A Mirage package is a development snapshot, not an Oasis declaration.
+
+Prebuilt channel transport is independent of GitHub release identity. Qualified
+Oasis bytes and rolling Mirage bytes may be served from the machine-oriented
+`distribution` branch while stable release identity remains attached only to
+qualified Oasis tags.
+
 ## Pull-request targeting
 
 - Experimental features and research normally target `mirage`.
@@ -116,6 +156,10 @@ permission to knowingly introduce dangerous behavior into shared infrastructure.
 
 Stable CENTL releases are cut from qualified `oasis` commits and use normal
 Semantic Versioning tags such as `v0.14.0`.
+
+`v0.14.0` is the first Oasis foundation point for the current public release
+history. Earlier releases and tags are historical development material rather
+than part of the active public release line.
 
 **Oasis is not a SemVer component.** It is the quality declaration attached to a
 release whose source has passed the Oasis gate. Public wording may use

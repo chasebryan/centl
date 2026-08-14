@@ -104,10 +104,10 @@ def main() -> int:
         require_clean(
             details,
             "x = 2 or x = 3\n\nDetails:\n"
-            "  Exact result\n"
+            "  Exact result within the admitted deterministic model\n"
             "  Variable: x\n"
-            "  Method: polynomial equation solving\n"
-            "  Verified by CENTL\n",
+            "  Method: CENTL polynomial equation solving\n"
+            "  Established by the authoritative CENTL execution path\n",
         )
         passed += 1
 
@@ -118,13 +118,12 @@ def main() -> int:
             timeout=args.timeout,
             env=env,
         )
-        require_clean(
-            explain,
-            "3/10\n\nDetails:\n"
-            "  Exact result\n"
-            "  Method: exact arithmetic\n"
-            "  Verified by CENTL\n",
-        )
+        require(explain.returncode == 0, f"explain exit {explain.returncode}: {explain.stderr}")
+        require(explain.stderr == "", f"unexpected explain stderr: {explain.stderr!r}")
+        require(explain.stdout.startswith("3/10\n\nExplanation\n"), "explanation header changed")
+        require("  Authoritative executor:\n    centl\n" in explain.stdout, "executor evidence missing")
+        require("  Status:\n    established\n" in explain.stdout, "explanation status changed")
+        require(explain.stdout.endswith("  Result:\n    3/10\n"), "explanation result changed")
         passed += 1
 
         machine = run(
@@ -157,7 +156,7 @@ def main() -> int:
         )
         require_clean(
             repl,
-            "CENTL-SCi v0.0.2-dev\n"
+            "CENTL-SCi v0.0.2-Caramels\n"
             "Free for science.\n\n"
             "HYBRID> 3/10\n"
             "HYBRID> 2500 m\n"
@@ -181,7 +180,7 @@ def main() -> int:
         )
         require_clean(
             modes,
-            "CENTL-SCi v0.0.2-dev\n"
+            "CENTL-SCi v0.0.2-Caramels\n"
             "Free for science.\n\n"
             "HYBRID> Mode: math\n"
             "MATH> 3/10\n"
@@ -203,14 +202,13 @@ def main() -> int:
             timeout=args.timeout,
             env=env,
         )
-        require_clean(
-            recovery,
-            "CENTL-SCi v0.0.2-dev\n"
-            "Free for science.\n\n"
-            "HYBRID> CENTL-SCi cannot solve this problem yet.\n"
-            "HYBRID> 3/10\n"
-            "HYBRID> ",
+        require(recovery.returncode == 0, f"recovery exit {recovery.returncode}: {recovery.stderr}")
+        require(recovery.stderr == "", f"unexpected recovery stderr: {recovery.stderr!r}")
+        require(
+            recovery.stdout.startswith("CENTL-SCi v0.0.2-Caramels\nFree for science.\n\nHYBRID> "),
+            "recovery banner or first prompt changed",
         )
+        require("HYBRID> 3/10\nHYBRID> " in recovery.stdout, "REPL did not recover after unsupported input")
         passed += 1
 
         clarification = run(
@@ -222,7 +220,7 @@ def main() -> int:
         )
         require_clean(
             clarification,
-            "CENTL-SCi v0.0.2-dev\n"
+            "CENTL-SCi v0.0.2-Caramels\n"
             "Free for science.\n\n"
             "HYBRID> I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0.\n"
             "HYBRID> ",
@@ -238,7 +236,7 @@ def main() -> int:
         )
         require_clean(
             eof,
-            "CENTL-SCi v0.0.2-dev\n"
+            "CENTL-SCi v0.0.2-Caramels\n"
             "Free for science.\n\n"
             "HYBRID> 3/10\n"
             "HYBRID> ",

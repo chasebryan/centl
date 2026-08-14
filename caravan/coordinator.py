@@ -94,14 +94,6 @@ class RetrievalTicket:
     expires_at: float
 
 
-@dataclass(frozen=True, slots=True)
-class CensusCounts:
-    active_camels: int
-    hungry_camels: int
-    lost_camels: int
-    cargo_loads: int
-
-
 class CoordinatorState:
     """SQLite-backed routing state with expiring presence and one-use tickets."""
 
@@ -144,12 +136,9 @@ class CoordinatorState:
 
                 CREATE TABLE IF NOT EXISTS carriers (
                     node_id TEXT PRIMARY KEY,
-                    caravan_number INTEGER UNIQUE,
                     public_identity TEXT NOT NULL,
                     policy_version TEXT NOT NULL,
                     agent_version TEXT NOT NULL,
-                    carrier_class TEXT NOT NULL DEFAULT 'volunteer'
-                        CHECK(carrier_class IN ('volunteer', 'fcf-admin')),
                     state TEXT NOT NULL CHECK(state IN ('active', 'quarantined', 'withdrawn')),
                     last_seen REAL NOT NULL,
                     load REAL NOT NULL DEFAULT 0 CHECK(load >= 0),
@@ -179,39 +168,8 @@ class CoordinatorState:
                     observed_digest TEXT NOT NULL,
                     observed_at REAL NOT NULL
                 );
-
-                CREATE TABLE IF NOT EXISTS caravan_counters (
-                    counter_name TEXT PRIMARY KEY,
-                    counter_value INTEGER NOT NULL CHECK(counter_value >= 0)
-                );
-
-                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
-                    VALUES ('cargo_loads', 0);
-                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
-                    VALUES ('camel_numbers', 0);
                 """
             )
-            columns = {row["name"] for row in db.execute("PRAGMA table_info(carriers)")}
-            if "carrier_class" not in columns:
-                db.execute(
-                    "ALTER TABLE carriers ADD COLUMN carrier_class TEXT NOT NULL DEFAULT 'volunteer'"
-                )
-            if "caravan_number" not in columns:
-                db.execute("ALTER TABLE carriers ADD COLUMN caravan_number INTEGER")
-            missing = db.execute(
-                "SELECT node_id FROM carriers WHERE caravan_number IS NULL ORDER BY rowid"
-            ).fetchall()
-            for row in missing:
-                db.execute(
-                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
-                )
-                number = db.execute(
-                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
-                ).fetchone()[0]
-                db.execute(
-                    "UPDATE carriers SET caravan_number = ? WHERE node_id = ?",
-                    (number, row["node_id"]),
-                )
 
     @staticmethod
     def _purge_expired_tickets(db: sqlite3.Connection, now: float) -> None:
@@ -257,13 +215,10 @@ class CoordinatorState:
         public_identity: str,
         policy_version: str,
         agent_version: str,
-        carrier_class: str = "volunteer",
         now: float | None = None,
     ) -> None:
         if not node_id or not public_identity or not policy_version or not agent_version:
             raise ValueError("carrier registration fields must be non-empty")
-        if carrier_class not in {"volunteer", "fcf-admin"}:
-            raise ValueError("unsupported CARAVAN carrier class")
         timestamp = time.time() if now is None else float(now)
         with self._connect() as db:
             row = db.execute(
@@ -273,43 +228,20 @@ class CoordinatorState:
                 raise CoordinatorError("node identity collision with different public identity")
             if row is None:
                 db.execute(
-                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
-                )
-                caravan_number = db.execute(
-                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
-                ).fetchone()[0]
-                db.execute(
                     """INSERT INTO carriers(
-                        node_id, caravan_number, public_identity, policy_version, agent_version,
-                        carrier_class, state, last_seen
-                    ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)""",
-                    (node_id, caravan_number, public_identity, policy_version, agent_version, carrier_class, timestamp),
+                        node_id, public_identity, policy_version, agent_version, state, last_seen
+                    ) VALUES (?, ?, ?, ?, 'active', ?)""",
+                    (node_id, public_identity, policy_version, agent_version, timestamp),
                 )
             elif row["state"] == "withdrawn":
                 raise CoordinatorError("withdrawn node identity must not be silently reactivated")
             else:
                 db.execute(
                     """UPDATE carriers
-                       SET policy_version = ?, agent_version = ?, carrier_class = ?, last_seen = ?
+                       SET policy_version = ?, agent_version = ?, last_seen = ?
                        WHERE node_id = ?""",
-                    (policy_version, agent_version, carrier_class, timestamp, node_id),
+                    (policy_version, agent_version, timestamp, node_id),
                 )
-            return int(
-                db.execute(
-                    "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
-                ).fetchone()[0]
-            )
-
-    def caravan_number(self, node_id: str) -> int:
-        """Return the durable, first-enrollment number assigned to a camel."""
-
-        with self._connect() as db:
-            row = db.execute(
-                "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
-            ).fetchone()
-        if row is None or row["caravan_number"] is None:
-            raise CoordinatorError("unknown camel number")
-        return int(row["caravan_number"])
 
     def heartbeat(
         self,
@@ -363,61 +295,6 @@ class CoordinatorState:
 
     def _fresh_cutoff(self, now: float) -> float:
         return now - self.heartbeat_ttl
-
-    def census_counts(
-        self,
-        *,
-        now: float | None = None,
-        active_window: float = 1_800.0,
-        lost_after: float = 259_200.0,
-    ) -> CensusCounts:
-        """Return aggregate public census counts from authenticated carriers.
-
-        Active and Lost use the public CARAVAN windows. Withdrawn and
-        quarantined carriers are excluded rather than being presented as Lost.
-        """
-        if active_window <= 0:
-            raise ValueError("active_window must be positive")
-        if lost_after <= active_window:
-            raise ValueError("lost_after must exceed active_window")
-        timestamp = time.time() if now is None else float(now)
-        active_cutoff = timestamp - float(active_window)
-        lost_cutoff = timestamp - float(lost_after)
-        with self._connect() as db:
-            row = db.execute(
-                """SELECT
-                       SUM(
-                           CASE
-                               WHEN state = 'active'
-                                AND last_seen >= ?
-                                AND last_seen <= ?
-                               THEN 1 ELSE 0
-                           END
-                       ) AS active_count,
-                       SUM(
-                           CASE
-                               WHEN state = 'active'
-                                AND last_seen < ?
-                                AND last_seen >= ?
-                               THEN 1 ELSE 0
-                           END
-                       ) AS hungry_count,
-                       SUM(
-                           CASE
-                               WHEN state = 'active'
-                                AND last_seen < ?
-                               THEN 1 ELSE 0
-                           END
-                       ) AS lost_count
-                   FROM carriers""",
-                (active_cutoff, timestamp, active_cutoff, lost_cutoff, lost_cutoff),
-            ).fetchone()
-        return CensusCounts(
-            int(row["active_count"] or 0),
-            int(row["hungry_count"] or 0),
-            int(row["lost_count"] or 0),
-            self.cargo_loads(),
-        )
 
     def network_stats(self, *, now: float | None = None) -> NetworkStats:
         timestamp = time.time() if now is None else float(now)
@@ -595,34 +472,3 @@ class CoordinatorState:
             deleted = db.execute("DELETE FROM tickets WHERE token_hash = ?", (token_hash,)).rowcount
             if deleted != 1:
                 raise CoordinatorError("retrieval ticket could not be consumed atomically")
-
-    def record_cargo_load(self, node_id: str, artifact_id: str) -> None:
-        """Count one artifact after its bytes pass verified retrieval.
-
-        The counter is aggregate-only. It is not incremented merely because a
-        ticket was issued or consumed, and it stores no public carrier identity.
-        """
-        _validate_artifact_id(artifact_id)
-        with self._connect() as db:
-            approved = db.execute(
-                "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
-            ).fetchone()
-            if approved is None or approved["distribution"] != "public-approved":
-                raise CoordinatorError("only public-approved artifacts count as CARAVAN cargo")
-            carrier = db.execute(
-                "SELECT state FROM carriers WHERE node_id = ?", (node_id,)
-            ).fetchone()
-            if carrier is None:
-                raise CoordinatorError("unknown carrier")
-            db.execute(
-                "UPDATE caravan_counters SET counter_value = counter_value + 1 "
-                "WHERE counter_name = 'cargo_loads'"
-            )
-
-    def cargo_loads(self) -> int:
-        """Return the monotonic aggregate of verified CARAVAN cargo loads."""
-        with self._connect() as db:
-            row = db.execute(
-                "SELECT counter_value FROM caravan_counters WHERE counter_name = 'cargo_loads'"
-            ).fetchone()
-        return int(row["counter_value"] if row is not None else 0)

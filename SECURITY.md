@@ -1,160 +1,211 @@
-# CENTL Security Policy
+# Security Policy
 
-CENTL treats numerical integrity, release integrity, and ordinary software security as parts of the same trust problem. A system that safely parses input but silently overstates mathematical certainty is not trustworthy, and a mathematically correct release whose bytes can be substituted is not trustworthy either.
+## Supported Versions
 
-## Supported versions
+Security fixes are made for the latest published stable minor series and the
+current `main` branch.
 
-The current supported stable series is **CENTL 0.14.x**.
-
-| Version / line | Status |
+| Version | Supported |
 | --- | --- |
-| 0.14.x | Supported stable series |
-| `oasis` | Authoritative stable-product branch |
-| `main` | Active developer/research distribution; security reports accepted |
-| `mirage` | Active experimental line; security reports accepted for reachable repository-controlled boundaries |
-| 0.13.0 | Never published as a stable release |
-| 0.12.x and earlier | No longer supported as the current stable series |
+| 0.14.x | Yes |
+| `main` | Yes |
+| 0.12.x and earlier | No |
 
-CENTL v0.14.0 is the current published **Oasis release**. Oasis qualification records a reviewed release boundary; it is not a claim that nontrivial software is free of every possible vulnerability.
+The 0.13.0 development line was never published as a separate stable release.
+CENTL v0.14.0 is the current Oasis stable baseline and the supported stable series
+is therefore 0.14.x under this latest-stable policy.
 
-## Reporting a vulnerability
+## Reporting a Vulnerability
 
-Use GitHub's private [Report a vulnerability](https://github.com/chasebryan/centl/security/advisories/new) form.
+Use GitHub's private
+[Report a vulnerability](https://github.com/chasebryan/centl/security/advisories/new)
+form. Do not open a public issue for a vulnerability that has not been fixed.
 
-**Do not open a public issue for an undisclosed vulnerability.**
+Include the affected version or commit, platform, reachable interface, impact,
+minimal reproduction steps, and any suggested mitigation. Do not include real
+credentials, private user data, or unnecessary exploit details. Maintainers
+will coordinate validation, remediation, credit, and disclosure through the
+private advisory.
 
-Please include, where available:
+## System and Scope
 
-- affected version, branch, tag, or commit;
-- GNU/Linux distribution and architecture;
-- reachable interface or trust boundary;
-- expected and observed behavior;
-- realistic impact;
-- minimal reproduction steps or proof of concept;
-- any useful mitigation or root-cause analysis.
+CENTL is a local exact-first calculator, numerical language, physics engine, and
+scientific interaction system. This policy covers its F* semantics and
+extraction, OCaml parser and application, C binding to FLINT/Arb, CLI and file
+input, JSON Lines and MCP-over-stdio interfaces, local history storage,
+CENTL-SCi, MIRAGE, CARAVAN Phase 1, installers, packaging scripts, release
+artifacts, and GitHub Actions workflows.
 
-Do not include real credentials, private user data, or exploit material unrelated to demonstrating the issue. Maintainers will use the private advisory to coordinate validation, remediation, credit, and disclosure.
+The CENTL core and CENTL-SCi do not provide a general remote network service.
+Applications may expose their stdio machine interfaces to less-trusted callers,
+so expressions, scripts, JSON, MCP messages, request identifiers, and request
+timing must be treated as attacker controlled.
 
-## Security scope
+CARAVAN Phase 1 adds an explicitly bounded local laboratory transport. Plain
+HTTP is allowed only for explicit loopback laboratory operation; non-loopback
+catalog/transport endpoints require the documented authenticated/HTTPS
+boundaries. Oasis qualification does not authorize arbitrary public volunteer
+enrollment or a production public carrier listener.
 
-The policy covers repository-controlled security boundaries including:
+MIRAGE ingests user-provided local documents and creates provenance, graph,
+evidence-obligation, and candidate-transaction artifacts. User document text
+is untrusted data and receives no shell, source-mutation, publication, or
+verified-core authority merely because MIRAGE parsed it.
 
-- the F* semantic core and generated extraction path;
-- the OCaml parser, evaluator, CLI, history, JSON Lines, and MCP interfaces;
-- native FLINT/Arb/GMP/MPFR bindings;
-- CENTL-SCi and local semantic-model integration;
-- MIRAGE ingestion, provenance, candidate staging, evidence, and workspace boundaries;
-- CARAVAN content identity, catalog, carrier, transfer, storage, enrollment, census, coordinator, and public-origin work;
-- installers, archives, checksums, release packaging, publication, and recovery paths;
-- GitHub Actions and release automation;
-- preservation and supply-chain tooling.
+Release archives, checksums, dependency registries, authenticated CARAVAN
+metadata, downloaded toolchains, and local preservation copies cross separate
+supply-chain trust boundaries.
 
-The standard CENTL core and CENTL-SCi surfaces are local-first rather than general remote network services. Applications that expose CENTL's stdio protocols to less-trusted callers must still treat expressions, scripts, JSON, MCP messages, identifiers, timing, and resource usage as attacker-controlled input.
+Important assets are mathematical-result integrity, exactness and enclosure
+claims, process and host availability, native memory safety, protocol integrity,
+private local history/workspaces, CARAVAN artifact authenticity and carrier
+credentials, MIRAGE provenance and rollback state, and the authenticity of
+published releases.
 
-## Core security invariants
+## Threat Model and Trust Boundaries
 
-CENTL security review is organized around invariants rather than a list of fashionable vulnerability names.
-
-### Numerical and semantic integrity
-
-- Decimal and integer input must not be silently narrowed through floating point or a fixed-width integer before exact interpretation and bounds checks.
-- Exact, approximate, residual, unsupported, indeterminate, and assurance-bearing results must remain distinguishable across terminal and machine interfaces.
-- Generated, external, or semantic-model output cannot promote its own assurance or override mathematical evidence.
-- A model may interpret intent; it is not mathematical authority.
-- Resource exhaustion, ambiguity, or unsupported mathematics must fail visibly rather than manufacture a result.
-
-### Native and process safety
-
-- Values crossing the native boundary must be validated before use.
-- Attacker-controlled sizes, precision, iteration, expression depth, queue populations, transfer sizes, and retained state must remain bounded where the component exposes them.
-- Cancellation and overload handling must not reorder committed state or mutate state after cancellation.
-- Malformed or extreme input must not cause unchecked native allocation, memory corruption, undefined behavior, or unsafe process behavior.
-
-### Filesystem integrity
-
-- History, workspace, identity, policy, catalog, coordinator, preservation, and release files must obey their documented ownership, regular-file, permission, symlink, path, size, and atomic-write rules where the platform supports them.
-- Archives must reject traversal, absolute paths, links, unsupported special entries, or unsafe layouts before activation.
-- Installation and update paths must stage and validate material before replacing active software.
+- The handwritten OCaml parser and host convert untrusted input into the
+  extracted F* core and serialize every public result view.
+- Exact values and validated dyadic bounds cross the OCaml/C boundary into
+  FLINT, Arb, GMP, and MPFR. F* proofs do not prove those external libraries.
+- Persistent JSON Lines and MCP modes retain definitions and process a bounded
+  queue for the lifetime of one local process; they do not authenticate callers.
+- History and CENTL-SCi/MIRAGE workspaces cross filesystem boundaries and may
+  contain sensitive expressions, specifications, generated plans, or evidence.
+- MIRAGE preserves user-source provenance and may stage candidate metadata, but
+  generated or model-proposed material remains untrusted until the applicable
+  parser, type/dimension, regression, trust, rollback, and verification gates
+  have been discharged.
+- CARAVAN carriers may provide malicious or malformed bytes. Carrier population
+  affects availability only; authenticated FCF/TUF metadata defines which bytes
+  are trusted. Retrieval must validate authenticated chunks and the complete
+  artifact before promotion.
+- CARAVAN carrier keys, policy receipts, retrieval tickets, coordinator state,
+  quarantine state, and catalog trust roots cross distinct identity and
+  filesystem/network boundaries.
+- Installers and release workflows cross GitHub, runner, archive, checksum,
+  compiler, package-registry, preservation-host, and end-user filesystem
+  boundaries.
+- The F* toolchain, selected Z3 version, OCaml compiler/runtime, native
+  compiler/linker, operating system, pinned Python dependencies used by shipped
+  components, and pinned third-party numerical/security libraries are in the
+  trusted computing base, subject to the validation and pinning in this
+  repository.
 
 ### CENTL-SCi publish path
 
-The in-process GitHub contribution path is a **narrow, explicit grant**. It is not a remote control surface and it is not a claim of perfect security.
+The in-process GitHub contribution path is a narrow, explicit grant. It is not
+a remote-control surface and it is not a claim of perfect security.
 
 - Credentials and tokens are never written by CENTL.
 - User English is never passed to a shell.
-- Only allowlisted `git` and `gh` argument vectors may run, and only after a local grant file owned by the current user with mode `0600`.
-- Automated pull requests are draft and must target `mirage`. `oasis` is not an automatic base. Force-push is not implemented.
-- Contributor grants can prepare and pack only. Commit and `gh pr create` require an owner grant plus the acceptance phrase.
-- GitHub review remains the approval authority for every contributor, including the repository owner.
-- Requests for malware, credential theft, or other out-of-scope harm are refused before execution.
+- Automated pull requests are draft and must target `mirage`. `oasis` is not
+  an automatic base. Force-push is not implemented.
+- A promotion candidate must contain the current oasis tip. Oasis does not
+  regress.
 
-A local grant cannot give a stranger push access to `chasebryan/centl`. GitHub authentication stays outside CENTL.
+## Security Invariants
 
-### MIRAGE authority boundaries
+- Decimal and integer input must not be narrowed through floating point or a
+  fixed-width integer before exact parsing and bounds checks.
+- Exact, approximate, residual, unsupported, and indeterminate results must not
+  be confused across terminal, JSON, JSON Lines, verification, or MCP output.
+- Untrusted input must remain within request, expression, exact-bit, iteration,
+  precision, result-size, retained-session, queue, transfer, document, catalog,
+  and process-lifetime limits appropriate to its component.
+- Cancellation and overload handling must not reorder committed definitions,
+  mutate state after cancellation, or permit unbounded retained work.
+- Values crossing the native boundary must be validated before use; malformed
+  or extreme input must not cause memory corruption, undefined behavior, or an
+  unchecked native allocation.
+- History, workspace, identity, policy, and coordinator files must enforce their
+  documented regular-file, ownership/permission, symlink, size, and atomic-write
+  boundaries where the platform supports them.
+- MIRAGE user documents remain data. A document cannot gain executable authority
+  through imperative wording, and staged candidates cannot promote their own
+  assurance or mutate the workspace before the required admission path.
+- CARAVAN carriers cannot redefine trusted artifact identity. Malformed,
+  reordered, truncated, appended, or digest-mismatched transfers must be
+  rejected before object promotion, and a failing carrier cannot rewrite the
+  authenticated expected identity.
+- CARAVAN retrieval capabilities must remain scoped, expiring, and replay-safe;
+  carrier identity proof and policy acceptance must be verified before
+  enrollment/use at the relevant boundary.
+- Archives must be checksum verified, reject unsafe paths/layouts, reject link
+  and unsupported special-entry semantics before extraction, and be staged and
+  validated before activation. A checksum hosted beside an archive detects
+  corruption but is not an independent signature against repository or
+  release-account compromise.
+- Repository workflows must use least-privilege tokens, immutable action pins
+  with accurate version annotations, reviewed dependency changes, and protected
+  publication paths. Untrusted pull request content must not execute with
+  release credentials.
 
-- User documents are data, not executable authority.
-- Imperative wording in a specification cannot grant shell access, source-mutation authority, publication authority, or verified-core status.
-- Candidate material remains staged until the applicable parsing, type/dimension, regression, provenance, rollback, review, and verification gates are satisfied.
-- Generated artifacts cannot certify themselves.
+## Reportable Findings and Severity Context
 
-### CARAVAN authority boundaries
+A finding is reportable when attacker-controlled input or a compromised
+dependency can realistically violate an invariant in a supported interface.
+Examples include memory corruption or code execution, unsafe archive
+extraction, unintended file access or overwrite, release substitution, secret
+exposure, a practical resource-limit bypass, cross-request state corruption,
+CARAVAN artifact/trust substitution, MIRAGE authority/provenance bypass, or a
+result-integrity failure that can mislead an automated caller about exactness,
+proof, enclosure, or assurance guarantees.
 
-CARAVAN's governing security invariant is:
+Severity depends on reachability and impact. Compromise of release consumers,
+arbitrary code execution, artifact-authentication bypass, or silent corruption
+of security-relevant machine results is high impact. A bounded local denial of
+service requiring the user to invoke malicious input is generally lower
+severity unless a common embedding makes the input remotely reachable. Tests
+and proof declarations are evidence of intended controls, not proof that a
+reported path is unreachable.
 
-> **A carrier may provide bytes, but a carrier may never define which bytes are trusted.**
+## Out of Scope, Exclusions, and Accepted Risk
 
-Accordingly:
+- Julia/Nemo laboratory code is not shipped in the runtime, though a weakness
+  that corrupts a release gate or trusted oracle remains in scope.
+- CARAVAN Phase 1 is a local laboratory. Vulnerabilities in a hypothetical
+  public deployment that is not implemented or authorized are not assigned
+  public-network reachability without a repository-controlled path, although
+  flaws in the laboratory trust model remain in scope.
+- A proof gap, style concern, or ordinary correctness bug without a realistic
+  security-boundary impact is not by itself a security vulnerability; report
+  ordinary bugs through GitHub Issues.
+- Vulnerabilities that require prior administrator/root compromise, or purely
+  theoretical third-party issues with no reachable CENTL path, are not
+  reportable without an additional repository-controlled weakness.
+- Unsupported versions are out of scope unless the same issue affects a
+  supported version.
 
-- authenticated FCF metadata defines approved artifact identity;
-- carrier count affects availability, not authority;
-- malformed, reordered, truncated, appended, or digest-mismatched transfers must be rejected before promotion;
-- carrier credentials, policy receipts, catalog trust roots, retrieval capabilities, census state, and quarantine state remain separate trust objects;
-- ordinary carriers must not become arbitrary file servers, proxies, shell gateways, or trust roots;
-- participation and withdrawal must respect explicit resource and privacy boundaries.
+No blanket vulnerability classes or known exploitable risks are accepted by
+this policy.
 
-The v0.14.0 stable boundary contains the bounded CARAVAN Phase 1 laboratory. Main-line work contains later enrollment and public-origin development, but **public volunteer network enrollment remains gated** until its release and operational requirements are deliberately satisfied.
+## Known Limitations and Compensating Controls
 
-### Release and supply-chain integrity
+- GitHub CodeQL analyzes supported portions of the native/security-relevant
+  repository but does not prove CENTL's OCaml or F* source correct. F*
+  verification, OCaml warnings, deterministic tests, fuzzing, sanitizers,
+  metamorphic tests, Julia/Nemo differential tests, CARAVAN negative tests, and
+  MIRAGE admission tests provide complementary coverage but do not replace
+  security review.
+- Dependabot coverage is ecosystem-dependent. Dependencies not supported by
+  GitHub's automated update tooling remain pinned and require manual advisory
+  review plus tested updates.
+- Native numerical libraries, Python security libraries used by CARAVAN, and
+  the language/toolchain stack remain part of the trusted computing base.
+  Narrow bindings, representation checks, exact pins, source/archive hashes,
+  authenticated metadata, and differential/negative testing reduce but do not
+  eliminate that risk.
+- GitHub secret scanning, push protection, private vulnerability reporting,
+  rulesets, required reviews, and code-scanning merge protection are repository
+  settings and must remain enabled in GitHub in addition to the files in this
+  repository.
 
-- Toolchains and dependencies used by the release path must be pinned and validated according to repository policy.
-- GitHub Actions must use appropriate least-privilege permissions and immutable action identities where required.
-- Untrusted pull-request content must not execute with publication credentials.
-- The release tag, qualified source commit, packaged bytes, checksums, and embedded build identity must agree through the publication path.
-- A checksum published beside an archive detects corruption but is not by itself an independent signature against compromise of the publication authority.
-- A release must never be rebuilt from a different source identity merely because the version number matches.
+## Oasis security gate
 
-## Reportable findings
-
-A finding is security-relevant when attacker-controlled input, a compromised dependency, or a repository-controlled trust failure can realistically violate a supported boundary.
-
-Examples include:
-
-- arbitrary code execution or memory corruption;
-- unsafe archive extraction or unintended filesystem access;
-- secret exposure;
-- release or artifact substitution;
-- a practical resource-limit bypass;
-- cross-request state corruption;
-- CARAVAN trust or content-identity substitution;
-- MIRAGE provenance or authority bypass;
-- silent corruption of an exactness, proof, enclosure, or assurance claim presented to a human or machine caller.
-
-Severity depends on both reachability and impact. A local bounded denial of service that requires a user to intentionally run hostile input is generally less severe than a path exposed through a common embedding, publication system, or network-facing component.
-
-## Out of scope and accepted boundaries
-
-- Ordinary correctness bugs without a realistic security, integrity, or assurance impact should be reported through GitHub Issues.
-- Julia/Nemo laboratory code is not shipped as the runtime, although a weakness that corrupts a trusted release gate or oracle remains in scope.
-- A hypothetical public CARAVAN deployment does not receive public-network reachability simply because a design document describes it. Security analysis should use the actually implemented and enabled path.
-- Vulnerabilities requiring prior administrator/root compromise are generally out of scope unless CENTL introduces an additional repository-controlled weakness that materially changes the impact.
-- Unsupported historical releases are out of scope unless the same issue affects a supported line.
-
-There is no blanket accepted class of known exploitable vulnerability.
-
-## Oasis security posture
-
-An Oasis release is not qualified merely because unit tests pass. The applicable gate also examines verification, hardening, dependency and hosted security state, component-specific trust boundaries, installer/release integrity, source identity, and publication integrity.
-
-A release-blocking security finding must be repaired, explicitly scoped out because it is genuinely unreachable or non-applicable, or otherwise resolved with defensible evidence. A checker must not be weakened solely to obtain a green release.
-
-See [`docs/OASIS.md`](docs/OASIS.md), [`docs/RELEASE-POLICY.md`](docs/RELEASE-POLICY.md), [`docs/CARAVAN-THREAT-MODEL.md`](docs/CARAVAN-THREAT-MODEL.md), and [`docs/VERIFICATION.md`](docs/VERIFICATION.md).
+An Oasis release is not justified merely because normal unit tests pass. The
+exact release SHA must also satisfy the repository's dependency/security
+analysis, relevant component-specific validation, installer/release integrity
+checks, and the dedicated hosted `Release security state` gate. No known
+release-blocking security finding may be intentionally hidden by weakening a
+checker solely to obtain a green release.

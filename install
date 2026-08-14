@@ -8,7 +8,6 @@ release_base_url=${CENTL_RELEASE_BASE_URL:-}
 archive_path=""
 prefix=${CENTL_PREFIX:-}
 configure_path=true
-reinstall=false
 
 usage() {
   cat <<'EOF'
@@ -17,7 +16,6 @@ Install CENTL on GNU/Linux.
 Usage: ./install [--channel oasis|mirage] [--version VERSION]
                  [--release-base-url URL] [--prefix PATH]
                  [--archive PATH] [--no-path]
-                 [--reinstall]
 
   --channel CHANNEL          install Oasis (stable) or Mirage (development)
   --version VERSION          install a specific Oasis version or Mirage build
@@ -27,7 +25,6 @@ Usage: ./install [--channel oasis|mirage] [--version VERSION]
   --prefix PATH              install below PATH (default: ~/.local)
   --archive PATH             install and verify a local Linux release archive
   --no-path                  do not update a shell startup file when PATH needs setup
-  --reinstall                replace the selected existing build after verification
   --help                     show this help
 
 Environment:
@@ -83,10 +80,6 @@ while [ "$#" -gt 0 ]; do
       ;;
     --no-path)
       configure_path=false
-      shift
-      ;;
-    --reinstall)
-      reinstall=true
       shift
       ;;
     --help|-h)
@@ -172,12 +165,6 @@ requested_release=""
 source_label="local archive"
 
 if [ -n "$archive_path" ]; then
-  if [ "$channel" = oasis ] && [ "$release_version" != latest ]; then
-    requested_release=${release_version#v}
-    case "$requested_release" in
-      ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested Oasis version is invalid" ;;
-    esac
-  fi
   [ -f "$archive_path" ] || fail "archive not found: $archive_path"
   [ -f "$archive_path.sha256" ] ||
     fail "checksum not found: $archive_path.sha256"
@@ -323,14 +310,8 @@ if [ "$channel" = oasis ]; then
 fi
 
 mkdir -p "$versions" "$bin_directory"
-existing_target=false
-if [ -e "$target" ] || [ -L "$target" ]; then
-  if [ "$reinstall" != true ]; then
-    fail "CENTL $channel build $install_id is already installed at $target"
-  fi
-  [ -d "$target" ] && [ ! -L "$target" ] ||
-    fail "cannot reinstall because the existing target is not a real directory: $target"
-  existing_target=true
+if [ -e "$target" ]; then
+  fail "CENTL $channel build $install_id is already installed at $target"
 fi
 
 staging=$(mktemp -d "$versions/.centl-$install_id.XXXXXXXX")
@@ -357,19 +338,8 @@ if [ "$sci_available" = true ]; then
     fail "the CENTL-SCi REPL did not report its scientific identity"
 fi
 
-if [ "$existing_target" = true ]; then
-  previous="${target}.previous.$$"
-  mv "$target" "$previous"
-  if ! mv "$staging" "$target"; then
-    mv "$previous" "$target" 2>/dev/null || true
-    fail "could not install the verified replacement build"
-  fi
-  staging=""
-  rm -rf -- "$previous"
-else
-  mv "$staging" "$target"
-  staging=""
-fi
+mv "$staging" "$target"
+staging=""
 ln -sfn "$target/bin/centl" "$channel_centl"
 if [ "$physics_available" = true ]; then
   ln -sfn "$target/bin/centl-physics" "$channel_physics"

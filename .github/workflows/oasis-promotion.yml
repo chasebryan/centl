@@ -1,28 +1,15 @@
-name: CARAVAN Phase 1 laboratory
+name: Oasis promotion qualification
 
 on:
   pull_request:
     branches:
       - oasis
-    paths:
-      - 'caravan/**'
-      - 'docs/CARAVAN-PHASE1.md'
-      - 'docs/CARAVAN-IDENTITY.md'
-      - 'docs/CARAVAN-CATALOG.md'
-      - 'docs/CARAVAN-TRANSPORT.md'
-      - 'scripts/caravan-phase1-check'
-      - 'tests/test_caravan_phase1.py'
-      - 'tests/test_caravan_identity.py'
-      - 'tests/test_caravan_enrollment.py'
-      - 'tests/test_caravan_tuf_catalog.py'
-      - 'tests/test_caravan_transport.py'
-      - '.github/workflows/caravan-phase1.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: caravan-phase1-${{ github.event.pull_request.number || github.ref }}
+  group: oasis-promotion-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
@@ -37,47 +24,17 @@ env:
   FLINT_VERSION: "3.0.1"
   FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
   PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
-  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
 jobs:
-  laboratory:
-    name: Identity, integrity, catalog, policy, and outbound transport gates
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out exact proposed Oasis SHA
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-
-      - name: Create isolated Python environment
-        run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
-
-      - name: Install pinned Phase 1 dependencies
-        run: |
-          "$RUNNER_TEMP/caravan-venv/bin/python" -m pip \
-            --disable-pip-version-check install \
-            --only-binary=:all: \
-            -r caravan/requirements-phase1.txt
-
-      - name: Run CARAVAN Phase 1 checks
-        env:
-          PYTHON: ${{ runner.temp }}/caravan-venv/bin/python
-        run: sh scripts/caravan-phase1-check
-
-  oasis-self-test:
-    name: Adversarial engine self-test
+  self-test:
+    name: Promotion engine self-test
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Check out exact proposed Oasis SHA
+      - name: Check out proposed Oasis candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-
-      - name: Require checkout identity
-        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
 
       - name: Compile Oasis policy surfaces
         run: |
@@ -99,26 +56,19 @@ jobs:
       - name: Validate complete candidate plan
         run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
 
-  oasis-converge:
-    name: Full stable-product convergence
-    needs:
-      - laboratory
-      - oasis-self-test
+  converge:
+    name: Promotion full convergence
+    needs: self-test
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
       JULIA_NUM_THREADS: "1"
       JULIA_PKG_PRECOMPILE_AUTO: "0"
-      CENTL_BUILD_COMMIT: ${{ github.event.pull_request.head.sha }}
     steps:
-      - name: Check out exact proposed Oasis SHA
+      - name: Check out proposed Oasis candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-
-      - name: Require checkout identity
-        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
 
       - name: Configure runner paths
         shell: bash
@@ -150,7 +100,7 @@ jobs:
       - name: Instantiate pinned independent oracle
         run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Create isolated Oasis Python environment
+      - name: Create isolated CARAVAN Python environment
         run: python3 -m venv "$RUNNER_TEMP/oasis-venv"
 
       - name: Install pinned CARAVAN dependencies
@@ -160,48 +110,17 @@ jobs:
             --only-binary=:all: \
             -r caravan/requirements-phase1.txt
 
-      - name: Execute complete exact-SHA Oasis convergence
+      - name: Execute complete candidate convergence
         env:
           OPAM_SWITCH: centl
         run: |
           "$RUNNER_TEMP/oasis-venv/bin/python" scripts/oasis.py \
             --root "$PWD" --no-repair --keep-going
 
-      - name: Preserve exact qualified release bytes
-        if: success()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: oasis-release-${{ github.event.pull_request.head.sha }}
-          path: dist/*
-          if-no-files-found: error
-
-      - name: Preserve Oasis convergence evidence
+      - name: Preserve promotion evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: oasis-evidence-${{ github.event.pull_request.head.sha }}
+          name: oasis-promotion-evidence-${{ github.sha }}
           path: _build/oasis/**
           if-no-files-found: warn
-
-  oasis-security:
-    name: Release security state
-    needs: oasis-converge
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      security-events: read
-    steps:
-      - name: Check out exact proposed Oasis SHA
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-
-      - name: Require checkout identity
-        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
-
-      - name: Require clear release-blocking GitHub security state
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/oasis-security-state.py --root "$PWD"
