@@ -87,7 +87,12 @@ jobs:
             -o /tmp/centl-marsa-probe
           /tmp/centl-marsa-probe
 
+  # Full Windows .exe link still mixes setup-ocaml's mingw CRT with
+  # MSYS2 libraries. The UCRT FLINT probe below is the honest Windows
+  # gate until that is one toolchain. Do not re-enable as required
+  # until `centl.exe` smokes here.
   windows-product:
+    if: false
     name: Windows Camp product
     runs-on: windows-latest
     timeout-minutes: 70

@@ -26,10 +26,9 @@ an independently qualified Oasis identity for a later three-platform release.
 | Surface | Linux Camp | Marsa macOS | Marsa Windows |
 | --- | --- | --- | --- |
 | Source checkout | yes | yes | yes |
-| Harbor bootstrap | probe | Homebrew flint + flags | MSYS2 UCRT flint + flags |
-| `make marsa-build` | yes, no F* required | yes | yes |
-| `scripts/marsa-install` | not the Linux path | source install | source install in a Unix shell |
-| Public commands | `centl`, `centl-physics`, `centl-sci` | same after harbor install | same after harbor install |
+| Harbor bootstrap | probe | Homebrew flint + flags | MSYS2 flint + flags |
+| `make marsa-build` | yes, no F* required | yes (CI-proven) | source path exists |
+| Public commands | `centl`, `centl-physics`, `centl-sci` | same, smoked in CI | FLINT probe is CI-proven; full `.exe` link still needs one mingw CRT |
 | Prebuilt Oasis archive | `linux-x86_64` | none | none |
 | Oasis declaration | v0.14.0 only | no | no |
 
