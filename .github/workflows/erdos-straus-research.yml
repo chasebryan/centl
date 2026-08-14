@@ -1,0 +1,118 @@
+name: CENTL Erdős-Straus research
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Hard-prime search limit
+        required: false
+        default: "10000000"
+      k_max:
+        description: Maximum Type A/B layer
+        required: false
+        default: "3000"
+  push:
+    branches:
+      - main
+    paths:
+      - 'research/erdos-straus/**'
+      - '.github/workflows/erdos-straus-research.yml'
+      - 'src/**'
+      - 'centl.opam'
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    name: Reproduce, independently verify, and CENTL-certify WS-CAND-003
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Build the exact CENTL binary
+        run: opam exec -- dune build src/main.exe
+
+      - name: Resolve research bounds
+        id: bounds
+        shell: bash
+        env:
+          DISPATCH_LIMIT: ${{ github.event.inputs.limit }}
+          DISPATCH_K_MAX: ${{ github.event.inputs.k_max }}
+        run: |
+          set -euo pipefail
+          limit=${DISPATCH_LIMIT:-10000000}
+          kmax=${DISPATCH_K_MAX:-3000}
+          case "$limit" in (*[!0-9]*|'') echo "invalid limit: $limit" >&2; exit 2;; esac
+          case "$kmax" in (*[!0-9]*|'') echo "invalid k_max: $kmax" >&2; exit 2;; esac
+          echo "limit=$limit" >> "$GITHUB_OUTPUT"
+          echo "kmax=$kmax" >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate Type A/B depth, shadow, ancestry, and novelty data
+        run: |
+          rm -rf research-output
+          python3 research/erdos-straus/esc_research.py \
+            --limit '${{ steps.bounds.outputs.limit }}' \
+            --k-max '${{ steps.bounds.outputs.kmax }}' \
+            --out research-output
+
+      - name: Independently verify finite certificates
+        run: |
+          python3 research/erdos-straus/verify_research.py \
+            --out research-output
+
+      - name: Certify algebra with CENTL
+        run: |
+          python3 research/erdos-straus/centl_certify.py \
+            --centl _build/default/src/main.exe \
+            --out research-output
+
+      - name: Freeze final artifact hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research-output
+          find . -maxdepth 1 -type f ! -name 'SHA256SUMS.final' -printf '%f\n' \
+            | LC_ALL=C sort \
+            | while IFS= read -r f; do sha256sum "$f"; done \
+            > SHA256SUMS.final
+          sha256sum -c SHA256SUMS.final
+
+      - name: Publish run summary
+        shell: bash
+        run: |
+          cat research-output/report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n## Independent verifier\n\n```json\n' >> "$GITHUB_STEP_SUMMARY"
+          cat research-output/independent-verification.json >> "$GITHUB_STEP_SUMMARY"
+          printf '\n```\n\n## CENTL certification\n\n```json\n' >> "$GITHUB_STEP_SUMMARY"
+          cat research-output/centl-certification-summary.json >> "$GITHUB_STEP_SUMMARY"
+          printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload complete research bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-ws-cand-003-${{ github.sha }}
+          path: research-output/
+          if-no-files-found: error
+          retention-days: 90
