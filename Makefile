@@ -136,7 +136,9 @@ release-verify:
 marsa-probe:
 	sh scripts/marsa-probe
 
-marsa-build: native-build
+marsa-build:
+	@for generated in $(GENERATED); do test -f "$$generated"; done
+	$(DUNE) build @install src/main.exe src/physics_main.exe src/sci_main.exe
 
 marsa-smoke: marsa-build
 	sh scripts/marsa-smoke
