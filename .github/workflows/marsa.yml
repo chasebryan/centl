@@ -96,6 +96,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
+        id: msys
         with:
           msystem: MINGW64
           update: true
@@ -117,9 +118,15 @@ jobs:
           windows-environment: msys2
           opam-pin: false
       - name: Build and smoke the three commands
-        shell: msys2 {0}
+        shell: bash
+        env:
+          MSYS2_ROOT: ${{ steps.msys.outputs.msys2-location }}
         run: |
           set -eu
+          export PATH="$MSYS2_ROOT/mingw64/bin:$PATH"
+          command -v opam
+          command -v pkg-config
+          pkg-config --exists flint
           opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
           eval "$(opam env)"
           make marsa-smoke
