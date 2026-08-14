@@ -78,11 +78,15 @@ work.
 Oasis-only gate merely because it contains the full tree.
 
 The main README and other flagship product surfaces must treat `oasis` as the
-authoritative source for stable product identity: recommended release/version,
-supported stable capabilities, installation claims, release badges, and other
-standard-product statements should reflect what is established on `oasis`.
-Experimental capabilities present through Mirage or main must be identified as
-such and must not silently inherit Oasis assurance.
+authoritative source for **stable product identity**: recommended release
+version, supported stable capabilities, installation claims, and release
+badges should reflect what is established on `oasis`.
+
+Those same surfaces must also name the current [FCF Camp](FCF-CAMPS.md) stay
+as the place where newest software and designs are used. A camp does not
+replace Oasis, inherit Oasis, or become a SemVer product. Experimental
+capabilities present through Mirage, main, or a camp must be identified as
+such.
 
 ## Promotion model
 

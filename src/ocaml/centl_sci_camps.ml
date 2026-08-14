@@ -8,6 +8,7 @@ type camp = {
   expedition : string;
   published_oasis : string;
   oasis_declared : bool;
+  artifact_tag : string option;
   why_not_oasis : string list;
   oasis_still_possible : string;
   in_bounds : string list;
@@ -37,6 +38,7 @@ let camp_001 =
     expedition = "secret-oasis-2026-08-14";
     published_oasis;
     oasis_declared = false;
+    artifact_tag = Some "fcf-camp-001";
     why_not_oasis =
       [
         "current identity is not the oasis branch";
@@ -106,6 +108,10 @@ let to_json occupation =
         ("expedition", `String camp.expedition);
         ("published_oasis", `String camp.published_oasis);
         ("oasis_declared", `Bool false);
+        ( "artifact_tag",
+          match camp.artifact_tag with
+          | None -> `Null
+          | Some tag -> `String tag );
         ( "why_not_oasis",
           `List (List.map (fun value -> `String value) camp.why_not_oasis) );
         ("oasis_still_possible", `String camp.oasis_still_possible);
@@ -141,6 +147,9 @@ let render_camp camp =
        "occupied: " ^ camp.date_occupied;
        "published Oasis: v" ^ camp.published_oasis;
        "Oasis declared: no";
+       (match camp.artifact_tag with
+       | None -> "named artifact: none"
+       | Some tag -> "named artifact: " ^ tag);
        "why this is not Oasis:";
      ]
     @ List.map (fun value -> "  - " ^ value) camp.why_not_oasis

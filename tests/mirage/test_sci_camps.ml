@@ -18,6 +18,8 @@ let test_camp_001_forbids_oasis_declaration () =
       Alcotest.(check string)
         "status" "occupied"
         (Centl_sci_camps.status_text camp.status);
+      Alcotest.(check (option string))
+        "artifact tag" (Some "fcf-camp-001") camp.artifact_tag;
       Alcotest.(check bool)
         "explains why Oasis is withheld" true
         (camp.why_not_oasis <> []);
