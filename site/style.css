@@ -168,6 +168,11 @@ ul, ol { margin-top: 7px; }
   background: var(--blue-dark);
   text-decoration: none;
 }
+.caravan-join-button:disabled {
+  cursor: not-allowed;
+  opacity: .52;
+}
+.caravan-join-button:not(:disabled) { cursor: pointer; font: inherit; }
 .caravan-join-flow {
   margin: 16px 0;
   padding-left: 12px;

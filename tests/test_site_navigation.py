@@ -56,6 +56,16 @@ class SiteNavigationTests(unittest.TestCase):
         self.assertIn('class="caravan-join-button caravan-join-action"', join)
         self.assertIn("CARAVAN-HOST-POLICY.md", join)
 
+    def test_join_page_generates_a_signed_option_specific_launcher(self) -> None:
+        join = (ROOT / "site" / "join.html").read_text(encoding="utf-8")
+        self.assertIn('id="download-caravan-launcher"', join)
+        self.assertIn("new Blob", join)
+        self.assertIn("fcf-caravan-join-1.0.5", join)
+        self.assertIn("signify -V", join)
+        self.assertIn('--missions \\\"$MISSIONS\\\"', join)
+        self.assertIn('--transport \\\"$TRANSPORT\\\"', join)
+        self.assertNotIn("releases/tag/fcf-caravan-join-1.0.5", join)
+
     def test_every_html_page_uses_the_same_primary_navigation(self) -> None:
         expected_headings = ["Foundation", "External"]
         expected_labels = [
