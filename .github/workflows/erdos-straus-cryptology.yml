@@ -6,7 +6,7 @@ on:
       bits:
         description: Toy prime bit length
         required: false
-        default: "31"
+        default: "39"
       samples:
         description: Samples per prime population
         required: false
@@ -19,12 +19,21 @@ on:
         description: Public/private fingerprint depth
         required: false
         default: "80"
+      trials:
+        description: Repeated held-out trials for v2
+        required: false
+        default: "12"
+      folds:
+        description: Stratified cross-validation folds for v2
+        required: false
+        default: "5"
   push:
     branches:
       - main
     paths:
       - 'research/erdos-straus/CRYPTOLOGY.md'
       - 'research/erdos-straus/crypto_probe.py'
+      - 'research/erdos-straus/crypto_probe_v2.py'
       - 'research/erdos-straus/cryptology-contracts.centl'
       - '.github/workflows/erdos-straus-cryptology.yml'
       - 'src/**'
@@ -35,7 +44,7 @@ permissions:
 
 jobs:
   probe:
-    name: Prime fingerprints, toy public-modulus diagnostics, and CENTL exact checks
+    name: Prime fingerprints, held-out diagnostics, and CENTL exact checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
@@ -71,13 +80,23 @@ jobs:
           SAMPLES: ${{ github.event.inputs.samples }}
           KMAX: ${{ github.event.inputs.k_max }}
           KFP: ${{ github.event.inputs.k_fingerprint }}
+          TRIALS: ${{ github.event.inputs.trials }}
+          FOLDS: ${{ github.event.inputs.folds }}
         run: |
           set -euo pipefail
-          bits=${BITS:-31}
+          bits=${BITS:-39}
           samples=${SAMPLES:-160}
           kmax=${KMAX:-500}
           kfp=${KFP:-80}
-          for pair in "bits:$bits" "samples:$samples" "kmax:$kmax" "kfp:$kfp"; do
+          trials=${TRIALS:-12}
+          folds=${FOLDS:-5}
+          for pair in \
+            "bits:$bits" \
+            "samples:$samples" \
+            "kmax:$kmax" \
+            "kfp:$kfp" \
+            "trials:$trials" \
+            "folds:$folds"; do
             name=${pair%%:*}; value=${pair#*:}
             case "$value" in (*[!0-9]*|'') echo "invalid $name: $value" >&2; exit 2;; esac
           done
@@ -85,8 +104,10 @@ jobs:
           echo "samples=$samples" >> "$GITHUB_OUTPUT"
           echo "kmax=$kmax" >> "$GITHUB_OUTPUT"
           echo "kfp=$kfp" >> "$GITHUB_OUTPUT"
+          echo "trials=$trials" >> "$GITHUB_OUTPUT"
+          echo "folds=$folds" >> "$GITHUB_OUTPUT"
 
-      - name: Run cryptology fingerprint probe
+      - name: Run cryptology fingerprint probe v1
         run: |
           rm -rf cryptology-output
           python3 research/erdos-straus/crypto_probe.py \
@@ -94,6 +115,17 @@ jobs:
             --samples '${{ steps.params.outputs.samples }}' \
             --k-max '${{ steps.params.outputs.kmax }}' \
             --k-fingerprint '${{ steps.params.outputs.kfp }}' \
+            --out cryptology-output
+
+      - name: Run repeated held-out cryptology probe v2
+        run: |
+          python3 research/erdos-straus/crypto_probe_v2.py \
+            --bits '${{ steps.params.outputs.bits }}' \
+            --samples '${{ steps.params.outputs.samples }}' \
+            --k-max '${{ steps.params.outputs.kmax }}' \
+            --k-fingerprint '${{ steps.params.outputs.kfp }}' \
+            --trials '${{ steps.params.outputs.trials }}' \
+            --folds '${{ steps.params.outputs.folds }}' \
             --out cryptology-output
 
       - name: CENTL exact certification of planted-control algebra
@@ -115,7 +147,11 @@ jobs:
           sha256sum -c SHA256SUMS
 
       - name: Publish summary
-        run: cat cryptology-output/cryptology-report.md >> "$GITHUB_STEP_SUMMARY"
+        shell: bash
+        run: |
+          cat cryptology-output/cryptology-report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat cryptology-output/cryptology-v2-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload cryptology diagnostic bundle
         if: always()
