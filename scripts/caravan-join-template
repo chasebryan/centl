@@ -7,6 +7,7 @@ set -Eeuo pipefail
 RELEASE_VERSION='@FCF_CARAVAN_JOIN_VERSION@'
 RELEASE_KEY_SHA256='@FCF_CARAVAN_JOIN_KEY_SHA256@'
 COORDINATOR_URL='@FCF_CARAVAN_COORDINATOR_URL@'
+RELEASE_SIGNIFY_HELPER_SHA256='@FCF_SIGNIFY_HELPER_SHA256@'
 
 fail() {
   printf 'FCF CARAVAN join: %s\n' "$*" >&2
@@ -25,7 +26,7 @@ esac
 [ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "this FCF CARAVAN release supports Linux hosts"
 [ "$(id -u)" -ne 0 ] || fail "normal CARAVAN carrier setup is rootless; do not run join-caravan with sudo"
 
-for cmd in sha256sum signify python3; do
+for cmd in sha256sum python3; do
   command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required to verify this authenticated release"
 done
 
@@ -78,7 +79,24 @@ release_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 actual_key_sha=$(sha256sum "$release_root/FCF-CARAVAN-JOIN.pub" | awk '{print $1}')
 [ "$actual_key_sha" = "$RELEASE_KEY_SHA256" ] || fail "bundled FCF join key identity differs from this release"
 
-signify -V -q -p "$release_root/FCF-CARAVAN-JOIN.pub" \
+signify_command=$(command -v signify 2>/dev/null || true)
+if [ -z "$signify_command" ]; then
+  case "$(uname -m)" in
+    x86_64|amd64)
+      helper="$release_root/fcf-signify-x86_64-glibc"
+      [ -f "$helper" ] && [ ! -L "$helper" ] ||
+        fail "signify is missing and the signed release does not contain its FCF helper"
+      helper_sha256=$(sha256sum "$helper" | awk '{print $1}')
+      [ "$helper_sha256" = "$RELEASE_SIGNIFY_HELPER_SHA256" ] ||
+        fail "the bundled FCF signify helper fingerprint is unexpected"
+      [ -x "$helper" ] || fail "the bundled FCF signify helper is not executable"
+      signify_command="$helper"
+      ;;
+    *) fail "signify is missing and this architecture has no FCF-hosted helper yet" ;;
+  esac
+fi
+
+"$signify_command" -V -q -p "$release_root/FCF-CARAVAN-JOIN.pub" \
   -x "$release_root/SHA256SUMS.sig" -m "$release_root/SHA256SUMS" ||
   fail "FCF release signature verification failed"
 

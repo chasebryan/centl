@@ -12,6 +12,7 @@ need() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
 VERSION=""
 OUTPUT=""
 ASSUME_YES=0
+HELPER_ASSET="fcf-signify-x86_64-glibc"
 
 usage() {
   cat <<'TXT'
@@ -27,6 +28,10 @@ explicit, passphrase-protected FCF signing key outside the repository.
 FCF_CARAVAN_COORDINATOR_URL must be the authenticated HTTPS coordinator URL or
 the public FCF coordinator-v1.json bootstrap URL embedded into the signed
 launcher. It must not contain credentials or a query.
+
+FCF_CARAVAN_SIGNIFY_HELPER must point to the FCF-built x86_64/glibc signify
+helper kept outside the repository. It is embedded into the signed archive so
+the released launcher can verify itself without a preinstalled signify.
 
 Existing release directories are never overwritten. A changed installer requires
 a new version and a new explicit signing action.
@@ -56,7 +61,9 @@ source_commit=$(git -C "$repo_root" rev-parse HEAD)
 
 secret=${FCF_CARAVAN_JOIN_SECRET_KEY:-}
 public=${FCF_CARAVAN_JOIN_PUBLIC_KEY:-}
+helper=${FCF_CARAVAN_SIGNIFY_HELPER:-}
 [ -n "$secret" ] && [ -n "$public" ] || fail "FCF_CARAVAN_JOIN_SECRET_KEY and FCF_CARAVAN_JOIN_PUBLIC_KEY are required"
+[ -n "$helper" ] || fail "FCF_CARAVAN_SIGNIFY_HELPER is required"
 coordinator_url=${FCF_CARAVAN_COORDINATOR_URL:-}
 [ -n "$coordinator_url" ] || fail "FCF_CARAVAN_COORDINATOR_URL is required"
 python3 - "$coordinator_url" <<'PY'
@@ -76,12 +83,17 @@ if (
 PY
 [ -f "$secret" ] && [ ! -L "$secret" ] || fail "secret signing key is missing or unsafe"
 [ -f "$public" ] && [ ! -L "$public" ] || fail "public signing key is missing or unsafe"
+[ -f "$helper" ] && [ ! -L "$helper" ] || fail "FCF signify helper is missing or unsafe"
 secret=$(readlink -f -- "$secret")
 public=$(readlink -f -- "$public")
+helper=$(readlink -f -- "$helper")
 case "$secret" in "$repo_root"|"$repo_root"/*) fail "secret FCF signing key must never live inside the CENTL repository" ;; esac
 
 key_sha=$(sha256sum "$public" | awk '{print $1}')
+helper_sha=$(sha256sum "$helper" | awk '{print $1}')
 release_name="fcf-caravan-join-$VERSION"
+helper_url=${FCF_CARAVAN_SIGNIFY_HELPER_URL:-"https://github.com/$repository/releases/download/$release_name/$HELPER_ASSET"}
+case "$helper_url" in https://*) ;; *) fail "FCF signify helper URL must use HTTPS" ;; esac
 out_root=$(readlink -m -- "$OUTPUT")
 release_dir="$out_root/$release_name"
 [ ! -e "$release_dir" ] || fail "release already exists and will not be overwritten: $release_dir"
@@ -92,25 +104,29 @@ stage="$work/$release_name"
 mkdir -p "$stage/payload/caravan" "$stage/payload/docs"
 
 [ -f "$repo_root/scripts/caravan-join-template" ] || fail "join template missing"
-python3 - "$repo_root/scripts/caravan-join-template" "$stage/join-caravan" "$VERSION" "$key_sha" "$coordinator_url" <<'PY'
+python3 - "$repo_root/scripts/caravan-join-template" "$stage/join-caravan" "$VERSION" "$key_sha" "$coordinator_url" "$helper_sha" <<'PY'
 from pathlib import Path
 import sys
-src, dst, version, key_sha, coordinator_url = sys.argv[1:]
+src, dst, version, key_sha, coordinator_url, helper_sha = sys.argv[1:]
 text = Path(src).read_text(encoding="utf-8")
 if (
     text.count("@FCF_CARAVAN_JOIN_VERSION@") < 1
     or text.count("@FCF_CARAVAN_JOIN_KEY_SHA256@") < 1
     or text.count("@FCF_CARAVAN_COORDINATOR_URL@") < 1
+    or text.count("@FCF_SIGNIFY_HELPER_SHA256@") < 1
 ):
     raise SystemExit("join release template markers are missing")
 text = text.replace("@FCF_CARAVAN_JOIN_VERSION@", version)
 text = text.replace("@FCF_CARAVAN_JOIN_KEY_SHA256@", key_sha)
 text = text.replace("@FCF_CARAVAN_COORDINATOR_URL@", coordinator_url)
+text = text.replace("@FCF_SIGNIFY_HELPER_SHA256@", helper_sha)
 Path(dst).write_text(text, encoding="utf-8")
 PY
 chmod 0755 "$stage/join-caravan"
 cp "$public" "$stage/FCF-CARAVAN-JOIN.pub"
 chmod 0644 "$stage/FCF-CARAVAN-JOIN.pub"
+cp "$helper" "$stage/$HELPER_ASSET"
+chmod 0555 "$stage/$HELPER_ASSET"
 
 for file in "$repo_root"/caravan/*.py "$repo_root/caravan/requirements-phase1.txt"; do
   [ -f "$file" ] || fail "CARAVAN payload file missing: $file"
@@ -132,11 +148,11 @@ cp "$repo_root/scripts/caravan-carrier-withdraw" "$stage/payload/fcf-caravan-wit
 chmod 0555 "$stage/payload/centl-install"
 chmod 0555 "$stage/payload/fcf-caravan-withdraw"
 
-python3 - "$stage/RELEASE.json" "$VERSION" "$source_commit" "$key_sha" <<'PY'
+python3 - "$stage/RELEASE.json" "$VERSION" "$source_commit" "$key_sha" "$helper_sha" "$helper_url" <<'PY'
 import json
 import sys
 from pathlib import Path
-out, version, source_commit, key_sha = sys.argv[1:]
+out, version, source_commit, key_sha, helper_sha, helper_url = sys.argv[1:]
 data = {
     "schema": "fcf-caravan-join-release-v1",
     "version": version,
@@ -154,6 +170,9 @@ data = {
     "public_node_listing": False,
     "public_network_enrollment": "authenticated-consent-and-heartbeat",
     "coordinator_bootstrap_url_embedded": True,
+    "bundled_signify_helper": "fcf-signify-x86_64-glibc",
+    "bundled_signify_helper_sha256": helper_sha,
+    "signify_helper_release_asset": helper_url,
     "carrier_transport_choices": ["https", "tor"],
     "withdrawal_command": "~/.local/bin/fcf-caravan-withdraw",
 }

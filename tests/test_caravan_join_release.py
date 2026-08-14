@@ -42,6 +42,8 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn("--reinstall-oasis", text)
         self.assertIn("already installed; reused", text)
         self.assertIn("failed its integrity check", text)
+        self.assertIn("RELEASE_SIGNIFY_HELPER_SHA256", text)
+        self.assertIn("bundled FCF signify helper", text)
         self.assertIn("payload/centl-install", text)
         self.assertIn('"software_support"', text)
         self.assertIn('"consent"', text)
@@ -79,7 +81,7 @@ class CaravanJoinReleaseTests(unittest.TestCase):
 
     def test_join_script_verifies_signed_exact_membership_before_install(self) -> None:
         text = TEMPLATE.read_text(encoding="utf-8")
-        signature = text.index("signify -V")
+        signature = text.index('"$signify_command" -V')
         membership = text.index("release exact-membership check failed")
         install = text.index('install_root="$LIB_HOME/fcf-caravan/releases/$RELEASE_VERSION"')
         self.assertLess(signature, membership)
@@ -111,6 +113,8 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         text = RELEASE.read_text(encoding="utf-8")
         self.assertIn("FCF_CARAVAN_JOIN_SECRET_KEY", text)
         self.assertIn("FCF_CARAVAN_JOIN_PUBLIC_KEY", text)
+        self.assertIn("FCF_CARAVAN_SIGNIFY_HELPER", text)
+        self.assertIn("FCF_CARAVAN_SIGNIFY_HELPER is required", text)
         self.assertIn("secret FCF signing key must never live inside the CENTL repository", text)
         self.assertIn("official join releases require a completely clean Git checkout", text)
         self.assertIn("release already exists and will not be overwritten", text)
