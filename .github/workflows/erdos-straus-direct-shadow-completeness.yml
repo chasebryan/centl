@@ -6,11 +6,11 @@ on:
       k_limit:
         description: Candidate layers to attack
         required: false
-        default: "600"
+        default: "1000"
       search_limit:
         description: Maximum parameter s searched per candidate
         required: false
-        default: "250000"
+        default: "1000000"
   push:
     branches: [main]
     paths:
@@ -55,8 +55,8 @@ jobs:
           K: ${{ github.event.inputs.k_limit }}
           S: ${{ github.event.inputs.search_limit }}
         run: |
-          echo "k=${K:-600}" >> "$GITHUB_OUTPUT"
-          echo "s=${S:-250000}" >> "$GITHUB_OUTPUT"
+          echo "k=${K:-1000}" >> "$GITHUB_OUTPUT"
+          echo "s=${S:-1000000}" >> "$GITHUB_OUTPUT"
 
       - name: Attack every directly novel candidate
         run: |
