@@ -11,6 +11,7 @@ Core linked records:
 - [`THEORY.md`](THEORY.md) — foundational shadow and modulus-ancestry results;
 - [`RESULTS-2026-08-14.md`](RESULTS-2026-08-14.md) — automated frontier, shadow map, independent verification, and CENTL certification;
 - [`DEPTH-SPECTRUM.md`](DEPTH-SPECTRUM.md) — exact-depth realization and the structural-gap versus latency-gap distinction;
+- [`DIRECT-SHADOW-COMPLETENESS.md`](DIRECT-SHADOW-COMPLETENESS.md) — candidatewise attack showing all 19,016 directly novel candidates through `k=600` have independently verified reduced avoiding progressions;
 - [`PRIME-MODULUS-BACKBONE.md`](PRIME-MODULUS-BACKBONE.md) — infinite exact-depth prime-modulus backbone;
 - [`SURVIVOR-DENSITY.md`](SURVIVOR-DENSITY.md) — exact finite-depth density, mass, and conditional hazard;
 - [`COMPOSITE-CORE.md`](COMPOSITE-CORE.md) — zero-density prime-modulus survivor core and composite-rescue reduction;
@@ -25,6 +26,8 @@ The harness is deliberately split into three layers:
 3. `centl_certify.py` feeds the algebraic output into the repository's CENTL binary. CENTL exactly verifies every frontier Egyptian-fraction decomposition, one polynomial family for every frontier witness, and the modulus-ancestry polynomial identity for every observed divisibility quotient. It also emits a dedicated receipt for the current record family.
 
 The GitHub Actions workflow `.github/workflows/erdos-straus-research.yml` builds CENTL from the checked-out commit, runs all three stages, hashes the outputs, and uploads the complete result bundle as a workflow artifact.
+
+A separate candidatewise falsification workflow, `.github/workflows/erdos-straus-direct-shadow-completeness.yml`, now attacks the possibility that multiple earlier partial shadows can jointly cover a candidate even when no single earlier layer does. Its first completed run through `k=600` found explicit reduced avoiding progressions for all `19,016` directly novel candidates and independently reverified every certificate.
 
 ## Default research contract
 
@@ -70,9 +73,11 @@ The finite computation can certify statements such as:
 - observed modulus divisibility edges satisfy `4k-1 = q(4j-1)` with `q = 4s+1` and therefore `k=qj-s`;
 - CENTL verifies the supplied exact Egyptian-fraction and polynomial identities without floating-point approximation.
 
+The candidatewise completeness harness adds a stronger finite statement: through `k=600`, every directly novel hard-compatible candidate, not merely every realizable layer, has an explicit reduced avoiding progression and therefore an infinite exact-depth prime family by Dirichlet.
+
 ## What the harness does not prove
 
-It does not prove the Erdős-Straus conjecture. It does not prove López's Type A/B coverage conjecture. It does not establish literature priority. `direct_novel` means no **single** previous layer shadows the entire class; several earlier layers could still collectively cover it. The stronger cases are the classes carrying actual first-hit primes, because those primes are concrete counterexamples to such collective coverage.
+It does not prove the Erdős-Straus conjecture. It does not prove López's Type A/B coverage conjecture. It does not establish literature priority. In general, `direct_novel` means only that no **single** previous layer shadows the entire class; several earlier layers could still collectively cover it. The new `k<=600` candidatewise certificates rule that collective-coverage possibility out for every directly novel candidate in that finite range, but do not prove the universal implication for all `k`.
 
 Observed quotient groups in `ancestry-candidate-families.json` are finite theorem candidates. They are not promoted to infinite shadow families without a separate proof.
 
@@ -82,8 +87,8 @@ The automation is designed to move the project from numerical scouting toward th
 
 `Type A/B witnesses -> C_AB -> trap layers -> direct shadow -> modulus ancestry -> witnessed irredundant core -> candidate infinite families`.
 
-The next mathematical target is a necessary-and-sufficient condition for full shadowing along modulus-ancestry families, especially the `q=5` relation `k=5j-1`, followed by an exact treatment of collective union shadowing for classes without an explicit first-hit witness.
+The highest-value immediate theorem target is now the universal form of **Direct-Shadow Completeness**: prove or refute that every hard-compatible candidate not directly shadowed by one earlier layer admits a reduced avoiding class. In parallel, classify full shadowing along modulus-ancestry families, especially the `q=5` relation `k=5j-1`.
 
-The broader theorem program is now summarized in [`DIAMOND.md`](DIAMOND.md):
+The broader theorem program is summarized in [`DIAMOND.md`](DIAMOND.md):
 
 `C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> prime-modulus backbone -> composite rescue core`.
