@@ -12,4 +12,4 @@ equal | 4037880*t + 1 | 23*(175560*t) + 1 | t:rational
 
 # If the same structured family is squared, the public product remains 1 mod M.
 # This is a one-parameter toy identity, not an RSA factorization result.
-equal | (4037880*t + 1)^2 | 16304558294400*t^2 + 8075760*t + 1 | t:rational
+equal | (4037880*t + 1)^2 | 16304474894400*t^2 + 8075760*t + 1 | t:rational
