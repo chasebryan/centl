@@ -1,0 +1,250 @@
+#!/bin/sh
+set -eu
+
+repository="chasebryan/centl"
+channel="oasis"
+component=""
+release_version="latest"
+prefix=${CENTL_PREFIX:-}
+archive_path=""
+
+usage() {
+  cat <<'EOF'
+Install exactly one CENTL scientific command on GNU/Linux x86_64.
+
+Usage: ./install-component --component centl|physics|sci
+                           [--channel oasis|mirage]
+                           [--version VERSION]
+                           [--prefix PATH]
+                           [--archive PATH]
+
+Components:
+  centl     exact mathematics engine only
+  physics   CENTL Physics command only
+  sci       CENTL-SCi interpreter only
+
+The component installer downloads a component-specific archive. It does not
+first download the full CENTL product bundle.
+
+Environment:
+  CENTL_PREFIX   same as --prefix
+EOF
+}
+
+fail() {
+  printf 'centl component install: %s\n' "$1" >&2
+  exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --component)
+      [ "$#" -ge 2 ] || fail "--component needs a value"
+      component=$2
+      shift 2
+      ;;
+    --channel)
+      [ "$#" -ge 2 ] || fail "--channel needs a value"
+      channel=$2
+      shift 2
+      ;;
+    --version)
+      [ "$#" -ge 2 ] || fail "--version needs a value"
+      release_version=$2
+      shift 2
+      ;;
+    --prefix)
+      [ "$#" -ge 2 ] || fail "--prefix needs a path"
+      prefix=$2
+      shift 2
+      ;;
+    --archive)
+      [ "$#" -ge 2 ] || fail "--archive needs a path"
+      archive_path=$2
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+case "$component" in
+  centl)
+    command_name=centl
+    asset="centl-only-linux-x86_64.tar.gz"
+    ;;
+  physics)
+    command_name=centl-physics
+    asset="centl-physics-only-linux-x86_64.tar.gz"
+    ;;
+  sci)
+    command_name=centl-sci
+    asset="centl-sci-only-linux-x86_64.tar.gz"
+    ;;
+  '') fail "choose --component centl, physics, or sci" ;;
+  *) fail "--component must be centl, physics, or sci" ;;
+esac
+
+case "$channel" in
+  oasis|mirage) ;;
+  *) fail "--channel must be oasis or mirage" ;;
+esac
+
+case $(uname -s) in
+  Linux) ;;
+  Darwin) fail "use CENTL-Marsa on macOS; see docs/MATHEMATICIANS.md or docs/PHYSICISTS.md" ;;
+  *) fail "this component installer is for GNU/Linux; use CENTL-Marsa for Windows" ;;
+esac
+case $(uname -m) in
+  x86_64|amd64) ;;
+  *) fail "component archives currently support GNU/Linux x86_64 only: $(uname -m)" ;;
+esac
+
+[ -n "$prefix" ] || {
+  [ -n "${HOME:-}" ] || fail "HOME is not set; use --prefix PATH"
+  prefix="$HOME/.local"
+}
+case "$prefix" in
+  /*) ;;
+  *) prefix="$(pwd)/$prefix" ;;
+esac
+
+command -v tar >/dev/null 2>&1 || fail "tar is required"
+if command -v sha256sum >/dev/null 2>&1; then
+  hash_command=sha256sum
+elif command -v shasum >/dev/null 2>&1; then
+  hash_command="shasum -a 256"
+else
+  fail "sha256sum or shasum is required"
+fi
+
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-component.XXXXXXXX")
+trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+archive="$temporary/$asset"
+checksum="$temporary/$asset.sha256"
+requested_release=""
+
+if [ -n "$archive_path" ]; then
+  [ -f "$archive_path" ] || fail "archive not found: $archive_path"
+  [ -f "$archive_path.sha256" ] || fail "checksum not found: $archive_path.sha256"
+  cp "$archive_path" "$archive"
+  cp "$archive_path.sha256" "$checksum"
+else
+  command -v curl >/dev/null 2>&1 || fail "curl is required to download CENTL"
+  channel_root="https://raw.githubusercontent.com/$repository/distribution/channels/$channel"
+  if [ "$channel" = oasis ]; then
+    if [ "$release_version" = latest ]; then
+      curl --fail --silent --show-error --location \
+        "$channel_root/LATEST" --output "$temporary/LATEST"
+      requested_release=$(sed -n '1p' "$temporary/LATEST")
+    else
+      requested_release=${release_version#v}
+    fi
+    case "$requested_release" in
+      ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid Oasis version" ;;
+    esac
+    base_url="$channel_root/v$requested_release"
+  else
+    if [ "$release_version" = latest ]; then
+      base_url="$channel_root/latest"
+    else
+      requested_release=${release_version#v}
+      case "$requested_release" in
+        ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "invalid Mirage build" ;;
+      esac
+      base_url="$channel_root/builds/$requested_release"
+    fi
+  fi
+  printf 'Downloading only %s from CENTL %s...\n' "$command_name" "$channel"
+  curl --fail --silent --show-error --location "$base_url/$asset" --output "$archive"
+  curl --fail --silent --show-error --location "$base_url/$asset.sha256" --output "$checksum"
+fi
+
+expected=$(awk 'NR == 1 {print $1}' "$checksum")
+case "$expected" in
+  ''|*[!0-9a-fA-F]*) fail "component checksum is malformed" ;;
+esac
+[ "${#expected}" -eq 64 ] || fail "component checksum is malformed"
+expected=$(printf '%s' "$expected" | tr 'A-F' 'a-f')
+if [ "$hash_command" = sha256sum ]; then
+  actual=$(sha256sum "$archive" | awk '{print $1}')
+else
+  actual=$(shasum -a 256 "$archive" | awk '{print $1}')
+fi
+[ "$actual" = "$expected" ] || fail "component checksum verification failed"
+
+tar -tzf "$archive" | while IFS= read -r member; do
+  case "$member" in
+    /*|../*|*/../*|*/..) fail "component archive contains an unsafe path" ;;
+    centl|centl/*) ;;
+    *) fail "component archive has an unexpected layout" ;;
+  esac
+done
+
+extracted="$temporary/extracted"
+mkdir "$extracted"
+tar --no-same-owner --no-same-permissions -xzf "$archive" -C "$extracted"
+package="$extracted/centl"
+[ -f "$package/VERSION" ] || fail "component archive has no VERSION"
+[ -f "$package/COMPONENT" ] || fail "component archive has no COMPONENT identity"
+[ "$(sed -n '1p' "$package/COMPONENT")" = "$component" ] || fail "component archive identity mismatch"
+[ -x "$package/bin/$command_name" ] || fail "component launcher is missing"
+[ -x "$package/libexec/$command_name" ] || fail "component executable is missing"
+
+for other in centl centl-physics centl-sci; do
+  if [ "$other" != "$command_name" ]; then
+    [ ! -e "$package/bin/$other" ] || fail "component archive unexpectedly contains $other"
+    [ ! -e "$package/libexec/$other" ] || fail "component archive unexpectedly contains $other"
+  fi
+done
+
+version=$(sed -n '1p' "$package/VERSION")
+case "$version" in
+  ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "component version is invalid" ;;
+esac
+if [ "$channel" = oasis ] && [ -n "$requested_release" ]; then
+  [ "$version" = "$requested_release" ] || fail "requested $requested_release but archive contains $version"
+fi
+
+case "$component" in
+  centl)
+    smoke=$("$package/bin/centl" '0.1 + 0.2' 2>&1) || fail "centl component cannot run: $smoke"
+    [ "$smoke" = '3/10' ] || fail "centl component failed exact arithmetic smoke test"
+    ;;
+  physics)
+    smoke=$("$package/bin/centl-physics" convert 100 cm m 2>&1) || fail "physics component cannot run: $smoke"
+    [ "$smoke" = '1' ] || fail "physics component failed unit conversion smoke test"
+    ;;
+  sci)
+    smoke=$("$package/bin/centl-sci" 'What is 0.1 plus 0.2?' 2>&1) || fail "SCi component cannot run: $smoke"
+    [ "$smoke" = '3/10' ] || fail "SCi component failed exact arithmetic smoke test"
+    ;;
+esac
+
+hash_short=$(printf '%s' "$actual" | cut -c1-12)
+if [ "$channel" = oasis ]; then
+  install_id=$version
+else
+  install_id="$version-$hash_short"
+fi
+component_root="$prefix/share/centl/components/$channel/$install_id/$component"
+bin_directory="$prefix/bin"
+mkdir -p "$(dirname "$component_root")" "$bin_directory"
+[ ! -e "$component_root" ] || fail "$component is already installed at $component_root"
+mv "$package" "$component_root"
+
+channel_link="$bin_directory/$channel-$command_name"
+ln -sfn "$component_root/bin/$command_name" "$channel_link"
+if [ "$channel" = oasis ]; then
+  ln -sfn "$component_root/bin/$command_name" "$bin_directory/$command_name"
+fi
+
+printf 'Installed only %s from CENTL %s.\n' "$command_name" "$channel"
+printf 'Location: %s\n' "$component_root"
+case ":${PATH:-}:" in
+  *":$bin_directory:"*) ;;
+  *) printf 'Add %s to PATH to use %s.\n' "$bin_directory" "$command_name" ;;
+esac
