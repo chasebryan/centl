@@ -98,15 +98,14 @@ jobs:
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         id: msys
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-pkg-config
-            mingw-w64-x86_64-gmp
-            mingw-w64-x86_64-mpfr
-            mingw-w64-x86_64-flint
-            mingw-w64-x86_64-make
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-pkg-config
+            mingw-w64-ucrt-x86_64-gmp
+            mingw-w64-ucrt-x86_64-mpfr
+            mingw-w64-ucrt-x86_64-flint
             unzip
             patch
             diffutils
@@ -123,9 +122,9 @@ jobs:
           MSYS2_ROOT: ${{ steps.msys.outputs.msys2-location }}
         run: |
           set -eu
-          export PATH="$MSYS2_ROOT/mingw64/bin:$PATH"
+          export PKG_CONFIG_PATH="$MSYS2_ROOT/ucrt64/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+          export PATH="$PATH:$MSYS2_ROOT/ucrt64/bin"
           command -v opam
-          command -v pkg-config
           pkg-config --exists flint
           opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
           eval "$(opam env)"
