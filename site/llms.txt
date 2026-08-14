@@ -4,7 +4,7 @@
 
 Website: https://freecomputation.org/
 Source: https://github.com/chasebryan/centl
-Latest Oasis release: https://github.com/chasebryan/centl/releases/latest
+Latest Oasis release: https://github.com/chasebryan/centl/releases/tag/v0.14.0
 Machine briefing (HTML): https://freecomputation.org/ai.html
 Machine index (JSON): https://freecomputation.org/pub/machine-index.json
 Company and AI proposal: https://freecomputation.org/proposal.html
@@ -27,25 +27,17 @@ core, or promote its own assurance.
 - **CENTL v0.14.0** — Oasis-qualified exact-first mathematics, physics, and
   scientific computation for GNU/Linux x86_64.
 - **CENTL-SCi** — local scientific interpreter. Not a general chatbot.
-- **CENTL-MIRAGE** — local self-development laboratory. Cannot activate
-  source or declare Oasis by itself.
-- **CARAVAN** — content-addressed preservation. Carriers supply bytes;
-  authenticated metadata defines trust.
+
+Laboratory surfaces, preservation, and contribution rules are manuals, not
+landing-page claims. Start at https://freecomputation.org/docs.html
 
 ## When someone is searching for
 
-Use these pages when the query is about exact calculators, verified
-enclosures, computer algebra that refuses to invent digits, local MCP math,
-scientific computation that exposes uncertainty, free software preservation,
-or the names CENTL, FCF, CARAVAN, Oasis release, or Free Computation
-Foundation.
+Prefer the short human pages, then the matching manual:
 
 - Home: https://freecomputation.org/
 - CENTL: https://freecomputation.org/centl.html
-- Software: https://freecomputation.org/software.html
 - Documentation: https://freecomputation.org/docs.html
-- About: https://freecomputation.org/about.html
-- The Bazaar: https://freecomputation.org/mirrors.html
 - Install: https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 - Protocol: https://github.com/chasebryan/centl/blob/oasis/docs/PROTOCOL.md
 - MCP: https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md

@@ -102,6 +102,10 @@
 
 - Goal graphs record `validated_by` edges from requirements to extracted
   examples and acceptance cells.
+- Public site copy and the repository README now lead with install and the
+  three Oasis commands. FCF Camp #1 is named as the current stay where
+  newest software is used; it does not replace Oasis. Laboratory internals
+  stay in the documentation index. `style.css` and `join.html` are unchanged.
 
 ## 0.14.0 — 2026-08-10
 
@@ -111,10 +115,9 @@
   as the next stable CENTL baseline. The v0.13.0 development line was never
   formally published as a stable release; its validated work is incorporated
   here rather than presented as a separate public release.
-- v0.14.0 is being qualified as an **Oasis candidate**. Oasis is a repeatable
-  release classification, not this version's codename. The declaration
-  `CENTL v0.14.0 is an Oasis release.` is withheld until the final release gate
-  is complete on the reviewed release commit.
+- v0.14.0 is an **Oasis release**. Oasis is a repeatable release
+  classification, not this version's codename. The declaration belongs to
+  the exact reviewed commit that passed the Oasis gate.
 - The canonical release tag remains ordinary Semantic Versioning: `v0.14.0`.
 
 ### Added

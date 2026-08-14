@@ -14,7 +14,8 @@ contributor, and entry-point material.
 
 Key surfaces include:
 
-- `README.md` — public project entry point and supported-system overview;
+- `README.md` — public project entry point: install and the three Oasis commands;
+- `docs/README.md` — start-here index for the rest of the manuals;
 - `CHANGELOG.md` — chronological version history;
 - `LICENSE`, `LICENSING.md`, `THIRD_PARTY_NOTICES.md`, `TRADEMARKS.md` — licensing and identity policy;
 - `SECURITY.md` — supported security boundary, threat model, and reporting policy;

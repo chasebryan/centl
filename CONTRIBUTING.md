@@ -7,14 +7,21 @@ changes.
 
 CENTL uses three long-lived branches with different responsibilities. Read
 [`docs/RELEASE-POLICY.md`](docs/RELEASE-POLICY.md) before choosing a pull-request
-target. In short: experimental work normally matures on `mirage`, only qualified
-stable work belongs on `oasis`, and `main` is the comprehensive developer/research
-distribution rather than the stable-product authority.
+target.
+
+- `mirage` is the laboratory and the ordinary pull-request target.
+- `main` is the developer distribution and the current
+  [FCF Camp](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md)
+  stay. Newest software and designs are used here. A camp is not Oasis.
+- `oasis` is the qualified stable product. Do not open ordinary pull requests
+  against it and do not declare Oasis from a camp.
+
+The published Oasis remains CENTL v0.14.0. Camp #1 is the inhabited stay.
 
 If any part of that stack is unfamiliar, start with the
-[manual contributor onboarding](docs/ONBOARDING.md). It provides a staged OCaml,
-F*, rigorous-numerics, protocol, testing, and source-code curriculum with
-readiness exercises.
+[documentation index](docs/README.md) and then the
+[manual contributor onboarding](docs/ONBOARDING.md). The onboarding guide is a
+staged OCaml, F*, numerics, protocol, testing, and source-code curriculum.
 
 Companies and other AI software that want a single written offer to use
 CENTL, contribute, and sponsor FCF should read
