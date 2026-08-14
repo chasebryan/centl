@@ -24,6 +24,9 @@ This command is the only supported path from the mutable repository template to
 an official join-caravan artifact. It requires a clean Git checkout and an
 explicit, passphrase-protected FCF signing key outside the repository.
 
+FCF_CARAVAN_COORDINATOR_URL must be the authenticated HTTPS coordinator URL
+embedded into the signed launcher. It must not contain credentials or a query.
+
 Existing release directories are never overwritten. A changed installer requires
 a new version and a new explicit signing action.
 TXT
@@ -53,6 +56,23 @@ source_commit=$(git -C "$repo_root" rev-parse HEAD)
 secret=${FCF_CARAVAN_JOIN_SECRET_KEY:-}
 public=${FCF_CARAVAN_JOIN_PUBLIC_KEY:-}
 [ -n "$secret" ] && [ -n "$public" ] || fail "FCF_CARAVAN_JOIN_SECRET_KEY and FCF_CARAVAN_JOIN_PUBLIC_KEY are required"
+coordinator_url=${FCF_CARAVAN_COORDINATOR_URL:-}
+[ -n "$coordinator_url" ] || fail "FCF_CARAVAN_COORDINATOR_URL is required"
+python3 - "$coordinator_url" <<'PY'
+from urllib.parse import urlparse
+import sys
+value = sys.argv[1]
+parsed = urlparse(value)
+if (
+    parsed.scheme != "https"
+    or not parsed.netloc
+    or parsed.username is not None
+    or parsed.password is not None
+    or parsed.query
+    or parsed.fragment
+):
+    raise SystemExit("FCF CARAVAN join release: coordinator URL must be credential-free HTTPS")
+PY
 [ -f "$secret" ] && [ ! -L "$secret" ] || fail "secret signing key is missing or unsafe"
 [ -f "$public" ] && [ ! -L "$public" ] || fail "public signing key is missing or unsafe"
 secret=$(readlink -f -- "$secret")
@@ -71,15 +91,20 @@ stage="$work/$release_name"
 mkdir -p "$stage/payload/caravan" "$stage/payload/docs"
 
 [ -f "$repo_root/scripts/caravan-join-template" ] || fail "join template missing"
-python3 - "$repo_root/scripts/caravan-join-template" "$stage/join-caravan" "$VERSION" "$key_sha" <<'PY'
+python3 - "$repo_root/scripts/caravan-join-template" "$stage/join-caravan" "$VERSION" "$key_sha" "$coordinator_url" <<'PY'
 from pathlib import Path
 import sys
-src, dst, version, key_sha = sys.argv[1:]
+src, dst, version, key_sha, coordinator_url = sys.argv[1:]
 text = Path(src).read_text(encoding="utf-8")
-if text.count("@FCF_CARAVAN_JOIN_VERSION@") < 1 or text.count("@FCF_CARAVAN_JOIN_KEY_SHA256@") < 1:
+if (
+    text.count("@FCF_CARAVAN_JOIN_VERSION@") < 1
+    or text.count("@FCF_CARAVAN_JOIN_KEY_SHA256@") < 1
+    or text.count("@FCF_CARAVAN_COORDINATOR_URL@") < 1
+):
     raise SystemExit("join release template markers are missing")
 text = text.replace("@FCF_CARAVAN_JOIN_VERSION@", version)
 text = text.replace("@FCF_CARAVAN_JOIN_KEY_SHA256@", key_sha)
+text = text.replace("@FCF_CARAVAN_COORDINATOR_URL@", coordinator_url)
 Path(dst).write_text(text, encoding="utf-8")
 PY
 chmod 0755 "$stage/join-caravan"
@@ -95,13 +120,16 @@ for doc in \
   CARAVAN-THREAT-MODEL.md \
   CARAVAN-JOIN-MANUAL.md \
   CARAVAN-CENSUS.md \
+  CARAVAN-PUBLIC-COORDINATOR.md \
   CARAVAN-JOIN-RELEASE.md; do
   [ -f "$repo_root/docs/$doc" ] || fail "CARAVAN release documentation missing: $doc"
   cp "$repo_root/docs/$doc" "$stage/payload/docs/$doc"
 done
 cp "$repo_root/LICENSE" "$stage/payload/LICENSE"
 cp "$repo_root/install" "$stage/payload/centl-install"
+cp "$repo_root/scripts/caravan-carrier-withdraw" "$stage/payload/fcf-caravan-withdraw"
 chmod 0555 "$stage/payload/centl-install"
+chmod 0555 "$stage/payload/fcf-caravan-withdraw"
 
 python3 - "$stage/RELEASE.json" "$VERSION" "$source_commit" "$key_sha" <<'PY'
 import json
@@ -123,7 +151,10 @@ data = {
     "mission_authority": "authenticated-fcf-public-approved-only",
     "census_publication": "aggregate-only",
     "public_node_listing": False,
-    "public_network_enrollment": "disabled-until-production-protocol-release",
+    "public_network_enrollment": "authenticated-consent-and-heartbeat",
+    "coordinator_url_embedded": True,
+    "carrier_transport_choices": ["https", "tor"],
+    "withdrawal_command": "~/.local/bin/fcf-caravan-withdraw",
 }
 Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY

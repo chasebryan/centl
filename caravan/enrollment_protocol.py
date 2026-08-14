@@ -54,7 +54,7 @@ class EnrollmentAuthority:
             receipt = PolicyAcceptanceReceipt.from_dict(value)
             if receipt.agent_version not in self.allowed_agent_versions:
                 raise EnrollmentProtocolError("carrier release is not admitted for enrollment")
-            register_accepted_carrier(
+            caravan_number = register_accepted_carrier(
                 self.coordinator,
                 receipt,
                 expected_policy_path=self.policy_path,
@@ -68,6 +68,7 @@ class EnrollmentAuthority:
         return {
             "schema": PUBLIC_ENROLLMENT_RESULT_SCHEMA,
             "node_id": receipt.node_id,
+            "caravan_number": caravan_number,
             "state": "active",
             "public_listing": False,
         }

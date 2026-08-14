@@ -437,6 +437,13 @@ class CarrierTransportClient:
             raise TransportError("coordinator did not return a carrier session")
         self._session_token = token
 
+    def enroll(self, receipt: dict[str, object]) -> dict[str, Any]:
+        """Submit a signed host-policy receipt before opening a session."""
+
+        if not isinstance(receipt, dict):
+            raise TransportError("policy receipt must be an object")
+        return self._post("/v1/enroll", {"receipt": receipt})
+
     def heartbeat(self, *, load: float, capacity: int) -> None:
         self._post(
             "/v1/carrier/heartbeat",
@@ -464,3 +471,8 @@ class CarrierTransportClient:
 
     def disconnect(self) -> None:
         self._session_token = None
+
+    def withdraw(self) -> dict[str, Any]:
+        result = self._post("/v1/carrier/withdraw", {}, authenticated=True)
+        self.disconnect()
+        return result

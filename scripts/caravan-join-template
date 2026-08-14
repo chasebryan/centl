@@ -6,6 +6,7 @@ set -Eeuo pipefail
 # installer.
 RELEASE_VERSION='@FCF_CARAVAN_JOIN_VERSION@'
 RELEASE_KEY_SHA256='@FCF_CARAVAN_JOIN_KEY_SHA256@'
+COORDINATOR_URL='@FCF_CARAVAN_COORDINATOR_URL@'
 
 fail() {
   printf 'FCF CARAVAN join: %s\n' "$*" >&2
@@ -18,6 +19,10 @@ case "$RELEASE_VERSION" in *@FCF_CARAVAN_JOIN_VERSION@*)
 esac
 case "$RELEASE_KEY_SHA256" in *@FCF_CARAVAN_JOIN_KEY_SHA256@*)
   fail "release trust identity was not rendered"
+  ;;
+esac
+case "$COORDINATOR_URL" in *@FCF_CARAVAN_COORDINATOR_URL@*)
+  fail "release coordinator endpoint was not rendered"
   ;;
 esac
 
@@ -89,6 +94,7 @@ PY
 STORAGE_GIB=10
 UPLOAD_MIBPS=4
 MISSIONS=""
+TRANSPORT="https"
 ASSUME_YES=0
 INSTALL_OASIS=1
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -104,6 +110,7 @@ Options:
   --missions LIST       preservation missions: source,releases,semantic,recovery or all
   --storage-gib N       local CARAVAN storage ceiling (default: 10 GiB)
   --upload-mibps N      future outbound serving rate ceiling (default: 4 MiB/s)
+  --transport MODE      coordinator route: https (default) or tor
   --no-oasis             do not install the current FCF Oasis release
   -y, --yes             accept the displayed local configuration
   -h, --help            show this help
@@ -113,9 +120,10 @@ parts of the FCF preservation mission this carrier will support. Mission choice
 never authorizes arbitrary local content; it filters authenticated FCF
 public-approved catalog objects only.
 
-This release configures a rootless carrier home. Public enrollment/network
-serving remains disabled until an authenticated FCF enrollment endpoint and
-production carrier protocol are included in an FCF-signed release.
+This release configures a rootless carrier home and enrolls it with the
+authenticated FCF coordinator after consent. HTTPS is the default outbound
+route. The optional Tor route requires the local tor and torsocks programs and
+sends the same signed enrollment and heartbeat protocol through local Tor.
 TXT
 }
 
@@ -124,6 +132,7 @@ while [ "$#" -gt 0 ]; do
     --missions) [ "$#" -ge 2 ] || fail "--missions needs a value"; MISSIONS=$2; shift 2 ;;
     --storage-gib) [ "$#" -ge 2 ] || fail "--storage-gib needs a value"; STORAGE_GIB=$2; shift 2 ;;
     --upload-mibps) [ "$#" -ge 2 ] || fail "--upload-mibps needs a value"; UPLOAD_MIBPS=$2; shift 2 ;;
+    --transport) [ "$#" -ge 2 ] || fail "--transport needs a value"; TRANSPORT=$2; shift 2 ;;
     --no-oasis) INSTALL_OASIS=0; shift ;;
     -y|--yes) ASSUME_YES=1; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -136,6 +145,14 @@ for value in "$STORAGE_GIB" "$UPLOAD_MIBPS"; do
 done
 [ "$STORAGE_GIB" -le 4096 ] || fail "storage ceiling exceeds safe installer maximum"
 [ "$UPLOAD_MIBPS" -le 1024 ] || fail "upload-rate ceiling exceeds safe installer maximum"
+case "$TRANSPORT" in
+  https) ;;
+  tor)
+    command -v tor >/dev/null 2>&1 || fail "Tor mode requires tor"
+    command -v torsocks >/dev/null 2>&1 || fail "Tor mode requires torsocks"
+    ;;
+  *) fail "transport must be https or tor" ;;
+esac
 
 normalize_missions() {
   python3 - "$1" <<'PY'
@@ -202,13 +219,16 @@ Release:              $RELEASE_VERSION
 Preservation missions: $MISSIONS
 Storage ceiling:      $STORAGE_GIB GiB
 Upload-rate ceiling:  $UPLOAD_MIBPS MiB/s
+Coordinator route:     $TRANSPORT
 Linux package family: $package_manager
 Oasis install:        $( [ "$INSTALL_OASIS" -eq 1 ] && printf 'current FCF Oasis release' || printf 'skipped by request' )
 
 Your home files are never cargo. Mission selection is a filter, never
-publication authority. When authenticated enrollment is active, this camel's
-heartbeat contributes to aggregate Active/Lost counts without exposing a
-hostname, username, IP address, or public node listing.
+publication authority. After consent, this release enrolls the camel and
+starts a rootless outbound heartbeat. The aggregate census counts it without
+exposing a hostname, username, IP address, or public node listing. HTTPS is
+ordinary Internet transport; Tor mode routes the same traffic through your
+local Tor.
 
 Support FCF:
   GitHub Sponsors  https://github.com/sponsors/chasebryan
@@ -253,6 +273,12 @@ if [ "$INSTALL_OASIS" -eq 1 ]; then
   [ -n "$OASIS_STATUS" ] || fail "CENTL Oasis installer did not report an installed version"
 fi
 
+withdraw_tool="$release_root/payload/fcf-caravan-withdraw"
+[ -f "$withdraw_tool" ] && [ ! -L "$withdraw_tool" ] || fail "this join release does not contain the withdrawal command"
+mkdir -p -m 0700 "$HOME/.local/bin"
+cp "$withdraw_tool" "$HOME/.local/bin/fcf-caravan-withdraw"
+chmod 0755 "$HOME/.local/bin/fcf-caravan-withdraw"
+
 CONSENT_AT=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 
 config_root="$CONFIG_HOME/fcf-caravan"
@@ -281,15 +307,88 @@ mv -- "$stage" "$install_root"
 trap - EXIT HUP INT TERM
 
 mkdir -p -m 0700 "$data_root/store" "$state_root/identity" "$state_root/census"
-python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" "$MISSIONS" "$package_manager" "$OASIS_STATUS" "$OASIS_TARGET" "$CONSENT_AT" <<'PY'
+identity_root="$state_root/identity"
+if [ "$TRANSPORT" = "tor" ]; then
+  tor_root="$state_root/tor"
+  tor_log="$state_root/tor.log"
+  tor_pid_file="$state_root/tor.pid"
+  mkdir -p -m 0700 "$tor_root"
+  if [ ! -s "$tor_pid_file" ] || ! kill -0 "$(cat "$tor_pid_file" 2>/dev/null || true)" 2>/dev/null; then
+    nohup tor --SocksPort 127.0.0.1:19050 --DataDirectory "$tor_root" \
+      --Log "notice file $tor_log" >/dev/null 2>&1 &
+    echo "$!" > "$tor_pid_file"
+    chmod 0600 "$tor_pid_file"
+  fi
+fi
+
+run_transport() {
+  if [ "$TRANSPORT" = "tor" ]; then
+    TORSOCKS_SERVER=127.0.0.1:19050 torsocks "$@"
+  else
+    "$@"
+  fi
+}
+
+CONSENT_EPOCH=$(date -u '+%s')
+run_transport env PYTHONPATH="$install_root/payload" python3 - \
+  "$identity_root" "$state_root/policy-receipt.json" "$state_root/enrollment-result.json" "$install_root/payload/docs/CARAVAN-HOST-POLICY.md" \
+  "$RELEASE_VERSION" "$CONSENT_EPOCH" "$ASSUME_YES" "$COORDINATOR_URL" "$STORAGE_GIB" <<'PY'
+from __future__ import annotations
+import sys
+from caravan.identity import CarrierIdentity
+from caravan.policy import create_policy_receipt, write_policy_receipt
+from caravan.transport import CarrierTransportClient
+
+identity_root, receipt_path, result_path, policy_path, version, accepted_at, assumed, coordinator_url, storage_gib = sys.argv[1:]
+try:
+    identity = CarrierIdentity.load(identity_root)
+except Exception:
+    identity = CarrierIdentity.create(identity_root)
+receipt = create_policy_receipt(
+    identity,
+    policy_path,
+    policy_version="FCF-CARAVAN-HOST-v1",
+    agent_version=version,
+    acceptance_mode="non-interactive" if assumed == "1" else "interactive",
+    accepted_at=float(accepted_at),
+)
+write_policy_receipt(receipt_path, receipt)
+client = CarrierTransportClient(coordinator_url, identity)
+result = client.enroll(receipt.to_dict())
+client.connect()
+client.heartbeat(load=0.0, capacity=int(storage_gib) * 1024 * 1024 * 1024)
+import json
+from pathlib import Path
+Path(result_path).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+print("enrolled_node_id=" + str(result.get("node_id", identity.node_id)))
+print("caravan_number=" + str(result.get("caravan_number", "unknown")))
+print("heartbeat=accepted")
+PY
+
+CARAVAN_NUMBER=$(python3 - "$state_root/enrollment-result.json" <<'PY'
 import json
 import sys
 from pathlib import Path
-out, version, storage, upload, missions, package_manager, oasis_version, oasis_target, consent_at = sys.argv[1:]
+value = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+number = value.get("caravan_number")
+if not isinstance(number, int) or isinstance(number, bool) or number < 1:
+    raise SystemExit("invalid live CARAVAN number")
+print(number)
+PY
+)
+
+python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" "$MISSIONS" "$package_manager" "$OASIS_STATUS" "$OASIS_TARGET" "$CONSENT_AT" "$COORDINATOR_URL" "$TRANSPORT" "$CARAVAN_NUMBER" <<'PY'
+import json
+import sys
+from pathlib import Path
+out, version, storage, upload, missions, package_manager, oasis_version, oasis_target, consent_at, coordinator_url, transport, caravan_number = sys.argv[1:]
 data = {
-    "schema": "fcf-caravan-carrier-config-v2",
+    "schema": "fcf-caravan-carrier-config-v3",
     "release_version": version,
-    "network_mode": "disabled-until-authenticated-enrollment",
+    "network_mode": "authenticated-outbound-heartbeat",
+    "coordinator_url": coordinator_url,
+    "transport": transport,
+    "caravan_number": int(caravan_number),
     "inbound_listen": False,
     "arbitrary_content": False,
     "storage_limit_gib": int(storage),
@@ -319,19 +418,41 @@ data = {
     },
     "census": {
         "mode": "aggregate-only",
-        "heartbeat": "disabled-until-authenticated-enrollment",
+        "heartbeat": "active-after-signed-consent",
         "public_node_listing": False,
         "public_ip_addresses": False,
         "public_hostnames": False,
+    },
+    "enrollment": {
+        "state": "active",
+        "receipt": str(Path.home() / ".local" / "state" / "fcf-caravan" / "policy-receipt.json"),
+        "withdraw_command": "fcf-caravan-withdraw",
     },
 }
 Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 chmod 0600 "$config_root/config.json"
 
+agent_log="$state_root/carrier-agent.log"
+agent_pid_file="$state_root/carrier-agent.pid"
+if [ ! -s "$agent_pid_file" ] || ! kill -0 "$(cat "$agent_pid_file" 2>/dev/null || true)" 2>/dev/null; then
+  if [ "$TRANSPORT" = "tor" ]; then
+    nohup env TORSOCKS_SERVER=127.0.0.1:19050 PYTHONPATH="$install_root/payload" \
+      torsocks python3 -m caravan.carrier_agent \
+      --coordinator "$COORDINATOR_URL" --identity "$identity_root" \
+      --storage-gib "$STORAGE_GIB" >>"$agent_log" 2>&1 &
+  else
+    nohup env PYTHONPATH="$install_root/payload" python3 -m caravan.carrier_agent \
+      --coordinator "$COORDINATOR_URL" --identity "$identity_root" \
+      --storage-gib "$STORAGE_GIB" >>"$agent_log" 2>&1 &
+  fi
+  echo "$!" > "$agent_pid_file"
+  chmod 0600 "$agent_pid_file" "$agent_log"
+fi
+
 cat <<TXT
 
-🐪 Your FCF-CARAVAN camel is prepared.
+🐪 Your FCF-CARAVAN camel is on the road.
 
 Release $RELEASE_VERSION is installed read-only at:
   $install_root
@@ -347,15 +468,20 @@ Supported software selected for this camel:
   recovery  FCF public-approved recovery and toolchain artifacts
 Selected: $MISSIONS
 
-Consent recorded: $CONSENT_AT
+Consent recorded and signed: $CONSENT_AT
   Host policy: FCF-CARAVAN-HOST-v1
   Scope: rootless, bounded carrier; authenticated public-approved cargo only
+  Coordinator route: $TRANSPORT ($COORDINATOR_URL)
+
+Enrollment: accepted; this machine is live Camel #$CARAVAN_NUMBER.
+Background heartbeat: running as a rootless user process (PID $(cat "$agent_pid_file"))
+Local status log: $agent_log
 
 No inbound port was opened, no arbitrary data was accepted, and no public
-machine identity was published. The carrier will be counted only after an
-authenticated coordinator accepts its heartbeat; the public census contains
-aggregate Active, Hungry, and Lost Camel counts, plus verified CARAVAN Cargo
-Loads as packages are successfully delivered.
+machine identity was published. The public census contains aggregate Active,
+Hungry, and Lost Camel counts, plus verified CARAVAN Cargo Loads as packages
+are successfully delivered. To leave, use the installed fcf-caravan-withdraw
+command.
 
 Thank you for helping keep free computation moving. 🧮
 

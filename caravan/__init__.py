@@ -16,6 +16,7 @@ from .policy import (
     write_policy_receipt,
 )
 from .retrieval import RetrievalError, RetrievalResult, retrieve_verified
+from .public_service import PublicCoordinatorService
 
 __all__ = [
     "ArtifactIdentity",
@@ -48,4 +49,5 @@ __all__ = [
     "RetrievalError",
     "RetrievalResult",
     "retrieve_verified",
+    "PublicCoordinatorService",
 ]

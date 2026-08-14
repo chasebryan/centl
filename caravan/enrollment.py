@@ -16,7 +16,7 @@ def register_accepted_carrier(
     expected_policy_version: str,
     carrier_class: str = "volunteer",
     now: float | None = None,
-) -> None:
+) -> int:
     """Register a carrier only after its signed policy receipt verifies.
 
     This is the laboratory enrollment boundary. The coordinator receives a
@@ -29,7 +29,7 @@ def register_accepted_carrier(
         expected_policy_path=expected_policy_path,
         expected_policy_version=expected_policy_version,
     )
-    coordinator.register_carrier(
+    return coordinator.register_carrier(
         verified.node_id,
         public_identity=verified.public_identity,
         policy_version=verified.policy_version,

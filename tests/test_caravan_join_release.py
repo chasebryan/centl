@@ -30,10 +30,10 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("mutable development template", result.stderr)
 
-    def test_join_release_is_rootless_and_starts_network_disabled(self) -> None:
+    def test_join_release_is_rootless_and_starts_authenticated_heartbeat(self) -> None:
         text = TEMPLATE.read_text(encoding="utf-8")
         self.assertIn("normal CARAVAN carrier setup is rootless", text)
-        self.assertIn('"network_mode": "disabled-until-authenticated-enrollment"', text)
+        self.assertIn('"network_mode": "authenticated-outbound-heartbeat"', text)
         self.assertIn('"inbound_listen": False', text)
         self.assertIn('"arbitrary_content": False', text)
         self.assertIn('"systemd_required": False', text)
@@ -42,6 +42,9 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn("payload/centl-install", text)
         self.assertIn('"software_support"', text)
         self.assertIn('"consent"', text)
+        self.assertIn('"caravan_number": int(caravan_number)', text)
+        self.assertIn('--transport', text)
+        self.assertIn('client.enroll(receipt.to_dict())', text)
         self.assertIn("Welcome to the FCF CARAVAN", text)
         self.assertIn("https://github.com/sponsors/chasebryan", text)
         self.assertIn("https://freecomputation.org/funding.html#x-money", text)
@@ -75,7 +78,7 @@ class CaravanJoinReleaseTests(unittest.TestCase):
             self.assertIn(mission, text)
         self.assertIn("no preservation mission selected", text)
         self.assertIn("authenticated-fcf-public-approved-only", text)
-        self.assertIn('"schema": "fcf-caravan-carrier-config-v2"', text)
+        self.assertIn('"schema": "fcf-caravan-carrier-config-v3"', text)
         self.assertIn('"missions": missions.split(",")', text)
         self.assertIn("Mission selection is a filter, never publication authority", text)
 
@@ -85,7 +88,7 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('"public_node_listing": False', text)
         self.assertIn('"public_ip_addresses": False', text)
         self.assertIn('"public_hostnames": False', text)
-        self.assertIn('"heartbeat": "disabled-until-authenticated-enrollment"', text)
+        self.assertIn('"heartbeat": "active-after-signed-consent"', text)
         self.assertIn('"$state_root/census"', text)
 
     def test_official_release_requires_explicit_external_fcf_secret_key(self) -> None:
@@ -263,7 +266,7 @@ class CaravanJoinReleaseTests(unittest.TestCase):
     def test_bazaar_explains_the_guided_non_manual_join_path(self) -> None:
         html = BAZAAR.read_text(encoding="utf-8")
         self.assertIn("guided", html)
-        self.assertIn("No repository checkout or special tooling is required", html)
+        self.assertIn("No repository checkout, Tailscale membership, or special tooling is required", html)
         self.assertIn("Read the manual path", html)
 
 

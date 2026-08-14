@@ -144,6 +144,7 @@ class CoordinatorState:
 
                 CREATE TABLE IF NOT EXISTS carriers (
                     node_id TEXT PRIMARY KEY,
+                    caravan_number INTEGER UNIQUE,
                     public_identity TEXT NOT NULL,
                     policy_version TEXT NOT NULL,
                     agent_version TEXT NOT NULL,
@@ -186,12 +187,30 @@ class CoordinatorState:
 
                 INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
                     VALUES ('cargo_loads', 0);
+                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
+                    VALUES ('camel_numbers', 0);
                 """
             )
             columns = {row["name"] for row in db.execute("PRAGMA table_info(carriers)")}
             if "carrier_class" not in columns:
                 db.execute(
                     "ALTER TABLE carriers ADD COLUMN carrier_class TEXT NOT NULL DEFAULT 'volunteer'"
+                )
+            if "caravan_number" not in columns:
+                db.execute("ALTER TABLE carriers ADD COLUMN caravan_number INTEGER")
+            missing = db.execute(
+                "SELECT node_id FROM carriers WHERE caravan_number IS NULL ORDER BY rowid"
+            ).fetchall()
+            for row in missing:
+                db.execute(
+                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
+                )
+                number = db.execute(
+                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
+                ).fetchone()[0]
+                db.execute(
+                    "UPDATE carriers SET caravan_number = ? WHERE node_id = ?",
+                    (number, row["node_id"]),
                 )
 
     @staticmethod
@@ -254,11 +273,17 @@ class CoordinatorState:
                 raise CoordinatorError("node identity collision with different public identity")
             if row is None:
                 db.execute(
+                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
+                )
+                caravan_number = db.execute(
+                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
+                ).fetchone()[0]
+                db.execute(
                     """INSERT INTO carriers(
-                        node_id, public_identity, policy_version, agent_version,
+                        node_id, caravan_number, public_identity, policy_version, agent_version,
                         carrier_class, state, last_seen
-                    ) VALUES (?, ?, ?, ?, ?, 'active', ?)""",
-                    (node_id, public_identity, policy_version, agent_version, carrier_class, timestamp),
+                    ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)""",
+                    (node_id, caravan_number, public_identity, policy_version, agent_version, carrier_class, timestamp),
                 )
             elif row["state"] == "withdrawn":
                 raise CoordinatorError("withdrawn node identity must not be silently reactivated")
@@ -269,6 +294,22 @@ class CoordinatorState:
                        WHERE node_id = ?""",
                     (policy_version, agent_version, carrier_class, timestamp, node_id),
                 )
+            return int(
+                db.execute(
+                    "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
+                ).fetchone()[0]
+            )
+
+    def caravan_number(self, node_id: str) -> int:
+        """Return the durable, first-enrollment number assigned to a camel."""
+
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
+            ).fetchone()
+        if row is None or row["caravan_number"] is None:
+            raise CoordinatorError("unknown camel number")
+        return int(row["caravan_number"])
 
     def heartbeat(
         self,

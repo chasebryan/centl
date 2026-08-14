@@ -1,6 +1,6 @@
 # Joining the FCF CARAVAN manually
 
-Status: normative operator/user procedure. Public volunteer network enrollment is still gated; the signed join release currently prepares a carrier without starting network service.
+Status: normative operator/user procedure for the authenticated public join release. Supporters use ordinary HTTPS and do not need to join the FCF administrator tailnet. An optional Tor route is available when the supporter has local `tor` and `torsocks`.
 
 CARAVAN exists to preserve and distribute authenticated Free Computation Foundation material without turning volunteer computers into general-purpose servers. A person may join with the signed `join-caravan` release, or may follow the same steps manually for audit, research, recovery, or environments where automation is undesirable.
 
@@ -165,6 +165,10 @@ The normal rootless installation uses XDG user directories:
 ~/.local/state/fcf-caravan/
   identity/
   census/
+  policy-receipt.json
+  enrollment-result.json
+  carrier-agent.pid
+  carrier-agent.log
 
 ~/.local/lib/fcf-caravan/releases/
   X.Y.Z/
@@ -176,31 +180,30 @@ The installer must reject symbolic-link tricks at security-sensitive roots and m
 
 ## 9. Current network status
 
-Until the production authenticated enrollment protocol passes the gates tracked in issue #167, a signed join release records:
+The authenticated public join release records:
 
 ```json
-"network_mode": "disabled-until-authenticated-enrollment"
+"network_mode": "authenticated-outbound-heartbeat"
 ```
 
-That means the current release can prepare a carrier and record its selected missions, but it must not start pretending to be a live public CARAVAN participant.
+After signed consent, the release submits a policy acceptance receipt, receives a durable live Camel number, completes proof-of-possession session authentication, sends the first heartbeat, and starts a rootless outbound heartbeat agent. It opens no inbound listener and does not publish a carrier roster. The first successful enrollment result is the source of the number printed in the welcome message; it is not a local estimate.
 
-No inbound listener, public advertisement, heartbeat, content request, or coordinator connection should occur before a later FCF-signed release explicitly enables the production protocol.
+HTTPS is the default route. `--transport tor` starts a local rootless Tor process and uses `torsocks` for the same enrollment and heartbeat calls. Tor is optional and does not change the consent or public aggregate contract.
 
-## 10. Production enrollment contract
+## 10. Enrollment contract
 
-When public volunteer enrollment is promoted, the same one-command installer experience will perform these operations after release authentication:
+The authenticated public join release performs these operations after release authentication:
 
 1. detect capabilities and the Linux package family;
 2. acquire any strictly necessary host dependency through the native package manager only after the authenticated release has been established;
 3. display the preservation mission picker;
 4. display storage/bandwidth/privacy terms;
-5. create owner-only local state and a high-entropy carrier enrollment token;
-6. enroll over authenticated TLS without publishing the home address/hostname;
-7. fetch authenticated TUF/catalog metadata;
-8. accept only `public-approved` content identities matching the selected missions;
-9. start an outbound-oriented carrier worker using the best available user-service mechanism for that Linux environment;
-10. begin privacy-minimized census heartbeats;
-11. print the carrier's local status and exact immutable release identity.
+5. create owner-only local Ed25519 identity and signed policy receipt;
+6. enroll over authenticated HTTPS without publishing the home address/hostname;
+7. receive the coordinator-assigned durable live Camel number;
+8. start an outbound heartbeat process and authenticate its session;
+9. count only aggregate census state; content retrieval remains limited to separately admitted public-approved cargo;
+10. print the carrier's live number, local status, and exact immutable release identity.
 
 The production script must be safe to re-run. It may inspect existing state and offer an authenticated upgrade or configuration change, but it must never overwrite an existing immutable release version.
 
@@ -258,7 +261,7 @@ A machine that simply disappears remains eligible for Lost Camel accounting afte
 
 Before the production service is enabled, a prepared carrier can be removed by deleting its user-owned CARAVAN configuration/state/data and, if desired, immutable release directories. Do not use a privileged recursive deletion against arbitrary paths.
 
-A future signed production release will ship a dedicated `leave-caravan`/uninstall command that validates every removal path against the fixed XDG CARAVAN roots before deleting anything.
+A signed join release ships `fcf-caravan-withdraw`; it validates the local identity, authenticates withdrawal, stops the heartbeat process, and leaves the signed receipt and identity in place for the operator's records.
 
 ## 15. FCF public-origin operators
 

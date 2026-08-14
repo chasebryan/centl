@@ -1,6 +1,6 @@
 # FCF CARAVAN privacy-preserving camel census
 
-Status: protocol contract for the production volunteer rollout. The public coordinator and live census endpoint are not yet enabled.
+Status: live public aggregate contract. The public coordinator serves the exact document at `/census-v1.json`; the website consumes a validated HTTPS copy of it.
 
 CARAVAN needs to know whether the preservation network is alive without turning its volunteers into a public tracking directory. The census therefore counts carriers centrally and publishes **aggregate counts only**.
 
@@ -35,21 +35,23 @@ A server necessarily observes the source network address of an HTTPS connection 
 
 ## Local carrier identity
 
-On first production enrollment, a carrier creates an owner-only, high-entropy random enrollment token. The token is not a human identity and contains no machine metadata.
+On first enrollment, a carrier creates an owner-only Ed25519 identity. The identity is pseudonymous, contains no human or machine metadata, and signs both the host-policy receipt and the session proof. The coordinator assigns a durable sequential CARAVAN number at first accepted enrollment; this number is returned privately to that carrier and is not included in the public census.
 
-Recommended local representation:
+The current local representation is:
 
 ```text
 ~/.local/state/fcf-caravan/identity/
-  enrollment-token        # 32 random bytes, mode 0600
-  enrollment.json         # non-secret coordinator state, mode 0600
+  private-key.pem        # Ed25519 private key, mode 0600
+  public-identity        # pseudonymous public identity, mode 0600
+  policy-receipt.json     # signed policy acceptance, mode 0600
+  enrollment-result.json  # coordinator result including live number, mode 0600
 ```
 
-The token must be generated with the operating system CSPRNG. It must never be derived from a hostname, username, IP address, MAC address, disk serial, machine-id, or other stable host identifier.
+The private key is generated with the operating system CSPRNG. It is never derived from a hostname, username, IP address, MAC address, disk serial, machine-id, or other stable host identifier.
 
-The coordinator stores only a one-way, server-peppered verifier/handle for the token plus minimal state required for counting and revocation. A database copy should not contain the bearer token itself.
+The coordinator stores only the public identity plus minimal state required for counting and revocation. A database copy cannot impersonate the carrier without its private key.
 
-The token is transmitted only over authenticated TLS to the designated FCF coordinator endpoint. It is never included in the public census document.
+The signed receipt and session proof are transmitted only over authenticated HTTPS to the designated FCF coordinator endpoint, or through the optional local Tor route. They are never included in the public census document.
 
 ## Why a persistent private handle exists
 
@@ -269,4 +271,4 @@ scripts/caravan-census-publish \
   --output /srv/fcf-caravan/census-v1.json
 ```
 
-The GitHub repository variable `FCF_CARAVAN_CENSUS_URL` must point to that FCF-controlled HTTPS endpoint before the Pages workflow consumes it. Until that variable and the production authenticated enrollment/heartbeat service are enabled, Pages uses the clearly identified X200 lead-origin fallback and public volunteer enrollment remains gated. The publication endpoint must serve the exact aggregate schema above, must not expose the coordinator database, and must not retain census access-log source addresses.
+The GitHub repository variable `FCF_CARAVAN_CENSUS_URL` points to the FCF-controlled HTTPS endpoint before the Pages workflow consumes it. The publication endpoint serves the exact aggregate schema above, must not expose the coordinator database, and must not retain census access-log source addresses.
