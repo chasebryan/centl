@@ -650,18 +650,21 @@ let promotion_logic () =
       "   Mirage is never a full release. Users may build or install from";
       "   `mirage` if they want experimental surfaces.";
       "2. `main` is the complete developer/research distribution. It is not";
-      "   an Oasis declaration.";
-      "3. Oasis is a promotion state on the `oasis` branch only, after";
-      "   `python3 scripts/oasis.py` and a final identity pass succeed on a";
-      "   clean, reviewed commit. See docs/OASIS.md.";
-      "4. CENTL v0.14.0 remains the published Oasis release until a later";
-      "   identity earns its own declaration. Oasis does not inherit.";
+      "   an Oasis declaration merely because it holds the same tree.";
+      "3. Oasis is the steadily advanced stable snapshot of current `main`";
+      "   and `mirage`. Build it as one linear commit on the current oasis";
+      "   tip that overlays that tree, then run `python3 scripts/oasis.py`.";
+      "   See docs/OASIS.md.";
+      "4. Assurance does not inherit. A later identity must earn its own";
+      "   declaration. After oasis advances, development continues on";
+      "   `mirage` and `main`.";
       "5. No agent, owner grant, or green CI result may self-approve, merge";
       "   to oasis, or create a SemVer tag.";
       "6. Draft pull requests created by CENTL-SCi target `mirage` only.";
       "7. Oasis does not regress: a candidate must contain the current oasis";
-      "   tip. Merge oasis into the candidate before promotion. Do not drop";
-      "   installer channels, gates, or Oasis-only fixes to land laboratory work.";
+      "   tip. Overlay the stable main/mirage tree onto that tip. Do not";
+      "   merge (merge commits are forbidden), do not squash the oasis PR,";
+      "   and do not drop installer channels, gates, or Oasis-only fixes.";
       "";
       "This command will not declare Oasis, merge to oasis, or publish a tag.";
     ]
@@ -704,7 +707,9 @@ let status () =
       "upstream: chasebryan/centl";
       grant_text;
       source_text;
-      "published Oasis: v0.14.0 (unchanged by this command)";
+      "published Oasis: v"
+      ^ Centl_sci_oasis.published_oasis
+      ^ " (unchanged by this command)";
       "SCi pull-request base: mirage (never oasis)";
       "approval: GitHub human review (never self-approved)";
       "forbidden: force push, oasis base, stored tokens, shell English,";

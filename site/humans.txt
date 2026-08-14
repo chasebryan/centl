@@ -8,7 +8,7 @@ Language: English
 Doctype: HTML5
 Standards: HTML, CSS. No required JavaScript.
 Last update: 2026-08-14
-Software: CENTL v0.14.0 Oasis release
+Software: CENTL v0.15.0 Al-Nur Oasis release
 Source: https://github.com/chasebryan/centl
 
 /* MACHINES */

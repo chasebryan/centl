@@ -8,10 +8,11 @@ Exact-first mathematics, physics, and scientific computation.
 
 ## Current release status
 
-**CENTL v0.14.0 is an Oasis release.**
+**CENTL v0.15.0 is an Oasis release.**
 
-Oasis is the qualified stable product. It lives on the `oasis` branch.
-A camp does not replace it, inherit it, or become it.
+This Oasis is named **Al-Nur**. The canonical tag is `v0.15.0`. It
+lives on the `oasis` branch. A camp does not replace it, inherit it,
+or become it.
 
 **FCF Camp #1** (`fcf-camp-001`) is the current stay. That is where the
 newest software and designs are used. It lives on `main` and `mirage`.

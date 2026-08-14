@@ -16,8 +16,8 @@ This document is the public proposal. A short human page is
 ## What is being offered
 
 The Free Computation Foundation publishes **CENTL**, an exact-first
-mathematics, physics, and scientific computation system. CENTL v0.14.0 is the
-current Oasis release for GNU/Linux x86_64.
+mathematics, physics, and scientific computation system. CENTL v0.15.0
+Al-Nur is the current Oasis release for GNU/Linux x86_64.
 
 Companies and other AI software may already:
 

@@ -10,25 +10,29 @@
 
 ## Verdict first
 
-Oasis is **not dead**.
+Oasis is **not dead**. Oasis is the steadily advanced stable snapshot of
+the current `main` and `mirage` trees. It is made by placing that tree on
+the current oasis tip so Oasis does not regress, passing the complete
+gate, and fast-forwarding `oasis`. After that, development continues on
+`mirage` and `main`.
 
-CENTL v0.14.0 remains the published Oasis release. A later exact identity can
-still earn Oasis if it contains the current oasis tip, satisfies the complete
-Oasis gate, and is published by the official human-reviewed path. Camps do not
-close that path, weaken it, or inherit it.
+The published Oasis is CENTL v0.15.0 **Al-Nur**. Camps do not close
+that path, weaken it, or inherit it.
 
-What **is** true of the current laboratory expedition is narrower:
+A Camp is still the named stay for inhabiting work that is not (yet) the
+next Oasis snapshot. Camp #1 remains occupied on `main` and `mirage`.
+Occupying a Camp does not mean Oasis can never be made from the stable
+tree.
 
-- this identity is not on `oasis`;
-- it is not a new SemVer product identity;
-- its laboratory surfaces exceed the v0.14.0 stable-product boundary;
-- release-blocking Security-tab findings still exist on the default branch
-  analysis ref until those workflow remediations land;
-- declaring Oasis here would require skipping, weakening, or faking a gate.
+What is true of an unpromoted laboratory checkout:
 
-So Oasis is not possible **for this expedition as a whole**, and it may never
-be possible **as a whole**. That is why Camps exist. It is not a reason to
-pretend Oasis can never be earned again by a later, thinner, reviewed identity.
+- it is not on `oasis`;
+- it is not an Oasis declaration merely because it matches the snapshot
+  tree;
+- laboratory surfaces do not inherit Oasis by proximity.
+
+Declaring Oasis still requires the official snapshot, the complete gate,
+an unchanged fast-forward, the SemVer tag, and qualified bytes.
 
 ## Definition
 
@@ -71,7 +75,7 @@ A Camp is not:
 - permission to skip, weaken, or rewrite Oasis gates;
 - a change to the signed join-caravan scheme;
 - a website visual redesign;
-- a claim that v0.14.0 has been superseded.
+- a claim that a Camp supersedes the published Oasis.
 
 If a sentence would be false after replacing "Camp" with "Oasis," the Camp
 record is lying.
@@ -80,8 +84,8 @@ record is lying.
 
 Pitch a Camp only when all of the following are true:
 
-1. Oasis inspect reports blockers that this expedition cannot honestly clear
-   as a whole without weakening a gate or dropping the oasis tip.
+1. Oasis inspect reports blockers that this checkout cannot honestly
+   clear without weakening a gate or dropping the oasis tip.
 2. The work is still worth keeping as a stayable laboratory line.
 3. The bounds can be written down: what is inside the camp, what remains
    experimental, and what remains forbidden.
@@ -113,12 +117,20 @@ feature / research work
          |
          +---- occupied Camp (stay; not a release)
          |
-         | later: stabilize + satisfy the complete Oasis gate
+         | inhabit / integrate
+         v
+       main
+         |
+         | linear snapshot on the oasis tip
+         | satisfy the complete Oasis gate
          v
        oasis
          |
          v
  stable release / tag
+         |
+         v
+ continue on mirage and main
 ```
 
 Leaving a Camp toward Oasis still requires the official Oasis path. Occupying

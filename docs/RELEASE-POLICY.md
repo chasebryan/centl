@@ -15,8 +15,10 @@ requirement imposed on every branch or every development commit.**
 
 ### `oasis` — standard product
 
-`oasis` is the authoritative stable-product branch. It is the only long-lived
-branch required to satisfy the complete Oasis qualification standard.
+`oasis` is the authoritative stable-product branch. It is the steadily
+advanced snapshot of the current stable `main` and `mirage` trees. It is
+the only long-lived branch required to satisfy the complete Oasis
+qualification standard.
 
 Code promoted to `oasis` must satisfy the repository's full release gates,
 including the applicable formatting, build, deterministic-test, verification,
@@ -24,7 +26,8 @@ integrity, security, documentation, packaging, reproducibility, and release
 requirements. An Oasis declaration applies only after those gates succeed.
 
 `oasis` is not the primary experimentation surface. New speculative work should
-mature elsewhere before promotion.
+mature elsewhere before promotion. After a snapshot is promoted, development
+continues on `mirage` and `main`.
 
 ### `mirage` — development and research laboratory
 
@@ -46,26 +49,34 @@ A failure to satisfy an Oasis-only qualification check does not by itself make a
 Mirage experiment invalid. The strict standard becomes mandatory when work is
 proposed for promotion to `oasis`.
 
-#### Oasis is the Mirage baseline
+#### Oasis is made from Mirage and main
 
-Every newly declared Oasis release becomes the new floor from which Mirage
-development continues. After an Oasis release is established, `mirage` must be
-reconciled onto that exact Oasis source baseline before new development proceeds.
-Mirage may then diverge forward again with experimental work.
+Every newly declared Oasis release is a snapshot of the then-current
+stable `main` and `mirage` trees, parented on the previous oasis tip so
+Oasis does not regress. After that snapshot is established, development
+continues on `mirage` and `main`.
 
-This rule is intentionally one-way:
+This cycle is intentionally one-way:
 
 ```text
 qualified Oasis baseline
           |
-          +------> Mirage begins here
+          +------> continue on mirage and main
                      |
                      +--> experiments / research / new features
+                     |
+                     v
+                   next Oasis snapshot on the new oasis tip
 ```
 
+Do not force-push `mirage` or `main` onto oasis. Do not merge oasis into
+those lines. The next snapshot again starts at the new oasis tip and
+overlays the then-current stable tree.
+
 Mirage never makes an older stable baseline authoritative merely because it has
-unique development commits. Unique Mirage work should be replayed, merged, or
-otherwise reconciled on top of the new Oasis baseline when it remains useful.
+unique development commits. Unique Mirage work that should survive is already
+on `main`/`mirage` and is included in the next snapshot when that tree is
+stable.
 
 ### `main` — complete developer and research distribution
 
@@ -107,16 +118,21 @@ feature/research work
         v
      mirage
         |
-        | stabilize + satisfy Oasis qualification
+        | inhabit / integrate
+        v
+      main
+        |
+        | linear snapshot on the oasis tip
+        | exact-SHA Oasis qualification
         v
       oasis
         |
         v
  stable release/tag
+        |
+        v
+ continue on mirage and main
 ```
-
-After a new Oasis release, the cycle restarts by making that Oasis commit the
-Mirage baseline.
 
 `main` is the integrated distribution view rather than a maturity rung. It can
 receive and expose both stable and experimental work according to repository
@@ -124,7 +140,7 @@ integration needs.
 
 The governing rule is:
 
-> **Oasis is a promotion state, not a property of every commit.**
+> **Oasis is a promotion state of one exact snapshot, not a property of every commit.**
 
 ## Continuous integration policy
 

@@ -42,16 +42,15 @@ let camp_001 =
     why_not_oasis =
       [
         "current identity is not the oasis branch";
-        "version identity is still the published Oasis 0.14.0, not a new \
-         SemVer product";
-        "laboratory SCi, MIRAGE, and CARAVAN surfaces exceed the v0.14.0 \
-         stable-product boundary";
+        "a camp inspect path cannot declare Oasis";
+        "laboratory SCi, MIRAGE, and CARAVAN surfaces stay outside the \
+         installed product";
         "declaring Oasis here would skip or weaken the official gate";
       ];
     oasis_still_possible =
-      "CENTL v0.14.0 remains the published Oasis. A later exact identity can \
-       still earn Oasis if it contains the oasis tip and satisfies the \
-       complete gate. This camp does not close that path.";
+      "Oasis is the steadily advanced snapshot of current main and mirage. \
+       CENTL v0.15.0 Al-Nur is the published Oasis. The canonical tag is \
+       v0.15.0. This camp inspect path does not declare it.";
     in_bounds =
       [
         "inspect-only Oasis, Wellspring, Camp, and CARAVAN commands";

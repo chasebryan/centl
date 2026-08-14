@@ -22,7 +22,7 @@ class SiteCopyTests(unittest.TestCase):
 
     def test_centl_page_states_oasis_and_installs_from_oasis(self) -> None:
         html = (SITE / "centl.html").read_text(encoding="utf-8")
-        self.assertIn("CENTL v0.14.0 is an Oasis release", html)
+        self.assertIn("CENTL v0.15.0 is an Oasis release", html)
         self.assertNotIn("Oasis candidate", html)
         self.assertIn("centl/oasis/install", html)
         self.assertNotIn("centl/main/install", html)
@@ -31,7 +31,7 @@ class SiteCopyTests(unittest.TestCase):
 
     def test_software_page_does_not_call_github_latest_the_oasis_release(self) -> None:
         html = (SITE / "software.html").read_text(encoding="utf-8")
-        self.assertIn("releases/tag/v0.14.0", html)
+        self.assertIn("releases/tag/v0.15.0", html)
         self.assertNotIn("releases/latest", html)
         self.assertIn("centl/oasis/install", html)
 
@@ -55,7 +55,7 @@ class SiteCopyTests(unittest.TestCase):
     def test_readme_leads_with_the_product(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("## Current release status", text)
-        self.assertIn("CENTL v0.14.0 is an Oasis release", text)
+        self.assertIn("CENTL v0.15.0 is an Oasis release", text)
         self.assertIn("FCF Camp #1", text)
         self.assertIn("oasis/install", text)
         self.assertNotIn("Mathematical Introspective Recursive Autonomous Growth Engine", text)

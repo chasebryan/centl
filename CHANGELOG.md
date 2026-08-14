@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Public site, manuals, and inspect now name CENTL v0.15.0 **Al-Nur** as
+  the published Oasis. `main` and `mirage` continue from that floor.
+  The `v0.15.0` tag stays.
+
+## 0.15.0 — 2026-08-14
+
+Official snapshot of the current stable main and mirage trees, placed on
+the oasis tip so Oasis does not regress. This Oasis is named **Al-Nur**.
+The canonical tag remains `v0.15.0`. After promotion, development
+continues on those lines. The public commands remain `centl`,
+`centl-physics`, and `centl-sci` on GNU/Linux x86_64. Laboratory
+surfaces stay laboratory. This identity is the published Oasis Al-Nur.
+
 ### Security
 
 - Workflow checkouts no longer persist GitHub credentials in `.git/config`.
@@ -20,6 +33,11 @@
 
 ### Added
 
+- Official Oasis logic: `oasis` is the steadily advanced stable snapshot
+  of current `main` and `mirage`. `./scripts/oasis --snapshot` reports
+  that procedure without declaring Oasis.
+- CARAVAN enrollment now assigns a durable live caravan number and
+  returns it on re-enrollment of the same carrier.
 - `CENTL-Marsa` is the undeletable harbor that ports the Camp stay to
   macOS and Windows. It is not Oasis. `install` now sends those kernels
   to the harbor instead of a dead end.
