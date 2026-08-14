@@ -1,6 +1,6 @@
 # Secret Oasis expedition — 2026-08-14
 
-**Status:** complete as a search activity  
+**Status:** complete as a search activity
 **Designated FCF Wellsprings:** none
 
 This expedition inspected CENTL's numerical contract, verified rendering core,

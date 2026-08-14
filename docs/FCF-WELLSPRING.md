@@ -1,9 +1,9 @@
 # FCF Wellspring
 
-**Status:** active FCF research designation  
-**Scope:** foundational discoveries arising from CENTL and Free Computation Foundation research  
-**SemVer effect:** none  
-**Oasis assurance effect:** none by itself  
+**Status:** active FCF research designation
+**Scope:** foundational discoveries arising from CENTL and Free Computation Foundation research
+**SemVer effect:** none
+**Oasis assurance effect:** none by itself
 **Publication authority:** separate from the designation
 
 > A Wellspring is not merely a successful experiment. It is a finding from which multiple new possibilities begin to flow.

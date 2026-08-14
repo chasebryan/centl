@@ -1,9 +1,9 @@
 # WS-CAND-002 — Justified outward decimal rendering
 
-**Status:** candidate  
-**Date identified:** 2026-08-14  
-**Investigators / contributors:** CENTL/FCF research expedition  
-**Originating expedition:** secret-oasis-2026-08-14  
+**Status:** candidate
+**Date identified:** 2026-08-14
+**Investigators / contributors:** CENTL/FCF research expedition
+**Originating expedition:** secret-oasis-2026-08-14
 **Source / commit / artifact identity:** `src/fstar/Centl.Core.fst`
 
 ## Core finding

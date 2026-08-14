@@ -341,5 +341,3 @@ jobs:
           printf 'Qualified installer candidate %s is ready for human publication as %s.\n' \
             "$HEAD_SHA" "$TAG"
           printf 'Official Oasis publication is a reviewed SemVer tag of origin/oasis, not this workflow.\n'
-
-

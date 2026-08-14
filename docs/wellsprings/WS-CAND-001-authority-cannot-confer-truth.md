@@ -1,9 +1,9 @@
 # WS-CAND-001 — Authority cannot confer truth
 
-**Status:** candidate  
-**Date identified:** 2026-08-14  
-**Investigators / contributors:** CENTL/FCF research expedition  
-**Originating expedition:** secret-oasis-2026-08-14  
+**Status:** candidate
+**Date identified:** 2026-08-14
+**Investigators / contributors:** CENTL/FCF research expedition
+**Originating expedition:** secret-oasis-2026-08-14
 **Source / commit / artifact identity:** `docs/NUMERICS.md`, `docs/CENTL-MIRAGE.md`, `docs/CARAVAN.md`
 
 ## Core finding

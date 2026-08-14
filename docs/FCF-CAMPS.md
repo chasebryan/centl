@@ -1,9 +1,9 @@
 # FCF Camps
 
-**Status:** authoritative FCF stay policy  
-**Scope:** durable, bounded stays when a new Oasis cannot honestly be declared  
-**SemVer effect:** none  
-**Oasis assurance effect:** none  
+**Status:** authoritative FCF stay policy
+**Scope:** durable, bounded stays when a new Oasis cannot honestly be declared
+**SemVer effect:** none
+**Oasis assurance effect:** none
 **Publication authority:** none
 
 > A Camp is a place to stay. It is not an Oasis.

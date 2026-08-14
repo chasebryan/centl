@@ -1,9 +1,9 @@
 # CAMP-001 — Laboratory waystation
 
-**Status:** occupied  
-**Date occupied:** 2026-08-14  
-**Expedition:** secret-oasis-2026-08-14 / Al-Tih  
-**Published Oasis:** CENTL v0.14.0  
+**Status:** occupied
+**Date occupied:** 2026-08-14
+**Expedition:** secret-oasis-2026-08-14 / Al-Tih
+**Published Oasis:** CENTL v0.14.0
 **Oasis declared by this camp:** no
 
 ## Why this camp exists
