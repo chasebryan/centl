@@ -21,6 +21,21 @@ tokens() {
 cflags=""
 libs="-lflint -lmpfr -lgmp -lpthread -lm"
 
+# MSYS2 pkg-config prints /ucrt64 or /mingw64. ocamlopt needs a real drive path.
+rewrite_msys_roots() {
+  text=$1
+  root=${MSYS2_ROOT:-}
+  if [ -z "$root" ] && [ -d /ucrt64 ]; then
+    root=$(cd /ucrt64/.. && pwd)
+  fi
+  if [ -z "$root" ]; then
+    printf '%s' "$text"
+    return
+  fi
+  root=$(printf '%s' "$root" | tr '\\' '/')
+  printf '%s' "$text" | sed "s|/ucrt64|${root}/ucrt64|g; s|/mingw64|${root}/mingw64|g"
+}
+
 if command -v brew >/dev/null 2>&1; then
   prefix=$(brew --prefix 2>/dev/null || true)
   if [ -n "$prefix" ]; then
@@ -34,6 +49,8 @@ if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists flint; then
   libs=$(pkg-config --libs flint gmp mpfr 2>/dev/null || pkg-config --libs flint)
   cflags=$(printf '%s' "$cflags" | tr -d '\r' | tr '\n' ' ')
   libs=$(printf '%s' "$libs" | tr -d '\r' | tr '\n' ' ')
+  cflags=$(rewrite_msys_roots "$cflags")
+  libs=$(rewrite_msys_roots "$libs")
   case $(uname -s) in
     Darwin|Linux)
       case " $libs " in
