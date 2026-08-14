@@ -1,10 +1,10 @@
 # FCF Camp #1
 
-**Tag:** `fcf-camp-001`  
-**Title:** FCF Camp #1 — Laboratory waystation  
-**Occupied:** 2026-08-14  
-**Published Oasis:** CENTL v0.14.0  
-**Oasis declared by this release:** no  
+**Tag:** `fcf-camp-001`
+**Title:** FCF Camp #1 — Laboratory waystation
+**Occupied:** 2026-08-14
+**Published Oasis:** CENTL v0.14.0
+**Oasis declared by this release:** no
 **SemVer:** none. This is not `v0.15.0` and does not supersede `v0.14.0`.
 
 > A Camp is a stay. This release is the snapshot of that stay.

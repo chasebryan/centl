@@ -1,9 +1,9 @@
 # FCF proposal to companies and AI software
 
-**Status:** open invitation  
-**Audience:** companies, research groups, and other AI or scientific software  
-**SemVer effect:** none  
-**Oasis assurance effect:** none  
+**Status:** open invitation
+**Audience:** companies, research groups, and other AI or scientific software
+**SemVer effect:** none
+**Oasis assurance effect:** none
 **Endorsement:** none implied
 
 > FCF is ready for you to use the software, contribute work, and sponsor the
@@ -65,7 +65,7 @@ JSON and JSON Lines interfaces are documented in
 is a guest. It may interpret a user's words. It may not treat its own output
 as a proof, rewrite the verified core, or promote its own assurance.
 
-Machine briefing: <https://freecomputation.org/ai.html>  
+Machine briefing: <https://freecomputation.org/ai.html>
 `llms.txt`: <https://freecomputation.org/llms.txt>
 
 ### Nominative use of the name
