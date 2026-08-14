@@ -1,0 +1,95 @@
+name: CENTL direct-shadow completeness attack
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Candidate layers to attack
+        required: false
+        default: "600"
+      search_limit:
+        description: Maximum parameter s searched per candidate
+        required: false
+        default: "250000"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/direct_shadow_completeness_probe.py'
+      - 'research/erdos-straus/verify_direct_shadow_completeness.py'
+      - '.github/workflows/erdos-straus-direct-shadow-completeness.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  attack:
+    name: Candidatewise union-shadow attack and CENTL certification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Build CENTL
+        run: opam exec -- dune build src/main.exe
+
+      - name: Resolve parameters
+        id: p
+        env:
+          K: ${{ github.event.inputs.k_limit }}
+          S: ${{ github.event.inputs.search_limit }}
+        run: |
+          echo "k=${K:-600}" >> "$GITHUB_OUTPUT"
+          echo "s=${S:-250000}" >> "$GITHUB_OUTPUT"
+
+      - name: Attack every directly novel candidate
+        run: |
+          rm -rf direct-shadow-output
+          python3 research/erdos-straus/direct_shadow_completeness_probe.py \
+            --k-limit '${{ steps.p.outputs.k }}' \
+            --search-limit '${{ steps.p.outputs.s }}' \
+            --out direct-shadow-output
+
+      - name: Independent verifier
+        run: python3 research/erdos-straus/verify_direct_shadow_completeness.py --out direct-shadow-output
+
+      - name: CENTL exact certification of hardest CRT progressions
+        run: |
+          _build/default/src/main.exe check direct-shadow-output/direct-shadow-hardest.centl \
+            --receipt direct-shadow-output/centl-direct-shadow-receipt.json
+          _build/default/src/main.exe --version > direct-shadow-output/centl-version.txt
+          _build/default/src/main.exe --build-info > direct-shadow-output/centl-build-info.txt
+
+      - name: Freeze hashes
+        run: |
+          cd direct-shadow-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat direct-shadow-output/direct-shadow-completeness-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload certificate bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: direct-shadow-completeness-${{ github.sha }}
+          path: direct-shadow-output/
+          if-no-files-found: error
+          retention-days: 90
