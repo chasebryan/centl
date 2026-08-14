@@ -577,6 +577,9 @@ let promotion_logic () =
       "5. No agent, owner grant, or green CI result may self-approve, merge";
       "   to oasis, or create a SemVer tag.";
       "6. Draft pull requests created by CENTL-SCi target `mirage` only.";
+      "7. Oasis does not regress: a candidate must contain the current oasis";
+      "   tip. Merge oasis into the candidate before promotion. Do not drop";
+      "   installer channels, gates, or Oasis-only fixes to land laboratory work.";
       "";
       "This command will not declare Oasis, merge to oasis, or publish a tag.";
     ]

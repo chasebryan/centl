@@ -652,6 +652,38 @@ def parser() -> argparse.ArgumentParser:
 PUBLISHED_OASIS = "0.14.0"
 
 
+def oasis_tip(root: Path) -> str:
+    for ref in ("origin/oasis", "oasis"):
+        try:
+            return run_capture(root, ("git", "rev-parse", ref))
+        except OasisError:
+            continue
+    raise OasisError("cannot resolve oasis tip (origin/oasis or oasis)")
+
+
+def contains_oasis_tip(root: Path) -> tuple[bool, str]:
+    """Return (contains, oasis_sha_or_error). Non-regression: Oasis work must remain."""
+    try:
+        tip = oasis_tip(root)
+    except OasisError as exc:
+        return False, str(exc)
+    try:
+        completed = subprocess.run(
+            ("git", "merge-base", "--is-ancestor", tip, "HEAD"),
+            cwd=root,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return False, f"cannot check oasis ancestry: {exc}"
+    if completed.returncode == 0:
+        return True, tip
+    return False, tip
+
+
 def inspect_identity(root: Path, version: str) -> dict[str, object]:
     """Describe whether this identity could be Oasis. Never declares Oasis."""
     try:
@@ -675,6 +707,14 @@ def inspect_identity(root: Path, version: str) -> dict[str, object]:
     if version != PUBLISHED_OASIS:
         blockers.append(
             f"current version {version} is not the published Oasis identity {PUBLISHED_OASIS}"
+        )
+    contains, oasis_ref = contains_oasis_tip(root)
+    if not contains:
+        tip_label = oasis_ref[:12] if len(oasis_ref) >= 12 and " " not in oasis_ref else oasis_ref
+        blockers.append(
+            "HEAD does not contain the current oasis tip "
+            f"{tip_label}; promoting this identity would regress Oasis-only "
+            "work. Merge oasis into the candidate first."
         )
     try:
         require_layout(root, version)

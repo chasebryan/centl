@@ -54,6 +54,18 @@ feature / research work
 
 `main` is an integration view, not another maturity rung.
 
+## Oasis does not regress
+
+A later candidate must not drop, weaken, or replace the already-published Oasis product.
+
+- `origin/oasis` must be an ancestor of any promotion candidate.
+- Existing Oasis tests, installer channels, qualification machinery, and supported command surfaces stay.
+- New work is added **on top of** Oasis, not instead of it.
+- If laboratory history diverged, merge `oasis` into the candidate first. Do not force-push Oasis away.
+- Gates are not weakened, skipped, or rewritten to obtain a green result.
+
+`scripts/oasis.py --inspect` reports a blocker when HEAD does not contain the current oasis tip. That blocker is a non-regression check, not a declaration.
+
 See [`RELEASE-POLICY.md`](RELEASE-POLICY.md) for the canonical branch rules.
 
 ## What earns the declaration

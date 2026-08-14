@@ -43,6 +43,9 @@
 - Requirements that already compose to existing CENTL operations are marked
   SATISFIED instead of asking for a new implementation.
 - Spoken ordinals such as `the 10th fibonacci number` lower to `fibonacci(10)`.
+- Oasis inspection now blocks promotion when HEAD does not contain the
+  current oasis tip, so a laboratory branch cannot regress Oasis-only
+  installer, CI, or qualification work.
 - CENTL-SCi encodes the official Oasis promotion path: experimental work
   drafts to `mirage`, Oasis remains a later qualification on `oasis`, and
   verbs that would self-approve, merge to oasis, or tag a release are

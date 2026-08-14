@@ -90,6 +90,18 @@ class InspectTests(unittest.TestCase):
         blockers = payload["blockers"]
         self.assertTrue(any("is not oasis" in str(item) for item in blockers))
 
+    def test_inspect_records_oasis_non_regression_when_tip_missing(self) -> None:
+        payload = OASIS.inspect_identity(ROOT, "0.14.0")
+        contains, _tip = OASIS.contains_oasis_tip(ROOT)
+        if contains:
+            self.assertFalse(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
+        else:
+            self.assertTrue(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
+
 
 class VersionTests(OasisTestCase):
     def test_reads_authoritative_version(self) -> None:
