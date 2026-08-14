@@ -18,6 +18,8 @@ This file exists specifically so the live research state is recoverable from the
 - [ODD-COVERING-BRIDGE.md](ODD-COVERING-BRIDGE.md)
 - [SHADOW-KERNEL.md](SHADOW-KERNEL.md)
 - [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md)
+- [SMALL-SELECTOR-HYPOTHESIS.md](SMALL-SELECTOR-HYPOTHESIS.md)
+- [QUADRATIC-TRAP-SIGNATURE.md](QUADRATIC-TRAP-SIGNATURE.md)
 - [DEPTH-SPECTRUM.md](DEPTH-SPECTRUM.md)
 - [SURVIVOR-DENSITY.md](SURVIVOR-DENSITY.md)
 - [PRIME-MODULUS-BACKBONE.md](PRIME-MODULUS-BACKBONE.md)
@@ -85,14 +87,7 @@ Artifact ZIP digest:
 sha256:a2479a4113d693af2e647ffc2e007d3d7b1cf628ce7190f72c4ad6282a98ba14
 ```
 
-The run completed successfully through:
-
-1. discovery of every directly novel candidate;
-2. independent verification;
-3. coordinate-core proof mining;
-4. CENTL exact symbolic certification;
-5. per-file SHA-256 verification;
-6. artifact upload.
+The run completed successfully through discovery, independent verification, coordinate-core proof mining, CENTL exact symbolic certification, per-file SHA-256 verification, and artifact upload.
 
 ## Exact theorem machinery now in the repository
 
@@ -116,33 +111,85 @@ Writing `q_j=p^a c`, the sharper fiber width `f_{j,p}` records the maximum numbe
 
 is therefore strictly sharper. If the augmented `Lambda_p*<1`, the coordinate is peelable while preserving reduced prime realization.
 
-The active proof strategy is now:
+### Quadratic trap signature
+
+For `m=4k-1` and every divisor `e|k`, the exact theorem now recorded in the repository is
 
 \[
-\text{directly novel candidate}
-\to
-\text{fiber peeling}
-\to
-\text{small-prime residual kernel}
-\to
-\text{prove a reduced local survivor}
-\to
-\text{DSC-P}.
+\boxed{
+\left(\frac{-e}{m}\right)
+=\left(\frac{-4e}{m}\right)
+=-1.
+}
 \]
 
-## Next configured computational assault
+Thus every Type A/B trap lies in the Jacobi-negative part of the unit group. This yields the **quadratic character shield**: if the candidate progression can be assigned local Legendre signs making every earlier modulus have Jacobi sign `+1`, then all earlier Type A/B traps are avoided automatically. The sign-selection problem is a finite linear system over `F_2`.
 
-The workflow is configured to attack:
+A solvable character system therefore gives a reduced exact-depth progression independently of the stored sequential witness.
+
+### Small-selector residual-kernel experiment
+
+After exact fiber peeling, [`shadow_small_selector_analyzer.py`](shadow_small_selector_analyzer.py) tests whether the residual small-prime kernel is already solved by a fixed menu
+
+\[
+0,\pm1,\ldots,\pm64.
+\]
+
+Selector success is an independent constructive existence proof when combined with reverse fiber extension. Failure of the bounded menu is only a proof-mining failure, not a DSC-P counterexample.
+
+## Active proof architecture
+
+\[
+\boxed{
+\text{direct novelty}
+\to
+\text{coarse peel}
+\to
+\text{fiber peel}
+\to
+\text{quadratic shield / small selector}
+\to
+\text{bounded small-prime core}
+\to
+\text{reduced avoiding class}
+\to
+\text{DSC-P}.
+}
+\]
+
+## Current k<=1500 assault
+
+The combined workflow commit is:
 
 ```text
-k_limit      = 1500
-search_limit = 3,000,000
+c508994fb48e6f701f15577352f275df5646cd78
 ```
 
-This crosses the earlier record-depth region around `k=1403` and `k=1435` while applying both coarse and fiber kernel reduction.
+The resulting GitHub Actions run is:
 
-No future run is to be promoted to an established result until discovery, independent verification, CENTL certification, hashes, and artifact publication all complete successfully.
+```text
+run id: 31849103304
+status at checkpoint: in progress
+k_limit: 1500
+search_limit: 3,000,000
+selector menu after fiber peeling: 0, ±1, ..., ±64
+```
+
+The workflow now executes:
+
+1. exhaustive candidate discovery;
+2. independent verifier;
+3. coordinate-core locality analysis;
+4. coarse shadow-kernel peeling;
+5. fiber shadow-kernel peeling;
+6. bounded small-selector residual-kernel attack;
+7. quadratic character-shield analysis;
+8. CENTL symbolic certification;
+9. SHA-256 freezing;
+10. artifact publication.
+
+No numerical conclusion from this `k<=1500` run is established until every stage completes successfully and the final artifact digest is frozen into the repository.
 
 ## Research rule
 
-Every material theorem, conjecture, computational frontier, counterexample search, artifact digest, and change in claim boundary should be committed to this repository. Chat discussion is exploratory; the repository is canonical.
+Every material theorem, conjecture, computational frontier, counterexample search, workflow result, artifact digest, and change in claim boundary should be committed to this repository. Chat discussion is exploratory; **the repository is canonical**.
