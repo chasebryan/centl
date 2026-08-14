@@ -7,6 +7,12 @@
 - Workflow checkouts no longer persist GitHub credentials in `.git/config`.
   Distribution jobs use job-scoped `contents: write` and an explicit push
   token header instead of a workflow-wide write token.
+- Oasis qualification and publication workflows no longer hold
+  `statuses: write` or `checks: write`. Exact-SHA attestation is the Actions
+  job conclusion, which cannot be forged with a stolen status token.
+- The Oasis security gate still fails closed on high GitHub Security-tab
+  alerts, except Scorecard's job-level `contents: write` warning on jobs that
+  must publish releases or the `distribution` branch.
 - Publish grants clamp contributor privileges regardless of hand-edited JSON.
   Pack identities, basenames, origin URLs, and staged paths are allowlisted;
   possible secret material is refused; `git` is invoked with `-C` instead of

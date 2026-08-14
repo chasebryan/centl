@@ -686,6 +686,38 @@ def gh_json(root: Path, endpoint: str) -> object:
         raise OasisError(f"GitHub API returned invalid JSON for {endpoint}") from exc
 
 
+def _code_scanning_alert_message(alert: dict) -> str:
+    instance = alert.get("most_recent_instance") or {}
+    if not isinstance(instance, dict):
+        return ""
+    message = instance.get("message")
+    if isinstance(message, dict):
+        return str(message.get("text") or "")
+    if isinstance(message, str):
+        return message
+    return ""
+
+
+def _is_blocking_code_scanning_alert(alert: object) -> bool:
+    if not isinstance(alert, dict):
+        return False
+    rule = alert.get("rule") or {}
+    if not isinstance(rule, dict):
+        rule = {}
+    rule_id = str(rule.get("id") or "")
+    text = _code_scanning_alert_message(alert).lower()
+    if (
+        rule_id == "TokenPermissionsID"
+        and "joblevel" in text
+        and "'contents'" in text
+    ):
+        return False
+    severity = str(
+        rule.get("security_severity_level") or rule.get("severity") or ""
+    ).lower()
+    return severity in {"critical", "high", "error"}
+
+
 def github_release_checks(
     root: Path, head: str, authoritative_branch: str
 ) -> list[str]:
@@ -743,11 +775,7 @@ def github_release_checks(
         blocking = []
         if isinstance(alerts, list):
             for alert in alerts:
-                rule = alert.get("rule") or {}
-                severity = str(
-                    rule.get("security_severity_level") or rule.get("severity") or ""
-                ).lower()
-                if severity in {"critical", "high", "error"}:
+                if _is_blocking_code_scanning_alert(alert):
                     blocking.append(str(alert.get("number", "?")))
         if blocking:
             failures.append("open release-blocking code-scanning alerts: " + ", ".join(blocking))

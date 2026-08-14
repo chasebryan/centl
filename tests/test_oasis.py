@@ -329,6 +329,47 @@ class GitHubGateTests(OasisTestCase):
             failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
         self.assertTrue(any("code-scanning" in item for item in failures))
 
+    def test_scorecard_job_level_contents_write_does_not_block_final_gate(self) -> None:
+        def fake_capture(root: Path, argv, timeout=30):
+            if tuple(argv[:3]) == ("gh", "pr", "list"):
+                return "[]"
+            raise AssertionError(f"unexpected command: {argv}")
+
+        def fake_json(root: Path, endpoint: str):
+            if "check-runs" in endpoint:
+                return {
+                    "check_runs": [
+                        {"name": "CI", "status": "completed", "conclusion": "success"}
+                    ]
+                }
+            if "code-scanning" in endpoint:
+                return [
+                    {
+                        "number": 67,
+                        "rule": {
+                            "id": "TokenPermissionsID",
+                            "security_severity_level": "high",
+                            "severity": "error",
+                        },
+                        "most_recent_instance": {
+                            "message": {
+                                "text": "score is 0: jobLevel 'contents' permission set to 'write'"
+                            }
+                        },
+                    }
+                ]
+            if "dependabot" in endpoint or "secret-scanning" in endpoint:
+                return []
+            raise AssertionError(endpoint)
+
+        with mock.patch.object(
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
+        ):
+            failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
+        self.assertFalse(any("code-scanning" in item for item in failures))
+
     def test_open_pr_targeting_oasis_blocks_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):

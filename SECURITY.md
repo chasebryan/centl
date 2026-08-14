@@ -104,9 +104,13 @@ a remote-control surface and it is not a claim of perfect security.
 - A promotion candidate must contain the current oasis tip. Oasis does not
   regress.
 - Workflow default tokens are read-only. Jobs that publish releases or the
-  `distribution` branch take job-scoped write and do not persist checkout
-  credentials. Commit-status write on Oasis qualification/publication jobs
-  remains because those jobs post exact-SHA attestations.
+  `distribution` branch take job-scoped `contents: write` and do not persist
+  checkout credentials.
+- Qualification and publication workflows do not hold `statuses: write` or
+  `checks: write`. Attestation is the GitHub Actions job conclusion itself.
+  Scorecard still reports leftover job-level `contents: write` on publication
+  jobs; that permission is required to create releases or update
+  `distribution` and is accepted residual risk, not a top-level write token.
 
 This sweep does not claim the absence of every future defect. Residual risk
 includes native library memory safety, a compromised GitHub release account,
