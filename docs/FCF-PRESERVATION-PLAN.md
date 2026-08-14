@@ -97,13 +97,33 @@ This includes source archives, package-index state, dependency metadata, lockfil
 
 For CENTL, the existing **FCF Dependency Chest** is the first concrete implementation of this principle. The Chest remains focused on immutable, authenticated dependency and recovery crates required for CENTL and related FCF systems. It is a subset of the broader preservation mission, not the limit of it.
 
-### 5. Programming languages, compilers, and interpreters
+### 5. Project languages, compilers, interpreters, and build dialects
 
-FCF should consider preservation of foundational free language implementations and their build ecosystems, particularly where they are required by preserved systems or have substantial historical value.
+FCF must preserve **every programming language and language-adjacent build or specification dialect materially used by FCF software**. This is a project-survival requirement, not merely a historical-interest category.
 
-Relevant families may include C, C++, Scheme/Lisp, OCaml, Python, Perl, Rust, and others according to technical dependency, historical importance, licensing, and preservation capacity.
+For CENTL and other FCF projects, preserving a language means preserving it **as it is used by the project**. Preserving only the language name, a language specification, or whatever implementation happens to be current in the future is not sufficient when the project depends on particular implementation behavior, versions, libraries, tools, or build semantics.
 
-For each admitted language ecosystem, the useful preservation unit may include compiler/interpreter source, standard libraries, package metadata, bootstrap dependencies, documentation, and representative conformance or regression suites.
+For every materially used project language or language-adjacent tooling surface, the preservation set should include, where applicable:
+
+- the exact compiler, interpreter, runtime, proof checker, or implementation version used by the project, or the precise admissible version range when the project intentionally permits one;
+- standard libraries and runtime components required by that implementation;
+- package managers, build systems, language-specific dependency metadata, lockfiles, compiler flags, feature selections, and environment assumptions;
+- bootstrap compilers, interpreters, generators, and transitive dependencies required to reconstruct the usable language implementation from preserved source;
+- the relevant language, runtime, ABI, build-system, and tool documentation needed to understand the preserved environment;
+- representative conformance, regression, and project test suites capable of demonstrating that the reconstructed language environment behaves as required by the preserved project;
+- FCF or upstream patches, forks, configuration, wrappers, or compatibility layers that materially alter the behavior used by the project;
+- provenance, checksums, signatures, licenses, and source-control identity for the preserved implementation and its critical dependencies; and
+- known-good environment manifests, containers, virtual-machine recipes, or equivalent reconstruction evidence where practical.
+
+**Version drift is not preservation.** A future tool carrying the same language name is not an adequate substitute if it cannot reproduce the semantics, build behavior, proof behavior, runtime behavior, or other properties on which the preserved FCF project relied.
+
+This rule applies across programming languages, proof/specification languages, scripting languages, markup and styling languages when they are required to reconstruct project outputs, and build/configuration dialects when they are required to reproduce the project.
+
+The repository's language and tooling inventory must therefore be treated as an evolving preservation input. At the time of this plan update, the CENTL repository contains code or build material identified as **OCaml, Python, shell scripting, F\*, HTML, Raku, PowerShell, Julia, C, Makefile, Dockerfile, CSS, Dune, and Turing**. Presence alone does not prove that every detected fragment is a runtime dependency: preservation cataloging should classify each surface as active, build-critical, documentation/output-critical, historical or frozen, or fixture-only. Every material surface must nevertheless have an explicit preservation disposition rather than being silently ignored.
+
+Whenever an FCF project adopts a new material language, runtime, compiler, proof system, interpreter, or build dialect, that tooling surface automatically enters preservation scope. The preservation plan should not depend on a manually maintained fixed list remaining current.
+
+FCF may additionally preserve foundational free language implementations that are not currently project dependencies when they have substantial historical or ecosystem value. Relevant families may include C, C++, Scheme/Lisp, OCaml, Python, Perl, Rust, and others according to technical dependency, historical importance, licensing, and preservation capacity.
 
 ### 6. Boot, firmware, and low-level system freedom
 
@@ -276,9 +296,10 @@ The first strategic preservation set should concentrate on artifacts that direct
 5. FreeBSD;
 6. the GNU developer toolchain and foundational utilities;
 7. FSF/GNU books, manuals, and technical/historical documentation under their applicable rights;
-8. CENTL source, releases, documentation, dependencies, recovery material, and qualified semantic artifacts;
-9. boot/firmware projects useful to long-lived free systems, including coreboot and Libreboot; and
-10. the preservation metadata, verification tooling, and CARAVAN infrastructure needed to keep all of the above inspectable and recoverable.
+8. every programming, proof/specification, scripting, markup, and build language materially required by CENTL or another FCF project, preserved in the exact implementation and toolchain forms required to reconstruct that project;
+9. CENTL source, releases, documentation, dependencies, recovery material, and qualified semantic artifacts;
+10. boot/firmware projects useful to long-lived free systems, including coreboot and Libreboot; and
+11. the preservation metadata, verification tooling, and CARAVAN infrastructure needed to keep all of the above inspectable and recoverable.
 
 This priority list is a compass, not an assertion that every object is already archived or publicly distributable.
 
