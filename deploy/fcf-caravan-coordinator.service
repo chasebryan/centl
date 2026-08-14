@@ -6,7 +6,7 @@ After=network-online.target
 Type=simple
 WorkingDirectory=/var/home/chasebryan/centl
 Environment=PYTHONPATH=/var/home/chasebryan/centl
-ExecStart=/usr/bin/python3 -m caravan.public_service --database /var/home/chasebryan/.local/state/fcf-caravan/coordinator.sqlite3 --policy /var/home/chasebryan/centl/docs/CARAVAN-HOST-POLICY.md --policy-version FCF-CARAVAN-HOST-v1 --agent-version 1.0.3 --port 8789
+ExecStart=/usr/bin/python3 -m caravan.public_service --database /var/home/chasebryan/.local/state/fcf-caravan/coordinator.sqlite3 --policy /var/home/chasebryan/centl/docs/CARAVAN-HOST-POLICY.md --policy-version FCF-CARAVAN-HOST-v1 --agent-version 1.0.3 --agent-version 1.0.4 --port 8789
 Restart=always
 RestartSec=5
 NoNewPrivileges=true
