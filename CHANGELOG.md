@@ -4,10 +4,12 @@
 
 ## 0.15.0 — 2026-08-14
 
-Candidate identity for the main and mirage tree placed on the oasis tip.
-The public commands remain `centl`, `centl-physics`, and `centl-sci` on
-GNU/Linux x86_64. Laboratory surfaces stay laboratory. This heading is
-not a completed Oasis declaration.
+Official snapshot of the current stable main and mirage trees, placed on
+the oasis tip so Oasis does not regress. After promotion, development
+continues on those lines. The public commands remain `centl`,
+`centl-physics`, and `centl-sci` on GNU/Linux x86_64. Laboratory
+surfaces stay laboratory. This heading is not a completed Oasis
+declaration.
 
 ### Security
 
@@ -27,6 +29,11 @@ not a completed Oasis declaration.
 
 ### Added
 
+- Official Oasis logic: `oasis` is the steadily advanced stable snapshot
+  of current `main` and `mirage`. `./scripts/oasis --snapshot` reports
+  that procedure without declaring Oasis.
+- CARAVAN enrollment now assigns a durable live caravan number and
+  returns it on re-enrollment of the same carrier.
 - `CENTL-Marsa` is the undeletable harbor that ports the Camp stay to
   macOS and Windows. It is not Oasis. `install` now sends those kernels
   to the harbor instead of a dead end.

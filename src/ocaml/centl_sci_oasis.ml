@@ -54,8 +54,9 @@ let inspect ~root ~current_version ~branch =
     else
       "no new Oasis was found. CENTL v" ^ published_oasis
       ^ " remains the published Oasis release; this identity does not satisfy \
-         the Oasis declaration requirements. FCF Camps are the stay when \
-         Oasis cannot be declared; they are not Oasis."
+         the Oasis declaration requirements. Oasis is the steadily advanced \
+         snapshot of current main and mirage. FCF Camps are the stay when a \
+         snapshot cannot be declared; they are not Oasis."
   in
   { published_oasis; current_version; declaration; blockers; summary }
 

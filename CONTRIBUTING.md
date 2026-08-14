@@ -18,9 +18,11 @@ target.
 - `CENTL-Marsa` is the undeletable Windows and macOS harbor of the Camp stay.
   Do not treat a Marsa build as Oasis.
 
-The last completed Oasis is CENTL v0.14.0. v0.15.0 is the candidate
-from main and mirage on the oasis tip. Camp #1 remains the inhabited
-stay until that candidate finishes the gate.
+The last completed Oasis is CENTL v0.14.0. v0.15.0 is the official
+snapshot of current main and mirage on the oasis tip. After that
+snapshot is promoted, development continues on `mirage` and `main`.
+Camp #1 remains the inhabited stay until that candidate finishes the
+gate.
 
 If any part of that stack is unfamiliar, start with the
 [documentation index](docs/README.md) and then the
@@ -183,8 +185,9 @@ Choose the target branch according to the maturity and purpose of the change:
 - **`mirage`** is the normal target for experimental features, prototypes,
   research, speculative mathematics, architecture exploration, and other work
   that is not yet claiming stable-product quality.
-- **`oasis`** is for release hardening, qualification repairs, and deliberately
-  prepared promotions that are ready to satisfy the complete Oasis gate.
+- **`oasis`** is for the official snapshot of current `main` and `mirage`,
+  plus release hardening and qualification repairs. That pull request
+  must be a linear descendant of the oasis tip and must not be squash-merged.
 - **`main`** is for repository-wide integration, documentation, tooling, or work
   whose purpose is the comprehensive developer/research distribution.
 
@@ -245,5 +248,6 @@ Protocol: `op: "verify"`. MCP: `centl_verify`. See `docs/PROTOCOL.md` and
 CENTL-SCi can prepare a local pack with `pack contribution` and, after an
 explicit publish grant, open a **draft** pull request against `mirage`.
 That path does not store tokens, does not target `oasis`, and does not
-replace this human review. Oasis promotion requires the candidate to
-contain the current oasis tip so the published product does not regress.
+replace this human review. Oasis promotion requires a linear snapshot of
+the current stable main/mirage tree on the oasis tip so the published
+product does not regress.

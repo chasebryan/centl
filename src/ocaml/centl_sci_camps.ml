@@ -48,8 +48,9 @@ let camp_001 =
         "declaring Oasis here would skip or weaken the official gate";
       ];
     oasis_still_possible =
-      "CENTL v0.15.0 is the Oasis candidate from main and mirage on the \
-       oasis tip. This camp inspect path does not declare it.";
+      "Oasis is the steadily advanced snapshot of current main and mirage. \
+       CENTL v0.15.0 is that snapshot on the oasis tip. This camp inspect \
+       path does not declare it.";
     in_bounds =
       [
         "inspect-only Oasis, Wellspring, Camp, and CARAVAN commands";

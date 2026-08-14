@@ -2,6 +2,39 @@
 
 Oasis promotion is deliberately bound to one exact source identity from final candidate qualification through publication.
 
+## 0. Official snapshot from main and mirage
+
+Oasis represents the current stable `main` and `mirage` trees. It is
+steadily advanced; it does not regress. After a snapshot is promoted,
+development continues on `mirage` and `main`.
+
+Build the candidate as a linear descendant of the current oasis tip:
+
+```text
+origin/oasis
+        |
+        | overlay current origin/main
+        | (origin/mirage must have the same tree)
+        | write SemVer identity
+        v
+one linear commit   ← this is the Oasis candidate
+        |
+        | exact-SHA hosted qualification
+        v
+same SHA fast-forwarded to oasis
+        |
+        v
+continue development on mirage and main
+```
+
+Do not squash-merge that pull request. Do not create a merge commit. Do
+not force-push `oasis`, `main`, or `mirage`. If histories have diverged
+through squash-landing, overlay the stable tree onto the oasis tip
+instead of merging.
+
+`./scripts/oasis --snapshot` reports whether the current checkout matches
+this procedure. It never declares Oasis.
+
 ## 1. Exact candidate proof
 
 A pull request targeting `oasis` enters the hardened exact-SHA target qualification path. The trusted workflow definition lives on the repository default branch, admits only a same-repository candidate authored by the repository owner, and executes candidate code with read-only repository permissions. For the Oasis candidate it checks out the **literal pull-request head SHA**, not GitHub's synthetic merge commit, and requires:
@@ -48,11 +81,12 @@ Publication consumes the archive that already passed full convergence. It does *
 
 After upload, the release latch downloads the published archive and checksum again, verifies the checksum, and compares the published archive digest to the already-qualified archive digest.
 
-The intended v0.14.0 path is therefore:
+The intended path is therefore:
 
 ```text
-mirage / integrated work
+current stable main / mirage tree
         |
+        | linear snapshot on the oasis tip
         v
 final Oasis PR head SHA
         |
@@ -62,12 +96,15 @@ same SHA fast-forwarded to oasis
         |
         | close qualification PR / release latch
         v
-same SHA tagged v0.14.0
+same SHA tagged vX.Y.Z
         |
         v
 exact qualified bytes published + reverified
+        |
+        v
+development continues on mirage and main
 ```
 
 Only after the complete chain closes is the declaration authoritative:
 
-> **CENTL v0.14.0 is an Oasis release.**
+> **CENTL vX.Y.Z is an Oasis release.**

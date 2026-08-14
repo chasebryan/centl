@@ -344,6 +344,128 @@ def contains_oasis_tip(root: Path) -> tuple[bool, str]:
     return False, tip
 
 
+def resolve_ref(root: Path, *names: str) -> tuple[str, str]:
+    """Return (name, sha) for the first resolvable git ref."""
+    for name in names:
+        try:
+            return name, run_capture(root, ("git", "rev-parse", "--verify", name))
+        except OasisError:
+            continue
+    raise OasisError("cannot resolve " + " or ".join(names))
+
+
+def tree_sha(root: Path, rev: str) -> str:
+    return run_capture(root, ("git", "rev-parse", f"{rev}^{{tree}}"))
+
+
+def snapshot_state(root: Path) -> dict[str, object]:
+    """Describe the official Oasis snapshot of current main and mirage.
+
+    Oasis is the steadily advanced stable snapshot of those trees. This
+    report never declares Oasis and never qualifies a release.
+    """
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "artifact_kind": "oasis_snapshot_inspection",
+        "declaration": False,
+        "eligible_for_final_qualification": False,
+        "policy": (
+            "oasis is the steadily advanced stable snapshot of current main "
+            "and mirage. After promotion, development continues on mirage and "
+            "main. Oasis does not regress."
+        ),
+    }
+    blockers: list[str] = []
+    try:
+        oasis_name, oasis_sha = resolve_ref(root, "origin/oasis", "oasis")
+        main_name, main_sha = resolve_ref(root, "origin/main", "main")
+        mirage_name, mirage_sha = resolve_ref(root, "origin/mirage", "mirage")
+        head = run_capture(root, ("git", "rev-parse", "HEAD"))
+        oasis_tree = tree_sha(root, oasis_sha)
+        main_tree = tree_sha(root, main_sha)
+        mirage_tree = tree_sha(root, mirage_sha)
+        head_tree = tree_sha(root, head)
+        trees_match = main_tree == mirage_tree
+        contains, _tip = contains_oasis_tip(root)
+        if not trees_match:
+            blockers.append(
+                "main and mirage trees differ; Oasis is made only from the "
+                "current stable pair when those trees match"
+            )
+        if not contains:
+            blockers.append(
+                "HEAD does not contain the current oasis tip; a snapshot must "
+                "be a linear descendant of oasis so Oasis does not regress. "
+                "Rebuild on the oasis tip by overlaying the current main tree. "
+                "Do not merge (merge commits are forbidden) and do not "
+                "force-push oasis."
+            )
+        payload.update(
+            {
+                "oasis_ref": oasis_name,
+                "oasis_sha": oasis_sha,
+                "oasis_tree": oasis_tree,
+                "main_ref": main_name,
+                "main_sha": main_sha,
+                "main_tree": main_tree,
+                "mirage_ref": mirage_name,
+                "mirage_sha": mirage_sha,
+                "mirage_tree": mirage_tree,
+                "head": head,
+                "head_tree": head_tree,
+                "main_mirage_trees_match": trees_match,
+                "head_contains_oasis_tip": contains,
+                "head_tree_matches_main": head_tree == main_tree,
+            }
+        )
+    except OasisError as exc:
+        blockers.append(str(exc))
+    payload["blockers"] = blockers
+    payload["summary"] = (
+        "This snapshot inspection does not run gates and cannot declare Oasis. "
+        "Oasis is made from the current stable main and mirage trees by a "
+        "linear commit on the oasis tip. After that snapshot is promoted, "
+        "development continues on mirage and main."
+    )
+    return payload
+
+
+def prepare_snapshot(root: Path, *, allow_dirty: bool = False) -> dict[str, object]:
+    """Overlay the current stable main tree onto an oasis-descendant worktree.
+
+    Does not commit, declare Oasis, fast-forward oasis, or create a tag.
+    """
+    state = git_state(root)
+    if state["tracked_dirty"] and not allow_dirty:
+        raise OasisError(
+            "tracked edits already exist; commit or stash them, or pass "
+            "--allow-dirty, before preparing an Oasis snapshot"
+        )
+    report = snapshot_state(root)
+    if report.get("main_mirage_trees_match") is not True:
+        raise OasisError(
+            "cannot prepare an Oasis snapshot while main and mirage trees differ"
+        )
+    if report.get("head_contains_oasis_tip") is not True:
+        raise OasisError(
+            "cannot prepare an Oasis snapshot unless HEAD already contains "
+            "the current oasis tip; check out origin/oasis first"
+        )
+    main_ref = str(report.get("main_ref") or "origin/main")
+    run_capture(root, ("git", "checkout", main_ref, "--", "."))
+    report["prepared"] = True
+    report["overlaid_from"] = main_ref
+    report["committed"] = False
+    report["declaration"] = False
+    report["summary"] = (
+        f"Overlaid {main_ref} onto the oasis-descendant worktree. "
+        "Write the SemVer identity, create one linear commit, open a pull "
+        "request to oasis, and do not squash-merge it. This preparation "
+        "cannot declare Oasis."
+    )
+    return report
+
+
 def inspect_identity(root: Path, version: str) -> dict[str, object]:
     """Describe whether this identity could be Oasis. Never declares Oasis."""
     try:
@@ -376,8 +498,11 @@ def inspect_identity(root: Path, version: str) -> dict[str, object]:
         blockers.append(
             "HEAD does not contain the current oasis tip "
             f"{tip_label}; promoting this identity would regress Oasis-only "
-            "work. Merge oasis into the candidate first."
+            "work. Rebuild the candidate as a linear snapshot on the oasis "
+            "tip from the current stable main/mirage tree. Do not merge "
+            "(merge commits are forbidden) and do not force-push oasis."
         )
+    snapshot = snapshot_state(root)
     try:
         require_layout(root, version)
     except OasisError as exc:
@@ -395,8 +520,12 @@ def inspect_identity(root: Path, version: str) -> dict[str, object]:
         "summary": (
             f"CENTL v{PUBLISHED_OASIS} remains the published Oasis release. "
             "This inspection does not run gates and cannot declare Oasis. "
-            "FCF Camps are the stay when Oasis cannot be declared; they are not Oasis."
+            "Oasis is the steadily advanced stable snapshot of current main "
+            "and mirage; after promotion, development continues on those "
+            "lines. FCF Camps are the stay when a snapshot cannot be "
+            "declared; they are not Oasis."
         ),
+        "snapshot": snapshot,
         "fcf_camp": {
             "policy": "docs/FCF-CAMPS.md",
             "oasis_closed": False,
@@ -839,6 +968,16 @@ def parser() -> argparse.ArgumentParser:
         action="store_true",
         help="report Oasis identity distance without running gates or declaring Oasis",
     )
+    p.add_argument(
+        "--snapshot",
+        action="store_true",
+        help="report whether this tree can be the official Oasis snapshot of current main and mirage",
+    )
+    p.add_argument(
+        "--snapshot-prepare",
+        action="store_true",
+        help="overlay the current main tree onto an oasis-descendant worktree without committing or declaring Oasis",
+    )
     p.add_argument("--report", type=Path, help="explicit JSON evidence report path")
     p.add_argument("--quiet", action="store_true")
     return p
@@ -855,6 +994,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     except OasisError as exc:
         print(f"[oasis] PRECHECK FAILED: {exc}", file=sys.stderr)
         return 2
+
+    if args.snapshot or args.snapshot_prepare:
+        try:
+            payload = (
+                prepare_snapshot(root, allow_dirty=args.allow_dirty)
+                if args.snapshot_prepare
+                else snapshot_state(root)
+            )
+        except OasisError as exc:
+            print(f"[oasis] SNAPSHOT FAILED: {exc}", file=sys.stderr)
+            return 2
+        text = (
+            f"CENTL Oasis snapshot inspection\n"
+            f"declaration: no\n"
+            f"{payload.get('summary')}\n"
+        )
+        blockers = payload.get("blockers")
+        if isinstance(blockers, list) and blockers:
+            text += "blockers:\n" + "".join(f"  - {item}\n" for item in blockers)
+        if payload.get("main_ref"):
+            text += (
+                f"main: {payload.get('main_ref')} {payload.get('main_sha')}\n"
+                f"mirage: {payload.get('mirage_ref')} {payload.get('mirage_sha')}\n"
+                f"oasis: {payload.get('oasis_ref')} {payload.get('oasis_sha')}\n"
+                f"main/mirage trees match: {payload.get('main_mirage_trees_match')}\n"
+                f"HEAD contains oasis tip: {payload.get('head_contains_oasis_tip')}\n"
+            )
+        if not args.quiet:
+            print(text, end="")
+        report_path = args.report or (root / "_build/oasis/snapshot.json")
+        atomic_json(report_path, payload)
+        return 0
 
     if args.inspect:
         payload = inspect_identity(root, version)
