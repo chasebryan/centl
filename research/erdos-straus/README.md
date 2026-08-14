@@ -2,6 +2,22 @@
 
 This directory operationalizes the research program recorded in `docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md`.
 
+## Research map
+
+**Current synthesis:** [`DIAMOND.md`](DIAMOND.md) records how the minimal Type A/B depth invariant, shadow graph, exact-depth spectrum, exact survivor hazard, prime-modulus backbone, and composite rescue core now fit into one theorem program.
+
+Core linked records:
+
+- [`THEORY.md`](THEORY.md) — foundational shadow and modulus-ancestry results;
+- [`RESULTS-2026-08-14.md`](RESULTS-2026-08-14.md) — automated frontier, shadow map, independent verification, and CENTL certification;
+- [`DEPTH-SPECTRUM.md`](DEPTH-SPECTRUM.md) — exact-depth realization and the structural-gap versus latency-gap distinction;
+- [`PRIME-MODULUS-BACKBONE.md`](PRIME-MODULUS-BACKBONE.md) — infinite exact-depth prime-modulus backbone;
+- [`SURVIVOR-DENSITY.md`](SURVIVOR-DENSITY.md) — exact finite-depth density, mass, and conditional hazard;
+- [`COMPOSITE-CORE.md`](COMPOSITE-CORE.md) — zero-density prime-modulus survivor core and composite-rescue reduction;
+- [`PRIOR-ART.md`](PRIOR-ART.md) — literature and priority boundary;
+- [`CRYPTOLOGY.md`](CRYPTOLOGY.md), [`CRYPTOLOGY-THEORY.md`](CRYPTOLOGY-THEORY.md), and [`CRYPTOLOGY-RESULTS-2026-08-14.md`](CRYPTOLOGY-RESULTS-2026-08-14.md) — controlled cryptology side investigation;
+- [`../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md`](../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md) — formal Wellspring Candidate record.
+
 The harness is deliberately split into three layers:
 
 1. `esc_research.py` regenerates the finite Type A/B first-hit computation, exact trap cardinalities, direct shadow map, shadow ancestry graph, finite candidate quotient families, and first-hit witnesses that prove selected classes are not union-shadowed by all previous layers.
@@ -67,3 +83,7 @@ The automation is designed to move the project from numerical scouting toward th
 `Type A/B witnesses -> C_AB -> trap layers -> direct shadow -> modulus ancestry -> witnessed irredundant core -> candidate infinite families`.
 
 The next mathematical target is a necessary-and-sufficient condition for full shadowing along modulus-ancestry families, especially the `q=5` relation `k=5j-1`, followed by an exact treatment of collective union shadowing for classes without an explicit first-hit witness.
+
+The broader theorem program is now summarized in [`DIAMOND.md`](DIAMOND.md):
+
+`C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> prime-modulus backbone -> composite rescue core`.
