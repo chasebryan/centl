@@ -77,6 +77,15 @@ work.
 `main` is not itself an Oasis declaration and is not required to satisfy every
 Oasis-only gate merely because it contains the full tree.
 
+### `CENTL-Marsa` — Windows and macOS harbor
+
+`CENTL-Marsa` ports the current Camp stay to macOS and Windows. It is a
+harbor, not a fourth product and not an Oasis declaration. The branch is
+undeletable. Feature work still matures on `mirage` and is inhabited on
+`main`; Marsa replays that stay onto the other operating systems.
+
+See [CENTL-MARSA.md](CENTL-MARSA.md).
+
 The main README and other flagship product surfaces must treat `oasis` as the
 authoritative source for **stable product identity**: recommended release
 version, supported stable capabilities, installation claims, and release
