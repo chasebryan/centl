@@ -32,6 +32,9 @@ let wants text =
   || contains "create a release" text
   || contains "tag a release" text
 
+let lstat path =
+  try Some (Unix.lstat path) with Unix.Unix_error (Unix.ENOENT, _, _) -> None
+
 let home_dir () =
   match Sys.getenv_opt "HOME" with
   | Some value when String.trim value <> "" -> Some (String.trim value)
@@ -40,11 +43,14 @@ let home_dir () =
 let grant_path () =
   match home_dir () with
   | None -> None
-  | Some home ->
-      Some (Filename.concat (Filename.concat home ".centl") "publish.grant")
-
-let lstat path =
-  try Some (Unix.lstat path) with Unix.Unix_error (Unix.ENOENT, _, _) -> None
+  | Some home -> (
+      match lstat home with
+      | Some stat when stat.Unix.st_kind = Unix.S_LNK -> None
+      | Some stat when stat.Unix.st_kind <> Unix.S_DIR -> None
+      | None -> None
+      | Some _ ->
+          Some
+            (Filename.concat (Filename.concat home ".centl") "publish.grant"))
 
 let validate_secret_file path =
   match lstat path with
@@ -80,7 +86,13 @@ let parse_grant json =
       with
       | Some "chasebryan/centl", Some role, Some allow_commit, Some allow_pr ->
           begin match role with
-          | "contributor" -> Ok { role = Contributor; allow_commit; allow_pr }
+          | "contributor" ->
+              Ok
+                {
+                  role = Contributor;
+                  allow_commit = false;
+                  allow_pr = false;
+                }
           | "owner" -> Ok { role = Owner; allow_commit; allow_pr }
           | _ -> Error "publish grant has an unknown role"
           end
@@ -175,12 +187,46 @@ let source_root () =
   match Sys.getenv_opt "CENTL_SOURCE" with
   | Some value when String.trim value <> "" ->
       let value = String.trim value in
-      if is_source_root value then Some value else None
+      begin match lstat value with
+      | Some stat
+        when stat.Unix.st_kind = Unix.S_DIR && is_source_root value ->
+          Some value
+      | _ -> None
+      end
   | _ -> walk_source (Sys.getcwd ())
 
 let safe_branch id =
   let digest = String.sub (Centl_sha256.hex_string id) 0 8 in
   "centl-sci/contrib-" ^ digest
+
+let valid_pack_id name =
+  let length = String.length name in
+  length >= 12 && length <= 24
+  && String.starts_with ~prefix:"r" name
+  && String.for_all
+       (function 'a' .. 'z' | '0' .. '9' | '-' -> true | _ -> false)
+       name
+  && (not (String.contains name '/'))
+  && (not (String.contains name '\\'))
+
+let safe_basename name =
+  name <> "" && name <> "." && name <> ".."
+  && (not (String.contains name '/'))
+  && (not (String.contains name '\\'))
+  && name.[0] <> '.'
+  && String.for_all
+       (function
+         | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '-' | '.' -> true
+         | _ -> false)
+       name
+
+let looks_secret text =
+  let lower = String.lowercase_ascii text in
+  contains "ghp_" text
+  || contains "gho_" text
+  || contains "github_pat_" lower
+  || contains "begin openssh private key" lower
+  || contains "aws_secret_access_key" lower
 
 let valid_branch name =
   let ok = function
@@ -212,6 +258,8 @@ let read_regular path =
 let copy_file source dest =
   match read_regular source with
   | Error _ as error -> error
+  | Ok text when looks_secret text ->
+      Error ("refusing to pack possible secret material: " ^ source)
   | Ok text -> (
       try
         Centl_sci_workspace.ensure_directory (Filename.dirname dest);
@@ -225,42 +273,63 @@ let run_allowlisted ~cwd executable args =
   if executable <> "git" && executable <> "gh" then
     Error "refusing non-allowlisted executable"
   else
-    let argv = Array.of_list (executable :: args) in
-    try
-      let previous = Sys.getcwd () in
-      Fun.protect
-        ~finally:(fun () -> try Sys.chdir previous with Sys_error _ -> ())
-        (fun () ->
-          Sys.chdir cwd;
-          let channel = Unix.open_process_args_in executable argv in
-          let buffer = Buffer.create 256 in
-          let rec loop count =
-            if count > 65_536 then Error "command output exceeded the bound"
-            else
-              match input_char channel with
-              | character ->
-                  Buffer.add_char buffer character;
-                  loop (count + 1)
-              | exception End_of_file ->
-                  begin match Unix.close_process_in channel with
-                  | Unix.WEXITED 0 -> Ok (Buffer.contents buffer)
-                  | Unix.WEXITED code ->
-                      Error
-                        (Printf.sprintf "%s exited %d: %s" executable code
-                           (String.trim (Buffer.contents buffer)))
-                  | _ -> Error (executable ^ " terminated abnormally")
-                  end
-          in
-          loop 0)
-    with Sys_error message | Unix.Unix_error (_, _, message) -> Error message
+    match lstat cwd with
+    | Some stat when stat.Unix.st_kind <> Unix.S_DIR ->
+        Error "refusing to run from a non-directory"
+    | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
+        Error "refusing to run from a symbolic-link directory"
+    | None -> Error "working directory is unavailable"
+    | Some _ ->
+        let args =
+          match executable with
+          | "git" -> "-C" :: cwd :: args
+          | _ -> args
+        in
+        let argv = Array.of_list (executable :: args) in
+        try
+          let previous = Sys.getcwd () in
+          Fun.protect
+            ~finally:(fun () -> try Sys.chdir previous with Sys_error _ -> ())
+            (fun () ->
+              if executable = "gh" then Sys.chdir cwd;
+              let channel = Unix.open_process_args_in executable argv in
+              let buffer = Buffer.create 256 in
+              let rec loop count =
+                if count > 65_536 then Error "command output exceeded the bound"
+                else
+                  match input_char channel with
+                  | character ->
+                      Buffer.add_char buffer character;
+                      loop (count + 1)
+                  | exception End_of_file ->
+                      begin match Unix.close_process_in channel with
+                      | Unix.WEXITED 0 -> Ok (Buffer.contents buffer)
+                      | Unix.WEXITED code ->
+                          Error
+                            (Printf.sprintf "%s exited %d: %s" executable code
+                               (String.trim (Buffer.contents buffer)))
+                      | _ -> Error (executable ^ " terminated abnormally")
+                      end
+              in
+              loop 0)
+        with Sys_error message | Unix.Unix_error (_, _, message) ->
+          Error message
 
 let origin_is_official root =
   match run_allowlisted ~cwd:root "git" [ "remote"; "get-url"; "origin" ] with
   | Error _ -> false
   | Ok url ->
-      let url = String.lowercase_ascii url in
-      contains "github.com/chasebryan/centl" url
-      || contains "github.com:chasebryan/centl" url
+      let url = String.lowercase_ascii (String.trim url) in
+      let url =
+        if String.ends_with ~suffix:".git\n" url then
+          String.sub url 0 (String.length url - 5)
+        else if String.ends_with ~suffix:".git" url then
+          String.sub url 0 (String.length url - 4)
+        else String.trim url
+      in
+      url = "https://github.com/chasebryan/centl"
+      || url = "git@github.com:chasebryan/centl"
+      || url = "ssh://git@github.com/chasebryan/centl"
 
 let pack_id workspace =
   let revision = Centl_sci_workspace.read_revision workspace in
@@ -329,6 +398,7 @@ let copy_tree_limited ~src_dir ~dest_dir ~suffixes =
     List.fold_left
       (fun count name ->
         if count >= 32 then count
+        else if not (safe_basename name) then count
         else
           let source = Filename.concat src_dir name in
           match lstat source with
@@ -395,8 +465,9 @@ let latest_pack workspace =
   else
     Sys.readdir directory |> Array.to_list
     |> List.filter (fun name ->
-        Sys.file_exists
-          (Filename.concat (Filename.concat directory name) "REVIEW.md"))
+        valid_pack_id name
+        && Sys.file_exists
+             (Filename.concat (Filename.concat directory name) "REVIEW.md"))
     |> List.sort String.compare |> List.rev
     |> function
     | name :: _ -> Some name
@@ -413,6 +484,8 @@ let stage workspace =
       match latest_pack workspace with
       | None ->
           Error "No contribution pack exists. Run `pack contribution` first."
+      | Some id when not (valid_pack_id id) ->
+          Error "refusing unsafe contribution pack identity"
       | Some id -> (
           let src = pack_root workspace id in
           let dest =
@@ -422,6 +495,15 @@ let stage workspace =
                  "sci-contributions")
               (Filename.concat "proposed" id)
           in
+          let allowed_prefix =
+            Filename.concat source "lab/sci-contributions/proposed/"
+          in
+          if
+            not
+              (String.starts_with ~prefix:allowed_prefix dest
+              || String.starts_with ~prefix:allowed_prefix (dest ^ "/"))
+          then Error "refusing to stage outside lab/sci-contributions/proposed"
+          else
           try
             Centl_sci_workspace.ensure_directory dest;
             let files =

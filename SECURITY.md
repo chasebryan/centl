@@ -103,6 +103,14 @@ a remote-control surface and it is not a claim of perfect security.
   an automatic base. Force-push is not implemented.
 - A promotion candidate must contain the current oasis tip. Oasis does not
   regress.
+- Workflow default tokens are read-only. Jobs that publish releases or the
+  `distribution` branch take job-scoped write and do not persist checkout
+  credentials. Commit-status write on Oasis qualification/publication jobs
+  remains because those jobs post exact-SHA attestations.
+
+This sweep does not claim the absence of every future defect. Residual risk
+includes native library memory safety, a compromised GitHub release account,
+and any write token that a publication job must still hold.
 
 ## Security Invariants
 

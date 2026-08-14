@@ -27,6 +27,17 @@ let test_branch_allowlist () =
     "injection forbidden" false
     (Centl_sci_publish.valid_branch "centl-sci/contrib-x; rm -rf /")
 
+let test_pack_id_allowlist () =
+  Alcotest.(check bool)
+    "generated shape" true
+    (Centl_sci_publish.valid_pack_id "r12-deadbeef");
+  Alcotest.(check bool)
+    "path escape" false
+    (Centl_sci_publish.valid_pack_id "../secret");
+  Alcotest.(check bool)
+    "dotfile" false
+    (Centl_sci_publish.valid_pack_id ".hidden")
+
 let test_contributor_grant_does_not_commit () =
   let home = temp_dir "centl-publish-home-" in
   Fun.protect
@@ -120,6 +131,7 @@ let () =
       ( "publish",
         [
           Alcotest.test_case "branch allowlist" `Quick test_branch_allowlist;
+          Alcotest.test_case "pack id allowlist" `Quick test_pack_id_allowlist;
           Alcotest.test_case "contributor grant" `Quick
             test_contributor_grant_does_not_commit;
           Alcotest.test_case "owner acceptance" `Quick

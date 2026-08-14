@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: centl-distribution-writer
@@ -31,10 +31,13 @@ jobs:
     name: Build and publish Mirage channel
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - name: Check out Mirage
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Configure runner paths
@@ -87,6 +90,8 @@ jobs:
             "$RUNNER_TEMP/mirage-package/centl-linux-x86_64.tar.gz.sha256"
 
       - name: Publish rolling and addressable Mirage bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -121,7 +126,8 @@ jobs:
               exit 0
             fi
             git commit -m "dist(mirage): publish $GITHUB_SHA"
-            if git push origin HEAD:distribution; then
+            if git -c "http.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
+              push origin HEAD:distribution; then
               exit 0
             fi
             echo "distribution branch moved; retrying ($attempt/4)" >&2

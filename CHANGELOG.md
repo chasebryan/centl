@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Security
+
+- Workflow checkouts no longer persist GitHub credentials in `.git/config`.
+  Distribution jobs use job-scoped `contents: write` and an explicit push
+  token header instead of a workflow-wide write token.
+- Publish grants clamp contributor privileges regardless of hand-edited JSON.
+  Pack identities, basenames, origin URLs, and staged paths are allowlisted;
+  possible secret material is refused; `git` is invoked with `-C` instead of
+  trusting a process-wide directory change.
+
 ### Added
 
 - CENTL-MIRAGE now runs a complete local development cycle: CEGIS example
