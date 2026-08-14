@@ -524,8 +524,10 @@ Al-Tih is the decision to spend longer in the desert so that the next Oasis mean
 
 CENTL should emerge from this epoch not merely larger, but more capable of explaining its own structure, discovering its own limitations, proposing its own improvements, attacking those proposals, preserving what it learns, and distinguishing speculation from justified computation.
 
-The destination is deliberately unnamed.
+The destination of that wandering is now named **Al-Nur**.
+That name is Oasis CENTL v0.15.0. It is not a SemVer component and not
+a second tag. The canonical tag remains `v0.15.0`.
 
-For now, the work is the wandering.
+For now, the work after Al-Nur continues on `mirage` and `main`.
 
 **Free for science.**

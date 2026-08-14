@@ -108,3 +108,6 @@ development continues on mirage and main
 Only after the complete chain closes is the declaration authoritative:
 
 > **CENTL vX.Y.Z is an Oasis release.**
+
+For this snapshot the human release title is `CENTL v0.15.0 — Al-Nur`.
+The canonical tag remains `v0.15.0`. The name is not a second tag.

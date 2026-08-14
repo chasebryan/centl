@@ -18,11 +18,11 @@ target.
 - `CENTL-Marsa` is the undeletable Windows and macOS harbor of the Camp stay.
   Do not treat a Marsa build as Oasis.
 
-The last completed Oasis is CENTL v0.14.0. v0.15.0 is the official
-snapshot of current main and mirage on the oasis tip. After that
-snapshot is promoted, development continues on `mirage` and `main`.
-Camp #1 remains the inhabited stay until that candidate finishes the
-gate.
+The last completed Oasis is CENTL v0.14.0. v0.15.0 is **Al-Nur**, the
+official snapshot of current main and mirage on the oasis tip. The
+canonical tag remains `v0.15.0`. After that snapshot is promoted,
+development continues on `mirage` and `main`. Camp #1 remains the
+inhabited stay until that candidate finishes the gate.
 
 If any part of that stack is unfamiliar, start with the
 [documentation index](docs/README.md) and then the

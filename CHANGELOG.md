@@ -5,7 +5,8 @@
 ## 0.15.0 — 2026-08-14
 
 Official snapshot of the current stable main and mirage trees, placed on
-the oasis tip so Oasis does not regress. After promotion, development
+the oasis tip so Oasis does not regress. This Oasis is named **Al-Nur**.
+The canonical tag remains `v0.15.0`. After promotion, development
 continues on those lines. The public commands remain `centl`,
 `centl-physics`, and `centl-sci` on GNU/Linux x86_64. Laboratory
 surfaces stay laboratory. This heading is not a completed Oasis

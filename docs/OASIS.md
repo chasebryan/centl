@@ -8,7 +8,7 @@
 
 An **Oasis release** is a CENTL release that has been deliberately reconciled, organized, hardened, validated, and established as a cohesive stable baseline.
 
-The lowercase `oasis` branch is CENTL's authoritative standard-product line. Oasis is not a version suffix or a one-time codename. Stable tags remain ordinary Semantic Versioning, for example `v0.14.0`.
+The lowercase `oasis` branch is CENTL's authoritative standard-product line. Oasis is not a version suffix. An Oasis may carry a desert name; that name is not the tag. Stable tags remain ordinary Semantic Versioning, for example `v0.14.0` and `v0.15.0`. CENTL v0.15.0 is named **Al-Nur**.
 
 Before qualification, a proposed stable release is an **Oasis candidate**. After the complete gate closes on one exact commit, the declaration uses this form:
 
@@ -227,14 +227,17 @@ A later-discovered vulnerability does not rewrite the historical fact that a rel
 
 ## v0.15.0
 
-CENTL v0.15.0 is the official snapshot of the current stable main and
-mirage trees, placed on the current oasis tip so Oasis does not regress.
-After this snapshot is promoted, development continues on `mirage` and
-`main`.
+CENTL v0.15.0 is **Al-Nur**. It is the official snapshot of the current
+stable main and mirage trees, placed on the current oasis tip so Oasis
+does not regress. After this snapshot is promoted, development continues
+on `mirage` and `main`.
 
 The final declaration carried by the exact release candidate is:
 
 > **CENTL v0.15.0 is an Oasis release.**
+
+The human release title is `CENTL v0.15.0 — Al-Nur`. The canonical tag
+remains `v0.15.0`.
 
 This declaration becomes authoritative only if this exact candidate SHA
 passes every applicable local and hosted gate, is promoted unchanged to

@@ -10,13 +10,14 @@ Exact-first mathematics, physics, and scientific computation.
 
 **CENTL v0.15.0 is an Oasis release.**
 
+This Oasis is named **Al-Nur**. The canonical tag remains `v0.15.0`.
 Oasis is the steadily advanced snapshot of current main and mirage,
 placed on the oasis tip so it does not regress. After promotion,
 development continues on those lines. The declaration is authoritative
 only after the complete Oasis gate, an unchanged fast-forward to
-`oasis`, the matching SemVer tag, and publication of the
-already-qualified bytes. Until that chain closes, the previous Oasis
-identity remains the last completed one.
+`oasis`, the `v0.15.0` tag, and publication of the already-qualified
+bytes. Until that chain closes, the previous Oasis identity remains the
+last completed one.
 
 **FCF Camp #1** (`fcf-camp-001`) is the current stay. That is where the
 newest software and designs are used. It lives on `main` and `mirage`.

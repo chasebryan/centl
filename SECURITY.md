@@ -13,9 +13,10 @@ current `main` branch.
 | 0.12.x and earlier | No |
 
 The 0.13.0 development line was never published as a separate stable release.
-CENTL v0.15.0 is the Oasis candidate built from main and mirage on the oasis
-tip. Until that identity finishes the Oasis gate, v0.14.0 remains the last
-completed Oasis.
+CENTL v0.15.0 is **Al-Nur**, the Oasis candidate built from main and
+mirage on the oasis tip. The canonical tag remains `v0.15.0`. Until that
+identity finishes the Oasis gate, v0.14.0 remains the last completed
+Oasis.
 
 ## Reporting a Vulnerability
 

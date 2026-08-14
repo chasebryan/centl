@@ -49,8 +49,9 @@ let camp_001 =
       ];
     oasis_still_possible =
       "Oasis is the steadily advanced snapshot of current main and mirage. \
-       CENTL v0.15.0 is that snapshot on the oasis tip. This camp inspect \
-       path does not declare it.";
+       CENTL v0.15.0 is Al-Nur, that snapshot on the oasis tip. The \
+       canonical tag remains v0.15.0. This camp inspect path does not \
+       declare it.";
     in_bounds =
       [
         "inspect-only Oasis, Wellspring, Camp, and CARAVAN commands";

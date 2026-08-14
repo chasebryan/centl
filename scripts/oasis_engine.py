@@ -310,6 +310,8 @@ def run_capture(root: Path, argv: Sequence[str], timeout: int = 30) -> str:
 
 
 PUBLISHED_OASIS = "0.15.0"
+PUBLISHED_OASIS_NAME = "Al-Nur"
+OASIS_RELEASE_TITLE = f"CENTL v{PUBLISHED_OASIS} — {PUBLISHED_OASIS_NAME}"
 
 
 def oasis_tip(root: Path) -> str:
@@ -512,18 +514,21 @@ def inspect_identity(root: Path, version: str) -> dict[str, object]:
         "artifact_kind": "oasis_identity_inspection",
         "declaration": False,
         "published_oasis": PUBLISHED_OASIS,
+        "oasis_name": PUBLISHED_OASIS_NAME,
+        "release_title": OASIS_RELEASE_TITLE,
+        "canonical_tag": f"v{PUBLISHED_OASIS}",
         "current_version": version,
         "branch": branch,
         "head": state.get("head"),
         "blockers": blockers,
         "eligible_for_final_qualification": False,
         "summary": (
-            f"CENTL v{PUBLISHED_OASIS} remains the published Oasis release. "
-            "This inspection does not run gates and cannot declare Oasis. "
-            "Oasis is the steadily advanced stable snapshot of current main "
-            "and mirage; after promotion, development continues on those "
-            "lines. FCF Camps are the stay when a snapshot cannot be "
-            "declared; they are not Oasis."
+            f"CENTL v{PUBLISHED_OASIS} ({PUBLISHED_OASIS_NAME}) remains the "
+            "published Oasis release. This inspection does not run gates and "
+            "cannot declare Oasis. Oasis is the steadily advanced stable "
+            "snapshot of current main and mirage; after promotion, "
+            "development continues on those lines. FCF Camps are the stay "
+            "when a snapshot cannot be declared; they are not Oasis."
         ),
         "snapshot": snapshot,
         "fcf_camp": {
@@ -1031,7 +1036,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         payload = inspect_identity(root, version)
         text = (
             f"CENTL Oasis identity inspection\n"
-            f"published Oasis: v{payload['published_oasis']}\n"
+            f"published Oasis: v{payload['published_oasis']} "
+            f"({payload.get('oasis_name') or PUBLISHED_OASIS_NAME})\n"
+            f"release title: {payload.get('release_title') or OASIS_RELEASE_TITLE}\n"
+            f"canonical tag: {payload.get('canonical_tag') or f'v{PUBLISHED_OASIS}'}\n"
             f"current version: {payload['current_version']}\n"
             f"branch: {payload['branch']}\n"
             f"declaration: no\n"
