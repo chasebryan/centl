@@ -4,7 +4,7 @@
 
 Website: https://freecomputation.org/
 Source: https://github.com/chasebryan/centl
-Latest Oasis release: https://github.com/chasebryan/centl/releases/tag/v0.14.0
+Latest Oasis release: https://github.com/chasebryan/centl/releases/tag/v0.15.0
 Machine briefing (HTML): https://freecomputation.org/ai.html
 Machine index (JSON): https://freecomputation.org/pub/machine-index.json
 Company and AI proposal: https://freecomputation.org/proposal.html
@@ -24,7 +24,7 @@ core, or promote its own assurance.
 ## What this is
 
 - **FCF** — Free Computation Foundation. Public index at freecomputation.org.
-- **CENTL v0.14.0** — Oasis-qualified exact-first mathematics, physics, and
+- **CENTL v0.15.0 Al-Nur** — Oasis-qualified exact-first mathematics, physics, and
   scientific computation for GNU/Linux x86_64.
 - **CENTL-SCi** — local scientific interpreter. Not a general chatbot.
 

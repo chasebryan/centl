@@ -33,12 +33,12 @@ https://freecomputation.org/centl.html
 
 - Organization: Free Computation Foundation (FCF)
 - Domain: freecomputation.org
-- Current stable product: CENTL v0.14.0 Oasis release
+- Current stable product: CENTL v0.15.0 Al-Nur Oasis release
 - Platform: GNU/Linux x86_64
 - License: see the repository LICENSE and LICENSING.md
 - Source: https://github.com/chasebryan/centl
-- Oasis is a promotion state, not a marketing word. v0.14.0 is the published
-  Oasis. Later identities must earn it independently.
+- Oasis is a promotion state, not a marketing word. v0.15.0 Al-Nur is the
+  published Oasis. Later identities must earn it independently.
 - FCF Camps are stays when a new Oasis cannot be declared. They are not Oasis.
 
 ## Interfaces machines may use

@@ -20,10 +20,11 @@ repeating every surface on the landing pages.
 
 ## Product identity
 
-- [OASIS.md](OASIS.md) — qualified stable product
+- [OASIS.md](OASIS.md) — steadily advanced snapshot of current main and mirage
 - [FCF-CAMPS.md](FCF-CAMPS.md) — current stay; newest software lives here
 - [CENTL-MARSA.md](CENTL-MARSA.md) — Windows and macOS harbor of that stay
 - [RELEASE-POLICY.md](RELEASE-POLICY.md)
+- [releases/0.15.0.md](releases/0.15.0.md)
 - [releases/0.14.0.md](releases/0.14.0.md)
 - [releases/camp-001.md](releases/camp-001.md)
 - [REPOSITORY-MAP.md](REPOSITORY-MAP.md)

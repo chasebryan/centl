@@ -1,7 +1,7 @@
 let test_occupation_does_not_declare_oasis () =
   let occupation = Centl_sci_camps.inspect () in
   Alcotest.(check bool) "oasis declared" false occupation.oasis_declared;
-  Alcotest.(check string) "published" "0.14.0" occupation.published_oasis;
+  Alcotest.(check string) "published" "0.15.0" occupation.published_oasis;
   Alcotest.(check bool) "camp occupied" true (occupation.occupied <> []);
   Alcotest.(check bool)
     "summary is a stay"

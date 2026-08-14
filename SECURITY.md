@@ -7,13 +7,14 @@ current `main` branch.
 
 | Version | Supported |
 | --- | --- |
+| 0.15.x | Yes |
 | 0.14.x | Yes |
 | `main` | Yes |
 | 0.12.x and earlier | No |
 
 The 0.13.0 development line was never published as a separate stable release.
-CENTL v0.14.0 is the current Oasis stable baseline and the supported stable series
-is therefore 0.14.x under this latest-stable policy.
+CENTL v0.15.0 is **Al-Nur**, the published Oasis. The canonical tag is
+`v0.15.0`. `main` remains the Camp stay and developer distribution.
 
 ## Reporting a Vulnerability
 

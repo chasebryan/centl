@@ -67,9 +67,13 @@ def main(argv=None) -> int:
     # A final Oasis declaration requires positive evidence that the mandatory
     # hosted qualification checks exist and succeeded. Do this before the local
     # final engine so an empty, skipped, neutral, or still-running hosted check
-    # set can never be mistaken for release proof. --plan remains side-effect
-    # free and does not query GitHub.
-    if "--final" in args and "--plan" not in args:
+    # set can never be mistaken for release proof. --plan, --inspect, and
+    # --snapshot remain side-effect free and do not query GitHub.
+    inspect_only = any(
+        flag in args
+        for flag in ("--plan", "--inspect", "--snapshot", "--snapshot-prepare")
+    )
+    if "--final" in args and not inspect_only:
         try:
             head, failures = _required_checks.check(_root_from_argv(args))
         except _required_checks.HostedCheckError as exc:

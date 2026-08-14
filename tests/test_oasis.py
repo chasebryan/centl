@@ -405,7 +405,10 @@ class InspectTests(unittest.TestCase):
             payload = json.loads(report.read_text(encoding="utf-8"))
             self.assertFalse(payload["declaration"])
             self.assertFalse(payload["eligible_for_final_qualification"])
-            self.assertEqual(payload["published_oasis"], "0.14.0")
+            self.assertEqual(payload["published_oasis"], "0.15.0")
+            self.assertEqual(payload["oasis_name"], "Al-Nur")
+            self.assertEqual(payload["canonical_tag"], "v0.15.0")
+            self.assertEqual(payload["release_title"], "CENTL v0.15.0-Oasis.Al-Nur")
             self.assertIn("blockers", payload)
             self.assertIn("cannot declare Oasis", payload["summary"])
             self.assertFalse(payload["fcf_camp"]["oasis_closed"])
@@ -423,6 +426,28 @@ class InspectTests(unittest.TestCase):
             self.assertTrue(
                 any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
             )
+            self.assertTrue(
+                any("linear snapshot" in str(item) for item in payload["blockers"])
+            )
+
+    def test_snapshot_does_not_declare_oasis(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-oasis-snapshot-") as tmp:
+            report = Path(tmp) / "snapshot.json"
+            rc = OASIS.main(
+                ["--root", str(ROOT), "--snapshot", "--quiet", "--report", str(report)]
+            )
+            self.assertEqual(rc, 0)
+            payload = json.loads(report.read_text(encoding="utf-8"))
+            self.assertFalse(payload["declaration"])
+            self.assertFalse(payload["eligible_for_final_qualification"])
+            self.assertEqual(payload["artifact_kind"], "oasis_snapshot_inspection")
+            self.assertIn("cannot declare Oasis", payload["summary"])
+            self.assertIn("main", payload["policy"])
+            self.assertIn("mirage", payload["policy"])
+            self.assertIn("main_mirage_trees_match", payload)
+            inspect_payload = OASIS.inspect_identity(ROOT, "0.15.0")
+            self.assertIn("snapshot", inspect_payload)
+            self.assertFalse(inspect_payload["snapshot"]["declaration"])
 
 if __name__ == "__main__":
     unittest.main()

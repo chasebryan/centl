@@ -169,7 +169,8 @@ class CoordinatorState:
                     state TEXT NOT NULL CHECK(state IN ('active', 'quarantined', 'withdrawn')),
                     last_seen REAL NOT NULL,
                     load REAL NOT NULL DEFAULT 0 CHECK(load >= 0),
-                    capacity INTEGER NOT NULL DEFAULT 0 CHECK(capacity >= 0)
+                    capacity INTEGER NOT NULL DEFAULT 0 CHECK(capacity >= 0),
+                    caravan_number INTEGER UNIQUE CHECK(caravan_number IS NULL OR caravan_number >= 1)
                 );
 
                 CREATE TABLE IF NOT EXISTS replicas (
@@ -211,6 +212,20 @@ class CoordinatorState:
                 db.execute(
                     "ALTER TABLE carriers ADD COLUMN carrier_class TEXT NOT NULL DEFAULT 'volunteer'"
                 )
+            if "caravan_number" not in columns:
+                db.execute("ALTER TABLE carriers ADD COLUMN caravan_number INTEGER")
+                existing = db.execute(
+                    "SELECT node_id FROM carriers ORDER BY last_seen ASC, node_id ASC"
+                ).fetchall()
+                for index, row in enumerate(existing, start=1):
+                    db.execute(
+                        "UPDATE carriers SET caravan_number = ? WHERE node_id = ?",
+                        (index, row["node_id"]),
+                    )
+            db.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS carriers_caravan_number "
+                "ON carriers(caravan_number) WHERE caravan_number IS NOT NULL"
+            )
 
     @staticmethod
     def _purge_expired_tickets(db: sqlite3.Connection, now: float) -> None:
@@ -258,24 +273,31 @@ class CoordinatorState:
         agent_version: str,
         carrier_class: str = "volunteer",
         now: float | None = None,
-    ) -> None:
+    ) -> int:
         if not node_id or not public_identity or not policy_version or not agent_version:
             raise ValueError("carrier registration fields must be non-empty")
         if not carrier_class:
             raise ValueError("carrier_class must be non-empty")
         timestamp = time.time() if now is None else float(now)
         with self._connect() as db:
+            db.execute("BEGIN IMMEDIATE")
             row = db.execute(
-                "SELECT public_identity, state FROM carriers WHERE node_id = ?", (node_id,)
+                "SELECT public_identity, state, caravan_number FROM carriers WHERE node_id = ?",
+                (node_id,),
             ).fetchone()
             if row is not None and row["public_identity"] != public_identity:
                 raise CoordinatorError("node identity collision with different public identity")
             if row is None:
+                next_number = int(
+                    db.execute(
+                        "SELECT COALESCE(MAX(caravan_number), 0) + 1 FROM carriers"
+                    ).fetchone()[0]
+                )
                 db.execute(
                     """INSERT INTO carriers(
                         node_id, public_identity, policy_version, agent_version,
-                        carrier_class, state, last_seen
-                    ) VALUES (?, ?, ?, ?, ?, 'active', ?)""",
+                        carrier_class, state, last_seen, caravan_number
+                    ) VALUES (?, ?, ?, ?, ?, 'active', ?, ?)""",
                     (
                         node_id,
                         public_identity,
@@ -283,17 +305,30 @@ class CoordinatorState:
                         agent_version,
                         carrier_class,
                         timestamp,
+                        next_number,
                     ),
                 )
-            elif row["state"] == "withdrawn":
+                return next_number
+            if row["state"] == "withdrawn":
                 raise CoordinatorError("withdrawn node identity must not be silently reactivated")
-            else:
-                db.execute(
-                    """UPDATE carriers
-                       SET policy_version = ?, agent_version = ?, carrier_class = ?, last_seen = ?
-                       WHERE node_id = ?""",
-                    (policy_version, agent_version, carrier_class, timestamp, node_id),
+            db.execute(
+                """UPDATE carriers
+                   SET policy_version = ?, agent_version = ?, carrier_class = ?, last_seen = ?
+                   WHERE node_id = ?""",
+                (policy_version, agent_version, carrier_class, timestamp, node_id),
+            )
+            number = row["caravan_number"]
+            if number is None:
+                number = int(
+                    db.execute(
+                        "SELECT COALESCE(MAX(caravan_number), 0) + 1 FROM carriers"
+                    ).fetchone()[0]
                 )
+                db.execute(
+                    "UPDATE carriers SET caravan_number = ? WHERE node_id = ?",
+                    (number, node_id),
+                )
+            return int(number)
 
     def heartbeat(
         self,
