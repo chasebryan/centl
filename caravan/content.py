@@ -372,3 +372,49 @@ class ContentStore:
     def path_for_verified(self, identity: ArtifactIdentity) -> Path:
         self.verify(identity)
         return self._object_path(identity.sha256)
+
+    def inventory(self) -> tuple[ArtifactIdentity, ...]:
+        """Hash every immutable object and require name == content identity."""
+
+        found: list[ArtifactIdentity] = []
+        base = self.root / "objects" / "sha256"
+        self._assert_internal_directories()
+        for current, dirs, files in os.walk(base, followlinks=False):
+            current_path = Path(current)
+            dirs.sort()
+            files.sort()
+            for name in list(dirs):
+                child = current_path / name
+                info = os.lstat(child)
+                if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+                    raise IntegrityError(f"unsupported object-store entry: {child}")
+            for name in files:
+                child = current_path / name
+                info = os.lstat(child)
+                if not stat.S_ISREG(info.st_mode):
+                    raise IntegrityError(f"unsupported object-store entry: {child}")
+                if len(name) != 64 or any(ch not in "0123456789abcdef" for ch in name):
+                    raise IntegrityError(f"object name is not a SHA-256 digest: {child}")
+                actual = hash_file(child)
+                if actual.sha256 != name:
+                    raise IntegrityError(
+                        f"stored object name does not match content: {child}"
+                    )
+                found.append(actual)
+        found.sort(key=lambda identity: identity.sha256)
+        return tuple(found)
+
+    def reverify_all(self) -> tuple[ArtifactIdentity, ...]:
+        """Re-hash the entire immutable store. Mutation cannot be ignored."""
+
+        return self.inventory()
+
+    def holds(self, identity: ArtifactIdentity) -> bool:
+        path = self._object_path(identity.sha256)
+        if not path.exists():
+            return False
+        try:
+            self.verify(identity)
+        except (IntegrityError, OSError):
+            return False
+        return True

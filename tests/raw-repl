@@ -17,9 +17,24 @@ case "$case_name" in
   *) fail "usage: raw-repl BINARY {edit|limit|partial-escape}" ;;
 esac
 
+# Keep a hard watchdog for genuine PTY hangs, but do not make preservation
+# qualification depend on hosted-runner speed. The long-line cases below seed
+# the real persistent-history store and recall the entry into the raw editor in
+# one operation. This still exercises the production 32 KiB editor boundary,
+# cursor editing, overflow state, terminal repainting, and REPL error path
+# without forcing slow machines to echo tens of thousands of synthetic
+# keystrokes one byte at a time.
+watchdog_seconds=${CENTL_RAW_REPL_WATCHDOG_SECONDS:-120}
+case "$watchdog_seconds" in
+  ''|*[!0-9]*) fail "CENTL_RAW_REPL_WATCHDOG_SECONDS must be a positive integer" ;;
+esac
+[ "$watchdog_seconds" -gt 0 ] ||
+  fail "CENTL_RAW_REPL_WATCHDOG_SECONDS must be a positive integer"
+
 temporary=$(mktemp -d "${TMPDIR:-/tmp}/centl-raw-repl.XXXXXXXX")
 input=$temporary/input
 output=$temporary/output
+history_root=$temporary/state
 session_pid=""
 
 cleanup() {
@@ -32,10 +47,41 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 
+seed_history() {
+  spaces=$1
+  suffix=$2
+  history_dir=$history_root/centl
+  mkdir -p "$history_dir"
+  {
+    printf '{"version":1,"entries":["'
+    awk -v count="$spaces" 'BEGIN { for (i = 0; i < count; i++) printf " " }'
+    printf '%s' "$suffix"
+    printf '"]}\n'
+  } >"$history_dir/history.json"
+  chmod 600 "$history_dir/history.json"
+}
+
+session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
+case "$case_name" in
+  edit)
+    # Exactly 30,000 bytes: 29,998 spaces followed by 12. Recalling the entry
+    # performs one bounded editor copy; the cursor/delete operations then prove
+    # editing remains correct near the production line-size ceiling.
+    seed_history 29998 12
+    session_command="TERM=xterm; XDG_STATE_HOME='$history_root'; export TERM XDG_STATE_HOME; exec '$binary' --color=never"
+    ;;
+  limit)
+    # Exactly 32,768 bytes, which is the production history/editor boundary.
+    # One additional printable byte must trip the raw editor overflow state and
+    # produce CENTL's source-byte-limit error when the line is submitted.
+    seed_history 32767 1
+    session_command="TERM=xterm; XDG_STATE_HOME='$history_root'; export TERM XDG_STATE_HOME; exec '$binary' --color=never"
+    ;;
+esac
+
 mkfifo "$input"
 exec 3<>"$input"
-session_command="TERM=xterm; export TERM; exec '$binary' --color=never --no-history"
-timeout -k 2s 15s script -qefc "$session_command" /dev/null \
+timeout -k 5s "${watchdog_seconds}s" script -qefc "$session_command" /dev/null \
   <&3 3<&- >"$output" &
 session_pid=$!
 
@@ -51,12 +97,13 @@ done
 
 case "$case_name" in
   edit)
-    awk 'BEGIN { for (i = 0; i < 30000; i++) printf " " }' >&3
-    printf '12\033[D\177\n:quit\n' >&3
+    # Recall the 30,000-byte line, move left over 2, delete 1, then submit 2.
+    printf '\033[A\033[D\177\n:quit\n' >&3
     ;;
   limit)
-    awk 'BEGIN { for (i = 0; i < 32768; i++) printf " " }' >&3
-    printf '1\n:quit\n' >&3
+    # Recall a full 32 KiB line, attempt one byte beyond the real editor limit,
+    # submit it, then leave the fresh prompt after the required limit error.
+    printf '\033[A1\n:quit\n' >&3
     ;;
   partial-escape)
     printf '\033' >&3
@@ -73,6 +120,11 @@ wait "$session_pid"
 status=$?
 set -e
 session_pid=""
+case "$status" in
+  124|137)
+    fail "PTY watchdog expired after ${watchdog_seconds}s while running $case_name"
+    ;;
+esac
 [ "$status" -eq 0 ] || fail "calculator session exited with status $status"
 
 case "$case_name" in

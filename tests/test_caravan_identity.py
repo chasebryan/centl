@@ -62,6 +62,14 @@ class CarrierIdentityTests(unittest.TestCase):
             with self.assertRaises(IdentityError):
                 CarrierIdentity.create(link)
 
+    def test_partial_identity_state_cannot_be_replaced_with_a_new_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "identity"
+            root.mkdir(mode=0o700)
+            (root / "identity.pem").write_text("not a key\n", encoding="utf-8")
+            with self.assertRaises(IdentityError):
+                CarrierIdentity.load(root)
+
 
 class PolicyReceiptTests(unittest.TestCase):
     def test_policy_receipt_binds_exact_policy_and_identity(self) -> None:

@@ -20,6 +20,9 @@ There is **no scheduled next Oasis**.
 
 The next Oasis will be attempted only when the work produced in MIRAGE has become excellent enough to justify the cost of qualification.
 
+Until then, stayable laboratory work occupies an [FCF Camp](FCF-CAMPS.md)
+rather than inventing a release. A Camp is not an Oasis.
+
 The governing rule is:
 
 > **Oasis is not scheduled. Oasis is earned.**

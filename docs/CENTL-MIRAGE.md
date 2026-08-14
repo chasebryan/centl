@@ -370,21 +370,38 @@ No autonomy level implies automatic network publication. Pushing upstream remain
 
 Uploaded documents are data, not shell scripts. Document text never gains command-execution authority merely because it contains imperative language.
 
-## 13. Initial implementation slice
+## 13. Implementation slice
 
-The first MIRAGE implementation intentionally begins below autonomous code mutation.
-
-It establishes:
+The first MIRAGE implementation began below autonomous code mutation. The
+current local cycle now also includes the documented next slice:
 
 1. a first-class `library/` directory in the local CENTL workspace;
 2. deterministic ingestion of local text/Markdown design documents;
 3. provenance-preserving Specification IR;
 4. classification of directives, invariants, examples, acceptance criteria, non-goals, questions, and context;
 5. capability-aware planning using the existing BUILD capability and implementation-layer machinery;
-6. an `active.json` cycle record identifying the next MIRAGE phase;
-7. tests proving ingestion is local, attributable, reversible, and independent of a remote AI service.
+6. a typed goal/capability graph with conflict detection, gap analysis, and `validated_by` links;
+7. evidence obligations, candidate transactions, deterministic materialization, readiness, and execution plans;
+8. a bounded CEGIS loop: extract examples, verify them against staged source, and refuse to invent a second implementation after a counterexample;
+9. semantic fingerprints over a curated deterministic CENTL corpus, plus baseline comparison;
+10. evidence executors for parser acceptance, capability discovery, example/fingerprint regression, and reversible snapshots;
+11. admission, review, and explicit accept/reject under an `observe|stage|local|core` autonomy policy;
+12. an `active.json` cycle record identifying the next MIRAGE phase and termination condition;
+13. tests proving the cycle is local, attributable, reversible, and independent of a remote AI service;
+14. bounded algebraic rewrite saturation with cheaper equivalent extraction;
+15. metamorphic property checks (determinism, exactness, equality substitution);
+16. a claim-local evidence lattice and Pareto ranking among admissible candidates;
+17. an explicit progress measure recorded on the active cycle;
+18. native AST composition of existing CENTL operations before new synthesis;
+19. session-aware semantic fingerprints that detect core-corpus shadowing;
+20. deterministic proposals that never inherit model authority;
+21. `iterate` to recompute gaps from the stored source and `library` to list ingested documents.
 
-Subsequent slices should implement the goal graph, capability-gap IR, candidate transaction area, CEGIS engine, semantic fingerprints, and autonomous acceptance rules.
+A cycle never activates source by itself. `local` policy permits a later
+explicit `centl-mirage accept` of an admissible downstream candidate. Isolated
+core patches and network publication remain outside automatic authority.
+
+Generated material still does not inherit verified-core assurance.
 
 During Al-Tih, these slices are no longer treated as isolated endpoints. They are to be driven toward the integrated expeditions and promotion architecture defined in [`MIRAGE-AL-TIH.md`](MIRAGE-AL-TIH.md).
 

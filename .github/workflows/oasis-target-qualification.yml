@@ -1,0 +1,323 @@
+name: Oasis exact-SHA qualification
+run-name: Oasis exact-SHA qualification
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/oasis-qualification-trigger"
+      - ".github/workflows/oasis-target-qualification.yml"
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact CENTL release candidate commit SHA to qualify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oasis-exact-sha-qualification
+  cancel-in-progress: false
+
+env:
+  FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
+  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
+  GMP_VERSION: "6.3.0"
+  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
+  MPFR_VERSION: "4.2.2"
+  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
+  FLINT_VERSION: "3.0.1"
+  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
+
+jobs:
+  start:
+    name: Establish trusted Oasis candidate identity
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      candidate_sha: ${{ steps.resolve.outputs.candidate_sha }}
+    steps:
+      - name: Check out trusted control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Resolve exact candidate SHA
+        id: resolve
+        env:
+          INPUT_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            candidate="$INPUT_CANDIDATE_SHA"
+          else
+            candidate=$(tr -d '[:space:]' < .github/oasis-qualification-trigger)
+          fi
+          if ! printf '%s' "$candidate" | grep -Eq '^[0-9a-f]{40}$'; then
+            printf 'candidate SHA must be a full lowercase 40-hex commit SHA\n' >&2
+            exit 1
+          fi
+          printf 'candidate_sha=%s\n' "$candidate" >> "$GITHUB_OUTPUT"
+
+      - name: Require one open owner Oasis PR for this exact SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ steps.resolve.outputs.candidate_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload=$(curl --fail --silent --show-error \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls?state=open&base=oasis&per_page=100")
+          matches=$(printf '%s' "$payload" | jq \
+            --arg sha "$CANDIDATE_SHA" \
+            --arg owner "$GITHUB_REPOSITORY_OWNER" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            '[.[] | select(.head.sha == $sha and .user.login == $owner and .head.repo.full_name == $repo)] | length')
+          if [ "$matches" != 1 ]; then
+            printf 'expected exactly one open owner PR to oasis at %s; found %s\n' "$CANDIDATE_SHA" "$matches" >&2
+            exit 1
+          fi
+
+      - name: Require candidate commit exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ steps.resolve.outputs.candidate_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/commits/$CANDIDATE_SHA" >/dev/null
+
+  security-preflight:
+    name: Release security access and state preflight
+    needs: start
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: read
+      vulnerability-alerts: read
+    steps:
+      - name: Check out trusted security control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Require trusted control-plane identity
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Require release security APIs are readable and clear
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OASIS_SECRET_SCANNING_TOKEN: ${{ secrets.OASIS_SECRET_SCANNING_TOKEN }}
+        run: python3 .github/scripts/oasis-security-state.py
+
+  caravan:
+    name: Identity, integrity, catalog, policy, and outbound transport gates
+    needs: start
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
+    steps:
+      - name: Check out exact candidate SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.start.outputs.candidate_sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - name: Create isolated Python environment
+        run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
+      - name: Install pinned Phase 1 dependencies
+        run: |
+          "$RUNNER_TEMP/caravan-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
+      - name: Run CARAVAN Phase 1 checks
+        env:
+          PYTHON: ${{ runner.temp }}/caravan-venv/bin/python
+        run: sh scripts/caravan-phase1-check
+
+  self-test:
+    name: Candidate adversarial engine self-test
+    needs: start
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
+    steps:
+      - name: Check out exact candidate SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.start.outputs.candidate_sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - name: Compile Oasis policy surfaces
+        run: |
+          python3 -m py_compile \
+            scripts/oasis.py \
+            scripts/oasis_engine.py \
+            scripts/oasis-toolchain-check.py \
+            scripts/oasis-metadata-check.py \
+            scripts/oasis_required_checks.py \
+            scripts/oasis-security-state.py \
+            tests/test_oasis.py \
+            tests/test_oasis_metadata.py \
+            tests/test_oasis_required_checks.py \
+            tests/test_oasis_security_state.py
+      - name: Run adversarial Oasis policy tests
+        run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
+      - name: Validate complete candidate plan
+        run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
+
+  converge:
+    name: Candidate full stable-product convergence
+    needs:
+      - start
+      - security-preflight
+      - caravan
+      - self-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
+      NATIVE_PREFIX: /tmp/centl-native
+      PKG_CONFIG_PATH: /tmp/centl-native/lib/pkgconfig
+      LIBRARY_PATH: /tmp/centl-native/lib
+      LD_LIBRARY_PATH: /tmp/centl-native/lib
+      C_INCLUDE_PATH: /tmp/centl-native/include
+      JULIA_NUM_THREADS: "1"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+      CENTL_BUILD_COMMIT: ${{ needs.start.outputs.candidate_sha }}
+    steps:
+      - name: Check out exact candidate SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.start.outputs.candidate_sha }}
+          persist-credentials: false
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl git libzstd1 m4 make opam patch \
+            pkg-config python3 python3-venv tar xz-utils
+      - name: Bootstrap pinned proof and native toolchain
+        run: sh scripts/oasis-ci-bootstrap
+      - name: Set up pinned Julia
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
+        with:
+          version: "1.12.6"
+      - name: Instantiate pinned independent oracle
+        run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
+      - name: Create isolated Oasis Python environment
+        run: python3 -m venv "$RUNNER_TEMP/oasis-venv"
+      - name: Install pinned CARAVAN dependencies
+        run: |
+          "$RUNNER_TEMP/oasis-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
+      - name: Execute complete exact-SHA Oasis convergence
+        env:
+          OPAM_SWITCH: centl
+        run: |
+          "$RUNNER_TEMP/oasis-venv/bin/python" scripts/oasis.py \
+            --root "$PWD" --no-repair --keep-going
+      - name: Preserve exact qualified release bytes
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-release-${{ needs.start.outputs.candidate_sha }}
+          path: dist/*
+          if-no-files-found: error
+      - name: Preserve Oasis convergence evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-evidence-${{ needs.start.outputs.candidate_sha }}
+          path: _build/oasis/**
+          if-no-files-found: warn
+
+  security:
+    name: Candidate release security state
+    needs:
+      - start
+      - converge
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: read
+      vulnerability-alerts: read
+    env:
+      HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
+    steps:
+      - name: Check out trusted security control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Require trusted control-plane identity
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Require clear release-blocking GitHub security state
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OASIS_SECRET_SCANNING_TOKEN: ${{ secrets.OASIS_SECRET_SCANNING_TOKEN }}
+        run: python3 .github/scripts/oasis-security-state.py
+
+  attest:
+    name: Attest exact-SHA Oasis results
+    if: always() && needs.start.result == 'success'
+    needs:
+      - start
+      - caravan
+      - self-test
+      - security-preflight
+      - converge
+      - security
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      HEAD_SHA: ${{ needs.start.outputs.candidate_sha }}
+      SELF_RESULT: ${{ needs.self-test.result }}
+      SECURITY_PREFLIGHT_RESULT: ${{ needs.security-preflight.result }}
+      CONVERGE_RESULT: ${{ needs.converge.result }}
+      SECURITY_RESULT: ${{ needs.security.result }}
+    steps:
+      - name: Require every exact-SHA qualification job succeeded
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'candidate=%s\n' "$HEAD_SHA"
+          printf 'self-test=%s preflight=%s converge=%s security=%s\n' \
+            "$SELF_RESULT" "$SECURITY_PREFLIGHT_RESULT" "$CONVERGE_RESULT" "$SECURITY_RESULT"
+          test "$SELF_RESULT" = success
+          test "$SECURITY_PREFLIGHT_RESULT" = success
+          test "$CONVERGE_RESULT" = success
+          test "$SECURITY_RESULT" = success

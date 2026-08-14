@@ -47,8 +47,14 @@ class CaravanLifecycleTests(unittest.TestCase):
             self.assertFalse(summary["public_carrier_listener_required"])
             self.assertFalse(summary["network_required_for_lab_flow"])
             self.assertEqual(summary["available_caravans_after_quarantine"], 1)
-            self.assertEqual(summary["protected_artifacts"], 1)
-            self.assertEqual(summary["verified_replicas"], 1)
+            self.assertEqual(summary["protected_artifacts"], 2)
+            self.assertEqual(summary["verified_replicas"], 2)
+            self.assertEqual(summary["cargo_loads"], 2)
+            self.assertFalse(summary["join_scheme_invoked"])
+            coverage = summary["coverage"]
+            self.assertEqual(coverage["public_approved"], 2)
+            self.assertEqual(coverage["locally_held"], 2)
+            self.assertEqual(summary["source_mission_public_approved"], 1)
 
 
 if __name__ == "__main__":

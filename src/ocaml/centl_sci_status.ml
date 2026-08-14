@@ -32,22 +32,23 @@ let collect () =
         gated =
           [
             "BUILD workspace operations require HOME or CENTL_WORKSPACE";
-            "live workspace import activation remains gated until same-command \
-             core-session reload is wired";
+            "generated external/native scaffolds remain inactive until their \
+             JSONL ABI is implemented and explicitly validated";
           ];
       }
   | Some workspace ->
       let extensions = Centl_sci_extensions.list workspace in
       let enabled_native_extensions =
         extensions
-        |> List.filter (fun extension ->
-            extension.Centl_sci_extensions.enabled
-            && extension.kind = "native_centl")
-        |> List.map (fun extension -> extension.name)
+        |> List.filter (fun (extension : Centl_sci_extensions.manifest) ->
+            extension.enabled && extension.kind = "native_centl")
+        |> List.map (fun (extension : Centl_sci_extensions.manifest) ->
+            extension.name)
       in
       let disabled_extensions =
         extensions
-        |> List.filter (fun extension -> not extension.enabled)
+        |> List.filter (fun (extension : Centl_sci_extensions.manifest) ->
+            not extension.enabled)
         |> List.length
       in
       let audit = Centl_sci_audit.collect workspace in
@@ -56,14 +57,15 @@ let collect () =
         platform = platform ();
         workspace_root = Some workspace.root;
         workspace_revision = Some (Centl_sci_workspace.read_revision workspace);
-        workspace_health = Some (Centl_sci_audit.health audit);
+        workspace_health =
+          Some (if Centl_sci_audit.healthy audit then "healthy" else "warnings");
         enabled_native_extensions;
         disabled_extensions;
         packages = List.length (Centl_sci_package.list workspace);
         gated =
           [
-            "live workspace import activation remains gated until same-command \
-             core-session reload is wired";
+            "generated external/native scaffolds remain inactive until their \
+             JSONL ABI is implemented and explicitly validated";
             "main centl calculator shared-editor migration remains a separate \
              integration item";
           ];

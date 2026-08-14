@@ -14,7 +14,7 @@ from pathlib import Path
 import tempfile
 from typing import BinaryIO, Callable, Mapping, Sequence
 
-from .catalog import ChunkRecord
+from .catalog import CatalogArtifact, ChunkRecord
 from .content import DEFAULT_CHUNK_SIZE, ArtifactIdentity, ContentStore, IntegrityError
 from .coordinator import CoordinatorError, CoordinatorState, RetrievalTicket
 
@@ -183,6 +183,10 @@ def retrieve_verified(
                         expected=expected,
                         _lock_held=True,
                     )
+                    coordinator.record_verified_delivery(
+                        ticket.node_id,
+                        expected.artifact_id,
+                    )
                     return RetrievalResult(
                         identity=identity,
                         node_id=ticket.node_id,
@@ -215,3 +219,27 @@ def retrieve_verified(
             ) from last_error
     except IntegrityError as exc:
         raise RetrievalError("authenticated artifact does not fit CARAVAN store limits") from exc
+
+
+def retrieve_catalog_artifact(
+    coordinator: CoordinatorState,
+    store: ContentStore,
+    artifact: CatalogArtifact,
+    *,
+    fetchers: Mapping[str, CarrierFetcher],
+    max_attempts: int = 2,
+) -> RetrievalResult:
+    """Retrieve one already-authenticated catalog artifact with fallback."""
+
+    if artifact.distribution != "public-approved":
+        raise RetrievalError(
+            "only public-approved catalog artifacts may be retrieved by volunteers"
+        )
+    return retrieve_verified(
+        coordinator,
+        store,
+        expected=artifact.identity,
+        chunks=artifact.chunks,
+        fetchers=fetchers,
+        max_attempts=max_attempts,
+    )

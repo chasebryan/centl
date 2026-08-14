@@ -110,6 +110,34 @@ let test_gap_analysis_prefers_existing_composition () =
             "diff capability matched" true
             (List.mem "diff" gap.capability_matches))
 
+let test_existing_composition_is_satisfied () =
+  let root = temp_dir "centl-mirage-satisfied-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
+      Centl_sci_workspace.ensure workspace;
+      let graph =
+        Centl_sci_mirage_goal.build workspace
+          [
+            {
+              Centl_sci_mirage_goal.id = 1;
+              kind = "DIRECTIVE";
+              text = "compute gcd of 48 and 18";
+              start_line = 1;
+              end_line = 1;
+            };
+          ]
+      in
+      match find_gap 1 graph with
+      | None -> Alcotest.fail "expected a gap classification"
+      | Some gap ->
+          Alcotest.(check string)
+            "existing composition is satisfied" "SATISFIED"
+            (Centl_sci_mirage_goal.gap_status_text gap.status))
+
 let test_explicit_native_definition_requires_staging () =
   let root = temp_dir "centl-mirage-native-definition-" in
   Fun.protect
@@ -202,6 +230,14 @@ let test_spec_analysis_persists_graph () =
                (fun edge ->
                  edge.Centl_sci_mirage_goal.kind = Centl_sci_mirage_goal.Refines
                  && edge.source = "cell:2" && edge.target = "cell:1")
+               graph.edges);
+          Alcotest.(check bool)
+            "objective is validated by acceptance" true
+            (List.exists
+               (fun edge ->
+                 edge.Centl_sci_mirage_goal.kind
+                 = Centl_sci_mirage_goal.Validated_by
+                 && edge.source = "cell:1" && edge.target = "cell:2")
                graph.edges))
 
 let () =
@@ -215,6 +251,8 @@ let () =
             test_unrelated_negative_requirement_does_not_conflict;
           Alcotest.test_case "reuse existing capability" `Quick
             test_gap_analysis_prefers_existing_composition;
+          Alcotest.test_case "composed requirement satisfied" `Quick
+            test_existing_composition_is_satisfied;
           Alcotest.test_case "explicit native definition" `Quick
             test_explicit_native_definition_requires_staging;
           Alcotest.test_case "unknown capability" `Quick

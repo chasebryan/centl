@@ -23,7 +23,9 @@ _PUBLIC_KEYS = frozenset(
         "status",
         "generated_at",
         "active_camels",
+        "hungry_camels",
         "lost_camels",
+        "cargo_loads",
         "active_window_seconds",
         "lost_after_seconds",
         "individual_nodes_public",
@@ -71,7 +73,14 @@ def validate_public_document(document: Mapping[str, Any]) -> dict[str, Any]:
         raise CensusError("public census status must be live")
     if not _valid_timestamp(document["generated_at"]):
         raise CensusError("public census generated_at must be an offset-aware timestamp")
-    for field in ("active_camels", "lost_camels", "active_window_seconds", "lost_after_seconds"):
+    for field in (
+        "active_camels",
+        "hungry_camels",
+        "lost_camels",
+        "cargo_loads",
+        "active_window_seconds",
+        "lost_after_seconds",
+    ):
         if not _nonnegative_int(document[field]):
             raise CensusError(f"public census {field} must be a non-negative integer")
     if document["active_window_seconds"] != ACTIVE_WINDOW_SECONDS:
@@ -109,7 +118,9 @@ def build_live_document(
         "status": "live",
         "generated_at": _utc_timestamp(timestamp) if generated_at is None else generated_at,
         "active_camels": counts.active_camels,
+        "hungry_camels": counts.hungry_camels,
         "lost_camels": counts.lost_camels,
+        "cargo_loads": counts.cargo_loads,
         "active_window_seconds": ACTIVE_WINDOW_SECONDS,
         "lost_after_seconds": LOST_AFTER_SECONDS,
         "individual_nodes_public": False,

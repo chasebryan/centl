@@ -265,6 +265,15 @@ let normalize mode text =
 let session_commands =
   [
     ":help";
+    ":catalog";
+    ":products";
+    ":workbook";
+    ":programs";
+    ":spoken";
+    ":dialect";
+    ":journal";
+    ":publish";
+    ":host-patches";
     ":history";
     ":clear-history";
     ":last";
@@ -302,7 +311,11 @@ let math_completions =
     "evaluate";
     "expand";
     "factor";
+    "factorial";
+    "fibonacci";
+    "gcd";
     "integrate";
+    "lcm";
     "simplify";
     "solve";
     "substitute";
@@ -335,6 +348,7 @@ let build_completions =
     "assurance";
     "audit";
     "capabilities";
+    "catalog";
     "create";
     "disable";
     "enable";
@@ -348,8 +362,11 @@ let build_completions =
     "modify";
     "package";
     "packages";
+    "products";
     "prepare";
+    "programs";
     "remove";
+    "spoken";
     "revision";
     "revisions";
     "scaffold";

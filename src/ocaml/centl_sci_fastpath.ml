@@ -295,6 +295,47 @@ let normalize_arithmetic text =
   |> replace_all ~needle:" times " ~replacement:" * "
   |> String.trim
 
+let expression_char = function
+  | 'a' .. 'z'
+  | 'A' .. 'Z'
+  | '0' .. '9'
+  | '_' | ' ' | '\t' | '.' | '+' | '-' | '*' | '/' | '^' | '(' | ')' | ',' ->
+      true
+  | _ -> false
+
+let named_expression problem =
+  let cleaned = trim_terminal problem in
+  let candidate =
+    match drop_prefix_ci "what is " cleaned with
+    | Some value -> value
+    | None -> (
+        match drop_prefix_ci "calculate " cleaned with
+        | Some value -> value
+        | None -> (
+            match drop_prefix_ci "compute " cleaned with
+            | Some value -> value
+            | None -> (
+                match drop_prefix_ci "evaluate " cleaned with
+                | Some value -> value
+                | None -> cleaned)))
+  in
+  let candidate = String.trim candidate in
+  if
+    candidate = ""
+    || (not (String.for_all expression_char candidate))
+    || not
+         (String.exists
+            (function 'a' .. 'z' | 'A' .. 'Z' | '_' -> true | _ -> false)
+            candidate)
+  then None
+  else
+    match Centl_parser.parse_statement_located candidate with
+    | Ok located -> (
+        match located.statement with
+        | Centl_parser.Evaluate _ -> native_ir candidate
+        | _ -> None)
+    | Error _ -> None
+
 let exact_expression problem =
   let cleaned = trim_terminal problem in
   let candidate =
@@ -585,6 +626,179 @@ let polynomial_equation problem =
           end
       end
 
+let token_ok text =
+  let text = String.trim text in
+  text <> ""
+  && (numeric_token text
+     || String.length text <= 32
+        && String.for_all
+             (function
+               | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true | _ -> false)
+             text)
+
+let combinator problem =
+  let cleaned = trim_terminal problem in
+  let rec strip_articles text =
+    match drop_prefix_ci "the " text with
+    | Some value -> strip_articles value
+    | None -> text
+  in
+  let body =
+    match drop_prefix_ci "what is " cleaned with
+    | Some value -> strip_articles value
+    | None -> (
+        match drop_prefix_ci "calculate " cleaned with
+        | Some value -> strip_articles value
+        | None -> (
+            match drop_prefix_ci "compute " cleaned with
+            | Some value -> strip_articles value
+            | None -> strip_articles cleaned))
+  in
+  let binary name prefix =
+    match drop_prefix_ci prefix body with
+    | None -> None
+    | Some rest -> (
+        match split_once_ci " and " rest with
+        | Some (left, right) when token_ok left && token_ok right ->
+            native_ir
+              (Printf.sprintf "%s(%s, %s)" name (String.trim left)
+                 (String.trim right))
+        | _ -> None)
+  in
+  let unary name prefix =
+    match drop_prefix_ci prefix body with
+    | Some argument when token_ok argument ->
+        native_ir (Printf.sprintf "%s(%s)" name (String.trim argument))
+    | _ -> None
+  in
+  let first_identifier text =
+    let length = String.length text in
+    let rec skip index =
+      if index >= length then None
+      else
+        match text.[index] with
+        | 'a' .. 'z' | 'A' .. 'Z' | '_' ->
+            let rec finish current =
+              if current < length then
+                match text.[current] with
+                | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ->
+                    finish (current + 1)
+                | _ -> current
+              else current
+            in
+            let stop = finish (index + 1) in
+            Some (String.sub text index (stop - index))
+        | _ -> skip (index + 1)
+    in
+    skip 0
+  in
+  let series name prefixes =
+    let rec loop = function
+      | [] -> None
+      | prefix :: rest -> (
+          match drop_prefix_ci prefix body with
+          | None -> loop rest
+          | Some remainder -> (
+              match split_once_ci " from " remainder with
+              | Some (expression, range) -> (
+                  match split_once_ci " to " range with
+                  | Some (lower, upper)
+                    when String.trim expression <> ""
+                         && token_ok lower && token_ok upper -> (
+                      match first_identifier expression with
+                      | Some variable ->
+                          native_ir
+                            (Printf.sprintf "%s(%s, %s = %s, %s)" name
+                               (String.trim expression) variable
+                               (String.trim lower) (String.trim upper))
+                      | None -> loop rest)
+                  | _ -> loop rest)
+              | None -> loop rest))
+    in
+    loop prefixes
+  in
+  let ordinal_index text =
+    let text = String.trim text in
+    let length = String.length text in
+    let rec digits index =
+      if index < length && text.[index] >= '0' && text.[index] <= '9' then
+        digits (index + 1)
+      else index
+    in
+    let stop = digits 0 in
+    if stop = 0 then None
+    else
+      let number = String.sub text 0 stop in
+      let rest =
+        String.sub text stop (length - stop) |> String.lowercase_ascii
+      in
+      if
+        String.starts_with ~prefix:"th" rest
+        || String.starts_with ~prefix:"st" rest
+        || String.starts_with ~prefix:"nd" rest
+        || String.starts_with ~prefix:"rd" rest
+      then int_of_string_opt number
+      else None
+  in
+  let ordinal_fibonacci () =
+    match ordinal_index body with
+    | None -> None
+    | Some index ->
+        let rest =
+          let rec skip_ordinal text =
+            match ordinal_index text with
+            | None -> String.trim text
+            | Some _ ->
+                let rec consume i =
+                  if
+                    i < String.length text && text.[i] >= '0' && text.[i] <= '9'
+                  then consume (i + 1)
+                  else i
+                in
+                let after_digits = consume 0 in
+                let after =
+                  if after_digits + 2 <= String.length text then
+                    String.sub text (after_digits + 2)
+                      (String.length text - after_digits - 2)
+                  else ""
+                in
+                String.trim after
+          in
+          skip_ordinal body
+        in
+        let rest = String.lowercase_ascii rest in
+        if
+          rest = "fibonacci" || rest = "fibonacci number"
+          || rest = "fibonacci numbers"
+        then native_ir (Printf.sprintf "fibonacci(%d)" index)
+        else None
+  in
+  match binary "gcd" "gcd of " with
+  | Some _ as value -> value
+  | None -> (
+      match binary "lcm" "lcm of " with
+      | Some _ as value -> value
+      | None -> (
+          match unary "fibonacci" "fibonacci of " with
+          | Some _ as value -> value
+          | None -> (
+              match ordinal_fibonacci () with
+              | Some _ as value -> value
+              | None -> (
+                  match unary "factorial" "factorial of " with
+                  | Some _ as value -> value
+                  | None -> (
+                      match series "sum" [ "sum of "; "sum " ] with
+                      | Some _ as value -> value
+                      | None -> (
+                          match
+                            series "product" [ "product of "; "product " ]
+                          with
+                          | Some _ as value -> value
+                          | None ->
+                              series "sequence" [ "sequence of "; "sequence " ])
+                      )))))
+
 let interpret problem =
   match Centl_sci_mechanics.interpret problem with
   | Some _ as result -> result
@@ -609,7 +823,13 @@ let interpret problem =
                           | None ->
                               begin match approximation problem with
                               | Some _ as result -> result
-                              | None -> exact_expression problem
+                              | None -> (
+                                  match combinator problem with
+                                  | Some _ as result -> result
+                                  | None -> (
+                                      match named_expression problem with
+                                      | Some _ as result -> result
+                                      | None -> exact_expression problem))
                               end
                           end
                       end
@@ -617,3 +837,10 @@ let interpret problem =
               end
           end
       end
+
+let recover_program problem =
+  match interpret problem with
+  | Some (Centl_sci_ir.Exact_expression { expression; _ }) -> Some expression
+  | Some (Centl_sci_ir.Polynomial_equation { left; right; variable; _ }) ->
+      Some (Printf.sprintf "solve(%s = %s, %s)" left right variable)
+  | _ -> None

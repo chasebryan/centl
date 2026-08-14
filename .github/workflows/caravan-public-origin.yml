@@ -1,0 +1,106 @@
+name: CARAVAN public origin
+
+on:
+  pull_request:
+    paths:
+      - 'docs/CARAVAN-PUBLIC-ORIGIN.md'
+      - 'docs/CARAVAN-JOIN-RELEASE.md'
+      - 'docs/CARAVAN-JOIN-MANUAL.md'
+      - 'docs/CARAVAN-PRESERVATION-DRIVER.md'
+      - 'scripts/caravan-linux-platform'
+      - 'scripts/caravan-preserve'
+      - 'scripts/offline-rebuild'
+      - 'scripts/caravan-public-origin-*'
+      - 'scripts/caravan-join-*'
+      - 'infra/caravan-public-origin/**'
+      - 'tests/test_caravan_public_origin*.py'
+      - 'tests/test_caravan_join_release.py'
+      - 'tests/test_caravan_preserve_driver.py'
+      - '.github/workflows/caravan-public-origin.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caravan-public-origin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+jobs:
+  public-origin-boundary:
+    name: Public-origin closed-world boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact proposed SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Require checkout identity
+        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
+
+      - name: Set up pinned Julia for preservation smoke proof
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
+        with:
+          version: "1.12.6"
+
+      - name: Prove Julia loads from read-only preserved bytes with writable scratch cache
+        run: |
+          set -eu
+          preserved="$RUNNER_TEMP/julia-preserved"
+          scratch="$RUNNER_TEMP/julia-scratch"
+          probe="$preserved/packages/Probe"
+          mkdir -p "$probe/src" "$scratch"
+          cat > "$probe/Project.toml" <<'EOF'
+          name = "Probe"
+          uuid = "91cc9a97-c50d-4e7f-93bc-335c507d1d29"
+          version = "0.1.0"
+          EOF
+          cat > "$probe/src/Probe.jl" <<'EOF'
+          module Probe
+          answer() = 42
+          end
+          EOF
+          chmod -R a-w "$preserved"
+          SCRATCH="$scratch" \
+            JULIA_DEPOT_PATH="$scratch:$preserved" \
+            JULIA_LOAD_PATH="$preserved/packages:@stdlib" \
+            JULIA_PKG_OFFLINE=true \
+            JULIA_PKG_PRECOMPILE_AUTO=0 \
+            julia --startup-file=no -e \
+            'using Probe; @assert Probe.answer() == 42; @assert first(DEPOT_PATH) == ENV["SCRATCH"]'
+          test -d "$scratch/compiled"
+          test ! -e "$preserved/compiled"
+          printf 'read-only-julia-preservation-overlay: PASS\n'
+
+      - name: Prove publisher has no mutable-source network authority
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          candidate = Path('scripts/caravan-public-origin-candidate.py').read_text()
+          ingest = Path('scripts/caravan-public-origin-ingest').read_text()
+          unit = Path('infra/caravan-public-origin/fcf-caravan-candidate.service').read_text()
+          forbidden = (
+              'github.com/chasebryan/centl.git',
+              'refs/remotes/origin/',
+              'git fetch',
+              'refs/pull',
+          )
+          for token in forbidden:
+              if token in candidate:
+                  raise SystemExit(f'candidate retains mutable source authority: {token}')
+          if 'FCF_CARAVAN_PRESERVATION_ROOT is required' not in ingest:
+              raise SystemExit('ingest does not fail closed without preservation authority')
+          if 'PrivateNetwork=yes' not in unit or 'IPAddressDeny=any' not in unit:
+              raise SystemExit('candidate compiler is not networkless')
+          if 'RestrictAddressFamilies=AF_UNIX' not in unit:
+              raise SystemExit('candidate compiler retains unnecessary network address families')
+          print('closed-world-source-policy: PASS')
+          PY
+
+      - name: Run public-origin adversarial gate
+        run: sh scripts/caravan-public-origin-check

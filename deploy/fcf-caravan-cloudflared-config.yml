@@ -1,0 +1,7 @@
+tunnel: d59e3e73-544d-40f8-8ad4-9bb6aa6cd689
+credentials-file: /var/home/chasebryan/.cloudflared/d59e3e73-544d-40f8-8ad4-9bb6aa6cd689.json
+
+ingress:
+  - hostname: caravan.freecomputation.org
+    service: http://127.0.0.1:8789
+  - service: http_status:404

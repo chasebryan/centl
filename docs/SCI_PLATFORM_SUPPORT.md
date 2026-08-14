@@ -24,12 +24,34 @@ scientific system is still developing rapidly.
 Shared code should remain portable when doing so is simple and does not weaken or
 complicate the Linux implementation. The project should not add abstraction,
 compatibility branches, CI jobs, packaging machinery, or release gates solely to
-preserve hypothetical macOS or Windows support.
+preserve hypothetical macOS or Windows support during the current rapid-development
+period.
 
-Support for another operating system may be reintroduced later from a stable
-CENTL specification when there is a concrete user need and enough engineering
-capacity to maintain it honestly. Until then, the support hierarchy is simply:
+## Future direction: Three Horizons
 
-1. **GNU/Linux — supported reference platform.**
-2. **macOS — unsupported.**
-3. **Windows — unsupported.**
+CENTL's current compass directive is to use the Linux-first period to deepen and
+stabilize the system, then deliberately work toward a future Oasis-qualified release
+set for **GNU/Linux, macOS, and Windows**.
+
+The preferred horizon is the late-December 2026 / New Year 2027 window, but this is
+an aspirational direction rather than a release promise. The schedule, architecture
+matrix, packaging strategy, and version number may change as the implementation and
+qualification evidence improve.
+
+Cross-platform restoration will not be considered complete merely because CENTL
+compiles on all three operating systems. A supported target must earn a maintained
+build, installation, runtime, conformance, hardening, and Oasis qualification path
+with the same mathematical meaning and trust boundaries as the other supported
+targets.
+
+The Linux-first policy remains authoritative until a later Oasis release explicitly
+changes it. In particular, macOS and Windows failures do not currently block Mirage
+experimentation or the existing Linux product line.
+
+See [CENTL: Three Horizons](THREE-HORIZONS.md) for the full compass directive.
+
+Until then, the support hierarchy is:
+
+1. **GNU/Linux - supported reference platform.**
+2. **macOS - unsupported, future Three Horizons target.**
+3. **Windows - unsupported, future Three Horizons target.**

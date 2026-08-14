@@ -1,0 +1,56 @@
+name: Oasis qualified-byte publication
+run-name: Publish qualified CENTL Oasis release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/oasis-publication-trigger"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oasis-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish exact qualified Oasis bytes
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Check out trusted publication control plane
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Resolve exact qualified candidate
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate=$(tr -d '[:space:]' < .github/oasis-publication-trigger)
+          if ! printf '%s' "$candidate" | grep -Eq '^[0-9a-f]{40}$'; then
+            printf 'publication candidate must be a full lowercase 40-hex SHA\n' >&2
+            exit 1
+          fi
+          printf 'sha=%s\n' "$candidate" >> "$GITHUB_OUTPUT"
+
+      - name: Publish already-qualified bytes
+        id: publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ steps.candidate.outputs.sha }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/oasis-publication-runner.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --candidate "$CANDIDATE_SHA"

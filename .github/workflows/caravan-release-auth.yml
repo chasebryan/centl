@@ -1,0 +1,38 @@
+name: CARAVAN release authentication
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/caravan-join-key-ceremony'
+      - 'scripts/caravan-join-release'
+      - 'scripts/caravan-join-verify'
+      - 'docs/CARAVAN-JOIN-KEY-CEREMONY.md'
+      - 'docs/CARAVAN-JOIN-RELEASE.md'
+      - 'tests/test_caravan_key_ceremony.py'
+      - 'tests/test_caravan_join_release.py'
+      - '.github/workflows/caravan-release-auth.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  release-authentication:
+    name: Join key and immutable release guardrails
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate shell surfaces
+        run: |
+          bash -n scripts/caravan-join-key-ceremony
+          bash -n scripts/caravan-join-release
+          bash -n scripts/caravan-join-verify
+
+      - name: Run release-authentication regression tests
+        run: |
+          python3 -m unittest -v \
+            tests/test_caravan_key_ceremony.py \
+            tests/test_caravan_join_release.py

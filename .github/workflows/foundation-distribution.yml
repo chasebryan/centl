@@ -1,0 +1,211 @@
+name: Foundation distribution bootstrap
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/foundation-distribution.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: centl-distribution-writer
+  cancel-in-progress: false
+
+jobs:
+  preserve-and-clean:
+    name: Preserve Oasis foundation and clean legacy releases
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      FOUNDATION_VERSION: 0.14.0
+      FOUNDATION_TAG: v0.14.0
+      FOUNDATION_SHA: d587726f11063d6f278da4a050161d8189ce876d
+      PAYLOAD_TAG: v0.14.0-oasis-payload
+      ARCHIVE_SHA256: 3c7e438b2aed3a76ff2daf2783dbb3f37f9b856f4c77e8a6e960a7c61c83b45b
+      ASSET: centl-linux-x86_64.tar.gz
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify canonical Oasis foundation identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force origin "refs/tags/$FOUNDATION_TAG:refs/tags/$FOUNDATION_TAG"
+          actual=$(git rev-list -n 1 "$FOUNDATION_TAG")
+          test "$actual" = "$FOUNDATION_SHA" || {
+            echo "foundation tag points to $actual, expected $FOUNDATION_SHA" >&2
+            exit 1
+          }
+
+      - name: Retrieve already-qualified Oasis bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/foundation"
+          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$PAYLOAD_TAG"
+          curl --fail --silent --show-error --location \
+            "$base/$ASSET" --output "$RUNNER_TEMP/foundation/$ASSET"
+          curl --fail --silent --show-error --location \
+            "$base/$ASSET.sha256" --output "$RUNNER_TEMP/foundation/$ASSET.sha256"
+
+          actual=$(sha256sum "$RUNNER_TEMP/foundation/$ASSET" | awk '{print $1}')
+          test "$actual" = "$ARCHIVE_SHA256" || {
+            echo "qualified archive hash changed: $actual" >&2
+            exit 1
+          }
+
+          adjacent=$(awk 'NR == 1 {print $1}' "$RUNNER_TEMP/foundation/$ASSET.sha256")
+          test "$adjacent" = "$ARCHIVE_SHA256" || {
+            echo "qualified adjacent checksum disagrees with locked hash" >&2
+            exit 1
+          }
+
+      - name: Validate qualified archive boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/foundation/$ASSET"
+          while IFS= read -r member; do
+            case "$member" in
+              /*|../*|*/../*|*/..)
+                echo "unsafe archive path: $member" >&2
+                exit 1
+                ;;
+              centl|centl/*) ;;
+              *)
+                echo "unexpected archive path: $member" >&2
+                exit 1
+                ;;
+            esac
+          done < <(tar -tzf "$archive")
+
+          mkdir -p "$RUNNER_TEMP/foundation/extracted"
+          tar --no-same-owner --no-same-permissions -xzf "$archive" \
+            -C "$RUNNER_TEMP/foundation/extracted"
+          test "$(cat "$RUNNER_TEMP/foundation/extracted/centl/VERSION")" = "$FOUNDATION_VERSION"
+          test "$("$RUNNER_TEMP/foundation/extracted/centl/bin/centl" --version)" = "centl $FOUNDATION_VERSION"
+          "$RUNNER_TEMP/foundation/extracted/centl/bin/centl" --build-info \
+            | grep -Fqx "commit=$FOUNDATION_SHA"
+          test "$("$RUNNER_TEMP/foundation/extracted/centl/bin/centl" '0.1 + 0.2')" = '3/10'
+          test "$("$RUNNER_TEMP/foundation/extracted/centl/bin/centl-physics" convert 100 cm m)" = '1'
+          test "$("$RUNNER_TEMP/foundation/extracted/centl/bin/centl-sci" 'What is 0.1 plus 0.2?')" = '3/10'
+
+      - name: Publish permanent distribution branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if git ls-remote --exit-code --heads origin distribution >/dev/null 2>&1; then
+            git fetch origin distribution
+            git switch --force-create distribution origin/distribution
+          else
+            git switch --orphan distribution
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          mkdir -p "channels/oasis/v$FOUNDATION_VERSION"
+          cp "$RUNNER_TEMP/foundation/$ASSET" \
+            "channels/oasis/v$FOUNDATION_VERSION/$ASSET"
+          cp "$RUNNER_TEMP/foundation/$ASSET.sha256" \
+            "channels/oasis/v$FOUNDATION_VERSION/$ASSET.sha256"
+          printf '%s\n' "$FOUNDATION_VERSION" > channels/oasis/LATEST
+          printf '%s\n' "$FOUNDATION_SHA" > "channels/oasis/v$FOUNDATION_VERSION/SOURCE-COMMIT"
+          printf '%s\n' \
+            '# CENTL distribution' \
+            '' \
+            'This branch is a machine-oriented distribution surface, not a development branch.' \
+            '' \
+            '- `channels/oasis/` contains immutable qualified Oasis release bytes.' \
+            '- `channels/mirage/` may contain rolling Mirage development builds.' \
+            '' \
+            'The canonical source release history begins at `v0.14.0`.' \
+            > README.md
+
+          git add README.md channels/oasis
+          if git diff --cached --quiet; then
+            echo 'Foundation distribution already present.'
+          else
+            git commit -m 'dist: preserve CENTL v0.14.0 Oasis foundation'
+            git -c "http.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
+              push origin HEAD:distribution
+          fi
+
+      - name: Verify permanent public bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/distribution/channels/oasis/v$FOUNDATION_VERSION"
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location \
+              "$base/$ASSET.sha256" --output "$RUNNER_TEMP/public.sha256"; then
+              break
+            fi
+            test "$attempt" -lt 12 || exit 1
+            sleep 5
+          done
+          public_expected=$(awk 'NR == 1 {print $1}' "$RUNNER_TEMP/public.sha256")
+          test "$public_expected" = "$ARCHIVE_SHA256"
+
+          curl --fail --silent --show-error --location \
+            "$base/$ASSET" --output "$RUNNER_TEMP/public.tar.gz"
+          test "$(sha256sum "$RUNNER_TEMP/public.tar.gz" | awk '{print $1}')" = "$ARCHIVE_SHA256"
+
+      - name: Delete every non-foundation GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS=$'\t' read -r id tag; do
+            test -n "$id" || continue
+            if [ "$tag" != "$FOUNDATION_TAG" ]; then
+              echo "Deleting release $tag ($id)"
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/$id"
+            fi
+          done < <(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | [.id, .tag_name] | @tsv')
+
+      - name: Delete every non-foundation tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t tags < <(gh api --paginate "repos/$GITHUB_REPOSITORY/tags?per_page=100" --jq '.[].name')
+          for tag in "${tags[@]}"; do
+            if [ "$tag" != "$FOUNDATION_TAG" ]; then
+              echo "Deleting tag $tag"
+              encoded=${tag//\//%2F}
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$encoded"
+            fi
+          done
+
+      - name: Verify foundation-only release history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t releases < <(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')
+          test "${#releases[@]}" -eq 1
+          test "${releases[0]}" = "$FOUNDATION_TAG"
+
+          mapfile -t tags < <(gh api --paginate "repos/$GITHUB_REPOSITORY/tags?per_page=100" --jq '.[].name')
+          test "${#tags[@]}" -eq 1
+          test "${tags[0]}" = "$FOUNDATION_TAG"
+
+          echo "CENTL release history now begins at $FOUNDATION_TAG ($FOUNDATION_SHA)."

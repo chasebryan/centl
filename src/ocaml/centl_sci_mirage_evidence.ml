@@ -19,6 +19,16 @@ type snapshot_evidence =
   | Snapshot_ready of string
   | Snapshot_failed of string
 
+type context = {
+  candidates : Centl_sci_mirage_candidate.report option;
+  materialization : Centl_sci_mirage_materialize.report option;
+  cegis : Centl_sci_mirage_cegis.report option;
+  compare : Centl_sci_mirage_compare.report option;
+}
+
+let empty_context =
+  { candidates = None; materialization = None; cegis = None; compare = None }
+
 let receipt_state_text = function
   | Passed -> "passed"
   | Pending -> "pending"
@@ -93,7 +103,125 @@ let prepare_snapshot workspace (plan : Centl_sci_mirage_execution_plan.report) =
     | Ok path -> Snapshot_ready path
     | Error message -> Snapshot_failed message
 
-let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
+let candidate_for context candidate_id =
+  match context.candidates with
+  | None -> None
+  | Some report ->
+      List.find_opt
+        (fun candidate ->
+          String.equal candidate.Centl_sci_mirage_candidate.id candidate_id)
+        report.candidates
+
+let materialization_for context candidate_id =
+  match context.materialization with
+  | None -> None
+  | Some report ->
+      List.find_opt
+        (fun item ->
+          String.equal item.Centl_sci_mirage_materialize.candidate_id
+            candidate_id)
+        report.items
+
+let cegis_trials context candidate_id =
+  match context.cegis with
+  | None -> []
+  | Some report ->
+      List.filter
+        (fun trial ->
+          String.equal trial.Centl_sci_mirage_cegis.candidate_id candidate_id)
+        report.trials
+
+let execute_parser_action context
+    (action : Centl_sci_mirage_execution_plan.action) =
+  match materialization_for context action.candidate_id with
+  | Some item
+    when item.state = Centl_sci_mirage_materialize.Materialized_source
+         && item.parser_validated ->
+      make_receipt action Passed
+        "authoritative parser accepted the exact staged candidate source" None
+  | Some item when item.state = Centl_sci_mirage_materialize.Declarative_reuse
+    ->
+      make_receipt action Passed
+        "declarative composition introduces no generated source requiring a \
+         parser gate"
+        None
+  | Some item when item.state = Centl_sci_mirage_materialize.Blocked ->
+      make_receipt action Blocked
+        "candidate materialization is blocked; parser evidence cannot pass" None
+  | Some _ | None ->
+      make_receipt action Pending
+        "no transaction-bound materialization evidence is available for the \
+         parser executor"
+        None
+
+let execute_capability_action context
+    (action : Centl_sci_mirage_execution_plan.action) =
+  match candidate_for context action.candidate_id with
+  | Some candidate when candidate.capability_inputs <> [] ->
+      make_receipt action Passed
+        "capability discovery recorded matched existing capabilities for this \
+         candidate"
+        None
+  | Some _ ->
+      make_receipt action Pending
+        "the candidate has no recorded capability inputs to witness reuse" None
+  | None ->
+      make_receipt action Pending
+        "no transaction-bound candidate record is available for capability \
+         discovery"
+        None
+
+let execute_regression_action context
+    (action : Centl_sci_mirage_execution_plan.action) =
+  let trials = cegis_trials context action.candidate_id in
+  let valid_with_examples =
+    List.exists
+      (fun trial ->
+        trial.Centl_sci_mirage_cegis.state = Centl_sci_mirage_cegis.Valid
+        && trial.examples_checked > 0)
+      trials
+  in
+  let counterexample =
+    List.exists
+      (fun trial ->
+        trial.Centl_sci_mirage_cegis.state
+        = Centl_sci_mirage_cegis.Counterexample)
+      trials
+  in
+  let compose_preserved =
+    match candidate_for context action.candidate_id with
+    | Some candidate
+      when candidate.strategy = Centl_sci_mirage_candidate.Compose_existing -> (
+        match context.compare with
+        | Some compare when compare.core_preserved || compare.behavior_preserved
+          ->
+            true
+        | _ -> false)
+    | _ -> false
+  in
+  if counterexample then
+    make_receipt action Blocked
+      "CEGIS recorded a counterexample against an extracted example; \
+       regression cannot pass"
+      None
+  else if valid_with_examples then
+    make_receipt action Passed
+      "CEGIS verified every extracted example against the candidate; this is \
+       example evidence, not a complete regression proof"
+      None
+  else if compose_preserved then
+    make_receipt action Passed
+      "the candidate is a non-mutating composition and the semantic \
+       fingerprint corpus is unchanged"
+      None
+  else
+    make_receipt action Pending
+      "no extracted examples or behavior-preservation fingerprint is available \
+       to discharge this regression obligation"
+      None
+
+let execute_action context snapshot
+    (action : Centl_sci_mirage_execution_plan.action) =
   match action.executor with
   | "workspace_snapshot" when action.precondition = "before_activation" ->
       begin match snapshot with
@@ -113,6 +241,9 @@ let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
              evidence cycle"
             None
       end
+  | "candidate_parser_or_build" -> execute_parser_action context action
+  | "capability_discovery" -> execute_capability_action context action
+  | "deterministic_regression_gate" -> execute_regression_action context action
   | _ when not action.executor_supported ->
       make_receipt action Blocked
         (match action.blocking_reason with
@@ -125,14 +256,16 @@ let execute_action snapshot (action : Centl_sci_mirage_execution_plan.action) =
          execute that validation mechanism"
         None
 
-let execute_candidate snapshot
+let execute_candidate context snapshot
     (candidate : Centl_sci_mirage_execution_plan.candidate_plan) =
-  List.map (execute_action snapshot) candidate.actions
+  List.map (execute_action context snapshot) candidate.actions
 
-let execute workspace (plan : Centl_sci_mirage_execution_plan.report) =
+let execute ?(context = empty_context) workspace
+    (plan : Centl_sci_mirage_execution_plan.report) =
   let snapshot = prepare_snapshot workspace plan in
   {
-    receipts = List.concat_map (execute_candidate snapshot) plan.candidates;
+    receipts =
+      List.concat_map (execute_candidate context snapshot) plan.candidates;
     blocked_cells = plan.blocked_cells;
   }
 
@@ -194,8 +327,8 @@ let output_path execution_plan_path =
     ^ ".evidence.json"
   else execution_plan_path ^ ".evidence.json"
 
-let construct workspace execution_plan_path plan =
-  let report = execute workspace plan in
+let construct ?(context = empty_context) workspace execution_plan_path plan =
+  let report = execute ~context workspace plan in
   let path = output_path execution_plan_path in
   try
     Centl_sci_workspace.atomic_write_json path (to_json report);

@@ -146,6 +146,69 @@ let test_general_knowledge_defers_to_model () =
        (Centl_sci_fastpath.interpret
           "Who was the 16th president of the United States?"))
 
+let test_gcd_language () =
+  match
+    Centl_sci_fastpath.interpret "What is the gcd of 48 and 18?"
+    |> require_some "gcd combinator"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "gcd(48, 18)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression gcd IR"
+
+let test_sum_language () =
+  match
+    Centl_sci_fastpath.interpret "sum of k^2 from 1 to 10"
+    |> require_some "sum series"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "sum(k^2, k = 1, 10)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression sum IR"
+
+let test_product_language () =
+  match
+    Centl_sci_fastpath.interpret "product of k from 1 to 5"
+    |> require_some "product series"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string)
+        "expression" "product(k, k = 1, 5)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression product IR"
+
+let test_ordinal_fibonacci_language () =
+  match
+    Centl_sci_fastpath.interpret "the 10th fibonacci number"
+    |> require_some "ordinal fibonacci"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "fibonacci(10)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression ordinal fibonacci IR"
+
+let test_factorial_language () =
+  match
+    Centl_sci_fastpath.interpret "factorial of 6"
+    |> require_some "factorial combinator"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "factorial(6)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression factorial IR"
+
+let test_fibonacci_language () =
+  match
+    Centl_sci_fastpath.interpret "fibonacci of 10"
+    |> require_some "fibonacci combinator"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "fibonacci(10)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression fibonacci IR"
+
+let test_named_call_language () =
+  match
+    Centl_sci_fastpath.interpret "square(6)" |> require_some "named local call"
+  with
+  | Centl_sci_ir.Exact_expression data ->
+      Alcotest.(check string) "expression" "square(6)" data.expression
+  | _ -> Alcotest.fail "expected exact_expression named call IR"
+
 let test_fast_path_executes_exactly () =
   let ir =
     Centl_sci_fastpath.interpret "What is 0.1 plus 0.2?"
@@ -276,6 +339,14 @@ let () =
             test_ambiguous_spoken_equation_defers_to_model;
           Alcotest.test_case "general knowledge defers" `Quick
             test_general_knowledge_defers_to_model;
+          Alcotest.test_case "gcd language" `Quick test_gcd_language;
+          Alcotest.test_case "fibonacci language" `Quick test_fibonacci_language;
+          Alcotest.test_case "sum language" `Quick test_sum_language;
+          Alcotest.test_case "factorial language" `Quick test_factorial_language;
+          Alcotest.test_case "product language" `Quick test_product_language;
+          Alcotest.test_case "ordinal fibonacci" `Quick
+            test_ordinal_fibonacci_language;
+          Alcotest.test_case "named local call" `Quick test_named_call_language;
         ] );
       ( "execution",
         [

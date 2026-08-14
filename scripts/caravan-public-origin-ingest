@@ -1,0 +1,197 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+umask 022
+
+fail() {
+  printf 'fcf caravan preservation ingest: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+need python3
+need sha256sum
+need find
+need sort
+need date
+need awk
+need xargs
+need git
+
+PRESERVATION_ROOT=${FCF_CARAVAN_PRESERVATION_ROOT:-}
+SOURCE_AUTHORIZATION=${FCF_CARAVAN_SOURCE_AUTHORIZATION:-/etc/fcf-caravan/source-authorization.json}
+APPROVED_ROOT=${FCF_CARAVAN_APPROVED_ROOT:-/var/lib/fcf-caravan/approved}
+WORK_ROOT=${FCF_CARAVAN_INGEST_WORK_ROOT:-/var/lib/fcf-caravan/ingest-work}
+TOOLS_ROOT=${FCF_CARAVAN_TOOLS_ROOT:-/usr/local/libexec/fcf-caravan/centl-tools}
+SEMANTIC_MODE=${FCF_CARAVAN_SEMANTIC_MODE:-auto}
+
+case "$SEMANTIC_MODE" in auto|off|require) ;; *) fail "semantic mode must be auto, off, or require" ;; esac
+[ -n "$PRESERVATION_ROOT" ] || fail "FCF_CARAVAN_PRESERVATION_ROOT is required; public origin has no GitHub bypass"
+[ -x "$TOOLS_ROOT/scripts/mirror-receipt" ] || fail "installed mirror-receipt tool missing"
+[ -x "$TOOLS_ROOT/scripts/publication-export" ] || fail "installed publication-export tool missing"
+[ -x "$TOOLS_ROOT/scripts/model-origin-export.py" ] || fail "installed model-origin-export tool missing"
+[ -x "$TOOLS_ROOT/scripts/caravan-public-origin-source-export.py" ] || fail "installed source exporter missing"
+[ -f "$SOURCE_AUTHORIZATION" ] && [ ! -L "$SOURCE_AUTHORIZATION" ] ||
+  fail "explicit root-owned source authorization is required"
+
+parent=$(dirname "$APPROVED_ROOT")
+mkdir -p "$parent" "$WORK_ROOT"
+[ -d "$parent" ] && [ ! -L "$parent" ] || fail "approved parent is not a normal directory"
+[ -d "$WORK_ROOT" ] && [ ! -L "$WORK_ROOT" ] || fail "ingest work root must be a normal directory"
+[ ! -L "$APPROVED_ROOT" ] || fail "approved root must not be a symbolic link"
+[ -d "$PRESERVATION_ROOT" ] && [ ! -L "$PRESERVATION_ROOT" ] || fail "configured preservation mirror is unsafe"
+
+# Stage beside APPROVED_ROOT so the final rename cannot cross filesystems.
+build="$parent/.approved-new-$$"
+backup="$parent/.approved-old-$$"
+rm -rf -- "$build" "$backup"
+mkdir -p "$build"
+
+cleanup() {
+  if [ -n "${build:-}" ] && [ -e "$build" ]; then
+    chmod -R u+w "$build" 2>/dev/null || true
+    rm -rf -- "$build" 2>/dev/null || true
+  fi
+  if [ -n "${backup:-}" ] && [ -e "$backup" ]; then
+    if [ ! -e "$APPROVED_ROOT" ]; then
+      mv -- "$backup" "$APPROVED_ROOT" 2>/dev/null || true
+    else
+      chmod -R u+w "$backup" 2>/dev/null || true
+      rm -rf -- "$backup" 2>/dev/null || true
+    fi
+  fi
+}
+trap cleanup EXIT HUP INT TERM
+
+# This verifies exact regular-file membership and symlink membership of the
+# preservation authority before any public export is compiled.
+"$TOOLS_ROOT/scripts/mirror-receipt" verify "$PRESERVATION_ROOT" >/dev/null
+mirror_receipt_sha256=$(sha256sum "$PRESERVATION_ROOT/MIRROR-SHA256SUMS" | awk '{print $1}')
+source_authorization_sha256=$(sha256sum "$SOURCE_AUTHORIZATION" | awk '{print $1}')
+
+# Source is exported only from project/centl.bundle inside the verified mirror,
+# and only for exact commits in the independently root-owned authorization.
+"$TOOLS_ROOT/scripts/caravan-public-origin-source-export.py" \
+  "$PRESERVATION_ROOT" "$SOURCE_AUTHORIZATION" "$build/source" >/dev/null
+
+# Releases are an optional publication class. A preservation snapshot that has
+# never admitted a public release is still valid source authority. If a releases
+# path exists and contains anything, however, the strict publication exporter
+# must validate it; malformed or non-publishable release state remains fatal.
+releases_published=false
+releases_root="$PRESERVATION_ROOT/releases"
+if [ -e "$releases_root" ] || [ -L "$releases_root" ]; then
+  [ -d "$releases_root" ] && [ ! -L "$releases_root" ] ||
+    fail "preservation releases path is not a normal directory"
+  if find "$releases_root" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+    "$TOOLS_ROOT/scripts/publication-export" "$PRESERVATION_ROOT" "$build/releases" >/dev/null
+    releases_published=true
+  fi
+fi
+
+semantic_published=false
+semantic_status=not-configured
+case "$SEMANTIC_MODE" in
+  off)
+    semantic_status=disabled
+    ;;
+  auto)
+    if "$TOOLS_ROOT/scripts/model-origin-export.py" "$PRESERVATION_ROOT" --check >/dev/null 2>&1; then
+      "$TOOLS_ROOT/scripts/model-origin-export.py" \
+        "$PRESERVATION_ROOT" "$build/semantic" --catalog-version 1 >/dev/null
+      semantic_published=true
+      semantic_status=public-approved
+    else
+      semantic_status=withheld-by-provenance-policy
+    fi
+    ;;
+  require)
+    "$TOOLS_ROOT/scripts/model-origin-export.py" "$PRESERVATION_ROOT" --check >/dev/null
+    "$TOOLS_ROOT/scripts/model-origin-export.py" \
+      "$PRESERVATION_ROOT" "$build/semantic" --catalog-version 1 >/dev/null
+    semantic_published=true
+    semantic_status=public-approved
+    ;;
+esac
+
+python3 - "$build/INGEST-STATUS.json" "$releases_published" \
+  "$semantic_published" "$semantic_status" "$mirror_receipt_sha256" \
+  "$source_authorization_sha256" <<'PY'
+from __future__ import annotations
+import datetime as dt
+import json
+import sys
+from pathlib import Path
+out, releases, semantic, semantic_status, receipt, authorization = sys.argv[1:]
+data = {
+    "schema": "fcf-caravan-approved-ingest-status-v2",
+    "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+    "preservation_mirror_verified": True,
+    "mirror_regular_receipt_sha256": receipt,
+    "source_authorization_sha256": authorization,
+    "source_export_present": True,
+    "release_export_present": releases == "true",
+    "semantic_export_present": semantic == "true",
+    "semantic_status": semantic_status,
+}
+Path(out).write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+PY
+
+python3 - "$build" <<'PY'
+from __future__ import annotations
+import os
+import stat
+import sys
+from pathlib import Path
+root = Path(sys.argv[1])
+for current, dirs, files in os.walk(root, followlinks=False):
+    base = Path(current)
+    for name in dirs + files:
+        p = base / name
+        st = os.lstat(p)
+        if stat.S_ISLNK(st.st_mode):
+            raise SystemExit(f"public ingest contains symbolic link: {p}")
+        if not (stat.S_ISDIR(st.st_mode) or stat.S_ISREG(st.st_mode)):
+            raise SystemExit(f"public ingest contains special file: {p}")
+PY
+
+(
+  cd "$build"
+  find . -type f ! -name 'APPROVED-SHA256SUMS' ! -name 'APPROVED-SHA256SUMS.sha256' \
+    -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > APPROVED-SHA256SUMS
+  sha256sum APPROVED-SHA256SUMS > APPROVED-SHA256SUMS.sha256
+  sha256sum -c APPROVED-SHA256SUMS.sha256 >/dev/null
+  sha256sum -c APPROVED-SHA256SUMS >/dev/null
+)
+
+find "$build" -type f -exec chmod 0444 {} +
+find "$build" -type d -exec chmod 0555 {} +
+
+if [ -e "$APPROVED_ROOT" ]; then
+  [ -d "$APPROVED_ROOT" ] && [ ! -L "$APPROVED_ROOT" ] || fail "existing approved root is unsafe"
+  mv -- "$APPROVED_ROOT" "$backup"
+fi
+
+if ! mv -- "$build" "$APPROVED_ROOT"; then
+  if [ -e "$backup" ] && [ ! -e "$APPROVED_ROOT" ]; then
+    mv -- "$backup" "$APPROVED_ROOT" 2>/dev/null || true
+  fi
+  fail "atomic approved-store promotion failed"
+fi
+build=""
+
+if [ -d "$backup" ]; then
+  chmod -R u+w "$backup" 2>/dev/null || true
+  rm -rf -- "$backup"
+fi
+backup=""
+trap - EXIT HUP INT TERM
+
+printf 'fcf caravan preservation ingest: PASS\n'
+printf 'mirror_verified=true\n'
+printf 'source=preservation-authorized\n'
+printf 'releases=%s\n' "$releases_published"
+printf 'semantic=%s\n' "$semantic_status"

@@ -1,0 +1,104 @@
+#!/bin/bash
+# Shared Linux platform adapter for CARAVAN installers.
+# Source this file from bash; it intentionally performs no work on load.
+
+fcf_linux_fail() {
+  printf 'fcf caravan linux platform: %s\n' "$*" >&2
+  return 1
+}
+
+fcf_linux_require_kernel() {
+  [ "$(uname -s 2>/dev/null || true)" = Linux ] || fcf_linux_fail "Linux is required"
+}
+
+fcf_linux_require_systemd() {
+  command -v systemctl >/dev/null 2>&1 || fcf_linux_fail "systemd is required for the FCF public-origin role"
+  [ -d /run/systemd/system ] || fcf_linux_fail "systemd is not the active service manager"
+}
+
+fcf_linux_package_manager() {
+  for manager in apt-get dnf yum zypper pacman; do
+    if command -v "$manager" >/dev/null 2>&1; then
+      printf '%s\n' "$manager"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Debian-family systems intentionally install the OpenBSD-compatible implementation
+# as /usr/bin/signify-openbsd instead of /usr/bin/signify. Normalize that packaging
+# difference only inside the current CARAVAN installer shell. Downstream CENTL
+# verification scripts independently accept either executable name.
+fcf_linux_normalize_signify_command() {
+  if command -v signify >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v signify-openbsd >/dev/null 2>&1; then
+    signify() {
+      command signify-openbsd "$@"
+    }
+    return 0
+  fi
+  return 1
+}
+
+fcf_linux_origin_commands_present() {
+  local cmd
+  fcf_linux_normalize_signify_command || return 1
+  for cmd in certbot curl find git gzip nft nginx python3 ss systemctl useradd; do
+    command -v "$cmd" >/dev/null 2>&1 || return 1
+  done
+}
+
+fcf_linux_install_origin_dependencies() {
+  # If everything is already present, an otherwise unrecognized distribution can
+  # still use the installer. CARAVAN depends on capabilities, not distro branding.
+  fcf_linux_origin_commands_present && return 0
+
+  local manager
+  manager=$(fcf_linux_package_manager) || {
+    fcf_linux_fail "missing dependencies and no supported package manager found (apt, dnf, yum, zypper, pacman)"
+    return 1
+  }
+
+  case "$manager" in
+    apt-get)
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get install -y --no-install-recommends \
+        ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
+        nftables passwd python3 signify-openbsd util-linux
+      ;;
+    dnf)
+      dnf install -y \
+        ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
+        nftables python3 shadow-utils signify util-linux
+      ;;
+    yum)
+      yum install -y \
+        ca-certificates certbot coreutils curl findutils git gzip iproute nginx \
+        nftables python3 shadow-utils signify util-linux
+      ;;
+    zypper)
+      zypper --non-interactive refresh
+      zypper --non-interactive install \
+        ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
+        nftables python3 shadow signify util-linux
+      ;;
+    pacman)
+      pacman -Sy --needed --noconfirm \
+        ca-certificates certbot coreutils curl findutils git gzip iproute2 nginx \
+        nftables python shadow signify util-linux
+      ;;
+    *)
+      fcf_linux_fail "unsupported package manager: $manager"
+      return 1
+      ;;
+  esac
+
+  fcf_linux_origin_commands_present || {
+    fcf_linux_fail "dependency installation completed but one or more required commands are still absent"
+    return 1
+  }
+}

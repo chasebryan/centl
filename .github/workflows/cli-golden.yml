@@ -1,0 +1,93 @@
+name: CLI golden contract
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/ocaml/centl_version.ml'
+      - 'src/dune'
+      - 'scripts/offline-rebuild'
+      - 'scripts/write-build-identity'
+      - 'tests/cli.t'
+      - 'tests/**'
+      - 'centl.opam'
+      - '.github/workflows/cli-golden.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/ocaml/centl_version.ml'
+      - 'src/dune'
+      - 'scripts/offline-rebuild'
+      - 'scripts/write-build-identity'
+      - 'tests/cli.t'
+      - 'tests/**'
+      - 'centl.opam'
+      - '.github/workflows/cli-golden.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cli-golden:
+    name: Version consistency and CLI tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Reject stale CLI semantic-version expectations
+        shell: python
+        run: |
+          import pathlib
+          import re
+          import sys
+
+          version_source = pathlib.Path('src/ocaml/centl_version.ml').read_text()
+          match = re.fullmatch(r'let value = "([0-9]+\.[0-9]+\.[0-9]+)"\n?', version_source)
+          if not match:
+              raise SystemExit('centl_version.ml does not contain one canonical semantic version')
+          current = match.group(1)
+
+          fixture = pathlib.Path('tests/cli.t').read_text()
+          versions = set(re.findall(r'(?<![0-9])([0-9]+\.[0-9]+\.[0-9]+)(?![0-9])', fixture))
+          if versions != {current}:
+              raise SystemExit(
+                  f'tests/cli.t semantic versions {sorted(versions)} do not match current CENTL version {current}'
+              )
+          print(f'CLI golden semantic version synchronized: {current}')
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install pinned CENTL test dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Prove immutable build commit reaches binary metadata
+        run: |
+          set -eu
+          expected=0123456789abcdef0123456789abcdef01234567
+          CENTL_BUILD_COMMIT="$expected" opam exec -- dune build src/main.exe
+          reported=$(
+            _build/default/src/main.exe --build-info \
+              | sed -n 's/^commit=//p'
+          )
+          test "$reported" = "$expected"
+          printf 'build-commit-identity: PASS (%s)\n' "$reported"
+
+      - name: Run CLI and native test directory
+        run: opam exec -- dune runtest tests

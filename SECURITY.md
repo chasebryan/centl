@@ -92,6 +92,30 @@ published releases.
   trusted computing base, subject to the validation and pinning in this
   repository.
 
+### CENTL-SCi publish path
+
+The in-process GitHub contribution path is a narrow, explicit grant. It is not
+a remote-control surface and it is not a claim of perfect security.
+
+- Credentials and tokens are never written by CENTL.
+- User English is never passed to a shell.
+- Automated pull requests are draft and must target `mirage`. `oasis` is not
+  an automatic base. Force-push is not implemented.
+- A promotion candidate must contain the current oasis tip. Oasis does not
+  regress.
+- Workflow default tokens are read-only. Jobs that publish releases or the
+  `distribution` branch take job-scoped `contents: write` and do not persist
+  checkout credentials.
+- Qualification and publication workflows do not hold `statuses: write` or
+  `checks: write`. Attestation is the GitHub Actions job conclusion itself.
+  Scorecard still reports leftover job-level `contents: write` on publication
+  jobs; that permission is required to create releases or update
+  `distribution` and is accepted residual risk, not a top-level write token.
+
+This sweep does not claim the absence of every future defect. Residual risk
+includes native library memory safety, a compromised GitHub release account,
+and any write token that a publication job must still hold.
+
 ## Security Invariants
 
 - Decimal and integer input must not be narrowed through floating point or a

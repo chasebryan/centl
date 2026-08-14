@@ -224,3 +224,9 @@ Local claim checking without a full release:
 
 Protocol: `op: "verify"`. MCP: `centl_verify`. See `docs/PROTOCOL.md` and
 `docs/DESIGN_PATH.md`.
+
+CENTL-SCi can prepare a local pack with `pack contribution` and, after an
+explicit publish grant, open a **draft** pull request against `mirage`.
+That path does not store tokens, does not target `oasis`, and does not
+replace this human review. Oasis promotion requires the candidate to
+contain the current oasis tip so the published product does not regress.

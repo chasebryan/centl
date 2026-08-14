@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "organization": "Free Computation Foundation",
+  "as_of": "2026-08-13",
+  "currency": "USD",
+  "total_received": 25.0,
+  "sources": [
+    {
+      "name": "GitHub Sponsors",
+      "received": 0.0,
+      "url": "https://github.com/sponsors/chasebryan"
+    },
+    {
+      "name": "X Money",
+      "received": 25.0,
+      "recipient": "@FreeSystemsDev",
+      "payment_surface": "public X Money recipient card with QR",
+      "recipient_card_asset": "assets/xmoney-image.jpeg"
+    }
+  ],
+  "methodology": "Manually reported sponsorship contributions received by the Free Computation Foundation. This is a public sponsorship transparency record, not a complete financial statement."
+}

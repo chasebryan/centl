@@ -2,9 +2,11 @@
 """Require mandatory hosted Oasis checks to exist, be authentic, and succeed.
 
 A release cannot earn Oasis status merely because GitHub returned an empty,
-incomplete, or look-alike check set. This module fail-closes on the authoritative
-qualification and security jobs and requires the newest run of each check to be a
-completed success for the exact candidate commit, reported by GitHub Actions.
+incomplete, or look-alike check set. This module fail-closes on the native
+GitHub Actions jobs from ``oasis-qualification.yml`` and requires the newest
+run of each named check to be a completed success for the exact candidate
+commit. Custom commit-status or Checks API attestations are not accepted as a
+substitute; those write tokens are not granted to qualification workflows.
 """
 
 from __future__ import annotations

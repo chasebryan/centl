@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Register and heartbeat an FCF administrator machine as a private camel."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from caravan.coordinator import CoordinatorState  # noqa: E402
+from caravan.enrollment import register_accepted_carrier  # noqa: E402
+from caravan.identity import CarrierIdentity  # noqa: E402
+from caravan.policy import create_policy_receipt  # noqa: E402
+
+
+POLICY_VERSION = "FCF-CARAVAN-HOST-v1"
+AGENT_VERSION = "fcf-admin-camel-v1"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Enroll this FCF administrator machine into private aggregate census state"
+    )
+    parser.add_argument("--database", type=Path, required=True)
+    parser.add_argument("--identity-dir", type=Path, required=True)
+    parser.add_argument("--policy", type=Path, default=ROOT / "docs" / "CARAVAN-HOST-POLICY.md")
+    parser.add_argument("--accept-policy", required=True)
+    parser.add_argument("--load", type=float, default=0.0)
+    parser.add_argument("--capacity", type=int, default=0)
+    args = parser.parse_args()
+    if args.accept_policy != POLICY_VERSION:
+        parser.error(f"--accept-policy must be {POLICY_VERSION}")
+    if args.load < 0 or args.capacity < 0:
+        parser.error("--load and --capacity must be non-negative")
+
+    identity = (
+        CarrierIdentity.load(args.identity_dir)
+        if args.identity_dir.exists()
+        else CarrierIdentity.create(args.identity_dir)
+    )
+    receipt = create_policy_receipt(
+        identity,
+        args.policy,
+        policy_version=POLICY_VERSION,
+        agent_version=AGENT_VERSION,
+        acceptance_mode="non-interactive",
+    )
+    coordinator = CoordinatorState(args.database)
+    register_accepted_carrier(
+        coordinator,
+        receipt,
+        expected_policy_path=args.policy,
+        expected_policy_version=POLICY_VERSION,
+        carrier_class="fcf-admin",
+    )
+    coordinator.heartbeat(identity.node_id, load=args.load, capacity=args.capacity)
+    print("FCF administrator camel: ACTIVE")
+    print("The administrator class is private coordinator state; public census output is aggregate-only.")
+    print(f"node_id={identity.node_id}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
