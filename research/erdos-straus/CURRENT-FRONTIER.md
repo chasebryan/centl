@@ -1,4 +1,4 @@
-# Current research frontier: from shadow completeness to the fiber kernel
+# Current research frontier: from shadow completeness to quotient and square-lift cores
 
 **Date:** 2026-08-14  
 **Status:** active theorem program  
@@ -6,208 +6,300 @@
 
 This is the short moving-frontier record. The full synthesis remains [DIAMOND.md](DIAMOND.md).
 
-## What is now exact
+## 1. Exact candidatewise frontier
 
-The candidatewise Direct-Shadow attack has reached `k<=1200`:
+The completed candidatewise Direct-Shadow attack through `k<=1200` remains the latest fully frozen all-stage certificate result:
 
-- `57,367` admissible hard-compatible Type A/B candidates;
-- `15,897` directly shadowed candidates;
-- `41,470` directly novel candidates;
-- `41,470/41,470` explicit integer avoiding witnesses;
-- `41,470/41,470` reduced avoiding progressions;
-- `0` unresolved integer candidates;
-- `0` unresolved reduced candidates;
-- independent verifier verdict: `VERIFIED`;
-- CENTL exact certification of selected hardest progression identities;
-- hashes and artifact publication completed successfully.
+```text
+admissible candidates:             57,367
+directly shadowed candidates:      15,897
+directly novel candidates:         41,470
+integer avoiding witnesses:        41,470
+reduced avoiding witnesses:        41,470
+unresolved integer candidates:          0
+unresolved reduced candidates:          0
+independent verifier:              VERIFIED
+```
+
+Every one of the `41,470` directly novel hard-compatible candidates therefore has an explicit reduced avoiding progression and hence an infinite exact-depth prime family by Dirichlet.
 
 See [DIRECT-SHADOW-K1200.md](DIRECT-SHADOW-K1200.md).
 
-The universal conjecture remains open, but no candidatewise union-shadow counterexample has appeared through twelve hundred layers.
+This is an exact finite theorem-certificate statement, not universal DSC-P.
 
-## Exact coordinate locality through k=1200
+## 2. Stronger independent construction on the same k<=1200 bundle
 
-The first complete prime-power coordinate-core diagnostic is also frozen for all `41,470` directly novel candidates.
-
-A canonical unary-safe local assignment already solves
+A full replay of the frozen candidate bundle through the newer exact fiber-peeling theorem gives:
 
 \[
-15,715/41,470=37.895\%
+\boxed{26,044/41,470}
 \]
 
-of the candidates.
+candidates whose entire residual coordinate system peels away constructively.
 
-Using each already-certified reduced witness only as a guide for which local coordinate values to substitute, every candidate can be reached from that basepoint by at most
+The remaining
 
 \[
-\boxed{9}
+\boxed{15,426}
 \]
 
-prime-power coordinate changes.
-
-The cumulative guided upper bounds are:
-
-```text
-0 changes: 37.895%
-<=1:       71.264%
-<=2:       88.847%
-<=3:       96.122%
-<=4:       98.727%
-<=5:       99.612%
-<=6:       99.908%
-<=7:       99.990%
-<=8:       99.998%
-<=9:      100.000%
-```
-
-These repair counts are not proven minimal and do not independently establish witness existence. They are proof-mining evidence that the globally large congruence systems have surprisingly low local repair complexity.
-
-## The covering-system bridge
-
-For a candidate `x=r+Ls`, every earlier Type A/B layer induces a forbidden system
+nonempty residual kernels are all solved by the fixed selector menu
 
 \[
-s\bmod q_j\in R_j,
-\qquad q_j=(4j-1)/\gcd(L,4j-1).
+\boxed{\{0,\pm1,\ldots,\pm64\}}.
 \]
 
-Every nontrivial `q_j` is odd. Union shadowing is therefore a special structured odd covering problem.
-
-The general Erdős-Selfridge odd covering problem is classical and open; our system is a much more restricted divisor-generated subclass with repeated moduli and multi-residue layers. See [ODD-COVERING-BRIDGE.md](ODD-COVERING-BRIDGE.md).
-
-## Prime-power peeling theorem
-
-Write
+Thus
 
 \[
-Q=\prod_p p^{A_p}
+\boxed{41,470/41,470}
 \]
 
-for the total parameter period. For coordinate `p`, define
+are independently resolved by
 
 \[
-\lambda_p
-=
-\sum_{p\mid q_j}\frac{|R_j|}{p^{v_p(q_j)}}.
+\boxed{
+\text{fiber peeling}
++
+\text{bounded residual selector}
+}
 \]
 
-If
+without using the stored sequential witness to decide either step.
+
+The largest selector radius actually needed was
 
 \[
-\lambda_p<1,
+\boxed{54}.
 \]
 
-then `p` can be removed from the satisfiability problem: any solution of the constraints not involving `p` can be extended to a value of the `p^{A_p}` coordinate satisfying every incident constraint.
+Every nonempty residual fiber kernel in this finite replay used primes at most `23`.
 
-Adding the one local residue forbidden by the reducedness condition gives the augmented version used for prime realization.
+See [FIBER-SELECTOR-K1200.md](FIBER-SELECTOR-K1200.md).
 
-See [SHADOW-KERNEL.md](SHADOW-KERNEL.md).
+## 3. Exact fiber-peeling theorem
 
-## Universal finite large-prime elimination
-
-Using only the trap sizes and the implication `p|q_j => p|4j-1`, define the conservative candidate-independent bound
-
-\[
-B_p(k)
-=
-\frac{1+\sum_{j<k,\ p\mid4j-1}|T_j|}{p}.
-\]
-
-At `k=1000`, exact evaluation gives `B_p(1000)<1` for every prime `p>=113`, so every admissible candidate in that range can universally shed all parameter-prime coordinates at least `113` before the true obstruction is considered.
-
-At `k=1200`, the analogous first bound pushes the possible universal kernel only through the small-prime region: primes `p>=127` are automatically peelable under the same conservative criterion.
-
-Candidate-specific elimination is much stronger.
-
-## New theorem: fiber peeling
-
-The coarse local load still charges every prime coordinate for all of `|R_j|`, even though after the other coordinates are fixed only one fiber of `R_j` can matter.
-
-For
+For a pulled-back earlier constraint with
 
 \[
 q_j=p^{a_{j,p}}c,
-\qquad(p,c)=1,
+\qquad (p,c)=1,
 \]
 
-let `f_{j,p}` be the maximum number of forbidden `p^{a_{j,p}}` residues lying above any one fixed value modulo `c`.
+let `f_{j,p}` be the maximum width of a forbidden `p^{a_{j,p}}` fiber after the other coordinates are fixed.
 
 Define
 
 \[
 \Lambda_p
 =
-\sum_{p\mid q_j}\frac{f_{j,p}}{p^{a_{j,p}}}.
+\sum_{p\mid q_j}
+\frac{f_{j,p}}{p^{a_{j,p}}}.
+\]
+
+If the augmented reducedness load satisfies
+
+\[
+\boxed{\Lambda_p^{*}<1,}
+\]
+
+then the entire `p` coordinate is peelable while preserving a reduced solution.
+
+See [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md).
+
+This turns a global covering problem into an iterated local elimination problem.
+
+## 4. Exact quadratic trap signature
+
+For every divisor `e|k`, with `m_k=4k-1`,
+
+\[
+\boxed{
+\left(\frac{-e}{m_k}\right)
+=
+\left(\frac{-4e}{m_k}\right)
+=-1.
+}
+\]
+
+Thus every Type A/B trap lies on the Jacobi-negative side.
+
+The resulting character shield converts simultaneous trap avoidance into an `F_2` sign problem. See [QUADRATIC-TRAP-SIGNATURE.md](QUADRATIC-TRAP-SIGNATURE.md).
+
+## 5. Proved character-shield obstruction completeness
+
+The global `F_2` character system has now been reduced exactly.
+
+Let `W_k` be the squareclass span of all earlier moduli and `F_k` the coordinate subspace supported on primes fixed by the target progression. Let `U_k` be the span of earlier rows that are individually fixed-only.
+
+Then
+
+\[
+\boxed{W_k\cap F_k=U_k.}
+\]
+
+Consequently the simultaneous Jacobi `+1` shield is inconsistent **if and only if** one earlier fixed-only layer is already Jacobi-negative by itself.
+
+There is no genuinely collective new obstruction at the scalar quadratic-character level.
+
+See [CHARACTER-SHIELD-COMPLETENESS.md](CHARACTER-SHIELD-COMPLETENESS.md).
+
+## 6. New multiplicative trap-coset theorem
+
+For
+
+\[
+m_k=4k-1,
+\qquad
+G_k=(\mathbb Z/m_k\mathbb Z)^\times,
+\]
+
+define
+
+\[
+H_k=\langle\ell\bmod m_k:\ell\text{ prime},\ \ell\mid k\rangle.
 \]
 
 Then
 
 \[
-\boxed{\Lambda_p<1}
+\boxed{T_k\subseteq-H_k}
 \]
 
-is an exact stronger peeling criterion. Adding the local reducedness cost produces `Lambda_p^*` for prime realization.
+and
 
-See [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md).
+\[
+\boxed{-1\notin H_k.}
+\]
 
-This is a genuine theoretical advance over the raw candidate search: it explains how a coordinate can be eliminated by the internal fiber geometry of the Type A/B forbidden sets.
+So the entire Type A/B trap set lies inside one proper multiplicative coset.
 
-## Fiber-kernel proof mining
+Define the index
 
-An exact analyzer, [`shadow_fiber_kernel_analyzer.py`](shadow_fiber_kernel_analyzer.py), now implements this theorem candidate by candidate without using the stored avoiding witness to decide peelability.
+\[
+\iota(k)=[G_k:H_k].
+\]
 
-Exploratory diagnostics from the already verified `k<=1000` bundle are striking:
+The Jacobi `-1` theorem is only one order-two quotient of this richer structure. Finite exact enumeration through `k<=1200` found indices as large as `210`.
 
-- an evenly distributed `5,000`-candidate diagnostic sample had an empty fiber kernel in `3,686` cases, about `73.7%`;
-- every nonempty residual kernel in that sample used primes at most `23`;
-- the two dominant nonempty signatures were `{3,11,13}` and `{3,5,11,13,17,19,23}`;
-- the difficult `(k,h,t)=(987,169,3935)` case collapsed to `{3,11,13}`;
-- the `(648,529,2585)` case peeled completely.
+See [MULTIPLICATIVE-TRAP-COSET.md](MULTIPLICATIVE-TRAP-COSET.md) and [`trap_coset_analyzer.py`](trap_coset_analyzer.py).
 
-These sample statistics remain proof-mining diagnostics until a complete automated bundle freezes the fiber analysis across the entire candidate range. The fiber peeling theorem itself is exact regardless of those sample numbers.
+## 7. New full local quadratic-signature theorem
 
-## Next automated attack
+Factor
 
-The workflow has now been expanded to run four distinct stages after discovery:
+\[
+m_k=\prod_{i=1}^r p_i^{a_i}
+\]
 
-1. independent candidate verifier;
-2. coordinate-core locality diagnostic;
-3. exact coarse shadow-kernel peeling;
-4. exact fiber shadow-kernel peeling;
-5. CENTL symbolic certification, hashing, and artifact publication.
+and record the complete vector of Legendre signs at the distinct primes `p_i`.
 
-The next configured falsification target is
+If `V_k` is the `F_2` span of the local signatures of the prime divisors of `k`, and `eta_k` is the signature of `-1`, then the **exact set of trap signatures** is
+
+\[
+\boxed{
+\lambda_{m_k}(T_k)=\eta_k+V_k.
+}
+\]
+
+Thus Type A/B traps occupy one affine subspace of the full local quadratic-signature space. The scalar Jacobi theorem is only one projection of this vector statement.
+
+A proof-mining replay of the frozen `k<=1200` bundle found:
+
+```text
+full local quadratic-signature shield solved: 30,786
+direct signature residual:                    10,684
+collective linear inconsistency:                   0
+unresolved non-direct signature systems:           0
+```
+
+This finite pattern is not yet promoted to a universal signature-level completeness theorem.
+
+See [QUADRATIC-SIGNATURE-COSET.md](QUADRATIC-SIGNATURE-COSET.md) and [`quadratic_signature_shield_analyzer.py`](quadratic_signature_shield_analyzer.py).
+
+## 8. New square-lift core
+
+If an earlier row is fixed at the squareclass level, then every prime outside the target modulus occurs in that earlier modulus with even exponent.
+
+Equivalently, for a character-fixed earlier row,
+
+\[
+\boxed{
+p\nmid L\Longrightarrow v_p(m_j)\equiv0\pmod2.}
+\]
+
+The same holds in the pulled-back modulus `q_j`.
+
+Therefore after the quadratic signs have been exhausted, any genuinely new prime coordinate enters the remaining obstruction only through a square power:
+
+\[
+\boxed{
+q_j=c_j s_j^2,
+}
+\]
+
+where the prime support of `c_j` lies inside the fixed target modulus and `(s_j,L)=1`.
+
+The unresolved problem is therefore becoming a **higher p-adic lifting problem**, not another free quadratic-sign problem.
+
+See [SQUARE-LIFT-CORE.md](SQUARE-LIFT-CORE.md) and [`square_lift_core_analyzer.py`](square_lift_core_analyzer.py).
+
+## 9. Current automated assault
+
+GitHub Actions run `31849103304` is currently attacking
 
 \[
 \boxed{k\le1500}
 \]
 
-with witness search through
+with sequential witness search through
 
 \[
 \boxed{s\le3,000,000}.
 \]
 
-This deliberately crosses the earlier record-depth region around `k=1403` and `k=1435` while simultaneously testing whether the new kernel machinery continues to compress the obstruction.
+It includes independent verification, coordinate proof mining, coarse and fiber peeling, bounded residual selectors, the quadratic shield, CENTL certification, hashes, and artifact publication.
 
-No result from that next run should be treated as established until all verification and certification stages finish green.
+At the latest check the main candidatewise attack stage was still running. **No `k<=1500` numerical result is being promoted until the complete workflow finishes green.**
 
-## The problem we are actually trying to solve now
+## 10. The problem we are actually trying to solve now
 
-The immediate theorem target has become much more precise:
+The original global question
 
-> Prove that every directly novel Type A/B pullback system peels to a small-prime fiber kernel, and prove that every such kernel has a reduced satisfying assignment.
+> can hundreds of earlier Type A/B congruence restrictions collectively cover a directly novel candidate?
 
-A successful proof would give universal DSC-P:
+has been compressed into a hierarchy:
 
 \[
-\text{not directly shadowed}
-\Longrightarrow
-\text{reduced avoiding class}
-\Longrightarrow
-\text{infinitely many exact-depth primes}.
+\boxed{
+\begin{array}{c}
+\text{exact Type A/B pullbacks}\\
+\downarrow\\
+\text{fiber peeling}\\
+\downarrow\\
+\text{small-prime residual kernel}\\
+\downarrow\\
+\text{Jacobi character saturation}\\
+\downarrow\\
+\text{full local quadratic signatures}\\
+\downarrow\\
+\text{multiplicative coset quotient}\\
+\downarrow\\
+\text{square-lift / higher p-adic core}\\
+\downarrow\\
+\text{exact divisor-generated residue avoidance}
+\end{array}
+}
 \]
 
-If that succeeds, the shadow graph becomes a complete obstruction theory for Type A/B first-hit realizability.
+The immediate theorem targets are now:
+
+1. prove or refute signature-level Direct-Shadow Completeness;
+2. prove a bounded small-prime fiber-kernel theorem;
+3. classify the fixed-negative square-lift cores;
+4. prove a local `p`-adic escape theorem for those cores;
+5. combine the local mechanisms into universal DSC-P.
+
+A successful universal DSC-P theorem would make the direct-shadow graph a complete obstruction theory for exact Type A/B first-hit realizability.
 
 That is the present edge of the diamond.
