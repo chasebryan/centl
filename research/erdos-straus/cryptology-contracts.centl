@@ -1,0 +1,15 @@
+# Exact algebraic contracts for the WS-CAND-003 cryptology probe.
+# These certify only the planted structured-prime family used as a control.
+# They do not establish any cryptographic weakness.
+
+# M = lcm(840, 11, 19, 23) = 4037880.
+# p(t) = M*t + 1 is therefore 1 modulo each listed divisor of M.
+equal | 4037880*t + 1 - 1 | 4037880*t | t:rational
+equal | 4037880*t + 1 | 840*(4807*t) + 1 | t:rational
+equal | 4037880*t + 1 | 11*(367080*t) + 1 | t:rational
+equal | 4037880*t + 1 | 19*(212520*t) + 1 | t:rational
+equal | 4037880*t + 1 | 23*(175560*t) + 1 | t:rational
+
+# If the same structured family is squared, the public product remains 1 mod M.
+# This is a one-parameter toy identity, not an RSA factorization result.
+equal | (4037880*t + 1)^2 | 16304558294400*t^2 + 8075760*t + 1 | t:rational
