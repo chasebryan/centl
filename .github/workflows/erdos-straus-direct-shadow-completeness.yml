@@ -19,6 +19,7 @@ on:
       - 'research/erdos-straus/shadow_coordinate_core.py'
       - 'research/erdos-straus/shadow_kernel_analyzer.py'
       - 'research/erdos-straus/shadow_fiber_kernel_analyzer.py'
+      - 'research/erdos-straus/shadow_small_selector_analyzer.py'
       - 'research/erdos-straus/quadratic_trap_signature_analyzer.py'
       - '.github/workflows/erdos-straus-direct-shadow-completeness.yml'
 
@@ -82,6 +83,9 @@ jobs:
       - name: Apply exact fiber shadow-kernel peeling
         run: python3 research/erdos-straus/shadow_fiber_kernel_analyzer.py --out direct-shadow-output
 
+      - name: Test bounded selectors on residual fiber kernels
+        run: python3 research/erdos-straus/shadow_small_selector_analyzer.py --out direct-shadow-output --selector-bound 64
+
       - name: Apply quadratic character shield
         run: python3 research/erdos-straus/quadratic_trap_signature_analyzer.py --out direct-shadow-output
 
@@ -107,6 +111,8 @@ jobs:
           cat direct-shadow-output/shadow-kernel-analysis-report.md >> "$GITHUB_STEP_SUMMARY"
           printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat direct-shadow-output/shadow-fiber-kernel-analysis-report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat direct-shadow-output/shadow-small-selector-analysis-report.md >> "$GITHUB_STEP_SUMMARY"
           printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat direct-shadow-output/quadratic-trap-signature-analysis-report.md >> "$GITHUB_STEP_SUMMARY"
 
