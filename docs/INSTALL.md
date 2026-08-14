@@ -7,11 +7,61 @@ CENTL has two GNU/Linux installation channels:
 
 The channels install independently and can coexist on the same machine.
 
-CENTL currently supports **GNU/Linux x86_64** as its native release target. macOS and Windows are outside the active release promise.
+CENTL's qualified native release target is currently **GNU/Linux x86_64**. macOS and Windows use the current Camp software through [CENTL Marsa](CENTL-MARSA.md); those ports are not Oasis declarations.
 
-## Quick install
+## Install only what you need
 
-Download the installer from the authoritative Oasis branch:
+The full CENTL bundle is convenient, but it is not mandatory.
+
+If you want exactly one public scientific command on GNU/Linux x86_64, use the component installer:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
+```
+
+Then choose one component:
+
+```sh
+# exact mathematics only
+sh install-component --component centl
+
+# typed exact-first physics only
+sh install-component --component physics
+
+# CENTL-SCi interpreter only
+sh install-component --component sci
+```
+
+The Oasis component installer downloads a **component-specific archive**. It does not first download the full three-command product and discard the commands you did not ask for.
+
+Each component archive contains only the selected public launcher/executable plus the shared runtime libraries, license material, and provenance metadata required to run and redistribute it correctly. It does not contain the other two public command executables.
+
+Typical scientist choices are:
+
+| Need | Install |
+| --- | --- |
+| Pure formal mathematics | `--component centl` |
+| Typed physics only | `--component physics` |
+| Natural-language scientific interaction only | `--component sci` |
+| Mathematics + SCi, no Physics command | install `centl`, then `sci` |
+| Physics + direct mathematics, no SCi | install `physics`, then `centl` |
+| Everything | use the full installer below |
+
+For field-specific guidance, start with [🧮 📐 Mathematician onboarding](MATHEMATICIANS.md) or [⚛️ 🔬 Physicist onboarding](PHYSICISTS.md).
+
+On macOS and Windows, `CENTL-Marsa` provides the same installed-command selection through:
+
+```sh
+sh scripts/marsa-install --component centl
+sh scripts/marsa-install --component physics
+sh scripts/marsa-install --component sci
+```
+
+Marsa currently builds from the shared source graph, so its source checkout still contains shared build code. Its **installed command surface** is selective. See [CENTL Marsa](CENTL-MARSA.md).
+
+## Quick full install
+
+Use the ordinary installer when you intentionally want the complete GNU/Linux product bundle:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
@@ -40,10 +90,9 @@ A non-interactive invocation with no `--channel` defaults to Oasis.
 
 ## Installing both channels
 
-The channels occupy separate version trees below the installation prefix.
-Installing Mirage never replaces the stable Oasis commands.
+The channels occupy separate version trees below the installation prefix. Installing Mirage never replaces the stable Oasis commands.
 
-Oasis installs these conventional commands:
+The complete Oasis bundle installs these conventional commands:
 
 ```text
 centl
@@ -59,7 +108,7 @@ oasis-centl-physics
 oasis-centl-sci
 ```
 
-Mirage uses separate commands:
+Mirage uses separate commands when a rolling Mirage package is available:
 
 ```text
 mirage-centl
@@ -67,22 +116,13 @@ mirage-centl-physics
 mirage-centl-sci
 ```
 
-Therefore installing both is simply:
-
-```sh
-sh install --channel oasis
-sh install --channel mirage
-```
-
-The stable `centl`, `centl-physics`, and `centl-sci` aliases continue to point only to Oasis.
-
 The project deliberately does **not** use `centl-mirage` as the Mirage-channel launcher. That name remains available for the CENTL-MIRAGE self-development system itself.
 
 ## Distribution model
 
 The canonical GitHub release history begins at the first Oasis foundation release, `v0.14.0`.
 
-Prebuilt channel bytes are served from the repository's machine-oriented `distribution` branch:
+Prebuilt channel bytes are served from the repository's machine-oriented `distribution` branch. An Oasis version directory contains the complete bundle and command-selective derivatives:
 
 ```text
 channels/
@@ -91,33 +131,28 @@ channels/
     v0.15.0/
       centl-linux-x86_64.tar.gz
       centl-linux-x86_64.tar.gz.sha256
+
+      centl-only-linux-x86_64.tar.gz
+      centl-only-linux-x86_64.tar.gz.sha256
+
+      centl-physics-only-linux-x86_64.tar.gz
+      centl-physics-only-linux-x86_64.tar.gz.sha256
+
+      centl-sci-only-linux-x86_64.tar.gz
+      centl-sci-only-linux-x86_64.tar.gz.sha256
+
       SOURCE-COMMIT
-    v0.14.0/
-      centl-linux-x86_64.tar.gz
-      centl-linux-x86_64.tar.gz.sha256
-      SOURCE-COMMIT
-  mirage/
-    LATEST
-    latest/
-      centl-linux-x86_64.tar.gz
-      centl-linux-x86_64.tar.gz.sha256
-      SOURCE-COMMIT
-      VERSION
-    builds/
-      <commit-sha>/
-        centl-linux-x86_64.tar.gz
-        centl-linux-x86_64.tar.gz.sha256
-        SOURCE-COMMIT
-        VERSION
 ```
 
-Oasis directories contain immutable qualified release bytes. Mirage `latest` is a rolling development pointer while each published Mirage commit remains addressable under `builds/<commit-sha>/`.
+The command-selective archives are mechanically derived from the already-published aggregate package without rebuilding or modifying the selected executable bytes. Each records the source aggregate and its SHA-256 identity. CI verifies that each archive contains its requested public executable and none of the other two public executables, then smoke-installs each component independently.
 
-This separates **release identity** from **artifact transport**. `LATEST` currently names **v0.15.0 Al-Nur**. The immutable `v0.14.0` Al-Khayma bytes remain on the channel as the previous Oasis.
+When a Mirage aggregate package is published, the component-distribution workflow is designed to derive the same command-selective shapes for that rolling build. Mirage remains a development channel and never inherits Oasis assurance merely from packaging.
 
-## What the installer verifies
+This separates **release identity**, **artifact transport**, and **component choice**. `LATEST` currently names **v0.15.0 Al-Nur**. The immutable `v0.14.0` Al-Khayma bytes remain on the channel as the previous Oasis.
 
-For both channels the installer:
+## What the full installer verifies
+
+For the complete package, the installer:
 
 1. requires GNU/Linux x86_64;
 2. downloads the selected native package and adjacent SHA-256 file, or accepts an offline archive;
@@ -133,30 +168,42 @@ For both channels the installer:
 
 The default prefix is `~/.local`.
 
+## What the component installer verifies
+
+For a command-selective archive, `install-component`:
+
+1. requires GNU/Linux x86_64;
+2. downloads only the archive named for the requested component and its adjacent SHA-256 file, or accepts an offline component archive;
+3. verifies the checksum before extraction;
+4. rejects unsafe or unexpected archive paths;
+5. requires an explicit component identity;
+6. requires the selected launcher and executable to exist;
+7. rejects an archive containing either of the other public command executables;
+8. smoke-tests the requested command using a domain-appropriate exact operation; and
+9. installs the component independently under the chosen prefix.
+
+Installing a second component later does not require reinstalling the first.
+
 ## Oasis
 
-Install the latest qualified Oasis release:
+Install the latest qualified complete Oasis release:
 
 ```sh
 sh install --channel oasis
 ```
 
-Install a specific qualified Oasis version:
+Install a specific qualified complete Oasis version:
 
 ```sh
 sh install --channel oasis --version 0.15.0
 ```
 
-Start the scientific interface:
+Or install only one Oasis command:
 
 ```sh
-centl-sci
-```
-
-Or use the explicit channel name:
-
-```sh
-oasis-centl-sci
+sh install-component --component centl
+sh install-component --component physics
+sh install-component --component sci
 ```
 
 Basic checks:
@@ -167,6 +214,8 @@ centl 'solve(x^2 - 5*x + 6 = 0, x)'
 centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
 centl-physics convert 100 cm m
 ```
+
+Run only the checks for commands you actually installed.
 
 Expected exact-first results include:
 
@@ -179,16 +228,10 @@ verdict: verified (closed_exact_rational via closed_rational_comparison); compar
 
 ## Mirage
 
-Install the latest rolling Mirage build:
+Install the latest rolling Mirage aggregate build when one is published:
 
 ```sh
 sh install --channel mirage
-```
-
-Start it with:
-
-```sh
-mirage-centl-sci
 ```
 
 Mirage is intentionally not an Oasis claim. A successful Mirage package build establishes only that the development snapshot met the lighter installability baseline used to publish that snapshot. It does not promote the snapshot to the `oasis` branch or make it a stable release.
@@ -201,27 +244,34 @@ sh install --channel mirage --version <commit-sha>
 
 ## Offline archives
 
-Keep a Linux archive and its adjacent `.sha256` file together:
+Keep an archive and its adjacent `.sha256` file together.
+
+Complete Oasis bundle:
 
 ```sh
 sh install --channel oasis --archive ./centl-linux-x86_64.tar.gz
 ```
 
-A Mirage archive can be installed independently:
+A component can also be installed offline without the other command archives:
 
 ```sh
-sh install --channel mirage --archive ./centl-linux-x86_64.tar.gz
-```
+sh install-component --component centl \
+  --archive ./centl-only-linux-x86_64.tar.gz
 
-Offline installation performs the same checksum, archive-structure, staging, runtime, and command smoke checks.
+sh install-component --component physics \
+  --archive ./centl-physics-only-linux-x86_64.tar.gz
+
+sh install-component --component sci \
+  --archive ./centl-sci-only-linux-x86_64.tar.gz
+```
 
 ## Alternate static release hosts
 
-A custom Oasis-compatible release root may expose immutable version directories:
+A custom full-bundle Oasis-compatible release root may expose immutable version directories:
 
 ```text
 RELEASE_ROOT/
-  v0.14.0/
+  v0.15.0/
     centl-linux-x86_64.tar.gz
     centl-linux-x86_64.tar.gz.sha256
 ```
@@ -231,7 +281,7 @@ Install from it with an explicit version:
 ```sh
 sh install \
   --channel oasis \
-  --version 0.14.0 \
+  --version 0.15.0 \
   --release-base-url https://downloads.example.org/centl/releases
 ```
 
@@ -239,24 +289,24 @@ The equivalent environment form is:
 
 ```sh
 CENTL_RELEASE_BASE_URL=https://downloads.example.org/centl/releases \
-  sh install --channel oasis --version 0.14.0
+  sh install --channel oasis --version 0.15.0
 ```
 
 Custom network roots must use HTTPS. `file://` roots are accepted for local static mirrors and hermetic testing. Plain HTTP is rejected because replacing both an archive and its adjacent checksum would defeat checksum-only transport verification.
 
 ## Custom installation prefix
 
+For the full installer:
+
 ```sh
 sh install --channel oasis --prefix "$HOME/software"
 ```
 
-To prevent shell startup-file changes:
+For a component:
 
 ```sh
-sh install --channel oasis --no-path
+sh install-component --component centl --prefix "$HOME/software"
 ```
-
-The installer prints the command directory that must then be added to `PATH` manually.
 
 ## Optional semantic model
 
@@ -286,4 +336,4 @@ Maintainers package a tested Linux build with:
 make release VERSION=0.15.0
 ```
 
-Oasis publication must use the already-qualified bytes from the exact release SHA. Mirage publication is a separate rolling development channel and never substitutes for Oasis qualification.
+Oasis publication must use the already-qualified bytes from the exact release SHA. Component archives are transport derivatives of those published bytes, not new release identities. Mirage publication is a separate rolling development channel and never substitutes for Oasis qualification.
