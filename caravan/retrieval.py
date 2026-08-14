@@ -183,6 +183,10 @@ def retrieve_verified(
                         expected=expected,
                         _lock_held=True,
                     )
+                    coordinator.record_cargo_load(
+                        ticket.node_id,
+                        expected.artifact_id,
+                    )
                     return RetrievalResult(
                         identity=identity,
                         node_id=ticket.node_id,

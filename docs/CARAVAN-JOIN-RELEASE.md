@@ -57,7 +57,7 @@ A join release has all of these identities:
 
 The release archive is deterministic with normalized ordering, timestamps, ownership metadata, and gzip timestamp handling.
 
-The release metadata also records the allowed preservation mission classes, the fact that mission selection has no publication authority, that a normal carrier does not require systemd, and that census publication is aggregate-only.
+The release metadata also records the allowed preservation mission classes, the fact that mission selection has no publication authority, that a normal carrier does not require systemd, and that census publication is aggregate-only. By default the launcher also installs the current FCF Oasis distribution through the embedded checksum-verifying installer into `~/.local/bin`; `--no-oasis` is an explicit opt-out and the receipt records the installed version and commands.
 
 ## Signing-key separation
 

@@ -128,6 +128,7 @@ def write_document(path: Path, *, active: bool, hungry: bool = False) -> None:
         "active_camels": 1 if active else 0,
         "hungry_camels": 1 if hungry else 0,
         "lost_camels": 0 if active or hungry else 1,
+        "cargo_loads": 0,
         "active_window_seconds": 900,
         "lost_after_seconds": 900,
         "individual_nodes_public": False,

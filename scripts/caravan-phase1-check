@@ -53,7 +53,8 @@ PY
   tests/test_caravan_lifecycle.py \
   tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
-  tests/test_caravan_join_release.py
+  tests/test_caravan_join_release.py \
+  tests/test_site_navigation.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
@@ -69,6 +70,7 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_lifecycle.py \
   tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
-  tests/test_caravan_join_release.py
+  tests/test_caravan_join_release.py \
+  tests/test_site_navigation.py
 
 PYTHONPATH=. "$PYTHON" -m caravan.lab >/dev/null

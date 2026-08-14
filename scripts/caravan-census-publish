@@ -25,7 +25,7 @@ def fail(message: str) -> "NoReturn":
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Publish aggregate Active/Lost Camel counts without carrier identities"
+        description="Publish aggregate Camel and CARAVAN Cargo Load counts without carrier identities"
     )
     parser.add_argument("--database", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -50,7 +50,9 @@ def main() -> int:
     os.replace(temporary, output)
     print(
         "CARAVAN census published: "
-        f"active={document['active_camels']} lost={document['lost_camels']} "
+        f"active={document['active_camels']} hungry={document['hungry_camels']} "
+        f"lost={document['lost_camels']} "
+        f"cargo_loads={document['cargo_loads']} "
         f"generated_at={document['generated_at']}"
     )
     return 0

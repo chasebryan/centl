@@ -7,7 +7,9 @@ CARAVAN needs to know whether the preservation network is alive without turning 
 The public-facing names are intentionally simple:
 
 - **Active Camels 🐪** — enrolled carriers with a recent authenticated heartbeat.
+- **Hungry Camels 🐪** — enrolled carriers whose last authenticated heartbeat is older than the Active window but not yet beyond the loss window.
 - **Lost Camels 🐪** — enrolled carriers that have stopped heartbeating beyond the loss window without explicitly withdrawing or being revoked.
+- **CARAVAN Cargo Loads 📦** — the monotonic aggregate of FCF public-approved artifacts successfully verified after a CARAVAN retrieval. A source-clone arrival counts only when CARAVAN actually carries it.
 
 The public website must never publish a per-carrier roster.
 
@@ -93,13 +95,13 @@ The coordinator maintains these internal states:
 
 Last valid heartbeat is no older than 30 minutes.
 
-### Quiet
+### Hungry
 
 Last valid heartbeat is older than the Active window but not yet past the Lost threshold.
 
 This absorbs normal laptop sleep, temporary network loss, travel, maintenance, and brief outages without immediately declaring a carrier lost.
 
-Quiet is an internal operational state. The initial public widget does not need to display it.
+Hungry is published as an aggregate count so the Bazaar can distinguish a temporarily quiet camel from a lost one. No individual carrier enters the public document.
 
 ### Lost
 
@@ -135,6 +137,11 @@ No historical heartbeat timeline is required for the public counter. Updating `l
 
 When a withdrawn/revoked record no longer needs to be retained for security or abuse-prevention purposes, it should be deleted or reduced to non-identifying aggregate statistics.
 
+The Cargo Loads value is maintained as a monotonic aggregate counter. A
+successful verified retrieval increments it once; ticket issuance, failed
+integrity checks, retries that do not complete, and ordinary GitHub web traffic
+do not increment it. No per-download public history is retained.
+
 ## Public census document
 
 The coordinator publishes a small aggregate document such as:
@@ -145,7 +152,9 @@ The coordinator publishes a small aggregate document such as:
   "status": "live",
   "generated_at": "2026-08-12T00:00:00Z",
   "active_camels": 42,
+  "hungry_camels": 8,
   "lost_camels": 3,
+  "cargo_loads": 127,
   "active_window_seconds": 1800,
   "lost_after_seconds": 259200,
   "individual_nodes_public": false,
@@ -165,13 +174,15 @@ The Bazaar hosts a compact widget with at least:
 
 ```text
 CARAVAN
-Active Camels 🐪    42
-Lost Camels 🐪       3
+Active Camels 🐪       42
+Hungry Camels 🐪        8
+Lost Camels 🐪          3
+CARAVAN Cargo Loads 📦 127
 ```
 
 The widget should refresh periodically, but "live" means recent authenticated census state rather than a continuously streaming location tracker.
 
-The UI must state the freshness time/age and the definitions of Active and Lost. If the census endpoint is unavailable or not yet provisioned, it must display an unavailable/provisioning state rather than fabricate zeroes.
+The UI must state the freshness time/age and the definitions of Active, Hungry, Lost, and Cargo Loads. If the census endpoint is unavailable or not yet provisioned, it must display an unavailable/provisioning state rather than fabricate zeroes. The Cargo Loads counter is not a GitHub traffic counter and must not be relabeled as one; GitHub clone traffic may be published separately only when an authenticated GitHub traffic export is actually connected.
 
 ## Role aggregates and k-anonymity
 

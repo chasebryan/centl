@@ -38,6 +38,10 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('"arbitrary_content": False', text)
         self.assertIn('"systemd_required": False', text)
         self.assertIn("official releases are immutable in place", text)
+        self.assertIn("--no-oasis", text)
+        self.assertIn("payload/centl-install", text)
+        self.assertIn('"software_support"', text)
+        self.assertIn('"consent"', text)
         self.assertIn("Welcome to the FCF CARAVAN", text)
         self.assertIn("https://github.com/sponsors/chasebryan", text)
         self.assertIn("https://freecomputation.org/funding.html#x-money", text)
@@ -112,6 +116,8 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('"census_publication": "aggregate-only"', text)
         self.assertIn('"public_node_listing": False', text)
         self.assertIn('"normal_carrier_requires_systemd": False', text)
+        self.assertIn('"installs_current_oasis": True', text)
+        self.assertIn('"oasis_install_path": "~/.local/bin"', text)
 
     def test_independent_verifier_requires_separately_trusted_key(self) -> None:
         text = VERIFY.read_text(encoding="utf-8")
@@ -157,6 +163,8 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn("Active Camels", html)
         self.assertIn("Hungry Camels", html)
         self.assertIn("Lost Camels", html)
+        self.assertIn("CARAVAN Cargo Loads", html)
+        self.assertIn("__FCF_CARGO_LOADS__", html)
         self.assertIn("__FCF_ACTIVE_CAMELS__", html)
         self.assertIn("__FCF_HUNGRY_CAMELS__", html)
         self.assertIn("__FCF_LOST_CAMELS__", html)
@@ -185,6 +193,7 @@ class CaravanJoinReleaseTests(unittest.TestCase):
                         "active_camels": 1,
                         "hungry_camels": 0,
                         "lost_camels": 0,
+                        "cargo_loads": 0,
                     }
                 ),
                 encoding="utf-8",
@@ -220,7 +229,9 @@ class CaravanJoinReleaseTests(unittest.TestCase):
                         "status": "live",
                         "generated_at": "2026-08-13T22:25:02Z",
                         "active_camels": 7,
+                        "hungry_camels": 1,
                         "lost_camels": 2,
+                        "cargo_loads": 19,
                         "active_window_seconds": 1800,
                         "lost_after_seconds": 259200,
                         "individual_nodes_public": False,
@@ -244,14 +255,16 @@ class CaravanJoinReleaseTests(unittest.TestCase):
             )
             rendered = output.read_text(encoding="utf-8")
             self.assertIn("<strong>7</strong>", rendered)
+            self.assertIn("<strong>1</strong>", rendered)
             self.assertIn("<strong>2</strong>", rendered)
+            self.assertIn("<strong>19</strong>", rendered)
             self.assertIn("authenticated coordinator census", rendered)
 
     def test_bazaar_explains_the_guided_non_manual_join_path(self) -> None:
         html = BAZAAR.read_text(encoding="utf-8")
         self.assertIn("guided", html)
         self.assertIn("No repository checkout or special tooling is required", html)
-        self.assertIn("Manual setup remains available", html)
+        self.assertIn("Read the manual path", html)
 
 
 if __name__ == "__main__":

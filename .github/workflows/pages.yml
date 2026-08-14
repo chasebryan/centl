@@ -6,6 +6,8 @@ on:
     paths:
       - 'site/**'
       - 'caravan/census.py'
+      - 'caravan/coordinator.py'
+      - 'caravan/retrieval.py'
       - 'scripts/caravan-census-validate'
       - 'scripts/caravan-render-bazaar'
       - 'assets/branding/fcf-centl-banner.png'

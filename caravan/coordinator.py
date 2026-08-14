@@ -97,7 +97,9 @@ class RetrievalTicket:
 @dataclass(frozen=True, slots=True)
 class CensusCounts:
     active_camels: int
+    hungry_camels: int
     lost_camels: int
+    cargo_loads: int
 
 
 class CoordinatorState:
@@ -176,6 +178,14 @@ class CoordinatorState:
                     observed_digest TEXT NOT NULL,
                     observed_at REAL NOT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS caravan_counters (
+                    counter_name TEXT PRIMARY KEY,
+                    counter_value INTEGER NOT NULL CHECK(counter_value >= 0)
+                );
+
+                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
+                    VALUES ('cargo_loads', 0);
                 """
             )
             columns = {row["name"] for row in db.execute("PRAGMA table_info(carriers)")}
@@ -347,15 +357,25 @@ class CoordinatorState:
                            CASE
                                WHEN state = 'active'
                                 AND last_seen < ?
+                                AND last_seen >= ?
+                               THEN 1 ELSE 0
+                           END
+                       ) AS hungry_count,
+                       SUM(
+                           CASE
+                               WHEN state = 'active'
+                                AND last_seen < ?
                                THEN 1 ELSE 0
                            END
                        ) AS lost_count
                    FROM carriers""",
-                (active_cutoff, timestamp, lost_cutoff),
+                (active_cutoff, timestamp, active_cutoff, lost_cutoff, lost_cutoff),
             ).fetchone()
         return CensusCounts(
             int(row["active_count"] or 0),
+            int(row["hungry_count"] or 0),
             int(row["lost_count"] or 0),
+            self.cargo_loads(),
         )
 
     def network_stats(self, *, now: float | None = None) -> NetworkStats:
@@ -534,3 +554,34 @@ class CoordinatorState:
             deleted = db.execute("DELETE FROM tickets WHERE token_hash = ?", (token_hash,)).rowcount
             if deleted != 1:
                 raise CoordinatorError("retrieval ticket could not be consumed atomically")
+
+    def record_cargo_load(self, node_id: str, artifact_id: str) -> None:
+        """Count one artifact after its bytes pass verified retrieval.
+
+        The counter is aggregate-only. It is not incremented merely because a
+        ticket was issued or consumed, and it stores no public carrier identity.
+        """
+        _validate_artifact_id(artifact_id)
+        with self._connect() as db:
+            approved = db.execute(
+                "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
+            ).fetchone()
+            if approved is None or approved["distribution"] != "public-approved":
+                raise CoordinatorError("only public-approved artifacts count as CARAVAN cargo")
+            carrier = db.execute(
+                "SELECT state FROM carriers WHERE node_id = ?", (node_id,)
+            ).fetchone()
+            if carrier is None:
+                raise CoordinatorError("unknown carrier")
+            db.execute(
+                "UPDATE caravan_counters SET counter_value = counter_value + 1 "
+                "WHERE counter_name = 'cargo_loads'"
+            )
+
+    def cargo_loads(self) -> int:
+        """Return the monotonic aggregate of verified CARAVAN cargo loads."""
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT counter_value FROM caravan_counters WHERE counter_name = 'cargo_loads'"
+            ).fetchone()
+        return int(row["counter_value"] if row is not None else 0)

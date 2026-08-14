@@ -44,12 +44,11 @@ def read_census(path: Path) -> dict[str, object]:
             document = validate_public_document(document)
         except ValueError as exc:
             fail(str(exc))
-        document["hungry_camels"] = 0
         document["probe"] = "coordinator"
         return document
     if document.get("schema") != LEAD_SCHEMA:
         fail("census schema is unsupported")
-    for field in ("active_camels", "hungry_camels", "lost_camels"):
+    for field in ("active_camels", "hungry_camels", "lost_camels", "cargo_loads"):
         value = document.get(field)
         if not isinstance(value, int) or isinstance(value, bool) or value < 0:
             fail(f"census {field} is invalid")
@@ -91,6 +90,7 @@ def main() -> int:
         "__FCF_ACTIVE_CAMELS__": str(document["active_camels"]),
         "__FCF_HUNGRY_CAMELS__": str(document["hungry_camels"]),
         "__FCF_LOST_CAMELS__": str(document["lost_camels"]),
+        "__FCF_CARGO_LOADS__": str(document["cargo_loads"]),
         "__FCF_CENSUS_STATUS__": status_text(document),
     }
     for token, value in values.items():

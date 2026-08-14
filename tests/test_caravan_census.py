@@ -34,7 +34,7 @@ class CensusTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             state = CoordinatorState(Path(tmp) / "coordinator.sqlite")
             self._register(state, "active", now=1_000)
-            self._register(state, "quiet", now=1_000 - ACTIVE_WINDOW_SECONDS - 1)
+            self._register(state, "hungry", now=1_000 - ACTIVE_WINDOW_SECONDS - 1)
             self._register(state, "lost", now=1_000 - 259_200 - 1)
             self._register(state, "withdrawn", now=1_000 - 259_200 - 1)
             state.withdraw("withdrawn")
@@ -42,7 +42,11 @@ class CensusTests(unittest.TestCase):
             state.quarantine("quarantined")
 
             counts = state.census_counts(now=1_000)
-            self.assertEqual((counts.active_camels, counts.lost_camels), (1, 1))
+            self.assertEqual(
+                (counts.active_camels, counts.hungry_camels, counts.lost_camels),
+                (1, 1, 1),
+            )
+            self.assertEqual(counts.cargo_loads, 0)
 
     def test_live_document_is_exact_aggregate_contract(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -62,7 +66,9 @@ class CensusTests(unittest.TestCase):
                     "status": "live",
                     "generated_at": "1970-01-01T00:01:40Z",
                     "active_camels": 1,
+                    "hungry_camels": 0,
                     "lost_camels": 1,
+                    "cargo_loads": 0,
                     "active_window_seconds": ACTIVE_WINDOW_SECONDS,
                     "lost_after_seconds": 259_200,
                     "individual_nodes_public": False,
@@ -78,7 +84,9 @@ class CensusTests(unittest.TestCase):
                     "status": "live",
                     "generated_at": "1970-01-01T00:01:40Z",
                     "active_camels": 1,
+                    "hungry_camels": 0,
                     "lost_camels": 0,
+                    "cargo_loads": 0,
                     "active_window_seconds": ACTIVE_WINDOW_SECONDS,
                     "lost_after_seconds": 259_200,
                     "individual_nodes_public": False,
@@ -94,7 +102,9 @@ class CensusTests(unittest.TestCase):
                     "status": "live",
                     "generated_at": "1970-01-01T00:01:40Z",
                     "active_camels": True,
+                    "hungry_camels": 0,
                     "lost_camels": 0,
+                    "cargo_loads": 0,
                     "active_window_seconds": ACTIVE_WINDOW_SECONDS,
                     "lost_after_seconds": 259_200,
                     "individual_nodes_public": False,

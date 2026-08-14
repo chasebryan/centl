@@ -120,14 +120,13 @@ ul, ol { margin-top: 7px; }
 
 .caravan-census {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 10px 0 8px;
 }
 .camel-count {
-  border: 1px solid var(--rule);
-  background: var(--panel);
-  padding: 12px 14px;
+  padding: 8px 12px 8px 14px;
+  border-left: 3px solid var(--rule);
 }
 .camel-count span {
   display: block;
@@ -139,6 +138,8 @@ ul, ol { margin-top: 7px; }
   margin-top: 4px;
   font: 700 30px/1 Georgia, "Times New Roman", serif;
 }
+.cargo-count { border-left-color: var(--rust); }
+.cargo-count span { color: var(--rust); }
 .census-status {
   grid-column: 1 / -1;
   margin: 0;
@@ -180,6 +181,20 @@ ul, ol { margin-top: 7px; }
 .caravan-consent input { margin-right: 7px; }
 .caravan-join-action { display: none; margin-top: 4px; }
 .caravan-join-flow:has(.caravan-consent input:checked) .caravan-join-action { display: inline-block; }
+.caravan-options {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 14px;
+  padding: 0;
+  border: 0;
+}
+.caravan-options legend {
+  margin-bottom: 5px;
+  color: var(--blue-dark);
+  font-weight: 700;
+}
+.caravan-options label { display: block; }
+.caravan-options input { margin-right: 7px; }
 
 
 .sponsor-actions {

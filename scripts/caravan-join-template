@@ -90,6 +90,7 @@ STORAGE_GIB=10
 UPLOAD_MIBPS=4
 MISSIONS=""
 ASSUME_YES=0
+INSTALL_OASIS=1
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
@@ -103,6 +104,7 @@ Options:
   --missions LIST       preservation missions: source,releases,semantic,recovery or all
   --storage-gib N       local CARAVAN storage ceiling (default: 10 GiB)
   --upload-mibps N      future outbound serving rate ceiling (default: 4 MiB/s)
+  --no-oasis             do not install the current FCF Oasis release
   -y, --yes             accept the displayed local configuration
   -h, --help            show this help
 
@@ -122,6 +124,7 @@ while [ "$#" -gt 0 ]; do
     --missions) [ "$#" -ge 2 ] || fail "--missions needs a value"; MISSIONS=$2; shift 2 ;;
     --storage-gib) [ "$#" -ge 2 ] || fail "--storage-gib needs a value"; STORAGE_GIB=$2; shift 2 ;;
     --upload-mibps) [ "$#" -ge 2 ] || fail "--upload-mibps needs a value"; UPLOAD_MIBPS=$2; shift 2 ;;
+    --no-oasis) INSTALL_OASIS=0; shift ;;
     -y|--yes) ASSUME_YES=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) fail "unknown option: $1" ;;
@@ -169,9 +172,9 @@ if [ -z "$MISSIONS" ]; then
     esac
   }
   ask_mission source "approved CENTL source snapshots"
-  ask_mission releases "signed FCF/CENTL release artifacts"
-  ask_mission semantic "redistribution-approved semantic artifacts"
-  ask_mission recovery "public-approved recovery/toolchain artifacts"
+  ask_mission releases "CENTL Oasis and signed FCF release artifacts"
+  ask_mission semantic "CENTL-SCi approved semantic artifacts"
+  ask_mission recovery "FCF recovery and toolchain artifacts"
   [ -n "$selected" ] || fail "no preservation mission selected"
   MISSIONS=$selected
 fi
@@ -200,6 +203,7 @@ Preservation missions: $MISSIONS
 Storage ceiling:      $STORAGE_GIB GiB
 Upload-rate ceiling:  $UPLOAD_MIBPS MiB/s
 Linux package family: $package_manager
+Oasis install:        $( [ "$INSTALL_OASIS" -eq 1 ] && printf 'current FCF Oasis release' || printf 'skipped by request' )
 
 Your home files are never cargo. Mission selection is a filter, never
 publication authority. When authenticated enrollment is active, this camel's
@@ -230,6 +234,27 @@ if [ "$ASSUME_YES" -eq 0 ]; then
   case "$answer" in y|Y|yes|YES) ;; *) fail "cancelled" ;; esac
 fi
 
+OASIS_STATUS="not installed by request"
+OASIS_TARGET=""
+if [ "$INSTALL_OASIS" -eq 1 ]; then
+  oasis_installer="$release_root/payload/centl-install"
+  [ -f "$oasis_installer" ] && [ ! -L "$oasis_installer" ] ||
+    fail "this join release does not contain the authenticated CENTL Oasis installer"
+  oasis_log=$(mktemp "${TMPDIR:-/tmp}/fcf-oasis-install.XXXXXXXX")
+  if ! sh "$oasis_installer" --channel oasis >"$oasis_log" 2>&1; then
+    cat "$oasis_log" >&2
+    rm -f "$oasis_log"
+    fail "CENTL Oasis installation failed; the CARAVAN carrier was not activated"
+  fi
+  cat "$oasis_log"
+  OASIS_STATUS=$(sed -n 's/^Installed CENTL oasis channel, build \([^ ]*\) at .*$/\1/p' "$oasis_log" | tail -n 1)
+  OASIS_TARGET=$(sed -n 's/^Installed CENTL oasis channel, build [^ ]* at //p' "$oasis_log" | tail -n 1)
+  rm -f "$oasis_log"
+  [ -n "$OASIS_STATUS" ] || fail "CENTL Oasis installer did not report an installed version"
+fi
+
+CONSENT_AT=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
 config_root="$CONFIG_HOME/fcf-caravan"
 data_root="$DATA_HOME/fcf-caravan"
 state_root="$STATE_HOME/fcf-caravan"
@@ -256,11 +281,11 @@ mv -- "$stage" "$install_root"
 trap - EXIT HUP INT TERM
 
 mkdir -p -m 0700 "$data_root/store" "$state_root/identity" "$state_root/census"
-python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" "$MISSIONS" "$package_manager" <<'PY'
+python3 - "$config_root/config.json" "$RELEASE_VERSION" "$STORAGE_GIB" "$UPLOAD_MIBPS" "$MISSIONS" "$package_manager" "$OASIS_STATUS" "$OASIS_TARGET" "$CONSENT_AT" <<'PY'
 import json
 import sys
 from pathlib import Path
-out, version, storage, upload, missions, package_manager = sys.argv[1:]
+out, version, storage, upload, missions, package_manager, oasis_version, oasis_target, consent_at = sys.argv[1:]
 data = {
     "schema": "fcf-caravan-carrier-config-v2",
     "release_version": version,
@@ -270,7 +295,24 @@ data = {
     "storage_limit_gib": int(storage),
     "upload_limit_mibps": int(upload),
     "missions": missions.split(","),
+    "software_support": {
+        "source": "approved CENTL source snapshots",
+        "releases": "CENTL Oasis and signed FCF release artifacts",
+        "semantic": "CENTL-SCi redistribution-approved semantic artifacts",
+        "recovery": "FCF public-approved recovery and toolchain artifacts",
+    },
     "mission_authority": "authenticated-fcf-public-approved-only",
+    "consent": {
+        "host_policy_version": "FCF-CARAVAN-HOST-v1",
+        "accepted_at": consent_at,
+        "scope": "rootless bounded carrier using only authenticated public-approved cargo",
+    },
+    "oasis": {
+        "installed_version": oasis_version,
+        "install_target": oasis_target,
+        "commands": ["centl", "centl-physics", "centl-sci"],
+        "path_directory": str(Path.home() / ".local" / "bin"),
+    },
     "platform": {
         "package_manager_hint": package_manager,
         "systemd_required": False,
@@ -289,15 +331,31 @@ chmod 0600 "$config_root/config.json"
 
 cat <<TXT
 
-🐪 Your camel is prepared.
+🐪 Your FCF-CARAVAN camel is prepared.
 
 Release $RELEASE_VERSION is installed read-only at:
   $install_root
 
-The machine is configured with the missions you selected. No inbound port was
-opened, no arbitrary data was accepted, and no public machine identity was
-published. The carrier will be counted only after an authenticated coordinator
-accepts its heartbeat; the public census contains aggregate counts only.
+CENTL Oasis: $OASIS_STATUS
+Oasis install target: ${OASIS_TARGET:-not installed}
+Commands placed in ~/.local/bin when available: centl, centl-physics, centl-sci
+
+Supported software selected for this camel:
+  source    approved CENTL source snapshots
+  releases  CENTL Oasis and signed FCF release artifacts
+  semantic  CENTL-SCi redistribution-approved semantic artifacts
+  recovery  FCF public-approved recovery and toolchain artifacts
+Selected: $MISSIONS
+
+Consent recorded: $CONSENT_AT
+  Host policy: FCF-CARAVAN-HOST-v1
+  Scope: rootless, bounded carrier; authenticated public-approved cargo only
+
+No inbound port was opened, no arbitrary data was accepted, and no public
+machine identity was published. The carrier will be counted only after an
+authenticated coordinator accepts its heartbeat; the public census contains
+aggregate Active, Hungry, and Lost Camel counts, plus verified CARAVAN Cargo
+Loads as packages are successfully delivered.
 
 Thank you for helping keep free computation moving. 🧮
 
