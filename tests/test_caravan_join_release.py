@@ -37,8 +37,11 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('"inbound_listen": False', text)
         self.assertIn('"arbitrary_content": False', text)
         self.assertIn('"systemd_required": False', text)
-        self.assertIn("official releases are immutable in place", text)
+        self.assertIn("existing release $RELEASE_VERSION failed its integrity check", text)
         self.assertIn("--no-oasis", text)
+        self.assertIn("--reinstall-oasis", text)
+        self.assertIn("already installed; reused", text)
+        self.assertIn("failed its integrity check", text)
         self.assertIn("payload/centl-install", text)
         self.assertIn('"software_support"', text)
         self.assertIn('"consent"', text)
@@ -68,6 +71,11 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('cd "$install_root/payload"', text)
         self.assertIn('PYTHONPATH="$install_root/payload" python3 "$@"', text)
         self.assertIn('agent_pid=$(cd "$install_root/payload"', text)
+
+    def test_join_reuses_identity_state_instead_of_creating_a_new_camel(self) -> None:
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn("if any(identity_path.iterdir()):", text)
+        self.assertNotIn("except Exception:\n    identity = CarrierIdentity.create(identity_root)", text)
 
     def test_join_script_verifies_signed_exact_membership_before_install(self) -> None:
         text = TEMPLATE.read_text(encoding="utf-8")

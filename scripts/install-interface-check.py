@@ -122,6 +122,10 @@ def run() -> None:
         if "Oasis is ready. Start with: centl-sci" not in oasis.stdout:
             raise SystemExit(f"Oasis installer output is incomplete:\n{oasis.stdout}")
 
+        reinstall = run_installer(["--reinstall", "--archive", str(archive)], env)
+        if "Installed CENTL oasis channel" not in reinstall.stdout:
+            raise SystemExit(f"Oasis reinstall output is incomplete:\n{reinstall.stdout}")
+
         sci_output = subprocess.check_output(
             [str(prefix / "bin" / "centl-sci"), "What is 0.1 plus 0.2?"], text=True
         ).strip()
@@ -152,7 +156,7 @@ def run() -> None:
         headless_home.mkdir()
         headless_env = env.copy()
         headless_env["HOME"] = str(headless_home)
-        headless_env.pop("SHELL", None)
+        headless_env["SHELL"] = ""
         run_installer(["--archive", str(archive)], headless_env)
         headless_prefix = headless_home / ".local"
         require_symlink(headless_prefix / "bin" / "centl-sci")

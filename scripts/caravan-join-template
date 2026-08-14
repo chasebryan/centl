@@ -134,6 +134,7 @@ MISSIONS=""
 TRANSPORT="https"
 ASSUME_YES=0
 INSTALL_OASIS=1
+REINSTALL_OASIS=0
 CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
@@ -149,6 +150,7 @@ Options:
   --upload-mibps N      future outbound serving rate ceiling (default: 4 MiB/s)
   --transport MODE      coordinator route: https (default) or tor
   --no-oasis             do not install the current FCF Oasis release
+  --reinstall-oasis      replace the existing Oasis build after verification
   -y, --yes             accept the displayed local configuration
   -h, --help            show this help
 
@@ -171,6 +173,7 @@ while [ "$#" -gt 0 ]; do
     --upload-mibps) [ "$#" -ge 2 ] || fail "--upload-mibps needs a value"; UPLOAD_MIBPS=$2; shift 2 ;;
     --transport) [ "$#" -ge 2 ] || fail "--transport needs a value"; TRANSPORT=$2; shift 2 ;;
     --no-oasis) INSTALL_OASIS=0; shift ;;
+    --reinstall-oasis|--reinstall) REINSTALL_OASIS=1; shift ;;
     -y|--yes) ASSUME_YES=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) fail "unknown option: $1" ;;
@@ -260,6 +263,10 @@ Coordinator route:     $TRANSPORT
 Linux package family: $package_manager
 Oasis install:        $( [ "$INSTALL_OASIS" -eq 1 ] && printf 'current FCF Oasis release' || printf 'skipped by request' )
 
+If the current Oasis build is already installed, this launcher verifies and
+reuses it. To deliberately replace that build, rerun this launcher with
+--reinstall-oasis.
+
 Your home files are never cargo. Mission selection is a filter, never
 publication authority. After consent, this release enrolls the camel and
 starts a rootless outbound heartbeat. The aggregate census counts it without
@@ -298,14 +305,27 @@ if [ "$INSTALL_OASIS" -eq 1 ]; then
   [ -f "$oasis_installer" ] && [ ! -L "$oasis_installer" ] ||
     fail "this join release does not contain the authenticated CENTL Oasis installer"
   oasis_log=$(mktemp "${TMPDIR:-/tmp}/fcf-oasis-install.XXXXXXXX")
-  if ! sh "$oasis_installer" --channel oasis >"$oasis_log" 2>&1; then
-    cat "$oasis_log" >&2
-    rm -f "$oasis_log"
-    fail "CENTL Oasis installation failed; the CARAVAN carrier was not activated"
+  oasis_args=(--channel oasis)
+  if [ "$REINSTALL_OASIS" -eq 1 ]; then
+    oasis_args+=(--reinstall)
   fi
-  cat "$oasis_log"
-  OASIS_STATUS=$(sed -n 's/^Installed CENTL oasis channel, build \([^ ]*\) at .*$/\1/p' "$oasis_log" | tail -n 1)
-  OASIS_TARGET=$(sed -n 's/^Installed CENTL oasis channel, build [^ ]* at //p' "$oasis_log" | tail -n 1)
+  if ! sh "$oasis_installer" "${oasis_args[@]}" >"$oasis_log" 2>&1; then
+    existing_oasis_version=$(sed -n 's/.*CENTL oasis build \([^ ]*\) is already installed at .*/\1/p' "$oasis_log" | tail -n 1)
+    existing_oasis_target=$(sed -n 's/.*CENTL oasis build [^ ]* is already installed at //p' "$oasis_log" | tail -n 1)
+    if [ "$REINSTALL_OASIS" -eq 0 ] && [ -n "$existing_oasis_version" ] && [ -n "$existing_oasis_target" ]; then
+      cat "$oasis_log"
+      OASIS_STATUS="$existing_oasis_version (already installed; reused)"
+      OASIS_TARGET="$existing_oasis_target"
+    else
+      cat "$oasis_log" >&2
+      rm -f "$oasis_log"
+      fail "CENTL Oasis installation failed; the CARAVAN carrier was not activated"
+    fi
+  else
+    cat "$oasis_log"
+    OASIS_STATUS=$(sed -n 's/^Installed CENTL oasis channel, build \([^ ]*\) at .*$/\1/p' "$oasis_log" | tail -n 1)
+    OASIS_TARGET=$(sed -n 's/^Installed CENTL oasis channel, build [^ ]* at //p' "$oasis_log" | tail -n 1)
+  fi
   rm -f "$oasis_log"
   [ -n "$OASIS_STATUS" ] || fail "CENTL Oasis installer did not report an installed version"
 fi
@@ -329,19 +349,24 @@ for root in "$config_root" "$data_root" "$state_root" "$(dirname "$install_root"
   fi
   mkdir -p -m 0700 "$root"
 done
-if [ -e "$install_root" ]; then
-  fail "release $RELEASE_VERSION is already installed; official releases are immutable in place"
+if [ -e "$install_root" ] || [ -L "$install_root" ]; then
+  [ -d "$install_root" ] && [ ! -L "$install_root" ] ||
+    fail "existing release $RELEASE_VERSION is not a real directory"
+  find "$install_root" -type l -print -quit | grep -q . &&
+    fail "existing release $RELEASE_VERSION contains a symbolic link"
+  diff -qr -- "$release_root" "$install_root" >/dev/null ||
+    fail "existing release $RELEASE_VERSION failed its integrity check"
+else
+  stage="${install_root}.new.$$"
+  trap 'chmod -R u+w "$stage" 2>/dev/null || true; rm -rf -- "$stage" 2>/dev/null || true' EXIT HUP INT TERM
+  mkdir -p -m 0700 "$stage"
+  cp -a "$release_root/." "$stage/"
+  find "$stage" -type l -print -quit | grep -q . && fail "release copy contains symbolic links"
+  find "$stage" -type f -exec chmod 0444 {} +
+  find "$stage" -type d -exec chmod 0555 {} +
+  mv -- "$stage" "$install_root"
+  trap - EXIT HUP INT TERM
 fi
-
-stage="${install_root}.new.$$"
-trap 'chmod -R u+w "$stage" 2>/dev/null || true; rm -rf -- "$stage" 2>/dev/null || true' EXIT HUP INT TERM
-mkdir -p -m 0700 "$stage"
-cp -a "$release_root/." "$stage/"
-find "$stage" -type l -print -quit | grep -q . && fail "release copy contains symbolic links"
-find "$stage" -type f -exec chmod 0444 {} +
-find "$stage" -type d -exec chmod 0555 {} +
-mv -- "$stage" "$install_root"
-trap - EXIT HUP INT TERM
 
 mkdir -p -m 0700 "$data_root/store" "$state_root/identity" "$state_root/census"
 identity_root="$state_root/identity"
@@ -387,14 +412,16 @@ run_payload_python - \
   "$RELEASE_VERSION" "$CONSENT_EPOCH" "$ASSUME_YES" "$COORDINATOR_URL" "$STORAGE_GIB" <<'PY'
 from __future__ import annotations
 import sys
+from pathlib import Path
 from caravan.identity import CarrierIdentity
 from caravan.policy import create_policy_receipt, write_policy_receipt
 from caravan.transport import CarrierTransportClient
 
 identity_root, receipt_path, result_path, policy_path, version, accepted_at, assumed, coordinator_url, storage_gib = sys.argv[1:]
-try:
+identity_path = Path(identity_root)
+if any(identity_path.iterdir()):
     identity = CarrierIdentity.load(identity_root)
-except Exception:
+else:
     identity = CarrierIdentity.create(identity_root)
 receipt = create_policy_receipt(
     identity,

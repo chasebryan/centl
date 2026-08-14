@@ -36,7 +36,7 @@ The mission classes are:
 
 A volunteer can change mission preferences later through an authenticated configuration update, but already installed immutable executable release bytes are never edited in place.
 
-The guided join release installs the current FCF Oasis distribution after consent, verifies its adjacent SHA-256 before activation, places `centl`, `centl-physics`, and `centl-sci` in `~/.local/bin`, and records the version in the private carrier receipt. A user may pass `--no-oasis` when they intentionally want the carrier without the Oasis command-line tools.
+The guided join release installs the current FCF Oasis distribution after consent, verifies its adjacent SHA-256 before activation, places `centl`, `centl-physics`, and `centl-sci` in `~/.local/bin`, and records the version in the private carrier receipt. If that exact Oasis build is already present, the launcher verifies and reuses it; `--reinstall-oasis` deliberately replaces it after verification. A user may pass `--no-oasis` when they intentionally want the carrier without the Oasis command-line tools.
 
 ## 3. Resource and privacy invariants
 
