@@ -130,7 +130,7 @@
 
   $ ../src/main.exe --help | sed -n '1p;3p;5,12p'
   CENTL - exact mathematics, directly.
-  Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE
+  Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE | centl caravan inspect ...
     centl EXPRESSION   calculate
     centl              open the calculator
     --file PATH        run a script
