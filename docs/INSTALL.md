@@ -88,6 +88,10 @@ Prebuilt channel bytes are served from the repository's machine-oriented `distri
 channels/
   oasis/
     LATEST
+    v0.15.0/
+      centl-linux-x86_64.tar.gz
+      centl-linux-x86_64.tar.gz.sha256
+      SOURCE-COMMIT
     v0.14.0/
       centl-linux-x86_64.tar.gz
       centl-linux-x86_64.tar.gz.sha256
@@ -109,7 +113,7 @@ channels/
 
 Oasis directories contain immutable qualified release bytes. Mirage `latest` is a rolling development pointer while each published Mirage commit remains addressable under `builds/<commit-sha>/`.
 
-This separates **release identity** from **artifact transport**. The immutable `v0.14.0` release remains the canonical Oasis foundation even though GitHub release immutability prevented adding assets after it was published.
+This separates **release identity** from **artifact transport**. `LATEST` currently names **v0.15.0 Al-Nur**. The immutable `v0.14.0` Al-Khayma bytes remain on the channel as the previous Oasis.
 
 ## What the installer verifies
 
@@ -140,7 +144,7 @@ sh install --channel oasis
 Install a specific qualified Oasis version:
 
 ```sh
-sh install --channel oasis --version 0.14.0
+sh install --channel oasis --version 0.15.0
 ```
 
 Start the scientific interface:
@@ -279,7 +283,7 @@ dune exec centl-sci
 Maintainers package a tested Linux build with:
 
 ```sh
-make release VERSION=0.14.0
+make release VERSION=0.15.0
 ```
 
 Oasis publication must use the already-qualified bytes from the exact release SHA. Mirage publication is a separate rolling development channel and never substitutes for Oasis qualification.
