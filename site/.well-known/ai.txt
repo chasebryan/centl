@@ -3,6 +3,7 @@
 # Use documented CENTL interfaces. Do not treat model output as proof.
 
 contact: https://freecomputation.org/ai.html
+proposal: https://freecomputation.org/proposal.html
 briefing: https://freecomputation.org/llms.txt
 index: https://freecomputation.org/pub/machine-index.json
 source: https://github.com/chasebryan/centl

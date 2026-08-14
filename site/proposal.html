@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FCF proposal for companies and AI software: use CENTL, contribute to mirage, and sponsor the foundation. Sponsorship does not buy Oasis or endorsement.">
+  <title>Proposal — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/proposal.html">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="author" content="Free Computation Foundation">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Free Computation Foundation">
+  <meta property="og:url" content="https://freecomputation.org/proposal.html">
+  <meta property="og:title" content="Proposal — Free Computation Foundation">
+  <meta property="og:description" content="Use CENTL, contribute work, and sponsor FCF. Money is welcome. Money is not a crown.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
+    <div class="title"><h1>Proposal</h1><p>For companies and other AI software: use, contribute, sponsor.</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/latest">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main>
+      <h2>The invitation is open</h2>
+      <p>FCF is ready for companies and other AI software to use CENTL, contribute work, and sponsor the foundation. The full text is <a href="https://github.com/chasebryan/centl/blob/main/docs/FCF-PROPOSAL.md">docs/FCF-PROPOSAL.md</a>. A machine copy is <a href="pub/proposal.json"><code>pub/proposal.json</code></a>.</p>
+      <div class="notice"><strong>Rule:</strong> sponsorship does not buy Oasis, a trademark, or mathematical authority. Money is welcome. Money is not a crown.</div>
+
+      <h2>Use</h2>
+      <p>CENTL is Apache-2.0. You do not need a special deal to run it, embed it, or call it from an agent.</p>
+      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+sh install
+centl --mcp</code></pre>
+      <p>MCP clients should launch local <code>centl --mcp</code>. JSON and JSON Lines are documented in the repository. A model may interpret. It may not confer truth. See <a href="ai.html">Machines and AI</a>.</p>
+
+      <h2>Contribute</h2>
+      <p>Open a draft pull request against <code>mirage</code>. Sign off with the Developer Certificate of Origin. Do not target <code>oasis</code> automatically and do not declare Oasis. Ordinary review happens on GitHub. There is no separate vendor portal.</p>
+
+      <h2>Sponsor</h2>
+      <div class="sponsor-actions" aria-label="FCF sponsorship methods">
+        <a class="sponsor-button" href="https://github.com/sponsors/chasebryan">Sponsor FCF with GitHub Sponsors</a>
+        <a class="sponsor-button sponsor-button-alt" href="funding.html#x-money">Sponsor FCF with X Money</a>
+      </div>
+      <p>Public totals and methodology are on the <a href="funding.html">funding page</a>. Sponsorship funds development, publication, preservation, and independent operation. It does not purchase a partner logo or a skipped gate.</p>
+
+      <h2>How to accept today</h2>
+      <table class="directory">
+        <tr><th>Who</th><th>First step</th></tr>
+        <tr><td>A company</td><td>Install CENTL, open a draft PR to <code>mirage</code>, or sponsor through a public route.</td></tr>
+        <tr><td>Other AI software</td><td>Ship <code>centl --mcp</code>, keep model output distinct from CENTL evidence, optionally sponsor or send protocol tests.</td></tr>
+      </table>
+      <p class="small">Contact is the public repository and its security advisory form. FCF has no separate sales inbox.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Proposal · Free for science.</footer>
+</div>
+</body>
+</html>

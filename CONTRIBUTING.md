@@ -16,6 +16,12 @@ If any part of that stack is unfamiliar, start with the
 F*, rigorous-numerics, protocol, testing, and source-code curriculum with
 readiness exercises.
 
+Companies and other AI software that want a single written offer to use
+CENTL, contribute, and sponsor FCF should read
+[`docs/FCF-PROPOSAL.md`](docs/FCF-PROPOSAL.md). Organizational patches still
+use this guide, a `Signed-off-by` DCO line, and a draft pull request to
+`mirage`. Sponsorship does not skip review.
+
 The canonical versions are recorded in [`toolchain.lock`](toolchain.lock). The
 checked-in [`centl.opam`](centl.opam) manifest gives opam exact constraints for
 the OCaml compiler, build tools, test libraries, and formatter.

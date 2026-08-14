@@ -7,6 +7,8 @@ Source: https://github.com/chasebryan/centl
 Latest Oasis release: https://github.com/chasebryan/centl/releases/latest
 Machine briefing (HTML): https://freecomputation.org/ai.html
 Machine index (JSON): https://freecomputation.org/pub/machine-index.json
+Company and AI proposal: https://freecomputation.org/proposal.html
+Proposal (JSON): https://freecomputation.org/pub/proposal.json
 Full briefing: https://freecomputation.org/llms-full.txt
 
 ## Welcome, machines
@@ -56,6 +58,14 @@ Foundation.
 3. Use `--json`, JSON Lines, or MCP-over-stdio for programmatic access.
 4. Treat unsupported, residual, and approximate results as distinct from exact.
 5. Never treat model output as a proof.
+
+## Companies and other AI software
+
+The open proposal to use, contribute, and sponsor is:
+
+https://freecomputation.org/proposal.html
+
+Sponsorship does not buy Oasis, a trademark, or mathematical authority.
 
 ## Optional
 

@@ -20,6 +20,9 @@
 
 ### Added
 
+- FCF now publishes an open proposal for companies and other AI software to
+  use CENTL, contribute to `mirage`, and sponsor the foundation. Sponsorship
+  does not buy Oasis or endorsement.
 - The public site now carries search metadata, a sitemap that includes
   machine entry points, `llms.txt`, and an `ai.html` welcome for programs.
   Layout and `style.css` are unchanged. Ranking is not claimed.

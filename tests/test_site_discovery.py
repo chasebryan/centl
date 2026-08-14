@@ -47,6 +47,7 @@ class SiteDiscoveryTests(unittest.TestCase):
             SITE / "mirrors.html",
             SITE / "join.html",
             SITE / "ai.html",
+            SITE / "proposal.html",
             SITE / "pub" / "index.html",
         ]
         for path in pages:
@@ -71,6 +72,7 @@ class SiteDiscoveryTests(unittest.TestCase):
             "https://freecomputation.org/",
             "https://freecomputation.org/centl.html",
             "https://freecomputation.org/ai.html",
+            "https://freecomputation.org/proposal.html",
             "https://freecomputation.org/join.html",
             "https://freecomputation.org/llms.txt",
         ):
@@ -86,6 +88,22 @@ class SiteDiscoveryTests(unittest.TestCase):
         self.assertFalse(index["oasis_declared_by_this_file"])
         self.assertFalse(index["model_is_mathematical_authority"])
         self.assertTrue(any(item["name"] == "mcp" for item in index["interfaces"]))
+        self.assertIn("proposal", index["briefings"])
+
+    def test_company_and_ai_proposal_is_open_and_does_not_sell_oasis(self) -> None:
+        html = (SITE / "proposal.html").read_text(encoding="utf-8")
+        self.assertIn("draft pull request against <code>mirage</code>", html)
+        self.assertIn("github.com/sponsors/chasebryan", html)
+        self.assertIn("Money is not a crown", html)
+        proposal = json.loads((SITE / "pub" / "proposal.json").read_text(encoding="utf-8"))
+        self.assertEqual(proposal["schema"], "fcf-proposal-v1")
+        self.assertEqual(proposal["status"], "open")
+        self.assertFalse(proposal["oasis_declared_by_this_file"])
+        self.assertFalse(proposal["endorsement_granted"])
+        self.assertFalse(proposal["sla_offered"])
+        self.assertEqual(proposal["contribute"]["pull_request_base"], "mirage")
+        self.assertIsNone(proposal["contact"]["sales_inbox"])
+        self.assertIn("Oasis qualification", proposal["sponsor"]["does_not_buy"])
 
     def test_home_json_ld_is_valid_and_names_centl(self) -> None:
         html = (SITE / "index.html").read_text(encoding="utf-8")
