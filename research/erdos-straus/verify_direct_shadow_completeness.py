@@ -28,12 +28,14 @@ def crt(a,m,b,n):
     u=0 if nn==1 else (((b-a)//g)*pow(mm,-1,nn))%nn
     return (a+m*u)%(m*nn), m*nn
 
-def direct_shadow(k,h,t,j,T):
-    cr=crt(h,840,t,4*k-1)
-    if cr is None: return False
-    r,L=cr; mj=4*j-1; g=math.gcd(L,mj)
-    fibre={u for u in range(r%g,mj,g)}
-    return fibre <= T[j]
+def direct_shadow_from_crt(r,L,j,T):
+    """Independent fibre-containment test with early exit and no set allocation."""
+    mj=4*j-1; g=math.gcd(L,mj)
+    start=r%g
+    for u in range(start,mj,g):
+        if u not in T[j]:
+            return False
+    return True
 
 def verify_witness(rec,T,reduced):
     k,h,t=rec['k'],rec['h'],rec['t']
@@ -41,11 +43,11 @@ def verify_witness(rec,T,reduced):
     m=4*k-1
     if math.gcd(t,m)!=1: raise AssertionError('nonunit target')
     if (t-h)%math.gcd(840,m): raise AssertionError('incompatible target')
-    if any(direct_shadow(k,h,t,j,T) for j in range(1,k)):
-        raise AssertionError(f"reported direct-novel candidate is directly shadowed: {(k,h,t)}")
     cr=crt(h,840,t,m)
     if cr is None: raise AssertionError('CRT failed')
     r,L=cr
+    if any(direct_shadow_from_crt(r,L,j,T) for j in range(1,k)):
+        raise AssertionError(f"reported direct-novel candidate is directly shadowed: {(k,h,t)}")
     if (r,L)!=(rec['r'],rec['L']): raise AssertionError('CRT record mismatch')
     s=rec['reduced_witness_s'] if reduced else rec['integer_witness_s']
     x=rec['reduced_witness_x'] if reduced else rec['integer_witness_x']
@@ -59,7 +61,11 @@ def verify_witness(rec,T,reduced):
         qcheck=1
         for j in range(1,k):
             mj=4*j-1; g=math.gcd(L,mj); q=mj//g
-            compatible=any((u-r)%g==0 for u in T[j])
+            compatible=False
+            for u in T[j]:
+                if (u-r)%g==0:
+                    compatible=True
+                    break
             if compatible: qcheck=math.lcm(qcheck,q)
         if Q!=qcheck or M!=L*Q: raise AssertionError('period mismatch')
         if math.gcd(x,M)!=1: raise AssertionError('reduced witness not reduced')
