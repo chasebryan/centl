@@ -24,3 +24,5 @@ This directory is the manual set for the Oasis product line.
 - [MCP.md](MCP.md)
 
 The public site deploys from `main`: https://freecomputation.org/docs.html
+
+- [CENTL Marsa](https://github.com/chasebryan/centl/blob/CENTL-Marsa/docs/CENTL-MARSA.md) — Windows and macOS harbor of the Camp stay
