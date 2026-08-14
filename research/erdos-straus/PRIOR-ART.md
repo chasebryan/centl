@@ -4,7 +4,7 @@
 
 **Status:** working research record. A negative search result is not proof of novelty or priority.
 
-This file records the targeted primary-literature pass used to calibrate claims around `C_AB`, exact trap cardinality, and congruence-layer shadowing.
+This file records the targeted primary-literature pass used to calibrate claims around `C_AB`, exact trap cardinality, congruence-layer shadowing, and the later depth-spectrum / survival-process framework.
 
 ## Primary sources reviewed
 
@@ -66,6 +66,26 @@ Relevant prior art:
 - bounds and algorithms for enumerating unit-fraction decompositions;
 - distributional results in reduced residue classes.
 
+### R. C. Vaughan, 1970
+
+*On a problem of Erdős, Straus and Schinzel*, Mathematika 17 (1970), 193-198.
+
+Relevant prior art:
+
+- classical sparse-exception / almost-all results for Erdős-Straus;
+- large-sieve methods showing that the unresolved population is very thin.
+
+Consequence for the current program: a density-one solvability statement is not, by itself, a novelty claim.
+
+### Christian Elsholtz, 2001
+
+Parametric-solution work strengthening sparse-exception bounds for generalized unit-fraction problems.
+
+Relevant prior art:
+
+- parametric families can yield strong upper bounds for exceptional sets;
+- asymptotic sparsity of failures is classical territory.
+
 ### Bernd R. Schuh, 2025
 
 *The Erdös-Straus Conjecture and Pythagorean Primes*  
@@ -115,18 +135,51 @@ The search specifically looked for prior definitions or equivalent constructions
 
 5. a distinction between direct shadowing and collective union-shadowing of Type A/B congruence classes;
 
-6. an irredundant-core reduction of the López Type A/B congruence system based on those shadow relations.
+6. an irredundant-core reduction of the López Type A/B congruence system based on those shadow relations;
 
-The targeted searches did not surface these exact objects under the terminology above. That result is encouraging but insufficient for a priority claim because equivalent ideas could exist under different notation, in non-arXiv literature, theses, books, conference material, computational notes, or unpublished work.
+7. the exact-depth spectrum
 
-## Current claim boundary
+   `D = { k : infinitely many primes satisfy C_AB(p)=k }`;
 
-The strongest responsible wording remains:
+8. an exact finite-depth survivor process for López Type A/B minimal depth with
 
-> FCF has identified a potentially novel structural framework for measuring and reducing López Type A/B congruence systems in the Erdős-Straus problem, centered on minimal witness depth and congruence-layer shadowing.
+   `delta_K`, `mu_k = delta_(k-1)-delta_k`, and `h_k = mu_k/delta_(k-1)`;
 
-Do not replace `potentially novel` with `new`, `first`, `discovered`, or an equivalent priority claim until a broader literature review and independent mathematical review are complete.
+9. a prime-modulus exact-depth backbone in which `4k-1` prime makes the target layer an independent CRT coordinate and gives a closed conditional hazard;
+
+10. a structural-gap versus finite-latency distinction for minimal Type A/B depth, including finite modular certificates proving infinite exact-depth realization;
+
+11. a prime-modulus survivor core whose remaining finite Type A/B witnesses must occur at composite target moduli, organized as a composite-rescue problem;
+
+12. threshold pre-shadow load measuring how conditioning on early survival deletes later admissible Type A/B candidate classes.
+
+The targeted searches did not surface these exact objects as an integrated Type-A/B-specific framework. That result is encouraging but insufficient for a priority claim because equivalent ideas could exist under different notation, in non-arXiv literature, theses, books, conference material, computational notes, or unpublished work.
+
+## Important novelty exclusions
+
+The following must **not** be advertised as FCF discoveries by themselves:
+
+- density-one solvability of Erdős-Straus;
+- the fact that simple divisor/congruence criteria solve almost all integers or primes;
+- general sieve survival probabilities;
+- general congruence redundancy or covering-system ideas;
+- CRT independence for a new coprime modulus;
+- Dirichlet realization of a reduced arithmetic progression.
+
+The candidate novelty is the way these classical ingredients interact with the López Type A/B system after introducing minimal witness depth and shadow geometry.
+
+## Current strongest candidate
+
+The strongest responsible mathematical novelty statement is now broader than the original shadow-only wording:
+
+> FCF has identified a potentially novel Type-A/B-specific minimal-depth framework for the Erdős-Straus problem, combining the invariant `C_AB`, congruence-layer shadowing, an exact-depth spectrum, exact survivor mass and conditional hazard, a prime-modulus exact-depth backbone, and a zero-density composite-rescue core.
+
+This should still be described as **potentially novel** until a publication-grade literature review and external mathematical review are complete.
+
+## Integration record
+
+The current synthesis is [`DIAMOND.md`](DIAMOND.md). That document distinguishes established prior art, elementary consequences, strong novelty candidates, and the unproved theorem targets that would materially enlarge the contribution.
 
 ## Next prior-art work
 
-A publication-grade review should expand beyond keyword search and trace citations backward and forward from López 2022/2024, Salez, Mordell-related congruence results, Monks/Velingker, Elsholtz/Tao, and modern divisor parametrizations. Search terms should include covering systems, congruence inclusion, redundant congruence classes, minimal parameter/product, nested moduli, first-hit sieves, residue-class containment, and divisor-generated modular systems.
+A publication-grade review should expand beyond keyword search and trace citations backward and forward from López 2022/2024, Salez, Mordell-related congruence results, Monks/Velingker, Vaughan, Elsholtz/Tao, Elsholtz/Planitzer, and modern divisor parametrizations. Search terms should include covering systems, congruence inclusion, redundant congruence classes, minimal parameter/product, nested moduli, first-hit sieves, stopping times in arithmetic sieves, survivor sets, exact-depth spectra, residue-class containment, congruence hazard, and divisor-generated modular systems.
