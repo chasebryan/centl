@@ -391,7 +391,7 @@ feature work -> mirage (experimental, installable if you choose)
                    oasis  ->  SemVer tag  ->  “CENTL vX.Y.Z is an Oasis release.”
 ```
 
-`main` is the complete developer/research tree, not Oasis. Mirage is never a full release. CENTL v0.14.0 remains the published Oasis until a later identity earns its own declaration. `declare oasis`, `approve this pull request`, `merge to oasis`, and `create a release` are refused by CENTL-SCi. GitHub human review and the Oasis gate remain the authorities.
+`main` is the complete developer/research tree, not Oasis. Mirage is never a full release. CENTL v0.15.0 Al-Nur is the published Oasis. `declare oasis`, `approve this pull request`, `merge to oasis`, and `create a release` are refused by CENTL-SCi. GitHub human review and the Oasis gate remain the authorities.
 
 ## Reuse before invention
 

@@ -139,6 +139,34 @@ class CoordinatorTests(unittest.TestCase):
             with self.assertRaises(CoordinatorError):
                 CoordinatorState(link)
 
+    def test_register_carrier_assigns_durable_live_numbers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = self._coordinator(Path(tmp))
+            first = state.register_carrier(
+                "node-a",
+                public_identity="pub-a",
+                policy_version="v1",
+                agent_version="0.1",
+                now=100,
+            )
+            second = state.register_carrier(
+                "node-b",
+                public_identity="pub-b",
+                policy_version="v1",
+                agent_version="0.1",
+                now=100,
+            )
+            again = state.register_carrier(
+                "node-a",
+                public_identity="pub-a",
+                policy_version="v1",
+                agent_version="0.1",
+                now=101,
+            )
+            self.assertEqual(first, 1)
+            self.assertEqual(second, 2)
+            self.assertEqual(again, 1)
+
     def test_counts_include_only_fresh_eligible_carriers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state = self._coordinator(Path(tmp))

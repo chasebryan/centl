@@ -8,7 +8,7 @@
 
 An **Oasis release** is a CENTL release that has been deliberately reconciled, organized, hardened, validated, and established as a cohesive stable baseline.
 
-The lowercase `oasis` branch is CENTL's authoritative standard-product line. Oasis is not a version suffix or a one-time codename. Stable tags remain ordinary Semantic Versioning, for example `v0.14.0`.
+The lowercase `oasis` branch is CENTL's authoritative standard-product line. Oasis is not a version suffix. An Oasis may carry a desert name; that name is not the tag. Stable tags remain ordinary Semantic Versioning, for example `v0.14.0` and `v0.15.0`. CENTL v0.15.0 is named **Al-Nur**.
 
 Before qualification, a proposed stable release is an **Oasis candidate**. After the complete gate closes on one exact commit, the declaration uses this form:
 
@@ -18,30 +18,50 @@ The canonical branch roles are defined in [RELEASE-POLICY.md](RELEASE-POLICY.md)
 
 ## Branch relationship
 
-The ordinary maturity path is:
+Oasis is the steadily advanced stable snapshot of current `main` and
+`mirage`. The ordinary cycle is:
 
 ```text
 feature / research work
          |
          v
-      mirage
+      mirage          laboratory; installable; never a full release
          |
-         | stabilize + satisfy the complete Oasis gate
+         | inhabit / integrate
          v
-       oasis
+       main           developer distribution; current Camp stay
+         |
+         | when that tree is the current stable product:
+         |   start at origin/oasis so Oasis does not regress
+         |   overlay the current main tree (mirage must match)
+         |   write the SemVer identity
+         |   one linear commit whose only parent is the oasis tip
+         |   PR to oasis → exact-SHA qualify → fast-forward oasis → tag
+         v
+       oasis          steadily advanced stable snapshot
          |
          v
- stable release / tag
+ continue development on mirage and main
 ```
 
-`mirage` is the development and research laboratory. `main` is the comprehensive developer and research distribution. Neither inherits Oasis assurance merely by containing code that also exists on `oasis`.
+`mirage` is the development and research laboratory. `main` is the
+comprehensive developer and research distribution. Neither is an Oasis
+declaration merely because it contains the same files as `oasis`.
 
-> **Oasis is a promotion state, not a property of every commit.**
+> **Oasis is a promotion state of one exact snapshot, not a property of every commit on main or mirage.**
 
-When an expedition cannot honestly be declared Oasis, FCF occupies a
+Assurance does not inherit. The Oasis product **is** made from the
+stable main/mirage tree. Those are different sentences.
+
+Inspect the official snapshot with:
+
+```sh
+./scripts/oasis --snapshot
+```
+
+When a checkout cannot honestly close the gate, FCF occupies a
 [Camp](FCF-CAMPS.md). A Camp is a stay. It does not close Oasis, inherit
-Oasis, or replace the official promotion path. CENTL v0.14.0 remains the
-published Oasis until a later identity independently earns the declaration.
+Oasis, or replace the official snapshot path.
 
 ## Oasis does not regress
 
@@ -50,7 +70,7 @@ A later candidate must not drop, weaken, or replace the already-published Oasis 
 - `origin/oasis` must be an ancestor of any promotion candidate.
 - Existing Oasis tests, installer channels, qualification machinery, and supported command surfaces stay.
 - New work is added **on top of** Oasis, not instead of it.
-- If laboratory history diverged, merge `oasis` into the candidate first. Do not force-push Oasis away.
+- If laboratory history diverged, rebuild the candidate as a linear snapshot on the oasis tip: check out `origin/oasis`, overlay the current stable `main` tree, write the identity, and commit once. Do not merge (`required_linear_history` forbids merge commits). Do not force-push oasis.
 - Gates are not weakened, skipped, or rewritten to obtain a green result.
 
 `scripts/oasis.py --inspect` reports a blocker when HEAD does not contain the current oasis tip. That blocker is a non-regression check, not a declaration.
@@ -201,11 +221,31 @@ Conversely, unfinished Mirage research, non-shipped laboratory capabilities, or 
 
 ## Independence between releases
 
-Oasis status never carries forward automatically. Every release must independently satisfy the standard.
+Oasis status never carries forward automatically. Every release must independently satisfy the standard. The next Oasis is a new snapshot of the then-current stable main/mirage tree, parented on the previous oasis tip.
 
 A later-discovered vulnerability does not rewrite the historical fact that a release passed its defined gate, but it must be handled through normal security advisories, fixes, and supported-version decisions. Oasis does not mean permanently supported, invulnerable, or mathematically complete.
 
-## v0.14.0
+## v0.15.0
+
+CENTL v0.15.0 is **Al-Nur**. It is the official snapshot of the current
+stable main and mirage trees, placed on the current oasis tip so Oasis
+does not regress. After this snapshot is promoted, development continues
+on `mirage` and `main`.
+
+The published declaration is:
+
+> **CENTL v0.15.0 is an Oasis release.**
+
+The human release title is `CENTL v0.15.0-Oasis.Al-Nur`. The canonical
+tag is `v0.15.0`. Source SHA `d9bcc5122d1f8e7a673f02d741c77e8145717695`.
+Development continues on `mirage` and `main`. A later snapshot needs a
+new SemVer identity.
+
+The installed product remains GNU/Linux x86_64 with `centl`,
+`centl-physics`, and `centl-sci`. Laboratory surfaces do not inherit
+Oasis by sitting in the same tree.
+
+### Historical v0.14.0
 
 CENTL v0.14.0 is the first release prepared under this complete Oasis standard.
 

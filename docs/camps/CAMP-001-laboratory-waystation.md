@@ -3,7 +3,7 @@
 **Status:** occupied
 **Date occupied:** 2026-08-14
 **Expedition:** secret-oasis-2026-08-14 / Al-Tih
-**Published Oasis:** CENTL v0.14.0
+**Published Oasis:** CENTL v0.15.0 Al-Nur
 **Oasis declared by this camp:** no
 **Named artifact:** `fcf-camp-001`
 **Release notes:** [`docs/releases/camp-001.md`](../releases/camp-001.md)
@@ -12,24 +12,21 @@
 
 This expedition produced stayable laboratory work: English-to-program SCi
 workshop surfaces, honest Oasis and Wellspring inspect, CARAVAN catalog
-coverage, and workflow token hygiene. The expedition as a whole cannot
-honestly be declared a new Oasis.
+coverage, and workflow token hygiene. People inhabit that work here.
 
-Oasis is still possible later for a different exact identity. It is not
-possible for this line as a whole without weakening a gate, inventing a
-version, or treating laboratory surfaces as the v0.14.0 stable product.
+Oasis is the steadily advanced snapshot of current `main` and `mirage`.
+This camp does not declare that snapshot. Occupying the camp does not
+mean Oasis cannot be made from the stable tree.
 
-## Why Oasis is not declared
+## Why Oasis is not declared here
 
-- The current branch is not `oasis`.
-- The version identity is still `0.14.0`; a new Oasis would need its own
-  SemVer identity after the complete gate.
-- Laboratory SCi, MIRAGE, and CARAVAN surfaces exceed the v0.14.0 stable
-  runtime boundary.
-- GitHub Security-tab Scorecard findings on `main` remain until those
-  workflow remediations land on the default-branch analysis ref.
-- Official promotion remains a human-reviewed path. This camp does not
-  self-approve, merge, or tag.
+- A Camp checkout is not the `oasis` branch.
+- Official promotion is a linear snapshot on the oasis tip, then the
+  complete gate, an unchanged fast-forward, a SemVer tag, and qualified
+  bytes.
+- Laboratory SCi, MIRAGE, and CARAVAN surfaces stay laboratory even
+  when their source is in the snapshot tree.
+- This camp does not self-approve, merge, or tag.
 
 ## In bounds
 

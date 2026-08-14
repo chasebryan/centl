@@ -128,9 +128,12 @@ branch presence, or naming.
 
 CENTL has three long-lived branches with distinct responsibilities:
 
-- **`oasis` — standard product.** This is the authoritative stable-product branch
-  and the only long-lived branch required to satisfy the full Oasis qualification
-  standard. Stable releases are promoted and tagged from qualified Oasis commits.
+- **`oasis` — standard product.** This is the steadily advanced stable
+  snapshot of current `main` and `mirage`. It is the only long-lived
+  branch required to satisfy the full Oasis qualification standard.
+  Stable releases are promoted and tagged from qualified Oasis commits.
+  After a snapshot is promoted, development continues on `mirage` and
+  `main`.
 - **`mirage` — development and research laboratory.** New features, prototypes,
   experimental mathematics, architecture changes, and speculative work normally
   mature here. Mirage deliberately uses lighter development checks and is not
@@ -146,8 +149,10 @@ installation claims, and other standard-product statements. Experimental materia
 present in `main` must remain visibly experimental rather than silently inheriting
 Oasis status.
 
-The ordinary maturity path is `mirage` -> Oasis qualification -> `oasis`. `main` is
-an integrated distribution view rather than another maturity stage.
+The ordinary maturity path is `mirage` -> `main` -> linear snapshot on
+the oasis tip -> Oasis qualification -> `oasis`, then development
+continues on `mirage` and `main`. `main` is an integrated distribution
+view rather than another maturity stage.
 
 Short-lived feature/fix branches are implementation vehicles, not long-term product
 surfaces. `archive/*` or explicitly documented preservation refs may retain
@@ -157,7 +162,7 @@ intentionally discarded or preserved elsewhere.
 
 The governing repository rule is:
 
-> **Oasis is a promotion state, not a property of every commit.**
+> **Oasis is a promotion state of one exact snapshot, not a property of every commit.**
 
 ## Releases
 

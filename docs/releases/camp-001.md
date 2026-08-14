@@ -3,9 +3,9 @@
 **Tag:** `fcf-camp-001`
 **Title:** FCF Camp #1 — Laboratory waystation
 **Occupied:** 2026-08-14
-**Published Oasis:** CENTL v0.14.0
+**Published Oasis:** CENTL v0.15.0 Al-Nur
 **Oasis declared by this release:** no
-**SemVer:** none. This is not `v0.15.0` and does not supersede `v0.14.0`.
+**SemVer:** none. This is not `v0.15.0` and does not supersede Oasis.
 
 > A Camp is a stay. This release is the snapshot of that stay.
 
@@ -91,5 +91,5 @@ FCF Camp #1 — Laboratory waystation
 Quality sentence:
 
 ```text
-This is a Camp stay, not an Oasis release. CENTL v0.14.0 remains Oasis.
+This is a Camp stay, not an Oasis release. CENTL v0.15.0 Al-Nur remains Oasis.
 ```
