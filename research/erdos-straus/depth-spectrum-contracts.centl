@@ -1,0 +1,16 @@
+# Exact contracts for the delayed C_AB=104 realization.
+# These certify the arithmetic identities only. Primality and minimal-depth
+# exclusion of all earlier layers are checked by depth_spectrum_probe.py.
+
+# Closed exact Egyptian-fraction witness for p = 11035249.
+equal | 4/11035249 | 1/2765460 + 1/1147665896 + 1/793456032188040
+
+# Type A family behind k = d*n = 4*26 = 104.
+# p(t) = (4dn-1)t - 4d = 415t - 16
+# u(t) = nt - 1 = 26t - 1
+# v(t) = n*p(t) = 26(415t-16)
+# x=du, y=dv, z=duv. Cross multiplication removes variable denominators.
+equal | 4*(104*t-4)*(104*(415*t-16))*(104*(26*t-1)*(415*t-16)) | (415*t-16)*((104*(415*t-16))*(104*(26*t-1)*(415*t-16)) + (104*t-4)*(104*(26*t-1)*(415*t-16)) + (104*t-4)*(104*(415*t-16))) | t:rational
+
+# The concrete prime is the t=26591 member of p(t).
+equal | 415*26591 - 16 | 11035249
