@@ -11,6 +11,7 @@ A record here is not an Oasis, not a SemVer release, and not a Wellspring.
 - Published Oasis: CENTL v0.14.0
 - Occupied Camps:
   - [`CAMP-001`](CAMP-001-laboratory-waystation.md)
+- Named artifact: `fcf-camp-001`
 - Declared Oasis from these records: none
 
 Inspect the same records locally with:
