@@ -48,6 +48,14 @@ class PrimaryNavigationParser(HTMLParser):
 
 
 class SiteNavigationTests(unittest.TestCase):
+    def test_bazaar_has_a_simple_join_button_and_consent_page(self) -> None:
+        bazaar = (ROOT / "site" / "mirrors.html").read_text(encoding="utf-8")
+        join = (ROOT / "site" / "join.html").read_text(encoding="utf-8")
+        self.assertIn('class="caravan-join-button" href="join.html"', bazaar)
+        self.assertIn('class="caravan-consent"', join)
+        self.assertIn('class="caravan-join-button caravan-join-action"', join)
+        self.assertIn("CARAVAN-HOST-POLICY.md", join)
+
     def test_every_html_page_uses_the_same_primary_navigation(self) -> None:
         expected_headings = ["Foundation", "External"]
         expected_labels = [
