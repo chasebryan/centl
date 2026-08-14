@@ -47,6 +47,7 @@ jobs:
       - uses: ocaml/setup-ocaml@c1574629b7cc38ef189d7228c2794fb5f9042478 # v3.7.1
         with:
           ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
       - name: Build and smoke the three commands
         run: |
           set -eu
@@ -89,22 +90,36 @@ jobs:
   windows-product:
     name: Windows Camp product
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gmp
+            mingw-w64-x86_64-mpfr
+            mingw-w64-x86_64-flint
+            mingw-w64-x86_64-make
+            unzip
+            patch
+            diffutils
+            tar
       - uses: ocaml/setup-ocaml@c1574629b7cc38ef189d7228c2794fb5f9042478 # v3.7.1
         with:
           ocaml-compiler: ocaml-base-compiler.4.14.1
+          windows-compiler: mingw
+          windows-environment: msys2
+          opam-pin: false
       - name: Build and smoke the three commands
-        shell: bash
+        shell: msys2 {0}
         run: |
           set -eu
-          opam install --yes conf-pkg-config
-          opam install --yes --assume-depexts dune.3.24.1 zarith.1.14 yojson.2.2.2 \
-            conf-gmp conf-mpfr conf-flint ||
-            opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 \
-              conf-gmp conf-mpfr conf-flint
+          opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
           eval "$(opam env)"
           make marsa-smoke
