@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FCF research note on minimal Type A/B witness depth and congruence shadow structure in the Erdős-Straus problem.">
+  <title>Erdős-Straus Type A/B shadow research — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/research-erdos-straus.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/research-erdos-straus.html">
+  <meta property="og:title" content="Erdős-Straus Type A/B witness depth and congruence shadow structure">
+  <meta property="og:description" content="A Wellspring Candidate from FCF research: a minimal Type A/B depth invariant, certified frontier, exact trap cardinality, and congruence-layer shadow relation.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
+    <div class="title"><h1>Erdős-Straus Type A/B shadow research</h1><p>Wellspring Candidate · identified August 14, 2026</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul><li><a href="research-erdos-straus.html">Erdős-Straus Type A/B</a></li></ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">Complete technical record</a></li>
+      </ul>
+    </nav>
+    <main>
+      <p><strong>Status: Wellspring Candidate.</strong> This page reports a potentially new structural lens on the Type A/B congruence system used in research on the Erdős-Straus conjecture. Novelty and priority remain under review. The Erdős-Straus conjecture remains open.</p>
+
+      <h2>What the candidate contribution is</h2>
+      <p>The Type A and Type B solution forms are not new. Miguel Angel López introduced and studied those structures and conjectured that every prime has a Type A or Type B solution. The FCF candidate contribution is the structure built on top of that framework: a minimal first-hit depth, exact layer cardinality, a proof that the depth is unbounded over primes, and a CRT-based shadow relation showing that many later congruence layers are mathematically redundant.</p>
+
+      <p>Define <code>m(k)=4k-1</code> and the Type A/B trap set</p>
+      <pre><code>T_k = {-d, -4d mod (4k-1) : d divides k}.</code></pre>
+      <p>The Type A/B witness depth is</p>
+      <pre><code>C_AB(p) = min { k &gt;= 1 : p mod (4k-1) is in T_k }.</code></pre>
+      <p>This is the minimum product <code>d*n</code> among López Type A/B witnesses. It is intentionally called <code>C_AB</code>, not a global Erdős-Straus complexity measure.</p>
+
+      <h2>Certified frontier through 10,000,000</h2>
+      <p>FCF searched the six classical difficult residue classes modulo 840: <code>1, 121, 169, 289, 361, 529</code>. There were 20,513 selected primes through 10,000,000. Every one received a Type A/B witness by depth 2622.</p>
+      <table class="directory">
+        <tr><th>p</th><th>C_AB(p)</th><th>Type</th><th>d,n</th><th>m</th></tr>
+        <tr><td>1009</td><td>3</td><td>B</td><td>1, 3</td><td>11</td></tr>
+        <tr><td>1201</td><td>8</td><td>A</td><td>2, 4</td><td>31</td></tr>
+        <tr><td>2521</td><td>22</td><td>B</td><td>11, 2</td><td>87</td></tr>
+        <tr><td>3361</td><td>25</td><td>B</td><td>5, 5</td><td>99</td></tr>
+        <tr><td>9601</td><td>28</td><td>A</td><td>14, 2</td><td>111</td></tr>
+        <tr><td>33289</td><td>45</td><td>B</td><td>9, 5</td><td>179</td></tr>
+        <tr><td>76441</td><td>70</td><td>B</td><td>14, 5</td><td>279</td></tr>
+        <tr><td>83449</td><td>170</td><td>A</td><td>17, 10</td><td>679</td></tr>
+        <tr><td>1095481</td><td>245</td><td>A</td><td>5, 49</td><td>979</td></tr>
+        <tr><td>1423321</td><td>1050</td><td>A</td><td>35, 30</td><td>4199</td></tr>
+        <tr><td>2031121</td><td>1403</td><td>B</td><td>23, 61</td><td>5611</td></tr>
+        <tr><td>4728649</td><td>1435</td><td>B</td><td>5, 287</td><td>5739</td></tr>
+        <tr><td>9658489</td><td><strong>2622</strong></td><td>B</td><td>69, 38</td><td>10487</td></tr>
+      </table>
+      <p>A separate verifier exhaustively rejected every smaller Type A/B layer for each of the thirteen frontier records. For 9,658,489 it rejected layers 1 through 2621 before finding the Type B witness <code>d=69, n=38, q=921</code> at layer 2622.</p>
+
+      <h2>CENTL exact verification</h2>
+      <p>The record witness gives the exact unit-fraction identity</p>
+      <pre><code>4/9658489
+= 1/2414862
++ 1/613787317461
++ 1/25324558158</code></pre>
+      <p>CENTL verified the closed exact rational equality and separately verified the full polynomial family</p>
+      <pre><code>P(t) = 10487*t - 38
+X(t) = 2622*t
+Y(t) = 69*t*(10487*t - 38)
+Z(t) = 2622*(10487*t - 38)</code></pre>
+      <p>through the cross-multiplied identity <code>4XYZ = PYZ + PXZ + PXY</code>. At <code>t=921</code>, <code>P(t)=9658489</code>.</p>
+
+      <h2>Exact trap cardinality</h2>
+      <p>If <code>tau(k)</code> denotes the number of divisors of <code>k</code>, the experiment produced and checked the exact formula</p>
+      <pre><code>|T_k| = 2*tau(k) - 1 - [4 divides k]*tau(k/4).</code></pre>
+      <p>The subtraction comes from one universal cross-collision and an additional family of collisions exactly when 4 divides <code>k</code>. For <code>k=2622</code>, <code>tau(k)=16</code>, so the layer contains exactly 31 distinct Type A/B trap residues.</p>
+
+      <h2>No universal constant depth</h2>
+      <p>For every fixed <code>K</code>, let <code>L_K</code> be the least common multiple of 840 and all <code>4k-1</code> with <code>1 &lt;= k &lt;= K</code>. Dirichlet's theorem supplies infinitely many primes <code>p = 1 mod L_K</code>. Such primes lie in the hard class <code>1 mod 840</code> and reduce to 1 at every Type A/B modulus through level <code>K</code>. But 1 cannot equal any trap residue <code>-d</code> or <code>-4d</code> at those levels. Therefore <code>C_AB(p) &gt; K</code>.</p>
+      <p>So if López's Type A/B coverage conjecture is true, its witnesses must still occur at unbounded depths. A finite universal cutoff cannot prove the conjecture.</p>
+
+      <h2>Congruence shadowing</h2>
+      <p>The most revealing experimental turn came from conditional hazard analysis. Several layers had exactly zero first hits even though a prime-conditioned model expected many. The missing variable was survival history.</p>
+      <p>An admissible trap class at layer <code>k</code> combines a hard residue <code>h mod 840</code> with a trap residue <code>t mod (4k-1)</code>. CRT turns that into one progression <code>r mod L</code>. At an earlier layer <code>j</code>, the progression occupies exactly the residue fibre congruent to <code>r mod gcd(L,4j-1)</code>. If that entire fibre lies in <code>T_j</code>, the later class is already covered and is directly shadowed.</p>
+
+      <h3>Example: k = 14 is mathematically redundant</h3>
+      <p>For <code>k=14</code>, the modulus is 55. The relevant admissible trap residues reduce modulo 11 to <code>8, 7, 10</code>. But layer 3 has modulus 11 and trap set <code>{7,8,10}</code>. Therefore every admissible hard-prime hit at layer 14 was already a hit at layer 3.</p>
+      <pre><code>k=14  m=55  classes=9  shadowed=9  novel=0  sources=[3]</code></pre>
+      <p>Consequently no selected hard prime can have <code>C_AB(p)=14</code>. The observed zero at layer 14 is an exact congruence consequence, not a statistical accident.</p>
+
+      <h2>Selected shadow-map results</h2>
+      <table class="directory">
+        <tr><th>k</th><th>classes</th><th>shadowed</th><th>directly novel</th><th>novelty fraction</th></tr>
+        <tr><td>14</td><td>9</td><td>9</td><td>0</td><td>0.0000</td></tr>
+        <tr><td>24</td><td>15</td><td>9</td><td>6</td><td>0.4000</td></tr>
+        <tr><td>25</td><td>12</td><td>0</td><td>12</td><td>1.0000</td></tr>
+        <tr><td>36</td><td>84</td><td>60</td><td>24</td><td>0.2857</td></tr>
+        <tr><td>40</td><td>36</td><td>0</td><td>36</td><td>1.0000</td></tr>
+        <tr><td>51</td><td>8</td><td>0</td><td>8</td><td>1.0000</td></tr>
+        <tr><td>62</td><td>42</td><td>42</td><td>0</td><td>0.0000</td></tr>
+        <tr><td>70</td><td>48</td><td>24</td><td>24</td><td>0.5000</td></tr>
+        <tr><td>75</td><td>66</td><td>66</td><td>0</td><td>0.0000</td></tr>
+        <tr><td>170</td><td>16</td><td>0</td><td>16</td><td>1.0000</td></tr>
+        <tr><td>1050</td><td>282</td><td>216</td><td>66</td><td>0.2340</td></tr>
+        <tr><td>1403</td><td>42</td><td>18</td><td>24</td><td>0.5714</td></tr>
+        <tr><td>1435</td><td>48</td><td>0</td><td>48</td><td>1.0000</td></tr>
+        <tr><td>2622</td><td>186</td><td>0</td><td>186</td><td>1.0000</td></tr>
+      </table>
+      <p>The optimized computation found hundreds of fully directly shadowed layers through <code>k=3000</code>. Examples begin <code>14&lt;-3</code>, <code>29&lt;-6</code>, <code>39&lt;-8</code>, <code>59&lt;-12</code>, <code>62&lt;-5,10,24</code>, and <code>75&lt;-6,10,29</code>.</p>
+
+      <h2>The remaining caveat: union shadowing</h2>
+      <p>A directly fresh class is one that no single earlier layer covers completely. Several earlier layers might still cover different pieces whose union covers the whole class. The current shadow map has not yet solved that stronger union-shadow problem.</p>
+      <p>The particular class containing <code>p=9658489</code> is known to contain at least one globally surviving point through layer 2621 because the independent minimality verifier checked the prime itself. That does not automatically establish union irredundancy for all 186 admissible classes at layer 2622.</p>
+
+      <h2>Novelty status</h2>
+      <p>The current novelty candidate is the package consisting of <strong>minimal Type A/B witness depth, certified frontier behavior, exact trap cardinality, unboundedness, and the CRT congruence-shadow hierarchy that exposes redundant Type A/B layers</strong>.</p>
+      <p>A targeted 2026 primary-literature search did not find this exact invariant and shadow structure. That is not a priority proof. FCF will keep the result at Wellspring Candidate status until a broader prior-art review, independent mathematical review, and stronger union-shadow analysis are complete.</p>
+
+      <h2>What comes next</h2>
+      <p>The immediate research target is the irredundant Type A/B sieve: classify completely redundant depths, compute union shadowing, identify infinite shadow families, study the growth of <code>C_AB</code>, and determine whether the remaining irredundant congruence structure can illuminate López's global Type A/B coverage conjecture.</p>
+
+      <p><strong>Complete technical record:</strong> <a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">WS-CAND-003 on GitHub</a>.</p>
+      <p><strong>Primary prior work:</strong> <a href="https://arxiv.org/abs/2404.01508">López, A Complete Congruence System for the Erdos-Straus Conjecture</a>.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Research publication · Candidate status, not a claim that Erdős-Straus is solved.</footer>
+</div>
+</body>
+</html>
