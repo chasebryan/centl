@@ -20,20 +20,27 @@ on:
         required: false
         default: "80"
       trials:
-        description: Repeated held-out trials for v2
+        description: Repeated held-out trials
         required: false
         default: "12"
       folds:
-        description: Stratified cross-validation folds for v2
+        description: Stratified cross-validation folds
         required: false
         default: "5"
+      depth_floor:
+        description: High-depth selection floor for v3
+        required: false
+        default: "25"
   push:
     branches:
       - main
     paths:
       - 'research/erdos-straus/CRYPTOLOGY.md'
+      - 'research/erdos-straus/CRYPTOLOGY-THEORY.md'
+      - 'research/erdos-straus/CRYPTOLOGY-RESULTS-2026-08-14.md'
       - 'research/erdos-straus/crypto_probe.py'
       - 'research/erdos-straus/crypto_probe_v2.py'
+      - 'research/erdos-straus/crypto_probe_v3.py'
       - 'research/erdos-straus/cryptology-contracts.centl'
       - '.github/workflows/erdos-straus-cryptology.yml'
       - 'src/**'
@@ -82,6 +89,7 @@ jobs:
           KFP: ${{ github.event.inputs.k_fingerprint }}
           TRIALS: ${{ github.event.inputs.trials }}
           FOLDS: ${{ github.event.inputs.folds }}
+          DEPTH_FLOOR: ${{ github.event.inputs.depth_floor }}
         run: |
           set -euo pipefail
           bits=${BITS:-39}
@@ -90,22 +98,29 @@ jobs:
           kfp=${KFP:-80}
           trials=${TRIALS:-12}
           folds=${FOLDS:-5}
+          depth_floor=${DEPTH_FLOOR:-25}
           for pair in \
             "bits:$bits" \
             "samples:$samples" \
             "kmax:$kmax" \
             "kfp:$kfp" \
             "trials:$trials" \
-            "folds:$folds"; do
+            "folds:$folds" \
+            "depth_floor:$depth_floor"; do
             name=${pair%%:*}; value=${pair#*:}
             case "$value" in (*[!0-9]*|'') echo "invalid $name: $value" >&2; exit 2;; esac
           done
+          if [ "$depth_floor" -ge "$kfp" ]; then
+            echo "depth_floor must be below k_fingerprint" >&2
+            exit 2
+          fi
           echo "bits=$bits" >> "$GITHUB_OUTPUT"
           echo "samples=$samples" >> "$GITHUB_OUTPUT"
           echo "kmax=$kmax" >> "$GITHUB_OUTPUT"
           echo "kfp=$kfp" >> "$GITHUB_OUTPUT"
           echo "trials=$trials" >> "$GITHUB_OUTPUT"
           echo "folds=$folds" >> "$GITHUB_OUTPUT"
+          echo "depth_floor=$depth_floor" >> "$GITHUB_OUTPUT"
 
       - name: Run cryptology fingerprint probe v1
         run: |
@@ -122,6 +137,18 @@ jobs:
           python3 research/erdos-straus/crypto_probe_v2.py \
             --bits '${{ steps.params.outputs.bits }}' \
             --samples '${{ steps.params.outputs.samples }}' \
+            --k-max '${{ steps.params.outputs.kmax }}' \
+            --k-fingerprint '${{ steps.params.outputs.kfp }}' \
+            --trials '${{ steps.params.outputs.trials }}' \
+            --folds '${{ steps.params.outputs.folds }}' \
+            --out cryptology-output
+
+      - name: Run high-depth source transmission probe v3
+        run: |
+          python3 research/erdos-straus/crypto_probe_v3.py \
+            --bits '${{ steps.params.outputs.bits }}' \
+            --samples '${{ steps.params.outputs.samples }}' \
+            --depth-floor '${{ steps.params.outputs.depth_floor }}' \
             --k-max '${{ steps.params.outputs.kmax }}' \
             --k-fingerprint '${{ steps.params.outputs.kfp }}' \
             --trials '${{ steps.params.outputs.trials }}' \
@@ -152,6 +179,8 @@ jobs:
           cat cryptology-output/cryptology-report.md >> "$GITHUB_STEP_SUMMARY"
           printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat cryptology-output/cryptology-v2-report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat cryptology-output/cryptology-v3-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload cryptology diagnostic bundle
         if: always()
