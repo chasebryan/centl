@@ -4,7 +4,7 @@
 This is a distribution/fingerprint experiment, not a cryptanalytic attack.
 It generates small deterministic prime populations, computes Type A/B depth
 and hit fingerprints, and compares public product-trap fingerprints of toy
-RSA moduli.  The true factors are retained only for scoring.
+RSA moduli. The true factors are retained only for scoring.
 """
 
 from __future__ import annotations
@@ -164,7 +164,7 @@ def main() -> None:
     traps = [set()] + [trap_set(k) for k in range(1, args.k_max + 1)]
     prod = product_traps(traps, args.k_fingerprint)
 
-    # A deliberately planted deeper-congruence family.  It shares p == 1 mod 840
+    # A deliberately planted deeper-congruence family. It shares p == 1 mod 840
     # with the hard1 control while additionally forcing p == 1 mod 11, 19, 23.
     structured_modulus = math.lcm(840, 11, 19, 23)
 
@@ -184,10 +184,14 @@ def main() -> None:
 
     summaries = {name: summarize(name, ps, traps, args.k_max, args.k_fingerprint) for name, ps in populations.items()}
 
-    depth_hists = {
-        name: Counter(str(cab_depth(p, traps, args.k_max)) if cab_depth(p, traps, args.k_max) is not None else f">{args.k_max}" for p in ps)
-        for name, ps in populations.items()
-    }
+    depth_hists = {}
+    for name, ps in populations.items():
+        counter = Counter()
+        for p in ps:
+            d = cab_depth(p, traps, args.k_max)
+            counter[str(d) if d is not None else f">{args.k_max}"] += 1
+        depth_hists[name] = counter
+
     tv = {}
     names = sorted(populations)
     for i, a in enumerate(names):
@@ -229,8 +233,8 @@ def main() -> None:
     a = summaries["hard1"]
     b = summaries["structured_hard1"]
     controlled_tv = tv["hard1__vs__structured_hard1"]
-    report = f"""# WS-CAND-003 cryptology probe\n\n"
-    report += f"Status: exploratory diagnostic only; no cryptographic break claimed.\n\n"
+    report = "# WS-CAND-003 cryptology probe\n\n"
+    report += "Status: exploratory diagnostic only; no cryptographic break claimed.\n\n"
     report += f"- bits: `{args.bits}`\n- samples per population: `{args.samples}`\n- C_AB search depth: `{args.k_max}`\n- fingerprint depth: `{args.k_fingerprint}`\n- deterministic seed: `{args.seed}`\n\n"
     report += "## Controlled prime-source comparison\n\n"
     report += "Both populations below satisfy `p == 1 mod 840`. The structured population additionally satisfies `p == 1 mod 11, 19, 23`. This isolates deeper planted congruence structure from the shared mod-840 condition.\n\n"
