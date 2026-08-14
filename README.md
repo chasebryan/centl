@@ -6,52 +6,71 @@ Exact-first mathematics, physics, and scientific computation.
 
 > Good maths should be free. Never manufacture mathematical certainty.
 
+## CENTL Marsa: install only what you need 🍎 🪟
+
+This branch is the macOS and Windows harbor for the current Camp software. It supports component-selective installation:
+
+```sh
+# exact mathematics only
+sh scripts/marsa-install --component centl
+
+# typed physics only
+sh scripts/marsa-install --component physics
+
+# scientific interpreter only
+sh scripts/marsa-install --component sci
+
+# all three public commands
+sh scripts/marsa-install --component all
+```
+
+A mathematician does not need to install Physics. A physicist does not need to install the mathematics CLI or SCi unless those surfaces are useful to their work.
+
+Start with the field guides on `main` for the scientist-facing path:
+
+- [🧮 📐 Mathematician onboarding](https://github.com/chasebryan/centl/blob/main/docs/MATHEMATICIANS.md)
+- [⚛️ 🔬 Physicist onboarding](https://github.com/chasebryan/centl/blob/main/docs/PHYSICISTS.md)
+
+Marsa builds from the shared source graph, so the checkout still contains shared build dependencies. The installed command surface is component-selective. GNU/Linux Oasis additionally publishes physically separate component archives so the download itself can be command-specific.
+
 ## Current release status
 
-**CENTL v0.14.0 is an Oasis release.**
+**CENTL v0.15.0 Al-Nur is the qualified Oasis release.** It lives on the `oasis` branch and is currently qualified for GNU/Linux x86_64.
 
-Oasis is the qualified stable product. It lives on the `oasis` branch.
-A camp does not replace it, inherit it, or become it.
-
-**FCF Camp #1** (`fcf-camp-001`) is the current stay. That is where the
-newest software and designs are used. It lives on `main` and `mirage`.
-It is not an Oasis declaration and not a SemVer product.
-
-**CENTL Marsa** is the harbor that ports that Camp stay to macOS and
-Windows. It is not Oasis.
+**FCF Camp #1** (`fcf-camp-001`) is the current stay on `main` and `mirage`. `CENTL-Marsa` ports that Camp-stable software to macOS and Windows. Marsa is not an Oasis declaration and has no SemVer effect.
 
 | Line | What it is |
 | --- | --- |
-| [`oasis`](https://github.com/chasebryan/centl/tree/oasis) | Qualified stable product. Install this for the published calculator. |
+| [`oasis`](https://github.com/chasebryan/centl/tree/oasis) | Qualified stable product. |
 | [`main`](https://github.com/chasebryan/centl/tree/main) | Developer distribution and current Camp stay. |
 | [`mirage`](https://github.com/chasebryan/centl/tree/mirage) | Laboratory. Installable. Never a full release. |
-| [`CENTL-Marsa`](https://github.com/chasebryan/centl/tree/CENTL-Marsa) | Windows and macOS harbor of the Camp stay. |
+| [`CENTL-Marsa`](https://github.com/chasebryan/centl/tree/CENTL-Marsa) | macOS and Windows harbor of the Camp stay. |
 
-See [docs/OASIS.md](docs/OASIS.md) and
-[FCF Camps](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md).
+See [CENTL Marsa documentation](https://github.com/chasebryan/centl/blob/main/docs/CENTL-MARSA.md) and [FCF Camps](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md).
 
-## Install the Oasis product
+## macOS
 
-```sh
-curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
-sh install
-centl-sci
-```
-
-GNU/Linux x86_64. The installer checks the archive, then activates.
-Details: [docs/INSTALL.md](docs/INSTALL.md).
+Homebrew is required. From this branch:
 
 ```sh
-centl '0.1 + 0.2'
-centl-physics convert 100 cm m
+sh scripts/marsa-install --component centl      # mathematics only
+sh scripts/marsa-install --component physics    # physics only
+sh scripts/marsa-install --component sci        # SCi only
 ```
 
-## Use the current Camp stay
+The macOS Camp product is built and smoke-tested in the Marsa workflow. It is not Oasis-qualified.
 
-Clone `main` (or `mirage` if you want the laboratory). That tree is
-where current work is inhabited on Linux. On macOS or Windows, check out
-`CENTL-Marsa` and run `sh scripts/marsa-install`. The camp notes are
-[docs/releases/camp-001.md](https://github.com/chasebryan/centl/blob/main/docs/releases/camp-001.md).
+## Windows
+
+Use an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. Git and `opam` must be available in that environment.
+
+```sh
+sh scripts/marsa-install --component centl
+sh scripts/marsa-install --component physics
+sh scripts/marsa-install --component sci
+```
+
+The Windows dependency and FLINT harbor is CI-checked. The full Windows product CI job remains disabled until the OCaml/MinGW runtime and numeric-library toolchains are unified, so a successful Windows Marsa build is not an Oasis claim.
 
 ## Commands
 
@@ -61,22 +80,11 @@ where current work is inhabited on Linux. On macOS or Windows, check out
 | `centl-physics` | Typed exact-first physics |
 | `centl-sci` | Local scientific interpreter. Not a chatbot |
 
-Exact values stay exact. Approximations carry justified bounds.
-Unsupported work stays visible. The contract is
-[docs/NUMERICS.md](docs/NUMERICS.md).
-
-## Read next
-
-- [Installation](docs/INSTALL.md)
-- [Documentation index](docs/README.md)
-- [Contributing](CONTRIBUTING.md)
-- [Security](SECURITY.md)
-- Site: [freecomputation.org](https://freecomputation.org/)
+Exact values stay exact. Approximations carry justified bounds. Unsupported work stays visible. The numerical contract is [docs/NUMERICS.md](docs/NUMERICS.md).
 
 ## License
 
-Software is Apache-2.0. Documentation is CC BY 4.0 where identified.
-Branding is separate: [LICENSING.md](LICENSING.md).
+Software is Apache-2.0. Documentation is CC BY 4.0 where identified. Branding is separate: [LICENSING.md](LICENSING.md).
 
 Developed under the **Free Computation Foundation**.
 
