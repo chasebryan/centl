@@ -1,0 +1,19 @@
+[Unit]
+Description=FCF CARAVAN public coordinator
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/home/chasebryan/centl
+Environment=PYTHONPATH=/var/home/chasebryan/centl
+ExecStart=/usr/bin/python3 -m caravan.public_service --database /var/home/chasebryan/.local/state/fcf-caravan/coordinator.sqlite3 --policy /var/home/chasebryan/centl/docs/CARAVAN-HOST-POLICY.md --policy-version FCF-CARAVAN-HOST-v1 --agent-version 1.0.2 --port 8789
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/home/chasebryan/.local/state/fcf-caravan
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target
