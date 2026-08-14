@@ -15,6 +15,8 @@ target.
   stay. Newest software and designs are used here. A camp is not Oasis.
 - `oasis` is the qualified stable product. Do not open ordinary pull requests
   against it and do not declare Oasis from a camp.
+- `CENTL-Marsa` is the undeletable Windows and macOS harbor of the Camp stay.
+  Do not treat a Marsa build as Oasis.
 
 The published Oasis remains CENTL v0.14.0. Camp #1 is the inhabited stay.
 

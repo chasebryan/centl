@@ -47,6 +47,7 @@ class SiteCopyTests(unittest.TestCase):
         html = (SITE / "index.html").read_text(encoding="utf-8")
         self.assertIn("centl/oasis/install", html)
         self.assertIn("FCF Camp #1", html)
+        self.assertIn("CENTL Marsa", html)
         self.assertNotIn("proposal.html", html)
         self.assertNotIn("Why simple HTML", html)
         self.assertNotIn("CENTL-MIRAGE", html)

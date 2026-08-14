@@ -1,17 +1,18 @@
 # CENTL-SCi platform support
 
-CENTL and CENTL-SCi currently support **GNU/Linux only**.
+CENTL and CENTL-SCi currently ship a **GNU/Linux** Oasis product. The
+inhabited Camp stay is also Linux-first. **CENTL Marsa** is the harbor that
+ports that Camp stay to macOS and Windows. Marsa is not Oasis.
 
 Linux is the reference platform, the primary development environment, the native
 release target, and the only release-blocking platform for the Caramels series.
 Build, test, packaging, installer, filesystem, local-model, workspace, extension,
 and self-extension behavior are specified and validated against Linux.
 
-macOS and Windows are currently **unsupported**. They may continue to work in
-parts of the codebase because CENTL avoids unnecessary platform lock-in where
-portable code is natural, but the project makes no compatibility, packaging,
-installer, CI, or release promise for either operating system. Failures that are
-specific to macOS or Windows do not block Linux development or a CENTL release.
+macOS and Windows are **Marsa harbor targets**, not Oasis targets. A Marsa
+build, installer probe, or CI job does not inherit Oasis assurance. Failures
+that are specific to macOS or Windows do not block the Linux Oasis product or
+the Linux Camp stay.
 
 This is an engineering-scope decision. CENTL-SCi increasingly depends on
 operating-system-sensitive behavior including persistent terminal interaction,

@@ -22,9 +22,10 @@ scientific, verification, security, MIRAGE, SCi, and CARAVAN work could progress
 without continuously multiplying platform-specific engineering costs.
 
 That decision remains useful during rapid development. Three Horizons does not
-reverse the Linux-first principle prematurely. Instead, it gives the project a
-clear destination: once the core is mature enough, CENTL should deliberately
-reunify its supported user base around a common, qualified scientific product.
+reverse the Linux-first principle prematurely. [CENTL Marsa](CENTL-MARSA.md)
+is the harbor that ports the current Camp stay to macOS and Windows so that
+work can begin without pretending those builds are Oasis. The destination
+remains a later independently qualified three-platform Oasis.
 
 The desired outcome is not merely that the source happens to compile on three
 operating systems. The desired outcome is that users on the supported GNU/Linux,
