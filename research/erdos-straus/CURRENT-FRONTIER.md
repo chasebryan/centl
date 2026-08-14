@@ -1,28 +1,66 @@
-# Current research frontier: from shadow completeness to the small-prime kernel
+# Current research frontier: from shadow completeness to the fiber kernel
 
 **Date:** 2026-08-14  
 **Status:** active theorem program  
-**Claim boundary:** Erdos-Straus remains open; universal Lopez Type A/B coverage and universal Direct-Shadow Completeness remain unproved.
+**Claim boundary:** Erdős-Straus remains open; universal López Type A/B coverage and universal Direct-Shadow Completeness remain unproved.
 
 This is the short moving-frontier record. The full synthesis remains [DIAMOND.md](DIAMOND.md).
 
 ## What is now exact
 
-The candidatewise Direct-Shadow attack has reached `k<=1000`:
+The candidatewise Direct-Shadow attack has reached `k<=1200`:
 
-- `46,254` admissible hard-compatible Type A/B candidates;
-- `12,610` directly shadowed candidates;
-- `33,644` directly novel candidates;
-- `33,644/33,644` explicit integer avoiding witnesses;
-- `33,644/33,644` reduced avoiding progressions;
+- `57,367` admissible hard-compatible Type A/B candidates;
+- `15,897` directly shadowed candidates;
+- `41,470` directly novel candidates;
+- `41,470/41,470` explicit integer avoiding witnesses;
+- `41,470/41,470` reduced avoiding progressions;
 - `0` unresolved integer candidates;
 - `0` unresolved reduced candidates;
 - independent verifier verdict: `VERIFIED`;
-- CENTL exact certification of selected hardest progression identities.
+- CENTL exact certification of selected hardest progression identities;
+- hashes and artifact publication completed successfully.
 
-See [DIRECT-SHADOW-K1000.md](DIRECT-SHADOW-K1000.md).
+See [DIRECT-SHADOW-K1200.md](DIRECT-SHADOW-K1200.md).
 
-The universal conjecture remains open, but no candidatewise union-shadow counterexample has appeared through one thousand layers.
+The universal conjecture remains open, but no candidatewise union-shadow counterexample has appeared through twelve hundred layers.
+
+## Exact coordinate locality through k=1200
+
+The first complete prime-power coordinate-core diagnostic is also frozen for all `41,470` directly novel candidates.
+
+A canonical unary-safe local assignment already solves
+
+\[
+15,715/41,470=37.895\%
+\]
+
+of the candidates.
+
+Using each already-certified reduced witness only as a guide for which local coordinate values to substitute, every candidate can be reached from that basepoint by at most
+
+\[
+\boxed{9}
+\]
+
+prime-power coordinate changes.
+
+The cumulative guided upper bounds are:
+
+```text
+0 changes: 37.895%
+<=1:       71.264%
+<=2:       88.847%
+<=3:       96.122%
+<=4:       98.727%
+<=5:       99.612%
+<=6:       99.908%
+<=7:       99.990%
+<=8:       99.998%
+<=9:      100.000%
+```
+
+These repair counts are not proven minimal and do not independently establish witness existence. They are proof-mining evidence that the globally large congruence systems have surprisingly low local repair complexity.
 
 ## The covering-system bridge
 
@@ -35,9 +73,9 @@ s\bmod q_j\in R_j,
 
 Every nontrivial `q_j` is odd. Union shadowing is therefore a special structured odd covering problem.
 
-The general Erdos-Selfridge odd covering problem is classical and open; our system is a much more restricted divisor-generated subclass with repeated moduli and multi-residue layers. See [ODD-COVERING-BRIDGE.md](ODD-COVERING-BRIDGE.md).
+The general Erdős-Selfridge odd covering problem is classical and open; our system is a much more restricted divisor-generated subclass with repeated moduli and multi-residue layers. See [ODD-COVERING-BRIDGE.md](ODD-COVERING-BRIDGE.md).
 
-## New theorem: prime-power peeling
+## Prime-power peeling theorem
 
 Write
 
@@ -65,9 +103,9 @@ Adding the one local residue forbidden by the reducedness condition gives the au
 
 See [SHADOW-KERNEL.md](SHADOW-KERNEL.md).
 
-## Universal finite kernel through k=1000
+## Universal finite large-prime elimination
 
-Using only the trap sizes and the fact that `p|q_j` implies `p|4j-1`, define the conservative candidate-independent bound
+Using only the trap sizes and the implication `p|q_j => p|4j-1`, define the conservative candidate-independent bound
 
 \[
 B_p(k)
@@ -75,72 +113,92 @@ B_p(k)
 \frac{1+\sum_{j<k,\ p\mid4j-1}|T_j|}{p}.
 \]
 
-Exact evaluation at `k=1000` gives
+At `k=1000`, exact evaluation gives `B_p(1000)<1` for every prime `p>=113`, so every admissible candidate in that range can universally shed all parameter-prime coordinates at least `113` before the true obstruction is considered.
+
+At `k=1200`, the analogous first bound pushes the possible universal kernel only through the small-prime region: primes `p>=127` are automatically peelable under the same conservative criterion.
+
+Candidate-specific elimination is much stronger.
+
+## New theorem: fiber peeling
+
+The coarse local load still charges every prime coordinate for all of `|R_j|`, even though after the other coordinates are fixed only one fiber of `R_j` can matter.
+
+For
 
 \[
-B_p(1000)<1
+q_j=p^{a_{j,p}}c,
+\qquad(p,c)=1,
 \]
 
-for every prime `p>=113`.
+let `f_{j,p}` be the maximum number of forbidden `p^{a_{j,p}}` residues lying above any one fixed value modulo `c`.
 
-Therefore every admissible candidate through `k=1000` can shed every parameter prime coordinate at least `113` before the genuine obstruction is even considered.
-
-Only 28 primes survive the universal first bound:
-
-```text
-3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
-53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109
-```
-
-Candidate-specific peeling is stronger still.
-
-This is the current theoretical pivot:
+Define
 
 \[
-\boxed{
-\text{global union-cover problem}
-\longrightarrow
-\text{provably peelable large-prime exterior}
-\longrightarrow
-\text{small-prime shadow kernel}.
-}
+\Lambda_p
+=
+\sum_{p\mid q_j}\frac{f_{j,p}}{p^{a_{j,p}}}.
 \]
 
-## Coordinate-core proof mining
-
-A new analyzer, [`shadow_coordinate_core.py`](shadow_coordinate_core.py), decomposes certified candidates into prime-power coordinates, satisfies all unary constraints first, prefers local residue `1` where possible, and measures how many coordinate changes are required to reach a globally satisfying assignment.
-
-Exploratory analysis of the `k<=1000` certified bundle found a strikingly local pattern: most candidates are already satisfied by the unary-safe basepoint or require only a few prime-coordinate changes. The analyzer is now part of the automated research pipeline so future numbers will be regenerated and frozen with the certificate bundle rather than treated as an informal notebook observation.
-
-## Attack currently running
-
-The automated candidatewise falsification range has been raised to
+Then
 
 \[
-\boxed{k\le1200}
+\boxed{\Lambda_p<1}
+\]
+
+is an exact stronger peeling criterion. Adding the local reducedness cost produces `Lambda_p^*` for prime realization.
+
+See [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md).
+
+This is a genuine theoretical advance over the raw candidate search: it explains how a coordinate can be eliminated by the internal fiber geometry of the Type A/B forbidden sets.
+
+## Fiber-kernel proof mining
+
+An exact analyzer, [`shadow_fiber_kernel_analyzer.py`](shadow_fiber_kernel_analyzer.py), now implements this theorem candidate by candidate without using the stored avoiding witness to decide peelability.
+
+Exploratory diagnostics from the already verified `k<=1000` bundle are striking:
+
+- an evenly distributed `5,000`-candidate diagnostic sample had an empty fiber kernel in `3,686` cases, about `73.7%`;
+- every nonempty residual kernel in that sample used primes at most `23`;
+- the two dominant nonempty signatures were `{3,11,13}` and `{3,5,11,13,17,19,23}`;
+- the difficult `(k,h,t)=(987,169,3935)` case collapsed to `{3,11,13}`;
+- the `(648,529,2585)` case peeled completely.
+
+These sample statistics remain proof-mining diagnostics until a complete automated bundle freezes the fiber analysis across the entire candidate range. The fiber peeling theorem itself is exact regardless of those sample numbers.
+
+## Next automated attack
+
+The workflow has now been expanded to run four distinct stages after discovery:
+
+1. independent candidate verifier;
+2. coordinate-core locality diagnostic;
+3. exact coarse shadow-kernel peeling;
+4. exact fiber shadow-kernel peeling;
+5. CENTL symbolic certification, hashing, and artifact publication.
+
+The next configured falsification target is
+
+\[
+\boxed{k\le1500}
 \]
 
 with witness search through
 
 \[
-\boxed{s\le2,000,000}.
+\boxed{s\le3,000,000}.
 \]
 
-The same run now also mines the prime-power coordinate core after independent witness verification and before CENTL certification/hashing.
+This deliberately crosses the earlier record-depth region around `k=1403` and `k=1435` while simultaneously testing whether the new kernel machinery continues to compress the obstruction.
 
-For reference, the candidate-independent bound at `k=1200` already predicts that every prime coordinate `p>=127` is universally peelable; only primes through `113` can survive the first universal kernel bound.
-
-No result from the in-progress run should be treated as established until the workflow finishes and the independent verifier, coordinate analyzer, CENTL checks, hashes, and artifact upload are green.
+No result from that next run should be treated as established until all verification and certification stages finish green.
 
 ## The problem we are actually trying to solve now
 
-The immediate theorem target is no longer "find more examples."
+The immediate theorem target has become much more precise:
 
-It is:
+> Prove that every directly novel Type A/B pullback system peels to a small-prime fiber kernel, and prove that every such kernel has a reduced satisfying assignment.
 
-> Prove that the small-prime Type A/B shadow kernel always has a reduced satisfying assignment whenever no direct shadow exists.
-
-A successful proof would convert the candidatewise finite phenomenon into universal DSC-P:
+A successful proof would give universal DSC-P:
 
 \[
 \text{not directly shadowed}
