@@ -1,0 +1,171 @@
+name: Component-selective distribution
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/component-distribution.yml
+      - install-component
+  workflow_run:
+    workflows:
+      - Mirage rolling distribution
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: centl-distribution-writer
+  cancel-in-progress: false
+
+jobs:
+  slice:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    name: Publish command-only archives
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Slice qualified and rolling bundles without changing executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4; do
+            git fetch origin distribution
+            git switch --force-create distribution origin/distribution
+
+            work="$RUNNER_TEMP/centl-components"
+            rm -rf "$work"
+            mkdir -p "$work"
+
+            slice_one() {
+              source_archive=$1
+              component=$2
+              command_name=$3
+              output_archive=$4
+
+              local_dir="$work/$(printf '%s' "$component-$RANDOM-$RANDOM")"
+              mkdir -p "$local_dir/extracted"
+              tar --no-same-owner --no-same-permissions -xzf "$source_archive" -C "$local_dir/extracted"
+              test -x "$local_dir/extracted/centl/bin/$command_name"
+              test -x "$local_dir/extracted/centl/libexec/$command_name"
+
+              source_sha=$(sha256sum "$source_archive" | awk '{print $1}')
+              printf '%s\n' "$component" > "$local_dir/extracted/centl/COMPONENT"
+              printf '%s\n' "$(basename "$source_archive")" > "$local_dir/extracted/centl/SOURCE-BUNDLE"
+              printf '%s\n' "$source_sha" > "$local_dir/extracted/centl/SOURCE-BUNDLE-SHA256"
+
+              find "$local_dir/extracted/centl/bin" -maxdepth 1 -type f ! -name "$command_name" -delete
+              find "$local_dir/extracted/centl/libexec" -maxdepth 1 -type f ! -name "$command_name" -delete
+
+              test -x "$local_dir/extracted/centl/bin/$command_name"
+              test -x "$local_dir/extracted/centl/libexec/$command_name"
+              for other in centl centl-physics centl-sci; do
+                if test "$other" != "$command_name"; then
+                  test ! -e "$local_dir/extracted/centl/bin/$other"
+                  test ! -e "$local_dir/extracted/centl/libexec/$other"
+                fi
+              done
+
+              mkdir -p "$(dirname "$output_archive")"
+              tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
+                -czf "$output_archive" -C "$local_dir/extracted" centl
+              sha256sum "$output_archive" > "$output_archive.sha256"
+
+              case "$component" in
+                centl)
+                  test "$(tar -xOzf "$output_archive" centl/VERSION | head -n1)" != ''
+                  ;;
+                physics|sci) ;;
+              esac
+              rm -rf "$local_dir"
+            }
+
+            slice_directory() {
+              dir=$1
+              source="$dir/centl-linux-x86_64.tar.gz"
+              test -f "$source" || return 0
+              slice_one "$source" centl centl "$dir/centl-only-linux-x86_64.tar.gz"
+              slice_one "$source" physics centl-physics "$dir/centl-physics-only-linux-x86_64.tar.gz"
+              slice_one "$source" sci centl-sci "$dir/centl-sci-only-linux-x86_64.tar.gz"
+            }
+
+            while IFS= read -r archive; do
+              slice_directory "$(dirname "$archive")"
+            done < <(find channels/oasis -type f -name 'centl-linux-x86_64.tar.gz' -print | sort)
+
+            if test -d channels/mirage; then
+              while IFS= read -r archive; do
+                slice_directory "$(dirname "$archive")"
+              done < <(find channels/mirage -type f -name 'centl-linux-x86_64.tar.gz' -print | sort)
+            fi
+
+            git add channels/oasis channels/mirage 2>/dev/null || git add channels/oasis
+            if git diff --cached --quiet; then
+              echo 'Component distribution already matches aggregate bundles.'
+              exit 0
+            fi
+
+            git commit -m 'dist: publish component-selective CENTL archives'
+            if git -c "http.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" push origin HEAD:distribution; then
+              exit 0
+            fi
+
+            echo "distribution branch moved; retrying ($attempt/4)" >&2
+            git reset --hard origin/distribution
+            sleep $((attempt * 2))
+          done
+
+          echo 'could not update distribution branch after retries' >&2
+          exit 1
+
+      - name: Verify component archives are actually narrow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin distribution
+          git switch --force-create distribution-check origin/distribution
+
+          verify_dir() {
+            dir=$1
+            test -f "$dir/centl-linux-x86_64.tar.gz" || return 0
+            for spec in \
+              'centl:centl-only-linux-x86_64.tar.gz' \
+              'centl-physics:centl-physics-only-linux-x86_64.tar.gz' \
+              'centl-sci:centl-sci-only-linux-x86_64.tar.gz'; do
+              command_name=${spec%%:*}
+              asset=${spec#*:}
+              test -f "$dir/$asset"
+              sha256sum --check "$dir/$asset.sha256"
+              tar -tzf "$dir/$asset" | grep -Fqx "centl/bin/$command_name"
+              tar -tzf "$dir/$asset" | grep -Fqx "centl/libexec/$command_name"
+              for other in centl centl-physics centl-sci; do
+                if test "$other" != "$command_name"; then
+                  ! tar -tzf "$dir/$asset" | grep -Fqx "centl/bin/$other"
+                  ! tar -tzf "$dir/$asset" | grep -Fqx "centl/libexec/$other"
+                fi
+              done
+            done
+          }
+
+          latest=$(cat channels/oasis/LATEST)
+          verify_dir "channels/oasis/v$latest"
+          if test -f channels/mirage/latest/centl-linux-x86_64.tar.gz; then
+            verify_dir channels/mirage/latest
+          fi
