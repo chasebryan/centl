@@ -80,6 +80,70 @@ let builtins =
       summary = "symbolic substitution";
     };
     {
+      name = "gcd";
+      aliases = [ "greatest common divisor"; "highest common factor" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "exact greatest common divisor";
+    };
+    {
+      name = "lcm";
+      aliases = [ "least common multiple"; "lowest common multiple" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "exact least common multiple";
+    };
+    {
+      name = "fibonacci";
+      aliases = [ "fibonacci number"; "fib" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "exact Fibonacci number";
+    };
+    {
+      name = "sequence";
+      aliases = [ "sequence helper"; "exact sequence" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "bounded exact sequence evaluation";
+    };
+    {
+      name = "sum";
+      aliases = [ "summation"; "sigma" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "bounded exact summation";
+    };
+    {
+      name = "product";
+      aliases = [ "product series"; "pi product" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "bounded exact product";
+    };
+    {
+      name = "factorial";
+      aliases = [ "factorial number"; "n factorial" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "exact factorial of a nonnegative integer";
+    };
+    {
+      name = "recurrence";
+      aliases = [ "recurrence helper"; "recurrence solver" ];
+      category = "mathematics";
+      origin = Verified_core;
+      assurance = "core";
+      summary = "bounded first-order exact recurrence";
+    };
+    {
       name = "approx";
       aliases = [ "approximate"; "decimal"; "enclosure"; "significant digits" ];
       category = "mathematics";
@@ -247,13 +311,69 @@ let builtins =
           "modify value";
           "extend centl";
           "generate centl";
+          "make a function";
+          "write a function";
+          "let";
+          "teach yourself";
+          "local program";
         ];
       category = "build";
       origin = Caramels_runtime;
       assurance = "parser-validated local extension";
       summary =
-        "turns supported BUILD requests into native CENTL definitions, \
-         manifests, revisions, and live downstream session reloads";
+        "turns English or BUILD requests into native CENTL programs, spoken \
+         aliases, live session reloads, and honest restart advice";
+    };
+    {
+      name = "spoken aliases";
+      aliases =
+        [
+          "spoken";
+          "english alias";
+          "teach english";
+          "square of";
+          "harmonic mean of";
+        ];
+      category = "build";
+      origin = Caramels_runtime;
+      assurance = "local spoken lowering; not verified core";
+      summary =
+        "user-owned English phrases that lower to local programs without a \
+         restart";
+    };
+    {
+      name = "user dialect";
+      aliases =
+        [
+          "dialect";
+          "growth journal";
+          "export dialect";
+          "and then";
+          "my programs";
+        ];
+      category = "build";
+      origin = Caramels_runtime;
+      assurance = "user-owned downstream journal; not verified core";
+      summary =
+        "records local programs, spoken aliases, and session evidence as a \
+         replayable dialect the user owns";
+    };
+    {
+      name = "reviewed publish";
+      aliases =
+        [
+          "publish";
+          "pull request";
+          "github";
+          "prepare contribution";
+          "pack contribution";
+        ];
+      category = "build";
+      origin = Caramels_runtime;
+      assurance = "explicit grant; draft PR; GitHub remains approval";
+      summary =
+        "prepares and optionally submits a draft contribution to \
+         chasebryan/centl without storing tokens or targeting oasis";
     };
   ]
 

@@ -49,6 +49,61 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_mirage_fingerprint)
+ (modules test_sci_mirage_fingerprint)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_cegis)
+ (modules test_sci_mirage_cegis)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_policy)
+ (modules test_sci_mirage_policy)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_cycle)
+ (modules test_sci_mirage_cycle)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_wellspring)
+ (modules test_sci_wellspring)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_camps)
+ (modules test_sci_camps)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_rewrite)
+ (modules test_sci_mirage_rewrite)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_metamorphic)
+ (modules test_sci_mirage_metamorphic)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_scaffold_abi)
+ (modules test_sci_scaffold_abi)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_compose)
+ (modules test_sci_mirage_compose)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_mirage_doctor)
+ (modules test_sci_mirage_doctor)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sha256)
  (modules test_sha256)
  (libraries centl_lib alcotest))

@@ -65,6 +65,7 @@ class CaravanRetrievalTests(unittest.TestCase):
             stats = coordinator.network_stats()
             self.assertEqual(stats.available_caravans, 1)
             self.assertEqual(stats.verified_replicas, 1)
+            self.assertEqual(coordinator.cargo_loads(), 1)
 
     def test_truncated_transfer_is_never_promoted(self) -> None:
         with tempfile.TemporaryDirectory(prefix="centl-caravan-truncated-") as temp:
@@ -85,6 +86,7 @@ class CaravanRetrievalTests(unittest.TestCase):
                 )
             self.assertEqual(store.total_bytes(), 0)
             self.assertEqual(coordinator.network_stats().available_caravans, 0)
+            self.assertEqual(coordinator.cargo_loads(), 0)
 
     def test_appended_bytes_are_never_promoted(self) -> None:
         with tempfile.TemporaryDirectory(prefix="centl-caravan-appended-") as temp:

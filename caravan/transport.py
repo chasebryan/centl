@@ -357,6 +357,7 @@ class CarrierTransportClient:
         *,
         allow_loopback_http: bool = False,
         timeout: float = 5.0,
+        user_agent: str = "FCF-CARAVAN-carrier/1",
     ) -> None:
         if timeout <= 0:
             raise ValueError("transport timeout must be positive")
@@ -366,6 +367,9 @@ class CarrierTransportClient:
         )
         self.identity = identity
         self.timeout = float(timeout)
+        if not user_agent or any(char in user_agent for char in "\r\n"):
+            raise ValueError("transport user agent must be non-empty and single-line")
+        self.user_agent = user_agent
         self._session_token: str | None = None
 
     def _post(
@@ -376,7 +380,10 @@ class CarrierTransportClient:
         authenticated: bool = False,
     ) -> dict[str, Any]:
         payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": self.user_agent,
+        }
         if authenticated:
             if self._session_token is None:
                 raise TransportError("carrier session has not been established")
@@ -437,6 +444,13 @@ class CarrierTransportClient:
             raise TransportError("coordinator did not return a carrier session")
         self._session_token = token
 
+    def enroll(self, receipt: dict[str, object]) -> dict[str, Any]:
+        """Submit a signed host-policy receipt before opening a session."""
+
+        if not isinstance(receipt, dict):
+            raise TransportError("policy receipt must be an object")
+        return self._post("/v1/enroll", {"receipt": receipt})
+
     def heartbeat(self, *, load: float, capacity: int) -> None:
         self._post(
             "/v1/carrier/heartbeat",
@@ -464,3 +478,8 @@ class CarrierTransportClient:
 
     def disconnect(self) -> None:
         self._session_token = None
+
+    def withdraw(self) -> dict[str, Any]:
+        result = self._post("/v1/carrier/withdraw", {}, authenticated=True)
+        self.disconnect()
+        return result

@@ -231,9 +231,8 @@ jobs:
     timeout-minutes: 20
     permissions:
       actions: read
-      contents: write
+      contents: read
       pull-requests: read
-      statuses: write
     env:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       INSTALL_RESULT: ${{ needs.linux.result }}
@@ -248,22 +247,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Mark publication pending
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          payload=$(printf '{"state":"pending","context":"centl/oasis-publication","description":"Qualified Oasis publication running","target_url":"%s"}' "$target")
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
-            --data "$payload" >/dev/null
 
       - name: Require successful authoritative closed-event gates
         shell: bash
@@ -351,82 +334,10 @@ jobs:
               raise SystemExit("qualified verification attestation mismatch")
           PY
 
-      - name: Create exact SemVer tag if needed
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Refuse automated tag or GitHub release
         shell: bash
         run: |
           set -euo pipefail
-          existing=$(git ls-remote origin "refs/tags/$TAG" | awk 'NR == 1 { print $1 }')
-          if [ -n "$existing" ]; then
-            test "$existing" = "$HEAD_SHA"
-          else
-            gh api --method POST \
-              "repos/$GITHUB_REPOSITORY/git/refs" \
-              -f ref="refs/tags/$TAG" \
-              -f sha="$HEAD_SHA" >/dev/null
-          fi
-
-      - name: Publish exact qualified bytes if needed
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release create "$TAG" \
-              dist/centl-linux-x86_64.tar.gz \
-              dist/centl-linux-x86_64.tar.gz.sha256 \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "CENTL $TAG" \
-              --notes-file "docs/releases/$VERSION.md"
-          fi
-
-      - name: Reverify published bytes
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p published
-          gh release download "$TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --pattern 'centl-linux-x86_64.tar.gz' \
-            --pattern 'centl-linux-x86_64.tar.gz.sha256' \
-            --dir published
-          (cd published && sha256sum --check centl-linux-x86_64.tar.gz.sha256)
-          test "$(sha256sum dist/centl-linux-x86_64.tar.gz | awk '{print $1}')" = \
-               "$(sha256sum published/centl-linux-x86_64.tar.gz | awk '{print $1}')"
-
-      - name: Mark Oasis publication successful
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          payload=$(printf '{"state":"success","context":"centl/oasis-publication","description":"Qualified Oasis release published and reverified","target_url":"%s"}' "$target")
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
-            --data "$payload" >/dev/null
-
-      - name: Mark Oasis publication failed
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          payload=$(printf '{"state":"failure","context":"centl/oasis-publication","description":"Qualified Oasis publication failed","target_url":"%s"}' "$target")
-          curl --fail --silent --show-error \
-            --request POST \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
-            --data "$payload" >/dev/null
+          printf 'Qualified installer candidate %s is ready for human publication as %s.\n' \
+            "$HEAD_SHA" "$TAG"
+          printf 'Official Oasis publication is a reviewed SemVer tag of origin/oasis, not this workflow.\n'

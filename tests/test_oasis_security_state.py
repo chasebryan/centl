@@ -26,6 +26,70 @@ class SecurityStateTests(unittest.TestCase):
         )
         self.assertTrue(any("code-scanning" in item for item in failures))
 
+    def test_scorecard_job_level_contents_write_does_not_block(self) -> None:
+        failures = SECURITY.blocking_findings(
+            [
+                {
+                    "number": 67,
+                    "rule": {
+                        "id": "TokenPermissionsID",
+                        "security_severity_level": "high",
+                        "severity": "error",
+                    },
+                    "most_recent_instance": {
+                        "message": {
+                            "text": "score is 0: jobLevel 'contents' permission set to 'write'"
+                        }
+                    },
+                }
+            ],
+            [],
+            [],
+        )
+        self.assertEqual(failures, [])
+
+    def test_scorecard_top_level_contents_write_blocks(self) -> None:
+        failures = SECURITY.blocking_findings(
+            [
+                {
+                    "number": 68,
+                    "rule": {
+                        "id": "TokenPermissionsID",
+                        "security_severity_level": "high",
+                    },
+                    "most_recent_instance": {
+                        "message": {
+                            "text": "score is 0: topLevel 'contents' permission set to 'write'"
+                        }
+                    },
+                }
+            ],
+            [],
+            [],
+        )
+        self.assertTrue(any("68" in item for item in failures))
+
+    def test_scorecard_job_level_statuses_write_blocks(self) -> None:
+        failures = SECURITY.blocking_findings(
+            [
+                {
+                    "number": 66,
+                    "rule": {
+                        "id": "TokenPermissionsID",
+                        "security_severity_level": "high",
+                    },
+                    "most_recent_instance": {
+                        "message": {
+                            "text": "score is 0: jobLevel 'statuses' permission set to 'write'"
+                        }
+                    },
+                }
+            ],
+            [],
+            [],
+        )
+        self.assertTrue(any("66" in item for item in failures))
+
     def test_error_code_scanning_blocks(self) -> None:
         failures = SECURITY.blocking_findings(
             [{"number": 8, "rule": {"severity": "error"}}], [], []

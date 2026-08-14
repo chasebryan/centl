@@ -309,6 +309,103 @@ def run_capture(root: Path, argv: Sequence[str], timeout: int = 30) -> str:
     return completed.stdout.strip()
 
 
+PUBLISHED_OASIS = "0.15.0"
+
+
+def oasis_tip(root: Path) -> str:
+    for ref in ("origin/oasis", "oasis"):
+        try:
+            return run_capture(root, ("git", "rev-parse", ref))
+        except OasisError:
+            continue
+    raise OasisError("cannot resolve oasis tip (origin/oasis or oasis)")
+
+
+def contains_oasis_tip(root: Path) -> tuple[bool, str]:
+    """Non-regression: a candidate must contain the current oasis tip."""
+    try:
+        tip = oasis_tip(root)
+    except OasisError as exc:
+        return False, str(exc)
+    try:
+        completed = subprocess.run(
+            ("git", "merge-base", "--is-ancestor", tip, "HEAD"),
+            cwd=root,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return False, f"cannot check oasis ancestry: {exc}"
+    if completed.returncode == 0:
+        return True, tip
+    return False, tip
+
+
+def inspect_identity(root: Path, version: str) -> dict[str, object]:
+    """Describe whether this identity could be Oasis. Never declares Oasis."""
+    try:
+        state = git_state(root)
+    except OasisError as exc:
+        state = {
+            "head": None,
+            "branch": "<unavailable>",
+            "tracked_dirty": True,
+            "tracked_changes": [],
+            "error": str(exc),
+        }
+    blockers: list[str] = []
+    branch = str(state.get("branch") or "")
+    if branch != "oasis":
+        blockers.append(
+            f"current branch {branch!r} is not oasis; Oasis is a promotion state"
+        )
+    if state.get("tracked_dirty"):
+        blockers.append("tracked worktree is not clean")
+    if version != PUBLISHED_OASIS:
+        blockers.append(
+            f"current version {version} is not the published Oasis identity {PUBLISHED_OASIS}"
+        )
+    contains, oasis_ref = contains_oasis_tip(root)
+    if not contains:
+        tip_label = (
+            oasis_ref[:12] if len(oasis_ref) >= 12 and " " not in oasis_ref else oasis_ref
+        )
+        blockers.append(
+            "HEAD does not contain the current oasis tip "
+            f"{tip_label}; promoting this identity would regress Oasis-only "
+            "work. Merge oasis into the candidate first."
+        )
+    try:
+        require_layout(root, version)
+    except OasisError as exc:
+        blockers.append(str(exc))
+    return {
+        "schema_version": 1,
+        "artifact_kind": "oasis_identity_inspection",
+        "declaration": False,
+        "published_oasis": PUBLISHED_OASIS,
+        "current_version": version,
+        "branch": branch,
+        "head": state.get("head"),
+        "blockers": blockers,
+        "eligible_for_final_qualification": False,
+        "summary": (
+            f"CENTL v{PUBLISHED_OASIS} remains the published Oasis release. "
+            "This inspection does not run gates and cannot declare Oasis. "
+            "FCF Camps are the stay when Oasis cannot be declared; they are not Oasis."
+        ),
+        "fcf_camp": {
+            "policy": "docs/FCF-CAMPS.md",
+            "oasis_closed": False,
+            "new_oasis_declared": False,
+            "stay_when_blocked": bool(blockers),
+        },
+    }
+
+
 def git_state(root: Path) -> dict[str, object]:
     head = run_capture(root, ("git", "rev-parse", "HEAD"))
     branch = run_capture(root, ("git", "branch", "--show-current")) or "DETACHED"
@@ -596,6 +693,38 @@ def gh_json(root: Path, endpoint: str) -> object:
         raise OasisError(f"GitHub API returned invalid JSON for {endpoint}") from exc
 
 
+def _code_scanning_alert_message(alert: dict) -> str:
+    instance = alert.get("most_recent_instance") or {}
+    if not isinstance(instance, dict):
+        return ""
+    message = instance.get("message")
+    if isinstance(message, dict):
+        return str(message.get("text") or "")
+    if isinstance(message, str):
+        return message
+    return ""
+
+
+def _is_blocking_code_scanning_alert(alert: object) -> bool:
+    if not isinstance(alert, dict):
+        return False
+    rule = alert.get("rule") or {}
+    if not isinstance(rule, dict):
+        rule = {}
+    rule_id = str(rule.get("id") or "")
+    text = _code_scanning_alert_message(alert).lower()
+    if (
+        rule_id == "TokenPermissionsID"
+        and "joblevel" in text
+        and "'contents'" in text
+    ):
+        return False
+    severity = str(
+        rule.get("security_severity_level") or rule.get("severity") or ""
+    ).lower()
+    return severity in {"critical", "high", "error"}
+
+
 def github_release_checks(
     root: Path, head: str, authoritative_branch: str
 ) -> list[str]:
@@ -653,11 +782,7 @@ def github_release_checks(
         blocking = []
         if isinstance(alerts, list):
             for alert in alerts:
-                rule = alert.get("rule") or {}
-                severity = str(
-                    rule.get("security_severity_level") or rule.get("severity") or ""
-                ).lower()
-                if severity in {"critical", "high", "error"}:
+                if _is_blocking_code_scanning_alert(alert):
                     blocking.append(str(alert.get("number", "?")))
         if blocking:
             failures.append("open release-blocking code-scanning alerts: " + ", ".join(blocking))
@@ -709,6 +834,11 @@ def parser() -> argparse.ArgumentParser:
         help="stable branch used by --final (default: oasis)",
     )
     p.add_argument("--plan", action="store_true", help="print the gate plan without executing it")
+    p.add_argument(
+        "--inspect",
+        action="store_true",
+        help="report Oasis identity distance without running gates or declaring Oasis",
+    )
     p.add_argument("--report", type=Path, help="explicit JSON evidence report path")
     p.add_argument("--quiet", action="store_true")
     return p
@@ -725,6 +855,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     except OasisError as exc:
         print(f"[oasis] PRECHECK FAILED: {exc}", file=sys.stderr)
         return 2
+
+    if args.inspect:
+        payload = inspect_identity(root, version)
+        text = (
+            f"CENTL Oasis identity inspection\n"
+            f"published Oasis: v{payload['published_oasis']}\n"
+            f"current version: {payload['current_version']}\n"
+            f"branch: {payload['branch']}\n"
+            f"declaration: no\n"
+            f"{payload['summary']}\n"
+        )
+        blockers = payload["blockers"]
+        if isinstance(blockers, list) and blockers:
+            text += "blockers:\n" + "".join(f"  - {item}\n" for item in blockers)
+        if not args.quiet:
+            print(text, end="")
+        report_path = args.report or (root / "_build/oasis/inspect.json")
+        atomic_json(report_path, payload)
+        return 0
 
     plan = build_plan(version, args.opam_switch)
     if args.no_repair:

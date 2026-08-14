@@ -436,18 +436,82 @@ let render_ingest result =
       "Network/paid AI required: no.";
     ]
 
+let json_string name = function
+  | `Assoc fields -> (
+      match List.assoc_opt name fields with
+      | Some (`String value) -> Some value
+      | _ -> None)
+  | _ -> None
+
+let json_int name = function
+  | `Assoc fields -> (
+      match List.assoc_opt name fields with
+      | Some (`Int value) -> Some value
+      | _ -> None)
+  | _ -> None
+
+let json_bool name = function
+  | `Assoc fields -> (
+      match List.assoc_opt name fields with
+      | Some (`Bool value) -> Some value
+      | _ -> None)
+  | _ -> None
+
+let list_library workspace =
+  let directory = library_dir workspace in
+  if not (Sys.file_exists directory) then
+    "CENTL-MIRAGE structure library is empty."
+  else
+    let names =
+      Sys.readdir directory |> Array.to_list
+      |> List.filter (fun name ->
+          let path = Filename.concat directory name in
+          (not (Sys.is_directory path)) && name <> "." && name <> "..")
+      |> List.sort String.compare
+    in
+    match names with
+    | [] -> "CENTL-MIRAGE structure library is empty."
+    | names ->
+        String.concat "\n"
+          (("CENTL-MIRAGE structure library ("
+           ^ string_of_int (List.length names)
+           ^ " documents):")
+          :: List.map (fun name -> "  - " ^ name) names)
+
 let status workspace =
   let path = active_path workspace in
   if not (Sys.file_exists path) then
     "CENTL-MIRAGE has no active local development cycle."
   else
     try
-      let channel = open_in path in
-      let content =
-        Fun.protect
-          ~finally:(fun () -> close_in_noerr channel)
-          (fun () -> really_input_string channel (in_channel_length channel))
+      let json = Yojson.Safe.from_file path in
+      let line label name =
+        match json_string name json with
+        | None -> []
+        | Some value -> [ label ^ ": " ^ value ]
       in
-      "CENTL-MIRAGE active cycle:\n" ^ content
-    with Sys_error message ->
+      let count label name =
+        match json_int name json with
+        | None -> []
+        | Some value -> [ label ^ ": " ^ string_of_int value ]
+      in
+      let flag label name =
+        match json_bool name json with
+        | None -> []
+        | Some value -> [ (label ^ ": " ^ if value then "yes" else "no") ]
+      in
+      String.concat "\n"
+        ([ "CENTL-MIRAGE active cycle" ]
+        @ line "phase" "phase"
+        @ line "next phase" "next_phase"
+        @ line "termination" "termination"
+        @ line "policy" "autonomy_policy"
+        @ count "gaps" "goal_gaps"
+        @ count "admissible" "admission_admissible_count"
+        @ line "fingerprint" "fingerprint"
+        @ flag "behavior preserved" "behavior_preserved"
+        @ flag "source activated" "candidate_source_activated"
+        @ flag "assurance promoted" "assurance_promoted"
+        @ [ "network required: no" ])
+    with Sys_error message | Yojson.Json_error message ->
       "CENTL-MIRAGE status could not be read: " ^ message

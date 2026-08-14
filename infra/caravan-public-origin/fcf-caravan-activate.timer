@@ -1,0 +1,11 @@
+[Unit]
+Description=Schedule FCF CARAVAN activation gate
+
+[Timer]
+OnBootSec=6min
+OnUnitActiveSec=10min
+Persistent=true
+Unit=fcf-caravan-activate.service
+
+[Install]
+WantedBy=timers.target

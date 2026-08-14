@@ -303,7 +303,8 @@ snapshot_opam() {
 
   while IFS= read -r package; do
     [ -n "$package" ] || continue
-    version=$(opam show --switch="$switch" --installed --field=version "$package")
+    version=$(opam show --switch="$switch" --field=installed-version "$package")
+    [ -n "$version" ] || fail "installed package version unavailable: $package"
     printf '%s %s\n' "$package" "$version" >> "$out/installed-packages.txt"
     target="$out/sources/$package-$version"
     rm -rf "$target"

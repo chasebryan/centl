@@ -1,0 +1,256 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+umask 077
+
+ENABLE_NOW=0
+LIVE_ROOT=/srv/fcf-caravan-live/current
+STATE_DIR=/var/lib/fcf-telepathyd
+SERVICE_USER=fcf-telepathyd
+TOR_INSTALLED_BY_US=0
+
+fail() {
+  printf '\nfcf-telepathyd installer: %s\n' "$*" >&2
+  exit 1
+}
+
+say() { printf '%s\n' "$*"; }
+need() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
+
+usage() {
+  cat <<'TXT'
+Usage: sudo bash scripts/fcf-telepathyd-install [options]
+
+Install the FCF Telepathy daemon and its hardened systemd service. Installation
+alone never publishes a Tor onion service. Public onion activation requires the
+explicit --enable-now flag.
+
+Options:
+  --enable-now          enable and start/restart fcf-telepathyd after install
+  --caravan-live-root   activated CARAVAN live selector
+                        (default: /srv/fcf-caravan-live/current)
+  -h, --help            show this help
+
+The installed service is intentionally narrow:
+  * unprivileged fcf-telepathyd service account
+  * read-only access to the activated CARAVAN live generation
+  * private persistent Tor/onion-service state
+  * loopback-only HTTP publication boundary
+  * outbound network access only because Tor must build circuits
+  * no ambient Linux capabilities
+TXT
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --enable-now)
+      ENABLE_NOW=1
+      shift
+      ;;
+    --caravan-live-root)
+      [ "$#" -ge 2 ] || fail "--caravan-live-root requires a value"
+      LIVE_ROOT=$2
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+[ "$(id -u)" -eq 0 ] || fail "run with sudo/root"
+case "$LIVE_ROOT" in /*) ;; *) fail "CARAVAN live root must be absolute" ;; esac
+case "$LIVE_ROOT" in
+  *[!A-Za-z0-9._/+:-]*) fail "CARAVAN live root contains unsupported characters" ;;
+esac
+LIVE_ANCHOR=$(dirname -- "$LIVE_ROOT")
+[ "$LIVE_ANCHOR" != "/" ] || fail "CARAVAN live root must have a dedicated parent directory"
+case "$LIVE_ANCHOR" in
+  *[!A-Za-z0-9._/+:-]*) fail "CARAVAN live anchor contains unsupported characters" ;;
+esac
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+unit_source="$repo_root/infra/fcf-telepathyd/fcf-telepathyd.service"
+
+for path in \
+  "$repo_root/scripts/fcf-telepathyd" \
+  "$repo_root/telepathy/__init__.py" \
+  "$repo_root/telepathy/carrier.py" \
+  "$repo_root/telepathy/gateway.py" \
+  "$repo_root/telepathy/live_root.py" \
+  "$repo_root/telepathy/policy.py" \
+  "$repo_root/telepathy/tor.py" \
+  "$repo_root/tests/test_fcf_telepathyd.py" \
+  "$unit_source"; do
+  [ -f "$path" ] || fail "required repository file missing: $path"
+done
+
+for command in awk dirname getent grep install mktemp python3 sed seq sleep stat systemctl tr useradd; do
+  need "$command"
+done
+
+install_tor() {
+  command -v tor >/dev/null 2>&1 && return 0
+  say "Tor is not installed; installing the distribution Tor package..."
+  if command -v apt-get >/dev/null 2>&1; then
+    DEBIAN_FRONTEND=noninteractive apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tor
+  elif command -v dnf >/dev/null 2>&1; then
+    dnf install -y tor
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y tor
+  elif command -v zypper >/dev/null 2>&1; then
+    zypper --non-interactive install tor
+  elif command -v pacman >/dev/null 2>&1; then
+    pacman -Sy --noconfirm tor
+  else
+    fail "Tor is missing and no supported package manager was found; install Tor first"
+  fi
+  command -v tor >/dev/null 2>&1 || fail "Tor installation did not provide a tor executable"
+  TOR_INSTALLED_BY_US=1
+}
+
+say "[1/7] Verifying source-tree Telepathy gates..."
+python3 "$repo_root/tests/test_fcf_telepathyd.py" || fail "fcf-telepathyd tests failed"
+
+say "[2/7] Verifying activated CARAVAN live generation..."
+[ -e "$LIVE_ROOT" ] || fail "CARAVAN live root is missing: $LIVE_ROOT"
+[ -r "$LIVE_ROOT/status.json" ] || fail "CARAVAN status.json is not readable through $LIVE_ROOT"
+owner=$(stat -Lc '%u' -- "$LIVE_ROOT")
+[ "$owner" = 0 ] || fail "activated CARAVAN generation must be root-owned (uid=$owner)"
+
+say "[3/7] Preparing Tor..."
+install_tor
+if [ "$TOR_INSTALLED_BY_US" -eq 1 ]; then
+  # Package installation may auto-start the distribution's general Tor instance.
+  # fcf-telepathyd launches its own dedicated Tor process with SocksPort 0, so do
+  # not leave a second instance that this installer created running beside it.
+  systemctl disable --now tor.service tor@default.service >/dev/null 2>&1 || true
+fi
+
+say "[4/7] Installing unprivileged daemon account and files..."
+if ! getent passwd "$SERVICE_USER" >/dev/null 2>&1; then
+  nologin=/usr/sbin/nologin
+  [ -x "$nologin" ] || nologin=/sbin/nologin
+  [ -x "$nologin" ] || nologin=/bin/false
+  useradd --system --home-dir "$STATE_DIR" --no-create-home --shell "$nologin" "$SERVICE_USER"
+fi
+
+install -d -o root -g root -m 0755 /usr/local/libexec/fcf-telepathyd
+install -d -o root -g root -m 0755 /usr/local/libexec/fcf-telepathyd/telepathy
+install -o root -g root -m 0755 \
+  "$repo_root/scripts/fcf-telepathyd" \
+  /usr/local/libexec/fcf-telepathyd/fcf-telepathyd
+for module in "$repo_root"/telepathy/*.py; do
+  install -o root -g root -m 0644 "$module" /usr/local/libexec/fcf-telepathyd/telepathy/
+done
+
+install -d -o root -g root -m 0755 /etc/systemd/system
+unit_tmp=$(mktemp)
+trap 'rm -f "$unit_tmp"' EXIT
+sed \
+  -e "s#@FCF_CARAVAN_LIVE_ROOT@#$LIVE_ROOT#g" \
+  -e "s#@FCF_CARAVAN_LIVE_ANCHOR@#$LIVE_ANCHOR#g" \
+  "$unit_source" > "$unit_tmp"
+if grep -q '@FCF_CARAVAN_' "$unit_tmp"; then
+  fail "fcf-telepathyd service template contains an unresolved CARAVAN placeholder"
+fi
+install -o root -g root -m 0644 "$unit_tmp" /etc/systemd/system/fcf-telepathyd.service
+
+say "[5/7] Verifying service sandbox..."
+systemctl daemon-reload
+if command -v systemd-analyze >/dev/null 2>&1; then
+  systemd-analyze verify /etc/systemd/system/fcf-telepathyd.service >/dev/null ||
+    fail "systemd rejected fcf-telepathyd.service"
+fi
+
+say "[6/7] Verifying service account can read CARAVAN but cannot own it..."
+uid=$(getent passwd "$SERVICE_USER" | awk -F: '{print $3}')
+[ -n "$uid" ] || fail "could not resolve fcf-telepathyd uid"
+[ "$uid" != 0 ] || fail "fcf-telepathyd must never run as root"
+runuser_bin=$(command -v runuser || true)
+if [ -n "$runuser_bin" ]; then
+  "$runuser_bin" -u "$SERVICE_USER" -- test -r "$LIVE_ROOT/status.json" ||
+    fail "fcf-telepathyd account cannot read CARAVAN live generation"
+fi
+
+if [ "$ENABLE_NOW" -eq 0 ]; then
+  say "[7/7] Installed but NOT activated."
+  cat <<TXT
+
+fcf-telepathyd is installed and deliberately offline.
+
+To publish the CARAVAN live generation over Tor when you are ready:
+
+  sudo systemctl enable fcf-telepathyd.service
+  sudo systemctl start fcf-telepathyd.service
+  sudo systemctl status --no-pager fcf-telepathyd.service
+  sudo cat $STATE_DIR/tor/hidden-service/hostname
+
+Or rerun this installer with --enable-now.
+TXT
+  exit 0
+fi
+
+say "[7/7] Explicit activation requested; starting fcf-telepathyd..."
+systemctl enable fcf-telepathyd.service >/dev/null
+systemctl restart fcf-telepathyd.service
+systemctl is-active --quiet fcf-telepathyd.service || {
+  systemctl status --no-pager fcf-telepathyd.service >&2 || true
+  fail "fcf-telepathyd did not stay active"
+}
+
+python3 - <<'PY'
+from http.client import HTTPConnection
+import time
+
+deadline = time.monotonic() + 15.0
+last_error = "gateway did not become ready"
+
+while time.monotonic() < deadline:
+    conn = HTTPConnection("127.0.0.1", 8790, timeout=1.0)
+    try:
+        conn.request("HEAD", "/status.json")
+        response = conn.getresponse()
+        response.read()
+        server = response.getheader("Server") or ""
+        if response.status == 200 and server.startswith("fcf-telepathyd/"):
+            break
+        last_error = (
+            f"status={response.status} server={server!r}"
+        )
+    except OSError as exc:
+        last_error = repr(exc)
+    finally:
+        conn.close()
+    time.sleep(0.1)
+else:
+    raise SystemExit(
+        f"local Telepathy verification failed after readiness wait: {last_error}"
+    )
+PY
+
+hostname_path="$STATE_DIR/tor/hidden-service/hostname"
+onion=""
+for _ in $(seq 1 100); do
+  if [ -r "$hostname_path" ]; then
+    onion=$(tr -d '\r\n' < "$hostname_path")
+    if printf '%s\n' "$onion" | grep -Eq '^[a-z2-7]{56}\.onion$'; then
+      break
+    fi
+    onion=""
+  fi
+  sleep 0.1
+done
+[ -n "$onion" ] || {
+  systemctl status --no-pager fcf-telepathyd.service >&2 || true
+  fail "Tor did not publish a valid v3 onion hostname"
+}
+
+printf '\nFCF TELEPATHY ACTIVE\n'
+printf '  local gateway: http://127.0.0.1:8790\n'
+printf '  Tor carrier:    http://%s/\n' "$onion"
+printf '  service:        fcf-telepathyd.service\n'
+printf '\nA second Tor client should perform the final remote onion GET/HEAD smoke test.\n'

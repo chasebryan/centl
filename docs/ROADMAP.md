@@ -5,16 +5,33 @@ must preserve the numerical contract.
 
 ## Current release
 
-`0.12.0` is stable and adds enforceable math contracts to the agent-safe 0.11.0
-foundation. Structured verification, F*-backed equality for the admitted
-univariate rational-polynomial fragment, exact counterexamples, replayable
-receipts, stamped build identity, and the reusable `centl-check` Action are
-published. Protocol version 1 remains stable with documented compatibility
-operations.
+`0.14.0` is the current stable Oasis release for GNU/Linux x86_64. It consolidates
+the validated post-0.12 development line, CENTL-SCi v0.0.2-Caramels, bounded
+MIRAGE work, and the CARAVAN Phase 1 laboratory into one reviewed and hardened
+release boundary. The intermediate 0.13.0 line was never published as a stable
+release.
 
-CENTL-SCi `v0.0.2-Caramels` is the active interaction/self-extension development
-line. GNU/Linux is the supported reference platform and the only release-blocking
-operating system for this series.
+GNU/Linux remains the supported reference platform and the only release-blocking
+operating system for the current series.
+
+## Compass directive: Three Horizons
+
+CENTL's next platform-level vision is **Three Horizons**: work toward a future
+Oasis-qualified release set for **GNU/Linux, macOS, and Windows** with the same
+mathematical semantics, trust model, conformance evidence, and release identity.
+
+The preferred horizon is the late-December 2026 / New Year 2027 period. This is a
+strategic direction, not a fixed release promise. The schedule, supported
+architecture matrix, packaging design, and version number remain subject to change
+as engineering evidence accumulates.
+
+The current Linux-first development policy remains in force while the system is
+moving rapidly. Mirage should not be burdened with complete cross-platform Oasis
+qualification on every experimental commit. Cross-platform restoration becomes a
+strict release obligation only when a Three Horizons candidate is prepared for
+Oasis promotion.
+
+See [CENTL: Three Horizons](THREE-HORIZONS.md) for the complete compass directive.
 
 ## 0. Foundation
 
@@ -161,9 +178,34 @@ machine schema, and differential test suite.
   resource exhaustion, cancellation, and hostile machine requests have focused
   adversarial coverage; continue auditing as new domains are added.
 - Keep macOS and Windows source compatibility opportunistic only where it is
-  naturally free of maintenance cost; do not add release, CI, packaging, or
-  compatibility obligations for unsupported operating systems.
+  naturally free of maintenance cost during the current Linux-first phase.
 
 Exit condition: the supported Linux release process reproduces verified binaries
 and publishes the exact toolchain, numerical backend, and remaining trust
 assumptions.
+
+## 8. Three Horizons cross-platform Oasis
+
+This phase is the platform reunification campaign described by the Three Horizons
+compass directive.
+
+- Deepen the scientific system under the Linux-first development model through
+  August and September 2026.
+- Audit platform assumptions in October 2026, especially filesystem, subprocess,
+  terminal, local-model, native-library, dependency, packaging, and architecture
+  boundaries.
+- Restore serious Windows and macOS build/test environments during November and
+  bring platform-native installation and packaging into the candidate release
+  engineering path.
+- Run shared mathematical, verification, protocol, and scientific conformance
+  corpora across the declared platform matrix.
+- Add platform-specific hardening without forking the mathematical semantics.
+- Enter a bounded December feature freeze for candidate qualification,
+  reproducibility, security review, clean-install testing, artifact provenance,
+  upgrade/rollback testing, and complete Oasis evaluation.
+- Prefer delaying the release over weakening Oasis or omitting a declared target
+  merely to meet the calendar.
+
+Exit condition: one qualified source lineage produces maintained Oasis artifacts
+for the declared GNU/Linux, macOS, and Windows targets, with documented behavioral
+and mathematical parity and an auditable installation/release path on each.

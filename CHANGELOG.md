@@ -1,5 +1,122 @@
 # Changelog
 
+## Unreleased
+
+## 0.15.0 — 2026-08-14
+
+Candidate identity for the main and mirage tree placed on the oasis tip.
+The public commands remain `centl`, `centl-physics`, and `centl-sci` on
+GNU/Linux x86_64. Laboratory surfaces stay laboratory. This heading is
+not a completed Oasis declaration.
+
+### Security
+
+- Workflow checkouts no longer persist GitHub credentials in `.git/config`.
+  Distribution jobs use job-scoped `contents: write` and an explicit push
+  token header instead of a workflow-wide write token.
+- Oasis qualification and publication workflows no longer hold
+  `statuses: write` or `checks: write`. Exact-SHA attestation is the Actions
+  job conclusion, which cannot be forged with a stolen status token.
+- The Oasis security gate still fails closed on high GitHub Security-tab
+  alerts, except Scorecard's job-level `contents: write` warning on jobs that
+  must publish releases or the `distribution` branch.
+- Publish grants clamp contributor privileges regardless of hand-edited JSON.
+  Pack identities, basenames, origin URLs, and staged paths are allowlisted;
+  possible secret material is refused; `git` is invoked with `-C` instead of
+  trusting a process-wide directory change.
+
+### Added
+
+- `CENTL-Marsa` is the undeletable harbor that ports the Camp stay to
+  macOS and Windows. It is not Oasis. `install` now sends those kernels
+  to the harbor instead of a dead end.
+- FCF Camp #1 publishes a named stay artifact `fcf-camp-001`. It is not a
+  SemVer identity and not an Oasis declaration. CENTL v0.14.0 remains Oasis.
+- FCF now publishes an open proposal for companies and other AI software to
+  use CENTL, contribute to `mirage`, and sponsor the foundation. Sponsorship
+  does not buy Oasis or endorsement.
+- The public site now carries search metadata, a sitemap that includes
+  machine entry points, `llms.txt`, and an `ai.html` welcome for programs.
+  Layout and `style.css` are unchanged. Ranking is not claimed.
+- FCF Camps are the named stay when a new Oasis cannot honestly be declared.
+  `centl-mirage camps` inspects occupation and never declares Oasis. CENTL
+  v0.14.0 remains the published Oasis.
+- CARAVAN reports catalog coverage, mission filters, store inventory, and
+  verified cargo loads. `centl caravan inspect` is inspect-only. The signed
+  join installer, invite schema, and `join.html` are unchanged.
+- CENTL-MIRAGE now runs a complete local development cycle: CEGIS example
+  search, semantic fingerprints, fingerprint comparison, autonomy policy,
+  review, and explicit accept/reject. A cycle still does not activate source or
+  promote assurance by itself.
+- MIRAGE evidence executors can discharge parser, capability-discovery, and
+  example or fingerprint regression obligations from transaction-bound
+  artifacts instead of leaving those actions permanently pending.
+- Deterministic SCi code generation can locate a native definition request
+  inside surrounding prose rather than only at the start of a cell.
+- `centl-mirage wellspring` and `centl-mirage oasis` inspect Wellspring
+  Candidates and Oasis identity without declaring either status.
+- `scripts/oasis.py --inspect` reports distance from Oasis qualification and
+  cannot declare a release.
+- Durable Wellspring Candidate records live under `docs/wellsprings/`.
+- MIRAGE now records bounded equality-saturation rewrites, metamorphic
+  property checks, a claim-local evidence lattice, Pareto ranking of
+  admissible candidates, and an explicit cycle progress measure.
+- Generated SCi external/native scaffolds have an inspectable JSONL ABI
+  contract that cannot self-enable or claim verified-core modification.
+- CENTL-SCi `status` is now a real BUILD command over the previously orphaned
+  status module, with honest remaining gates.
+- Deterministic SCi fast paths now admit `gcd of`, `lcm of`, and
+  `fibonacci of` without consulting a model.
+- The capability graph now includes gcd, lcm, Fibonacci, sequence, sum,
+  product, and recurrence so MIRAGE can prefer composition.
+- MIRAGE fingerprints load candidate definitions and report whether the core
+  observation corpus is preserved; `iterate` recomputes an active cycle from
+  stored source.
+- CENTL-SCi now has a deterministic capability catalog, an FCF product-family
+  listing, constructive next-step guidance, and `extend <request>` to start a
+  local MIRAGE cycle instead of dead-ending on unsolved work.
+- Spoken `sum of`, `product of`, `sequence of`, and `factorial of` lower to
+  exact CENTL without a model.
+- SCi can export a replayable workbook from the live session; BUILD can
+  inspect a single catalog capability; MIRAGE `doctor` reports structural
+  cycle health.
+- Requirements that already compose to existing CENTL operations are marked
+  SATISFIED instead of asking for a new implementation.
+- Spoken ordinals such as `the 10th fibonacci number` lower to `fibonacci(10)`.
+- Oasis inspection now blocks promotion when HEAD does not contain the
+  current oasis tip, so a laboratory branch cannot regress Oasis-only
+  installer, CI, or qualification work.
+- CENTL-SCi encodes the official Oasis promotion path: experimental work
+  drafts to `mirage`, Oasis remains a later qualification on `oasis`, and
+  verbs that would self-approve, merge to oasis, or tag a release are
+  refused. Inspection never declares Oasis.
+- CENTL-SCi can prepare a reviewed contribution pack and, with an explicit
+  local grant, commit only that pack and open a **draft** GitHub pull
+  request against `mirage`. Tokens are not stored, English is not passed
+  to a shell, oasis is never the automatic base, and out-of-scope harm
+  is refused. This is not a claim of perfect security.
+- CENTL-SCi records a user-owned growth journal and replayable dialect.
+  `let square(x) = x^2 and then square(6)` creates, hot-loads, and evaluates
+  in one utterance. Composition reports `Uses:`. Missing programs stay
+  symbolic and tell the user how to create them. `:dialect`, `:journal`,
+  and `export dialect` expose the living local language without promoting
+  assurance.
+- CENTL-SCi now has a live English program workshop: `let`, topic names,
+  conventional exact recipes, and `teach yourself` create local `.centl`
+  programs, install spoken aliases, evaluate a first example, and say
+  whether a restart is required. Native programs hot-load. Host/OCaml
+  growth writes a reviewable proposal and requires `dune build` plus a
+  process restart. Verified core is never rewritten by this path.
+
+### Changed
+
+- Goal graphs record `validated_by` edges from requirements to extracted
+  examples and acceptance cells.
+- Public site copy and the repository README now lead with install and the
+  three Oasis commands. FCF Camp #1 is named as the current stay where
+  newest software is used; it does not replace Oasis. Laboratory internals
+  stay in the documentation index. `style.css` and `join.html` are unchanged.
+
 ## 0.14.0 — 2026-08-10
 
 ### Release posture
@@ -8,10 +125,9 @@
   as the next stable CENTL baseline. The v0.13.0 development line was never
   formally published as a stable release; its validated work is incorporated
   here rather than presented as a separate public release.
-- v0.14.0 is being qualified as an **Oasis candidate**. Oasis is a repeatable
-  release classification, not this version's codename. The declaration
-  `CENTL v0.14.0 is an Oasis release.` is withheld until the final release gate
-  is complete on the reviewed release commit.
+- v0.14.0 is an **Oasis release**. Oasis is a repeatable release
+  classification, not this version's codename. The declaration belongs to
+  the exact reviewed commit that passed the Oasis gate.
 - The canonical release tag remains ordinary Semantic Versioning: `v0.14.0`.
 
 ### Added

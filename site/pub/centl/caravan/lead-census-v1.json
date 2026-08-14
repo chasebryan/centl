@@ -1,0 +1,15 @@
+{
+  "active_camels": 1,
+  "active_window_seconds": 900,
+  "generated_at": "2026-08-13T21:24:10+00:00",
+  "hungry_camels": 0,
+  "cargo_loads": 0,
+  "individual_nodes_public": false,
+  "ip_addresses_public": false,
+  "lead_origin_monitored": true,
+  "lost_after_seconds": 900,
+  "lost_camels": 0,
+  "probe": "healthy",
+  "schema": "fcf-caravan-lead-census-v1",
+  "status": "live"
+}

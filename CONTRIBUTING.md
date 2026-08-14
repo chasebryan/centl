@@ -18,7 +18,9 @@ target.
 - `CENTL-Marsa` is the undeletable Windows and macOS harbor of the Camp stay.
   Do not treat a Marsa build as Oasis.
 
-The published Oasis remains CENTL v0.14.0. Camp #1 is the inhabited stay.
+The last completed Oasis is CENTL v0.14.0. v0.15.0 is the candidate
+from main and mirage on the oasis tip. Camp #1 remains the inhabited
+stay until that candidate finishes the gate.
 
 If any part of that stack is unfamiliar, start with the
 [documentation index](docs/README.md) and then the

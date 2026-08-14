@@ -503,7 +503,148 @@ let generated_change input =
       Some (create_value ~replace source)
 
 let handle_direct trimmed lower =
-  if
+  if Centl_sci_publish.wants trimmed then
+    match Centl_sci_publish.handle trimmed with
+    | Error message -> Handled { message; changed = false; revision = None }
+    | Ok message -> Handled { message; changed = false; revision = None }
+  else if
+    List.mem lower
+      [ "catalog"; "show catalog"; "capabilities"; "what can you do"; "help" ]
+    || Centl_sci_catalog.is_discovery_request trimmed
+  then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_catalog.render ~workspace ();
+            changed = false;
+            revision = None;
+          })
+  else if
+    String.starts_with ~prefix:"show capability " lower
+    || String.starts_with ~prefix:"capability " lower
+  then
+    let name =
+      if String.starts_with ~prefix:"show capability " trimmed then
+        String.sub trimmed 16 (String.length trimmed - 16) |> String.trim
+      else String.sub trimmed 11 (String.length trimmed - 11) |> String.trim
+    in
+    workspace_result (fun workspace ->
+        match Centl_sci_catalog.lookup ~workspace name with
+        | Some entry ->
+            Handled
+              {
+                message = Centl_sci_catalog.render_entry entry;
+                changed = false;
+                revision = None;
+              }
+        | None ->
+            Handled
+              {
+                message =
+                  "No catalog entry named `" ^ name
+                  ^ "`. Use `catalog` to list deterministic capabilities.";
+                changed = false;
+                revision = None;
+              })
+  else if List.mem lower [ "products"; "show products"; "product family" ] then
+    Handled
+      {
+        message = Centl_sci_products.render ();
+        changed = false;
+        revision = None;
+      }
+  else if
+    String.starts_with ~prefix:"extend " lower
+    || String.starts_with ~prefix:"grow " lower
+  then
+    let request =
+      if String.starts_with ~prefix:"extend " trimmed then
+        String.sub trimmed 7 (String.length trimmed - 7) |> String.trim
+      else if String.starts_with ~prefix:"grow " trimmed then
+        String.sub trimmed 5 (String.length trimmed - 5) |> String.trim
+      else trimmed
+    in
+    workspace_result (fun workspace ->
+        match Centl_sci_handoff.extend workspace request with
+        | Error message -> Handled { message; changed = false; revision = None }
+        | Ok message -> Handled { message; changed = false; revision = None })
+  else if List.mem lower [ "programs"; "show programs"; "list programs" ] then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_program.list_programs workspace;
+            changed = false;
+            revision = None;
+          })
+  else if List.mem lower [ "spoken"; "show spoken"; "list spoken"; "aliases" ]
+  then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_spoken.render_list workspace;
+            changed = false;
+            revision = None;
+          })
+  else if List.mem lower [ "journal"; "show journal"; "growth journal" ] then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_journal.render workspace;
+            changed = false;
+            revision = None;
+          })
+  else if List.mem lower [ "dialect"; "show dialect"; "user dialect" ] then
+    workspace_result (fun workspace ->
+        ignore (Centl_sci_journal.write_dialect workspace);
+        Handled
+          {
+            message = Centl_sci_journal.dialect_text workspace;
+            changed = false;
+            revision = None;
+          })
+  else if
+    String.starts_with ~prefix:"export dialect " lower
+    || lower = "export dialect"
+  then
+    workspace_result (fun workspace ->
+        let path =
+          if lower = "export dialect" then
+            Filename.concat workspace.Centl_sci_workspace.generated "dialect"
+          else String.sub trimmed 15 (String.length trimmed - 15) |> String.trim
+        in
+        match Centl_sci_journal.export workspace path with
+        | Error message -> Handled { message; changed = false; revision = None }
+        | Ok path ->
+            Handled
+              {
+                message =
+                  "Exported the user dialect to " ^ path
+                  ^ ".\nThis is downstream state, not verified CENTL core.";
+                changed = false;
+                revision = None;
+              })
+  else if
+    List.mem lower
+      [
+        "host patches"; "show host patches"; "list host patches"; "host-patches";
+      ]
+  then
+    workspace_result (fun workspace ->
+        Handled
+          {
+            message = Centl_sci_host.render_list workspace;
+            changed = false;
+            revision = None;
+          })
+  else if List.mem lower [ "status"; "show status"; ":status" ] then
+    workspace_result (fun _workspace ->
+        Handled
+          {
+            message = Centl_sci_status.render (Centl_sci_status.collect ());
+            changed = false;
+            revision = None;
+          })
+  else if
     List.mem lower
       [
         "workspace";

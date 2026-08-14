@@ -8,10 +8,13 @@ Exact-first mathematics, physics, and scientific computation.
 
 ## Current release status
 
-**CENTL v0.14.0 is an Oasis release.**
+**CENTL v0.15.0 is an Oasis release.**
 
-Oasis is the qualified stable product. It lives on the `oasis` branch.
-A camp does not replace it, inherit it, or become it.
+This identity is the main and mirage tree placed on the oasis tip so
+Oasis does not regress. The declaration is authoritative only after the
+complete Oasis gate, an unchanged fast-forward to `oasis`, the `v0.15.0`
+tag, and publication of the already-qualified bytes. Until that chain
+closes, the previous Oasis identity remains the last completed one.
 
 **FCF Camp #1** (`fcf-camp-001`) is the current stay. That is where the
 newest software and designs are used. It lives on `main` and `mirage`.

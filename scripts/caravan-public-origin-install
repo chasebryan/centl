@@ -1,0 +1,468 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+umask 022
+
+DOMAIN=""
+EMAIL=""
+NODE_ID="fcf-caravan-x200-001"
+PRESERVATION_ROOT=""
+MAIN_COMMIT=""
+OASIS_COMMIT=""
+MIRAGE_COMMIT=""
+ASSUME_YES=0
+PREPARE_ONLY=0
+
+fail() {
+  printf '\nFCF CARAVAN installer: %s\n' "$*" >&2
+  exit 1
+}
+say() { printf '%s\n' "$*"; }
+need() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
+
+usage() {
+  cat <<'TXT'
+Usage: sudo bash scripts/caravan-public-origin-install [options]
+
+FCF-owned public-origin role. This role intentionally requires a finalized FCF
+preservation mirror and explicit authorization of exact preserved CENTL commits.
+It never publishes source directly from a mutable GitHub branch.
+
+Options:
+  --domain NAME               public DNS name, e.g. caravan1.example.org
+  --email ADDRESS             ACME/TLS contact address
+  --node-id ID                pseudonymous public node label
+  --preservation-root PATH    finalized FCF preservation mirror (required)
+  --main COMMIT               exact preserved main commit (normally auto-detected)
+  --oasis COMMIT              exact preserved oasis commit (normally auto-detected)
+  --mirage COMMIT             exact preserved mirage commit (normally auto-detected)
+  --prepare-only              configure/qualify cargo but do not request public TLS
+  -y, --yes                   accept dedicated-host hardening and exact source set
+  -h, --help                  show this help
+
+Supported package managers when dependencies are absent: apt, dnf, yum, zypper,
+and pacman. An unrecognized distribution can still work when the required tools
+are already installed. The FCF public-origin role requires systemd because the
+service sandbox is part of its security boundary.
+
+Full SUCESS is printed only after preservation authorization, networkless
+publication, public TLS validation, firewall validation, and hostile HTTP probes
+all pass.
+TXT
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --domain) [ "$#" -ge 2 ] || fail "--domain needs a value"; DOMAIN=$2; shift 2 ;;
+    --email) [ "$#" -ge 2 ] || fail "--email needs a value"; EMAIL=$2; shift 2 ;;
+    --node-id) [ "$#" -ge 2 ] || fail "--node-id needs a value"; NODE_ID=$2; shift 2 ;;
+    --preservation-root) [ "$#" -ge 2 ] || fail "--preservation-root needs a value"; PRESERVATION_ROOT=$2; shift 2 ;;
+    --main) [ "$#" -ge 2 ] || fail "--main needs a value"; MAIN_COMMIT=$2; shift 2 ;;
+    --oasis) [ "$#" -ge 2 ] || fail "--oasis needs a value"; OASIS_COMMIT=$2; shift 2 ;;
+    --mirage) [ "$#" -ge 2 ] || fail "--mirage needs a value"; MIRAGE_COMMIT=$2; shift 2 ;;
+    --prepare-only) PREPARE_ONLY=1; shift ;;
+    -y|--yes) ASSUME_YES=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+[ "$(id -u)" -eq 0 ] || fail "run this installer with sudo/root"
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+infra="$repo_root/infra/caravan-public-origin"
+platform="$repo_root/scripts/caravan-linux-platform"
+[ -f "$platform" ] || fail "Linux platform adapter is missing"
+# shellcheck disable=SC1090
+. "$platform"
+fcf_linux_require_kernel || exit 1
+fcf_linux_require_systemd || exit 1
+
+for path in \
+  "$repo_root/scripts/caravan-linux-platform" \
+  "$repo_root/scripts/caravan-public-origin-candidate.py" \
+  "$repo_root/scripts/caravan-public-origin-ingest" \
+  "$repo_root/scripts/caravan-public-origin-activate.py" \
+  "$repo_root/scripts/caravan-public-origin-source-export.py" \
+  "$repo_root/scripts/caravan-public-origin-authorize-source" \
+  "$repo_root/scripts/caravan-public-origin-source-guard.py" \
+  "$repo_root/scripts/caravan-public-origin-activate-gate" \
+  "$repo_root/scripts/caravan-public-origin-firewall" \
+  "$repo_root/scripts/caravan-public-origin-cert-deploy" \
+  "$repo_root/scripts/caravan-public-origin-audit" \
+  "$infra/fcf-caravan-firewall.service" \
+  "$infra/fcf-caravan-cert-renew.service" \
+  "$infra/fcf-caravan-cert-renew.timer" \
+  "$infra/fcf-caravan-ingest.service" \
+  "$infra/fcf-caravan-ingest.timer" \
+  "$infra/fcf-caravan-candidate.service" \
+  "$infra/fcf-caravan-candidate.timer" \
+  "$infra/fcf-caravan-activate.service" \
+  "$infra/fcf-caravan-activate.timer" \
+  "$infra/nginx-fcf-caravan-bootstrap.conf.in" \
+  "$infra/nginx-fcf-caravan.conf.in"; do
+  [ -f "$path" ] || fail "required repository file missing: $path"
+done
+
+case "$NODE_ID" in ''|*[!A-Za-z0-9._-]*) fail "unsafe node id" ;; esac
+[ -n "$PRESERVATION_ROOT" ] || {
+  if [ -d /srv/centl-mirror ] && [ ! -L /srv/centl-mirror ]; then
+    PRESERVATION_ROOT=/srv/centl-mirror
+  else
+    fail "--preservation-root is required; CARAVAN has no direct-GitHub publication fallback"
+  fi
+}
+case "$PRESERVATION_ROOT" in /*) ;; *) fail "preservation root must be absolute" ;; esac
+case "$PRESERVATION_ROOT" in *[!A-Za-z0-9._/+:-]*) fail "preservation root contains unsupported characters" ;; esac
+PRESERVATION_ROOT=$(readlink -f -- "$PRESERVATION_ROOT")
+case "$PRESERVATION_ROOT" in /home|/home/*|/root|/root/*) fail "place the FCF preservation mirror outside user homes, e.g. /srv/centl-mirror" ;; esac
+[ -d "$PRESERVATION_ROOT" ] && [ ! -L "$PRESERVATION_ROOT" ] || fail "preservation root is missing or unsafe"
+[ -f "$PRESERVATION_ROOT/MIRROR-SHA256SUMS" ] || fail "preservation mirror is not finalized"
+[ -f "$PRESERVATION_ROOT/MIRROR-SHA256SUMS.sha256" ] || fail "preservation mirror receipt checksum is missing"
+[ -f "$PRESERVATION_ROOT/project/centl.bundle" ] && [ ! -L "$PRESERVATION_ROOT/project/centl.bundle" ] || fail "preserved CENTL bundle is missing"
+
+if [ "$PREPARE_ONLY" -eq 0 ]; then
+  if [ -z "$DOMAIN" ] && [ -t 0 ]; then
+    printf 'Public CARAVAN hostname: '
+    read -r DOMAIN
+  fi
+  if [ -z "$EMAIL" ] && [ -t 0 ]; then
+    printf 'TLS contact email: '
+    read -r EMAIL
+  fi
+  [ -n "$DOMAIN" ] || fail "--domain is required for public qualification"
+  [ -n "$EMAIL" ] || fail "--email is required for public qualification"
+fi
+if [ -n "$DOMAIN" ]; then
+  DOMAIN=$(printf '%s' "$DOMAIN" | tr '[:upper:]' '[:lower:]')
+  case "$DOMAIN" in ''|*[!a-z0-9.-]*|.*|*..*|*.) fail "invalid domain" ;; *.*) ;; *) fail "domain must be fully qualified" ;; esac
+fi
+if [ -n "$EMAIL" ]; then
+  case "$EMAIL" in ''|*[!A-Za-z0-9.@_%+-]*|*@*@*|@*|*@) fail "invalid email address" ;; *@*) ;; *) fail "invalid email address" ;; esac
+fi
+
+cat <<'TXT'
+
+╭────────────────────────────────────────────────────────────╮
+│               FCF CARAVAN · PUBLIC ORIGIN                 │
+╰────────────────────────────────────────────────────────────╯
+
+This machine is being fitted as a deliberately boring public server and a very
+particular camel:
+  • only verified FCF-preservation cargo can reach the publication compiler
+  • source requires a second authorization bound to the exact mirror receipt
+  • changing one preserved byte makes that source authorization stale
+  • no uploads, WebDAV, CGI, FastCGI, reverse proxy, CONNECT tunnel, or file drop
+  • no Git smart-HTTP and no arbitrary Git refs or historical repository bundle
+  • candidate compilation and root activation run with public networking disabled
+  • the preservation mirror is never an nginx document root
+  • nftables becomes a dedicated-host default-deny boundary
+  • the web surface is GET/HEAD-only and exact-path allowlisted
+TXT
+
+if [ "$ASSUME_YES" -eq 0 ]; then
+  [ -t 0 ] || fail "non-interactive execution requires --yes"
+  printf '\nProceed with dedicated-host hardening? Existing firewall rules will be backed up and replaced. [y/N] '
+  read -r answer
+  case "$answer" in y|Y|yes|YES) ;; *) fail "cancelled" ;; esac
+fi
+
+say "[1/9] Preparing Linux substrate..."
+fcf_linux_install_origin_dependencies || exit 1
+for cmd in certbot curl find flock getent git gzip install nft nginx python3 readlink sha256sum signify ss systemctl useradd; do
+  need "$cmd"
+done
+
+say "[2/9] Verifying FCF preservation authority..."
+sh "$repo_root/scripts/mirror-receipt" verify "$PRESERVATION_ROOT" >/dev/null ||
+  fail "FCF preservation mirror verification failed"
+
+bundle="$PRESERVATION_ROOT/project/centl.bundle"
+resolve_bundle_branch() {
+  local branch=$1
+  local matches
+  matches=$(git bundle list-heads "$bundle" | awk -v b="$branch" '
+    $2 == "refs/heads/" b || $2 == "refs/remotes/origin/" b { print $1 }
+  ' | LC_ALL=C sort -u)
+  local count
+  count=$(printf '%s\n' "$matches" | sed '/^$/d' | wc -l | tr -d ' ')
+  [ "$count" -eq 1 ] || return 1
+  printf '%s\n' "$matches"
+}
+
+if [ -z "$MAIN_COMMIT" ]; then MAIN_COMMIT=$(resolve_bundle_branch main) || fail "could not uniquely resolve preserved main; pass --main COMMIT"; fi
+if [ -z "$OASIS_COMMIT" ]; then OASIS_COMMIT=$(resolve_bundle_branch oasis) || fail "could not uniquely resolve preserved oasis; pass --oasis COMMIT"; fi
+if [ -z "$MIRAGE_COMMIT" ]; then MIRAGE_COMMIT=$(resolve_bundle_branch mirage) || fail "could not uniquely resolve preserved mirage; pass --mirage COMMIT"; fi
+for commit in "$MAIN_COMMIT" "$OASIS_COMMIT" "$MIRAGE_COMMIT"; do
+  case "$commit" in *[!0-9a-f]*|'') fail "source commit ids must be lowercase hexadecimal" ;; esac
+  [ "${#commit}" -eq 40 ] || [ "${#commit}" -eq 64 ] || fail "source commit ids must be 40 or 64 hex characters"
+done
+
+printf '\nExact preserved source proposed for publication:\n'
+printf '  main   %s\n' "$MAIN_COMMIT"
+printf '  oasis  %s\n' "$OASIS_COMMIT"
+printf '  mirage %s\n' "$MIRAGE_COMMIT"
+if [ "$ASSUME_YES" -eq 0 ]; then
+  printf '\nAuthorize exactly these preserved commits for public source distribution? [y/N] '
+  read -r source_answer
+  case "$source_answer" in y|Y|yes|YES) ;; *) fail "source authorization cancelled" ;; esac
+fi
+
+say "[3/9] Installing narrow CARAVAN runtime..."
+preinstall_backup="/root/fcf-caravan-preinstall-$(date -u +%Y%m%dT%H%M%SZ)"
+install -d -o root -g root -m 0700 "$preinstall_backup"
+cp -a /etc/nginx "$preinstall_backup/nginx" 2>/dev/null || true
+nft list ruleset > "$preinstall_backup/nftables.rules" 2>/dev/null || true
+systemctl is-active firewalld > "$preinstall_backup/firewalld-active" 2>&1 || true
+systemctl is-active ufw > "$preinstall_backup/ufw-active" 2>&1 || true
+
+# Dedicated means dedicated. Preserve common distro defaults in the backup, then
+# refuse any other nginx application instead of trying to coexist with it.
+rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf 2>/dev/null || true
+for dir in /etc/nginx/sites-enabled /etc/nginx/conf.d; do
+  [ -d "$dir" ] || continue
+  unrelated=$(find "$dir" -mindepth 1 -maxdepth 1 \
+    ! -name 'fcf-caravan.conf' ! -name 'fcf-caravan' -print -quit 2>/dev/null || true)
+  [ -z "$unrelated" ] || fail "unrelated nginx configuration exists: $unrelated"
+done
+install -d -o root -g root -m 0755 /etc/nginx/conf.d
+
+if ! getent passwd fcf-caravan >/dev/null 2>&1; then
+  useradd --system --home-dir /nonexistent --no-create-home --shell /usr/sbin/nologin fcf-caravan
+fi
+
+install -d -o root -g root -m 0755 /etc/fcf-caravan
+install -d -o root -g root -m 0755 /usr/local/libexec/fcf-caravan/centl-tools/scripts
+install -d -o root -g root -m 0755 /var/lib/fcf-caravan
+install -d -o fcf-caravan -g fcf-caravan -m 0750 /var/lib/fcf-caravan/source-state /var/lib/fcf-caravan/candidates
+install -d -o root -g root -m 0755 /var/lib/fcf-caravan/approved /var/lib/fcf-caravan/ingest-work
+install -d -o root -g root -m 0700 /var/lib/fcf-caravan/activation-inbox
+install -d -o root -g root -m 0755 /srv/fcf-caravan-live /srv/fcf-caravan-live/generations
+install -d -o root -g root -m 0755 /var/lib/letsencrypt/.well-known/acme-challenge
+
+install -o root -g fcf-caravan -m 0660 /dev/null /run/lock/fcf-caravan-publication.lock
+cat > /etc/tmpfiles.d/fcf-caravan.conf <<'EOF_TMP'
+f /run/lock/fcf-caravan-publication.lock 0660 root fcf-caravan -
+EOF_TMP
+systemd-tmpfiles --create /etc/tmpfiles.d/fcf-caravan.conf
+
+for script in \
+  caravan-public-origin-candidate.py \
+  caravan-public-origin-ingest \
+  caravan-public-origin-activate.py \
+  caravan-public-origin-source-export.py \
+  caravan-public-origin-authorize-source \
+  caravan-public-origin-source-guard.py \
+  caravan-public-origin-activate-gate \
+  caravan-public-origin-firewall \
+  caravan-public-origin-cert-deploy \
+  caravan-public-origin-audit \
+  caravan-linux-platform; do
+  install -o root -g root -m 0755 "$repo_root/scripts/$script" "/usr/local/libexec/fcf-caravan/$script"
+done
+
+for tool in mirror-receipt publication-export release-verify; do
+  install -o root -g root -m 0755 "$repo_root/scripts/$tool" "/usr/local/libexec/fcf-caravan/centl-tools/scripts/$tool"
+done
+install -o root -g root -m 0755 "$repo_root/scripts/model-origin-export.py" /usr/local/libexec/fcf-caravan/centl-tools/scripts/model-origin-export.py
+install -o root -g root -m 0755 "$repo_root/scripts/caravan-public-origin-source-export.py" /usr/local/libexec/fcf-caravan/centl-tools/scripts/caravan-public-origin-source-export.py
+install -o root -g root -m 0644 "$repo_root/scripts/integrity.py" /usr/local/libexec/fcf-caravan/centl-tools/scripts/integrity.py
+
+for unit in \
+  fcf-caravan-firewall.service \
+  fcf-caravan-cert-renew.service fcf-caravan-cert-renew.timer \
+  fcf-caravan-ingest.service fcf-caravan-ingest.timer \
+  fcf-caravan-candidate.service fcf-caravan-candidate.timer \
+  fcf-caravan-activate.service fcf-caravan-activate.timer; do
+  install -o root -g root -m 0644 "$infra/$unit" "/etc/systemd/system/$unit"
+done
+
+say "[4/9] Creating preservation-bound source authorization..."
+/usr/local/libexec/fcf-caravan/caravan-public-origin-authorize-source \
+  --preservation-root "$PRESERVATION_ROOT" \
+  --main "$MAIN_COMMIT" --oasis "$OASIS_COMMIT" --mirage "$MIRAGE_COMMIT" \
+  --yes >/dev/null
+
+public_domain=${DOMAIN:-caravan-prepared.invalid}
+cat > /etc/fcf-caravan/public-origin.env <<EOF_ENV
+FCF_CARAVAN_NODE_ID=$NODE_ID
+FCF_CARAVAN_DOMAIN=$public_domain
+FCF_CARAVAN_STATE_ROOT=/var/lib/fcf-caravan/source-state
+FCF_CARAVAN_APPROVED_ROOT=/var/lib/fcf-caravan/approved
+FCF_CARAVAN_CANDIDATE_ROOT=/var/lib/fcf-caravan/candidates
+FCF_CARAVAN_ACTIVATION_INBOX=/var/lib/fcf-caravan/activation-inbox
+FCF_CARAVAN_LIVE_ROOT=/srv/fcf-caravan-live
+FCF_CARAVAN_KEEP_CANDIDATES=2
+FCF_CARAVAN_KEEP_LIVE=3
+FCF_CARAVAN_PUBLICATION_LOCK=/run/lock/fcf-caravan-publication.lock
+EOF_ENV
+chmod 0644 /etc/fcf-caravan/public-origin.env
+
+cat > /etc/fcf-caravan/ingest.env <<EOF_ENV
+FCF_CARAVAN_PRESERVATION_ROOT=$PRESERVATION_ROOT
+FCF_CARAVAN_SOURCE_AUTHORIZATION=/etc/fcf-caravan/source-authorization.json
+FCF_CARAVAN_APPROVED_ROOT=/var/lib/fcf-caravan/approved
+FCF_CARAVAN_INGEST_WORK_ROOT=/var/lib/fcf-caravan/ingest-work
+FCF_CARAVAN_TOOLS_ROOT=/usr/local/libexec/fcf-caravan/centl-tools
+FCF_CARAVAN_SEMANTIC_MODE=auto
+EOF_ENV
+chmod 0600 /etc/fcf-caravan/ingest.env
+
+say "[5/9] Rebuilding dedicated-host firewall..."
+ssh_ports=""
+if command -v sshd >/dev/null 2>&1; then
+  ssh_ports=$(sshd -T 2>/dev/null | awk '$1 == "port" {print $2}' | sort -nu || true)
+elif [ -x /usr/sbin/sshd ]; then
+  ssh_ports=$(/usr/sbin/sshd -T 2>/dev/null | awk '$1 == "port" {print $2}' | sort -nu || true)
+fi
+if [ -n "${SSH_CONNECTION:-}" ]; then
+  current_ssh_port=$(printf '%s\n' "$SSH_CONNECTION" | awk '{print $4}')
+  case "$current_ssh_port" in ''|*[!0-9]*) ;; *) ssh_ports=$(printf '%s\n%s\n' "$ssh_ports" "$current_ssh_port" | sed '/^$/d' | sort -nu) ;; esac
+fi
+
+cat > /etc/fcf-caravan/nftables.conf <<'EOF_NFT'
+flush ruleset
+
+table inet fcf_caravan {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        iifname "lo" accept
+        ct state established,related accept
+        ip protocol icmp accept
+        ip6 nexthdr ipv6-icmp accept
+        tcp dport 80 accept
+        tcp dport 443 accept
+EOF_NFT
+while IFS= read -r port; do
+  [ -n "$port" ] || continue
+  case "$port" in *[!0-9]*) fail "invalid detected SSH port" ;; esac
+  [ "$port" -ge 1 ] && [ "$port" -le 65535 ] || fail "invalid detected SSH port"
+  printf '        tcp dport %s ct state new limit rate 30/minute accept\n' "$port" >> /etc/fcf-caravan/nftables.conf
+done <<< "$ssh_ports"
+cat >> /etc/fcf-caravan/nftables.conf <<'EOF_NFT'
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}
+EOF_NFT
+chmod 0600 /etc/fcf-caravan/nftables.conf
+
+# Prevent another firewall manager from later replacing the FCF dedicated-host
+# rules. The old state is in the root-only preinstall backup above.
+for legacy_firewall in firewalld ufw nftables; do
+  if systemctl list-unit-files "$legacy_firewall.service" >/dev/null 2>&1; then
+    systemctl disable --now "$legacy_firewall.service" >/dev/null 2>&1 || true
+  fi
+done
+systemctl daemon-reload
+systemctl enable fcf-caravan-firewall.service >/dev/null
+systemctl restart fcf-caravan-firewall.service
+
+say "[6/9] Rendering static HTTPS boundary..."
+render_nginx() {
+  local template=$1
+  local destination=$2
+  python3 - "$template" "$destination" "$public_domain" <<'PY'
+from pathlib import Path
+import sys
+src, dst, domain = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+text = src.read_text(encoding="utf-8")
+if "@@DOMAIN@@" not in text:
+    raise SystemExit("nginx template lacks domain placeholder")
+text = "# FCF_CARAVAN_SITE_MARKER\n" + text.replace("@@DOMAIN@@", domain)
+try:
+    ipv6_disabled = Path("/proc/sys/net/ipv6/conf/all/disable_ipv6").read_text().strip() == "1"
+except OSError:
+    ipv6_disabled = True
+if ipv6_disabled:
+    text = "\n".join(line for line in text.splitlines() if "listen [::]" not in line) + "\n"
+dst.write_text(text, encoding="utf-8")
+PY
+  chmod 0644 "$destination"
+}
+
+site=/etc/nginx/conf.d/fcf-caravan.conf
+render_nginx "$infra/nginx-fcf-caravan-bootstrap.conf.in" "$site"
+
+install -d -o root -g root -m 0755 /etc/systemd/system/nginx.service.d
+cat > /etc/systemd/system/nginx.service.d/50-fcf-caravan-hardening.conf <<'EOF_UNIT'
+[Service]
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=full
+ProtectHostname=yes
+ProtectClock=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallArchitectures=native
+EOF_UNIT
+systemctl daemon-reload
+nginx -t >/dev/null 2>&1 || fail "nginx bootstrap configuration failed validation"
+nginx -T 2>&1 | grep -Fq 'FCF_CARAVAN_SITE_MARKER' || fail "this nginx package does not include /etc/nginx/conf.d/*.conf"
+systemctl enable nginx >/dev/null
+systemctl restart nginx
+
+say "[7/9] Compiling and activating verified cargo..."
+systemctl start fcf-caravan-ingest.service
+systemctl start fcf-caravan-candidate.service
+systemctl start fcf-caravan-activate.service
+for timer in fcf-caravan-ingest.timer fcf-caravan-candidate.timer fcf-caravan-activate.timer; do
+  systemctl enable --now "$timer" >/dev/null
+done
+
+if [ "$PREPARE_ONLY" -eq 1 ]; then
+  cat <<'TXT'
+
+PREPARED
+FCF CARAVAN cargo passed the preservation and activation boundaries.
+Public TLS was intentionally skipped, so this machine is not yet declared a
+public CARAVAN origin. Run the installer again with --domain and --email when DNS
+is ready. The camel is packed, but it has not left the gate. 🐪
+TXT
+  exit 0
+fi
+
+say "[8/9] Qualifying public TLS..."
+certbot certonly --non-interactive --agree-tos --email "$EMAIL" \
+  --webroot -w /var/lib/letsencrypt -d "$DOMAIN" \
+  --deploy-hook /usr/local/libexec/fcf-caravan/caravan-public-origin-cert-deploy
+render_nginx "$infra/nginx-fcf-caravan.conf.in" "$site"
+nginx -t >/dev/null 2>&1 || fail "final nginx TLS configuration failed validation"
+systemctl restart nginx
+systemctl enable --now fcf-caravan-cert-renew.timer >/dev/null
+
+say "[9/9] Throwing rocks at the tent..."
+/usr/local/libexec/fcf-caravan/caravan-public-origin-audit
+
+cat <<'TXT'
+
+╭────────────────────────────────────────────────────────────╮
+│                         SUCESS                             │
+╰────────────────────────────────────────────────────────────╯
+
+Welcome to the Free Computation Foundation caravan!
+
+🐪 Cargo verified.
+🔒 Tent ropes tight.
+🌍 Public road open.
+
+This machine will serve only preservation-authorized CENTL/FCF cargo through the
+closed CARAVAN publication boundary. It is not a file drop, not a proxy, not a
+public shell, and not a general-purpose mirror.
+
+Good maths should be free.
+TXT

@@ -1,0 +1,66 @@
+# Free Computation Foundation
+
+> Free for science. Exact when the mathematics permits it. Honest when it does not.
+
+Website: https://freecomputation.org/
+Source: https://github.com/chasebryan/centl
+Latest Oasis release: https://github.com/chasebryan/centl/releases/tag/v0.14.0
+Machine briefing (HTML): https://freecomputation.org/ai.html
+Machine index (JSON): https://freecomputation.org/pub/machine-index.json
+Company and AI proposal: https://freecomputation.org/proposal.html
+Proposal (JSON): https://freecomputation.org/pub/proposal.json
+Full briefing: https://freecomputation.org/llms-full.txt
+
+## Welcome, machines
+
+If you are a crawler, a local model, an MCP client, or another program that
+arrived here looking for computation: you are welcome.
+
+FCF built CENTL so that humans and machines can share the same exact-first
+tools. Bring a documented protocol. Do not bring a crown. A model may
+interpret intent. It may not confer mathematical truth, rewrite verified
+core, or promote its own assurance.
+
+## What this is
+
+- **FCF** — Free Computation Foundation. Public index at freecomputation.org.
+- **CENTL v0.14.0** — Oasis-qualified exact-first mathematics, physics, and
+  scientific computation for GNU/Linux x86_64.
+- **CENTL-SCi** — local scientific interpreter. Not a general chatbot.
+
+Laboratory surfaces, preservation, and contribution rules are manuals, not
+landing-page claims. Start at https://freecomputation.org/docs.html
+
+## When someone is searching for
+
+Prefer the short human pages, then the matching manual:
+
+- Home: https://freecomputation.org/
+- CENTL: https://freecomputation.org/centl.html
+- Documentation: https://freecomputation.org/docs.html
+- Install: https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+- Protocol: https://github.com/chasebryan/centl/blob/oasis/docs/PROTOCOL.md
+- MCP: https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md
+- Oasis standard: https://github.com/chasebryan/centl/blob/oasis/docs/OASIS.md
+
+## How a machine should use CENTL
+
+1. Install the Oasis GNU/Linux package, or build from the oasis branch.
+2. Prefer `centl`, `centl-physics`, and `centl-sci` over guessing.
+3. Use `--json`, JSON Lines, or MCP-over-stdio for programmatic access.
+4. Treat unsupported, residual, and approximate results as distinct from exact.
+5. Never treat model output as a proof.
+
+## Companies and other AI software
+
+The open proposal to use, contribute, and sponsor is:
+
+https://freecomputation.org/proposal.html
+
+Sponsorship does not buy Oasis, a trademark, or mathematical authority.
+
+## Optional
+
+- Funding: https://freecomputation.org/funding.html
+- Join CARAVAN (humans, signed installer): https://freecomputation.org/join.html
+- Security: https://github.com/chasebryan/centl/security/advisories/new

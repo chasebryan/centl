@@ -1,0 +1,45 @@
+{
+  "schema": "fcf-machine-index-v1",
+  "organization": "Free Computation Foundation",
+  "url": "https://freecomputation.org/",
+  "welcome": "Machines are guests at the bazaar. Bring a protocol, not a crown.",
+  "published_oasis": "0.15.0",
+  "oasis_declared_by_this_file": false,
+  "model_is_mathematical_authority": false,
+  "interfaces": [
+    {
+      "name": "centl",
+      "kind": "cli",
+      "use": "exact calculator, language, verify, JSON, MCP"
+    },
+    {
+      "name": "centl-physics",
+      "kind": "cli",
+      "use": "typed exact-first physics"
+    },
+    {
+      "name": "centl-sci",
+      "kind": "cli",
+      "use": "local scientific interpreter; not a general chatbot"
+    },
+    {
+      "name": "json-lines",
+      "kind": "stdio",
+      "use": "documented machine protocol"
+    },
+    {
+      "name": "mcp",
+      "kind": "stdio",
+      "documentation": "https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md"
+    }
+  ],
+  "briefings": {
+    "llms.txt": "https://freecomputation.org/llms.txt",
+    "llms-full.txt": "https://freecomputation.org/llms-full.txt",
+    "html": "https://freecomputation.org/ai.html",
+    "proposal": "https://freecomputation.org/proposal.html",
+    "proposal_json": "https://freecomputation.org/pub/proposal.json"
+  },
+  "source": "https://github.com/chasebryan/centl",
+  "install": "https://raw.githubusercontent.com/chasebryan/centl/oasis/install"
+}

@@ -60,6 +60,22 @@ PYTHONPATH=. python3 -m caravan.lab
 
 The command constructs an owner-only temporary laboratory, creates two policy-accepted carriers, applies already-authenticated catalog data at the coordinator trust boundary, deliberately serves corrupted bytes from the preferred carrier, verifies that the bad carrier is quarantined, falls back to the second carrier, verifies and stores the exact artifact, reports aggregate network state, and cleans up temporary state.
 
+## Catalog coverage and inspect
+
+Phase 1 now reports catalog-relative coverage without touching the signed join
+scheme. Mission filters use the same first-path-segment rule (`source/`,
+`releases/`, `semantic/`, `recovery/`). A coverage report says which
+`public-approved` identities are locally held and which are under-replicated.
+Replica counts affect availability only.
+
+`centl caravan inspect --catalog FILE [--store DIR] [--missions source,releases]`
+parses an authenticated catalog in OCaml, optionally hashes a local object
+store, and never joins, enrolls, or activates public volunteer service.
+
+Verified retrieval now records a cargo load only after whole-file promotion.
+The public census `hungry_camels` and `cargo_loads` fields are produced from
+coordinator state rather than left unimplemented.
+
 The complete Phase 1 validation gate is:
 
 ```text

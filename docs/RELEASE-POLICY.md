@@ -28,6 +28,10 @@ mature elsewhere before promotion.
 
 ### `mirage` — development and research laboratory
 
+When a Mirage expedition produces stayable work that still cannot honestly
+become Oasis, FCF occupies a [Camp](FCF-CAMPS.md). A Camp is not a fourth
+release branch and is not an Oasis declaration.
+
 `mirage` is the development, experimentation, and research branch. New features,
 prototypes, speculative mathematics, architecture experiments, self-development
 work, and other incomplete ideas should normally mature here.
@@ -73,12 +77,25 @@ work.
 `main` is not itself an Oasis declaration and is not required to satisfy every
 Oasis-only gate merely because it contains the full tree.
 
+### `CENTL-Marsa` — Windows and macOS harbor
+
+`CENTL-Marsa` ports the current Camp stay to macOS and Windows. It is a
+harbor, not a fourth product and not an Oasis declaration. The branch is
+undeletable. Feature work still matures on `mirage` and is inhabited on
+`main`; Marsa replays that stay onto the other operating systems.
+
+See [CENTL-MARSA.md](CENTL-MARSA.md).
+
 The main README and other flagship product surfaces must treat `oasis` as the
-authoritative source for stable product identity: recommended release/version,
-supported stable capabilities, installation claims, release badges, and other
-standard-product statements should reflect what is established on `oasis`.
-Experimental capabilities present through Mirage or main must be identified as
-such and must not silently inherit Oasis assurance.
+authoritative source for **stable product identity**: recommended release
+version, supported stable capabilities, installation claims, and release
+badges should reflect what is established on `oasis`.
+
+Those same surfaces must also name the current [FCF Camp](FCF-CAMPS.md) stay
+as the place where newest software and designs are used. A camp does not
+replace Oasis, inherit Oasis, or become a SemVer product. Experimental
+capabilities present through Mirage, main, or a camp must be identified as
+such.
 
 ## Promotion model
 

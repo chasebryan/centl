@@ -61,6 +61,7 @@
   Centl_sci_present
   Centl_sci_contrib
   Centl_sci_interaction
+  Centl_sci_scope
   Centl_sci_intent
   Centl_sci_suggestion
   Centl_sci_workspace
@@ -72,6 +73,7 @@
   Centl_sci_revisions
   Centl_sci_dependencies
   Centl_sci_change_ir
+  Centl_sci_recipe
   Centl_sci_build_plan
   Centl_sci_mirage
   Centl_sci_mirage_goal
@@ -83,8 +85,26 @@
   Centl_sci_mirage_evidence
   Centl_sci_mirage_admission
   Centl_sci_mirage_review
+  Centl_sci_mirage_fingerprint
+  Centl_sci_mirage_compare
+  Centl_sci_mirage_cegis
+  Centl_sci_mirage_policy
+  Centl_sci_mirage_accept
+  Centl_sci_mirage_compose
+  Centl_sci_mirage_propose
+  Centl_sci_mirage_rewrite
+  Centl_sci_mirage_metamorphic
+  Centl_sci_mirage_lattice
+  Centl_sci_mirage_rank
+  Centl_sci_mirage_progress
+  Centl_sci_mirage_cycle
+  Centl_sci_oasis
+  Centl_sci_wellspring
+  Centl_sci_camps
+  Centl_caravan
   Centl_sci_core_plan
   Centl_sci_scaffold
+  Centl_sci_scaffold_abi
   Centl_sci_codegen
   Centl_sci_validate
   Centl_sci_audit
@@ -92,6 +112,19 @@
   Centl_sci_build
   Centl_sci_evidence
   Centl_sci_session
+  Centl_sci_status
+  Centl_sci_products
+  Centl_sci_catalog
+  Centl_sci_next
+  Centl_sci_handoff
+  Centl_sci_workbook
+  Centl_sci_mirage_doctor
+  Centl_sci_spoken
+  Centl_sci_host
+  Centl_sci_program
+  Centl_sci_journal
+  Centl_sci_publish
+  Centl_sci_kernel
   Centl_sci_app
   Centl_physics
   Centl_physics_collision

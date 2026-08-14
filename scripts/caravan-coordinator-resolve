@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Resolve the public CARAVAN coordinator bootstrap document."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from urllib.parse import urlparse
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", type=Path, required=True)
+    args = parser.parse_args()
+    value = json.loads(args.input.read_text(encoding="utf-8"))
+    if not isinstance(value, dict) or value.get("schema") != "fcf-caravan-coordinator-v1":
+        raise SystemExit("invalid CARAVAN coordinator bootstrap schema")
+    url = value.get("url")
+    parsed = urlparse(url) if isinstance(url, str) else None
+    if (
+        parsed is None
+        or parsed.scheme != "https"
+        or not parsed.netloc
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise SystemExit("CARAVAN coordinator bootstrap URL must be credential-free HTTPS")
+    print(url.rstrip("/"))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

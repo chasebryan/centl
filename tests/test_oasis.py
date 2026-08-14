@@ -329,6 +329,47 @@ class GitHubGateTests(OasisTestCase):
             failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
         self.assertTrue(any("code-scanning" in item for item in failures))
 
+    def test_scorecard_job_level_contents_write_does_not_block_final_gate(self) -> None:
+        def fake_capture(root: Path, argv, timeout=30):
+            if tuple(argv[:3]) == ("gh", "pr", "list"):
+                return "[]"
+            raise AssertionError(f"unexpected command: {argv}")
+
+        def fake_json(root: Path, endpoint: str):
+            if "check-runs" in endpoint:
+                return {
+                    "check_runs": [
+                        {"name": "CI", "status": "completed", "conclusion": "success"}
+                    ]
+                }
+            if "code-scanning" in endpoint:
+                return [
+                    {
+                        "number": 67,
+                        "rule": {
+                            "id": "TokenPermissionsID",
+                            "security_severity_level": "high",
+                            "severity": "error",
+                        },
+                        "most_recent_instance": {
+                            "message": {
+                                "text": "score is 0: jobLevel 'contents' permission set to 'write'"
+                            }
+                        },
+                    }
+                ]
+            if "dependabot" in endpoint or "secret-scanning" in endpoint:
+                return []
+            raise AssertionError(endpoint)
+
+        with mock.patch.object(
+            OASIS._engine, "github_repo_slug", return_value="chasebryan/centl"
+        ), mock.patch.object(OASIS._engine, "run_capture", side_effect=fake_capture), mock.patch.object(
+            OASIS._engine, "gh_json", side_effect=fake_json
+        ):
+            failures = OASIS.github_release_checks(self.root, "a" * 40, "oasis")
+        self.assertFalse(any("code-scanning" in item for item in failures))
+
     def test_open_pr_targeting_oasis_blocks_final_gate(self) -> None:
         def fake_capture(root: Path, argv, timeout=30):
             if tuple(argv[:3]) == ("gh", "pr", "list"):
@@ -350,6 +391,38 @@ class GitHubGateTests(OasisTestCase):
         self.assertTrue(any("#123" in item for item in failures))
         self.assertTrue(any("target oasis" in item for item in failures))
 
+
+
+
+class InspectTests(unittest.TestCase):
+    def test_inspect_does_not_declare_oasis(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-oasis-inspect-") as tmp:
+            report = Path(tmp) / "inspect.json"
+            rc = OASIS.main(
+                ["--root", str(ROOT), "--inspect", "--quiet", "--report", str(report)]
+            )
+            self.assertEqual(rc, 0)
+            payload = json.loads(report.read_text(encoding="utf-8"))
+            self.assertFalse(payload["declaration"])
+            self.assertFalse(payload["eligible_for_final_qualification"])
+            self.assertEqual(payload["published_oasis"], "0.15.0")
+            self.assertIn("blockers", payload)
+            self.assertIn("cannot declare Oasis", payload["summary"])
+            self.assertFalse(payload["fcf_camp"]["oasis_closed"])
+            self.assertFalse(payload["fcf_camp"]["new_oasis_declared"])
+
+    def test_inspect_records_oasis_non_regression_when_tip_missing(self) -> None:
+        payload = OASIS.inspect_identity(ROOT, "0.14.0")
+        self.assertFalse(payload["declaration"])
+        contains, _tip = OASIS.contains_oasis_tip(ROOT)
+        if contains:
+            self.assertFalse(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
+        else:
+            self.assertTrue(
+                any("would regress Oasis-only work" in str(item) for item in payload["blockers"])
+            )
 
 if __name__ == "__main__":
     unittest.main()

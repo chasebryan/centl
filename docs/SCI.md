@@ -46,6 +46,17 @@ The terminal interaction layer provides:
 
 A shadow suggestion is not part of submitted input until the user explicitly accepts it. Structural suggestions that would invent missing scientific content are display-only.
 
+Ask what the system can do without reading this document first:
+
+```text
+HYBRID> what can you do
+BUILD> catalog
+BUILD> products
+BUILD> extend add a local helper for my lab protocol
+```
+
+`catalog` lists deterministic capabilities and examples. `products` names the FCF family without collapsing Oasis, MIRAGE, CARAVAN, Wellspring, or Camp. `extend` starts a local MIRAGE cycle from the request; it does not activate source or promote assurance. Unsolved work now points to those surfaces instead of ending at a dead “cannot solve this yet.”
+
 ## Input recovery and interpretation
 
 Before model inference, Caramels applies conservative deterministic normalization:
@@ -287,6 +298,101 @@ English BUILD request
 
 Generated text does not bypass the existing parser boundary.
 
+## Beyond the calculator
+
+Caramels can now grow from inside the live session.
+
+Type ordinary English and SCi will create a local program, load it immediately, teach the session the spoken phrase, evaluate a first example, and say whether you must restart.
+
+```text
+HYBRID> make a function called square that takes x and computes x^2
+HYBRID> square(6)
+36
+HYBRID> what is the square of 6
+36
+HYBRID> make a kinetic energy function
+HYBRID> kinetic_energy(2, 3)
+9
+HYBRID> teach yourself to compute the harmonic mean of a and b as 2 / ((1/a) + (1/b))
+HYBRID> what is the harmonic mean of 3 and 4
+24/7
+```
+
+Three growth classes stay distinct:
+
+| What you asked | What SCi does | Restart |
+| --- | --- | --- |
+| A local function or value | Writes `modules/NAME.centl`, enables it, hot-loads the running session, and installs a spoken alias under `spoken/` | No restart |
+| `teach yourself` / `extend yourself` without an exact body | Starts a local MIRAGE cycle. Nothing is activated | No restart to inspect |
+| `patch your source` / compiled-host change | Writes a reviewable host-growth proposal under `generated/host-patches/` | Rebuild with `dune build`, then restart `centl-sci` |
+
+If a named exact definition is already in the local recipe catalog — kinetic energy, harmonic mean, and similar algebraic identities — SCi may use that conventional definition and say so. If the name is already a CENTL built-in, SCi reuses it, refuses to shadow it, and can still install a spoken English alias. It does not invent measured constants or unverified physics.
+
+The files are the product. Edit the `.centl` source, edit the spoken JSON, `disable NAME`, or `undo`. Local programs are never presented as verified CENTL core.
+
+```text
+:programs
+:spoken
+:dialect
+:journal
+:host-patches
+```
+
+The live dialect is the user's CENTL: local programs, spoken aliases, and a growth journal under `history/growth/`. It is not verified core. Replay it with `centl --file dialect.centl`. Export it with `export dialect`.
+
+Chain a creation into a first use:
+
+```text
+HYBRID> let square(x) = x^2 and then square(6)
+36
+```
+
+If a call names a program that does not exist yet, SCi keeps the symbolic form and tells you how to create it. New programs that call existing ones report `Uses:` so composition stays visible.
+
+## Reviewed publish, not a backdoor
+
+CENTL can prepare local work for `chasebryan/centl`. It cannot silently upgrade the official repository.
+
+```text
+BUILD> publish status
+BUILD> pack contribution
+BUILD> grant contributor publish
+BUILD> stage contribution
+```
+
+Owner-only, after an explicit acceptance phrase:
+
+```text
+BUILD> grant owner publish I accept local git and gh without storing tokens
+BUILD> commit contribution
+BUILD> open draft pull request
+```
+
+Rules that stay in the code, not in a comment:
+
+- no tokens or passwords are stored;
+- English is never interpolated into a shell;
+- only allowlisted `git` / `gh` argv arrays run;
+- pull requests are **draft** and target **`mirage`**, never `oasis`;
+- force-push is not available;
+- contributor grants cannot commit or open PRs;
+- GitHub human review is the approval authority for everyone, including the owner;
+- out-of-scope requests (malware, credential theft, illegal or abusive content) are refused.
+
+This is not a claim that software is 100% secure. It is a narrow, reviewable publish path so you can grow CENTL from inside CENTL without using an external AI as the upgrade tool.
+
+Official promotion logic, which overrides informal “just ship Oasis” requests:
+
+```text
+feature work -> mirage (experimental, installable if you choose)
+                     |
+                     | stabilize + scripts/oasis.py on a clean oasis commit
+                     v
+                   oasis  ->  SemVer tag  ->  “CENTL vX.Y.Z is an Oasis release.”
+```
+
+`main` is the complete developer/research tree, not Oasis. Mirage is never a full release. CENTL v0.14.0 remains the published Oasis until a later identity earns its own declaration. `declare oasis`, `approve this pull request`, `merge to oasis`, and `create a release` are refused by CENTL-SCi. GitHub human review and the Oasis gate remain the authorities.
+
 ## Reuse before invention
 
 Generic BUILD planning searches a capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces, Caramels runtime mechanisms, downstream extensions, and local packages.
@@ -341,12 +447,14 @@ Layout:
 workspace.json
 extensions/
 modules/
+spoken/
 tests/
 data/
 config/
 history/
 packages/
 generated/
+  host-patches/
 ```
 
 `workspace.json` identifies the environment as user-owned downstream state and records the rule that local extensions never silently inherit verified-core assurance.

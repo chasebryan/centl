@@ -1,0 +1,56 @@
+#!/bin/bash
+set -Eeuo pipefail
+
+fail() { printf 'FCF CARAVAN withdraw: %s\n' "$*" >&2; exit 1; }
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/fcf-caravan"
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}/fcf-caravan"
+config="$config_root/config.json"
+[ -f "$config" ] && [ ! -L "$config" ] || fail "CARAVAN configuration is missing"
+
+readarray -t settings < <(python3 - "$config" <<'PY'
+import json
+import sys
+from pathlib import Path
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(data["release_version"])
+print(data["coordinator_url"])
+print(data["transport"])
+PY
+)
+version=${settings[0]}
+coordinator=${settings[1]}
+transport=${settings[2]}
+payload="$HOME/.local/lib/fcf-caravan/releases/$version/payload"
+[ -d "$payload" ] || fail "installed CARAVAN payload is missing"
+
+run_transport() {
+  if [ "$transport" = tor ]; then
+    command -v torsocks >/dev/null 2>&1 || fail "torsocks is required for the configured Tor route"
+    TORSOCKS_SERVER=127.0.0.1:19050 torsocks "$@"
+  else
+    "$@"
+  fi
+}
+
+run_transport env PYTHONPATH="$payload" python3 - "$state_root/identity" "$coordinator" <<'PY'
+from __future__ import annotations
+import sys
+from caravan.identity import CarrierIdentity
+from caravan.transport import CarrierTransportClient
+
+identity = CarrierIdentity.load(sys.argv[1])
+client = CarrierTransportClient(sys.argv[2], identity)
+client.connect()
+result = client.withdraw()
+print("FCF CARAVAN withdrawal accepted for " + str(result.get("node_id", identity.node_id)))
+PY
+
+if [ -f "$state_root/carrier-agent.pid" ]; then
+  agent_pid=$(cat "$state_root/carrier-agent.pid" 2>/dev/null || true)
+  case "$agent_pid" in ''|*[!0-9]*) ;; *) kill "$agent_pid" 2>/dev/null || true ;; esac
+fi
+if [ -f "$state_root/tor.pid" ]; then
+  tor_pid=$(cat "$state_root/tor.pid" 2>/dev/null || true)
+  case "$tor_pid" in ''|*[!0-9]*) ;; *) kill "$tor_pid" 2>/dev/null || true ;; esac
+fi
+printf 'The local heartbeat process was stopped. Your signed receipt and identity remain on this machine for your records.\n'

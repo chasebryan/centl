@@ -15,6 +15,7 @@ type edge_kind =
   | Constrains
   | Conflicts_with
   | Candidate_satisfied_by
+  | Validated_by
 
 type gap_status =
   | Satisfied
@@ -72,6 +73,7 @@ let edge_kind_text = function
   | Constrains -> "constrains"
   | Conflicts_with -> "conflicts_with"
   | Candidate_satisfied_by -> "candidate_satisfied_by"
+  | Validated_by -> "validated_by"
 
 let gap_status_text = function
   | Satisfied -> "SATISFIED"
@@ -305,6 +307,10 @@ let gap_for_cell workspace conflict_pairs (cell : spec_cell) =
              MIRAGE can stage deterministically; capability overlap supplies \
              implementation machinery or ingredients but does not satisfy the \
              requested new binding" )
+      | _ when Option.is_some (Centl_sci_fastpath.recover_program cell.text) ->
+          ( Satisfied,
+            "existing CENTL operations already compute a composed form of this \
+             requirement; no new implementation is required" )
       | _ when is_alias_request cell.text && matches <> [] ->
           ( Alias_or_wrapper,
             "existing capabilities appear reusable; the requested semantic \
@@ -334,27 +340,38 @@ let nearest_objective (cells : spec_cell list) before_id =
 
 let cell_edges (cells : spec_cell list) =
   cells
-  |> List.filter_map (fun (cell : spec_cell) ->
+  |> List.concat_map (fun (cell : spec_cell) ->
       match String.uppercase_ascii cell.kind with
       | "ACCEPTANCE" | "EXAMPLE" ->
-          Option.map
-            (fun (objective : spec_cell) ->
-              {
-                source = cell_node_id cell.id;
-                target = cell_node_id objective.id;
-                kind = Refines;
-              })
-            (nearest_objective cells cell.id)
+          begin match nearest_objective cells cell.id with
+          | None -> []
+          | Some objective ->
+              [
+                {
+                  source = cell_node_id cell.id;
+                  target = cell_node_id objective.id;
+                  kind = Refines;
+                };
+                {
+                  source = cell_node_id objective.id;
+                  target = cell_node_id cell.id;
+                  kind = Validated_by;
+                };
+              ]
+          end
       | "NON_GOAL" ->
-          Option.map
-            (fun (objective : spec_cell) ->
-              {
-                source = cell_node_id cell.id;
-                target = cell_node_id objective.id;
-                kind = Constrains;
-              })
-            (nearest_objective cells cell.id)
-      | _ -> None)
+          begin match nearest_objective cells cell.id with
+          | None -> []
+          | Some objective ->
+              [
+                {
+                  source = cell_node_id cell.id;
+                  target = cell_node_id objective.id;
+                  kind = Constrains;
+                };
+              ]
+          end
+      | _ -> [])
 
 let conflict_edges pairs =
   List.map

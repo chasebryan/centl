@@ -22,31 +22,63 @@ PY
   caravan/__init__.py \
   caravan/content.py \
   caravan/coordinator.py \
+  caravan/census.py \
   caravan/identity.py \
   caravan/policy.py \
   caravan/enrollment.py \
+  caravan/enrollment_protocol.py \
+  caravan/resource_policy.py \
+  caravan/rotation.py \
   caravan/catalog.py \
   caravan/tuf_lab.py \
   caravan/session.py \
   caravan/transport.py \
+  caravan/public_service.py \
+  caravan/carrier_agent.py \
   caravan/retrieval.py \
   caravan/lifecycle.py \
   caravan/lab.py \
+  caravan/coverage.py \
+  caravan/join_caravan.py \
+  scripts/caravan-admin-camel \
+  scripts/caravan-census-publish \
+  scripts/caravan-census-validate \
+  scripts/caravan-coordinator-resolve \
   tests/test_caravan_phase1.py \
+  tests/test_caravan_census.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
+  tests/test_caravan_enrollment_protocol.py \
+  tests/test_caravan_resource_policy.py \
+  tests/test_caravan_rotation.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
+  tests/test_caravan_public_service.py \
   tests/test_caravan_retrieval.py \
-  tests/test_caravan_lifecycle.py
+  tests/test_caravan_lifecycle.py \
+  tests/test_caravan_coverage.py \
+  tests/test_caravan_linux_platform.py \
+  tests/test_join_caravan.py \
+  tests/test_caravan_join_release.py \
+  tests/test_site_navigation.py
 
 PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_phase1.py \
+  tests/test_caravan_census.py \
   tests/test_caravan_identity.py \
   tests/test_caravan_enrollment.py \
+  tests/test_caravan_enrollment_protocol.py \
+  tests/test_caravan_resource_policy.py \
+  tests/test_caravan_rotation.py \
   tests/test_caravan_tuf_catalog.py \
   tests/test_caravan_transport.py \
+  tests/test_caravan_public_service.py \
   tests/test_caravan_retrieval.py \
-  tests/test_caravan_lifecycle.py
+  tests/test_caravan_lifecycle.py \
+  tests/test_caravan_coverage.py \
+  tests/test_caravan_linux_platform.py \
+  tests/test_join_caravan.py \
+  tests/test_caravan_join_release.py \
+  tests/test_site_navigation.py
 
 PYTHONPATH=. "$PYTHON" -m caravan.lab >/dev/null

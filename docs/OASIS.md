@@ -38,6 +38,23 @@ feature / research work
 
 > **Oasis is a promotion state, not a property of every commit.**
 
+When an expedition cannot honestly be declared Oasis, FCF occupies a
+[Camp](FCF-CAMPS.md). A Camp is a stay. It does not close Oasis, inherit
+Oasis, or replace the official promotion path. CENTL v0.14.0 remains the
+published Oasis until a later identity independently earns the declaration.
+
+## Oasis does not regress
+
+A later candidate must not drop, weaken, or replace the already-published Oasis product.
+
+- `origin/oasis` must be an ancestor of any promotion candidate.
+- Existing Oasis tests, installer channels, qualification machinery, and supported command surfaces stay.
+- New work is added **on top of** Oasis, not instead of it.
+- If laboratory history diverged, merge `oasis` into the candidate first. Do not force-push Oasis away.
+- Gates are not weakened, skipped, or rewritten to obtain a green result.
+
+`scripts/oasis.py --inspect` reports a blocker when HEAD does not contain the current oasis tip. That blocker is a non-regression check, not a declaration.
+
 ## Stable release boundary
 
 An Oasis release must state exactly what is supported and what is not.
@@ -188,7 +205,25 @@ Oasis status never carries forward automatically. Every release must independent
 
 A later-discovered vulnerability does not rewrite the historical fact that a release passed its defined gate, but it must be handled through normal security advisories, fixes, and supported-version decisions. Oasis does not mean permanently supported, invulnerable, or mathematically complete.
 
-## v0.14.0
+## v0.15.0
+
+CENTL v0.15.0 is the main and mirage tree placed on the current oasis tip.
+
+The final declaration carried by the exact release candidate is:
+
+> **CENTL v0.15.0 is an Oasis release.**
+
+This declaration becomes authoritative only if this exact candidate SHA
+passes every applicable local and hosted gate, is promoted unchanged to
+`oasis`, receives the exact `v0.15.0` tag, and publishes and reverifies
+the already-qualified release bytes. Any source change after
+qualification creates a new candidate and requires the gate again.
+
+The installed product remains GNU/Linux x86_64 with `centl`,
+`centl-physics`, and `centl-sci`. Laboratory surfaces do not inherit
+Oasis by sitting in the same tree.
+
+### Historical v0.14.0
 
 CENTL v0.14.0 is the first release prepared under this complete Oasis standard.
 
