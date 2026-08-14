@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: centl-distribution-writer
@@ -20,6 +20,8 @@ jobs:
     name: Preserve Oasis foundation and clean legacy releases
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: write
     env:
       FOUNDATION_VERSION: 0.14.0
       FOUNDATION_TAG: v0.14.0
@@ -31,6 +33,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Verify canonical Oasis foundation identity
@@ -98,6 +101,8 @@ jobs:
           test "$("$RUNNER_TEMP/foundation/extracted/centl/bin/centl-sci" 'What is 0.1 plus 0.2?')" = '3/10'
 
       - name: Publish permanent distribution branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -135,7 +140,8 @@ jobs:
             echo 'Foundation distribution already present.'
           else
             git commit -m 'dist: preserve CENTL v0.14.0 Oasis foundation'
-            git push origin HEAD:distribution
+            git -c "http.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
+              push origin HEAD:distribution
           fi
 
       - name: Verify permanent public bytes
