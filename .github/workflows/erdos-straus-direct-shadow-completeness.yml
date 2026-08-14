@@ -6,16 +6,17 @@ on:
       k_limit:
         description: Candidate layers to attack
         required: false
-        default: "1000"
+        default: "1200"
       search_limit:
         description: Maximum parameter s searched per candidate
         required: false
-        default: "1000000"
+        default: "2000000"
   push:
     branches: [main]
     paths:
       - 'research/erdos-straus/direct_shadow_completeness_probe.py'
       - 'research/erdos-straus/verify_direct_shadow_completeness.py'
+      - 'research/erdos-straus/shadow_coordinate_core.py'
       - '.github/workflows/erdos-straus-direct-shadow-completeness.yml'
 
 permissions:
@@ -25,7 +26,7 @@ jobs:
   attack:
     name: Candidatewise union-shadow attack and CENTL certification
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,8 +56,8 @@ jobs:
           K: ${{ github.event.inputs.k_limit }}
           S: ${{ github.event.inputs.search_limit }}
         run: |
-          echo "k=${K:-1000}" >> "$GITHUB_OUTPUT"
-          echo "s=${S:-1000000}" >> "$GITHUB_OUTPUT"
+          echo "k=${K:-1200}" >> "$GITHUB_OUTPUT"
+          echo "s=${S:-2000000}" >> "$GITHUB_OUTPUT"
 
       - name: Attack every directly novel candidate
         run: |
@@ -68,6 +69,9 @@ jobs:
 
       - name: Independent verifier
         run: python3 research/erdos-straus/verify_direct_shadow_completeness.py --out direct-shadow-output
+
+      - name: Mine prime-power coordinate core
+        run: python3 research/erdos-straus/shadow_coordinate_core.py --out direct-shadow-output
 
       - name: CENTL exact certification of hardest CRT progressions
         run: |
@@ -83,7 +87,10 @@ jobs:
           sha256sum -c SHA256SUMS
 
       - name: Publish summary
-        run: cat direct-shadow-output/direct-shadow-completeness-report.md >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          cat direct-shadow-output/direct-shadow-completeness-report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat direct-shadow-output/shadow-coordinate-core-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload certificate bundle
         if: always()
