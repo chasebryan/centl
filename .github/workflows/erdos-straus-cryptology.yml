@@ -28,7 +28,7 @@ on:
         required: false
         default: "5"
       depth_floor:
-        description: High-depth selection floor for v3
+        description: High-depth selection floor for v3 and threshold shadow analysis
         required: false
         default: "25"
   push:
@@ -41,6 +41,7 @@ on:
       - 'research/erdos-straus/crypto_probe.py'
       - 'research/erdos-straus/crypto_probe_v2.py'
       - 'research/erdos-straus/crypto_probe_v3.py'
+      - 'research/erdos-straus/threshold_shadow_probe.py'
       - 'research/erdos-straus/cryptology-contracts.centl'
       - '.github/workflows/erdos-straus-cryptology.yml'
       - 'src/**'
@@ -51,7 +52,7 @@ permissions:
 
 jobs:
   probe:
-    name: Prime fingerprints, held-out diagnostics, and CENTL exact checks
+    name: Prime fingerprints, threshold shadows, and CENTL exact checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
@@ -116,6 +117,7 @@ jobs:
           fi
           echo "bits=$bits" >> "$GITHUB_OUTPUT"
           echo "samples=$samples" >> "$GITHUB_OUTPUT"
+          echo "threshold_samples=$((samples * 3))" >> "$GITHUB_OUTPUT"
           echo "kmax=$kmax" >> "$GITHUB_OUTPUT"
           echo "kfp=$kfp" >> "$GITHUB_OUTPUT"
           echo "trials=$trials" >> "$GITHUB_OUTPUT"
@@ -155,6 +157,17 @@ jobs:
             --folds '${{ steps.params.outputs.folds }}' \
             --out cryptology-output
 
+      - name: Measure threshold shadow depletion
+        run: |
+          python3 research/erdos-straus/threshold_shadow_probe.py \
+            --bits '${{ steps.params.outputs.bits }}' \
+            --samples '${{ steps.params.outputs.threshold_samples }}' \
+            --h 1 \
+            --depth-floor '${{ steps.params.outputs.depth_floor }}' \
+            --k-max '${{ steps.params.outputs.kmax }}' \
+            --k-fingerprint '${{ steps.params.outputs.kfp }}' \
+            --out cryptology-output
+
       - name: CENTL exact certification of planted-control algebra
         run: |
           _build/default/src/main.exe check \
@@ -181,6 +194,8 @@ jobs:
           cat cryptology-output/cryptology-v2-report.md >> "$GITHUB_STEP_SUMMARY"
           printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
           cat cryptology-output/cryptology-v3-report.md >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+          cat cryptology-output/threshold-shadow-probe-report.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload cryptology diagnostic bundle
         if: always()
