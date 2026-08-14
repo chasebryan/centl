@@ -8,8 +8,12 @@ mode=${1:-cflags}
 tokens() {
   printf '('
   for tok in "$@"; do
+    tok=$(printf '%s' "$tok" | tr -d '\r')
     [ -n "$tok" ] || continue
-    printf ' %s' "$tok"
+    case "$tok" in
+      *[:\\]*) printf ' "%s"' "$tok" ;;
+      *) printf ' %s' "$tok" ;;
+    esac
   done
   printf ' )\n'
 }
@@ -28,6 +32,8 @@ fi
 if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists flint; then
   cflags=$(pkg-config --cflags flint gmp mpfr 2>/dev/null || pkg-config --cflags flint)
   libs=$(pkg-config --libs flint gmp mpfr 2>/dev/null || pkg-config --libs flint)
+  cflags=$(printf '%s' "$cflags" | tr -d '\r' | tr '\n' ' ')
+  libs=$(printf '%s' "$libs" | tr -d '\r' | tr '\n' ' ')
   case $(uname -s) in
     Darwin|Linux)
       case " $libs " in
