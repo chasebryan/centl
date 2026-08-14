@@ -122,7 +122,14 @@ class _PublicHandler(BaseHTTPRequestHandler):
         # Deliberately discard the default client-address/path log record.
         return
 
-    def _send_json(self, status: int, value: dict[str, object], *, cache: str = "no-store") -> None:
+    def _send_json(
+        self,
+        status: int,
+        value: dict[str, object],
+        *,
+        cache: str = "no-store",
+        public_read: bool = False,
+    ) -> None:
         payload = (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode(
             "utf-8"
         )
@@ -135,6 +142,9 @@ class _PublicHandler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", cache)
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Strict-Transport-Security", "max-age=31536000")
+        if public_read:
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Vary", "Origin")
         self.end_headers()
         self.wfile.write(payload)
 
@@ -178,7 +188,12 @@ class _PublicHandler(BaseHTTPRequestHandler):
                 self._send_json(200, {"schema": "fcf-caravan-health-v1", "status": "ok"})
                 return
             if self.path == "/census-v1.json":
-                self._send_json(200, build_live_document(self.server.coordinator), cache="no-cache")
+                self._send_json(
+                    200,
+                    build_live_document(self.server.coordinator),
+                    cache="no-cache",
+                    public_read=True,
+                )
                 return
             self._send_error(404, "not_found")
         except (OSError, ValueError, RuntimeError):
