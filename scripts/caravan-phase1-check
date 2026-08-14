@@ -37,6 +37,9 @@ PY
   caravan/lifecycle.py \
   caravan/lab.py \
   caravan/join_caravan.py \
+  scripts/caravan-admin-camel \
+  scripts/caravan-census-publish \
+  scripts/caravan-census-validate \
   tests/test_caravan_phase1.py \
   tests/test_caravan_census.py \
   tests/test_caravan_identity.py \

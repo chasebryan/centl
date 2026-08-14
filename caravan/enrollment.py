@@ -14,6 +14,7 @@ def register_accepted_carrier(
     *,
     expected_policy_path: os.PathLike[str] | str,
     expected_policy_version: str,
+    carrier_class: str = "volunteer",
     now: float | None = None,
 ) -> None:
     """Register a carrier only after its signed policy receipt verifies.
@@ -33,5 +34,6 @@ def register_accepted_carrier(
         public_identity=verified.public_identity,
         policy_version=verified.policy_version,
         agent_version=verified.agent_version,
+        carrier_class=carrier_class,
         now=now,
     )

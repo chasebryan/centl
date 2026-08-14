@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'caravan/census.py'
+      - 'scripts/caravan-census-validate'
+      - 'scripts/caravan-render-bazaar'
       - 'assets/branding/fcf-centl-banner.png'
       - 'assets/branding/centl-sci-v0.0.1-camelus-banner.png'
       - '.github/workflows/pages.yml'
@@ -33,11 +36,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Tor client
+        if: ${{ vars.FCF_CARAVAN_CENSUS_URL == '' }}
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends tor
 
       - name: Start private Tor client
+        if: ${{ vars.FCF_CARAVAN_CENSUS_URL == '' }}
         run: |
           set -eu
           tor_data="$RUNNER_TEMP/fcf-caravan-tor"
@@ -58,7 +63,22 @@ jobs:
             echo "CARAVAN_TOR_READY=1" >> "$GITHUB_ENV"
           fi
 
-      - name: Probe X200
+      - name: Fetch aggregate coordinator census
+        if: ${{ vars.FCF_CARAVAN_CENSUS_URL != '' }}
+        env:
+          CENSUS_URL: ${{ vars.FCF_CARAVAN_CENSUS_URL }}
+        run: |
+          set -eu
+          case "$CENSUS_URL" in https://*) ;; *) echo "FCF_CARAVAN_CENSUS_URL must use HTTPS" >&2; exit 1 ;; esac
+          curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 30 --max-filesize 65536 \
+            --output "$RUNNER_TEMP/fcf-caravan-census.json" "$CENSUS_URL"
+          python3 scripts/caravan-census-validate \
+            --input "$RUNNER_TEMP/fcf-caravan-census.json" \
+            --output site/pub/centl/caravan/census-v1.json
+
+      - name: Probe X200 fallback
+        if: ${{ vars.FCF_CARAVAN_CENSUS_URL == '' }}
         run: |
           if [ "${CARAVAN_TOR_READY:-0}" = "1" ]; then
             python3 scripts/caravan-lead-census --origin-file site/pub/centl/caravan/lead-origin.json --output site/pub/centl/caravan/lead-census-v1.json --socks 127.0.0.1:19050
@@ -78,12 +98,18 @@ jobs:
 
       - name: Assemble static site
         if: steps.pages.outcome == 'success'
+        env:
+          FCF_CARAVAN_CENSUS_URL: ${{ vars.FCF_CARAVAN_CENSUS_URL }}
         run: |
           set -eu
           rm -rf _site
           mkdir -p _site/assets
           cp -a site/. _site/
-          python3 scripts/caravan-render-bazaar --template site/mirrors.html --census site/pub/centl/caravan/lead-census-v1.json --output _site/mirrors.html
+          census_input=site/pub/centl/caravan/lead-census-v1.json
+          if [ -n "$FCF_CARAVAN_CENSUS_URL" ]; then
+            census_input=site/pub/centl/caravan/census-v1.json
+          fi
+          python3 scripts/caravan-render-bazaar --template site/mirrors.html --census "$census_input" --output _site/mirrors.html
           cp assets/branding/fcf-centl-banner.png _site/assets/fcf-centl-banner.png
           cp assets/branding/centl-sci-v0.0.1-camelus-banner.png _site/assets/centl-sci-v0.0.1-camelus-banner.png
 

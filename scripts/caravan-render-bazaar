@@ -7,7 +7,13 @@ import json
 from pathlib import Path
 import sys
 
-SCHEMA = "fcf-caravan-lead-census-v1"
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from caravan.census import CENSUS_SCHEMA, validate_public_document  # noqa: E402
+
+LEAD_SCHEMA = "fcf-caravan-lead-census-v1"
 
 
 def fail(message: str) -> "NoReturn":
@@ -31,12 +37,18 @@ def read_census(path: Path) -> dict[str, object]:
         document = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         fail(f"census is unreadable: {exc}")
-    if (
-        not isinstance(document, dict)
-        or document.get("schema") != SCHEMA
-        or document.get("status") != "live"
-    ):
-        fail("census does not match the live lead-census schema")
+    if not isinstance(document, dict) or document.get("status") != "live":
+        fail("census does not match a live CARAVAN census schema")
+    if document.get("schema") == CENSUS_SCHEMA:
+        try:
+            document = validate_public_document(document)
+        except ValueError as exc:
+            fail(str(exc))
+        document["hungry_camels"] = 0
+        document["probe"] = "coordinator"
+        return document
+    if document.get("schema") != LEAD_SCHEMA:
+        fail("census schema is unsupported")
     for field in ("active_camels", "hungry_camels", "lost_camels"):
         value = document.get(field)
         if not isinstance(value, int) or isinstance(value, bool) or value < 0:
@@ -50,6 +62,11 @@ def read_census(path: Path) -> dict[str, object]:
 def status_text(document: dict[str, object]) -> str:
     generated_at = escape(str(document["generated_at"]))
     probe = document.get("probe")
+    if probe == "coordinator":
+        return (
+            f"Updated {generated_at} from the authenticated coordinator census. "
+            "Only aggregate carrier counts are published."
+        )
     if probe == "healthy":
         return f"Updated {generated_at}. The X200 lead origin passed the latest Tor probe."
     if probe == "monitor-stale":

@@ -38,6 +38,11 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn('"arbitrary_content": False', text)
         self.assertIn('"systemd_required": False', text)
         self.assertIn("official releases are immutable in place", text)
+        self.assertIn("Welcome to the FCF CARAVAN", text)
+        self.assertIn("https://github.com/sponsors/chasebryan", text)
+        self.assertIn("https://freecomputation.org/funding.html#x-money", text)
+        self.assertNotIn("╭", text)
+        self.assertNotIn("╰", text)
         for network_primitive in (
             "curl ",
             "wget ",
@@ -202,6 +207,51 @@ class CaravanJoinReleaseTests(unittest.TestCase):
             self.assertIn("<strong>1</strong>", rendered)
             self.assertGreaterEqual(rendered.count("<strong>0</strong>"), 2)
             self.assertIn("passed the latest Tor probe", rendered)
+
+    def test_bazaar_renderer_accepts_authenticated_coordinator_census(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            census = root / "census.json"
+            output = root / "mirrors.html"
+            census.write_text(
+                json.dumps(
+                    {
+                        "schema": "fcf-caravan-census-v1",
+                        "status": "live",
+                        "generated_at": "2026-08-13T22:25:02Z",
+                        "active_camels": 7,
+                        "lost_camels": 2,
+                        "active_window_seconds": 1800,
+                        "lost_after_seconds": 259200,
+                        "individual_nodes_public": False,
+                        "ip_addresses_public": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDER),
+                    "--template",
+                    str(BAZAAR),
+                    "--census",
+                    str(census),
+                    "--output",
+                    str(output),
+                ],
+                check=True,
+            )
+            rendered = output.read_text(encoding="utf-8")
+            self.assertIn("<strong>7</strong>", rendered)
+            self.assertIn("<strong>2</strong>", rendered)
+            self.assertIn("authenticated coordinator census", rendered)
+
+    def test_bazaar_explains_the_guided_non_manual_join_path(self) -> None:
+        html = BAZAAR.read_text(encoding="utf-8")
+        self.assertIn("guided", html)
+        self.assertIn("No repository checkout or special tooling is required", html)
+        self.assertIn("Manual setup remains available", html)
 
 
 if __name__ == "__main__":

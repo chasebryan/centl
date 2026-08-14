@@ -145,6 +145,14 @@ ul, ol { margin-top: 7px; }
   padding: 7px 9px;
   border-left: 3px solid var(--rule);
 }
+.caravan-join-links {
+  margin: 14px 0;
+  font-weight: 700;
+}
+.caravan-join-links a {
+  display: inline-block;
+  margin-right: 8px;
+}
 
 
 .sponsor-actions {

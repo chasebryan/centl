@@ -178,6 +178,7 @@ fi
 MISSIONS=$(normalize_missions "$MISSIONS")
 
 package_manager="capability-present"
+# Mission selection is a filter, never publication authority.
 for candidate in apt-get dnf yum zypper pacman apk xbps-install emerge nix; do
   if command -v "$candidate" >/dev/null 2>&1; then
     package_manager=$candidate
@@ -187,26 +188,39 @@ done
 
 cat <<TXT
 
-╭────────────────────────────────────────────────────────────╮
-│                  JOIN THE FCF CARAVAN                     │
-╰────────────────────────────────────────────────────────────╯
+🐪 Welcome to the FCF CARAVAN, camel.
 
-Authenticated release: $RELEASE_VERSION
+You are preparing this Linux machine to help preserve free computation for
+science, mathematics, and open knowledge. Your carrier is rootless, bounded,
+and privacy-preserving: it opens no public inbound port, publishes no machine
+identity, and accepts only authenticated FCF public-approved cargo.
+
+Release:              $RELEASE_VERSION
 Preservation missions: $MISSIONS
-Storage ceiling:       $STORAGE_GIB GiB
-Upload-rate ceiling:   $UPLOAD_MIBPS MiB/s
-Linux package family:  $package_manager
-Privilege model:       rootless
-Inbound ports:         none
-Arbitrary file hosting:none
-Proxy/tunnel service:  none
-Public node listing:   none
-Census publication:    aggregate counts only (production enrollment)
+Storage ceiling:      $STORAGE_GIB GiB
+Upload-rate ceiling:  $UPLOAD_MIBPS MiB/s
+Linux package family: $package_manager
 
-The carrier store is content-addressed and is intended to accept only artifacts
-admitted by authenticated FCF catalog metadata. Your home files are not cargo.
-This installer does not expose a directory, create an upload endpoint, or open a
-public listening socket. Mission selection is a filter, never publication authority.
+Your home files are never cargo. Mission selection is a filter, never
+publication authority. When authenticated enrollment is active, this camel's
+heartbeat contributes to aggregate Active/Lost counts without exposing a
+hostname, username, IP address, or public node listing.
+
+Support FCF:
+  GitHub Sponsors  https://github.com/sponsors/chasebryan
+  X Money         https://freecomputation.org/funding.html#x-money
+  Funding details https://freecomputation.org/funding.html
+
+Get involved:
+  Preserve source and releases, test the carrier, review the policies, report
+  bugs, improve documentation, and share the project with people who value
+  open scientific computing.
+  https://freecomputation.org/docs.html
+  https://github.com/chasebryan/centl/issues
+
+The carrier store is content-addressed and accepts only catalog-approved
+artifacts. This installer does not expose a directory, create an upload
+endpoint, or provide a proxy or tunnel service.
 TXT
 
 if [ "$ASSUME_YES" -eq 0 ]; then
@@ -275,18 +289,18 @@ chmod 0600 "$config_root/config.json"
 
 cat <<TXT
 
-CONFIGURED
-Welcome to the Free Computation Foundation caravan! 🐪
+🐪 Your camel is prepared.
 
 Release $RELEASE_VERSION is installed read-only at:
   $install_root
 
-Preservation missions:
-  $MISSIONS
+The machine is configured with the missions you selected. No inbound port was
+opened, no arbitrary data was accepted, and no public machine identity was
+published. The carrier will be counted only after an authenticated coordinator
+accepts its heartbeat; the public census contains aggregate counts only.
 
-This machine is PREPARED, not publicly enrolled yet. No inbound port was opened,
-no arbitrary data was accepted, no public machine identity was published, and no
-background network service was started. When FCF promotes the authenticated
-carrier protocol to a signed public release, the same immutable-release mechanism
-will perform explicit enrollment and privacy-minimized aggregate census reporting.
+Thank you for helping keep free computation moving. 🧮
+
+Funding: https://freecomputation.org/funding.html
+Project: https://github.com/chasebryan/centl
 TXT

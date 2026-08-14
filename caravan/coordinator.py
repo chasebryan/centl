@@ -145,6 +145,8 @@ class CoordinatorState:
                     public_identity TEXT NOT NULL,
                     policy_version TEXT NOT NULL,
                     agent_version TEXT NOT NULL,
+                    carrier_class TEXT NOT NULL DEFAULT 'volunteer'
+                        CHECK(carrier_class IN ('volunteer', 'fcf-admin')),
                     state TEXT NOT NULL CHECK(state IN ('active', 'quarantined', 'withdrawn')),
                     last_seen REAL NOT NULL,
                     load REAL NOT NULL DEFAULT 0 CHECK(load >= 0),
@@ -176,6 +178,11 @@ class CoordinatorState:
                 );
                 """
             )
+            columns = {row["name"] for row in db.execute("PRAGMA table_info(carriers)")}
+            if "carrier_class" not in columns:
+                db.execute(
+                    "ALTER TABLE carriers ADD COLUMN carrier_class TEXT NOT NULL DEFAULT 'volunteer'"
+                )
 
     @staticmethod
     def _purge_expired_tickets(db: sqlite3.Connection, now: float) -> None:
@@ -221,10 +228,13 @@ class CoordinatorState:
         public_identity: str,
         policy_version: str,
         agent_version: str,
+        carrier_class: str = "volunteer",
         now: float | None = None,
     ) -> None:
         if not node_id or not public_identity or not policy_version or not agent_version:
             raise ValueError("carrier registration fields must be non-empty")
+        if carrier_class not in {"volunteer", "fcf-admin"}:
+            raise ValueError("unsupported CARAVAN carrier class")
         timestamp = time.time() if now is None else float(now)
         with self._connect() as db:
             row = db.execute(
@@ -235,18 +245,19 @@ class CoordinatorState:
             if row is None:
                 db.execute(
                     """INSERT INTO carriers(
-                        node_id, public_identity, policy_version, agent_version, state, last_seen
-                    ) VALUES (?, ?, ?, ?, 'active', ?)""",
-                    (node_id, public_identity, policy_version, agent_version, timestamp),
+                        node_id, public_identity, policy_version, agent_version,
+                        carrier_class, state, last_seen
+                    ) VALUES (?, ?, ?, ?, ?, 'active', ?)""",
+                    (node_id, public_identity, policy_version, agent_version, carrier_class, timestamp),
                 )
             elif row["state"] == "withdrawn":
                 raise CoordinatorError("withdrawn node identity must not be silently reactivated")
             else:
                 db.execute(
                     """UPDATE carriers
-                       SET policy_version = ?, agent_version = ?, last_seen = ?
+                       SET policy_version = ?, agent_version = ?, carrier_class = ?, last_seen = ?
                        WHERE node_id = ?""",
-                    (policy_version, agent_version, timestamp, node_id),
+                    (policy_version, agent_version, carrier_class, timestamp, node_id),
                 )
 
     def heartbeat(

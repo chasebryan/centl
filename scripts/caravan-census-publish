@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Publish the privacy-preserving aggregate census from coordinator state."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import sys
+import time
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from caravan.census import build_live_document  # noqa: E402
+from caravan.coordinator import CoordinatorState  # noqa: E402
+
+
+def fail(message: str) -> "NoReturn":
+    print(f"caravan-census-publish: {message}", file=sys.stderr)
+    raise SystemExit(2)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Publish aggregate Active/Lost Camel counts without carrier identities"
+    )
+    parser.add_argument("--database", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--now", type=float, help="fixed Unix timestamp for deterministic tests")
+    args = parser.parse_args()
+
+    try:
+        coordinator = CoordinatorState(args.database)
+        document = build_live_document(coordinator, now=args.now)
+    except (OSError, ValueError, RuntimeError) as exc:
+        fail(str(exc))
+
+    output = args.output
+    if output.is_symlink():
+        fail("output path must not be a symlink")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.parent / f".{output.name}.new-{os.getpid()}"
+    if temporary.exists() or temporary.is_symlink():
+        fail("temporary output path already exists")
+    temporary.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.chmod(0o644)
+    os.replace(temporary, output)
+    print(
+        "CARAVAN census published: "
+        f"active={document['active_camels']} lost={document['lost_camels']} "
+        f"generated_at={document['generated_at']}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

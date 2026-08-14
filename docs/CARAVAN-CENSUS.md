@@ -236,3 +236,26 @@ The first website widget should count volunteer carrier enrollments only. Public
 Census protocol code is part of the security-sensitive carrier release. Any change to heartbeat authentication, enrollment credentials, state transitions, privacy fields, or coordinator trust requires a new immutable signed `join-caravan` release and the corresponding protocol compatibility review.
 
 There is no silent server command that rewrites an installed carrier into a different census protocol.
+
+## FCF administrator carrier and publication
+
+An FCF administrator machine may participate in the same private coordinator state as a volunteer carrier. The administrator class is stored only in the coordinator database and is intentionally omitted from the public document.
+
+On an FCF-controlled machine, accept the reviewed host policy explicitly and send a local heartbeat:
+
+```sh
+scripts/caravan-admin-camel \
+  --database /protected/fcf-caravan/coordinator.sqlite3 \
+  --identity-dir /protected/fcf-caravan/admin-identity \
+  --accept-policy FCF-CARAVAN-HOST-v1
+```
+
+The coordinator operator can then produce the exact aggregate document for an FCF-controlled HTTPS publication service:
+
+```sh
+scripts/caravan-census-publish \
+  --database /protected/fcf-caravan/coordinator.sqlite3 \
+  --output /srv/fcf-caravan/census-v1.json
+```
+
+The GitHub repository variable `FCF_CARAVAN_CENSUS_URL` must point to that FCF-controlled HTTPS endpoint before the Pages workflow consumes it. Until that variable and the production authenticated enrollment/heartbeat service are enabled, Pages uses the clearly identified X200 lead-origin fallback and public volunteer enrollment remains gated. The publication endpoint must serve the exact aggregate schema above, must not expose the coordinator database, and must not retain census access-log source addresses.

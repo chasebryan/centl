@@ -70,6 +70,13 @@ class CaravanLeadCensusTests(unittest.TestCase):
             self.assertEqual(document["lost_camels"], 1)
             self.assertEqual(document["probe"], "unreachable")
 
+            MODULE.write_document(output, active=False, hungry=True)
+            document = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(document["active_camels"], 0)
+            self.assertEqual(document["hungry_camels"], 1)
+            self.assertEqual(document["lost_camels"], 0)
+            self.assertEqual(document["probe"], "monitor-stale")
+
 
 if __name__ == "__main__":
     unittest.main()
