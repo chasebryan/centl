@@ -1,10 +1,10 @@
-# Current research frontier: from shadow completeness to quotient and square-lift cores
+# Current research frontier: from shadow completeness to quotient, tower, and dyadic cores
 
 **Date:** 2026-08-14  
 **Status:** active theorem program  
 **Claim boundary:** Erdős-Straus remains open; universal López Type A/B coverage and universal Direct-Shadow Completeness remain unproved.
 
-This is the short moving-frontier record. The full synthesis remains [DIAMOND.md](DIAMOND.md).
+This is the short moving-frontier record. The full synthesis remains [DIAMOND.md](DIAMOND.md). The durable checkpoint is [RESEARCH-BACKUP-2026-08-14.md](RESEARCH-BACKUP-2026-08-14.md).
 
 ## 1. Exact candidatewise frontier
 
@@ -107,84 +107,38 @@ then the entire `p` coordinate is peelable while preserving a reduced solution.
 
 See [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md).
 
-This turns a global covering problem into an iterated local elimination problem.
-
-## 4. Exact quadratic trap signature
+## 4. Exact quadratic trap signature and character-shield completeness
 
 For every divisor `e|k`, with `m_k=4k-1`,
 
 \[
-\boxed{
 \left(\frac{-e}{m_k}\right)
 =
 \left(\frac{-4e}{m_k}\right)
 =-1.
-}
 \]
 
-Thus every Type A/B trap lies on the Jacobi-negative side.
+The Type B half of this quadratic-nonresidue property is already present in López 2024 and is not an FCF novelty claim. See [QUADRATIC-PRIOR-ART-NOTE.md](QUADRATIC-PRIOR-ART-NOTE.md).
 
-The resulting character shield converts simultaneous trap avoidance into an `F_2` sign problem. See [QUADRATIC-TRAP-SIGNATURE.md](QUADRATIC-TRAP-SIGNATURE.md).
-
-## 5. Proved character-shield obstruction completeness
-
-The global `F_2` character system has now been reduced exactly.
-
-Let `W_k` be the squareclass span of all earlier moduli and `F_k` the coordinate subspace supported on primes fixed by the target progression. Let `U_k` be the span of earlier rows that are individually fixed-only.
-
-Then
+The new reduction is [CHARACTER-SHIELD-COMPLETENESS.md](CHARACTER-SHIELD-COMPLETENESS.md). Let `W_k` be the squareclass span of earlier moduli, `F_k` the target-fixed prime-coordinate subspace, and `U_k` the span of individually fixed-only earlier rows. Then
 
 \[
 \boxed{W_k\cap F_k=U_k.}
 \]
 
-Consequently the simultaneous Jacobi `+1` shield is inconsistent **if and only if** one earlier fixed-only layer is already Jacobi-negative by itself.
+Consequently
+
+\[
+\boxed{
+\text{character shield inconsistent}
+\iff
+\exists\text{ one fixed-only earlier layer with Jacobi sign }-1.
+}
+\]
 
 There is no genuinely collective new obstruction at the scalar quadratic-character level.
 
-See [CHARACTER-SHIELD-COMPLETENESS.md](CHARACTER-SHIELD-COMPLETENESS.md).
-
-## 6. New multiplicative trap-coset theorem
-
-For
-
-\[
-m_k=4k-1,
-\qquad
-G_k=(\mathbb Z/m_k\mathbb Z)^\times,
-\]
-
-define
-
-\[
-H_k=\langle\ell\bmod m_k:\ell\text{ prime},\ \ell\mid k\rangle.
-\]
-
-Then
-
-\[
-\boxed{T_k\subseteq-H_k}
-\]
-
-and
-
-\[
-\boxed{-1\notin H_k.}
-\]
-
-So the entire Type A/B trap set lies inside one proper multiplicative coset.
-
-Define the index
-
-\[
-\iota(k)=[G_k:H_k].
-\]
-
-The Jacobi `-1` theorem is only one order-two quotient of this richer structure. Finite exact enumeration through `k<=1200` found indices as large as `210`.
-
-See [MULTIPLICATIVE-TRAP-COSET.md](MULTIPLICATIVE-TRAP-COSET.md) and [`trap_coset_analyzer.py`](trap_coset_analyzer.py).
-
-## 7. New full local quadratic-signature theorem
+## 5. Full local quadratic signatures sharpen the shield
 
 Factor
 
@@ -192,57 +146,180 @@ Factor
 m_k=\prod_{i=1}^r p_i^{a_i}
 \]
 
-and record the complete vector of Legendre signs at the distinct primes `p_i`.
-
-If `V_k` is the `F_2` span of the local signatures of the prime divisors of `k`, and `eta_k` is the signature of `-1`, then the **exact set of trap signatures** is
+and retain the complete vector of local Legendre signs. If `H_k` is the span of local signatures of prime divisors of `k`, then
 
 \[
 \boxed{
-\lambda_{m_k}(T_k)=\eta_k+V_k.
+\chi_k(T_k)=\chi_k(-1)+H_k.
 }
 \]
 
-Thus Type A/B traps occupy one affine subspace of the full local quadratic-signature space. The scalar Jacobi theorem is only one projection of this vector statement.
+So all Type A/B traps occupy one affine class in the quotient
 
-A proof-mining replay of the frozen `k<=1200` bundle found:
+\[
+Q_k=V_k/H_k.
+\]
+
+On the frozen `k<=1200` candidate bundle:
 
 ```text
-full local quadratic-signature shield solved: 30,786
-direct signature residual:                    10,684
-collective linear inconsistency:                   0
-unresolved non-direct signature systems:           0
+Jacobi character shield solved:        30,414 / 41,470
+full quadratic-signature shield:       30,786 / 41,470
+rescued beyond Jacobi:                    372
+direct quadratic-signature residual:  10,684
 ```
 
-This finite pattern is not yet promoted to a universal signature-level completeness theorem.
-
-See [QUADRATIC-SIGNATURE-COSET.md](QUADRATIC-SIGNATURE-COSET.md) and [`quadratic_signature_shield_analyzer.py`](quadratic_signature_shield_analyzer.py).
-
-## 8. New square-lift core
-
-If an earlier row is fixed at the squareclass level, then every prime outside the target modulus occurs in that earlier modulus with even exponent.
-
-Equivalently, for a character-fixed earlier row,
+All
 
 \[
-\boxed{
-p\nmid L\Longrightarrow v_p(m_j)\equiv0\pmod2.}
+\boxed{1,566,322/1,566,322}
 \]
 
-The same holds in the pulled-back modulus `q_j`.
+higher-codimension signature constraints encountered were shadowed by one codimension-one signature constraint. An independent implementation reproduced the same finite result.
 
-Therefore after the quadratic signs have been exhausted, any genuinely new prime coordinate enters the remaining obstruction only through a square power:
+See [QUADRATIC-SIGNATURE-SHIELD-K1200.md](QUADRATIC-SIGNATURE-SHIELD-K1200.md).
+
+## 6. The multiplicative trap quotient is stronger still
+
+Let
+
+\[
+D_k=\langle \ell:\ell\text{ prime},\ \ell\mid k\rangle
+\le(\mathbb Z/(4k-1)\mathbb Z)^\times.
+\]
+
+Then
+
+\[
+\boxed{T_k\subseteq-D_k.}
+\]
+
+Hence all Type A/B traps occupy one distinguished class in
+
+\[
+\boxed{\Gamma_k=(\mathbb Z/(4k-1)\mathbb Z)^\times/D_k.}
+\]
+
+The full local quadratic quotient is only a quotient of this multiplicative object.
+
+The normalized exact trap set inside `D_k` is the image of two exponent boxes:
 
 \[
 \boxed{
-q_j=c_j s_j^2,
+-T_k
+=
+\phi_k(\mathcal B_{\mathbf a})
+\cup
+\phi_k(\mathcal B_{\mathbf a}-\mathbf a).
 }
 \]
 
-where the prime support of `c_j` lies inside the fixed target modulus and `(s_j,L)=1`.
+See [MULTIPLICATIVE-TRAP-QUOTIENT.md](MULTIPLICATIVE-TRAP-QUOTIENT.md).
 
-The unresolved problem is therefore becoming a **higher p-adic lifting problem**, not another free quadratic-sign problem.
+## 7. Character residuals form coherent square-lift towers
 
-See [SQUARE-LIFT-CORE.md](SQUARE-LIFT-CORE.md) and [`square_lift_core_analyzer.py`](square_lift_core_analyzer.py).
+For an earlier modulus `m_j=4j-1`, let `sf(m_j)` be its squarefree kernel.
+
+An earlier layer is character-fixed exactly when
+
+\[
+\boxed{
+\operatorname{sf}(m_j)\mid\operatorname{rad}(L).
+}
+\]
+
+Thus every such modulus is
+
+\[
+\boxed{m_j=a b^2,}
+\qquad
+a\mid\operatorname{rad}(L),\quad a\equiv3\pmod4.
+\]
+
+For a fixed target progression,
+
+\[
+\boxed{
+\left(\frac r{a b^2}\right)=\left(\frac r a\right),
+}
+\]
+
+so an entire tower is character-positive or character-negative at once.
+
+Within a tower, `b_1|b_2` gives an exact odd-square modulus ancestry relation:
+
+\[
+\boxed{
+\frac{m(a,b_2)}{m(a,b_1)}
+=\left(\frac{b_2}{b_1}\right)^2.
+}
+\]
+
+The frozen `k<=1200` replay shows that among the `11,056` Jacobi-character residual candidates, the median number of variable negative towers is `1`, the mean is about `1.110`, and the observed maximum is `10`. These finite counts are proof-mining diagnostics only.
+
+See [SQUARE-LIFT-TOWERS.md](SQUARE-LIFT-TOWERS.md).
+
+## 8. New infinite theorem family: the dyadic trap lattice
+
+For
+
+\[
+k=2^a,
+\]
+
+the modulus is
+
+\[
+m_a=2^{a+2}-1.
+\]
+
+The exact theorem is
+
+\[
+\boxed{
+T_{2^a}=-\langle2\rangle,
+\qquad
+\operatorname{ord}_{m_a}(2)=a+2.
+}
+\]
+
+More strongly,
+
+\[
+\boxed{
+T_k=-D_k
+\iff
+k\text{ is a power of }2.
+}
+\]
+
+So powers of two are exactly the Type A/B layers whose exact trap set saturates its entire multiplicative trap coset.
+
+The Mersenne divisibility identity gives
+
+\[
+2^{a+2}-1\mid2^{b+2}-1
+\iff
+a+2\mid b+2.
+\]
+
+Whenever this holds with `a<b`, reduction maps the entire later dyadic trap set onto the earlier one:
+
+\[
+\boxed{
+T_{2^b}\bmod(2^{a+2}-1)=T_{2^a}.
+}
+\]
+
+This gives an infinite exact family of direct Type A/B shadow relations.
+
+Within the dyadic subsystem, the nodes irredundant with respect to earlier dyadic nodes are exactly
+
+\[
+\boxed{2^{q-2}\text{ with }q\text{ prime}.}
+\]
+
+See [DYADIC-TRAP-LATTICE.md](DYADIC-TRAP-LATTICE.md). A dedicated GitHub Actions regression checks the theorem family and the finite full-saturation classification automatically.
 
 ## 9. Current automated assault
 
@@ -260,20 +337,18 @@ with sequential witness search through
 
 It includes independent verification, coordinate proof mining, coarse and fiber peeling, bounded residual selectors, the quadratic shield, CENTL certification, hashes, and artifact publication.
 
-At the latest check the main candidatewise attack stage was still running. **No `k<=1500` numerical result is being promoted until the complete workflow finishes green.**
+No `k<=1500` numerical result is promoted until the complete workflow finishes green.
 
 ## 10. The problem we are actually trying to solve now
 
-The original global question
-
-> can hundreds of earlier Type A/B congruence restrictions collectively cover a directly novel candidate?
-
-has been compressed into a hierarchy:
+The original global covering question has repeatedly collapsed when viewed at the right resolution:
 
 \[
 \boxed{
 \begin{array}{c}
 \text{exact Type A/B pullbacks}\\
+\downarrow\\
+\text{direct shadow graph}\\
 \downarrow\\
 \text{fiber peeling}\\
 \downarrow\\
@@ -283,23 +358,31 @@ has been compressed into a hierarchy:
 \downarrow\\
 \text{full local quadratic signatures}\\
 \downarrow\\
-\text{multiplicative coset quotient}\\
+\text{multiplicative quotient}\\
 \downarrow\\
-\text{square-lift / higher p-adic core}\\
+\text{square-lift towers / two-box core}\\
 \downarrow\\
-\text{exact divisor-generated residue avoidance}
+\text{local p-adic exact trap avoidance}
 \end{array}
 }
 \]
 
-The immediate theorem targets are now:
+The immediate theorem target is:
 
-1. prove or refute signature-level Direct-Shadow Completeness;
-2. prove a bounded small-prime fiber-kernel theorem;
-3. classify the fixed-negative square-lift cores;
-4. prove a local `p`-adic escape theorem for those cores;
-5. combine the local mechanisms into universal DSC-P.
+> Prove that every directly novel Type A/B candidate can escape the remaining multiplicative/tower core by local `p`-adic choices.
 
-A successful universal DSC-P theorem would make the direct-shadow graph a complete obstruction theory for exact Type A/B first-hit realizability.
+That would give universal DSC-P:
+
+\[
+\boxed{
+\text{not directly shadowed}
+\Longrightarrow
+\text{reduced avoiding class}
+\Longrightarrow
+\text{infinitely many exact-depth primes}.
+}
+\]
+
+If achieved, the direct-shadow graph becomes a complete obstruction theory for Type A/B first-hit realizability.
 
 That is the present edge of the diamond.
