@@ -91,7 +91,8 @@ jobs:
 
               case "$component" in
                 centl)
-                  test "$(tar -xOzf "$output_archive" centl/VERSION | head -n1)" != ''
+                  version_member=$(tar -xOzf "$output_archive" centl/VERSION)
+                  test -n "$version_member"
                   ;;
                 physics|sci) ;;
               esac
@@ -120,22 +121,23 @@ jobs:
             git add channels/oasis channels/mirage 2>/dev/null || git add channels/oasis
             if git diff --cached --quiet; then
               echo 'Component distribution already matches aggregate bundles.'
-              exit 0
+              break
             fi
 
             git commit -m 'dist: publish component-selective CENTL archives'
             if git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" \
               push origin HEAD:distribution; then
-              exit 0
+              break
             fi
 
             echo "distribution branch moved; retrying ($attempt/4)" >&2
             git reset --hard origin/distribution
+            if [ "$attempt" -eq 4 ]; then
+              echo 'could not update distribution branch after retries' >&2
+              exit 1
+            fi
             sleep $((attempt * 2))
           done
-
-          echo 'could not update distribution branch after retries' >&2
-          exit 1
 
       - name: Verify component archives are actually narrow
         shell: bash
@@ -155,12 +157,21 @@ jobs:
               asset=${spec#*:}
               test -f "$dir/$asset"
               sha256sum --check "$dir/$asset.sha256"
-              tar -tzf "$dir/$asset" | grep -Fqx "centl/bin/$command_name"
-              tar -tzf "$dir/$asset" | grep -Fqx "centl/libexec/$command_name"
+
+              listing="$RUNNER_TEMP/$(basename "$asset").listing"
+              tar -tzf "$dir/$asset" > "$listing"
+              grep -Fqx "centl/bin/$command_name" "$listing"
+              grep -Fqx "centl/libexec/$command_name" "$listing"
               for other in centl centl-physics centl-sci; do
                 if test "$other" != "$command_name"; then
-                  ! tar -tzf "$dir/$asset" | grep -Fqx "centl/bin/$other"
-                  ! tar -tzf "$dir/$asset" | grep -Fqx "centl/libexec/$other"
+                  if grep -Fqx "centl/bin/$other" "$listing"; then
+                    echo "$asset unexpectedly contains centl/bin/$other" >&2
+                    exit 1
+                  fi
+                  if grep -Fqx "centl/libexec/$other" "$listing"; then
+                    echo "$asset unexpectedly contains centl/libexec/$other" >&2
+                    exit 1
+                  fi
                 fi
               done
             done
