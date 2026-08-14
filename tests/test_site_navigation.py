@@ -60,7 +60,7 @@ class SiteNavigationTests(unittest.TestCase):
         join = (ROOT / "site" / "join.html").read_text(encoding="utf-8")
         self.assertIn('id="download-caravan-launcher"', join)
         self.assertIn("new Blob", join)
-        self.assertIn("fcf-caravan-join-1.0.6", join)
+        self.assertIn("fcf-caravan-join-1.0.7", join)
         self.assertIn("fcf-signify-x86_64-glibc", join)
         self.assertIn("EXPECTED_HELPER_SHA256", join)
         self.assertIn("-V -q", join)
