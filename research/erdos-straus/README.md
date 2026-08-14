@@ -8,7 +8,7 @@ This directory operationalizes the research program recorded in `docs/wellspring
 
 **Moving frontier:** [`CURRENT-FRONTIER.md`](CURRENT-FRONTIER.md) is the shortest current-state record.
 
-**Durable checkpoint:** [`RESEARCH-BACKUP-2026-08-14.md`](RESEARCH-BACKUP-2026-08-14.md) freezes the latest independently verified frontier, workflow run, artifact ID and SHA-256 digest so the research state is recoverable from the repository independently of chat or local scratch data.
+**Durable checkpoint:** [`RESEARCH-BACKUP-2026-08-14.md`](RESEARCH-BACKUP-2026-08-14.md) freezes independently verified workflow/artifact provenance so the research state is recoverable from the repository independently of chat or local scratch data.
 
 Core linked records:
 
@@ -18,12 +18,17 @@ Core linked records:
 - [`DIRECT-SHADOW-COMPLETENESS.md`](DIRECT-SHADOW-COMPLETENESS.md) — first candidatewise completeness attack through `k=600`;
 - [`DIRECT-SHADOW-K1000.md`](DIRECT-SHADOW-K1000.md) — independently verified extension through `k=1000`;
 - [`DIRECT-SHADOW-K1200.md`](DIRECT-SHADOW-K1200.md) — exact extension through `k=1200`, with `41,470/41,470` directly novel candidates carrying reduced avoiding progressions;
+- [`FIBER-SELECTOR-K1200.md`](FIBER-SELECTOR-K1200.md) — full theorem-driven replay of the frozen `k<=1200` bundle: `26,044` fiber-empty candidates plus `15,426/15,426` nonempty kernels solved by `0,±1,...,±64`, with maximum radius `54`;
 - [`SHADOW-COVER-GEOMETRY.md`](SHADOW-COVER-GEOMETRY.md) — dense-cover diagnostics showing the phenomenon is not explained by a trivial global union bound;
 - [`ODD-COVERING-BRIDGE.md`](ODD-COVERING-BRIDGE.md) — bridge to odd covering-system structure;
 - [`SHADOW-KERNEL.md`](SHADOW-KERNEL.md) — exact prime-power local-load peeling theorem and small-prime kernel reduction;
 - [`FIBER-SHADOW-KERNEL.md`](FIBER-SHADOW-KERNEL.md) — sharper exact fiber-load elimination theorem;
 - [`SMALL-SELECTOR-HYPOTHESIS.md`](SMALL-SELECTOR-HYPOTHESIS.md) — bounded integer-selector attack on residual fiber kernels;
-- [`QUADRATIC-TRAP-SIGNATURE.md`](QUADRATIC-TRAP-SIGNATURE.md) — exact Jacobi `-1` signature of every Type A/B trap and the resulting quadratic character-shield theorem;
+- [`QUADRATIC-TRAP-SIGNATURE.md`](QUADRATIC-TRAP-SIGNATURE.md) — exact Jacobi `-1` signature of every Type A/B trap and quadratic character shield;
+- [`CHARACTER-SHIELD-COMPLETENESS.md`](CHARACTER-SHIELD-COMPLETENESS.md) — proved collapse of collective scalar-character obstruction to fixed negative earlier layers;
+- [`QUADRATIC-SIGNATURE-COSET.md`](QUADRATIC-SIGNATURE-COSET.md) — exact vector-valued Legendre-signature affine coset of every Type A/B trap set;
+- [`MULTIPLICATIVE-TRAP-COSET.md`](MULTIPLICATIVE-TRAP-COSET.md) — proved multiplicative envelope `T_k subset -H_k` and quotient index `iota(k)`;
+- [`SQUARE-LIFT-CORE.md`](SQUARE-LIFT-CORE.md) — proved reduction showing genuinely new primes in the fixed character core enter only to even exponent, isolating a higher `p`-adic lifting problem;
 - [`PRIME-MODULUS-BACKBONE.md`](PRIME-MODULUS-BACKBONE.md) — infinite exact-depth prime-modulus backbone;
 - [`SURVIVOR-DENSITY.md`](SURVIVOR-DENSITY.md) — exact finite-depth density, mass, and conditional hazard;
 - [`COMPOSITE-CORE.md`](COMPOSITE-CORE.md) — zero-density prime-modulus survivor core and composite-rescue reduction;
@@ -35,21 +40,27 @@ Core linked records:
 
 The main workflow `.github/workflows/erdos-straus-research.yml` regenerates the finite Type A/B research corpus, independently verifies certificates, feeds exact identities into CENTL, hashes outputs, and uploads the evidence bundle.
 
-The candidatewise falsification workflow `.github/workflows/erdos-straus-direct-shadow-completeness.yml` now performs a stronger theorem attack:
+The candidatewise falsification workflow `.github/workflows/erdos-straus-direct-shadow-completeness.yml` performs the stronger theorem attack:
 
 1. enumerate every directly novel hard-compatible candidate through the configured depth;
 2. search for an integer avoiding every earlier Type A/B layer;
-3. search for a **reduced** avoiding progression, which yields infinitely many exact-depth primes by Dirichlet;
+3. search for a **reduced** avoiding progression, yielding infinitely many exact-depth primes by Dirichlet;
 4. independently recompute and verify every witness;
 5. analyze the prime-power coordinate core;
 6. apply exact coarse local-load peeling;
 7. apply exact fiber-load peeling;
 8. test a bounded fixed selector menu on the residual fiber kernel without consulting the stored witness;
-9. apply the quadratic-character shield;
+9. apply quadratic-character analysis;
 10. certify selected CRT progression identities with CENTL;
 11. freeze hashes and upload the complete certificate bundle.
 
 The current workflow defaults are `k<=1500`, `s<=3,000,000`, and residual selector menu `0, ±1, ..., ±64`.
+
+Additional theorem falsifiers and proof-mining analyzers now include:
+
+- [`trap_coset_analyzer.py`](trap_coset_analyzer.py) — exact finite regression of the multiplicative trap-coset theorem;
+- [`quadratic_signature_shield_analyzer.py`](quadratic_signature_shield_analyzer.py) — exact affine local Legendre-signature shield;
+- [`square_lift_core_analyzer.py`](square_lift_core_analyzer.py) — exact parity check and finite classification of the post-character square-lift core.
 
 ## Latest frozen finite result
 
@@ -68,18 +79,22 @@ independent verifier:              VERIFIED
 
 Every directly novel hard-compatible candidate in this finite range therefore has an explicit reduced avoiding progression. This is an exact finite theorem-certificate statement, not a universal proof of DSC-P.
 
-The same run showed that every certified local solution is within at most nine guided prime-power coordinate changes of a simple unary-safe basepoint. That count is an upper bound, not a proven minimum.
+A separate full replay on the same frozen candidate bundle independently resolves all `41,470` candidates by exact fiber peeling followed, when necessary, by a bounded residual selector. No stored witness is used to decide those two stages.
 
 ## Exact structural tools
 
-The project now contains several exact sufficient mechanisms for proving candidate realizability without relying on the sequential numerical witness search:
+The project now contains a hierarchy of exact sufficient mechanisms and envelopes:
 
-- **prime-power peeling:** if a local coordinate load is below one, that coordinate can be eliminated while preserving satisfiability;
-- **fiber peeling:** replace full forbidden-set size by the maximum relevant fiber width after other coordinates are fixed, giving a strictly sharper elimination theorem;
-- **quadratic character shield:** every Type A/B trap modulo `m_k=4k-1` has Jacobi symbol `-1`, so any construction forcing all earlier moduli to Jacobi sign `+1` automatically avoids every earlier trap;
-- **small-selector experiment:** after exact fiber peeling, test whether a tiny fixed menu of integer parameter values already solves the remaining small-prime kernel.
+- **prime-power peeling:** a coordinate whose local load is below one can be eliminated while preserving satisfiability;
+- **fiber peeling:** replacing full forbidden-set size by the maximum relevant fiber width gives a strictly sharper local elimination theorem;
+- **bounded residual selectors:** after fiber peeling, the `k<=1200` replay solved every nonempty kernel with the fixed menu `0,±1,...,±64`;
+- **Jacobi character shield:** every Type A/B trap modulo `m_k=4k-1` has Jacobi symbol `-1`;
+- **character obstruction completeness:** collective scalar-character inconsistency adds no obstruction beyond one fixed-negative earlier layer;
+- **full quadratic-signature coset:** the complete vector of local Legendre signs of `T_k` is the affine space `eta_k+V_k`;
+- **multiplicative trap coset:** the exact trap set sits inside one proper coset `-H_k` in the unit group;
+- **square-lift core:** after squareclass information is fixed, any genuinely new prime in the remaining character core can occur only to even exponent.
 
-The small-selector test is a falsifiable proof-mining diagnostic. Failure of the bounded menu is not a DSC-P counterexample.
+Each stage deliberately preserves the claim boundary: failure of a coarse shield or a bounded selector does **not** imply exact Type A/B coverage. It only says finer geometry remains.
 
 ## Default main research contract
 
@@ -96,14 +111,14 @@ The main finite research run uses:
 
 It does not prove the Erdős-Straus conjecture. It does not prove López's universal Type A/B coverage conjecture. It does not yet prove universal Direct-Shadow Completeness. It does not establish literature priority.
 
-Finite candidatewise results are theorem-certificate statements for their stated ranges. Kernel, selector and character criteria are sufficient tools; a residual kernel, failed bounded selector, or inconsistent character-shield system is **not** evidence of a counterexample. It means finer exact trap geometry remains to be analyzed.
+Finite candidatewise results are theorem-certificate statements for their stated ranges. Kernel, selector, quadratic-signature, multiplicative-coset and square-lift tools are exact sufficient structures or envelopes, but a residual from any one of them is **not** evidence of a counterexample.
 
 ## Research direction
 
 The active theorem program is now:
 
-`Type A/B witnesses -> C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> direct-shadow completeness -> prime-power/fiber kernel -> quadratic character shield -> bounded selector/core classification -> composite rescue`.
+`Type A/B witnesses -> C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> direct-shadow completeness -> fiber kernel -> bounded selector -> scalar character saturation -> local quadratic signatures -> multiplicative quotient -> square-lift/p-adic core -> composite rescue`.
 
-The immediate goal is to identify an invariant or finite kernel classification proving that a directly novel candidate always has a reduced avoiding progression. If achieved, the direct-shadow graph would become a complete obstruction theory for exact Type A/B first-hit realizability.
+The immediate goal is to convert the increasingly tiny residual core into a universal local escape theorem. If achieved, the direct-shadow graph would become a complete obstruction theory for exact Type A/B first-hit realizability.
 
 Chat discussion is exploratory. **The repository is canonical.**
