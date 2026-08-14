@@ -200,7 +200,11 @@ else
         ''|*/*|*..*|*[!0-9A-Za-z.+_-]*) fail "the requested Oasis version is invalid" ;;
       esac
       base_url="$channel_root/v$requested_release"
-      source_label="Oasis v$requested_release"
+      case "$requested_release" in
+        0.15.0) source_label="Oasis v0.15.0 Al-Nur" ;;
+        0.14.0) source_label="Oasis v0.14.0 Al-Khayma" ;;
+        *) source_label="Oasis v$requested_release" ;;
+      esac
     else
       if [ "$release_version" = latest ]; then
         base_url="$channel_root/latest"
