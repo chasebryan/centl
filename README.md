@@ -6,18 +6,35 @@ Exact-first mathematics, physics, and scientific computation.
 
 > Good maths should be free. Never manufacture mathematical certainty.
 
-## Choose your field
+## Choose your field — and take only what you need
 
-You do **not** need to learn the whole CENTL repository before using CENTL for your science. Start with the path for the work you actually do:
+You do **not** need to learn, download, or install the whole CENTL product family before using CENTL for your science. Start with your field, then install only the scientific surface you actually want:
 
-| Field | Start here | What it covers |
+| Field | Start here | Smallest useful install |
 | --- | --- | --- |
-| 🧮 📐 **Mathematics** | **[Mathematician onboarding](docs/MATHEMATICIANS.md)** | Pure mathematics with `centl` and mathematics-first `centl-sci`: exact arithmetic, algebra, equations, calculus, approximation, and verification. |
-| ⚛️ 🔬 **Physics** | **[Physicist onboarding](docs/PHYSICISTS.md)** | Physics with `centl-physics`, supporting mathematics with `centl`, and physics-first `centl-sci`: dimensions, units, constants, mechanics, simulation, and assurance boundaries. |
+| 🧮 📐 **Mathematics** | **[Mathematician onboarding](docs/MATHEMATICIANS.md)** | `centl` only for formal pure mathematics; add `centl-sci` only if you want ordinary-language mathematics. |
+| ⚛️ 🔬 **Physics** | **[Physicist onboarding](docs/PHYSICISTS.md)** | `centl-physics` only for direct typed physics; add `centl` and/or `centl-sci` only when you actually need them. |
 
-**Both field guides begin with platform setup for 🐧 GNU/Linux, 🍎 macOS, and 🪟 Windows.** After installation, the scientific command surfaces converge so researchers can focus on mathematics or physics rather than repository architecture.
+**Both field guides cover 🐧 GNU/Linux, 🍎 macOS, and 🪟 Windows, and both begin with component-selective setup.**
 
-If you are here only to do mathematics or physics, those onboarding pages are your front door. The repository's networking, release, infrastructure, and contributor systems can wait until you actually need them.
+On GNU/Linux x86_64, CENTL publishes separate component archives so the installer can download the requested command **without first downloading the full three-command bundle**:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
+
+# pure mathematics only
+sh install-component --component centl
+
+# typed physics only
+sh install-component --component physics
+
+# scientific interpreter only
+sh install-component --component sci
+```
+
+The traditional complete bundle remains available for people who intentionally want everything. macOS and Windows use component-selective `CENTL-Marsa` source builds; the field guides give the exact commands and explain the current assurance boundary.
+
+If you are here only to do mathematics or physics, those onboarding pages are your front door. Networking, release infrastructure, CARAVAN, and contributor systems can wait until you actually need them.
 
 ## Current release status
 
@@ -44,7 +61,9 @@ Windows. It is not Oasis.
 See [docs/OASIS.md](docs/OASIS.md), [CENTL Marsa](docs/CENTL-MARSA.md), and
 [FCF Camps](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md).
 
-## Install the Oasis product
+## Install the complete Oasis product
+
+Use this only when you actually want all three public commands:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
@@ -60,7 +79,7 @@ centl '0.1 + 0.2'
 centl-physics convert 100 cm m
 ```
 
-For macOS and Windows installation, use the field-specific onboarding above or [CENTL Marsa](docs/CENTL-MARSA.md).
+For a smaller install, use the component installer above. For macOS and Windows installation, use the field-specific onboarding or [CENTL Marsa](docs/CENTL-MARSA.md).
 
 ## Use the current Camp stay
 
@@ -75,9 +94,7 @@ On GNU/Linux, clone `main` (or `mirage` if you want the laboratory). On macOS or
 | `centl-physics` | Typed exact-first physics |
 | `centl-sci` | Local scientific interpreter. Not a chatbot |
 
-Exact values stay exact. Approximations carry justified bounds.
-Unsupported work stays visible. The contract is
-[docs/NUMERICS.md](docs/NUMERICS.md).
+Each public command can now be selected independently on the scientist-facing install paths. Exact values stay exact. Approximations carry justified bounds. Unsupported work stays visible. The contract is [docs/NUMERICS.md](docs/NUMERICS.md).
 
 ## Read next
 
