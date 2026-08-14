@@ -1,0 +1,127 @@
+name: CENTL Erdős-Straus cryptology probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      bits:
+        description: Toy prime bit length
+        required: false
+        default: "31"
+      samples:
+        description: Samples per prime population
+        required: false
+        default: "160"
+      k_max:
+        description: Maximum C_AB depth
+        required: false
+        default: "500"
+      k_fingerprint:
+        description: Public/private fingerprint depth
+        required: false
+        default: "80"
+  push:
+    branches:
+      - main
+    paths:
+      - 'research/erdos-straus/CRYPTOLOGY.md'
+      - 'research/erdos-straus/crypto_probe.py'
+      - 'research/erdos-straus/cryptology-contracts.centl'
+      - '.github/workflows/erdos-straus-cryptology.yml'
+      - 'src/**'
+      - 'centl.opam'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Prime fingerprints, toy public-modulus diagnostics, and CENTL exact checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Build CENTL
+        run: opam exec -- dune build src/main.exe
+
+      - name: Resolve probe parameters
+        id: params
+        shell: bash
+        env:
+          BITS: ${{ github.event.inputs.bits }}
+          SAMPLES: ${{ github.event.inputs.samples }}
+          KMAX: ${{ github.event.inputs.k_max }}
+          KFP: ${{ github.event.inputs.k_fingerprint }}
+        run: |
+          set -euo pipefail
+          bits=${BITS:-31}
+          samples=${SAMPLES:-160}
+          kmax=${KMAX:-500}
+          kfp=${KFP:-80}
+          for pair in "bits:$bits" "samples:$samples" "kmax:$kmax" "kfp:$kfp"; do
+            name=${pair%%:*}; value=${pair#*:}
+            case "$value" in (*[!0-9]*|'') echo "invalid $name: $value" >&2; exit 2;; esac
+          done
+          echo "bits=$bits" >> "$GITHUB_OUTPUT"
+          echo "samples=$samples" >> "$GITHUB_OUTPUT"
+          echo "kmax=$kmax" >> "$GITHUB_OUTPUT"
+          echo "kfp=$kfp" >> "$GITHUB_OUTPUT"
+
+      - name: Run cryptology fingerprint probe
+        run: |
+          rm -rf cryptology-output
+          python3 research/erdos-straus/crypto_probe.py \
+            --bits '${{ steps.params.outputs.bits }}' \
+            --samples '${{ steps.params.outputs.samples }}' \
+            --k-max '${{ steps.params.outputs.kmax }}' \
+            --k-fingerprint '${{ steps.params.outputs.kfp }}' \
+            --out cryptology-output
+
+      - name: CENTL exact certification of planted-control algebra
+        run: |
+          _build/default/src/main.exe check \
+            research/erdos-straus/cryptology-contracts.centl \
+            --receipt cryptology-output/centl-cryptology-contracts-receipt.json
+          _build/default/src/main.exe --version > cryptology-output/centl-version.txt
+          _build/default/src/main.exe --build-info > cryptology-output/centl-build-info.txt
+
+      - name: Freeze hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cryptology-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' \
+            | LC_ALL=C sort \
+            | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat cryptology-output/cryptology-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload cryptology diagnostic bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ws-cand-003-cryptology-${{ github.sha }}
+          path: cryptology-output/
+          if-no-files-found: error
+          retention-days: 90
