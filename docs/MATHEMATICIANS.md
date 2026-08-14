@@ -4,86 +4,120 @@ This page is deliberately narrow. It is for mathematicians who want to use CENTL
 
 If that is you, you can ignore CENTL Physics, CARAVAN, networking, repository infrastructure, release engineering, and contributor workflows unless you later choose to explore them.
 
+## Take only what you need
+
+A pure mathematician does **not** need to install the whole CENTL product family.
+
+| What you want | Install | What you do **not** get |
+| --- | --- | --- |
+| Formal exact mathematics only | `centl` | `centl-physics`, `centl-sci` |
+| Mathematics in ordinary language only | `centl-sci` | the separate `centl` and `centl-physics` commands |
+| Formal mathematics + ordinary-language mathematics | `centl` + `centl-sci` | `centl-physics` |
+| Everything | full CENTL bundle | nothing omitted |
+
+**For pure mathematics, `centl` alone is the recommended minimum.** Install SCi only if you actually want its mathematics-first interpretation layer.
+
+On GNU/Linux, the component installer downloads a **component-specific archive**. Choosing `centl` does not first download an archive containing the Physics or SCi executables. Required runtime libraries, license texts, provenance metadata, and the selected executable are retained because they are part of making that command runnable and redistributable.
+
 ## Start here: choose your operating system 🐧 🍎 🪟
 
 CENTL currently has three scientist-facing operating-system paths. The mathematical interface is the same after installation; what differs is how the software reaches your machine.
 
 | Platform | Current path | Assurance / distribution status |
 | --- | --- | --- |
-| 🐧 **GNU/Linux x86_64** | Oasis installer | Qualified stable CENTL product. This is the reference release path. |
-| 🍎 **macOS** | `CENTL-Marsa` | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
-| 🪟 **Windows** | `CENTL-Marsa` under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
+| 🐧 **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
+| 🍎 **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
+| 🪟 **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
 
-The distinction above is about release assurance, **not different mathematics**. Once installed, use the same `centl` and `centl-sci` scientific commands on every platform.
+The distinction above is about release assurance, **not different mathematics**.
 
-### 🐧 GNU/Linux x86_64 — qualified Oasis
+### 🐧 GNU/Linux x86_64 — download only `centl`
 
-Install the qualified Oasis product:
+Download the small component installer and ask for the mathematics engine only:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
+sh install-component --component centl
+```
+
+That installs the `centl` command and no `centl-physics` or `centl-sci` command.
+
+If you also want mathematics-first CENTL-SCi, add it separately:
+
+```sh
+sh install-component --component sci
+```
+
+You can therefore choose exactly one of these shapes:
+
+```sh
+# pure formal mathematics only
+sh install-component --component centl
+
+# ordinary-language scientific interpreter only
+sh install-component --component sci
+
+# both mathematics surfaces, still no Physics command
+sh install-component --component centl
+sh install-component --component sci
+```
+
+If you intentionally want the complete three-command bundle instead, use the ordinary Oasis installer:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install --channel oasis
 ```
 
-The normal installed commands are:
+### 🍎 macOS — build and install only the component you want
 
-```text
-centl
-centl-physics
-centl-sci
-```
-
-For a mathematician, your primary commands are `centl` and `centl-sci`.
-
-### 🍎 macOS — CENTL Marsa
-
-macOS uses the `CENTL-Marsa` harbor, which builds the current Camp software locally. Homebrew is required; the Marsa bootstrap prepares the numeric stack and can install `opam` when it is missing.
+macOS uses the `CENTL-Marsa` harbor. Homebrew is required; the Marsa bootstrap prepares the numeric stack and OCaml/opam environment.
 
 ```sh
-git clone https://github.com/chasebryan/centl.git
+git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
 cd centl
-git checkout CENTL-Marsa
-sh scripts/marsa-install
+sh scripts/marsa-install --component centl
 ```
 
-By default the commands are installed below `~/.local/bin`. If that directory is not already on your `PATH`, add it for the current shell with:
+That installs only the `centl` command. To add SCi later:
+
+```sh
+sh scripts/marsa-install --component sci
+```
+
+Or, only when you really want all three public commands:
+
+```sh
+sh scripts/marsa-install --component all
+```
+
+By default commands are installed below `~/.local/bin`. If needed:
 
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Marsa builds and installs the same public command names:
+Marsa currently builds from the shared source graph, so the source checkout contains shared build dependencies even when only one command is installed. The **installed product surface**, however, is component-selective. macOS Marsa is the Camp harbor, not an Oasis-qualified release.
 
-```text
-centl
-centl-physics
-centl-sci
-```
+### 🪟 Windows — install only the selected command
 
-macOS Marsa is the Camp harbor, not an Oasis-qualified release.
-
-### 🪟 Windows — CENTL Marsa
-
-Windows currently uses `CENTL-Marsa` from an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. You need Git and `opam` available in that environment; the Marsa bootstrap uses `pacman` to prepare the MinGW GMP, MPFR, FLINT, compiler, build, and `pkg-config` dependencies.
+Windows currently uses `CENTL-Marsa` from an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. You need Git and `opam` available in that environment; the Marsa bootstrap uses `pacman` to prepare the MinGW numeric and build dependencies.
 
 From the MSYS2 MinGW64 shell:
 
 ```sh
-git clone https://github.com/chasebryan/centl.git
+git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
 cd centl
-git checkout CENTL-Marsa
-sh scripts/marsa-install
+sh scripts/marsa-install --component centl
 ```
 
-The installer copies the public commands as Windows executables under the selected prefix, normally `~/.local/bin`:
+That installs only `centl.exe`. Add SCi only if wanted:
 
-```text
-centl.exe
-centl-physics.exe
-centl-sci.exe
+```sh
+sh scripts/marsa-install --component sci
 ```
 
-MSYS2 resolves those through the ordinary command names once that directory is on `PATH`:
+The installed executables live below the selected prefix, normally `~/.local/bin`. MSYS2 resolves the ordinary command names once that directory is on `PATH`:
 
 ```sh
 export PATH="$HOME/.local/bin:$PATH"
@@ -117,7 +151,7 @@ centl 'approx(sqrt(2), 30)'
 centl verify --left '0.1 + 0.2' --relation equal --right '3/10'
 ```
 
-If you prefer to state problems in ordinary language, start CENTL-SCi:
+If you chose to install CENTL-SCi, start it with:
 
 ```sh
 centl-sci
@@ -150,9 +184,9 @@ centl 'integrate(3*x^2 + 2*x + 1, x)'
 centl 'assuming(x / x, x != 0)'
 ```
 
-### `centl-sci` — the mathematics interpreter
+### `centl-sci` — the optional mathematics interpreter
 
-Use `centl-sci` when you want to describe a supported mathematical task in ordinary language while keeping CENTL as the authoritative evaluator.
+Use `centl-sci` when you want to describe a supported mathematical task in ordinary language while keeping CENTL's deterministic machinery authoritative. It is optional for mathematicians.
 
 Examples:
 
@@ -163,7 +197,7 @@ MATH> approximate sqrt(2) to 30 significant digits
 MATH> verify 0.1 + 0.2 equals 3/10
 ```
 
-CENTL-SCi is not a second mathematics engine. It interprets the request, constructs a validated problem representation, and dispatches the admitted operation to CENTL. A semantic model is not required for deterministic supported paths.
+CENTL-SCi is not a second mathematics engine. It interprets the request, constructs a validated problem representation, and dispatches the admitted operation to CENTL's deterministic machinery. A semantic model is not required for deterministic supported paths.
 
 For more evidence about how a request was interpreted and executed, use the SCi details and explanation surfaces:
 
@@ -262,7 +296,7 @@ For closed comparisons, use the verifier directly:
 centl verify --left '1/3' --relation less_than --right '1/2'
 ```
 
-or through SCi:
+or through SCi, if installed:
 
 ```text
 MATH> check whether 1/3 < 1/2
@@ -287,20 +321,21 @@ The refusal boundary is intentional. CENTL would rather leave mathematics unreso
 
 ## Recommended mathematician workflow
 
-1. **Choose the correct platform path first:** Oasis on GNU/Linux x86_64, Marsa on macOS or Windows.
-2. **Use `centl` first** when you know the formal expression you want evaluated.
-3. **Use `centl-sci` in `MATH` mode** when ordinary mathematical language is faster or more natural.
-4. **Keep exact forms exact** unless approximation is part of your actual task.
-5. **Read the resolution status**, not only the displayed expression.
-6. **Use `--details` or `--explain`** when you need to inspect SCi's interpretation path.
-7. **Treat unsupported or unknown results as information**, not as an invitation to infer a missing answer.
+1. **Install only the surface you need.** For most pure mathematicians, that is `centl` alone.
+2. **Choose the correct platform path:** Oasis component archive on GNU/Linux x86_64, Marsa component build on macOS or Windows.
+3. **Use `centl` first** when you know the formal expression you want evaluated.
+4. **Add `centl-sci` only when you want ordinary-language mathematics.**
+5. **Keep exact forms exact** unless approximation is part of your actual task.
+6. **Read the resolution status**, not only the displayed expression.
+7. **Use `--details` or `--explain`** when you need to inspect SCi's interpretation path.
+8. **Treat unsupported or unknown results as information**, not as an invitation to infer a missing answer.
 
 ## Read next, and only when you need it
 
 - [Numerical contract](NUMERICS.md) — exactness, enclosures, precision, comparisons, and failure semantics.
 - [Exact symbolic algebra](ALGEBRA.md) — simplification, expansion, factoring, assumptions, and equations.
 - [Symbolic calculus](CALCULUS.md) — differentiation, integration, and substitution.
-- [CENTL-SCi](SCI.md) — mathematics-first natural-language interaction and evidence surfaces.
+- [CENTL-SCi](SCI.md) — optional mathematics-first natural-language interaction and evidence surfaces.
 - [Installation](INSTALL.md) — GNU/Linux Oasis/Mirage channels, offline installation, and source builds.
 - [CENTL Marsa](CENTL-MARSA.md) — macOS and Windows Camp harbor, dependencies, and assurance boundary.
 
