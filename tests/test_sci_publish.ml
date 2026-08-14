@@ -90,9 +90,9 @@ let test_oasis_verbs_do_not_declare () =
            (Centl_sci_interaction.find_substring ~needle:"declaration: no"
               message));
       Alcotest.(check bool)
-        "v0.14.0 remains published" true
+        "v0.15.0 remains published" true
         (Option.is_some
-           (Centl_sci_interaction.find_substring ~needle:"v0.14.0" message))
+           (Centl_sci_interaction.find_substring ~needle:"v0.15.0" message))
 
 let test_self_merge_is_refused () =
   match Centl_sci_publish.handle "approve this pull request" with

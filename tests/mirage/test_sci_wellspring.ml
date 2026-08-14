@@ -36,7 +36,7 @@ let test_oasis_inspect_never_declares () =
       ~branch:"main"
   in
   Alcotest.(check bool) "declaration" false report.declaration;
-  Alcotest.(check string) "published" "0.14.0" report.published_oasis;
+  Alcotest.(check string) "published" "0.15.0" report.published_oasis;
   Alcotest.(check bool)
     "branch blocker" true
     (List.exists

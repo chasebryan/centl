@@ -1,12 +1,15 @@
 type report = {
   published_oasis : string;
+  oasis_name : string;
   current_version : string;
   declaration : bool;
   blockers : string list;
   summary : string;
 }
 
-let published_oasis = "0.14.0"
+let published_oasis = "0.15.0"
+let oasis_name = "Al-Nur"
+let release_title = "CENTL v" ^ published_oasis ^ "-Oasis." ^ oasis_name
 
 let layout_blockers root =
   let required =
@@ -52,12 +55,13 @@ let inspect ~root ~current_version ~branch =
        this command does not run the Oasis gate and therefore cannot declare \
        Oasis"
     else
-      "no new Oasis was found. CENTL v" ^ published_oasis
-      ^ " remains the published Oasis release; this identity does not satisfy \
-         the Oasis declaration requirements. FCF Camps are the stay when \
-         Oasis cannot be declared; they are not Oasis."
+      "no new Oasis was found. CENTL v" ^ published_oasis ^ " (" ^ oasis_name
+      ^ ") remains the published Oasis release; this identity does not \
+         satisfy the Oasis declaration requirements. Oasis is the steadily \
+         advanced snapshot of current main and mirage. FCF Camps are the \
+         stay when a snapshot cannot be declared; they are not Oasis."
   in
-  { published_oasis; current_version; declaration; blockers; summary }
+  { published_oasis; oasis_name; current_version; declaration; blockers; summary }
 
 let to_json report =
   `Assoc
@@ -66,6 +70,9 @@ let to_json report =
       ("system", `String "CENTL");
       ("artifact_kind", `String "oasis_identity_inspection");
       ("published_oasis", `String report.published_oasis);
+      ("oasis_name", `String report.oasis_name);
+      ("release_title", `String release_title);
+      ("canonical_tag", `String ("v" ^ report.published_oasis));
       ("current_version", `String report.current_version);
       ("declaration", `Bool false);
       ("oasis_declared_by_this_command", `Bool false);
@@ -86,7 +93,10 @@ let render report =
   String.concat "\n"
     ([
        "CENTL Oasis identity inspection";
-       "published Oasis: v" ^ report.published_oasis;
+       "published Oasis: v" ^ report.published_oasis ^ " (" ^ report.oasis_name
+       ^ ")";
+       "release title: " ^ release_title;
+       "canonical tag: v" ^ report.published_oasis;
        "current version: " ^ report.current_version;
        "declaration: no";
        report.summary;

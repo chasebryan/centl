@@ -11,7 +11,7 @@ let family =
     {
       name = "CENTL";
       kind = "exact calculator and numerical language";
-      status = "Oasis-qualified as v0.14.0 for GNU/Linux x86_64";
+      status = "Oasis candidate v0.15.0 Al-Nur for GNU/Linux x86_64";
       assurance = "verified core plus explicit numerical contract";
       summary =
         "Exact-first mathematics. Unqualified digits are never manufactured.";

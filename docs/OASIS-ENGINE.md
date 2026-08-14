@@ -39,6 +39,15 @@ Verification-only convergence without the formatting repair step:
 ./scripts/oasis --no-repair
 ```
 
+Official snapshot of current main and mirage (never declares Oasis):
+
+```sh
+./scripts/oasis --snapshot
+```
+
+That report checks whether `main` and `mirage` trees match and whether
+HEAD contains the oasis tip. It does not run gates.
+
 Final release identity:
 
 ```sh
