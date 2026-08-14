@@ -20,6 +20,9 @@
 
 ### Added
 
+- FCF Camps are the named stay when a new Oasis cannot honestly be declared.
+  `centl-mirage camps` inspects occupation and never declares Oasis. CENTL
+  v0.14.0 remains the published Oasis.
 - CARAVAN reports catalog coverage, mission filters, store inventory, and
   verified cargo loads. `centl caravan inspect` is inspect-only. The signed
   join installer, invite schema, and `join.html` are unchanged.

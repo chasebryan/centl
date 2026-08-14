@@ -38,6 +38,11 @@ feature / research work
 
 > **Oasis is a promotion state, not a property of every commit.**
 
+When an expedition cannot honestly be declared Oasis, FCF occupies a
+[Camp](FCF-CAMPS.md). A Camp is a stay. It does not close Oasis, inherit
+Oasis, or replace the official promotion path. CENTL v0.14.0 remains the
+published Oasis until a later identity independently earns the declaration.
+
 ## Oasis does not regress
 
 A later candidate must not drop, weaken, or replace the already-published Oasis product.

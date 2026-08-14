@@ -55,7 +55,7 @@ BUILD> products
 BUILD> extend add a local helper for my lab protocol
 ```
 
-`catalog` lists deterministic capabilities and examples. `products` names the FCF family without collapsing Oasis, MIRAGE, CARAVAN, or Wellspring. `extend` starts a local MIRAGE cycle from the request; it does not activate source or promote assurance. Unsolved work now points to those surfaces instead of ending at a dead “cannot solve this yet.”
+`catalog` lists deterministic capabilities and examples. `products` names the FCF family without collapsing Oasis, MIRAGE, CARAVAN, Wellspring, or Camp. `extend` starts a local MIRAGE cycle from the request; it does not activate source or promote assurance. Unsolved work now points to those surfaces instead of ending at a dead “cannot solve this yet.”
 
 ## Input recovery and interpretation
 

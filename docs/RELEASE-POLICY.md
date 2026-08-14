@@ -28,6 +28,10 @@ mature elsewhere before promotion.
 
 ### `mirage` — development and research laboratory
 
+When a Mirage expedition produces stayable work that still cannot honestly
+become Oasis, FCF occupies a [Camp](FCF-CAMPS.md). A Camp is not a fourth
+release branch and is not an Oasis declaration.
+
 `mirage` is the development, experimentation, and research branch. New features,
 prototypes, speculative mathematics, architecture experiments, self-development
 work, and other incomplete ideas should normally mature here.

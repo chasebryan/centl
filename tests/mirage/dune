@@ -74,6 +74,11 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_camps)
+ (modules test_sci_camps)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
  (name test_sci_mirage_rewrite)
  (modules test_sci_mirage_rewrite)
  (libraries centl_lib alcotest unix yojson))

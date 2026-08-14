@@ -81,6 +81,7 @@ Important subsystem families include:
 - CENTL-SCi and Caramels BUILD/self-extension;
 - CENTL-MIRAGE architecture;
 - FCF Wellspring records under `docs/wellsprings/`;
+- FCF Camp records under `docs/camps/`;
 - CARAVAN architecture, threat model, host policy, rollout, transport, identity, catalog, and laboratory documentation;
 - platform support and preservation/recovery documentation;
 - branch and release policy;

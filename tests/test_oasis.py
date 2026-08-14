@@ -408,6 +408,8 @@ class InspectTests(unittest.TestCase):
             self.assertEqual(payload["published_oasis"], "0.14.0")
             self.assertIn("blockers", payload)
             self.assertIn("cannot declare Oasis", payload["summary"])
+            self.assertFalse(payload["fcf_camp"]["oasis_closed"])
+            self.assertFalse(payload["fcf_camp"]["new_oasis_declared"])
 
     def test_inspect_records_oasis_non_regression_when_tip_missing(self) -> None:
         payload = OASIS.inspect_identity(ROOT, "0.14.0")

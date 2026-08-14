@@ -79,6 +79,7 @@ The relationship is best summarized as:
 MIRAGE        = where uncertain work can develop
 Secret Oasis  = a deliberate search for unusually valuable directions
 Wellspring    = a foundational, generative finding
+Camp          = a durable stay when Oasis cannot be declared
 Oasis         = a qualified stable-product release state
 ```
 

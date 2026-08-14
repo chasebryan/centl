@@ -394,8 +394,15 @@ def inspect_identity(root: Path, version: str) -> dict[str, object]:
         "eligible_for_final_qualification": False,
         "summary": (
             f"CENTL v{PUBLISHED_OASIS} remains the published Oasis release. "
-            "This inspection does not run gates and cannot declare Oasis."
+            "This inspection does not run gates and cannot declare Oasis. "
+            "FCF Camps are the stay when Oasis cannot be declared; they are not Oasis."
         ),
+        "fcf_camp": {
+            "policy": "docs/FCF-CAMPS.md",
+            "oasis_closed": False,
+            "new_oasis_declared": False,
+            "stay_when_blocked": bool(blockers),
+        },
     }
 
 

@@ -15,6 +15,8 @@ let usage () =
       "  centl-mirage reject CANDIDATE_ID";
       "  centl-mirage wellspring";
       "  centl-mirage wellspring RECORD_ID";
+      "  centl-mirage camps";
+      "  centl-mirage camps CAMP_ID";
       "  centl-mirage oasis";
       "  centl-mirage doctor";
       "  centl-mirage explain CANDIDATE_ID";
@@ -170,6 +172,20 @@ let reject candidate_id =
   let workspace = workspace_or_exit () in
   persist_decision workspace (Centl_sci_mirage_accept.reject_one candidate_id)
 
+let camps = function
+  | [] ->
+      let occupation = Centl_sci_camps.inspect () in
+      print_endline (Centl_sci_camps.render occupation)
+  | [ id ] -> (
+      match Centl_sci_camps.find_record id with
+      | None ->
+          prerr_endline ("centl-mirage: unknown FCF Camp " ^ id);
+          exit 2
+      | Some camp -> print_endline (Centl_sci_camps.render_camp camp))
+  | _ ->
+      prerr_endline (usage ());
+      exit 2
+
 let wellspring = function
   | [] ->
       let expedition = Centl_sci_wellspring.run_expedition () in
@@ -256,6 +272,7 @@ let main () =
   | [ _; "accept"; candidate_id ] -> accept candidate_id
   | [ _; "reject"; candidate_id ] -> reject candidate_id
   | _ :: "wellspring" :: rest -> wellspring rest
+  | _ :: "camps" :: rest -> camps rest
   | [ _; "oasis" ] -> ignore (oasis ())
   | [ _; "doctor" ] -> doctor ()
   | [ _; "explain"; candidate_id ] -> explain candidate_id
