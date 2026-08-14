@@ -15,6 +15,8 @@ You do **not** need to learn the whole CENTL repository before using CENTL for y
 | 🧮 📐 **Mathematics** | **[Mathematician onboarding](docs/MATHEMATICIANS.md)** | Pure mathematics with `centl` and mathematics-first `centl-sci`: exact arithmetic, algebra, equations, calculus, approximation, and verification. |
 | ⚛️ 🔬 **Physics** | **[Physicist onboarding](docs/PHYSICISTS.md)** | Physics with `centl-physics`, supporting mathematics with `centl`, and physics-first `centl-sci`: dimensions, units, constants, mechanics, simulation, and assurance boundaries. |
 
+**Both field guides begin with platform setup for 🐧 GNU/Linux, 🍎 macOS, and 🪟 Windows.** After installation, the scientific command surfaces converge so researchers can focus on mathematics or physics rather than repository architecture.
+
 If you are here only to do mathematics or physics, those onboarding pages are your front door. The repository's networking, release, infrastructure, and contributor systems can wait until you actually need them.
 
 ## Current release status
@@ -39,7 +41,7 @@ Windows. It is not Oasis.
 | [`mirage`](https://github.com/chasebryan/centl/tree/mirage) | Laboratory. Installable. Never a full release. |
 | [`CENTL-Marsa`](https://github.com/chasebryan/centl/tree/CENTL-Marsa) | Windows and macOS harbor of the Camp stay. |
 
-See [docs/OASIS.md](docs/OASIS.md) and
+See [docs/OASIS.md](docs/OASIS.md), [CENTL Marsa](docs/CENTL-MARSA.md), and
 [FCF Camps](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md).
 
 ## Install the Oasis product
@@ -58,11 +60,11 @@ centl '0.1 + 0.2'
 centl-physics convert 100 cm m
 ```
 
+For macOS and Windows installation, use the field-specific onboarding above or [CENTL Marsa](docs/CENTL-MARSA.md).
+
 ## Use the current Camp stay
 
-Clone `main` (or `mirage` if you want the laboratory). That tree is
-where current work is inhabited. Build and run from the checkout.
-The camp notes are
+On GNU/Linux, clone `main` (or `mirage` if you want the laboratory). On macOS or Windows, use the `CENTL-Marsa` harbor for the current Camp software. The camp notes are
 [docs/releases/camp-001.md](https://github.com/chasebryan/centl/blob/main/docs/releases/camp-001.md).
 
 ## Commands
@@ -82,6 +84,7 @@ Unsupported work stays visible. The contract is
 - [🧮 📐 Mathematician onboarding](docs/MATHEMATICIANS.md)
 - [⚛️ 🔬 Physicist onboarding](docs/PHYSICISTS.md)
 - [Installation](docs/INSTALL.md)
+- [CENTL Marsa](docs/CENTL-MARSA.md)
 - [Documentation index](docs/README.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
