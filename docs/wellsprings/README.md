@@ -14,6 +14,7 @@ the CENTL release identity.
 - Candidates:
   - [`WS-CAND-001`](WS-CAND-001-authority-cannot-confer-truth.md)
   - [`WS-CAND-002`](WS-CAND-002-justified-decimal-rendering.md)
+  - [`WS-CAND-003`](WS-CAND-003-erdos-straus-type-ab-shadow-structure.md) - Erdős-Straus Type A/B witness depth and congruence shadow structure
 
 Under-designation is required. Independent review has not occurred.
 
