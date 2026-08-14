@@ -6,6 +6,17 @@ Exact-first mathematics, physics, and scientific computation.
 
 > Good maths should be free. Never manufacture mathematical certainty.
 
+## Choose your field
+
+You do **not** need to learn the whole CENTL repository before using CENTL for your science. Start with the path for the work you actually do:
+
+| Field | Start here | What it covers |
+| --- | --- | --- |
+| 🧮 📐 **Mathematics** | **[Mathematician onboarding](docs/MATHEMATICIANS.md)** | Pure mathematics with `centl` and mathematics-first `centl-sci`: exact arithmetic, algebra, equations, calculus, approximation, and verification. |
+| ⚛️ 🔬 **Physics** | **[Physicist onboarding](docs/PHYSICISTS.md)** | Physics with `centl-physics`, supporting mathematics with `centl`, and physics-first `centl-sci`: dimensions, units, constants, mechanics, simulation, and assurance boundaries. |
+
+If you are here only to do mathematics or physics, those onboarding pages are your front door. The repository's networking, release, infrastructure, and contributor systems can wait until you actually need them.
+
 ## Current release status
 
 **CENTL v0.15.0 is an Oasis release.**
@@ -68,6 +79,8 @@ Unsupported work stays visible. The contract is
 
 ## Read next
 
+- [🧮 📐 Mathematician onboarding](docs/MATHEMATICIANS.md)
+- [⚛️ 🔬 Physicist onboarding](docs/PHYSICISTS.md)
 - [Installation](docs/INSTALL.md)
 - [Documentation index](docs/README.md)
 - [Contributing](CONTRIBUTING.md)
