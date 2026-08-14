@@ -2,10 +2,13 @@
 
 **Codename:** Mathematical Introspective Recursive Autonomous Growth Engine
 **Status:** active development architecture
+**Current development epoch:** **Al-Tih** -- see [`MIRAGE-AL-TIH.md`](MIRAGE-AL-TIH.md)
 **Scope:** CENTL-SCi self-development, local specification ingestion, synthesis, validation, recursive improvement
 **Network requirement:** none
 
 > A self-extensible system must be able to change itself without being allowed to lie to itself.
+
+> **Al-Tih declaration:** Oasis is not scheduled. Oasis is earned.
 
 ## 1. Purpose
 
@@ -25,6 +28,8 @@ The target is not a chatbot that edits source files. The target is a computation
 10. repeat when unmet requirements remain.
 
 The system must remain useful with no paid AI service and no network connection. A local semantic model may help interpret prose, rank candidate meanings, or propose programs, but it is never the mathematical or engineering authority.
+
+The active **Al-Tih** epoch deliberately pushes this architecture through sustained experimentation before another Oasis is sought. Its major expeditions are **The Caravan Trial**, **The Mirror**, **The Crucible**, **The Scribe**, **The Djinn Boundary**, **The Long Night**, **The Book of the Desert**, and eventually **The Return**. The complete charter, promotion protocol, and end conditions are defined in [`MIRAGE-AL-TIH.md`](MIRAGE-AL-TIH.md).
 
 ## 2. The MIRAGE state
 
@@ -398,6 +403,8 @@ core patches and network publication remain outside automatic authority.
 
 Generated material still does not inherit verified-core assurance.
 
+During Al-Tih, these slices are no longer treated as isolated endpoints. They are to be driven toward the integrated expeditions and promotion architecture defined in [`MIRAGE-AL-TIH.md`](MIRAGE-AL-TIH.md).
+
 ## 14. Non-negotiable invariants
 
 CENTL-MIRAGE development is governed by these invariants:
@@ -416,3 +423,5 @@ CENTL-MIRAGE development is governed by these invariants:
 12. MIRAGE must be able to explain why a change was made, what evidence admitted it, and which source requirement caused it.
 
 This is the architecture required for CENTL to become capable of developing itself while remaining recognizably CENTL.
+
+During **Al-Tih**, the project intentionally remains in MIRAGE until the evidence justifies **The Return**. There is no version deadline and no scheduled Oasis declaration.
