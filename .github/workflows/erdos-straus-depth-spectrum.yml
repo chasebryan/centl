@@ -1,0 +1,109 @@
+name: CENTL Erdős-Straus depth spectrum
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Maximum minimal-depth layer to classify
+        required: false
+        default: "300"
+      search_limit:
+        description: Maximum avoiding parameter s searched per candidate
+        required: false
+        default: "5000"
+  push:
+    branches:
+      - main
+    paths:
+      - 'research/erdos-straus/DEPTH-SPECTRUM.md'
+      - 'research/erdos-straus/depth_spectrum_probe.py'
+      - 'research/erdos-straus/depth-spectrum-contracts.centl'
+      - '.github/workflows/erdos-straus-depth-spectrum.yml'
+      - 'src/**'
+      - 'centl.opam'
+
+permissions:
+  contents: read
+
+jobs:
+  spectrum:
+    name: Exact depth spectrum and CENTL certification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            m4 pkg-config libgmp-dev libmpfr-dev libflint-dev
+
+      - name: Set up pinned OCaml
+        uses: ocaml/setup-ocaml@15d660006c1d3110d77c34b7faa3bddefe8b82f0 # v3.7.0
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+          opam-pin: false
+
+      - name: Install CENTL dependencies
+        run: opam install . --deps-only --with-test --assume-depexts
+
+      - name: Build CENTL
+        run: opam exec -- dune build src/main.exe
+
+      - name: Resolve spectrum parameters
+        id: params
+        shell: bash
+        env:
+          KLIMIT: ${{ github.event.inputs.k_limit }}
+          SLIMIT: ${{ github.event.inputs.search_limit }}
+        run: |
+          set -euo pipefail
+          k=${KLIMIT:-300}
+          s=${SLIMIT:-5000}
+          case "$k" in (*[!0-9]*|'') echo "invalid k_limit" >&2; exit 2;; esac
+          case "$s" in (*[!0-9]*|'') echo "invalid search_limit" >&2; exit 2;; esac
+          echo "k=$k" >> "$GITHUB_OUTPUT"
+          echo "s=$s" >> "$GITHUB_OUTPUT"
+
+      - name: Run exact minimal-depth spectrum probe
+        run: |
+          rm -rf depth-spectrum-output
+          python3 research/erdos-straus/depth_spectrum_probe.py \
+            --k-limit '${{ steps.params.outputs.k }}' \
+            --search-limit '${{ steps.params.outputs.s }}' \
+            --out depth-spectrum-output
+
+      - name: CENTL certify delayed k=104 arithmetic
+        run: |
+          _build/default/src/main.exe check \
+            research/erdos-straus/depth-spectrum-contracts.centl \
+            --receipt depth-spectrum-output/centl-depth-spectrum-receipt.json
+          _build/default/src/main.exe --version > depth-spectrum-output/centl-version.txt
+          _build/default/src/main.exe --build-info > depth-spectrum-output/centl-build-info.txt
+
+      - name: Freeze hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd depth-spectrum-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' \
+            | LC_ALL=C sort \
+            | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat depth-spectrum-output/depth-spectrum-probe-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload exact spectrum certificate bundle
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-depth-spectrum-${{ github.sha }}
+          path: depth-spectrum-output/
+          if-no-files-found: error
+          retention-days: 90
