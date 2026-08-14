@@ -13,17 +13,13 @@ fail() {
   exit 1
 }
 
-case "$RELEASE_VERSION" in *@FCF_CARAVAN_JOIN_VERSION@*)
+printf '%s' "$RELEASE_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
   fail "this is the mutable development template, not an authenticated FCF join release"
-  ;;
-esac
-case "$RELEASE_KEY_SHA256" in *@FCF_CARAVAN_JOIN_KEY_SHA256@*)
+printf '%s' "$RELEASE_KEY_SHA256" | grep -Eq '^[0-9a-f]{64}$' ||
   fail "release trust identity was not rendered"
-  ;;
-esac
-case "$COORDINATOR_URL" in *@FCF_CARAVAN_COORDINATOR_URL@*)
-  fail "release coordinator endpoint was not rendered"
-  ;;
+case "$COORDINATOR_URL" in
+  https://*) ;;
+  *) fail "release coordinator endpoint was not rendered" ;;
 esac
 
 [ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "CARAVAN carrier enrollment is Linux-only"
