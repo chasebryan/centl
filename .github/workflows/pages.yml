@@ -75,12 +75,20 @@ jobs:
           curl --fail --silent --show-error --location \
             --connect-timeout 10 --max-time 30 --max-filesize 65536 \
             --output "$RUNNER_TEMP/fcf-caravan-coordinator.json" "$CENSUS_URL"
-          coordinator_url=$(python3 scripts/caravan-coordinator-resolve \
-            --input "$RUNNER_TEMP/fcf-caravan-coordinator.json")
-          curl --fail --silent --show-error --location \
-            --connect-timeout 10 --max-time 30 --max-filesize 65536 \
-            --output "$RUNNER_TEMP/fcf-caravan-census.json" \
-            "$coordinator_url/census-v1.json"
+          case "$CENSUS_URL" in
+            */census-v1.json)
+              mv "$RUNNER_TEMP/fcf-caravan-coordinator.json" \
+                "$RUNNER_TEMP/fcf-caravan-census.json"
+              ;;
+            *)
+              coordinator_url=$(python3 scripts/caravan-coordinator-resolve \
+                --input "$RUNNER_TEMP/fcf-caravan-coordinator.json")
+              curl --fail --silent --show-error --location \
+                --connect-timeout 10 --max-time 30 --max-filesize 65536 \
+                --output "$RUNNER_TEMP/fcf-caravan-census.json" \
+                "$coordinator_url/census-v1.json"
+              ;;
+          esac
           python3 scripts/caravan-census-validate \
             --input "$RUNNER_TEMP/fcf-caravan-census.json" \
             --output site/pub/centl/caravan/census-v1.json
