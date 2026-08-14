@@ -1,0 +1,6 @@
+{
+  "schema": "fcf-caravan-coordinator-v1",
+  "transport": "https",
+  "url": "https://caravan.freecomputation.org",
+  "updated_at": "2026-08-14T02:55:22Z"
+}

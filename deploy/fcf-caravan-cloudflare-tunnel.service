@@ -1,0 +1,20 @@
+[Unit]
+Description=FCF CARAVAN named Cloudflare Tunnel
+After=fcf-caravan-coordinator.service network-online.target
+Wants=fcf-caravan-coordinator.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/home/chasebryan/centl
+Environment=PATH=/var/home/chasebryan/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/var/home/chasebryan/.local/bin/cloudflared tunnel --config /var/home/chasebryan/.cloudflared/config.yml run fcf-caravan-coordinator
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target

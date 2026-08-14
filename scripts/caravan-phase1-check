@@ -42,6 +42,7 @@ PY
   scripts/caravan-admin-camel \
   scripts/caravan-census-publish \
   scripts/caravan-census-validate \
+  scripts/caravan-coordinator-resolve \
   tests/test_caravan_phase1.py \
   tests/test_caravan_census.py \
   tests/test_caravan_identity.py \

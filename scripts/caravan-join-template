@@ -29,6 +29,41 @@ for cmd in sha256sum signify python3; do
   command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required to verify this authenticated release"
 done
 
+if [[ "$COORDINATOR_URL" == */coordinator-v1.json ]]; then
+  bootstrap_json=$(mktemp "${TMPDIR:-/tmp}/fcf-caravan-coordinator.XXXXXXXX")
+  trap 'rm -f -- "$bootstrap_json"' EXIT HUP INT TERM
+  python3 - "$COORDINATOR_URL" "$bootstrap_json" <<'PY'
+import sys
+from pathlib import Path
+from urllib.request import Request, urlopen
+url, output = sys.argv[1:]
+request = Request(url, headers={"Accept": "application/json"})
+with urlopen(request, timeout=30) as response:
+    payload = response.read(65537)
+if len(payload) > 65536:
+    raise SystemExit("coordinator bootstrap is too large")
+Path(output).write_bytes(payload)
+PY
+  COORDINATOR_URL=$(python3 - "$bootstrap_json" <<'PY'
+import json
+import sys
+from urllib.parse import urlparse
+value = json.loads(open(sys.argv[1], encoding="utf-8").read())
+if not isinstance(value, dict) or value.get("schema") != "fcf-caravan-coordinator-v1":
+    raise SystemExit("invalid coordinator bootstrap schema")
+url = value.get("url")
+parsed = urlparse(url) if isinstance(url, str) else None
+if (
+    parsed is None or parsed.scheme != "https" or not parsed.netloc
+    or parsed.username is not None or parsed.password is not None
+    or parsed.query or parsed.fragment
+):
+    raise SystemExit("invalid coordinator bootstrap URL")
+print(url.rstrip("/"))
+PY
+) || fail "the public coordinator bootstrap was invalid"
+fi
+
 release_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 [ -f "$release_root/SHA256SUMS" ] && [ ! -L "$release_root/SHA256SUMS" ] || fail "release manifest missing"
 [ -f "$release_root/SHA256SUMS.sig" ] && [ ! -L "$release_root/SHA256SUMS.sig" ] || fail "release signature missing"

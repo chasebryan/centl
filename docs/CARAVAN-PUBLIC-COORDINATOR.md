@@ -1,8 +1,16 @@
 # FCF CARAVAN public coordinator
 
-The public coordinator is a loopback-bound Python service behind a TLS edge. In
-the FCF administrator deployment, Tailscale Funnel provides the public HTTPS
-edge; supporters do not need Tailscale membership.
+The public coordinator is a loopback-bound Python service behind a TLS edge.
+Supporters do not need Tailscale membership. The public bootstrap document at
+`site/pub/centl/caravan/coordinator-v1.json` contains the current HTTPS edge;
+the signed join release resolves that document immediately before enrollment.
+This lets the administrator replace an edge without issuing a new trust key or
+inventing a new caravan number.
+
+The administrator machine uses a dedicated named Cloudflare Tunnel as that
+edge because the local Tailscale Funnel anycast route is not serving external
+TLS connections. The tunnel connects outbound from the administrator machine;
+the coordinator remains loopback-only and the public hostname is stable.
 
 It exposes only:
 

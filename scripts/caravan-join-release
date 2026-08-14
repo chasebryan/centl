@@ -24,8 +24,9 @@ This command is the only supported path from the mutable repository template to
 an official join-caravan artifact. It requires a clean Git checkout and an
 explicit, passphrase-protected FCF signing key outside the repository.
 
-FCF_CARAVAN_COORDINATOR_URL must be the authenticated HTTPS coordinator URL
-embedded into the signed launcher. It must not contain credentials or a query.
+FCF_CARAVAN_COORDINATOR_URL must be the authenticated HTTPS coordinator URL or
+the public FCF coordinator-v1.json bootstrap URL embedded into the signed
+launcher. It must not contain credentials or a query.
 
 Existing release directories are never overwritten. A changed installer requires
 a new version and a new explicit signing action.
@@ -152,7 +153,7 @@ data = {
     "census_publication": "aggregate-only",
     "public_node_listing": False,
     "public_network_enrollment": "authenticated-consent-and-heartbeat",
-    "coordinator_url_embedded": True,
+    "coordinator_bootstrap_url_embedded": True,
     "carrier_transport_choices": ["https", "tor"],
     "withdrawal_command": "~/.local/bin/fcf-caravan-withdraw",
 }
