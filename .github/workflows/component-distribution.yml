@@ -45,6 +45,7 @@ jobs:
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
 
           for attempt in 1 2 3 4; do
             git fetch origin distribution
@@ -123,7 +124,8 @@ jobs:
             fi
 
             git commit -m 'dist: publish component-selective CENTL archives'
-            if git -c "http.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" push origin HEAD:distribution; then
+            if git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" \
+              push origin HEAD:distribution; then
               exit 0
             fi
 
