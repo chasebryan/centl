@@ -20,6 +20,9 @@
 
 ### Added
 
+- The public site now carries search metadata, a sitemap that includes
+  machine entry points, `llms.txt`, and an `ai.html` welcome for programs.
+  Layout and `style.css` are unchanged. Ranking is not claimed.
 - FCF Camps are the named stay when a new Oasis cannot honestly be declared.
   `centl-mirage camps` inspects occupation and never declares Oasis. CENTL
   v0.14.0 remains the published Oasis.

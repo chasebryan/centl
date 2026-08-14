@@ -1,0 +1,4 @@
+Contact: https://github.com/chasebryan/centl/security/advisories/new
+Policy: https://github.com/chasebryan/centl/blob/oasis/SECURITY.md
+Preferred-Languages: en
+Canonical: https://freecomputation.org/.well-known/security.txt
