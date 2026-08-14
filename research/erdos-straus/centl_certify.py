@@ -84,7 +84,6 @@ def main() -> None:
         if q % 4 != 1:
             raise RuntimeError(f"invalid ancestry quotient {q}")
         s = (q - 1) // 4
-        # If k=q*j-s then 4k-1=q(4j-1).  This contract certifies the fixed-q polynomial identity.
         lines.append(f"equal | 4*({q}*j-{s})-1 | {q}*(4*j-1) | j:rational")
 
     contract.write_text("\n".join(lines) + "\n")
@@ -92,11 +91,12 @@ def main() -> None:
 
     run([centl, "--version"], out / "centl-version.txt")
     run([centl, "--build-info"], out / "centl-build-info.txt")
-    check_out = run([centl, "check", str(contract), "--receipt", str(out / "centl-research-contracts-receipt.json")], out / "centl-check-output.txt")
-    if "verified" not in check_out.lower():
-        raise SystemExit("CENTL check completed without a visible verified verdict")
 
-    # Preserve a dedicated proof-carrying receipt for the record fixed family.
+    receipt = out / "centl-research-contracts-receipt.json"
+    run([centl, "check", str(contract), "--receipt", str(receipt)], out / "centl-check-output.txt")
+    if not receipt.is_file() or receipt.stat().st_size == 0:
+        raise SystemExit("CENTL check returned success but did not produce its required receipt")
+
     record = max(frontier, key=lambda r: r["C_AB"])
     P, X, Y, Z = family_expressions(record)
     verify_out = run([
