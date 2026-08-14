@@ -195,6 +195,11 @@ Current mission classes include:
 
 Mission selection is a filter over FCF-approved catalog content. It never grants a carrier authority to add an arbitrary URL, local file, digest, or unpublished artifact to the network.
 
+Laboratory coverage and `centl caravan inspect` use the same first-path-segment
+prefixes. They report which authenticated identities are held or
+under-replicated. They do not join, enroll, or change the signed join
+installer.
+
 The broader FCF preservation domains do not automatically become protocol mission strings. That mapping must remain explicit and versioned as CARAVAN evolves.
 
 ## Redistribution classes

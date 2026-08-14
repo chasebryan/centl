@@ -38,6 +38,7 @@ PY
   caravan/retrieval.py \
   caravan/lifecycle.py \
   caravan/lab.py \
+  caravan/coverage.py \
   caravan/join_caravan.py \
   scripts/caravan-admin-camel \
   scripts/caravan-census-publish \
@@ -55,6 +56,7 @@ PY
   tests/test_caravan_public_service.py \
   tests/test_caravan_retrieval.py \
   tests/test_caravan_lifecycle.py \
+  tests/test_caravan_coverage.py \
   tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
   tests/test_caravan_join_release.py \
@@ -73,6 +75,7 @@ PYTHONPATH=. "$PYTHON" -m unittest -v \
   tests/test_caravan_public_service.py \
   tests/test_caravan_retrieval.py \
   tests/test_caravan_lifecycle.py \
+  tests/test_caravan_coverage.py \
   tests/test_caravan_linux_platform.py \
   tests/test_join_caravan.py \
   tests/test_caravan_join_release.py \

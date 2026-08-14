@@ -25,6 +25,11 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_caravan)
+ (modules test_caravan)
+ (libraries centl_lib alcotest yojson))
+
+(test
  (name test_request_queue)
  (modules test_request_queue)
  (deps ../src/main.exe)

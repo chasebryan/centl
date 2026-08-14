@@ -48,6 +48,18 @@ class CensusTests(unittest.TestCase):
             )
             self.assertEqual(counts.cargo_loads, 0)
 
+    def test_verified_delivery_increments_cargo_loads_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            state = CoordinatorState(Path(tmp) / "coordinator.sqlite")
+            artifact_id = "sha256:" + ("ab" * 32)
+            state.apply_authenticated_catalog(
+                [(artifact_id, 4, "public-approved")],
+                catalog_version=1,
+            )
+            state.record_verified_delivery("camel-a", artifact_id, now=50)
+            self.assertEqual(state.cargo_loads(), 1)
+            self.assertEqual(state.census_counts(now=50).cargo_loads, 1)
+
     def test_live_document_is_exact_aggregate_contract(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             state = CoordinatorState(Path(tmp) / "coordinator.sqlite")

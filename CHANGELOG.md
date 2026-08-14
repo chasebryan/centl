@@ -20,6 +20,9 @@
 
 ### Added
 
+- CARAVAN reports catalog coverage, mission filters, store inventory, and
+  verified cargo loads. `centl caravan inspect` is inspect-only. The signed
+  join installer, invite schema, and `join.html` are unchanged.
 - CENTL-MIRAGE now runs a complete local development cycle: CEGIS example
   search, semantic fingerprints, fingerprint comparison, autonomy policy,
   review, and explicit accept/reject. A cycle still does not activate source or
