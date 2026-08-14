@@ -9,9 +9,11 @@
 <p>After execution, the welcome message reports everything installed, the provisions accepted, your live Caravan number, funding links, and other ways to help. Funding is optional: <a href="funding.html">support FCF</a>, preserve source and releases, test the carrier, improve documentation, review policy, or report bugs.</p>
 <script>
 (() => {
-  const releaseVersion = "1.0.5";
-  const releaseBase = "https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.5";
+  const releaseVersion = "1.0.6";
+  const releaseBase = "https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.6";
   const publicKeySha256 = "450a55addaade128814788a02662a3f10230411f15d91d1060fa17543c288aa8";
+  const helperAsset = "fcf-signify-x86_64-glibc";
+  const helperSha256 = "5fb7cf62bf9f01d4957ff3b2cbed9f6137cffd5cddf9392e7d4a2eecfeb54530";
   const consent = document.getElementById("caravan-consent");
   const download = document.getElementById("download-caravan-launcher");
   const status = document.getElementById("download-status");
@@ -26,6 +28,7 @@ names = (
     "FCF-CARAVAN-JOIN.pub",
     "SHA256SUMS",
     "SHA256SUMS.sig",
+    "fcf-signify-x86_64-glibc",
 )
 for name in names:
     request = Request(
@@ -60,8 +63,10 @@ for name in names:
     `TRANSPORT=${shellQuote(transport)}`,
     `ASSET_BASE=${shellQuote(releaseBase)}`,
     `EXPECTED_KEY_SHA256=${shellQuote(publicKeySha256)}`,
+    "HELPER_ASSET='fcf-signify-x86_64-glibc'",
+    "EXPECTED_HELPER_SHA256='5fb7cf62bf9f01d4957ff3b2cbed9f6137cffd5cddf9392e7d4a2eecfeb54530'",
     "fail() { printf '%s\\n' \"FCF CARAVAN launcher: $*\" >&2; exit 1; }",
-    "for command in python3 sha256sum signify tar; do command -v \"$command\" >/dev/null 2>&1 || fail \"$command is required for signed setup\"; done",
+    "for command in python3 sha256sum tar; do command -v \"$command\" >/dev/null 2>&1 || fail \"$command is required for signed setup\"; done",
     "work=\"$(mktemp -d \"${TMPDIR:-/tmp}/fcf-caravan-join.XXXXXXXX\")\"",
     "cleanup() { rm -rf -- \"$work\"; }",
     "trap cleanup EXIT HUP INT TERM",
@@ -70,7 +75,28 @@ for name in names:
     "PY",
     "actual_key_sha256=\"$(sha256sum \"$work/FCF-CARAVAN-JOIN.pub\" | awk '{print $1}')\"",
     "[ \"$actual_key_sha256\" = \"$EXPECTED_KEY_SHA256\" ] || fail \"the downloaded FCF trust key fingerprint is unexpected\"",
-    "signify -V -q -p \"$work/FCF-CARAVAN-JOIN.pub\" -x \"$work/SHA256SUMS.sig\" -m \"$work/SHA256SUMS\" || fail \"FCF release signature verification failed\"",
+    "signify_command=\"$(command -v signify 2>/dev/null || true)\"",
+    "if [ -z \"$signify_command\" ]; then",
+    "  case \"$(uname -m)\" in",
+    "    x86_64|amd64)",
+    "      helper_sha256=\"$(sha256sum \"$work/$HELPER_ASSET\" | awk '{print $1}')\"",
+    "      [ \"$helper_sha256\" = \"$EXPECTED_HELPER_SHA256\" ] || fail \"the FCF signify helper fingerprint is unexpected\"",
+    "      helper_dir=\"$HOME/.local/bin\"",
+    "      helper_target=\"$helper_dir/signify\"",
+    "      mkdir -p -m 0755 \"$helper_dir\"",
+    "      if [ -e \"$helper_target\" ] || [ -L \"$helper_target\" ]; then",
+    "        [ \"$(sha256sum \"$helper_target\" | awk '{print $1}')\" = \"$EXPECTED_HELPER_SHA256\" ] || fail \"an unexpected user-local signify already exists\"",
+    "      else",
+    "        cp \"$work/$HELPER_ASSET\" \"$helper_target\"",
+    "        chmod 0755 \"$helper_target\"",
+    "      fi",
+    "      signify_command=\"$helper_target\"",
+    "      PATH=\"$helper_dir:$PATH\"; export PATH",
+    "      ;;",
+    "    *) fail \"signify is missing and this architecture has no FCF-hosted helper yet\" ;;",
+    "  esac",
+    "fi",
+    "\"$signify_command\" -V -q -p \"$work/FCF-CARAVAN-JOIN.pub\" -x \"$work/SHA256SUMS.sig\" -m \"$work/SHA256SUMS\" || fail \"FCF release signature verification failed\"",
     "(cd \"$work\" && sha256sum -c SHA256SUMS >/dev/null) || fail \"FCF release checksum verification failed\"",
     "tar -xzf \"$work/fcf-caravan-join-$RELEASE_VERSION.tar.gz\" -C \"$work\" || fail \"signed FCF release could not be unpacked\"",
     "signed_join=\"$work/fcf-caravan-join-$RELEASE_VERSION/join-caravan\"",
