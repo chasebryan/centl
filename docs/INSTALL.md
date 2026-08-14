@@ -144,7 +144,7 @@ channels/
       SOURCE-COMMIT
 ```
 
-The command-selective archives are mechanically derived from the already-published aggregate package without rebuilding or modifying the selected executable bytes. Each records the source aggregate and its SHA-256 identity. CI verifies that each archive contains its requested public executable and none of the other two public executables, then smoke-installs each component independently.
+The command-selective archives are mechanically derived from the already-published aggregate package without rebuilding or modifying the selected executable bytes. Each records the source aggregate and its SHA-256 identity. CI verifies that each archive contains its requested public executable and none of the other two public executables, and that the selected launcher, executable, and retained runtime-library bytes are identical to the aggregate Oasis package.
 
 When a Mirage aggregate package is published, the component-distribution workflow is designed to derive the same command-selective shapes for that rolling build. Mirage remains a development channel and never inherits Oasis assurance merely from packaging.
 
