@@ -43,6 +43,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          cp install-component "$RUNNER_TEMP/install-component"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')
@@ -139,7 +140,7 @@ jobs:
             sleep $((attempt * 2))
           done
 
-      - name: Verify component archives are actually narrow
+      - name: Verify component archives are actually narrow and installable
         shell: bash
         run: |
           set -euo pipefail
@@ -178,7 +179,31 @@ jobs:
           }
 
           latest=$(cat channels/oasis/LATEST)
-          verify_dir "channels/oasis/v$latest"
+          latest_dir="channels/oasis/v$latest"
+          verify_dir "$latest_dir"
           if test -f channels/mirage/latest/centl-linux-x86_64.tar.gz; then
             verify_dir channels/mirage/latest
           fi
+
+          smoke_component() {
+            component=$1
+            asset=$2
+            command_name=$3
+            prefix="$RUNNER_TEMP/install-$component"
+            rm -rf "$prefix"
+            sh "$RUNNER_TEMP/install-component" \
+              --component "$component" \
+              --archive "$PWD/$latest_dir/$asset" \
+              --prefix "$prefix"
+
+            test -x "$prefix/bin/$command_name"
+            for other in centl centl-physics centl-sci; do
+              if test "$other" != "$command_name"; then
+                test ! -e "$prefix/bin/$other"
+              fi
+            done
+          }
+
+          smoke_component centl centl-only-linux-x86_64.tar.gz centl
+          smoke_component physics centl-physics-only-linux-x86_64.tar.gz centl-physics
+          smoke_component sci centl-sci-only-linux-x86_64.tar.gz centl-sci
