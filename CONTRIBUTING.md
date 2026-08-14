@@ -261,6 +261,11 @@ Prefer small, reviewable semantic changes over large unrelated bundles.
 
 Do not weaken a release, security, proof, or integrity check merely to make a branch green. If a check is wrong, fix the check and explain why it was wrong.
 
+CENTL-SCi can prepare a local pack with `pack contribution` and, after an
+explicit publish grant, open a **draft** pull request against `mirage`.
+That path does not store tokens, does not target `oasis`, and does not
+replace this human review. See [SCI.md](docs/SCI.md).
+
 ## Developer Certificate of Origin
 
 CENTL uses the **Developer Certificate of Origin 1.1** rather than a contributor license agreement or copyright assignment.

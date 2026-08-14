@@ -136,6 +136,66 @@
  (libraries centl_lib alcotest unix yojson))
 
 (test
+ (name test_sci_status)
+ (modules test_sci_status)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_catalog)
+ (modules test_sci_catalog)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_workbook)
+ (modules test_sci_workbook)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_program)
+ (modules test_sci_program)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_kernel)
+ (modules test_sci_kernel)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_journal)
+ (modules test_sci_journal)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_scope)
+ (modules test_sci_scope)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_publish)
+ (modules test_sci_publish)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_recipe)
+ (modules test_sci_recipe)
+ (libraries centl_lib alcotest))
+
+(test
+ (name test_sci_spoken)
+ (modules test_sci_spoken)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_host)
+ (modules test_sci_host)
+ (libraries centl_lib alcotest unix yojson))
+
+(test
+ (name test_sci_intent)
+ (modules test_sci_intent)
+ (libraries centl_lib alcotest))
+
+(test
  (name test_sci_portable)
  (modules test_sci_portable)
  (libraries centl_lib alcotest unix yojson))
@@ -246,6 +306,10 @@
 
 (cram
  (applies_to sci_cli)
+ (deps ../src/sci_main.exe))
+
+(cram
+ (applies_to sci_program)
  (deps ../src/sci_main.exe))
 
 (cram

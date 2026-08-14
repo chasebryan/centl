@@ -184,6 +184,11 @@ No automated score, model output, MIRAGE acceptance result, or project founder d
 
 ## Wellspring Record
 
+Durable records live under [`docs/wellsprings/`](wellsprings/README.md). The
+local `centl-mirage wellspring` command can render the current expedition and
+records, but it cannot designate a Wellspring: designation requires the
+evidence review described below.
+
 A designated Wellspring should receive a durable **Wellspring Record** in the repository or another FCF-controlled research archive.
 
 A record should contain at least:

@@ -131,11 +131,12 @@ let structural ~mode input cursor =
           mechanics_missing
           "particle-simulation grammar is missing required typed fields"
     | Centl_sci_intent.Program_creation
-      when mode = Centl_sci_interaction.Build && not (String.contains lower '=')
-      ->
-        make " = [expression]"
-          [ "implementation expression" ]
-          "BUILD creation request is missing an implementation body"
+      when (not (String.contains lower '='))
+           && (not (contains "computes" lower))
+           && not (contains "returns" lower) ->
+        make " called [name] that takes [params] and computes [expression]"
+          [ "name"; "parameters"; "implementation expression" ]
+          "program workshop needs a name, parameters, and an exact body"
     | Centl_sci_intent.System_inspection
       when mode = Centl_sci_interaction.Build
            && (lower = "validate"

@@ -69,6 +69,28 @@ class OasisTestCase(unittest.TestCase):
         return archive
 
 
+class InspectTests(unittest.TestCase):
+    def test_inspect_does_not_declare_oasis(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="centl-oasis-inspect-") as tmp:
+            report = Path(tmp) / "inspect.json"
+            rc = OASIS.main(
+                ["--root", str(ROOT), "--inspect", "--quiet", "--report", str(report)]
+            )
+            self.assertEqual(rc, 0)
+            payload = json.loads(report.read_text(encoding="utf-8"))
+            self.assertFalse(payload["declaration"])
+            self.assertFalse(payload["eligible_for_final_qualification"])
+            self.assertEqual(payload["published_oasis"], "0.14.0")
+            self.assertIn("blockers", payload)
+            self.assertIn("cannot declare Oasis", payload["summary"])
+
+    def test_inspect_identity_records_branch_blocker(self) -> None:
+        payload = OASIS.inspect_identity(ROOT, "0.14.0")
+        self.assertFalse(payload["declaration"])
+        blockers = payload["blockers"]
+        self.assertTrue(any("is not oasis" in str(item) for item in blockers))
+
+
 class VersionTests(OasisTestCase):
     def test_reads_authoritative_version(self) -> None:
         self.write_version("1.2.3-rc.4")

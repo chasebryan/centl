@@ -172,6 +172,24 @@ let classify ~mode input =
         else if starts [ "simulate "; "step "; "evolve " ] input then
           result Physics_simulation Medium "simulation verb"
         else if
+          starts
+            [
+              "create a function";
+              "make a function";
+              "write a function";
+              "write me a function";
+              "define a function";
+              "let ";
+              "teach yourself";
+              "program yourself";
+              "patch your source";
+            ]
+            input
+          || contains "function" input
+             && (contains "that takes" input
+                || contains "called" input || contains "named" input)
+        then result Program_creation High "English program workshop"
+        else if
           starts [ "calculate "; "compute "; "evaluate "; "what is " ] input
         then result Arithmetic Medium "calculation phrase"
         else if starts [ "find " ] input then

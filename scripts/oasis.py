@@ -639,9 +639,62 @@ def parser() -> argparse.ArgumentParser:
         help="also require exact oasis/tag identity and release-blocking GitHub state to be green",
     )
     p.add_argument("--plan", action="store_true", help="print the gate plan without executing it")
+    p.add_argument(
+        "--inspect",
+        action="store_true",
+        help="report Oasis identity distance without running gates or declaring Oasis",
+    )
     p.add_argument("--report", type=Path, help="explicit JSON evidence report path")
     p.add_argument("--quiet", action="store_true")
     return p
+
+
+PUBLISHED_OASIS = "0.14.0"
+
+
+def inspect_identity(root: Path, version: str) -> dict[str, object]:
+    """Describe whether this identity could be Oasis. Never declares Oasis."""
+    try:
+        state = git_state(root)
+    except OasisError as exc:
+        state = {
+            "head": None,
+            "branch": "<unavailable>",
+            "tracked_dirty": True,
+            "tracked_changes": [],
+            "error": str(exc),
+        }
+    blockers: list[str] = []
+    branch = str(state.get("branch") or "")
+    if branch != "oasis":
+        blockers.append(
+            f"current branch {branch!r} is not oasis; Oasis is a promotion state"
+        )
+    if state.get("tracked_dirty"):
+        blockers.append("tracked worktree is not clean")
+    if version != PUBLISHED_OASIS:
+        blockers.append(
+            f"current version {version} is not the published Oasis identity {PUBLISHED_OASIS}"
+        )
+    try:
+        require_layout(root, version)
+    except OasisError as exc:
+        blockers.append(str(exc))
+    return {
+        "schema_version": 1,
+        "artifact_kind": "oasis_identity_inspection",
+        "declaration": False,
+        "published_oasis": PUBLISHED_OASIS,
+        "current_version": version,
+        "branch": branch,
+        "head": state.get("head"),
+        "blockers": blockers,
+        "eligible_for_final_qualification": False,
+        "summary": (
+            f"CENTL v{PUBLISHED_OASIS} remains the published Oasis release. "
+            "This inspection does not run gates and cannot declare Oasis."
+        ),
+    }
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -655,6 +708,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     except OasisError as exc:
         print(f"[oasis] PRECHECK FAILED: {exc}", file=sys.stderr)
         return 2
+
+    if args.inspect:
+        payload = inspect_identity(root, version)
+        text = (
+            f"CENTL Oasis identity inspection\n"
+            f"published Oasis: v{payload['published_oasis']}\n"
+            f"current version: {payload['current_version']}\n"
+            f"branch: {payload['branch']}\n"
+            f"declaration: no\n"
+            f"{payload['summary']}\n"
+        )
+        blockers = payload["blockers"]
+        if isinstance(blockers, list) and blockers:
+            text += "blockers:\n" + "".join(f"  - {item}\n" for item in blockers)
+        if not args.quiet:
+            print(text, end="")
+        report_path = args.report or (root / "_build/oasis/inspect.json")
+        atomic_json(report_path, payload)
+        return 0
 
     plan = build_plan(version, args.opam_switch)
     if args.no_repair:

@@ -76,6 +76,20 @@ CENTL security review is organized around invariants rather than a list of fashi
 - Archives must reject traversal, absolute paths, links, unsupported special entries, or unsafe layouts before activation.
 - Installation and update paths must stage and validate material before replacing active software.
 
+### CENTL-SCi publish path
+
+The in-process GitHub contribution path is a **narrow, explicit grant**. It is not a remote control surface and it is not a claim of perfect security.
+
+- Credentials and tokens are never written by CENTL.
+- User English is never passed to a shell.
+- Only allowlisted `git` and `gh` argument vectors may run, and only after a local grant file owned by the current user with mode `0600`.
+- Automated pull requests are draft and must target `mirage`. `oasis` is not an automatic base. Force-push is not implemented.
+- Contributor grants can prepare and pack only. Commit and `gh pr create` require an owner grant plus the acceptance phrase.
+- GitHub review remains the approval authority for every contributor, including the repository owner.
+- Requests for malware, credential theft, or other out-of-scope harm are refused before execution.
+
+A local grant cannot give a stranger push access to `chasebryan/centl`. GitHub authentication stays outside CENTL.
+
 ### MIRAGE authority boundaries
 
 - User documents are data, not executable authority.

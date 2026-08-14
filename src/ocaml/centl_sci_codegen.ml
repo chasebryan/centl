@@ -37,6 +37,23 @@ let strip_prefix_ci prefix text =
       |> String.trim)
   else None
 
+let extract_after_prefix_ci prefix text =
+  match strip_prefix_ci prefix text with
+  | Some value -> Some value
+  | None ->
+      let text = String.trim text in
+      let lower_text = lower text in
+      let prefix_lower = String.lowercase_ascii prefix in
+      begin match find_substring ~needle:prefix_lower lower_text with
+      | None -> None
+      | Some index ->
+          let start = index + String.length prefix in
+          if start > String.length text then None
+          else
+            Some
+              (String.sub text start (String.length text - start) |> String.trim)
+      end
+
 let valid_identifier = Centl_sci_change_ir.valid_identifier
 
 let split_parameters text =
@@ -108,17 +125,31 @@ let parse_function ~replace text =
     else
       [
         "create a function named ";
+        "create a function called ";
         "create function named ";
+        "create function called ";
         "make a function named ";
+        "make a function called ";
         "make function named ";
+        "make function called ";
+        "write a function named ";
+        "write a function called ";
+        "write me a function named ";
         "add a function named ";
         "add function named ";
+        "define a function named ";
+        "define a function called ";
+        "define function named ";
+        "i need a function named ";
+        "i want a function named ";
+        "i need a function called ";
+        "i want a function called ";
       ]
   in
   let rec body = function
     | [] -> None
     | prefix :: rest ->
-        begin match strip_prefix_ci prefix text with
+        begin match extract_after_prefix_ci prefix text with
         | Some value -> Some value
         | None -> body rest
         end
@@ -139,7 +170,19 @@ let parse_function ~replace text =
           let implementation =
             match split_at_ci " and computes " tail with
             | Some value -> Some value
-            | None -> split_at_ci " and returns " tail
+            | None -> (
+                match split_at_ci " and returns " tail with
+                | Some value -> Some value
+                | None -> (
+                    match split_at_ci " and is " tail with
+                    | Some value -> Some value
+                    | None -> (
+                        match split_at_ci " as " tail with
+                        | Some value -> Some value
+                        | None -> (
+                            match split_at_ci " that equals " tail with
+                            | Some value -> Some value
+                            | None -> split_at_ci " = " tail))))
           in
           begin match implementation with
           | None ->
@@ -186,12 +229,14 @@ let parse_value ~replace text =
         "make value named ";
         "add a value named ";
         "add value named ";
+        "define a value named ";
+        "define value named ";
       ]
   in
   let rec body = function
     | [] -> None
     | prefix :: rest ->
-        begin match strip_prefix_ci prefix text with
+        begin match extract_after_prefix_ci prefix text with
         | Some value -> Some value
         | None -> body rest
         end

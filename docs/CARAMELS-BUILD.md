@@ -21,11 +21,19 @@ understand the requested change
 
 ```text
 BUILD> status
+BUILD> catalog
+BUILD> products
 BUILD> capabilities
-BUILD> show capability integration
+BUILD> show capability gcd
+BUILD> extend add a local helper for my lab protocol
 BUILD> audit workspace
 BUILD> revisions
 ```
+
+In the live REPL, `:workbook PATH` exports the current session as a replayable
+CENTL script. `:catalog` and `:products` expose the same discovery surfaces.
+`centl-mirage doctor` reports structural MIRAGE cycle health; it is not Oasis
+qualification.
 
 `status` reports the Caramels version, platform family, workspace/revision, structural workspace health, enabled native extensions, package count, and deliberately gated integration work.
 
@@ -71,7 +79,39 @@ English-to-CENTL construction:
 ```text
 BUILD> create a value named tau equal to 2*pi
 BUILD> create a function named kinetic_energy that takes mass and velocity and computes 1/2 * mass * velocity^2
+BUILD> make a kinetic energy function
+BUILD> let square(x) = x^2
+BUILD> teach yourself harmonic mean
 ```
+
+English, `let`, topic names, and `teach yourself` share the same parser-validated workshop. A successful native program is hot-loaded and usually receives a spoken alias, so `square of 6` works in the same session. No restart is required for native CENTL programs.
+
+`patch your source` / compiled-host requests write a reviewable proposal under `generated/host-patches/`. Those cannot hot-load. SCi says so: rebuild with `dune build`, then restart `centl-sci`.
+
+```text
+BUILD> programs
+BUILD> spoken
+BUILD> dialect
+BUILD> journal
+BUILD> export dialect
+BUILD> host patches
+```
+
+`dialect` is the replayable local language. `journal` is the inspectable growth log. `export dialect` writes those artifacts without touching verified core.
+
+## Reviewed GitHub publish
+
+```text
+BUILD> publish status
+BUILD> pack contribution
+BUILD> grant contributor publish
+BUILD> stage contribution
+BUILD> grant owner publish I accept local git and gh without storing tokens
+BUILD> commit contribution
+BUILD> open draft pull request
+```
+
+`push this to github` prints the required sequence. It does not push. Other contributors can pack and open a draft PR by hand; their work still needs approval. oasis is never the automatic base. Tokens are never stored.
 
 The English path produces a structured change request before native source generation. Generated native source is parsed by the existing CENTL parser before it can be written into the local workspace.
 

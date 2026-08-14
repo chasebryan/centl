@@ -106,10 +106,18 @@ let record_interpreter_error ~source ?backend ~problem ~code ~message () =
        ~message ())
 
 let human_error ~details error =
+  let guidance = Centl_sci_next.render ~problem:error.human_message () in
   if details then
     String.concat "\n"
-      [ error.human_message; ""; "Details:"; "  " ^ error.detail_message ]
-  else error.human_message
+      [
+        error.human_message;
+        "";
+        "Details:";
+        "  " ^ error.detail_message;
+        "";
+        guidance;
+      ]
+  else String.concat "\n" [ error.human_message; guidance ]
 
 let print_json_error error = Printf.eprintf "centl-sci: %s\n" error.diagnostic
 
@@ -217,24 +225,49 @@ let starts_any prefixes text =
 
 let looks_like_build_request problem =
   let lower = String.lowercase_ascii (String.trim problem) in
-  starts_any
-    [
-      "create function ";
-      "create value ";
-      "modify function ";
-      "modify value ";
-      "initialize workspace";
-      "show workspace";
-      "inspect workspace";
-      "list extensions";
-      "show extensions";
-      "enable extension ";
-      "disable extension ";
-      "remove extension ";
-      "extend centl";
-      "prepare this extension for upstream";
-    ]
-    lower
+  Centl_sci_program.wants_program problem
+  || Centl_sci_catalog.is_discovery_request lower
+  || starts_any
+       [
+         "create function ";
+         "create value ";
+         "modify function ";
+         "modify value ";
+         "initialize workspace";
+         "status";
+         "show status";
+         "catalog";
+         "products";
+         "programs";
+         "spoken";
+         "aliases";
+         "dialect";
+         "journal";
+         "host patches";
+         "host-patches";
+         "extend ";
+         "show workspace";
+         "inspect workspace";
+         "list extensions";
+         "show extensions";
+         "enable extension ";
+         "disable extension ";
+         "remove extension ";
+         "extend centl";
+         "prepare this extension for upstream";
+         "prepare contribution";
+         "pack contribution";
+         "publish status";
+         "grant contributor publish";
+         "grant owner publish";
+         "stage contribution";
+         "commit contribution";
+         "open draft pull request";
+         "declare oasis";
+         "achieve oasis";
+       ]
+       lower
+  || Centl_sci_publish.wants problem
   || Option.is_some
        (Centl_sci_interaction.find_substring ~needle:" to centl" lower)
      && starts_any [ "add "; "make "; "integrate " ] lower
@@ -419,23 +452,29 @@ let main () =
     else
       match Centl_sci_fastpath.interpret canonical with
       | Some ir -> Ok (Fast_path, ir, canonical, classification)
-      | None ->
-          begin match Centl_sci_interaction.clarification mode canonical with
-          | Some message ->
-              Error
-                {
-                  exit_code = 2;
-                  human_message = message;
-                  detail_message =
-                    "The request was classified but is not executable without \
-                     more information.";
-                  diagnostic = "clarification_required";
-                }
+      | None -> (
+          match Centl_sci_spoken.interpret canonical with
+          | Some ir -> Ok (Fast_path, ir, canonical, classification)
           | None ->
-              Result.map
-                (fun (source, ir) -> (source, ir, canonical, classification))
-                (model_interpret canonical)
-          end
+              begin match
+                Centl_sci_interaction.clarification mode canonical
+              with
+              | Some message ->
+                  Error
+                    {
+                      exit_code = 2;
+                      human_message = message;
+                      detail_message =
+                        "The request was classified but is not executable \
+                         without more information.";
+                      diagnostic = "clarification_required";
+                    }
+              | None ->
+                  Result.map
+                    (fun (source, ir) ->
+                      (source, ir, canonical, classification))
+                    (model_interpret canonical)
+              end)
   in
   let execute_problem mode problem =
     match interpret mode problem with
@@ -472,7 +511,13 @@ let main () =
     end
     else if !details_output then
       Centl_sci_present.details outcome |> print_endline
-    else Centl_sci_present.human outcome |> print_endline
+    else begin
+      Centl_sci_present.human outcome |> print_endline;
+      match outcome.Centl_sci_runtime.status with
+      | Centl_sci_runtime.Unsupported | Centl_sci_runtime.Failed ->
+          print_endline (Centl_sci_next.render ~problem ())
+      | _ -> ()
+    end
   in
   let run_build problem =
     match Centl_sci_build.handle problem with
@@ -485,30 +530,173 @@ let main () =
           print_workspace_warnings (reload_core core_state);
         handled.changed
   in
+  let last_growth = ref None in
+  let evaluate_try expression =
+    match Centl_sci_fastpath.native_ir expression with
+    | None -> None
+    | Some ir ->
+        let outcome = Centl_sci_runtime.execute ~core_state:!core_state ir in
+        begin match outcome.Centl_sci_runtime.status with
+        | Centl_sci_runtime.Established ->
+            Some (Centl_sci_present.human outcome)
+        | _ -> None
+        end
+  in
+  let run_program problem =
+    match Centl_sci_program.prepare problem with
+    | Error message ->
+        print_endline message;
+        false
+    | Ok plan ->
+        let handled =
+          if String.trim plan.Centl_sci_program.command = "" then
+            Some
+              {
+                Centl_sci_build.message =
+                  (if plan.kind = Centl_sci_program.Already_present then
+                     "No local file was written. The built-in operation is \
+                      already live."
+                   else
+                     "No local CENTL program was required for this host-growth \
+                      request.");
+                changed = false;
+                revision = None;
+              }
+          else
+            match Centl_sci_build.handle plan.command with
+            | Centl_sci_build.Not_handled -> None
+            | Centl_sci_build.Handled value -> Some value
+        in
+        begin match handled with
+        | None ->
+            print_endline
+              "I understood a program request, but could not apply it.";
+            false
+        | Some handled ->
+            if handled.changed then
+              print_workspace_warnings (reload_core core_state);
+            let spoken_line, host_line =
+              match Centl_sci_workspace.default () with
+              | None -> (None, None)
+              | Some workspace
+                when handled.changed || plan.host_request <> None
+                     || plan.kind = Centl_sci_program.Host_patch
+                     || plan.kind = Centl_sci_program.Already_present ->
+                  let spoken, host =
+                    Centl_sci_program.install_accessories workspace plan
+                  in
+                  ( Option.map Centl_sci_program.spoken_line spoken,
+                    Option.map Centl_sci_host.render host )
+              | Some _ -> (None, None)
+            in
+            let try_result =
+              match plan.try_next with
+              | Some expression
+                when handled.changed
+                     || plan.kind = Centl_sci_program.Already_present ->
+                  evaluate_try expression
+              | _ -> None
+            in
+            let uses =
+              match Centl_sci_workspace.default () with
+              | None -> []
+              | Some workspace ->
+                  Centl_sci_kernel.record_program workspace plan ~input:problem
+                    ~result:try_result
+            in
+            begin match
+              (Centl_sci_workspace.default (), plan.try_next, try_result)
+            with
+            | Some workspace, Some example, Some result ->
+                Centl_sci_kernel.write_example_test workspace plan example
+                  result
+            | _ -> ()
+            end;
+            let uses_line = Centl_sci_kernel.uses_line uses in
+            let rendered =
+              Centl_sci_program.render_success ?spoken_line ?host_line
+                ?try_result plan handled.message
+            in
+            let rendered =
+              match uses_line with
+              | None -> rendered
+              | Some line -> rendered ^ "\n\n" ^ line
+            in
+            print_endline rendered;
+            last_growth := Some rendered;
+            handled.changed || plan.kind = Host_patch
+        end
+  in
+  let note_unknown problem result_text =
+    match Centl_sci_kernel.unknown_hint problem with
+    | None -> ()
+    | Some hint ->
+        print_newline ();
+        print_endline hint;
+        ignore result_text
+  in
+  let journal_compute problem result_text =
+    match Centl_sci_workspace.default () with
+    | None -> ()
+    | Some workspace ->
+        Centl_sci_kernel.record_compute workspace ~input:problem
+          ~result:result_text
+  in
+  let rec handle_input ~mode ~on_compute problem =
+    match Centl_sci_scope.classify problem with
+    | Centl_sci_scope.Rejected message -> print_endline message
+    | Centl_sci_scope.Allowed _ ->
+        begin match Centl_sci_kernel.split_chain problem with
+        | Some (first, rest) ->
+            ignore (run_program first);
+            print_newline ();
+            handle_input ~mode ~on_compute rest
+        | None ->
+            if Centl_sci_program.wants_program problem then
+              ignore (run_program problem)
+            else if
+              mode = Centl_sci_interaction.Build
+              || looks_like_build_request problem
+            then ignore (run_build problem)
+            else on_compute problem
+        end
+  in
   let run_one problem =
     if problem = "" then begin
       Printf.eprintf
         "centl-sci: a mathematics, physics, or BUILD request is required\n";
       exit 2
     end;
-    if
-      !initial_mode = Centl_sci_interaction.Build
-      || looks_like_build_request problem
-    then ignore (run_build problem)
-    else
-      match execute_problem !initial_mode problem with
-      | Error error ->
-          if !json_output then print_json_error error
-          else
-            human_error ~details:(!details_output || !explain_output) error
-            |> print_endline;
-          exit error.exit_code
-      | Ok (source, outcome, normalized, _) ->
-          print_outcome ~problem ~normalized ~mode:!initial_mode ~source outcome;
-          begin match outcome.Centl_sci_runtime.status with
-          | Centl_sci_runtime.Failed -> exit 1
-          | _ -> ()
-          end
+    handle_input ~mode:!initial_mode
+      ~on_compute:(fun problem ->
+        match execute_problem !initial_mode problem with
+        | Error error ->
+            if !json_output then print_json_error error
+            else
+              human_error ~details:(!details_output || !explain_output) error
+              |> print_endline;
+            begin match Centl_sci_kernel.unknown_hint problem with
+            | None -> ()
+            | Some hint ->
+                print_newline ();
+                print_endline hint
+            end;
+            exit error.exit_code
+        | Ok (source, outcome, normalized, _) ->
+            print_outcome ~problem ~normalized ~mode:!initial_mode ~source
+              outcome;
+            let result_text = Centl_sci_present.human outcome in
+            journal_compute problem result_text;
+            begin match outcome.Centl_sci_runtime.status with
+            | Centl_sci_runtime.Failed -> exit 1
+            | Centl_sci_runtime.Unsupported -> note_unknown problem result_text
+            | Centl_sci_runtime.Established
+              when Option.is_some (Centl_sci_kernel.unknown_call problem)
+                   && String.trim result_text = String.trim problem ->
+                note_unknown problem result_text
+            | _ -> ()
+            end)
+      problem
   in
   let repl () =
     print_endline ("CENTL-SCi v" ^ sci_version);
@@ -526,7 +714,19 @@ let main () =
       Centl_history.create ~persistent ?path:(sci_history_path ()) ()
     in
     let help () =
+      print_endline
+        "Create a program: make a function called square that takes x and \
+         computes x^2";
       print_endline ":help               show session controls";
+      print_endline ":catalog            list deterministic capabilities";
+      print_endline ":products           list the FCF product family";
+      print_endline ":workbook PATH      export this session as a CENTL script";
+      print_endline ":programs           list enabled local programs";
+      print_endline ":spoken             list spoken English aliases";
+      print_endline ":dialect            show the live local dialect";
+      print_endline ":journal            show the growth journal";
+      print_endline ":publish            show GitHub publish status";
+      print_endline ":host-patches       list host-growth proposals";
       print_endline
         ":mode [mode]        show/set math, physics, hybrid, or build";
       print_endline ":history            show input history";
@@ -607,6 +807,48 @@ let main () =
             help ();
             loop ()
           end
+          else if command = ":programs" then begin
+            ignore (run_build "programs");
+            loop ()
+          end
+          else if command = ":spoken" then begin
+            ignore (run_build "spoken");
+            loop ()
+          end
+          else if command = ":host-patches" then begin
+            ignore (run_build "host patches");
+            loop ()
+          end
+          else if command = ":dialect" then begin
+            ignore (run_build "dialect");
+            loop ()
+          end
+          else if command = ":journal" then begin
+            ignore (run_build "journal");
+            loop ()
+          end
+          else if command = ":publish" then begin
+            ignore (run_build "publish status");
+            loop ()
+          end
+          else if command = ":catalog" then begin
+            ignore (run_build "catalog");
+            loop ()
+          end
+          else if command = ":products" then begin
+            ignore (run_build "products");
+            loop ()
+          end
+          else if String.starts_with ~prefix:":workbook " command then begin
+            let path =
+              String.sub problem 10 (String.length problem - 10) |> String.trim
+            in
+            begin match Centl_sci_workbook.export path results with
+            | Error message -> print_endline ("workbook: " ^ message)
+            | Ok path -> Printf.printf "Wrote workbook %s\n" path
+            end;
+            loop ()
+          end
           else if command = ":mode" then begin
             Printf.printf "Mode: %s\n" (Centl_sci_interaction.mode_text !mode);
             loop ()
@@ -672,34 +914,59 @@ let main () =
             loop ()
           end
           else if problem = "" then loop ()
-          else if
-            !mode = Centl_sci_interaction.Build
-            || looks_like_build_request problem
-          then begin
-            ignore (run_build problem);
-            loop ()
-          end
           else begin
-            begin match execute_problem !mode problem with
-            | Error error ->
-                human_error ~details:(!details || !explain) error
-                |> print_endline
-            | Ok (source, outcome, normalized, classification) ->
-                let result_text = Centl_sci_present.human outcome in
-                let details_text = Centl_sci_present.details outcome in
-                if !explain then begin
-                  print_endline result_text;
-                  print_newline ();
-                  evidence ~problem ~normalized ~mode:!mode ~source outcome
-                  |> Centl_sci_evidence.render |> print_endline
-                end
-                else if !details then print_endline details_text
-                else print_endline result_text;
+            last_growth := None;
+            handle_input ~mode:!mode
+              ~on_compute:(fun problem ->
+                match execute_problem !mode problem with
+                | Error error ->
+                    human_error ~details:(!details || !explain) error
+                    |> print_endline;
+                    begin match Centl_sci_kernel.unknown_hint problem with
+                    | None -> ()
+                    | Some hint ->
+                        print_newline ();
+                        print_endline hint
+                    end
+                | Ok (source, outcome, normalized, classification) ->
+                    let result_text = Centl_sci_present.human outcome in
+                    let details_text = Centl_sci_present.details outcome in
+                    if !explain then begin
+                      print_endline result_text;
+                      print_newline ();
+                      evidence ~problem ~normalized ~mode:!mode ~source outcome
+                      |> Centl_sci_evidence.render |> print_endline
+                    end
+                    else if !details then print_endline details_text
+                    else begin
+                      print_endline result_text;
+                      match outcome.Centl_sci_runtime.status with
+                      | Centl_sci_runtime.Unsupported | Centl_sci_runtime.Failed
+                        ->
+                          print_endline (Centl_sci_next.render ~problem ());
+                          note_unknown problem result_text
+                      | Centl_sci_runtime.Established
+                        when Option.is_some
+                               (Centl_sci_kernel.unknown_call problem)
+                             && String.trim result_text = String.trim problem ->
+                          note_unknown problem result_text
+                      | _ -> ()
+                    end;
+                    journal_compute problem result_text;
+                    ignore
+                      (Centl_sci_session.add results ~input:problem ~normalized
+                         ~mode:!mode
+                         ~intent:(Centl_sci_intent.text classification.intent)
+                         ~result:result_text ~details:details_text
+                         ~workspace_revision:(workspace_revision ())))
+              problem;
+            begin match !last_growth with
+            | None -> ()
+            | Some rendered ->
                 ignore
-                  (Centl_sci_session.add results ~input:problem ~normalized
-                     ~mode:!mode
-                     ~intent:(Centl_sci_intent.text classification.intent)
-                     ~result:result_text ~details:details_text
+                  (Centl_sci_session.add results ~input:problem
+                     ~normalized:problem ~mode:!mode ~intent:"program_creation"
+                     ~result:rendered ~details:rendered
                      ~workspace_revision:(workspace_revision ()))
             end;
             loop ()

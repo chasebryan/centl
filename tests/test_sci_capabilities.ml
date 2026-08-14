@@ -35,6 +35,14 @@ let test_builtin_constant_reuse () =
          capability.Centl_sci_capabilities.name = "physical constants")
        matches)
 
+let test_builtin_gcd_reuse () =
+  let matches = Centl_sci_capabilities.search "greatest common divisor" in
+  Alcotest.(check bool)
+    "gcd capability found" true
+    (List.exists
+       (fun capability -> capability.Centl_sci_capabilities.name = "gcd")
+       matches)
+
 let test_builtin_integration_reuse () =
   let matches = Centl_sci_capabilities.search "integrate a polynomial" in
   Alcotest.(check bool)
@@ -90,6 +98,7 @@ let () =
             test_builtin_constant_reuse;
           Alcotest.test_case "integration reuse" `Quick
             test_builtin_integration_reuse;
+          Alcotest.test_case "gcd reuse" `Quick test_builtin_gcd_reuse;
           Alcotest.test_case "local package composition" `Quick
             test_local_package_is_reusable_composition;
         ] );

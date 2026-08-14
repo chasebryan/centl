@@ -108,9 +108,15 @@ Free for science.
 
 > Solve x squared minus 5x plus 6 equals zero.
 x = 2 or x = 3
+
+> make a function called square that takes x and computes x^2
+> square(6)
+36
+> what is the square of 6
+36
 ```
 
-Caramels provides deterministic fast paths, mathematics/physics/hybrid interaction modes, evidence-backed explanations, clarification instead of invented assumptions, persistent user workspaces, and controlled BUILD/self-extension workflows.
+Caramels provides deterministic fast paths, mathematics/physics/hybrid interaction modes, evidence-backed explanations, clarification instead of invented assumptions, persistent user workspaces, a live English-to-program workshop with honest restart advice, a user-owned growth journal and replayable dialect, and controlled BUILD/self-extension workflows.
 
 A configured local language model is an **interpreter of intent, not a mathematical authority**. Model-produced semantics must cross CENTL's typed and deterministic boundaries before a result can inherit mathematical meaning.
 
@@ -122,7 +128,7 @@ See [CENTL-SCi](docs/SCI.md) and [Caramels BUILD](docs/CARAMELS-BUILD.md).
 
 MIRAGE is CENTL's local self-development architecture. It is designed to turn user-supplied specifications and ordinary-language engineering intent into explicit, inspectable, reversible development artifacts rather than granting a model permission to rewrite trusted source code unchecked.
 
-The architecture preserves provenance, builds typed goals and capability graphs, computes gaps, prefers reuse and composition before new implementation, constructs evidence obligations, and stages candidate work behind explicit admission boundaries.
+The architecture preserves provenance, builds typed goals and capability graphs, computes gaps, prefers reuse and composition before new implementation, constructs evidence obligations, searches extracted examples in a bounded CEGIS loop, records semantic fingerprints, and stages candidate work behind explicit admission and review boundaries.
 
 MIRAGE does not grant generated material verified-core authority. Candidate source, model proposals, and user documents must cross the same parsing, testing, regression, provenance, trust, and verification boundaries required of other CENTL work.
 
@@ -173,6 +179,8 @@ CENTL uses three long-lived branches with deliberately different responsibilitie
 
 Experimental work normally matures on `mirage`. Stable promotions are deliberately qualified into `oasis`. Repository-wide integration and documentation may target `main` according to the branch policy.
 
+`mirage` is not a full release. You may still check it out and build it if you want experimental surfaces. Recommended stable installation remains the published Oasis identity on `oasis` (`v0.14.0`). A later version becomes Oasis only after its own qualification; it does not inherit the declaration.
+
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## Development
@@ -211,6 +219,7 @@ Contributor setup and the manual learning path are documented in [CONTRIBUTING.m
 - [FCF Preservation Plan](docs/FCF-PRESERVATION-PLAN.md)
 - [CARAVAN join manual](docs/CARAVAN-JOIN-MANUAL.md)
 - [Oasis release standard](docs/OASIS.md)
+- [FCF Wellspring](docs/FCF-WELLSPRING.md)
 - [Release and branch policy](docs/RELEASE-POLICY.md)
 - [Three Horizons compass directive](docs/THREE-HORIZONS.md)
 - [Platform support](docs/SCI_PLATFORM_SUPPORT.md)

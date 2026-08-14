@@ -97,6 +97,11 @@
   Free for science.
   
   HYBRID> I understand this as an equation-solving request, but the equation relation or right-hand side is missing. Try, for example: solve x squared plus 4 equals 0.
+  Related deterministic capabilities:
+    - solve — supported equation-solving path
+    - reviewed publish — prepares and optionally submits a draft contribution to chasebryan/centl without storing tokens or targeting oasis
+  Try an explicit CENTL expression, `catalog`, `make a function called square that takes x and computes x^2`, or `extend <request>` to start a local MIRAGE cycle.
+  A model suggestion would still have to pass the same parser and evidence gates.
   HYBRID>
 
   $ printf '%s\n' 'What is 0.1 plus 0.2?' | ../src/sci_main.exe --repl --no-history | sed 's/> $/>/'

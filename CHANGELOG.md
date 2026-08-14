@@ -1,5 +1,75 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- CENTL-MIRAGE now runs a complete local development cycle: CEGIS example
+  search, semantic fingerprints, fingerprint comparison, autonomy policy,
+  review, and explicit accept/reject. A cycle still does not activate source or
+  promote assurance by itself.
+- MIRAGE evidence executors can discharge parser, capability-discovery, and
+  example or fingerprint regression obligations from transaction-bound
+  artifacts instead of leaving those actions permanently pending.
+- Deterministic SCi code generation can locate a native definition request
+  inside surrounding prose rather than only at the start of a cell.
+- `centl-mirage wellspring` and `centl-mirage oasis` inspect Wellspring
+  Candidates and Oasis identity without declaring either status.
+- `scripts/oasis.py --inspect` reports distance from Oasis qualification and
+  cannot declare a release.
+- Durable Wellspring Candidate records live under `docs/wellsprings/`.
+- MIRAGE now records bounded equality-saturation rewrites, metamorphic
+  property checks, a claim-local evidence lattice, Pareto ranking of
+  admissible candidates, and an explicit cycle progress measure.
+- Generated SCi external/native scaffolds have an inspectable JSONL ABI
+  contract that cannot self-enable or claim verified-core modification.
+- CENTL-SCi `status` is now a real BUILD command over the previously orphaned
+  status module, with honest remaining gates.
+- Deterministic SCi fast paths now admit `gcd of`, `lcm of`, and
+  `fibonacci of` without consulting a model.
+- The capability graph now includes gcd, lcm, Fibonacci, sequence, sum,
+  product, and recurrence so MIRAGE can prefer composition.
+- MIRAGE fingerprints load candidate definitions and report whether the core
+  observation corpus is preserved; `iterate` recomputes an active cycle from
+  stored source.
+- CENTL-SCi now has a deterministic capability catalog, an FCF product-family
+  listing, constructive next-step guidance, and `extend <request>` to start a
+  local MIRAGE cycle instead of dead-ending on unsolved work.
+- Spoken `sum of`, `product of`, `sequence of`, and `factorial of` lower to
+  exact CENTL without a model.
+- SCi can export a replayable workbook from the live session; BUILD can
+  inspect a single catalog capability; MIRAGE `doctor` reports structural
+  cycle health.
+- Requirements that already compose to existing CENTL operations are marked
+  SATISFIED instead of asking for a new implementation.
+- Spoken ordinals such as `the 10th fibonacci number` lower to `fibonacci(10)`.
+- CENTL-SCi encodes the official Oasis promotion path: experimental work
+  drafts to `mirage`, Oasis remains a later qualification on `oasis`, and
+  verbs that would self-approve, merge to oasis, or tag a release are
+  refused. Inspection never declares Oasis.
+- CENTL-SCi can prepare a reviewed contribution pack and, with an explicit
+  local grant, commit only that pack and open a **draft** GitHub pull
+  request against `mirage`. Tokens are not stored, English is not passed
+  to a shell, oasis is never the automatic base, and out-of-scope harm
+  is refused. This is not a claim of perfect security.
+- CENTL-SCi records a user-owned growth journal and replayable dialect.
+  `let square(x) = x^2 and then square(6)` creates, hot-loads, and evaluates
+  in one utterance. Composition reports `Uses:`. Missing programs stay
+  symbolic and tell the user how to create them. `:dialect`, `:journal`,
+  and `export dialect` expose the living local language without promoting
+  assurance.
+- CENTL-SCi now has a live English program workshop: `let`, topic names,
+  conventional exact recipes, and `teach yourself` create local `.centl`
+  programs, install spoken aliases, evaluate a first example, and say
+  whether a restart is required. Native programs hot-load. Host/OCaml
+  growth writes a reviewable proposal and requires `dune build` plus a
+  process restart. Verified core is never rewritten by this path.
+
+### Changed
+
+- Goal graphs record `validated_by` edges from requirements to extracted
+  examples and acceptance cells.
+
 ## 0.14.0 — 2026-08-10
 
 ### Release posture
