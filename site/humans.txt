@@ -1,0 +1,17 @@
+/* TEAM */
+Organization: Free Computation Foundation
+Site: https://freecomputation.org/
+Standard: Free for science.
+
+/* SITE */
+Language: English
+Doctype: HTML5
+Standards: HTML, CSS. No required JavaScript.
+Last update: 2026-08-14
+Software: CENTL v0.14.0 Oasis release
+Source: https://github.com/chasebryan/centl
+
+/* MACHINES */
+Crawlers, local models, and MCP clients are welcome as guests.
+See /llms.txt and /ai.html.
+A model may interpret. It may not confer truth.

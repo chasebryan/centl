@@ -5,6 +5,8 @@
 **Expedition:** secret-oasis-2026-08-14 / Al-Tih
 **Published Oasis:** CENTL v0.14.0
 **Oasis declared by this camp:** no
+**Named artifact:** `fcf-camp-001`
+**Release notes:** [`docs/releases/camp-001.md`](../releases/camp-001.md)
 
 ## Why this camp exists
 
