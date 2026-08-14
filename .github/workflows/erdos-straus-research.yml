@@ -15,10 +15,15 @@ on:
     branches:
       - main
     paths:
-      - 'research/erdos-straus/**'
+      - 'research/erdos-straus/*.py'
+      - 'research/erdos-straus/expected-frontier.json'
       - '.github/workflows/erdos-straus-research.yml'
       - 'src/**'
       - 'centl.opam'
+
+concurrency:
+  group: erdos-straus-research-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
