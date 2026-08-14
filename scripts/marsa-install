@@ -1,6 +1,6 @@
 #!/bin/sh
-# Build the Camp stay from this CENTL-Marsa checkout and install the three
-# public commands. This is not an Oasis installer.
+# Build the Camp stay from this CENTL-Marsa checkout and install only the
+# requested public scientific command(s). This is not an Oasis installer.
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
@@ -8,6 +8,7 @@ cd "$root"
 
 prefix=${CENTL_PREFIX:-}
 configure_path=true
+component=all
 
 fail() {
   printf 'centl marsa-install: %s\n' "$1" >&2
@@ -16,6 +17,11 @@ fail() {
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --component)
+      [ "$#" -ge 2 ] || fail "--component needs a value"
+      component=$2
+      shift 2
+      ;;
     --prefix)
       [ "$#" -ge 2 ] || fail "--prefix needs a path"
       prefix=$2
@@ -27,18 +33,29 @@ while [ "$#" -gt 0 ]; do
       ;;
     --help|-h)
       cat <<'EOF'
-Install CENTL from this CENTL-Marsa source tree onto macOS or Windows.
+Install selected CENTL Camp software from this CENTL-Marsa source tree.
 
-Usage: scripts/marsa-install [--prefix PATH] [--no-path]
+Usage: scripts/marsa-install [--component all|centl|physics|sci]
+                             [--prefix PATH] [--no-path]
 
-This builds centl, centl-physics, and centl-sci from the Camp stay.
-It does not declare Oasis and does not replace CENTL v0.14.0.
+Components:
+  centl     build and install only the exact mathematics command
+  physics   build and install only centl-physics
+  sci       build and install only centl-sci
+  all       build and install all three public commands (default)
+
+This is the macOS/Windows Camp harbor. It does not declare Oasis.
 EOF
       exit 0
       ;;
     *) fail "unknown option: $1" ;;
   esac
 done
+
+case "$component" in
+  all|centl|physics|sci) ;;
+  *) fail "--component must be all, centl, physics, or sci" ;;
+esac
 
 [ -n "$prefix" ] || {
   [ -n "${HOME:-}${USERPROFILE:-}" ] || fail "HOME/USERPROFILE is unset; use --prefix"
@@ -66,7 +83,27 @@ eval "$(opam env --switch=centl)"
 opam install --yes --unlock-base \
   dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
 
-make -C "$root" marsa-build
+for generated in \
+  "$root/src/generated/Centl_Gcd.ml" \
+  "$root/src/generated/Centl_Core.ml" \
+  "$root/src/generated/Centl_PolynomialSoundness.ml"; do
+  [ -f "$generated" ] || fail "missing generated verified source: $generated"
+done
+
+case "$component" in
+  all)
+    make -C "$root" marsa-build
+    ;;
+  centl)
+    dune build "$root/src/main.exe" 2>/dev/null || dune build src/main.exe
+    ;;
+  physics)
+    dune build "$root/src/physics_main.exe" 2>/dev/null || dune build src/physics_main.exe
+    ;;
+  sci)
+    dune build "$root/src/sci_main.exe" 2>/dev/null || dune build src/sci_main.exe
+    ;;
+esac
 
 bindir="$prefix/bin"
 mkdir -p "$bindir"
@@ -85,18 +122,52 @@ copy_cmd() {
   fi
 }
 
-copy_cmd "$root/_build/default/src/main.exe" centl
-copy_cmd "$root/_build/default/src/physics_main.exe" centl-physics
-copy_cmd "$root/_build/default/src/sci_main.exe" centl-sci
+case "$component" in
+  all)
+    copy_cmd "$root/_build/default/src/main.exe" centl
+    copy_cmd "$root/_build/default/src/physics_main.exe" centl-physics
+    copy_cmd "$root/_build/default/src/sci_main.exe" centl-sci
+    ;;
+  centl)
+    copy_cmd "$root/_build/default/src/main.exe" centl
+    ;;
+  physics)
+    copy_cmd "$root/_build/default/src/physics_main.exe" centl-physics
+    ;;
+  sci)
+    copy_cmd "$root/_build/default/src/sci_main.exe" centl-sci
+    ;;
+esac
 
 if [ "$configure_path" = true ]; then
   case :${PATH}: in
     *:"$bindir":*) ;;
-    *)
-      printf 'Add %s to PATH to use the installed commands.\n' "$bindir"
-      ;;
+    *) printf 'Add %s to PATH to use the installed command(s).\n' "$bindir" ;;
   esac
 fi
 
-printf 'CENTL Marsa installed the Camp stay. This is not Oasis.\n'
-sh "$root/scripts/marsa-smoke" "$bindir"
+case "$component" in
+  all)
+    sh "$root/scripts/marsa-smoke" "$bindir"
+    ;;
+  centl)
+    centl_cmd="$bindir/centl"
+    [ -x "$centl_cmd" ] || centl_cmd="$bindir/centl.exe"
+    result=$("$centl_cmd" '0.1 + 0.2') || fail "installed centl failed smoke test"
+    [ "$result" = '3/10' ] || fail "installed centl returned '$result', expected 3/10"
+    ;;
+  physics)
+    physics_cmd="$bindir/centl-physics"
+    [ -x "$physics_cmd" ] || physics_cmd="$bindir/centl-physics.exe"
+    result=$("$physics_cmd" convert 100 cm m) || fail "installed centl-physics failed smoke test"
+    [ "$result" = '1' ] || fail "installed centl-physics returned '$result', expected 1"
+    ;;
+  sci)
+    sci_cmd="$bindir/centl-sci"
+    [ -x "$sci_cmd" ] || sci_cmd="$bindir/centl-sci.exe"
+    result=$("$sci_cmd" 'What is 0.1 plus 0.2?') || fail "installed centl-sci failed smoke test"
+    [ "$result" = '3/10' ] || fail "installed centl-sci returned '$result', expected 3/10"
+    ;;
+esac
+
+printf 'CENTL Marsa installed component: %s. This is not Oasis.\n' "$component"
