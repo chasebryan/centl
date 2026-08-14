@@ -17,11 +17,15 @@ A camp does not replace it, inherit it, or become it.
 newest software and designs are used. It lives on `main` and `mirage`.
 It is not an Oasis declaration and not a SemVer product.
 
+**CENTL Marsa** is the harbor that ports that Camp stay to macOS and
+Windows. It is not Oasis.
+
 | Line | What it is |
 | --- | --- |
 | [`oasis`](https://github.com/chasebryan/centl/tree/oasis) | Qualified stable product. Install this for the published calculator. |
 | [`main`](https://github.com/chasebryan/centl/tree/main) | Developer distribution and current Camp stay. |
 | [`mirage`](https://github.com/chasebryan/centl/tree/mirage) | Laboratory. Installable. Never a full release. |
+| [`CENTL-Marsa`](https://github.com/chasebryan/centl/tree/CENTL-Marsa) | Windows and macOS harbor of the Camp stay. |
 
 See [docs/OASIS.md](docs/OASIS.md) and
 [FCF Camps](https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md).
