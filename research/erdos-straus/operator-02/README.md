@@ -1,8 +1,8 @@
 # Operator-02 Research Container
 
-**Role:** Operator #2 (analysis, verification support, and furtherance)
-**Coordinator:** primary research lead (repository owner)
-**Status:** active, subordinate, non-destructive
+**Role:** Operator #2 (analysis, verification support, and furtherance)  
+**Coordinator:** primary research lead (repository owner)  
+**Status:** active, subordinate, non-destructive  
 **Date established:** 2026-08-14
 
 ## Mandate
@@ -38,13 +38,14 @@ No content from those files is copied or rewritten here. Citations are by path o
 
 | Date       | Activity                                                                 | Document |
 |------------|--------------------------------------------------------------------------|----------|
-| 2026-08-14 | Container established; initial independent reading of frontier and tools | this file, `ANALYSIS-2026-08-14.md`, `NEXT-TARGETS.md` |
+| 2026-08-14 | Container established; initial independent reading of frontier and tools | `ANALYSIS-2026-08-14.md`, `NEXT-TARGETS.md` |
+| 2026-08-14 | Fiber-kernel residual structure analysis (read-only of parent theorems)  | `FIBER-KERNEL-RESIDUALS.md` |
 
 ## Claim discipline
 
 Operator-02 inherits the claim boundaries of the primary program:
 
-- The Erdős–Straus conjecture remains open.
+- The Erdős-Straus conjecture remains open.
 - Universal López Type A/B coverage remains unproved.
 - Universal Direct-Shadow Completeness remains unproved.
 - Finite candidatewise results are theorem-certificate statements for their stated ranges only.
