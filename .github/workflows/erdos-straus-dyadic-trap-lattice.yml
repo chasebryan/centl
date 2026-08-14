@@ -1,0 +1,67 @@
+name: CENTL Erdős-Straus dyadic trap lattice
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Full saturation regression depth
+        required: false
+        default: "50000"
+      a_limit:
+        description: Dyadic exponent depth
+        required: false
+        default: "18"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/DYADIC-TRAP-LATTICE.md'
+      - 'research/erdos-straus/dyadic_trap_lattice_analyzer.py'
+      - '.github/workflows/erdos-straus-dyadic-trap-lattice.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify dyadic trap-coset and shadow lattice
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve parameters
+        id: p
+        env:
+          K: ${{ github.event.inputs.k_limit }}
+          A: ${{ github.event.inputs.a_limit }}
+        run: |
+          echo "k=${K:-50000}" >> "$GITHUB_OUTPUT"
+          echo "a=${A:-18}" >> "$GITHUB_OUTPUT"
+
+      - name: Run exact dyadic regression
+        run: |
+          rm -rf dyadic-trap-output
+          python3 research/erdos-straus/dyadic_trap_lattice_analyzer.py \
+            --k-limit '${{ steps.p.outputs.k }}' \
+            --a-limit '${{ steps.p.outputs.a }}' \
+            --out dyadic-trap-output
+
+      - name: Freeze hashes
+        run: |
+          cd dyadic-trap-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat dyadic-trap-output/dyadic-trap-lattice-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dyadic-trap-lattice-${{ github.sha }}
+          path: dyadic-trap-output/
+          if-no-files-found: error
+          retention-days: 90
