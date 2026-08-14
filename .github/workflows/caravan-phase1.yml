@@ -2,32 +2,20 @@ name: CARAVAN Phase 1 laboratory
 
 on:
   pull_request:
+    branches:
+      - oasis
     paths:
       - 'caravan/**'
       - 'docs/CARAVAN-PHASE1.md'
       - 'docs/CARAVAN-IDENTITY.md'
       - 'docs/CARAVAN-CATALOG.md'
       - 'docs/CARAVAN-TRANSPORT.md'
-      - 'docs/CARAVAN-TELEPATHY-PILOT.md'
-      - 'docs/CARAVAN-HOST-POLICY.md'
       - 'scripts/caravan-phase1-check'
-      - 'scripts/caravan-join-release'
-      - 'scripts/caravan-linux-platform'
-      - 'scripts/fcf-telepathyd'
-      - 'scripts/join-caravan'
-      - 'scripts/joincaravan'
-      - 'site/mirrors.html'
       - 'tests/test_caravan_phase1.py'
       - 'tests/test_caravan_identity.py'
       - 'tests/test_caravan_enrollment.py'
       - 'tests/test_caravan_tuf_catalog.py'
       - 'tests/test_caravan_transport.py'
-      - 'tests/test_caravan_retrieval.py'
-      - 'tests/test_caravan_lifecycle.py'
-      - 'tests/test_caravan_linux_platform.py'
-      - 'tests/test_caravan_census.py'
-      - 'tests/test_caravan_join_release.py'
-      - 'tests/test_join_caravan.py'
       - '.github/workflows/caravan-phase1.yml'
 
 permissions:
@@ -56,14 +44,11 @@ jobs:
     name: Identity, integrity, catalog, policy, and outbound transport gates
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out exact proposed SHA
+      - name: Check out exact proposed Oasis SHA
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-
-      - name: Require checkout identity
-        run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
 
       - name: Create isolated Python environment
         run: python3 -m venv "$RUNNER_TEMP/caravan-venv"
@@ -82,7 +67,6 @@ jobs:
 
   oasis-self-test:
     name: Adversarial engine self-test
-    if: github.base_ref == 'oasis'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -117,7 +101,6 @@ jobs:
 
   oasis-converge:
     name: Full stable-product convergence
-    if: github.base_ref == 'oasis'
     needs:
       - laboratory
       - oasis-self-test
@@ -137,14 +120,16 @@ jobs:
       - name: Require checkout identity
         run: test "$(git rev-parse HEAD)" = "$PR_HEAD_SHA"
 
-      - name: Configure native prefix environment
+      - name: Configure runner paths
+        shell: bash
         run: |
+          set -euo pipefail
           {
-            echo "NATIVE_PREFIX=$RUNNER_TEMP/centl-native"
-            echo "PKG_CONFIG_PATH=$RUNNER_TEMP/centl-native/lib/pkgconfig"
-            echo "LIBRARY_PATH=$RUNNER_TEMP/centl-native/lib"
-            echo "LD_LIBRARY_PATH=$RUNNER_TEMP/centl-native/lib"
-            echo "C_INCLUDE_PATH=$RUNNER_TEMP/centl-native/include"
+            printf 'NATIVE_PREFIX=%s/centl-native\n' "$RUNNER_TEMP"
+            printf 'PKG_CONFIG_PATH=%s/centl-native/lib/pkgconfig\n' "$RUNNER_TEMP"
+            printf 'LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'LD_LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'C_INCLUDE_PATH=%s/centl-native/include\n' "$RUNNER_TEMP"
           } >> "$GITHUB_ENV"
 
       - name: Install build prerequisites
@@ -200,7 +185,6 @@ jobs:
 
   oasis-security:
     name: Release security state
-    if: github.base_ref == 'oasis'
     needs: oasis-converge
     runs-on: ubuntu-24.04
     timeout-minutes: 10

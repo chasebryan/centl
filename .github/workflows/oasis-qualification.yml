@@ -1,4 +1,3 @@
-# Oasis-only canonical-format qualification support.
 name: Oasis qualification
 
 on:
@@ -17,54 +16,168 @@ concurrency:
   group: oasis-qualification-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  FSTAR_VERSION: "2026.07.05"
+  FSTAR_COMMIT: "2173bc4316a51f01754f10bf94f697aba083c2e0"
+  FSTAR_SHA256: "23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4"
+  Z3_VERSION: "4.13.3"
+  GMP_VERSION: "6.3.0"
+  GMP_SHA256: "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"
+  MPFR_VERSION: "4.2.2"
+  MPFR_SHA256: "b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01"
+  FLINT_VERSION: "3.0.1"
+  FLINT_SHA256: "7b311a00503a863881eb8177dbeb84322f29399f3d7d72f3b1a4c9ba1d5794b4"
+  PORTABLE_X86_CFLAGS: "-O2 -fomit-frame-pointer -m64 -march=x86-64 -mtune=generic"
+
 jobs:
-  format:
-    name: Require canonical source formatting
+  engine-self-test:
+    name: Adversarial engine self-test
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - name: Check out Oasis candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Install pinned formatter toolchain
+      - name: Compile engine, policy gates, and tests
+        run: |
+          python3 -m py_compile \
+            scripts/oasis.py \
+            scripts/oasis_engine.py \
+            scripts/oasis-toolchain-check.py \
+            scripts/oasis-metadata-check.py \
+            scripts/oasis_required_checks.py \
+            scripts/oasis-security-state.py \
+            tests/test_oasis.py \
+            tests/test_oasis_metadata.py \
+            tests/test_oasis_required_checks.py \
+            tests/test_oasis_security_state.py
+
+      - name: Run adversarial Oasis tests
+        run: python3 -m unittest discover -s tests -p 'test_oasis*.py'
+
+      - name: Validate live repository gate plan
+        run: python3 scripts/oasis.py --root "$PWD" --no-repair --plan
+
+  qualify:
+    name: Full stable-product convergence
+    needs: engine-self-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      JULIA_NUM_THREADS: "1"
+      JULIA_PKG_PRECOMPILE_AUTO: "0"
+    steps:
+      - name: Check out Oasis candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Configure runner paths
         shell: bash
         run: |
           set -euo pipefail
+          {
+            printf 'NATIVE_PREFIX=%s/centl-native\n' "$RUNNER_TEMP"
+            printf 'PKG_CONFIG_PATH=%s/centl-native/lib/pkgconfig\n' "$RUNNER_TEMP"
+            printf 'LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'LD_LIBRARY_PATH=%s/centl-native/lib\n' "$RUNNER_TEMP"
+            printf 'C_INCLUDE_PATH=%s/centl-native/include\n' "$RUNNER_TEMP"
+          } >> "$GITHUB_ENV"
+
+      - name: Install build prerequisites
+        run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git make m4 opam
-          opam init --bare --disable-sandboxing --yes
-          opam switch create centl ocaml-base-compiler.4.14.1 --jobs=2 --yes
-          opam install --switch=centl --yes dune.3.24.1 ocamlformat.0.29.0
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl git libzstd1 m4 make opam patch \
+            pkg-config python3 python3-venv tar xz-utils
 
-      - name: Compute canonical formatting patch
-        id: format
-        shell: bash
+      - name: Bootstrap pinned proof and native toolchain
+        run: sh scripts/oasis-ci-bootstrap
+
+      - name: Set up pinned Julia
+        uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
+        with:
+          version: "1.12.6"
+
+      - name: Instantiate pinned independent oracle
+        run: julia --startup-file=no --project=lab/julia -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Create isolated CARAVAN Python environment
+        run: python3 -m venv "$RUNNER_TEMP/oasis-venv"
+
+      - name: Install pinned CARAVAN dependencies
         run: |
-          set -euo pipefail
-          opam exec --switch=centl -- make format-fix
-          git diff --check
-          git diff --binary -- src > format.patch
-          git diff --stat -- src
-          if test -s format.patch; then
-            echo "has_diff=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_diff=false" >> "$GITHUB_OUTPUT"
-            echo "Oasis candidate source formatting is canonical."
-          fi
+          "$RUNNER_TEMP/oasis-venv/bin/python" -m pip \
+            --disable-pip-version-check install \
+            --only-binary=:all: \
+            -r caravan/requirements-phase1.txt
 
-      - name: Preserve formatting repair patch
-        if: steps.format.outputs.has_diff == 'true'
+      - name: Execute complete Oasis convergence engine
+        env:
+          OPAM_SWITCH: centl
+        run: |
+          "$RUNNER_TEMP/oasis-venv/bin/python" scripts/oasis.py \
+            --root "$PWD" --no-repair --keep-going
+
+      - name: Preserve exact qualified release candidate
+        if: success() && github.event_name == 'push'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: oasis-format-patch-${{ github.sha }}
-          path: format.patch
+          name: oasis-release-${{ github.sha }}
+          path: dist/*
           if-no-files-found: error
 
-      - name: Reject non-canonical Oasis candidate
-        if: steps.format.outputs.has_diff == 'true'
+      - name: Preserve Oasis evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: oasis-evidence-${{ github.sha }}
+          path: _build/oasis/**
+          if-no-files-found: warn
+
+  release-security:
+    name: Release security state
+    needs: qualify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - name: Check out qualified Oasis head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require clear release-blocking GitHub security state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/oasis-security-state.py --root "$PWD"
+
+  convergence-status:
+    name: Require Oasis convergence jobs succeeded
+    needs:
+      - engine-self-test
+      - qualify
+      - release-security
+    if: always() && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Require exact-SHA convergence jobs succeeded
+        env:
+          SELF_TEST_RESULT: ${{ needs.engine-self-test.result }}
+          QUALIFY_RESULT: ${{ needs.qualify.result }}
+          SECURITY_RESULT: ${{ needs.release-security.result }}
         shell: bash
         run: |
-          echo "Oasis candidates must already be canonically formatted. Apply the uploaded patch or run make format-fix locally."
-          exit 1
+          set -euo pipefail
+          printf 'self-test=%s qualify=%s security=%s\n' \
+            "$SELF_TEST_RESULT" "$QUALIFY_RESULT" "$SECURITY_RESULT"
+          test "$SELF_TEST_RESULT" = success
+          test "$QUALIFY_RESULT" = success
+          test "$SECURITY_RESULT" = success

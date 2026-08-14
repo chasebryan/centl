@@ -219,6 +219,55 @@ let test_persisted_receipts_deny_activation () =
             "assurance remains unpromoted" false
             (json |> member "assurance_promoted" |> to_bool))
 
+let test_parser_executor_uses_materialization () =
+  let root = temp_dir "centl-mirage-evidence-parser-" in
+  Fun.protect
+    ~finally:(fun () -> cleanup root)
+    (fun () ->
+      let workspace =
+        Centl_sci_workspace.make (Filename.concat root "workspace")
+      in
+      let materialization =
+        {
+          Centl_sci_mirage_materialize.items =
+            [
+              {
+                candidate_id = "candidate:1";
+                transaction_fingerprint = String.make 64 'a';
+                strategy = "downstream_extension";
+                state = Centl_sci_mirage_materialize.Materialized_source;
+                source = Some "square(x) = x^2";
+                source_sha256 = Some (String.make 64 'b');
+                parser_validated = true;
+                rationale = "test";
+                materialization_fingerprint = String.make 64 'c';
+              };
+            ];
+          blocked_cells = [];
+        }
+      in
+      let context =
+        {
+          Centl_sci_mirage_evidence.empty_context with
+          materialization = Some materialization;
+        }
+      in
+      let report =
+        Centl_sci_mirage_evidence.execute ~context workspace
+          (plan
+             [
+               action ~id:"parser-action" ~kind:"candidate_parses"
+                 ~executor:"candidate_parser_or_build"
+                 ~precondition:"candidate_materialized" ();
+             ])
+      in
+      match report.receipts with
+      | [ receipt ] ->
+          Alcotest.(check string)
+            "parser evidence passes" "passed"
+            (Centl_sci_mirage_evidence.receipt_state_text receipt.state)
+      | _ -> Alcotest.fail "expected one parser receipt")
+
 let () =
   Alcotest.run "CENTL-MIRAGE evidence execution"
     [
@@ -234,5 +283,7 @@ let () =
             test_unsupported_executor_is_blocked;
           Alcotest.test_case "persist receipts" `Quick
             test_persisted_receipts_deny_activation;
+          Alcotest.test_case "parser executor" `Quick
+            test_parser_executor_uses_materialization;
         ] );
     ]

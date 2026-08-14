@@ -86,6 +86,7 @@ let powered_variable ~variable token =
   token = variable ^ "^2" || token = variable ^ "^3"
 
 let parse_term ~variable = function
+  | token :: rest when token = variable ^ "^2" -> Some (token, rest)
   | token :: "squared" :: rest when token = variable ->
       Some (variable ^ "^2", rest)
   | token :: rest when powered_variable ~variable token -> Some (token, rest)

@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import stat
+from typing import Sequence
 from urllib.parse import urlparse
 
 try:
@@ -35,10 +36,41 @@ DISTRIBUTION_CLASSES = {
     "pending-review",
     "fcf-preservation-only",
 }
+MISSIONS = ("source", "releases", "semantic", "recovery")
 
 
 class CatalogError(RuntimeError):
     """Raised when authenticated catalog state is invalid or unusable."""
+
+
+def mission_of(logical_path: str) -> str | None:
+    """Return the documented mission class for a catalog logical path, if any."""
+
+    try:
+        first = PurePosixPath(logical_path).parts[0]
+    except (IndexError, ValueError):
+        return None
+    if first in MISSIONS:
+        return first
+    return None
+
+
+def normalize_missions(missions: Sequence[str]) -> frozenset[str]:
+    """Expand ``all`` and reject unknown mission names."""
+
+    if not missions:
+        raise CatalogError("at least one CARAVAN mission is required")
+    allowed: set[str] = set()
+    for mission in missions:
+        if not isinstance(mission, str) or not mission:
+            raise CatalogError("mission names must be non-empty strings")
+        if mission == "all":
+            allowed.update(MISSIONS)
+            continue
+        if mission not in MISSIONS:
+            raise CatalogError(f"unknown CARAVAN mission: {mission}")
+        allowed.add(mission)
+    return frozenset(allowed)
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +104,33 @@ class AuthenticatedCatalog:
         return tuple(
             artifact for artifact in self.artifacts if artifact.distribution == "public-approved"
         )
+
+    def by_artifact_id(self, artifact_id: str) -> CatalogArtifact | None:
+        for artifact in self.artifacts:
+            if artifact.identity.artifact_id == artifact_id:
+                return artifact
+        return None
+
+    def by_logical_path(self, logical_path: str) -> CatalogArtifact | None:
+        for artifact in self.artifacts:
+            if artifact.logical_path == logical_path:
+                return artifact
+        return None
+
+    def for_missions(self, missions: Sequence[str]) -> tuple[CatalogArtifact, ...]:
+        """Filter public-approved artifacts by the documented mission prefixes.
+
+        This is the same first-path-segment rule the signed join installer uses.
+        It does not change join, enrollment, or what a volunteer may publish.
+        """
+
+        allowed = normalize_missions(missions)
+        selected: list[CatalogArtifact] = []
+        for artifact in self.public_artifacts():
+            mission = mission_of(artifact.logical_path)
+            if mission is not None and mission in allowed:
+                selected.append(artifact)
+        return tuple(selected)
 
 
 def _validate_digest(value: object, *, field: str) -> str:

@@ -36,6 +36,31 @@ let test_change_ir_json () =
   | Error message -> Alcotest.fail message
   | Ok source -> Alcotest.(check string) "source" "f(x) = x + 1" source
 
+let test_function_called_prefix () =
+  let input =
+    "write a function called area that takes width and height and returns \
+     width * height"
+  in
+  match Centl_sci_codegen.generate input with
+  | Centl_sci_codegen.Generated
+      (Centl_sci_codegen.Function { replace = false; source }) ->
+      Alcotest.(check string)
+        "called prefix" "area(width, height) = width * height" source
+  | _ -> Alcotest.fail "expected generated function from called phrasing"
+
+let test_function_generation_from_prose () =
+  let input =
+    "CENTL should create a function named kinetic_energy that takes mass and \
+     velocity and computes 1/2 * mass * velocity^2"
+  in
+  match Centl_sci_codegen.generate input with
+  | Centl_sci_codegen.Generated
+      (Centl_sci_codegen.Function { replace = false; source }) ->
+      Alcotest.(check string)
+        "native source from surrounding prose"
+        "kinetic_energy(mass, velocity) = 1/2 * mass * velocity^2" source
+  | _ -> Alcotest.fail "expected generated function from surrounding prose"
+
 let test_missing_body_clarifies () =
   match Centl_sci_codegen.generate "create a function named f that takes x" with
   | Centl_sci_codegen.Needs_clarification _ -> ()
@@ -47,6 +72,9 @@ let () =
       ( "change IR",
         [
           Alcotest.test_case "function" `Quick test_function_generation;
+          Alcotest.test_case "function from prose" `Quick
+            test_function_generation_from_prose;
+          Alcotest.test_case "called prefix" `Quick test_function_called_prefix;
           Alcotest.test_case "value" `Quick test_value_generation;
           Alcotest.test_case "modify" `Quick test_modify_generation;
           Alcotest.test_case "IR source" `Quick test_change_ir_json;

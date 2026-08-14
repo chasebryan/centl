@@ -25,7 +25,7 @@ This is a working checklist. Product sequencing and release themes live in
   context.
 - [x] Add bounded exact sequences and recurrence evaluation.
 - [x] Persist interactive history across calculator processes.
-- [ ] Carry source spans through evaluation so runtime mathematical failures can
+- [x] Carry source spans through evaluation so runtime mathematical failures can
   point back to their originating subexpression.
 
 ## Math contracts (0.12.0 path)
@@ -52,8 +52,14 @@ This is a working checklist. Product sequencing and release themes live in
   dependency validation, assurance inspection, bounded undo, and portability.
 - [x] Implement validated workspace import with same-operation active-session
   reload and rollback on post-validation copy failure.
-- [ ] Stabilize an executable ABI/activation boundary for generated external and
+- [x] Stabilize an executable ABI/activation boundary for generated external and
   native scaffolds when a concrete backend integration requires it.
+- [x] Live English-to-program workshop with spoken aliases, self-extend,
+  host-growth proposals, and honest restart/rebuild advice.
+- [x] User dialect / growth journal: chain `and then`, composition uses,
+  missing-program hints, `:dialect`, `:journal`, `export dialect`.
+- [x] Reviewed publish path: scope gate, contributor/owner grants, local
+  pack, draft PR to mirage only, no stored tokens.
 
 Keep this file limited to actionable near-term work; remove or check items when
 the implementation lands instead of duplicating completed CI or setup tasks.

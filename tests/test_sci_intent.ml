@@ -12,7 +12,9 @@ let test_math_intents () =
     "change 2.5 kilometers into meters";
   check_intent "differentiation" Centl_sci_interaction.Math
     "derivative of x squared";
-  check_intent "integration" Centl_sci_interaction.Math "integrate x squared"
+  check_intent "integration" Centl_sci_interaction.Math "integrate x squared";
+  check_intent "program_creation" Centl_sci_interaction.Hybrid
+    "make a function called square that takes x and computes x^2"
 
 let test_build_intents () =
   check_intent "system_extension" Centl_sci_interaction.Build

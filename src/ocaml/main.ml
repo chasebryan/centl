@@ -21,7 +21,8 @@ type command = {
 }
 
 let usage =
-  "Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE"
+  "Usage: centl [options] [EXPRESSION] | centl verify ... | centl check FILE | \
+   centl caravan inspect ..."
 
 let print_help () =
   print_endline "CENTL - exact mathematics, directly.";
@@ -45,6 +46,10 @@ let print_help () =
   print_endline
     "                      check a structured claim (exit 0 only if verified)";
   print_endline "  centl check FILE [--json]  check contract assertions";
+  print_endline
+    "  centl caravan inspect --catalog FILE [--store DIR] [--missions LIST]";
+  print_endline
+    "                      inspect catalog coverage; never joins or enrolls";
   print_endline
     "  assert(LEFT REL RIGHT)   calculator claim form (host-checked)"
 
@@ -1566,6 +1571,76 @@ let run_check arguments =
           exit 2
       end
 
+let caravan_usage =
+  "Usage: centl caravan inspect --catalog FILE [--store DIR] [--missions LIST] \
+   [--json]"
+
+let parse_caravan_inspect arguments =
+  let rec loop catalog store missions json = function
+    | [] -> Ok (catalog, store, missions, json)
+    | "--json" :: rest -> loop catalog store missions true rest
+    | "--catalog" :: path :: rest ->
+        begin match catalog with
+        | None -> loop (Some path) store missions json rest
+        | Some _ -> Error "--catalog may be given only once"
+        end
+    | "--catalog" :: [] -> Error "--catalog requires a path"
+    | "--store" :: path :: rest ->
+        begin match store with
+        | None -> loop catalog (Some path) missions json rest
+        | Some _ -> Error "--store may be given only once"
+        end
+    | "--store" :: [] -> Error "--store requires a path"
+    | "--missions" :: value :: rest ->
+        let names =
+          String.split_on_char ',' value
+          |> List.map String.trim
+          |> List.filter (fun item -> item <> "")
+        in
+        loop catalog store names json rest
+    | "--missions" :: [] -> Error "--missions requires a comma-separated list"
+    | option :: _ -> Error ("unknown caravan inspect option " ^ option)
+  in
+  loop None None [ "all" ] false arguments
+
+let run_caravan = function
+  | [] | [ "--help" ] | [ "help" ] ->
+      print_endline caravan_usage;
+      print_endline "";
+      print_endline
+        "Inspect an authenticated CARAVAN catalog and optional local store.";
+      print_endline
+        "This command never joins the public carrier scheme, never enrolls, \
+         and never lets a carrier define trust.";
+      exit 0
+  | "inspect" :: inspect_arguments ->
+      begin match parse_caravan_inspect inspect_arguments with
+      | Error message ->
+          prerr_endline ("centl caravan: " ^ message);
+          prerr_endline caravan_usage;
+          exit 2
+      | Ok (None, _, _, _) ->
+          prerr_endline "centl caravan: inspect requires --catalog";
+          prerr_endline caravan_usage;
+          exit 2
+      | Ok (Some catalog_path, store, mission_names, json) -> (
+          try
+            let catalog = Centl_caravan.parse_catalog_file catalog_path in
+            let missions = Centl_caravan.normalize_missions mission_names in
+            let report = Centl_caravan.inspect ?store ~missions catalog in
+            if json then print_json (Centl_caravan.to_json report)
+            else print_string (Centl_caravan.render report);
+            if report.missing_locally > 0 && Option.is_some store then exit 1
+            else exit 0
+          with Centl_caravan.Catalog_error message ->
+            prerr_endline ("centl caravan: " ^ message);
+            exit 2)
+      end
+  | other :: _ ->
+      prerr_endline ("centl caravan: unknown command " ^ other);
+      prerr_endline caravan_usage;
+      exit 2
+
 let () =
   let arguments = Array.to_list Sys.argv |> List.tl in
   match arguments with
@@ -1574,6 +1649,7 @@ let () =
       exit 0
   | "verify" :: verify_arguments -> run_verify verify_arguments
   | "check" :: check_arguments -> run_check check_arguments
+  | "caravan" :: caravan_arguments -> run_caravan caravan_arguments
   | _ ->
       begin match parse_arguments arguments with
       | Error message ->

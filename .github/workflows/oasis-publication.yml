@@ -54,5 +54,3 @@ jobs:
           python3 .github/scripts/oasis-publication-runner.py \
             --repository "$GITHUB_REPOSITORY" \
             --candidate "$CANDIDATE_SHA"
-
-

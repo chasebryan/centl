@@ -6,6 +6,7 @@ an artifact identity based on carrier population, reputation, or availability.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 import hashlib
 import os
@@ -14,7 +15,7 @@ import sqlite3
 import stat
 import time
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator
 
 MAX_PENDING_TICKETS = 4096
 MAX_TICKET_TTL = 300.0
@@ -102,6 +103,15 @@ class CensusCounts:
     cargo_loads: int
 
 
+@dataclass(frozen=True, slots=True)
+class ReplicaCoverage:
+    artifact_id: str
+    length: int
+    replica_count: int
+    carriers: tuple[str, ...]
+    under_replicated: bool
+
+
 class CoordinatorState:
     """SQLite-backed routing state with expiring presence and one-use tickets."""
 
@@ -125,11 +135,19 @@ class CoordinatorState:
         self.max_ticket_ttl = float(max_ticket_ttl)
         self._initialize()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.database)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
-        return connection
+        try:
+            yield connection
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
 
     def _initialize(self) -> None:
         with self._connect() as db:
@@ -144,12 +162,10 @@ class CoordinatorState:
 
                 CREATE TABLE IF NOT EXISTS carriers (
                     node_id TEXT PRIMARY KEY,
-                    caravan_number INTEGER UNIQUE,
                     public_identity TEXT NOT NULL,
                     policy_version TEXT NOT NULL,
                     agent_version TEXT NOT NULL,
-                    carrier_class TEXT NOT NULL DEFAULT 'volunteer'
-                        CHECK(carrier_class IN ('volunteer', 'fcf-admin')),
+                    carrier_class TEXT NOT NULL DEFAULT 'volunteer',
                     state TEXT NOT NULL CHECK(state IN ('active', 'quarantined', 'withdrawn')),
                     last_seen REAL NOT NULL,
                     load REAL NOT NULL DEFAULT 0 CHECK(load >= 0),
@@ -180,37 +196,20 @@ class CoordinatorState:
                     observed_at REAL NOT NULL
                 );
 
-                CREATE TABLE IF NOT EXISTS caravan_counters (
-                    counter_name TEXT PRIMARY KEY,
-                    counter_value INTEGER NOT NULL CHECK(counter_value >= 0)
+                CREATE TABLE IF NOT EXISTS deliveries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    node_id TEXT NOT NULL,
+                    artifact_id TEXT NOT NULL,
+                    delivered_at REAL NOT NULL
                 );
-
-                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
-                    VALUES ('cargo_loads', 0);
-                INSERT OR IGNORE INTO caravan_counters(counter_name, counter_value)
-                    VALUES ('camel_numbers', 0);
                 """
             )
-            columns = {row["name"] for row in db.execute("PRAGMA table_info(carriers)")}
+            columns = {
+                str(row[1]) for row in db.execute("PRAGMA table_info(carriers)")
+            }
             if "carrier_class" not in columns:
                 db.execute(
                     "ALTER TABLE carriers ADD COLUMN carrier_class TEXT NOT NULL DEFAULT 'volunteer'"
-                )
-            if "caravan_number" not in columns:
-                db.execute("ALTER TABLE carriers ADD COLUMN caravan_number INTEGER")
-            missing = db.execute(
-                "SELECT node_id FROM carriers WHERE caravan_number IS NULL ORDER BY rowid"
-            ).fetchall()
-            for row in missing:
-                db.execute(
-                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
-                )
-                number = db.execute(
-                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
-                ).fetchone()[0]
-                db.execute(
-                    "UPDATE carriers SET caravan_number = ? WHERE node_id = ?",
-                    (number, row["node_id"]),
                 )
 
     @staticmethod
@@ -262,8 +261,8 @@ class CoordinatorState:
     ) -> None:
         if not node_id or not public_identity or not policy_version or not agent_version:
             raise ValueError("carrier registration fields must be non-empty")
-        if carrier_class not in {"volunteer", "fcf-admin"}:
-            raise ValueError("unsupported CARAVAN carrier class")
+        if not carrier_class:
+            raise ValueError("carrier_class must be non-empty")
         timestamp = time.time() if now is None else float(now)
         with self._connect() as db:
             row = db.execute(
@@ -273,17 +272,18 @@ class CoordinatorState:
                 raise CoordinatorError("node identity collision with different public identity")
             if row is None:
                 db.execute(
-                    "UPDATE caravan_counters SET counter_value = counter_value + 1 WHERE counter_name = 'camel_numbers'"
-                )
-                caravan_number = db.execute(
-                    "SELECT counter_value FROM caravan_counters WHERE counter_name = 'camel_numbers'"
-                ).fetchone()[0]
-                db.execute(
                     """INSERT INTO carriers(
-                        node_id, caravan_number, public_identity, policy_version, agent_version,
+                        node_id, public_identity, policy_version, agent_version,
                         carrier_class, state, last_seen
-                    ) VALUES (?, ?, ?, ?, ?, ?, 'active', ?)""",
-                    (node_id, caravan_number, public_identity, policy_version, agent_version, carrier_class, timestamp),
+                    ) VALUES (?, ?, ?, ?, ?, 'active', ?)""",
+                    (
+                        node_id,
+                        public_identity,
+                        policy_version,
+                        agent_version,
+                        carrier_class,
+                        timestamp,
+                    ),
                 )
             elif row["state"] == "withdrawn":
                 raise CoordinatorError("withdrawn node identity must not be silently reactivated")
@@ -294,22 +294,6 @@ class CoordinatorState:
                        WHERE node_id = ?""",
                     (policy_version, agent_version, carrier_class, timestamp, node_id),
                 )
-            return int(
-                db.execute(
-                    "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
-                ).fetchone()[0]
-            )
-
-    def caravan_number(self, node_id: str) -> int:
-        """Return the durable, first-enrollment number assigned to a camel."""
-
-        with self._connect() as db:
-            row = db.execute(
-                "SELECT caravan_number FROM carriers WHERE node_id = ?", (node_id,)
-            ).fetchone()
-        if row is None or row["caravan_number"] is None:
-            raise CoordinatorError("unknown camel number")
-        return int(row["caravan_number"])
 
     def heartbeat(
         self,
@@ -412,12 +396,101 @@ class CoordinatorState:
                    FROM carriers""",
                 (active_cutoff, timestamp, active_cutoff, lost_cutoff, lost_cutoff),
             ).fetchone()
+            cargo = db.execute("SELECT COUNT(*) AS count FROM deliveries").fetchone()
         return CensusCounts(
-            int(row["active_count"] or 0),
-            int(row["hungry_count"] or 0),
-            int(row["lost_count"] or 0),
-            self.cargo_loads(),
+            active_camels=int(row["active_count"] or 0),
+            hungry_camels=int(row["hungry_count"] or 0),
+            lost_camels=int(row["lost_count"] or 0),
+            cargo_loads=int(cargo["count"] or 0),
         )
+
+    def cargo_loads(self) -> int:
+        """Return verified public-approved deliveries, not replica advertisements."""
+
+        with self._connect() as db:
+            row = db.execute("SELECT COUNT(*) AS count FROM deliveries").fetchone()
+        return int(row["count"] or 0)
+
+    def record_verified_delivery(
+        self,
+        node_id: str,
+        artifact_id: str,
+        *,
+        now: float | None = None,
+    ) -> None:
+        """Record one verified retrieval. Carriers cannot invent cargo loads."""
+
+        _validate_artifact_id(artifact_id)
+        if not node_id:
+            raise ValueError("delivery node_id must be non-empty")
+        timestamp = time.time() if now is None else float(now)
+        with self._connect() as db:
+            target = db.execute(
+                "SELECT distribution FROM catalog WHERE artifact_id = ?",
+                (artifact_id,),
+            ).fetchone()
+            if target is None or target["distribution"] != "public-approved":
+                raise CoordinatorError(
+                    "only public-approved catalog artifacts can become cargo loads"
+                )
+            db.execute(
+                """INSERT INTO deliveries(node_id, artifact_id, delivered_at)
+                   VALUES (?, ?, ?)""",
+                (node_id, artifact_id, timestamp),
+            )
+
+    def replica_coverage(
+        self,
+        *,
+        min_replicas: int = 2,
+        now: float | None = None,
+    ) -> tuple[ReplicaCoverage, ...]:
+        """Report fresh replica counts for every public-approved catalog identity.
+
+        Availability numbers never change artifact identity. An under-replicated
+        public-approved object remains the same object.
+        """
+
+        if min_replicas < 1:
+            raise ValueError("min_replicas must be positive")
+        timestamp = time.time() if now is None else float(now)
+        cutoff = self._fresh_cutoff(timestamp)
+        with self._connect() as db:
+            artifacts = db.execute(
+                """SELECT artifact_id, length FROM catalog
+                   WHERE distribution = 'public-approved'
+                   ORDER BY artifact_id"""
+            ).fetchall()
+            rows = db.execute(
+                """SELECT r.artifact_id, c.node_id
+                   FROM replicas r
+                   JOIN carriers c ON c.node_id = r.node_id
+                   JOIN catalog a ON a.artifact_id = r.artifact_id
+                   WHERE c.state = 'active'
+                     AND c.last_seen >= ?
+                     AND a.distribution = 'public-approved'
+                   ORDER BY r.artifact_id, c.node_id""",
+                (cutoff,),
+            ).fetchall()
+        carriers_by_artifact: dict[str, list[str]] = {}
+        for row in rows:
+            carriers_by_artifact.setdefault(str(row["artifact_id"]), []).append(
+                str(row["node_id"])
+            )
+        report: list[ReplicaCoverage] = []
+        for artifact in artifacts:
+            artifact_id = str(artifact["artifact_id"])
+            carriers = tuple(carriers_by_artifact.get(artifact_id, ()))
+            report.append(
+                ReplicaCoverage(
+                    artifact_id=artifact_id,
+                    length=int(artifact["length"]),
+                    replica_count=len(carriers),
+                    carriers=carriers,
+                    under_replicated=len(carriers) < min_replicas,
+                )
+            )
+        return tuple(report)
 
     def network_stats(self, *, now: float | None = None) -> NetworkStats:
         timestamp = time.time() if now is None else float(now)
@@ -595,34 +668,3 @@ class CoordinatorState:
             deleted = db.execute("DELETE FROM tickets WHERE token_hash = ?", (token_hash,)).rowcount
             if deleted != 1:
                 raise CoordinatorError("retrieval ticket could not be consumed atomically")
-
-    def record_cargo_load(self, node_id: str, artifact_id: str) -> None:
-        """Count one artifact after its bytes pass verified retrieval.
-
-        The counter is aggregate-only. It is not incremented merely because a
-        ticket was issued or consumed, and it stores no public carrier identity.
-        """
-        _validate_artifact_id(artifact_id)
-        with self._connect() as db:
-            approved = db.execute(
-                "SELECT distribution FROM catalog WHERE artifact_id = ?", (artifact_id,)
-            ).fetchone()
-            if approved is None or approved["distribution"] != "public-approved":
-                raise CoordinatorError("only public-approved artifacts count as CARAVAN cargo")
-            carrier = db.execute(
-                "SELECT state FROM carriers WHERE node_id = ?", (node_id,)
-            ).fetchone()
-            if carrier is None:
-                raise CoordinatorError("unknown carrier")
-            db.execute(
-                "UPDATE caravan_counters SET counter_value = counter_value + 1 "
-                "WHERE counter_name = 'cargo_loads'"
-            )
-
-    def cargo_loads(self) -> int:
-        """Return the monotonic aggregate of verified CARAVAN cargo loads."""
-        with self._connect() as db:
-            row = db.execute(
-                "SELECT counter_value FROM caravan_counters WHERE counter_name = 'cargo_loads'"
-            ).fetchone()
-        return int(row["counter_value"] if row is not None else 0)

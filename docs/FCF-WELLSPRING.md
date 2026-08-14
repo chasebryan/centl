@@ -1,9 +1,9 @@
 # FCF Wellspring
 
-**Status:** active FCF research designation  
-**Scope:** foundational discoveries arising from CENTL and Free Computation Foundation research  
-**SemVer effect:** none  
-**Oasis assurance effect:** none by itself  
+**Status:** active FCF research designation
+**Scope:** foundational discoveries arising from CENTL and Free Computation Foundation research
+**SemVer effect:** none
+**Oasis assurance effect:** none by itself
 **Publication authority:** separate from the designation
 
 > A Wellspring is not merely a successful experiment. It is a finding from which multiple new possibilities begin to flow.
@@ -79,6 +79,7 @@ The relationship is best summarized as:
 MIRAGE        = where uncertain work can develop
 Secret Oasis  = a deliberate search for unusually valuable directions
 Wellspring    = a foundational, generative finding
+Camp          = a durable stay when Oasis cannot be declared
 Oasis         = a qualified stable-product release state
 ```
 
@@ -183,6 +184,11 @@ Candidate status means:
 No automated score, model output, MIRAGE acceptance result, or project founder declaration should bypass the evidence review implied by candidate status.
 
 ## Wellspring Record
+
+Durable records live under [`docs/wellsprings/`](wellsprings/README.md). The
+local `centl-mirage wellspring` command can render the current expedition and
+records, but it cannot designate a Wellspring: designation requires the
+evidence review described below.
 
 A designated Wellspring should receive a durable **Wellspring Record** in the repository or another FCF-controlled research archive.
 
