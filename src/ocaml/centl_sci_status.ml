@@ -26,7 +26,8 @@ let collect () =
         packages = 0;
         gated =
           [
-            "BUILD workspace operations require HOME or CENTL_WORKSPACE";
+            "BUILD workspace operations require HOME, USERPROFILE, or \
+             CENTL_WORKSPACE";
             "generated external/native scaffolds remain inactive until their \
              JSONL ABI is implemented and explicitly validated";
           ];

@@ -16,10 +16,7 @@ let mode_of_string text =
   | "examples" -> Some Examples
   | _ -> None
 
-let home () =
-  match Sys.getenv_opt "HOME" with
-  | Some value when String.trim value <> "" -> Some value
-  | _ -> None
+let home () = Centl_platform.home_directory ()
 
 let base_dir env_name fallback_suffix =
   match Sys.getenv_opt env_name with

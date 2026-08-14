@@ -36,7 +36,7 @@ let default_root () =
   match nonempty_environment "CENTL_WORKSPACE" with
   | Some root -> Some root
   | None ->
-      begin match nonempty_environment "HOME" with
+      begin match Centl_platform.home_directory () with
       | None -> None
       | Some home ->
           Some
@@ -100,14 +100,16 @@ let layout workspace =
 let require_managed_directory path =
   match lstat path with
   | Some stat when stat.Unix.st_kind = Unix.S_DIR ->
-      if stat.Unix.st_uid <> Unix.geteuid () then
-        raise
-          (Sys_error
-             ("workspace directory is not owned by the current user: " ^ path));
-      if stat.Unix.st_perm land 0o022 <> 0 then
-        raise
-          (Sys_error
-             ("workspace directory must not be group/other writable: " ^ path))
+      if Centl_platform.posix_identity_enforced then begin
+        if stat.Unix.st_uid <> Unix.geteuid () then
+          raise
+            (Sys_error
+               ("workspace directory is not owned by the current user: " ^ path));
+        if stat.Unix.st_perm land 0o022 <> 0 then
+          raise
+            (Sys_error
+               ("workspace directory must not be group/other writable: " ^ path))
+      end
   | Some stat when stat.Unix.st_kind = Unix.S_LNK ->
       raise (Sys_error ("refusing symbolic-link workspace directory: " ^ path))
   | Some _ -> raise (Sys_error ("workspace path is not a directory: " ^ path))

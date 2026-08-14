@@ -1,0 +1,58 @@
+#!/bin/sh
+# Emit Dune sexp flag lists for the current FLINT/GMP/MPFR prefix.
+# Usage: marsa-dune-flags cflags|libs
+set -eu
+
+mode=${1:-cflags}
+
+tokens() {
+  printf '('
+  for tok in "$@"; do
+    [ -n "$tok" ] || continue
+    printf ' %s' "$tok"
+  done
+  printf ' )\n'
+}
+
+cflags=""
+libs="-lflint -lmpfr -lgmp -lpthread -lm"
+
+if command -v brew >/dev/null 2>&1; then
+  prefix=$(brew --prefix 2>/dev/null || true)
+  if [ -n "$prefix" ]; then
+    PKG_CONFIG_PATH="$prefix/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+    export PKG_CONFIG_PATH
+  fi
+fi
+
+if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists flint; then
+  cflags=$(pkg-config --cflags flint gmp mpfr 2>/dev/null || pkg-config --cflags flint)
+  libs=$(pkg-config --libs flint gmp mpfr 2>/dev/null || pkg-config --libs flint)
+  case $(uname -s) in
+    Darwin|Linux)
+      case " $libs " in
+        *" -lpthread "*) ;;
+        *) libs="$libs -lpthread" ;;
+      esac
+      case " $libs " in
+        *" -lm "*) ;;
+        *) libs="$libs -lm" ;;
+      esac
+      ;;
+  esac
+fi
+
+case "$mode" in
+  cflags)
+    # shellcheck disable=SC2086
+    tokens $cflags
+    ;;
+  libs)
+    # shellcheck disable=SC2086
+    tokens $libs
+    ;;
+  *)
+    printf 'usage: %s cflags|libs\n' "$(basename "$0")" >&2
+    exit 2
+    ;;
+esac

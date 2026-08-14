@@ -152,6 +152,16 @@ case $(uname -m) in
 esac
 
 if [ "$platform" != linux ] || [ "$architecture" != x86_64 ]; then
+  here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+  if [ -f "$here/scripts/marsa-install" ]; then
+    printf 'centl install: no Oasis prebuilt for %s-%s; building the Camp stay from this CENTL-Marsa tree.\n' \
+      "$platform" "$architecture" >&2
+    extra=""
+    if [ "$configure_path" = false ]; then
+      extra=--no-path
+    fi
+    exec sh "$here/scripts/marsa-install" --prefix "$prefix" $extra
+  fi
   cat <<EOF >&2
 centl install: no prebuilt $platform-$architecture Oasis archive.
 The published Oasis product remains GNU/Linux x86_64.
@@ -161,8 +171,7 @@ To inhabit the Camp stay on this machine, use CENTL Marsa:
   git clone https://github.com/chasebryan/centl.git
   cd centl
   git checkout CENTL-Marsa
-  sh scripts/marsa-bootstrap
-  make build
+  sh scripts/marsa-install
 
 CENTL Marsa is not Oasis. It does not replace v0.14.0.
 EOF

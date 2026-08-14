@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+
+bindir=${1:-}
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+
+pick() {
+  name=$1
+  if [ -n "$bindir" ] && [ -x "$bindir/$name" ]; then
+    printf '%s' "$bindir/$name"
+  elif [ -n "$bindir" ] && [ -x "$bindir/$name.exe" ]; then
+    printf '%s' "$bindir/$name.exe"
+  elif [ -x "$root/_build/default/src/$2" ]; then
+    printf '%s' "$root/_build/default/src/$2"
+  else
+    printf '%s\n' "centl marsa-smoke: missing $name" >&2
+    exit 1
+  fi
+}
+
+centl=$(pick centl main.exe)
+physics=$(pick centl-physics physics_main.exe)
+sci=$(pick centl-sci sci_main.exe)
+
+exact=$("$centl" '0.1 + 0.2')
+[ "$exact" = "3/10" ] || {
+  printf 'centl marsa-smoke: expected 3/10, got %s\n' "$exact" >&2
+  exit 1
+}
+
+metre=$("$physics" convert 100 cm m)
+[ "$metre" = "1" ] || {
+  printf 'centl marsa-smoke: expected 1 metre, got %s\n' "$metre" >&2
+  exit 1
+}
+
+"$sci" -help >/dev/null
+
+printf 'centl marsa-smoke: centl, centl-physics, and centl-sci answered.\n'
+printf 'Harbor: CENTL Marsa. Not Oasis.\n'

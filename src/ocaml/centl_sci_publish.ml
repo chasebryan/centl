@@ -35,10 +35,7 @@ let wants text =
 let lstat path =
   try Some (Unix.lstat path) with Unix.Unix_error (Unix.ENOENT, _, _) -> None
 
-let home_dir () =
-  match Sys.getenv_opt "HOME" with
-  | Some value when String.trim value <> "" -> Some (String.trim value)
-  | _ -> None
+let home_dir () = Centl_platform.home_directory ()
 
 let grant_path () =
   match home_dir () with
@@ -59,9 +56,13 @@ let validate_secret_file path =
       Error "refusing symbolic-link publish grant"
   | Some stat when stat.Unix.st_kind <> Unix.S_REG ->
       Error "publish grant is not a regular file"
-  | Some stat when stat.Unix.st_uid <> Unix.geteuid () ->
+  | Some stat
+    when Centl_platform.posix_identity_enforced
+         && stat.Unix.st_uid <> Unix.geteuid () ->
       Error "publish grant is not owned by the current user"
-  | Some stat when stat.Unix.st_perm land 0o077 <> 0 ->
+  | Some stat
+    when Centl_platform.posix_identity_enforced
+         && stat.Unix.st_perm land 0o077 <> 0 ->
       Error "publish grant must not be group/other readable"
   | Some _ -> Ok ()
 

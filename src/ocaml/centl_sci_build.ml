@@ -18,8 +18,9 @@ let workspace_result action =
       Handled
         {
           message =
-            "CENTL-SCi cannot determine a local workspace because HOME is \
-             unavailable. Set CENTL_WORKSPACE to an explicit directory.";
+            "CENTL-SCi cannot determine a local workspace because HOME or \
+             USERPROFILE is unavailable. Set CENTL_WORKSPACE to an explicit \
+             directory.";
           changed = false;
           revision = None;
         }

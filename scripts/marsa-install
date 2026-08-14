@@ -1,0 +1,102 @@
+#!/bin/sh
+# Build the Camp stay from this CENTL-Marsa checkout and install the three
+# public commands. This is not an Oasis installer.
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+cd "$root"
+
+prefix=${CENTL_PREFIX:-}
+configure_path=true
+
+fail() {
+  printf 'centl marsa-install: %s\n' "$1" >&2
+  exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --prefix)
+      [ "$#" -ge 2 ] || fail "--prefix needs a path"
+      prefix=$2
+      shift 2
+      ;;
+    --no-path)
+      configure_path=false
+      shift
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Install CENTL from this CENTL-Marsa source tree onto macOS or Windows.
+
+Usage: scripts/marsa-install [--prefix PATH] [--no-path]
+
+This builds centl, centl-physics, and centl-sci from the Camp stay.
+It does not declare Oasis and does not replace CENTL v0.14.0.
+EOF
+      exit 0
+      ;;
+    *) fail "unknown option: $1" ;;
+  esac
+done
+
+[ -n "$prefix" ] || {
+  [ -n "${HOME:-}${USERPROFILE:-}" ] || fail "HOME/USERPROFILE is unset; use --prefix"
+  if [ -n "${HOME:-}" ]; then
+    prefix="$HOME/.local"
+  else
+    prefix="$USERPROFILE/.local"
+  fi
+}
+
+sh "$root/scripts/marsa-bootstrap"
+
+command -v opam >/dev/null 2>&1 || fail "opam is required; install it and re-run"
+
+if [ ! -d "${OPAMROOT:-$HOME/.opam}" ] && [ ! -d "${USERPROFILE:-}/.opam" ]; then
+  opam init --disable-sandboxing --bare -a
+fi
+
+if ! opam switch list --short 2>/dev/null | grep -qx centl; then
+  opam switch create centl ocaml-base-compiler.4.14.1
+fi
+
+eval "$(opam env --switch=centl)"
+
+opam install --yes --unlock-base \
+  dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
+
+make -C "$root" marsa-build
+
+bindir="$prefix/bin"
+mkdir -p "$bindir"
+
+copy_cmd() {
+  source=$1
+  dest=$2
+  [ -f "$source" ] || fail "missing built command: $source"
+  if [ -n "${OS:-}" ] && [ "${OS:-}" = Windows_NT ]; then
+    cp "$source" "$bindir/$dest.exe"
+    printf 'Installed %s\n' "$bindir/$dest.exe"
+  else
+    cp "$source" "$bindir/$dest"
+    chmod 755 "$bindir/$dest"
+    printf 'Installed %s\n' "$bindir/$dest"
+  fi
+}
+
+copy_cmd "$root/_build/default/src/main.exe" centl
+copy_cmd "$root/_build/default/src/physics_main.exe" centl-physics
+copy_cmd "$root/_build/default/src/sci_main.exe" centl-sci
+
+if [ "$configure_path" = true ]; then
+  case :${PATH}: in
+    *:"$bindir":*) ;;
+    *)
+      printf 'Add %s to PATH to use the installed commands.\n' "$bindir"
+      ;;
+  esac
+fi
+
+printf 'CENTL Marsa installed the Camp stay. This is not Oasis.\n'
+sh "$root/scripts/marsa-smoke" "$bindir"

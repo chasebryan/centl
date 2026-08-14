@@ -4,15 +4,6 @@ on:
   push:
     branches:
       - CENTL-Marsa
-    paths:
-      - "src/**"
-      - "install"
-      - "scripts/marsa-*"
-      - "docs/CENTL-MARSA.md"
-      - "docs/SCI_PLATFORM_SUPPORT.md"
-      - ".github/workflows/marsa.yml"
-      - "tests/test_platform.ml"
-      - "tests/test_marsa_install.py"
   pull_request:
     branches:
       - CENTL-Marsa
@@ -34,34 +25,35 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Probe and installer still serve Linux
+      - name: Probe, flags, and installer contract
         run: |
           set -eu
           sh scripts/marsa-probe
           python3 tests/test_marsa_install.py
 
-  macos-libraries:
-    name: macOS FLINT harbor
+  macos-product:
+    name: macOS Camp product
     runs-on: macos-latest
-    timeout-minutes: 20
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install Homebrew numeric stack
+      - name: Homebrew numeric stack
         run: |
           set -eu
           brew install gmp mpfr flint pkg-config
           sh scripts/marsa-probe
-          pkg-config --libs flint gmp mpfr
-      - name: Link a FLINT probe
+      - uses: ocaml/setup-ocaml@c1574629b7cc38ef189d7228c2794fb5f9042478 # v3.7.1
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+      - name: Build and smoke the three commands
         run: |
           set -eu
-          cc -Wall -Wextra -Werror \
-            scripts/marsa-native-probe.c \
-            $(pkg-config --cflags --libs flint gmp mpfr) \
-            -o /tmp/centl-marsa-probe
-          /tmp/centl-marsa-probe
+          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+          opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 conf-gmp conf-mpfr conf-flint
+          eval "$(opam env)"
+          make marsa-smoke
 
   windows-libraries:
     name: Windows MSYS2 FLINT harbor
@@ -93,3 +85,26 @@ jobs:
             $(pkg-config --cflags --libs flint gmp mpfr) \
             -o /tmp/centl-marsa-probe
           /tmp/centl-marsa-probe
+
+  windows-product:
+    name: Windows Camp product
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ocaml/setup-ocaml@c1574629b7cc38ef189d7228c2794fb5f9042478 # v3.7.1
+        with:
+          ocaml-compiler: ocaml-base-compiler.4.14.1
+      - name: Build and smoke the three commands
+        shell: bash
+        run: |
+          set -eu
+          opam install --yes conf-pkg-config
+          opam install --yes --assume-depexts dune.3.24.1 zarith.1.14 yojson.2.2.2 \
+            conf-gmp conf-mpfr conf-flint ||
+            opam install --yes dune.3.24.1 zarith.1.14 yojson.2.2.2 \
+              conf-gmp conf-mpfr conf-flint
+          eval "$(opam env)"
+          make marsa-smoke

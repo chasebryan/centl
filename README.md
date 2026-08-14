@@ -49,8 +49,8 @@ centl-physics convert 100 cm m
 ## Use the current Camp stay
 
 Clone `main` (or `mirage` if you want the laboratory). That tree is
-where current work is inhabited. Build and run from the checkout.
-The camp notes are
+where current work is inhabited on Linux. On macOS or Windows, check out
+`CENTL-Marsa` and run `sh scripts/marsa-install`. The camp notes are
 [docs/releases/camp-001.md](https://github.com/chasebryan/centl/blob/main/docs/releases/camp-001.md).
 
 ## Commands

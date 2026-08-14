@@ -35,7 +35,7 @@ SCI_ASSIMILATION_ARGS ?=
 	extract native-build native-test adversarial-test fuzz-test metamorphic-test \
 	sanitizer-test performance-test hardening-test differential-test sci-model-test \
 	sci-interface-check sci-assimilate sci-assimilate-full sci-assimilate-publish \
-	build test release clean marsa-probe
+	build test release clean marsa-probe marsa-build marsa-smoke
 
 all: build
 
@@ -135,6 +135,11 @@ release-verify:
 
 marsa-probe:
 	sh scripts/marsa-probe
+
+marsa-build: native-build
+
+marsa-smoke: marsa-build
+	sh scripts/marsa-smoke
 
 quality: format lint licensing-check install-interface-check integrity-source supply-chain-check
 

@@ -1,5 +1,25 @@
 (include_subdirs no)
 
+(rule
+ (target marsa-cflags.sexp)
+ (deps
+  (universe)
+  ../../scripts/marsa-dune-flags)
+ (action
+  (with-stdout-to
+   %{target}
+   (run sh %{dep:../../scripts/marsa-dune-flags} cflags))))
+
+(rule
+ (target marsa-libs.sexp)
+ (deps
+  (universe)
+  ../../scripts/marsa-dune-flags)
+ (action
+  (with-stdout-to
+   %{target}
+   (run sh %{dep:../../scripts/marsa-dune-flags} libs))))
+
 (library
  (name centl_arb)
  (wrapped false)
@@ -8,10 +28,7 @@
   (language c)
   (names centl_arb_stubs)
   (flags
-   (:standard -Wall -Wextra -Werror)))
+   (:standard -Wall -Wextra -Werror)
+   (:include marsa-cflags.sexp)))
  (c_library_flags
-  %{env:CENTL_FLINT_LIBRARY=-lflint}
-  %{env:CENTL_MPFR_LIBRARY=-lmpfr}
-  %{env:CENTL_GMP_LIBRARY=-lgmp}
-  %{env:CENTL_PTHREAD_LIBRARY=-lpthread}
-  %{env:CENTL_MATH_LIBRARY=-lm}))
+  (:include marsa-libs.sexp)))

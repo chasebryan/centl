@@ -26,10 +26,14 @@ an independently qualified Oasis identity for a later three-platform release.
 | Surface | Linux Camp | Marsa macOS | Marsa Windows |
 | --- | --- | --- | --- |
 | Source checkout | yes | yes | yes |
-| `scripts/marsa-bootstrap` | probe only | Homebrew flint/opam | MSYS2 MinGW flint |
-| Native FLINT stubs | yes | in progress | in progress |
-| Prebuilt installer | Oasis `linux-x86_64` | none | none |
+| Harbor bootstrap | probe | Homebrew flint + flags | MSYS2 MinGW flint + flags |
+| `make marsa-build` | yes, no F* required | yes | yes |
+| `scripts/marsa-install` | not the Linux path | source install | source install in a Unix shell |
+| Public commands | `centl`, `centl-physics`, `centl-sci` | same after harbor install | same after harbor install |
+| Prebuilt Oasis archive | `linux-x86_64` | none | none |
 | Oasis declaration | v0.14.0 only | no | no |
+
+F* re-extraction is not required. Marsa builds the committed generated core.
 
 ## How to inhabit the harbor
 
@@ -37,12 +41,22 @@ an independently qualified Oasis identity for a later three-platform release.
 git clone https://github.com/chasebryan/centl.git
 cd centl
 git checkout CENTL-Marsa
-sh scripts/marsa-bootstrap
-make build
+sh scripts/marsa-install
 ```
 
-On Windows use MSYS2 MinGW64, not a generic Command Prompt, until a native
-Windows installer exists.
+That installs `centl`, `centl-physics`, and `centl-sci` under `~/.local/bin`
+by default. `./install` in this tree does the same on macOS and Windows.
+
+On Windows use MSYS2 MinGW64 or another Unix shell with opam. A generic
+Command Prompt is not the harbor path yet.
+
+Then:
+
+```sh
+centl '0.1 + 0.2'
+centl-physics convert 100 cm m
+centl-sci
+```
 
 ## Branch rule
 

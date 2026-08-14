@@ -4,6 +4,16 @@ let windows = Sys.win32
 
 let darwin_marker = "/System/Library/CoreServices/SystemVersion.plist"
 
+let nonempty_env name =
+  match Sys.getenv_opt name with
+  | Some value when String.trim value <> "" -> Some (String.trim value)
+  | Some _ | None -> None
+
+let home_directory () =
+  match nonempty_env "HOME" with
+  | Some home -> Some home
+  | None -> nonempty_env "USERPROFILE"
+
 let family () =
   if windows then Windows
   else if Sys.file_exists darwin_marker then Macos
@@ -39,3 +49,5 @@ let prebuilt_archive_id = function
 let harbor = "CENTL Marsa"
 
 let oasis_native_supported = function Linux -> true | _ -> false
+
+let posix_identity_enforced = not windows
