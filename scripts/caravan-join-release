@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 umask 077
 
+repository="chasebryan/centl"
+
 fail() {
   printf 'FCF CARAVAN join release: %s\n' "$*" >&2
   exit 1
