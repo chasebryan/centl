@@ -65,7 +65,7 @@ and [`OASIS.md`](OASIS.md).
 A Camp is not:
 
 - an Oasis release or Oasis candidate declaration;
-- a SemVer tag, GitHub Release, or substitute for `vX.Y.Z`;
+- a CENTL SemVer identity such as `vX.Y.Z`, or a substitute for Oasis;
 - a Wellspring;
 - a full product promotion of `mirage` or `main`;
 - permission to skip, weaken, or rewrite Oasis gates;
@@ -123,6 +123,17 @@ feature / research work
 
 Leaving a Camp toward Oasis still requires the official Oasis path. Occupying
 a Camp does not shorten it.
+
+## Named camp artifacts
+
+A Camp may publish a **named stay artifact** on GitHub under a tag of the
+form `fcf-camp-NNN`. That tag is a snapshot of the occupied stay. It is not
+`vX.Y.Z`, it is not latest Oasis, and it must not be marked as an Oasis
+release.
+
+The artifact may attach the camp source tree, a SHA-256 manifest, and notes
+that list which surfaces are inherited from the published Oasis and which
+remain laboratory. It must not rebuild or replace the Oasis native bytes.
 
 ## Inspection
 

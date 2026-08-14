@@ -20,6 +20,8 @@
 
 ### Added
 
+- FCF Camp #1 publishes a named stay artifact `fcf-camp-001`. It is not a
+  SemVer identity and not an Oasis declaration. CENTL v0.14.0 remains Oasis.
 - FCF now publishes an open proposal for companies and other AI software to
   use CENTL, contribute to `mirage`, and sponsor the foundation. Sponsorship
   does not buy Oasis or endorsement.
