@@ -61,6 +61,14 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         ):
             self.assertNotIn(network_primitive, text)
 
+    def test_join_release_uses_its_payload_from_any_invocation_directory(self) -> None:
+        text = TEMPLATE.read_text(encoding="utf-8")
+        self.assertIn('"User-Agent": f"FCF-CARAVAN-join/{version}"', text)
+        self.assertIn("run_payload_python -", text)
+        self.assertIn('cd "$install_root/payload"', text)
+        self.assertIn('PYTHONPATH="$install_root/payload" python3 "$@"', text)
+        self.assertIn('agent_pid=$(cd "$install_root/payload"', text)
+
     def test_join_script_verifies_signed_exact_membership_before_install(self) -> None:
         text = TEMPLATE.read_text(encoding="utf-8")
         signature = text.index("signify -V")

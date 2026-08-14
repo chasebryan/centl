@@ -22,7 +22,7 @@ case "$COORDINATOR_URL" in
   *) fail "release coordinator endpoint was not rendered" ;;
 esac
 
-[ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "CARAVAN carrier enrollment is Linux-only"
+[ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "this FCF CARAVAN release supports Linux hosts"
 [ "$(id -u)" -ne 0 ] || fail "normal CARAVAN carrier setup is rootless; do not run join-caravan with sudo"
 
 for cmd in sha256sum signify python3; do
@@ -32,12 +32,18 @@ done
 if [[ "$COORDINATOR_URL" == */coordinator-v1.json ]]; then
   bootstrap_json=$(mktemp "${TMPDIR:-/tmp}/fcf-caravan-coordinator.XXXXXXXX")
   trap 'rm -f -- "$bootstrap_json"' EXIT HUP INT TERM
-  python3 - "$COORDINATOR_URL" "$bootstrap_json" <<'PY'
+  python3 - "$COORDINATOR_URL" "$bootstrap_json" "$RELEASE_VERSION" <<'PY'
 import sys
 from pathlib import Path
 from urllib.request import Request, urlopen
-url, output = sys.argv[1:]
-request = Request(url, headers={"Accept": "application/json"})
+url, output, version = sys.argv[1:]
+request = Request(
+    url,
+    headers={
+        "Accept": "application/json",
+        "User-Agent": f"FCF-CARAVAN-join/{version}",
+    },
+)
 with urlopen(request, timeout=30) as response:
     payload = response.read(65537)
 if len(payload) > 65536:
@@ -360,8 +366,23 @@ run_transport() {
   fi
 }
 
+# Always run release payload code from the immutable payload directory.  This
+# prevents Python's implicit current-directory import from selecting a stale
+# caravan/ package when a supporter launches this file from any checkout.
+run_payload_python() {
+  (
+    cd "$install_root/payload"
+    if [ "$TRANSPORT" = "tor" ]; then
+      TORSOCKS_SERVER=127.0.0.1:19050 PYTHONPATH="$install_root/payload" \
+        torsocks python3 "$@"
+    else
+      PYTHONPATH="$install_root/payload" python3 "$@"
+    fi
+  )
+}
+
 CONSENT_EPOCH=$(date -u '+%s')
-run_transport env PYTHONPATH="$install_root/payload" python3 - \
+run_payload_python - \
   "$identity_root" "$state_root/policy-receipt.json" "$state_root/enrollment-result.json" "$install_root/payload/docs/CARAVAN-HOST-POLICY.md" \
   "$RELEASE_VERSION" "$CONSENT_EPOCH" "$ASSUME_YES" "$COORDINATOR_URL" "$STORAGE_GIB" <<'PY'
 from __future__ import annotations
@@ -467,17 +488,19 @@ chmod 0600 "$config_root/config.json"
 agent_log="$state_root/carrier-agent.log"
 agent_pid_file="$state_root/carrier-agent.pid"
 if [ ! -s "$agent_pid_file" ] || ! kill -0 "$(cat "$agent_pid_file" 2>/dev/null || true)" 2>/dev/null; then
-  if [ "$TRANSPORT" = "tor" ]; then
+  agent_pid=$(cd "$install_root/payload" && if [ "$TRANSPORT" = "tor" ]; then
     nohup env TORSOCKS_SERVER=127.0.0.1:19050 PYTHONPATH="$install_root/payload" \
       torsocks python3 -m caravan.carrier_agent \
       --coordinator "$COORDINATOR_URL" --identity "$identity_root" \
       --storage-gib "$STORAGE_GIB" >>"$agent_log" 2>&1 &
+    echo "$!"
   else
     nohup env PYTHONPATH="$install_root/payload" python3 -m caravan.carrier_agent \
       --coordinator "$COORDINATOR_URL" --identity "$identity_root" \
       --storage-gib "$STORAGE_GIB" >>"$agent_log" 2>&1 &
-  fi
-  echo "$!" > "$agent_pid_file"
+    echo "$!"
+  fi)
+  echo "$agent_pid" > "$agent_pid_file"
   chmod 0600 "$agent_pid_file" "$agent_log"
 fi
 
