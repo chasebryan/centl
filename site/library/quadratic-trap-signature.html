@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note records a structural invariant discovered while trying to explain why the Type A/B shadow-cover systems overlap so strongly.">
+  <title>Quadratic trap signature and character shield — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quadratic-trap-signature.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quadratic-trap-signature.html">
+  <meta property="og:title" content="Quadratic trap signature and character shield — Free Computation Foundation">
+  <meta property="og:description" content="This note records a structural invariant discovered while trying to explain why the Type A/B shadow-cover systems overlap so strongly.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quadratic trap signature and character shield</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">This note records a structural invariant discovered while trying to explain why the Type A/B shadow-cover systems overlap so strongly.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUADRATIC-TRAP-SIGNATURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact theorem note and active proof direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. Literature priority for this character formulation inside the present minimal-depth/shadow framework remains under review.</p>
+<p>This note records a structural invariant discovered while trying to explain why the Type A/B shadow-cover systems overlap so strongly.</p>
+<p>Read with:</p>
+<ul><li><a href="diamond.html">DIAMOND.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="shadow-cover-geometry.html">SHADOW-COVER-GEOMETRY.md</a></li><li><a href="shadow-kernel.html">SHADOW-KERNEL.md</a></li><li><a href="fiber-shadow-kernel.html">FIBER-SHADOW-KERNEL.md</a></li></ul>
+<h2>1. Type A/B trap sets</h2>
+<p>For</p>
+<div class="math" role="math">m_k=4k-1,</div>
+<p>write</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<p>A López Type A/B hit at depth <code>k</code> is exactly the condition that the integer under study lands in <code>T_k</code> modulo <code>m_k</code>.</p>
+<p>The first result below shows that every such trap lies on the same quadratic-character side of the unit group.</p>
+<h2>2. Quadratic nonresidue theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>k&gt;=1</code>, let <code>e|k</code>, and put</p>
+<div class="math" role="math">m=4k-1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ \left(\frac{-e}{m}\right) = \left(\frac{-4e}{m}\right) =-1, }</div>
+<p>where <code>(a/m)</code> denotes the Jacobi symbol.</p>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ T_k\subseteq\{u\in(\mathbb Z/m_k\mathbb Z)^\times:(u/m_k)=-1\}. }</div>
+<h3>Proof</h3>
+<p>Write</p>
+<div class="math" role="math">k=ed.</div>
+<p>Then</p>
+<div class="math" role="math">m=4ed-1\equiv3\pmod4</div>
+<p>and <code>gcd(e,m)=1</code>.</p>
+<p>We first prove</p>
+<div class="math" role="math">\left(\frac e m\right)=1.</div>
+<p>Write <code>e=2^a u</code> with <code>u</code> odd.</p>
+<p>If <code>a&gt;0</code>, then <code>8|4e</code>, hence</p>
+<div class="math" role="math">m\equiv-1\equiv7\pmod8,</div>
+<p>so</p>
+<div class="math" role="math">\left(\frac2m\right)=1.</div>
+<p>For the odd part <code>u</code>, Jacobi reciprocity gives, because <code>m=3 mod 4</code>,</p>
+<div class="math" role="math">\left(\frac u m\right) = (-1)^{(u-1)/2} \left(\frac m u\right).</div>
+<p>But <code>m=4ed-1</code> is congruent to <code>-1 mod u</code>, hence</p>
+<div class="math" role="math">\left(\frac m u\right) = \left(\frac{-1}u\right) = (-1)^{(u-1)/2}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac u m\right)=1.</div>
+<p>Together with <code>(2/m)=1</code> when the power of two is present, this gives</p>
+<div class="math" role="math">\left(\frac e m\right)=1.</div>
+<p>Since <code>m=3 mod 4</code>,</p>
+<div class="math" role="math">\left(\frac{-1}m\right)=-1,</div>
+<p>and since <code>4</code> is a square,</p>
+<div class="math" role="math">\left(\frac4m\right)=1.</div>
+<p>Hence</p>
+<div class="math" role="math">\left(\frac{-e}m\right) = \left(\frac{-1}m\right) \left(\frac e m\right) =-1,</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac{-4e}m\right) = \left(\frac4m\right) \left(\frac{-e}m\right) =-1.</div>
+<p>QED.</p>
+<h2>3. Immediate interpretation</h2>
+<p>Type A and Type B traps are not arbitrary unit residues. They are confined to the Jacobi <code>-1</code> half of the unit group.</p>
+<p>Therefore any unit <code>x mod m_k</code> satisfying</p>
+<div class="math" role="math">\left(\frac{x}{m_k}\right)=+1</div>
+<p>is automatically safe from the entire Type A/B trap set <code>T_k</code>.</p>
+<p>This gives a new way to attack the union-shadow problem: instead of avoiding every exact trap residue separately, try to place the candidate progression on the <code>+1</code> quadratic-character side of every earlier modulus.</p>
+<h2>4. Quadratic character shield</h2>
+<p>Fix an admissible candidate <code>(k,h,t)</code> and write its CRT progression as</p>
+<div class="math" role="math">x\equiv r\pmod L, \qquad L=\operatorname{lcm}(840,m_k).</div>
+<p>For every odd prime <code>p|L</code>, the Legendre sign</p>
+<div class="math" role="math">\epsilon_p\in\mathbb F_2, \qquad \left(\frac rp\right)=(-1)^{\epsilon_p},</div>
+<p>is fixed throughout the candidate progression.</p>
+<p>For every odd prime <code>p</code> dividing some earlier <code>m_j</code> but not dividing <code>L</code>, introduce a binary variable <code>z_p</code>, intended to encode a chosen Legendre sign</p>
+<div class="math" role="math">\left(\frac xp\right)=(-1)^{z_p}.</div>
+<p>For an earlier modulus</p>
+<div class="math" role="math">m_j=\prod_p p^{a_{j,p}},</div>
+<p>its Jacobi sign depends only on the primes whose exponent is odd. To force</p>
+<div class="math" role="math">\left(\frac{x}{m_j}\right)=+1,</div>
+<p>we therefore require the linear equation over <code>F_2</code></p>
+<div class="math" role="math">\boxed{ \sum_{\substack{p\nmid L\\a_{j,p}\text{ odd}}} z_p = \sum_{\substack{p\mid L\\a_{j,p}\text{ odd}}}\epsilon_p \pmod2. }</div>
+<p>Collect these equations for all <code>j&lt;k</code>.</p>
+<h3>Character-shield theorem</h3>
+<p>If this finite linear system over <code>F_2</code> is solvable, then the candidate has a reduced avoiding arithmetic progression and hence infinitely many primes of exact Type A/B depth <code>k</code>.</p>
+<h3>Proof</h3>
+<p>Choose one nonzero residue <code>a_p mod p</code> with Legendre sign <code>(-1)^{z_p}</code> for every free prime. By CRT, combine</p>
+<div class="math" role="math">x\equiv r\pmod L</div>
+<p>with</p>
+<div class="math" role="math">x\equiv a_p\pmod p</div>
+<p>for all free primes.</p>
+<p>The resulting arithmetic progression is reduced: <code>r</code> is already a unit modulo <code>L</code> by prime compatibility, and every newly imposed residue <code>a_p</code> is nonzero.</p>
+<p>By construction, every earlier <code>m_j</code> has Jacobi symbol <code>+1</code> on the progression. The quadratic nonresidue theorem shows that every element of <code>T_j</code> has Jacobi symbol <code>-1</code>. Thus no member of the progression can hit any earlier Type A/B trap.</p>
+<p>At depth <code>k</code>, the congruence <code>x=t mod m_k</code> is already fixed by <code>x=r mod L</code>, so every member of the progression remains in the target Type A/B trap class.</p>
+<p>Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions therefore gives infinitely many primes whose first Type A/B hit is exactly the target candidate at depth <code>k</code>.</p>
+<p>QED.</p>
+<h2>5. All-square shield</h2>
+<p>A particularly simple sufficient condition is obtained by taking</p>
+<div class="math" role="math">z_p=0</div>
+<p>for every free prime, i.e. choosing quadratic-residue local signs everywhere outside <code>L</code>.</p>
+<p>If every shared prime appearing to odd exponent in an earlier <code>m_j</code> already satisfies</p>
+<div class="math" role="math">\left(\frac rp\right)=+1,</div>
+<p>then every earlier Jacobi symbol is automatically <code>+1</code> and the character-shield theorem applies.</p>
+<p>Equivalently, one may choose <code>x=1 mod p</code> for every free prime coordinate.</p>
+<p>This produces an especially transparent infinite exact-depth family without searching the enormous parameter period.</p>
+<h2>6. Why this may explain part of the shadow geometry</h2>
+<p>The raw trap sets looked dense after pullback because hundreds of exact residue constraints can be active simultaneously. The quadratic signature reveals that all those exact traps live inside character-negative regions.</p>
+<p>Thus there are now two layers of compression:</p>
+<ol><li><strong>exact shadow/fiber compression</strong>, which removes redundant residue constraints;</li><li><strong>quadratic character compression</strong>, which can discard an entire earlier layer whenever its Jacobi sign is forced to <code>+1</code>.</li></ol>
+<p>The remaining obstruction is not an arbitrary covering system. It is the intersection of a divisor-generated exact trap system with a highly structured family of quadratic-character half-spaces.</p>
+<h2>7. Computational program</h2>
+<p>The companion analyzer <code>quadratic_trap_signature_analyzer.py</code> is designed to:</p>
+<ol><li>recheck the Jacobi <code>-1</code> theorem by explicit trap enumeration through the configured finite range;</li><li>solve the exact <code>F_2</code> character-shield system for every directly novel candidate in a certificate bundle;</li><li>count candidates already proved infinitely exact-depth realizable by the character shield alone;</li><li>identify the residual <strong>character core</strong> where at least one earlier modulus cannot simultaneously be placed on the Jacobi <code>+1</code> side;</li><li>compare that core with the prime-power and fiber shadow kernels.</li></ol>
+<p>The character criterion is sufficient, not necessary. Failure of the linear system does not imply union shadowing. It means only that some earlier layers must be escaped inside their Jacobi <code>-1</code> region by using the finer exact trap geometry.</p>
+<h2>8. New proof target</h2>
+<p>The strongest next question is whether the combination</p>
+<div class="math" role="math">\boxed{ \text{quadratic character shield} + \text{fiber shadow kernel} }</div>
+<p>collapses every directly novel candidate to a uniformly bounded small-prime residual core.</p>
+<p>If so, universal DSC-P would reduce to classifying that residual core rather than controlling the full set of hundreds or thousands of earlier congruence layers.</p>
+<p>That is now a primary theorem target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

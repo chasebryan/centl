@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Class-C active-core census through k = 1500 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/class-c-census-k1500.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/class-c-census-k1500.html">
+  <meta property="og:title" content="Class-C active-core census through k = 1500 — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Class-C active-core census through k = 1500</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CLASS-C-CENSUS-K1500.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-certificate result</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Coordinator:</strong> Operator-01 / primary research lead</p>
+<p><strong>Partner framework:</strong> Operator-02 active fixed-negative core and valuation-source split</p>
+<p><strong>Claim boundary:</strong> this is an exact finite-range result. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="class-c-c1-single-active.html">CLASS-C-C1-SINGLE-ACTIVE.md</a></li><li><a href="single-active-local-escape.html">SINGLE-ACTIVE-LOCAL-ESCAPE.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/OPERATOR-COORDINATION.md">OPERATOR-COORDINATION.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md">operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIAMOND-VALUATION-CRITERION.md">operator-02/DIAMOND-VALUATION-CRITERION.md</a></li><li><a href="direct-shadow-k1500.html">DIRECT-SHADOW-K1500.md</a></li></ul>
+<h2>1. Provenance</h2>
+<p>The census replays the already frozen candidate bundle from the completed direct-shadow workflow:</p>
+<pre><code class="language-text">source workflow run:  31849103304
+source artifact id:   9238241616
+source candidate set: 53,240 directly novel candidates through k&lt;=1500</code></pre>
+<p>The census itself ran in a separate replay-only workflow:</p>
+<pre><code class="language-text">census workflow run: 31854324273
+workflow head:       d330e20082297d21f3005f5a173eaebfdc40ea9b
+census artifact id:  9238613961
+artifact sha256:
+9ba6c7425356dac272821a71b677811ed697c3dd062040cf78302b5f272031ba</code></pre>
+<p>The artifact contains:</p>
+<ul><li><code>class-c-census.json</code></li><li><code>class-c-census-report.md</code></li><li><code>class-c-census-independent-verifier.json</code></li><li><code>provenance.txt</code></li><li><code>SHA256SUMS</code></li></ul>
+<p>Its internal SHA-256 manifest was checked successfully.</p>
+<h2>2. Independent verification</h2>
+<p>The independent verifier reconstructs the fixed-negative core, active subcore, valuation sources, exact pullbacks, residual fiber kernels, and bounded selectors with a different peeling control flow: local fiber loads are recomputed from scratch after every peel rather than maintained incrementally.</p>
+<p>It returned:</p>
+<pre><code class="language-json">{
+  &quot;direct_novel_candidates_checked&quot;: 53240,
+  &quot;independent_control_flow&quot;: &quot;fiber loads recomputed from scratch after each peel&quot;,
+  &quot;k_limit&quot;: 1500,
+  &quot;mismatched_sections&quot;: [],
+  &quot;single_active_candidates_checked&quot;: 2770,
+  &quot;verdict&quot;: &quot;VERIFIED&quot;
+}</code></pre>
+<p>Therefore the counts below are independently reproduced finite statements.</p>
+<h2>3. Active-core census</h2>
+<p>Among all <code>53,240</code> directly novel candidates:</p>
+<pre><code class="language-text">character shield solvable, N empty:             38,658
+N^act empty:                                     43,968
+N nonempty but N^act empty:                       5,310
+exactly one active fixed-negative layer:          2,770</code></pre>
+<p>The <code>5,310</code> inactive-only cases are especially important conceptually: scalar character shielding can fail even though every fixed-negative row is already parameter-inactive. Direct novelty then certifies exact safety at those locked rows.</p>
+<h2>4. Single-active population</h2>
+<p>For all</p>
+<div class="math" role="math">\boxed{2,770}</div>
+<p>candidates with</p>
+<div class="math" role="math">|\mathcal N^{\mathrm{act}}_{k,r}|=1,</div>
+<p>the unique active quotient was:</p>
+<pre><code class="language-text">q = 3: 1,322
+q = 5:    34
+q = 9: 1,414</code></pre>
+<p>No other <code>q</code> occurred.</p>
+<p>Every one of the 2,770 cases was Operator-02 <strong>Class A only</strong>:</p>
+<pre><code class="language-text">Class A only: 2,770
+Class B only:     0
+mixed A/B:        0</code></pre>
+<p>Thus every observed active valuation excess came from a higher power of a prime already dividing the target progression modulus <code>L</code>. No even-powered free-prime source occurred in the single-active population through <code>k&lt;=1500</code>.</p>
+<p>This <code>3,5,9</code> / Class-A-only collapse is a finite result, not yet a universal theorem.</p>
+<h2>5. Exact pullback size</h2>
+<p>For the unique active row <code>j0</code>, the exact forbidden pullback <code>R_j0</code> was tiny:</p>
+<pre><code class="language-text">|R_j0| = 0: 2,644 candidates
+|R_j0| = 1:   126 candidates</code></pre>
+<p>The number of locally reduced and exact-safe residues modulo <code>q_j0</code> was never zero. The minimum was</p>
+<div class="math" role="math">\boxed{2}.</div>
+<p>Distribution:</p>
+<pre><code class="language-text">2 reduced-safe residues:   12 candidates
+3 reduced-safe residues: 1310
+5 reduced-safe residues:   34
+8 reduced-safe residues:  114
+9 reduced-safe residues: 1300</code></pre>
+<p>This finite behavior is consistent with the universal local lemma in <a href="single-active-local-escape.html">SINGLE-ACTIVE-LOCAL-ESCAPE.md</a>.</p>
+<h2>6. Fiber-kernel interaction</h2>
+<p>The 2,770 single-active candidates split as:</p>
+<pre><code class="language-text">fiber kernel empty:      1,290
+fiber kernel nonempty:   1,480</code></pre>
+<p>Among the 1,480 nonempty residual systems, the unique active fixed-negative row itself survived fiber peeling only</p>
+<div class="math" role="math">\boxed{18}</div>
+<p>times.</p>
+<p>It was removed before the final residual kernel in</p>
+<div class="math" role="math">\boxed{1,462}</div>
+<p>cases.</p>
+<p>Residual edge-source census:</p>
+<pre><code class="language-text">nonfixed earlier rows:                 69,672
+unique active fixed-negative row:          18
+other fixed-negative rows:                   0
+fixed-positive rows:                         0</code></pre>
+<p>This is a decisive organizational result:</p>
+<div class="math" role="math">\boxed{ \mathcal N^{\mathrm{act}} \text{ and the final fiber residual are different resolutions.} }</div>
+<p>The active fixed-negative core identifies where scalar character shielding fails while the parameter still moves. It does <strong>not</strong> identify the complete exact residual row set after fiber peeling.</p>
+<h2>7. Residual kernel signatures in C1</h2>
+<p>Among the 1,480 nonempty single-active systems, the observed residual signatures were:</p>
+<pre><code class="language-text">{3,5,11,13,17,19,23}:           680
+{3,11,13}:                       336
+{3,11,13,19,23}:                 210
+{3,5,11,17,19,23}:               160
+{3,11,13,17,19,23}:               54
+{3,5,11,13,17,19,23,29,31}:      16
+{3,5,13,17,19,23}:                12
+{3,5,11,13,19,23}:                 6
+{3,11,13,19}:                       4
+{11,13}:                             2</code></pre>
+<p>The two <code>{11,13}</code> cases are the smallest nontrivial residual systems in this C1 range and are priority exact laboratories.</p>
+<h2>8. Independent bounded-selector result</h2>
+<p>Every nonempty C1 residual kernel was solved by the fixed bounded selector menu</p>
+<div class="math" role="math">\{0,\pm1,\ldots,\pm64\}.</div>
+<p>Result:</p>
+<div class="math" role="math">\boxed{1,480/1,480}</div>
+<p>with maximum required absolute selector</p>
+<div class="math" role="math">\boxed{48}.</div>
+<p>This is finite evidence only. It does not prove a universal bounded-selector theorem.</p>
+<h2>9. What the census changed</h2>
+<p>The original Class-C intuition risked treating <code>N^act</code> as the exact residual obstruction.</p>
+<p>The census rejects that simplification.</p>
+<p>The correct coordinated picture is:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{fixed-negative character core }\mathcal N\\ \downarrow\\ \text{parameter-active subcore }\mathcal N^{act}\\ \downarrow\\ \text{exact fiber peeling}\\ \downarrow\\ \text{mostly nonfixed residual rows} \end{array}}</div>
+<p>So the next theorem must coordinate two structures:</p>
+<ol><li>the valuation/character mechanism controlling <code>N^act</code>;</li><li>the nonfixed exact rows that survive into the small-prime fiber kernel.</li></ol>
+<h2>10. New theorem targets</h2>
+<p>The verified census gives four immediate targets:</p>
+<ol><li><strong>single-active excess theorem:</strong> prove as much as possible about why a unique active fixed-negative row has a prime-power excess quotient of very low complexity;</li><li><strong>hard-class <code>3,5,9</code> collapse:</strong> prove or falsify the observed restriction <code>q in {3,5,9}</code> and absence of Class B in the hard-class single-active regime;</li><li><strong>two-prime residual theorem:</strong> solve the two <code>{11,13}</code> C1 systems structurally rather than by selector lookup;</li><li><strong>active-to-nonfixed coordination:</strong> identify why the unique active row usually peels away while the remaining nonfixed rows still admit a common local escape.</li></ol>
+<p>The first of these already admits a universal prime-power reduction, recorded separately in the next theorem note.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

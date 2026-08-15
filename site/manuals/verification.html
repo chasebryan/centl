@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The current F core proves:">
+  <title>Verification boundary — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/verification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/verification.html">
+  <meta property="og:title" content="Verification boundary — Free Computation Foundation">
+  <meta property="og:description" content="The current F core proves:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Verification boundary</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">The current F core proves:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/VERIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>The current F* core proves:</p>
+<ul><li>the Euclidean algorithm returns a greatest common divisor of its inputs;</li><li>normalized rationals have a positive denominator;</li><li>normalization preserves the represented mathematical value;</li><li>addition, subtraction, multiplication, negation, and successful division implement their exact rational semantics;</li><li>exact rational powers preserve rational invariants;</li><li>division by zero is a structured result; and</li><li>every successful evaluator result satisfies the rational invariant;</li><li>symbolic differentiation agrees with independently defined tangent semantics for the supported univariate integer-polynomial domain;</li><li>exact rational-coefficient polynomial integration constructs zero-constant coefficient lists, and independently defined coefficient differentiation recovers the source coefficients up to exact rational equivalence; and</li><li>rational-polynomial collection preserves denotation for the admitted univariate fragment, so a zero collected difference implies equality at every rational point; and</li><li>dyadic intervals are rounded outward to exact decimal scales.</li></ul>
+<p>The core also validates native real enclosures before use: the lower endpoint must not exceed the upper endpoint, and the shared binary exponent must remain within the configured boundary. The bounded <code>round_enclosure_outward</code> entry point then computes the floor of the lower endpoint and ceiling of the upper endpoint at a requested power-of-ten scale. Its postcondition proves both endpoint inequalities using exact integer arithmetic, including for negative values. Exact rational square-root candidates are computed by the host but accepted only after the F* core checks, by direct integer equality, that the candidate squares to the radicand.</p>
+<p>The F* symbolic evaluator, substitution pass, differentiation pass, and exact polynomial-integration helpers are total and extract with no admits. Differentiation correctness is stated over a separate polynomial model containing integer constants, one distinguished variable, negation, addition, subtraction, multiplication, and natural powers. Ordinary evaluation and dual-number tangent evaluation are defined independently. <code>polynomial_differentiation_is_semantic</code> proves that evaluating the production differentiator&#x27;s output returns that tangent at every integer point. A checked cubic witness demonstrates that this domain is inhabited.</p>
+<p>Substitution is simultaneous: one replacement is never rewritten by another replacement from the same operation. It is also capture-avoiding across every expression-level binder. The iterator variable in four-argument <code>sum</code>, <code>product</code>, and <code>sequence</code> forms scopes only the body, so a matching substitution does not enter the body or replace the binder, while both bounds still receive substitutions. In six-argument <code>recurrence</code>, the previous-value and index names both scope only the step; the initial expression and both bounds remain outside their scope. The integration variable similarly scopes only its integrand; definite integration bounds remain outside that scope. The variable in <code>substitute(inner, variable = replacement)</code> scopes only <code>inner</code>; the replacement remains outside that scope. Differentiation and residual-derivative variables scope their inner expressions, and a <code>solve</code> variable scopes both equation sides.</p>
+<p>When a replacement contains a free occurrence of a binder name, the core alpha-renames that binder before entering its scope. Fresh names use ordinary parser identifier syntax and are checked against the scoped term, substitution names, and replacement expressions. A structurally bounded suffix search skips preoccupied candidates, allowing an alpha-renamed symbolic definition to survive rendering and parsing without capture. A recurrence may alpha-rename either or both step binders. Checked F* witnesses cover direct iteration, sequence, and two-binder recurrence capture as well as an already occupied initial candidate; native substitution and session regressions exercise the same scope behavior after extraction.</p>
+<p>Finite range enumeration, recurrence stepping, and the exact-sequence container remain in the OCaml host. Each produced element is nevertheless evaluated by the extracted exact core. The host enforces request-wide element and traversal budgets plus aggregate exact-bit, symbolic-node, and rendered-byte ceilings as the result grows, and checks cancellation between terms. This boundary returns a structured failure rather than a partial sequence and is covered by exact, scope, empty-range, limit, cancellation, protocol, and MCP tests.</p>
+<p>Exact polynomial addition, negation, subtraction, scaling, multiplication, bounded powers, coefficient collection, rendering, and the conservative assumption simplifier are also total F* definitions. Generated expansion, collection, and cubic-derivative identities are checked after exact substitution against independently computed integer results.</p>
+<p><code>Centl.PolynomialSoundness.surface_rational_polynomial_identity_sound</code> is the semantic theorem used by the verification API. Its executable admission function covers rational literals, one selected variable, negation, addition, subtraction, multiplication, bounded positive powers, and transparent <code>simplify</code>/<code>expand</code>/<code>factor</code> wrappers. It rejects unsupported syntax, including an unreduced symbolic <code>Divide</code> node. The OCaml verifier requires both its bounded normalizer to obtain zero and the extracted F* classifier to return <code>VerifiedPolynomialIdentity</code>; disagreement is <code>unknown</code>, never verification.</p>
+<p>CENTL 0.9.0 extends that exact polynomial model with coefficient-wise antiderivatives. Each coefficient division is exact rational arithmetic, and the chosen constant term is zero. <code>polynomial_derivative_of_antiderivative_correct</code> proves the coefficient-list round trip up to exact rational equivalence; the public expression path is covered by concrete F* witnesses and native regression tests, not by a stronger production-differentiator equivalence theorem. Definite integration at exact rational bounds evaluates the same coefficient list twice with Horner&#x27;s method and subtracts, without introducing a numerical backend. Inputs outside the accepted univariate polynomial domain remain explicit <code>integrate(...)</code> expressions.</p>
+<p>Exact equation classification is also in F<em>. The core reduces both sides to a univariate rational polynomial, distinguishes constant, linear, quadratic, and unsupported cases, and computes linear and repeated quadratic roots exactly. For a positive quadratic discriminant, the host proposes floor-square-root witnesses for its normalized numerator and denominator. The core proves each witness is either exact or lies strictly between consecutive squares. Two exact witnesses retain the rational-root path; otherwise the core derives the canonical exact pair <code>-b/(2a) ± sqrt(discriminant/(4a^2))</code>. Invalid witnesses or noncanonical boundary rationals are rejected rather than repaired by the host. Concrete F</em> examples cover irrational completion, equation-scaling invariance, rational fallback, and invalid-witness rejection.</p>
+<p>Exact rational powers use verified exponentiation by squaring rather than a linear recursive multiplication chain.</p>
+<p>Verification runs with no admitted SMT queries:</p>
+<pre><code class="language-sh">make verify</code></pre>
+<p>F<em> extracts the verified definitions to OCaml. A small local extraction runtime maps F</em> integers directly to Zarith arbitrary-precision integers. The generated OCaml snapshot is versioned so ordinary opam/Dune package builds do not need F*; verification CI regenerates it with the pinned verifier and rejects any diff. The release identity hashes <code>Centl_Core.ml</code>, <code>Centl_Gcd.ml</code>, and <code>Centl_PolynomialSoundness.ml</code> in that order.</p>
+<p>The current trusted application boundary still includes the handwritten OCaml lexer/parser, exact finite-iteration driver and sequence container, terminal and JSON code, Zarith, the F*/OCaml extraction process, the OCaml compiler, Z3, the narrow C shim, FLINT/Arb, MPFR, and GMP. Tests attack that boundary with golden CLI cases, direct enclosure-containment checks, and thousands of generated exact identities checked against independent Zarith computations. The result renderer uses an explicit traversal stack, iterative size preflight, and a bounded buffer; adversarial tests cover deep symbolic trees, allocation scaling, cancellation, and agreement among plain, colored, JSON, and MCP views.</p>
+<p>The host validates that every core result is reduced and has a positive denominator before rendering it. It never repairs or silently approximates a core result.</p>
+<h2>Runtime hardening</h2>
+<p><code>make fuzz-test</code> retains the generated adversarial/property suite and then runs a committed, deterministic mutation corpus. Selected byte positions in parser, JSONL, MCP, and native rational seeds receive boundary-byte insertions, deletions, replacements, reversals, duplication, and truncation. The harness requires total compatibility, located-expression, and located-statement parser diagnostics with bounded byte spans; serializable protocol envelopes; explicit MCP notification handling; finite ordered Arb enclosures; and safe rejection of malformed native integers. Definition and multiline seeds cover statement locations, while a compact corpus directive expands to a 32,000-digit integer near the default source-size boundary. This corpus is reproducible in CI; it complements rather than replaces randomized or coverage-guided fuzzing.</p>
+<p><code>make metamorphic-test</code> generates a platform-stable stream of seeded rationals and checks all native intervals with exact Zarith rational comparisons. It requires higher-precision enclosures to refine lower-precision enclosures, checks that <code>sqrt(q)^2</code> and <code>exp(log(q))</code> contain the exact positive rational, and checks overlapping enclosures for odd/even transcendental symmetries. A second pass requires plain, JSON, MCP text content, and MCP structured content to agree exactly for the same rational expressions. No binary or decimal floating-point comparison is part of the oracle.</p>
+<p><code>make sanitizer-test</code> recompiles the production Arb C shim in an isolated build directory with AddressSanitizer and UndefinedBehaviorSanitizer, then stresses allocation, finalization, endpoint extraction, every arithmetic/transcendental primitive, malformed integer strings, and precision/exponent limits. It skips cleanly when the platform compiler lacks both sanitizers. Linux CI sets <code>CENTL_SANITIZER_REQUIRED=1</code>, so an unavailable or failing sanitizer is an error there. The ordinary native library remains unsanitized and portable.</p>
+<p><code>make performance-test</code> provides the separate conservative regression budgets and methodology documented in <a href="https://github.com/chasebryan/centl/blob/main/docs/PERFORMANCE.md">PERFORMANCE.md</a>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

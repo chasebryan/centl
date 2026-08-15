@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Divisor-child ancestry theorem for Type A/B shadowing — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/ancestry-divisor-child-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/ancestry-divisor-child-theorem.html">
+  <meta property="og:title" content="Divisor-child ancestry theorem for Type A/B shadowing — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Divisor-child ancestry theorem for Type A/B shadowing</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ANCESTRY-DIVISOR-CHILD-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem with coordinator-reviewed <code>q=13</code> and <code>q=17</code> classifications</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Coordinator:</strong> Operator-01 / primary research lead</p>
+<p><strong>Operator-02 provenance:</strong> <code>operator-02/ANCESTRY-Q13-CLASSIFICATION.md</code>, <code>operator-02/ANCESTRY-Q17-CLASSIFICATION.md</code></p>
+<p><strong>Claim boundary:</strong> this note concerns unrestricted Type A/B trap-set shadowing along modulus ancestry. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. Hard-class-conditioned shadowing can be stronger than unrestricted shadowing.</p>
+<p>Read with:</p>
+<ul><li><a href="theory.html">THEORY.md</a></li><li><a href="prime-child-shadows.html">PRIME-CHILD-SHADOWS.md</a></li><li><a href="quotient-9-rigidity.html">QUOTIENT-9-RIGIDITY.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/OPERATOR-COORDINATION.md">OPERATOR-COORDINATION.md</a></li></ul>
+<h2>1. General ancestry parameter</h2>
+<p>Fix positive integers <code>j</code> and <code>s</code>, and put</p>
+<div class="math" role="math">Q=4s+1, \qquad K=Qj-s.</div>
+<p>Then</p>
+<div class="math" role="math">4K-1 =Q(4j-1).</div>
+<p>Write</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>Thus <code>j -&gt; K</code> is a modulus-divisibility ancestry edge with quotient <code>Q</code>.</p>
+<p>The elementary identity</p>
+<div class="math" role="math">\boxed{K=s m+j}</div>
+<p>gives</p>
+<div class="math" role="math">K\equiv j\pmod m</div>
+<p>and</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,s).</div>
+<p>Define the normalized ancestor trap set</p>
+<div class="math" role="math">S_j=-T_j =\{e,4e\pmod m:e\mid j\}.</div>
+<p>As in the existing ancestry theory,</p>
+<div class="math" role="math">T_K\bmod m\subseteq T_j</div>
+<p>is equivalent to requiring every divisor of <code>K</code>, reduced modulo <code>m</code>, to lie in <code>S_j</code>.</p>
+<h2>2. Divisor-child theorem</h2>
+<h3>Theorem</h3>
+<p>Let</p>
+<div class="math" role="math">a\mid\gcd(j,s)</div>
+<p>and suppose</p>
+<div class="math" role="math">\boxed{K=a p}</div>
+<p>for a prime <code>p</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\boxed{T_K\bmod(4j-1)\subseteq T_j.}</div>
+<p>In words:</p>
+<blockquote><p>whenever the child depth is a prime multiplied by a divisor common to the ancestry shift <code>s</code> and the ancestor depth <code>j</code>, the entire child Type A/B trap set is shadowed by the ancestor.</p></blockquote>
+<h3>Proof</h3>
+<p>Write</p>
+<div class="math" role="math">j=a d, \qquad s=a c.</div>
+<p>Then</p>
+<div class="math" role="math">p=\frac Ka =\frac{(4s+1)j-s}{a}.</div>
+<p>Subtract <code>d=j/a</code>:</p>
+<div class="math" role="math">\begin{aligned} p-d &amp;=4sd-c\\ &amp;=c(4ad-1)\\ &amp;=c(4j-1)\\ &amp;=c m. \end{aligned}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{p\equiv d=j/a\pmod m.}</div>
+<p>Every divisor <code>E</code> of <code>K=a p</code> can be written in one of the forms</p>
+<div class="math" role="math">E=b \quad\text{or}\quad E=bp</div>
+<p>for some divisor <code>b|a</code>. This remains true if <code>p|a</code>: divisors with the final extra <code>p</code>-exponent use the second form.</p>
+<p>If <code>E=b</code>, then</p>
+<div class="math" role="math">b\mid a\mid j,</div>
+<p>so <code>E</code> is an ancestor divisor and lies in <code>S_j</code>.</p>
+<p>If <code>E=bp</code>, then</p>
+<div class="math" role="math">E\equiv b\frac ja\pmod m.</div>
+<p>But</p>
+<div class="math" role="math">b\frac ja =\frac{j}{a/b}</div>
+<p>is again a divisor of <code>j</code>. Therefore <code>E mod m</code> lies in <code>S_j</code>.</p>
+<p>Thus every divisor of <code>K</code> maps into <code>S_j</code>, proving</p>
+<div class="math" role="math">T_K\bmod m\subseteq T_j.</div>
+<p>QED.</p>
+<h2>3. Prime-child theorem as the first case</h2>
+<p>Taking</p>
+<div class="math" role="math">a=1</div>
+<p>recovers the existing prime-child theorem immediately:</p>
+<div class="math" role="math">K\text{ prime} \Longrightarrow T_K\bmod m\subseteq T_j.</div>
+<p>So prime children are the <code>a=1</code> edge of a larger divisor-child family.</p>
+<h2>4. Immediate ancestry ladder</h2>
+<p>For a fixed ancestry shift <code>s</code>, every divisor</p>
+<div class="math" role="math">a\mid s</div>
+<p>that also divides <code>j</code> supplies a potential fully shadowed child shape</p>
+<div class="math" role="math">\boxed{K=a p,\quad p\text{ prime}.}</div>
+<p>This predicts the exact composite families independently observed at the first ancestry quotients.</p>
+<h3>Q = 5</h3>
+<p>Here <code>s=1</code>, so only <code>a=1</code> exists:</p>
+<div class="math" role="math">K=p.</div>
+<p>This agrees with the proved <code>q=5</code> rigidity theorem: unrestricted full shadow occurs only for prime children.</p>
+<h3>Q = 9</h3>
+<p>Here <code>s=2</code>, so</p>
+<div class="math" role="math">a\in\{1,2\}.</div>
+<p>The theorem gives</p>
+<div class="math" role="math">K=p\quad\text{or}\quad K=2p.</div>
+<p>The existing exact classification adds one exceptional smooth child</p>
+<div class="math" role="math">(j,K)=(2,16).</div>
+<h3>Q = 13</h3>
+<p>Here <code>s=3</code>, so</p>
+<div class="math" role="math">a\in\{1,3\}.</div>
+<p>The theorem gives</p>
+<div class="math" role="math">K=p\quad\text{or}\quad K=3p.</div>
+<p>Operator-02 independently proved that these are not merely sufficient but exhaustive.</p>
+<h3>Q = 17</h3>
+<p>Here <code>s=4</code>, so</p>
+<div class="math" role="math">a\in\{1,2,4\}.</div>
+<p>The theorem gives</p>
+<div class="math" role="math">K=p,\quad2p,\quad4p.</div>
+<p>Operator-02 independently proved the full converse, with one exceptional smooth child</p>
+<div class="math" role="math">(j,K)=(4,64).</div>
+<h2>5. Coordinator review: q = 13 classification</h2>
+<p>Operator-02 source:</p>
+<p><code>operator-02/ANCESTRY-Q13-CLASSIFICATION.md</code></p>
+<h3>Accepted theorem</h3>
+<p>Let</p>
+<div class="math" role="math">K=13j-3.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K\bmod(4j-1)\subseteq T_j \iff K\text{ is prime or }K=3p\text{ with }p\text{ prime}. }</div>
+<p>The direct implication is now subsumed by the divisor-child theorem with <code>s=3</code>.</p>
+<p>The Operator-02 converse was reviewed by the Coordinator. Its case split is sound:</p>
+<ol><li>if <code>j</code> is odd and <code>K</code> composite, divisor <code>2</code> escapes <code>S_j</code>;</li><li>if <code>j</code> is even and <code>3∤j</code>, a least prime factor of composite <code>K</code> is <code>&lt;m</code>, does not divide <code>j</code>, and escapes <code>S_j</code>;</li><li>if <code>j=3d</code>, write <code>K=3(13d-1)</code>; when the cofactor is composite, a least non-3 prime factor escapes, while the remaining <code>3</code>-divisible subcase gives divisor <code>9</code>, and <code>9∉S_j</code> because <code>9∤j</code>.</li></ol>
+<p>No coarse signature/exact-trap equivalence is used.</p>
+<p>Coordinator classification: <strong>PROVED / promoted</strong>.</p>
+<h2>6. Coordinator review: q = 17 classification</h2>
+<p>Operator-02 source:</p>
+<p><code>operator-02/ANCESTRY-Q17-CLASSIFICATION.md</code></p>
+<h3>Accepted theorem</h3>
+<p>Let</p>
+<div class="math" role="math">K=17j-4.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K\bmod(4j-1)\subseteq T_j \iff \begin{cases} K\text{ prime},\text{ or}\\ K=2p,\text{ or}\\ K=4p,\text{ or}\\ (j,K)=(4,64), \end{cases} }</div>
+<p>where <code>p</code> is an odd prime in the composite prime-times-divisor cases.</p>
+<p>The direct prime/<code>2p</code>/<code>4p</code> implications follow from the divisor-child theorem with <code>s=4</code>.</p>
+<p>The Coordinator reviewed the converse by 2-adic cases:</p>
+<ul><li>odd <code>j</code>: a least prime factor of composite <code>K</code> escapes;</li><li><code>v2(K)=1</code>: after <code>j=2d</code>, a least prime factor of the odd composite cofactor escapes;</li><li><code>v2(K)=2</code>: same after <code>j=4d</code>;</li><li><code>v2(K)=3</code> or <code>4</code>: the odd cofactor lies strictly between <code>j</code> and <code>m</code> and hence cannot be in <code>S_j</code>;</li><li><code>v2(K)&gt;=5</code>: <code>j≡4 mod8</code>, so <code>v2(j)=2</code>; divisor <code>32</code> escapes except at <code>j=4</code>, where <code>K=64</code> and the power-of-two residues are explicitly contained in <code>S_4</code>.</li></ul>
+<p>Coordinator classification: <strong>PROVED / promoted</strong>.</p>
+<h2>7. New structural conjecture: prime-times-common-divisor plus smooth exceptions</h2>
+<p>The first four exact ancestry quotients now have a common form:</p>
+<div class="math" role="math">\boxed{ \text{full shadow child} = \text{prime}\times a,\quad a\mid\gcd(j,s), }</div>
+<p>plus rare children whose entire factorization is supported on the small primes of the shift <code>s</code>.</p>
+<p>This motivates the following theorem candidate.</p>
+<h3>Ancestry converse candidate</h3>
+<p>For fixed <code>s</code> and sufficiently large <code>j</code>, if</p>
+<div class="math" role="math">T_{(4s+1)j-s}\bmod(4j-1)\subseteq T_j,</div>
+<p>then</p>
+<div class="math" role="math">\boxed{K=a p}</div>
+<p>for some</p>
+<div class="math" role="math">a\mid\gcd(j,s)</div>
+<p>and prime <code>p</code>, except possibly for a finite set of <code>s</code>-smooth children.</p>
+<p>This is <strong>not proved</strong> in general.</p>
+<h2>8. Why a general converse is plausible</h2>
+<p>Let <code>ell|K</code> be a prime not dividing <code>j</code>.</p>
+<p>If</p>
+<div class="math" role="math">1&lt;\ell&lt;m=4j-1,</div>
+<p>then <code>ell</code> cannot lie in <code>S_j</code>:</p>
+<ul><li>it is not a plain divisor of <code>j</code>;</li><li>as a prime it cannot equal <code>4e</code> for a proper divisor <code>e|j</code>;</li><li>the endpoint <code>4j</code> reduces to <code>1</code>, not <code>ell</code>.</li></ul>
+<p>Thus under full shadowing, every prime factor of <code>K</code> below <code>m</code> must divide <code>j</code>, and hence must divide</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,s).</div>
+<p>Any prime factor not supported by the shift must therefore be at least <code>m</code>.</p>
+<p>Since</p>
+<div class="math" role="math">K=(4s+1)j-s</div>
+<p>grows linearly in <code>j</code> while <code>m^2</code> grows quadratically, for fixed <code>s</code> and large <code>j</code> one has</p>
+<div class="math" role="math">K&lt;m^2.</div>
+<p>Consequently there can be at most one prime factor outside the shift support.</p>
+<p>This is the mechanism behind the observed prime-times-common-divisor families. The remaining work is to control excessive powers of the shift primes and classify the finite smooth exceptions.</p>
+<h2>9. Proof target</h2>
+<p>The next ancestry theorem should formalize Section 8 into:</p>
+<ol><li>an explicit threshold <code>J(s)</code> above which <code>K&lt;m^2</code>;</li><li>a bound on the exponents of primes dividing <code>gcd(j,s)</code> under full shadowing;</li><li>a finite classification of <code>s</code>-smooth exceptions below that threshold or with exceptional exponent cycles;</li><li>a general converse yielding the divisor-child family as the complete asymptotic ancestry skeleton.</li></ol>
+<p>If successful, the separate <code>q=5,9,13,17,...</code> rigidity calculations collapse into one theorem.</p>
+<p>That would turn the ancestry portion of the shadow graph from a collection of observed quotient families into a single structural law.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

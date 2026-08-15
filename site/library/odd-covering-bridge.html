@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note connects the FCF/CENTL shadow program to classical covering-system theory.">
+  <title>Type A/B shadow pullbacks as a structured odd-covering problem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/odd-covering-bridge.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/odd-covering-bridge.html">
+  <meta property="og:title" content="Type A/B shadow pullbacks as a structured odd-covering problem — Free Computation Foundation">
+  <meta property="og:description" content="This note connects the FCF/CENTL shadow program to classical covering-system theory.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Type A/B shadow pullbacks as a structured odd-covering problem</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">This note connects the FCF/CENTL shadow program to classical covering-system theory.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ODD-COVERING-BRIDGE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theory bridge / prior-art orientation</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> this note does not claim a solution of the Erdos-Selfridge odd covering problem, Direct-Shadow Completeness, Lopez Type A/B coverage, or the Erdos-Straus conjecture.</p>
+<p>This note connects the FCF/CENTL shadow program to classical covering-system theory.</p>
+<p>Read with:</p>
+<ul><li><a href="diamond.html">DIAMOND.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="direct-shadow-k1000.html">DIRECT-SHADOW-K1000.md</a></li><li><a href="shadow-cover-geometry.html">SHADOW-COVER-GEOMETRY.md</a></li><li><a href="prior-art.html">PRIOR-ART.md</a></li></ul>
+<h2>1. Pullback formulation</h2>
+<p>For a fixed admissible Type A/B candidate <code>(k,h,t)</code>, write</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1).</div>
+<p>Every earlier layer <code>j&lt;k</code> induces a forbidden parameter system</p>
+<div class="math" role="math">s\bmod q_j\in R_j, \qquad q_j=\frac{4j-1}{\gcd(L,4j-1)}.</div>
+<p>Because every <code>4j-1</code> is odd, every nontrivial pullback modulus <code>q_j</code> is odd.</p>
+<p>Thus union-shadowing of the candidate is exactly the statement that the structured family</p>
+<div class="math" role="math">\mathscr R_{k,h,t} = \{s\equiv a\pmod{q_j}:a\in R_j,\ j&lt;k\}</div>
+<p>covers all integers.</p>
+<p>A direct shadow is the degenerate local case where one earlier layer alone supplies all residue classes modulo its <code>q_j</code>.</p>
+<p>Direct-Shadow Completeness asks whether, for this special Type A/B-generated family, collective covering can ever occur without such a local complete layer.</p>
+<h2>2. Relation to the Erdos-Selfridge odd covering problem</h2>
+<p>Classical covering-system theory studies finite unions of congruence classes that cover all integers. A famous open problem of Erdos and Selfridge asks whether a covering system can exist with all moduli odd, distinct, and greater than one.</p>
+<p>Relevant sources include:</p>
+<ul><li>Song Guo and Zhi-Wei Sun, <em>On odd covering systems with distinct moduli</em>, arXiv:math/0412217.</li><li>Jackson Hopper, <em>On covering systems of integers</em>, arXiv:1705.04372.</li><li>Joshua Harrington, Yewen Sun, Wing Hong Tony Wong, <em>Covering systems with odd moduli</em>, arXiv:2104.00602.</li><li>Chris Bispels et al., <em>A further investigation on covering systems with odd moduli</em>, arXiv:2507.16135.</li></ul>
+<p>A 2026 formalization by Ibrahim Mian and Shayaan Siddique, arXiv:2607.25628, gives kernel-checked finite exclusions for the distinct-odd-modulus problem while explicitly treating the general problem as open.</p>
+<p>The Type A/B pullback problem is <strong>not identical</strong> to the Erdos-Selfridge problem:</p>
+<ol><li>pullback moduli <code>q_j</code> can repeat;</li><li>one earlier layer can contribute multiple residue classes <code>R_j</code> at the same modulus;</li><li>the residues are not arbitrary: they are affine pullbacks of divisor-generated trap sets</li></ol>
+<div class="math" role="math">T_j=\{-e,-4e\pmod{4j-1}:e\mid j\};</div>
+<ol><li>the moduli themselves arise as quotients of <code>4j-1</code> by gcds with a fixed candidate modulus <code>L</code>;</li><li>prime-realization requires a reduced uncovered class, not merely an uncovered integer.</li></ol>
+<p>Therefore a proof of DSC-P would establish a no-cover theorem for a special arithmetic subclass of odd covering systems, not resolve the general odd covering problem.</p>
+<h2>3. Why this bridge matters</h2>
+<p>The covering-system viewpoint gives precise language for the obstruction we are trying to understand.</p>
+<p>General proper congruence classes can collectively cover the integers. Consequently,</p>
+<div class="math" role="math">R_j\neq\mathbb Z/q_j\mathbb Z\ \forall j</div>
+<p>is nowhere near enough in an arbitrary covering problem.</p>
+<p>But in the exact Type A/B computations through <code>k=1000</code>, every directly novel candidate admits a reduced uncovered progression.</p>
+<p>Thus the research question is now:</p>
+<blockquote><p>What arithmetic property of the divisor-generated Type A/B pullback family prevents it from behaving like an arbitrary odd covering system?</p></blockquote>
+<p>That question should be attacked using both the special algebra of <code>T_j</code> and known covering-system obstructions.</p>
+<h2>4. A prime-power coordinate model</h2>
+<p>Let</p>
+<div class="math" role="math">Q=\operatorname{lcm}\{q_j:R_j\neq\varnothing\} = \prod_{\ell}\ell^{a_\ell}.</div>
+<p>Then the parameter line modulo <code>Q</code> decomposes by CRT into prime-power coordinates</p>
+<div class="math" role="math">\mathbb Z/Q\mathbb Z \cong \prod_{\ell}\mathbb Z/\ell^{a_\ell}\mathbb Z.</div>
+<p>Each forbidden system <code>(q_j,R_j)</code> depends only on the coordinates corresponding to prime powers dividing <code>q_j</code>.</p>
+<p>This turns Direct-Shadow Completeness into a finite constraint-satisfaction problem on an odd prime-power product.</p>
+<p>A useful taxonomy is:</p>
+<ul><li><strong>unary constraints:</strong> <code>q_j</code> is a prime power, so the event depends on one coordinate;</li><li><strong>binary constraints:</strong> <code>q_j</code> has two distinct prime factors;</li><li><strong>higher-support constraints:</strong> <code>q_j</code> has three or more distinct prime factors.</li></ul>
+<p>Preliminary diagnostics on difficult certified candidates show a strong concentration in unary and binary support. This suggests that the pullback family may have a low-complexity local core even while the raw number of earlier constraints is large.</p>
+<h2>5. Canonical coordinate experiment</h2>
+<p>For each prime-power coordinate <code>ell^a</code> of <code>Q</code>:</p>
+<ol><li>combine all unary Type A/B constraints acting only on that coordinate;</li><li>choose an allowed local residue, preferring <code>1</code> whenever it survives;</li><li>combine the local choices by CRT;</li><li>count the remaining violated multi-prime constraints;</li><li>attempt to repair them by changing the smallest possible number of prime-power coordinates while preserving all unary constraints.</li></ol>
+<p>This is not merely a faster witness search. It asks whether the global survivor can be <strong>constructed locally</strong>.</p>
+<p>If every directly novel candidate admits a survivor after a bounded number of local repairs, that would suggest a much sharper theorem than raw DSC-P.</p>
+<h2>6. Candidate theorem hierarchy</h2>
+<h3>Coordinate-Core Conjecture</h3>
+<p>Every directly novel Type A/B pullback family has a prime-power coordinate assignment satisfying all unary constraints and all but finitely controlled multi-prime obstructions.</p>
+<h3>Bounded-Repair Conjecture</h3>
+<p>There exists an absolute or structurally bounded repair number <code>B</code> such that every directly novel candidate can be made globally avoiding by changing at most <code>B</code> prime-power coordinates from a canonical unary-safe assignment.</p>
+<h3>DSC-P</h3>
+<p>Every directly novel candidate has a reduced avoiding parameter class and therefore infinitely many exact-depth prime realizations.</p>
+<p>A proof of a strong bounded-repair theorem could imply DSC-P by an explicit construction.</p>
+<h2>7. Proof mechanisms to investigate</h2>
+<ol><li><strong>Unary saturation:</strong> classify when the combined prime-power-only constraints can cover a coordinate. Determine whether such local saturation is equivalent to a direct shadow or forces one elsewhere.</li><li><strong>Binary graph structure:</strong> build the graph whose vertices are prime-power coordinates and whose edges are binary pullback constraints. Study degeneracy, cores, cycles, and whether the forbidden edge relations have a common algebraic orientation.</li><li><strong>Residue 1 bias:</strong> the trap fact <code>1 notin T_j</code> may survive affine pullback in a weakened coordinate form, making the all-ones assignment a natural base point except on a small exceptional set of coordinates.</li><li><strong>Minimal-cover contradiction:</strong> assume a minimal Type A/B union cover and apply classical covering-system necessities to its odd moduli, then use the special divisor-generated residues to contradict minimality.</li><li><strong>Character signatures:</strong> test quadratic and higher multiplicative characters of the allowed and forbidden local residues.</li><li><strong>Prime-power valuation signatures:</strong> test whether forbidden pullbacks force incompatible valuation patterns around <code>r+Ls+e</code> or <code>r+Ls+4e</code>.</li></ol>
+<h2>8. Research significance</h2>
+<p>This bridge sharpens the novelty target.</p>
+<p>The generic concept of a congruence covering is classical and must not be claimed as new. The candidate novelty is that the Lopez Type A/B system appears to generate a special family of odd covering problems with an unexpectedly strong local-to-global noncoverage phenomenon.</p>
+<p>If universal DSC-P is proved, one defensible interpretation would be:</p>
+<blockquote><p>Type A/B first-hit realizability admits a complete local obstruction theory because the associated divisor-generated odd pullback systems cannot collectively cover unless a direct shadow is already present.</p></blockquote>
+<p>That would be a theorem about a structured subclass of odd covering systems and, simultaneously, a theorem about the exact-depth geometry of the Erdos-Straus Type A/B system.</p>
+<h2>9. Immediate work</h2>
+<p>The project should now run two attacks in parallel:</p>
+<ul><li>continue exact candidatewise falsification beyond <code>k=1000</code>;</li><li>mine the certified <code>k&lt;=1000</code> bundle for the prime-power coordinate invariant that explains the absence of covers.</li></ul>
+<p>The second attack is now higher value than merely extending the numerical range.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

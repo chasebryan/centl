@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Type ./centl --syntax at any time for this reference in the terminal.">
+  <title>CENTL syntax — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/syntax.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/syntax.html">
+  <meta property="og:title" content="CENTL syntax — Free Computation Foundation">
+  <meta property="og:description" content="Type ./centl --syntax at any time for this reference in the terminal.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL syntax</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Type ./centl --syntax at any time for this reference in the terminal.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/SYNTAX.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Type <code>./centl --syntax</code> at any time for this reference in the terminal.</p>
+<p>CENTL is exact by default. Use <code>approx(...)</code> only when you want a rigorous real enclosure.</p>
+<h2>Implemented forms</h2>
+<h3>Values</h3>
+<p><code>123</code> <code>0.125</code> <code>1/3</code> <code>x</code> <code>(expression)</code> <code>pi</code> <code>e</code> <code>tau</code></p>
+<h3>Arithmetic</h3>
+<p><code>+x</code> <code>-x</code> <code>a + b</code> <code>a - b</code> <code>a * b</code> <code>a / b</code> <code>x^n</code></p>
+<h3>Symbolic math</h3>
+<p><code>f(x, ...)</code> <code>name = expression</code> <code>f(x, ...) = expression</code> <code>solve(left = right, variable)</code> <code>diff(expression, variable)</code> <code>integrate(expression, variable)</code> <code>integrate(expression, variable = lower, upper)</code> <code>substitute(expression, variable = value)</code> <code>simplify(expression)</code> <code>expand(expression)</code> <code>factor(expression)</code> <code>assuming(expression, condition)</code> <code>=  !=  &lt;  &lt;=  &gt;  &gt;=</code></p>
+<h3>Approximation</h3>
+<p><code>approx(expression)</code> <code>approx(expression, digits)</code></p>
+<h3>Functions</h3>
+<p><code>sqrt(x)</code> <code>abs(x)</code> <code>exp(x)</code> <code>log(x)</code> <code>sin(x)</code> <code>cos(x)</code> <code>tan(x)</code> <code>asin(x)</code> <code>acos(x)</code> <code>atan(x)</code> <code>atan2(y, x)</code> <code>sinh(x)</code> <code>cosh(x)</code> <code>tanh(x)</code> <code>radians(degrees)</code> <code>degrees(radians)</code></p>
+<h3>Geometry</h3>
+<p><code>square_area(side)</code> <code>rectangle_area(width, height)</code> <code>rectangle_perimeter(width, height)</code> <code>triangle_area(base, height)</code> <code>trapezoid_area(base1, base2, height)</code> <code>circle_area(radius)</code> <code>circumference(radius)</code> <code>sphere_area(radius)</code> <code>sphere_volume(radius)</code> <code>cylinder_volume(radius, height)</code> <code>hypot(a, b)</code> <code>distance(x1, y1, x2, y2)</code> <code>slope(x1, y1, x2, y2)</code></p>
+<h3>Concrete math</h3>
+<p><code>gcd(a, b)</code> <code>lcm(a, b)</code> <code>factorial(n)</code> <code>choose(n, k)</code> <code>permutations(n, k)</code> <code>fibonacci(n)</code></p>
+<h3>Finite iteration and sequences</h3>
+<p><code>sum(expression, variable = lower, upper)</code> <code>product(expression, variable = lower, upper)</code> <code>sequence(expression, variable = lower, upper)</code> <code>recurrence(initial, previous = step, index = lower, upper)</code></p>
+<h3>Scripts</h3>
+<p><code>assert(left relation right)</code> <code># comment</code></p>
+<p><code>assert(...)</code> checks a claim without adding a session definition. It exits successfully only for a <code>verified</code> verdict; <code>refuted</code>, <code>unknown</code>, and <code>invalid</code> claims are unsuccessful. A quantified rational form is also accepted: <code>assert(left relation right, for_all = x, domain = rational)</code>.</p>
+<h2>Example calculation forms</h2>
+<pre><code class="language-text">exact          0.1 + 0.2                         -&gt; 3/10
+calculus       diff(x^3 + 2*x + 1, x)            -&gt; 3 * x^2 + 2
+integration    integrate(x^2, x = 0, 1)          -&gt; 1/3
+equation       solve(x^2 = 2, x)                  -&gt; x in {-sqrt(2), sqrt(2)}
+definition     f(x) = x^2 + 1                    -&gt; f(x) = x^2 + 1
+sequence       sequence(k^2, k = 1, 4)           -&gt; [1, 4, 9, 16]
+recurrence     recurrence(1, a = a*n, n = 0, 4)  -&gt; [1, 1, 2, 6, 24]
+geometry       circle_area(3)                    -&gt; 9 * pi
+rigorous       approx(sqrt(2), 12)               -&gt; ≈ [1.41421356237, 1.41421356238]</code></pre>
+<p>Inside the calculator, type <code>:syntax</code> for the catalog or <code>:help</code> for usage. Definitions are immutable and last for the current calculator session or script. Approximate a definition when using it: <code>approx(f(2), 20)</code>. <code>solve</code> handles exact linear equations and real quadratics with rational coefficients. Positive nonsquare discriminants return a canonical exact pair <code>center - sqrt(radicand)</code> and <code>center + sqrt(radicand)</code>; CENTL does not turn these roots into decimal approximations. Higher-degree and otherwise unsupported equations return an explicit unresolved value plus an <code>unsupported</code> resolution label and reason.</p>
+<p>The integration forms accept rational-coefficient univariate polynomials with positive powers no larger than 64. Explicit zero powers remain residual to preserve the possible <code>0^0</code> error. <code>integrate(p, x)</code> selects the zero-constant antiderivative, while <code>integrate(p, x = a, b)</code> requires exact rational bounds. Unsupported integrals stay visible as <code>integrate(...)</code> expressions and carry an <code>unsupported</code> resolution label. <code>simplify</code>, <code>expand</code>, and <code>factor</code> similarly report when an input is outside their documented polynomial domains. If <code>simplify</code> or <code>expand</code> proves that an expression is already in its requested form, the result is labeled <code>unchanged_proved</code>; an unchanged value is never presented as if a transformation silently succeeded.</p>
+<p>Finite sequence bounds are inclusive exact integers. A sequence index scopes only its element expression. In a recurrence, <code>initial</code> is the term at the lower index; <code>previous</code> and <code>index</code> scope only <code>step</code>, which is evaluated for each later index. A lower bound greater than the upper bound produces <code>[]</code> without evaluating the element, initial value, or step. Sequence elements and recurrence terms must be scalar exact values, and the resulting sequence is not a scalar operand. See <a href="https://github.com/chasebryan/centl/blob/main/docs/ITERATION.md">exact finite iteration and sequences</a>.</p>
+<p>Statements may span lines without a continuation marker while parentheses are open or an operator still needs a right-hand operand. The calculator shows <code>....&gt;</code> for continuation lines; standard input and <code>--file</code> scripts use the same rule. Interactive terminals offer Tab completion and bounded durable history through Up/Down, <code>:history</code>, and <code>:clear-history</code>.</p>
+<h3>Interactive history</h3>
+<p>Interactive history is loaded when the calculator starts and each accepted entry is saved immediately. It contains calculator input only; definitions and evaluation state still last only for the current session. <code>:clear-history</code> clears both the current editor history and the saved file.</p>
+<p>The version-1 JSON history file is stored at:</p>
+<ul><li>Unix: <code>$XDG_STATE_HOME/centl/history.json</code> when <code>XDG_STATE_HOME</code> is a nonempty absolute path, otherwise <code>$HOME/.local/state/centl/history.json</code>.</li><li>Windows: <code>%LOCALAPPDATA%\centl\history.json</code>, falling back to <code>%APPDATA%\centl\history.json</code> and then <code>%USERPROFILE%\AppData\Local\centl\history.json</code> when needed.</li></ul>
+<p>CENTL keeps at most 1,000 entries, 1,048,576 serialized bytes, and 32,768 bytes per entry. Oldest entries are discarded first. Blank, adjacent duplicate, oversized, and terminal-control entries are not retained.</p>
+<p>On Unix, CENTL creates its state directory with mode <code>0700</code> and its history and lock files with mode <code>0600</code>. Windows relies on the current account&#x27;s operating system access controls because OCaml&#x27;s Unix-compatible file modes cannot express Windows ACLs. Writes re-read and merge the current disk state under a cross-process lock, fsync a private temporary file, and atomically replace the history file; CENTL&#x27;s Windows reads permit that replacement while they are open. This prevents concurrent writers from replacing one another&#x27;s additions. A running editor keeps its startup snapshot; entries from another process become available after the next launch. A clear and concurrent adds are ordered by the same lock, and stale in-memory snapshots are never written back wholesale.</p>
+<p>Use <code>--no-history</code> for one invocation, set <code>CENTL_NO_HISTORY</code> to any value, or set <code>CENTL_HISTORY</code> to <code>0</code>, <code>false</code>, <code>no</code>, or <code>off</code> to disable disk reads and writes. Up/Down and <code>:history</code> continue to work in memory for that process.</p>
+<p>Version 1 is CENTL&#x27;s first on-disk history format, so there is no legacy file to migrate or plaintext format to import. Malformed files and files with an unknown version are ignored safely. The next saved entry replaces such a file with a valid version-1 file; CENTL never guesses at or executes unknown history content.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

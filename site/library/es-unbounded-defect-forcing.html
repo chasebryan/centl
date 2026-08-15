@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Unbounded defect forcing from prescribed external nonresidue load — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-unbounded-defect-forcing.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-unbounded-defect-forcing.html">
+  <meta property="og:title" content="Unbounded defect forcing from prescribed external nonresidue load — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Unbounded defect forcing from prescribed external nonresidue load</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-UNBOUNDED-DEFECT-FORCING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-TWO-TARGET-KNESER.md</code>, <code>FAB-KNESER-EVEN-DEFECT-EDGE.md</code>, <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code></p>
+<p><strong>Imported classical tools:</strong> Chinese remainder theorem and Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> this proves that a hypothetical prime counterexample would require arbitrarily large full-stabilizer defect quotients as the auxiliary external prime shift varies. It does not by itself rule out those unbounded defects and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix a Mordell-hard prime <code>p</code> and suppose, for contradiction-program purposes only, that <code>p</code> is an Erdős--Straus counterexample.</p>
+<p>Then by the exact two-target signed-box equivalence, every admissible shift</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1</div>
+<p>misses both targets</p>
+<div class="math" role="math">-p^{-1} \qquad\text{and}\qquad -1.</div>
+<p>Let</p>
+<div class="math" role="math">\ell_1,\ldots,\ell_t</div>
+<p>be distinct primes satisfying</p>
+<div class="math" role="math">\boxed{ \left(\frac{\ell_i}{p}\right)=-1.}</div>
+<p>Choose arbitrary positive exponents</p>
+<div class="math" role="math">e_1,\ldots,e_t.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{M=\prod_{i=1}^t\ell_i^{e_i}.}</div>
+<hr>
+<h2>2. Force the entire prescribed load into one shifted integer</h2>
+<p>Choose a quadratic nonresidue class</p>
+<div class="math" role="math">a\pmod p.</div>
+<p>By CRT there is a residue class <code>b</code> modulo</p>
+<div class="math" role="math">\boxed{4pM}</div>
+<p>satisfying</p>
+<div class="math" role="math">\boxed{ \begin{aligned} b&amp;\equiv3\pmod4,\\ b&amp;\equiv a\pmod p,\\ b&amp;\equiv-p\pmod{\ell_i^{e_i}} \quad(1\le i\le t). \end{aligned}}</div>
+<p>This class is reduced modulo <code>4pM</code>:</p>
+<ul><li>it is odd;</li><li><code>a</code> is nonzero modulo <code>p</code>;</li><li><code>-p</code> is nonzero modulo every <code>ell_i</code> because <code>ell_i ne p</code>.</li></ul>
+<p>Therefore Dirichlet&#x27;s theorem gives infinitely many primes</p>
+<div class="math" role="math">\boxed{q\equiv b\pmod{4pM}.}</div>
+<p>Every such prime satisfies</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac qp\right)=-1</div>
+<p>because <code>q≡a mod p</code>.</p>
+<p>Put</p>
+<div class="math" role="math">\boxed{C_q=\frac{p+q}{4}.}</div>
+<p>Since</p>
+<div class="math" role="math">q\equiv-p\pmod{4\ell_i^{e_i}},</div>
+<p>we obtain</p>
+<div class="math" role="math">\boxed{ \ell_i^{e_i}\mid C_q \qquad(1\le i\le t).}</div>
+<p>Thus any prescribed finite external-nonresidue prime-power load can be inserted into a shifted factorization at infinitely many prime shifts.</p>
+<hr>
+<h2>3. The loaded primes remain nonresidues modulo q</h2>
+<p>For each loaded prime <code>ell=ell_i</code>, we have</p>
+<div class="math" role="math">q\equiv-p\pmod\ell</div>
+<p>and <code>q≡3 mod4</code>.</p>
+<p>Quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac\ell q\right) = (-1)^{((\ell-1)/2)((q-1)/2)} \left(\frac q\ell\right).</div>
+<p>Because <code>(q-1)/2</code> is odd,</p>
+<div class="math" role="math">\left(\frac\ell q\right) = (-1)^{(\ell-1)/2} \left(\frac{-p}\ell\right).</div>
+<p>Now</p>
+<div class="math" role="math">\left(\frac{-p}\ell\right) = \left(\frac{-1}\ell\right) \left(\frac p\ell\right) = (-1)^{(\ell-1)/2} \left(\frac p\ell\right).</div>
+<p>The two signs cancel. Since <code>p≡1 mod4</code>, reciprocity between <code>p</code> and <code>ell</code> gives</p>
+<div class="math" role="math">\left(\frac p\ell\right) = \left(\frac\ell p\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left(\frac{\ell_i}{q}\right) = \left(\frac{\ell_i}{p}\right) =-1.}</div>
+<p>So every loaded prime power contributes visible quadratic-nonresidue valuation at the new external prime shift.</p>
+<hr>
+<h2>4. Forced lower bound on the defect index</h2>
+<p>Let</p>
+<div class="math" role="math">R_q=\mathcal R_q(C_q)</div>
+<p>be the exact signed divisor box modulo <code>q</code>, and let</p>
+<div class="math" role="math">H_q=\operatorname{Stab}(R_q), \qquad n_q=[(\mathbb Z/q\mathbb Z)^\times:H_q].</div>
+<p>Under the hypothetical-counterexample assumption, both exact solution targets miss.</p>
+<p>The combined Kneser theorem forces <code>n_q</code> to be even, while the external-nonresidue edge theorem gives</p>
+<div class="math" role="math">\boxed{ n_q\ge2E_q(C_q)+4,}</div>
+<p>where</p>
+<div class="math" role="math">E_q(C_q) = \sum_{ r^e\parallel C_q, (r/q)=-1 }e.</div>
+<p>The prescribed load gives</p>
+<div class="math" role="math">E_q(C_q) \ge \sum_{i=1}^t e_i.</div>
+<p>Hence:</p>
+<h3>Theorem — prescribed-load defect bound</h3>
+<p>For every prime <code>q</code> in the Dirichlet family above,</p>
+<div class="math" role="math">\boxed{ n_q \ge 2\sum_{i=1}^t e_i+4.}</div>
+<p>Moreover each loaded prime satisfies the full-stabilizer projected-order gap</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G_q/H_q}(\ell_iH_q) &gt;2e_i+1.}</div>
+<p>Thus the obstruction is forced to expose every prescribed external prime power as a high-order quotient atom.</p>
+<hr>
+<h2>5. Unbounded-defect corollary</h2>
+<p>Take any integer</p>
+<div class="math" role="math">B\ge1.</div>
+<p>Choose the exponents so that</p>
+<div class="math" role="math">2\sum_i e_i+4&gt;B.</div>
+<p>Then the theorem produces infinitely many external prime shifts <code>q</code> for which a hypothetical counterexample must have</p>
+<div class="math" role="math">\boxed{n_q&gt;B.}</div>
+<p>Therefore:</p>
+<h3>Corollary — no bounded defect model can support a counterexample</h3>
+<p>If a Mordell-hard prime counterexample exists, then the full-stabilizer quotient indices of its failed external prime shifts are unbounded:</p>
+<div class="math" role="math">\boxed{ \sup_{ q\equiv3\ (4), (q/p)=-1 } [(\mathbb Z/q\mathbb Z)^\times:H_q] =\infty.}</div>
+<p>In fact arbitrarily large defect indices occur on infinite Dirichlet families whose shifted factorizations contain any prescribed finite external-nonresidue prime-power load.</p>
+<hr>
+<h2>6. Strategic consequence</h2>
+<p>This theorem rules out a large class of possible proof models.</p>
+<p>A hypothetical counterexample cannot be explained by saying that every failed auxiliary shift falls into a fixed finite collection of quotient defects such as</p>
+<div class="math" role="math">6,10,14,18,\ldots,N.</div>
+<p>For every finite ceiling <code>N</code>, one can force a new external shift whose visible nonresidue load requires defect index greater than <code>N</code>.</p>
+<p>Thus the remaining direct proof must exploit something that survives <strong>unbounded quotient complexity</strong>, for example:</p>
+<ol><li>a global incompatibility among the loaded high-order atoms;</li><li>reciprocity constraints connecting different forced shifts;</li><li>analytic information showing that the required low-entropy stabilizer factorizations cannot persist on all such Dirichlet families;</li><li>a construction of one shift where the prescribed load plus an additional uncontrolled factor necessarily breaks every possible stabilizer.</li></ol>
+<p>The theorem therefore redirects the search away from finite classification of defect indices and toward a uniform expansion/reciprocity principle.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

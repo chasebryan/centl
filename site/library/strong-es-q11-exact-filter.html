@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact q=11 filter for Mordell-hard primes in the strong/Type-II corridor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-q11-exact-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-q11-exact-filter.html">
+  <meta property="og:title" content="Exact q=11 filter for Mordell-hard primes in the strong/Type-II corridor — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact q=11 filter for Mordell-hard primes in the strong/Type-II corridor</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-Q11-EXACT-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact factorization criterion</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-FINITE-SHIFT-CORRIDOR.md</code>, <code>STRONG-ES-Q7-EXACT-FILTER.md</code>, <code>FAB-HARD-FIRST-FILTERS.md</code></p>
+<p><strong>Claim boundary:</strong> classifies the fixed Type-II shift <code>q=11</code> for Mordell-hard primes. It does not prove the strong conjecture or Erdős--Straus.</p>
+<hr>
+<h2>1. Forced factor at q = 11</h2>
+<p>Let <code>p</code> be Mordell-hard. Then</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod3.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+11}{4}.}</div>
+<p>Since</p>
+<div class="math" role="math">p+11\equiv1+2\equiv0\pmod3,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{3\mid C.}</div>
+<p>Also <code>p≡1 mod8</code>, so <code>p+11≡4 mod8</code> and therefore</p>
+<div class="math" role="math">\boxed{C\text{ is odd}.}</div>
+<p>The exact fixed-shift Type-II criterion is</p>
+<div class="math" role="math">\boxed{-1\in\mathcal R_{11}(C).}</div>
+<hr>
+<h2>2. Cyclic coordinate modulo 11</h2>
+<p>The group</p>
+<div class="math" role="math">G=(\mathbb Z/11\mathbb Z)^\times</div>
+<p>is cyclic of order ten.</p>
+<p>Using primitive root <code>2</code>, write residues by discrete-log class in</p>
+<div class="math" role="math">\mathbb Z/10\mathbb Z.</div>
+<p>Then:</p>
+<ul><li>quadratic residues are the even classes;</li><li>quadratic nonresidues are the odd classes;</li><li>the target <code>-1</code> is class <code>5</code>;</li><li>the forced factor</li></ul>
+<div class="math" role="math">3\equiv2^8</div>
+<p>has class <code>8=-2</code>, hence order five.</p>
+<p>The residue classes split concretely as</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} \text{type} &amp; \text{residues mod }11\\ \hline \text{identity} &amp; 1\\ \text{nontrivial quadratic residues} &amp; 3,4,5,9\\ \text{primitive NR, type I} &amp; 2,6\\ \text{primitive NR, type II} &amp; 7,8\\ \text{order-two target} &amp; 10 \end{array}}</div>
+<p>The labels “type I/II” in this table refer only to the two primitive-log orientations inside <code>C_10</code>, not to standard Erdős--Straus Type I/II.</p>
+<hr>
+<h2>3. Two units of quadratic-residue valuation fill the QR subgroup</h2>
+<p>Let <code>Q</code> be the total signed contribution from nontrivial quadratic-residue prime factors of <code>C</code>.</p>
+<p>Every such factor has order five.</p>
+<p>A simple factor contributes a three-point set</p>
+<div class="math" role="math">\{0,\pm c\} \subset C_5</div>
+<p>for some nonzero <code>c</code>.</p>
+<p>Two such valuation units already fill all of <code>C_5</code>: by direct inspection, or Cauchy--Davenport,</p>
+<div class="math" role="math">\boxed{ \{0,\pm c\}+\{0,\pm d\}=C_5 }</div>
+<p>for nonzero <code>c,d</code>.</p>
+<p>Likewise a single order-five prime occurring to exponent at least two has local interval length five and fills the QR subgroup.</p>
+<p>Therefore if the total valuation of nontrivial QR prime factors is at least two, the signed box contains the complete quadratic-residue subgroup.</p>
+<p>Any quadratic-nonresidue factor would then translate that subgroup onto the full nonresidue coset, which contains <code>-1</code>.</p>
+<p>Hence:</p>
+<h3>Lemma</h3>
+<p>If the nontrivial QR valuation mass is at least two, then a <code>q=11</code> miss is possible <strong>if and only if every prime factor of <code>C</code> is a quadratic residue modulo 11</strong>.</p>
+<hr>
+<h2>4. The thin case has v3(C) = 1</h2>
+<p>Because <code>3|C</code> and <code>3</code> is a nontrivial QR, the only way the total nontrivial QR valuation can equal one is</p>
+<div class="math" role="math">\boxed{v_3(C)=1}</div>
+<p>and every other quadratic-residue prime factor is actually</p>
+<div class="math" role="math">\boxed{1\pmod{11}.}</div>
+<p>The QR contribution is then exactly</p>
+<div class="math" role="math">\boxed{Q=\{0,2,8\}}</div>
+<p>in additive <code>C_10</code> notation, after replacing class <code>8</code> by its symmetric generator <code>±2</code>.</p>
+<p>We classify which nonresidue factors may coexist with this set while still missing target class <code>5</code>.</p>
+<hr>
+<h2>5. Primitive classes 7 and 8 force a hit immediately</h2>
+<p>The residues</p>
+<div class="math" role="math">7,8\pmod{11}</div>
+<p>have logarithms <code>7,3</code>, i.e. classes <code>±3</code> in <code>C_10</code>.</p>
+<p>A simple such factor contributes</p>
+<div class="math" role="math">\{0,3,7\}.</div>
+<p>But</p>
+<div class="math" role="math">2+3=5</div>
+<p>and</p>
+<div class="math" role="math">8+7=15\equiv5\pmod{10}.</div>
+<p>Therefore even one prime factor</p>
+<div class="math" role="math">\boxed{7\text{ or }8\pmod{11}}</div>
+<p>forces the Type-II target.</p>
+<p>A factor <code>10 mod11</code> is the target <code>-1</code> itself and also forces a hit directly.</p>
+<hr>
+<h2>6. Primitive classes 2 and 6 can survive only with valuation at most two</h2>
+<p>The residues</p>
+<div class="math" role="math">2,6\pmod{11}</div>
+<p>have logarithms <code>1,9</code>, i.e. classes <code>±1</code> in <code>C_10</code>.</p>
+<p>If their total valuation is <code>E</code>, their combined signed contribution is</p>
+<div class="math" role="math">\boxed{P_E=\{-E,-E+1,\ldots,E\}\pmod{10}.}</div>
+<p>The target is hit exactly when</p>
+<div class="math" role="math">5\in Q+P_E.</div>
+<p>Since</p>
+<div class="math" role="math">Q=\{0,2,8\},</div>
+<p>this requires <code>P_E</code> to contain one of</p>
+<div class="math" role="math">5,3,7.</div>
+<p>For</p>
+<div class="math" role="math">E\le2,</div>
+<p>it contains none of them.</p>
+<p>For</p>
+<div class="math" role="math">E\ge3,</div>
+<p>it contains <code>3</code> and <code>7</code>, hence the target is hit.</p>
+<p>Therefore the thin branch misses exactly when</p>
+<div class="math" role="math">\boxed{E\le2.}</div>
+<hr>
+<h2>7. Exact q=11 miss theorem</h2>
+<p>Let</p>
+<div class="math" role="math">C=\frac{p+11}{4}</div>
+<p>for a Mordell-hard prime <code>p</code>.</p>
+<p>Then <code>q=11</code> misses exactly in one of the following two cases.</p>
+<h3>Branch A: pure quadratic splitting</h3>
+<p>Every prime factor of <code>C</code> is a quadratic residue modulo <code>11</code>:</p>
+<div class="math" role="math">\boxed{ \operatorname{supp}(C) \subseteq \{1,3,4,5,9\}\pmod{11}.}</div>
+<h3>Branch B: thin primitive defect</h3>
+<p>All of the following hold:</p>
+<ol><li>&lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;\boxed{v_3(C)=1};&lt;/div&gt;</li></ol>
+<ol><li>every other quadratic-residue prime factor is <code>1 mod11</code>;</li><li>there are no prime factors <code>7,8,10 mod11</code>;</li><li>every nonresidue prime factor belongs to</li></ol>
+<div class="math" role="math">\boxed{2,6\pmod{11}};</div>
+<ol><li>their total valuation satisfies</li></ol>
+<div class="math" role="math">\boxed{ \sum_{r^e\parallel C,\ r\equiv2,6\ (11)}e\le2.}</div>
+<p>No other miss geometry is possible.</p>
+<hr>
+<h2>8. The square-divisible subcase is especially clean</h2>
+<p>If</p>
+<div class="math" role="math">\boxed{9\mid C,}</div>
+<p>then the forced prime <code>3</code> alone occurs with exponent at least two and fills the complete quadratic-residue subgroup.</p>
+<p>Therefore Branch B is impossible and</p>
+<div class="math" role="math">\boxed{ 9\mid C \Longrightarrow \left( q=11\text{ misses} \iff \text{every prime factor of }C\text{ is QR mod }11 \right).}</div>
+<hr>
+<h2>9. Consecutive corridor position</h2>
+<p>With</p>
+<div class="math" role="math">A=\frac{p+3}{4},</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{C=A+2.}</div>
+<p>Thus a hypothetical strong/Type-II counterexample must make the first three consecutive integers satisfy:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} A &amp; \text{all prime factors }1\pmod3\\ A+1 &amp; \text{all prime factors quadratic residues mod }7\\ A+2 &amp; \text{Branch A or the thin Branch B above mod }11. \end{array}}</div>
+<p>The first two are pure splitting laws; the third allows only one explicitly bounded defect packet beyond pure splitting.</p>
+<hr>
+<h2>10. Next targets</h2>
+<ol><li>Measure the joint density of the exact <code>q=3,7,11</code> survivor templates.</li><li>Classify <code>q=19</code> and <code>q=23</code>, using the small prime factors forced by the hard congruence classes.</li><li>Search for a general theorem: a forced high-order quadratic-residue factor with enough valuation collapses a fixed prime-shift miss to pure quadratic splitting.</li><li>Combine several corridor positions with sieve estimates on consecutive shifted integers.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quotient-9 shadow rigidity — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-9-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-9-rigidity.html">
+  <meta property="og:title" content="Quotient-9 shadow rigidity — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quotient-9 shadow rigidity</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-9-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem inside the Type A/B minimal-depth/shadow program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It completely classifies unrestricted full direct shadows along the ancestry quotient <code>q=9</code>.</p>
+<p>Read with:</p>
+<ul><li><a href="prime-child-shadows.html">PRIME-CHILD-SHADOWS.md</a></li><li><a href="square-lift-towers.html">SQUARE-LIFT-TOWERS.md</a></li><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li></ul>
+<h2>1. Quotient-9 ancestry</h2>
+<p>Fix a source depth <code>j&gt;=1</code>, put</p>
+<div class="math" role="math">m=4j-1,</div>
+<p>and define its quotient-9 ancestry child</p>
+<div class="math" role="math">\boxed{K=9j-2.}</div>
+<p>Then</p>
+<div class="math" role="math">4K-1=9(4j-1)=9m.</div>
+<p>Thus this is exactly the odd-square lift with square multiplier</p>
+<div class="math" role="math">9=3^2.</div>
+<p>Also</p>
+<div class="math" role="math">\boxed{K\equiv j\pmod m}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{4K\equiv1\pmod m.}</div>
+<h2>2. Normalized trap sets</h2>
+<p>It is convenient to negate the trap sets. Define</p>
+<div class="math" role="math">S_n=-T_n = \{e,4e\pmod{4n-1}:e\mid n\}.</div>
+<p>The set <code>S_n</code> is inverse-closed. Indeed, if <code>e|n</code> and <code>f=n/e</code>, then</p>
+<div class="math" role="math">(4e)f=4n\equiv1\pmod{4n-1},</div>
+<p>so</p>
+<div class="math" role="math">(4e)^{-1}\equiv f,</div>
+<p>and conversely.</p>
+<p>For the ancestry pair <code>(j,K)</code>, if <code>e f=K</code>, then modulo <code>m</code></p>
+<div class="math" role="math">(4e)f=4K\equiv1.</div>
+<p>Therefore, once every divisor residue <code>e mod m</code> belongs to <code>S_j</code>, all companion residues <code>4e mod m</code> belong as well by inverse closure.</p>
+<p>Hence:</p>
+<h3>Lemma</h3>
+<p>For <code>K=9j-2</code>,</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff e\bmod m\in S_j\quad\text{for every divisor }e\mid K. }</div>
+<p>This reduces quotient-9 full shadowing to the image of the target divisor lattice.</p>
+<h2>3. Classification theorem</h2>
+<h3>Theorem</h3>
+<p>Let</p>
+<div class="math" role="math">K=9j-2.</div>
+<p>Then the complete unrestricted target layer is shadowed by <code>j</code> if and only if exactly one of the following occurs:</p>
+<ol><li><code>K</code> is prime;</li><li><code>K=2p</code> with <code>p</code> prime;</li><li><code>(j,K)=(2,16)</code>.</li></ol>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ T_{9j-2}\bmod(4j-1)\subseteq T_j \iff \begin{cases} 9j-2\text{ is prime},\quad\text{or}\\ (9j-2)/2\text{ is prime},\quad\text{or}\\ j=2. \end{cases} }</div>
+<p>In the second alternative <code>j</code> is automatically even because <code>9j-2</code> is even.</p>
+<h2>4. Prime child direction</h2>
+<p>If <code>K</code> is prime, the general prime-child ancestry theorem applies immediately:</p>
+<div class="math" role="math">\boxed{T_K\bmod m\subseteq T_j.}</div>
+<h2>5. Twice-prime child direction</h2>
+<p>Suppose</p>
+<div class="math" role="math">K=2p</div>
+<p>with <code>p</code> prime.</p>
+<p>Then <code>K</code> is even, so <code>j</code> is even. Put</p>
+<div class="math" role="math">d=j/2.</div>
+<p>Since</p>
+<div class="math" role="math">K=9j-2,</div>
+<p>we have</p>
+<div class="math" role="math">p=\frac K2=\frac{9j-2}{2}.</div>
+<p>Subtract <code>d=j/2</code>:</p>
+<div class="math" role="math">p-d = \frac{8j-2}{2} =4j-1 =m.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{p\equiv d=j/2\pmod m.}</div>
+<p>The divisors of <code>K=2p</code> are</p>
+<div class="math" role="math">1,2,p,K.</div>
+<p>Modulo <code>m</code> these become</p>
+<div class="math" role="math">1,\quad2,\quad j/2,\quad j,</div>
+<p>and every one is a divisor of <code>j</code>.</p>
+<p>Thus every target divisor residue lies in <code>S_j</code>, so by the normalized-divisor lemma</p>
+<div class="math" role="math">\boxed{T_K\bmod m\subseteq T_j.}</div>
+<h2>6. Exceptional child K = 16</h2>
+<p>For</p>
+<div class="math" role="math">j=2,</div>
+<p>we get</p>
+<div class="math" role="math">K=16, \qquad m=7.</div>
+<p>The normalized base trap set is</p>
+<div class="math" role="math">S_2=\{1,2,4\}\pmod7.</div>
+<p>Every divisor of <code>16</code> is a power of two, and its residue modulo <code>7</code> lies in</p>
+<div class="math" role="math">\{1,2,4\}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{T_{16}\bmod7\subseteq T_2.}</div>
+<p>This is the unique composite child in the quotient-9 classification that is neither prime nor twice a prime.</p>
+<h2>7. Converse when j is odd</h2>
+<p>Assume <code>j</code> is odd. Then <code>K=9j-2</code> is odd.</p>
+<p>Suppose <code>K</code> is composite. Let <code>ell</code> be its smallest prime factor. Then</p>
+<div class="math" role="math">\ell\le\sqrt K.</div>
+<p>For every composite odd child beyond the tiny initial range,</p>
+<div class="math" role="math">\sqrt K&lt;4j-1=m,</div>
+<p>and the few initial values are checked directly. In fact the inequality already holds for every relevant odd <code>j&gt;=1</code> with composite <code>K</code>.</p>
+<p>Also</p>
+<div class="math" role="math">\gcd(j,K) = \gcd(j,9j-2) = \gcd(j,2) =1,</div>
+<p>so</p>
+<div class="math" role="math">\ell\nmid j.</div>
+<p>Because <code>ell</code> is an odd integer with</p>
+<div class="math" role="math">1&lt;\ell&lt;m,</div>
+<p>it cannot be a member of the normalized base set <code>S_j</code>:</p>
+<ul><li>it is not a divisor of <code>j</code>;</li><li>every unwrapped value <code>4d</code> with <code>d&lt;j</code> is divisible by <code>4</code>, hence cannot equal odd <code>ell</code>;</li><li>the only wrapped endpoint <code>4j</code> reduces to <code>1</code>.</li></ul>
+<p>Thus</p>
+<div class="math" role="math">\ell\notin S_j.</div>
+<p>But <code>ell|K</code>, so the normalized-divisor lemma says full shadowing fails.</p>
+<p>Therefore, when <code>j</code> is odd,</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff K\text{ is prime}. }</div>
+<h2>8. Converse when j is even</h2>
+<p>Now let</p>
+<div class="math" role="math">j=2d.</div>
+<p>Then</p>
+<div class="math" role="math">K=18d-2 =2N,</div>
+<p>where</p>
+<div class="math" role="math">\boxed{N=9d-1.}</div>
+<p>Also</p>
+<div class="math" role="math">N-m = (9d-1)-(8d-1) =d,</div>
+<p>because</p>
+<div class="math" role="math">m=4j-1=8d-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{N\equiv d=j/2\pmod m.}</div>
+<p>Suppose <code>N</code> has an odd prime factor <code>ell</code>.</p>
+<p>Choose the smallest such factor. Since <code>ell|N</code> and</p>
+<div class="math" role="math">\gcd(N,d)=\gcd(9d-1,d)=1,</div>
+<p>we have</p>
+<div class="math" role="math">\ell\nmid j.</div>
+<p>Also <code>ell&lt;m</code> except for the prime case <code>N=ell</code> itself. If <code>N</code> is composite with an odd prime factor, choosing a proper prime factor gives <code>ell&lt;=sqrt N&lt;m</code>.</p>
+<p>As above, an odd <code>ell</code> with <code>1&lt;ell&lt;m</code> and <code>ell not|j</code> cannot lie in <code>S_j</code>.</p>
+<p>Therefore full shadowing forces either:</p>
+<ol><li><code>N</code> is prime, giving the twice-prime family <code>K=2N</code>; or</li><li><code>N</code> has no odd prime factor, so</li></ol>
+<div class="math" role="math">N=2^r.</div>
+<p>We must classify the second possibility.</p>
+<h2>9. The power-of-two residual is unique</h2>
+<p>Suppose</p>
+<div class="math" role="math">N=9d-1=2^r.</div>
+<p>Then</p>
+<div class="math" role="math">2^r\equiv-1\pmod9.</div>
+<p>The powers of <code>2 mod 9</code> have period <code>6</code>, and <code>-1 mod 9</code> occurs exactly when</p>
+<div class="math" role="math">\boxed{r\equiv3\pmod6.}</div>
+<p>For <code>r=3</code>,</p>
+<div class="math" role="math">N=8, \qquad d=1, \qquad\j=2, \qquad K=16,</div>
+<p>which is the exceptional shadow already found.</p>
+<p>Now suppose <code>r&gt;=9</code>. Then <code>d=(2^r+1)/9</code> is odd, so</p>
+<div class="math" role="math">j=2d</div>
+<p>has exact 2-adic valuation <code>1</code>.</p>
+<p>The target depth is</p>
+<div class="math" role="math">K=2N=2^{r+1},</div>
+<p>so <code>16|K</code> and therefore <code>16</code> is a target divisor.</p>
+<p>For <code>r&gt;=9</code>,</p>
+<div class="math" role="math">16&lt;m=8d-1.</div>
+<p>But <code>16</code> cannot lie in <code>S_j</code>:</p>
+<ul><li><code>16</code> is not a divisor of <code>j</code>, because <code>v_2(j)=1</code>;</li><li>if <code>16=4e</code> in the unwrapped second family, then <code>e=4</code>, but <code>4 not|j</code>;</li><li>the wrapped endpoint is only <code>1</code>.</li></ul>
+<p>Hence the target divisor <code>16</code> escapes the base normalized trap set.</p>
+<p>Therefore no <code>r&gt;=9</code> works.</p>
+<p>So the unique power-of-two residual is</p>
+<div class="math" role="math">\boxed{j=2,\ K=16.}</div>
+<p>Combining all cases proves the classification theorem. QED.</p>
+<h2>10. Structural interpretation</h2>
+<p>The quotient-5 theorem said:</p>
+<div class="math" role="math">\boxed{q=5:\quad\text{full unrestricted shadow}\iff\text{child prime}.}</div>
+<p>The new quotient-9 theorem says:</p>
+<div class="math" role="math">\boxed{ q=9:\quad \text{full unrestricted shadow} \iff \text{child has divisor lattice of prime / twice-prime type, plus }16. }</div>
+<p>This is the first exact evidence that <strong>composite-child shadowing is controlled by the factorization shape of the child depth itself</strong>.</p>
+<p>The square multiplier <code>9=3^2</code> permits one extra divisor coordinate, but only in an extremely rigid way.</p>
+<h2>11. Infinite shadow subfamilies</h2>
+<p>The theorem gives several infinite families.</p>
+<h3>Prime children</h3>
+<p>Prime children satisfy</p>
+<div class="math" role="math">K\equiv-2\equiv7\pmod9.</div>
+<p>Dirichlet gives infinitely many primes in this class, hence infinitely many quotient-9 prime-child shadows.</p>
+<h3>Twice-prime children</h3>
+<p>Write</p>
+<div class="math" role="math">K=2p=9j-2.</div>
+<p>Then</p>
+<div class="math" role="math">p\equiv-1\equiv8\pmod9.</div>
+<p>Every prime</p>
+<div class="math" role="math">p\equiv8\pmod9</div>
+<p>gives</p>
+<div class="math" role="math">j=\frac{2p+2}{9} =\frac{2(p+1)}9</div>
+<p>and hence a quotient-9 full shadow.</p>
+<p>Dirichlet gives infinitely many such primes.</p>
+<p>Therefore the quotient-9 graph has at least two infinite arithmetic components:</p>
+<div class="math" role="math">\boxed{ K\text{ prime},\ K\equiv7\pmod9, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ K=2p,\quad p\text{ prime},\ p\equiv8\pmod9. }</div>
+<h2>12. Counting</h2>
+<p>For child depths <code>K&lt;=X</code>, the prime component has asymptotic count</p>
+<div class="math" role="math">\pi(X;9,7) \sim \frac{1}{6}\frac{X}{\log X}.</div>
+<p>The twice-prime component corresponds to primes</p>
+<div class="math" role="math">p\le X/2, \qquad p\equiv8\pmod9,</div>
+<p>and therefore has asymptotic count</p>
+<div class="math" role="math">\pi(X/2;9,8) \sim \frac{1}{12}\frac{X}{\log X}.</div>
+<p>Ignoring their disjoint tiny exception, quotient <code>9</code> therefore contributes</p>
+<div class="math" role="math">\boxed{ \left(\frac14+o(1)\right) \frac{X}{\log X} }
+<p>unrestricted full-shadow child depths up to <code>X</code>.</p>
+<h2>13. Next theorem target</h2>
+<p>The next ancestry quotient is</p>
+<p>\[ q=13, \qquad K=13j-3.&lt;/div&gt;</p>
+<p>Unlike <code>9</code>, the quotient is prime rather than a square. The prime-child family is automatic, but composite children may obey a different rigidity law.</p>
+<p>The broader target is now clear:</p>
+<blockquote><p>For each fixed ancestry quotient <code>q=4s+1</code>, classify the factorization types of the child depth <code>K=qj-s</code> for which every target divisor residue is absorbed by the base divisor/inverse set.</p></blockquote>
+<p>Quotients <code>5</code> and <code>9</code> are now completely solved in the unrestricted system.</p>
+<h2>14. Novelty boundary</h2>
+<p>Divisor arguments, Dirichlet&#x27;s theorem, and elementary congruences are classical. López Type A/B congruences are prior art.</p>
+<p>The candidate contribution is the <strong>exact quotient-9 ancestry shadow classification in the <code>C_AB</code> minimal-depth/shadow framework</strong>, extending the prime-child theorem into a genuinely composite-child rigidity theorem.</p>
+<p>Publication priority remains subject to external review and broader prior-art search.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

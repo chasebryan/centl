@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-index hierarchy for FAB Kneser defects — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-kneser-prime-index-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-kneser-prime-index-defect.html">
+  <meta property="og:title" content="Prime-index hierarchy for FAB Kneser defects — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-index hierarchy for FAB Kneser defects</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-KNESER-PRIME-INDEX-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollary of <code>FAB-KNESER-DIVISOR-DEFECT.md</code></p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> sharply bounds the non-power-residue valuation mass in any prime-index fixed-k placement defect. It does not prove that such defects cannot occur for every auxiliary k and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Use the notation of <code>FAB-KNESER-DIVISOR-DEFECT.md</code>.</p>
+<p>For a fixed admissible <code>k</code>, write</p>
+<div class="math" role="math">C=\frac{p+k}{4}=\prod_i r_i^{e_i}</div>
+<p>and let <code>R</code> be the signed divisor box. Assume the exact target is missed and let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R).</div>
+<p>The Kneser defect budget is</p>
+<div class="math" role="math">\boxed{ \sum_i \left( \min(2e_i+1,\operatorname{ord}_{G_k/H}(r_iH))-1 \right) \le [G_k:H]-2. }</div>
+<hr>
+<h2>2. Prime quotient index</h2>
+<p>Assume the stabilizer quotient has odd prime order</p>
+<div class="math" role="math">\boxed{[G_k:H]=\ell.}</div>
+<p>Then every nonidentity element of <code>G_k/H</code> has exact order <code>ell</code>.</p>
+<p>Hence for every prime factor <code>r_i</code> lying outside <code>H</code>,</p>
+<div class="math" role="math">\operatorname{ord}(r_iH)=\ell</div>
+<p>and its contribution to the defect budget is</p>
+<div class="math" role="math">\boxed{ \min(2e_i+1,\ell)-1 =\min(2e_i,\ell-1). }</div>
+<p>If</p>
+<div class="math" role="math">e_i\ge\frac{\ell-1}{2},</div>
+<p>then this one factor contributes <code>ell-1</code>, already larger than the entire available budget <code>ell-2</code>. Therefore every exceptional factor must satisfy</p>
+<div class="math" role="math">\boxed{e_i\le\frac{\ell-3}{2}.}</div>
+<p>In that allowed range its contribution is exactly <code>2e_i</code>.</p>
+<p>Summing the defect inequality gives</p>
+<div class="math" role="math">2\sum_{r_i\notin H}e_i \le\ell-2.</div>
+<p>The left side is even, so in fact</p>
+<div class="math" role="math">\boxed{ \sum_{r_i\notin H}e_i \le\frac{\ell-3}{2}. }</div>
+<hr>
+<h2>3. Prime-index defect theorem</h2>
+<h3>Theorem</h3>
+<p>If a fixed-k FAB signed divisor box misses its target and the stabilizer quotient has odd prime index <code>ell</code>, then the total valuation mass of prime factors of <code>C=(p+k)/4</code> outside the index-<code>ell</code> subgroup is bounded by</p>
+<div class="math" role="math">\boxed{ \sum_{ r^e\parallel C, r\notin H }e \le\frac{\ell-3}{2}. }</div>
+<p>When the ambient unit group is cyclic and <code>H</code> is the unique index-<code>ell</code> subgroup, this says:</p>
+<div class="math" role="math">\boxed{ \text{total exponent of prime factors of }C \text{ that are not }\ell\text{-th-power residues} \le\frac{\ell-3}{2}. }</div>
+<p>This is a valuation statement, not merely a bound on the number of exceptional distinct primes.</p>
+<hr>
+<h2>4. First cases</h2>
+<h3>ell = 3</h3>
+<div class="math" role="math">\frac{\ell-3}{2}=0.</div>
+<p>Therefore every prime factor of <code>C</code> lies in the cubic-residue subgroup.</p>
+<p>This recovers the cubic-defect theorem.</p>
+<h3>ell = 5</h3>
+<div class="math" role="math">\frac{\ell-3}{2}=1.</div>
+<p>There is at most one non-fifth-power prime factor, and it must occur to exponent one.</p>
+<p>This recovers the fifth-power sparsity theorem.</p>
+<h3>ell = 7</h3>
+<div class="math" role="math">\frac{\ell-3}{2}=2.</div>
+<p>The complete exceptional valuation mass is at most two. The only possibilities are therefore:</p>
+<ul><li>one exceptional prime to exponent one;</li><li>one exceptional prime to exponent two;</li><li>two distinct exceptional primes, both simple.</li></ul>
+<p>Everything else in <code>C</code> is a seventh-power residue in the quotient.</p>
+<h3>ell = 11</h3>
+<p>The total exceptional valuation mass is at most four.</p>
+<p>Thus even at larger prime defect index, most of the shifted factorization is forced into one high-power residue subgroup.</p>
+<hr>
+<h2>5. Contrapositive expansion criterion</h2>
+<p>The theorem has an immediately useful contrapositive.</p>
+<p>Fix an odd prime <code>ell</code> dividing the order of the relevant cyclic unit group. If</p>
+<div class="math" role="math">\boxed{ \sum_{ r^e\parallel C, r\notin G^\ell }e &gt;\frac{\ell-3}{2}, }</div>
+<p>then <strong>index <code>ell</code> cannot be the stabilizer defect of a failed FAB box</strong>.</p>
+<p>Thus every independent non-<code>ell</code>-power prime factor consumes two units of Kneser room, and enough such factors eliminate that defect index completely.</p>
+<p>This turns higher-power residue diversity in the shifted integer into an exact placement weapon.</p>
+<hr>
+<h2>6. Relation to external nonresidue descent</h2>
+<p>At an external nonresidue prime <code>q=3 mod4</code>, the shifted integer</p>
+<div class="math" role="math">C_q=\frac{p+q}{4}</div>
+<p>contains a prime factor that is a quadratic nonresidue modulo both <code>p</code> and <code>q</code>.</p>
+<p>If the FAB box at <code>q</code> fails with odd prime defect index <code>ell</code>, then all but at most <code>(ell-3)/2</code> units of prime-factor valuation of <code>C_q</code> must nevertheless lie in the <code>ell</code>-th-power subgroup modulo <code>q</code>.</p>
+<p>Therefore a persistent failure along the external-nonresidue factor cycle requires a sequence of shifted factorizations that are simultaneously:</p>
+<ol><li>quadratic-sign rich enough to carry the nonresidue descent;</li><li>higher-power-residue sparse enough to remain inside the Kneser budget.</li></ol>
+<p>That tension is the next universal obstruction to exploit.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

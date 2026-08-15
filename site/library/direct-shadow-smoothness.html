@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fix a candidate progression">
+  <title>Direct-shadow smoothness theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/direct-shadow-smoothness.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/direct-shadow-smoothness.html">
+  <meta property="og:title" content="Direct-shadow smoothness theorem — Free Computation Foundation">
+  <meta property="og:description" content="Fix a candidate progression">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Direct-shadow smoothness theorem</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Fix a candidate progression</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIRECT-SHADOW-SMOOTHNESS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this theorem restricts which earlier moduli can directly shadow a fixed candidate progression. It does not imply that collective/union shadows collapse to direct shadows, and it does not prove Erdős-Straus.</p>
+<h2>Setup</h2>
+<p>Fix a candidate progression</p>
+<div class="math" role="math">x(s)=r+Ls.</div>
+<p>For an earlier Type A/B layer <code>i</code>, write</p>
+<div class="math" role="math">m=4i-1, \qquad g=\gcd(L,m), \qquad q=m/g.</div>
+<p>The attained fibre modulo <code>m</code> is</p>
+<div class="math" role="math">\{r+Ls\pmod m:s\in\mathbb Z/q\mathbb Z\}.</div>
+<p>Every Type A/B trap residue is a unit modulo <code>m</code>, because each trap is <code>-e</code> or <code>-4e</code> with <code>e|i</code> and</p>
+<div class="math" role="math">\gcd(i,4i-1)=1.</div>
+<h2>Theorem</h2>
+<p>If layer <code>i</code> directly shadows the candidate, then every prime divisor of <code>m</code> already divides <code>L</code>:</p>
+<div class="math" role="math">\boxed{\operatorname{rad}(m)\mid\operatorname{rad}(L).}</div>
+<p>Equivalently, every direct-shadow modulus is smooth over the prime support of <code>L</code>.</p>
+<h3>Proof</h3>
+<p>Suppose a prime <code>p|m</code> does not divide <code>L</code>.</p>
+<p>Then <code>p</code> divides the quotient</p>
+<div class="math" role="math">q=m/\gcd(L,m),</div>
+<p>and <code>L</code> is invertible modulo <code>p</code>.</p>
+<p>As <code>s</code> runs over a complete parameter period modulo <code>q</code>, it runs over every class modulo <code>p</code>. Therefore there is an <code>s</code> satisfying</p>
+<div class="math" role="math">r+Ls\equiv0\pmod p.</div>
+<p>That attained fibre point is not a unit modulo <code>m</code>, while every Type A/B trap is a unit modulo <code>m</code>. Hence that fibre point is not in <code>T_i</code>, so the layer cannot directly shadow the whole candidate.</p>
+<p>Contradiction. QED.</p>
+<h2>Consequence for exact direct-shadow falsification</h2>
+<p>For a concrete target candidate with target modulus <code>M=4k-1</code>, every earlier direct-shadow modulus satisfies</p>
+<div class="math" role="math">m&lt;M, \qquad m\equiv3\pmod4, \qquad \operatorname{rad}(m)\mid\operatorname{rad}(L).</div>
+<p>Thus an exact direct-shadow check need not scan all <code>i&lt;k</code>. It is enough to enumerate the finitely many <code>L</code>-smooth odd moduli below <code>M</code> that are <code>3 mod 4</code>, and test their complete attained fibres.</p>
+<p>This reduction is used by <code>verify_dsc_counterexample.py</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

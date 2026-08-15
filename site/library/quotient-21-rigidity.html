@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quotient-21 shadow rigidity — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-21-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-21-rigidity.html">
+  <meta property="og:title" content="Quotient-21 shadow rigidity — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quotient-21 shadow rigidity</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-21-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem inside the Type A/B minimal-depth/shadow program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Provenance:</strong> Operator-02 first isolated/proved the <code>5p</code> pattern; the canonical proof below is the Coordinator&#x27;s independent proof via the general ancestry skeleton.</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. Does not prove universal DSC-P, López coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="ancestry-asymptotic-skeleton.html">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li><li><a href="quotient-21-29-rigidity.html">QUOTIENT-21-29-RIGIDITY.md</a></li></ul>
+<h2>Theorem</h2>
+<p>Let</p>
+<div class="math" role="math">K=21j-5, \qquad m=4j-1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff K\text{ is prime or }K=5p\text{ with }p\text{ prime}. }</div>
+<p>In the second alternative necessarily <code>5|j</code>.</p>
+<h2>Direct implication</h2>
+<p>This is the divisor-child theorem with shift <code>s=5</code>.</p>
+<p>The only divisors of <code>5</code> are <code>1</code> and <code>5</code>, giving respectively:</p>
+<ul><li>prime children;</li><li><code>K=5p</code> when <code>5|j</code>.</li></ul>
+<p>Both are fully shadowed.</p>
+<h2>Converse for j &gt;= 6</h2>
+<p>Since the shift <code>s=5</code> is odd and</p>
+<div class="math" role="math">j\ge s+1=6,</div>
+<p>the odd-shift asymptotic skeleton applies.</p>
+<p>Thus every fully shadowed child is either:</p>
+<ol><li><code>5</code>-smooth, so <code>K=5^u</code>; or</li><li>a divisor-child <code>K=ap</code> with <code>a|gcd(j,5)</code>, hence <code>a=1</code> or <code>5</code>.</li></ol>
+<p>The second case is exactly prime or <code>5p</code>.</p>
+<p>For the smooth case, <code>K&gt;5</code> forces <code>25|K</code>. If <code>25&lt;m</code>, then <code>25</code> is an odd divisor of <code>K</code> below <code>m</code>. But</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,5)</div>
+<p>shows <code>25∤j</code>, and an odd integer cannot be of the form <code>4e</code>. Therefore <code>25∉S_j</code>, contradicting full shadowing.</p>
+<p>Hence a smooth full shadow would require</p>
+<div class="math" role="math">m\le25.</div>
+<p>With <code>j&gt;=6</code>, only <code>j=6</code> remains. Then</p>
+<div class="math" role="math">K=121, \qquad m=23,</div>
+<p>and divisor <code>11</code> satisfies <code>1&lt;11&lt;m</code> and <code>11∤j</code>, so <code>11∉S_j</code>.</p>
+<p>Therefore no smooth exception occurs.</p>
+<h2>Exact small cases j = 1,...,5</h2>
+<pre><code class="language-text">j=1: K=16,  m=3;  divisor 2 escapes S_1.
+j=2: K=37;         prime, shadowed.
+j=3: K=58,  m=11; divisor 2 escapes S_3.
+j=4: K=79;         prime, shadowed.
+j=5: K=100, m=19; divisor 2 escapes S_5.</code></pre>
+<p>This completes the exact classification. QED.</p>
+<h2>Correction note</h2>
+<p>An earlier promoted draft inherited the sentence</p>
+<blockquote><p><code>N=21d-1</code> is always odd.</p></blockquote>
+<p>That sentence is false when <code>d</code> is odd. The theorem itself is unaffected because the canonical proof above does not use that parity assertion.</p>
+<p>The repository preserves the earlier version in Git history for provenance.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

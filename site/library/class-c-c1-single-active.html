@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fix a directly novel Type A/B candidate">
+  <title>C1: single-active Class-C attack — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/class-c-c1-single-active.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/class-c-c1-single-active.html">
+  <meta property="og:title" content="C1: single-active Class-C attack — Free Computation Foundation">
+  <meta property="og:description" content="Fix a directly novel Type A/B candidate">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C1: single-active Class-C attack</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Fix a directly novel Type A/B candidate</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CLASS-C-C1-SINGLE-ACTIVE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> coordinated theorem target and falsification design</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Coordinator:</strong> primary research coordinator</p>
+<p><strong>Partner input:</strong> Operator-02 <code>DIAMOND-CLASS-C-NODE.md</code>, <code>DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md</code>, <code>DIAMOND-VALUATION-CRITERION.md</code></p>
+<p><strong>Claim boundary:</strong> this file defines an attack. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<h2>1. Target</h2>
+<p>Fix a directly novel Type A/B candidate</p>
+<div class="math" role="math">x\equiv r\pmod L, \qquad L=\operatorname{lcm}(840,4k-1).</div>
+<p>For each earlier layer <code>j&lt;k</code>, put</p>
+<div class="math" role="math">m_j=4j-1, \qquad q_j=\frac{m_j}{\gcd(L,m_j)}.</div>
+<p>Let</p>
+<div class="math" role="math">\mathcal N_{k,r} =\{j&lt;k:\sigma(m_j)\in F_k,\ (r/m_j)=-1\}</div>
+<p>be the fixed-negative character core, and define Operator-02&#x27;s active subcore</p>
+<div class="math" role="math">\boxed{ \mathcal N^{\mathrm{act}}_{k,r} =\{j\in\mathcal N_{k,r}:q_j&gt;1\}. }</div>
+<p>The first coordinated special case is</p>
+<div class="math" role="math">\boxed{|\mathcal N^{\mathrm{act}}_{k,r}|=1.}</div>
+<p>Call the unique active fixed-negative layer <code>j0</code>.</p>
+<h2>2. Why C1 is the correct first target</h2>
+<p>Character-shield completeness says the free quadratic signs can make every earlier layer outside the fixed-negative core Jacobi-positive. Fixed-negative layers with <code>q_j=1</code> are parameter-inactive and direct novelty already guarantees that their locked residue is not an exact Type A/B trap.</p>
+<p>Thus when the active core has one member, all remaining exact difficulty is concentrated at one moving fixed-negative layer, together with reducedness and any finer local compatibility required to realize the chosen character assignment.</p>
+<p>The central question is therefore:</p>
+<blockquote><p>Does direct novelty at the unique active layer always leave a residue choice that is compatible with the global character shield and reducedness?</p></blockquote>
+<p>A proof would establish a genuine infinite special case of DSC-P rather than a finite-range statistic.</p>
+<h2>3. Valuation source split</h2>
+<p>For the unique active layer,</p>
+<div class="math" role="math">q_{j_0}&gt;1 \iff \exists p:\ v_p(m_{j_0})&gt;v_p(L).</div>
+<p>The excess primes are classified as:</p>
+<ul><li><strong>Class A:</strong> <code>p|L</code> with a higher power in <code>m_j0</code> than in <code>L</code>;</li><li><strong>Class B:</strong> <code>p∤L</code> occurring to even valuation in <code>m_j0</code>, hence invisible to the squareclass/Jacobi row but still active on the parameter line.</li></ul>
+<p>The C1 census must separate these two mechanisms.</p>
+<h2>4. Exact finite census to run first</h2>
+<p>On the already verified <code>k&lt;=1500</code> candidate bundle, the primary analyzer will compute for every directly novel candidate:</p>
+<ol><li><code>|N|</code> and <code>|N_act|</code>;</li><li>the unique active layer when <code>|N_act|=1</code>;</li><li><code>q_j0</code> and its prime-power factorization;</li><li>Class A and Class B valuation witnesses;</li><li>the exact pulled-back forbidden set <code>R_j0</code>;</li><li>whether the candidate&#x27;s fiber kernel is empty;</li><li>if nonempty, its residual prime signature;</li><li>whether all residual kernel primes are explained by Class A/B valuation witnesses from <code>N_act</code>;</li><li>bounded-selector radius from the independently generated selector construction where available;</li><li>the exact number of safe residues modulo <code>q_j0</code> before and after reducedness.</li></ol>
+<p>The output is a census, not a theorem.</p>
+<h2>5. Falsifiers</h2>
+<p>The C1 theorem route is weakened or falsified in its proposed form if the census finds any of the following:</p>
+<ul><li>a single-active candidate whose post-character exact constraints require an additional active fixed-negative layer not captured by <code>N_act</code>;</li><li>a residual kernel coordinate with no valuation-source explanation from the active layer and no separately identified non-fixed-negative source;</li><li>a unique active layer whose exact safe set is nonempty by direct novelty but every safe choice conflicts with the necessary character/reducedness conditions;</li><li>evidence that the local compatibility problem cannot be represented on the active layer&#x27;s valuation-excess coordinates.</li></ul>
+<p>None of these would falsify DSC-P itself. They would falsify this proof route.</p>
+<h2>6. Candidate proof route</h2>
+<p>For <code>|N_act|=1</code>, attempt to show:</p>
+<ol><li>all other earlier layers can be made Jacobi-positive by the proved character-shield extension;</li><li>inactive fixed-negative layers are exact-safe by direct novelty;</li><li>the unique active layer has a proper forbidden pullback set <code>R_j0</code> because direct shadow is absent;</li><li>the remaining character choices restrict only signs or higher-power lifts on the prime-power coordinates of <code>q_j0</code>;</li><li>the two-box / multiplicative trap structure prevents those compatible choices from exhausting the complement of <code>R_j0</code>;</li><li>choose one reduced local residue and reverse the fiber/CRT construction;</li><li>Dirichlet gives infinitely many exact-depth primes.</li></ol>
+<p>The high-value lemma is Step 5.</p>
+<h2>7. Relationship to Operator-02</h2>
+<p>Operator-02 is asked to attack C1 independently from the formulation side:</p>
+<ul><li>classify possible Class A/B valuation patterns when <code>|N_act|=1</code>;</li><li>search for a direct local lemma forcing at least one safe residue;</li><li>identify any hidden source of residual constraints omitted by the primary formulation;</li><li>adversarially test any Coordinator proof attempt.</li></ul>
+<p>The Coordinator owns the canonical census, proof promotion, workflow integration, and theorem claim boundary.</p>
+<h2>8. Promotion rule</h2>
+<p>C1 is promoted from <code>THEOREM-CANDIDATE</code> to <code>PROVED</code> only after a universal proof is written and independently checked. A clean <code>k&lt;=1500</code> census, even with zero exceptions, remains finite evidence only.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Status: experimental physics engine foundation on the development path after 0.11.0.">
+  <title>CENTL physics engine — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/physics.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/physics.html">
+  <meta property="og:title" content="CENTL physics engine — Free Computation Foundation">
+  <meta property="og:description" content="Status: experimental physics engine foundation on the development path after 0.11.0.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL physics engine</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Status: experimental physics engine foundation on the development path after 0.11.0.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/PHYSICS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Status: experimental physics engine foundation on the development path after 0.11.0.</p>
+<p>CENTL Physics extends the exact-first mathematical kernel with typed physical quantities and deterministic particle simulation. Rational inputs remain exact through unit conversion, force evaluation, collision formulas, contact classification, and fixed-step time evolution. A physics result is not silently coerced across incompatible physical dimensions.</p>
+<p>The engine is available as the <code>Centl_physics</code> OCaml module, through the <code>centl-physics</code> command-line executable and its versioned JSON Lines server, and through the read-only <code>centl_physics</code> MCP tool.</p>
+<h2>Implemented now</h2>
+<h3>Dimensions and units</h3>
+<p>The engine represents all seven SI base dimensions:</p>
+<ul><li>length</li><li>mass</li><li>time</li><li>electric current</li><li>thermodynamic temperature</li><li>amount of substance</li><li>luminous intensity</li></ul>
+<p>Derived dimensions are composed algebraically. Addition and subtraction require identical dimensions. Multiplication and division compose dimensions. Unit conversion is exact when the unit scale is rational.</p>
+<p>The initial unit catalog includes <code>m</code>, <code>cm</code>, <code>mm</code>, <code>km</code>, <code>s</code>, <code>ms</code>, <code>min</code>, <code>h</code>, <code>kg</code>, <code>g</code>, <code>A</code>, <code>K</code>, <code>mol</code>, <code>cd</code>, <code>m/s</code>, <code>m/s^2</code>, <code>N</code>, <code>J</code>, <code>Pa</code>, <code>Hz</code>, <code>C</code>, <code>W</code>, <code>V</code>, <code>N/m</code>, <code>kg/s</code>, <code>J*s</code>, <code>J/K</code>, and <code>1/mol</code>.</p>
+<p>For example:</p>
+<pre><code class="language-sh">centl-physics convert 100 cm m</code></pre>
+<p>prints:</p>
+<pre><code class="language-text">1</code></pre>
+<p>An incompatible conversion fails instead of producing a number:</p>
+<pre><code class="language-sh">centl-physics convert 1 m s</code></pre>
+<h3>Vectors</h3>
+<p>Three-dimensional vectors carry a physical dimension. The engine implements addition, subtraction, scalar scaling, dot products, cross products, and exact squared norms. Vector addition and subtraction reject mismatched dimensions.</p>
+<h3>Particle state</h3>
+<p>A particle has:</p>
+<ul><li>a stable identifier</li><li>positive mass</li><li>three-dimensional position</li><li>three-dimensional velocity</li></ul>
+<p>Mass, position, and velocity are dimension-checked when the particle is constructed.</p>
+<h3>Forces</h3>
+<p>The initial force-model interface supports composable state-dependent forces. Built-in models are:</p>
+<ul><li>constant force</li><li>uniform gravity</li><li>Hooke-law spring force about a fixed anchor</li><li>linear velocity drag</li></ul>
+<p>Net force is accumulated exactly before acceleration is derived from <code>F / m</code>.</p>
+<h3>Deterministic time evolution</h3>
+<p>The first integrator is fixed-step symplectic Euler. For each step CENTL computes acceleration from the current state, updates velocity, then updates position with the new velocity.</p>
+<p>With rational mass, state, force parameters, and time step, every intermediate state is represented by an arbitrary-precision rational. The engine does not introduce binary floating-point rounding into this path.</p>
+<p>A safety limit rejects simulations longer than 1,000,000 steps in one call.</p>
+<p>Example:</p>
+<pre><code class="language-sh">centl-physics gravity 2 0,0,10 1,0,0 0,0,-10 1/10 10</code></pre>
+<p>prints:</p>
+<pre><code class="language-text">integrator=symplectic-euler
+steps=10
+position=1,0,9/2 m
+velocity=1,0,-10 m/s</code></pre>
+<p>The <code>9/2</code> position is the exact result of the documented discrete integrator; it is not presented as the analytic continuous-time solution.</p>
+<h3>Diagnostics</h3>
+<p>The library exposes exact momentum and kinetic-energy calculations, uniform gravity potential energy, spring potential energy, and exact invariant comparison. An invariant report distinguishes exact equality from a nonzero delta.</p>
+<h3>Multi-particle world and exact sphere contact classification</h3>
+<p>The library has a bounded deterministic world layer for ordered particle state. A world accepts at most 256 particles, requires every particle identifier to be non-empty and unique, preserves particle order across a step, and exposes exact whole-world vector momentum and kinetic-energy diagnostics.</p>
+<p><code>step_world_symplectic_euler</code> applies the existing exact particle transition to each particle using the supplied force models. This first world transition does not implicitly detect or resolve collisions and does not invent pairwise force models. Contact processing remains a separate operation.</p>
+<p>For contact geometry, a particle may be paired with a positive exact-rational sphere radius. CENTL classifies each sphere pair as exactly one of:</p>
+<ul><li><code>separated</code></li><li><code>touching</code></li><li><code>overlapping</code></li></ul>
+<p>The classifier compares the exact squared center distance with the exact square of the summed radii. It therefore needs no square-root normalization and keeps rational positions and radii rational. The bounded sphere-world operation enumerates unordered pairs deterministically and can return only exactly <code>touching</code> pairs when requested.</p>
+<p><code>overlapping</code> is a first-class result. CENTL does not silently move penetrated particles apart or reinterpret overlap as an instantaneous contact suitable for an elastic impulse. Likewise, <code>touching</code> identifies geometric contact only; the separate collision-response primitive still decides whether the relative normal motion requires an impulse.</p>
+<h3>Exact isolated contact composition</h3>
+<p><code>resolve_isolated_elastic_touching_contacts</code> composes exact sphere contact detection with the existing exact 3D elastic response under a deliberately narrow world-level contract.</p>
+<p>The operation first classifies every unordered sphere pair. Its decision rules are deterministic:</p>
+<ol><li>If any pair is <code>overlapping</code>, the entire operation returns <code>Deferred</code> with <code>overlap_detected</code>. No particle is modified. Overlap has precedence over any other contact condition.</li><li>Otherwise, if any particle belongs to more than one simultaneous <code>touching</code> pair, the entire operation returns <code>Deferred</code> with <code>ambiguous_simultaneous_contacts</code>. No particle is modified.</li><li>Otherwise the touching pairs form a disjoint matching. Each pair is passed to <code>elastic_collision_3d_at_contact</code> independently, and the resulting velocities are installed while preserving sphere order, positions, masses, identifiers, and radii.</li><li>If there are no touching pairs, the operation completes with the unchanged world and an empty pair-response list.</li></ol>
+<p>A completed result returns the per-pair <code>resolved</code> or <code>separating_or_stationary</code> response status plus exact whole-world momentum and kinetic-energy conservation flags.</p>
+<p>The disjoint-matching restriction is an assurance boundary, not a claim that simultaneous multi-contact physics has a unique pairwise solution. CENTL does not choose an arbitrary impulse order for a contact graph such as A-B-C, and it does not reinterpret an already penetrated configuration as a valid contact state. This operation is also not part of the time integrator: detection and response remain explicit operations.</p>
+<p>The world/contact and isolated-composition layers are machine-facing through the version-1 JSON Lines physics protocol and the read-only <code>centl_physics</code> MCP tool. <code>analyze_sphere_contacts</code> exposes exact geometry and evidence without mutation. <code>resolve_isolated_elastic_sphere_contacts</code> exposes the partial exact resolver and returns an explicit <code>deferred</code> verdict when CENTL cannot justify a unique operation. These are not automatic time-step hooks and are not separate human CLI subcommands.</p>
+<h3>Elastic collisions</h3>
+<p>CENTL provides an ideal one-dimensional perfectly elastic collision primitive for two positive masses with exact rational arithmetic.</p>
+<p>It also provides <code>elastic_collision_3d_at_contact</code>, an exact rational, frictionless three-dimensional contact-response primitive for two particles. The caller supplies two particles already known to be at an instantaneous contact with distinct centers. CENTL projects relative velocity onto the line of centers without normalizing that line, so rational positions, velocities, and masses stay rational and no square root is introduced merely to compute the collision normal.</p>
+<p>If the particles are approaching along the contact normal, CENTL applies the ideal elastic normal impulse. If they are separating or stationary along that normal, it returns <code>separating_or_stationary</code> and applies no impulse. The result includes both final particle states and exact whole-pair checks for vector momentum and kinetic-energy conservation.</p>
+<p>The machine result records the trust boundary explicitly as <code>caller_supplied_contact_with_distinct_centers</code>.</p>
+<p>These are collision-response primitives, not a general rigid-body solver. The 3D response operation does not infer radii, establish contact by itself, correct penetration, model spin or torque, or apply friction.</p>
+<h3>Certified bounded continuous sphere contact</h3>
+<p><code>certify_linear_sphere_contact</code> certifies whether two exact-rational spheres make contact during a bounded interval when both centers follow constant exact-rational velocity throughout that interval.</p>
+<p>For initial relative center position <code>r</code>, relative velocity <code>v</code>, and summed radius <code>R</code>, CENTL reasons exactly about</p>
+<pre><code class="language-text">f(t) = |r + v t|^2 - R^2
+     = a t^2 + b t + c</code></pre>
+<p>where <code>a = v·v</code>, <code>b = 2(r·v)</code>, and <code>c = r·r - R^2</code>. Since the quadratic is convex, CENTL can minimize it exactly on <code>[0,duration]</code> and certify contact or non-contact over the whole admitted interval without time sampling.</p>
+<p>The certificate returns one of five statuses:</p>
+<ul><li><code>initially_overlapping</code></li><li><code>touching_at_start</code></li><li><code>no_contact_in_interval</code></li><li><code>tangent_contact</code></li><li><code>crossing_contact</code></li></ul>
+<p>For a crossing, an exact rational first-contact time is returned when the quadratic discriminant is a perfect rational square. When the first-contact time is quadratic irrational, CENTL does not manufacture a decimal or rational timestamp: it preserves the exact polynomial and discriminant and returns a certified rational bracket for the algebraic event.</p>
+<p>A zero bounded minimum is not automatically treated as tangency. If first contact occurs exactly at the interval endpoint and the discriminant is positive, the certificate reports <code>crossing_contact</code>; true tangency requires a repeated root.</p>
+<p>The operation requires distinct particle identifiers, positive sphere radii, dimension-checked position and velocity, and a nonnegative duration carrying the time dimension. It does not mutate either sphere or apply a collision impulse.</p>
+<p>This is a narrow certified continuous-contact contract, not a general CCD engine. It does not reason about acceleration or force-integrated trajectories, guarantee that a symplectic-Euler step follows the admitted linear path, resolve penetration, order simultaneous contact events, or solve friction/spin/rigid-body contact. See <a href="https://github.com/chasebryan/centl/blob/main/docs/PHYSICS_LINEAR_CONTACT.md">PHYSICS_LINEAR_CONTACT.md</a> for the formal boundary.</p>
+<h3>Exact rational contact event stepping</h3>
+<p>The library also provides <code>evolve_linear_sphere_pair_through_contact</code>, which composes the continuous certificate with exact state evolution and the existing 3D elastic response when the first-contact time is rational.</p>
+<p>For exactly two spheres under the declared force-free constant-velocity model, the operation:</p>
+<ol><li>certifies the whole interval;</li><li>advances exactly to a rational first-contact time when one exists;</li><li>independently re-checks that the advanced geometry is exactly <code>touching</code>;</li><li>applies <code>elastic_collision_3d_at_contact</code> at that exact state;</li><li>advances the exact remaining duration with the returned velocities.</li></ol>
+<p>No-contact intervals advance linearly for the entire duration. Initial overlap returns <code>Deferred initial_overlap</code> with both inputs unchanged. A quadratic-irrational first-contact time returns <code>Deferred quadratic_irrational_event_time</code>, also unchanged; CENTL does not round that event into a fake rational time merely to continue the step.</p>
+<p>Completed results retain the original contact certificate, event time when present, at-event sphere states, exact contact evidence, response status, final sphere states, state-change information, and exact pair momentum and kinetic-energy conservation flags.</p>
+<p>For an admitted rational collision event, the exact response makes the post-contact normal motion non-approaching. With force-free constant velocities after the response, the remaining segment therefore does not silently contain a second contact of the same pair.</p>
+<p>This event-step operation is <strong>library-only</strong> at this stage. It is not a JSON Lines or MCP action and is not an automatic hook in <code>symplectic_euler</code> or the multi-particle world step. It defines no force-driven trajectory semantics and no simultaneous multi-contact event ordering. See <a href="https://github.com/chasebryan/centl/blob/main/docs/PHYSICS_LINEAR_CONTACT.md">PHYSICS_LINEAR_CONTACT.md</a> for the detailed contract.</p>
+<h3>Physical constants</h3>
+<p>The first constant catalog deliberately contains only exact SI defining or conventional values:</p>
+<ul><li>speed of light in vacuum, <code>c</code></li><li>Planck constant, <code>h</code></li><li>elementary charge, <code>e</code></li><li>Boltzmann constant, <code>k_B</code></li><li>Avogadro constant, <code>N_A</code></li><li>standard acceleration of gravity, <code>g0</code></li></ul>
+<p>Each entry carries provenance text and an explicit exact-value flag. Measured constants such as the Newtonian gravitational constant are intentionally not included until CENTL has a first-class uncertainty/provenance representation.</p>
+<p>Example:</p>
+<pre><code class="language-sh">centl-physics constant c</code></pre>
+<h2>Machine interfaces</h2>
+<p><code>centl-physics --serve</code> exposes the implemented physics operations through a versioned, stateless JSON Lines protocol. The main <code>centl --mcp</code> server exposes the same deterministic physics semantics through one read-only, idempotent <code>centl_physics</code> tool. The MCP adapter delegates to the typed physics protocol; it does not implement a second evaluator.</p>
+<p>Capability discovery advertises the exact supported machine actions, including <code>elastic_collision_1d</code>, <code>elastic_collision_3d_at_contact</code>, <code>analyze_sphere_contacts</code>, <code>resolve_isolated_elastic_sphere_contacts</code>, and <code>certify_linear_sphere_contact</code>. Contact-world requests are bounded to 4,096 unordered sphere pairs. Detailed world analysis expands only non-separated pairs while the summary still counts every pair.</p>
+<p>A resolver <code>deferred</code> result is a successful exact physics verdict, not a malformed request or MCP tool error. It means CENTL exactly identified a valid world outside the current solver&#x27;s justified response domain. Overlap and shared simultaneous-contact ambiguity return the original world unchanged, so machine callers do not have to infer whether a partial impulse was applied.</p>
+<p>The continuous contact action exposes its exact polynomial evidence, closest time, minimum clearance, discriminant, and typed first-contact representation. Its trust boundary explicitly records constant velocity, exact sphere geometry, no time sampling, no floating-point root finding, no force integration, no automatic response, and no simultaneous-contact solving.</p>
+<p>The rational event-step composition is not yet exposed through these machine interfaces. Machine callers may obtain the continuous certificate, but they do not yet have a protocol action that advances through the event and applies the response.</p>
+<p>Physics simulation calls retain deterministic request, step, trajectory, and cancellation limits. Sphere/contact requests remain stateless and bounded and do not create persistent physical worlds inside the server.</p>
+<h2>Numerical contract</h2>
+<p>The physics engine follows CENTL&#x27;s exact-first philosophy:</p>
+<ol><li>Decimal and rational inputs are parsed as exact rationals.</li><li>Rational unit scales are exact.</li><li>Dimension mismatches are errors, not implicit coercions.</li><li>Fixed-step particle and world transitions preserve rational state using exact rational arithmetic.</li><li>Discrete simulation results are identified as results of the chosen integrator; they are not claimed to equal a closed-form continuous solution.</li><li>Sphere contact classification uses exact squared-distance comparisons and distinguishes separation, contact, and overlap.</li><li>World-level elastic composition is admitted only for disjoint exact touching pairs; overlap and shared simultaneous contacts defer without mutation.</li><li>Collision response remains distinct from contact detection, and the direct 3D machine response reports its caller-supplied contact assumption explicitly.</li><li>Machine-facing contact evidence exposes the exact geometric basis of a touching or overlapping verdict rather than only a human-readable label.</li><li>Bounded continuous sphere contact is certified only for the declared constant-velocity pair model; irrational first-contact time remains an algebraic certificate instead of being rounded into a fake rational time.</li><li>Event-aware state advancement is admitted only for two-body force-free cases with an exact rational event time; initial overlap and irrational event time defer unchanged.</li><li>No measured quantity is silently promoted to mathematical exactness.</li></ol>
+<h2>Current boundary</h2>
+<p>The engine is now real, but it is intentionally small. The following are not implemented yet:</p>
+<ul><li>rigid-body orientation and angular inertia tensors</li><li>spatial broad-phase collision acceleration</li><li>general-shape narrow-phase collision detection</li><li>general or force-driven continuous collision detection</li><li>exact state evolution through quadratic-irrational event time</li><li>penetration correction or contact manifolds</li><li>simultaneous multi-contact event ordering or impulse solving</li><li>automatic collision processing inside world time stepping</li><li>force-aware event stepping</li><li>constraints and joints</li><li>frictional contact solvers</li><li>adaptive or higher-order ODE integrators</li><li>rigorous enclosure propagation for truncation error</li><li>measured-constant uncertainty propagation</li><li>relativistic, quantum, continuum, fluid, or field solvers</li><li>a physics surface in the main <code>centl</code> expression grammar</li></ul>
+<p>Those are future engine layers. The present implementation is a deterministic, dimension-safe, exact-rational particle mechanics foundation with library, CLI, JSON Lines, and MCP interfaces. Multi-particle world state, exact discrete sphere contact classification, isolated exact contact resolution, and bounded constant-velocity continuous sphere-contact certificates cross the machine boundary. A two-sphere rational-event composition layer now exists in the library while remaining deliberately separate from automatic time stepping and machine exposure.</p>
+<p>The next difficult boundary is deciding how, or whether, to expose event-aware evolution through the machine protocol without weakening its refusal semantics. Force-driven event location, algebraic event-state evolution, and simultaneous multi-contact ordering remain separate research problems rather than implied extensions of this exact linear model.</p>
+<h2>Validation</h2>
+<p><code>dune runtest</code> exercises:</p>
+<ul><li>exact unit conversion</li><li>dimension mismatch rejection</li><li>vector algebra</li><li>an exact ten-step gravity trajectory</li><li>spring force and potential energy</li><li>kinetic energy</li><li>exact multi-particle world momentum and kinetic energy</li><li>deterministic ordered world stepping</li><li>duplicate world-identifier rejection</li><li>exact separated, touching, and overlapping sphere classification</li><li>fractional exact contact without square-root normalization</li><li>deterministic sphere-pair ordering</li><li>isolated touching-pair elastic composition</li><li>separating touching-pair no-impulse composition</li><li>no-contact world completion without mutation</li><li>overlap deferral without mutation</li><li>shared simultaneous-contact deferral without mutation</li><li>deterministic resolution of multiple disjoint touching pairs</li><li>overlap precedence over simultaneous-contact ambiguity</li><li>exact whole-world conservation checks after completed contact composition</li><li>ideal 1D elastic-collision momentum and energy conservation</li><li>exact 3D head-on and oblique contact response</li><li>separating-contact no-impulse behavior</li><li>coincident-center rejection</li><li>rational continuous first-contact time</li><li>first contact exactly at the bounded interval endpoint</li><li>exact tangent contact</li><li>quadratic-irrational first-contact certification and rational bracketing</li><li>short-interval continuous no-contact certification</li><li>parallel and stationary continuous-contact misses</li><li>continuous contact at time zero and initial overlap</li><li>distinct-ID and duration-dimension enforcement for continuous contact</li><li>exact no-contact full-duration event advancement</li><li>rational head-on event response plus exact remainder advancement</li><li>exact event response at the interval endpoint</li><li>exact oblique rational 3D event response with fractional geometry and state</li><li>touching-at-start approaching and separating event-step behavior</li><li>tangent event stepping with no impulse</li><li>failure-atomic irrational-event and initial-overlap deferral</li><li>zero-duration event-step behavior</li><li>identifier, mass, and radius preservation through event composition</li><li>exact pair momentum and kinetic-energy conservation through completed events</li><li>JSON and MCP 3D collision surfaces and the explicit contact trust boundary</li><li>JSON Lines exact sphere-contact analysis and squared-distance evidence</li><li>JSON Lines completed isolated sphere-contact resolution and conservation flags</li><li>JSON Lines overlap and simultaneous-contact deferral semantics</li><li>JSON Lines rational, irrational, endpoint, and no-contact continuous certificates</li><li>MCP sphere-contact analysis and resolution</li><li>MCP <code>deferred</code> verdicts remaining successful tool results</li><li>MCP rational and quadratic-irrational continuous-contact certificates</li><li>strict MCP rejection of unknown sphere/contact arguments</li><li>the 4,096-pair machine-interface contact ceiling</li><li>exact physical constants</li><li>CLI success and failure behavior</li></ul>
+<p>The repository-level randomized <code>./executeme</code> gauntlet remains complementary: it stresses mathematical physics identities, while these tests exercise the actual stateful physics engine implementation and its typed machine boundaries.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

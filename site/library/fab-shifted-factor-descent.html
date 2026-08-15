@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Shifted-factor descent for the post-DSC Erdős–Straus wall — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-shifted-factor-descent.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-shifted-factor-descent.html">
+  <meta property="og:title" content="Shifted-factor descent for the post-DSC Erdős–Straus wall — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Shifted-factor descent for the post-DSC Erdős–Straus wall</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-SHIFTED-FACTOR-DESCENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> working theorem checkpoint; exact reductions proved below, universal existence step open</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>, <code>FAB-HARD-FIRST-FILTERS.md</code></p>
+<p><strong>Claim boundary:</strong> this document does <strong>not</strong> prove Erdős–Straus or López-all-primes. It records exact algebraic reductions that survive the post-DSC pivot and isolates a narrower divisor-placement theorem.</p>
+<hr>
+<h2>1. Starting criterion</h2>
+<p>For a prime</p>
+<div class="math" role="math">p\equiv1\pmod4,</div>
+<p>and coprime positive integers <code>a,b&lt;p</code>, the current <code>fab</code> reduction says that a positive divisor <code>k|a+bp</code> gives a certificate exactly when</p>
+<div class="math" role="math">\boxed{k\equiv-p\pmod{4ab}.}</div>
+<p>Write</p>
+<div class="math" role="math">q=\frac{a+bp}{k}, \qquad p+k=4abc.</div>
+<p>Then the Egyptian-fraction identity is</p>
+<div class="math" role="math">\frac4p = \frac1{abc} + \frac1{aqc} + \frac1{bpqc}.</div>
+<p>The post-DSC goal is existence of at least one such certificate for every hard prime, not exact-depth realizability.</p>
+<hr>
+<h2>2. The b=1 four-cycle</h2>
+<p>Set <code>b=1</code>. Then</p>
+<div class="math" role="math">kq=a+p, \qquad p+k=4ac.</div>
+<p>From</p>
+<div class="math" role="math">kq=a+p=a+4ac-k</div>
+<p>we obtain</p>
+<div class="math" role="math">k(q+1)=a(1+4c).</div>
+<p>The coprime criterion gives <code>gcd(a,k)=1</code>, hence</p>
+<div class="math" role="math">\boxed{k\mid1+4c.}</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{1+4c=kd.}</div>
+<p>Since <code>k≡3 mod4</code>, necessarily</p>
+<div class="math" role="math">\boxed{d\equiv3\pmod4.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{q+1=ad.}</div>
+<p>Thus every <code>b=1</code> certificate sits in the exact four-link cycle</p>
+<div class="math" role="math">\boxed{ p+k=4ac, \quad 4c+1=kd, \quad p+a=kq, \quad q+1=ad. }</div>
+<p>Eliminating <code>c,q</code> gives the single bilinear surface</p>
+<div class="math" role="math">\boxed{p=akd-a-k.}</div>
+<p>Conversely, if positive integers <code>a,k,d</code> satisfy</p>
+<div class="math" role="math">k\equiv d\equiv3\pmod4, \qquad p=akd-a-k&gt;0,</div>
+<p>then</p>
+<div class="math" role="math">k\mid p+a, \qquad 4a\mid p+k,</div>
+<p>so <code>k</code> is a valid <code>b=1</code> divisor certificate.</p>
+<p>Therefore:</p>
+<h3>Theorem — b=1 surface</h3>
+<p>For prime <code>p≡1 mod4</code>, the <code>b=1</code> lane is equivalent to finding</p>
+<div class="math" role="math">\boxed{ a,k,d&gt;0,\quad k\equiv d\equiv3\pmod4,\quad p=akd-a-k. }</div>
+<p>This is an exact equivalence, not a heuristic.</p>
+<hr>
+<h2>3. Shifted-factor identity</h2>
+<p>Multiplying the surface relation by <code>d</code> gives</p>
+<div class="math" role="math">dp+1 =akd^2-ad-kd+1 =(ad-1)(kd-1).</div>
+<p>Hence every <code>b=1</code> certificate satisfies</p>
+<div class="math" role="math">\boxed{dp+1=(ad-1)(kd-1),\qquad d\equiv3\pmod4.}</div>
+<p>This packages the remaining existence problem as a self-referential shifted-factor problem.</p>
+<p>The already-proved <code>d=3</code> filter is the first special case. Failure at <code>d=3</code> forces</p>
+<div class="math" role="math">\frac{3p+1}{4}</div>
+<p>to have only prime factors <code>1 mod3</code>.</p>
+<p>The mirror <code>k=3</code> filter similarly forces</p>
+<div class="math" role="math">\frac{p+3}{4}</div>
+<p>to have only prime factors <code>1 mod3</code> on a hypothetical counterexample.</p>
+<p>Thus a hard counterexample must make the two neighbours</p>
+<div class="math" role="math">A=\frac{p+3}{4}, \qquad B=\frac{3p+1}{4}=3A-2</div>
+<p>simultaneously Eisenstein-split.</p>
+<hr>
+<h2>4. Fixed-k divisor-square reduction</h2>
+<p>Return to general coprime <code>a,b</code> and fix a prospective divisor <code>k≡3 mod4</code>. Put</p>
+<div class="math" role="math">C=\frac{p+k}{4}.</div>
+<p>A certificate with this <code>k</code> has</p>
+<div class="math" role="math">C=abc.</div>
+<p>Using</p>
+<div class="math" role="math">p=4abc-k,</div>
+<p>we get</p>
+<div class="math" role="math">a+bp =a+4ab^2c-bk =a(1+4b^2c)-bk.</div>
+<p>Because <code>gcd(a,k)=1</code>, the condition <code>k|a+bp</code> is equivalent to</p>
+<div class="math" role="math">\boxed{4b^2c\equiv-1\pmod k.}</div>
+<p>Define</p>
+<div class="math" role="math">u=b^2c.</div>
+<p>Then <code>u|C^2</code>.</p>
+<p>The converse divisor realization is exact:</p>
+<h3>Lemma — every divisor of C^2 is a b^2 c realization</h3>
+<p>For every positive divisor</p>
+<div class="math" role="math">u\mid C^2,</div>
+<p>there exist positive integers <code>a,b,c</code> such that</p>
+<div class="math" role="math">abc=C, \qquad \gcd(a,b)=1, \qquad b^2c=u.</div>
+<h3>Proof</h3>
+<p>Work prime by prime. If</p>
+<div class="math" role="math">v_r(C)=E, \qquad v_r(u)=U, \qquad 0\le U\le2E,</div>
+<p>then choose exponent triples <code>(alpha,beta,gamma)</code> for <code>(a,b,c)</code> as follows.</p>
+<p>If <code>U&lt;=E</code>, take</p>
+<div class="math" role="math">(\alpha,\beta,\gamma)=(E-U,0,U).</div>
+<p>If <code>U&gt;=E</code>, take</p>
+<div class="math" role="math">(\alpha,\beta,\gamma)=(0,U-E,2E-U).</div>
+<p>In both cases</p>
+<div class="math" role="math">\alpha+\beta+\gamma=E, \qquad 2\beta+\gamma=U,</div>
+<p>and never both <code>alpha,beta</code> are positive, so <code>gcd(a,b)=1</code>. Combining the local choices proves the lemma. QED.</p>
+<p>Therefore, whenever <code>k&lt;3p</code> (so <code>C&lt;p</code> and the reconstructed <code>a,b</code> automatically satisfy <code>a,b&lt;p</code>), we have:</p>
+<h3>Theorem — fixed-k divisor box</h3>
+<div class="math" role="math">\boxed{ \text{a coprime fab certificate with divisor }k \iff \exists u\mid C^2: 4u\equiv-1\pmod k, \quad C=\frac{p+k}{4}. }</div>
+<p>For larger <code>k</code>, the same arithmetic equivalence holds provided the reconstructed <code>a,b</code> satisfy the framework&#x27;s size hypotheses.</p>
+<p>This removes the apparent three-parameter search. At fixed <code>k</code>, the wall is one divisor-box hit in <code>Div(C^2)</code>.</p>
+<hr>
+<h2>5. Character alignment for an external nonresidue prime</h2>
+<p>Let <code>k</code> now be an odd prime with</p>
+<div class="math" role="math">k\equiv3\pmod4</div>
+<p>and suppose</p>
+<div class="math" role="math">\left(\frac{k}{p}\right)=-1.</div>
+<p>Because <code>p≡1 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac{p}{k}\right)=-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \left(\frac{-p}{k}\right)=+1. }</div>
+<p>Also</p>
+<div class="math" role="math">C=\frac{p+k}{4} \equiv\frac p4\pmod k,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ \left(\frac{C}{k}\right)=-1. }</div>
+<p>The target residue</p>
+<div class="math" role="math">-4^{-1}\pmod k</div>
+<p>is also a quadratic nonresidue because <code>(-1/k)=-1</code> and <code>4</code> is a square.</p>
+<p>Thus the fixed-k divisor-box problem has <strong>no quadratic-character obstruction</strong>: both <code>C</code> and the target class lie on the same nonresidue side.</p>
+<p>What remains is exact divisor placement inside that coset.</p>
+<p>This is a useful narrowing, not an existence proof.</p>
+<hr>
+<h2>6. Prescribing the leftover nonresidue c = ell</h2>
+<p>Let <code>ell</code> be an odd prime with</p>
+<div class="math" role="math">\left(\frac{\ell}{p}\right)=-1.</div>
+<p>Suppose <code>k</code> is an odd prime satisfying</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad k\equiv-p\pmod\ell.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ \left(\frac{-\ell}{k}\right)=+1. }</div>
+<h3>Proof</h3>
+<p>Since <code>p≡1 mod4</code>, reciprocity gives <code>(p/ell)=(ell/p)=-1</code>. From <code>k≡-p mod ell</code>,</p>
+<div class="math" role="math">\left(\frac{k}{\ell}\right) = \left(\frac{-p}{\ell}\right).</div>
+<p>Applying reciprocity between <code>k</code> and <code>ell</code> and using <code>k≡3 mod4</code> yields <code>(ell/k)=-1</code>; multiplying by <code>(-1/k)=-1</code> gives <code>(-ell/k)=+1</code>. QED.</p>
+<p>Therefore the quadratic congruence</p>
+<div class="math" role="math">\boxed{4\ell b^2\equiv-1\pmod k}</div>
+<p>is automatically solvable.</p>
+<p>Again, the remaining issue is not character theory. It is choosing a square-root representative <code>b</code> compatible with the exact factorization</p>
+<div class="math" role="math">\frac{p+k}{4}=ab\ell.</div>
+<p>This isolates the missing theorem as a divisor-placement problem.</p>
+<hr>
+<h2>7. Bezout and norm form when c = ell</h2>
+<p>Assume a certificate has <code>c=ell</code>. From</p>
+<div class="math" role="math">1+4b^2\ell=kd, \qquad q+b=ad,</div>
+<p>put</p>
+<div class="math" role="math">t=q=ad-b.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{4\ell bt-pd=1.}</div>
+<p>Indeed,</p>
+<div class="math" role="math">p=4ab\ell-k</div>
+<p>and multiplication by <code>d</code> gives</p>
+<div class="math" role="math">pd=4ab\ell d-(1+4b^2\ell) =4b\ell(ad-b)-1.</div>
+<p>There is also the exact factorization</p>
+<div class="math" role="math">\boxed{ (4a\ell b-p)(4a\ell t-p) =p^2+4a^2\ell. }</div>
+<p>The first factor is exactly</p>
+<div class="math" role="math">4a\ell b-p=k.</div>
+<p>Thus any certificate with prescribed external nonresidue <code>ell</code> gives a factorization of the norm-like integer</p>
+<div class="math" role="math">\boxed{p^2+4a^2\ell.}</div>
+<p>This is the cleanest present bridge to the repository&#x27;s quadratic-field / norm machinery.</p>
+<hr>
+<h2>8. Immediate universal target</h2>
+<p>The current reductions point to one narrow statement.</p>
+<p>For a hypothetical Mordell-hard counterexample <code>p</code>:</p>
+<ol><li>the first exact shifted-factor filters force simultaneous splitting restrictions on <code>(p+1)/2</code>, <code>(p+3)/4</code>, <code>(3p+1)/4</code>, <code>p+2</code>, and related small shifts;</li><li>any coprime certificate must import an external quadratic nonresidue prime <code>ell&gt;=11</code>;</li><li>after fixing a prospective divisor <code>k</code>, the entire <code>fab</code> search becomes</li></ol>
+<div class="math" role="math">\exists u\mid ((p+k)/4)^2:\quad4u\equiv-1\pmod k;</div>
+<ol><li>when <code>k</code> is a <code>3 mod4</code> quadratic nonresidue of <code>p</code>, the character obstruction to this congruence vanishes automatically;</li><li>prescribing the external nonresidue <code>c=ell</code> converts the problem into the Bezout/norm equations above.</li></ol>
+<p>The next theorem should therefore <strong>not</strong> be another finite <code>k</code> census. It should prove a divisor-placement result of one of the following forms:</p>
+<div class="math" role="math">\boxed{ \text{character alignment} +\text{hard-prime split restrictions} \Longrightarrow \text{target divisor in }\operatorname{Div}(C^2), }</div>
+<p>or, equivalently, a norm-factor selection theorem for</p>
+<div class="math" role="math">p^2+4a^2\ell.</div>
+<p>That is the present shortest route toward the all-prime wall.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

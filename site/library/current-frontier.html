@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Current research frontier — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/current-frontier.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/current-frontier.html">
+  <meta property="og:title" content="Current research frontier — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Current research frontier</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CURRENT-FRONTIER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> Erdős-Straus remains open. Universal López Type A/B coverage remains open. Universal DSC-0 and DSC-P are false. Universal prime strong/Type-II coverage is also unproved. The Mizony/Thépault divisor-square mechanism is classical prior art. The active FCF work is the structural synthesis, shadow theory, Kneser theory, and exact fixed-shift analysis described below.</p>
+<hr>
+<h2>1. The proof search now has two distinct lanes</h2>
+<p>Do not conflate these.</p>
+<h3>Lane A: exact prime Erdős-Straus</h3>
+<p>For prime</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>and an admissible shift</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1,</div>
+<p>put</p>
+<div class="math" role="math">C_k=\frac{p+k}{4}</div>
+<p>and define</p>
+<div class="math" role="math">\boxed{ \mathcal R_k(C_k) = \left\{ \prod_i r_i^{z_i}\pmod k: -e_i\le z_i\le e_i, \quad C_k=\prod_i r_i^{e_i} \right\}.}</div>
+<p><code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code> proves</p>
+<div class="math" role="math">\boxed{ p\text{ satisfies Erdős-Straus} \iff \exists k: \{-p^{-1},-1\} \cap \mathcal R_k(C_k) \ne\varnothing.}</div>
+<p>The targets are standard Type I and Type II respectively. Inversion symmetry adds the equivalent Type-I orientation <code>-p</code>.</p>
+<p>This is an exact reformulation of prime ES.</p>
+<h3>Lane B: classical strong/Type-II route</h3>
+<p>For a layer index <code>a</code>, define</p>
+<div class="math" role="math">\boxed{ S_a = \{-4D\pmod{4a-1}:D\mid a^2\}.}</div>
+<p>Universal prime coverage by the layers <code>S_a</code> would prove the classical strong/Type-II form and therefore Erdős-Straus, but it is logically stronger than original ES.</p>
+<p>The condition</p>
+<div class="math" role="math">D\mid a^2, \qquad 4a-1\mid p+4D</div>
+<p>belongs to the historical Mizony/Thépault/Rosati-Yamamoto lineage. See:</p>
+<ul><li><code>STRONG-ES-MIZONY-THEPAULT-PROVENANCE.md</code></li><li><code>SQUARE-COMPLETION-PRIOR-ART.md</code></li></ul>
+<p>No novelty claim should be made for the square-divisor criterion itself.</p>
+<hr>
+<h2>2. DSC is closed as the universal bridge</h2>
+<p>The explicit hosted counterexample proves</p>
+<div class="math" role="math">\boxed{\mathrm{DSC\!\!-0}\text{ is false}, \qquad \mathrm{DSC\!\!-P}\text{ is false}.}</div>
+<p>The following remain valid supporting mathematics:</p>
+<ul><li>strong/weak/pointwise <code>q=3</code> absorption;</li><li>exact reduced-parameter domain;</li><li>finite exact-depth certificates;</li><li>direct-shadow smoothness;</li><li>character and multiplicative quotient structure;</li><li>covering-core / hypergraph depth theory.</li></ul>
+<p>Do not spend the main ES effort trying to restore universal DSC.</p>
+<hr>
+<h2>3. López A/B are the two boundary orthants of the classical square layer</h2>
+<p>The ordinary López trap at layer <code>a</code> is</p>
+<div class="math" role="math">T_a = \{-e,-4e:e\mid a\} \pmod{4a-1}.</div>
+<p>Write</p>
+<div class="math" role="math">a=\prod_i\ell_i^{E_i}, \qquad D=\prod_i\ell_i^{U_i}, \qquad 0\le U_i\le2E_i.</div>
+<p>Then <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code> proves:</p>
+<ul><li>López Type A is the lower orthant <code>U_i&lt;=E_i</code> for every <code>i</code>;</li><li>López Type B is the upper orthant <code>U_i&gt;=E_i</code> for every <code>i</code>;</li><li>the additional standard Type-II parameters are the mixed cross-orthant points.</li></ul>
+<p>The exact mixed parameter count is</p>
+<div class="math" role="math">\boxed{ M(a)=\tau(a^2)-2\tau(a)+1.}</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{M(a)=0\iff a\text{ is a prime power}.}</div>
+<p>Prime-power layers are unchanged by completion:</p>
+<div class="math" role="math">\boxed{S_a=T_a\quad\text{if }\omega(a)=1.}</div>
+<hr>
+<h2>4. Central synthesis: the completed layer is a symmetric Kneser box</h2>
+<p>Center the square-divisor exponents:</p>
+<div class="math" role="math">z_i=U_i-E_i.</div>
+<p>Since</p>
+<div class="math" role="math">4a\equiv1\pmod{4a-1},</div>
+<p>one gets</p>
+<div class="math" role="math">-4D \equiv -\prod_i\ell_i^{z_i} \pmod{4a-1}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ S_a =-\mathcal R_{4a-1}(a).}</div>
+<p>This is the main structural merger.</p>
+<p>The old program studied cross-layer congruence shadowing. The newer program studied Kneser expansion and stabilizers of symmetric product boxes. They now act on the same classical strong/Type-II object.</p>
+<p>Divisor complement</p>
+<div class="math" role="math">D\mapsto a^2/D</div>
+<p>is exactly</p>
+<div class="math" role="math">z\mapsto-z</div>
+<p>and therefore residue inversion.</p>
+<p>The López A/B mutual-inverse relation is the boundary restriction of this global symmetry.</p>
+<p>See:</p>
+<ul><li><code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code></li><li><code>ES-SQUARE-TRAP-COMPLEMENT.md</code></li></ul>
+<hr>
+<h2>5. The old character shields survive completion</h2>
+<p>Let</p>
+<div class="math" role="math">H_a = \langle \ell\bmod(4a-1):\ell\mid a\rangle.</div>
+<p>The complete strong layer satisfies</p>
+<div class="math" role="math">\boxed{ T_a \subseteq S_a \subseteq -H_a \subseteq \{x:(x/(4a-1))=-1\}.}</div>
+<p>Thus square completion changes exact occupancy inside the old multiplicative coset, but does not weaken the coarse multiplicative or Jacobi shields.</p>
+<p>See <code>ES-SQUARE-COMPLETION-COSET-SHIELD.md</code>.</p>
+<hr>
+<h2>6. Root geometry</h2>
+<p>Every square-divisor parameter may be written</p>
+<div class="math" role="math">D=sb^2, \qquad \frac{a^2}{D}=sc^2, \qquad a=sbc,</div>
+<p>with <code>s</code> squarefree.</p>
+<p>The Type-II equations become</p>
+<div class="math" role="math">\boxed{ p+q=4sbt, \qquad b+t=cq.}</div>
+<p>López comparability is exact:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ccl} \text{Type A}&amp;\iff&amp;b\mid c,\\ \text{Type B}&amp;\iff&amp;c\mid b,\\ \text{mixed strong Type II}&amp;\iff&amp;b\nmid c\text{ and }c\nmid b. \end{array}}</div>
+<p>See <code>ES-TYPEII-ROOT-GEOMETRY.md</code>.</p>
+<hr>
+<h2>7. Completed depth is unbounded, but finite compression is strong</h2>
+<p>Two elementary facts hold for every layer:</p>
+<div class="math" role="math">\boxed{1\notin S_a,} \qquad \boxed{-1\in S_a.}</div>
+<p>The prime-modulus CRT/Dirichlet backbone therefore survives completion.</p>
+<p>Whenever</p>
+<div class="math" role="math">4a-1&gt;7</div>
+<p>is prime, infinitely many Mordell-hard primes have exact strong/Type-II first depth <code>a</code>.</p>
+<p>Hence completed first-hit depth is unbounded.</p>
+<p>A reproducible finite census through</p>
+<div class="math" role="math">p\le50,000,000</div>
+<p>contains <code>93,457</code> Mordell-hard primes, all captured by completed layers with</p>
+<div class="math" role="math">\boxed{a\le624.}</div>
+<p>The unique deepest observed prime is</p>
+<div class="math" role="math">\boxed{p=2,031,121}</div>
+<p>with mixed witness</p>
+<div class="math" role="math">\boxed{a=624, \quad D=576, \quad 4a-1=2495, \quad q=815.}</div>
+<p>Its López A/B first depth is <code>1403</code>.</p>
+<p>This is finite compression only, not a universal ceiling.</p>
+<p>See:</p>
+<ul><li><code>ES-SQUARE-COMPLETION-BACKBONE.md</code></li><li><code>SQUARE-COMPLETION-FINITE-CENSUS.md</code></li><li><code>square_completion_probe.py</code></li></ul>
+<hr>
+<h2>8. Exact prime-index spectrum</h2>
+<p>If the layer index <code>a</code> is prime, then</p>
+<div class="math" role="math">S_a=\{-4,-1,-a\}.</div>
+<p>Every ancestry edge into such a layer is a complete shadow. Consequently:</p>
+<div class="math" role="math">\boxed{ a\text{ prime is an exact completed depth} \iff 4a-1\text{ is prime}.}</div>
+<p>The positive case is realized infinitely often by Mordell-hard primes.</p>
+<p>See <code>ES-SQUARE-PRIME-INDEX-SPECTRUM.md</code>.</p>
+<hr>
+<h2>9. Prime-power and squarefree-semiprime dichotomy</h2>
+<h3>Prime powers</h3>
+<p>If <code>a</code> is a prime power,</p>
+<div class="math" role="math">S_a=T_a.</div>
+<p>In particular the power-of-two Mersenne shadow lattice carries over unchanged, including its infinite structural-gap families.</p>
+<h3>Squarefree semiprimes</h3>
+<p>If</p>
+<div class="math" role="math">a=uv</div>
+<p>with distinct primes <code>u&lt;v</code>, the only mixed square divisors are</p>
+<div class="math" role="math">u^2,\qquad v^2.</div>
+<p>Their signed ratios</p>
+<div class="math" role="math">u/v,\qquad v/u</div>
+<p>lie outside every López boundary residue.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{T_{uv}\subsetneq S_{uv}}</div>
+<p>for every squarefree semiprime layer.</p>
+<p>See <code>ES-SQUAREFREE-SEMIPRIME-MIXED-RESIDUES.md</code>.</p>
+<hr>
+<h2>10. Multiplicative ancestry is completely classified</h2>
+<p>Fix an ancestor <code>j</code> and let</p>
+<div class="math" role="math">R_j=\mathcal R_{4j-1}(j), \qquad H_j=\operatorname{Stab}(R_j).</div>
+<p>Take a multiplicative descendant</p>
+<div class="math" role="math">k=jB</div>
+<p>on an ancestry edge. The ancestry condition is</p>
+<div class="math" role="math">B\equiv1\pmod{4j-1}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ S_{jB}\bmod(4j-1)\subseteq S_j \iff r\bmod(4j-1)\in H_j \text{ for every prime }r\mid B.}</div>
+<p>Any containment is automatically equality.</p>
+<p>This is an exact iff classification of direct shadows on multiplicative ancestry edges.</p>
+<p>See <code>ES-SQUARE-MULTIPLICATIVE-SHADOW-IFF.md</code>.</p>
+<hr>
+<h2>11. Internal stabilizers manufacture infinite cross-layer gaps</h2>
+<p>If every prime factor of an extension <code>B</code> lies in <code>H_j</code> and</p>
+<div class="math" role="math">B\equiv1\pmod{4j-1},</div>
+<p>then</p>
+<div class="math" role="math">S_{jB}\bmod(4j-1)=S_j.</div>
+<p>For any <code>h in H_j</code>, Dirichlet gives primes</p>
+<div class="math" role="math">r\equiv h, \qquad s\equiv h^{-1} \pmod{4j-1}.</div>
+<p>Then <code>B=rs</code> gives an infinite structural-gap cone above <code>j</code>.</p>
+<p>This is the first exact theorem where an internal Kneser stabilizer generates cross-layer shadow edges.</p>
+<p>See <code>ES-SQUARE-STABILIZER-EXTENSION-SHADOW.md</code>.</p>
+<hr>
+<h2>12. Nonmultiplicative ancestry also has infinite exact structure</h2>
+<h3>Squarefree factor-lift theorem</h3>
+<p>If the later index is squarefree</p>
+<div class="math" role="math">k=r_1\cdots r_t</div>
+<p>and the ancestor factors as</p>
+<div class="math" role="math">j=A_1\cdots A_t</div>
+<p>with</p>
+<div class="math" role="math">r_i\equiv A_i\pmod{4j-1},</div>
+<p>then</p>
+<div class="math" role="math">\boxed{S_k\bmod(4j-1)\subseteq S_j.}</div>
+<h3>Every ancestry quotient has infinite factor-lift families</h3>
+<p>For any</p>
+<div class="math" role="math">Q=4s+1,</div>
+<p>choose a squarefree divisor <code>A|s</code>, put <code>t=s/A</code>, choose a prime</p>
+<div class="math" role="math">r\equiv-t\pmod Q,</div>
+<p>and define</p>
+<div class="math" role="math">B=\frac{r+t}{Q}, \qquad j=AB, \qquad k=Ar.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{4k-1=Q(4j-1)}</div>
+<p>and the later layer is completely shadowed by <code>j</code>.</p>
+<p>Dirichlet supplies infinitely many such <code>r</code>.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{ \text{every allowed ancestry quotient supports infinitely many exact completed structural gaps}.}</div>
+<p>See:</p>
+<ul><li><code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code></li><li><code>ES-SQUARE-ALL-QUOTIENT-FACTOR-LIFT.md</code></li></ul>
+<hr>
+<h2>13. Exponent-lattice normal form for arbitrary ancestry</h2>
+<p>For</p>
+<div class="math" role="math">j=\prod_i p_i^{E_i},</div>
+<p>define</p>
+<div class="math" role="math">\phi_j:\mathbb Z^d\to(\mathbb Z/(4j-1)\mathbb Z)^\times, \qquad z\mapsto\prod_i p_i^{z_i},</div>
+<p>and</p>
+<div class="math" role="math">L_j=\ker\phi_j.</div>
+<p>The ancestor completed box is the image of</p>
+<div class="math" role="math">B_j=\prod_i[-E_i,E_i]_{\mathbb Z}.</div>
+<p>For a later ancestry layer</p>
+<div class="math" role="math">k=\prod_\nu r_\nu^{F_\nu},</div>
+<p>choose exponent lifts <code>v_nu</code> with</p>
+<div class="math" role="math">\phi_j(v_\nu)=r_\nu.</div>
+<p>Define the later discrete zonotope</p>
+<div class="math" role="math">Z(k\to j) = \left\{ \sum_\nu z_\nu v_\nu: -F_\nu\le z_\nu\le F_\nu \right\}.</div>
+<p>Then direct shadow is exactly</p>
+<div class="math" role="math">\boxed{ Z(k\to j) \subseteq B_j+L_j.}</div>
+<p>A strong sufficient coordinate-budget test is</p>
+<div class="math" role="math">\boxed{ \sum_\nu F_\nu |(v_\nu)_i|\le E_i \quad\forall i.}</div>
+<p>This turns residual nonmultiplicative shadowing into a finite zonotope-in-lattice-cover problem.</p>
+<p>See <code>ES-SQUARE-EXPONENT-LATTICE-SHADOW.md</code>.</p>
+<hr>
+<h2>14. Effective dimension can be much smaller than prime support</h2>
+<p>For</p>
+<div class="math" role="math">j=2^e p</div>
+<p>with <code>p</code> odd prime,</p>
+<div class="math" role="math">4j-1=2^{e+2}p-1</div>
+<p>gives</p>
+<div class="math" role="math">p\equiv2^{-(e+2)}.</div>
+<p>Therefore the raw two-dimensional completed box collapses exactly to</p>
+<div class="math" role="math">\boxed{ \mathcal R_{4j-1}(j) = \{2^z:-2e-2\le z\le2e+2\}.}</div>
+<p>For <code>j=2p</code>, this is the nine-step interval <code>[-4,4]</code> in powers of <code>2</code>.</p>
+<p>This explains non-factor-lift shadows such as the finite edge <code>j=10 -&gt; k=8083=59*137</code>.</p>
+<p>See <code>ES-SQUARE-BINARY-PRIME-INTERVAL.md</code>.</p>
+<p>The next internal invariant should be <strong>effective signed-box dimension modulo <code>4j-1</code></strong>, not merely <code>omega(j)</code>.</p>
+<hr>
+<h2>15. Completed depth spectrum is quantitatively infinite and coinfinite</h2>
+<p>The prime-modulus backbone gives</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_{\rm sq}\cap[1,K]| \ge (1+o(1))\frac{2K}{\log(4K)}.}&lt;/div&gt;</p>
+<p>The quotient-nine factor-lift family</p>
+<div class="math" role="math">k=2r, \qquad r\equiv8\pmod9</div>
+<p>gives structural gaps with</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal G_{\rm sq}\cap[1,K]| \ge (1+o(1))\frac{K}{12\log K}.}&lt;/div&gt;</p>
+<p>Thus the completed strong/Type-II depth spectrum is provably infinite and coinfinite, with explicit backbone and anti-backbone subfamilies both of prime-counting order.</p>
+<p>See <code>ES-SQUARE-SPECTRUM-INFINITE-COINFINITE.md</code>.</p>
+<hr>
+<h2>16. Fixed-shift strong/Type-II search lives in a finite corridor</h2>
+<p>A successful Type-II shift <code>q</code> satisfies</p>
+<div class="math" role="math">\boxed{3q\le p+4.}</div>
+<p>Writing</p>
+<div class="math" role="math">A=\frac{p+3}{4},</div>
+<p>the shifts</p>
+<div class="math" role="math">q_h=4h+3</div>
+<p>correspond to consecutive integers</p>
+<div class="math" role="math">C_h=A+h.</div>
+<p>Only</p>
+<div class="math" role="math">0\le h\le\left\lfloor\frac{p-5}{12}\right\rfloor</div>
+<p>can support a Type-II solution.</p>
+<p>Thus a hypothetical strong counterexample requires simultaneous signed-box defects across a long finite corridor of consecutive integers.</p>
+<p>See <code>STRONG-ES-FINITE-SHIFT-CORRIDOR.md</code>.</p>
+<hr>
+<h2>17. Exact small-shift factor filters</h2>
+<p>For Mordell-hard primes:</p>
+<h3>q = 3</h3>
+<div class="math" role="math">\boxed{ q=3\text{ misses} \iff \text{every prime factor of }\frac{p+3}{4} \text{ is }1\pmod3.}</div>
+<h3>q = 7</h3>
+<div class="math" role="math">\boxed{ q=7\text{ misses} \iff \text{every prime factor of }\frac{p+7}{4} \text{ is a quadratic residue mod }7.}</div>
+<h3>q = 11</h3>
+<p>A miss is either:</p>
+<ol><li>pure quadratic splitting modulo <code>11</code>, or</li><li>a thin defect with <code>v_3=1</code>, all other QR factors <code>1 mod11</code>, only primitive NR classes <code>2,6</code>, and total such valuation at most <code>2</code>.</li></ol>
+<h3>q = 23</h3>
+<p>Because <code>6|(p+23)/4</code>, the forced factors <code>2,3</code> generate almost the entire QR subgroup. A miss is either:</p>
+<ol><li>pure quadratic splitting modulo <code>23</code>, or</li><li>a thin defect with <code>v_2=v_3=1</code>, all other QR factors <code>1 mod23</code>, only NR classes <code>5,14</code>, and total such valuation at most <code>2</code>.</li></ol>
+<p>See:</p>
+<ul><li><code>FAB-HARD-FIRST-FILTERS.md</code></li><li><code>STRONG-ES-Q7-EXACT-FILTER.md</code></li><li><code>STRONG-ES-Q11-EXACT-FILTER.md</code></li><li><code>STRONG-ES-Q23-EXACT-FILTER.md</code></li></ul>
+<hr>
+<h2>18. The first four prime shifts already give a dimension-three sieve</h2>
+<p>Classical upper-bound sieve theory applied to the exact corridor filters gives:</p>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ q=3,7\text{ both miss}\} \ll \frac{X}{(\log X)^2}.}</div>
+<p>Adding <code>q=11</code> gives</p>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ q=3,7,11\text{ all miss}\} \ll \frac{X}{(\log X)^{5/2}}.}</div>
+<p>Adding <code>q=23</code> gives</p>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ q=3,7,11,23\text{ all miss}\} \ll \frac{X}{(\log X)^3}.}</div>
+<p>The last estimate is a relative-prime exceptional proportion</p>
+<div class="math" role="math">\boxed{O((\log X)^{-2}).}</div>
+<p>These are specific applications of classical Selberg/Brun sieve ideas. Classical full-ES exceptional-set theorems are much stronger.</p>
+<p>See:</p>
+<ul><li><code>STRONG-ES-Q3-Q7-SIEVE.md</code></li><li><code>STRONG-ES-Q3-Q7-Q11-SIEVE.md</code></li><li><code>STRONG-ES-Q3-Q7-Q11-Q23-SIEVE.md</code></li></ul>
+<hr>
+<h2>19. Exact-ES external-shift Kneser obstruction theory remains active</h2>
+<p>For external prime shifts</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad (q/p)=-1,</div>
+<p>a combined Type-I/Type-II failure has even stabilizer index</p>
+<div class="math" role="math">\boxed{n\ge6}</div>
+<p>and symmetric defect budget</p>
+<div class="math" role="math">\boxed{ \sum_i \left( \min(2e_i+1,\operatorname{ord}(r_iH))-1 \right) \le n-4.}</div>
+<p>At index six the failure reduces to one simple primitive sextic factor and a forced external-nonresidue edge.</p>
+<p>Consecutive primitive defects can occur, with exact recurrence</p>
+<div class="math" role="math">\boxed{ q_{i-1} \equiv q_{i+1}^{\pm2}u_i^6 \pmod{q_i}.}</div>
+<p>A hypothetical ES counterexample would require unbounded full-stabilizer quotient complexity as the auxiliary shift varies, and the least odd prime divisor of that defect index can be forced arbitrarily large.</p>
+<p>Thus no finite classification of low Kneser defect indices can finish exact ES.</p>
+<hr>
+<h2>20. Two-target corridor companions (2026-08-15)</h2>
+<p>The exact two-target reformulation now has four additional corridor theorems on the original-ES side, not merely the strong/Type-II side.</p>
+<h3>Linear form <code>2p+1</code></h3>
+<p><code>TWO-P-PLUS-ONE-FILTER.md</code> proves that a Mordell-hard prime is solved as soon as <code>2p+1</code> has a divisor <code>7\bmod8</code>. A counterexample must place <code>2p+1</code> in the same <code>{1,3}\bmod8</code> semigroup already forced on <code>p+2</code>.</p>
+<h3><code>q=3</code> and <code>q=7</code> have no Type-I surplus</h3>
+<p>At <code>q=3</code> the two targets coincide for hard primes. At <code>q=7</code>, <code>HARD-Q7-TYPE-I-NO-RESCUE.md</code> proves they fail together: the forced factor <code>2</code> fills the whole quadratic-residue subgroup, and every hard class is itself a residue modulo <code>7</code>. Combined failure equals the existing Type-II miss.</p>
+<h3><code>q=11</code> has a genuine Type-I companion</h3>
+<p><code>Q11-TYPE-I-COMPANION.md</code> classifies the rescues. After a Type-II miss, Type I still hits on explicit residue classes modulo <code>11</code> once the QR box is full, and on the thinner set <code>{7,8,10}</code> when the box is only <code>{1,3,4}</code>. Through <code>2\cdot10^6</code> this companion solves <code>13</code> hard primes that Type II missed at the same shift.</p>
+<h3>Composite shift <code>k=15</code></h3>
+<p><code>K15-TWO-TARGET-FILTER.md</code> identifies the two-primary subgroup</p>
+<div class="math" role="math">H=\langle2\rangle=\{1,2,4,8\}\subset(\mathbb Z/15\mathbb Z)^\times.</div>
+<p>Both hard-class Type-I targets and the Type-II target lie outside <code>H</code>. Combined failure occurs exactly on the <code>H</code>-trap (every prime factor of <code>(p+15)/4</code> is <code>1,2,4,8\bmod15</code>) or on one thin <code>11</code>-packet. Any prime factor <code>7,13,14\bmod15</code>, or <code>11</code> with <code>v_2\ge2</code>, is an immediate Type-II hit.</p>
+<h3>Finite residual after <code>3,7,11</code></h3>
+<p>Through <code>2{,}000{,}000</code> there are <code>4519</code> Mordell-hard primes. Combined two-target failure at <code>3,7,11</code> leaves <code>711</code> primes, all solved by some later shift in</p>
+<div class="math" role="math">\{15,19,23,27,31,35,39,43,47,51,55,59\}.</div>
+<p>The next exact target is the prime shift <code>k=19</code>.</p>
+<p>These are corridor theorems, not a bounded-window existence proof.</p>
+<h3>Independent covering obstruction</h3>
+<p>A separate attack asked whether a fixed multiplier <code>M</code> can force <code>M\mid(p+k)/4</code> at the aligned shift <code>k\equiv-p\pmod{4M}</code> and hit Type II from the signed box of <code>M</code> alone. <code>HARD-SMOOTH-TYPEII-OBSTRUCTION.md</code> proves this is impossible whenever <code>M</code> is <code>{2,3,5,7}</code>-smooth: the whole forced box is Jacobi-positive, while <code>-1</code> is Jacobi-negative. Any uniform Type-II arithmetic-progression cover of a hard class must import an external prime <code>ℓ≥11</code>. Including <code>13</code> produces at least one explicit infinite family,</p>
+<div class="math" role="math">p=10920t+10369, \qquad \frac4p=\frac1{546Tp}+\frac1{2730T}+\frac1{5Tp},\quad T=t+1.</div>
+<p>That family sits inside the single hard class <code>289\bmod840</code> and does not cover the class. Original Erdős--Straus remains open.</p>
+<hr>
+<h2>21. Current highest-priority proof targets</h2>
+<h3>A. Strong/Type-II cross-layer ancestry</h3>
+<p>Use the exact object</p>
+<div class="math" role="math">S_a=-\mathcal R_{4a-1}(a)</div>
+<p>and classify the residual nonmultiplicative ancestry edges after removing:</p>
+<ol><li>multiplicative stabilizer extensions, already solved exactly;</li><li>factor-lift families, already infinite at every quotient;</li><li>low effective-dimension folds such as <code>2^e p</code>.</li></ol>
+<p>The exponent-lattice criterion is now the primary language.</p>
+<h3>B. Strong/Type-II finite corridor</h3>
+<p>Continue exact fixed-shift classifications at useful small primes <code>q</code> and track the added sieve dimension.</p>
+<p>The immediate questions are:</p>
+<ol><li>identify more shifts where hard congruences force a large QR product subset;</li><li>quantify all exceptional low-entropy branches;</li><li>determine whether a useful uniform family of corridor shifts exists.</li></ol>
+<h3>C. Exact ES two-target lane</h3>
+<p>Continue the corridor from the new <code>k=15</code> combined filter. The immediate exact target is <code>k=19</code>, then the already-classified Type-II shift <code>k=23</code> with its Type-I companion.</p>
+<p>The proven unbounded-defect forcing theorem still means no finite list of Kneser indices can finish the external-nonresidue lane. The corridor lane is a different finite-for-each-prime search and is not forbidden by that theorem.</p>
+<h3>D. Prior-art review</h3>
+<p>Continue tracing Thépault, Mizony, Rosati-Yamamoto, Mordell, Bradford, López, Chamberland, and BHB-F so all structural novelty claims remain conservative and publication-safe.</p>
+<h3>E. Public hunt</h3>
+<p>The operator-facing attack is now a public infinite hunt: <a href="es-hunt.html"><code>ES-HUNT.md</code></a>, kernels <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>bb.kernel</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>CC.kernel</code></a>, findings under <a href="start-here.html"><code>findings/</code></a>. The recurrence is the windows \((s,s+\Delta]\) with no last interval. Letters are collected; the engine stops when the operator stops it. Letter numbers are the first 128 bits of SHA-256 of <code>ES-LETTER-v1</code> and do not depend on the start factor. A cleared window is not a proof.</p>
+<hr>
+<h2>22. One-line status</h2>
+<p>The main new research object is now clear:</p>
+<div class="math" role="math">\boxed{ \text{classical Mizony/Thépault strong layer} = \text{square-completed López layer} = -\text{symmetric signed divisor box}.}</div>
+<p>Its internal Kneser geometry and cross-layer shadow geometry are now partially unified, multiplicative ancestry is completely classified, every ancestry quotient has infinite exact gap families, the residual shadow problem has an exact exponent-lattice form, and four tiny fixed Type-II shifts already leave only an <code>O(X/(log X)^3)</code> prime survivor set. On the original-ES two-target corridor the first three prime shifts are now combined-exact, <code>2p+1</code> is an additional linear-form filter, and <code>k=15</code> is a complete two-target theorem. Original Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

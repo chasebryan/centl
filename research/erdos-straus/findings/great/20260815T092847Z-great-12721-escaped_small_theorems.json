@@ -1,0 +1,22 @@
+{
+  "event": {
+    "equation": "4/12721 = 1/3231 + 1/202476 + 1/7727091588",
+    "kernel": "CC.kernel",
+    "kind": "fab",
+    "layer": "window",
+    "method": "fab(1,3)",
+    "n": 12721,
+    "p": 12721,
+    "solved": true,
+    "x": "3231",
+    "y": "202476",
+    "z": "7727091588"
+  },
+  "file": "20260815T092847Z-great-12721-escaped_small_theorems.md",
+  "grade": "great",
+  "tags": [
+    "escaped_small_theorems",
+    "certified_hard_witness",
+    "new_method"
+  ]
+}

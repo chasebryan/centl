@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The previous version claimed that for an odd prime s, with">
+  <title>General odd-prime-shift ancestry rigidity — corrected scope — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-odd-prime-s-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-odd-prime-s-rigidity.html">
+  <meta property="og:title" content="General odd-prime-shift ancestry rigidity — corrected scope — Free Computation Foundation">
+  <meta property="og:description" content="The previous version claimed that for an odd prime s, with">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>General odd-prime-shift ancestry rigidity — corrected scope</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">The previous version claimed that for an odd prime s, with</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-ODD-PRIME-S-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> <code>REVISE / PREVIOUS ALL-j CLAIM RETRACTED</code></p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the former statement in this file claimed an exact classification for every <code>j&gt;=1</code>. That statement is false. The correct universal theorem holds in the asymptotic range <code>j&gt;=s+1</code>; small <code>j</code> can contain additional full-shadow children. See <a href="odd-prime-shift-asymptotic-rigidity.html"><code>ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md</code></a>.</p>
+<h2>1. Retraction of the former all-j statement</h2>
+<p>The previous version claimed that for an odd prime <code>s</code>, with</p>
+<div class="math" role="math">Q=4s+1, \qquad K=Qj-s, \qquad m=4j-1,</div>
+<p>full unrestricted shadowing always satisfied</p>
+<div class="math" role="math">T_K\bmod m\subseteq T_j \iff K\text{ prime or }K=s p\text{ with }p\text{ prime}.</div>
+<p>This is false for small <code>j</code>.</p>
+<p>A concrete counterexample is</p>
+<div class="math" role="math">\boxed{s=17,\quad j=2,\quad K=121=11^2,\quad m=7.}</div>
+<p>Here</p>
+<div class="math" role="math">S_2=-T_2=\{1,2,4\}\pmod7.</div>
+<p>The divisors of <code>121</code> are</p>
+<div class="math" role="math">1,11,121,</div>
+<p>which reduce modulo <code>7</code> to</p>
+<div class="math" role="math">1,4,2,</div>
+<p>respectively. All lie in <code>S_2</code>, so</p>
+<div class="math" role="math">T_{121}\bmod7\subseteq T_2.</div>
+<p>But <code>121</code> is neither prime nor <code>17p</code>.</p>
+<p>Therefore the all-<code>j</code> theorem is disproved.</p>
+<h2>2. Why the former proof failed</h2>
+<p>The previous write-up itself exposed the problem: it attempted to use</p>
+<div class="math" role="math">K&lt;m^2</div>
+<p>for all small <code>j</code>, but this inequality fails when <code>s</code> is large relative to <code>j</code>.</p>
+<p>For example, at <code>s=17</code>, <code>j=2</code>,</p>
+<div class="math" role="math">K=121&gt;49=m^2.</div>
+<p>The least-prime-factor escape argument therefore does not apply.</p>
+<p>A proof cannot replace this missing range with an unspecified “finite check per <code>s</code>” while still claiming a uniform all-<code>s</code>, all-<code>j</code> theorem.</p>
+<h2>3. What remains valid</h2>
+<p>The following results remain valid:</p>
+<ol><li>the prime-child theorem;</li><li>the divisor-child theorem:</li></ol>
+<div class="math" role="math">a\mid\gcd(j,s),\ K=ap,\ p\text{ prime} \Longrightarrow T_K\bmod m\subseteq T_j;</div>
+<ol><li>the asymptotic ancestry skeleton for <code>j&gt;=s+1</code>;</li><li>the exact quotient-specific classifications already proved independently for <code>Q=13</code>, <code>17</code>, <code>21</code>, and <code>29</code>;</li><li>the corrected odd-prime-shift theorem in <a href="odd-prime-shift-asymptotic-rigidity.html"><code>ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md</code></a>.</li></ol>
+<h2>4. Small-j exception family is a real object</h2>
+<p>The counterexample above is not isolated.</p>
+<p>Finite scouting finds additional small-<code>j</code> full-shadow children for prime shifts, for example:</p>
+<pre><code class="language-text">s=19, j=4:   K=289=17^2
+s=53, j=4:   K=799=17*47
+s=71, j=8:   K=2209=47^2
+s=71, j=16:  K=4489=67^2
+s=83, j=2:   K=583=11*53
+s=89, j=10:  K=3481=59^2</code></pre>
+<p>These are not counterexamples to the asymptotic skeleton because every one lies in the small range</p>
+<div class="math" role="math">j&lt;s+1.</div>
+<p>They define a separate <strong>small-ancestor exception problem</strong> governed by the exact multiplicative geometry of <code>S_j</code>.</p>
+<p>In particular, dyadic ancestors <code>j=2^a</code> are already understood through the Mersenne trap lattice:</p>
+<div class="math" role="math">S_{2^a}=\langle2\rangle \pmod{2^{a+2}-1}.</div>
+<p>That multiplicative closure naturally permits composite child divisors to remain inside the ancestor trap image.</p>
+<h2>5. Correct research program</h2>
+<p>The odd-prime-shift program now splits cleanly:</p>
+<h3>Large-j theorem</h3>
+<p>For</p>
+<div class="math" role="math">j\ge s+1,</div>
+<p>the exact nonsmooth classification is prime or <code>sp</code>, and smooth children are eliminated in the corrected theorem note.</p>
+<h3>Small-j exception census</h3>
+<p>For</p>
+<div class="math" role="math">1\le j\le s,</div>
+<p>classify full shadows by the finite group / trap geometry of <code>S_j</code>.</p>
+<p>This small range is not noise. It intersects the dyadic trap lattice and other multiplicative-saturation phenomena and may possess infinite families as <code>s</code> varies.</p>
+<h2>6. Scientific record</h2>
+<p>The invalid all-<code>j</code> proof remains available in Git history for provenance but must not be cited as a theorem.</p>
+<p>The canonical status is now:</p>
+<pre><code class="language-text">all-j odd-prime-shift rigidity:      FALSE
+asymptotic j&gt;=s+1 rigidity:          PROVED
+small-j exception classification:    OPEN</code></pre>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

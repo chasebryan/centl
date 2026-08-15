@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Exact survivor density and hazard for the Type A/B sieve — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/survivor-density.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/survivor-density.html">
+  <meta property="og:title" content="Exact survivor density and hazard for the Type A/B sieve — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact survivor density and hazard for the Type A/B sieve</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SURVIVOR-DENSITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem note</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> this note applies the prime number theorem for arithmetic progressions, the divergence of reciprocal primes in the class <code>3 mod 4</code>, and the Type A/B congruence characterization. It proves a density-one statement for Type A/B coverage of primes. It does not prove pointwise coverage of every prime and therefore does not solve the Erdős-Straus conjecture. No literature-priority claim is made without a separate prior-art review.</p>
+<h2>1. Finite-depth survivor states</h2>
+<p>Let</p>
+<div class="math" role="math">m_k=4k-1, \qquad T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<p>For an odd prime <code>p</code>, let</p>
+<div class="math" role="math">C_{AB}(p)=\min\{k\ge1:p\bmod m_k\in T_k\},</div>
+<p>with <code>C_AB(p)=infinity</code> if no such layer exists.</p>
+<p>For a fixed depth <code>K</code>, define</p>
+<div class="math" role="math">M_K=\operatorname{lcm}(m_1,m_2,\ldots,m_K).</div>
+<p>Define the reduced survivor set</p>
+<div class="math" role="math">S_K= \left\{ a\in(\mathbb Z/M_K\mathbb Z)^\times: a\bmod m_j\notin T_j\text{ for every }1\le j\le K \right\}.</div>
+<p>Except for the finitely many primes dividing <code>M_K</code>, a prime survives the first <code>K</code> Type A/B layers if and only if its residue modulo <code>M_K</code> belongs to <code>S_K</code>.</p>
+<h2>2. Exact finite-depth prime density theorem</h2>
+<p>By the prime number theorem for arithmetic progressions, each reduced residue class modulo fixed <code>M_K</code> contains asymptotically the same proportion of primes.</p>
+<p>Therefore the relative density among primes of surviving through layer <code>K</code> exists and is exactly</p>
+<div class="math" role="math">\boxed{ \delta_K=\frac{|S_K|}{\varphi(M_K)}. }</div>
+<p>Likewise, define the exact-depth residue set</p>
+<div class="math" role="math">E_k= \left\{ a\in(\mathbb Z/M_k\mathbb Z)^\times: a\bmod m_k\in T_k, \quad a\bmod m_j\notin T_j\text{ for }j&lt;k \right\}.</div>
+<p>Then the relative prime density of exact minimal depth <code>k</code> is</p>
+<div class="math" role="math">\boxed{ \mu_k=\frac{|E_k|}{\varphi(M_k)}. }</div>
+<p>Since exact depth <code>k</code> is precisely survival through <code>k-1</code> followed by failure at <code>k</code>,</p>
+<div class="math" role="math">\boxed{ \mu_k=\delta_{k-1}-\delta_k. }</div>
+<p>Thus the minimal-depth spectrum is literally the support of the density drop:</p>
+<div class="math" role="math">\boxed{ k\text{ is infinitely prime-realizable}\iff\mu_k&gt;0.}</div>
+<p>The implication from a nonempty reduced residue class to infinitely many prime realizations is Dirichlet&#x27;s theorem.</p>
+<h2>3. The exact survival-history hazard</h2>
+<p>Whenever <code>delta_(k-1)&gt;0</code>, define</p>
+<div class="math" role="math">\boxed{ h_k=\frac{\mu_k}{\delta_{k-1}} =1-\frac{\delta_k}{\delta_{k-1}}.}</div>
+<p>This is the exact asymptotic conditional probability that a prime hits Type A/B layer <code>k</code>, conditioned on having survived every earlier layer.</p>
+<p>It is not a heuristic independence model. All arithmetic dependence, all direct shadows, and all joint shadow closure are already encoded in the finite residue set <code>S_(k-1)</code>.</p>
+<p>This is the correct arithmetic replacement for the earlier raw and prime-conditioned empirical hazard models.</p>
+<p>A structural gap is exactly a zero-hazard layer:</p>
+<div class="math" role="math">\boxed{h_k=0\iff\mu_k=0.}</div>
+<h2>4. Exact hazard on the prime-modulus backbone</h2>
+<p>Suppose</p>
+<div class="math" role="math">q=m_k=4k-1</div>
+<p>is prime.</p>
+<p>Because <code>q</code> is larger than every earlier modulus <code>m_j</code>, it divides none of them. Hence</p>
+<div class="math" role="math">\gcd(q,M_{k-1})=1</div>
+<p>and</p>
+<div class="math" role="math">M_k=qM_{k-1}.</div>
+<p>Every survivor residue modulo <code>M_(k-1)</code> therefore has exactly <code>q-1</code> reduced CRT extensions modulo <code>M_k</code>, one for each nonzero residue modulo <code>q</code>.</p>
+<p>Exactly <code>|T_k|</code> of those extensions hit the target layer. Consequently</p>
+<div class="math" role="math">|S_k|=|S_{k-1}|\bigl(q-1-|T_k|\bigr)</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ h_k=\frac{|T_k|}{q-1}=\frac{|T_k|}{4k-2}.}</div>
+<p>Using the exact trap-cardinality identity</p>
+<div class="math" role="math">|T_k| = 2\tau(k)-1-\mathbf 1_{4\mid k}\tau(k/4),</div>
+<p>we obtain the closed formula</p>
+<div class="math" role="math">\boxed{ h_k = \frac{2\tau(k)-1-\mathbf 1_{4\mid k}\tau(k/4)}{4k-2} \qquad(4k-1\text{ prime}).}</div>
+<p>Thus every prime-modulus backbone layer is not merely realizable. Its conditional asymptotic hazard is known exactly and is independent of the entire preceding shadow history.</p>
+<h2>5. Density-one Type A/B coverage of primes</h2>
+<p>For every backbone depth with <code>q=4k-1&gt;7</code> prime, <code>k&gt;=3</code> and</p>
+<div class="math" role="math">|T_k|\ge3.</div>
+<p>Non-backbone layers can only remove additional survivors. Therefore</p>
+<div class="math" role="math">\delta_K \le \prod_{\substack{q\le4K-1\\q\equiv3\pmod4\\q&gt;7}} \left(1-\frac{3}{q-1}\right).</div>
+<p>The reciprocal sum over primes <code>q congruent 3 mod 4</code> diverges. Hence this product tends to zero and</p>
+<div class="math" role="math">\boxed{\lim_{K\to\infty}\delta_K=0.}</div>
+<p>Let</p>
+<div class="math" role="math">\mathcal E=\{p\text{ prime}:C_{AB}(p)=\infty\}.</div>
+<p>For every fixed <code>K</code>, the set <code>E</code> is contained in the primes surviving through <code>K</code>, whose relative density is <code>delta_K</code>. Therefore</p>
+<div class="math" role="math">\overline d_{\mathbb P}(\mathcal E)\le\delta_K</div>
+<p>for every <code>K</code>. Sending <code>K</code> to infinity gives</p>
+<div class="math" role="math">\boxed{ overline d_{\mathbb P}(\mathcal E)=0. }</div>
+<p>Equivalently:</p>
+<div class="math" role="math">\boxed{\text{A relative density-one set of primes has a Type A or Type B solution.}}</div>
+<p>This is a pointwise weaker statement than López&#x27;s conjecture that every prime has Type A or B, but it is unconditional.</p>
+<h2>6. A quantitative decay in depth</h2>
+<p>The Mertens theorem for primes in arithmetic progressions gives</p>
+<div class="math" role="math">\sum_{\substack{q\le x\\q\equiv3\pmod4}}\frac1q = \frac12\log\log x+O(1).</div>
+<p>Using <code>log(1-u)&lt;=-u</code>, the prime-modulus backbone alone yields</p>
+<div class="math" role="math">\log\delta_K \le -3 \sum_{\substack{q\le4K-1\\q\equiv3\pmod4\\q&gt;7}} \frac1{q-1} = -\frac32\log\log K+O(1).</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \delta_K\ll(\log K)^{-3/2}. }</div>
+<p>This is a conservative bound because it uses only three trap residues at each prime-modulus layer and ignores every composite-modulus layer as well as the extra divisor structure in <code>T_k</code>.</p>
+<h2>7. Hard-class version</h2>
+<p>The same argument remains valid after conditioning on any fixed reduced residue class modulo a modulus coprime to the backbone prime <code>q</code>.</p>
+<p>In particular, for the six Mordell hard classes modulo <code>840</code>, every backbone prime <code>q&gt;7</code> is coprime to <code>840</code>. Therefore the exact backbone hazard formula survives unchanged inside each hard class.</p>
+<p>Consequently the set of hard-class primes not covered by Type A/B also has relative density zero within the hard-prime population.</p>
+<p>This dovetails with the hard-class depth spectrum and arrival-function framework: structural gaps are zero-density drops, realizable depths are positive drops, and the prime-modulus backbone supplies infinitely many explicit positive drops.</p>
+<h2>8. Why this changes the research picture</h2>
+<p>The Type A/B system can now be viewed as an exact arithmetic survival process:</p>
+<div class="math" role="math">1=\delta_0\ge\delta_1\ge\delta_2\ge\cdots\to0,</div>
+<p>with exact mass function</p>
+<div class="math" role="math">\mu_k=\delta_{k-1}-\delta_k</div>
+<p>and exact conditional hazard</p>
+<div class="math" role="math">h_k=\mu_k/\delta_{k-1}.</div>
+<p>The shadow graph describes dependencies between layers. The shadow closure describes finite covering of survivor states. The depth spectrum is the support of <code>mu_k</code>. The arrival function records the first prime occupying each positive-mass depth. The prime-modulus backbone gives an infinite set of layers where the hazard is closed-form and independent of the past.</p>
+<p>This unifies what previously looked like separate empirical phenomena.</p>
+<h2>9. The next theorem targets</h2>
+<p>The strongest immediate targets are:</p>
+<ol><li>compute or bound <code>h_k</code> at composite moduli using the shadow-closure quotient rather than raw residue density;</li><li>determine whether direct-shadow completeness is true, which would characterize every zero-hazard layer by a one-edge shadow obstruction;</li><li>exploit the exact backbone recurrence together with average divisor information for <code>k=(q+1)/4</code> to improve the conservative <code>(log K)^(-3/2)</code> survivor bound;</li><li>study whether the exact hazard sequence has a tractable Euler-product or multiplicative approximation after quotienting shadow dependencies;</li><li>relate the depth-tail <code>delta_K</code> to the arrival function <code>lambda(k)</code> and the observed record frontier.</li></ol>
+<p>The remaining universal question is still pointwise: density zero does not rule out an infinite sparse exceptional set, and proving that the exceptional set is empty remains equivalent to establishing Type A/B coverage for every prime.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

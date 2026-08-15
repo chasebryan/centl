@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Direct-Shadow Completeness counterexample — primitive q=3 triple cover — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/dsc-q3-triple-counterexample.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/dsc-q3-triple-counterexample.html">
+  <meta property="og:title" content="Direct-Shadow Completeness counterexample — primitive q=3 triple cover — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Direct-Shadow Completeness counterexample — primitive q=3 triple cover</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DSC-Q3-TRIPLE-COUNTEREXAMPLE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact counterexample to universal DSC-0 and DSC-P</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this falsifies the universal Direct-Shadow Completeness implication and the proposed universal Class-C local-escape route. It does <strong>not</strong> falsify the Erdős-Straus conjecture. In fact the candidate progression below is covered by earlier Type A/B layers, so it supplies no ES counterexample.</p>
+<p>Read with:</p>
+<ul><li><code>DIRECT-SHADOW-COMPLETENESS.md</code></li><li><code>Q3-ABSORPTION.md</code></li><li><code>Q3-WEAK-REDUNDANCY.md</code></li><li><code>Q3-POINTWISE-ABSORPTION.md</code></li><li><code>Q3-FIBER-INJECTIVITY.md</code></li><li><code>Q3-NEXT-DIGIT-NORMAL-FORM.md</code></li></ul>
+<hr>
+<h2>1. Result</h2>
+<p>There exists an admissible Mordell-hard Type A/B target candidate that is <strong>not directly shadowed by any single earlier layer</strong>, but is nevertheless covered by the union of three earlier q=3 layers.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \text{directly novel} \not\Longrightarrow \text{not union-shadowed}. }</div>
+<p>Therefore both proposed universal implications</p>
+<div class="math" role="math">\boxed{\mathrm{DSC\text{-}0}} \qquad\text{and}\qquad \boxed{\mathrm{DSC\text{-}P}}</div>
+<p>are false.</p>
+<p>The counterexample sits inside the active fixed-negative/Class-C geometry: the three covering layers are fixed-only, Jacobi-negative, active, and have q=3.</p>
+<hr>
+<h2>2. Constructed target</h2>
+<p>Take</p>
+<div class="math" role="math">\boxed{k=15,290,696}.</div>
+<p>Then</p>
+<div class="math" role="math">M=4k-1 =61,162,783 =11\cdot31\cdot83\cdot2161.</div>
+<p>Let</p>
+<div class="math" role="math">\boxed{d=764=4\cdot191}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{D=20,014}, \qquad k=dD.</div>
+<p>Choose the target Type A trap</p>
+<div class="math" role="math">\boxed{t=-d\pmod M=61,162,019}.</div>
+<p>Because</p>
+<div class="math" role="math">\gcd(M,840)=1,</div>
+<p>the target trap is compatible with every Mordell-hard class</p>
+<div class="math" role="math">H=\{1,121,169,289,361,529\}\pmod{840}.</div>
+<p>For the simplest representative choose</p>
+<div class="math" role="math">\boxed{h=1}.</div>
+<p>The candidate progression is</p>
+<div class="math" role="math">x(s)=r+Ls,</div>
+<p>where CRT gives</p>
+<div class="math" role="math">\boxed{L=\operatorname{lcm}(840,M)=51,376,737,720}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{r=41,284,877,761}.</div>
+<p>Thus</p>
+<div class="math" role="math">r\equiv1\pmod{840}, \qquad r\equiv61,162,019\pmod{61,162,783}.</div>
+<hr>
+<h2>3. The three covering q=3 layers</h2>
+<p>Use the earlier layers</p>
+<div class="math" role="math">\boxed{j=25,70,187}.</div>
+<p>Their moduli are</p>
+<div class="math" role="math">m_{25}=99=9\cdot11, \qquad m_{70}=279=9\cdot31, \qquad m_{187}=747=9\cdot83.</div>
+<p>For the target progression:</p>
+<div class="math" role="math">\gcd(L,99)=33, \qquad \gcd(L,279)=93, \qquad \gcd(L,747)=249.</div>
+<p>Hence all three pullback moduli are exactly</p>
+<div class="math" role="math">\boxed{q_{25}=q_{70}=q_{187}=3}.</div>
+<h3>Layer 25</h3>
+<p>Modulo <code>99</code>,</p>
+<div class="math" role="math">r\equiv28, \qquad L\equiv66.</div>
+<p>Therefore the three parameter classes give</p>
+<div class="math" role="math">28,\ 94,\ 61\pmod{99}.</div>
+<p>Since</p>
+<div class="math" role="math">94\equiv-5\pmod{99}, \qquad 5\mid25,</div>
+<p>and the other two lifts are not in <code>T_25</code>,</p>
+<div class="math" role="math">\boxed{R_{25}=\{1\}}.</div>
+<h3>Layer 70</h3>
+<p>Modulo <code>279</code>,</p>
+<div class="math" role="math">r\equiv73, \qquad L\equiv93.</div>
+<p>The three lifts are</p>
+<div class="math" role="math">73,\ 166,\ 259\pmod{279}.</div>
+<p>Since</p>
+<div class="math" role="math">259\equiv-20=-4\cdot5\pmod{279}, \qquad 5\mid70,</div>
+<p>we get</p>
+<div class="math" role="math">\boxed{R_{70}=\{2\}}.</div>
+<h3>Layer 187</h3>
+<p>Modulo <code>747</code>,</p>
+<div class="math" role="math">r\equiv730, \qquad L\equiv498.</div>
+<p>The three lifts are</p>
+<div class="math" role="math">730,\ 481,\ 232\pmod{747}.</div>
+<p>Since</p>
+<div class="math" role="math">730\equiv-17\pmod{747}, \qquad17\mid187,</div>
+<p>we get</p>
+<div class="math" role="math">\boxed{R_{187}=\{0\}}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ R_{25}\cup R_{70}\cup R_{187} =\{0,1,2\} =\mathbb Z/3\mathbb Z. }</div>
+<p>Every integer parameter <code>s</code> hits at least one earlier Type A/B layer.</p>
+<p>So this target candidate is <strong>union-shadowed</strong>.</p>
+<hr>
+<h2>4. The cover is pointwise primitive</h2>
+<p>The three trap atoms used above are exactly the kind left after the strong/weak/pointwise reductions:</p>
+<ul><li><code>j=25</code>: <code>u=94=-5 mod 99</code>;</li><li><code>j=70</code>: <code>u=259=-4*5 mod 279</code>;</li><li><code>j=187</code>: <code>u=730=-17 mod 747</code>.</li></ul>
+<p>Each is pointwise primitive relative to every earlier layer whose modulus divides <code>m_j/3</code>.</p>
+<p>Their residues modulo <code>9</code> are</p>
+<div class="math" role="math">94\equiv4, \qquad 259\equiv7, \qquad 730\equiv1 \pmod9.</div>
+<p>Thus they occupy the three distinct next 3-adic digits predicted by <code>Q3-NEXT-DIGIT-NORMAL-FORM.md</code>.</p>
+<hr>
+<h2>5. The three rows are active fixed-negative rows</h2>
+<p>Their squarefree signatures are</p>
+<div class="math" role="math">\sigma(99)=e_{11}, \qquad \sigma(279)=e_{31}, \qquad \sigma(747)=e_{83},</div>
+<p>because the factor <code>3^2</code> is square.</p>
+<p>All three primes <code>11,31,83</code> divide the target modulus <code>M</code>, so all three rows are fixed-only in the character-shield sense.</p>
+<p>For the chosen target residue,</p>
+<div class="math" role="math">\left(\frac r{99}\right)=-1, \qquad \left(\frac r{279}\right)=-1, \qquad \left(\frac r{747}\right)=-1.</div>
+<p>Since each has <code>q_j=3&gt;1</code>, all three belong to the active fixed-negative core</p>
+<div class="math" role="math">\boxed{\mathcal N^{\rm act}_{k,r}}.</div>
+<p>Thus this is not merely a non-character residual accident. It is a genuine shared Class-C active-core cover.</p>
+<hr>
+<h2>6. Direct novelty — exhaustive exact verification</h2>
+<p>The remaining question is whether some <strong>single</strong> earlier layer directly shadows the target. It does not.</p>
+<p>A direct shadow at layer <code>j</code> requires</p>
+<div class="math" role="math">|R_j|=q_j.</div>
+<p>Since</p>
+<div class="math" role="math">|R_j|\le|T_j|\le2\tau(j),</div>
+<p>only layers with</p>
+<div class="math" role="math">q_j\le2\tau(j)</div>
+<p>can possibly directly shadow.</p>
+<p>Two independent exhaustive implementations were used.</p>
+<h3>Verifier A — full j scan + exact divisor-count sieve</h3>
+<p>For every</p>
+<div class="math" role="math">1\le j&lt;15,290,696,</div>
+<p>a linear divisor-count sieve found</p>
+<div class="math" role="math">\boxed{\max\tau(j)=504}</div>
+<p>(attained at <code>j=14,414,400</code>).</p>
+<p>Hence any direct shadow must satisfy</p>
+<div class="math" role="math">q_j\le1008.</div>
+<p>The implementation scanned all 15,290,695 earlier layers, retained only those meeting the exact cardinality condition, reconstructed every trap pullback, and found:</p>
+<pre><code class="language-text">possible after q &lt;= 2*tau(j): 297
+actual direct shadows:           0</code></pre>
+<p>The same result holds for each of the six hard classes.</p>
+<h3>Verifier B — independent square-root envelope</h3>
+<p>A separate Python control flow does not use the maximum-tau sieve.</p>
+<p>It uses only the elementary bound</p>
+<div class="math" role="math">\tau(j)\le2\sqrt j,</div>
+<p>so a direct shadow must satisfy</p>
+<div class="math" role="math">q_j\le4\sqrt j&lt;15,642.</div>
+<p>It scans all earlier <code>j</code> for this coarse necessary condition, obtaining <code>111,057</code> candidates; independently factors those <code>j</code>, applies the exact <code>q_j&lt;=2*tau(j)</code> test, leaving the same</p>
+<div class="math" role="math">\boxed{297}</div>
+<p>possible layers; and reconstructs their exact pullbacks.</p>
+<p>Result:</p>
+<div class="math" role="math">\boxed{0\text{ direct shadows}.}</div>
+<p>Therefore the candidate is directly novel but union-shadowed.</p>
+<hr>
+<h2>7. How the counterexample was constructed</h2>
+<p>This was not obtained by blindly scanning fifteen million depths.</p>
+<p>The primitive q=3 atoms impose congruences on the target divisor <code>d</code>.</p>
+<p>Choose:</p>
+<ul><li>row <code>25</code>, atom <code>-5</code>, giving <code>d=5 mod 11</code>;</li><li>row <code>70</code>, atom <code>-4*5</code>, giving <code>d=20 mod 31</code>;</li><li>row <code>187</code>, atom <code>-17</code>, giving <code>d=17 mod 83</code>.</li></ul>
+<p>CRT gives</p>
+<div class="math" role="math">\boxed{ d\equiv764\pmod{11\cdot31\cdot83} }</div>
+<p>with least positive solution <code>d=764</code>.</p>
+<p>The complementary target factor must satisfy the inverse factor-pair congruences</p>
+<div class="math" role="math">D\equiv5\pmod{11}, \qquad D\equiv19\pmod{31}, \qquad D\equiv11\pmod{83},</div>
+<p>whose least positive solution is</p>
+<div class="math" role="math">\boxed{D=20,014}.</div>
+<p>Then</p>
+<div class="math" role="math">k=dD=15,290,696</div>
+<p>and automatically</p>
+<div class="math" role="math">4k-1 =(11\cdot31\cdot83)\cdot2161.</div>
+<p>The q=3 triple cover is therefore a CRT/factor-pair construction arising directly from the primitive next-digit theory.</p>
+<hr>
+<h2>8. Consequences for the research architecture</h2>
+<h3>Falsified</h3>
+<p>The following universal targets must no longer be used:</p>
+<div class="math" role="math">\boxed{ \text{direct novelty}\Rightarrow\text{no union shadow} }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \text{direct novelty}\Rightarrow\text{reduced avoiding progression}. }</div>
+<p>In particular:</p>
+<ul><li>universal DSC-0 is false;</li><li>universal DSC-P is false;</li><li>universal shared-CN local escape is false;</li><li>the proposed universal Class-C implication <code>direct novelty -&gt; local escape</code> is false.</li></ul>
+<h3>Not falsified</h3>
+<p>The following remain valid within their stated boundaries:</p>
+<ul><li>all frozen finite DSC certificates through <code>k&lt;=1500</code>;</li><li>C1 single-layer escape;</li><li>C2-coprime and CN-coprime CRT results;</li><li>strong q=3 absorption;</li><li>weak q=3 redundancy;</li><li>pointwise q=3 absorption;</li><li>q=3 fiber injectivity;</li><li>q=3 next-digit normal form;</li><li>ancestry rigidity theorems;</li><li>character-shield completeness.</li></ul>
+<p>The counterexample appears far beyond the previous finite frontier and is fully consistent with those bounded certificates.</p>
+<hr>
+<h2>9. Consequence for Erdős-Straus</h2>
+<p>This counterexample is <strong>not bad news for the Erdős-Straus conjecture itself</strong>.</p>
+<p>The target progression is not an uncovered family. It is the opposite: every parameter is caught by one of the earlier Type A/B layers <code>25,70,187</code>.</p>
+<p>So the lesson is architectural:</p>
+<blockquote><p>collective Type A/B shadowing is real, and it can be constructive rather than pathological.</p></blockquote>
+<p>The research program should pivot from trying to prove that collective shadows never occur to <strong>classifying and exploiting collective shadows</strong> as an additional coverage mechanism.</p>
+<p>That may strengthen the route toward López-all-primes, because a target candidate need not possess an exact-depth realization in order for its primes to be covered by Type A/B; it may instead collapse collectively into earlier covered layers.</p>
+<hr>
+<h2>10. New frontier</h2>
+<p>The immediate replacement for DSC is a <strong>collective-shadow classification program</strong>:</p>
+<ol><li>classify primitive q=3 triple covers by CRT/factor-pair data;</li><li>determine when such covers are themselves forced for remaining Type A/B target candidates;</li><li>combine direct shadows, collective shadows, character shields, and explicit realizations into a complete prime-coverage theorem;</li><li>attack the López remainder directly rather than requiring every novel candidate to realize an exact-depth prime family.</li></ol>
+<p>The universal ES wall remains exactly where it should:</p>
+<div class="math" role="math">\boxed{\text{López all primes open; Erdős-Straus open}.}</div>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

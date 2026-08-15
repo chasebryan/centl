@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL uses one product umbrella and three long-lived branches with deliberately different responsibilities. Oasis quality is a promotion standard, not a requirement imposed on every branch or every development commit.">
+  <title>CENTL release and branch policy — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/release-policy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/release-policy.html">
+  <meta property="og:title" content="CENTL release and branch policy — Free Computation Foundation">
+  <meta property="og:description" content="CENTL uses one product umbrella and three long-lived branches with deliberately different responsibilities. Oasis quality is a promotion standard, not a requirement imposed on every branch or every development commit.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL release and branch policy</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL uses one product umbrella and three long-lived branches with deliberately different responsibilities. Oasis quality is a promotion standard, not a requirement imposed on every branch or every development commit.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/RELEASE-POLICY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CENTL uses one product umbrella and three long-lived branches with deliberately different responsibilities. <strong>Oasis quality is a promotion standard, not a requirement imposed on every branch or every development commit.</strong></p>
+<h2>Product umbrella</h2>
+<ul><li><code>CENTL</code> is the product name.</li><li><code>CENTL-SCi</code>, <code>CENTL-MIRAGE</code>, <code>CENTL-CARAVAN</code>, <code>Caramels</code>, and related names are subsystems or feature generations under the CENTL umbrella.</li><li>Public stable product claims are derived from the <code>oasis</code> branch.</li></ul>
+<h2>The three long-lived branches</h2>
+<h3><code>oasis</code> — standard product</h3>
+<p><code>oasis</code> is the authoritative stable-product branch. It is the steadily advanced snapshot of the current stable <code>main</code> and <code>mirage</code> trees. It is the only long-lived branch required to satisfy the complete Oasis qualification standard.</p>
+<p>Code promoted to <code>oasis</code> must satisfy the repository&#x27;s full release gates, including the applicable formatting, build, deterministic-test, verification, integrity, security, documentation, packaging, reproducibility, and release requirements. An Oasis declaration applies only after those gates succeed.</p>
+<p><code>oasis</code> is not the primary experimentation surface. New speculative work should mature elsewhere before promotion. After a snapshot is promoted, development continues on <code>mirage</code> and <code>main</code>.</p>
+<h3><code>mirage</code> — development and research laboratory</h3>
+<p>When a Mirage expedition produces stayable work that still cannot honestly become Oasis, FCF occupies a <a href="camps.html">Camp</a>. A Camp is not a fourth release branch and is not an Oasis declaration.</p>
+<p><code>mirage</code> is the development, experimentation, and research branch. New features, prototypes, speculative mathematics, architecture experiments, self-development work, and other incomplete ideas should normally mature here.</p>
+<p><code>mirage</code> intentionally uses a lighter gate than <code>oasis</code>. It should retain basic engineering protections needed to keep development useful, such as preventing obvious repository corruption and catching appropriate build, syntax, test, or security failures, but <strong>a Mirage commit is not required to meet the complete Oasis standard</strong>.</p>
+<p>A failure to satisfy an Oasis-only qualification check does not by itself make a Mirage experiment invalid. The strict standard becomes mandatory when work is proposed for promotion to <code>oasis</code>.</p>
+<h4>Oasis is made from Mirage and main</h4>
+<p>Every newly declared Oasis release is a snapshot of the then-current stable <code>main</code> and <code>mirage</code> trees, parented on the previous oasis tip so Oasis does not regress. After that snapshot is established, development continues on <code>mirage</code> and <code>main</code>.</p>
+<p>This cycle is intentionally one-way:</p>
+<pre><code class="language-text">qualified Oasis baseline
+          |
+          +------&gt; continue on mirage and main
+                     |
+                     +--&gt; experiments / research / new features
+                     |
+                     v
+                   next Oasis snapshot on the new oasis tip</code></pre>
+<p>Do not force-push <code>mirage</code> or <code>main</code> onto oasis. Do not merge oasis into those lines. The next snapshot again starts at the new oasis tip and overlays the then-current stable tree.</p>
+<p>Mirage never makes an older stable baseline authoritative merely because it has unique development commits. Unique Mirage work that should survive is already on <code>main</code>/<code>mirage</code> and is included in the next snapshot when that tree is stable.</p>
+<h3><code>main</code> — complete developer and research distribution</h3>
+<p><code>main</code> is the comprehensive source line for developers and researchers who want the whole CENTL codebase. It may contain the stable Oasis baseline together with Mirage-originated experimental facilities, research material, and integration work.</p>
+<p><code>main</code> is not itself an Oasis declaration and is not required to satisfy every Oasis-only gate merely because it contains the full tree.</p>
+<h3><code>CENTL-Marsa</code> — Windows and macOS harbor</h3>
+<p><code>CENTL-Marsa</code> ports the current Camp stay to macOS and Windows. It is a harbor, not a fourth product and not an Oasis declaration. The branch is undeletable. Feature work still matures on <code>mirage</code> and is inhabited on <code>main</code>; Marsa replays that stay onto the other operating systems.</p>
+<p>See <a href="marsa.html">CENTL-MARSA.md</a>.</p>
+<p>The main README and other flagship product surfaces must treat <code>oasis</code> as the authoritative source for <strong>stable product identity</strong>: recommended release version, supported stable capabilities, installation claims, and release badges should reflect what is established on <code>oasis</code>.</p>
+<p>Those same surfaces must also name the current <a href="camps.html">FCF Camp</a> stay as the place where newest software and designs are used. A camp does not replace Oasis, inherit Oasis, or become a SemVer product. Experimental capabilities present through Mirage, main, or a camp must be identified as such.</p>
+<h2>Promotion model</h2>
+<p>The normal direction of maturity is:</p>
+<pre><code class="language-text">feature/research work
+        |
+        v
+     mirage
+        |
+        | inhabit / integrate
+        v
+      main
+        |
+        | linear snapshot on the oasis tip
+        | exact-SHA Oasis qualification
+        v
+      oasis
+        |
+        v
+ stable release/tag
+        |
+        v
+ continue on mirage and main</code></pre>
+<p><code>main</code> is the integrated distribution view rather than a maturity rung. It can receive and expose both stable and experimental work according to repository integration needs.</p>
+<p>The governing rule is:</p>
+<blockquote><p><strong>Oasis is a promotion state of one exact snapshot, not a property of every commit.</strong></p></blockquote>
+<h2>Continuous integration policy</h2>
+<p>CI should be branch-aware.</p>
+<ul><li><strong><code>oasis</code></strong> runs the complete Oasis gate and must remain strict.</li><li><strong><code>mirage</code></strong> runs a development gate optimized for useful feedback and rapid iteration without pretending experimental work is release-ready.</li><li><strong><code>main</code></strong> runs integration checks appropriate to the complete source tree, but Oasis-only qualification failures must not be treated as proof that the stable Oasis product is broken.</li><li>Promotion from <code>mirage</code> or another development line into <code>oasis</code> must run the complete Oasis gate regardless of what lighter checks passed earlier.</li></ul>
+<p>Required security boundaries must never be bypassed merely for convenience. The lighter Mirage policy concerns release qualification and development friction, not permission to knowingly introduce dangerous behavior into shared infrastructure.</p>
+<h2>Installation channels</h2>
+<p>Oasis and Mirage are separate install channels.</p>
+<ul><li>Oasis is the default user installation and owns the conventional <code>centl</code>, <code>centl-physics</code>, and <code>centl-sci</code> commands.</li><li>Mirage is an opt-in development installation and uses <code>mirage-centl</code>, <code>mirage-centl-physics</code>, and <code>mirage-centl-sci</code> so it can coexist with Oasis.</li><li>Installing Mirage must never silently replace the active Oasis commands.</li><li>A Mirage package is a development snapshot, not an Oasis declaration.</li></ul>
+<p>Prebuilt channel transport is independent of GitHub release identity. Qualified Oasis bytes and rolling Mirage bytes may be served from the machine-oriented <code>distribution</code> branch while stable release identity remains attached only to qualified Oasis tags.</p>
+<h2>Pull-request targeting</h2>
+<ul><li>Experimental features and research normally target <code>mirage</code>.</li><li>Release hardening, qualification repairs, and explicitly prepared promotions target <code>oasis</code>.</li><li>Repository-wide integration, documentation, tooling, or work whose purpose is the comprehensive developer/research distribution may target <code>main</code>.</li><li>Short-lived feature/fix branches should be deleted after their work is merged or intentionally abandoned, unless retained as a documented archival reference.</li></ul>
+<h2>Releases and versioning</h2>
+<p>Stable CENTL releases are cut from qualified <code>oasis</code> commits and use normal Semantic Versioning tags such as <code>v0.14.0</code>.</p>
+<p><code>v0.14.0</code> is the first Oasis foundation point for the current public release history. Earlier releases and tags are historical development material rather than part of the active public release line.</p>
+<p><strong>Oasis is not a SemVer component.</strong> It is the quality declaration attached to a</p>
+<p>release whose source has passed the Oasis gate. Public wording may use <code>CENTL vX.Y.Z</code> or <code>CENTL OASIS vX.Y.Z</code> when emphasizing the release line.</p>
+<p>Mirage work may use development identifiers where useful, but experimental branch state must not be presented as an Oasis release merely because it carries a version-like label.</p>
+<h2>Documentation authority</h2>
+<p>When documents disagree about branch roles, this policy controls. Repository maps, contributor instructions, CI documentation, release notes, and the main README should be kept consistent with it.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

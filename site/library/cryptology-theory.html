@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note records arithmetic controls that must be applied before interpreting any Type A/B fingerprint as a nontrivial cryptologic signal. It also formalizes the threshold-shadow mechanism exposed by the high-versus-low CAB experiment.">
+  <title>Cryptology control lemmas for WS-CAND-003 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cryptology-theory.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cryptology-theory.html">
+  <meta property="og:title" content="Cryptology control lemmas for WS-CAND-003 — Free Computation Foundation">
+  <meta property="og:description" content="This note records arithmetic controls that must be applied before interpreting any Type A/B fingerprint as a nontrivial cryptologic signal. It also formalizes the threshold-shadow mechanism exposed by the high-versus-low CAB experiment.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Cryptology control lemmas for WS-CAND-003</h1><p>Cryptology · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Cryptology</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Cryptology</p>
+          <p class="dek">This note records arithmetic controls that must be applied before interpreting any Type A/B fingerprint as a nontrivial cryptologic signal. It also formalizes the threshold-shadow mechanism exposed by the high-versus-low CAB experiment.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CRYPTOLOGY-THEORY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary controls and experimental interpretation</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p>This note records arithmetic controls that must be applied before interpreting any Type A/B fingerprint as a nontrivial cryptologic signal. It also formalizes the threshold-shadow mechanism exposed by the high-versus-low <code>C_AB</code> experiment.</p>
+<h2>1. The residue 1 is never a Type A/B trap</h2>
+<p>Recall</p>
+<div class="math" role="math">m_k=4k-1,</div>
+<p>and</p>
+<div class="math" role="math">T_k=\{-d,-4d\pmod{m_k}:d\mid k\}.</div>
+<h3>Lemma</h3>
+<p>For every integer <code>k &gt;= 1</code>,</p>
+<div class="math" role="math">\boxed{1\notin T_k.}</div>
+<h3>Proof</h3>
+<p>Suppose first that for a divisor <code>d | k</code>,</p>
+<div class="math" role="math">1\equiv-d\pmod{4k-1}.</div>
+<p>Then <code>4k-1</code> divides <code>d+1</code>. But</p>
+<div class="math" role="math">0&lt;d+1\le k+1&lt;4k-1</div>
+<p>for <code>k &gt;= 2</code>, which is impossible. The case <code>k=1</code> is immediate by direct enumeration.</p>
+<p>Suppose instead</p>
+<div class="math" role="math">1\equiv-4d\pmod{4k-1}.</div>
+<p>Then <code>4k-1</code> divides <code>4d+1</code>. Since</p>
+<div class="math" role="math">0&lt;4d+1\le4k+1=(4k-1)+2,</div>
+<p>the only possible positive multiple is <code>4k-1</code>, which would force</p>
+<div class="math" role="math">4d+1=4k-1,</div>
+<p>hence <code>d=k-1/2</code>, impossible for integral <code>d</code>. QED.</p>
+<h2>2. Forced-escape corollary</h2>
+<p>If</p>
+<div class="math" role="math">p\equiv1\pmod{4k-1},</div>
+<p>then <code>p</code> cannot have a Type A/B hit at layer <code>k</code>.</p>
+<p>Thus a prime generator deliberately constrained by</p>
+<div class="math" role="math">p\equiv1\pmod{\operatorname{lcm}(4k_1-1,\ldots,4k_r-1)}</div>
+<p>forces escape from every listed layer <code>k_i</code>.</p>
+<p>This observation is closely related to the existing proof that <code>C_AB</code> is unbounded: imposing residue 1 simultaneously modulo all early Type A/B moduli forces a prime to survive those layers.</p>
+<h2>3. Interpretation of the first cryptology pilot</h2>
+<p>The first controlled toy source used</p>
+<div class="math" role="math">p\equiv1\pmod{\operatorname{lcm}(840,11,19,23)}.</div>
+<p>Since</p>
+<div class="math" role="math">11=4(3)-1,\qquad19=4(5)-1,\qquad23=4(6)-1,</div>
+<p>the structured source was deliberately forced to avoid Type A/B hits at</p>
+<div class="math" role="math">\boxed{k=3,5,6.}</div>
+<p>Therefore the large pilot separation between the <code>p == 1 mod 840</code> control and the structured source is not by itself surprising cryptologic evidence. Part of the signal is an exact arithmetic consequence of how the structured source was constructed.</p>
+<p>The pilot is still useful because it demonstrates that the Type A/B fingerprint responds strongly to planted modular structure. But the correct next question is harder:</p>
+<blockquote><p>Does any statistically useful signal remain after every feature that directly exposes the planted congruences is removed?</p></blockquote>
+<h2>4. Required negative-control mask</h2>
+<p>For the planted extra modulus</p>
+<div class="math" role="math">M_{extra}=11\cdot19\cdot23,</div>
+<p>a conservative masked fingerprint should discard every layer <code>k</code> for which</p>
+<div class="math" role="math">\gcd(4k-1,M_{extra})&gt;1.</div>
+<p>This removes not only the exact layers <code>3,5,6</code>, but every fingerprint modulus sharing an arithmetic factor with the planted constraints.</p>
+<p>A still stronger control also removes the very early layers and all layers fully directly shadowed, leaving a shadow-compressed deep fingerprint.</p>
+<p>The repeated held-out probe <code>crypto_probe_v2.py</code> implements both controls.</p>
+<h2>5. Threshold shadowing</h2>
+<p>The high-versus-low <code>C_AB</code> experiment introduces a different source of structure. No extra congruences are explicitly planted. Instead, primes are selected by whether they survive the Type A/B sieve through a threshold.</p>
+<p>Fix a hard residue class <code>h mod 840</code> and a threshold <code>D &gt;= 2</code>. For <code>k &gt;= D</code>, let <code>A_{k,h}</code> be the admissible Type A/B candidate classes <code>(h,t)</code> at layer <code>k</code>.</p>
+<p>Define</p>
+<div class="math" role="math">S_{D,k,h}=\left\{(h,t)\in A_{k,h}:\exists j&lt;D\text{ such that }(h,t)\text{ is directly shadowed by }j\right\}.</div>
+<p>The <strong>pre-shadow load</strong> is</p>
+<div class="math" role="math">\boxed{ \sigma_{D,h}(k)=\frac{|S_{D,k,h}|}{|A_{k,h}|} }</div>
+<p>when <code>A_{k,h}</code> is nonempty.</p>
+<h3>Theorem: survival excludes pre-shadowed later candidates</h3>
+<p>Let <code>p</code> be a prime with</p>
+<div class="math" role="math">p\equiv h\pmod{840}</div>
+<p>and</p>
+<div class="math" role="math">C_{AB}(p)\ge D.</div>
+<p>For any <code>k &gt;= D</code>, if <code>p</code> has a Type A/B hit at layer <code>k</code>, then its candidate class at <code>k</code> lies in</p>
+<div class="math" role="math">A_{k,h}\setminus S_{D,k,h}.</div>
+<p>Equivalently, no prime surviving every layer below <code>D</code> can occupy a later candidate class directly shadowed by any <code>j&lt;D</code>.</p>
+<h3>Proof</h3>
+<p>Assume toward a contradiction that the layer-<code>k</code> candidate containing <code>p</code> lies in <code>S_{D,k,h}</code>. Then by definition there exists <code>j&lt;D</code> such that every integer in that layer-<code>k</code> CRT progression is captured by the Type A/B trap at layer <code>j</code>.</p>
+<p>Since <code>p</code> belongs to that CRT progression, <code>p</code> is captured at layer <code>j</code>. Therefore</p>
+<div class="math" role="math">C_{AB}(p)\le j&lt;D,</div>
+<p>contradicting <code>C_AB(p) &gt;= D</code>. QED.</p>
+<h3>Corollary: complete pre-shadow forbids a later first hit</h3>
+<p>If</p>
+<div class="math" role="math">\sigma_{D,h}(k)=1,</div>
+<p>then no prime in hard class <code>h</code> with <code>C_AB(p) &gt;= D</code> can hit at layer <code>k</code>.</p>
+<p>Thus a later layer may become deterministically unavailable after conditioning on survival through an earlier threshold, even when <code>k</code> is numerically well beyond that threshold.</p>
+<h3>Corollary: partial pre-shadow induces support depletion</h3>
+<p>If</p>
+<div class="math" role="math">0&lt;\sigma_{D,h}(k)&lt;1,</div>
+<p>then deep survivors can hit layer <code>k</code> only through the unshadowed fraction</p>
+<div class="math" role="math">1-\sigma_{D,h}(k)</div>
+<p>of admissible candidate classes.</p>
+<p>This does not by itself determine the conditional probability of a hit, because prime density and interactions among the remaining congruence constraints still matter. But it proves an exact support restriction.</p>
+<h2>6. Why this explains the v3 ablation</h2>
+<p>In the v3 experiment, the high-depth source satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{840},\qquad C_{AB}(p)\ge25.</div>
+<p>A classifier using all later layers <code>k &gt;= 25</code> achieved substantial held-out factor-level accuracy. When completely directly shadowed layers were removed, that accuracy collapsed close to chance.</p>
+<p>The threshold-shadow theorem supplies the mechanism: later classes shadowed by earlier <code>j&lt;25</code> are prohibited for the high-depth source by construction. They therefore encode early survival history even though their own layer indices lie at or above 25.</p>
+<p>The current shadow-compression experiment removes only layers whose entire admissible candidate set is directly shadowed. A more precise analysis should use the fractional quantity <code>sigma_{25,1}(k)</code> and ask whether empirical high-depth depletion varies with pre-shadow load.</p>
+<p>That is now the primary theorem-and-experiment target.</p>
+<h2>7. Experimental decision rule</h2>
+<p>For both factor-level prime fingerprints and public toy-RSA product fingerprints:</p>
+<ul><li><strong>signal survives masking:</strong> investigate first for sampling bias, finite-range effects, classifier leakage, direct shadow, partial pre-shadow, and hidden algebraic dependence;</li><li><strong>signal collapses after masking or shadow compression:</strong> record the negative cryptologic result and the corresponding arithmetic explanation;</li><li><strong>public-modulus signal survives all source-definition and shadow controls:</strong> treat it as a candidate source-distribution distinguisher, not as key recovery, and subject it to independent reproduction before escalating the claim.</li></ul>
+<h2>8. Claim boundary</h2>
+<p>The proved content of this note is elementary modular arithmetic. It establishes how deliberately planted <code>1 mod (4k-1)</code> constraints and threshold-conditioned Type A/B survival affect later fingerprint support.</p>
+<p>It does not establish a cryptographic weakness, factorization method, key-recovery algorithm, or attack on any deployed system.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

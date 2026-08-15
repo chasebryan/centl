@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL has two GNU/Linux installation channels:">
+  <title>Install CENTL — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/install.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/install.html">
+  <meta property="og:title" content="Install CENTL — Free Computation Foundation">
+  <meta property="og:description" content="CENTL has two GNU/Linux installation channels:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Install CENTL</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL has two GNU/Linux installation channels:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CENTL has two GNU/Linux installation channels:</p>
+<ul><li><strong>Oasis</strong> is the qualified stable product and the recommended default.</li><li><strong>Mirage</strong> is the rolling development product. It begins from the current Oasis baseline and may contain newer experimental work that has not earned Oasis qualification.</li></ul>
+<p>The channels install independently and can coexist on the same machine.</p>
+<p>CENTL&#x27;s qualified native release target is currently <strong>GNU/Linux x86_64</strong>. macOS and Windows use the current Camp software through <a href="marsa.html">CENTL Marsa</a>; those ports are not Oasis declarations.</p>
+<h2>Install only what you need</h2>
+<p>The full CENTL bundle is convenient, but it is not mandatory.</p>
+<p>If you want exactly one public scientific command on GNU/Linux x86_64, use the component installer:</p>
+<pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component</code></pre>
+<p>Then choose one component:</p>
+<pre><code class="language-sh"># exact mathematics only
+sh install-component --component centl
+
+# typed exact-first physics only
+sh install-component --component physics
+
+# CENTL-SCi interpreter only
+sh install-component --component sci</code></pre>
+<p>The Oasis component installer downloads a <strong>component-specific archive</strong>. It does not first download the full three-command product and discard the commands you did not ask for.</p>
+<p>Each component archive contains only the selected public launcher/executable plus the shared runtime libraries, license material, and provenance metadata required to run and redistribute it correctly. It does not contain the other two public command executables.</p>
+<p>Typical scientist choices are:</p>
+<table class="directory"><thead><tr><th>Need</th><th>Install</th></tr></thead><tbody><tr><td>Pure formal mathematics</td><td><code>--component centl</code></td></tr><tr><td>Typed physics only</td><td><code>--component physics</code></td></tr><tr><td>Natural-language scientific interaction only</td><td><code>--component sci</code></td></tr><tr><td>Mathematics + SCi, no Physics command</td><td>install <code>centl</code>, then <code>sci</code></td></tr><tr><td>Physics + direct mathematics, no SCi</td><td>install <code>physics</code>, then <code>centl</code></td></tr><tr><td>Everything</td><td>use the full installer below</td></tr></tbody></table>
+<p>For field-specific guidance, start with <a href="mathematicians.html">🧮 📐 Mathematician onboarding</a> or <a href="physicists.html">⚛️ 🔬 Physicist onboarding</a>.</p>
+<p>On macOS and Windows, <code>CENTL-Marsa</code> provides the same installed-command selection through:</p>
+<pre><code class="language-sh">sh scripts/marsa-install --component centl
+sh scripts/marsa-install --component physics
+sh scripts/marsa-install --component sci</code></pre>
+<p>Marsa currently builds from the shared source graph, so its source checkout still contains shared build code. Its <strong>installed command surface</strong> is selective. See <a href="marsa.html">CENTL Marsa</a>.</p>
+<h2>Quick full install</h2>
+<p>Use the ordinary installer when you intentionally want the complete GNU/Linux product bundle:</p>
+<pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+sh install</code></pre>
+<p>When run interactively, the installer asks which channel to install:</p>
+<pre><code class="language-text">Choose a CENTL channel:
+  1) Oasis  - qualified stable product (recommended)
+  2) Mirage - development and experimental product
+Selection [1]:</code></pre>
+<p>Press Enter for Oasis.</p>
+<p>For scripts, CI, containers, or anyone who wants to be explicit:</p>
+<pre><code class="language-sh">sh install --channel oasis
+sh install --channel mirage</code></pre>
+<p>A non-interactive invocation with no <code>--channel</code> defaults to Oasis.</p>
+<h2>Installing both channels</h2>
+<p>The channels occupy separate version trees below the installation prefix. Installing Mirage never replaces the stable Oasis commands.</p>
+<p>The complete Oasis bundle installs these conventional commands:</p>
+<pre><code class="language-text">centl
+centl-physics
+centl-sci</code></pre>
+<p>It also provides explicit channel aliases:</p>
+<pre><code class="language-text">oasis-centl
+oasis-centl-physics
+oasis-centl-sci</code></pre>
+<p>Mirage uses separate commands when a rolling Mirage package is available:</p>
+<pre><code class="language-text">mirage-centl
+mirage-centl-physics
+mirage-centl-sci</code></pre>
+<p>The project deliberately does <strong>not</strong> use <code>centl-mirage</code> as the Mirage-channel launcher. That name remains available for the CENTL-MIRAGE self-development system itself.</p>
+<h2>Distribution model</h2>
+<p>The canonical GitHub release history begins at the first Oasis foundation release, <code>v0.14.0</code>.</p>
+<p>Prebuilt channel bytes are served from the repository&#x27;s machine-oriented <code>distribution</code> branch. An Oasis version directory contains the complete bundle and command-selective derivatives:</p>
+<pre><code class="language-text">channels/
+  oasis/
+    LATEST
+    v0.15.0/
+      centl-linux-x86_64.tar.gz
+      centl-linux-x86_64.tar.gz.sha256
+
+      centl-only-linux-x86_64.tar.gz
+      centl-only-linux-x86_64.tar.gz.sha256
+
+      centl-physics-only-linux-x86_64.tar.gz
+      centl-physics-only-linux-x86_64.tar.gz.sha256
+
+      centl-sci-only-linux-x86_64.tar.gz
+      centl-sci-only-linux-x86_64.tar.gz.sha256
+
+      SOURCE-COMMIT</code></pre>
+<p>The command-selective archives are mechanically derived from the already-published aggregate package without rebuilding or modifying the selected executable bytes. Each records the source aggregate and its SHA-256 identity. CI verifies that each archive contains its requested public executable and none of the other two public executables, and that the selected launcher, executable, and retained runtime-library bytes are identical to the aggregate Oasis package.</p>
+<p>When a Mirage aggregate package is published, the component-distribution workflow is designed to derive the same command-selective shapes for that rolling build. Mirage remains a development channel and never inherits Oasis assurance merely from packaging.</p>
+<p>This separates <strong>release identity</strong>, <strong>artifact transport</strong>, and <strong>component choice</strong>. <code>LATEST</code> currently names <strong>v0.15.0 Al-Nur</strong>. The immutable <code>v0.14.0</code> Al-Khayma bytes remain on the channel as the previous Oasis.</p>
+<h2>What the full installer verifies</h2>
+<p>For the complete package, the installer:</p>
+<ol><li>requires GNU/Linux x86_64;</li><li>downloads the selected native package and adjacent SHA-256 file, or accepts an offline archive;</li><li>verifies the archive SHA-256 before extraction;</li><li>rejects unsafe archive paths and unsupported link/device/FIFO members;</li><li>stages the package away from the active installation;</li><li>requires the packaged <code>centl --version</code> identity to match its metadata;</li><li>smoke-tests exact physics conversion when CENTL Physics is present;</li><li>smoke-tests <code>centl-sci &#x27;What is 0.1 plus 0.2?&#x27;</code> and requires <code>3/10</code>;</li><li>starts and exits the CENTL-SCi REPL and checks its identity;</li><li>atomically activates the selected channel; and</li><li>adds the command directory to the current user&#x27;s shell profile when necessary unless <code>--no-path</code> is requested.</li></ol>
+<p>The default prefix is <code>~/.local</code>.</p>
+<h2>What the component installer verifies</h2>
+<p>For a command-selective archive, <code>install-component</code>:</p>
+<ol><li>requires GNU/Linux x86_64;</li><li>downloads only the archive named for the requested component and its adjacent SHA-256 file, or accepts an offline component archive;</li><li>verifies the checksum before extraction;</li><li>rejects unsafe or unexpected archive paths;</li><li>requires an explicit component identity;</li><li>requires the selected launcher and executable to exist;</li><li>rejects an archive containing either of the other public command executables;</li><li>smoke-tests the requested command using a domain-appropriate exact operation; and</li><li>installs the component independently under the chosen prefix.</li></ol>
+<p>Installing a second component later does not require reinstalling the first.</p>
+<h2>Oasis</h2>
+<p>Install the latest qualified complete Oasis release:</p>
+<pre><code class="language-sh">sh install --channel oasis</code></pre>
+<p>Install a specific qualified complete Oasis version:</p>
+<pre><code class="language-sh">sh install --channel oasis --version 0.15.0</code></pre>
+<p>Or install only one Oasis command:</p>
+<pre><code class="language-sh">sh install-component --component centl
+sh install-component --component physics
+sh install-component --component sci</code></pre>
+<p>Basic checks:</p>
+<pre><code class="language-sh">centl &#x27;0.1 + 0.2&#x27;
+centl &#x27;solve(x^2 - 5*x + 6 = 0, x)&#x27;
+centl verify --left &#x27;0.1 + 0.2&#x27; --relation equal --right &#x27;3/10&#x27;
+centl-physics convert 100 cm m</code></pre>
+<p>Run only the checks for commands you actually installed.</p>
+<p>Expected exact-first results include:</p>
+<pre><code class="language-text">3/10
+x in {2, 3}
+verdict: verified (closed_exact_rational via closed_rational_comparison); comparison=equal
+1</code></pre>
+<h2>Mirage</h2>
+<p>Install the latest rolling Mirage aggregate build when one is published:</p>
+<pre><code class="language-sh">sh install --channel mirage</code></pre>
+<p>Mirage is intentionally not an Oasis claim. A successful Mirage package build establishes only that the development snapshot met the lighter installability baseline used to publish that snapshot. It does not promote the snapshot to the <code>oasis</code> branch or make it a stable release.</p>
+<p>A specific published Mirage build may be selected by its commit SHA:</p>
+<pre><code class="language-sh">sh install --channel mirage --version &lt;commit-sha&gt;</code></pre>
+<h2>Offline archives</h2>
+<p>Keep an archive and its adjacent <code>.sha256</code> file together.</p>
+<p>Complete Oasis bundle:</p>
+<pre><code class="language-sh">sh install --channel oasis --archive ./centl-linux-x86_64.tar.gz</code></pre>
+<p>A component can also be installed offline without the other command archives:</p>
+<pre><code class="language-sh">sh install-component --component centl \
+  --archive ./centl-only-linux-x86_64.tar.gz
+
+sh install-component --component physics \
+  --archive ./centl-physics-only-linux-x86_64.tar.gz
+
+sh install-component --component sci \
+  --archive ./centl-sci-only-linux-x86_64.tar.gz</code></pre>
+<h2>Alternate static release hosts</h2>
+<p>A custom full-bundle Oasis-compatible release root may expose immutable version directories:</p>
+<pre><code class="language-text">RELEASE_ROOT/
+  v0.15.0/
+    centl-linux-x86_64.tar.gz
+    centl-linux-x86_64.tar.gz.sha256</code></pre>
+<p>Install from it with an explicit version:</p>
+<pre><code class="language-sh">sh install \
+  --channel oasis \
+  --version 0.15.0 \
+  --release-base-url https://downloads.example.org/centl/releases</code></pre>
+<p>The equivalent environment form is:</p>
+<pre><code class="language-sh">CENTL_RELEASE_BASE_URL=https://downloads.example.org/centl/releases \
+  sh install --channel oasis --version 0.15.0</code></pre>
+<p>Custom network roots must use HTTPS. <code>file://</code> roots are accepted for local static mirrors and hermetic testing. Plain HTTP is rejected because replacing both an archive and its adjacent checksum would defeat checksum-only transport verification.</p>
+<h2>Custom installation prefix</h2>
+<p>For the full installer:</p>
+<pre><code class="language-sh">sh install --channel oasis --prefix &quot;$HOME/software&quot;</code></pre>
+<p>For a component:</p>
+<pre><code class="language-sh">sh install-component --component centl --prefix &quot;$HOME/software&quot;</code></pre>
+<h2>Optional semantic model</h2>
+<p>A semantic model is <strong>not required</strong> for deterministic CENTL-SCi paths. Exact arithmetic, admitted polynomial equations, spoken polynomial forms, and admitted unit conversion can run without model inference.</p>
+<p>Model weights remain separate from the native package and are never silently downloaded. A configured model may interpret intent, but its output is untrusted until it passes CENTL&#x27;s typed and deterministic boundaries. See <a href="sci.html">SCI.md</a>.</p>
+<h2>Build from source</h2>
+<p>Source builds are for development and require the pinned Linux toolchain. See <a href="onboarding.html">ONBOARDING.md</a> and <a href="contributing.html">CONTRIBUTING.md</a>.</p>
+<pre><code class="language-sh">scripts/bootstrap-opam
+eval &quot;$(opam env --switch=centl)&quot;
+make test</code></pre>
+<p>Run the live scientific interface directly with:</p>
+<pre><code class="language-sh">dune exec centl-sci</code></pre>
+<p>Maintainers package a tested Linux build with:</p>
+<pre><code class="language-sh">make release VERSION=0.15.0</code></pre>
+<p>Oasis publication must use the already-qualified bytes from the exact release SHA. Component archives are transport derivatives of those published bytes, not new release identities. Mirage publication is a separate rolling development channel and never substitutes for Oasis qualification.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

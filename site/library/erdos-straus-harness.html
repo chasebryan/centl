@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This directory operationalizes the research program recorded in docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md.">
+  <title>Erdős-Straus Type A/B automated research harness — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/erdos-straus-harness.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/erdos-straus-harness.html">
+  <meta property="og:title" content="Erdős-Straus Type A/B automated research harness — Free Computation Foundation">
+  <meta property="og:description" content="This directory operationalizes the research program recorded in docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Erdős-Straus Type A/B automated research harness</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">This directory operationalizes the research program recorded in docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/README.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This directory operationalizes the research program recorded in <code>docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md</code>.</p>
+<p><strong>Public library:</strong> every public note here is hosted at</p>
+<p><a href="https://freecomputation.org/research.html">freecomputation.org/research.html</a>. The program overview is <a href="https://freecomputation.org/research-erdos-straus.html">freecomputation.org/research-erdos-straus.html</a>.</p>
+<h2>Research map</h2>
+<p><strong>Current synthesis:</strong> <a href="diamond.html"><code>DIAMOND.md</code></a> records how the minimal Type A/B depth invariant, shadow graph, exact-depth spectrum, exact survivor hazard, prime-modulus backbone, composite rescue core, and Direct-Shadow Completeness program fit into one theorem architecture.</p>
+<p><strong>Moving frontier:</strong> <a href="current-frontier.html"><code>CURRENT-FRONTIER.md</code></a> is the shortest current-state record.</p>
+<p><strong>Two-target corridor (2026-08-15):</strong> <a href="two-p-plus-one-filter.html"><code>TWO-P-PLUS-ONE-FILTER.md</code></a>, <a href="hard-q7-type-i-no-rescue.html"><code>HARD-Q7-TYPE-I-NO-RESCUE.md</code></a>, <a href="q11-type-i-companion.html"><code>Q11-TYPE-I-COMPANION.md</code></a>, and <a href="k15-two-target-filter.html"><code>K15-TWO-TARGET-FILTER.md</code></a> make the original-ES corridor combined-exact at <code>3,7,11,15</code> and add the linear form <code>2p+1</code>.</p>
+<p><strong>Independent covering obstruction:</strong> <a href="hard-smooth-typeii-obstruction.html"><code>HARD-SMOOTH-TYPEII-OBSTRUCTION.md</code></a> proves that no <code>{2,3,5,7}</code>-smooth forced multiplier can produce a Type-II hit at the aligned shift <code>k≡-p (mod 4M)</code>.</p>
+<p><strong>Public hunt (2026-08-15):</strong> <a href="es-hunt.html"><code>ES-HUNT.md</code></a> is the operator-facing record. <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>bb.kernel</code></a> (also <code>B-BervigES.kernel</code>) is the Python reference; <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>CC.kernel</code></a> is the fast hard-prime engine. Findings live in <a href="start-here.html"><code>findings/</code></a>. Letter numbers are content-addressed and identical on every machine that finds the same letter. From the repo root: <code>./centl es go</code> (or <code>./centl es</code> for the menu). A start factor of <code>0</code>, <code>--from N</code>, or <code>--random</code> chooses where a hunt begins. Erdős–Straus remains open.</p>
+<p><strong>Shared-factor CN (2026-08-15):</strong> <a href="cn-shared-theorem.html"><code>CN-SHARED-THEOREM.md</code></a> proves lift-room, the odd totient-ratio lemma, the C2-thin reduction to complementary <code>q=3</code>, and the <code>205 → 10</code> absorption theorem. Unrestricted C2-shared is false. Directly novel admissible complementary covers are zero through <code>k ≤ 1500</code>; the replayable certificate is <a href="cn-shared-certificate-2026-08-15.html"><code>CN-SHARED-CERTIFICATE-2026-08-15.md</code></a>.</p>
+<p><strong>Durable checkpoint:</strong> <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RESEARCH-BACKUP-2026-08-14.md"><code>RESEARCH-BACKUP-2026-08-14.md</code></a> freezes independently verified workflow/artifact provenance so the research state is recoverable from the repository independently of chat or local scratch data.</p>
+<p>Core linked records:</p>
+<ul><li><a href="theory.html"><code>THEORY.md</code></a> — foundational shadow and modulus-ancestry results;</li><li><a href="results-2026-08-14.html"><code>RESULTS-2026-08-14.md</code></a> — automated frontier, shadow map, independent verification, and CENTL certification;</li><li><a href="depth-spectrum.html"><code>DEPTH-SPECTRUM.md</code></a> — exact-depth realization and structural-gap versus latency-gap distinction;</li><li><a href="direct-shadow-completeness.html"><code>DIRECT-SHADOW-COMPLETENESS.md</code></a> — first candidatewise completeness attack through <code>k=600</code>;</li><li><a href="direct-shadow-k1000.html"><code>DIRECT-SHADOW-K1000.md</code></a> — independently verified extension through <code>k=1000</code>;</li><li><a href="direct-shadow-k1200.html"><code>DIRECT-SHADOW-K1200.md</code></a> — exact extension through <code>k=1200</code>, with <code>41,470/41,470</code> directly novel candidates carrying reduced avoiding progressions;</li><li><a href="fiber-selector-k1200.html"><code>FIBER-SELECTOR-K1200.md</code></a> — full theorem-driven replay of the frozen <code>k&lt;=1200</code> bundle: <code>26,044</code> fiber-empty candidates plus <code>15,426/15,426</code> nonempty kernels solved by <code>0,±1,...,±64</code>, with maximum radius <code>54</code>;</li><li><a href="shadow-cover-geometry.html"><code>SHADOW-COVER-GEOMETRY.md</code></a> — dense-cover diagnostics showing the phenomenon is not explained by a trivial global union bound;</li><li><a href="odd-covering-bridge.html"><code>ODD-COVERING-BRIDGE.md</code></a> — bridge to odd covering-system structure;</li><li><a href="shadow-kernel.html"><code>SHADOW-KERNEL.md</code></a> — exact prime-power local-load peeling theorem and small-prime kernel reduction;</li><li><a href="fiber-shadow-kernel.html"><code>FIBER-SHADOW-KERNEL.md</code></a> — sharper exact fiber-load elimination theorem;</li><li><a href="small-selector-hypothesis.html"><code>SMALL-SELECTOR-HYPOTHESIS.md</code></a> — bounded integer-selector attack on residual fiber kernels;</li><li><a href="quadratic-trap-signature.html"><code>QUADRATIC-TRAP-SIGNATURE.md</code></a> — exact Jacobi <code>-1</code> signature of every Type A/B trap and quadratic character shield;</li><li><a href="character-shield-completeness.html"><code>CHARACTER-SHIELD-COMPLETENESS.md</code></a> — proved collapse of collective scalar-character obstruction to fixed negative earlier layers;</li><li><a href="quadratic-signature-quotient.html"><code>QUADRATIC-SIGNATURE-QUOTIENT.md</code></a> and <a href="quadratic-signature-coset.html"><code>QUADRATIC-SIGNATURE-COSET.md</code></a> — complete vector-valued Legendre-signature quotient/coset of every Type A/B trap set;</li><li><a href="multiplicative-trap-coset.html"><code>MULTIPLICATIVE-TRAP-COSET.md</code></a> and <a href="multiplicative-trap-quotient.html"><code>MULTIPLICATIVE-TRAP-QUOTIENT.md</code></a> — multiplicative envelope, quotient shield, and exact two-box trap geometry;</li><li><a href="dyadic-trap-lattice.html"><code>DYADIC-TRAP-LATTICE.md</code></a> — exact power-of-two trap saturation and infinite Mersenne-type shadow lattice;</li><li><a href="square-lift-core.html"><code>SQUARE-LIFT-CORE.md</code></a> — fixed-character residual primes outside the target modulus can enter only through even powers;</li><li><a href="squarefree-lift-core.html"><code>SQUAREFREE-LIFT-CORE.md</code></a> — squarefree-ancestor localization and exact projection-excess reduction;</li><li><a href="square-lift-reciprocity.html"><code>SQUARE-LIFT-RECIPROCITY.md</code></a> — quadratic reciprocity forces every square-lift divisor onto the Jacobi-positive side of its squarefree ancestor, yielding infinite shadow families;</li><li><a href="jacobi-saturation.html"><code>JACOBI-SATURATION.md</code></a> — classification of exact Jacobi-saturated Type A/B layers: only <code>k=1,2,4</code>;</li><li><a href="square-lift-signature.html"><code>SQUARE-LIFT-SIGNATURE.md</code></a> — exact projected local-signature space and automatic ancestor shadowing whenever <code>kappa(a)=1</code>;</li><li><a href="reciprocity-defect-quotient.html"><code>RECIPROCITY-DEFECT-QUOTIENT.md</code></a> — defect quotient <code>R_a</code>, its dimension <code>kappa(a)-1</code>, and the prime-factor defect conservation law;</li><li><a href="square-lift-signature-classification.html"><code>SQUARE-LIFT-SIGNATURE-CLASSIFICATION.md</code></a> — if-and-only-if theorem: <code>kappa(a)=1</code> exactly when every square lift is ancestor-shadowed at quadratic-signature resolution; <code>kappa(a)&gt;1</code> produces infinitely many signature exceptions;</li><li><a href="reciprocity-matrix.html"><code>RECIPROCITY-MATRIX.md</code></a> — binary Type A/B reciprocity matrix with canonical left Jacobi null vector and right exponent-parity null vector;</li><li><a href="quadratic-field-bridge.html"><code>QUADRATIC-FIELD-BRIDGE.md</code></a> — norm-form, split-prime, ideal-class conservation, and explicit genus/Rédei prior-art boundary for the square-lift theory;</li><li><a href="prime-modulus-backbone.html"><code>PRIME-MODULUS-BACKBONE.md</code></a> — infinite exact-depth prime-modulus backbone;</li><li><a href="survivor-density.html"><code>SURVIVOR-DENSITY.md</code></a> — exact finite-depth density, mass, and conditional hazard;</li><li><a href="composite-core.html"><code>COMPOSITE-CORE.md</code></a> — zero-density prime-modulus survivor core and composite-rescue reduction;</li><li><a href="prior-art.html"><code>PRIOR-ART.md</code></a> — literature and priority boundary;</li><li><a href="cryptology.html"><code>CRYPTOLOGY.md</code></a>, <a href="cryptology-theory.html"><code>CRYPTOLOGY-THEORY.md</code></a>, and <a href="cryptology-results-2026-08-14.html"><code>CRYPTOLOGY-RESULTS-2026-08-14.md</code></a> — controlled cryptology side investigation;</li><li><a href="es-hunt.html"><code>ES-HUNT.md</code></a> — public infinite hunt, seeds, and letter numbers;</li><li><a href="ws-cand-003-erdos-straus-type-ab-shadow-structure.html"><code>../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md</code></a> — formal Wellspring Candidate record.</li></ul>
+<h2>Automation</h2>
+<p>The main workflow <code>.github/workflows/erdos-straus-research.yml</code> regenerates the finite Type A/B research corpus, independently verifies certificates, feeds exact identities into CENTL, hashes outputs, and uploads the evidence bundle.</p>
+<p>The candidatewise falsification workflow <code>.github/workflows/erdos-straus-direct-shadow-completeness.yml</code> performs the stronger theorem attack:</p>
+<ol><li>enumerate every directly novel hard-compatible candidate through the configured depth;</li><li>search for an integer avoiding every earlier Type A/B layer;</li><li>search for a <strong>reduced</strong> avoiding progression, yielding infinitely many exact-depth primes by Dirichlet;</li><li>independently recompute and verify every witness;</li><li>analyze the prime-power coordinate core;</li><li>apply exact coarse local-load peeling;</li><li>apply exact fiber-load peeling;</li><li>test a bounded fixed selector menu on the residual fiber kernel without consulting the stored witness;</li><li>apply quadratic-character analysis;</li><li>certify selected CRT progression identities with CENTL;</li><li>freeze hashes and upload the complete certificate bundle.</li></ol>
+<p>The current workflow defaults are <code>k&lt;=1500</code>, <code>s&lt;=3,000,000</code>, and residual selector menu <code>0, ±1, ..., ±64</code>.</p>
+<p>Additional theorem falsifiers and proof-mining analyzers now include:</p>
+<ul><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/trap_coset_analyzer.py"><code>trap_coset_analyzer.py</code></a> — exact finite regression of the multiplicative trap-coset theorem;</li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/quadratic_signature_shield_analyzer.py"><code>quadratic_signature_shield_analyzer.py</code></a> — exact affine local Legendre-signature shield;</li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/square_lift_core_analyzer.py"><code>square_lift_core_analyzer.py</code></a> — parity check and finite classification of the post-character square-lift core;</li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/squarefree_lift_core_analyzer.py"><code>squarefree_lift_core_analyzer.py</code></a> — exact squarefree-ancestor projection-excess localization on a candidate bundle.</li></ul>
+<h2>Latest frozen finite result</h2>
+<p>The completed candidatewise run through <code>k&lt;=1200</code> produced:</p>
+<pre><code class="language-text">admissible candidates:             57,367
+directly shadowed candidates:      15,897
+directly novel candidates:         41,470
+integer avoiding witnesses:        41,470
+reduced avoiding witnesses:        41,470
+unresolved integer candidates:          0
+unresolved reduced candidates:          0
+independent verifier:              VERIFIED</code></pre>
+<p>Every directly novel hard-compatible candidate in this finite range therefore has an explicit reduced avoiding progression. This is an exact finite theorem-certificate statement, not a universal proof of DSC-P.</p>
+<p>A separate full replay on the same frozen candidate bundle independently resolves all <code>41,470</code> candidates by exact fiber peeling followed, when necessary, by a bounded residual selector. No stored witness is used to decide those two stages.</p>
+<h2>Exact structural tools</h2>
+<p>The project now contains a hierarchy of exact sufficient mechanisms and envelopes:</p>
+<ul><li><strong>prime-power peeling:</strong> a coordinate whose local load is below one can be eliminated while preserving satisfiability;</li><li><strong>fiber peeling:</strong> replacing full forbidden-set size by the maximum relevant fiber width gives a strictly sharper local elimination theorem;</li><li><strong>bounded residual selectors:</strong> after fiber peeling, the <code>k&lt;=1200</code> replay solved every nonempty kernel with the fixed menu <code>0,±1,...,±64</code>;</li><li><strong>Jacobi character shield:</strong> every Type A/B trap modulo <code>m_k=4k-1</code> has Jacobi symbol <code>-1</code>;</li><li><strong>character obstruction completeness:</strong> collective scalar-character inconsistency adds no obstruction beyond one fixed-negative earlier layer;</li><li><strong>full quadratic-signature coset:</strong> the complete vector of local Legendre signs of <code>T_k</code> is the affine space <code>eta_k+V_k</code>;</li><li><strong>multiplicative trap coset:</strong> the exact trap set sits inside one proper coset <code>-H_k</code> in the unit group;</li><li><strong>squarefree-lift localization:</strong> every character-fixed layer has a squarefree ancestor modulus and only its projection excess can remain exactly active;</li><li><strong>square-lift reciprocity:</strong> every divisor prime of a lift splits in the ancestor quadratic field;</li><li><strong>signature-shadow classification:</strong> <code>kappa(a)=1</code> is exactly the universal square-lift signature-shadow regime;</li><li><strong>reciprocity defect conservation:</strong> higher-quotient lift defects must cancel according to prime-exponent parity;</li><li><strong>reciprocity matrix:</strong> the Legendre-symbol matrix has canonical conservation laws on both its left and right null spaces;</li><li><strong>quadratic-field norm bridge:</strong> square-lift depths are norms of <code>(1+s sqrt(-d))/2</code>, giving a principal-ideal conservation law stronger than its quadratic-character projection.</li></ul>
+<p>Each stage deliberately preserves the claim boundary: failure of a coarse shield or a bounded selector does <strong>not</strong> imply exact Type A/B coverage. It only says finer geometry remains.</p>
+<h2>Default main research contract</h2>
+<p>The main finite research run uses:</p>
+<ul><li>prime limit <code>10,000,000</code>;</li><li>Mordell-hard classes modulo 840: <code>1, 121, 169, 289, 361, 529</code>;</li><li>Type A/B depth search through <code>k=3000</code>;</li><li>the checked-in thirteen-record frontier as a regression fixture;</li><li>exact direct-shadow analysis through <code>k=3000</code>;</li><li>explicit non-union-shadow witnesses wherever a first-hit prime is present.</li></ul>
+<h2>What the harness does not prove</h2>
+<p>It does not prove the Erdős-Straus conjecture. It does not prove López&#x27;s universal Type A/B coverage conjecture. It does not yet prove universal Direct-Shadow Completeness. It does not establish literature priority.</p>
+<p>Finite candidatewise results are theorem-certificate statements for their stated ranges. Kernel, selector, quadratic-signature, multiplicative-coset and square-lift tools are exact sufficient structures or envelopes, but a residual from any one of them is <strong>not</strong> evidence of a counterexample.</p>
+<h2>Research direction</h2>
+<p>The active theorem program is now:</p>
+<p><code>Type A/B witnesses -&gt; C_AB -&gt; shadow graph -&gt; exact-depth spectrum -&gt; exact survivor process -&gt; direct-shadow completeness -&gt; fiber kernel -&gt; bounded selector -&gt; scalar character saturation -&gt; local quadratic signatures -&gt; reciprocity matrix/defect quotient -&gt; multiplicative quotient -&gt; exact square-lift/ray-class residue core -&gt; composite rescue</code>.</p>
+<p>The immediate goal is to convert the increasingly tiny residual core into a universal local escape theorem. If achieved, the direct-shadow graph would become a complete obstruction theory for exact Type A/B first-hit realizability.</p>
+<p>Chat discussion is exploratory. <strong>The repository is canonical.</strong></p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

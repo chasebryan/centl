@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note follows DIRECT-SHADOW-COMPLETENESS.md. The candidatewise run established that all 19,016 directly novel hard-compatible candidates through k=600 have reduced avoiding progressions. The question here is why that happens.">
+  <title>Shadow-cover geometry behind Direct-Shadow Completeness — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/shadow-cover-geometry.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/shadow-cover-geometry.html">
+  <meta property="og:title" content="Shadow-cover geometry behind Direct-Shadow Completeness — Free Computation Foundation">
+  <meta property="og:description" content="This note follows DIRECT-SHADOW-COMPLETENESS.md. The candidatewise run established that all 19,016 directly novel hard-compatible candidates through k=600 have reduced avoiding progressions. The question here is why that happens.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Shadow-cover geometry behind Direct-Shadow Completeness</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This note follows DIRECT-SHADOW-COMPLETENESS.md. The candidatewise run established that all 19,016 directly novel hard-compatible candidates through k=600 have reduced avoiding progressions. The question here is why that happens.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SHADOW-COVER-GEOMETRY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite diagnostic from the verified <code>k &lt;= 600</code> candidate bundle</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> this note identifies a proof obstruction and a stronger theorem target. It does not prove universal Direct-Shadow Completeness.</p>
+<p>This note follows <a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a>. The candidatewise run established that all <code>19,016</code> directly novel hard-compatible candidates through <code>k=600</code> have reduced avoiding progressions. The question here is <strong>why</strong> that happens.</p>
+<p>For a candidate progression</p>
+<div class="math" role="math">x=r+Ls,</div>
+<p>each earlier Type A/B layer <code>j&lt;k</code> forbids a finite set</p>
+<div class="math" role="math">R_j\subseteq\mathbb Z/q_j\mathbb Z, \qquad q_j=\frac{4j-1}{\gcd(L,4j-1)}.</div>
+<p>The candidate is union-shadowed exactly when these pulled-back forbidden residue systems cover every integer parameter <code>s</code>.</p>
+<hr>
+<h2>1. A cheap density proof does not explain the result</h2>
+<p>A first possible explanation would be a union bound. Define the raw <strong>cover mass</strong></p>
+<div class="math" role="math">W(k,h,t)=\sum_{j&lt;k}\frac{|R_j|}{q_j},</div>
+<p>summing only nonempty forbidden systems.</p>
+<p>If <code>W&lt;1</code>, the union bound immediately proves that the forbidden systems cannot cover all integers. If most directly novel candidates had <code>W&lt;1</code>, Direct-Shadow Completeness would have a simple density explanation.</p>
+<p>That is emphatically not what the verified <code>k&lt;=600</code> bundle shows.</p>
+<p>Across all <code>19,016</code> directly novel candidates:</p>
+<pre><code class="language-text">minimum W:        0
+median W:         8.500010768048488
+mean W:           7.906791184249354
+maximum W:        10.789829231455588
+W &lt; 1:            132 candidates
+W &gt; 1:         18,884 candidates</code></pre>
+<p>Thus</p>
+<div class="math" role="math">\boxed{18,884/19,016\approx99.306\%}</div>
+<p>of directly novel candidates have raw cover mass <strong>greater than one</strong>, often much greater than one, yet every one of them still has an explicit avoiding parameter and a reduced Dirichlet progression.</p>
+<p>Therefore the observed noncoverage is not explained by low total forbidden density.</p>
+<p>The overlap and dependency geometry among the forbidden congruences is doing essential arithmetic work.</p>
+<hr>
+<h2>2. The constraint systems are genuinely dense</h2>
+<p>The same exact recomputation gives, among the directly novel candidates through <code>k=600</code>:</p>
+<pre><code class="language-text">median number of active earlier constraints: 251
+mean number of active earlier constraints:   245.6381994110223
+maximum active earlier constraints:          477</code></pre>
+<p>So a typical candidate is not escaping because only a handful of earlier layers interact with it. Hundreds of earlier Type A/B layers can impose nonempty forbidden parameter classes.</p>
+<p>Nevertheless the complete collection still fails to cover the parameter line in every tested directly novel candidate.</p>
+<hr>
+<h2>3. Nor is there a simple new-coordinate explanation</h2>
+<p>Another tempting explanation is that each successive constraint might introduce a fresh CRT prime-power coordinate, leaving enough freedom to escape.</p>
+<p>That is also false in its simplest form.</p>
+<p>Process the active constraints in increasing layer order and maintain the accumulated parameter modulus</p>
+<div class="math" role="math">Q_i=\operatorname{lcm}(q_1,\ldots,q_i).</div>
+<p>Call a constraint <strong>new-coordinate</strong> if adjoining its <code>q_j</code> enlarges the accumulated lcm, and <strong>old-coordinate</strong> otherwise.</p>
+<p>Across the verified candidate bundle, both kinds occur heavily. The median counts are approximately</p>
+<pre><code class="language-text">new-coordinate constraints: 145
+old-coordinate constraints:  108</code></pre>
+<p>and some candidates have more than <code>200</code> active old-coordinate constraints.</p>
+<p>For the hardest first-run reduced witness</p>
+<div class="math" role="math">(k,h,t)=(500,529,1979),</div>
+<p>there are <code>392</code> active earlier constraints:</p>
+<pre><code class="language-text">207 new-coordinate constraints
+185 old-coordinate constraints</code></pre>
+<p>So the finite theorem cannot be explained by saying that every forbidden layer acts on a fresh independent coordinate.</p>
+<hr>
+<h2>4. The stronger structural clue</h2>
+<p>We now know three things simultaneously in the tested range:</p>
+<ol><li>no single earlier layer covers a directly novel candidate;</li><li>the total nominal forbidden density is usually far above <code>1</code>;</li><li>hundreds of dependent constraints nevertheless leave a reduced avoiding progression.</li></ol>
+<p>This points toward a special <strong>overlap theorem</strong> for Type A/B pullback constraints.</p>
+<p>The important object is no longer merely the list of forbidden densities</p>
+<div class="math" role="math">|R_j|/q_j.</div>
+<p>It is their structured intersection geometry.</p>
+<p>A future proof of Direct-Shadow Completeness must explain why Type A/B forbidden residue systems overlap so strongly that collective coverage cannot arise without one layer already becoming a direct shadow.</p>
+<p>That property would be special. General covering systems absolutely can cover the integers without any single constituent covering them, so no generic union-bound or generic CRT argument can establish the desired theorem.</p>
+<hr>
+<h2>5. Refined theorem target</h2>
+<p>For a directly novel candidate <code>(k,h,t)</code>, define the finite pullback family</p>
+<div class="math" role="math">\mathscr R_{k,h,t} = \{(q_j,R_j):1\le j&lt;k,\ R_j\ne\varnothing\}.</div>
+<p>The experimental phenomenon can be stated as:</p>
+<div class="math" role="math">\boxed{ R_j\ne\mathbb Z/q_j\mathbb Z\ \forall j \quad\Longrightarrow\quad \bigcup_j\{s:s\bmod q_j\in R_j\}\ne\mathbb Z. }</div>
+<p>for every tested Type A/B pullback family.</p>
+<p>The prime-realization version adds that the complement contains a residue class <code>s0</code> for which</p>
+<div class="math" role="math">\gcd(r+Ls_0,LQ)=1.</div>
+<p>The candidate proof mechanism should therefore search for an invariant of the <strong>family of pullbacks</strong>, not merely of individual <code>q_j</code> or cardinalities <code>|R_j|</code>.</p>
+<hr>
+<h2>6. High-value proof directions</h2>
+<p>The next proof search should test the following mechanisms.</p>
+<h3>A. Shadow-of-shadow redundancy</h3>
+<p>Many old-coordinate constraints may themselves be redundant after pullback. Determine whether every apparently new forbidden class is contained in the union of a small ancestral basis while the basis itself necessarily leaves a residue uncovered.</p>
+<h3>B. Prime-power coordinate signatures</h3>
+<p>Factor every <code>q_j</code> into prime powers and study which local coordinates each <code>R_j</code> can occupy. Search for a prime-power coordinate on which all active Type A/B forbidden sets omit a common compatible value.</p>
+<h3>C. Multiplicative character obstruction</h3>
+<p>The residues in <code>T_j</code> are generated from divisors of <code>j</code> by the two maps <code>e -&gt; -e</code> and <code>e -&gt; -4e</code>. Their affine pullbacks may preserve a quadratic, multiplicative, or divisor-theoretic signature that prevents arbitrary covering-system behavior.</p>
+<h3>D. Minimal-cover contradiction</h3>
+<p>Assume a smallest union-shadowed but not directly shadowed candidate exists. Extract a minimal subcover of parameter residue systems. Classical covering-system constraints on repeated maximal moduli or prime-power divisibility may then collide with the special form <code>q_j=(4j-1)/gcd(L,4j-1)</code> and the trap-cardinality bounds.</p>
+<h3>E. Reduced-survivor strengthening</h3>
+<p>The finite data show more than an uncovered integer: every candidate has an uncovered parameter whose resulting arithmetic progression is reduced modulo <code>LQ</code>. A proof may be easier if constructed prime-power coordinate by prime-power coordinate while preserving reducedness from the outset.</p>
+<hr>
+<h2>7. Why this is a better clue than simply extending the search</h2>
+<p>The <code>k&lt;=600</code> experiment already rules out the obvious failure mode for <code>19,016</code> individual candidates. The cover-mass diagnostic now rules out the obvious easy proof.</p>
+<p>That is progress in both directions:</p>
+<ul><li>the conjecture survived a much stronger falsification attempt;</li><li>the explanation cannot be a trivial density estimate.</li></ul>
+<p>The remaining mechanism must account for substantial, highly overlapping modular mass.</p>
+<p>In project terms, this is the <strong>diamond inside the diamond</strong>: the shadow graph appears to carry a nontrivial overlap geometry that is invisible if one records only which layers are connected.</p>
+<p>The next mathematical goal is to identify and prove that overlap invariant.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

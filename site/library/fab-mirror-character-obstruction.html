@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Mirror character obstruction for fixed-k fab rescue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-mirror-character-obstruction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-mirror-character-obstruction.html">
+  <meta property="og:title" content="Mirror character obstruction for fixed-k fab rescue — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mirror character obstruction for fixed-k fab rescue</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-MIRROR-CHARACTER-OBSTRUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem on the Mordell-hard prime lane</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code></p>
+<p><strong>Claim boundary:</strong> this rules out a broad class of tempting fixed-k constructions. It does not by itself prove that a rescue always exists and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime. In particular</p>
+<div class="math" role="math">p\equiv1\pmod8.</div>
+<p>Let <code>C&gt;0</code> satisfy</p>
+<div class="math" role="math">\gcd(C,p)=1</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{k=4C-p.}</div>
+<p>Assume <code>k&gt;1</code>. Then</p>
+<div class="math" role="math">\boxed{k\equiv3\pmod4}</div>
+<p>and</p>
+<div class="math" role="math">\gcd(C,k)=1.</div>
+<p>The fixed-k divisor-square theorem says that this <code>k</code> supplies a sufficient fab certificate exactly when there is a divisor</p>
+<div class="math" role="math">u\mid C^2</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{4u\equiv-1\pmod k.}</div>
+<p>We now show that a <code>C</code> assembled entirely from quadratic residues modulo <code>p</code> can never do this.</p>
+<hr>
+<h2>2. Reciprocity transfer lemma</h2>
+<h3>Lemma</h3>
+<p>For every odd prime <code>r|C</code>,</p>
+<div class="math" role="math">\boxed{\left(\frac r k\right)=\left(\frac r p\right),}</div>
+<p>where the left symbol is Jacobi when <code>k</code> is composite.</p>
+<h3>Proof</h3>
+<p>Because <code>r|C</code>,</p>
+<div class="math" role="math">k=4C-p\equiv-p\pmod r.</div>
+<p>Since <code>k\equiv3 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac r k\right) = \left(\frac{-1}{r}\right) \left(\frac k r\right).</div>
+<p>But</p>
+<div class="math" role="math">\left(\frac k r\right) = \left(\frac{-p}{r}\right) = \left(\frac{-1}{r}\right) \left(\frac p r\right).</div>
+<p>The two <code>(-1/r)</code> factors cancel, so</p>
+<div class="math" role="math">\left(\frac r k\right)=\left(\frac p r\right).</div>
+<p>Finally <code>p\equiv1 mod4</code>, hence reciprocity between <code>p</code> and <code>r</code> contributes no sign:</p>
+<div class="math" role="math">\left(\frac p r\right)=\left(\frac r p\right).</div>
+<p>QED.</p>
+<h3>The factor 2</h3>
+<p>If <code>2|C</code>, then <code>C</code> is even and</p>
+<div class="math" role="math">k=4C-p\equiv-p\equiv7\pmod8.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac2k\right)=+1.</div>
+<p>On the hard-prime lane <code>p\equiv1 mod8</code>, so also</p>
+<div class="math" role="math">\left(\frac2p\right)=+1.</div>
+<p>Thus the same residue sign is preserved for the dyadic factor as well.</p>
+<hr>
+<h2>3. Mirror obstruction theorem</h2>
+<h3>Theorem</h3>
+<p>Assume every prime factor <code>r</code> of <code>C</code> is a quadratic residue modulo <code>p</code>:</p>
+<div class="math" role="math">\boxed{ r\mid C\Longrightarrow \left(\frac r p\right)=+1. }</div>
+<p>Then there is <strong>no</strong> divisor <code>u|C^2</code> satisfying</p>
+<div class="math" role="math">4u\equiv-1\pmod k, \qquad k=4C-p&gt;1.</div>
+<p>Consequently this <code>k</code> cannot supply a fixed-k sufficient fab certificate.</p>
+<h3>Proof</h3>
+<p>By the reciprocity-transfer lemma, every prime divisor of <code>C</code> is also Jacobi-positive modulo <code>k</code>. Hence every divisor</p>
+<div class="math" role="math">u\mid C^2</div>
+<p>satisfies</p>
+<div class="math" role="math">\boxed{\left(\frac u k\right)=+1.}</div>
+<p>If instead</p>
+<div class="math" role="math">4u\equiv-1\pmod k,</div>
+<p>then, since <code>4</code> is a square modulo odd <code>k</code>,</p>
+<div class="math" role="math">\left(\frac u k\right) = \left(\frac{-4^{-1}}k\right) = \left(\frac{-1}k\right).</div>
+<p>But <code>k\equiv3 mod4</code>, so</p>
+<div class="math" role="math">\boxed{\left(\frac{-1}k\right)=-1.}</div>
+<p>This contradicts <code>(u/k)=+1</code>. Therefore no such divisor exists. QED.</p>
+<hr>
+<h2>4. Structural interpretation</h2>
+<p>The theorem says that the fixed-k rescue mechanism cannot be obtained by simply taking a nearby integer <code>C</code> whose complete prime support has already been forced onto the quadratic-residue side of <code>p</code>, and then reflecting it through</p>
+<div class="math" role="math">\boxed{k=4C-p.}</div>
+<p>That construction preserves the residue sign of every prime factor of <code>C</code>, while the fixed-k target</p>
+<div class="math" role="math">-4^{-1}\pmod k</div>
+<p>is Jacobi-negative.</p>
+<p>Thus any successful interior divisor-square rescue must import genuine nonresidue support:</p>
+<div class="math" role="math">\boxed{ \exists r\mid C: \left(\frac r p\right)=-1. }</div>
+<p>This is the fixed-k mirror of the external-nonresidue theorem in <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>.</p>
+<hr>
+<h2>5. Exact corollaries for the current counterexample sieve</h2>
+<p>The theorem kills several seductive but structurally impossible one-line constructions.</p>
+<h3>Corollary A — mirror of the <code>p+1</code> spine</h3>
+<p>Let</p>
+<div class="math" role="math">C=\frac{p+1}{2}, \qquad k=p+2.</div>
+<p>If the simplest <code>p+1</code> filter has failed, every odd prime factor of <code>C</code> is <code>1 mod4</code>; hence every such factor is a quadratic residue modulo hard <code>p</code>. The factor <code>2</code>, when present, is also a residue because <code>p\equiv1 mod8</code>.</p>
+<p>Therefore the reflected choice</p>
+<div class="math" role="math">\boxed{k=p+2}</div>
+<p>cannot rescue a hard-prime survivor through the fixed-k divisor-square criterion.</p>
+<h3>Corollary B — mirror of the Eisenstein neighbour</h3>
+<p>Let</p>
+<div class="math" role="math">A=\frac{p+3}{4}.</div>
+<p>If the exact <code>k=3</code> filter has failed, every prime factor of <code>A</code> is <code>1 mod3</code>. For hard <code>p</code>, reciprocity gives those factors quadratic-residue sign relative to the corresponding mirror construction. Hence taking a fixed-k construction obtained merely by reflecting this already-residue-safe support cannot supply the missing nonresidue target.</p>
+<p>The same principle applies to the other shifted-factor filters whenever their failure theorem has already forced every prime divisor of the chosen <code>C</code> to be a quadratic residue modulo <code>p</code>.</p>
+<hr>
+<h2>6. Research consequence</h2>
+<p>This theorem prunes an entire family of false proof strategies.</p>
+<p>The next successful construction must <strong>not</strong> be a mirror of an already-safe shifted factor. It must deliberately incorporate a prime or factor carrying</p>
+<div class="math" role="math">\boxed{\left(\frac r p\right)=-1.}</div>
+<p>For Mordell-hard primes the small shield gives</p>
+<div class="math" role="math">\left(\frac2p\right) = \left(\frac3p\right) = \left(\frac5p\right) = \left(\frac7p\right)=+1,</div>
+<p>so the first possible genuinely new prime support begins at the external boundary</p>
+<div class="math" role="math">\boxed{11,13,17,\ldots}</div>
+<p>depending on <code>p</code>.</p>
+<p>This explains why the one-shot search should now construct <code>k</code> <strong>from external nonresidue data</strong>, rather than reflect any of the already-proved residue-safe neighbouring forms.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

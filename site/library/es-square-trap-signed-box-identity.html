@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Square-completed López layer equals a symmetric signed divisor box — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-trap-signed-box-identity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-trap-signed-box-identity.html">
+  <meta property="og:title" content="Square-completed López layer equals a symmetric signed divisor box — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-completed López layer equals a symmetric signed divisor box</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact identity</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code>, <code>ES-SQUARE-TRAP-COMPLEMENT.md</code>, <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code></p>
+<p><strong>Claim boundary:</strong> this is an exact finite-group identity at each layer. It does not by itself prove that every prime is hit by some layer.</p>
+<hr>
+<h2>1. Square-completed layer</h2>
+<p>Fix</p>
+<div class="math" role="math">a\ge1, \qquad m=4a-1.</div>
+<p>The square-completed standard Type-II trap layer is</p>
+<div class="math" role="math">\boxed{ S_a = \{-4D\pmod m:D\mid a^2\}.}</div>
+<p>Write the prime factorization</p>
+<div class="math" role="math">\boxed{ a=\prod_{i=1}^s\ell_i^{E_i}.}</div>
+<p>Every divisor of <code>a^2</code> has the form</p>
+<div class="math" role="math">D=\prod_i\ell_i^{U_i}, \qquad 0\le U_i\le2E_i.</div>
+<hr>
+<h2>2. Center the divisor exponents</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{z_i=U_i-E_i.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{-E_i\le z_i\le E_i.}</div>
+<p>Moreover</p>
+<div class="math" role="math">D =a\prod_i\ell_i^{z_i}</div>
+<p>as an identity in the multiplicative group of rational numbers, and modulo <code>m</code> every prime factor of <code>a</code> is a unit because</p>
+<div class="math" role="math">\gcd(a,4a-1)=1.</div>
+<p>Thus <code>D/a</code> is a well-defined unit modulo <code>m</code>.</p>
+<p>Since</p>
+<div class="math" role="math">4a\equiv1\pmod m,</div>
+<p>we obtain</p>
+<div class="math" role="math">\begin{aligned} -4D &amp;=-4a\frac Da\\ &amp;\equiv-\frac Da\\ &amp;=-\prod_i\ell_i^{z_i} \pmod m. \end{aligned}</div>
+<hr>
+<h2>3. Exact signed-box identity</h2>
+<p>Define the symmetric signed divisor box of <code>a</code> modulo <code>m</code> by</p>
+<div class="math" role="math">\boxed{ \mathcal R_m(a) = \left\{ \prod_i\ell_i^{z_i}\pmod m: -E_i\le z_i\le E_i \right\}.}</div>
+<p>The centered exponent map above is a bijection between divisors <code>D|a^2</code> and signed exponent vectors.</p>
+<p>Therefore:</p>
+<h3>Theorem — square trap = negative signed box</h3>
+<div class="math" role="math">\boxed{ S_a =-\mathcal R_{4a-1}(a).}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ p\bmod(4a-1)\in S_a \iff -p\in\mathcal R_{4a-1}(a).}</div>
+<p>Thus the complete square-completed Type-II congruence layer is exactly a symmetric multiplicative product box.</p>
+<hr>
+<h2>4. López Type A and B are the two monotone orthants</h2>
+<p>Under</p>
+<div class="math" role="math">z_i=U_i-E_i,</div>
+<p>the lower divisor condition</p>
+<div class="math" role="math">D\mid a</div>
+<p>becomes</p>
+<div class="math" role="math">\boxed{z_i\le0\quad\text{for every }i.}</div>
+<p>This is the Type-A orthant.</p>
+<p>The upper divisor condition</p>
+<div class="math" role="math">a\mid D\mid a^2</div>
+<p>becomes</p>
+<div class="math" role="math">\boxed{z_i\ge0\quad\text{for every }i.}</div>
+<p>This is the Type-B orthant.</p>
+<p>Hence the López Type-A/B trap is the restriction of the signed box to</p>
+<div class="math" role="math">\boxed{ [-E_1,0]\times\cdots\times[-E_s,0] \quad\cup\quad [0,E_1]\times\cdots\times[0,E_s].}</div>
+<p>The complete Type-II square layer allows the entire centered box</p>
+<div class="math" role="math">\boxed{[-E_1,E_1]\times\cdots\times[-E_s,E_s].}</div>
+<p>The omitted certificates are precisely the mixed-sign exponent vectors.</p>
+<hr>
+<h2>5. Inversion becomes z -&gt; -z</h2>
+<p>Divisor complement</p>
+<div class="math" role="math">D\longmapsto\frac{a^2}{D}</div>
+<p>sends</p>
+<div class="math" role="math">U_i\longmapsto2E_i-U_i,</div>
+<p>so the centered coordinates transform as</p>
+<div class="math" role="math">\boxed{z_i\longmapsto-z_i.}</div>
+<p>Therefore the complement/inversion theorem becomes the obvious central symmetry of the signed box:</p>
+<div class="math" role="math">\boxed{ \mathcal R_m(a)^{-1}=\mathcal R_m(a).}</div>
+<p>Likewise Type A and Type B are exchanged by</p>
+<div class="math" role="math">z\longmapsto-z.</div>
+<p>This recovers the López mutual-inverse theorem as orthant reflection.</p>
+<hr>
+<h2>6. The Kneser machinery applies directly</h2>
+<p>The box</p>
+<div class="math" role="math">\mathcal R_m(a) = \prod_i \{\ell_i^{-E_i},\ldots,1,\ldots,\ell_i^{E_i}\}</div>
+<p>is exactly the kind of finite multiplicative product set treated by the repository&#x27;s Kneser defect theory.</p>
+<p>Let</p>
+<div class="math" role="math">G_m=(\mathbb Z/m\mathbb Z)^\times</div>
+<p>and</p>
+<div class="math" role="math">H_a=\operatorname{Stab}(\mathcal R_m(a)).</div>
+<p>Passing to</p>
+<div class="math" role="math">G_m/H_a</div>
+<p>therefore imports the full-stabilizer order gap:</p>
+<p>for every prime-power factor</p>
+<div class="math" role="math">\ell_i^{E_i}\parallel a</div>
+<p>whose residue lies outside <code>H_a</code>,</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G_m/H_a}(\ell_iH_a)&gt;2E_i+1.}</div>
+<p>And any target miss can be studied by Kneser expansion exactly as in the fixed-shift FAB box.</p>
+<p>This is the direct algebraic merger of the old shadow layer and the newer signed-box defect theory.</p>
+<hr>
+<h2>7. Prime-power layers revisited</h2>
+<p>If</p>
+<div class="math" role="math">a=\ell^E,</div>
+<p>the signed box is one-dimensional:</p>
+<div class="math" role="math">\mathcal R_m(a) = \{\ell^z:-E\le z\le E\}.</div>
+<p>Every exponent is either nonpositive or nonnegative. Therefore the two López orthants already fill the entire box.</p>
+<p>This re-proves immediately that</p>
+<div class="math" role="math">\boxed{S_a=T_a}</div>
+<p>for prime-power layers.</p>
+<p>The mixed Type-II geometry is therefore exactly the higher-dimensional phenomenon</p>
+<div class="math" role="math">\boxed{\omega(a)\ge2.}</div>
+<hr>
+<h2>8. Example a = 12</h2>
+<p>For</p>
+<div class="math" role="math">a=12=2^2\cdot3, \qquad m=47,</div>
+<p>the completed signed exponent box is</p>
+<div class="math" role="math">\boxed{(z_2,z_3)\in[-2,2]\times[-1,1].}</div>
+<p>The López families use only</p>
+<div class="math" role="math">(z_2,z_3)\le(0,0)</div>
+<p>coordinatewise or</p>
+<div class="math" role="math">(z_2,z_3)\ge(0,0)</div>
+<p>coordinatewise.</p>
+<p>The <code>p=2521</code> mixed divisor <code>D=16</code> has</p>
+<div class="math" role="math">(U_2,U_3)=(4,0),</div>
+<p>so</p>
+<div class="math" role="math">\boxed{(z_2,z_3)=(2,-1).}</div>
+<p>This is visibly a mixed-sign point.</p>
+<p>Its signed-box value is</p>
+<div class="math" role="math">2^2\,3^{-1}\equiv17\pmod{47},</div>
+<p>and therefore the trap residue is</p>
+<div class="math" role="math">-17\equiv30\pmod{47},</div>
+<p>exactly the square-only residue that captures <code>2521</code>.</p>
+<hr>
+<h2>9. Strategic consequence</h2>
+<p>The two major research languages can now be unified:</p>
+<h3>Shadow language</h3>
+<p>Layer <code>a</code>, modulus <code>4a-1</code>, congruence trap containment, ancestry, collective cover.</p>
+<h3>Kneser language</h3>
+<p>Symmetric signed product box, stabilizer quotient, expansion defect, high-order exceptional atoms.</p>
+<p>The identity</p>
+<div class="math" role="math">\boxed{S_a=-\mathcal R_{4a-1}(a)}</div>
+<p>shows that these are the <strong>same completed Type-II layer</strong>.</p>
+<p>The next proof program should therefore work on one object and use both toolkits:</p>
+<ol><li>shadow/CRT geometry across different layers;</li><li>Kneser expansion inside each completed layer;</li><li>complement/inversion to pair mixed candidates;</li><li>the exact mixed-parameter count to measure how much new mass is added beyond López A/B;</li><li>finite tests of whether the old Type-A/B zero-density survivor core disappears rapidly under the completed symmetric layers.</li></ol>
+<p>This is the cleanest current synthesis between the pre-DSC Type-A/B research and the post-DSC exact Type-I/II route.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target divisor-square criterion — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-two-target-divisor-square.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-two-target-divisor-square.html">
+  <meta property="og:title" content="Exact two-target divisor-square criterion — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target divisor-square criterion</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-TWO-TARGET-DIVISOR-SQUARE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact reformulation</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code></p>
+<p><strong>Claim boundary:</strong> this is an equivalent coordinate form of the exact prime Type-I/Type-II signed-box theorem. It does not prove universal target existence.</p>
+<hr>
+<h2>1. From signed exponents to divisors of C^2</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime and let</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+k}{4} =\prod_i r_i^{e_i}.</div>
+<p>The signed divisor box is</p>
+<div class="math" role="math">\mathcal R_k(C) = \left\{ \prod_i r_i^{z_i}\pmod k: -e_i\le z_i\le e_i \right\}.</div>
+<p>For each signed exponent vector define</p>
+<div class="math" role="math">u_i=e_i-z_i.</div>
+<p>Then</p>
+<div class="math" role="math">0\le u_i\le2e_i</div>
+<p>and</p>
+<div class="math" role="math">d=\prod_i r_i^{u_i}</div>
+<p>runs through <strong>every positive divisor of <code>C^2</code> exactly once</strong> as the exponent vector varies.</p>
+<p>Moreover</p>
+<div class="math" role="math">\prod_i r_i^{z_i} =C\,d^{-1}\pmod k.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \mathcal R_k(C) = \{C d^{-1}\pmod k:d\mid C^2\}.}</div>
+<p>This is a bijective reparametrization of the signed box.</p>
+<hr>
+<h2>2. Type-I target</h2>
+<p>By inversion symmetry, the Type-I target may be written as</p>
+<div class="math" role="math">-p</div>
+<p>instead of <code>-p^{-1}</code>.</p>
+<p>Since</p>
+<div class="math" role="math">p\equiv4C\pmod k,</div>
+<p>the equation</p>
+<div class="math" role="math">C d^{-1}\equiv-p\pmod k</div>
+<p>is equivalent to</p>
+<div class="math" role="math">C d^{-1}\equiv-4C\pmod k.</div>
+<p>Because <code>C</code> is a unit modulo <code>k</code>, this becomes</p>
+<div class="math" role="math">d^{-1}\equiv-4\pmod k,</div>
+<p>or</p>
+<div class="math" role="math">\boxed{4d\equiv-1\pmod k.}</div>
+<p>Thus:</p>
+<h3>Exact Type-I divisor-square criterion</h3>
+<div class="math" role="math">\boxed{ \text{Type I at shift }k \iff \exists d\mid C^2: 4d\equiv-1\pmod k.}</div>
+<p>This recovers the fixed-<code>k</code> divisor-square target from the earlier strong FAB lane, now as the exact standard Type-I coordinate.</p>
+<hr>
+<h2>3. Type-II target</h2>
+<p>The Type-II target is</p>
+<div class="math" role="math">-1.</div>
+<p>Hence</p>
+<div class="math" role="math">C d^{-1}\equiv-1\pmod k</div>
+<p>is equivalent to</p>
+<div class="math" role="math">\boxed{d\equiv-C\pmod k.}</div>
+<p>Therefore:</p>
+<h3>Exact Type-II divisor-square criterion</h3>
+<div class="math" role="math">\boxed{ \text{Type II at shift }k \iff \exists d\mid C^2: d\equiv-C\pmod k.}</div>
+<p>This is the divisor-square counterpart that was missing from the one-target fixed-<code>k</code> formulation.</p>
+<hr>
+<h2>4. Exact two-target theorem</h2>
+<p>Combining the two cases with <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code> gives:</p>
+<h3>Theorem — prime ES as two divisor classes inside Div(C^2)</h3>
+<p>For prime <code>p≡1 mod4</code>, Erdős--Straus holds for <code>p</code> if and only if there exists</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1,</div>
+<p>such that, with</p>
+<div class="math" role="math">C=\frac{p+k}{4},</div>
+<p>there is a divisor <code>d|C^2</code> satisfying at least one of</p>
+<div class="math" role="math">\boxed{4d\equiv-1\pmod k}</div>
+<p>or</p>
+<div class="math" role="math">\boxed{d\equiv-C\pmod k.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \operatorname{Div}(C^2) \cap \left( \{-4^{-1}\} \cup \{-C\} \right) \ne\varnothing \pmod k.}</div>
+<p>The first class is Type I; the second is Type II.</p>
+<hr>
+<h2>5. Complement involution</h2>
+<p>The divisor set has the natural involution</p>
+<div class="math" role="math">\boxed{d\longmapsto d^*=\frac{C^2}{d}.}</div>
+<p>Under the signed-box map</p>
+<div class="math" role="math">C/d,</div>
+<p>this is exactly inversion:</p>
+<div class="math" role="math">\frac C{d^*} = \left(\frac Cd\right)^{-1}.</div>
+<h3>Type I</h3>
+<p>The two orientations <code>-p</code> and <code>-p^{-1}</code> correspond to a complementary divisor pair.</p>
+<p>If</p>
+<div class="math" role="math">d\equiv-4^{-1}\pmod k,</div>
+<p>then</p>
+<div class="math" role="math">d^*=C^2d^{-1} \equiv-4C^2\pmod k,</div>
+<p>which is the divisor coordinate of the inverse Type-I orientation.</p>
+<h3>Type II</h3>
+<p>The Type-II residue is self-inverse. If</p>
+<div class="math" role="math">d\equiv-C\pmod k,</div>
+<p>then</p>
+<div class="math" role="math">d^* =C^2d^{-1} \equiv-C\pmod k.</div>
+<p>Thus the Type-II target class is fixed by divisor complement.</p>
+<p>This self-reciprocity is a useful structural distinction between the two solution types.</p>
+<hr>
+<h2>6. Type-II square-pair form</h2>
+<p>Suppose</p>
+<div class="math" role="math">d\mid C^2, \qquad d\equiv-C\pmod k.</div>
+<p>Put</p>
+<div class="math" role="math">e=\frac{C^2}{d}.</div>
+<p>Then also</p>
+<div class="math" role="math">e\equiv-C\pmod k.</div>
+<p>Since <code>de=C^2</code> is a square, <code>d</code> and <code>e</code> have the same squarefree kernel. Write</p>
+<div class="math" role="math">\boxed{d=s a^2,\qquad e=s b^2}</div>
+<p>with <code>s</code> squarefree. Then</p>
+<div class="math" role="math">\boxed{C=sab.}</div>
+<p>Now</p>
+<div class="math" role="math">d+C =s a^2+sab =s a(a+b).</div>
+<p>Because every prime factor of <code>sa</code> divides <code>C</code> and <code>gcd(C,k)=1</code>, one has</p>
+<div class="math" role="math">\gcd(sa,k)=1.</div>
+<p>Therefore</p>
+<div class="math" role="math">k\mid d+C \iff \boxed{k\mid a+b.}</div>
+<p>So Type II may equivalently be viewed as a complementary divisor-square pair whose square roots add to a multiple of the shift.</p>
+<p>This recovers the familiar normalized factor-pair geometry from a different direction.</p>
+<hr>
+<h2>7. Strategic consequence</h2>
+<p>The exact prime problem can be stated without signed exponents:</p>
+<blockquote><p>Choose an admissible shift <code>k</code>. The square divisor lattice of <code>C=(p+k)/4</code> must hit one of two residue classes modulo <code>k</code>: the fixed Type-I class <code>-4^{-1}</code> or the moving Type-II class <code>-C</code>.</p></blockquote>
+<p>The two classes have different involution behavior:</p>
+<ul><li>Type I is a complementary pair under <code>d -&gt; C^2/d</code>;</li><li>Type II is self-complementary.</li></ul>
+<p>This form may be better suited to divisor-distribution, reciprocity, and lattice arguments than the original signed-box notation while remaining exactly equivalent to it.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

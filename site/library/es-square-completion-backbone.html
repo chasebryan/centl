@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-modulus backbone and unbounded depth for the square-completed Type-II layers — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-completion-backbone.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-completion-backbone.html">
+  <meta property="og:title" content="Prime-modulus backbone and unbounded depth for the square-completed Type-II layers — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-modulus backbone and unbounded depth for the square-completed Type-II layers</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-COMPLETION-BACKBONE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code>, <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>PRIME-MODULUS-BACKBONE.md</code></p>
+<p><strong>Imported classical tools:</strong> Chinese remainder theorem and Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> proves arbitrarily large exact finite first-hit depths for the square-completed Type-II congruence system. It does not imply failure of universal Type-II coverage and does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Completed trap layers</h2>
+<p>For</p>
+<div class="math" role="math">a\ge1</div>
+<p>put</p>
+<div class="math" role="math">\boxed{m_a=4a-1}</div>
+<p>and define the square-completed Type-II trap</p>
+<div class="math" role="math">\boxed{ S_a = \{-4D\pmod{m_a}:D\mid a^2\}.}</div>
+<p>The ordinary López trap satisfies</p>
+<div class="math" role="math">T_a\subseteq S_a.</div>
+<p>The first question is whether the much larger completed layers might accidentally contain the neutral residue <code>1</code>, which would destroy the old CRT exact-depth construction.</p>
+<p>They do not.</p>
+<hr>
+<h2>2. The neutral residue is never trapped</h2>
+<h3>Theorem</h3>
+<p>For every</p>
+<div class="math" role="math">a\ge1,</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{1\notin S_a.}</div>
+<h3>Proof</h3>
+<p>Suppose instead that there exists</p>
+<div class="math" role="math">D\mid a^2</div>
+<p>with</p>
+<div class="math" role="math">-4D\equiv1\pmod{4a-1}.</div>
+<p>Then for some positive integer <code>q</code>,</p>
+<div class="math" role="math">\boxed{4D+1=q(4a-1).}</div>
+<p>Because the left side is <code>1 mod 4</code> and <code>4a-1≡3 mod4</code>,</p>
+<div class="math" role="math">\boxed{q\equiv3\pmod4.}</div>
+<p>Write the canonical squarefree-root factorization</p>
+<div class="math" role="math">D=sb^2, \qquad a=sbc,</div>
+<p>with <code>s,b,c</code> positive.</p>
+<p>The assumed equation becomes</p>
+<div class="math" role="math">1+4sb^2=(4sbc-1)q.</div>
+<p>Rearrange:</p>
+<div class="math" role="math">1+q =4sbcq-4sb^2 =4sb(cq-b).</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{t=cq-b.}</div>
+<p>Since the left side is positive,</p>
+<div class="math" role="math">\boxed{t&gt;0.}</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{q=4sbt-1.}</div>
+<p>But from the definition of <code>t</code>,</p>
+<div class="math" role="math">\boxed{b+t=cq\ge q.}</div>
+<p>On the other hand, for positive integers <code>s,b,t</code>,</p>
+<div class="math" role="math">q=4sbt-1 \ge4bt-1 &gt;b+t.</div>
+<p>The last strict inequality holds for all <code>b,t&gt;=1</code>.</p>
+<p>This is a contradiction. Therefore</p>
+<div class="math" role="math">\boxed{1\notin S_a.}</div>
+<p>QED.</p>
+<hr>
+<h2>3. The target residue -1 is always trapped</h2>
+<p>Take</p>
+<div class="math" role="math">D=a.</div>
+<p>Since</p>
+<div class="math" role="math">a\mid a^2,</div>
+<p>this is a valid square divisor.</p>
+<p>Moreover</p>
+<div class="math" role="math">-4D=-4a\equiv-1\pmod{4a-1}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{-1\in S_a\quad\text{for every }a.}</div>
+<p>So every layer contains the familiar central Type-A/B spine while still excluding the neutral residue.</p>
+<hr>
+<h2>4. Exact-depth theorem at a prime target modulus</h2>
+<p>Let <code>a</code> be such that</p>
+<div class="math" role="math">\boxed{q=4a-1}</div>
+<p>is a prime greater than <code>7</code>.</p>
+<p>Define</p>
+<div class="math" role="math">L_{a-1} = \operatorname{lcm} \left( 840, \{4j-1:1\le j&lt;a\} \right).</div>
+<p>Since <code>q</code> is prime and larger than every earlier modulus, it divides none of them. Since <code>q&gt;7</code>, it also does not divide <code>840</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\gcd(q,L_{a-1})=1.}</div>
+<p>By CRT there is a unique residue class modulo <code>qL_{a-1}</code> satisfying</p>
+<div class="math" role="math">\boxed{ x\equiv1\pmod{L_{a-1}}, \qquad x\equiv-1\pmod q.}</div>
+<p>This residue is reduced modulo <code>qL_{a-1}</code>.</p>
+<p>Dirichlet&#x27;s theorem therefore gives infinitely many primes <code>p</code> in this class.</p>
+<p>For every earlier layer <code>j&lt;a</code>,</p>
+<div class="math" role="math">p\equiv1\pmod{4j-1}.</div>
+<p>By the neutral-residue theorem,</p>
+<div class="math" role="math">1\notin S_j,</div>
+<p>so no earlier completed layer captures <code>p</code>.</p>
+<p>At the target layer,</p>
+<div class="math" role="math">p\equiv-1\pmod q</div>
+<p>and</p>
+<div class="math" role="math">-1\in S_a.</div>
+<p>Thus the first square-completed Type-II congruence hit occurs exactly at <code>a</code>.</p>
+<p>Finally, <code>840|L_{a-1}</code>, so all these primes satisfy</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840}.}</div>
+<p>Therefore:</p>
+<h3>Theorem — square-completed prime-modulus exact depth</h3>
+<p>Whenever</p>
+<div class="math" role="math">4a-1&gt;7</div>
+<p>is prime, there exist infinitely many Mordell-hard primes whose first square-completed Type-II layer is exactly <code>a</code>.</p>
+<hr>
+<h2>5. Unbounded completed depth</h2>
+<p>There are infinitely many primes</p>
+<div class="math" role="math">q\equiv3\pmod4.</div>
+<p>Every such prime <code>q&gt;7</code> has the form</p>
+<div class="math" role="math">q=4a-1</div>
+<p>for</p>
+<div class="math" role="math">a=\frac{q+1}{4}.</div>
+<p>Applying the exact-depth theorem gives arbitrarily large finite first-hit depths.</p>
+<p>Hence:</p>
+<h3>Corollary</h3>
+<div class="math" role="math">\boxed{ \text{the square-completed Type-II first-hit depth is unbounded}.}</div>
+<p>This remains true even when restricted to primes in the single Mordell-hard class</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840}.}</div>
+<hr>
+<h2>6. The completed prime-modulus backbone</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \mathcal B_{\rm sq} = \left\{ \frac{q+1}{4}: q&gt;7\text{ prime}, \ q\equiv3\pmod4 \right\}.}</div>
+<p>Then every depth in <code>B_sq</code> is realized infinitely often as an exact square-completed first-hit depth among Mordell-hard primes.</p>
+<p>This is the same index set as the old López prime-modulus backbone, but it now belongs to the complete symmetric Type-II layer.</p>
+<p>The completion can dramatically reduce the depth of individual primes, but it cannot produce a universal constant ceiling.</p>
+<hr>
+<h2>7. Finite census versus theorem</h2>
+<p>A finite search can therefore show substantial compression without suggesting boundedness.</p>
+<p>The current exact finite census through</p>
+<div class="math" role="math">p\le50,000,000</div>
+<p>finds all <code>93,457</code> Mordell-hard primes captured by square-completed layers no deeper than</p>
+<div class="math" role="math">\boxed{a=624.}</div>
+<p>The unique deepest observed prime is</p>
+<div class="math" role="math">\boxed{p=2,031,121.}</div>
+<p>Its completed witness is</p>
+<div class="math" role="math">\boxed{ a=624, \qquad D=576, \qquad m_a=2495.}</div>
+<p>Indeed</p>
+<div class="math" role="math">576\mid624^2</div>
+<p>and</p>
+<div class="math" role="math">2,031,121+4\cdot576 =2,033,425 =2495\cdot815.</div>
+<p>The divisor <code>576</code> is mixed relative to</p>
+<div class="math" role="math">624=2^4\cdot3\cdot13:</div>
+<div class="math" role="math">576=2^6\cdot3^2</div>
+<p>lies above the midpoint in the <code>2</code> and <code>3</code> coordinates and below it in the <code>13</code> coordinate.</p>
+<p>For comparison, the first López Type-A/B hit for the same prime is</p>
+<div class="math" role="math">\boxed{1403.}</div>
+<p>Thus square completion more than halves the observed depth of this finite record prime.</p>
+<p>These are finite computational facts, not a bound theorem. The exact-depth result above proves that later primes must eventually exceed every fixed depth.</p>
+<hr>
+<h2>8. Strategic consequence</h2>
+<p>The completed system has two simultaneous features:</p>
+<ol><li><strong>strong finite compression:</strong> mixed-sign square divisors can solve hard primes much earlier than the López boundary orthants;</li><li><strong>provable unbounded latency:</strong> prime-modulus CRT coordinates force arbitrarily large exact first-hit depths.</li></ol>
+<p>Therefore the all-prime proof cannot be a bounded-depth theorem.</p>
+<p>The right target is structural coverage:</p>
+<div class="math" role="math">\boxed{ \text{prove every prime has some completed layer, while accepting that the first such layer is unbounded}.}</div>
+<p>This matches the lesson already learned from the López depth spectrum, now in the complete square-completed Type-II geometry.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

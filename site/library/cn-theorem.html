@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>CN Theorem — Finite Active-Core Escape — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cn-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cn-theorem.html">
+  <meta property="og:title" content="CN Theorem — Finite Active-Core Escape — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CN Theorem — Finite Active-Core Escape</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CN-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> pairwise-coprime case proved for all finite n; shared-factor C3/C4 certified</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>C1-THEOREM.md</code>, <code>C2-THEOREM.md</code></p>
+<p><strong>Claim boundary:</strong> Does not prove Erdős-Straus, López-all-primes, or DSC-P for unconstrained shared-prime clusters of arbitrary geometry. Closes the coprime-tower route and certifies small shared clusters.</p>
+<hr>
+<h2>Setup</h2>
+<p>Directly novel candidate. Active fixed-negative layers</p>
+<div class="math" role="math">\mathcal N^{\mathrm{act}}=\{j_1,\ldots,j_n\},\qquad n\ge 1,</div>
+<p>with pullback moduli <code>q_i &gt; 1</code> and forbidden sets <code>R_i</code> as in C1. Let</p>
+<div class="math" role="math">S_i = U_i \setminus R_i \ne \emptyset</div>
+<p>by Theorem C1 (<code>U_i</code> = units mod <code>q_i</code>). Put <code>Q = lcm(q_1,...,q_n)</code>.</p>
+<hr>
+<h2>Theorem CN-coprime (all finite n)</h2>
+<p>If <code>gcd(q_i, q_j) = 1</code> for all <code>i ≠ j</code>, then a simultaneous reduced escape exists.</p>
+<h3>Proof</h3>
+<p>By C1, each <code>S_i ≠ ∅</code>. Choose <code>a_i ∈ S_i</code>. The system</p>
+<div class="math" role="math">s \equiv a_i \pmod{q_i},\qquad i=1,\ldots,n</div>
+<p>has a unique solution mod <code>Q = q_1···q_n</code> by the Chinese Remainder Theorem. Moreover <code>gcd(s,Q)=1</code>. Hence <code>s</code> is reduced and avoids every <code>R_i</code>. QED.</p>
+<p><strong>Induction form.</strong> The case <code>n=1</code> is C1. The case <code>n=2</code> is C2-coprime. For <code>n≥3</code>, CRT against the product of the first <code>n−1</code> moduli (inductively safe) with <code>a_n ∈ S_n</code> extends the escape.</p>
+<hr>
+<h2>Theorem CN-shared (certificates)</h2>
+<p>When the <code>q_i</code> share prime factors, compatibility conditions mod those primes are required.</p>
+<h3>Certificate C3 / C4 (tight, admissible)</h3>
+<p>See <code>CN-SHARED-THEOREM.md</code>. On the <code>73,814</code> admissible hard candidates through <code>k ≤ 1500</code>:</p>
+<ul><li>tight <code>q ≤ 9</code> triples: <code>3,994,891</code> checks, <strong>0</strong> failures;</li><li>the only shared-pair failures are <code>21</code> complementary <code>q=3</code> covers in the <code>205</code> family, all directly shadowed by layer <code>10</code>.</li></ul>
+<p>Sampled-<code>r</code> C3/C4 scans remain valid as samples. They are not a universal shared-factor theorem. Unrestricted complementary <code>q=3</code> covers exist.</p>
+<h3>Obstruction pattern</h3>
+<p>Lift-room peels every layer with <code>φ(q)/φ(d) &gt; |R|</code>. The totient-ratio lemma makes this automatic whenever <code>d &lt; q</code> and <code>|R| ≤ 1</code>. The residual tight cluster is 3-adic. Complementary covers there are either non-admissible or ancestry-absorbed (<code>205 → 10</code>). A fully formal proof that every <code>q=3</code> layer is an absorbed child of a <code>q=1</code> anchor is the remaining shared-CN path.</p>
+<hr>
+<h2>Corollary — Coprime active cores are DSC-P complete</h2>
+<p>Any directly novel candidate whose active fixed-negative moduli are pairwise coprime is reduced-realizable:</p>
+<ol><li>Character-shield extension (parent)</li><li>Inactive fixed-negative layers safe by direct novelty</li><li><strong>CN-coprime</strong> simultaneous escape</li><li>Fiber reverse (parent)</li><li>Dirichlet → infinitely many exact-depth primes</li></ol>
+<hr>
+<h2>Scoreboard</h2>
+<table class="directory"><thead><tr><th>Result</th><th>Status</th></tr></thead><tbody><tr><td>C1</td><td>Closed</td></tr><tr><td>C2-coprime</td><td>Closed</td></tr><tr><td>C2-shared</td><td>Certified 0-fail</td></tr><tr><td>CN-coprime (all n)</td><td><strong>Closed</strong></td></tr><tr><td>C3/C4 shared</td><td>Tight admissible 0-fail; unrestricted C2-shared false</td></tr><tr><td>205-absorption</td><td><strong>Closed</strong> (<code>CN-SHARED-THEOREM.md</code>)</td></tr><tr><td>Arbitrary shared CN</td><td>Open (remaining <code>q=3</code> families)</td></tr><tr><td>Universal DSC-P</td><td>Open</td></tr><tr><td>López all primes</td><td>Open</td></tr><tr><td>Erdős-Straus</td><td>Open</td></tr></tbody></table>
+<hr>
+<h2>Next</h2>
+<ol><li>Formalize shared-factor CN via simultaneous projection of thin two-box pullbacks.</li><li>Bound <code>|N^{act}|</code> in the Class-C residual (parent census: median variable negative towers ~1).</li><li>If <code>|N^{act}|</code> is uniformly bounded or generically pairwise-coprime, DSC-P collapses to closed theorems.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

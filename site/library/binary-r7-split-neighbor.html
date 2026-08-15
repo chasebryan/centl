@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be a Mordell-hard prime. Then">
+  <title>Exact r=7 binary rescue for Mordell-hard primes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-r7-split-neighbor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-r7-split-neighbor.html">
+  <meta property="og:title" content="Exact r=7 binary rescue for Mordell-hard primes — Free Computation Foundation">
+  <meta property="og:description" content="Let p be a Mordell-hard prime. Then">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact r=7 binary rescue for Mordell-hard primes</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let p be a Mordell-hard prime. Then</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-R7-SPLIT-NEIGHBOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved iff classification</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-RESCUE.md</code>, <code>BINARY-R-DIVISOR-COLLISION.md</code></p>
+<p><strong>Claim boundary:</strong> this closes the <code>r=7</code> stage exactly. It does not prove that every hard prime is rescued at <code>r=7</code>, and therefore does not prove Erdős–Straus.</p>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime. Then</p>
+<div class="math" role="math">p\bmod840\in\{1,121,169,289,361,529\},</div>
+<p>so in particular</p>
+<div class="math" role="math">\boxed{p\bmod7\in\{1,2,4\}.}</div>
+<p>These are exactly the nonzero quadratic residues modulo <code>7</code>.</p>
+<p>Put</p>
+<div class="math" role="math">\boxed{A_7=\frac{p+7}{4}}, \qquad N_7=pA_7.</div>
+<p>Since hard <code>p == 1 (mod 8)</code>,</p>
+<div class="math" role="math">p+7\equiv0\pmod8,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{2\mid A_7.}</div>
+<p>By the binary-r collision theorem, <code>p</code> is rescued at <code>r=7</code> iff the divisor residues of <code>N_7</code> meet their negatives modulo <code>7</code>.</p>
+<h2>2. Fixed quadratic-residue divisors already fill the QR half</h2>
+<p>The quadratic-residue subgroup modulo <code>7</code> is</p>
+<div class="math" role="math">Q_7=\{1,2,4\}.</div>
+<p>We always have divisor residue <code>1</code>.</p>
+<p>We also have the divisor <code>p</code>, whose residue lies in <code>Q_7</code>, and because <code>2|A_7</code>, the literal divisor <code>2</code> belongs to <code>N_7</code>.</p>
+<p>Casewise:</p>
+<ul><li>if <code>p == 1 (mod 7)</code>, divisors <code>1</code> and <code>2</code> are present, and <code>A_7 == 2 (mod 7)</code>; products available inside the divisor lattice give the needed QR support;</li><li>if <code>p == 2 (mod 7)</code>, the fixed divisors <code>1,p,A_7</code> have residues</li></ul>
+<div class="math" role="math">1,2,4;</div>
+<ul><li>if <code>p == 4 (mod 7)</code>, the fixed divisors <code>1,p,2</code> have residues</li></ul>
+<div class="math" role="math">1,4,2.</div>
+<p>More directly in the first case, if a nonresidue factor <code>q</code> occurs, multiplication by the divisor <code>2</code> supplies the missing negative whenever <code>q == 3 (mod 7)</code>, while <code>q == 5,6</code> collide with already present <code>2,1</code> respectively. Thus no separate assumption that all three QR residues are present is needed.</p>
+<h2>3. Any nonresidue prime factor forces rescue</h2>
+<p>The nonresidues modulo <code>7</code> are</p>
+<div class="math" role="math">\{3,5,6\}.</div>
+<p>Let <code>q|A_7</code> be prime and assume <code>(q/7)=-1</code>.</p>
+<h3>q == 5 mod 7</h3>
+<p>Then</p>
+<div class="math" role="math">-q\equiv2\pmod7.</div>
+<p>The divisor <code>2|A_7</code> is present, so the divisor residue set contains both <code>q</code> and <code>-q</code>. Rescue follows.</p>
+<h3>q == 6 mod 7</h3>
+<p>Then</p>
+<div class="math" role="math">-q\equiv1\pmod7.</div>
+<p>The divisor <code>1</code> is present, so rescue follows.</p>
+<h3>q == 3 mod 7</h3>
+<p>Then</p>
+<div class="math" role="math">2q\equiv6\equiv-1\pmod7.</div>
+<p>Because <code>q</code> is odd and <code>2q|A_7</code>, both <code>1</code> and the divisor <code>2q</code> are present, so the collision follows.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ \exists q\mid A_7\text{ prime with }(q/7)=-1 \Longrightarrow r=7\text{ rescues }p. }</div>
+<h2>4. Converse</h2>
+<p>If every prime factor of <code>A_7</code> is a quadratic residue modulo <code>7</code>, then every divisor of <code>A_7</code> is a quadratic residue modulo <code>7</code>.</p>
+<p>The hard prime <code>p</code> is itself a quadratic residue modulo <code>7</code>. Therefore every divisor of</p>
+<div class="math" role="math">N_7=pA_7</div>
+<p>lies in <code>Q_7</code>.</p>
+<p>But</p>
+<div class="math" role="math">-1\equiv6\pmod7</div>
+<p>is a quadratic nonresidue, so negation maps the QR half to the NQR half. Hence</p>
+<div class="math" role="math">D_7(N_7)\cap(-D_7(N_7))=\varnothing.</div>
+<p>No binary-r rescue exists at <code>r=7</code>.</p>
+<p>Combining the two directions gives the exact classification:</p>
+<div class="math" role="math">\boxed{ \text{r=7 rescues }p \iff \frac{p+7}{4} \text{ has a prime factor that is a quadratic nonresidue mod }7. }</div>
+<p>Equivalently, failure at <code>r=7</code> is exactly</p>
+<div class="math" role="math">\boxed{ q\mid\frac{p+7}{4},\ q\text{ prime} \Longrightarrow \left(\frac q7\right)=+1. }</div>
+<h2>5. Simultaneous residue interpretation modulo p</h2>
+<p>By the reciprocity bridge in <code>BINARY-R-DIVISOR-COLLISION.md</code>, for every odd prime <code>q|A_7</code>,</p>
+<div class="math" role="math">\left(\frac qp\right)=\left(\frac q7\right).</div>
+<p>Therefore failure of the <code>r=7</code> rescue says that every prime factor of the neighboring integer</p>
+<div class="math" role="math">\boxed{A_7=A_3+1}</div>
+<p>is simultaneously a quadratic residue modulo <code>7</code> and modulo <code>p</code>.</p>
+<p>The preceding <code>r=3</code> failure says every prime factor of</p>
+<div class="math" role="math">A_3=\frac{p+3}{4}</div>
+<p>is <code>1 mod 3</code>, equivalently quadratic-residue-side modulo <code>3</code>.</p>
+<p>Thus a hypothetical counterexample surviving both binary stages has two consecutive integers</p>
+<div class="math" role="math">A_3,\quad A_3+1</div>
+<p>with exact split-prime restrictions in two different quadratic characters.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

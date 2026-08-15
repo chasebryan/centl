@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Verifier:">
+  <title>Constructive counterexample to universal Direct-Shadow Completeness — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/dsc-counterexample.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/dsc-counterexample.html">
+  <meta property="og:title" content="Constructive counterexample to universal Direct-Shadow Completeness — Free Computation Foundation">
+  <meta property="og:description" content="Verifier:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Constructive counterexample to universal Direct-Shadow Completeness</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Verifier:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DSC-COUNTEREXAMPLE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact constructive counterexample; independently replayed and frozen in GitHub Actions</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this falsifies the universal conjectures DSC-0 and DSC-P as stated in the research program. It does <strong>not</strong> falsify the Erdős-Straus conjecture, and it does not falsify López Type A/B coverage. The target candidate is collectively redundant rather than directly redundant.</p>
+<p>Verifier:</p>
+<ul><li><code>verify_dsc_counterexample.py</code></li><li><code>DIRECT-SHADOW-SMOOTHNESS.md</code></li></ul>
+<p>Hosted certificate:</p>
+<pre><code class="language-text">workflow run: 31862644146
+head SHA:     ee08dd722164843da6cfa417fc6439d5ac09447d
+artifact id:  9241048158
+artifact digest:
+sha256:7a8ee6c11d77b1d637238de10fae033be64b3099388c43e17942748b38b354df
+verdict:      SUCCESS</code></pre>
+<hr>
+<h2>1. The statements falsified</h2>
+<p>The program defined:</p>
+<h3>DSC-0</h3>
+<div class="math" role="math">\text{not directly shadowed} \Longrightarrow \text{not union-shadowed}.</div>
+<h3>DSC-P</h3>
+<div class="math" role="math">\text{not directly shadowed} \Longrightarrow \text{there exists a reduced avoiding parameter class}.</div>
+<p>The candidate below is not directly shadowed, but three earlier <code>q=3</code> rows cover <strong>every integer parameter</strong>. Therefore it has no integer avoiding parameter at all, hence certainly no reduced avoiding parameter.</p>
+<p>Thus:</p>
+<div class="math" role="math">\boxed{\text{DSC-0 is false}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\text{DSC-P is false}.}</div>
+<hr>
+<h2>2. Constructed target</h2>
+<p>Set</p>
+<div class="math" role="math">D=2,218,779,486, \qquad N=1,900,986,818,</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ k=DN=4,217,870,554,934,815,548.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ M=4k-1 =16,871,482,219,739,262,191. }</div>
+<p>Its exact factorization is</p>
+<div class="math" role="math">\boxed{ M =19\cdot229\cdot433\cdot487\cdot3823\cdot4,809,977. }</div>
+<p>All displayed factors are prime.</p>
+<p>Because <code>D|k</code>, the residue</p>
+<div class="math" role="math">\boxed{ t\equiv-4D\pmod M}</div>
+<p>is a Type A/B target trap. In least nonnegative form,</p>
+<div class="math" role="math">\boxed{ t=16,871,482,210,864,144,247.}</div>
+<p>Also</p>
+<div class="math" role="math">\gcd(M,840)=1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ L=\operatorname{lcm}(840,M) =840M =14,172,045,064,580,980,240,440. }</div>
+<p>Two Mordell-hard siblings work:</p>
+<div class="math" role="math">h=361 \qquad\text{and}\qquad h=529.</div>
+<p>Their CRT bases are respectively</p>
+<div class="math" role="math">\boxed{ r_{361}=13,750,258,009,078,623,567,721}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ r_{529}=2,412,621,957,413,839,375,369.}</div>
+<p>Each satisfies</p>
+<div class="math" role="math">r_h\equiv h\pmod{840}, \qquad r_h\equiv t\pmod M, \qquad \gcd(r_h,L)=1.</div>
+<p>Either sibling by itself falsifies DSC-0 and DSC-P.</p>
+<hr>
+<h2>3. Three earlier q=3 rows cover every parameter</h2>
+<p>Use the following earlier layers:</p>
+<table class="directory"><thead><tr><th><code>j</code></th><th><code>m_j=4j-1</code></th><th>trap divisor <code>e</code></th><th>branch</th><th>trap <code>u</code></th></tr></thead><tbody><tr><td>6,820</td><td>27,279</td><td>20</td><td><code>-4e</code></td><td>27,199</td></tr><tr><td>8,602</td><td>34,407</td><td>506</td><td><code>-e</code></td><td>33,901</td></tr><tr><td>9,790</td><td>39,159</td><td>89</td><td><code>-4e</code></td><td>38,803</td></tr></tbody></table>
+<p>The trap divisibility is exact:</p>
+<pre><code class="language-text">20  | 6820
+506 | 8602
+89  | 9790</code></pre>
+<p>and the moduli factor as</p>
+<div class="math" role="math">27279=3^2\cdot7\cdot433,</div>
+<div class="math" role="math">34407=3^2\cdot3823,</div>
+<div class="math" role="math">39159=3^2\cdot19\cdot229.</div>
+<p>For the target <code>L</code>, their gcds are</p>
+<div class="math" role="math">9093, \qquad 11469, \qquad 13053,</div>
+<p>so all three have</p>
+<div class="math" role="math">\boxed{q_j=3.}</div>
+<h3>Hard sibling h=361</h3>
+<p>The exact pullback classes are</p>
+<pre><code class="language-text">j=6820  -&gt; s = 1 mod 3
+j=8602  -&gt; s = 2 mod 3
+j=9790  -&gt; s = 0 mod 3</code></pre>
+<h3>Hard sibling h=529</h3>
+<p>They are the cyclic shift</p>
+<pre><code class="language-text">j=6820  -&gt; s = 0 mod 3
+j=8602  -&gt; s = 1 mod 3
+j=9790  -&gt; s = 2 mod 3</code></pre>
+<p>Therefore in either candidate</p>
+<div class="math" role="math">\boxed{ R_{6820}\cup R_{8602}\cup R_{9790} =\mathbb Z/3\mathbb Z. }</div>
+<p>By <code>Q3-SINGLETON-PULLBACK.md</code>, each row contributes only its displayed singleton class, but together the three singletons cover all classes.</p>
+<p>Hence for <strong>every integer</strong> <code>s</code>, at least one earlier Type A/B row is hit:</p>
+<div class="math" role="math">\boxed{ \forall s\in\mathbb Z, \quad r_h+Ls \text{ lies in an earlier Type A/B layer.} }</div>
+<p>This is an exact union shadow.</p>
+<hr>
+<h2>4. Why the direct-shadow check is finite</h2>
+<p>A direct shadow cannot contain any prime outside the support of <code>L</code>.</p>
+<p><code>DIRECT-SHADOW-SMOOTHNESS.md</code> proves:</p>
+<div class="math" role="math">\boxed{ \text{direct shadow by modulus }m \Longrightarrow \operatorname{rad}(m)\mid\operatorname{rad}(L). }</div>
+<p>Reason: if <code>p|m</code> but <code>p∤L</code>, the attained fibre contains a value divisible by <code>p</code>, while every Type A/B trap is a unit modulo <code>m</code>.</p>
+<p>Therefore every possible earlier direct-shadow modulus is smooth over the odd prime support</p>
+<div class="math" role="math">\boxed{ \{3,5,7,19,229,433,487,3823,4,809,977\}. }</div>
+<p>There are exactly</p>
+<div class="math" role="math">\boxed{270,836}</div>
+<p>positive smooth integers below <code>M</code>, of which exactly</p>
+<div class="math" role="math">\boxed{135,402}</div>
+<p>are nontrivial and congruent to <code>3 mod 4</code>, hence are possible earlier Type A/B moduli.</p>
+<p>The verifier enumerates all of them.</p>
+<p>For each modulus <code>m=4i-1</code>, it computes</p>
+<div class="math" role="math">g=\gcd(L,m), \qquad q=m/g,</div>
+<p>and checks every one of the <code>q</code> attained fibre points directly against the exact Type A/B trap criterion.</p>
+<p>Result for <code>h=361</code>:</p>
+<pre><code class="language-text">possible smooth Type A/B direct-shadow moduli checked: 135,402
+direct shadows: 0</code></pre>
+<p>Result for <code>h=529</code>:</p>
+<pre><code class="language-text">possible smooth Type A/B direct-shadow moduli checked: 135,402
+direct shadows: 0</code></pre>
+<p>Thus both candidates are <strong>directly novel</strong>.</p>
+<hr>
+<h2>5. Independent hosted replay</h2>
+<p>The GitHub Actions verifier reconstructs the target factorization, candidate CRT data, all three q=3 pullbacks, the complete smooth direct-shadow search space, and every attained fibre without consulting a stored verdict.</p>
+<p>The first hosted run completed successfully:</p>
+<pre><code class="language-text">run id:      31862644146
+head:        ee08dd722164843da6cfa417fc6439d5ac09447d
+artifact:    9241048158
+archive sha: 7a8ee6c11d77b1d637238de10fae033be64b3099388c43e17942748b38b354df</code></pre>
+<p>Thus the counterexample is now frozen as a replayable theorem-certificate, not merely a local search observation.</p>
+<hr>
+<h2>6. Exact conclusion</h2>
+<p>For each of the two hard siblings:</p>
+<ol><li>the target is a valid admissible Type A/B candidate;</li><li>no single earlier layer directly shadows it;</li><li>three earlier <code>q=3</code> layers jointly cover every integer parameter.</li></ol>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \text{directly novel} \centernot\Longrightarrow \text{not union-shadowed}. }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \text{directly novel} \centernot\Longrightarrow \text{reduced prime-realizable}. }</div>
+<p>The finite <code>k&lt;=1500</code> and related DSC certificates remain correct <strong>finite statements</strong>. What fails is their universal extrapolation.</p>
+<hr>
+<h2>7. What this means for the research program</h2>
+<p>This result removes the proposed DSC shortcut. The shadow graph is not a complete obstruction theory when only direct edges are retained.</p>
+<p>The replacement object must preserve <strong>collective local covers</strong>. At minimum, the correct structure needs hyperedges / covering cores rather than only single-layer ancestry edges.</p>
+<p>For the Erdős-Straus goal, however, this is not a negative result: a union-shadowed target candidate is already covered by earlier Type A/B decompositions. Exact-depth prime realizability was a stronger auxiliary objective than pointwise Type A/B coverage requires.</p>
+<p>The immediate program should therefore split cleanly:</p>
+<ol><li><strong>Depth-spectrum track:</strong> classify minimal union-shadow cores and replace DSC with a hypergraph/covering-core theory.</li><li><strong>Erdős-Straus track:</strong> attack pointwise Type A/B coverage directly, especially the zero-density prime-modulus survivor/composite-rescue core.</li><li>Retain Strong Absorption, Weak Redundancy, Pointwise Absorption, singleton q=3 pullbacks, and direct-shadow smoothness as exact reduction tools.</li><li>Keep López-all-primes separate: this counterexample concerns minimal-depth realizability of one target candidate, not existence of some Type A/B decomposition for a prime.</li><li>Keep the Erdős-Straus wall honest until the all-prime/composite remainder is actually closed.</li></ol>
+<p>The project has learned something stronger than another finite survival bound: <strong>the universal bridge itself has been falsified constructively, and the ES route can now discard that unnecessary burden.</strong></p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

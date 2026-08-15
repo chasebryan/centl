@@ -103,6 +103,8 @@ Each public command can now be selected independently on the scientist-facing in
 - [Installation](docs/INSTALL.md)
 - [CENTL Marsa](docs/CENTL-MARSA.md)
 - [Documentation index](docs/README.md)
+- [Research library](https://freecomputation.org/research.html)
+- [Erdős–Straus program](https://freecomputation.org/research-erdos-straus.html)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
 - Site: [freecomputation.org](https://freecomputation.org/)

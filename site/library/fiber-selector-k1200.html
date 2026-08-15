@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Full fiber-kernel and bounded-selector replay through k = 1200 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fiber-selector-k1200.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fiber-selector-k1200.html">
+  <meta property="og:title" content="Full fiber-kernel and bounded-selector replay through k = 1200 — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Full fiber-kernel and bounded-selector replay through k = 1200</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FIBER-SELECTOR-K1200.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite replay against the frozen <code>k&lt;=1200</code> candidate certificate bundle</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this result is finite. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. The counts below were replayed from the already frozen <code>k&lt;=1200</code> candidate bundle using the exact fiber-peeling and bounded-selector constructions now checked into the repository. They should be superseded by the next all-in-one hashed workflow artifact once that workflow completes.</p>
+<p>Read with:</p>
+<ul><li><a href="direct-shadow-k1200.html">DIRECT-SHADOW-K1200.md</a></li><li><a href="fiber-shadow-kernel.html">FIBER-SHADOW-KERNEL.md</a></li><li><a href="small-selector-hypothesis.html">SMALL-SELECTOR-HYPOTHESIS.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/shadow_fiber_kernel_analyzer.py"><code>shadow_fiber_kernel_analyzer.py</code></a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/shadow_small_selector_analyzer.py"><code>shadow_small_selector_analyzer.py</code></a></li><li><a href="current-frontier.html">CURRENT-FRONTIER.md</a></li></ul>
+<h2>1. Input provenance</h2>
+<p>The input was the completed <code>k&lt;=1200</code> Direct-Shadow bundle from GitHub Actions run</p>
+<pre><code class="language-text">31846146909</code></pre>
+<p>with artifact ID</p>
+<pre><code class="language-text">9236427053</code></pre>
+<p>and uploaded artifact ZIP digest</p>
+<pre><code class="language-text">sha256:a2479a4113d693af2e647ffc2e007d3d7b1cf628ce7190f72c4ad6282a98ba14</code></pre>
+<p>That bundle had already independently verified all <code>41,470</code> directly novel candidate witnesses through depth <code>1200</code>.</p>
+<p>The replay did <strong>not</strong> use those stored reduced witnesses to decide fiber peelability or bounded-selector success.</p>
+<h2>2. Fiber-kernel result</h2>
+<p>There are</p>
+<div class="math" role="math">41,470</div>
+<p>directly novel candidates in the frozen range.</p>
+<p>Exact augmented fiber peeling empties the complete residual coordinate system for</p>
+<div class="math" role="math">\boxed{26,044}</div>
+<p>of them:</p>
+<div class="math" role="math">\boxed{26,044/41,470=62.802\%}.</div>
+<p>For those candidates, the fiber-peeling theorem itself supplies an independent constructive existence proof of a reduced avoiding class by reverse extension.</p>
+<p>The remaining</p>
+<div class="math" role="math">\boxed{15,426}</div>
+<p>candidates have nonempty residual fiber kernels.</p>
+<h2>3. Residual prime universe</h2>
+<p>Across the entire finite replay, every nonempty fiber kernel is supported on primes at most</p>
+<div class="math" role="math">\boxed{23}.</div>
+<p>The complete kernel-size distribution is:</p>
+<pre><code class="language-text">size 0: 26,044
+size 2:     28
+size 3:  3,868
+size 5:    142
+size 6:    498
+size 7: 10,890</code></pre>
+<p>No residual kernel of size <code>1</code> or <code>4</code> appeared.</p>
+<p>The observed signatures were exactly:</p>
+<pre><code class="language-text">{}                                              26,044
+{3,11,13}                                       3,868
+{11,13}                                            28
+{3,11,13,19,23}                                   142
+{3,5,11,13,17,19,23}                           10,890
+{3,5,11,13,17,23}                                 124
+{3,5,13,17,19,23}                                  92
+{5,11,13,17,19,23}                                  88
+{3,5,11,13,17,19}                                  72
+{3,5,11,13,19,23}                                  48
+{3,5,11,17,19,23}                                  42
+{3,11,13,17,19,23}                                 32</code></pre>
+<p>These signatures are finite observations, not a universal <code>p&lt;=23</code> theorem.</p>
+<h2>4. Bounded-selector assault</h2>
+<p>For each of the <code>15,426</code> nonempty residual kernels, test the deterministic menu</p>
+<div class="math" role="math">\mathcal S_{64}=\{0,\pm1,\pm2,\ldots,\pm64\}.</div>
+<p>A selector is accepted only if it:</p>
+<ol><li>avoids every residual exact forbidden pullback set;</li><li>preserves the required local reducedness conditions.</li></ol>
+<p>Result:</p>
+<div class="math" role="math">\boxed{15,426/15,426}</div>
+<p>nonempty residual kernels are solved by this fixed menu.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{41,470/41,470}</div>
+<p>directly novel candidates through <code>k&lt;=1200</code> are independently resolved by the two-stage construction</p>
+<div class="math" role="math">\boxed{ \text{fiber peeling} + \text{bounded residual selector}. }</div>
+<p>Unresolved selector kernels:</p>
+<div class="math" role="math">\boxed{0}.</div>
+<h2>5. Selector radius</h2>
+<p>The largest selector radius actually required was</p>
+<div class="math" role="math">\boxed{54},</div>
+<p>not the configured bound <code>64</code>.</p>
+<p>Cumulative resolution, including fiber-empty candidates, was:</p>
+<table class="directory"><thead><tr><th>radius</th><th>total resolved fraction</th></tr></thead><tbody><tr><td>fiber empty</td><td>62.802%</td></tr><tr><td>0</td><td>67.036%</td></tr><tr><td>&lt;=1</td><td>75.124%</td></tr><tr><td>&lt;=2</td><td>80.801%</td></tr><tr><td>&lt;=3</td><td>85.028%</td></tr><tr><td>&lt;=4</td><td>88.071%</td></tr><tr><td>&lt;=5</td><td>90.586%</td></tr><tr><td>&lt;=6</td><td>92.390%</td></tr><tr><td>&lt;=7</td><td>93.800%</td></tr><tr><td>&lt;=8</td><td>94.951%</td></tr><tr><td>&lt;=9</td><td>95.975%</td></tr><tr><td>&lt;=10</td><td>96.696%</td></tr><tr><td>&lt;=11</td><td>97.273%</td></tr><tr><td>&lt;=12</td><td>97.769%</td></tr><tr><td>&lt;=13</td><td>98.153%</td></tr><tr><td>&lt;=14</td><td>98.500%</td></tr><tr><td>&lt;=16</td><td>99.016%</td></tr><tr><td>&lt;=19</td><td>99.491%</td></tr><tr><td>&lt;=31</td><td>99.961%</td></tr><tr><td>&lt;=43</td><td>99.993%</td></tr><tr><td>&lt;=48</td><td>99.998%</td></tr><tr><td>&lt;=54</td><td>100.000%</td></tr></tbody></table>
+<h2>6. Hardest selector in the replay</h2>
+<p>The unique candidate requiring radius <code>54</code> under the deterministic selector ordering was</p>
+<pre><code class="language-text">candidate index: 35,972
+k:               1062
+h mod 840:       361
+t mod (4k-1):    4129
+r:               1,940,761
+L:               3,567,480
+selector:        -54</code></pre>
+<p>Its residual fiber kernel uses</p>
+<div class="math" role="math">\boxed{\{3,5,11,13,17,19,23\}}</div>
+<p>and contains <code>64</code> residual exact constraints.</p>
+<p>Every selector of smaller absolute value fails that residual system; <code>+54</code> also fails before <code>-54</code> succeeds in the deterministic order.</p>
+<p>This is a useful regression fixture for future theorem attempts.</p>
+<h2>7. Why this is materially stronger than the raw witness scan</h2>
+<p>The original candidatewise scan established, for each candidate, an explicit reduced parameter found by searching the original progression.</p>
+<p>The replay uses a different architecture:</p>
+<div class="math" role="math">\text{hundreds of earlier layers} \to \text{exact fiber elimination} \to \text{tiny small-prime kernel} \to \text{one selector from a fixed 129-element menu}.</div>
+<p>The stored witness is not needed to decide either step.</p>
+<p>Thus the finite phenomenon is no longer only</p>
+<blockquote><p>a witness exists.</p></blockquote>
+<p>It is now</p>
+<blockquote><p>a witness can be constructed after theorem-driven elimination from a uniformly tiny residual menu throughout the tested range.</p></blockquote>
+<p>That is substantially closer to a proof architecture.</p>
+<h2>8. The next theorem target</h2>
+<p>The data suggests two increasingly strong statements:</p>
+<h3>Bounded-kernel target</h3>
+<p>Prove that every directly novel candidate peels to a residual kernel belonging to a controlled small-prime family.</p>
+<h3>Selector target</h3>
+<p>Prove that every such residual kernel admits a selector from a bounded set independent of <code>k</code>, or identify the arithmetic mechanism that replaces the finite menu.</p>
+<p>A theorem of that form would give</p>
+<div class="math" role="math">\boxed{ \text{direct novelty} \Longrightarrow \text{fiber peel} \Longrightarrow \text{bounded local selector} \Longrightarrow \text{reduced avoiding progression}, }</div>
+<p>which is a concrete route to universal DSC-P.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

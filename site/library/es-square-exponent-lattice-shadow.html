@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exponent-lattice formulation of square-completed ancestry shadows — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-exponent-lattice-shadow.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-exponent-lattice-shadow.html">
+  <meta property="og:title" content="Exponent-lattice formulation of square-completed ancestry shadows — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exponent-lattice formulation of square-completed ancestry shadows</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-EXPONENT-LATTICE-SHADOW.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact criterion and coordinate-budget corollary</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>ES-SQUARE-MULTIPLICATIVE-SHADOW-IFF.md</code>, <code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code></p>
+<p><strong>Claim boundary:</strong> gives an exact finite-lattice reformulation of direct shadow along any modulus-ancestry edge, together with a strong sufficient box-budget test. It does not solve the resulting lattice-containment problem in full generality.</p>
+<hr>
+<h2>1. Ancestor exponent lattice</h2>
+<p>Fix an earlier layer</p>
+<div class="math" role="math">\boxed{j=\prod_{i=1}^d p_i^{E_i}}</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{m=4j-1.}</div>
+<p>Define the exponent homomorphism</p>
+<div class="math" role="math">\boxed{ \phi_j:\mathbb Z^d \longrightarrow (\mathbb Z/m\mathbb Z)^\times, \qquad (z_1,\ldots,z_d) \longmapsto \prod_{i=1}^d p_i^{z_i}.}</div>
+<p>Let</p>
+<div class="math" role="math">\boxed{L_j=\ker\phi_j.}</div>
+<p>Thus two exponent vectors give the same residue modulo <code>m</code> exactly when they differ by an element of <code>L_j</code>.</p>
+<p>The centered exponent box of the completed layer is</p>
+<div class="math" role="math">\boxed{ B_j = \prod_{i=1}^d[-E_i,E_i]_{\mathbb Z}.}</div>
+<p>By the signed-box identity,</p>
+<div class="math" role="math">\boxed{ \mathcal R_m(j)=\phi_j(B_j).}</div>
+<hr>
+<h2>2. A later ancestry layer</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{k=\prod_{\nu=1}^t r_\nu^{F_\nu}}</div>
+<p>and assume the modulus-ancestry relation</p>
+<div class="math" role="math">\boxed{m_j\mid m_k.}</div>
+<p>The later completed signed box reduced modulo the ancestor modulus is</p>
+<div class="math" role="math">\boxed{ R_{k\to j} = \left\{ \prod_{\nu=1}^t r_\nu^{z_\nu}\pmod m: -F_\nu\le z_\nu\le F_\nu \right\}.}</div>
+<p>For direct shadow by <code>j</code>, one needs</p>
+<div class="math" role="math">\boxed{R_{k\to j}\subseteq\phi_j(B_j).}</div>
+<hr>
+<h2>3. Immediate subgroup obstruction</h2>
+<p>If some prime factor <code>r_\nu</code> of <code>k</code> does not lie in the subgroup</p>
+<div class="math" role="math">\operatorname{im}\phi_j = \langle p_1,\ldots,p_d\rangle,</div>
+<p>then direct shadow is impossible.</p>
+<p>Indeed the later box contains the residue <code>r_\nu</code> itself, while the ancestor box is contained in <code>im phi_j</code>.</p>
+<p>Therefore a necessary condition is</p>
+<div class="math" role="math">\boxed{ r_\nu\in\operatorname{im}\phi_j \quad\text{for every }\nu.}</div>
+<p>Assume this from now on.</p>
+<p>Choose arbitrary exponent lifts</p>
+<div class="math" role="math">\boxed{v_\nu\in\mathbb Z^d}</div>
+<p>satisfying</p>
+<div class="math" role="math">\boxed{\phi_j(v_\nu)=r_\nu.}</div>
+<p>Different choices differ by vectors in <code>L_j</code> and therefore do not change the criterion below.</p>
+<hr>
+<h2>4. The later signed box is a discrete zonotope</h2>
+<p>Define the discrete zonotope</p>
+<div class="math" role="math">\boxed{ Z(k\to j) = \left\{ \sum_{\nu=1}^t z_\nu v_\nu: -F_\nu\le z_\nu\le F_\nu \right\} \subseteq\mathbb Z^d.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ R_{k\to j} = \phi_j(Z(k\to j)).}</div>
+<p>The ancestor completed box is</p>
+<div class="math" role="math">\phi_j(B_j).</div>
+<p>Therefore an element of the later box lies in the ancestor box exactly when its exponent vector can be shifted by a relation vector into <code>B_j</code>.</p>
+<hr>
+<h2>5. Exact lattice-cover criterion</h2>
+<h3>Theorem — ancestry shadow as zonotope containment modulo the relation lattice</h3>
+<p>Along the ancestry edge <code>j&lt;k</code>, the completed layer <code>k</code> is directly shadowed by <code>j</code> if and only if</p>
+<div class="math" role="math">\boxed{ Z(k\to j) \subseteq B_j+L_j.}</div>
+<p>Equivalently, for every coefficient vector</p>
+<div class="math" role="math">(z_\nu), \qquad -F_\nu\le z_\nu\le F_\nu,</div>
+<p>there exists a relation vector</p>
+<div class="math" role="math">\lambda\in L_j</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{ \sum_\nu z_\nu v_\nu-\lambda \in B_j.}</div>
+<p>This criterion is independent of the chosen lifts <code>v_\nu</code>.</p>
+<hr>
+<h2>6. Coordinate-budget sufficient theorem</h2>
+<p>A simple strong sufficient condition avoids relation-lattice wrapping entirely.</p>
+<p>Suppose lifts can be chosen so that for every ancestor coordinate <code>i</code>,</p>
+<div class="math" role="math">\boxed{ \sum_{\nu=1}^t F_\nu\,|(v_\nu)_i| \le E_i.}</div>
+<p>Then for every allowed signed coefficient vector,</p>
+<div class="math" role="math">\left| \sum_\nu z_\nu(v_\nu)_i \right| \le \sum_\nu F_\nu|(v_\nu)_i| \le E_i.</div>
+<p>Hence the whole zonotope already lies in <code>B_j</code>:</p>
+<div class="math" role="math">Z(k\to j)\subseteq B_j.</div>
+<p>Therefore:</p>
+<h3>Corollary — coordinate-budget shadow</h3>
+<p>If there exist exponent lifts satisfying</p>
+<div class="math" role="math">\boxed{ \sum_\nu F_\nu|(v_\nu)_i|\le E_i \quad\text{for every }i,}</div>
+<p>then</p>
+<div class="math" role="math">\boxed{S_k\bmod m_j\subseteq S_j.}</div>
+<p>This is a finite weighted <code>L^1</code> packing test.</p>
+<hr>
+<h2>7. Squarefree factor lift is a disjoint-support budget</h2>
+<p>In the squarefree factor-lift theorem, the earlier index factors as</p>
+<div class="math" role="math">j=A_1\cdots A_t</div>
+<p>and each later prime <code>r_\nu</code> is congruent to <code>A_\nu</code> modulo <code>m</code>.</p>
+<p>Choose <code>v_\nu</code> to be the exponent vector of <code>A_\nu</code>.</p>
+<p>When the factorization distributes the ancestor prime-power exponents among the <code>A_\nu</code>, the coordinate budgets add exactly to the midpoint exponents <code>E_i</code>.</p>
+<p>Thus</p>
+<div class="math" role="math">\sum_\nu |(v_\nu)_i|=E_i</div>
+<p>and the coordinate-budget theorem recovers the factor-lift shadow.</p>
+<p>The all-quotient Dirichlet families are therefore explicit exact packings of the ancestor exponent box.</p>
+<hr>
+<h2>8. Multiplicative stabilizer extensions use relation-lattice wrapping</h2>
+<p>The multiplicative-shadow iff theorem can behave differently.</p>
+<p>A stabilizer direction need not admit a small representative inside the raw coordinate budget. Its products may leave <code>B_j</code> and return through the relation lattice <code>L_j</code>.</p>
+<p>Thus the exact criterion</p>
+<div class="math" role="math">Z\subseteq B_j+L_j</div>
+<p>strictly generalizes the no-wrap coordinate budget.</p>
+<p>This separates two mechanisms cleanly:</p>
+<ol><li><strong>geometric packing:</strong> <code>Z subset B_j</code>;</li><li><strong>periodic packing:</strong> <code>Z subset B_j+L_j</code> only after relation-lattice reduction.</li></ol>
+<hr>
+<h2>9. Canonical relation for even ancestors</h2>
+<p>If</p>
+<div class="math" role="math">j=2^e\prod_{i=1}^s p_i^{E_i}</div>
+<p>is even, then</p>
+<div class="math" role="math">4j =2^{e+2}\prod_i p_i^{E_i} \equiv1\pmod{4j-1}.</div>
+<p>Therefore the exponent vector</p>
+<div class="math" role="math">\boxed{ (e+2,E_1,\ldots,E_s) \in L_j.}</div>
+<p>This canonical relation is responsible for many effective-dimension collapses.</p>
+<p>For <code>j=2^e p</code> with <code>p</code> prime, it yields the one-dimensional interval theorem</p>
+<div class="math" role="math">\mathcal R(j)=\{2^z:-2e-2\le z\le2e+2\}.</div>
+<p>For larger even support it supplies a distinguished lattice direction along which the ancestor box can be folded.</p>
+<hr>
+<h2>10. Effective dimension</h2>
+<p>The raw support dimension of the completed layer is</p>
+<div class="math" role="math">\omega(j)=d.</div>
+<p>But the actual multiplicative geometry is governed by the quotient lattice</p>
+<div class="math" role="math">\boxed{\mathbb Z^d/L_j.}</div>
+<p>and by the image of the bounded box <code>B_j</code> inside that quotient.</p>
+<p>Thus a more useful invariant is the <strong>effective signed-box dimension</strong>, meaning the minimal rank of a lattice model needed to represent <code>phi_j(B_j)</code> after quotienting by explicit relations.</p>
+<p>Examples:</p>
+<ul><li>prime powers: effective dimension one;</li><li><code>2^e p</code>: raw dimension two but effective cyclic interval dimension one;</li><li>general multi-prime indices may retain higher effective dimension.</li></ul>
+<hr>
+<h2>11. Research consequence</h2>
+<p>The remaining nonmultiplicative ancestry problem is now an exact finite geometry problem:</p>
+<div class="math" role="math">\boxed{ \text{Does a later discrete zonotope fit inside the ancestor exponent box modulo }L_j?}</div>
+<p>This suggests both theorem and computation paths:</p>
+<ol><li>derive canonical generators for <code>L_j</code> from the modulus identity and factor relations;</li><li>reduce <code>B_j</code> to a low-dimensional fundamental-domain model;</li><li>classify few-prime later zonotopes by coordinate budgets;</li><li>use Smith-normal-form or finite quotient methods for exact automated shadow certification;</li><li>search for infinite ancestry families corresponding to fixed lattice-packing templates.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

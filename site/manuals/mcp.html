@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Run CENTL as a local Model Context Protocol server:">
+  <title>MCP — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/mcp.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/mcp.html">
+  <meta property="og:title" content="MCP — Free Computation Foundation">
+  <meta property="og:description" content="Run CENTL as a local Model Context Protocol server:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>MCP</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Run CENTL as a local Model Context Protocol server:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Run CENTL as a local Model Context Protocol server:</p>
+<pre><code class="language-sh">centl --mcp</code></pre>
+<p>The adapter uses newline-delimited JSON-RPC 2.0 over standard input and output. It implements the current stable MCP revision, <code>2025-11-25</code>, and accepts the final revisions <code>2025-06-18</code>, <code>2025-03-26</code>, and <code>2024-11-05</code> during negotiation.</p>
+<p>Configure an MCP client with the equivalent of:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;centl&quot;: {
+      &quot;command&quot;: &quot;centl&quot;,
+      &quot;args&quot;: [&quot;--mcp&quot;]
+    }
+  }
+}</code></pre>
+<p>CENTL 0.12.0-rc.1 exposes these nine tools in deterministic order:</p>
+<ul><li><code>centl_compute</code> performs read-only mathematical evaluation and rejects definitions.</li><li><code>centl_define</code> creates one immutable value or function definition.</li><li><code>centl_verify</code> checks one structured mathematical claim and returns <code>verified</code>, <code>refuted</code>, <code>unknown</code>, or <code>invalid</code> with evidence. It decides closed exact rational comparisons and certified enclosure order/inequality (with dyadic bounds). Univariate rational polynomial false equalities may be <code>refuted</code> with an exact witness; admitted polynomial identities are verified by the named F* zero-difference soundness theorem. Free-form assumptions, unsupported proof syntax, and multi-variable claims return <code>unknown</code>.</li><li><code>centl_capabilities</code> returns supported domains, resolution statuses, limits, and cancellation behavior.</li><li><code>centl_session</code> inspects definitions and their direct dependencies without mutation.</li><li><code>centl_help</code> searches focused help generated from the canonical syntax catalog.</li><li><code>centl_calculate</code> retains the earlier combined mathematical behavior for compatibility.</li><li><code>centl_reset</code> forgets definitions held by the current process.</li><li><code>centl_physics</code> exposes deterministic exact-rational particle mechanics: physics capability and unit discovery, exact compatible-unit conversion, exact physical constants, dimension-checked particle simulation, exact ideal elastic collisions in 1D and at caller-supplied 3D contact, exact sphere contact analysis, isolated exact sphere-contact resolution with explicit deferral outside the justified solver domain, and certified bounded continuous sphere contact under an exact constant-velocity model.</li></ul>
+<p><code>centl_compute</code> requires <code>expression</code>; <code>centl_define</code> requires <code>definition</code>; both accept the same optional <code>limits</code> object as <code>centl --serve</code>. Compute may read definitions but cannot mutate them, and its MCP annotations accurately mark it read-only, non-destructive, idempotent, and closed-world. Definitions persist across tool calls in one server process. The server has no network listener, reads no credentials, and accesses no files on behalf of a tool call.</p>
+<p>The capability, session-inspection, help, and physics tools are read-only, idempotent, and closed-world. Their output schemas are closed and exact rather than free-form text contracts.</p>
+<h2>Physics tool</h2>
+<p><code>centl_physics</code> is a thin adapter over the same version-1 physics request/result model documented in <a href="https://github.com/chasebryan/centl/blob/main/docs/PHYSICS_PROTOCOL.md">PHYSICS_PROTOCOL.md</a>. MCP does not implement a second physics evaluator.</p>
+<p>The tool accepts one of ten discriminated actions:</p>
+<ul><li><code>capabilities</code></li><li><code>units</code></li><li><code>convert</code></li><li><code>constant</code></li><li><code>simulate_particle</code></li><li><code>elastic_collision_1d</code></li><li><code>elastic_collision_3d_at_contact</code></li><li><code>analyze_sphere_contacts</code></li><li><code>resolve_isolated_elastic_sphere_contacts</code></li><li><code>certify_linear_sphere_contact</code></li></ul>
+<p>Physical numeric inputs are strings so arbitrary-precision integers, finite decimals, and fractions cross the JSON boundary without host-number rounding. For example, a time step is represented as:</p>
+<pre><code class="language-json">{&quot;value&quot;:&quot;1/10&quot;,&quot;unit&quot;:&quot;s&quot;}</code></pre>
+<p>A gravity simulation can be called through MCP as:</p>
+<pre><code class="language-json">{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: &quot;fall&quot;,
+  &quot;method&quot;: &quot;tools/call&quot;,
+  &quot;params&quot;: {
+    &quot;name&quot;: &quot;centl_physics&quot;,
+    &quot;arguments&quot;: {
+      &quot;action&quot;: &quot;simulate_particle&quot;,
+      &quot;particle&quot;: {
+        &quot;id&quot;: &quot;body&quot;,
+        &quot;mass&quot;: {&quot;value&quot;:&quot;2&quot;,&quot;unit&quot;:&quot;kg&quot;},
+        &quot;position&quot;: {&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;10&quot;,&quot;unit&quot;:&quot;m&quot;},
+        &quot;velocity&quot;: {&quot;x&quot;:&quot;1&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m/s&quot;}
+      },
+      &quot;forces&quot;: [
+        {
+          &quot;kind&quot;: &quot;uniform_gravity&quot;,
+          &quot;acceleration&quot;: {&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;-10&quot;,&quot;unit&quot;:&quot;m/s^2&quot;}
+        }
+      ],
+      &quot;dt&quot;: {&quot;value&quot;:&quot;1/10&quot;,&quot;unit&quot;:&quot;s&quot;},
+      &quot;steps&quot;: 10
+    }
+  }
+}</code></pre>
+<p>The authoritative <code>structuredContent</code> identifies the integrator as <code>symplectic_euler</code> and returns typed initial/final states plus exact momentum and kinetic-energy diagnostics. Unsupported force models and incompatible physical dimensions return structured tool errors rather than being silently reinterpreted.</p>
+<p>Sphere contact analysis uses complete stateless sphere-world input. For example:</p>
+<pre><code class="language-json">{
+  &quot;jsonrpc&quot;: &quot;2.0&quot;,
+  &quot;id&quot;: &quot;contact&quot;,
+  &quot;method&quot;: &quot;tools/call&quot;,
+  &quot;params&quot;: {
+    &quot;name&quot;: &quot;centl_physics&quot;,
+    &quot;arguments&quot;: {
+      &quot;action&quot;: &quot;analyze_sphere_contacts&quot;,
+      &quot;spheres&quot;: [
+        {
+          &quot;particle&quot;: {
+            &quot;id&quot;: &quot;a&quot;,
+            &quot;mass&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;kg&quot;},
+            &quot;position&quot;: {&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m&quot;},
+            &quot;velocity&quot;: {&quot;x&quot;:&quot;1&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m/s&quot;}
+          },
+          &quot;radius&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;m&quot;}
+        },
+        {
+          &quot;particle&quot;: {
+            &quot;id&quot;: &quot;b&quot;,
+            &quot;mass&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;kg&quot;},
+            &quot;position&quot;: {&quot;x&quot;:&quot;2&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m&quot;},
+            &quot;velocity&quot;: {&quot;x&quot;:&quot;-1&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m/s&quot;}
+          },
+          &quot;radius&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;m&quot;}
+        }
+      ]
+    }
+  }
+}</code></pre>
+<p>The result reports the exact pairwise contact summary and expands every non-separated pair with exact squared-distance evidence. The paired action <code>resolve_isolated_elastic_sphere_contacts</code> composes that contact classification with CENTL&#x27;s exact 3D elastic response only when the touching graph is a disjoint matching.</p>
+<p>Overlap or simultaneous shared-contact ambiguity returns a successful physics result with <code>decision: &quot;deferred&quot;</code>; it does <strong>not</strong> set MCP <code>isError: true</code>. That distinction is intentional. <code>deferred</code> means the request was valid and CENTL exactly determined that the state lies outside the current solver&#x27;s justified resolution domain. The returned world is unchanged and no partial impulses are applied.</p>
+<h3>Certified continuous sphere contact</h3>
+<p><code>certify_linear_sphere_contact</code> accepts two identified spheres and an exact nonnegative duration. It certifies contact over the whole supplied interval under one explicit model: both sphere centers move with constant exact-rational velocity for the duration.</p>
+<p>Example MCP arguments:</p>
+<pre><code class="language-json">{
+  &quot;action&quot;: &quot;certify_linear_sphere_contact&quot;,
+  &quot;sphere1&quot;: {
+    &quot;particle&quot;: {
+      &quot;id&quot;: &quot;a&quot;,
+      &quot;mass&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;kg&quot;},
+      &quot;position&quot;: {&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m&quot;},
+      &quot;velocity&quot;: {&quot;x&quot;:&quot;1&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m/s&quot;}
+    },
+    &quot;radius&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;m&quot;}
+  },
+  &quot;sphere2&quot;: {
+    &quot;particle&quot;: {
+      &quot;id&quot;: &quot;b&quot;,
+      &quot;mass&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;kg&quot;},
+      &quot;position&quot;: {&quot;x&quot;:&quot;4&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m&quot;},
+      &quot;velocity&quot;: {&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;z&quot;:&quot;0&quot;,&quot;unit&quot;:&quot;m/s&quot;}
+    },
+    &quot;radius&quot;: {&quot;value&quot;:&quot;1&quot;,&quot;unit&quot;:&quot;m&quot;}
+  },
+  &quot;duration&quot;: {&quot;value&quot;:&quot;3&quot;,&quot;unit&quot;:&quot;s&quot;}
+}</code></pre>
+<p>The successful <code>structuredContent.physics</code> value is an exact <code>linear_sphere_contact_certificate</code>. It exposes the squared-clearance quadratic, closest time, minimum squared clearance, discriminant when applicable, and one of five statuses: <code>initially_overlapping</code>, <code>touching_at_start</code>, <code>no_contact_in_interval</code>, <code>tangent_contact</code>, or <code>crossing_contact</code>.</p>
+<p>When first contact has a rational event time, the result returns that time as an exact physical quantity. When the root is quadratic irrational, the tool does not fabricate a decimal or rational timestamp; it returns a <code>quadratic_irrational</code> certificate with the exact polynomial, exact discriminant, and a certified rational bracket. This operation uses no time sampling and no floating-point root finder.</p>
+<p>The certificate is deliberately narrower than a general continuous-collision solver. It does not integrate forces, alter particle state, apply collision response, order simultaneous events, or claim that a force-driven symplectic-Euler trajectory follows the admitted constant-velocity path.</p>
+<p>The current physics MCP action is stateless with respect to simulated physical worlds: every call supplies the complete initial particle or sphere state. It inherits the ordinary MCP process request-admission limit and retains the physics protocol&#x27;s 100,000-step simulation ceiling, 4,096-step full trajectory-output ceiling, and 4,096-pair sphere-contact ceiling. Because an <code>n</code>-sphere world has <code>n(n-1)/2</code> unordered pairs, 91 spheres fit that contact budget with 4,095 pairs while 92 spheres require 4,186 and are rejected.</p>
+<p>When <code>include_trajectory</code> is false, the particle executor retains only the current state and final result rather than allocating a state list proportional to the requested step count. Sphere contact actions likewise expand detailed evidence only for non-separated pairs, while still returning exact counts for all classified pairs.</p>
+<p>Exact finite <code>sum</code>, <code>product</code>, <code>sequence</code>, and <code>recurrence</code> expressions use <code>centl_compute</code>. Sums and products return the ordinary exact integer, rational, or symbolic value schema. Sequences and recurrences return a structured exact <code>sequence</code> value whose ordered <code>items</code> use those scalar schemas:</p>
+<pre><code class="language-json">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:&quot;squares&quot;,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{&quot;name&quot;:&quot;centl_compute&quot;,&quot;arguments&quot;:{&quot;expression&quot;:&quot;sequence(k^2, k = 1, 3)&quot;}}}</code></pre>
+<p>The tool&#x27;s text content is <code>[1, 4, 9]</code>; its <code>structuredContent.value</code> has <code>kind: &quot;sequence&quot;</code>, <code>exact: true</code>, <code>length: 3</code>, and the three exact integer items. Its provenance is classified <code>exact_sequence</code> with method <code>finite_iteration</code> and backend <code>centl-iteration</code>. The identical shape is documented in <a href="protocol.html#exact-sequences">the machine protocol</a>. Nested bounded operations share the call&#x27;s <code>max_integer_iterations</code>, expression-work, exact-bit, expression-node, and result-byte budgets.</p>
+<p>Every tool result contains human-readable <code>content</code> and the complete typed response in <code>structuredContent</code>. For residual, unsupported, unchanged-proved, and indeterminate mathematical outcomes, the text content appends the same <code>resolution:</code> annotation used by the human calculator so agents that only read tool text cannot treat incomplete work as success. Mathematical tool errors include the stable message and, when known, a recovery <code>suggestion</code> line. <code>structuredContent</code> remains authoritative. Mathematical failures such as division by zero are MCP tool errors with <code>isError: true</code>; malformed JSON-RPC, unknown methods, unknown tools, and invalid arguments are protocol errors. Physics request failures such as a dimension mismatch, malformed sphere world, contact-pair budget violation, or unsupported force model also return <code>isError: true</code> with the physics response preserved in <code>structuredContent</code>. A physics <code>deferred</code> contact verdict is instead a successful result with <code>isError: false</code>.</p>
+<p>Every successful mathematical calculation also has <code>structuredContent.resolution</code>, which states whether the request was computed, transformed, proved already in form, left residual, unsupported, or indeterminate. Non-complete results identify the operation, stable reason, and supported domain, so an agent never has to infer completion from symbolic text. <code>structuredContent.provenance</code> classifies every mathematical result as exact, exact symbolic, a rigorous enclosure, an exact or unresolved solution set, a definition, a failure, or a cancellation, and records its method and backend. Physics results carry their own physics provenance with the deterministic <code>centl-physics</code> backend.</p>
+<p>Each calculation tool advertises a closed, discriminated <code>outputSchema</code>. <code>centl_compute</code> permits only mathematical values or errors; <code>centl_define</code> permits only definitions or errors; the compatibility tool permits either. <code>centl_physics</code> preserves its original closed output schema and extends it with strict variants for enhanced capabilities, exact sphere-contact analysis, isolated contact resolution, and certified continuous linear-contact results. Completed contact resolution, overlap deferral, simultaneous-contact deferral, and linear-contact certificates are closed typed variants, so callers do not have to infer the verdict from free-form text. A quadratic-irrational contact time has its own closed representation rather than being coerced into the rational quantity schema. The solution-set branch for mathematics accepts the existing rational solution object and the exact <code>real_quadratic</code> object documented in <a href="protocol.html#values">the machine protocol</a>. <code>centl_reset</code> advertises a separate self-contained control-response schema. The schemas are constructed only for <code>tools/list</code>, so ordinary calculator and JSON startup do not allocate MCP-only schema trees.</p>
+<h2>Cancellation</h2>
+<p>The stdio adapter implements MCP <code>notifications/cancelled</code>. A client can cancel an outstanding cancellable mathematical or physics <code>tools/call</code> by its JSON-RPC request ID:</p>
+<pre><code class="language-json">{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;notifications/cancelled&quot;,&quot;params&quot;:{&quot;requestId&quot;:&quot;tool-7&quot;,&quot;reason&quot;:&quot;User stopped the calculation&quot;}}</code></pre>
+<p>The input reader marks an active or queued cancellable tool call immediately while the stateful evaluator continues to process accepted requests in FIFO order. Mathematical cancellation is cooperative at parser, session-expansion, bounded-iteration term boundaries, symbolic-transformation, approximation-retry, and pre-commit checkpoints. A native backend call already in progress completes before the next checkpoint. A definition whose evaluation observes cancellation is not committed.</p>
+<p>Every physics action has an admission-time cancellation checkpoint, so a queued request that was cancelled before execution does not run. Physics particle simulation additionally checks cancellation at deterministic integration-step boundaries. A symplectic-Euler step already in progress completes before the next cancellation checkpoint. Conversion, constant lookup, capability queries, unit listing, exact collision calls, discrete sphere contact analysis/resolution, and the bounded continuous linear-contact certificate are bounded operations and do not contain internal cancellation checkpoints after admission. A signal that races with an already completed call may have no effect.</p>
+<p>As required by MCP, a cancellation notification has no response and CENTL does not emit the cancelled tool call&#x27;s response. Unknown, completed, and malformed cancellation targets are ignored. Request IDs must remain unique while calls are outstanding. Clients should retain an external timeout and terminate the process if they require interruption inside a single non-cooperative native or exact operation.</p>
+<p>Valid cancellation notifications bypass the process request-admission counter. The reader keeps at most 10,000 ordinary pending inputs and 16 MiB of their source bytes. When either budget is full, one valid cancellation notification may use a separately accounted emergency slot, still bounded by the per-request input limit; there is no second emergency slot. Further overload is terminal: CENTL marks active and queued cancellable tool evaluations cancelled, drains the ordinary queue plus any emergency notification, emits one ordered overload error when the overflowing input is a request, and exits with failure status. This keeps cancellation reachable at saturation while preventing an unbounded stdio backlog.</p>
+<p>The adapter implements <code>initialize</code>, <code>notifications/initialized</code>, <code>notifications/cancelled</code>, <code>ping</code>, <code>tools/list</code>, and <code>tools/call</code>. End of input drains already accepted requests and then stops the server.</p>
+<p>The wire behavior follows the official MCP <a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle">lifecycle</a>, <a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports">stdio transport</a>, and <a href="https://modelcontextprotocol.io/specification/2025-11-25/server/tools">tools</a> specifications, including the <a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/cancellation">cancellation utility</a>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

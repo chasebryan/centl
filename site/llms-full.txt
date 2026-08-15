@@ -29,6 +29,14 @@ Then to CENTL:
 
 https://freecomputation.org/centl.html
 
+Research library, with native HTML search suggestions and no JavaScript:
+
+https://freecomputation.org/research.html
+
+Hosted manuals:
+
+https://freecomputation.org/docs.html
+
 ## Product facts
 
 - Organization: Free Computation Foundation (FCF)
@@ -75,10 +83,13 @@ A model is an interpreter of intent. It is not mathematical authority.
 
 ## Canonical documents
 
-- Numerical contract: docs/NUMERICS.md
-- Protocol: docs/PROTOCOL.md
-- MCP: docs/MCP.md
-- Oasis: docs/OASIS.md
-- Camps: docs/FCF-CAMPS.md
+- Numerical contract: https://freecomputation.org/manuals/numerics.html
+- Protocol: https://freecomputation.org/manuals/protocol.html
+- MCP: https://freecomputation.org/manuals/mcp.html
+- Oasis: https://freecomputation.org/manuals/oasis.html
+- Camps: https://freecomputation.org/manuals/camps.html
+- Research library: https://freecomputation.org/research.html
+- Erdős–Straus program: https://freecomputation.org/research-erdos-straus.html
+- Erdős–Straus public hunt: https://freecomputation.org/library/es-hunt.html
 - CARAVAN: docs/CARAVAN.md
-- Security: SECURITY.md
+- Security: https://freecomputation.org/manuals/security.html

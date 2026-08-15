@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Binary-r rescue after one exact greedy denominator — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-r-rescue.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-r-rescue.html">
+  <meta property="og:title" content="Binary-r rescue after one exact greedy denominator — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Binary-r rescue after one exact greedy denominator</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-R-RESCUE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact criterion; finite theorem-mining evidence deposited separately</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this gives an exact sufficient-and-necessary binary criterion after fixing the first denominator. It does not prove that a suitable <code>r</code> always exists and therefore does not prove Erdős–Straus.</p>
+<h2>1. One denominator leaves a binary problem</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime, and let</p>
+<div class="math" role="math">\boxed{r\equiv3\pmod4}</div>
+<p>be a prime. Put</p>
+<div class="math" role="math">\boxed{A_r=\frac{p+r}{4}}.</div>
+<p>Then</p>
+<div class="math" role="math">4A_r=p+r,</div>
+<p>so</p>
+<div class="math" role="math">\frac4p-\frac1{A_r} = \frac{4A_r-p}{pA_r} = \boxed{\frac r{pA_r}}.</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{N_r=pA_r.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{A_r} + \frac r{N_r}. }</div>
+<p>The Erdős–Straus problem for this chosen first denominator is therefore exactly a two-unit-fraction problem.</p>
+<hr>
+<h2>2. Exact binary divisor criterion</h2>
+<p>Because <code>p≡1 mod4</code> and <code>r≡3 mod4</code>, <code>r!=p</code>. Also</p>
+<div class="math" role="math">A_r\equiv p\,4^{-1}\pmod r,</div>
+<p>so</p>
+<div class="math" role="math">\gcd(N_r,r)=1.</div>
+<p>Let <code>d</code> be a positive divisor of <code>N_r^2</code>, and put</p>
+<div class="math" role="math">d_1=\frac{N_r^2}{d}.</div>
+<p>If</p>
+<div class="math" role="math">\boxed{d\equiv-N_r\pmod r,}</div>
+<p>then, since <code>N_r</code> is invertible modulo <code>r</code>,</p>
+<div class="math" role="math">d^{-1}\equiv-N_r^{-1}\pmod r</div>
+<p>and therefore</p>
+<div class="math" role="math">d_1=N_r^2d^{-1}\equiv-N_r\pmod r.</div>
+<p>Thus both</p>
+<div class="math" role="math">\boxed{Y=\frac{N_r+d}{r}}, \qquad \boxed{Z=\frac{N_r+d_1}{r}}</div>
+<p>are positive integers.</p>
+<p>Now</p>
+<div class="math" role="math">\frac1Y+\frac1Z = \frac{r}{N_r+d}+ \frac{r}{N_r+d_1}.</div>
+<p>Since <code>dd_1=N_r^2</code>,</p>
+<div class="math" role="math">(N_r+d)(N_r+d_1) =N_r(2N_r+d+d_1),</div>
+<p>while the numerator is</p>
+<div class="math" role="math">r(2N_r+d+d_1).</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \frac1Y+\frac1Z=\frac r{N_r}. }</div>
+<p>Combining with the first denominator gives</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{A_r} + \frac1Y + \frac1Z. }</div>
+<p>Conversely, the standard factorization of a two-unit-fraction equation shows that every split</p>
+<div class="math" role="math">\frac r{N_r}=\frac1Y+\frac1Z</div>
+<p>produces</p>
+<div class="math" role="math">d=rY-N_r, \qquad d_1=rZ-N_r,</div>
+<p>with</p>
+<div class="math" role="math">dd_1=N_r^2, \qquad d\equiv d_1\equiv-N_r\pmod r.</div>
+<p>Therefore the divisor condition is exact for the fixed <code>r</code>.</p>
+<hr>
+<h2>3. The target is always a quadratic nonresidue</h2>
+<p>Modulo <code>r</code>,</p>
+<div class="math" role="math">N_r =p\frac{p+r}{4} \equiv\frac{p^2}{4}.</div>
+<p>Thus the target class is</p>
+<div class="math" role="math">\boxed{ -N_r\equiv-\frac{p^2}{4}\pmod r. }</div>
+<p>The factor <code>p^2/4</code> is a square modulo <code>r</code>, while</p>
+<div class="math" role="math">\left(\frac{-1}{r}\right)=-1</div>
+<p>because <code>r≡3 mod4</code>. Hence</p>
+<div class="math" role="math">\boxed{ \left(\frac{-N_r}{r}\right)=-1. }</div>
+<p>So every binary-r rescue must select a <strong>quadratic-nonresidue divisor of <code>N_r^2</code> in one exact residue class</strong>.</p>
+<p>This is the cleanest direct bridge found so far between:</p>
+<ul><li>the external-nonresidue phenomenon in <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>;</li><li>the factorization of a nearby shifted integer <code>(p+r)/4</code>;</li><li>an actual three-term Erdős–Straus decomposition.</li></ul>
+<p>Unlike the coprime-fab route, this criterion does not require the three denominators of the associated <code>1/p</code> decomposition to all be divisible by <code>4</code>.</p>
+<hr>
+<h2>4. Relation to the r=3 filter</h2>
+<p>For</p>
+<div class="math" role="math">r=3, \qquad A_3=\frac{p+3}{4},</div>
+<p>the unit group modulo <code>3</code> has only two classes. The target nonresidue is the unique class <code>2 mod3</code>.</p>
+<p>Thus the failure of the <code>r=3</code> binary rescue forces the prime-factor support of <code>A_3</code> into the <code>1 mod3</code> side, recovering the exact first filter already deposited in <code>FAB-HARD-FIRST-FILTERS.md</code>.</p>
+<p>The significance of larger <code>r</code> is that they preserve the same exact binary mechanism while introducing a richer but still finite multiplicative residue group.</p>
+<hr>
+<h2>5. Finite theorem-mining signal</h2>
+<p><code>one_shot_es_probe.py</code> independently replays this criterion.</p>
+<p>Through <code>p&lt;=500,000</code>:</p>
+<ul><li>Mordell-hard primes: <code>1,246</code>;</li><li>survivors of the first four exact shifted-factor theorems: <code>202</code>;</li><li>every one of those <code>202</code> has a binary-r rescue for a prime</li></ul>
+<div class="math" role="math">r\equiv3\pmod4, \qquad r\le71;</div>
+<ul><li>the first successful <code>r</code> histogram is</li></ul>
+<pre><code class="language-text">r=7   : 77
+r=11  : 73
+r=19  : 27
+r=23  : 10
+r=31  : 13
+r=59  : 1
+r=71  : 1</code></pre>
+<p>There are zero unresolved candidates in that finite census when the probe is allowed primes <code>r&lt;=200</code>.</p>
+<p>This is finite evidence only. It is <strong>not</strong> a proof that <code>r&lt;=71</code>, <code>r&lt;=200</code>, or any fixed finite bound works universally.</p>
+<hr>
+<h2>6. New theorem target</h2>
+<p>The pointwise all-prime wall can now be attacked in the following form:</p>
+<blockquote><p>For every Mordell-hard prime <code>p</code>, prove that there exists a prime <code>r≡3 mod4</code> such that the divisor box of &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; N_r^2</p></blockquote>
+<p>&amp;gt; =p^2\left(\frac{p+r}{4}\right)^2 &amp;gt;&lt;/div&gt;</p>
+<blockquote><p>contains the exact nonresidue class &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; -N_r\pmod r.</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<p>Equivalently, classify failure of the exact target class for each small <code>r</code> as a multiplicative residue-support restriction on <code>(p+r)/4</code>, then prove that the simultaneous failure restrictions cannot persist for all <code>r</code>.</p>
+<p>This route attacks Erdős–Straus directly and does not require resurrecting the false universal DSC conjecture.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

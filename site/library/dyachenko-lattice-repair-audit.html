@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Dyachenko ED2 lattice repair audit — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/dyachenko-lattice-repair-audit.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/dyachenko-lattice-repair-audit.html">
+  <meta property="og:title" content="Dyachenko ED2 lattice repair audit — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Dyachenko ED2 lattice repair audit</h1><p>Prior art · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Prior art</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Prior art</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DYACHENKO-LATTICE-REPAIR-AUDIT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact proof audit and corrected lattice lemma</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Primary source:</strong> E. Dyachenko, arXiv:2511.07465v1</p>
+<p><strong>Claim boundary:</strong> this note does not claim that no repair of the paper is possible. It proves that the stated Lemma 9.24 / Proposition 9.25 route is invalid, gives a correct replacement rectangle bound, and shows that replacing the false <code>d&#x27;</code> bound by that correct bound does not by itself establish Theorem 9.21.</p>
+<hr>
+<h2>1. The lattice in the claimed unconditional step</h2>
+<p>The paper considers</p>
+<div class="math" role="math">L=\{(u,v)\in\mathbb Z^2:b&#x27;u+c&#x27;v\equiv0\pmod g\},</div>
+<p>with</p>
+<div class="math" role="math">\gcd(b&#x27;,g)=\gcd(c&#x27;,g)=1,</div>
+<p>and defines</p>
+<div class="math" role="math">\alpha=\gcd(g,b&#x27;+c&#x27;), \qquad \boxed{d&#x27;=g/\alpha}.</div>
+<p>The map</p>
+<div class="math" role="math">\phi:\mathbb Z^2\to\mathbb Z/g\mathbb Z, \qquad (u,v)\mapsto b&#x27;u+c&#x27;v</div>
+<p>is surjective because <code>b&#x27;</code> is a unit modulo <code>g</code>. Hence</p>
+<div class="math" role="math">\boxed{[\mathbb Z^2:L]=g.}</div>
+<p>So the geometric scale of the full kernel lattice is its index <code>g</code>, not the diagonal period <code>d&#x27;</code> alone.</p>
+<hr>
+<h2>2. Lemma 9.24 is false as stated</h2>
+<p>The paper states that if</p>
+<div class="math" role="math">w=(d&#x27;,d&#x27;)\in L</div>
+<p>and <code>p0=(u0,v0) in L</code>, then</p>
+<div class="math" role="math">p_0+\mathbb Zw = \{(u,v)\in L:u\equiv u_0,\ v\equiv v_0\pmod{d&#x27;}\}.</div>
+<p>This equality is false in general.</p>
+<h3>Smallest counterexample</h3>
+<p>Take</p>
+<div class="math" role="math">g=2,\qquad b&#x27;=c&#x27;=1.</div>
+<p>Then</p>
+<div class="math" role="math">L=\{(u,v):u+v\equiv0\pmod2\},</div>
+<p>and</p>
+<div class="math" role="math">\alpha=\gcd(2,2)=2, \qquad d&#x27;=1.</div>
+<p>Choose <code>p0=(0,0)</code>. Since congruence modulo <code>1</code> imposes no condition, the right-hand side of the claimed equality is <strong>all of <code>L</code></strong>.</p>
+<p>The left-hand side is only</p>
+<div class="math" role="math">\{(m,m):m\in\mathbb Z\},</div>
+<p>a single diagonal line.</p>
+<p>For example <code>(2,0) in L</code> lies on the right but not the left.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\text{Lemma 9.24 is false as stated.}}</div>
+<p>The correct statement is only the inclusion</p>
+<div class="math" role="math">p_0+\mathbb Z(d&#x27;,d&#x27;) \subseteq \{(u,v)\in L:u\equiv u_0,\ v\equiv v_0\pmod{d&#x27;}\}.</div>
+<p>The reverse inclusion generally contains multiple parallel diagonal cosets.</p>
+<hr>
+<h2>3. Proposition 9.25 is false as stated</h2>
+<p>The proposition claims that every axis-parallel rectangle</p>
+<div class="math" role="math">R=[x_0,x_0+H)\times[y_0,y_0+W)</div>
+<p>with</p>
+<div class="math" role="math">H,W\ge d&#x27;</div>
+<p>meets <code>L</code>.</p>
+<p>The earlier <code>g=2,b&#x27;=c&#x27;=1,d&#x27;=1</code> example gives</p>
+<div class="math" role="math">R=[0,1)\times[1,2).</div>
+<p>Its only integer point is <code>(0,1)</code>, and</p>
+<div class="math" role="math">0+1\not\equiv0\pmod2.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{L\cap R=\varnothing.}</div>
+<p>So Proposition 9.25 is false.</p>
+<p>The proof error is exact: it chooses an <code>x</code>-coordinate representative and a <code>y</code>-coordinate representative independently, then uses <strong>one</strong> diagonal shift parameter and assumes it realizes both choices simultaneously.</p>
+<hr>
+<h2>4. There is no replacement bound depending only on d&#x27;</h2>
+<p>The failure is not a missing factor of <code>2</code> or another small constant.</p>
+<p>For any integer</p>
+<div class="math" role="math">g\ge2,</div>
+<p>take</p>
+<div class="math" role="math">b&#x27;=1,\qquad c&#x27;=g-1.</div>
+<p>Then both are units modulo <code>g</code> and</p>
+<div class="math" role="math">b&#x27;+c&#x27;=g,</div>
+<p>so</p>
+<div class="math" role="math">\alpha=g, \qquad \boxed{d&#x27;=1}.</div>
+<p>But</p>
+<div class="math" role="math">L=\{(u,v):u-v\equiv0\pmod g\}.</div>
+<p>Its diagonal period is <code>(1,1)</code>, yet the lattice has index <code>g</code> and consists of <code>g</code> distinct diagonal congruence layers inside <code>Z^2</code>.</p>
+<p>Unit-size rectangles can plainly be placed on integer points outside <code>L</code>, no matter how large <code>g</code> is.</p>
+<p>Therefore there is no universal theorem of the form</p>
+<div class="math" role="math">H,W\ge F(d&#x27;) \Longrightarrow L\cap R\ne\varnothing</div>
+<p>for a function <code>F</code> depending only on <code>d&#x27;</code>.</p>
+<p>The missing geometric information is the transverse spacing / full index <code>g</code>.</p>
+<hr>
+<h2>5. Correct elementary rectangle-hitting theorem</h2>
+<h3>Theorem</h3>
+<p>Let</p>
+<div class="math" role="math">L=\{(u,v)\in\mathbb Z^2:b&#x27;u+c&#x27;v\equiv0\pmod g\}</div>
+<p>with</p>
+<div class="math" role="math">\gcd(c&#x27;,g)=1.</div>
+<p>Then every axis-parallel rectangle</p>
+<div class="math" role="math">R=[x_0,x_0+H)\times[y_0,y_0+W)</div>
+<p>with</p>
+<div class="math" role="math">\boxed{H\ge1,\qquad W\ge g}</div>
+<p>meets <code>L</code>.</p>
+<p>Symmetrically, if <code>gcd(b&#x27;,g)=1</code>, then</p>
+<div class="math" role="math">\boxed{H\ge g,\qquad W\ge1}</div>
+<p>also suffices.</p>
+<h3>Proof</h3>
+<p>Assume <code>H&gt;=1</code>. The half-open interval <code>[x0,x0+H)</code> contains an integer <code>u</code>.</p>
+<p>For this fixed <code>u</code>, the lattice congruence is</p>
+<div class="math" role="math">c&#x27;v\equiv-b&#x27;u\pmod g.</div>
+<p>Because <code>c&#x27;</code> is invertible modulo <code>g</code>, there is exactly one residue class</p>
+<div class="math" role="math">v\equiv r(u)\pmod g.</div>
+<p>Every half-open interval of length at least <code>g</code> contains a representative of every residue class modulo <code>g</code>. Since <code>W&gt;=g</code>, choose such a <code>v</code> in <code>[y0,y0+W)</code>.</p>
+<p>Then <code>(u,v) in L cap R</code>. QED.</p>
+<p>This is crude but universal and exact.</p>
+<hr>
+<h2>6. Why the corrected bound does not repair Theorem 9.21</h2>
+<p>There are two independent issues.</p>
+<h3>A. The paper verifies only the weaker d&#x27;-scale condition</h3>
+<p>The Type-I discussion and Corollary 9.26 explicitly use</p>
+<div class="math" role="math">H,W\ge d&#x27;=g/\alpha.</div>
+<p>The corrected elementary theorem needs the full <code>g</code> scale in one coordinate.</p>
+<p>When <code>alpha&gt;1</code>, these are genuinely different requirements. The family in section 4 has</p>
+<div class="math" role="math">d&#x27;=1</div>
+<p>with arbitrarily large <code>g</code>.</p>
+<p>Thus the stated box-size argument does not imply the corrected hitting condition.</p>
+<p>In the special setup of Section 9.6 the paper says to <strong>fix</strong> <code>alpha,d&#x27;</code>, so <code>g=alpha d&#x27;</code> is fixed and a polylogarithmic coordinate range eventually exceeds <code>g</code> for sufficiently large <code>P</code>. That observation can repair only the <em>linear lattice hit</em> for such a fixed parameter family and sufficiently large <code>P</code>. It does not prove that one fixed <code>(alpha,d&#x27;)</code> family produces the required nonlinear ED2 point for every prime <code>P</code>.</p>
+<h3>B. A linear lattice hit is not the nonlinear ED2 existence theorem</h3>
+<p>The paper itself states after Proposition 9.25 that the lattice step provides a point satisfying the <strong>linear constraints</strong>.</p>
+<p>To obtain an ED2 solution it invokes the normalized coordinates and the inverse test. In Appendix D, Lemma D.16 gives the necessary-and-sufficient conditions</p>
+<div class="math" role="math">m\mid u, \qquad u\equiv v\pmod2, \qquad \boxed{u^2-v^2=4M},</div>
+<p>or equivalently requires the discriminant</p>
+<div class="math" role="math">\boxed{u^2-4M}</div>
+<p>to be a perfect square.</p>
+<p>That lemma is a verifier/equivalence theorem. It does <strong>not</strong> assert that an arbitrary lattice point furnished by a rectangle hit satisfies the square equation.</p>
+<p>Therefore even a corrected proof that the rectangle contains a point of <code>L</code> would establish only a linear-congruence point. An additional existence theorem is still required to force the nonlinear discriminant/perfect-square condition.</p>
+<hr>
+<h2>7. Appendix status agrees with this boundary</h2>
+<p>The paper&#x27;s own appendix summary distinguishes:</p>
+<ul><li>the unconditional algebraic core;</li><li>unconditional direct/back algorithms and their correctness;</li><li>a <strong>conditional finite covering scheme</strong>;</li><li>computational/counting criteria for windows.</li></ul>
+<p>This is consistent with the repair audit: the algorithms can correctly verify or construct a solution when the required arithmetic point exists, while universal existence still needs an independent covering/existence argument.</p>
+<hr>
+<h2>8. Conclusion for the CENTL/FCF proof hunt</h2>
+<p>The attempted shortcut</p>
+<div class="math" role="math">\text{replace false Proposition 9.25 by a correct lattice-radius lemma}</div>
+<p>does <strong>not</strong> close Erdős-Straus.</p>
+<p>What survives is useful but narrower:</p>
+<ol><li>the ED2 algebraic identities and direct/back tests are legitimate theorem-mining tools;</li><li>the kernel lattice has exact index <code>g</code> and a simple correct <code>g</code>-scale hitting theorem;</li><li>the diagonal period <code>d&#x27;=g/alpha</code> cannot control arbitrary rectangle hitting by itself;</li><li>after any corrected linear hit, the perfect-square/discriminant existence problem remains.</li></ol>
+<p>Accordingly, the highest-value CENTL route remains the internally derived exact divisor-placement / external-nonresidue program rather than attempting to resurrect Theorem 9.21 from its present lattice argument.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

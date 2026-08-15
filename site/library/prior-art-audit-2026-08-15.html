@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Primary sources checked:">
+  <title>Prior-art audit — recent claimed Erdős–Straus proofs — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prior-art-audit-2026-08-15.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prior-art-audit-2026-08-15.html">
+  <meta property="og:title" content="Prior-art audit — recent claimed Erdős–Straus proofs — Free Computation Foundation">
+  <meta property="og:description" content="Primary sources checked:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prior-art audit — recent claimed Erdős–Straus proofs</h1><p>Prior art · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Prior art</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Prior art</p>
+          <p class="dek">Primary sources checked:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIOR-ART-AUDIT-2026-08-15.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Status:</strong> source audit / proof triage</p>
+<p><strong>Claim boundary:</strong> this note identifies specific proof obligations or counterexamples to intermediate statements in public preprints. It is not a priority claim, and it does not establish Erdős–Straus.</p>
+<p>Primary sources checked:</p>
+<ul><li>Kyle Bradford, <em>A solution to the Straus-Erdős conjecture</em>, arXiv:2602.11774v1.</li><li>E. Dyachenko, <em>Constructive Proofs of the Erdős–Straus Conjecture for Prime Numbers of the Form P ≡ 1 (mod 4)</em>, arXiv:2511.07465v1.</li><li>A. Bello-Hernández, M. Benito, F. Fernández, <em>A Divisor Parametrization for the Erdős–Straus Conjecture</em>, arXiv:2606.10922v1.</li></ul>
+<hr>
+<h2>1. Bradford 2602.11774v1 — covering step not supplied</h2>
+<p>Bradford derives explicit congruence families from Type I/II forms and then states that combining them will produce a covering system.</p>
+<p>The paper ends its mathematical development with the sentence:</p>
+<blockquote><p>“The last thing that we must show is that this is a covering system.”</p></blockquote>
+<p>No subsequent proof that the displayed residue families cover every prime <code>p ≡ 1 (mod 4)</code> appears in v1.</p>
+<p>Therefore the preprint supplies useful explicit solution families, but its universal conclusion still requires the global covering statement it itself identifies.</p>
+<p><strong>FCF use:</strong> harvest the valid congruence families; do not treat the universal cover as proved.</p>
+<hr>
+<h2>2. Dyachenko 2511.07465v1 — the unconditional box-hitting lemma is false</h2>
+<p>The paper claims an unconditional ED2 existence theorem. The geometric step is Proposition 9.25.</p>
+<p>In the paper&#x27;s notation,</p>
+<div class="math" role="math">L=\{(u,v)\in\mathbb Z^2:u b&#x27;+v c&#x27;\equiv0\pmod g\},</div>
+<p>with</p>
+<div class="math" role="math">\alpha=\gcd(g,b&#x27;+c&#x27;), \qquad d&#x27;=g/\alpha.</div>
+<p>Proposition 9.25 asserts that every axis-parallel rectangle of width and height at least <code>d&#x27;</code> meets <code>L</code>.</p>
+<h3>Exact counterexample</h3>
+<p>Take</p>
+<div class="math" role="math">g=2, \qquad b&#x27;=c&#x27;=1.</div>
+<p>Then</p>
+<div class="math" role="math">\alpha=\gcd(2,2)=2, \qquad d&#x27;=1,</div>
+<p>and</p>
+<div class="math" role="math">L=\{(u,v)\in\mathbb Z^2:u+v\equiv0\pmod2\}.</div>
+<p>Consider</p>
+<div class="math" role="math">R=[0,1)\times[1,2).</div>
+<p>Its width and height are both exactly</p>
+<div class="math" role="math">1=d&#x27;.</div>
+<p>Its only integer point is</p>
+<div class="math" role="math">(0,1),</div>
+<p>but</p>
+<div class="math" role="math">0+1\equiv1\pmod2,</div>
+<p>so</p>
+<div class="math" role="math">(0,1)\notin L.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{L\cap R=\varnothing}</div>
+<p>and Proposition 9.25 is false as stated.</p>
+<h3>Where the proof slips</h3>
+<p>The proof chooses a representative <code>u*</code> in the first interval congruent to <code>u0 mod d&#x27;</code> and independently chooses a representative <code>v*</code> in the second interval congruent to <code>v0 mod d&#x27;</code>.</p>
+<p>It then defines a single shift</p>
+<div class="math" role="math">m=(u^*-u_0)/d&#x27;</div>
+<p>and moves along the diagonal lattice vector</p>
+<div class="math" role="math">(d&#x27;,d&#x27;).</div>
+<p>This guarantees the first coordinate becomes <code>u*</code>, but it does <strong>not</strong> imply that the second coordinate becomes the independently chosen <code>v*</code>. The two required shifts need not be equal.</p>
+<p>The subsequent unconditional existence statement in Theorem 9.21 explicitly invokes Proposition 9.25, so the claimed universal conclusion is not established by that argument.</p>
+<h3>The appendix itself preserves a conditional covering burden</h3>
+<p>Appendix D calls §D.7 a <strong>“Conditional residue covering scheme.”</strong> The direct-algorithm discussion later states that a global guarantee from a fixed finite list corresponds to that conditional covering scheme.</p>
+<p>So there is a clean separation between:</p>
+<ul><li>valid ED2 identities and constructors;</li><li>a false box-hitting shortcut;</li><li>a remaining global covering/existence obligation.</li></ul>
+<p><strong>FCF use:</strong> ED2 algebra may be mined, but do not import the unconditional existence claim.</p>
+<hr>
+<h2>3. Bello-Hernández–Benito–Fernández 2606.10922v1 — useful complete parametrization, no universal bounded theorem claimed</h2>
+<p>This paper defines the divisor function <code>fab(n,a,b)</code> and proves that its admissible divisors give Erdős–Straus decompositions. It also proves a completeness statement for decompositions of <code>1/n</code> with all three denominators divisible by <code>4</code>.</p>
+<p>For primes <code>p ≡ 1 (mod 4)</code>, the paper reports a striking computation:</p>
+<div class="math" role="math">5\le p&lt;10^{14}</div>
+<p>was covered with some</p>
+<div class="math" role="math">1\le a,b\le11.</div>
+<p>The paper explicitly cautions that the bounded window is computational evidence rather than a universal theorem, and gives composite examples requiring larger parameters.</p>
+<p>FCF has extracted two exact consequences:</p>
+<ul><li><code>FAB-COPRIME-DIVISOR-CRITERION.md</code>;</li><li><code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>.</li></ul>
+<p>These reduce a large part of the search to a divisor-in-residue-class problem and connect hard-class certificates to external quadratic nonresidues.</p>
+<hr>
+<h2>4. Net consequence for the CENTL/FCF route</h2>
+<p>None of the audited recent preprints currently supplies a proof that can simply be imported to close the conjecture.</p>
+<p>The useful surviving ingredients are:</p>
+<ol><li>Bradford: explicit Type I/II congruence families;</li><li>Dyachenko: algebraic ED2 identities and finite constructors, <strong>not</strong> the unconditional box-hitting claim;</li><li>Bello et al.: a flexible divisor parametrization and exceptionally strong bounded-parameter computational evidence.</li></ol>
+<p>The actual all-prime wall remains a pointwise divisor/covering theorem. This matches the post-DSC <code>CURRENT-FRONTIER.md</code>: solve the zero-density prime survivor/composite-rescue core rather than relying on an unproved global cover.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

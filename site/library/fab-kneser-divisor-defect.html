@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Kneser defect theorem for the fixed-k FAB divisor box — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-kneser-divisor-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-kneser-divisor-defect.html">
+  <meta property="og:title" content="Kneser defect theorem for the fixed-k FAB divisor box — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Kneser defect theorem for the fixed-k FAB divisor box</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-KNESER-DIVISOR-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved application of classical Kneser addition theory</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code>, <code>FAB-FIXED-K-SIGNED-DIVISOR.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code></p>
+<p><strong>Claim boundary:</strong> this theorem classifies the structure forced by failure of one fixed-k signed divisor box. It does not prove that some k must succeed for every prime and therefore does not prove Erdős-Straus.</p>
+<p><strong>Imported theorem:</strong> Kneser&#x27;s addition theorem for finite subsets of abelian groups. A convenient modern proof is Matt DeVos, <em>A short proof of Kneser&#x27;s addition theorem for abelian groups</em>, arXiv:1303.3539. Kneser&#x27;s theorem is classical; only its application to the present FAB divisor box is part of this note.</p>
+<hr>
+<h2>1. Fixed-k signed divisor box</h2>
+<p>Let <code>p</code> be an odd prime with</p>
+<div class="math" role="math">p\equiv1\pmod4,</div>
+<p>and let</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(p,k)=1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+k}{4} =\prod_{i=1}^m r_i^{e_i}.</div>
+<p>The strong fixed-k divisor-ratio theorem gives the finite multiplicative box</p>
+<div class="math" role="math">\boxed{ \mathcal R_k(C) =\left\{ \prod_{i=1}^m r_i^{z_i}\pmod k: -e_i\le z_i\le e_i \right\} \subseteq G_k=(\mathbb Z/k\mathbb Z)^\times. }</div>
+<p>In the strong sufficient lane the exact target is</p>
+<div class="math" role="math">\boxed{\tau=-p^{-1}\pmod k.}</div>
+<p>Thus a fixed-k strong certificate exists exactly when</p>
+<div class="math" role="math">\boxed{\tau\in\mathcal R_k(C).}</div>
+<p>For each prime-power factor of <code>C</code>, define the symmetric local set</p>
+<div class="math" role="math">A_i=\{r_i^{-e_i},\ldots,r_i^{-1},1,r_i,\ldots,r_i^{e_i}\}\subseteq G_k.</div>
+<p>Then</p>
+<div class="math" role="math">\mathcal R_k(C)=A_1A_2\cdots A_m.</div>
+<hr>
+<h2>2. Kneser applied to the product box</h2>
+<p>Let</p>
+<div class="math" role="math">R=\mathcal R_k(C)</div>
+<p>and let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R) =\{g\in G_k:gR=R\}.</div>
+<p>Kneser&#x27;s theorem, written multiplicatively and iterated over the finite family <code>A_i</code>, gives</p>
+<div class="math" role="math">\boxed{
+<p>|R| \ge \sum_{i=1}^m |A_iH|-(m-1)|H|. }&lt;/div&gt;</p>
+<p>Let</p>
+<div class="math" role="math">\pi:G_k\to G_k/H</div>
+<p>be the quotient map and put</p>
+<div class="math" role="math">\boxed{n=[G_k:H].}</div>
+<p>For each factor define</p>
+<div class="math" role="math">d_i=\operatorname{ord}_{G_k/H}(r_iH).</div>
+<p>Because the exponents in <code>A_i</code> form the consecutive interval <code>[-e_i,e_i]</code>, its image in the cyclic subgroup generated by <code>r_iH</code> has exact size</p>
+<div class="math" role="math">\boxed{ s_i:=|\pi(A_i)|=\min(2e_i+1,d_i).}</div>
+<p>Therefore</p>
+<div class="math" role="math">|A_iH|=s_i|H|</div>
+<p>and Kneser becomes</p>
+<div class="math" role="math">\boxed{
+<p>|R| \ge</p>
+<p>|H|\left(1+\sum_{i=1}^m(s_i-1)\right). }&lt;/div&gt;</p>
+<hr>
+<h2>3. The defect-budget theorem</h2>
+<p>Assume the fixed-k target is missed:</p>
+<div class="math" role="math">\boxed{\tau\notin R.}</div>
+<p>Then <code>R</code> is a proper <code>H</code>-periodic subset of <code>G_k</code>. Hence it occupies at most <code>n-1</code> quotient cosets:</p>
+<div class="math" role="math">|R|\le(n-1)|H|.</div>
+<p>Combining this with the Kneser lower bound gives the central inequality.</p>
+<h3>Theorem — FAB Kneser defect budget</h3>
+<p>If the fixed-k strong divisor-ratio target is missed, then for the stabilizer <code>H</code> of the signed divisor box,</p>
+<div class="math" role="math">\boxed{ \sum_{i=1}^m \left( \min(2e_i+1,\operatorname{ord}_{G_k/H}(r_iH))-1 \right) \le n-2, \qquad n=[G_k:H]. }</div>
+<p>In words:</p>
+<blockquote><p>A failed exact divisor placement is possible only if all prime-power factors of <code>(p+k)/4</code> have very little total expansion in one proper quotient of the unit group.</p></blockquote>
+<p>This turns an exact target miss into a quantitative quotient defect rather than an unstructured factorization accident.</p>
+<hr>
+<h2>4. Prime external-nonresidue specialization</h2>
+<p>Now let</p>
+<div class="math" role="math">\boxed{k=q}</div>
+<p>be an odd prime satisfying</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Then</p>
+<div class="math" role="math">G_q=(\mathbb Z/q\mathbb Z)^\times</div>
+<p>is cyclic of order <code>q-1</code>.</p>
+<p>Quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pq\right)=-1.</div>
+<p>The fixed-k target</p>
+<div class="math" role="math">\tau=-p^{-1}\pmod q</div>
+<p>is a quadratic residue because</p>
+<div class="math" role="math">\left(\frac{-p^{-1}}q\right) =\left(\frac{-1}q\right) \left(\frac pq\right)^{-1} =(-1)(-1)=+1.</div>
+<p>Also</p>
+<div class="math" role="math">C=\frac{p+q}{4} \equiv\frac p4\pmod q</div>
+<p>is a quadratic nonresidue modulo <code>q</code>.</p>
+<p>This is exactly the external-nonresidue placement regime isolated elsewhere in the repository.</p>
+<hr>
+<h2>5. Index two cannot support a failure</h2>
+<p>The cyclic group <code>G_q</code> has a unique index-two subgroup, namely the quadratic residues</p>
+<div class="math" role="math">Q_q=G_q^2.</div>
+<p>Suppose the stabilizer <code>H</code> of a failed box had index <code>2</code>. Then</p>
+<div class="math" role="math">H=Q_q.</div>
+<p>But <code>1 in R</code>, and <code>R</code> is <code>H</code>-periodic. Hence</p>
+<div class="math" role="math">H\subseteq R.</div>
+<p>The target <code>tau</code> is quadratic-residue-side, so</p>
+<div class="math" role="math">\tau\in H\subseteq R,</div>
+<p>contradicting failure.</p>
+<p>Therefore:</p>
+<h3>Corollary — no quadratic defect</h3>
+<p>For an external nonresidue prime shift,</p>
+<div class="math" role="math">\boxed{ \tau\notin\mathcal R_q(C) \Longrightarrow [G_q:H]\ne2. }</div>
+<p>Since index <code>1</code> would mean <code>R=G_q</code>, every failure has</p>
+<div class="math" role="math">\boxed{[G_q:H]\ge3.}</div>
+<p>Thus the familiar quadratic-character obstruction has been removed completely. Any remaining failure lives in a strictly finer quotient.</p>
+<hr>
+<h2>6. Exact index-three classification</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{[G_q:H]=3.}</div>
+<p>The defect budget is</p>
+<div class="math" role="math">\sum_i(s_i-1)\le1.</div>
+<p>In the cyclic quotient of order <code>3</code>, every nonidentity element has order <code>3</code>. Therefore if any prime factor <code>r_i</code> lies outside <code>H</code>, then <code>e_i&gt;=1</code> and</p>
+<div class="math" role="math">s_i=\min(2e_i+1,3)=3,</div>
+<p>so that single factor contributes</p>
+<div class="math" role="math">s_i-1=2,</div>
+<p>contradicting the budget.</p>
+<p>Hence every prime factor of <code>C</code> lies in <code>H</code>.</p>
+<p>Because <code>H</code> is the unique index-three subgroup of the cyclic unit group, this says:</p>
+<div class="math" role="math">\boxed{ q\equiv1\pmod3 \quad\text{and}\quad r_i\in G_q^3 \text{ for every prime }r_i\mid C. }</div>
+<p>Moreover every local set lies in <code>H</code>, while <code>R</code> is <code>H</code>-periodic and contains <code>1</code>; therefore</p>
+<div class="math" role="math">\boxed{R=H.}</div>
+<p>So failure also requires</p>
+<div class="math" role="math">\boxed{\tau\notin G_q^3.}</div>
+<p>Since <code>C in H</code> and <code>p≡4C (mod q)</code>, we have</p>
+<div class="math" role="math">\tau=-p^{-1} \equiv-4^{-1}C^{-1}\pmod q.</div>
+<p>The element <code>-1</code> lies in every index-three subgroup of <code>G_q</code>, so the target lies outside <code>H</code> exactly when <code>4</code> does. In an order-three quotient, squaring is an automorphism, hence</p>
+<div class="math" role="math">4\in H\iff2\in H.</div>
+<p>Thus:</p>
+<h3>Corollary — cubic-defect normal form</h3>
+<p>An index-three placement failure at an external nonresidue shift can occur only if</p>
+<div class="math" role="math">\boxed{ \begin{aligned} &amp;3\mid q-1,\\ &amp;\text{every prime factor of }C=(p+q)/4\text{ is a cubic residue mod }q,\\ &amp;2\text{ is not a cubic residue mod }q. \end{aligned}}</div>
+<p>In particular <code>2</code> cannot divide <code>C</code>. For a Mordell-hard prime <code>p≡1 mod8</code>, this forces</p>
+<div class="math" role="math">\boxed{q\equiv3\pmod8.}</div>
+<p>So the entire index-three failure geometry collapses to a very rigid cubic-splitting condition on the shifted integer.</p>
+<hr>
+<h2>7. Index four is absent</h2>
+<p>For</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>we have</p>
+<div class="math" role="math">v_2(q-1)=1.</div>
+<p>Hence</p>
+<div class="math" role="math">4\nmid q-1.</div>
+<p>The cyclic group <code>G_q</code> therefore has no subgroup of index <code>4</code>.</p>
+<p>Thus there is no index-four defect case to classify.</p>
+<hr>
+<h2>8. Exact index-five sparsity</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{[G_q:H]=5.}</div>
+<p>The defect budget is</p>
+<div class="math" role="math">\sum_i(s_i-1)\le3.</div>
+<p>Every nonidentity element of the quotient has order <code>5</code>.</p>
+<p>If <code>r_i notin H</code> and <code>e_i=1</code>, then</p>
+<div class="math" role="math">s_i=3, \qquad s_i-1=2.</div>
+<p>If instead <code>e_i&gt;=2</code>, then</p>
+<div class="math" role="math">s_i=5, \qquad s_i-1=4,</div>
+<p>which already exceeds the total budget.</p>
+<p>Therefore:</p>
+<h3>Corollary — fifth-power defect sparsity</h3>
+<p>An index-five failure can have</p>
+<div class="math" role="math">\boxed{\text{at most one prime factor of }C\text{ outside }G_q^5,}</div>
+<p>and if such an exceptional factor exists then</p>
+<div class="math" role="math">\boxed{v_r(C)=1.}</div>
+<p>All other prime factors of <code>C</code> are fifth-power residues modulo <code>q</code>.</p>
+<p>If no exceptional factor exists, then <code>R=G_q^5</code>, and failure requires <code>tau</code> outside that subgroup.</p>
+<p>If one exceptional prime <code>r</code> exists, write bars for classes in <code>G_q/H</code>. Then</p>
+<div class="math" role="math">\boxed{ R/H=\{\bar r^{-1},1,\bar r\}, }</div>
+<p>and the exact remaining miss condition is</p>
+<div class="math" role="math">\boxed{ \bar\tau\notin\{\bar r^{-1},1,\bar r\}. }</div>
+<p>This is a three-coset defect, not an arbitrary factorization pattern.</p>
+<hr>
+<h2>9. General consequence: entropy or quotient defect</h2>
+<p>The theorem gives a dichotomy for every fixed-k product box:</p>
+<h3>Expansion</h3>
+<p>If no proper quotient <code>G_k/H</code> can satisfy the defect budget, then the box cannot miss the target and the fixed-k FAB certificate exists.</p>
+<h3>Structure</h3>
+<p>If the target is missed, there is a proper quotient of index <code>n</code> for which</p>
+<div class="math" role="math">\boxed{ \sum_i \left( \min(2e_i+1,\operatorname{ord}(r_iH))-1 \right) \le n-2. }</div>
+<p>Thus the factorization of <code>(p+k)/4</code> is forced into a low-entropy multiplicative configuration.</p>
+<p>For adaptive external nonresidue primes, the first possible defect is already cubic, and the next prime-index defect is fifth-power-sparse.</p>
+<p>This is the precise bridge needed for an <strong>entropy-or-descent</strong> attack:</p>
+<ol><li>enough independent factor residues force exact placement;</li><li>insufficient expansion forces a rigid higher-power-residue quotient;</li><li>that quotient structure can be transported along the external-nonresidue factor ladder / dual descent instead of restarting an unrelated search.</li></ol>
+<hr>
+<h2>10. Next theorem target</h2>
+<p>The all-prime burden has now narrowed to proving that the quotient defects cannot persist for every adaptive external nonresidue shift.</p>
+<p>A particularly concrete first target is:</p>
+<div class="math" role="math">\boxed{ \text{external nonresidue }q +\text{ cubic-defect conditions} \Longrightarrow \text{a new external shift where the defect index changes or placement succeeds}. }</div>
+<p>The index-three corollary gives exact arithmetic data to exploit:</p>
+<ul><li><code>q≡3 mod8</code>;</li><li><code>q≡1 mod3</code>;</li><li>every prime factor of <code>(p+q)/4</code> is a cube modulo <code>q</code>;</li><li><code>2</code> is not a cube modulo <code>q</code>.</li></ul>
+<p>A successful transfer/descent theorem from this configuration would close the first nontrivial placement defect rather than merely enlarge another finite census.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

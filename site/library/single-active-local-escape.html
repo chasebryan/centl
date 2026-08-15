@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Single-active Class-A local escape — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/single-active-local-escape.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/single-active-local-escape.html">
+  <meta property="og:title" content="Single-active Class-A local escape — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Single-active Class-A local escape</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-LOCAL-ESCAPE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal local lemma</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Coordinator:</strong> primary research coordinator</p>
+<p><strong>Partner input:</strong> Operator-02 active fixed-negative split and valuation criterion</p>
+<p><strong>Claim boundary:</strong> this lemma resolves the unique active fixed-negative row locally under a Class-A hypothesis. It does <strong>not</strong> by itself prove the full Class-C system, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="class-c-c1-single-active.html">CLASS-C-C1-SINGLE-ACTIVE.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/OPERATOR-COORDINATION.md">OPERATOR-COORDINATION.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md">operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIAMOND-VALUATION-CRITERION.md">operator-02/DIAMOND-VALUATION-CRITERION.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Fix a directly novel admissible target candidate</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1), \qquad \gcd(r,L)=1.</div>
+<p>Let <code>j&lt;k</code> be an earlier layer and put</p>
+<div class="math" role="math">m_j=4j-1, \qquad g_j=\gcd(L,m_j), \qquad q_j=m_j/g_j.</div>
+<p>Its exact pulled-back Type A/B forbidden set is</p>
+<div class="math" role="math">R_j\subseteq\mathbb Z/q_j\mathbb Z.</div>
+<p>Assume <code>j</code> lies in the active fixed-negative core and that its valuation excess is <strong>Class A only</strong>:</p>
+<div class="math" role="math">\boxed{p\mid q_j\Longrightarrow p\mid L.}</div>
+<p>Equivalently, no prime absent from <code>L</code> survives into <code>q_j</code>; activity comes only from higher powers of primes already fixed by the target progression.</p>
+<h2>2. Local escape theorem</h2>
+<h3>Theorem</h3>
+<p>If the target candidate is not directly shadowed by layer <code>j</code> and</p>
+<div class="math" role="math">\operatorname{rad}(q_j)\mid L,</div>
+<p>then there exists</p>
+<div class="math" role="math">s_0\pmod{q_j}</div>
+<p>such that</p>
+<div class="math" role="math">r+Ls_0\pmod{m_j}\notin T_j.</div>
+<p>Moreover every such choice is automatically reduced at every prime dividing <code>q_j</code>.</p>
+<h3>Proof</h3>
+<p>Direct shadowing by <code>j</code> is exactly the statement that every parameter residue modulo <code>q_j</code> is forbidden:</p>
+<div class="math" role="math">R_j=\mathbb Z/q_j\mathbb Z.</div>
+<p>The candidate is directly novel, so in particular it is not directly shadowed by <code>j</code>. Therefore</p>
+<div class="math" role="math">R_j\ne\mathbb Z/q_j\mathbb Z.</div>
+<p>Choose</p>
+<div class="math" role="math">s_0\notin R_j.</div>
+<p>By definition of the exact pullback, this gives</p>
+<div class="math" role="math">r+Ls_0\pmod{m_j}\notin T_j.</div>
+<p>Now let <code>p|q_j</code>. By the Class-A hypothesis, <code>p|L</code>. Hence</p>
+<div class="math" role="math">r+Ls_0\equiv r\pmod p.</div>
+<p>Since the target progression is admissible,</p>
+<div class="math" role="math">\gcd(r,L)=1,</div>
+<p>so <code>p</code> does not divide <code>r</code>. Thus</p>
+<div class="math" role="math">p\nmid r+Ls_0.</div>
+<p>This holds for every <code>p|q_j</code>, so every local escape residue is automatically reduced on the active layer&#x27;s prime support. QED.</p>
+<h2>3. CRT independence corollary</h2>
+<h3>Corollary</h3>
+<p>Under the theorem&#x27;s hypotheses, the local escape choice</p>
+<div class="math" role="math">s\equiv s_0\pmod{q_j}</div>
+<p>can be combined by CRT with <strong>arbitrary</strong> parameter congruence conditions whose moduli are coprime to <code>q_j</code>.</p>
+<h3>Proof</h3>
+<p>This is the ordinary Chinese remainder theorem. The point here is structural: Class-A activity lives entirely on prime-power lifts of coordinates already contained in <code>L</code>, while genuinely new parameter coordinates away from those primes are coprime to <code>q_j</code>. QED.</p>
+<h2>4. What the lemma removes</h2>
+<p>For a candidate with</p>
+<div class="math" role="math">|\mathcal N^{\rm act}_{k,r}|=1,</div>
+<p>let <code>j0</code> be the unique active fixed-negative layer.</p>
+<p>If <code>j0</code> is Class A only, then:</p>
+<ol><li>the unique active fixed-negative row itself always has an exact local escape;</li><li>reducedness cannot eliminate that escape;</li><li>any remaining obstruction must come from compatibility with other exact rows sharing the same small prime-power coordinates, or from nonfixed rows surviving the finer reductions.</li></ol>
+<p>So the unique active row is <strong>not</strong>, by itself, a local covering obstruction.</p>
+<p>This is weaker than full C1 because the complete residual system can contain nonfixed exact constraints.</p>
+<h2>5. Finite k &lt;= 1500 signal</h2>
+<p>The coordinated primary replay of the frozen <code>k&lt;=1500</code> bundle found, before independent workflow verification is promoted:</p>
+<pre><code class="language-text">exactly one active fixed-negative layer: 2,770 candidates
+Class-A-only source:                     2,770
+Class-B or mixed source:                     0
+observed q_j0:                           3, 5, 9
+minimum reduced-safe residues mod q_j0:     2</code></pre>
+<p>Thus every single-active candidate in that finite range lies inside the theorem above.</p>
+<p>These counts remain finite evidence until the dedicated Class-C census workflow completes and freezes its independent verifier/artifact.</p>
+<h2>6. A sharper finite observation to test</h2>
+<p>The same replay indicates that after exact fiber peeling the unique active fixed-negative row survives into the final nonempty residual kernel only very rarely, while most residual edges in this single-active population come from nonfixed earlier layers.</p>
+<p>If independently verified, that means the next C1 proof target should not be phrased as merely &quot;escape the unique active row.&quot; The theorem above already does that locally. The real task is:</p>
+<blockquote><p>prove that the active-row escape can always be coordinated with the surviving nonfixed exact rows.</p></blockquote>
+<p>That is a much sharper statement.</p>
+<h2>7. Falsifier and boundary</h2>
+<p>The theorem would fail only if one of its explicit hypotheses failed:</p>
+<ul><li>the candidate were directly shadowed, making <code>R_j</code> full;</li><li>a prime dividing <code>q_j</code> were absent from <code>L</code> (Operator-02 Class B), so reducedness and free-coordinate compatibility would require additional work;</li><li>or the target progression were not reduced/admissible.</li></ul>
+<p>No claim is made for Class-B activity here.</p>
+<p>The lemma is elementary once the active-core/valuation language is isolated. Its value is as a rigorous reduction inside the coordinated DSC-P proof architecture, not as a stand-alone resolution of the Erdős-Straus problem.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

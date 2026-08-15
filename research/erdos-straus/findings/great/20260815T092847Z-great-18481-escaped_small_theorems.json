@@ -1,0 +1,22 @@
+{
+  "event": {
+    "equation": "4/18481 = 1/4630 + 1/2194620 + 1/8111754444",
+    "kernel": "CC.kernel",
+    "kind": "fab",
+    "layer": "window",
+    "method": "fab(5,1)",
+    "n": 18481,
+    "p": 18481,
+    "solved": true,
+    "x": "4630",
+    "y": "2194620",
+    "z": "8111754444"
+  },
+  "file": "20260815T092847Z-great-18481-escaped_small_theorems.md",
+  "grade": "great",
+  "tags": [
+    "escaped_small_theorems",
+    "certified_hard_witness",
+    "new_method"
+  ]
+}

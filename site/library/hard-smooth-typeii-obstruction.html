@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>{2,3,5,7}-smooth forced factors cannot produce a Type-II hit — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/hard-smooth-typeii-obstruction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/hard-smooth-typeii-obstruction.html">
+  <meta property="og:title" content="{2,3,5,7}-smooth forced factors cannot produce a Type-II hit — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>{2,3,5,7}-smooth forced factors cannot produce a Type-II hit</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/HARD-SMOOTH-TYPEII-OBSTRUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved obstruction, with one explicit external-prime rescue family</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code></p>
+<p><strong>Claim boundary:</strong> this rules out a uniform Type-II covering that uses only the hard-class small primes as forced factors. It does not prove or disprove Erdős--Straus. The explicit <code>13</code>-family is an identity for one arithmetic progression inside a Mordell-hard class; no literature-priority claim is made for that residue without a separate prior-art check against Salez/Webb-type modular lists.</p>
+<hr>
+<h2>1. Independent question</h2>
+<p>A tempting covering strategy is:</p>
+<blockquote><p>pick a fixed multiplier <code>M</code>, force <code>M</code> to divide <code>C=(p+k)/4</code> by taking <code>k ≡ -p (mod 4M)</code>, and hope that the signed box of <code>M</code> already contains <code>-1</code>.</p></blockquote>
+<p>If this worked for a single <code>M</code> on every reduced residue class of the six Mordell-hard progressions modulo <code>4M</code>, it would prove prime Erdős--Straus by Type II alone.</p>
+<p>The strategy is formally decidable for each <code>M</code>. It fails completely when <code>M</code> is supported on <code>{2,3,5,7}</code>, and the failure is a Jacobi obstruction rather than a computational accident.</p>
+<hr>
+<h2>2. Aligned shift</h2>
+<p>Let <code>p</code> be a Mordell-hard prime and let <code>M</code> be a positive integer coprime to <code>p</code>. Write</p>
+<div class="math" role="math">k = \bigl((-p)\bmod 4M\bigr) \in\{1,2,\ldots,4M-1\}.</div>
+<p>Then <code>k ≡ -p \pmod{4M}</code> and, because <code>p ≡ 1 \pmod 4</code>,</p>
+<div class="math" role="math">k\equiv3\pmod4.</div>
+<p>The corresponding shifted integer is</p>
+<div class="math" role="math">C=\frac{p+k}{4},</div>
+<p>and the defining congruence forces</p>
+<div class="math" role="math">\boxed{M\mid C.}</div>
+<p>Hence</p>
+<div class="math" role="math">\mathcal R_k(M) \subseteq \mathcal R_k(C).</div>
+<p>A Type-II hit from the forced factors alone is exactly</p>
+<div class="math" role="math">-1\in\mathcal R_k(M).</div>
+<hr>
+<h2>3. Hard-class Jacobi calculus</h2>
+<p>Mordell-hard primes satisfy</p>
+<div class="math" role="math">p\equiv1\pmod8, \qquad p\equiv1\pmod3, \qquad p\equiv1\text{ or }4\pmod5, \qquad p\equiv1,2,\text{ or }4\pmod7.</div>
+<p>If a prime <code>r\in\{2,3,5,7}</code> divides <code>M</code>, then <code>4r</code> divides <code>4M</code>, so the aligned shift inherits a rigid residue modulo <code>4r</code>.</p>
+<h3><code>r=2</code></h3>
+<p>If <code>2\mid M</code> then <code>8\mid 4M</code>, hence</p>
+<div class="math" role="math">k\equiv-p\equiv-1\equiv7\pmod8,</div>
+<p>and</p>
+<div class="math" role="math">\Bigl(\frac2k\Bigr)=+1.</div>
+<h3><code>r=3</code></h3>
+<p>If <code>3\mid M</code> then</p>
+<div class="math" role="math">k\equiv-p\equiv-1\equiv2\pmod3.</div>
+<p>Quadratic reciprocity and <code>k\equiv3\pmod4</code> give</p>
+<div class="math" role="math">\Bigl(\frac3k\Bigr) = -\Bigl(\frac k3\Bigr) = -\Bigl(\frac23\Bigr) = -(-1) =+1.</div>
+<h3><code>r=5</code></h3>
+<p>If <code>5\mid M</code> then <code>k\equiv-p\pmod5</code> lies in <code>{1,4}</code>, both squares, and <code>5\equiv1\pmod4</code>, so</p>
+<div class="math" role="math">\Bigl(\frac5k\Bigr) = \Bigl(\frac k5\Bigr) =+1.</div>
+<h3><code>r=7</code></h3>
+<p>If <code>7\mid M</code> then <code>p</code> is a quadratic residue modulo <code>7</code> and <code>k\equiv-p\pmod7</code>. Thus</p>
+<div class="math" role="math">\Bigl(\frac k7\Bigr) = \Bigl(\frac{-p}7\Bigr) = \Bigl(\frac{-1}7\Bigr) = -1.</div>
+<p>Since <code>7\equiv3\pmod4</code> and <code>k\equiv3\pmod4</code>,</p>
+<div class="math" role="math">\Bigl(\frac7k\Bigr) = -\Bigl(\frac k7\Bigr) =+1.</div>
+<h3>Coprimality</h3>
+<p>For <code>r\in\{2,3,5,7\}</code> and <code>p\neq r</code> one has <code>gcd(r,k)=gcd(r,p)=1</code>, so each local factor is a unit modulo <code>k</code>.</p>
+<hr>
+<h2>4. The obstruction</h2>
+<h3>Theorem — hard-smooth Type-II obstruction</h3>
+<p>Let <code>p</code> be Mordell-hard and let <code>M</code> be a positive integer whose prime factors all lie in <code>{2,3,5,7}</code>, with <code>gcd(M,p)=1</code>. Let <code>k</code> be the aligned shift of Section 2. Then every element of the signed box <code>R_k(M)</code> is a Jacobi residue modulo <code>k</code>, while</p>
+<div class="math" role="math">\Bigl(\frac{-1}k\Bigr)=-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{-1\notin\mathcal R_k(M).}</div>
+<p>In particular the forced <code>{2,3,5,7}</code>-smooth part of <code>C</code> cannot by itself produce a Type-II solution at this aligned shift.</p>
+<h3>Proof</h3>
+<p>The signed box is generated by the prime factors of <code>M</code> and their inverses. Each such prime is Jacobi-positive modulo <code>k</code> by Section 3, so the whole box lies in the Jacobi-positive units. The Type-II target is Jacobi-negative because <code>k\equiv3\pmod4</code>. QED.</p>
+<p>The same argument applies to any subset of <code>{2,3,5,7}</code>. Special cases recover the forced-factor geometry of the small corridor:</p>
+<ul><li><code>M=2</code> produces <code>k=7</code> on every hard class, and <code>{2^{-1},1,2}</code> cannot contain <code>-1</code>;</li><li><code>M=6</code> produces <code>k=23</code> on every hard class, and the forced <code>{2,3}</code>-box cannot contain <code>-1</code>.</li></ul>
+<p>A Type-II hit at those shifts always requires a cofactor prime outside <code>{2,3,5,7}</code>.</p>
+<hr>
+<h2>5. Covering consequence</h2>
+<h3>Corollary — no <code>{2,3,5,7}</code>-smooth Type-II cover</h3>
+<p>There is no <code>{2,3,5,7}</code>-smooth multiplier <code>M</code> such that the aligned shift <code>k\equiv-p\pmod{4M}</code> is a Type-II hit from the forced factors of <code>M</code> for every Mordell-hard prime <code>p</code>.</p>
+<p>A finite scan of every such <code>M</code> with <code>210\mid M</code> and <code>M\le120120</code> found <strong>zero</strong> complete covers and, for <code>M=210</code>, zero hits among the six hard classes. The theorem explains the scan: those misses are forced, not sparse.</p>
+<p>Any uniform Type-II arithmetic-progression cover of a hard class must therefore import an external prime</p>
+<div class="math" role="math">\ell\ge11</div>
+<p>into <code>M</code>. This is the covering-language form of the same external-nonresidue boundary recorded in <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>.</p>
+<hr>
+<h2>6. Positive counterpart: an explicit <code>13</code>-family</h2>
+<p>Once an external prime is allowed, some refined hard subclasses do become uniform Type-II hits. The smallest clean example uses</p>
+<div class="math" role="math">M=2730=2\cdot3\cdot5\cdot7\cdot13, \qquad 4M=10920.</div>
+<p>The residue</p>
+<div class="math" role="math">r=10369\equiv289\pmod{840}</div>
+<p>is reduced modulo <code>10920</code>. Its aligned shift is</p>
+<div class="math" role="math">k=551=19\cdot29.</div>
+<p>The signed box of <code>M</code> modulo <code>551</code> contains <code>-1</code>. An explicit pair of inverse witnesses is</p>
+<div class="math" role="math">2\cdot3\cdot5^{-1}\cdot7\cdot13 \equiv -1 \pmod{551}</div>
+<p>and its reciprocal. Taking the first witness as a Type-II ratio <code>B/D</code> gives</p>
+<div class="math" role="math">B=2\cdot3\cdot7\cdot13=546, \qquad D=5, \qquad B+D=551.</div>
+<h3>Theorem — uniform Type-II family</h3>
+<p>Let <code>t\ge0</code> be an integer and put</p>
+<div class="math" role="math">\boxed{ p=10920t+10369, \qquad T=t+1. }</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{546\,T\,p} + \frac1{2730\,T} + \frac1{5\,T\,p}. }</div>
+<p>In particular every prime in the progression <code>10920t+10369</code> satisfies Erdős--Straus by a Type-II solution at shift <code>551</code>.</p>
+<h3>Proof</h3>
+<p>Set <code>A=1</code>, <code>B=546</code>, <code>D=5</code>. Then</p>
+<div class="math" role="math">4ABDT-Ap-B-D = 10920T-p-551 = 10920(t+1)-(10920t+10369)-551 =0.</div>
+<p>Dividing the identity <code>4ABDT=Ap+B+D</code> by <code>ABDTp</code> yields the displayed decomposition. Dirichlet&#x27;s theorem supplies infinitely many such primes because</p>
+<div class="math" role="math">\gcd(10369,10920)=1.</div>
+<p>The seed <code>t=0</code> is itself prime:</p>
+<div class="math" role="math">\boxed{ \frac4{10369} = \frac1{2730} + \frac1{51845} + \frac1{5661474}. }</div>
+<p>QED.</p>
+<p>The same construction, with <code>11</code> or <code>13</code> included in <code>M</code>, produces further isolated subclasses (for example <code>p\equiv18169\pmod{18480}</code> at shift <code>311</code>). They are thin: a few dozen hits among thousands of reduced subclasses. They do not cover any full Mordell-hard class modulo <code>840</code>.</p>
+<hr>
+<h2>7. What this does not do</h2>
+<p>The obstruction does not prevent:</p>
+<ul><li>a Type-II hit at a <strong>non-aligned</strong> shift;</li><li>a Type-I hit at the aligned shift, using the cofactor of <code>C/M</code>;</li><li>a Type-II hit that uses primes of <code>C</code> outside <code>M</code>.</li></ul>
+<p>It only kills the hope that a fixed <code>{2,3,5,7}</code>-smooth packet of forced factors, placed by CRT at <code>k\equiv-p\pmod{4M}</code>, can finish the hard classes.</p>
+<p>The remaining all-prime problem is unchanged: some later two-target shift, necessarily importing an external nonresidue into the signed box, must still be shown to exist for every hard prime.</p>
+<hr>
+<h2>8. Finite checks</h2>
+<p><code>verify_hard_smooth_typeii.py</code> independently checks:</p>
+<ol><li>the four Jacobi evaluations of Section 3 on a range of <code>{2,3,5,7}</code>-smooth <code>M</code> and all six hard residues;</li><li>absence of <code>-1</code> from <code>R_k(M)</code> on those aligned shifts;</li><li>the exponent witness <code>2\cdot3\cdot5^{-1}\cdot7\cdot13\equiv-1\pmod{551}</code>;</li><li>the master identity <code>4ABDT=Ap+B+D</code> for <code>0\le t\le 20</code>.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

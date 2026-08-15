@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be a Mordell-hard prime:">
+  <title>Coprime fab certificates force an external hard-class nonresidue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-hard-nonresidue-bridge.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-hard-nonresidue-bridge.html">
+  <meta property="og:title" content="Coprime fab certificates force an external hard-class nonresidue — Free Computation Foundation">
+  <meta property="og:description" content="Let p be a Mordell-hard prime:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Coprime fab certificates force an external hard-class nonresidue</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p be a Mordell-hard prime:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-HARD-NONRESIDUE-BRIDGE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code></p>
+<p><strong>Claim boundary:</strong> this gives a necessary condition for coprime fab certificates on the Mordell-hard prime classes. It does not prove existence of such a certificate for every prime and therefore does not prove Erdős-Straus.</p>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime:</p>
+<div class="math" role="math">p\bmod840\in\{1,121,169,289,361,529\}.</div>
+<p>In particular</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod8}</div>
+<p>and <code>p</code> is a quadratic residue modulo <code>3</code>, <code>5</code>, and <code>7</code>.</p>
+<p>Suppose <code>a,b</code> are coprime positive integers below <code>p</code>, and <code>k</code> is a coprime fab certificate as in <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>:</p>
+<div class="math" role="math">k\mid a+bp, \qquad k\equiv-p\pmod{4ab}.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{p+k=4abc}</div>
+<p>with <code>c&gt;0</code>, and put</p>
+<div class="math" role="math">q=\frac{a+bp}{k}.</div>
+<h2>2. Auxiliary factorization</h2>
+<p>From</p>
+<div class="math" role="math">kq=a+bp</div>
+<p>and</p>
+<div class="math" role="math">p=4abc-k,</div>
+<p>we get</p>
+<div class="math" role="math">kq =a+b(4abc-k) =a+4ab^{2}c-bk.</div>
+<p>Hence</p>
+<div class="math" role="math">k(q+b)=a(1+4b^{2}c).</div>
+<p>The coprime criterion gives <code>gcd(a,k)=1</code>, so</p>
+<div class="math" role="math">\boxed{k\mid1+4b^{2}c.}</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{kd=1+4b^{2}c.}</div>
+<p>Since the right side is <code>1 mod4</code> and <code>k=3 mod4</code>, necessarily</p>
+<div class="math" role="math">\boxed{d\equiv3\pmod4.}</div>
+<p>Also</p>
+<div class="math" role="math">\boxed{\gcd(k,c)=1,}</div>
+<p>because a common divisor would divide <code>1</code>.</p>
+<h2>3. Nonresidue theorem</h2>
+<h3>Theorem</h3>
+<p>For a Mordell-hard prime <code>p</code>, the leftover factor <code>c</code> satisfies</p>
+<div class="math" role="math">\boxed{\left(\frac{c}{p}\right)=-1,}</div>
+<p>where the symbol is the Legendre/Jacobi symbol after removing square factors in the numerator.</p>
+<h3>Proof for odd c</h3>
+<p>Modulo <code>k</code>,</p>
+<div class="math" role="math">4b^{2}c\equiv-1.</div>
+<p>Since <code>4b^2</code> is a square modulo <code>k</code>,</p>
+<div class="math" role="math">\left(\frac{c}{k}\right) = \left(\frac{-1}{k}\right) =-1</div>
+<p>because <code>k≡3 mod4</code>.</p>
+<p>On the other hand</p>
+<div class="math" role="math">p\equiv-k\pmod c.</div>
+<p>For odd <code>c</code>, Jacobi reciprocity and <code>k≡3 mod4</code> give</p>
+<div class="math" role="math">\left(\frac{-k}{c}\right) = \left(\frac{c}{k}\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac{p}{c}\right)=-1.</div>
+<p>Because <code>p≡1 mod4</code>, reciprocity introduces no sign when reversing <code>p</code> and the odd part of <code>c</code>, hence</p>
+<div class="math" role="math">\left(\frac{c}{p}\right)=-1.</div>
+<h3>Even c</h3>
+<p>Write <code>c=2^e c_0</code> with <code>c_0</code> odd.</p>
+<p>Since the hard classes satisfy <code>p≡1 mod8</code>,</p>
+<div class="math" role="math">\left(\frac2p\right)=1.</div>
+<p>If <code>e&gt;0</code>, the identity <code>p+k=4abc</code> forces <code>p+k≡0 mod8</code>, so</p>
+<div class="math" role="math">k\equiv7\pmod8</div>
+<p>and therefore</p>
+<div class="math" role="math">\left(\frac2k\right)=1.</div>
+<p>Removing the factor <code>2^e</code> from the reciprocity calculation leaves the same sign as in the odd case. Thus again</p>
+<div class="math" role="math">\boxed{\left(\frac{c}{p}\right)=-1.}</div>
+<p>QED.</p>
+<h2>4. External-prime corollary</h2>
+<p>For every hard class,</p>
+<div class="math" role="math">\left(\frac2p\right) = \left(\frac3p\right) = \left(\frac5p\right) = \left(\frac7p\right) =1.</div>
+<p>The first equality follows from <code>p=1 mod8</code>; the others follow by quadratic reciprocity from the fact that the six hard residues are quadratic residues modulo <code>3</code>, <code>5</code>, and <code>7</code>.</p>
+<p>If every prime factor of <code>c</code> belonged to <code>{2,3,5,7}</code> or occurred only through square contributions, then <code>(c/p)=1</code>, contradicting the theorem.</p>
+<p>Therefore:</p>
+<h3>Corollary</h3>
+<p>Every coprime fab certificate for a Mordell-hard prime contains an odd prime factor</p>
+<div class="math" role="math">\boxed{\ell\mid c,\qquad \ell\ge11}</div>
+<p>with odd valuation contribution and</p>
+<div class="math" role="math">\boxed{\left(\frac{\ell}{p}\right)=-1.}</div>
+<p>Since <code>p≡1 mod4</code>, equivalently</p>
+<div class="math" role="math">\boxed{\left(\frac{p}{\ell}\right)=-1.}</div>
+<h2>5. Why this matters</h2>
+<p>The Type A/B / shadow program reached residual small-prime coordinates beginning at <code>11</code> and <code>13</code> after the <code>3,5,7</code> hard shield was imposed.</p>
+<p>The divisor-parametrization framework reaches the same boundary from the opposite direction: a coprime certificate cannot live entirely inside the <code>2,3,5,7</code> squareclass support. It must import a genuine external nonresidue prime.</p>
+<p>Thus a promising all-prime strategy is to coordinate:</p>
+<ol><li>the first external quadratic nonresidue of the hard prime;</li><li>the factorization of the linear forms <code>a+bp</code>;</li><li>the divisor class <code>k=-p mod 4ab</code> from the coprime criterion.</li></ol>
+<p>This is a structural bridge between the two research languages, not a claim that the remaining existence theorem is closed.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Mixed-box obstruction in exact square-lift shadowing — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mixed-box-obstruction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mixed-box-obstruction.html">
+  <meta property="og:title" content="Mixed-box obstruction in exact square-lift shadowing — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mixed-box obstruction in exact square-lift shadowing</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MIXED-BOX-OBSTRUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact reformulation plus falsified simplification and finite proof-mining data</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness or exact square-lift shadowing. It identifies the exact combinatorial object left after multiplicative/genus reductions and records a counterexample to a tempting but false generator-wise simplification.</p>
+<p>Read with:</p>
+<ul><li><a href="multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a></li><li><a href="squarefree-lift-core.html">SQUAREFREE-LIFT-CORE.md</a></li><li><a href="square-lift-signature-classification.html">SQUARE-LIFT-SIGNATURE-CLASSIFICATION.md</a></li><li><a href="genus-defect-identification.html">GENUS-DEFECT-IDENTIFICATION.md</a></li></ul>
+<h2>1. Normalize the trap set</h2>
+<p>For a depth <code>k</code>, write</p>
+<div class="math" role="math">m_k=4k-1</div>
+<p>and define the normalized positive trap set</p>
+<div class="math" role="math">\boxed{ U_k=-T_k = \{e,4e\pmod{m_k}:e\mid k\}. }</div>
+<p>Let</p>
+<div class="math" role="math">D_k=\{e\pmod{m_k}:e\mid k\}</div>
+<p>be the divisor-residue set.</p>
+<p>Because</p>
+<div class="math" role="math">4k\equiv1\pmod{m_k},</div>
+<p>for <code>e|k</code> and <code>f=k/e</code> we have</p>
+<div class="math" role="math">4e\equiv f^{-1}\pmod{m_k}.</div>
+<p>As <code>e</code> ranges over divisors, so does <code>f</code>. Therefore:</p>
+<h3>Theorem</h3>
+<div class="math" role="math">\boxed{ U_k=D_k\cup D_k^{-1}. }</div>
+<p>This is the exact two-box/inverse formulation of a Type A/B trap layer.</p>
+<p>The inversion relationship itself is consistent with López&#x27;s prior observation that the two Type A/B divisor families are mutual inverses; the present use is to organize exact square-lift projection shadowing.</p>
+<h2>2. Square-lift projection criterion</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree and let</p>
+<div class="math" role="math">4j-1=d s^2.</div>
+<p>Project the lifted traps modulo the ancestor modulus <code>d</code>.</p>
+<p>Define</p>
+<div class="math" role="math">D_{j\to d} =\{e\bmod d:e\mid j\}.</div>
+<p>Since also</p>
+<div class="math" role="math">4j\equiv1\pmod d,</div>
+<p>the same divisor/inverse argument gives</p>
+<div class="math" role="math">\boxed{ -T_j\bmod d = D_{j\to d}\cup D_{j\to d}^{-1}. }</div>
+<p>The ancestor normalized trap is</p>
+<div class="math" role="math">U_a=D_a\cup D_a^{-1}.</div>
+<p>Since <code>U_a</code> is inversion-stable, we obtain:</p>
+<h3>Exact projection-shadow criterion</h3>
+<div class="math" role="math">\boxed{ T_j\bmod d\subseteq T_a \iff D_{j\to d}\subseteq U_a. }</div>
+<p>Thus exact square-lift projection shadowing is a problem about where <strong>all divisor residues of <code>j</code></strong> land relative to one ancestor two-box set.</p>
+<h2>3. Exponent-box formulation</h2>
+<p>Factor</p>
+<div class="math" role="math">a=\prod_{i=1}^r p_i^{A_i}.</div>
+<p>Let</p>
+<div class="math" role="math">H_a=\langle p_1,\ldots,p_r\rangle \le(\mathbb Z/d\mathbb Z)^\times</div>
+<p>and define</p>
+<div class="math" role="math">\phi_a:\mathbb Z^r\to H_a, \qquad (x_1,\ldots,x_r) \mapsto \prod_i p_i^{x_i}\pmod d.</div>
+<p>Let</p>
+<div class="math" role="math">B_A=\{x\in\mathbb Z^r:0\le x_i\le A_i\}.</div>
+<p>Then</p>
+<div class="math" role="math">D_a=\phi_a(B_A)</div>
+<p>and</p>
+<div class="math" role="math">D_a^{-1}=\phi_a(-B_A).</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ U_a=\phi_a(B_A\cup-B_A). }</div>
+<p>This is the ancestor&#x27;s exact <strong>signed exponent box</strong>.</p>
+<p>Now factor</p>
+<div class="math" role="math">j=\prod_{q\mid j}q^{E_q}.</div>
+<p>If a prime <code>q|j</code> lies outside <code>H_a</code>, exact projection shadowing fails immediately, because the divisor <code>q</code> itself lies outside <code>U_a subset H_a</code>.</p>
+<p>If every prime factor lies in <code>H_a</code>, choose exponent vectors <code>v_q</code> satisfying</p>
+<div class="math" role="math">\phi_a(v_q)=q\pmod d.</div>
+<p>Then every divisor of <code>j</code> has the form</p>
+<div class="math" role="math">\phi_a\left(\sum_q t_qv_q\right), \qquad 0\le t_q\le E_q.</div>
+<p>Therefore exact projection shadowing becomes the signed-box containment problem</p>
+<div class="math" role="math">\boxed{ \phi_a \left( \left\{ \sum_qt_qv_q:0\le t_q\le E_q \right\} \right) \subseteq \phi_a(B_A\cup-B_A). }</div>
+<p>The relation lattice <code>ker(phi_a)</code> allows wraparound, so the problem lives in a finite abelian exponent lattice rather than ordinary Euclidean boxes.</p>
+<h2>4. A tempting simplification is false</h2>
+<p>A natural guess is:</p>
+<blockquote><p>If every prime-power divisor <code>q^t</code> of <code>j</code> lands in <code>U_a</code>, then every divisor of <code>j</code> lands in <code>U_a</code>.</p></blockquote>
+<p>This would reduce exact projection shadowing to independent one-prime tests.</p>
+<p>It is false.</p>
+<h2>5. First mixed-box counterexample</h2>
+<p>Take</p>
+<div class="math" role="math">\boxed{j=696.}</div>
+<p>Then</p>
+<div class="math" role="math">4j-1=2783=23\cdot11^2,</div>
+<p>so the squarefree ancestor modulus is</p>
+<div class="math" role="math">d=23, \qquad a=6.</div>
+<p>The ancestor divisor set is</p>
+<div class="math" role="math">D_6=\{1,2,3,6\}\pmod{23}.</div>
+<p>Its inverse set is</p>
+<div class="math" role="math">D_6^{-1}=\{1,12,8,4\}.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ U_6=\{1,2,3,4,6,8,12\}\pmod{23}. }</div>
+<p>Now</p>
+<div class="math" role="math">696=2^3\cdot3\cdot29.</div>
+<p>Every prime-power direction individually stays inside the ancestor envelope:</p>
+<div class="math" role="math">2,4,8\in U_6,</div>
+<div class="math" role="math">3\in U_6,</div>
+<p>and</p>
+<div class="math" role="math">29\equiv6\pmod{23}\in U_6.</div>
+<p>Nevertheless the mixed divisor</p>
+<div class="math" role="math">87=3\cdot29</div>
+<p>satisfies</p>
+<div class="math" role="math">87\equiv18\pmod{23},</div>
+<p>and</p>
+<div class="math" role="math">\boxed{18\notin U_6.}</div>
+<p>Likewise</p>
+<div class="math" role="math">174\equiv13\pmod{23}</div>
+<p>is outside <code>U_6</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ T_{696}\bmod23 \not\subseteq T_6 }</div>
+<p>although every individual prime-power divisor direction passes the ancestor test.</p>
+<p>This is a genuine <strong>mixed-box obstruction</strong>.</p>
+<h2>6. Finite search through j &lt;= 20000</h2>
+<p>An exhaustive square-lift replay through <code>j&lt;=20000</code> found <code>3,788</code> non-squarefree moduli <code>4j-1</code>.</p>
+<p>They split as:</p>
+<pre><code class="language-text">exact ancestor projection contained:       1,198
+prime-power / axis failure visible:        2,575
+all prime-power axes safe but mixed fail:     15</code></pre>
+<p>The first mixed-only failure is <code>j=696</code> above.</p>
+<p>The 15 mixed-only failures through this finite range are:</p>
+<pre><code class="language-text">696, 1180, 2076, 2324, 6408,
+7044, 8319, 9592, 10024, 10632,
+10740, 12702, 16152, 19752, 19869</code></pre>
+<p>This finite list is proof-mining data, not a universal classification.</p>
+<p>Its importance is negative: it falsifies the simplest generator-wise exact theorem and proves that the final residue core contains real interactions among divisor directions.</p>
+<h2>7. Two kinds of exact square-lift defect</h2>
+<p>The exact projection failure now has a clean dichotomy.</p>
+<h3>Axis defect</h3>
+<p>Some prime-power divisor already escapes:</p>
+<div class="math" role="math">\boxed{ q^t\bmod d\notin U_a. }</div>
+<p>This is visible one generator at a time.</p>
+<h3>Mixed-box defect</h3>
+<p>Every prime-power divisor lies in <code>U_a</code>, but a product of different prime-power directions escapes:</p>
+<div class="math" role="math">\boxed{ \prod_q q^{t_q}\bmod d\notin U_a. }</div>
+<p>This is a genuine interaction effect.</p>
+<p>The first type dominates the finite data, but the second type is exactly where a purely local prime-by-prime classification fails.</p>
+<h2>8. Relation to the earlier quotient hierarchy</h2>
+<p>The hierarchy can now be written more sharply:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{genus / quadratic signature defect}\\ \downarrow\\ \text{multiplicative subgroup defect }(q\notin H_a)\\ \downarrow\\ \text{single-axis signed-box defect}\\ \downarrow\\ \text{mixed signed-box defect}\\ \downarrow\\ \text{exact projection excess} \end{array}}</div>
+<p>Each level is strictly finer than the one above it.</p>
+<p>The mixed-box counterexample proves that the last step cannot be removed without an additional theorem.</p>
+<h2>9. New theorem target</h2>
+<p>The highest-value exact square-lift question is now:</p>
+<blockquote><p>Classify the maps from the divisor exponent box of <code>j</code> into the ancestor signed box <code>B_A union -B_A</code> modulo the relation lattice of <code>H_a</code>.</p></blockquote>
+<p>Useful subtargets are:</p>
+<ol><li>classify when a single prime-power axis stays inside the signed box;</li><li>classify when two individually safe axes have an unsafe sum;</li><li>find a Helly-type or bounded-support theorem: if full containment fails, is there always a failing divisor involving at most <code>C</code> distinct prime factors for an absolute small <code>C</code>?</li><li>determine whether every mixed-box defect is already detected by a pair of prime directions;</li><li>compare the minimal failing support with the fiber-kernel residual size.</li></ol>
+<p>If target 4 were true, the final square-lift residue obstruction would reduce from an arbitrary divisor box to pairwise interactions.</p>
+<p>That is now directly falsifiable.</p>
+<h2>10. Novelty boundary</h2>
+<p>Exponent lattices, finite abelian groups, inverse sets, and box-containment problems are standard mathematical objects. López already records the mutual-inverse relation of the Type A/B divisor families.</p>
+<p>The candidate contribution is the <strong>signed-box formulation and its role as the exact residual layer of the Type A/B minimal-depth shadow hierarchy</strong>, pending prior-art and external review.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

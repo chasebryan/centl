@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Prime-child ancestry shadows — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-child-shadows.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-child-shadows.html">
+  <meta property="og:title" content="Prime-child ancestry shadows — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-child ancestry shadows</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-CHILD-SHADOWS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family inside the Type A/B minimal-depth program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It proves an infinite family of exact direct-shadow edges along every modulus-ancestry quotient and completely classifies the unrestricted quotient-5 case.</p>
+<p>Read with:</p>
+<ul><li><a href="theory.html">THEORY.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li></ul>
+<h2>1. Modulus ancestry</h2>
+<p>Let <code>j&lt;K</code> and suppose</p>
+<div class="math" role="math">4j-1\mid4K-1.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{ 4K-1=q(4j-1), }</div>
+<p>where necessarily</p>
+<div class="math" role="math">q\equiv1\pmod4.</div>
+<p>Write</p>
+<div class="math" role="math">q=4s+1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ K=qj-s. }</div>
+<p>A small but crucial identity is</p>
+<div class="math" role="math">\boxed{ K-j=s(4j-1), }</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ K\equiv j\pmod{4j-1}. }</div>
+<h2>2. Prime-child shadow theorem</h2>
+<h3>Theorem</h3>
+<p>Suppose</p>
+<div class="math" role="math">4j-1\mid4K-1</div>
+<p>and the later depth <code>K</code> is prime.</p>
+<p>Then the entire later Type A/B trap set is directly shadowed by the earlier layer <code>j</code>:</p>
+<div class="math" role="math">\boxed{ T_K\bmod(4j-1) \subseteq T_j. }</div>
+<h3>Proof</h3>
+<p>Because <code>K</code> is prime, its positive divisors are only</p>
+<div class="math" role="math">1,\ K.</div>
+<p>Therefore</p>
+<div class="math" role="math">T_K = \{-1,-4,-K,-4K\} \pmod{4K-1}.</div>
+<p>Reduce these residues modulo</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>The ancestry identity gives</p>
+<div class="math" role="math">K\equiv j\pmod m.</div>
+<p>Hence</p>
+<div class="math" role="math">-K\equiv-j\pmod m,</div>
+<p>and</p>
+<div class="math" role="math">-4K\equiv-4j\equiv-1\pmod m.</div>
+<p>Thus the projected target trap set is contained in</p>
+<div class="math" role="math">\{-1,-4,-j\}.</div>
+<p>But <code>1|j</code> and <code>j|j</code>, so all three residues belong to <code>T_j</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">T_K\bmod m\subseteq T_j.</div>
+<p>QED.</p>
+<h2>3. Infinite prime-child shadows for every ancestry quotient</h2>
+<p>Fix any</p>
+<div class="math" role="math">q=4s+1&gt;1.</div>
+<p>The ancestry children of quotient <code>q</code> have depths</p>
+<div class="math" role="math">K=qj-s.</div>
+<p>Equivalently,</p>
+<div class="math" role="math">K\equiv-s\pmod q.</div>
+<p>Since</p>
+<div class="math" role="math">\gcd(s,q)=1,</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many primes in the residue class</p>
+<div class="math" role="math">-s\pmod q.</div>
+<p>For every such prime <code>K</code>,</p>
+<div class="math" role="math">j=\frac{K+s}{q}</div>
+<p>is a positive integer and</p>
+<div class="math" role="math">4K-1=q(4j-1).</div>
+<p>The prime-child theorem therefore gives an exact direct-shadow edge</p>
+<div class="math" role="math">\boxed{j\longrightarrow K.}</div>
+<p>Thus:</p>
+<h3>Corollary</h3>
+<p>For <strong>every</strong> ancestry quotient</p>
+<div class="math" role="math">q\equiv1\pmod4, \qquad q&gt;1,</div>
+<p>there are infinitely many exact Type A/B direct-shadow edges of that quotient.</p>
+<h2>4. Counting prime-child edges for fixed q</h2>
+<p>Let</p>
+<div class="math" role="math">P_q(X) = \#\{K\le X:K\text{ prime and }K\equiv-s\pmod q\}, \qquad q=4s+1.</div>
+<p>Every such prime gives one prime-child shadow edge.</p>
+<p>By the prime number theorem in arithmetic progressions,</p>
+<div class="math" role="math">\boxed{ P_q(X) \sim \frac{\operatorname{Li}(X)}{\varphi(q)}. }</div>
+<p>So the prime-child mechanism alone contributes on the order of</p>
+<div class="math" role="math">\frac{X}{\varphi(q)\log X}</div>
+<p>shadow edges of fixed ancestry quotient <code>q</code> up to child depth <code>X</code>.</p>
+<p>This immediately explains why the smallest quotient <code>q=5</code> is expected to be especially prominent in finite shadow maps.</p>
+<h2>5. The quotient-5 family</h2>
+<p>For</p>
+<div class="math" role="math">q=5,</div>
+<p>we have <code>s=1</code> and</p>
+<div class="math" role="math">\boxed{K=5j-1.}</div>
+<p>The prime-child theorem gives</p>
+<div class="math" role="math">K\text{ prime} \Longrightarrow T_K\bmod(4j-1)\subseteq T_j.</div>
+<p>In this special quotient, the converse also holds.</p>
+<h2>6. Quotient-5 rigidity theorem</h2>
+<h3>Theorem</h3>
+<p>For every positive integer <code>j</code>, put</p>
+<div class="math" role="math">K=5j-1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K\bmod(4j-1)\subseteq T_j \iff K\text{ is prime}. }</div>
+<p>This concerns the <strong>unrestricted exact trap sets</strong>. Hard-class-conditioned shadowing can be stronger because inadmissible target residues have been removed.</p>
+<h3>Proof of the converse</h3>
+<p>Assume <code>K=5j-1</code> is composite. Put</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>We show some divisor of <code>K</code> produces a target trap residue outside <code>T_j</code>.</p>
+<h3>Case 1: j is odd</h3>
+<p>Then <code>K</code> is even. Since <code>K&gt;2</code>,</p>
+<div class="math" role="math">2\mid K.</div>
+<p>Thus</p>
+<div class="math" role="math">-2\in T_K.</div>
+<p>We claim</p>
+<div class="math" role="math">-2\notin T_j.</div>
+<p>Equivalently, <code>2</code> does not belong to the normalized base set</p>
+<div class="math" role="math">S_j=-T_j = \{d,4d\pmod m:d\mid j\}.</div>
+<p>Because <code>j</code> is odd, <code>2</code> is not a divisor of <code>j</code>.</p>
+<p>For <code>d&lt;j</code>,</p>
+<div class="math" role="math">4d\le4j-4=m-3,</div>
+<p>so <code>4d mod m</code> is an even integer at least <code>4</code>, never <code>2</code>.</p>
+<p>For <code>d=j</code>,</p>
+<div class="math" role="math">4j\equiv1\pmod m.</div>
+<p>Hence <code>2 notin S_j</code>, so <code>-2 notin T_j</code>.</p>
+<p>Therefore full shadowing fails.</p>
+<h3>Case 2: j is even</h3>
+<p>Then <code>K</code> is odd and composite. Let <code>ell</code> be a prime factor of <code>K</code> with</p>
+<div class="math" role="math">1&lt;\ell&lt;K.</div>
+<p>We may choose the smallest prime factor, so</p>
+<div class="math" role="math">\ell\le\sqrt K&lt;4j-1=m.</div>
+<p>Also</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,5j-1)=1,</div>
+<p>so</p>
+<div class="math" role="math">\ell\nmid j.</div>
+<p>If <code>ell</code> belonged to the normalized base trap set <code>S_j</code>, then because <code>ell&lt;m</code> there are only three possibilities:</p>
+<ol><li><code>ell=d</code> for some divisor <code>d|j</code>, impossible because <code>ell</code> does not divide <code>j</code>;</li><li><code>ell=4d</code> with <code>d&lt;j</code>, impossible because <code>ell</code> is odd;</li><li>the wrapped value from <code>d=j</code>, namely <code>4j mod m=1</code>, impossible because <code>ell&gt;1</code>.</li></ol>
+<p>Thus</p>
+<div class="math" role="math">\ell\notin S_j,</div>
+<p>so</p>
+<div class="math" role="math">-\ell\notin T_j.</div>
+<p>But <code>ell|K</code>, hence <code>-ell in T_K</code>. Full shadowing fails.</p>
+<p>Therefore a composite child can never give unrestricted quotient-5 full shadowing.</p>
+<p>Combined with the prime-child theorem,</p>
+<div class="math" role="math">\boxed{ T_{5j-1}\bmod(4j-1)\subseteq T_j \iff 5j-1\text{ is prime}. }</div>
+<p>QED.</p>
+<h2>7. Infinite quotient-5 family</h2>
+<p>Primes</p>
+<div class="math" role="math">K\equiv4\pmod5</div>
+<p>are infinite by Dirichlet.</p>
+<p>For every such prime,</p>
+<div class="math" role="math">j=\frac{K+1}{5}</div>
+<p>and the quotient-5 rigidity theorem gives a full exact direct shadow.</p>
+<p>The first bases are</p>
+<pre><code class="language-text">j = 4,  6,  12, 16, 18, 22, 28, 30, 36, 40, ...</code></pre>
+<p>corresponding to prime children</p>
+<pre><code class="language-text">K = 19, 29, 59, 79, 89, 109, 139, 149, 179, 199, ...</code></pre>
+<p>This matches the unrestricted trap-set computation.</p>
+<h2>8. Why the hard-class shadow map had additional q=5 edges</h2>
+<p>Earlier finite work on the Mordell-hard residue classes found q=5 shadows such as</p>
+<pre><code class="language-text">j=3 -&gt; K=14
+j=8 -&gt; K=39</code></pre>
+<p>whose child depths are composite.</p>
+<p>There is no contradiction.</p>
+<p>Those computations imposed prime compatibility and the six hard classes modulo <code>840</code> before asking whether the surviving target candidate classes were shadowed.</p>
+<p>The quotient-5 rigidity theorem concerns the complete unrestricted target trap set.</p>
+<p>Thus:</p>
+<div class="math" role="math">\boxed{ \text{unrestricted shadow} \subseteq \text{hard-compatible shadow} }</div>
+<p>and conditioning can create additional complete shadows after incompatible target classes disappear.</p>
+<p>This distinction is now important enough to keep explicit in future theorem statements.</p>
+<h2>9. New interpretation of the ancestry graph</h2>
+<p>The observed ancestry quotient groups are not arbitrary.</p>
+<p>Every quotient</p>
+<div class="math" role="math">q=5,9,13,17,\ldots</div>
+<p>carries an infinite prime-child shadow family.</p>
+<p>The direct-shadow graph therefore contains a universal arithmetic backbone indexed by:</p>
+<div class="math" role="math">\boxed{ (q,K): q\equiv1\pmod4, \quad K\equiv-(q-1)/4\pmod q, \quad K\text{ prime}. }</div>
+<p>The remaining composite-child shadows are the genuinely richer part of the ancestry problem.</p>
+<h2>10. Next theorem targets</h2>
+<ol><li>for each fixed quotient <code>q</code>, classify the <strong>composite</strong> children that are also fully shadowed;</li><li>compare composite-child shadows with square-lift quotients <code>q=c^2</code>;</li><li>determine when full local quadratic-signature shadowing explains a composite child;</li><li>determine when multiplicative quotient containment explains it;</li><li>isolate the residual composite-child shadows requiring exact two-box divisor geometry.</li></ol>
+<p>For <code>q=5</code>, this program is already complete in the unrestricted system: there are no composite-child full shadows.</p>
+<h2>11. Novelty boundary</h2>
+<p>Dirichlet&#x27;s theorem and the prime number theorem in arithmetic progressions are classical. The modulus-divisibility identity is elementary, and López Type A/B congruences are prior art.</p>
+<p>The candidate contribution is the <strong>prime-child direct-shadow theorem across all Type A/B ancestry quotients and the exact quotient-5 rigidity classification inside the minimal-depth/shadow framework</strong>.</p>
+<p>Targeted literature searches have not yet located this formulation. That is not proof of publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

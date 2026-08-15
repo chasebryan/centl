@@ -2,9 +2,16 @@
 
 ## Unreleased
 
+- The Erdős–Straus program now has a public infinite hunt (`./centl es go`),
+  coupled bb.kernel / CC.kernel engines, resume seeds, and content-addressed
+  letter numbers. The record is `research/erdos-straus/ES-HUNT.md`. A finished
+  hunt is not a proof of the conjecture.
 - Public site, manuals, and inspect now name CENTL v0.15.0 **Al-Nur** as
   the published Oasis. `main` and `mirage` continue from that floor.
   The `v0.15.0` tag stays.
+- The public site hosts the research library and front-facing manuals as
+  HTML. Search suggestions use a native `datalist`. The site serves no
+  JavaScript. `join.html` is a consent-gated static launcher download.
 
 ## 0.15.0 — 2026-08-14
 

@@ -7,6 +7,7 @@
   <title>Erdős-Straus Type A/B shadow research — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/research-erdos-straus.html">
   <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/research-erdos-straus.html">
   <meta property="og:title" content="Erdős-Straus Type A/B shadow research — August 2026 update">
@@ -19,8 +20,9 @@
 </head>
 <body>
 <div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
-    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
     <div class="title"><h1>Erdős-Straus Type A/B shadow research</h1><p>Wellspring Candidate · updated August 15, 2026</p></div>
   </header>
   <div class="layout">
@@ -36,18 +38,55 @@
         <li><a href="docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul><li><a href="research-erdos-straus.html">Erdős-Straus Type A/B</a></li></ul>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus">Research harness</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CURRENT-FRONTIER.md">Current frontier</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>
-    <main>
-      <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness (DSC-P) remains open. This page reports exact theorems and finite certificates inside the Type A/B shadow program, not a solution of the conjecture.</p>
+    <main id="content">
+      <p class="hero-actions"><a class="sponsor-button" href="research.html">Search the full research library</a></p>
+      <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness is <strong>false</strong>. This page reports exact theorems and finite certificates inside the Type A/B shadow program, not a solution of the conjecture.</p>
 
-      <h2>August 15, 2026 — what advanced</h2>
+      <h2>August 15, 2026 — public hunt</h2>
+      <p>The theorem notes now have an operator-facing hunt. Two kernels coexist: <strong>bb.kernel</strong> (Python reference, also <code>B-BervigES.kernel</code>) and <strong>CC.kernel</strong> (C attack engine). From the CENTL root the commands are <code>./centl es</code> for the menu and <code>./centl es go</code> for the infinite hunt. A start factor of <code>0</code>, a chosen bound, or <code>--random</code> chooses where a hunt begins. The seed is a resume cursor, not a random-number seed. Ctrl+C stops the engine and writes the cursor. The next <code>go</code> continues from there.</p>
+      <p>The hunt is the sequence of intervals <code>(s, s+Δ]</code> with no last interval. It collects letters instead of stopping on the first one. Every letter carries a number that is the first 128 bits of SHA-256 of a fixed description of what was found. Two people who find the same letter on different machines compute the same number and the same file name. The start factor is not part of that identity. A cleared window is a finite certificate, not a proof of the conjecture.</p>
+      <p>Primary sources:</p>
+      <ul>
+        <li><a href="library/es-hunt.html">ES-HUNT.md</a></li>
+        <li><a href="library/start-here.html">findings/START-HERE.md</a></li>
+        <li><a href="library/how-grades-work.html">findings/HOW-GRADES-WORK.md</a></li>
+        <li><a href="library/hunt-seed.html">findings/seeds/README.md</a></li>
+        <li><a href="library/bb-kernel.html">bb.kernel</a></li>
+        <li><a href="library/cc-kernel.html">CC.kernel</a></li>
+        <li><a href="library/cc-kernel-proof.html">CC.kernel/PROOF.md</a></li>
+      </ul>
+
+      <h2>August 15, 2026 — two-target corridor</h2>
+      <p>The original-ES lane is the exact two-target signed-box criterion. Combined Type I / Type II failure is now classified at the first corridor positions:</p>
+      <ul>
+        <li><strong>Linear form <code>2p+1</code>:</strong> a divisor <code>7 mod 8</code> is an explicit certificate. A counterexample must keep <code>2p+1</code> in the same <code>{1,3} mod 8</code> semigroup already forced on <code>p+2</code>.</li>
+        <li><strong><code>q=3</code> and <code>q=7</code>:</strong> for Mordell-hard primes, Type I never rescues a Type-II miss. Combined failure equals the existing Type-II miss.</li>
+        <li><strong><code>q=11</code>:</strong> Type I does rescue an explicit list of Type-II misses, including a thin three-class residue set when the quadratic box is only <code>{1,3,4}</code>.</li>
+        <li><strong><code>k=15</code>:</strong> both targets live outside the two-primary subgroup <code>{1,2,4,8}</code>. Combined miss is that subgroup trap, or one thin packet involving primes <code>11 mod 15</code>.</li>
+      </ul>
+      <p>Through <code>2·10<sup>6</sup></code>, every hard prime that misses <code>3,7,11</code> is solved by some later shift at most <code>59</code>. That is a finite census, not a bound. A separate covering attack is now closed in the negative: no <code>{2,3,5,7}</code>-smooth forced multiplier can produce a Type-II hit at the aligned shift <code>k ≡ −p (mod 4M)</code>. Any uniform Type-II arithmetic-progression cover of a hard class must import an external prime <code>ℓ ≥ 11</code>. The next exact corridor target is <code>k=19</code>.</p>
+      <p>Primary sources:</p>
+      <ul>
+        <li><a href="library/two-p-plus-one-filter.html">TWO-P-PLUS-ONE-FILTER.md</a></li>
+        <li><a href="library/hard-q7-type-i-no-rescue.html">HARD-Q7-TYPE-I-NO-RESCUE.md</a></li>
+        <li><a href="library/q11-type-i-companion.html">Q11-TYPE-I-COMPANION.md</a></li>
+        <li><a href="library/k15-two-target-filter.html">K15-TWO-TARGET-FILTER.md</a></li>
+        <li><a href="library/current-frontier.html">CURRENT-FRONTIER.md</a></li>
+        <li><a href="library/erdos-straus-wall.html">ERDOS-STRAUS-WALL.md</a></li>
+      </ul>
+
+      <h2>August 15, 2026 — ancestry and covering-core</h2>
       <p>The Type A/B shadow program now has a general ancestry skeleton, several exact quotient classifications, and a universal local theorem for the single-active Class-C branch:</p>
       <ul>
         <li><strong>Divisor-child ancestry theorem:</strong> for ancestry shift <code>s</code>, if <code>a | gcd(j,s)</code> and the child depth is <code>K = a·p</code> with <code>p</code> prime, then the entire child trap set is shadowed by the ancestor.</li>
@@ -59,11 +98,11 @@
       </ul>
       <p>Primary sources:</p>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ANCESTRY-DIVISOR-CHILD-THEOREM.md">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ANCESTRY-ASYMPTOTIC-SKELETON.md">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md">ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md">SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ERDOS-STRAUS-WALL.md">ERDOS-STRAUS-WALL.md</a> (honest wall statement)</li>
+        <li><a href="library/ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li>
+        <li><a href="library/ancestry-asymptotic-skeleton.html">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li>
+        <li><a href="library/odd-prime-shift-asymptotic-rigidity.html">ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md</a></li>
+        <li><a href="library/single-active-reduced-escape-theorem.html">SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md</a></li>
+        <li><a href="library/erdos-straus-wall.html">ERDOS-STRAUS-WALL.md</a> (honest wall statement)</li>
       </ul>
 
       <h2>What the program is</h2>
@@ -135,15 +174,16 @@ unresolved reduced candidates:          0</code></pre>
         <li>López Type A/B coverage for <em>every</em> prime (density one is not enough).</li>
         <li>Composite <code>n</code> arguments wired to the same structure.</li>
       </ol>
-      <p>See <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ERDOS-STRAUS-WALL.md">ERDOS-STRAUS-WALL.md</a>.</p>
+      <p>See <a href="library/erdos-straus-wall.html">ERDOS-STRAUS-WALL.md</a>.</p>
 
       <h2>Research map</h2>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIAMOND.md">DIAMOND.md</a> — full synthesis</li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CURRENT-FRONTIER.md">CURRENT-FRONTIER.md</a> — moving edge</li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CLASS-C-RESIDUAL-CORE.md">CLASS-C-RESIDUAL-CORE.md</a> — residual node</li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTIPLICATIVE-TRAP-QUOTIENT.md">MULTIPLICATIVE-TRAP-QUOTIENT.md</a> — two-box geometry</li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">WS-CAND-003</a> — formal Wellspring Candidate record</li>
+        <li><a href="library/es-hunt.html">ES-HUNT.md</a> — public hunt, seeds, letter numbers</li>
+        <li><a href="library/diamond.html">DIAMOND.md</a> — full synthesis</li>
+        <li><a href="library/current-frontier.html">CURRENT-FRONTIER.md</a> — moving edge</li>
+        <li><a href="library/class-c-residual-core.html">CLASS-C-RESIDUAL-CORE.md</a> — residual node</li>
+        <li><a href="library/multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a> — two-box geometry</li>
+        <li><a href="library/ws-cand-003-erdos-straus-type-ab-shadow-structure.html">WS-CAND-003</a> — formal Wellspring Candidate record</li>
       </ul>
 
       <p><strong>Primary prior work:</strong> <a href="https://arxiv.org/abs/2404.01508">López, A Complete Congruence System for the Erdos-Straus Conjecture</a>.</p>

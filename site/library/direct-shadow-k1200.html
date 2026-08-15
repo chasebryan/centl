@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This record extends the candidatewise falsification attack through k=1200 and freezes the first full automated prime-power coordinate-core diagnostic.">
+  <title>Direct-Shadow Completeness attack through k = 1200 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/direct-shadow-k1200.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/direct-shadow-k1200.html">
+  <meta property="og:title" content="Direct-Shadow Completeness attack through k = 1200 — Free Computation Foundation">
+  <meta property="og:description" content="This record extends the candidatewise falsification attack through k=1200 and freezes the first full automated prime-power coordinate-core diagnostic.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Direct-Shadow Completeness attack through k = 1200</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This record extends the candidatewise falsification attack through k=1200 and freezes the first full automated prime-power coordinate-core diagnostic.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIRECT-SHADOW-K1200.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-certificate result; universal theorem remains open</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Research lineage:</strong> <a href="diamond.html">DIAMOND.md</a> -&gt; <a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a> -&gt; <a href="direct-shadow-k1000.html">DIRECT-SHADOW-K1000.md</a> -&gt; this record</p>
+<p>This record extends the candidatewise falsification attack through <code>k=1200</code> and freezes the first full automated prime-power coordinate-core diagnostic.</p>
+<p>It does <strong>not</strong> prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<h2>1. Exact candidatewise result</h2>
+<p>The completed GitHub Actions run used:</p>
+<ul><li>all six Mordell-hard classes modulo <code>840</code>;</li><li>every Type A/B layer through <code>k=1200</code>;</li><li>every prime-compatible admissible target residue;</li><li>witness search through <code>s=2,000,000</code>;</li><li>an independent modular verifier;</li><li>the prime-power coordinate proof-mining analyzer;</li><li>CENTL exact certification of selected hardest CRT progression identities;</li><li>SHA-256 freezing and artifact publication.</li></ul>
+<p>The exact result was:</p>
+<pre><code class="language-text">admissible candidates:             57,367
+directly shadowed candidates:      15,897
+directly novel candidates:         41,470
+integer avoiding witnesses:        41,470
+reduced avoiding witnesses:        41,470
+unresolved integer candidates:          0
+unresolved reduced candidates:          0</code></pre>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ 41,470/41,470 \text{ directly novel candidates through }k=1200 \text{ are explicitly not union-shadowed.} }</div>
+<p>And more strongly,</p>
+<div class="math" role="math">\boxed{ 41,470/41,470 \text{ have reduced avoiding progressions.} }</div>
+<p>Every one therefore has an explicit Dirichlet progression containing infinitely many primes whose first Type A/B hit occurs at that candidate&#x27;s depth.</p>
+<p>This is an exact finite-range certificate statement, not an asymptotic or universal theorem.</p>
+<h2>2. Independent verification</h2>
+<p>The independent verifier returned:</p>
+<pre><code class="language-json">{
+  &quot;direct_novel_candidates_checked&quot;: 41470,
+  &quot;integer_witnesses_verified&quot;: 41470,
+  &quot;k_limit&quot;: 1200,
+  &quot;reduced_witnesses_verified&quot;: 41470,
+  &quot;unresolved_integer_candidates&quot;: 0,
+  &quot;unresolved_reduced_candidates&quot;: 0,
+  &quot;verdict&quot;: &quot;VERIFIED&quot;
+}</code></pre>
+<p>Thus the growth from <code>33,644</code> directly novel candidates at <code>k&lt;=1000</code> to <code>41,470</code> at <code>k&lt;=1200</code> introduced no collective-shadow counterexample and no failure of reduced prime realization.</p>
+<h2>3. Hardest first reduced witnesses</h2>
+<p>The largest first reduced parameters in this run included:</p>
+<table class="directory"><thead><tr><th>k</th><th>h</th><th>t</th><th>first reduced s</th><th>x = r + Ls</th></tr></thead><tbody><tr><td>1146</td><td>169</td><td>4579</td><td>1,232,114</td><td>4,743,294,875,089</td></tr><tr><td>1170</td><td>529</td><td>3899</td><td>1,200,079</td><td>4,716,744,233,569</td></tr><tr><td>1160</td><td>289</td><td>4607</td><td>1,066,259</td><td>4,154,955,601,729</td></tr><tr><td>1116</td><td>169</td><td>4427</td><td>1,065,106</td><td>3,992,999,483,929</td></tr><tr><td>1148</td><td>529</td><td>4550</td><td>1,060,095</td><td>4,088,194,001,329</td></tr><tr><td>1200</td><td>529</td><td>3199</td><td>1,059,772</td><td>4,272,114,097,969</td></tr><tr><td>1176</td><td>361</td><td>4691</td><td>1,019,129</td><td>4,026,090,113,161</td></tr><tr><td>1165</td><td>529</td><td>4426</td><td>1,012,370</td><td>1,320,658,207,369</td></tr><tr><td>1200</td><td>529</td><td>4784</td><td>1,009,638</td><td>4,070,014,316,449</td></tr><tr><td>1148</td><td>529</td><td>4583</td><td>991,301</td><td>3,822,896,533,369</td></tr></tbody></table>
+<p>The appearance of first avoiding parameters above one million reinforces that the positive certificates are not arising merely from trivial tiny parameter choices.</p>
+<h2>4. Prime-power coordinate locality</h2>
+<p>The run also froze the first complete coordinate-core diagnostic for all <code>41,470</code> directly novel candidates.</p>
+<p>The analyzer begins from a canonical assignment satisfying all single-prime-support constraints, preferring local residue <code>1</code> wherever possible. It then uses the already-certified reduced witness only to guide which prime-power coordinates to change. The repair count is therefore an explicit upper bound on local Hamming distance to a satisfying assignment; it is not asserted to be minimal and is not an independent proof of witness existence.</p>
+<p>Results:</p>
+<pre><code class="language-text">canonical unary-safe assignment solves: 15,715 / 41,470 = 37.895%
+maximum guided repair count:             9 prime-power coordinates</code></pre>
+<p>Repair distribution:</p>
+<table class="directory"><thead><tr><th>changed prime-power coordinates</th><th>candidates</th><th>cumulative</th></tr></thead><tbody><tr><td>0</td><td>15,715</td><td>37.895%</td></tr><tr><td>1</td><td>13,838</td><td>71.264%</td></tr><tr><td>2</td><td>7,292</td><td>88.847%</td></tr><tr><td>3</td><td>3,017</td><td>96.122%</td></tr><tr><td>4</td><td>1,080</td><td>98.727%</td></tr><tr><td>5</td><td>367</td><td>99.612%</td></tr><tr><td>6</td><td>123</td><td>99.908%</td></tr><tr><td>7</td><td>34</td><td>99.990%</td></tr><tr><td>8</td><td>3</td><td>99.998%</td></tr><tr><td>9</td><td>1</td><td>100.000%</td></tr></tbody></table>
+<p>Thus every one of the <code>41,470</code> certified candidates lies within at most nine prime-power coordinate changes of this simple unary-safe basepoint under the guided construction.</p>
+<p>That is a proof-mining observation, not a universal bounded-repair theorem. Its importance is structural: a huge global congruence system is exhibiting very low local repair complexity.</p>
+<h2>5. CENTL certification and artifact</h2>
+<p>CENTL verified all generated symbolic progression identities for the selected hardest cases. The independent number-theoretic verifier remained responsible for earlier-layer avoidance and reducedness.</p>
+<p>The completed artifact bundle was uploaded by workflow run <code>31846146909</code> with artifact ID <code>9236427053</code>.</p>
+<p>Artifact ZIP SHA-256 digest:</p>
+<pre><code class="language-text">a2479a4113d693af2e647ffc2e007d3d7b1cf628ce7190f72c4ad6282a98ba14</code></pre>
+<p>The bundle contains the complete candidate certificate JSON, independent verifier result, coordinate-core result, CENTL receipt, build information, generated contracts, reports, and per-file hashes.</p>
+<h2>6. What changed conceptually</h2>
+<p>The candidatewise pattern has now survived three increasingly strong exact ranges:</p>
+<pre><code class="language-text">k &lt;= 600:   19,016 / 19,016 directly novel candidates reduced-realizable
+k &lt;= 1000:  33,644 / 33,644 directly novel candidates reduced-realizable
+k &lt;= 1200:  41,470 / 41,470 directly novel candidates reduced-realizable</code></pre>
+<p>No union-shadow counterexample has appeared.</p>
+<p>At the same time, the coordinate-core result says the certified solution space is not merely nonempty. It appears close, in prime-power-coordinate distance, to a very simple local basepoint.</p>
+<p>This is exactly the behavior motivating the stronger local elimination theory in <a href="shadow-kernel.html">SHADOW-KERNEL.md</a> and <a href="fiber-shadow-kernel.html">FIBER-SHADOW-KERNEL.md</a>.</p>
+<h2>7. New target</h2>
+<p>The research frontier is no longer just to push the number <code>1200</code> upward.</p>
+<p>The main target is to prove that the Type A/B pullback system admits a local-to-global construction:</p>
+<div class="math" role="math">\boxed{ \text{directly novel} \Longrightarrow \text{small-prime fiber kernel} \Longrightarrow \text{reduced local solution} \Longrightarrow \text{infinite exact-depth prime family}. }</div>
+<p>The first implication is now partially supported by exact peeling theorems rather than computation alone. The second is where the deepest remaining structure appears to live.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

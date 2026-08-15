@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact index-6 FAB Kneser defect classification — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-kneser-index6-classification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-kneser-index6-classification.html">
+  <meta property="og:title" content="Exact index-6 FAB Kneser defect classification — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact index-6 FAB Kneser defect classification</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-KNESER-INDEX6-CLASSIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal classification in the external-nonresidue prime-shift lane</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-KNESER-DIVISOR-DEFECT.md</code>, <code>FAB-KNESER-PRIME-INDEX-DEFECT.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code></p>
+<p><strong>Claim boundary:</strong> classifies every failed fixed-q FAB box whose exact stabilizer quotient has order six. It does not prove that all possible stabilizer indices are impossible and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime and let</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>be a prime with</p>
+<div class="math" role="math">\left(\frac qp\right)=-1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+q}{4}=\prod_i r_i^{e_i}</div>
+<p>and let</p>
+<div class="math" role="math">R=\left\{\prod_i r_i^{z_i}\pmod q:-e_i\le z_i\le e_i\right\}</div>
+<p>be the signed divisor box in</p>
+<div class="math" role="math">G=(\mathbb Z/q\mathbb Z)^\times.</div>
+<p>Assume the exact FAB target</p>
+<div class="math" role="math">\tau=-p^{-1}\pmod q</div>
+<p>is missed.</p>
+<p>Let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R)</div>
+<p>and assume</p>
+<div class="math" role="math">\boxed{[G:H]=6.}</div>
+<p>Because <code>G</code> is cyclic, the quotient</p>
+<div class="math" role="math">\bar G=G/H</div>
+<p>is cyclic of order six.</p>
+<p>By definition of <code>H</code> as the <strong>full</strong> stabilizer of <code>R</code>, the image</p>
+<div class="math" role="math">\bar R=R/H</div>
+<p>has trivial stabilizer in <code>\bar G</code>.</p>
+<hr>
+<h2>2. Order-two projections are impossible</h2>
+<p>Suppose a prime factor <code>r_i|C</code> has image</p>
+<div class="math" role="math">\bar r_i\in\bar G</div>
+<p>of order two.</p>
+<p>For every exponent <code>e_i&gt;=1</code>, its local signed set in the quotient is</p>
+<div class="math" role="math">\{\bar r_i^{-e_i},\ldots,1,\ldots,\bar r_i^{e_i}\} =\{1,\bar r_i\},</div>
+<p>which is exactly the order-two subgroup of <code>\bar G</code>.</p>
+<p>Multiplying any set by this local set makes the resulting product set invariant under that order-two subgroup.</p>
+<p>Hence <code>\bar R</code> would have a nontrivial stabilizer, contradicting the fact that <code>H</code> was the full stabilizer of <code>R</code>.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{\operatorname{ord}(\bar r_i)\ne2\quad\text{for every }r_i|C.}</div>
+<hr>
+<h2>3. Order-three projections are impossible</h2>
+<p>The same argument applies to an image of order three.</p>
+<p>If</p>
+<div class="math" role="math">\operatorname{ord}(\bar r_i)=3,</div>
+<p>then already for <code>e_i&gt;=1</code> the exponent interval <code>[-e_i,e_i]</code> covers all three powers, so the local set is the complete order-three subgroup</p>
+<div class="math" role="math">\{1,\bar r_i,\bar r_i^2\}.</div>
+<p>Its presence would force <code>\bar R</code> to be invariant under that subgroup, again contradicting trivial stabilizer.</p>
+<p>Thus:</p>
+<div class="math" role="math">\boxed{\operatorname{ord}(\bar r_i)\ne3\quad\text{for every }r_i|C.}</div>
+<p>Consequently every prime factor of <code>C</code> either lies in <code>H</code> or projects to an element of exact order six.</p>
+<hr>
+<h2>4. Kneser room for order-six factors</h2>
+<p>For an order-six image, the local Kneser contribution is</p>
+<div class="math" role="math">\min(2e_i+1,6)-1.</div>
+<p>The index-six defect budget from <code>FAB-KNESER-DIVISOR-DEFECT.md</code> is</p>
+<div class="math" role="math">\sum_i(s_i-1)\le4.</div>
+<p>Hence:</p>
+<ul><li><code>e_i=1</code> contributes <code>2</code>;</li><li><code>e_i=2</code> contributes <code>4</code>;</li><li><code>e_i&gt;=3</code> contributes <code>5</code>, impossible.</li></ul>
+<p>Therefore the only Kneser-allowed nontrivial patterns are:</p>
+<ol><li>one order-six factor of exponent one;</li><li>one order-six factor of exponent two;</li><li>two order-six factors, both of exponent one.</li></ol>
+<p>All remaining prime factors must lie in <code>H</code>.</p>
+<hr>
+<h2>5. Quadratic character kills the even patterns</h2>
+<p>Because</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>and <code>(q/p)=-1</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pq\right)=-1.</div>
+<p>Since <code>4</code> is a square,</p>
+<div class="math" role="math">\boxed{\left(\frac Cq\right)=-1.}</div>
+<p>Thus <code>C</code> is a quadratic nonresidue modulo <code>q</code>.</p>
+<p>Now <code>H</code> has index six in a cyclic group. Every element of <code>H</code> is a square because</p>
+<div class="math" role="math">H=G^6\subseteq G^2.</div>
+<p>An order-six quotient element is represented by an odd exponent in the quotient and therefore carries the nontrivial quadratic parity.</p>
+<h3>One exponent-two exception</h3>
+<p>If the only nontrivial projected factor has exponent two, its quotient contribution to <code>C</code> is a square. Every other factor lies in <code>H</code> and is also a square.</p>
+<p>Therefore <code>C</code> would be a quadratic residue, contradiction.</p>
+<h3>Two simple order-six exceptions</h3>
+<p>Let their quotient classes be generators <code>x</code> and <code>y</code> of <code>C_6</code>.</p>
+<p>Every generator is either <code>g</code> or <code>g^{-1}</code> for a fixed quotient generator <code>g</code>. Thus</p>
+<div class="math" role="math">xy\in\{g^2,1,g^{-2}\},</div>
+<p>which always has even quotient exponent and is quadratic-residue-side.</p>
+<p>Again all remaining factors lie in <code>H</code>, so <code>C</code> would be a quadratic residue, contradiction.</p>
+<p>Hence both even patterns are impossible.</p>
+<hr>
+<h2>6. Exact classification theorem</h2>
+<h3>Theorem</h3>
+<p>Under the setup above, if the fixed-q FAB divisor box fails and its full stabilizer has quotient index six, then there is exactly one prime factor</p>
+<div class="math" role="math">\boxed{r\parallel C}</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{\operatorname{ord}_{G/H}(rH)=6.}</div>
+<p>Every other prime factor of <code>C</code> lies in <code>H</code>:</p>
+<div class="math" role="math">\boxed{s|C,\ s\ne r\Longrightarrow s\in H.}</div>
+<p>Equivalently, in the sixth-power quotient, the entire shifted factorization has exactly one simple primitive order-six defect.</p>
+<p>Since <code>G</code> is cyclic and <code>H=G^6</code>, this can be stated as:</p>
+<div class="math" role="math">\boxed{ C=r\cdot U, \qquad v_r(C)=1, \qquad U\text{ is supported entirely on sixth-power residues mod }q, }</div>
+<p>where <code>r mod q</code> has exact order six in <code>G/G^6</code>.</p>
+<hr>
+<h2>7. Quotient shape of the failed box</h2>
+<p>Let <code>x=rH</code>, a generator of the order-six quotient.</p>
+<p>All other local sets collapse to the identity coset, while the exceptional simple factor contributes</p>
+<div class="math" role="math">\{x^{-1},1,x\}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ R/H=\{x^{-1},1,x\}. }</div>
+<p>The FAB target is quadratic-residue-side. In <code>C_6</code>, the quadratic-residue subgroup is</p>
+<div class="math" role="math">\{1,x^2,x^4\}.</div>
+<p>Because the target is missed, it cannot be the identity coset already present in <code>R/H</code>. Hence its quotient class is exactly one of</p>
+<div class="math" role="math">\boxed{x^2\text{ or }x^4.}</div>
+<p>Thus the index-six failure is a rigid three-coset picture:</p>
+<div class="math" role="math">\boxed{ \text{available}=\{x^{-1},1,x\}, \qquad \text{target}\in\{x^2,x^4\}. }</div>
+<p>There is no other index-six geometry.</p>
+<hr>
+<h2>8. Why this matters for descent</h2>
+<p>At an external nonresidue vertex <code>q</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code> guarantees a prime factor of <code>C</code> that is also a quadratic nonresidue modulo <code>p</code>.</p>
+<p>In an index-six failure, the theorem above says the quotient has exactly one simple factor carrying the nontrivial sixth-power class. All remaining factor mass is invisible in the quotient.</p>
+<p>Therefore the descent has a canonical candidate:</p>
+<ul><li>if the unique order-six factor is the external-nonresidue factor, the factor edge is forced through the unique quotient defect;</li><li>if it is not, the external-nonresidue descent factor lies inside <code>H=G^6</code>, so it is simultaneously a sixth-power residue modulo <code>q</code> and a quadratic nonresidue modulo <code>p</code>.</li></ul>
+<p>Either way, index six no longer represents an arbitrary mixed character failure. It reduces to one distinguished simple factor and a sixth-power-residue background.</p>
+<p>The next useful classification targets are indices <code>10</code> and <code>18</code>, which are the other recurrent mixed defects seen in proof-mining and should admit analogous exact-stabilizer reductions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

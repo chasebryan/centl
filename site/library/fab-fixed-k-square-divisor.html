@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Fixed-k fab criterion collapses to one divisor of N² — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-fixed-k-square-divisor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-fixed-k-square-divisor.html">
+  <meta property="og:title" content="Fixed-k fab criterion collapses to one divisor of N² — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Fixed-k fab criterion collapses to one divisor of N²</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-FIXED-K-SQUARE-DIVISOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-FIXED-K-SIGNED-DIVISOR.md</code></p>
+<p><strong>Claim boundary:</strong> this is an exact fixed-k reformulation. It does not prove that some k always succeeds and therefore does not prove Erdős-Straus.</p>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime, and let</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{N=N_k=\frac{p+k}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">\gcd(N,k)=1.</div>
+<p>Assume <code>N&lt;p</code>, for example <code>k&lt;3p</code>, so every divisor of <code>N</code> automatically satisfies the size hypotheses in the coprime fab criterion.</p>
+<h2>2. The theorem</h2>
+<h3>Fixed-k square-divisor criterion</h3>
+<p>There exists a coprime fab certificate using the fixed admissible divisor <code>k</code> if and only if</p>
+<div class="math" role="math">\boxed{ \exists D\mid N^2 \quad\text{such that}\quad 4D\equiv-1\pmod k. }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ D\equiv-4^{-1}\pmod k. }</div>
+<p>For</p>
+<div class="math" role="math">k=4s+3,</div>
+<p>one has</p>
+<div class="math" role="math">4^{-1}\equiv s+1\pmod k,</div>
+<p>so the fixed target class is</p>
+<div class="math" role="math">\boxed{D\equiv3s+2\pmod{4s+3}.}</div>
+<p>Crucially, this target residue depends only on <code>k</code>, not on <code>p</code>.</p>
+<h2>3. Proof from signed exponents</h2>
+<p>Factor</p>
+<div class="math" role="math">N=\prod r^{e_r}.</div>
+<p>By <code>FAB-FIXED-K-SIGNED-DIVISOR.md</code>, fixed-k solvability is equivalent to choosing integers</p>
+<div class="math" role="math">-e_r\le z_r\le e_r</div>
+<p>such that</p>
+<div class="math" role="math">\prod r^{z_r}\equiv-p\pmod k.</div>
+<p>But</p>
+<div class="math" role="math">4N=p+k\equiv p\pmod k,</div>
+<p>hence</p>
+<div class="math" role="math">-p\equiv-4N\pmod k.</div>
+<p>Write</p>
+<div class="math" role="math">d_r=e_r-z_r.</div>
+<p>Then</p>
+<div class="math" role="math">0\le d_r\le2e_r.</div>
+<p>Therefore</p>
+<div class="math" role="math">D:=\prod r^{d_r}</div>
+<p>runs through <strong>exactly all positive divisors of <code>N^2</code></strong>.</p>
+<p>Also</p>
+<div class="math" role="math">\prod r^{z_r} =N D^{-1}\pmod k.</div>
+<p>Thus the target equation becomes</p>
+<div class="math" role="math">N D^{-1}\equiv-4N\pmod k.</div>
+<p>Since <code>N</code> is invertible modulo <code>k</code>, cancel it:</p>
+<div class="math" role="math">D^{-1}\equiv-4\pmod k,</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{4D\equiv-1\pmod k.}</div>
+<p>This proves the equivalence. QED.</p>
+<h2>4. Direct factor reconstruction</h2>
+<p>The divisor <code>D|N^2</code> contains the complete fab data.</p>
+<p>For each prime <code>r^e||N</code>, let</p>
+<div class="math" role="math">d=v_r(D), \qquad0\le d\le2e.</div>
+<p>Define the exponents</p>
+<div class="math" role="math">v_r(a)=\max(e-d,0),</div>
+<div class="math" role="math">v_r(b)=\max(d-e,0),</div>
+<div class="math" role="math">v_r(t)=e-|e-d|.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{N=abt,}</div>
+<div class="math" role="math">\boxed{D=b^2t,}</div>
+<p>and</p>
+<div class="math" role="math">\gcd(a,b)=1.</div>
+<p>The congruence</p>
+<div class="math" role="math">4D\equiv-1\pmod k</div>
+<p>is</p>
+<div class="math" role="math">4b^2t\equiv-1\pmod k.</div>
+<p>Since</p>
+<div class="math" role="math">p+k=4N=4abt,</div>
+<p>the fixed-k fab equations follow exactly.</p>
+<p>Let</p>
+<div class="math" role="math">q=\frac{a+bp}{k}.</div>
+<p>Then the decomposition is</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{abt} + \frac1{aqt} + \frac1{bpqt}. }</div>
+<h2>5. Immediate examples</h2>
+<h3>k=3</h3>
+<p>Here</p>
+<div class="math" role="math">-4^{-1}\equiv2\pmod3.</div>
+<p>Thus fixed <code>k=3</code> succeeds iff</p>
+<div class="math" role="math">\boxed{ N_3^2 \text{ has a divisor }2\pmod3. }</div>
+<p>That occurs exactly when <code>N_3=(p+3)/4</code> has a prime factor <code>2 mod3</code>, recovering the first Eisenstein filter.</p>
+<h3>k=7</h3>
+<p>Here</p>
+<div class="math" role="math">-4^{-1}\equiv5\pmod7.</div>
+<p>Thus fixed <code>k=7</code> succeeds iff</p>
+<div class="math" role="math">\boxed{ N_7^2 \text{ has a divisor }5\pmod7. }</div>
+<p>This is exactly the residue-product problem classified in <code>FAB-K7-EXACT-FILTER.md</code>.</p>
+<h3>k=11</h3>
+<p>Here</p>
+<div class="math" role="math">-4^{-1}\equiv8\pmod{11}.</div>
+<p>So the entire fixed-11 problem is simply:</p>
+<div class="math" role="math">\boxed{ \exists D\mid((p+11)/4)^2, \quad D\equiv8\pmod{11}. }</div>
+<p>No separate search over <code>a,b</code> is needed.</p>
+<h2>6. Shift formulation</h2>
+<p>Let</p>
+<div class="math" role="math">A=\frac{p+3}{4}.</div>
+<p>For <code>k=4s+3</code>,</p>
+<div class="math" role="math">N_k=A+s.</div>
+<p>Therefore the all-prime problem contains the following exact subproblem:</p>
+<blockquote><p>Given <code>A=(p+3)/4</code>, prove that for some <code>s&gt;=0</code>, the square of the shifted integer <code>A+s</code> has a divisor congruent to &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; 3s+2\pmod{4s+3}.</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<p>A finite set of <code>s</code> values would give a finite universal fab menu if proved sufficient. An expanding-set descent would also suffice.</p>
+<p>This is a substantially simpler arithmetic target than the original two-parameter fab conditions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

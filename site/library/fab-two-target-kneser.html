@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Two-target Kneser collapse for external nonresidue shifts — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-two-target-kneser.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-two-target-kneser.html">
+  <meta property="og:title" content="Two-target Kneser collapse for external nonresidue shifts — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Two-target Kneser collapse for external nonresidue shifts</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-TWO-TARGET-KNESER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-KNESER-DIVISOR-DEFECT.md</code>, <code>FAB-TYPE-II-SIGNED-DIVISOR.md</code>, <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code></p>
+<p><strong>Claim boundary:</strong> this removes every odd-index Kneser stabilizer defect from the combined Type-I/Type-II Erdős--Straus problem at an external nonresidue prime shift and strengthens the remaining Kneser budget by exploiting inversion symmetry. It does not eliminate the remaining even-index defects and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Same box, two solution targets</h2>
+<p>Let <code>p</code> be a Mordell-hard prime and let <code>q&lt;p</code> be an external quadratic-nonresidue prime satisfying</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+q}{4} =\prod_i r_i^{e_i}, \qquad G=(\mathbb Z/q\mathbb Z)^\times.</div>
+<p>The fixed-<code>q</code> signed divisor box is</p>
+<div class="math" role="math">\boxed{ R= \left\{ \prod_i r_i^{z_i}\pmod q: -e_i\le z_i\le e_i \right\}. }</div>
+<p>It is inversion-symmetric:</p>
+<div class="math" role="math">\boxed{R^{-1}=R.}</div>
+<p>Two exact sufficient targets live in the same box:</p>
+<div class="math" role="math">\boxed{\tau_I=-p^{-1}\pmod q}</div>
+<p>from the strong fixed-<code>q</code> FAB / normalized Type-I lane, and</p>
+<div class="math" role="math">\boxed{\tau_{II}=-1\pmod q}</div>
+<p>from the normalized Type-II lane.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \tau_I\in R \quad\text{or}\quad \tau_{II}\in R \Longrightarrow p\text{ satisfies Erdős--Straus}.}</div>
+<p>Because <code>R=R^{-1}</code>, a Type-I miss automatically also misses</p>
+<div class="math" role="math">\boxed{\tau_I^{-1}=-p.}</div>
+<p>Thus a genuine combined failure excludes three natural residues:</p>
+<div class="math" role="math">\boxed{-p^{-1},\quad -p,\quad -1.}</div>
+<hr>
+<h2>2. Quadratic character positions</h2>
+<p>Because <code>p≡1 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pq\right) = \left(\frac qp\right) =-1.</div>
+<p>Also <code>q≡3 mod4</code>, so</p>
+<div class="math" role="math">\left(\frac{-1}{q}\right)=-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left(\frac{-p^{-1}}q\right)=+1, \qquad \left(\frac{-p}q\right)=+1, \qquad \left(\frac{-1}q\right)=-1. }</div>
+<p>The two inverse Type-I orientations lie on the quadratic-residue side, while the Type-II target lies on the quadratic-nonresidue side.</p>
+<hr>
+<h2>3. Stabilizer and Kneser setup</h2>
+<p>Let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R)</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{n=[G:H].}</div>
+<p>Because <code>1∈R</code> and <code>R</code> is <code>H</code>-periodic,</p>
+<div class="math" role="math">\boxed{H\subseteq R.}</div>
+<p>For each prime factor <code>r_i</code> of <code>C</code>, define</p>
+<div class="math" role="math">d_i=\operatorname{ord}_{G/H}(r_iH), \qquad s_i=\min(2e_i+1,d_i).</div>
+<p>Kneser&#x27;s theorem gives</p>
+<div class="math" role="math">\boxed{
+<p>|R| \ge</p>
+<p>|H|\left(1+\sum_i(s_i-1)\right). }&lt;/div&gt;</p>
+<hr>
+<h2>4. Odd stabilizer index is impossible</h2>
+<p>Assume both solution targets are missed.</p>
+<p>If <code>n</code> were odd, then because</p>
+<div class="math" role="math">q-1=2m</div>
+<p>with <code>m</code> odd, the subgroup <code>H</code> would have even order. The cyclic group <code>G</code> has a unique element of order two, namely <code>-1</code>, so every even-order subgroup contains <code>-1</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">-1\in H\subseteq R,</div>
+<p>contradicting the Type-II miss.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{n\text{ is even}.}</div>
+<p>This eliminates every odd-index Type-I Kneser defect from the combined Erdős--Straus obstruction.</p>
+<hr>
+<h2>5. Index two is impossible</h2>
+<p>If <code>n=2</code>, then <code>H</code> is the quadratic-residue subgroup. The Type-I target <code>-p^{-1}</code> is a quadratic residue, so</p>
+<div class="math" role="math">-p^{-1}\in H\subseteq R,</div>
+<p>contradicting failure.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ \text{combined failure} \Longrightarrow n\ge6\text{ and }n\text{ is even}.}</div>
+<p>Since <code>v_2(q-1)=1</code>, every possible combined defect index has the form</p>
+<div class="math" role="math">\boxed{n=2m,\qquad m\ge3\text{ odd}.}</div>
+<p>The first possible index is <code>6</code>, not <code>3</code>.</p>
+<hr>
+<h2>6. Three distinct missed H-cosets</h2>
+<p>For an even combined defect index, <code>H</code> has odd order. Hence</p>
+<div class="math" role="math">H\subseteq G^2,</div>
+<p>the quadratic-residue subgroup.</p>
+<p>The Type-II target <code>-1</code> is a quadratic nonresidue, while <code>-p^{-1}</code> and <code>-p</code> are quadratic residues. Therefore</p>
+<div class="math" role="math">(-1)H</div>
+<p>is distinct from both Type-I target cosets.</p>
+<p>It remains to compare the inverse Type-I cosets.</p>
+<p>Because <code>H</code> has odd order, the quotient</p>
+<div class="math" role="math">G^2/H</div>
+<p>also has odd order. The class of <code>-p^{-1}</code> lies in this quotient. If</p>
+<div class="math" role="math">(-p^{-1})H=(-p)H,</div>
+<p>then the class of <code>-p^{-1}</code> would equal its inverse and therefore have order at most two. An odd-order group has no nontrivial element of order two, so this would force</p>
+<div class="math" role="math">-p^{-1}\in H\subseteq R,</div>
+<p>contradicting the assumed Type-I miss.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ (-p^{-1})H, \quad (-p)H, \quad (-1)H \text{ are three distinct }H\text{-cosets}.}</div>
+<hr>
+<h2>7. Symmetric three-coset Kneser budget</h2>
+<p>A combined failure therefore misses at least three distinct <code>H</code>-cosets. Since <code>R</code> is <code>H</code>-periodic,</p>
+<div class="math" role="math">\boxed{|R|\le(n-3)|H|.}</div>
+<p>Combining with the Kneser lower bound gives</p>
+<div class="math" role="math">1+\sum_i(s_i-1) \le n-3.</div>
+<p>Thus:</p>
+<h3>Theorem — symmetric combined defect budget</h3>
+<p>If both Type I and Type II miss at an external nonresidue prime shift, then</p>
+<div class="math" role="math">\boxed{ \sum_i \left( \min(2e_i+1,\operatorname{ord}_{G/H}(r_iH))-1 \right) \le n-4, \qquad n=[G:H]. }</div>
+<p>This improves the original one-target budget <code>n-2</code> by <strong>two full units of quotient room</strong>.</p>
+<hr>
+<h2>8. Odd-index defects are automatically Type-II rescued</h2>
+<p>The one-target analysis previously identified cubic index <code>3</code> as the first possible Type-I defect, followed by prime indices <code>5,7,11,...</code>.</p>
+<p>For the full equation, none of those odd-index defects can survive. At any odd index, <code>-1∈H⊆R</code>, so the Type-II target is already hit at the same fixed shift.</p>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{ \text{Type-I cubic defect} \Longrightarrow \text{Type-II rescue at the same }q.}</div>
+<p>The same implication holds for every odd stabilizer index.</p>
+<hr>
+<h2>9. First combined case: index six</h2>
+<p>At</p>
+<div class="math" role="math">n=6,</div>
+<p>the symmetric combined budget becomes</p>
+<div class="math" role="math">\boxed{ \sum_i(s_i-1)\le2.}</div>
+<p>Moreover the quotient has six classes. Because a combined failure misses exactly the three distinguished target-side classes at minimum,</p>
+<div class="math" role="math">(-p^{-1})H, \quad (-p)H, \quad (-1)H,</div>
+<p>only three quotient classes can remain occupied by the signed box.</p>
+<p><code>FAB-INDEX6-COMBINED-DEFECT.md</code> proves that this forces a single primitive sextic factor.</p>
+<hr>
+<h2>10. Strategic consequence</h2>
+<p>The direct ES search should no longer classify odd-prime Kneser defects one by one.</p>
+<p>The residual wall is now</p>
+<div class="math" role="math">\boxed{ \text{external nonresidue }q +\text{three target cosets missed} +\text{even stabilizer index }n\ge6 +\text{symmetric budget }\le n-4.}</div>
+<p>The first case is index six with budget only <code>2</code>. If index six is eliminated, the search jumps directly to the next even quotient <code>2m</code> under the same stronger symmetric budget.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

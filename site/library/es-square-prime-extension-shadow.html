@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-extension shadow family for square-completed Type-II layers — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-prime-extension-shadow.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-prime-extension-shadow.html">
+  <meta property="og:title" content="Prime-extension shadow family for square-completed Type-II layers — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-extension shadow family for square-completed Type-II layers</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-PRIME-EXTENSION-SHADOW.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved infinite exact shadow theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>THEORY.md</code></p>
+<p><strong>Imported classical tool:</strong> Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> proves an infinite family of structural gaps inside the square-completed Type-II depth system. It does not prove universal completed coverage or Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>For every positive layer index <code>k</code>, put</p>
+<div class="math" role="math">m_k=4k-1</div>
+<p>and define the completed trap</p>
+<div class="math" role="math">\boxed{ S_k =\{-4D\pmod{m_k}:D\mid k^2\}.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{S_k=-\mathcal R_{m_k}(k)}</div>
+<p>where <code>R</code> is the centered symmetric signed divisor box.</p>
+<p>Fix an earlier layer</p>
+<div class="math" role="math">\boxed{j\ge1.}</div>
+<p>Let <code>r</code> be a prime satisfying</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod{m_j}.}</div>
+<p>Define the later layer</p>
+<div class="math" role="math">\boxed{k=jr.}</div>
+<hr>
+<h2>2. Modulus ancestry is automatic</h2>
+<p>Modulo</p>
+<div class="math" role="math">m_j=4j-1,</div>
+<p>we have</p>
+<div class="math" role="math">4j\equiv1.</div>
+<p>Therefore</p>
+<div class="math" role="math">4jr-1 \equiv r-1 \pmod{m_j}.</div>
+<p>Since</p>
+<div class="math" role="math">r\equiv1\pmod{m_j},</div>
+<p>it follows that</p>
+<div class="math" role="math">\boxed{m_j\mid m_k.}</div>
+<p>Thus <code>j</code> is a genuine modulus ancestor of <code>k</code>.</p>
+<p>Equivalently, the standard ancestry relation gives</p>
+<div class="math" role="math">k\equiv j\pmod{m_j}.</div>
+<hr>
+<h2>3. The new prime factor is invisible in the ancestor group</h2>
+<p>Factor</p>
+<div class="math" role="math">j=\prod_i\ell_i^{E_i}.</div>
+<p>Then</p>
+<div class="math" role="math">k=jr</div>
+<p>has the same prime factors as <code>j</code>, together with one additional copy of <code>r</code> if <code>r</code> is new, or one extra exponent at <code>r</code> if <code>r</code> already divides <code>j</code>.</p>
+<p>But modulo <code>m_j</code>,</p>
+<div class="math" role="math">\boxed{r\equiv1.}</div>
+<p>Therefore every signed power of <code>r</code> is the identity:</p>
+<div class="math" role="math">\boxed{r^z\equiv1\pmod{m_j}\quad\text{for every integer }z.}</div>
+<p>So the extra signed exponent direction created by multiplying the layer index by <code>r</code> contributes no new residue at all in the ancestor unit group.</p>
+<hr>
+<h2>4. Exact signed-box reduction</h2>
+<p>The completed signed box of <code>k=jr</code> reduces modulo <code>m_j</code> to the signed box generated by the prime powers already present in <code>j</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \mathcal R_{m_k}(k)\bmod m_j = \mathcal R_{m_j}(j).}</div>
+<p>Multiplying by <code>-1</code> gives the completed trap identity:</p>
+<h3>Theorem — exact prime-extension shadow</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{k=jr, \qquad r\text{ prime}, \qquad r\equiv1\pmod{4j-1},}</div>
+<p>then</p>
+<div class="math" role="math">\boxed{ S_k\bmod(4j-1) =S_j.}</div>
+<p>Thus every congruence hit at layer <code>k</code> is already a hit at the earlier layer <code>j</code>.</p>
+<p>The later layer is completely directly shadowed.</p>
+<hr>
+<h2>5. Structural-gap consequence</h2>
+<p>For every integer <code>n</code>, if</p>
+<div class="math" role="math">n\bmod m_k\in S_k,</div>
+<p>then reduction along</p>
+<div class="math" role="math">m_j\mid m_k</div>
+<p>gives</p>
+<div class="math" role="math">n\bmod m_j\in S_j.</div>
+<p>Therefore <code>k=jr</code> cannot be the first completed hit of any integer.</p>
+<p>Hence:</p>
+<h3>Corollary — prime-extension structural gap</h3>
+<div class="math" role="math">\boxed{ r\equiv1\pmod{4j-1} \Longrightarrow jr\text{ is impossible as a square-completed minimal depth}.}</div>
+<p>This holds without any hard-prime restriction.</p>
+<hr>
+<h2>6. Infinite family from every layer</h2>
+<p>Because</p>
+<div class="math" role="math">\gcd(1,4j-1)=1,</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many primes</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod{4j-1}.}</div>
+<p>Therefore:</p>
+<h3>Theorem — every layer has infinitely many dead prime extensions</h3>
+<p>For every fixed</p>
+<div class="math" role="math">\boxed{j\ge1,}</div>
+<p>there are infinitely many composite layer indices</p>
+<div class="math" role="math">\boxed{k=jr}</div>
+<p>that are completely directly shadowed by <code>j</code> in the square-completed Type-II system.</p>
+<p>So the completed minimal-depth spectrum has infinitely many structural gaps above every base layer.</p>
+<hr>
+<h2>7. Example: j = 2</h2>
+<p>Take</p>
+<div class="math" role="math">j=2, \qquad m_j=7.</div>
+<p>Every prime</p>
+<div class="math" role="math">r\equiv1\pmod7</div>
+<p>produces a dead descendant</p>
+<div class="math" role="math">k=2r.</div>
+<p>For example</p>
+<div class="math" role="math">r=29</div>
+<p>gives</p>
+<div class="math" role="math">k=58, \qquad m_k=231=33\cdot7.</div>
+<p>Modulo <code>7</code>, the new prime is</p>
+<div class="math" role="math">29\equiv1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{S_{58}\bmod7=S_2.}</div>
+<p>Thus layer <code>58</code> carries no completed first-hit information beyond layer <code>2</code>.</p>
+<hr>
+<h2>8. Relation to the prime-index theorem</h2>
+<p><code>ES-SQUARE-PRIME-INDEX-SPECTRUM.md</code> showed that a prime-index layer <code>a</code> is structurally dead whenever <code>4a-1</code> is composite.</p>
+<p>The present theorem is complementary:</p>
+<ul><li>the prime-index theorem kills layers because the <strong>target modulus</strong> has an earlier <code>3 mod 4</code> divisor;</li><li>the prime-extension theorem kills composite indices because a <strong>new prime factor of the layer index becomes the identity</strong> in the ancestor unit group.</li></ul>
+<p>Both mechanisms become transparent in the completed signed-box coordinate.</p>
+<hr>
+<h2>9. Natural generalization</h2>
+<p>The proof uses only one property of the extension factor: every new signed exponent direction must be trivial modulo the ancestor modulus.</p>
+<p>Thus a broader sufficient condition is immediate.</p>
+<p>Suppose</p>
+<div class="math" role="math">k=jB</div>
+<p>and every prime divisor <code>r</code> of <code>B</code> satisfies</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod{4j-1}.}</div>
+<p>Then every signed power contributed by <code>B</code> is trivial modulo <code>m_j</code>, and therefore</p>
+<div class="math" role="math">\boxed{S_k\bmod m_j=S_j.}</div>
+<p>The prime-extension theorem is the irreducible one-prime version of this more general identity-extension shadow.</p>
+<hr>
+<h2>10. Research consequence</h2>
+<p>The composite completed spectrum now has at least two explicit infinite deletion mechanisms:</p>
+<ol><li>prime-power/Mersenne ancestry gaps, where the old López layer is already complete;</li><li>identity-extension gaps, where new prime directions collapse to the identity in an ancestor group.</li></ol>
+<p>The remaining composite-index problem should therefore factor out all prime divisors of the layer index that are <code>1</code> modulo an ancestry modulus before treating the residual signed box.</p>
+<p>This suggests an <strong>ancestry reduction kernel</strong> for completed layers: remove identity directions first, then apply Kneser only to genuinely nontrivial projected prime factors.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

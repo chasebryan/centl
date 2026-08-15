@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be a Mordell-hard prime:">
+  <title>First exact shifted-factor filters for Mordell-hard primes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-hard-first-filters.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-hard-first-filters.html">
+  <meta property="og:title" content="First exact shifted-factor filters for Mordell-hard primes — Free Computation Foundation">
+  <meta property="og:description" content="Let p be a Mordell-hard prime:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>First exact shifted-factor filters for Mordell-hard primes</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p be a Mordell-hard prime:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-HARD-FIRST-FILTERS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved sufficient families and necessary restrictions on any prime counterexample</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code></p>
+<p><strong>Claim boundary:</strong> these filters remove infinite families and sharply constrain a hypothetical counterexample. They do not prove that the remaining intersection is empty.</p>
+<h2>1. Hard-prime facts</h2>
+<p>Let <code>p</code> be a Mordell-hard prime:</p>
+<div class="math" role="math">p\bmod840\in\{1,121,169,289,361,529\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{24}.}</div>
+<p>In particular <code>p≡1 mod8</code> and <code>p≡1 mod3</code>.</p>
+<hr>
+<h2>2. The p+1 / mod-4 filter</h2>
+<p>Take <code>a=b=1</code> in the coprime divisor criterion. A certificate exists whenever</p>
+<div class="math" role="math">\exists k\mid p+1,\qquad k\equiv-p\equiv3\pmod4.</div>
+<p>Thus a counterexample must satisfy:</p>
+<div class="math" role="math">\boxed{ \text{every odd prime factor of }(p+1)/2\text{ is }1\pmod4. }</div>
+<p>This is the familiar simplest Type-B spine, included here to align the hierarchy.</p>
+<hr>
+<h2>3. Exact k=3 filter</h2>
+<p>Set</p>
+<div class="math" role="math">N_3^-:=\frac{p+3}{4}.</div>
+<p>Because <code>p≡1 mod24</code>, this is an odd integer congruent to <code>1 mod3</code>.</p>
+<h3>Theorem</h3>
+<p>If <code>N_3^-</code> has a divisor</p>
+<div class="math" role="math">a\equiv2\pmod3,</div>
+<p>then <code>fab(p,a,1)&gt;0</code> with admissible divisor</p>
+<div class="math" role="math">\boxed{k=3.}</div>
+<h3>Proof</h3>
+<p>Since <code>a|N_3^-</code>,</p>
+<div class="math" role="math">4a\mid p+3.</div>
+<p>Also <code>p≡1 mod3</code> and <code>a≡2 mod3</code>, hence</p>
+<div class="math" role="math">3\mid p+a.</div>
+<p>Thus <code>k=3</code> divides <code>a+p</code> and</p>
+<div class="math" role="math">3\equiv-p\pmod{4a}</div>
+<p>because <code>4a|p+3</code>. The coprime divisor criterion with <code>b=1</code> applies. QED.</p>
+<p>Since <code>N_3^-≡1 mod3</code>, it has a divisor <code>2 mod3</code> if and only if it has a prime factor <code>2 mod3</code>.</p>
+<p>Therefore any prime counterexample must satisfy</p>
+<div class="math" role="math">\boxed{ \text{every prime factor of }\frac{p+3}{4}\text{ is }1\pmod3. }</div>
+<p>An explicit decomposition is obtained by putting</p>
+<div class="math" role="math">t=\frac{p+3}{4a}, \qquad q=\frac{p+a}{3},</div>
+<p>which gives</p>
+<div class="math" role="math">\frac4p = \frac1{at} + \frac1{aqt} + \frac1{pqt}.</div>
+<hr>
+<h2>4. Dual d=3 filter</h2>
+<p>Set</p>
+<div class="math" role="math">N_3^+:=\frac{3p+1}{4}.</div>
+<p>Again <code>N_3^+≡1 mod3</code>.</p>
+<h3>Theorem</h3>
+<p>If <code>N_3^+</code> has a divisor</p>
+<div class="math" role="math">c\equiv2\pmod3,</div>
+<p>then <code>p</code> has a coprime fab certificate.</p>
+<h3>Construction</h3>
+<p>Put</p>
+<div class="math" role="math">q=\frac{N_3^+}{c}.</div>
+<p>Because <code>N_3^+≡1 mod3</code> and <code>c≡2 mod3</code>,</p>
+<div class="math" role="math">q\equiv2\pmod3.</div>
+<p>Define</p>
+<div class="math" role="math">a=\frac{q+1}{3}, \qquad k=\frac{4c+1}{3}.</div>
+<p>Both are positive integers, and since</p>
+<div class="math" role="math">3k=4c+1\equiv1\pmod4,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{k\equiv3\pmod4.}</div>
+<p>Now</p>
+<div class="math" role="math">3(a+p)=q+1+3p=q+(4cq-1)=q(4c+1)=3kq,</div>
+<p>so</p>
+<div class="math" role="math">k\mid a+p.</div>
+<p>Also</p>
+<div class="math" role="math">3(p+k)=3p+4c+1=4c(q+1)=12ac,</div>
+<p>hence</p>
+<div class="math" role="math">4a\mid p+k.</div>
+<p>Thus <code>k</code> satisfies the coprime divisor criterion for <code>(a,b)=(a,1)</code>. QED.</p>
+<p>Consequently any prime counterexample must also satisfy</p>
+<div class="math" role="math">\boxed{ \text{every prime factor of }\frac{3p+1}{4}\text{ is }1\pmod3. }</div>
+<hr>
+<h2>5. The two Eisenstein-split neighbours</h2>
+<p>A hypothetical Mordell-hard prime counterexample must therefore have</p>
+<div class="math" role="math">A:=\frac{p+3}{4}, \qquad B:=\frac{3p+1}{4}</div>
+<p>with every prime factor of both <code>A</code> and <code>B</code> equal to <code>1 mod3</code>.</p>
+<p>These numbers satisfy the exact relation</p>
+<div class="math" role="math">\boxed{B=3A-2.}</div>
+<p>Hence the all-prime remainder is contained in the simultaneous splitting problem</p>
+<div class="math" role="math">\boxed{ A\text{ and }3A-2 \text{ are composed entirely of primes }1\pmod3. }</div>
+<p>Equivalently, both lie in the multiplicative semigroup of rational primes that split in the Eisenstein quadratic field, with no ramified factor <code>3</code> and no inert factor <code>2 mod3</code>.</p>
+<p>This is a structural restriction, not a contradiction: examples exist. Its value is that every subsequent rescue theorem may assume this simultaneous split structure.</p>
+<hr>
+<h2>6. The p+2 / mod-8 filter</h2>
+<p>Take <code>(a,b)=(2,1)</code>. Since hard <code>p≡1 mod8</code>, the target divisor class is</p>
+<div class="math" role="math">-p\equiv7\pmod8.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ \exists k\mid p+2,\quad k\equiv7\pmod8 \Longrightarrow p\text{ is solved.} }</div>
+<p>The absence of such a divisor has an exact factorization description.</p>
+<p>Because</p>
+<div class="math" role="math">p+2\equiv3\pmod8,</div>
+<p>a divisor <code>7 mod8</code> exists unless all prime factors of <code>p+2</code> are in the classes</p>
+<div class="math" role="math">\boxed{1\text{ or }3\pmod8.}</div>
+<p>Indeed a prime factor <code>7 mod8</code> is itself a forbidden divisor, while a factor <code>3 mod8</code> times a factor <code>5 mod8</code> gives <code>7 mod8</code>. If no <code>7</code> divisor exists, classes <code>3</code> and <code>5</code> cannot both occur; the total residue <code>3 mod8</code> then forces the nontrivial class to be <code>3</code>, with odd total valuation parity.</p>
+<p>So a counterexample must satisfy</p>
+<div class="math" role="math">\boxed{ \text{every prime factor of }p+2\text{ is }1\text{ or }3\pmod8. }</div>
+<hr>
+<h2>7. Counterexample sieve produced by theorem, not by range</h2>
+<p>Every prime counterexample in the six Mordell-hard classes must simultaneously satisfy:</p>
+<ol><li><code>(p+1)/2</code> has only odd prime factors <code>1 mod4</code>;</li><li><code>(p+3)/4</code> has only prime factors <code>1 mod3</code>;</li><li><code>(3p+1)/4</code> has only prime factors <code>1 mod3</code>;</li><li><code>p+2</code> has only prime factors <code>1 or 3 mod8</code>.</li></ol>
+<p>These are exact infinite restrictions. They should be used as assumptions in the next descent rather than merely as computational filters.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

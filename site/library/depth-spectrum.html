@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For a prime p, define">
+  <title>The Type A/B minimal-depth spectrum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/depth-spectrum.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/depth-spectrum.html">
+  <meta property="og:title" content="The Type A/B minimal-depth spectrum — Free Computation Foundation">
+  <meta property="og:description" content="For a prime p, define">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>The Type A/B minimal-depth spectrum</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For a prime p, define</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DEPTH-SPECTRUM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> active research note</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> the theorems below are elementary consequences of the Type A/B congruence system, CRT, covering congruences, and Dirichlet&#x27;s theorem. The terminology and organization are part of the CENTL/FCF research program; no literature-priority claim is made here without a separate prior-art review.</p>
+<h2>1. Minimal Type A/B depth</h2>
+<p>For a prime <code>p</code>, define</p>
+<div class="math" role="math">C_{AB}(p)=\min\{k\ge1:\exists e\mid k,\ p\equiv-e\text{ or }-4e\pmod{4k-1}\},</div>
+<p>with <code>C_AB(p)=infinity</code> when no Type A/B witness exists.</p>
+<p>Write</p>
+<div class="math" role="math">m_k=4k-1, \qquad T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<p>Then <code>C_AB(p)=k</code> exactly when</p>
+<div class="math" role="math">p\bmod m_k\in T_k</div>
+<p>and</p>
+<div class="math" role="math">p\bmod m_j\notin T_j\qquad(1\le j&lt;k).</div>
+<p>The Mordell hard residue classes used here are</p>
+<div class="math" role="math">H=\{1,121,169,289,361,529\}\pmod{840}.</div>
+<h2>2. Exact candidate progression</h2>
+<p>Fix a layer <code>k</code>, hard class <code>h in H</code>, and a unit trap residue <code>t in T_k</code> compatible with <code>h</code> modulo <code>gcd(840,m_k)</code>.</p>
+<p>CRT gives a progression</p>
+<div class="math" role="math">x\equiv r\pmod L, \qquad L=\operatorname{lcm}(840,m_k),</div>
+<p>that simultaneously enforces</p>
+<div class="math" role="math">x\equiv h\pmod{840}, \qquad x\equiv t\pmod{m_k}.</div>
+<p>Write every integer in this progression as</p>
+<div class="math" role="math">x=r+Ls.</div>
+<p>For each earlier layer <code>j&lt;k</code>, put</p>
+<div class="math" role="math">g_j=\gcd(L,m_j), \qquad q_j=\frac{m_j}{g_j}.</div>
+<p>The earlier hit condition induces a finite forbidden set</p>
+<div class="math" role="math">R_j\subseteq\mathbb Z/q_j\mathbb Z</div>
+<p>such that</p>
+<div class="math" role="math">r+Ls\bmod m_j\in T_j \quad\Longleftrightarrow\quad s\bmod q_j\in R_j.</div>
+<p>Thus the entire minimal-depth problem for this candidate becomes a finite congruence-avoidance problem in the single parameter <code>s</code>.</p>
+<h2>3. Shadow closure is a covering-system problem</h2>
+<p>For a fixed <code>(k,h,t)</code> candidate, the family</p>
+<div class="math" role="math">\mathcal R_{&lt;k}=\{R_j\pmod{q_j}:1\le j&lt;k\}</div>
+<p>is a finite covering system on the parameter <code>s</code>.</p>
+<ul><li>If the union covers every integer <code>s</code>, the candidate is <strong>jointly shadowed</strong> by the earlier Type A/B layers.</li><li>If some <code>s</code> escapes the union, the candidate survives the entire earlier shadow closure.</li><li>Direct shadowing is the special case where one earlier layer alone covers every possible <code>s</code>.</li></ul>
+<p>This is stronger than the original pairwise shadow graph. The graph records one-layer implications; the covering system records their complete union.</p>
+<p>Define the <strong>shadow closure</strong> of the earlier layers on this candidate by</p>
+<div class="math" role="math">\operatorname{Sh}_{&lt;k}(h,t) = \bigcup_{j&lt;k}\{s:s\bmod q_j\in R_j\}.</div>
+<p>Then</p>
+<div class="math" role="math">\operatorname{Sh}_{&lt;k}(h,t)=\mathbb Z</div>
+<p>if and only if the candidate is impossible as a minimal-depth class.</p>
+<h2>4. Exact depth-realization theorem</h2>
+<p>Let</p>
+<div class="math" role="math">Q=\operatorname{lcm}\{q_j:1\le j&lt;k,\ R_j\ne\varnothing\}.</div>
+<p>Suppose there exists <code>s0</code> such that</p>
+<div class="math" role="math">s_0\bmod q_j\notin R_j\qquad\text{for every }j&lt;k</div>
+<p>and</p>
+<div class="math" role="math">\gcd(r+Ls_0,LQ)=1.</div>
+<p>Then every integer in the progression</p>
+<div class="math" role="math">p=r+Ls_0+LQz</div>
+<p>avoids every earlier Type A/B layer and hits layer <code>k</code>.</p>
+<p>Because the residue is coprime to the modulus, Dirichlet&#x27;s theorem gives infinitely many primes in this progression. Consequently,</p>
+<div class="math" role="math">\boxed{\text{infinitely many primes }p\equiv h\pmod{840}\text{ satisfy }C_{AB}(p)=k.}</div>
+<h3>Converse</h3>
+<p>If infinitely many primes in the fixed <code>(k,h,t)</code> candidate have minimal depth <code>k</code>, then at least one of their parameter residues modulo <code>Q</code> is an avoiding residue coprime to <code>LQ</code>. Therefore the criterion above is also necessary for infinite prime realization of that fixed candidate.</p>
+<p>This converts a question about an infinite prime population into a finite modular decision problem.</p>
+<h2>5. The hard-class depth spectrum</h2>
+<p>Define</p>
+<div class="math" role="math">\mathcal D_H=\{k:\text{infinitely many primes }p\bmod840\in H\text{ have }C_{AB}(p)=k\}.</div>
+<p>A layer can fail to enter this spectrum for at least two immediately detectable reasons:</p>
+<ol><li>it has no prime-compatible hard-class trap candidate;</li><li>every admissible candidate is already forced into an earlier Type A/B layer.</li></ol>
+<p>The full obstruction is joint shadow closure. A layer lies in <code>D_H</code> exactly when at least one compatible candidate has an uncovered parameter class that is reduced modulo its total period.</p>
+<p>The problem therefore has two dual sides:</p>
+<ul><li><strong>obstruction:</strong> earlier congruence classes cover the entire parameter line;</li><li><strong>realization:</strong> an uncovered reduced residue class survives, and Dirichlet populates it with infinitely many primes.</li></ul>
+<h2>6. Structural gaps, latency gaps, and the arrival function</h2>
+<p>Finite prime sweeps can show a zero at layer <code>k</code> for two fundamentally different reasons.</p>
+<h3>Structural gap</h3>
+<p>A layer is a <strong>structural gap</strong> when</p>
+<div class="math" role="math">k\notin\mathcal D_H.</div>
+<p>No sufficiently large search will ever produce a hard-class prime with exact depth <code>k</code>.</p>
+<h3>Latency gap</h3>
+<p>At a finite cutoff <code>X</code>, a layer is a <strong>latency gap</strong> when</p>
+<div class="math" role="math">k\in\mathcal D_H</div>
+<p>but its first realization lies beyond <code>X</code>.</p>
+<p>Define the <strong>arrival function</strong></p>
+<div class="math" role="math">\lambda_H(k) = \min\{p:\ p\text{ prime},\ p\bmod840\in H,\ C_{AB}(p)=k\},</div>
+<p>for <code>k in D_H</code>, and set <code>lambda_H(k)=infinity</code> for structural gaps.</p>
+<p>This separates an arithmetic impossibility from a finite-range absence. It also gives a new inverse view of the record frontier: instead of asking how deep <code>C_AB</code> has become by prime size <code>X</code>, ask when each admissible depth first enters the prime population.</p>
+<h2>7. The k=104 anomaly resolves</h2>
+<p>The finite hard-prime sweep through <code>10^7</code> had a striking pattern. Among the zero-first-hit layers through <code>k=109</code>, every layer except <code>k=104</code> was already explained by either absence of admissible hard-prime candidates or complete direct shadowing.</p>
+<p>Layer <code>104</code> was the lone apparent hole.</p>
+<p>For <code>k=104</code>,</p>
+<div class="math" role="math">m_{104}=415.</div>
+<p>Take</p>
+<div class="math" role="math">h=169, \qquad t=399.</div>
+<p>Since</p>
+<div class="math" role="math">399\equiv-4\cdot4\pmod{415},</div>
+<p>this is a Type A trap with</p>
+<div class="math" role="math">d=4, \qquad n=26, \qquad dn=104.</div>
+<p>CRT gives</p>
+<div class="math" role="math">r=19489, \qquad L=69720.</div>
+<p>The parameter</p>
+<div class="math" role="math">s_0=158</div>
+<p>avoids every Type A/B layer <code>j&lt;104</code>, and produces</p>
+<div class="math" role="math">\boxed{p=19489+69720\cdot158=11035249.}</div>
+<p>Direct deterministic checking gives</p>
+<div class="math" role="math">\boxed{p=11035249\text{ is prime and }C_{AB}(p)=104.}</div>
+<p>It is in the hard class</p>
+<div class="math" role="math">p\equiv169\pmod{840}</div>
+<p>and</p>
+<div class="math" role="math">p\equiv399\pmod{415}.</div>
+<p>The full parameter-period certificate uses</p>
+<div class="math" role="math">Q= 1657066545168047912667733918921197871682681719068608922730379418987341668019768388986313127431496215</div>
+<p>and</p>
+<div class="math" role="math">M=LQ= 115530679529116300471194408827185915613716569453463414092762053091797461094338252080125751244523916109800.</div>
+<p>Moreover,</p>
+<div class="math" role="math">\gcd(11035249,M)=1.</div>
+<p>Therefore Dirichlet gives the stronger statement</p>
+<div class="math" role="math">\boxed{\text{infinitely many primes have }C_{AB}(p)=104.}</div>
+<p>The absence of depth <code>104</code> in the earlier <code>10^7</code> data was therefore a finite-range effect, not structural impossibility. The first hard-class occurrence in an exhaustive sieve through <code>11035249</code> is exactly <code>11035249</code>, so</p>
+<div class="math" role="math">\boxed{\lambda_H(104)=11035249.}</div>
+<p>Thus the unique unexplained zero in the earlier range was a latency gap sitting just beyond the cutoff.</p>
+<h2>8. Exact Erdős-Straus witness for p=11035249</h2>
+<p>For the Type A congruence</p>
+<div class="math" role="math">p\equiv-4d\pmod{4dn-1}</div>
+<p>with <code>d=4</code>, <code>n=26</code>, write</p>
+<div class="math" role="math">p=(4dn-1)q-4d=415q-16.</div>
+<p>For <code>p=11035249</code>,</p>
+<div class="math" role="math">q=26591.</div>
+<p>Set</p>
+<div class="math" role="math">u=nq-1=691365, \qquad v=np=286916474.</div>
+<p>The Type A solution <code>(du,dv,duv)</code> is</p>
+<div class="math" role="math">\boxed{x=2765460},</div>
+<div class="math" role="math">\boxed{y=1147665896},</div>
+<div class="math" role="math">\boxed{z=793456032188040}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \frac4{11035249} = \frac1{2765460} + \frac1{1147665896} + \frac1{793456032188040} }.</div>
+<p>CENTL separately certifies this exact rational identity in <code>depth-spectrum-contracts.centl</code>.</p>
+<h2>9. Computational spectrum result through k=300</h2>
+<p>The accompanying <code>depth_spectrum_probe.py</code> performs exact modular checks for the hard classes. In the current experiment through <code>k=300</code>:</p>
+<ul><li><code>66</code> layers have no admissible hard-prime candidate;</li><li><code>39</code> layers have admissible candidates but every one is completely directly shadowed by an earlier layer;</li><li>the remaining <code>195</code> layers all receive an explicit Dirichlet realization certificate with an avoiding parameter <code>s &lt;= 5000</code>.</li></ul>
+<p>So, through <code>k=300</code>, every layer not already killed by the two simplest structural obstructions is explicitly certified as infinitely prime-realizable in the hard classes.</p>
+<p>Independent high-range exploratory computation has continued this same dichotomy much farther, but the repository&#x27;s reproducible certificate floor remains <code>k&lt;=300</code> until the higher-range run is packaged and independently checked.</p>
+<p>This is a finite computational theorem-certificate result, not a proof that the same dichotomy holds for every <code>k</code>.</p>
+<h2>10. The theorem target hiding behind the data</h2>
+<p>The most important conjectural strengthening suggested by the calculations is:</p>
+<blockquote><p><strong>Direct-shadow completeness conjecture.</strong> Once prime compatibility is imposed, every admissible Type A/B candidate that is not completely directly shadowed by a single earlier layer possesses an uncovered reduced parameter class and is therefore infinitely prime-realizable.</p></blockquote>
+<p>Equivalently, in this system there may be no genuinely new obstruction created only by a union of several partial shadows.</p>
+<p>If true, this would collapse the full covering-system obstruction problem to the much simpler direct-shadow graph.</p>
+<p>That would give a structural characterization of the hard-class minimal-depth spectrum:</p>
+<div class="math" role="math">\boxed{ \mathcal D_H = \{k:\text{some hard-compatible candidate survives direct shadowing}\}. }</div>
+<p>This is not proved. It is now a concrete theorem target generated by the exact data.</p>
+<h2>11. Research target</h2>
+<p>The emerging object is no longer merely a list of difficult primes. It is the <strong>minimal Type A/B depth spectrum, its arrival function, and its obstruction theory</strong>.</p>
+<p>The immediate questions are:</p>
+<ul><li>Is direct-shadow completeness true for all <code>k</code>?</li><li>Can every non-shadowed candidate be shown to contain a reduced avoiding class without search?</li><li>Is there a structural characterization of the complement of <code>D_H</code>?</li><li>Can the shadow graph be quotiented to an irreducible congruence sieve whose vertices are exactly the prime-realizable depths?</li><li>What governs the growth of <code>lambda_H(k)</code> on the realizable spectrum?</li><li>Are record values of <code>C_AB(p)</code> controlled by unusually delayed arrivals, unusually sparse residue support, or both?</li><li>What asymptotic information about <code>C_AB(p)</code> follows from the density and geometry of these realizable depth classes?</li></ul>
+<p>A proof of direct-shadow completeness, or a counterexample exhibiting a genuinely joint-only shadow obstruction, would be a major structural step for this program.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

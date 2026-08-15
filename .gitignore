@@ -10,3 +10,10 @@ lab/sci-contributions/private/
 .venv/
 __pycache__/
 *.py[cod]
+
+# Erdős–Straus hunt runtime (rebuilt / local cursor)
+research/erdos-straus/CC.kernel/cc-kernel
+research/erdos-straus/CC.kernel/ledger/
+research/erdos-straus/findings/seeds/current.json
+research/erdos-straus/findings/seeds/*.tmp
+research/erdos-straus/findings/log.jsonl

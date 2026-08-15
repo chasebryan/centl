@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A finding is refused if it claims three denominators that fail">
+  <title>How grades are decided — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/how-grades-work.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/how-grades-work.html">
+  <meta property="og:title" content="How grades are decided — Free Computation Foundation">
+  <meta property="og:description" content="A finding is refused if it claims three denominators that fail">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>How grades are decided</h1><p>Finding · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Finding</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Finding</p>
+          <p class="dek">A finding is refused if it claims three denominators that fail</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/findings/HOW-GRADES-WORK.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>A finding is refused if it claims three denominators that fail</p>
+<pre><code class="language-text">4 · x · y · z  =  n · (y z + x z + x y)</code></pre>
+<p>Otherwise the engine attaches every rule that applies, then keeps the strongest stamp.</p>
+<h2>LETTER</h2>
+<ol><li><code>unsolved_after_search</code> — a Mordell-hard prime missed every construction.</li><li><code>window_broken</code> — <code>a,b ≤ 11</code> failed and a later search still (or did not) resolve it.</li><li><code>universal_strike</code> — the proof ledger claims a complete proof. Read the certificate. Finite hunts never set this by themselves.</li></ol>
+<p>Each letter also carries a <strong>letter number</strong>: the first 128 bits of SHA-256 of the exact text</p>
+<pre><code class="language-text">ES-LETTER-v1
+rule=&lt;one of the three rules&gt;
+n=&lt;the prime, or 0&gt;
+extra=&lt;empty, or a hash of a claimed certificate&gt;</code></pre>
+<p>The same letter is the same number on every machine. The hunt&#x27;s start factor, the clock, and the hostname are not in that text.</p>
+<h2>GREAT</h2>
+<ol><li><code>escaped_small_theorems</code> — missed <code>k = 3,7,11,15</code> and the <code>p+4</code> / <code>4p+1</code> filters.</li><li><code>type_I_only</code> — Type II missed, Type I hit.</li><li><code>deep_shift</code> — first two-target hit has <code>k ≥ 19</code>.</li><li><code>record_shift</code> — that <code>k</code> is larger than any previously filed <code>k</code>.</li><li><code>cleared_bound</code> — every hard prime below a stated bound has a checked witness.</li></ol>
+<h2>GOOD</h2>
+<ol><li><code>certified_hard_witness</code> — a checked identity for a hard prime that is not merely a routine small-shift hit.</li><li><code>new_method</code> — a construction name the catalog has not seen.</li></ol>
+<p>Erdős–Straus stays open unless a LETTER named <code>universal_strike</code> points at a complete deposited proof.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

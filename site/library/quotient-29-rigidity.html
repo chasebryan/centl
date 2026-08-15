@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quotient-29 shadow rigidity — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-29-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-29-rigidity.html">
+  <meta property="og:title" content="Quotient-29 shadow rigidity — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quotient-29 shadow rigidity</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-29-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem inside the Type A/B minimal-depth/shadow program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. Does not prove universal DSC-P, López coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="ancestry-asymptotic-skeleton.html">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li><li><a href="quotient-21-29-rigidity.html">QUOTIENT-21-29-RIGIDITY.md</a></li></ul>
+<h2>Theorem</h2>
+<p>Let</p>
+<div class="math" role="math">K=29j-7, \qquad m=4j-1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff K\text{ is prime or }K=7p\text{ with }p\text{ prime}. }</div>
+<p>In the second alternative necessarily <code>7|j</code>.</p>
+<h2>Direct implication</h2>
+<p>This is the divisor-child theorem with shift <code>s=7</code>.</p>
+<p>The only divisors of <code>7</code> are <code>1</code> and <code>7</code>, giving prime children and <code>7p</code> children when <code>7|j</code>.</p>
+<h2>Converse for j &gt;= 8</h2>
+<p>Because <code>s=7</code> is odd and <code>j&gt;=s+1</code>, the odd-shift asymptotic skeleton applies.</p>
+<p>Hence every full shadow is either:</p>
+<ol><li><code>7</code>-smooth, so <code>K=7^u</code>; or</li><li>prime or <code>7p</code>.</li></ol>
+<p>If <code>K=7^u&gt;7</code>, then <code>49|K</code>. Whenever <code>49&lt;m</code>, the odd divisor <code>49</code> lies below <code>m</code>, while</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,7)</div>
+<p>shows <code>49∤j</code>. Thus <code>49∉S_j</code>, impossible.</p>
+<p>Therefore a smooth exception requires</p>
+<div class="math" role="math">m\le49.</div>
+<p>With <code>j&gt;=8</code>, this leaves only</p>
+<div class="math" role="math">8\le j\le12.</div>
+<h2>Exact finite window j = 1,...,12</h2>
+<pre><code class="language-text">j=1:  K=22,  m=3;  divisor 2 escapes.
+j=2:  K=51,  m=7;  divisor 3 escapes.
+j=3:  K=80,  m=11; divisor 2 escapes.
+j=4:  K=109;        prime, shadowed.
+j=5:  K=138, m=19; divisor 2 escapes.
+j=6:  K=167;        prime, shadowed.
+j=7:  K=196, m=27; divisor 2 escapes.
+j=8:  K=225, m=31; divisor 3 escapes.
+j=9:  K=254, m=35; divisor 2 escapes.
+j=10: K=283;        prime, shadowed.
+j=11: K=312, m=43; divisor 2 escapes.
+j=12: K=341, m=47; divisor 11 escapes.</code></pre>
+<p>Thus no smooth or other exceptional child survives the finite window. For <code>j&gt;=13</code>, the skeleton leaves only prime or <code>7p</code>.</p>
+<p>This completes the classification. QED.</p>
+<h2>Regression note</h2>
+<p>Earlier drafts referred to a bounded computational gate in the small range. The canonical proof no longer needs that gate: all twelve small values are displayed with explicit escaping divisors or primality.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

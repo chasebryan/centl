@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Full-stabilizer compression of FAB Kneser defects — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-kneser-full-stabilizer-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-kneser-full-stabilizer-defect.html">
+  <meta property="og:title" content="Full-stabilizer compression of FAB Kneser defects — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Full-stabilizer compression of FAB Kneser defects</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-KNESER-FULL-STABILIZER-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal strengthening of <code>FAB-KNESER-DIVISOR-DEFECT.md</code></p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-KNESER-DIVISOR-DEFECT.md</code></p>
+<p><strong>Claim boundary:</strong> compresses every failed fixed-k FAB product box once its full stabilizer is taken. It does not prove that some auxiliary k must always succeed and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">C=\frac{p+k}{4}=\prod_i r_i^{e_i}</div>
+<p>and let</p>
+<div class="math" role="math">R=\prod_i \{r_i^{-e_i},\ldots,r_i^{-1},1,r_i,\ldots,r_i^{e_i}\} \subseteq G_k=(\mathbb Z/k\mathbb Z)^\times</div>
+<p>be the fixed-k signed divisor box.</p>
+<p>Assume its exact FAB target is missed.</p>
+<p>Let</p>
+<div class="math" role="math">\boxed{H=\operatorname{Stab}(R)}</div>
+<p>be the <strong>full</strong> stabilizer, and put</p>
+<div class="math" role="math">\bar G=G_k/H, \qquad n=|\bar G|=[G_k:H].</div>
+<p>Write</p>
+<div class="math" role="math">\bar R=R/H.</div>
+<p>By construction,</p>
+<div class="math" role="math">\boxed{\operatorname{Stab}_{\bar G}(\bar R)=\{1\}.}</div>
+<p>For each prime factor define</p>
+<div class="math" role="math">d_i=\operatorname{ord}_{\bar G}(r_iH).</div>
+<hr>
+<h2>2. No local factor may fill its projected subgroup</h2>
+<p>Suppose <code>r_i notin H</code>, so <code>d_i&gt;1</code>.</p>
+<p>Its local signed set in the quotient is</p>
+<div class="math" role="math">\bar A_i =\{(r_iH)^z:-e_i\le z\le e_i\}.</div>
+<p>If</p>
+<div class="math" role="math">2e_i+1\ge d_i,</div>
+<p>then the consecutive exponent interval contains representatives of every residue modulo <code>d_i</code>. Therefore</p>
+<div class="math" role="math">\boxed{\bar A_i=\langle r_iH\rangle.}</div>
+<p>But then</p>
+<div class="math" role="math">\bar R =\bar A_i\prod_{j\ne i}\bar A_j</div>
+<p>is invariant under multiplication by the nontrivial subgroup</p>
+<div class="math" role="math">\langle r_iH\rangle.</div>
+<p>That contradicts the trivial stabilizer of <code>\bar R</code>.</p>
+<p>Hence:</p>
+<h3>Theorem — projected-order gap</h3>
+<p>For every prime-power factor outside the full stabilizer,</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G_k/H}(r_iH) &gt;2e_i+1. }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{d_i\ge2e_i+2.}</div>
+<p>This conclusion uses the <strong>exact</strong> stabilizer, not merely the Kneser size inequality.</p>
+<hr>
+<h2>3. Universal exceptional-valuation bound</h2>
+<p><code>FAB-KNESER-DIVISOR-DEFECT.md</code> proves the Kneser budget</p>
+<div class="math" role="math">\sum_i \left( \min(2e_i+1,d_i)-1 \right) \le n-2.</div>
+<p>For every <code>r_i notin H</code>, the projected-order theorem gives</p>
+<div class="math" role="math">2e_i+1&lt;d_i,</div>
+<p>so its contribution is exactly</p>
+<div class="math" role="math">2e_i.</div>
+<p>For every <code>r_i in H</code>, the contribution is zero.</p>
+<p>Therefore the entire Kneser budget collapses to</p>
+<div class="math" role="math">\boxed{ 2\sum_{r_i\notin H}e_i \le n-2. }</div>
+<p>Hence:</p>
+<h3>Theorem — full-stabilizer defect mass</h3>
+<p>Every failed fixed-k FAB signed divisor box satisfies</p>
+<div class="math" role="math">\boxed{ \sum_{ r^e\parallel C, r\notin H }e \le \left\lfloor\frac{[G_k:H]-2}{2}\right\rfloor. }</div>
+<p>Thus the total prime-factor valuation visible outside the stabilizer is universally bounded by half the quotient size.</p>
+<p>No primality assumption on the quotient index is needed.</p>
+<hr>
+<h2>4. Interpretation</h2>
+<p>Write</p>
+<div class="math" role="math">C=C_H\,C_{\mathrm{exc}},</div>
+<p>where <code>C_H</code> contains all prime powers with residue class in <code>H</code>, and <code>C_exc</code> contains the rest.</p>
+<p>Then every failed exact placement has two simultaneous properties:</p>
+<h3>Large hidden background</h3>
+<p>All prime-power factors of <code>C_H</code> are invisible in the quotient defect.</p>
+<h3>Tiny visible defect</h3>
+<p>The total valuation</p>
+<div class="math" role="math">\Omega(C_{\mathrm{exc}}) =\sum_{r^e\parallel C_{\mathrm{exc}}}e</div>
+<p>satisfies</p>
+<div class="math" role="math">\boxed{ \Omega(C_{\mathrm{exc}}) \le\left\lfloor\frac{n-2}{2}\right\rfloor. }</div>
+<p>Moreover every exceptional prime has projected order strictly larger than twice its exponent plus one.</p>
+<p>So a target miss is possible only when almost all shifted-factor mass collapses into one stabilizer subgroup and the visible quotient is supported by a short list of high-order atoms.</p>
+<hr>
+<h2>5. Recovery of earlier classifications</h2>
+<h3>Index 3</h3>
+<p>The mass bound gives</p>
+<div class="math" role="math">\Omega(C_{\mathrm{exc}})\le0,</div>
+<p>so every factor lies in <code>H</code>.</p>
+<h3>Index 5</h3>
+<div class="math" role="math">\Omega(C_{\mathrm{exc}})\le1.</div>
+<p>Thus there is at most one simple exceptional factor.</p>
+<h3>Index 6</h3>
+<div class="math" role="math">\Omega(C_{\mathrm{exc}})\le2.</div>
+<p>The projected-order gap excludes quotient orders <code>2</code> and <code>3</code> for every exceptional factor. Only order <code>6</code> remains. The external-nonresidue parity then reduces the possibilities further to the unique-simple-defect theorem in <code>FAB-KNESER-INDEX6-CLASSIFICATION.md</code>.</p>
+<h3>Index 10</h3>
+<div class="math" role="math">\boxed{\Omega(C_{\mathrm{exc}})\le4.}</div>
+<p>Every exceptional factor must have quotient order exceeding <code>2e+1</code>. In the cyclic order-ten quotient this immediately excludes:</p>
+<ul><li>all order-two projections;</li><li>order-five projections of exponent at least two;</li><li>order-ten projections of exponent at least five.</li></ul>
+<p>This sharply reduces the next mixed classification before any case analysis begins.</p>
+<hr>
+<h2>6. Contrapositive expansion criterion</h2>
+<p>For any candidate subgroup <code>H&lt;=G_k</code>, if the prime factorization of <code>C=(p+k)/4</code> has too much valuation outside <code>H</code>, namely</p>
+<div class="math" role="math">\boxed{ 2\sum_{r^e\parallel C,\ r\notin H}e &gt;[G_k:H]-2, }</div>
+<p>then <code>H</code> cannot be the full stabilizer of a failed divisor box.</p>
+<p>Likewise, if any factor outside <code>H</code> has</p>
+<div class="math" role="math">\operatorname{ord}_{G_k/H}(rH)\le2e+1,</div>
+<p>then <code>H</code> cannot be the full defect stabilizer.</p>
+<p>Thus a proof can eliminate candidate defect subgroups using only:</p>
+<ol><li>quotient orders of the actual shifted prime factors;</li><li>their valuations.</li></ol>
+<p>No exhaustive enumeration of all signed divisors is required.</p>
+<hr>
+<h2>7. Entropy-or-descent formulation</h2>
+<p>At an external-nonresidue factor-cycle vertex, the same shifted integer carries both:</p>
+<ul><li>a guaranteed external nonresidue factor for the descent edge;</li><li>a hypothetical Kneser defect subgroup if exact placement fails.</li></ul>
+<p>The full-stabilizer theorem says that the failure subgroup must hide almost all factor valuation, leaving only a bounded collection of high-order visible atoms.</p>
+<p>Therefore the universal program can be stated more sharply as:</p>
+<div class="math" role="math">\boxed{ \text{either shifted-factor residue entropy escapes every proper stabilizer,} \quad\text{or the factor cycle transports a tiny high-order defect.} }</div>
+<p>The remaining all-prime task is to prove that such a tiny high-order defect cannot persist around every external-nonresidue cycle.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

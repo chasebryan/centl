@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact q=23 filter for Mordell-hard primes in the strong/Type-II corridor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-q23-exact-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-q23-exact-filter.html">
+  <meta property="og:title" content="Exact q=23 filter for Mordell-hard primes in the strong/Type-II corridor — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact q=23 filter for Mordell-hard primes in the strong/Type-II corridor</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-Q23-EXACT-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact factorization criterion</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-FINITE-SHIFT-CORRIDOR.md</code>, <code>STRONG-ES-Q11-EXACT-FILTER.md</code></p>
+<p><strong>Claim boundary:</strong> classifies the fixed Type-II shift <code>q=23</code> for Mordell-hard primes. It does not prove the strong conjecture or Erdős--Straus.</p>
+<hr>
+<h2>1. Two forced factors</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+23}{4}.}</div>
+<p>Hard primes satisfy</p>
+<div class="math" role="math">p\equiv1\pmod{24}.</div>
+<p>Therefore</p>
+<div class="math" role="math">p+23\equiv24\equiv0\pmod{24},</div>
+<p>and hence</p>
+<div class="math" role="math">\boxed{6\mid C.}</div>
+<p>So both <code>2</code> and <code>3</code> are forced prime factors of <code>C</code>.</p>
+<p>The fixed-shift Type-II target is</p>
+<div class="math" role="math">\boxed{-1\in\mathcal R_{23}(C).}</div>
+<hr>
+<h2>2. The quadratic-residue subgroup modulo 23</h2>
+<p>The unit group</p>
+<div class="math" role="math">G=(\mathbb Z/23\mathbb Z)^\times</div>
+<p>is cyclic of order <code>22</code>.</p>
+<p>Its quadratic-residue subgroup</p>
+<div class="math" role="math">Q=G^2</div>
+<p>has prime order</p>
+<div class="math" role="math">\boxed{11.}</div>
+<p>Both forced factors have exact order <code>11</code> modulo <code>23</code>:</p>
+<div class="math" role="math">\boxed{\operatorname{ord}_{23}(2)=11,}</div>
+<div class="math" role="math">\boxed{\operatorname{ord}_{23}(3)=11.}</div>
+<p>Thus each is a generator of <code>Q</code>.</p>
+<p>Use <code>2</code> as a generator of <code>Q</code>. Then</p>
+<div class="math" role="math">\boxed{3\equiv2^8\pmod{23}.}</div>
+<p>So in additive <code>C_11</code> coordinates the forced simple factors contribute directions</p>
+<div class="math" role="math">1 \qquad\text{and}\qquad 8=-3.</div>
+<hr>
+<h2>3. The forced simple box occupies nine of eleven QR classes</h2>
+<p>Assume first</p>
+<div class="math" role="math">v_2(C)=v_3(C)=1.</div>
+<p>The signed local contribution from the two forced factors is</p>
+<div class="math" role="math">\boxed{ F = \{a+8b\pmod{11}:a,b\in\{-1,0,1\}\}.}</div>
+<p>Direct calculation gives</p>
+<div class="math" role="math">\boxed{ F = \{0,1,2,3,4,7,8,9,10\}.}</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{|F|=9}</div>
+<p>and only the two QR coordinates</p>
+<div class="math" role="math">\boxed{5,6}</div>
+<p>are missing.</p>
+<hr>
+<h2>4. Any extra nontrivial QR factor fills the whole subgroup</h2>
+<p>Let <code>c</code> be any nonzero element of <code>C_11</code>.</p>
+<p>A simple additional nontrivial QR factor contributes</p>
+<div class="math" role="math">\{0,c,-c\}.</div>
+<p>For every nonzero <code>c</code>, one checks</p>
+<div class="math" role="math">\boxed{ F+\{0,c,-c\}=C_{11}.}</div>
+<p>Likewise if either forced factor occurs to exponent at least two, its longer local interval fills the two missing QR coordinates when combined with the other forced factor.</p>
+<p>Therefore the complete QR subgroup is filled whenever any one of the following holds:</p>
+<div class="math" role="math">\boxed{ v_2(C)\ge2,}</div>
+<div class="math" role="math">\boxed{ v_3(C)\ge2,}</div>
+<p>or <code>C</code> has any further prime factor that is a nontrivial quadratic residue modulo <code>23</code>.</p>
+<p>Once the QR subgroup is full, the presence of any quadratic-nonresidue factor translates it onto the full NR coset, which contains <code>-1</code>.</p>
+<p>Thus in all those cases a miss is possible only under pure quadratic splitting.</p>
+<hr>
+<h2>5. Which simple nonresidue factors can evade the forced box</h2>
+<p>Continue in the thin case</p>
+<div class="math" role="math">\boxed{v_2(C)=v_3(C)=1}</div>
+<p>with no other nontrivial QR factor.</p>
+<p>Use primitive root <code>5 mod23</code> for the full group <code>C_22</code>. The forced QR set <code>F</code> corresponds to the even logarithm classes</p>
+<div class="math" role="math">2F\subset C_{22}.</div>
+<p>Let a simple quadratic-nonresidue factor have odd log class <code>c</code>.</p>
+<p>Its local signed set is</p>
+<div class="math" role="math">\{0,c,-c\}.</div>
+<p>The target is class <code>11</code>.</p>
+<p>A direct check shows</p>
+<div class="math" role="math">11\notin2F+\{0,c,-c\}</div>
+<p>only for</p>
+<div class="math" role="math">\boxed{c=\pm1\pmod{22}.}</div>
+<p>These two primitive classes are the residues</p>
+<div class="math" role="math">\boxed{5,14\pmod{23}.}</div>
+<p>Every other quadratic-nonresidue residue class forces a Type-II hit immediately.</p>
+<p>The class <code>-1=22 mod23</code> of course hits the target directly.</p>
+<hr>
+<h2>6. The surviving primitive pair has valuation at most two</h2>
+<p>The residues <code>5</code> and <code>14</code> are inverses modulo <code>23</code> and correspond to log classes <code>±1</code>.</p>
+<p>If their total valuation is <code>E</code>, their combined signed contribution is the interval</p>
+<div class="math" role="math">\boxed{ P_E=\{-E,-E+1,\ldots,E\}\pmod{22}.}</div>
+<p>For <code>E&lt;=2</code>, the only odd classes present are <code>±1</code>, and the target remains outside <code>2F+P_E</code>.</p>
+<p>For <code>E&gt;=3</code>, the classes <code>±3</code> appear. Since the forced QR set contains the required complementary even classes, one obtains target class <code>11</code>.</p>
+<p>Therefore a thin miss requires</p>
+<div class="math" role="math">\boxed{E\le2.}</div>
+<hr>
+<h2>7. Exact q=23 miss theorem</h2>
+<p>For a Mordell-hard prime <code>p</code>, let</p>
+<div class="math" role="math">C=\frac{p+23}{4}.</div>
+<p>Then <code>q=23</code> misses exactly in one of the following two cases.</p>
+<h3>Branch A: pure quadratic splitting</h3>
+<p>Every prime factor of <code>C</code> is a quadratic residue modulo <code>23</code>.</p>
+<h3>Branch B: forced-6 thin defect</h3>
+<p>All of the following hold:</p>
+<ol><li>&lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;\boxed{v_2(C)=v_3(C)=1};&lt;/div&gt;</li></ol>
+<ol><li>every other quadratic-residue prime factor is actually <code>1 mod23</code>;</li><li>the only allowed quadratic-nonresidue prime factors are</li></ol>
+<div class="math" role="math">\boxed{5,14\pmod{23}};</div>
+<ol><li>their total valuation satisfies</li></ol>
+<div class="math" role="math">\boxed{ \sum_{r^e\parallel C,\ r\equiv5,14\ (23)}e\le2.}</div>
+<p>No other miss geometry is possible.</p>
+<hr>
+<h2>8. Sieve density of the thin branch</h2>
+<p>Ignoring the finite exceptional primes <code>2</code> and <code>3</code>, Branch B allows ordinary prime factors only in the three reduced residue classes</p>
+<div class="math" role="math">\boxed{1,5,14\pmod{23}.}</div>
+<p>Thus ordinary primes in</p>
+<div class="math" role="math">\boxed{19\text{ of the }22}</div>
+<p>reduced residue classes modulo <code>23</code> are forbidden as factors of <code>C</code>.</p>
+<p>The exact valuation cap on the two nonresidue classes makes the true Branch-B set even thinner.</p>
+<p>This will be useful when the <code>q=23</code> filter is inserted into the consecutive-corridor sieve.</p>
+<hr>
+<h2>9. Consecutive corridor position</h2>
+<p>With</p>
+<div class="math" role="math">A=\frac{p+3}{4},</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{C=A+5.}</div>
+<p>Thus the corridor now contains exact splitting/defect laws at</p>
+<div class="math" role="math">A,\quad A+1,\quad A+2,\quad A+5</div>
+<p>for shifts</p>
+<div class="math" role="math">3,7,11,23.</div>
+<p>The <code>q=23</code> position is especially rigid because two independent generators of the QR subgroup are forced into <code>A+5</code> by the Mordell-hard congruence <code>p=1 mod24</code>.</p>
+<hr>
+<h2>10. Next target</h2>
+<p>Combine <code>q=23</code> with the existing <code>q=3,7,11</code> sieve.</p>
+<p>Since Branch A excludes half the prime residue classes modulo <code>23</code>, while Branch B excludes <code>19/22</code> of them, <strong>every</strong> <code>q=23</code> miss branch adds at least one-half unit of sieve dimension.</p>
+<p>This should raise the three-shift exponent <code>5/2</code> to a four-shift exponent <code>3</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

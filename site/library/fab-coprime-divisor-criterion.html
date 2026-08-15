@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be a prime with">
+  <title>Coprime fab certificates reduce to one divisor congruence — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-coprime-divisor-criterion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-coprime-divisor-criterion.html">
+  <meta property="og:title" content="Coprime fab certificates reduce to one divisor congruence — Free Computation Foundation">
+  <meta property="og:description" content="Let p be a prime with">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Coprime fab certificates reduce to one divisor congruence</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p be a prime with</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-COPRIME-DIVISOR-CRITERION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact reformulation</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>External framework:</strong> Bello-Hernández, Benito, Fernández, arXiv:2606.10922v1</p>
+<p><strong>Claim boundary:</strong> this is a reformulation of the admissibility conditions in the recent divisor-parametrization framework. It does not prove that such a divisor always exists and therefore does not prove Erdős-Straus.</p>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a prime with</p>
+<div class="math" role="math">p\equiv1\pmod4.</div>
+<p>Let <code>a,b</code> be positive integers satisfying</p>
+<div class="math" role="math">\gcd(a,b)=1, \qquad a&lt;p, \qquad b&lt;p.</div>
+<p>For a positive divisor <code>k</code> of <code>a+bp</code>, put</p>
+<div class="math" role="math">q=\frac{a+bp}{k}.</div>
+<p>The <code>fab</code> admissibility conditions are</p>
+<div class="math" role="math">k\equiv3\pmod4,</div>
+<div class="math" role="math">4b\mid q(p+k),</div>
+<p>and</p>
+<div class="math" role="math">4a\mid p q(p+k).</div>
+<h2>2. Coprimality collapse</h2>
+<p>Because</p>
+<div class="math" role="math">kq=a+bp,</div>
+<p>any common divisor of <code>b</code> and <code>kq</code> divides <code>a</code>; since <code>gcd(a,b)=1</code>,</p>
+<div class="math" role="math">\boxed{\gcd(b,kq)=1.}</div>
+<p>Likewise any common divisor of <code>a</code> and <code>kq</code> divides <code>bp</code>. Since <code>a&lt;p</code>, <code>p</code> is coprime to <code>a</code>, and <code>gcd(a,b)=1</code>, so</p>
+<div class="math" role="math">\boxed{\gcd(a,kq)=1.}</div>
+<p>In particular</p>
+<div class="math" role="math">\gcd(a,pq)=1, \qquad \gcd(b,q)=1.</div>
+<p>If <code>k≡3 mod4</code>, then with <code>p≡1 mod4</code>,</p>
+<div class="math" role="math">p+k\equiv0\pmod4.</div>
+<p>Write</p>
+<div class="math" role="math">c=\frac{p+k}{4}.</div>
+<p>The two remaining <code>fab</code> conditions become</p>
+<div class="math" role="math">b\mid qc, \qquad a\mid pqc.</div>
+<p>By the coprimalities above these are equivalent to</p>
+<div class="math" role="math">\boxed{b\mid c,\qquad a\mid c.}</div>
+<p>Since <code>gcd(a,b)=1</code>, this is equivalent to</p>
+<div class="math" role="math">\boxed{ab\mid c.}</div>
+<p>Thus</p>
+<div class="math" role="math">4ab\mid p+k,</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{k\equiv-p\pmod{4ab}.}</div>
+<p>Because <code>p≡1 mod4</code>, this congruence already forces <code>k≡3 mod4</code>.</p>
+<h2>3. The theorem</h2>
+<h3>Coprime divisor criterion</h3>
+<p>For prime <code>p≡1 mod4</code> and coprime <code>a,b&lt;p</code>, a positive divisor <code>k</code> of <code>a+bp</code> is <code>fab</code>-admissible <strong>if and only if</strong></p>
+<div class="math" role="math">\boxed{ k\equiv-p\pmod{4ab}.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \operatorname{fab}(p,a,b)&gt;0 \iff \exists k\mid(a+bp): k\equiv-p\pmod{4ab}. }</div>
+<p>The right side is now a pure divisor-in-residue-class condition.</p>
+<h2>4. Explicit decomposition</h2>
+<p>Write</p>
+<div class="math" role="math">p+k=4abt</div>
+<p>and</p>
+<div class="math" role="math">q=\frac{a+bp}{k}.</div>
+<p>The divisor identity becomes</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{abt} + \frac1{aqt} + \frac1{bpqt}. }</div>
+<p>Indeed,</p>
+<div class="math" role="math">4abqt=a+p(b+q)</div>
+<p>follows from <code>kq=a+bp</code> and <code>k=4abt-p</code>, and clearing denominators verifies the identity.</p>
+<h2>5. Edge cases a=1 or b=1</h2>
+<h3>b=1</h3>
+<p>A certificate is equivalent to finding a divisor</p>
+<div class="math" role="math">k\mid p+a</div>
+<p>with</p>
+<div class="math" role="math">\boxed{k\equiv-p\pmod{4a}.}</div>
+<h3>a=1</h3>
+<p>A certificate is equivalent to finding a divisor</p>
+<div class="math" role="math">k\mid1+bp</div>
+<p>with</p>
+<div class="math" role="math">\boxed{k\equiv-p\pmod{4b}.}</div>
+<p>For <code>a=b=1</code>, this says exactly that <code>p+1</code> has a divisor <code>3 mod4</code>, recovering the familiar simplest Type-B spine.</p>
+<h2>6. New all-prime target</h2>
+<p>The 2026 divisor-parametrization paper reports that every tested prime</p>
+<div class="math" role="math">5\le p\equiv1\pmod4, \qquad p&lt;10^{14},</div>
+<p>has a certificate with <code>1&lt;=a,b&lt;=11</code>.</p>
+<p>For coprime pairs, the theorem above translates that phenomenon into the concrete statement:</p>
+<blockquote><p>For each tested prime, at least one small linear form <code>a+bp</code> has a divisor in the single target class <code>-p mod 4ab</code>.</p></blockquote>
+<p>This suggests a cleaner proof target than universal exact-depth realizability:</p>
+<div class="math" role="math">\boxed{ \forall p\equiv1\pmod4\text{ prime}, \quad \exists\ (a,b)=1 \text{ with a controlled size and } \exists k\mid(a+bp), \ k\equiv-p\pmod{4ab}. }</div>
+<p>No bounded universal theorem is claimed here. The point is that the ES wall has been reduced to a precise divisor-distribution statement that can be attacked with reciprocity, shifted-factor structure, or a descent argument.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

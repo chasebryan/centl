@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note develops the prime-power kernel hinted at by ODD-COVERING-BRIDGE.md and the candidatewise results in DIRECT-SHADOW-K1000.md.">
+  <title>Prime-power shadow kernel — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/shadow-kernel.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/shadow-kernel.html">
+  <meta property="og:title" content="Prime-power shadow kernel — Free Computation Foundation">
+  <meta property="og:description" content="This note develops the prime-power kernel hinted at by ODD-COVERING-BRIDGE.md and the candidatewise results in DIRECT-SHADOW-K1000.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-power shadow kernel</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This note develops the prime-power kernel hinted at by ODD-COVERING-BRIDGE.md and the candidatewise results in DIRECT-SHADOW-K1000.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SHADOW-KERNEL.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem note plus finite exact bound</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, Lopez Type A/B coverage, or the Erdos-Straus conjecture.</p>
+<p>This note develops the prime-power kernel hinted at by <a href="odd-covering-bridge.html">ODD-COVERING-BRIDGE.md</a> and the candidatewise results in <a href="direct-shadow-k1000.html">DIRECT-SHADOW-K1000.md</a>.</p>
+<p>The main point is exact: a large class of prime-power coordinates can be removed from the union-shadow satisfiability problem by a local load inequality. Any genuine counterexample to Direct-Shadow Completeness must therefore survive inside a much smaller prime-coordinate kernel.</p>
+<h2>1. Pullback system</h2>
+<p>Fix an admissible hard-class Type A/B candidate <code>(k,h,t)</code> and write</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1).</div>
+<p>For every earlier layer <code>j&lt;k</code>, let</p>
+<div class="math" role="math">q_j=\frac{4j-1}{\gcd(L,4j-1)}</div>
+<p>and let</p>
+<div class="math" role="math">R_j\subseteq\mathbb Z/q_j\mathbb Z</div>
+<p>be the forbidden parameter residues satisfying</p>
+<div class="math" role="math">r+Ls\bmod(4j-1)\in T_j \iff s\bmod q_j\in R_j.</div>
+<p>Let</p>
+<div class="math" role="math">Q=\operatorname{lcm}\{q_j:R_j\neq\varnothing\} = \prod_p p^{A_p}.</div>
+<p>The parameter space decomposes as the product of the prime-power coordinates <code>p^{A_p}</code>.</p>
+<h2>2. Coordinate load</h2>
+<p>Fix a prime <code>p|Q</code>. For every active constraint with <code>p|q_j</code>, put</p>
+<div class="math" role="math">a_{j,p}=v_p(q_j)\ge1.</div>
+<p>Define the exact local load</p>
+<div class="math" role="math">\boxed{ \lambda_p = \sum_{\substack{j&lt;k\\p\mid q_j}} \frac{|R_j|}{p^{a_{j,p}}}. }</div>
+<p>This quantity is not the global cover mass. It measures only how much of the <code>p^{A_p}</code> coordinate can be excluded after every other prime-power coordinate has been fixed.</p>
+<h2>3. Prime-power peeling lemma</h2>
+<h3>Lemma</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{\lambda_p&lt;1,}</div>
+<p>then the <code>p</code> coordinate is <strong>peelable</strong>: every assignment of all other prime-power coordinates that satisfies the constraints not involving <code>p</code> can be extended to a value modulo <code>p^{A_p}</code> satisfying every constraint involving <code>p</code>.</p>
+<h3>Proof</h3>
+<p>Fix arbitrary values of every coordinate except <code>p^{A_p}</code>.</p>
+<p>Consider one constraint <code>(q_j,R_j)</code> involving <code>p</code>, with</p>
+<div class="math" role="math">p^{a_{j,p}}\Vert q_j.</div>
+<p>Once the other coordinates are fixed, each residue in <code>R_j</code> can forbid at most one residue modulo <code>p^{a_{j,p}}</code>. Each such residue has exactly</p>
+<div class="math" role="math">p^{A_p-a_{j,p}}</div>
+<p>lifts modulo <code>p^{A_p}</code>.</p>
+<p>Therefore constraint <code>j</code> excludes at most</p>
+<div class="math" role="math">|R_j|p^{A_p-a_{j,p}}</div>
+<p>values of the full <code>p</code> coordinate.</p>
+<p>By the union bound, all constraints involving <code>p</code> exclude at most</p>
+<div class="math" role="math">\sum_{p\mid q_j}|R_j|p^{A_p-a_{j,p}} = p^{A_p}\lambda_p.</div>
+<p>If <code>lambda_p&lt;1</code>, this number is strictly smaller than <code>p^{A_p}</code>. Hence at least one value of the <code>p</code> coordinate survives. QED.</p>
+<h2>4. Satisfiability-preserving elimination</h2>
+<p>The lemma gives an exact elimination rule.</p>
+<p>When <code>lambda_p&lt;1</code>:</p>
+<ol><li>remove the <code>p</code> coordinate;</li><li>remove every constraint involving <code>p</code>;</li><li>solve the residual constraint system;</li><li>extend the solution back to <code>p</code> using the peeling lemma.</li></ol>
+<p>Loads can only decrease after constraints are removed. Therefore this process may be iterated.</p>
+<p>The coordinates that remain when no further <code>lambda_p&lt;1</code> move is possible form the <strong>prime-power shadow kernel</strong> of the candidate under this peeling rule.</p>
+<p>If the kernel is empty, the candidate is proved not union-shadowed without searching over the complete period <code>Q</code>.</p>
+<h2>5. Reduced prime-realization load</h2>
+<p>For DSC-P we need more than an avoiding integer. We need a reduced progression.</p>
+<p>For every prime <code>p|Q</code> with <code>p</code> not dividing <code>L</code>, the condition</p>
+<div class="math" role="math">p\nmid r+Ls</div>
+<p>forbids exactly one residue class modulo <code>p</code>, namely</p>
+<div class="math" role="math">s\not\equiv-rL^{-1}\pmod p.</div>
+<p>This removes a fraction <code>1/p</code> of the <code>p^{A_p}</code> coordinate.</p>
+<p>Define the augmented load</p>
+<div class="math" role="math">\boxed{ \lambda_p^{\!*} = \lambda_p + \begin{cases} 1/p,&amp;p\nmid L,\\ 0,&amp;p\mid L. \end{cases} }</div>
+<p>If</p>
+<div class="math" role="math">\lambda_p^{\!*}&lt;1,</div>
+<p>the same proof peels <code>p</code> while preserving the possibility of a reduced final progression.</p>
+<p>For an admissible candidate, <code>r</code> is already coprime to <code>L</code>, because its residues modulo <code>840</code> and <code>4k-1</code> are prime-compatible units. Thus if every coordinate can be removed by augmented peeling, the resulting avoiding class is reduced modulo <code>LQ</code> and Dirichlet supplies infinitely many exact-depth primes.</p>
+<h2>6. Candidate-independent upper load</h2>
+<p>The local load can be bounded without knowing the candidate.</p>
+<p>Since <code>R_j</code> is an affine pullback of the trap set,</p>
+<div class="math" role="math">|R_j|\le|T_j|.</div>
+<p>Also, if <code>p|q_j</code>, then necessarily</p>
+<div class="math" role="math">p\mid4j-1.</div>
+<p>Because <code>a_{j,p}&gt;=1</code>, we obtain</p>
+<div class="math" role="math">\lambda_p \le \frac1p \sum_{\substack{1\le j&lt;k\\p\mid4j-1}}|T_j|.</div>
+<p>For reducedness, a uniform sufficient bound is therefore</p>
+<div class="math" role="math">\boxed{ B_p(k) = \frac{1+\displaystyle\sum_{\substack{1\le j&lt;k\\p\mid4j-1}}|T_j|}{p}. }</div>
+<p>Whenever</p>
+<div class="math" role="math">\boxed{B_p(k)&lt;1,}</div>
+<p>the prime coordinate <code>p</code> is guaranteed peelable for <strong>every</strong> admissible candidate at target depth at most <code>k</code>, regardless of <code>h</code>, <code>t</code>, or the detailed gcd reductions.</p>
+<p>This is deliberately conservative: candidate-specific <code>q_j</code> omit many of the terms counted by <code>B_p(k)</code>, higher <code>p</code>-adic exponents reduce load further, and multiple trap residues can project to the same local residue.</p>
+<h2>7. A crude analytic kernel bound</h2>
+<p>Let</p>
+<div class="math" role="math">D_k=\max_{1\le j&lt;k}\tau(j).</div>
+<p>Since</p>
+<div class="math" role="math">|T_j|\le2\tau(j)\le2D_k</div>
+<p>and <code>4j=1 mod p</code> selects at most one residue class of <code>j mod p</code>, the number of indices <code>j&lt;k</code> contributing to <code>B_p(k)</code> is at most approximately <code>ceil((k-1)/p)</code>.</p>
+<p>Thus the simple sufficient estimate</p>
+<div class="math" role="math">B_p(k) \le \frac{1+2D_k\lceil(k-1)/p\rceil}{p}</div>
+<p>shows that all sufficiently large prime coordinates are automatically peelable.</p>
+<p>Using <code>ceil(x)&lt;=x+1</code>, a convenient sufficient inequality is</p>
+<div class="math" role="math">p^2-(2D_k+1)p-2D_k(k-1)&gt;0.</div>
+<p>So any hypothetical union-shadow counterexample is forced into primes below a scale on the order of</p>
+<div class="math" role="math">\sqrt{kD_k}+D_k,</div>
+<p>before any candidate-specific information is used.</p>
+<p>This is not yet the sharp kernel. It is a universal elementary bound.</p>
+<h2>8. Exact universal bound through k = 1000</h2>
+<p>For <code>k&lt;=1000</code>, exact trap enumeration gives</p>
+<div class="math" role="math">\max_{j&lt;1000}\tau(j)=32.</div>
+<p>More importantly, evaluating the sharper finite quantity <code>B_p(1000)</code> for every odd prime shows that</p>
+<div class="math" role="math">B_p(1000)&lt;1</div>
+<p>for every prime</p>
+<div class="math" role="math">\boxed{p\ge113.}</div>
+<p>Therefore, for every admissible Type A/B candidate through depth <code>1000</code>, every parameter prime coordinate <code>p&gt;=113</code> is universally peelable even after the reducedness condition is included.</p>
+<p>Only the following <code>28</code> primes can survive this <strong>candidate-independent</strong> first kernel bound:</p>
+<pre><code class="language-text">3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109</code></pre>
+<p>The actual candidate-specific kernels are usually smaller because the universal bound intentionally overcounts.</p>
+<p>Exploratory exact peeling of difficult certified candidates has already produced residual kernels supported only on substantially smaller primes, for example at most <code>67</code> or <code>89</code> in selected high-depth cases. These observations are proof-mining data, not a universal <code>p&lt;=89</code> theorem.</p>
+<h2>9. Why this matters</h2>
+<p>This changes the shape of the proof search.</p>
+<p>A union-shadow counterexample no longer needs to be imagined as a gigantic arbitrary covering system over all prime factors of <code>Q</code>.</p>
+<p>Large prime coordinates are provably disposable.</p>
+<p>The obstruction, if it exists, must condense into a <strong>small-prime kernel</strong>.</p>
+<p>This is strongly consonant with classical covering-system theory, where small prime divisors play an essential role in possible covers, but the present lemma is specialized directly to the Type A/B pullback system and handles multi-residue constraints.</p>
+<p>The universal DSC-P problem can now be attacked as:</p>
+<div class="math" role="math">\boxed{ \text{peel the large coordinates} \longrightarrow \text{classify the surviving small-prime kernel} \longrightarrow \text{prove the kernel always has a reduced survivor.} }</div>
+<h2>10. Next theorem targets</h2>
+<ol><li>sharpen <code>B_p(k)</code> using the exact trap-cardinality formula and the arithmetic progression <code>4j=1 mod p</code>;</li><li>include exact candidate-specific gcd reductions and <code>p</code>-adic exponents in automated kernel certificates;</li><li>classify the small-prime kernels appearing through <code>k&lt;=1200</code> and beyond;</li><li>determine whether the kernel belongs to finitely many isomorphism types after quotienting by residue relabeling;</li><li>prove a local satisfiability theorem for those kernel types;</li><li>combine the kernel theorem with Direct-Shadow Completeness to obtain a constructive proof of exact-depth realization.</li></ol>
+<h2>11. Current interpretation</h2>
+<p>The shadow-cover problem appears to have two scales:</p>
+<ul><li>a large-prime exterior that can be removed by an elementary local-load argument;</li><li>a small-prime interior where the genuine overlap geometry lives.</li></ul>
+<p>That interior is now the highest-value object in the proof search.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

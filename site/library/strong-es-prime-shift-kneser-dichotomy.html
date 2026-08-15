@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-shift Kneser dichotomy for the classical strong/Type-II corridor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-prime-shift-kneser-dichotomy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-prime-shift-kneser-dichotomy.html">
+  <meta property="og:title" content="Prime-shift Kneser dichotomy for the classical strong/Type-II corridor — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-shift Kneser dichotomy for the classical strong/Type-II corridor</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-PRIME-SHIFT-KNESER-DICHOTOMY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved application of Kneser&#x27;s theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-FINITE-SHIFT-CORRIDOR.md</code>, <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code></p>
+<p><strong>Claim boundary:</strong> organizes fixed prime-shift Type-II misses into a pure quadratic-splitting branch and higher even-index defects. It does not prove universal Type-II coverage.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime and let</p>
+<div class="math" role="math">\boxed{q\equiv3\pmod4}</div>
+<p>be a prime shift with</p>
+<div class="math" role="math">q\ne p.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+q}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">\gcd(C,q)=1.</div>
+<p>Let</p>
+<div class="math" role="math">G=(\mathbb Z/q\mathbb Z)^\times,</div>
+<p>and define the symmetric signed divisor box</p>
+<div class="math" role="math">\boxed{ R=\mathcal R_q(C).}</div>
+<p>The standard Type-II target is</p>
+<div class="math" role="math">\boxed{-1\in G.}</div>
+<p>Let</p>
+<div class="math" role="math">\boxed{H=\operatorname{Stab}_G(R)}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{n=[G:H].}</div>
+<p>Because</p>
+<div class="math" role="math">1\in R,</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{H\subseteq R.}</div>
+<hr>
+<h2>2. A Type-II miss forces odd stabilizer order</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{-1\notin R.}</div>
+<p>Since</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>the group <code>G</code> has order</p>
+<div class="math" role="math">q-1=2m</div>
+<p>with <code>m</code> odd.</p>
+<p>The cyclic group <code>G</code> has a unique element of order two, namely <code>-1</code>.</p>
+<p>Every even-order subgroup of a cyclic group contains that unique order-two element.</p>
+<p>Therefore if <code>H</code> had even order, then</p>
+<div class="math" role="math">-1\in H\subseteq R,</div>
+<p>contradicting the miss.</p>
+<p>Hence:</p>
+<h3>Theorem — even defect index</h3>
+<p>Every prime-shift Type-II miss satisfies</p>
+<div class="math" role="math">\boxed{|H|\text{ odd}}</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{n=[G:H]\text{ even}.}</div>
+<hr>
+<h2>3. Index two is exactly the pure quadratic branch</h2>
+<p>Suppose</p>
+<div class="math" role="math">\boxed{n=2.}</div>
+<p>Then <code>H</code> is the unique index-two subgroup of <code>G</code>, namely the quadratic residues</p>
+<div class="math" role="math">\boxed{Q=G^2.}</div>
+<p>Because <code>R</code> is <code>H</code>-periodic and contains <code>1</code>,</p>
+<div class="math" role="math">H\subseteq R.</div>
+<p>If <code>R</code> contained any quadratic nonresidue, then <code>H</code>-periodicity would force the complete nonresidue coset into <code>R</code>.</p>
+<p>That coset contains <code>-1</code>, contradiction.</p>
+<p>Therefore</p>
+<div class="math" role="math">R=H=Q.</div>
+<p>In particular every prime divisor of <code>C</code>, which appears individually in the signed box, is a quadratic residue modulo <code>q</code>.</p>
+<p>Conversely, if every prime divisor of <code>C</code> is a quadratic residue, then the entire signed box lies in <code>Q</code>, so <code>-1</code> is missed.</p>
+<p>The full stabilizer may in that direction be smaller than <code>Q</code> unless the box fills <code>Q</code>; but the Type-II miss itself is automatic.</p>
+<p>Thus the exact <code>n=2</code> normal form is pure quadratic splitting.</p>
+<hr>
+<h2>4. Any nonresidue factor forces index at least six</h2>
+<p>Assume the Type-II target is missed and some prime divisor</p>
+<div class="math" role="math">r\mid C</div>
+<p>is a quadratic nonresidue modulo <code>q</code>.</p>
+<p>Then the signed box contains <code>r</code>, so it is not contained in the quadratic-residue subgroup.</p>
+<p>Therefore the full stabilizer cannot have index two.</p>
+<p>The defect index is even by Section 2.</p>
+<p>Also index four is impossible because</p>
+<div class="math" role="math">v_2(q-1)=1,</div>
+<p>so <code>4</code> does not divide <code>q-1</code> and <code>G</code> has no subgroup of index four.</p>
+<p>Hence:</p>
+<h3>Corollary — splitting-or-high-defect dichotomy</h3>
+<p>A prime-shift Type-II miss satisfies either:</p>
+<ol><li>every prime divisor of <code>C</code> is a quadratic residue modulo <code>q</code>; or</li><li>the full stabilizer index satisfies</li></ol>
+<div class="math" role="math">\boxed{n\ge6\text{ and }n\text{ is even}.}</div>
+<p>This is the universal form behind the explicit <code>q=7,11,23</code> filters.</p>
+<hr>
+<h2>5. One-target Kneser budget</h2>
+<p>Factor</p>
+<div class="math" role="math">C=\prod_i r_i^{e_i}.</div>
+<p>For each local factor define</p>
+<div class="math" role="math">s_i = \min\left( 2e_i+1, \operatorname{ord}_{G/H}(r_iH) \right).</div>
+<p>Kneser&#x27;s theorem gives</p>
+<div class="math" role="math">|R| \ge
+<p>|H|\left(1+\sum_i(s_i-1)\right).&lt;/div&gt;</p>
+<p>A Type-II miss removes at least one <code>H</code>-coset, so</p>
+<div class="math" role="math">|R|\le(n-1)|H|.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \sum_i(s_i-1) \le n-2.}</div>
+<p>Thus every higher defect is a low-expansion factorization in the stabilizer quotient.</p>
+<hr>
+<h2>6. Safe-prime specialization</h2>
+<p>Suppose</p>
+<div class="math" role="math">\boxed{q=2\ell+1}</div>
+<p>with <code>ell</code> an odd prime.</p>
+<p>Then</p>
+<div class="math" role="math">|G|=2\ell.</div>
+<p>The subgroup indices are only</p>
+<div class="math" role="math">1,2,\ell,2\ell.</div>
+<p>Index <code>1</code> means the box is all of <code>G</code> and therefore hits.</p>
+<p>Index <code>ell</code> is odd, impossible for a miss by Section 2.</p>
+<p>Therefore a Type-II miss has only two possibilities:</p>
+<div class="math" role="math">\boxed{n=2}</div>
+<p>or</p>
+<div class="math" role="math">\boxed{n=2\ell=q-1.}</div>
+<p>That is:</p>
+<h3>Theorem — safe-prime miss dichotomy</h3>
+<p>For a safe prime shift</p>
+<div class="math" role="math">q=2\ell+1\equiv3\pmod4,</div>
+<p>every Type-II miss is either:</p>
+<ol><li>the pure quadratic-splitting branch; or</li><li>a full-stabilizer-trivial aperiodic defect.</li></ol>
+<p>No intermediate quotient geometry exists.</p>
+<hr>
+<h2>7. The small filters as specializations</h2>
+<p>The shifts</p>
+<div class="math" role="math">q=7,11,23</div>
+<p>are all safe primes:</p>
+<div class="math" role="math">7=2\cdot3+1, \qquad 11=2\cdot5+1, \qquad 23=2\cdot11+1.</div>
+<p>Therefore each exact filter has the same architecture:</p>
+<ul><li>main branch: all prime factors of <code>C</code> are quadratic residues;</li><li>exceptional branch: the full signed box has trivial stabilizer.</li></ul>
+<p>The hard-prime congruences force small QR factors into <code>C</code>, which makes the aperiodic branch extremely small:</p>
+<ul><li>at <code>q=7</code>, the forced factor <code>2</code> eliminates it completely;</li><li>at <code>q=11</code>, forced <code>3</code> leaves only a two-unit primitive packet;</li><li>at <code>q=23</code>, forced <code>2,3</code> leave only a two-unit primitive packet in two residue classes.</li></ul>
+<p>This explains the parallel exact classifications without treating them as unrelated coincidences.</p>
+<hr>
+<h2>8. Research consequence</h2>
+<p>To find additional useful fixed shifts, prioritize primes</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>for which:</p>
+<ol><li>the possible stabilizer indices are sparse, ideally safe primes;</li><li>hard congruences force one or more generators of the QR subgroup into <code>(p+q)/4</code>;</li><li>those forced local intervals consume most of the aperiodic Kneser budget.</li></ol>
+<p>Such shifts contribute a clean half-density main splitting branch and only low-entropy exceptional branches to the consecutive-corridor sieve.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External-nonresidue factor cycle — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-factor-cycle.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-factor-cycle.html">
+  <meta property="og:title" content="External-nonresidue factor cycle — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External-nonresidue factor cycle</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-FACTOR-CYCLE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal elementary theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code>, <code>FAB-KNESER-DIVISOR-DEFECT.md</code></p>
+<p><strong>Claim boundary:</strong> constructs a finite descent/cycle graph of external quadratic nonresidue primes for every Mordell-hard prime. It does not by itself force a FAB divisor placement and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Hard-prime external nonresidue set</h2>
+<p>Let <code>p</code> be a Mordell-hard prime. Then</p>
+<div class="math" role="math">p\equiv1\pmod8</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac2p\right) =\left(\frac3p\right) =\left(\frac5p\right) =\left(\frac7p\right)=+1.</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{ E_p= \left\{ q&lt;p:q\text{ prime and }\left(\frac qp\right)=-1 \right\}. }</div>
+<h3>Lemma — E_p is nonempty and begins beyond the hard shield</h3>
+<p>The set <code>E_p</code> is nonempty, and every member satisfies</p>
+<div class="math" role="math">\boxed{q\ge11.}</div>
+<h3>Proof</h3>
+<p>The quadratic character modulo <code>p</code> is nontrivial, so there is a positive integer <code>n&lt;p</code> with</p>
+<div class="math" role="math">\left(\frac np\right)=-1.</div>
+<p>Factor <code>n</code>. The Legendre symbol is multiplicative, so at least one prime divisor <code>q|n</code> has odd nonresidue contribution:</p>
+<div class="math" role="math">\left(\frac qp\right)=-1.</div>
+<p>Then <code>q&lt;=n&lt;p</code>, so <code>q in E_p</code>.</p>
+<p>The primes <code>2,3,5,7</code> are quadratic residues modulo every Mordell-hard <code>p</code>, hence no member of <code>E_p</code> can lie in the hard shield. QED.</p>
+<hr>
+<h2>2. Positive shifted factor attached to every external nonresidue</h2>
+<p>For <code>q in E_p</code>, define</p>
+<div class="math" role="math">\boxed{ \sigma(q)= \begin{cases} 1,&amp;q\equiv3\pmod4,\\ 3,&amp;q\equiv1\pmod4, \end{cases}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ A_q=\frac{p+\sigma(q)q}{4}. }</div>
+<p>This is always a positive integer:</p>
+<ul><li>if <code>q=3 mod4</code>, then <code>p+q=0 mod4</code>;</li><li>if <code>q=1 mod4</code>, then <code>p+3q=0 mod4</code>.</li></ul>
+<p>Because <code>q&lt;p</code>, we also have</p>
+<div class="math" role="math">\boxed{A_q&lt;p.}</div>
+<p>Indeed,</p>
+<div class="math" role="math">A_q&lt;\frac{p+p}{4}=\frac p2</div>
+<p>in the <code>3 mod4</code> case, while</p>
+<div class="math" role="math">A_q&lt;\frac{p+3p}{4}=p</div>
+<p>in the <code>1 mod4</code> case.</p>
+<p>Also</p>
+<div class="math" role="math">\boxed{\gcd(A_q,q)=1,}</div>
+<p>because</p>
+<div class="math" role="math">4A_q\equiv p\pmod q</div>
+<p>and <code>q!=p</code>.</p>
+<hr>
+<h2>3. Every vertex has a distinct outgoing nonresidue factor</h2>
+<p>Modulo <code>p</code>,</p>
+<div class="math" role="math">4A_q\equiv\sigma(q)q.</div>
+<p>Since <code>4</code> is a square and the hard prime satisfies</p>
+<div class="math" role="math">\left(\frac3p\right)=+1,</div>
+<p>we obtain</p>
+<div class="math" role="math">\boxed{ \left(\frac{A_q}{p}\right) = \left(\frac{\sigma(q)}p\right) \left(\frac qp\right) =-1. }</div>
+<p>Therefore the prime factorization of <code>A_q</code> contains at least one prime <code>r</code> with odd valuation contribution and</p>
+<div class="math" role="math">\boxed{\left(\frac rp\right)=-1.}</div>
+<p>Because <code>r|A_q&lt;p</code>,</p>
+<div class="math" role="math">\boxed{r&lt;p.}</div>
+<p>Because <code>gcd(A_q,q)=1</code>,</p>
+<div class="math" role="math">\boxed{r\ne q.}</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{r\in E_p\setminus\{q\}.}</div>
+<h3>Theorem — external nonresidue factor descent</h3>
+<p>For every</p>
+<div class="math" role="math">q\in E_p,</div>
+<p>the shifted integer</p>
+<div class="math" role="math">A_q=\frac{p+\sigma(q)q}{4}</div>
+<p>has a prime divisor</p>
+<div class="math" role="math">\boxed{r\in E_p,\qquad r\ne q.}</div>
+<p>No search bound or density statement is used.</p>
+<hr>
+<h2>4. Directed graph and cycle theorem</h2>
+<p>Create a directed graph on the finite vertex set <code>E_p</code> by choosing, for each vertex <code>q</code>, one prime divisor</p>
+<div class="math" role="math">f(q)\mid A_q</div>
+<p>with</p>
+<div class="math" role="math">\left(\frac{f(q)}p\right)=-1.</div>
+<p>The theorem above guarantees</p>
+<div class="math" role="math">f(q)\in E_p</div>
+<p>and</p>
+<div class="math" role="math">f(q)\ne q.</div>
+<p>Hence every vertex has outdegree one and there are no self-loops.</p>
+<p>A finite functional digraph always contains a directed cycle. Since self-loops are absent, every cycle has length at least two.</p>
+<h3>Corollary — external nonresidue factor cycle</h3>
+<p>Every Mordell-hard prime admits distinct external nonresidue primes</p>
+<div class="math" role="math">q_1,\ldots,q_m, \qquad m\ge2,</div>
+<p>with indices understood cyclically such that</p>
+<div class="math" role="math">\boxed{ q_{i+1}\mid \frac{p+\sigma(q_i)q_i}{4} }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \left(\frac{q_i}{p}\right)=-1 \quad\text{for every }i. }</div>
+<p>Equivalently, there are positive integers <code>c_i</code> satisfying</p>
+<div class="math" role="math">\boxed{ p+\sigma(q_i)q_i=4c_iq_{i+1}.}</div>
+<p>This is an exact finite cyclic system attached to every hard prime.</p>
+<hr>
+<h2>5. Edge character when the source is 3 mod 4</h2>
+<p>Suppose</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>and <code>r</code> is a nonresidue factor chosen from</p>
+<div class="math" role="math">A_q=\frac{p+q}{4}.</div>
+<p><code>SHIFTED-NONRESIDUE-TRANSFER.md</code> proves factorwise that</p>
+<div class="math" role="math">\left(\frac rp\right) = \left(\frac rq\right).</div>
+<p>Since the edge was chosen with <code>(r/p)=-1</code>,</p>
+<div class="math" role="math">\boxed{ q\equiv3\pmod4 \Longrightarrow \left(\frac rq\right)=-1. }</div>
+<p>Thus every outgoing edge from a <code>3 mod4</code> vertex lands on a quadratic nonresidue modulo the source as well as modulo <code>p</code>.</p>
+<hr>
+<h2>6. Edge character when the source is 1 mod 4</h2>
+<p>Now suppose</p>
+<div class="math" role="math">q\equiv1\pmod4</div>
+<p>and</p>
+<div class="math" role="math">r\mid A_q=\frac{p+3q}{4}</div>
+<p>is chosen with <code>(r/p)=-1</code>.</p>
+<p>Modulo <code>r</code>,</p>
+<div class="math" role="math">p\equiv-3q.</div>
+<p>Because <code>p=1 mod4</code>, reciprocity gives</p>
+<div class="math" role="math">\left(\frac rp\right) = \left(\frac pr\right) = \left(\frac{-3q}{r}\right).</div>
+<p>Since <code>q=1 mod4</code>,</p>
+<div class="math" role="math">\left(\frac qr\right)=\left(\frac rq\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">-1 = \left(\frac{-3}{r}\right) \left(\frac rq\right),</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ q\equiv1\pmod4 \Longrightarrow \left(\frac rq\right) =-\left(\frac{-3}{r}\right). }</div>
+<p>This is the exact reciprocity rule on the second edge type.</p>
+<hr>
+<h2>7. Two-cycle obstruction in the all-3-mod-4 sector</h2>
+<p>Suppose two distinct primes</p>
+<div class="math" role="math">q,r\equiv3\pmod4</div>
+<p>formed a two-cycle:</p>
+<div class="math" role="math">q\to r\to q.</div>
+<p>The edge rule would give</p>
+<div class="math" role="math">\left(\frac rq\right)=-1</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac qr\right)=-1.</div>
+<p>But quadratic reciprocity for two <code>3 mod4</code> primes gives</p>
+<div class="math" role="math">\left(\frac rq\right) =-\left(\frac qr\right),</div>
+<p>a contradiction.</p>
+<p>Therefore:</p>
+<h3>Corollary</h3>
+<div class="math" role="math">\boxed{ \text{No directed 2-cycle can consist of two }3\bmod4\text{ vertices.} }</div>
+<p>So the shortest possible cycles are already constrained by reciprocity.</p>
+<hr>
+<h2>8. Relation to the Kneser divisor defect</h2>
+<p>At a <code>3 mod4</code> vertex <code>q</code>, the same shifted integer</p>
+<div class="math" role="math">A_q=\frac{p+q}{4}</div>
+<p>is precisely the fixed-k FAB factor box</p>
+<div class="math" role="math">C_q=\frac{p+q}{4}.</div>
+<p>Therefore every such vertex carries two simultaneous structures:</p>
+<ol><li>a signed divisor product box in <code>G_q</code> whose failure has a Kneser quotient defect;</li><li>an outgoing external-nonresidue prime factor <code>r|C_q</code> leading to another vertex of the finite cycle graph.</li></ol>
+<p>This gives the desired <strong>entropy-or-descent</strong> framework:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{external nonresidue vertex }q\\ \downarrow\\ \text{FAB divisor box at }C_q\\ \begin{cases} \text{target hit} &amp;\Rightarrow \text{ES certificate},\\ \text{target miss}&amp;\Rightarrow\text{proper Kneser quotient defect} \end{cases}\\ \downarrow\\ \text{nonresidue factor edge }q\to r\\ \downarrow\\ \text{finite directed cycle.} \end{array} }</div>
+<p>A universal proof would follow if one can show that the quotient defect cannot persist consistently around such a cycle.</p>
+<hr>
+<h2>9. Next exact target</h2>
+<p>The first nontrivial defect is the cubic case from <code>FAB-KNESER-DIVISOR-DEFECT.md</code>.</p>
+<p>At a <code>3 mod4</code> vertex with index-three failure:</p>
+<ul><li>every prime factor of <code>(p+q)/4</code> is a cubic residue modulo <code>q</code>;</li><li><code>2</code> is not a cubic residue modulo <code>q</code>;</li><li>every chosen nonresidue factor edge <code>q-&gt;r</code> therefore has</li></ul>
+<div class="math" role="math">r\in G_q^3 \quad\text{and}\quad \left(\frac rq\right)=-1.</div>
+<p>So the next theorem target is concrete:</p>
+<div class="math" role="math">\boxed{ \text{prove that cubic-defect edge labels cannot persist around an external-nonresidue cycle,} }</div>
+<p>or show that persistence forces a higher-index defect with strictly smaller Kneser room.</p>
+<p>That is now an exact finite-cycle obstruction problem rather than an unbounded search over unrelated auxiliary parameters.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

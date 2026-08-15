@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note continues the reduction developed in SHADOW-KERNEL.md and FIBER-SHADOW-KERNEL.md.">
+  <title>Small-selector hypothesis for residual Type A/B fiber kernels — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/small-selector-hypothesis.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/small-selector-hypothesis.html">
+  <meta property="og:title" content="Small-selector hypothesis for residual Type A/B fiber kernels — Free Computation Foundation">
+  <meta property="og:description" content="This note continues the reduction developed in SHADOW-KERNEL.md and FIBER-SHADOW-KERNEL.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Small-selector hypothesis for residual Type A/B fiber kernels</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">This note continues the reduction developed in SHADOW-KERNEL.md and FIBER-SHADOW-KERNEL.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SMALL-SELECTOR-HYPOTHESIS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> active proof-mining experiment</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note introduces a falsifiable finite diagnostic. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>This note continues the reduction developed in <a href="shadow-kernel.html">SHADOW-KERNEL.md</a> and <a href="fiber-shadow-kernel.html">FIBER-SHADOW-KERNEL.md</a>.</p>
+<h2>1. Motivation</h2>
+<p>The candidatewise search through <code>k&lt;=1200</code> found reduced avoiding progressions for all <code>41,470</code> directly novel candidates. A separate coordinate analysis showed that every certified solution lies within at most nine guided prime-power coordinate changes of a simple unary-safe basepoint.</p>
+<p>Fiber peeling goes further: it removes prime-power coordinates by theorem, without consulting the stored avoiding witness. The remaining obstruction is a small-prime residual kernel.</p>
+<p>The next question is deliberately simple:</p>
+<blockquote><p>Are those residual kernels already satisfiable by a tiny fixed menu of ordinary integer parameter values?</p></blockquote>
+<p>If so, the global-looking covering problem may admit a surprisingly small selector mechanism after the fiber exterior is removed.</p>
+<h2>2. Residual kernel</h2>
+<p>Fix a directly novel candidate</p>
+<div class="math" role="math">x=r+Ls.</div>
+<p>After exact augmented fiber peeling, suppose the residual prime set is</p>
+<div class="math" role="math">P_{\rm ker}=\{p_1,\ldots,p_m\}</div>
+<p>with residual forbidden constraints</p>
+<div class="math" role="math">s\bmod q_j\in R_j.</div>
+<p>An integer selector <code>s0</code> solves the residual kernel if</p>
+<div class="math" role="math">s_0\bmod q_j\notin R_j</div>
+<p>for every residual edge and, for each residual prime <code>p</code> not dividing <code>L</code>,</p>
+<div class="math" role="math">r+Ls_0\not\equiv0\pmod p.</div>
+<p>Once such a residual assignment is fixed, the exact fiber-peeling theorem extends it backward across the peeled coordinates. Thus a selector that solves the residual kernel gives an independent constructive proof of a reduced avoiding class for that candidate.</p>
+<h2>3. Finite small-selector experiment</h2>
+<p>The automated analyzer tests the fixed menu</p>
+<div class="math" role="math">\mathcal S_B=\{0,\pm1,\pm2,\ldots,\pm B\}</div>
+<p>in increasing absolute value, with a deterministic tie order.</p>
+<p>For each directly novel candidate it records:</p>
+<ul><li>whether fiber peeling already empties the kernel;</li><li>whether some <code>s0 in S_B</code> solves the residual kernel;</li><li>the first selector found;</li><li>the smallest absolute selector radius needed;</li><li>the distribution of selectors across all nonempty residual kernels;</li><li>any residual kernels not solved by the finite menu.</li></ul>
+<p>The default experimental bound is <code>B=64</code>.</p>
+<p>A failure of this finite selector menu is <strong>not</strong> a counterexample to DSC-P. It would only mean that this particularly simple post-peeling mechanism is insufficient.</p>
+<h2>4. Why a positive result would matter</h2>
+<p>Suppose a tiny fixed selector set solved every residual kernel over a large exact range. That would suggest a much stronger theorem architecture than raw witness search:</p>
+<div class="math" role="math">\boxed{ \text{direct novelty} \to \text{fiber peel} \to \text{tiny residual kernel} \to \text{small selector} \to \text{reduced avoiding class}. }</div>
+<p>The computational objective is not to replace proof with a lookup table. It is to identify which local residue values repeatedly survive, then derive the arithmetic reason.</p>
+<p>A particularly strong pattern would be the existence of a very small universal set such as</p>
+<div class="math" role="math">\{0,1,-1,2,-2\}</div>
+<p>or another bounded menu independent of <code>k</code>. Such an observation would become a theorem target, not a theorem by itself.</p>
+<h2>5. Falsification value</h2>
+<p>This test can fail cleanly in several useful ways:</p>
+<ol><li>a residual kernel requires a selector outside the tested range;</li><li>selector radii grow rapidly with <code>k</code>;</li><li>different kernel signatures require unrelated selector values;</li><li>the small-selector phenomenon disappears past the current finite frontier.</li></ol>
+<p>Any of those outcomes would teach us where the apparent low local complexity breaks.</p>
+<h2>6. Automation</h2>
+<p>The implementation is <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/shadow_small_selector_analyzer.py"><code>shadow_small_selector_analyzer.py</code></a>. It reconstructs the pullback system and performs fiber peeling independently of the stored reduced witness. It then tests only the residual kernel against the fixed selector menu.</p>
+<p>The direct-shadow GitHub Actions workflow runs this stage before CENTL certification and freezes its JSON/report into the hashed research artifact.</p>
+<h2>7. Current theorem target</h2>
+<p>The larger target remains DSC-P:</p>
+<div class="math" role="math">\text{not directly shadowed} \Longrightarrow \text{reduced avoiding class}.</div>
+<p>The small-selector experiment asks whether the missing proof can be compressed still further:</p>
+<div class="math" role="math">\boxed{ \text{every residual fiber kernel belongs to a locally solvable family with a bounded selector mechanism.} }</div>
+<p>If the data supports that statement, the next task is to classify the selector by kernel signature and prove why the surviving local residue exists.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

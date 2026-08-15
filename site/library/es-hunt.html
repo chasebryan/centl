@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Public Erdős–Straus hunt — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-hunt.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-hunt.html">
+  <meta property="og:title" content="Public Erdős–Straus hunt — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Public Erdős–Straus hunt</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-HUNT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> operational public hunt; not a proof</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>, <code>HARD-SMOOTH-TYPEII-OBSTRUCTION.md</code></p>
+<p><strong>Claim boundary:</strong> a cleared window is a finite certificate for those primes only. Letter numbers identify findings. Neither a finished hunt nor a pile of letters proves or disproves Erdős–Straus.</p>
+<hr>
+<h2>1. What this is</h2>
+<p>The conjecture asks whether every integer \(n \ge 2\) has a solution of</p>
+<div class="math" role="math">\frac{4}{n} = \frac{1}{x} + \frac{1}{y} + \frac{1}{z}</div>
+<p>in positive integers. The remaining computational burden, after the classical identities, lives on Mordell-hard primes: those congruent to</p>
+<div class="math" role="math">1,\ 121,\ 169,\ 289,\ 361,\ 529 \pmod{840}.</div>
+<p>This note records the public hunt that attacks those primes, files readable findings, and can be resumed on any machine. It is the operator-facing surface of the same two-target mathematics used in the theorem notes. It is not a new existence theorem.</p>
+<p>From the CENTL root:</p>
+<pre><code class="language-text">./centl es
+./centl es go
+./centl es go --random
+./centl es letters
+./centl es seed</code></pre>
+<p><code>./centl es</code> opens a menu. <code>go</code> is the infinite hunt. Ctrl+C stops it and saves the seed.</p>
+<hr>
+<h2>2. Two kernels</h2>
+<p>The work is split so a mathematician can read one stack and a long hunt can run the other.</p>
+<table class="directory"><thead><tr><th>name</th><th>job</th></tr></thead><tbody><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>bb.kernel</code></a> (also <code>B-BervigES.kernel</code>)</td><td>Python reference. Full construction menu, exact integer check \(4xyz = n(yz+xz+xy)\), findings librarian, seed, live menu.</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>CC.kernel</code></a></td><td>C attack engine. Theorem layer, \(a,b\le 11\) window, then the two-target corridor. Emits an explicit witness or reports a miss.</td></tr></tbody></table>
+<p>CC.kernel is the theorem/attack provider. bb.kernel is the coupled reference. Either can be invoked from <code>centl es</code>. Neither uses CENTL-SCi. <code>strike</code> in the CC ledger stays false until a universal certificate is deposited in <a href="cc-kernel-proof.html"><code>CC.kernel/PROOF.md</code></a>.</p>
+<hr>
+<h2>3. The infinite equation</h2>
+<p>Let \(s\) be the integer <code>scanned_through</code> in <a href="hunt-seed.html"><code>findings/seeds/current.json</code></a>, and let \(\Delta\) be the window width (default \(50\,000\)). The hunt is</p>
+<div class="math" role="math">W_i = (s + i\Delta,\ s + (i+1)\Delta], \qquad i = 0,1,2,\ldots</div>
+<p>with no last interval. \(s\) begins at the <strong>start factor</strong>: \(0\), a bound the operator types, or a random integer in \([10^6, 10^{10})\). After each window, \(s\) advances. Ctrl+C writes \(s\). The next <code>go</code> starts at \(s\), never at \(0\).</p>
+<p><code>cleared_through</code> is the last bound for which every Mordell-hard prime has a checked witness. It lags \(s\) if an unsolved letter was continued past.</p>
+<p>The engine walks the six hard residue classes and tests primality directly. There is no prefix-sieve cap at \(50\) million.</p>
+<p>Letters are collected. The hunt does not stop on the first letter.</p>
+<hr>
+<h2>4. Start factor</h2>
+<p>A start factor chooses <em>where</em> a hunt begins. It is stored with the seed and does not change for that hunt.</p>
+<pre><code class="language-text">./centl es go              # resume the saved hunt
+./centl es go --random     # new hunt at a random start factor
+./centl es go --from N     # new hunt beginning at N</code></pre>
+<p>Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter&#x27;s identity.</p>
+<hr>
+<h2>5. Letter numbers</h2>
+<p>A worldwide serial (<code>Letter #1</code>, <code>Letter #2</code> in discovery order) cannot be the same on two machines without a shared counter.</p>
+<p>A content-addressed number can. The letter number is the first \(128\) bits of SHA-256 of this exact UTF-8 text:</p>
+<pre><code class="language-text">ES-LETTER-v1
+rule=&lt;unsolved_after_search | window_broken | universal_strike&gt;
+n=&lt;the prime, or 0&gt;
+extra=&lt;empty, or a hash of a claimed certificate&gt;</code></pre>
+<p>Anyone who finds the same rule at the same prime computes the same integer and the same file name <code>letters/L-&lt;32 hex chars&gt;.md</code>. The start factor, the clock, and the hostname are not in the key.</p>
+<p>Different primes, or a different rule on the same prime, receive different numbers.</p>
+<p>The three letter rules are mechanical. They are written in <a href="how-grades-work.html"><code>findings/HOW-GRADES-WORK.md</code></a>.</p>
+<table class="directory"><thead><tr><th>stamp</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td>A checked hard identity that is not a routine small-shift hit.</td></tr><tr><td>GREAT</td><td>Escaped the small theorems, Type I only, a deep first hit, or a cleared bound.</td></tr><tr><td>LETTER</td><td>Unsolved after the full menu, \(a,b\le 11\) failed, or a claimed universal proof.</td></tr></tbody></table>
+<p>A finding is refused if it claims three denominators that fail \(4xyz = n(yz+xz+xy)\).</p>
+<hr>
+<h2>6. What the hunt does not claim</h2>
+<ul><li>A cleared bound is coverage of a finite interval.</li><li>A letter is an alarm or a structural event, not a counterexample by itself.</li><li><code>./centl es hunt --until-proof</code> expands the attack. It does not declare the conjecture proved.</li><li>Universal DSC-0 and DSC-P are false; they are not the bridge used here.</li></ul>
+<p>The remaining theorem work is still the all-prime two-target coverage recorded in <a href="erdos-straus-wall.html"><code>ERDOS-STRAUS-WALL.md</code></a> and <a href="current-frontier.html"><code>CURRENT-FRONTIER.md</code></a>.</p>
+<hr>
+<h2>7. How to check a finding</h2>
+<p>Open the file. If it shows</p>
+<pre><code class="language-text">4/n = 1/x + 1/y + 1/z</code></pre>
+<p>compute \(4xyz\) and \(n(yz+xz+xy)\) with any exact calculator, or run</p>
+<pre><code class="language-text">./centl es solve n</code></pre>
+<p>They must be equal. Do not trust a floating-point check.</p>
+<p>If two people both hold a letter, compare the <strong>letter number</strong> printed at the top of each file. The numbers match if and only if the findings are the same.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

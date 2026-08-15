@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Status: OPEN">
+  <title>Erdős-Straus — Wall — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/erdos-straus-wall.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/erdos-straus-wall.html">
+  <meta property="og:title" content="Erdős-Straus — Wall — Free Computation Foundation">
+  <meta property="og:description" content="Status: OPEN">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Erdős-Straus — Wall</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">Status: OPEN</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ERDOS-STRAUS-WALL.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status: OPEN</strong></p>
+<h2>Major route correction</h2>
+<p>Universal Direct-Shadow Completeness is no longer part of the wall because it is <strong>false</strong>.</p>
+<p><code>DSC-COUNTEREXAMPLE.md</code> gives a hosted-verified admissible hard candidate that is not directly shadowed but is collectively covered by three earlier q=3 rows. Thus DSC-0 and DSC-P are false as universal statements.</p>
+<p>This does <strong>not</strong> move Erdős-Straus backward. A collectively shadowed target is already solved by an earlier Type A/B layer. Exact-depth realizability was stronger than pointwise ES coverage requires.</p>
+<h2>Closed / retained on this route</h2>
+<ul><li>Density-one Type A/B coverage of primes via the prime-modulus backbone</li><li>Finite candidatewise DSC through <code>k&lt;=1500</code> as a finite theorem-certificate</li><li>Exact reduced-parameter domain <code>gcd(r+Ls,LQ)=1</code></li><li>Strong q=3 absorption</li><li>Weak q=3 redundancy</li><li>Pointwise q=3 absorption</li><li>q=3 singleton-pullback theorem</li><li>Direct-shadow smoothness</li><li>Explicit counterexample showing universal DSC-0 / DSC-P are false</li><li>Ancestry rigidity and the existing Type A/B local structure</li><li>Exact two-target corridor companions at <code>q=3,7,11</code> and <code>k=15</code>, plus the linear form <code>2p+1</code></li><li><code>{2,3,5,7}</code>-smooth aligned Type-II covering is impossible (external prime <code>ℓ≥11</code> is necessary)</li><li>A public infinite hard-prime hunt with content-addressed letter numbers (<code>ES-HUNT.md</code>). Finite coverage, not a proof</li></ul>
+<h2>Still required for the ES route</h2>
+<h3>1. All-prime two-target coverage</h3>
+<p>Prove that <strong>every</strong> prime has some Type A/B decomposition, or more generally some two-target signed-box hit. The density-one theorem is not enough. López A/B would suffice but is stronger than original ES requires.</p>
+<p>After the prime-modulus backbone, the pointwise burden is concentrated in the zero-density survivor core:</p>
+<div class="math" role="math">\boxed{ \text{every prime escaping all prime-modulus layers has a composite rescue}. }</div>
+<p>This is the principal current wall.</p>
+<h3>2. Composite n</h3>
+<p>Once every prime is solved, extend to arbitrary composite <code>n</code>. The standard divisor/scaling reduction means a solution for a divisor can be scaled to a solution for <code>n</code>; the repo should carry a clean self-contained proof when this stage is promoted into the final chain.</p>
+<h2>What is no longer required</h2>
+<p>The following are useful depth-spectrum questions but are <strong>not prerequisites for Erdős-Straus</strong>:</p>
+<ul><li>universal DSC-0;</li><li>universal DSC-P;</li><li>proving every directly novel candidate has an exact-depth prime;</li><li>eliminating every collective shadow.</li></ul>
+<p>These belong to the separate covering-core / exact-depth program.</p>
+<h2>Honest floor</h2>
+<p>A density-one set of primes is structurally captured. The remaining all-prime problem is a zero-density core: some later two-target shift must hit. Direct-shadow graphs alone cannot encode all redundancy, so future ES work should attack <strong>existence of some Type I or Type II hit</strong>, not universal exact-depth realizability. The next exact corridor target is <code>k=19</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

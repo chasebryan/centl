@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GitHub Actions workflow:">
+  <title>Reciprocity tower automated regression results — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/reciprocity-tower-results.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/reciprocity-tower-results.html">
+  <meta property="og:title" content="Reciprocity tower automated regression results — Free Computation Foundation">
+  <meta property="og:description" content="GitHub Actions workflow:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Reciprocity tower automated regression results</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">GitHub Actions workflow:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RECIPROCITY-TOWER-RESULTS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Status:</strong> completed green finite regression of proved theorem family</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the universal proofs are in <a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a>. The finite ranges below are regression/falsification evidence, not the proof itself.</p>
+<h2>Workflow provenance</h2>
+<p>GitHub Actions workflow:</p>
+<pre><code class="language-text">CENTL Erdős-Straus reciprocity tower shadows</code></pre>
+<p>Completed run:</p>
+<pre><code class="language-text">run id:      31852607474
+head commit: 93ce84c8fb1fa795da2b4ed8f4f2add497f7d89f
+conclusion:  success</code></pre>
+<p>Artifact:</p>
+<pre><code class="language-text">artifact id: 9237972571
+name:        reciprocity-tower-93ce84c8fb1fa795da2b4ed8f4f2add497f7d89f
+sha256:      11344d55fdfcd5d77c46ff9f7bf18d1ce2d556e3b077ccbeedfe75ef058a1288</code></pre>
+<p>The artifact contains the JSON theorem-regression record, report, and SHA-256 manifest.</p>
+<h2>Jacobi-saturation regression</h2>
+<p>Every Type A/B layer through</p>
+<div class="math" role="math">k\le50,000</div>
+<p>was checked by comparing the exact trap cardinality with one half of the reduced unit group.</p>
+<p>Observed Jacobi-saturated layers:</p>
+<div class="math" role="math">\boxed{[1,2,4].}</div>
+<p>No others appeared.</p>
+<p>This agrees with the universal classification proved in <a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a>:</p>
+<div class="math" role="math">\boxed{ T_j=\{u:(u/(4j-1))=-1\} \iff j\in\{1,2,4\}. }</div>
+<h2>Explicit tower regression</h2>
+<p>For each base</p>
+<div class="math" role="math">j\in\{1,2,4\}</div>
+<p>the workflow checked every positive odd lift parameter</p>
+<div class="math" role="math">1\le c\le1001.</div>
+<p>That is</p>
+<div class="math" role="math">501</div>
+<p>lifts per base and</p>
+<div class="math" role="math">\boxed{1503}</div>
+<p>total square-lift layers.</p>
+<p>For every tested lift</p>
+<div class="math" role="math">K=\frac{(4j-1)c^2+1}{4},</div>
+<p>the workflow explicitly enumerated the Type A/B trap residues at <code>K</code>, reduced them modulo the base modulus, and verified complete containment in the base trap set.</p>
+<p>Result:</p>
+<div class="math" role="math">\boxed{1503/1503\text{ fully shadowed}.}</div>
+<h2>Reciprocity-lemma regression</h2>
+<p>Across those lifted depths, the workflow enumerated</p>
+<div class="math" role="math">\boxed{12,715}</div>
+<p>divisors and independently checked</p>
+<div class="math" role="math">\left(\frac e{4j-1}\right)=+1</div>
+<p>for every divisor <code>e|K</code> used in the lifted trap sets.</p>
+<p>All <code>12,715</code> checks passed.</p>
+<h2>Range reached automatically</h2>
+<p>The largest lifted depth tested for each base was:</p>
+<pre><code class="language-text">base 1, modulus 3:   K =   751,501
+base 2, modulus 7:   K = 1,753,502
+base 4, modulus 15:  K = 3,757,504</code></pre>
+<p>Thus the regression reaches several million in Type A/B depth even though the theorem itself is universal and requires no finite bound.</p>
+<h2>The three exact infinite families</h2>
+<p>Writing <code>c=2n+1</code>, the theorem gives the structural-gap families</p>
+<div class="math" role="math">\boxed{3n^2+3n+1,}</div>
+<div class="math" role="math">\boxed{7n^2+7n+2,}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{15n^2+15n+4,}</div>
+<p>for every <code>n&gt;=1</code>.</p>
+<p>Every layer in the first family is fully shadowed by <code>j=1</code>; every layer in the second by <code>j=2</code>; every layer in the third by <code>j=4</code>.</p>
+<h2>Interpretation</h2>
+<p>The regression confirms that the infinite reciprocity theorem is not merely an algebraic curiosity. Its first 1,503 explicit target layers, extending to depth 3.75 million, behave exactly as predicted.</p>
+<p>Together with the green dyadic-lattice regression, the shadow graph now contains multiple independently automated infinite theorem families generated by different arithmetic mechanisms.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

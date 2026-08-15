@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Type I cannot rescue a hard-prime `q=7` Type-II miss — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/hard-q7-type-i-no-rescue.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/hard-q7-type-i-no-rescue.html">
+  <meta property="og:title" content="Type I cannot rescue a hard-prime `q=7` Type-II miss — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Type I cannot rescue a hard-prime `q=7` Type-II miss</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/HARD-Q7-TYPE-I-NO-RESCUE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact companion to the <code>q=7</code> Type-II filter</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-Q7-EXACT-FILTER.md</code>, <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code></p>
+<p><strong>Claim boundary:</strong> identifies the first corridor position at which the two exact targets coincide in obstruction. It does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. The two targets at shift <code>7</code></h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">C=\frac{p+7}{4}.</div>
+<p>The unit group modulo <code>7</code> is cyclic of order six. Its quadratic-residue subgroup is</p>
+<div class="math" role="math">Q=\{1,2,4\}.</div>
+<p>The Type-II target is</p>
+<div class="math" role="math">-1\equiv6\pmod7,</div>
+<p>a nonresidue. The Type-I target is</p>
+<div class="math" role="math">-p^{-1}\pmod7.</div>
+<hr>
+<h2>2. Forced generator of <code>Q</code></h2>
+<p>Hard primes satisfy <code>p≡1\pmod8</code>, so <code>2\mid C</code>. The residue</p>
+<div class="math" role="math">2\pmod7</div>
+<p>generates <code>Q</code>:</p>
+<div class="math" role="math">2,\qquad 2^2\equiv4,\qquad 2^3\equiv1.</div>
+<p>Already the local signed set of a single factor <code>2</code> is</p>
+<div class="math" role="math">\{2^{-1},1,2\}=\{4,1,2\}=Q.</div>
+<p>Thus for every Mordell-hard prime the signed box contains the full quadratic-residue subgroup.</p>
+<hr>
+<h2>3. Every hard class is a residue modulo <code>7</code></h2>
+<p>The six Mordell-hard classes satisfy</p>
+<div class="math" role="math">p\bmod7\in\{1,2,4\}=Q.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\Bigl(\frac p7\Bigr)=+1.}</div>
+<p>Because <code>7≡3\pmod4</code>, the Type-I target is then a nonresidue:</p>
+<div class="math" role="math">\Bigl(\frac{-p^{-1}}{7}\Bigr) = \Bigl(\frac{-1}{7}\Bigr) \Bigl(\frac p7\Bigr)^{-1} = (-1)\cdot(+1) = -1.</div>
+<p>Concretely:</p>
+<div class="math" role="math">\begin{array}{c|c} p\bmod7 &amp; -p^{-1}\bmod7\\ \hline 1 &amp; 6\\ 2 &amp; 3\\ 4 &amp; 5 \end{array}</div>
+<p>In the first row the two targets coincide. In the other two rows the Type-I target is a primitive order-six class.</p>
+<hr>
+<h2>4. Theorem</h2>
+<p>For a Mordell-hard prime, the following are equivalent:</p>
+<ol><li><code>-1\notin\mathcal R_7(C)</code>;</li><li><code>-p^{-1}\notin\mathcal R_7(C)</code>;</li><li>every prime factor of <code>C</code> is a quadratic residue modulo <code>7</code>.</li></ol>
+<h3>Proof</h3>
+<p>The existing <code>q=7</code> theorem gives <code>(1)\Leftrightarrow(3)</code>. Under <code>(3)</code> the signed box lies in <code>Q</code>, while both targets are nonresidues, so <code>(3)\Rightarrow(2)</code>. Conversely, if some prime factor is a nonresidue then the Type-II theorem already produces <code>-1</code> in the box, and inversion symmetry is not needed. If one prefers a direct Type-I check: a nonresidue factor together with the already-full subgroup <code>Q</code> fills the whole group, which contains both targets. QED.</p>
+<hr>
+<h2>5. Consequence</h2>
+<p>At the second corridor position, Type I contributes <strong>no additional hard-prime coverage</strong> beyond Type II. Combined Erdős--Straus failure at <code>q=7</code> is exactly the already-classified Type-II miss.</p>
+<p>The first corridor position <code>q=3</code> is the same phenomenon: for hard <code>p</code> one has <code>p≡1\pmod3</code>, so <code>-p^{-1}\equiv-1\pmod3</code> and the two targets coincide.</p>
+<p>The next prime shift <code>q=11</code> is different. There Type I can rescue a Type-II miss; see <code>Q11-TYPE-I-COMPANION.md</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External-nonresidue m=1 character synchronization — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-m1-synchronization.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-m1-synchronization.html">
+  <meta property="og:title" content="External-nonresidue m=1 character synchronization — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External-nonresidue m=1 character synchronization</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-M1-SYNCHRONIZATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code></p>
+<p><strong>Claim boundary:</strong> this removes the quadratic-character obstruction for the <code>m=1</code> external-prime lane and identifies the exact sign structure of the shifted factor. It does not prove the remaining divisor-ratio placement theorem and therefore does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime. Hence</p>
+<div class="math" role="math">p\equiv1\pmod8</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac2p\right) =\left(\frac3p\right) =\left(\frac5p\right) =\left(\frac7p\right)=+1.</div>
+<p>Let <code>ell</code> be an odd prime satisfying</p>
+<div class="math" role="math">\boxed{\ell\equiv3\pmod4}</div>
+<p>and assume <code>ell</code> is external to <code>p</code>:</p>
+<div class="math" role="math">\boxed{\left(\frac\ell p\right)=-1.}</div>
+<p>Set</p>
+<div class="math" role="math">\boxed{k=\ell}, \qquad \boxed{C=\frac{p+\ell}{4}}.</div>
+<p>Since <code>p==1 mod4</code> and <code>ell==3 mod4</code>, <code>C</code> is an integer. Also</p>
+<div class="math" role="math">\gcd(C,p\ell)=1.</div>
+<p>The fixed-k strong certificate theorem asks whether</p>
+<div class="math" role="math">\exists u\mid C^2: \qquad 4u\equiv-1\pmod\ell.</div>
+<p>Equivalently, in divisor-ratio form,</p>
+<div class="math" role="math">\exists a,b\mid C: \qquad \boxed{\frac ba\equiv-p^{-1}\pmod\ell}.</div>
+<hr>
+<h2>2. The whole shifted factor is a nonresidue on both sides</h2>
+<p>Modulo <code>p</code>,</p>
+<div class="math" role="math">C\equiv \ell\,4^{-1}\pmod p.</div>
+<p>Since <code>4</code> is a square,</p>
+<div class="math" role="math">\boxed{\left(\frac Cp\right)=\left(\frac\ell p\right)=-1.}</div>
+<p>Modulo <code>ell</code>,</p>
+<div class="math" role="math">C\equiv p\,4^{-1}\pmod\ell,</div>
+<p>so</p>
+<div class="math" role="math">\left(\frac C\ell\right)=\left(\frac p\ell\right).</div>
+<p>Because <code>p==1 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac p\ell\right)=\left(\frac\ell p\right)=-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left(\frac Cp\right) = \left(\frac C\ell\right) =-1. }</div>
+<p>Thus the shifted factor automatically contains an odd total amount of external nonresidue support. No separate search is needed to manufacture the missing quadratic sign.</p>
+<hr>
+<h2>3. Prime-by-prime synchronization</h2>
+<h3>Theorem</h3>
+<p>For every odd prime <code>q|C</code>,</p>
+<div class="math" role="math">\boxed{ \left(\frac qp\right) = \left(\frac q\ell\right). }</div>
+<h3>Proof</h3>
+<p>Since <code>q|C</code>,</p>
+<div class="math" role="math">p+\ell\equiv0\pmod q,</div>
+<p>hence</p>
+<div class="math" role="math">p\equiv-\ell\pmod q.</div>
+<p>Because <code>p==1 mod4</code>, reciprocity between <code>p</code> and <code>q</code> contributes no sign:</p>
+<div class="math" role="math">\left(\frac qp\right)=\left(\frac pq\right).</div>
+<p>Thus</p>
+<div class="math" role="math">\left(\frac qp\right) = \left(\frac{-\ell}{q}\right) = \left(\frac{-1}{q}\right) \left(\frac\ell q\right).</div>
+<p>Since <code>ell==3 mod4</code>, reciprocity between <code>ell</code> and <code>q</code> gives</p>
+<div class="math" role="math">\left(\frac\ell q\right) = \left(\frac{-1}{q}\right) \left(\frac q\ell\right).</div>
+<p>The two <code>(-1/q)</code> factors cancel, yielding</p>
+<div class="math" role="math">\boxed{ \left(\frac qp\right) = \left(\frac q\ell\right). }</div>
+<p>QED.</p>
+<h3>Dyadic factor</h3>
+<p>If <code>2|C</code>, then</p>
+<div class="math" role="math">p+\ell\equiv0\pmod8.</div>
+<p>Since hard <code>p==1 mod8</code>, necessarily</p>
+<div class="math" role="math">\ell\equiv7\pmod8.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac2\ell\right)=+1 =\left(\frac2p\right).</div>
+<p>So the same synchronization statement holds for the prime <code>2</code> whenever it occurs in <code>C</code>.</p>
+<hr>
+<h2>4. Exact target sign</h2>
+<p>The divisor-ratio target is</p>
+<div class="math" role="math">\boxed{T=-p^{-1}\pmod\ell.}</div>
+<p>Its Legendre symbol is</p>
+<div class="math" role="math">\left(\frac T\ell\right) = \left(\frac{-1}{\ell}\right) \left(\frac{p^{-1}}\ell\right).</div>
+<p>Because <code>ell==3 mod4</code>,</p>
+<div class="math" role="math">\left(\frac{-1}{\ell}\right)=-1.</div>
+<p>And because</p>
+<div class="math" role="math">\left(\frac p\ell\right)=-1,</div>
+<p>taking an inverse does not change the symbol:</p>
+<div class="math" role="math">\left(\frac{p^{-1}}\ell\right)=-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \left(\frac T\ell\right)=+1. }</div>
+<p>So the exact target lies in the quadratic-residue subgroup modulo <code>ell</code>.</p>
+<p>This is the decisive sign separation:</p>
+<div class="math" role="math">\boxed{ C\text{ is NQR mod }\ell, \qquad T=-p^{-1}\text{ is QR mod }\ell. }</div>
+<p>The external prime supplies the required nonresidue content to <code>C</code>, while the final exact ratio must be assembled from an even amount of nonresidue support, or entirely from residue-side factors.</p>
+<hr>
+<h2>5. Hard-shield factors remain residue-side</h2>
+<p>Let</p>
+<div class="math" role="math">q\in\{2,3,5,7\}</div>
+<p>and suppose <code>q|C</code>. Every such <code>q</code> is a quadratic residue modulo hard <code>p</code>.</p>
+<p>By the synchronization theorem,</p>
+<div class="math" role="math">\boxed{\left(\frac q\ell\right)=+1.}</div>
+<p>Therefore every signed ratio generated solely by the available powers of</p>
+<div class="math" role="math">2,3,5,7</div>
+<p>inside <code>C</code> lies in the same quadratic-residue subgroup as the exact target <code>T</code>.</p>
+<p>This explains structurally why the finite external-nonresidue probe is so often solved by tiny hard-shield ratios: those coordinates are automatically on the correct character side once they divide the constructed <code>C</code>.</p>
+<p>It does <strong>not</strong> prove exact equality with <code>T</code>; the remaining problem is placement inside the quadratic-residue subgroup.</p>
+<hr>
+<h2>6. Strong m=1 theorem target</h2>
+<p>The <code>m=1</code> route is now reduced to the exact statement:</p>
+<blockquote><p>For every Mordell-hard prime <code>p</code>, there exists a prime &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; \ell\equiv3\pmod4,</p></blockquote>
+<p>&amp;gt; \qquad &amp;gt; \left(\frac\ell p\right)=-1, &amp;gt;&lt;/div&gt;</p>
+<blockquote><p>such that, with &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; C=\frac{p+\ell}{4},</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<blockquote><p>the signed divisor-ratio box &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; \mathcal R_\ell(C)</p></blockquote>
+<p>&amp;gt; = &amp;gt; \left\{ &amp;gt; \prod_{q\mid C}q^{z_q}\bmod\ell: &amp;gt; -v_q(C)\le z_q\le v_q(C) &amp;gt; \right\} &amp;gt;&lt;/div&gt;</p>
+<blockquote><p>contains &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; \boxed{-p^{-1}\pmod\ell.}</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<p>All scalar quadratic-character obstructions to this target have already vanished.</p>
+<p>The remaining wall is <strong>exact multiplicative placement</strong>, not sign existence.</p>
+<hr>
+<h2>7. Shield-only sharpened target</h2>
+<p>Finite theorem-mining suggests a still narrower statement may suffice. Define the available hard-shield ratio box</p>
+<div class="math" role="math">\boxed{ \mathcal H_\ell(C) = \left\{ 2^{z_2}3^{z_3}5^{z_5}7^{z_7}\bmod\ell: -v_q(C)\le z_q\le v_q(C) \right\}, }</div>
+<p>where missing primes have exponent range <code>{0}</code>.</p>
+<p>A successful shield-only certificate is exactly</p>
+<div class="math" role="math">\boxed{-p^{-1}\in\mathcal H_\ell(C).}</div>
+<p>Equivalently, there are coprime <code>210</code>-smooth integers <code>A,B</code> with</p>
+<div class="math" role="math">AB\mid C</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{\ell\mid pA+B.}</div>
+<p>Indeed the ratio condition <code>A/B == -p^{-1} (mod ell)</code> is precisely <code>pA+B == 0 (mod ell)</code>.</p>
+<p>This is now the most compressed candidate theorem emerging from the finite data:</p>
+<div class="math" role="math">\boxed{ \text{external }\ell\text{ supplies the nonresidue modulus/sign} \quad+\quad \{2,3,5,7\}\text{ supplies the exact ratio}. }</div>
+<p>No universal existence claim is made here until the shield-only theorem is proved.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

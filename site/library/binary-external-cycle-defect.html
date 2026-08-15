@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Binary defects on the full external-nonresidue factor cycle — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-external-cycle-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-external-cycle-defect.html">
+  <meta property="og:title" content="Binary defects on the full external-nonresidue factor cycle — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Binary defects on the full external-nonresidue factor cycle</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-EXTERNAL-CYCLE-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved local reductions for both parity types of external prime vertices</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-NR-FACTOR-CYCLE.md</code>, <code>BINARY-R-DIVISOR-COLLISION.md</code>, <code>BINARY-R-KNESER-DEFECT.md</code></p>
+<p><strong>Claim boundary:</strong> puts every vertex of the external-nonresidue factor cycle into a binary-rescue defect framework and gives a necessary classification of any full-stabilizer index-two defect at a <code>1 mod 4</code> vertex. The broader Eisenstein support condition is an exact sufficient condition for binary failure, but it does <strong>not</strong> imply that the full stabilizer has index two. The file does not prove that a full cycle cannot consist entirely of failed vertices and does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. One binary numerator for every external prime vertex</h2>
+<p>Let <code>p</code> be Mordell-hard and let</p>
+<div class="math" role="math">q&lt;p, \qquad q\text{ prime}, \qquad \left(\frac qp\right)=-1.</div>
+<p>Define</p>
+<div class="math" role="math">\sigma(q)= \begin{cases} 1,&amp;q\equiv3\pmod4,\\ 3,&amp;q\equiv1\pmod4, \end{cases} \qquad R_q=\sigma(q)q.</div>
+<p>Then <code>R_q=3 mod 4</code>. Put</p>
+<div class="math" role="math">\boxed{A_q=\frac{p+R_q}{4}=\frac{p+\sigma(q)q}{4}}, \qquad N_q=pA_q.</div>
+<p>Since <code>q&lt;p</code>, one has <code>A_q&lt;p</code>, and <code>gcd(R_q,N_q)=1</code>. Therefore the exact binary divisor-collision theorem applies at every external-prime vertex. The vertex is binary-rescued exactly when the signed divisor box of <code>N_q</code> modulo <code>R_q</code> contains <code>-1</code>.</p>
+<hr>
+<h2>2. Odd full-stabilizer quotient is impossible for every binary modulus</h2>
+<p>Let</p>
+<div class="math" role="math">G=(\mathbb Z/R_q\mathbb Z)^\times,</div>
+<p>let <code>B</code> be the signed divisor box, and let</p>
+<div class="math" role="math">H=\operatorname{Stab}(B).</div>
+<p>If <code>B</code> misses <code>-1</code>, the quotient <code>G/H</code> cannot have odd order. Indeed, the image of <code>-1</code> has order dividing two. In an odd-order quotient its image is trivial, so <code>-1 in H</code>. Since <code>1 in B</code> and <code>B</code> is <code>H</code>-periodic, <code>H subseteq B</code>, forcing <code>-1 in B</code>, contradiction.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \text{binary failure}\Longrightarrow 2\mid[G:H]. }</div>
+<p>This holds for both <code>R_q=q</code> and <code>R_q=3q</code>.</p>
+<hr>
+<h2>3. The q = 3 mod 4 branch</h2>
+<p>If</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>then <code>R_q=q</code> is prime and <code>BINARY-R-KNESER-DEFECT.md</code> applies directly. Every failure satisfies</p>
+<div class="math" role="math">\boxed{[G:H]\ge6,\qquad [G:H]\equiv2\pmod4.}</div>
+<p>Every quadratic-nonresidue prime factor of</p>
+<div class="math" role="math">A_q=\frac{p+q}{4}</div>
+<p>is visible outside <code>H</code>, and the sharp Kneser valuation-mass bound holds. Thus a <code>3 mod 4</code> cycle vertex has no index-two defect.</p>
+<hr>
+<h2>4. The q = 1 mod 4 branch</h2>
+<p>Now assume</p>
+<div class="math" role="math">q\equiv1\pmod4.</div>
+<p>Then <code>R_q=3q</code>, and CRT gives</p>
+<div class="math" role="math">G\cong(\mathbb Z/3\mathbb Z)^\times\times(\mathbb Z/q\mathbb Z)^\times.</div>
+<p>There are three nontrivial quadratic characters</p>
+<div class="math" role="math">\varepsilon(x)=\left(\frac x3\right), \qquad \lambda(x)=\left(\frac xq\right), \qquad \chi(x)=\varepsilon(x)\lambda(x).</div>
+<p>For hard <code>p</code>,</p>
+<div class="math" role="math">\varepsilon(p)=+1, \qquad \lambda(p)=-1, \qquad \chi(p)=-1.</div>
+<p>For the target <code>-1</code>,</p>
+<div class="math" role="math">\varepsilon(-1)=-1, \qquad \lambda(-1)=+1, \qquad \chi(-1)=-1.</div>
+<hr>
+<h2>5. Necessary classification of a full-stabilizer index-two defect</h2>
+<p>Assume a binary failure has <strong>full stabilizer</strong> of index two.</p>
+<p>An index-two subgroup is the kernel of one of the three quadratic characters above.</p>
+<h3><code>H = ker(lambda)</code> is impossible</h3>
+<p>Since <code>lambda(-1)=+1</code>, the target lies in <code>H</code>, hence in <code>B</code>, contradiction.</p>
+<h3><code>H = ker(chi)</code> is impossible</h3>
+<p>Since <code>chi(p)=-1</code>, the exponent-one local set <code>{p^{-1},1,p}</code> already fills the two-element quotient. Thus the target quotient class is hit, contradiction.</p>
+<h3>Only <code>H = ker(epsilon)</code> can survive</h3>
+<p>Therefore any full-stabilizer index-two failure must have</p>
+<div class="math" role="math">\boxed{H=\ker\varepsilon.}</div>
+<p>If a prime factor <code>s|N_q</code> satisfies <code>s=2 mod 3</code>, then its local signed set fills the two-element quotient. Since hard <code>p=1 mod3</code>, index-two failure therefore requires</p>
+<div class="math" role="math">\boxed{ \ell\mid A_q,\ \ell\text{ prime} \Longrightarrow \ell\equiv1\pmod3. }</div>
+<p>This implication is universal:</p>
+<div class="math" role="math">\boxed{ \text{full stabilizer index }2 \Longrightarrow \text{all prime factors of }A_q\text{ are }1\pmod3. }</div>
+<hr>
+<h2>6. Eisenstein support is an exact coarse failure condition</h2>
+<p>There is a converse statement about <strong>binary failure</strong>, but not about the exact full-stabilizer index.</p>
+<p>Assume every prime factor of</p>
+<div class="math" role="math">A_q=\frac{p+3q}{4}</div>
+<p>is <code>1 mod3</code>. Since hard <code>p</code> is also <code>1 mod3</code>, every divisor of <code>N_q=pA_q</code> is <code>1 mod3</code>. Hence every signed divisor ratio lies in <code>ker epsilon</code>, while <code>-1=2 mod3</code>. Therefore</p>
+<div class="math" role="math">\boxed{-1\notin B.}</div>
+<p>So Eisenstein support proves binary failure.</p>
+<p>However, the full stabilizer of the failed box may be a proper subgroup of <code>ker epsilon</code>, giving a much larger quotient index. Thus the correct logic is</p>
+<div class="math" role="math">\boxed{ \text{full index-2 defect} \Longrightarrow \text{all factors of }A_q\text{ are }1\pmod3 \Longrightarrow \text{binary failure}, }</div>
+<p>and neither reverse implication is asserted for the full stabilizer index.</p>
+<h3>Regression example</h3>
+<p>Take</p>
+<div class="math" role="math">\boxed{p=1009,\qquad q=73}.</div>
+<p>Then</p>
+<div class="math" role="math">A_q=\frac{1009+3\cdot73}{4}=307,</div>
+<p>and <code>307=1 mod3</code>. Hence Eisenstein support proves binary failure. Direct reconstruction of the signed box gives full-stabilizer quotient index</p>
+<div class="math" role="math">\boxed{144,}</div>
+<p>not <code>2</code>.</p>
+<p>This example is a permanent guard against conflating a coarse character obstruction with the exact stabilizer.</p>
+<hr>
+<h2>7. Parity refinement of the Eisenstein obstruction</h2>
+<p>If every prime factor of <code>A_q</code> is <code>1 mod3</code>, then <code>A_q</code> is odd, since <code>2=2 mod3</code>.</p>
+<p>For hard <code>p=1 mod8</code> and <code>q=1 mod4</code>,</p>
+<div class="math" role="math">A_q=\frac{p+3q}{4}</div>
+<p>is odd exactly when</p>
+<div class="math" role="math">\boxed{q\equiv1\pmod8.}</div>
+<p>Thus every Eisenstein-support failure satisfies <code>q=1 mod8</code>. If <code>q=5 mod8</code>, then <code>A_q</code> is even, so the literal factor <code>2=2 mod3</code> is present and the coarse mod-3 obstruction cannot occur.</p>
+<hr>
+<h2>8. Consequence for the outgoing factor-cycle edge under Eisenstein support</h2>
+<p>At a <code>1 mod4</code> source vertex, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code> chooses a prime factor</p>
+<div class="math" role="math">s\mid A_q</div>
+<p>with <code>(s/p)=-1</code>. The edge-character theorem gives</p>
+<div class="math" role="math">\left(\frac sq\right)=-\left(\frac{-3}{s}\right) =-\left(\frac s3\right).</div>
+<p>Under Eisenstein support, <code>s=1 mod3</code>, so</p>
+<div class="math" role="math">\boxed{\left(\frac sq\right)=-1.}</div>
+<p>Thus even when the mod-3 support obstruction already proves binary failure, the outgoing edge remains a quadratic nonresidue modulo both <code>p</code> and the source prime <code>q</code>.</p>
+<hr>
+<h2>9. Correct local alphabet for a failed factor cycle</h2>
+<p>Every failed external-nonresidue cycle vertex now has one of the following forms.</p>
+<h3>Type I: <code>q = 3 mod 4</code></h3>
+<p>An even Kneser defect of index at least six, with every <code>q</code>-nonresidue factor visible.</p>
+<h3>Type II: <code>q = 1 mod 4</code></h3>
+<p>The full stabilizer quotient is even. If it is exactly two, Eisenstein support is necessary. More generally, Eisenstein support itself is a sufficient binary-failure obstruction and can coexist with a much larger full-stabilizer quotient.</p>
+<p>There are no odd-index full-stabilizer defects anywhere on the binary cycle.</p>
+<hr>
+<h2>10. Remaining cycle target</h2>
+<p>The remaining cycle theorem must not identify Eisenstein support with full index two.</p>
+<p>A valid closure target is:</p>
+<blockquote><p>Prove that no directed external-nonresidue factor cycle can carry binary failure at every vertex when every vertex has an even full-stabilizer defect, the <code>3 mod4</code> vertices obey the visible-nonresidue Kneser bounds, and any Eisenstein-support <code>1 mod4</code> vertex forces all factors of <code>(p+3q)/4</code> into <code>1 mod3</code> while its outgoing edge remains a quadratic nonresidue to the source.</p></blockquote>
+<p>This cycle program remains supplementary to the stronger exact two-target signed-box reformulation of the prime problem. The latter is now the preferred global frontier because either the Type-I target <code>-p^{-1}</code> or the Type-II target <code>-1</code> suffices.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

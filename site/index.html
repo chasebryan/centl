@@ -64,6 +64,7 @@
 </head>
 <body>
 <div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
   <header class="masthead home-masthead">
     <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
   </header>
@@ -72,14 +73,18 @@
       <h2>Foundation</h2>
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About FCF</a></li><li><a href="funding.html">Funding</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
         <li><a href="centl.html">CENTL</a></li>
         <li><a href="software.html">Software</a></li>
         <li><a href="mirrors.html">The Bazaar</a></li>
         <li><a href="docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul><li><a href="research-erdos-straus.html">Erdős-Straus Type A/B</a></li></ul>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
@@ -87,11 +92,11 @@
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>
-    <main>
+    <main id="content">
       <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
 
       <h2>Free for science</h2>
-      <p>The Free Computation Foundation publishes software that keeps serious computation exact when the mathematics permits it, and honest when it does not. <a href="centl.html">CENTL</a> is the current project. This site is static HTML and CSS. No JavaScript is required.</p>
+      <p>The Free Computation Foundation publishes software that keeps serious computation exact when the mathematics permits it, and honest when it does not. <a href="centl.html">CENTL</a> is the current project. This site is static HTML and CSS. No JavaScript is required, and none is served.</p>
 
       <h2>Current project</h2>
       <table class="status">
@@ -102,15 +107,19 @@
       </table>
       <p>Install the Oasis product below. Use the Camp stay from <code>main</code> when you want the current tree. Details stay in the <a href="docs.html">documentation index</a>.</p>
 
-      <h2>New research candidate</h2>
-      <p><strong>Erdős-Straus Type A/B witness depth and congruence shadow structure.</strong> FCF has preserved a new Wellspring Candidate arising from CENTL exact-verification work. The research defines a minimal Type A/B witness-depth invariant, records an independently checked frontier through the six difficult residue classes below 10,000,000, proves an exact Type A/B trap-cardinality formula and unbounded depth over primes, and identifies a CRT shadow relation that makes many later congruence layers provably redundant.</p>
-      <p><a href="research-erdos-straus.html">Read the public research note</a>. The Erdős-Straus conjecture remains open, and novelty/priority for the structural contribution remains under review.</p>
+      <h2>Research library</h2>
+      <p>Every public FCF research record is hosted on this site: Wellspring candidates, theorem notes, certificates, and the Erdős–Straus Type A/B program. Search suggestions appear as you type. Filters work in CSS. Nothing on this site requires a script.</p>
+      <p class="hero-actions">
+        <a class="sponsor-button" href="research.html">Open the research library</a>
+        <a class="sponsor-button sponsor-button-alt" href="research-erdos-straus.html">Read the Erdős–Straus program</a>
+      </p>
+      <p><strong>Erdős-Straus Type A/B witness depth and congruence shadow structure.</strong> FCF has preserved a new Wellspring Candidate arising from CENTL exact-verification work. The research defines a minimal Type A/B witness-depth invariant, records an independently checked frontier through the six difficult residue classes below 10,000,000, proves an exact Type A/B trap-cardinality formula and unbounded depth over primes, and identifies a CRT shadow relation that makes many later congruence layers provably redundant. A public hunt (<code>./centl es go</code>) now files findings with machine-independent letter numbers. The conjecture remains open.</p>
 
       <h2>Install CENTL</h2>
       <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install
 centl-sci</code></pre>
-      <p>GNU/Linux x86_64. The installer checks the archive, then activates. Details: <a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">installation guide</a>.</p>
+      <p>GNU/Linux x86_64. The installer checks the archive, then activates. Details: <a href="manuals/install.html">installation guide</a>.</p>
 
       <h2>Support the Free Computation Foundation</h2>
       <p>Sponsorship helps FCF develop, publish, and preserve the software. Totals and methods are on the <a href="funding.html">funding page</a>.</p>
@@ -126,7 +135,7 @@ centl-sci</code></pre>
       <p class="small">Reported sponsorship contributions received by FCF, updated manually. Last updated August 13, 2026.</p>
     </main>
   </div>
-  <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · No client-side framework required.</footer>
+  <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · No JavaScript is served.</footer>
 </div>
 </body>
 </html>

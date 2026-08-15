@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Reciprocity defect quotient for square-lift signature shadows — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/reciprocity-defect-quotient.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/reciprocity-defect-quotient.html">
+  <meta property="og:title" content="Reciprocity defect quotient for square-lift signature shadows — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Reciprocity defect quotient for square-lift signature shadows</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RECIPROCITY-DEFECT-QUOTIENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural theorem plus finite proof-mining signal</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove QDSC, universal Direct-Shadow Completeness, universal López Type A/B coverage, or the Erdős-Straus conjecture. It isolates exactly where a square lift can create new local quadratic-signature information beyond its ancestor.</p>
+<p>Read with:</p>
+<ul><li><a href="square-lift-signature.html">SQUARE-LIFT-SIGNATURE.md</a></li><li><a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a></li><li><a href="square-lift-reciprocity.html">SQUARE-LIFT-RECIPROCITY.md</a></li><li><a href="quadratic-signature-shield-k1200.html">QUADRATIC-SIGNATURE-SHIELD-K1200.md</a></li></ul>
+<h2>1. Ancestor signature spaces</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree. Let</p>
+<div class="math" role="math">V_d=\mathbb F_2^{\omega(d)}</div>
+<p>be the local Legendre-sign space at the distinct primes dividing <code>d</code>.</p>
+<p>Let</p>
+<div class="math" role="math">V_a =\operatorname{span} \{\lambda_d(\ell):\ell\mid a,\ \ell\text{ prime}\} \subseteq V_d</div>
+<p>be the ancestor divisor-signature space.</p>
+<p>Let</p>
+<div class="math" role="math">J_d:V_d\to\mathbb F_2</div>
+<p>be the Jacobi functional, obtained by summing the local sign bits with the odd-exponent weights of <code>d</code>. Since <code>d</code> is squarefree, this is simply the parity of the local negative signs.</p>
+<p>The Type A/B divisor-Jacobi theorem gives</p>
+<div class="math" role="math">V_a\subseteq\ker J_d.</div>
+<p>Define the quadratic quotient dimension</p>
+<div class="math" role="math">\kappa(a)=\dim V_d-\dim V_a.</div>
+<p>Because <code>J_d</code> is nonzero and annihilates <code>V_a</code>, <code>kappa(a)&gt;=1</code>.</p>
+<h2>2. The defect quotient</h2>
+<p>Define the <strong>reciprocity defect quotient</strong> of the ancestor by</p>
+<div class="math" role="math">\boxed{ \mathcal R_a = \ker J_d/V_a. }</div>
+<p>Its dimension is</p>
+<div class="math" role="math">\boxed{ \dim\mathcal R_a=\kappa(a)-1. }</div>
+<p>Thus <code>R_a</code> measures exactly the local quadratic information that remains after removing:</p>
+<ol><li>the ordinary Jacobi bit;</li><li>the signatures already generated by divisors of the ancestor depth <code>a</code>.</li></ol>
+<p>When <code>kappa(a)=1</code>, this quotient is zero and <a href="square-lift-signature.html">SQUARE-LIFT-SIGNATURE.md</a> gives automatic signature shadowing for every square lift.</p>
+<h2>3. Prime defect classes</h2>
+<p>For any integer <code>q</code> coprime to <code>d</code> with</p>
+<div class="math" role="math">(q/d)=+1,</div>
+<p>define its defect class</p>
+<div class="math" role="math">\boxed{ \delta_a(q) =[\lambda_d(q)] \in\mathcal R_a. }</div>
+<p>The class is zero exactly when</p>
+<div class="math" role="math">\lambda_d(q)\in V_a.</div>
+<p>Now let</p>
+<div class="math" role="math">4j-1=d s^2</div>
+<p>be a square lift of the ancestor.</p>
+<p>Square-lift reciprocity proves</p>
+<div class="math" role="math">(\ell/d)=+1</div>
+<p>for every prime <code>ell|j</code>, so every prime divisor of <code>j</code> has a well-defined defect class</p>
+<div class="math" role="math">\delta_a(\ell)\in\mathcal R_a.</div>
+<h2>4. Signature defect of the lift</h2>
+<p>Let</p>
+<div class="math" role="math">W_{j\to a} = \operatorname{span} \{\lambda_d(\ell):\ell\mid j\}</div>
+<p>be the projected divisor-signature space of the lift.</p>
+<p>Its image in the defect quotient is</p>
+<div class="math" role="math">\boxed{ \Delta_{j\to a} = (W_{j\to a}+V_a)/V_a \le\mathcal R_a. }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\Delta_{j\to a} = \operatorname{span} \{\delta_a(\ell):\ell\mid j\}.</div>
+<h3>Theorem</h3>
+<p>The square lift is completely shadowed by its ancestor at local quadratic-signature resolution if and only if</p>
+<div class="math" role="math">\boxed{ \Delta_{j\to a}=0. }</div>
+<p>This is the quotient form of the criterion <code>W_{j-&gt;a} subset V_a</code>.</p>
+<p>Thus every square-lift signature exception is precisely a nonzero subspace of the ancestor&#x27;s reciprocity defect quotient.</p>
+<h2>5. Conservation law for square-lift defects</h2>
+<p>Factor</p>
+<div class="math" role="math">j=\prod_i\ell_i^{e_i}.</div>
+<p>Because</p>
+<div class="math" role="math">4j\equiv1\pmod d,</div>
+<p>we have</p>
+<div class="math" role="math">j\equiv4^{-1}\pmod d.</div>
+<p>But <code>4</code> is a square modulo every prime divisor of <code>d</code>. Therefore</p>
+<div class="math" role="math">\boxed{ \lambda_d(j)=0. }</div>
+<p>By multiplicativity of the signature map,</p>
+<div class="math" role="math">\sum_i(e_i\bmod2)\lambda_d(\ell_i)=0.</div>
+<p>Passing to the defect quotient gives the exact conservation law</p>
+<div class="math" role="math">\boxed{ \sum_i(e_i\bmod2)\delta_a(\ell_i)=0 \quad\text{in }\mathcal R_a. }</div>
+<h3>Consequence</h3>
+<p>New square-lift signature information cannot appear as an unbalanced single defect.</p>
+<p>It must occur in a parity-cancelling configuration of prime-factor defect classes.</p>
+<p>This is a structural restriction on every possible square-lift signature exception.</p>
+<h2>6. One-dimensional defect quotient</h2>
+<p>Suppose</p>
+<div class="math" role="math">\kappa(a)=2.</div>
+<p>Then</p>
+<div class="math" role="math">\dim\mathcal R_a=1.</div>
+<p>There is only one nonzero defect class.</p>
+<p>Therefore a square lift has nonzero signature defect exactly when at least one prime divisor has the nonzero defect class, while the conservation law forces the total parity of nonzero-defect prime exponents to be even.</p>
+<p>So every exception in this case is built from one of two patterns:</p>
+<ol><li>at least two odd-exponent prime factors carrying the same nonzero defect;</li><li>a prime carrying nonzero defect to an even positive exponent.</li></ol>
+<p>The full lift may contain additional zero-defect prime factors.</p>
+<p>This converts a higher-dimensional signature phenomenon into a parity law.</p>
+<h2>7. Finite k &lt;= 1200 exception structure</h2>
+<p>Among the <code>224</code> non-squarefree layers through <code>j&lt;=1200</code>, only <code>17</code> escape their squarefree ancestor at full quadratic-signature resolution.</p>
+<p>Of those:</p>
+<pre><code class="language-text">16 have kappa(a)=2, so dim R_a=1
+ 1 has kappa(a)=3, so dim R_a=2</code></pre>
+<p>The one-dimensional cases exhibit the conservation law transparently. Examples include:</p>
+<pre><code class="language-text">j=115  over a=13: prime factors 5 and 23 carry the same nonzero defect
+j=205  over a=23: prime factors 5 and 41 carry the same nonzero defect
+j=259  over a=29: prime factors 7 and 37 carry the same nonzero defect
+j=319  over a=13: prime factors 11 and 29 carry the same nonzero defect
+j=529  over a=59: the nonzero-defect prime 23 occurs with exponent 2
+j=625  over a=13: the nonzero-defect prime 5 occurs with exponent 4
+j=961  over a=107: the nonzero-defect prime 31 occurs with exponent 2</code></pre>
+<p>The unique <code>k&lt;=1200</code> exception with a two-dimensional defect quotient is</p>
+<pre><code class="language-text">j=979
+m_j=3915
+ancestor a=109
+ancestor modulus d=435
+kappa(a)=3
+j=11*89</code></pre>
+<p>and the two odd prime factors again carry equal defect classes, so their sum vanishes as required.</p>
+<p>These are finite proof-mining observations. The defect quotient and conservation law are universal theorems.</p>
+<h2>8. Reciprocity-matrix interpretation</h2>
+<p>Let the rows be the primes dividing <code>d</code> and the columns the primes dividing the relevant depth. Put</p>
+<div class="math" role="math">A_{p,\ell} = \ell_p(\ell) \in\mathbb F_2,</div>
+<p>where the entry is the local Legendre-sign bit.</p>
+<p>Then:</p>
+<ul><li>the ancestor space <code>V_a</code> is the column space of the ancestor matrix;</li><li>the Jacobi functional is a canonical nonzero left-kernel vector;</li><li><code>R_a</code> is the remaining left-quotient after removing that Jacobi direction;</li><li>square-lift prime factors contribute columns whose classes live in <code>R_a</code>;</li><li>the exponent-parity vector of <code>j</code> gives a right-kernel relation because <code>lambda_d(j)=0</code>.</li></ul>
+<p>So the signature exception problem is a finite binary reciprocity-matrix problem with both a canonical left constraint and a canonical right dependency.</p>
+<h2>9. Why this matters for QDSC</h2>
+<p>The full quadratic-signature shield showed no collective obstruction without a direct signature residual through <code>k&lt;=1200</code>.</p>
+<p>The square-lift part of that phenomenon now has a sharper architecture:</p>
+<div class="math" role="math">\boxed{ \kappa(a)=1 \Rightarrow \text{automatic ancestor signature shadow}, }</div>
+<p>while for <code>kappa(a)&gt;1</code>, all genuinely new lift information is confined to</p>
+<div class="math" role="math">\boxed{ \mathcal R_a \text{ of dimension } \kappa(a)-1, }</div>
+<p>and must satisfy the defect conservation law.</p>
+<p>Thus a potentially large local-signature system reduces to a small quotient with a built-in parity dependency.</p>
+<p>The next target is to classify which defect configurations can actually occur from the norm-form depths</p>
+<div class="math" role="math">j=(d s^2+1)/4</div>
+<p>and prove that their induced signature constraints are already shadowed by lower-codimension layers.</p>
+<h2>10. Novelty boundary</h2>
+<p>Quadratic reciprocity, Legendre symbols, quotient vector spaces, and parity relations are classical. The candidate contribution is the <strong>reciprocity defect quotient and conservation law specialized to square-lift López Type A/B shadowing inside the minimal-depth framework</strong>.</p>
+<p>Publication priority remains subject to broader literature review and external mathematical review.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

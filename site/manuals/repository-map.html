@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This document describes the supported organization of the CENTL source tree and its long-lived branch roles. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the stable runtime.">
+  <title>CENTL Repository Map — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/repository-map.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/repository-map.html">
+  <meta property="og:title" content="CENTL Repository Map — Free Computation Foundation">
+  <meta property="og:description" content="This document describes the supported organization of the CENTL source tree and its long-lived branch roles. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the stable runtime.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL Repository Map</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">This document describes the supported organization of the CENTL source tree and its long-lived branch roles. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the stable runtime.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/REPOSITORY-MAP.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This document describes the supported organization of the CENTL source tree and its long-lived branch roles. It is an architectural map, not a promise that every historical file or preservation artifact belongs to the stable runtime.</p>
+<p>The authoritative branch and release rules are defined in <a href="release-policy.html"><code>docs/RELEASE-POLICY.md</code></a>.</p>
+<h2>Root</h2>
+<p>The repository root is reserved for project-wide build, package, policy, licensing, contributor, and entry-point material.</p>
+<p>Key surfaces include:</p>
+<ul><li><code>README.md</code> — public project entry point: install and the three Oasis commands;</li><li><code>docs/README.md</code> — start-here index for the rest of the manuals;</li><li><code>site/</code> — public HTML/CSS site, including the hosted research library;</li><li><code>CHANGELOG.md</code> — chronological version history;</li><li><code>LICENSE</code>, <code>LICENSING.md</code>, <code>THIRD_PARTY_NOTICES.md</code>, <code>TRADEMARKS.md</code> — licensing and identity policy;</li><li><code>SECURITY.md</code> — supported security boundary, threat model, and reporting policy;</li><li><code>CONTRIBUTING.md</code> — contributor policy;</li><li><code>dune-project</code>, <code>centl.opam</code>, <code>Makefile</code>, <code>toolchain.lock</code> — authoritative build/dependency entry points;</li><li><code>install</code> — supported GNU/Linux installation entry point;</li><li><code>centl</code>, <code>executeme</code> — command/compatibility launch surfaces retained by the current distribution.</li></ul>
+<p>Version-specific one-shot release automation does not belong at the root or in permanent CI after its release line is abandoned.</p>
+<h2><code>src/</code></h2>
+<p><code>src/</code> contains shipped implementation code.</p>
+<p>The current tree includes the OCaml/F*/native numerical core, physics implementation, command servers and protocol surfaces, CENTL-SCi, and the MIRAGE executable/modules. Code in this directory is part of the security-review surface whenever it is reachable from a shipped command, library, protocol, installer, or release artifact.</p>
+<p>New implementation code should be grouped by subsystem and should not be placed in <code>scripts/</code> merely because it is convenient to execute during development.</p>
+<h2><code>caravan/</code></h2>
+<p><code>caravan/</code> contains the Python implementation of the CARAVAN local laboratory.</p>
+<p>CARAVAN has its own explicit trust boundary: carriers affect availability but never define artifact authority. The directory contains content-addressed storage, catalog/TUF handling, identity/policy enrollment, coordinator state, transport, verified retrieval, lifecycle, and laboratory orchestration.</p>
+<p>Production/public-network CARAVAN code must not be mixed into the Phase 1 laboratory without satisfying the rollout and policy gates documented under <code>docs/</code>.</p>
+<h2><code>tests/</code></h2>
+<p><code>tests/</code> contains deterministic product and protocol tests. Subsystem-specific suites should remain grouped, such as <code>tests/mirage/</code>.</p>
+<p>Tests are evidence, not production authority. Fixtures should be bounded and should not silently become runtime dependencies.</p>
+<h2><code>scripts/</code></h2>
+<p><code>scripts/</code> contains developer, validation, packaging, preservation, demonstration, and operational helpers that are not themselves the primary shipped implementation.</p>
+<p>A script that becomes a required runtime component should be promoted into an appropriate implementation/package surface rather than remaining an accidental helper.</p>
+<p><code>scripts/publish-site-library.py</code> turns public research notes and front-facing manuals into the static HTML tree under <code>site/library/</code> and <code>site/manuals/</code>.</p>
+<p>Release-specific repair scripts should be removed or archived once they no longer serve a supported release path.</p>
+<h2><code>docs/</code></h2>
+<p><code>docs/</code> is the durable design, user, architecture, policy, and release-documentation surface.</p>
+<p>Important subsystem families include:</p>
+<ul><li>CENTL core design, mathematics, numerics, verification, protocol, MCP, and installation;</li><li>CENTL-SCi and Caramels BUILD/self-extension;</li><li>CENTL-MIRAGE architecture;</li><li>FCF Wellspring records under <code>docs/wellsprings/</code>;</li><li>FCF Camp records under <code>docs/camps/</code>;</li><li>the company and AI-software proposal in <a href="proposal.html"><code>FCF-PROPOSAL.md</code></a>;</li><li>CARAVAN architecture, threat model, host policy, rollout, transport, identity, catalog, and laboratory documentation;</li><li>platform support and preservation/recovery documentation;</li><li>branch and release policy;</li><li><code>docs/releases/</code> for durable release-specific notes.</li></ul>
+<p>Transient CI failure records do not belong in durable documentation.</p>
+<h2><code>assets/</code></h2>
+<p><code>assets/</code> contains project visual material. Branding should live under <code>assets/branding/</code>; demonstrative screenshots and output images should be grouped separately from canonical branding.</p>
+<p>README assets should have stable descriptive names. Temporary upload names and branch-specific image names should not become permanent interfaces.</p>
+<h2><code>.github/</code></h2>
+<p><code>.github/</code> contains repository automation and policy integration.</p>
+<p>Permanent workflows should be capability-oriented rather than tied to a single obsolete release number. Workflows must use least-privilege permissions, immutable action pins, and safe trust boundaries for pull-request content and publication credentials.</p>
+<p>CI is intentionally branch-aware. <code>oasis</code> receives the complete Oasis qualification gate, <code>mirage</code> receives a lighter development gate, and <code>main</code> receives integration checks appropriate to the comprehensive tree. Oasis-only release qualification must not be imposed indiscriminately on every branch.</p>
+<p>One-shot release automation is removed after it ceases to describe a supported release path.</p>
+<h2><code>lab/</code> and experimental surfaces</h2>
+<p>Laboratory or research material that is intentionally outside the stable runtime should remain visibly separated from shipped core behavior. Experimental results must not inherit verified-core or Oasis assurance through directory placement, branch presence, or naming.</p>
+<h2>Branches</h2>
+<p>CENTL has three long-lived branches with distinct responsibilities:</p>
+<ul><li><strong><code>oasis</code> — standard product.</strong> This is the steadily advanced stable snapshot of current <code>main</code> and <code>mirage</code>. It is the only long-lived branch required to satisfy the full Oasis qualification standard. Stable releases are promoted and tagged from qualified Oasis commits. After a snapshot is promoted, development continues on <code>mirage</code> and <code>main</code>.</li><li><strong><code>mirage</code> — development and research laboratory.</strong> New features, prototypes, experimental mathematics, architecture changes, and speculative work normally mature here. Mirage deliberately uses lighter development checks and is not required to satisfy every Oasis-only release gate.</li><li><strong><code>main</code> — complete developer and research distribution.</strong> Main exposes the comprehensive codebase, including stable Oasis material and integrated Mirage-originated experimental facilities. Main is not itself an Oasis declaration.</li></ul>
+<p>The main README and other flagship public-product surfaces must use <code>oasis</code> as the authoritative source for stable release/version identity, recommended capabilities, installation claims, and other standard-product statements. Experimental material present in <code>main</code> must remain visibly experimental rather than silently inheriting Oasis status.</p>
+<p>The ordinary maturity path is <code>mirage</code> -&gt; <code>main</code> -&gt; linear snapshot on the oasis tip -&gt; Oasis qualification -&gt; <code>oasis</code>, then development continues on <code>mirage</code> and <code>main</code>. <code>main</code> is an integrated distribution view rather than another maturity stage.</p>
+<p>Short-lived feature/fix branches are implementation vehicles, not long-term product surfaces. <code>archive/*</code> or explicitly documented preservation refs may retain historically important pre-merge states. Before deleting an old branch, compare it to the appropriate long-lived line or otherwise establish that unique work is intentionally discarded or preserved elsewhere.</p>
+<p>The governing repository rule is:</p>
+<blockquote><p><strong>Oasis is a promotion state of one exact snapshot, not a property of every commit.</strong></p></blockquote>
+<h2>Releases</h2>
+<p>Stable release tags use plain Semantic Versioning, for example <code>v0.14.0</code>, and are cut from qualified <code>oasis</code> commits. <strong>Oasis is not a codename or SemVer component.</strong> It is a repeatable quality declaration attached to a release only after that source satisfies the repository&#x27;s reconciliation, hardening, security, validation, documentation, packaging, and reproducibility gates.</p>
+<p>Release artifacts must be reproducible from the tagged Oasis commit through the supported release workflow and must retain checksum/build-manifest identity before activation or publication.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

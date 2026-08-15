@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Five-halves sieve bound from the exact q=3, q=7, and q=11 Type-II filters — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-q3-q7-q11-sieve.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-q3-q7-q11-sieve.html">
+  <meta property="og:title" content="Five-halves sieve bound from the exact q=3, q=7, and q=11 Type-II filters — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Five-halves sieve bound from the exact q=3, q=7, and q=11 Type-II filters</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-Q3-Q7-Q11-SIEVE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved application of a classical upper-bound sieve</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-Q3-Q7-SIEVE.md</code>, <code>STRONG-ES-Q11-EXACT-FILTER.md</code></p>
+<p><strong>Imported classical tools:</strong> Selberg/Brun upper-bound sieve, prime number theorem in arithmetic progressions, Dirichlet-character prime sums</p>
+<p><strong>Claim boundary:</strong> classical Erdős--Straus exceptional-set results are stronger when larger parametric families are used. This note records the specific quantitative consequence of the three exact fixed Type-II shifts <code>3,7,11</code>; it does not prove universal strong/Type-II coverage.</p>
+<hr>
+<h2>1. Consecutive corridor variables</h2>
+<p>Let</p>
+<div class="math" role="math">A=\frac{p+3}{4}.</div>
+<p>The first three prime shifts in the Type-II corridor are</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} q &amp; C=(p+q)/4\\ \hline 3 &amp; A\\ 7 &amp; A+1\\ 11 &amp; A+2. \end{array}}</div>
+<p>For a simultaneous survivor:</p>
+<ol><li><code>A</code> has only prime factors <code>1 mod3</code>;</li><li><code>A+1</code> has only quadratic-residue prime factors mod <code>7</code>;</li><li><code>A+2</code> lies in one of the two exact <code>q=11</code> miss branches.</li></ol>
+<p>We sieve each <code>q=11</code> branch separately.</p>
+<hr>
+<h2>2. Baseline dimension from primality, q=3, and q=7</h2>
+<p>For every large sieve prime <code>ell</code>, the first two-filter argument forbids:</p>
+<ul><li>one residue making <code>p=4A-3</code> divisible by <code>ell</code>;</li><li>residue <code>A=0</code> for the half of primes with <code>ell=2 mod3</code>;</li><li>residue <code>A=-1</code> for the half with <code>(ell/7)=-1</code>.</li></ul>
+<p>These residues are distinct away from finitely many small primes.</p>
+<p>Therefore the baseline sieve dimension is</p>
+<div class="math" role="math">\boxed{2.}</div>
+<p>and the baseline survivor count is</p>
+<div class="math" role="math">\ll X/(\log X)^2.</div>
+<hr>
+<h2>3. q=11 Branch A adds half a sieve dimension</h2>
+<p>Branch A requires every prime factor of</p>
+<div class="math" role="math">A+2</div>
+<p>to be a quadratic residue modulo <code>11</code>.</p>
+<p>Thus for every sieve prime <code>ell</code> with</p>
+<div class="math" role="math">\left(\frac\ell{11}\right)=-1,</div>
+<p>the residue</p>
+<div class="math" role="math">\boxed{A\equiv-2\pmod\ell}</div>
+<p>is forbidden.</p>
+<p>Quadratic nonresidue primes modulo <code>11</code> have relative density</p>
+<div class="math" role="math">\boxed{1/2.}</div>
+<p>among primes away from <code>11</code>.</p>
+<p>The residue <code>-2</code> is distinct from the three baseline forbidden residues for every sufficiently large <code>ell</code>; collisions occur only at finitely many primes and do not affect sieve dimension.</p>
+<p>Hence Branch A has dimension</p>
+<div class="math" role="math">\boxed{ 2+\frac12=\frac52.}</div>
+<p>The upper-bound sieve gives</p>
+<div class="math" role="math">\boxed{ N_A(X) \ll \frac{X}{(\log X)^{5/2}}.}</div>
+<hr>
+<h2>4. q=11 Branch B is even thinner</h2>
+<p>The exact thin Branch B requires:</p>
+<ul><li><code>v_3(A+2)=1</code>;</li><li>every other QR factor is <code>1 mod11</code>;</li><li>no prime factors <code>7,8,10 mod11</code>;</li><li>the only allowed nonresidue classes are <code>2,6 mod11</code>, with total valuation at most two.</li></ul>
+<p>For an upper bound we may <strong>discard</strong> the valuation restrictions and enlarge the set.</p>
+<p>After ignoring the special fixed prime <code>3</code>, every prime divisor of <code>A+2</code> is then allowed only in the three classes</p>
+<div class="math" role="math">\boxed{1,2,6\pmod{11}.}</div>
+<p>Therefore primes in the seven reduced classes</p>
+<div class="math" role="math">\boxed{3,4,5,7,8,9,10\pmod{11}}</div>
+<p>are forbidden as divisors of <code>A+2</code>.</p>
+<p>These classes have prime density</p>
+<div class="math" role="math">\boxed{7/10.}</div>
+<p>by the prime number theorem in arithmetic progressions.</p>
+<p>Thus Branch B has sieve dimension at least</p>
+<div class="math" role="math">\boxed{ 2+\frac7{10}=\frac{27}{10}.}</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ N_B(X) \ll \frac{X}{(\log X)^{27/10}}.}</div>
+<p>The actual exact Branch-B set is smaller because the ignored primitive valuation mass is capped by two.</p>
+<hr>
+<h2>5. Combined three-shift theorem</h2>
+<p>Every simultaneous <code>q=3,7,11</code> miss belongs to Branch A or Branch B at <code>q=11</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\begin{aligned} N_{3,7,11}(X) &amp;\le N_A(X)+N_B(X)\\ &amp;\ll \frac{X}{(\log X)^{5/2}} + \frac{X}{(\log X)^{27/10}}. \end{aligned}</div>
+<p>The first term dominates.</p>
+<p>Hence:</p>
+<h3>Theorem — three fixed Type-II shifts leave a five-halves-dimensional sifted set</h3>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ p\text{ prime and }q=3,7,11\text{ all miss}\} \ll \frac{X}{(\log X)^{5/2}}.}</div>
+<p>The same bound holds after restriction to the six Mordell-hard classes.</p>
+<hr>
+<h2>6. Relative prime density</h2>
+<p>Since</p>
+<div class="math" role="math">\pi(X)\sim X/\log X,</div>
+<p>the relative density of triple survivors among primes is</p>
+<div class="math" role="math">\boxed{ O\left((\log X)^{-3/2}\right).}</div>
+<p>Thus the first three prime Type-II shifts alone capture all but a very thin relative subset of primes.</p>
+<p>Again, this does not approach the strength of the best classical full-ES exceptional-set bounds. Its value is that it arises from three explicit exact strong/Type-II corridor positions.</p>
+<hr>
+<h2>7. Local-density interpretation</h2>
+<p>The dominant Branch-A sieve dimension decomposes as</p>
+<div class="math" role="math">\boxed{ 1 +\frac12 +\frac12 +\frac12 = \frac52.}</div>
+<p>The four pieces are:</p>
+<ol><li>primality of <code>4A-3</code>;</li><li>inert-prime exclusion from <code>A</code> modulo <code>3</code>;</li><li>quadratic-NR exclusion from <code>A+1</code> modulo <code>7</code>;</li><li>quadratic-NR exclusion from <code>A+2</code> modulo <code>11</code>.</li></ol>
+<p>The three shifted factor restrictions occur at distinct residues</p>
+<div class="math" role="math">0,-1,-2\pmod\ell</div>
+<p>for almost every sieve prime, so their local dimensions add cleanly.</p>
+<hr>
+<h2>8. Prior-art boundary</h2>
+<p>Vaughan, Elsholtz, and later work obtain substantially stronger exceptional-set estimates for Erdős--Straus using broader parametric solution families and deeper sieve arguments.</p>
+<p>No novelty claim is made for:</p>
+<ul><li>the upper-bound sieve;</li><li>density-zero exceptional sets;</li><li>the general use of several parametric families to increase sieve dimension.</li></ul>
+<p>The specific contribution here is the transparent translation of the exact <code>q=3,7,11</code> Type-II factorization filters into an additive sieve-dimension ledger.</p>
+<hr>
+<h2>9. Next target</h2>
+<p>The corridor now suggests a systematic program.</p>
+<p>For each small prime shift</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>classify the exact miss into:</p>
+<ol><li>a main splitting branch excluding a positive-density set of prime divisors of <code>(p+q)/4</code>;</li><li>finitely many low-entropy defect branches.</li></ol>
+<p>If the main splitting density and every defect-branch density can be quantified uniformly, each new corridor position can add positive sieve dimension.</p>
+<p>The immediate algebraic targets are <code>q=19</code> and <code>q=23</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

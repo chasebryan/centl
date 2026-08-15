@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prior-art calibration for the square-completed Type-II route — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-completion-prior-art.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-completion-prior-art.html">
+  <meta property="og:title" content="Prior-art calibration for the square-completed Type-II route — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prior-art calibration for the square-completed Type-II route</h1><p>Prior art · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Prior art</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Prior art</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-COMPLETION-PRIOR-ART.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> source/provenance note</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this note deliberately narrows FCF novelty language. The divisor-of-a-square Type-II mechanism is prior art. Any FCF novelty claim must concern later structural synthesis only after a publication-grade review.</p>
+<hr>
+<h2>1. The square-divisor mechanism is old prior art</h2>
+<p>The current FCF route uses positive integers <code>a,d</code> with</p>
+<div class="math" role="math">d\mid a^2</div>
+<p>and a congruence equivalent to</p>
+<div class="math" role="math">4a-1\mid ap+d.</div>
+<p>This mechanism must <strong>not</strong> be advertised as an FCF discovery.</p>
+<p>A source trail reaches at least to Léon Thépault&#x27;s 1979 work, recorded in later historical analysis of the Erdős--Straus problem.</p>
+<p>The theorem is stated in the form:</p>
+<blockquote><p>for a prime <code>n≡1 mod4</code>, if there exist positive <code>a,b</code> such that <code>b|a^2</code> and <code>4a-1</code> divides <code>bn+a</code>, then an Erdős--Straus decomposition exists.</p></blockquote>
+<p>The explicit decomposition recorded with that theorem is</p>
+<div class="math" role="math">\boxed{ \frac4n = \frac1{an} + \frac{4a-1}{n(a+bn)} + \frac{b(4a-1)}{a(a+bn)}.}</div>
+<p>Thus divisor-square Type-II constructions were already present decades before the current work.</p>
+<hr>
+<h2>2. Exact equivalence with the current congruence coordinate</h2>
+<p>The FCF square-completed congruence is written as</p>
+<div class="math" role="math">\boxed{ 4a-1\mid p+4d, \qquad d\mid a^2.}</div>
+<p>Since</p>
+<div class="math" role="math">4a\equiv1\pmod{4a-1},</div>
+<p>this is equivalent to</p>
+<div class="math" role="math">\boxed{4a-1\mid ap+d.}</div>
+<p>Let</p>
+<div class="math" role="math">d^*=\frac{a^2}{d}.</div>
+<p>Because <code>d</code> is a unit modulo <code>4a-1</code>, multiplying</p>
+<div class="math" role="math">ap+d\equiv0</div>
+<p>by <code>a/d</code> gives</p>
+<div class="math" role="math">\boxed{d^*p+a\equiv0\pmod{4a-1}.}</div>
+<p>This is exactly the Thépault shape with</p>
+<div class="math" role="math">\boxed{b=d^*.}</div>
+<p>Therefore the present square-completed coordinate and the historical Thépault condition are related by the divisor-complement involution.</p>
+<p>The underlying existence mechanism is prior art.</p>
+<hr>
+<h2>3. 2017/2023 public discussion</h2>
+<p>A 2017 Mathematics Stack Exchange question studied the integrality condition</p>
+<div class="math" role="math">\boxed{ \frac{d+an}{4a-1}\in\mathbb Z}</div>
+<p>with square-divisor conditions.</p>
+<p>A 2023 answer explicitly relates the resulting condition <code>D|A^2</code> to the classical Type-II form and derives the square-divisor parameter from Mordell-style Type-II variables.</p>
+<p>This is non-peer-reviewed discussion, but it is additional evidence that the square-divisor coordinate itself was already recognized before the current project.</p>
+<hr>
+<h2>4. Bradford 2024</h2>
+<p>Kyle Bradford&#x27;s 2024 preprint</p>
+<p><em>Elemental Patterns from the Erdős Straus Conjecture</em>, arXiv:2403.16047,</p>
+<p>proves necessary and sufficient divisor-of-a-square modular descriptions in terms of the smallest denominator <code>x</code>.</p>
+<p>For prime <code>p</code>, Bradford uses divisors</p>
+<div class="math" role="math">d\mid x^2</div>
+<p>and gives separate modular conditions corresponding to standard Type I and Type II, with a one-to-one correspondence to Erdős--Straus solutions.</p>
+<p>This is a different coordinate system from the <code>4a-1</code> square-completed López layer, but it confirms that <strong>complete square-divisor descriptions of prime ES solutions are established prior art</strong>.</p>
+<hr>
+<h2>5. Bello-Hernández--Benito--Fernández 2026</h2>
+<p>The 2026 divisor-parametrization paper</p>
+<p><em>A Divisor Parametrization for the Erdős--Straus Conjecture</em>, arXiv:2606.10922,</p>
+<p>provides another complete divisor-based coordinate system and compares it with standard Type I/II descriptions.</p>
+<p>The FCF two-target signed-box theorem and divisor-square forms should be presented as reformulations/syntheses against this complete modern background, not as the first divisor parametrization of ES.</p>
+<hr>
+<h2>6. What remains potentially distinctive in the current work</h2>
+<p>The targeted prior-art pass above changes the responsible novelty boundary.</p>
+<p>Do <strong>not</strong> claim novelty for:</p>
+<ul><li>the condition <code>d|a^2</code>;</li><li>a Type-II solution generated from a divisor of a square;</li><li>divisor complement by itself;</li><li>a complete divisor-of-a-square description of Type I/II solutions;</li><li>the general use of modular divisor criteria for Erdős--Straus.</li></ul>
+<p>The current potentially distinctive synthesis is narrower:</p>
+<ol><li>place Thépault&#x27;s complete square divisor lattice on the <strong>same layer <code>a</code></strong> as López&#x27;s 2024 Type-A/B congruence system;</li><li>prove that López Type A and Type B are exactly the two monotone boundary orthants of that centered divisor box;</li><li>identify the omitted Type-II certificates as mixed-sign/cross-orthant parameters;</li><li>derive the exact mixed-parameter count</li></ol>
+<div class="math" role="math">\tau(a^2)-2\tau(a)+1;</div>
+<ol><li>identify López A/B mutual inversion as the restriction of the global divisor-complement involution;</li><li>prove the exact finite-group identity</li></ol>
+<div class="math" role="math">S_a=-\mathcal R_{4a-1}(a),</div>
+<p>merging the completed López layer with the repository&#x27;s Kneser signed-box machinery;</p>
+<ol><li>combine that internal Kneser geometry with the pre-existing cross-layer shadow/ancestry framework.</li></ol>
+<p>These items are <strong>potentially novel structural synthesis</strong>, not established priority claims.</p>
+<hr>
+<h2>7. Terminology correction</h2>
+<p>Future research notes should prefer language such as:</p>
+<ul><li><strong>Thépault square-completed layer</strong>;</li><li><strong>square-completed López layer</strong>;</li><li><strong>FCF orthant/Kneser synthesis</strong>;</li></ul>
+<p>rather than wording that implies FCF originated the square-divisor criterion.</p>
+<p>The theorem files already carry claim-boundary disclaimers; this note supplies the explicit provenance correction.</p>
+<hr>
+<h2>8. Publication-grade follow-up</h2>
+<p>A proper priority review should trace:</p>
+<ol><li>the original Thépault publication in <em>Pour la Science</em> / Gardner&#x27;s reporting and any surviving primary text;</li><li>Gardes&#x27; historical thesis transcription and analysis;</li><li>Mordell&#x27;s Type-II parametrization;</li><li>Elsholtz--Tao&#x27;s solution parametrizations;</li><li>the 2017 public square-divisor discussion;</li><li>Bradford 2024;</li><li>López 2022/2024;</li><li>Bello-Hernández--Benito--Fernández 2026;</li><li>Schuh 2025 and related Pythagorean-prime square-divisor parametrizations.</li></ol>
+<p>Until that review is complete, the orthant/signed-box merger should be described as <strong>potentially novel</strong> rather than first or unique.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

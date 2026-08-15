@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Fiber Injectivity and Three-Layer Minimum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-fiber-injectivity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-fiber-injectivity.html">
+  <meta property="og:title" content="q=3 Fiber Injectivity and Three-Layer Minimum — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Fiber Injectivity and Three-Layer Minimum</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-FIBER-INJECTIVITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>REDUCED-PARAMETER-DOMAIN.md</code>, <code>Q3-ABSORPTION.md</code>, <code>Q3-WEAK-REDUNDANCY.md</code>, <code>Q3-POINTWISE-ABSORPTION.md</code></p>
+<p><strong>Claim boundary:</strong> proves that every q=3 Type A/B pullback is a singleton or empty and therefore that a corrected-domain q=3 cover needs at least three distinct layers. It does not rule out such a three-layer cover universally and does not prove DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">m=4j-1</div>
+<p>and assume</p>
+<div class="math" role="math">3\mid m.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{n=m/3.}</div>
+<p>The Type A/B trap set is</p>
+<div class="math" role="math">T_j=\{-e,-4e\pmod m:e\mid j\}.</div>
+<p>It is convenient to negate it:</p>
+<div class="math" role="math">S_j=-T_j=\{e,4e\pmod m:e\mid j\}.</div>
+<p>Since</p>
+<div class="math" role="math">4j=m+1=3n+1,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{j=(3n+1)/4&lt;n}</div>
+<p>for every nontrivial case.</p>
+<hr>
+<h2>2. Theorem — trap reduction modulo n is injective</h2>
+<h3>Theorem</h3>
+<p>The natural reduction map</p>
+<div class="math" role="math">\boxed{T_j\longrightarrow\mathbb Z/n\mathbb Z}</div>
+<p>is injective.</p>
+<p>Equivalently, if two Type A/B traps agree modulo <code>n=m/3</code>, then they were already the same trap modulo <code>m</code>.</p>
+<h3>Proof</h3>
+<p>Work with the normalized set <code>S_j=-T_j</code>.</p>
+<p>For every divisor <code>e|j</code>:</p>
+<ul><li>the plain value <code>e</code> satisfies <code>1&lt;=e&lt;=j&lt;n</code>;</li><li>if <code>e&lt;j</code>, then <code>e&lt;=j/2</code>, hence</li></ul>
+<div class="math" role="math">4e\le2j=(3n+1)/2&lt;2n;</div>
+<ul><li>if <code>e=j</code>, then</li></ul>
+<div class="math" role="math">4e=4j=m+1\equiv1\pmod m,</div>
+<p>which is already the same normalized trap as the divisor <code>1</code>.</p>
+<p>Thus every distinct element of <code>S_j</code> has a representative in <code>[1,2n)</code>.</p>
+<p>Suppose two distinct representatives are congruent modulo <code>n</code>. Their difference must therefore be exactly <code>n</code> or <code>-n</code>.</p>
+<p>There are only three structural cases.</p>
+<h3>Case A: plain/plain</h3>
+<p>If</p>
+<div class="math" role="math">e-f=\pm n,</div>
+<p>then <code>|e-f|&lt;n</code> because <code>e,f&lt;n</code>, impossible.</p>
+<h3>Case B: fourfold/fourfold</h3>
+<p>If</p>
+<div class="math" role="math">4e-4f=\pm n,</div>
+<p>then the left side is divisible by <code>4</code>, while <code>n</code> is odd. Impossible.</p>
+<h3>Case C: fourfold/plain</h3>
+<p>The only potentially nontrivial equation is</p>
+<div class="math" role="math">4e-f=n.</div>
+<p>(The opposite sign would force the plain divisor to exceed <code>n&gt;j</code>; the other mixed orientation is symmetric.)</p>
+<p>Since <code>f&gt;0</code>, this gives</p>
+<div class="math" role="math">4e&gt;n&gt;\frac{4j-1}{3},</div>
+<p>so</p>
+<div class="math" role="math">e&gt;j/3-1/12.</div>
+<p>As <code>e</code> is a proper divisor of <code>j</code> in a genuinely distinct mixed pair, the integer quotient <code>j/e</code> is at least <code>2</code>. The displayed lower bound forces</p>
+<div class="math" role="math">\boxed{j/e=2},</div>
+<p>so <code>e=j/2</code>.</p>
+<p>Substituting into <code>4e-f=n</code> gives</p>
+<div class="math" role="math">f=2j-n =2j-\frac{4j-1}{3} =\frac{2j+1}{3}.</div>
+<p>For <code>j&gt;1</code>, this satisfies</p>
+<div class="math" role="math">\frac j2&lt;f&lt;j.</div>
+<p>But a positive proper divisor of <code>j</code> cannot lie strictly between <code>j/2</code> and <code>j</code>. Contradiction.</p>
+<p>The tiny endpoint is checked by the same formulas and produces no distinct trap collision.</p>
+<p>Therefore no two distinct normalized traps can agree modulo <code>n</code>. Negation is a bijection, so the same is true for <code>T_j</code>. QED.</p>
+<hr>
+<h2>3. Corollary — every q=3 pullback is empty or singleton</h2>
+<p>Fix a candidate progression</p>
+<div class="math" role="math">x(s)=r+Ls</div>
+<p>with</p>
+<div class="math" role="math">q_j=\frac{m_j}{\gcd(L,m_j)}=3.</div>
+<p>Then</p>
+<div class="math" role="math">\gcd(L,m_j)=n=m_j/3.</div>
+<p>The three parameter classes modulo <code>3</code> map bijectively to the three lifts modulo <code>m_j</code> above the single residue <code>r mod n</code>.</p>
+<p>By the theorem, at most one of those three lifts can belong to <code>T_j</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{|R_j|\le1.}</div>
+<p>This is universal. No hard-class assumption, finite search, or primitivity assumption is needed.</p>
+<hr>
+<h2>4. Corollary — corrected q=3 coverage needs at least three layers</h2>
+<p>For the Mordell-hard Type A/B program,</p>
+<div class="math" role="math">3\mid840\mid L.</div>
+<p>The exact Dirichlet condition therefore imposes <strong>no forbidden parameter class modulo 3</strong> merely for reducedness. The local reduced domain is the full ring</p>
+<div class="math" role="math">\boxed{\mathbb Z/3\mathbb Z=\{0,1,2\}.}</div>
+<p>Since every q=3 layer forbids at most one class, any q=3 cover of the corrected domain requires at least three distinct nonempty layers:</p>
+<div class="math" role="math">\boxed{ \bigcup_jR_j=\mathbb Z/3\mathbb Z \Longrightarrow \#\{j:R_j\ne\varnothing\}\ge3. }</div>
+<p>In particular, the old two-singleton <code>R={1}</code> / <code>R={2}</code> complementary-pair obstruction was an artifact of restricting the parameter to units modulo 3. In the exact Dirichlet domain it leaves the third class.</p>
+<hr>
+<h2>5. Combination with the absorption hierarchy</h2>
+<p>On a directly novel candidate:</p>
+<ol><li><strong>strong q=3 descendants</strong> cannot be nonempty (<code>Q3-ABSORPTION.md</code>);</li><li><strong>weak q=3 descendants</strong> add no new residue (<code>Q3-WEAK-REDUNDANCY.md</code>);</li><li>every actually used trap must be <strong>pointwise primitive</strong> (<code>Q3-POINTWISE-ABSORPTION.md</code>);</li><li>by this theorem, every surviving layer contributes at most one class.</li></ol>
+<p>Therefore a genuine directly novel q=3 obstruction has the exact form</p>
+<div class="math" role="math">\boxed{ \text{three or more pointwise-primitive base singleton rows} \text{ whose classes cover }\{0,1,2\}. }</div>
+<p>That is now the residual q=3 theorem target.</p>
+<hr>
+<h2>6. Proof-mining observation</h2>
+<p>A direct reconstruction of the corrected primitive system through target depth <code>k&lt;=100000</code> found no admissible candidate with three primitive q=3 classes simultaneously present. This observation is <strong>not</strong> promoted here as a certificate because the present file is a universal theorem note; it is recorded only as motivation for the next independently replayed finite attack.</p>
+<p>The theorem burden is now much narrower than the former shared-factor problem: explain why three pointwise-primitive base singleton rows cannot align on one directly novel admissible target, or find the first such alignment and analyze it.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

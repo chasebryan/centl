@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Hard-class union shadows and the five-of-nine C1 3-adic fiber theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-hard-union-shadow-fiber-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-hard-union-shadow-fiber-theorem.html">
+  <meta property="og:title" content="Hard-class union shadows and the five-of-nine C1 3-adic fiber theorem — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Hard-class union shadows and the five-of-nine C1 3-adic fiber theorem</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-HARD-UNION-SHADOW-FIBER-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact row-domination and conditioned-fiber theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem applies to the stated Mordell-hard residue classes and the stated C1 residual row pattern. It proves the exact 3-adic extension lower bound for that pattern. It does not prove full C1, universal DSC-P, López universal coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="c1-anchor-row-domination.html">C1-ANCHOR-ROW-DOMINATION.md</a></li><li><a href="c1-conditioned-fiber-31113.html">C1-CONDITIONED-FIBER-31113.md</a></li><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li></ul>
+<h2>1. Hard residue facts</h2>
+<p>Let</p>
+<div class="math" role="math">H=\{1,121,169,289,361,529\}\pmod{840}.</div>
+<p>Every <code>h in H</code> satisfies</p>
+<div class="math" role="math">\boxed{h\equiv1\pmod3.}</div>
+<p>Modulo <code>21</code>, the six hard classes occupy only</p>
+<div class="math" role="math">\boxed{H\pmod{21}=\{1,4,16\}.}</div>
+<p>These two elementary facts are enough to turn several apparently independent residual rows into exact union shadows.</p>
+<h2>2. The j=520 row is union-shadowed by j=3 and j=25</h2>
+<p>The relevant moduli are</p>
+<div class="math" role="math">m_3=11, \qquad m_{25}=99, \qquad m_{520}=2079=21\cdot99.</div>
+<p>The trap sets needed below are</p>
+<div class="math" role="math">T_3=\{7,8,10\}\pmod{11}</div>
+<p>and</p>
+<div class="math" role="math">T_{25}=\{74,79,94,95,98\}\pmod{99}.</div>
+<p>Since</p>
+<div class="math" role="math">\gcd(840,2079)=21,</div>
+<p>a trap at layer <code>520</code> can occur on a Mordell-hard integer only if its residue modulo <code>21</code> is one of <code>1,4,16</code>.</p>
+<p>The complete hard-compatible portion of <code>T_520</code> is:</p>
+<table class="directory"><thead><tr><th><code>t in T_520</code></th><th><code>t mod 21</code></th><th><code>t mod 99 in T_25</code></th><th><code>t mod 11 in T_3</code></th></tr></thead><tbody><tr><td>1975</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>2059</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>1663</td><td>4</td><td>yes</td><td>no</td></tr><tr><td>1999</td><td>4</td><td>no</td><td>yes</td></tr><tr><td>2053</td><td>16</td><td>no</td><td>yes</td></tr><tr><td>2074</td><td>16</td><td>yes</td><td>no</td></tr></tbody></table>
+<p>There are no other <code>T_520</code> residues in the three hard-compatible classes modulo <code>21</code>.</p>
+<p>Therefore:</p>
+<h3>Theorem 1: hard union shadow at j=520</h3>
+<p>For every integer <code>x</code> with</p>
+<div class="math" role="math">x\pmod{840}\in H,</div>
+<div class="math" role="math">\boxed{ x\bmod2079\in T_{520} \Longrightarrow \left( x\bmod99\in T_{25} \quad\text{or}\quad x\bmod11\in T_3 \right).}</div>
+<p>Thus, on every Mordell-hard progression, once layers <code>3</code> and <code>25</code> are avoided, layer <code>520</code> is automatically avoided.</p>
+<p>This is stronger than the previously observed projected relation between the <code>j=25</code> and <code>j=520</code> parameter fibers. It is an exact two-anchor union shadow in <code>x</code>-space.</p>
+<h2>3. Exact one-class fiber at j=25</h2>
+<p>The hard condition gives</p>
+<div class="math" role="math">x\equiv1\pmod3.</div>
+<p>The only traps in <code>T_25</code> compatible with that condition are</p>
+<div class="math" role="math">\boxed{79,94.}</div>
+<p>Their residues modulo <code>11</code> are</p>
+<div class="math" role="math">79\equiv2\pmod{11}, \qquad 94\equiv6\pmod{11}.</div>
+<p>They are distinct.</p>
+<p>Hence:</p>
+<h3>Lemma 2</h3>
+<p>After fixing the 11-coordinate of a hard-compatible parameter class, layer <code>j=25</code> can contribute at most one compatible trap.</p>
+<p>In the common C1 residual regime</p>
+<div class="math" role="math">\gcd(L,99)=3, \qquad q_{25}=33=3\cdot11,</div>
+<p>the affine pullback is a coordinatewise bijection. Therefore, after fixing the parameter modulo <code>11</code>, the <code>j=25</code> row forbids at most</p>
+<div class="math" role="math">\boxed{1}</div>
+<p>residue modulo <code>3</code>.</p>
+<p>Equivalently, when lifted to modulo <code>9</code>, it removes at most three of the nine classes.</p>
+<h2>4. Exact one-class fiber at j=88</h2>
+<p>Now</p>
+<div class="math" role="math">m_{88}=351=27\cdot13.</div>
+<p>Again hard compatibility requires trap residue <code>1 mod 3</code>.</p>
+<p>The complete compatible trap fiber is</p>
+<div class="math" role="math">\boxed{ \{175,307,319,340,343,349\}. }</div>
+<p>Their residues modulo <code>13</code> are respectively</p>
+<div class="math" role="math">\boxed{6,8,2,5,11,7,}</div>
+<p>all distinct.</p>
+<p>Therefore:</p>
+<h3>Lemma 3</h3>
+<p>After fixing the 13-coordinate of a hard-compatible parameter class, layer <code>j=88</code> can contribute at most one compatible trap.</p>
+<p>In the recurring C1 regime</p>
+<div class="math" role="math">\gcd(L,351)=3, \qquad q_{88}=117=9\cdot13,</div>
+<p>the affine pullback preserves this fiber multiplicity. Thus after fixing the parameter modulo <code>13</code>, layer <code>j=88</code> forbids at most</p>
+<div class="math" role="math">\boxed{1}</div>
+<p>residue modulo <code>9</code>.</p>
+<h2>5. Other apparent 3-adic rows are exact redundancies</h2>
+<p>The recurring <code>{3,11,13}</code> residual systems also display rows</p>
+<div class="math" role="math">205,322,790.</div>
+<p>They contribute no independent 3-adic obstruction once the anchor rows are safe:</p>
+<h3>j=205</h3>
+<div class="math" role="math">4(205)-1=21(4(10)-1), \qquad 205=5\cdot41.</div>
+<p>By the divisor-child theorem,</p>
+<div class="math" role="math">\boxed{T_{205}\bmod39\subseteq T_{10}.}</div>
+<h3>j=790</h3>
+<div class="math" role="math">4(790)-1=81(4(10)-1), \qquad 790=10\cdot79.</div>
+<p>Again the divisor-child theorem gives</p>
+<div class="math" role="math">\boxed{T_{790}\bmod39\subseteq T_{10}.}</div>
+<p>So the fine <code>3^4</code> row at <code>j=790</code> is completely redundant after layer <code>10</code> is avoided.</p>
+<h3>j=322</h3>
+<p>The exact hard-compatible union-shadow theorem already proved in <a href="c1-anchor-row-domination.html">C1-ANCHOR-ROW-DOMINATION.md</a> gives</p>
+<div class="math" role="math">\boxed{ x\equiv1\pmod3,\ x\bmod1287\in T_{322} \Longrightarrow x\bmod11\in T_3 \text{ or } x\bmod39\in T_{10}.}</div>
+<p>Hence <code>j=322</code> is redundant after the unary anchors <code>j=3</code> and <code>j=10</code> are avoided.</p>
+<h3>j=520</h3>
+<p>Theorem 1 above removes <code>j=520</code> after <code>j=3</code> and <code>j=25</code> are avoided.</p>
+<p>Thus the entire 3-adic stage of this row pattern reduces exactly to</p>
+<div class="math" role="math">\boxed{j=25\quad\text{and}\quad j=88.}</div>
+<h2>6. Five-of-nine theorem</h2>
+<p>Fix a Mordell-hard progression in the recurring C1 row pattern and suppose the relevant 11- and 13-coordinates have already been chosen to avoid their unary anchors and the preceding pair stage.</p>
+<p>By Lemma 2, <code>j=25</code> forbids at most one residue modulo <code>3</code>. Lifted to modulo <code>9</code>, this removes at most</p>
+<div class="math" role="math">3</div>
+<p>classes.</p>
+<p>By Lemma 3, <code>j=88</code> forbids at most one additional residue modulo <code>9</code>.</p>
+<p>All other 3-adic rows are redundant by Section 5.</p>
+<p>Therefore the total number of forbidden residue classes modulo <code>9</code> is at most</p>
+<div class="math" role="math">3+1=4.</div>
+<p>Hence:</p>
+<h3>Theorem 4: conditioned five-of-nine extension</h3>
+<p>For every Mordell-hard C1 residual system whose 3-coupled rows are the recurring pattern</p>
+<div class="math" role="math">\{25,88,205,322,520,790\}</div>
+<p>or any subset thereof, after the anchor-safe 11/13 assignment is fixed,</p>
+<div class="math" role="math">\boxed{ \#\{\text{safe 3-adic classes mod }9\}\ge5. }</div>
+<p>In particular a 3-adic extension always exists.</p>
+<p>If the residual 3-coordinate is actually modulo</p>
+<div class="math" role="math">3^4=81,</div>
+<p>the only row reaching that precision is <code>j=790</code>, already dominated by <code>j=10</code>. Therefore every safe mod-9 class lifts freely to all nine classes modulo <code>81</code> above it, giving at least</p>
+<div class="math" role="math">\boxed{45}</div>
+<p>safe full 3-adic values.</p>
+<h2>7. This exactly explains the finite conditioned-fiber spectrum</h2>
+<p>The frozen <code>k&lt;=1500</code> <code>{3,11,13}</code> family exhibited safe full 3-fiber sizes</p>
+<div class="math" role="math">\{5,6,8,9,45,54,72,81\}.</div>
+<p>The theorem explains the structure:</p>
+<ul><li>the base values <code>5,6,8,9</code> are the possible surviving counts modulo <code>9</code>;</li><li>the values <code>45,54,72,81</code> are exactly ninefold lifts when the coordinate extends to modulo <code>81</code>;</li><li>the universal lower bound within this row pattern is <code>5</code>.</li></ul>
+<p>Thus the empirically observed minimum <code>5</code> is no longer merely a finite statistic. It follows from exact trap geometry plus exact ancestry/union-shadow domination.</p>
+<h2>8. A second hard union shadow: j=465</h2>
+<p>The same mechanism explains the fine <code>13^2</code> pair row.</p>
+<p>Here</p>
+<div class="math" role="math">m_{465}=1859=11\cdot13^2.</div>
+<p>For any hard integer <code>x</code>, we again have <code>x=1 mod 3</code>. Since <code>m_465</code> contains both <code>11</code> and <code>13</code>, a trap residue <code>t in T_465</code> determines <code>x mod11</code> and <code>x mod13</code>; together with <code>x=1 mod3</code>, the latter determines <code>x mod39</code>.</p>
+<p>Direct enumeration of the 15 exact traps gives:</p>
+<div class="math" role="math">\boxed{ x\bmod1859\in T_{465},\ x\equiv1\pmod3 \Longrightarrow \left( x\bmod143\in T_{36} \ 	ext{or}\ x\bmod11\in T_3 \ 	ext{or}\ x\bmod39\in T_{10} \right).}</div>
+<p>The only traps not already caught by <code>j=36</code> or <code>j=3</code> have 13-residues whose hard-compatible CRT lift modulo <code>39</code> is one of</p>
+<div class="math" role="math">\boxed{19,31,34,37,}</div>
+<p>all belonging to <code>T_10</code>.</p>
+<p>Therefore <code>j=465</code> is an exact three-anchor union shadow after <code>j=3</code>, <code>j=10</code>, and <code>j=36</code> are avoided.</p>
+<p>This proves, rather than merely observes, why the fine <code>13^2</code> row introduces no new obstruction in the recurring conditioned-fiber family.</p>
+<h2>9. Where the remaining C1 work now sits</h2>
+<p>Two large chunks of the conditioned-fiber certificate have moved from computation into theorem:</p>
+<ol><li>the fine <code>13^2</code> row <code>j=465</code> is anchor-dominated;</li><li>the entire 3-adic stage has a proved five-of-nine lower bound.</li></ol>
+<p>The unresolved recurring pair-stage is therefore concentrated mainly in the coarse rows</p>
+<div class="math" role="math">\boxed{j=36\quad\text{and, when present, }j=608,}</div>
+<p>after unary 11- and 13-adic constraints are imposed.</p>
+<p>This is the next proof target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

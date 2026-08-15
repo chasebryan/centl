@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Multiplicative-coset and Jacobi shields survive square completion — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-completion-coset-shield.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-completion-coset-shield.html">
+  <meta property="og:title" content="Multiplicative-coset and Jacobi shields survive square completion — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multiplicative-coset and Jacobi shields survive square completion</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-COMPLETION-COSET-SHIELD.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact containment theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>MULTIPLICATIVE-TRAP-COSET.md</code>, <code>QUADRATIC-TRAP-SIGNATURE.md</code></p>
+<p><strong>Claim boundary:</strong> shows that the existing coarse multiplicative/character shields remain valid for the full square-completed Type-II layer. It does not prove exact completed coverage or Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix</p>
+<div class="math" role="math">a\ge1, \qquad m=4a-1,</div>
+<p>and let</p>
+<div class="math" role="math">G=(\mathbb Z/m\mathbb Z)^\times.</div>
+<p>Define the divisor-generated subgroup</p>
+<div class="math" role="math">\boxed{ H_a = \langle \ell\bmod m: \ell\text{ prime},\ \ell\mid a\rangle \le G.}</div>
+<p>The full square-completed Type-II layer is</p>
+<div class="math" role="math">\boxed{ S_a =\{-4D\pmod m:D\mid a^2\}.}</div>
+<p>By the signed-box identity,</p>
+<div class="math" role="math">\boxed{ S_a =-\mathcal R_m(a),}</div>
+<p>where</p>
+<div class="math" role="math">\mathcal R_m(a) = \left\{ \prod_{\ell^E\parallel a}\ell^z: -E\le z\le E \right\}.</div>
+<hr>
+<h2>2. Every completed signed divisor lies in the divisor-generated subgroup</h2>
+<p>Every prime base occurring in the signed product belongs to <code>H_a</code>.</p>
+<p>Because <code>H_a</code> is a group, it contains all positive and negative powers of those bases.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \mathcal R_m(a)\subseteq H_a.}</div>
+<p>Multiplying by <code>-1</code> gives:</p>
+<h3>Theorem — completed trap-coset containment</h3>
+<div class="math" role="math">\boxed{ S_a\subseteq-H_a.}</div>
+<p>Thus square completion enlarges the exact trap only <strong>inside the same multiplicative coset envelope</strong> that already contained López Type A/B.</p>
+<hr>
+<h2>3. The Jacobi sign remains fixed negative</h2>
+<p>Let</p>
+<div class="math" role="math">\chi_a(x) = \left(\frac{x}{m}\right)</div>
+<p>be the Jacobi character modulo <code>m=4a-1</code>.</p>
+<p>The divisor-prime calculation from the earlier trap-signature work gives</p>
+<div class="math" role="math">\boxed{ \chi_a(\ell)=+1 \qquad(\ell\mid a).}</div>
+<p>Hence <code>chi_a</code> is identically <code>+1</code> on the subgroup generated by those primes:</p>
+<div class="math" role="math">\boxed{ \chi_a(h)=+1 \qquad(h\in H_a).}</div>
+<p>Because</p>
+<div class="math" role="math">m\equiv3\pmod4,</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{ \chi_a(-1)=-1.}</div>
+<p>Therefore every completed trap residue satisfies</p>
+<div class="math" role="math">\boxed{ \chi_a(x)=-1 \qquad(x\in S_a).}</div>
+<p>So the complete Type-II layer remains entirely in the Jacobi-negative half of the unit group.</p>
+<hr>
+<h2>4. Exact hierarchy of safe-region tests</h2>
+<p>The complete square layer now fits into the same containment hierarchy as the old López layer:</p>
+<div class="math" role="math">\boxed{ T_a \subseteq S_a \subseteq -H_a \subseteq \{x\in G:\chi_a(x)=-1\}.}</div>
+<p>Thus there are still three increasingly coarse resolutions:</p>
+<ol><li>exact López boundary trap <code>T_a</code>;</li><li>exact complete Type-II trap <code>S_a</code>;</li><li>multiplicative coset envelope <code>-H_a</code>;</li><li>Jacobi-negative half.</li></ol>
+<p>The important correction is that the exact layer in the middle is now the complete square-divisor Type-II layer rather than only the López boundary orthants.</p>
+<hr>
+<h2>5. Old coset shields remain sound</h2>
+<p>Any residue class outside</p>
+<div class="math" role="math">-H_a</div>
+<p>is automatically safe from <strong>every</strong> square-completed Type-II certificate at layer <code>a</code>.</p>
+<p>Likewise every Jacobi-positive residue is automatically safe.</p>
+<p>Therefore all arguments that use only the outer multiplicative-coset or character obstruction remain valid after square completion.</p>
+<p>What changes is only the exact occupancy inside the negative coset.</p>
+<p>This means the pre-existing character quotient and multiplicative quotient machinery does not need to be discarded or re-proved from scratch.</p>
+<hr>
+<h2>6. What square completion changes</h2>
+<p>The old López trap occupies two monotone orthants of the signed exponent box.</p>
+<p>The completion fills every mixed-sign exponent vector as well.</p>
+<p>Hence square completion increases the density inside <code>-H_a</code> while preserving:</p>
+<ul><li>the same divisor-generated ambient subgroup;</li><li>the same Jacobi signature;</li><li>the same quotient-character safe regions.</li></ul>
+<p>Symbolically,</p>
+<div class="math" role="math">\boxed{ \text{completion changes exact occupancy, not the outer shield}.}</div>
+<p>This is useful for the all-prime program because every coarse elimination theorem can be retained while the exact residual core is recomputed with the larger layer.</p>
+<hr>
+<h2>7. Power-of-two saturation</h2>
+<p>For</p>
+<div class="math" role="math">a=2^b,</div>
+<p>the old Mersenne theorem gives</p>
+<div class="math" role="math">T_a=-H_a.</div>
+<p>Since prime-power layers have</p>
+<div class="math" role="math">S_a=T_a,</div>
+<p>one also has</p>
+<div class="math" role="math">\boxed{ S_{2^b}=-H_{2^b}.}</div>
+<p>Thus the binary layers continue to saturate the complete multiplicative coset.</p>
+<p>For general layers the inclusions may be strict.</p>
+<hr>
+<h2>8. Research consequence</h2>
+<p>The unified completed-layer proof architecture should now be</p>
+<div class="math" role="math">\boxed{ \text{Jacobi shield} \supseteq \text{multiplicative coset shield} \supseteq \text{exact completed signed box} \supseteq \text{López boundary orthants}.}</div>
+<p>The proof search can therefore proceed coarse-to-fine:</p>
+<ol><li>discard candidates by Jacobi sign;</li><li>discard more by quotient characters of <code>G/H_a</code>;</li><li>apply Kneser/stabilizer structure to the exact symmetric box <code>S_a</code>;</li><li>use cross-layer ancestry only on the small exact residual.</li></ol>
+<p>This preserves the strongest parts of the pre-DSC obstruction theory while upgrading the exact layer to standard Type II.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

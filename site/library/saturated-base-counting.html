@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Counting the source-1 structural-gap semigroup — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/saturated-base-counting.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/saturated-base-counting.html">
+  <meta property="og:title" content="Counting the source-1 structural-gap semigroup — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Counting the source-1 structural-gap semigroup</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SATURATED-BASE-COUNTING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved analytic corollary of the exact source-1 shadow classification</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the analytic machinery is classical. The Type-A/B-specific input is the exact theorem that every depth whose prime factors are all <code>1 mod 3</code> is completely shadowed by layer <code>1</code>.</p>
+<p>Read with:</p>
+<ul><li><a href="saturated-base-shadow-semigroups.html">SATURATED-BASE-SHADOW-SEMIGROUPS.md</a></li><li><a href="spectrum-counting.html">SPECTRUM-COUNTING.md</a></li><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li></ul>
+<h2>1. The exact gap semigroup</h2>
+<p>Define</p>
+<div class="math" role="math">\mathcal S_3 = \left\{ n\ge1: p\mid n\Longrightarrow p\equiv1\pmod3 \right\}.</div>
+<p>The exact saturated-base theorem gives</p>
+<div class="math" role="math">\boxed{ \mathcal S_3\setminus\{1\} \subseteq \mathbb N\setminus\mathcal D_\exists. }</div>
+<p>Every nontrivial member of this multiplicative semigroup is a global structural gap because its complete Type A/B layer is shadowed by depth <code>1</code>.</p>
+<p>Let</p>
+<div class="math" role="math">S_3(X)=\#\{n\le X:n\in\mathcal S_3\}.</div>
+<p>Then the structural-gap counting function satisfies</p>
+<div class="math" role="math">\boxed{G(X)\ge S_3(X)-1.}</div>
+<h2>2. Dirichlet series</h2>
+<p>Let <code>f_3(n)</code> be the indicator of <code>S_3</code>.</p>
+<p>Its Dirichlet series is</p>
+<div class="math" role="math">F_3(s) = \sum_{n\ge1}\frac{f_3(n)}{n^s} = \prod_{p\equiv1\pmod3} (1-p^{-s})^{-1}.</div>
+<p>Let <code>chi_3</code> be the nontrivial primitive Dirichlet character modulo <code>3</code>.</p>
+<p>Using the Euler products for <code>zeta(s)</code> and <code>L(s,chi_3)</code>,</p>
+<div class="math" role="math">\zeta(s)L(s,\chi_3) = (1-3^{-s})^{-1} F_3(s)^2 \prod_{p\equiv2\pmod3}(1-p^{-2s})^{-1}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ F_3(s)^2 = \zeta(s)L(s,\chi_3) (1-3^{-s}) \prod_{p\equiv2\pmod3}(1-p^{-2s}). }</div>
+<p>Write</p>
+<div class="math" role="math">F_3(s)=\zeta(s)^{1/2}H_3(s),</div>
+<p>where</p>
+<div class="math" role="math">H_3(s) = \left[ L(s,\chi_3) (1-3^{-s}) \prod_{p\equiv2\pmod3}(1-p^{-2s}) \right]^{1/2}.</div>
+<p>The factor <code>H_3(s)</code> is analytic and nonzero in a neighborhood of <code>s=1</code> suitable for the classical Selberg-Delange method.</p>
+<h2>3. Selberg-Delange asymptotic</h2>
+<p>The Selberg-Delange theorem for a Dirichlet series of the form</p>
+<div class="math" role="math">\zeta(s)^z H(s)</div>
+<p>with <code>z=1/2</code> gives</p>
+<div class="math" role="math">\boxed{ S_3(X) \sim C_3\frac{X}{\sqrt{\log X}}, }</div>
+<p>where</p>
+<div class="math" role="math">\boxed{ C_3 = \frac{H_3(1)}{\Gamma(1/2)} = \frac1{\sqrt\pi} \left[ \frac23L(1,\chi_3) \prod_{p\equiv2\pmod3}(1-p^{-2}) \right]^{1/2}. }</div>
+<p>Using the classical value</p>
+<div class="math" role="math">L(1,\chi_3)=\frac{\pi}{3\sqrt3},</div>
+<p>this is an explicit positive Euler-product constant.</p>
+<p>A numerical truncation gives approximately</p>
+<div class="math" role="math">C_3\approx0.3012,</div>
+<p>but the exact product expression is the theorem-level object.</p>
+<h2>4. Strong structural-gap lower bound</h2>
+<p>Since every nontrivial member of <code>S_3</code> is a structural gap,</p>
+<div class="math" role="math">G(X)\ge S_3(X)-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ G(X) \ge (C_3+o(1)) \frac{X}{\sqrt{\log X}}. }</div>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{ G(X)\gg \frac{X}{\sqrt{\log X}}. }</div>
+<p>This is substantially stronger than the earlier lower bounds</p>
+<div class="math" role="math">\sqrt X</div>
+<p>from a single polynomial reciprocity tower and</p>
+<div class="math" role="math">X/\log X</div>
+<p>from prime-depth residue classes.</p>
+<h2>5. Comparison with the realized backbone</h2>
+<p>The prime-modulus backbone gives</p>
+<div class="math" role="math">R(X)\gg X/\log X.</div>
+<p>The source-1 gap semigroup gives</p>
+<div class="math" role="math">G(X)\gg X/\sqrt{\log X}.</div>
+<p>Thus the presently proved structural-gap lower bound is asymptotically larger than the presently proved lower bound for infinitely realized depths:</p>
+<div class="math" role="math">\frac{X/\sqrt{\log X}}{X/\log X} =\sqrt{\log X}.</div>
+<p>This does <strong>not</strong> imply that gaps outnumber realized depths in the full spectrum. These are only lower bounds generated by two specific theorem families.</p>
+<h2>6. Density consequence</h2>
+<p>Because</p>
+<div class="math" role="math">\frac{1}{\sqrt{\log X}}\to0,</div>
+<p>the source-1 semigroup itself has natural density zero among all positive integers.</p>
+<p>So the theorem does not yet prove that structural gaps have positive density.</p>
+<p>It does prove that the complement of the exact-depth spectrum is quantitatively much thicker than an isolated polynomial or prime sequence.</p>
+<h2>7. Why the exponent 1/2 appears</h2>
+<p>The allowed generating primes are precisely the primes</p>
+<div class="math" role="math">p\equiv1\pmod3,</div>
+<p>which occupy one of the two reduced residue classes modulo <code>3</code> and hence have Dirichlet density <code>1/2</code> among primes not equal to <code>3</code>.</p>
+<p>The square-root logarithmic exponent is the analytic reflection of that half-density prime generator set.</p>
+<p>In broad terms:</p>
+<div class="math" role="math">\boxed{ \text{half the prime classes generate the exact source-1 shadow semigroup} \Longrightarrow X/(\log X)^{1/2}\text{ semigroup size}. }</div>
+<h2>8. Potential extensions</h2>
+<p>The source-<code>2</code> and source-<code>4</code> shadow families are also multiplicative semigroup problems with additional target residue constraints.</p>
+<p>A natural next analytic task is to count:</p>
+<div class="math" role="math">\left\{ K\le X: K\equiv2\pmod7, \ \ell\mid K\Rightarrow (\ell/7)=+1 \right\}</div>
+<p>and</p>
+<div class="math" role="math">\left\{ K\le X: K\equiv4\pmod{15}, \ \ell\mid K\Rightarrow (\ell/15)=+1 \right\}.</div>
+<p>Their generator primes also occupy character-positive subsets, so similar Selberg-Delange behavior is expected after the residue constraint is incorporated.</p>
+<p>The union of the three saturated-base semigroups may yield a larger explicit constant in the structural-gap asymptotic lower bound.</p>
+<h2>9. Publication references for the analytic step</h2>
+<p>The analytic deduction is an application of the classical Selberg-Delange method. A modern reference is:</p>
+<ul><li>Régis de la Bretèche and Gérald Tenenbaum, <em>Remarks on the Selberg--Delange method</em>, arXiv:2010.12929.</li></ul>
+<p>No novelty is claimed for Selberg-Delange, Dirichlet characters, or the Euler-product manipulation.</p>
+<h2>10. Research significance</h2>
+<p>The exact shadow theory has now produced an analytic theorem about the <strong>size of the forbidden depth set</strong>.</p>
+<p>The chain is:</p>
+<div class="math" role="math">\boxed{ \text{exact source-1 shadow classification} \to \text{multiplicative gap semigroup} \to \text{Euler product} \to \text{Selberg-Delange} \to G(X)\gg X/\sqrt{\log X}. }</div>
+<p>That is a direct bridge from the finite-looking Type A/B shadow graph to asymptotic number theory.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

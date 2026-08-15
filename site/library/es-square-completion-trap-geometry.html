@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Square-completed Type-II trap geometry: López A/B are the two boundary orthants — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-completion-trap-geometry.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-completion-trap-geometry.html">
+  <meta property="og:title" content="Square-completed Type-II trap geometry: López A/B are the two boundary orthants — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-completed Type-II trap geometry: López A/B are the two boundary orthants</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact structural theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TYPEII-SQUARE-COMPLETION-LOPEZ-A.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>COMPOSITE-CORE.md</code></p>
+<p><strong>External background:</strong> Miguel Angel López, <em>A Complete Congruence System for the Erdos-Straus Conjecture</em>, arXiv:2404.01508</p>
+<p><strong>Claim boundary:</strong> this identifies the López Type-A/B layer inside the complete square-divisor Type-II layer. It does not prove that every prime is hit by a square-completed layer.</p>
+<hr>
+<h2>1. Three trap systems at one layer</h2>
+<p>Fix</p>
+<div class="math" role="math">a\ge1, \qquad m_a=4a-1.</div>
+<p>The existing López Type-A/B trap set is</p>
+<div class="math" role="math">\boxed{ T_a = \{-e,-4e\pmod{m_a}:e\mid a\}.}</div>
+<p>The exact square-completed standard Type-II theorem suggests the enlarged set</p>
+<div class="math" role="math">\boxed{ S_a = \{-4D\pmod{m_a}:D\mid a^2\}.}</div>
+<p>For a prime <code>p</code>, a residue hit in <code>S_a</code> is a standard Type-II certificate whenever the representing divisor <code>D</code> is not divisible by <code>p</code>.</p>
+<p>We now identify the old two-family trap exactly inside this square-divisor box.</p>
+<hr>
+<h2>2. Type A is the lower divisor box</h2>
+<p>Every divisor</p>
+<div class="math" role="math">e\mid a</div>
+<p>is also a divisor of <code>a^2</code>.</p>
+<p>Taking</p>
+<div class="math" role="math">D=e</div>
+<p>in the square-completed trap gives</p>
+<div class="math" role="math">-4D=-4e.</div>
+<p>Therefore the López Type-A residues are exactly the square-divisor parameters</p>
+<div class="math" role="math">\boxed{D\mid a.}</div>
+<p>This is the lower half of the divisor exponent box.</p>
+<hr>
+<h2>3. Type B is the upper divisor box</h2>
+<p>Again let</p>
+<div class="math" role="math">e\mid a.</div>
+<p>Take</p>
+<div class="math" role="math">\boxed{D=ae.}</div>
+<p>Then</p>
+<div class="math" role="math">D\mid a^2.</div>
+<p>Since</p>
+<div class="math" role="math">4a\equiv1\pmod{4a-1},</div>
+<p>we have</p>
+<div class="math" role="math">-4D =-4ae \equiv-e\pmod{4a-1}.</div>
+<p>Thus every López Type-B residue is also a square-completed Type-II residue at the <strong>same layer</strong>.</p>
+<p>The Type-B parameters are exactly</p>
+<div class="math" role="math">\boxed{D=ae,\qquad e\mid a,}</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{a\mid D\mid a^2.}</div>
+<p>This is the upper half of the divisor exponent box.</p>
+<p>Therefore:</p>
+<h3>Theorem — exact layerwise containment</h3>
+<p>For every <code>a</code>,</p>
+<div class="math" role="math">\boxed{T_a\subseteq S_a.}</div>
+<p>More precisely,</p>
+<div class="math" role="math">\boxed{ T_a = \{-4D:D\mid a\} \cup \{-4D:a\mid D\mid a^2\} \pmod{4a-1}.}</div>
+<p>So López A and B are not separate from square-completed Type II. They are the two boundary divisor regions of the complete Type-II layer.</p>
+<hr>
+<h2>4. Prime-exponent geometry</h2>
+<p>Write</p>
+<div class="math" role="math">a=\prod_{i=1}^s \ell_i^{E_i}.</div>
+<p>Every divisor of <code>a^2</code> has the unique form</p>
+<div class="math" role="math">D=\prod_{i=1}^s\ell_i^{U_i}, \qquad 0\le U_i\le2E_i.</div>
+<p>Thus the square-completed parameter space is the full integer box</p>
+<div class="math" role="math">\boxed{ \mathcal B(a) = \prod_{i=1}^s[0,2E_i]_{\mathbb Z}.}</div>
+<h3>Type-A orthant</h3>
+<p>The condition <code>D|a</code> is</p>
+<div class="math" role="math">\boxed{U_i\le E_i\quad\text{for every }i.}</div>
+<h3>Type-B orthant</h3>
+<p>The condition <code>a|D|a^2</code> is</p>
+<div class="math" role="math">\boxed{U_i\ge E_i\quad\text{for every }i.}</div>
+<p>Hence the López parameter region is</p>
+<div class="math" role="math">\boxed{ \mathcal B_-(a)\cup\mathcal B_+(a),}</div>
+<p>where</p>
+<div class="math" role="math">\mathcal B_-(a)=\prod_i[0,E_i], \qquad \mathcal B_+(a)=\prod_i[E_i,2E_i].</div>
+<p>The complete Type-II square box is all of <code>B(a)</code>.</p>
+<hr>
+<h2>5. The genuinely new region is mixed</h2>
+<p>A square divisor <code>D|a^2</code> lies outside both López families exactly when its exponent vector is <strong>mixed</strong> relative to the midpoint vector <code>(E_i)</code>:</p>
+<div class="math" role="math">\boxed{ \exists i,j: U_i&lt;E_i, \qquad U_j&gt;E_j.}</div>
+<p>These are the cross-orthant regions omitted by both Type A and Type B.</p>
+<p>Therefore a standard Type-II certificate that is not represented by López A or B at the same layer must use a mixed square divisor.</p>
+<p>This gives a precise geometric meaning to the extra Type-II room.</p>
+<hr>
+<h2>6. Prime-power layers are already complete</h2>
+<p>Suppose</p>
+<div class="math" role="math">a=\ell^E</div>
+<p>is a prime power.</p>
+<p>Then every exponent</p>
+<div class="math" role="math">0\le U\le2E</div>
+<p>satisfies either</p>
+<div class="math" role="math">U\le E</div>
+<p>or</p>
+<div class="math" role="math">U\ge E.</div>
+<p>Hence there is no mixed region.</p>
+<p>Therefore:</p>
+<h3>Theorem — prime-power layer equality</h3>
+<p>If <code>a</code> is a prime power, then</p>
+<div class="math" role="math">\boxed{S_a=T_a.}</div>
+<p>So square completion adds <strong>no new Type-II trap residue at all</strong> on a prime-power layer.</p>
+<p>Every genuinely new square-completed parameter requires a layer <code>a</code> with at least two distinct prime divisors.</p>
+<hr>
+<h2>7. Composite layers create the cross-regions</h2>
+<p>If <code>a</code> has at least two distinct prime factors, then mixed divisor parameters exist.</p>
+<p>For example, if</p>
+<div class="math" role="math">a=u^Ev^F\cdots</div>
+<p>with distinct primes <code>u,v</code>, then the exponent choice</p>
+<div class="math" role="math">U_u=0, \qquad U_v=2F</div>
+<p>is below the midpoint in one coordinate and above it in another.</p>
+<p>This proves that the <strong>parameter-space</strong> completion is nontrivial on every non-prime-power layer.</p>
+<p>Residue collisions modulo <code>4a-1</code> can in principle identify some mixed parameters with boundary residues, so parameter-space nontriviality alone does not assert strict residue-set enlargement for every such <code>a</code>. But strict enlargement occurs already in small examples and is exactly what happens in the canonical <code>2521</code> rescue below.</p>
+<hr>
+<h2>8. The p = 2521 mixed-divisor rescue</h2>
+<p>Take</p>
+<div class="math" role="math">p=2521, \qquad a=12=2^2\cdot3.</div>
+<p>Then</p>
+<div class="math" role="math">m_a=4a-1=47.</div>
+<p>The square-only certificate from <code>ES-TYPEII-SQUARE-COMPLETION-LOPEZ-A.md</code> uses</p>
+<div class="math" role="math">\boxed{D=16=2^4.}</div>
+<p>Relative to</p>
+<div class="math" role="math">a^2=2^4\cdot3^2,</div>
+<p>the exponent vector of <code>D</code> is</p>
+<div class="math" role="math">(U_2,U_3)=(4,0),</div>
+<p>while the midpoint vector for <code>a</code> is</p>
+<div class="math" role="math">(E_2,E_3)=(2,1).</div>
+<p>Thus</p>
+<div class="math" role="math">4&gt;2, \qquad 0&lt;1,</div>
+<p>so <code>D</code> is genuinely mixed.</p>
+<p>Its residue is</p>
+<div class="math" role="math">-4D=-64\equiv30\pmod{47}.</div>
+<p>The ordinary López layer has divisors</p>
+<div class="math" role="math">1,2,3,4,6,12</div>
+<p>and trap residues</p>
+<div class="math" role="math">\{-e,-4e:e\mid12\}.</div>
+<p>None is <code>30 mod 47</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{30\in S_{12}\setminus T_{12}.}</div>
+<p>And indeed</p>
+<div class="math" role="math">2521\equiv30\pmod{47}.</div>
+<p>So the square-completed layer solves <code>2521</code> at the prime modulus <code>47</code> through a mixed divisor that neither López boundary orthant can see.</p>
+<hr>
+<h2>9. Exact relation to the López Type-B parametrization</h2>
+<p>The upper-box embedding can also be written directly in López parameters.</p>
+<p>A Type-B witness has positive <code>d,n</code> and modulus</p>
+<div class="math" role="math">4dn-1.</div>
+<p>Put</p>
+<div class="math" role="math">a=dn</div>
+<p>and choose the square divisor</p>
+<div class="math" role="math">\boxed{D=dn^2=an.}</div>
+<p>Then</p>
+<div class="math" role="math">D\mid a^2</div>
+<p>because</p>
+<div class="math" role="math">\frac{a^2}{D}=d.</div>
+<p>Moreover</p>
+<div class="math" role="math">4D=4dn^2 =n(4dn) \equiv n\pmod{4dn-1}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{-4D\equiv-n\pmod{4dn-1},}</div>
+<p>which is exactly the López Type-B residue.</p>
+<p>Thus both López parametrizations embed explicitly into one square-divisor formula:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} \text{López family} &amp; \text{square divisor }D\\ \hline \text{Type A} &amp; d\\ \text{Type B} &amp; dn^2 \end{array}}</div>
+<p>at the common layer <code>a=dn</code>.</p>
+<hr>
+<h2>10. Strategic consequence: reuse the shadow machinery</h2>
+<p>The mature Type-A/B research should not be discarded when moving to the exact Type-I/II formulation.</p>
+<p>Instead, define the square-completed layer</p>
+<div class="math" role="math">S_a=\{-4D:D\mid a^2\}\pmod{4a-1}</div>
+<p>and regard the existing López layer <code>T_a</code> as its two boundary orthants.</p>
+<p>This creates a concrete next program:</p>
+<ol><li>extend exact trap cardinality from <code>Div(a)</code> to the square divisor lattice <code>Div(a^2)</code>;</li><li>classify collisions among mixed square-divisor residues;</li><li>extend direct-shadow and ancestry theorems from <code>T_a</code> to <code>S_a</code>;</li><li>determine whether the old zero-density Type-A/B survivor core is killed by mixed square-divisor traps;</li><li>exploit the theorem that prime-power layers need no extension, so all new geometry is localized to multi-prime layers;</li><li>compare mixed-divisor shadow quotients with the exact Kneser stabilizer defects of the signed-box formulation.</li></ol>
+<p>The conceptual picture is now precise:</p>
+<div class="math" role="math">\boxed{ \text{López A/B} = \text{two boundary orthants of the complete Type-II square-divisor box}.}</div>
+<p>The missing certificates live in the cross-regions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

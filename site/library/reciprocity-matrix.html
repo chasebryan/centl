@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>The Type A/B reciprocity matrix — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/reciprocity-matrix.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/reciprocity-matrix.html">
+  <meta property="og:title" content="The Type A/B reciprocity matrix — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>The Type A/B reciprocity matrix</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RECIPROCITY-MATRIX.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural theorem and active proof direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove QDSC, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It packages the quadratic-signature structure of one Type A/B layer into a binary matrix with canonical left and right conservation laws.</p>
+<p>Read with:</p>
+<ul><li><a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a></li><li><a href="reciprocity-defect-quotient.html">RECIPROCITY-DEFECT-QUOTIENT.md</a></li><li><a href="square-lift-signature.html">SQUARE-LIFT-SIGNATURE.md</a></li><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li></ul>
+<h2>1. Matrix definition</h2>
+<p>Fix a depth <code>k&gt;=1</code> and write</p>
+<div class="math" role="math">m=4k-1.</div>
+<p>Let the distinct prime factors of <code>m</code> be</p>
+<div class="math" role="math">p_1,\ldots,p_r</div>
+<p>and the distinct prime factors of <code>k</code> be</p>
+<div class="math" role="math">\ell_1,\ldots,\ell_s.</div>
+<p>Because <code>gcd(k,m)=1</code>, every Legendre symbol below is defined.</p>
+<p>Define the binary <strong>Type A/B reciprocity matrix</strong></p>
+<div class="math" role="math">\boxed{ A_k=(a_{ij})\in M_{r\times s}(\mathbb F_2), }</div>
+<p>where</p>
+<div class="math" role="math">\left(\frac{\ell_j}{p_i}\right)=(-1)^{a_{ij}}.</div>
+<p>Thus column <code>j</code> is exactly the local quadratic-signature vector</p>
+<div class="math" role="math">\lambda_m(\ell_j).</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ \operatorname{col}(A_k)=V_k, }</div>
+<p>where <code>V_k</code> is the divisor-signature space from <a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a>.</p>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{ \kappa(k)=r-\operatorname{rank}(A_k). }</div>
+<p>So the quadratic quotient dimension is the left nullity of the reciprocity matrix.</p>
+<h2>2. Canonical left null vector</h2>
+<p>Factor</p>
+<div class="math" role="math">m=\prod_{i=1}^r p_i^{\alpha_i}.</div>
+<p>Let</p>
+<div class="math" role="math">\boxed{ c_k=(\alpha_i\bmod2)_{i=1}^r\in\mathbb F_2^r.}</div>
+<p>This is the squarefree-kernel parity vector of <code>m</code>.</p>
+<p>Because <code>m=3 mod 4</code>, <code>m</code> is not a perfect square, so</p>
+<div class="math" role="math">\boxed{c_k\ne0.}</div>
+<p>For every prime <code>ell_j|k</code>, the divisor-Jacobi theorem gives</p>
+<div class="math" role="math">\left(\frac{\ell_j}{m}\right)=+1.</div>
+<p>Expanding the Jacobi symbol over the prime powers of <code>m</code> gives</p>
+<div class="math" role="math">\prod_i \left(\frac{\ell_j}{p_i}\right)^{\alpha_i}=+1.</div>
+<p>In bit form,</p>
+<div class="math" role="math">\sum_i(\alpha_i\bmod2)a_{ij}=0.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ c_k^T A_k=0.}</div>
+<h3>Consequence</h3>
+<p>Every reciprocity matrix has nontrivial left kernel, so</p>
+<div class="math" role="math">\boxed{\kappa(k)\ge1.}</div>
+<p>This recovers the universal Jacobi quotient as the canonical first left-null direction.</p>
+<h2>3. Canonical right null vector</h2>
+<p>Factor</p>
+<div class="math" role="math">k=\prod_{j=1}^s\ell_j^{\beta_j}</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{ b_k=(\beta_j\bmod2)_{j=1}^s\in\mathbb F_2^s.}</div>
+<p>Modulo every prime <code>p_i|m</code>,</p>
+<div class="math" role="math">4k\equiv1\pmod{p_i},</div>
+<p>hence</p>
+<div class="math" role="math">k\equiv4^{-1}\pmod{p_i}.</div>
+<p>Since <code>4^{-1}</code> is a square modulo <code>p_i</code>,</p>
+<div class="math" role="math">\left(\frac{k}{p_i}\right)=+1.</div>
+<p>By multiplicativity,</p>
+<div class="math" role="math">\prod_j \left(\frac{\ell_j}{p_i}\right)^{\beta_j}=+1.</div>
+<p>In bit form,</p>
+<div class="math" role="math">\sum_j(\beta_j\bmod2)a_{ij}=0.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ A_k b_k=0. }</div>
+<p>When <code>k</code> is not a perfect square, <code>b_k</code> is nonzero. Thus every nonsquare depth has a canonical nontrivial right-kernel relation among the prime-factor signature columns.</p>
+<p>This is the layer-level version of the square-lift defect conservation law.</p>
+<h2>4. Double conservation theorem</h2>
+<p>Combining the previous sections gives:</p>
+<h3>Theorem</h3>
+<p>For every Type A/B depth <code>k</code>, the reciprocity matrix satisfies</p>
+<div class="math" role="math">\boxed{ c_k^T A_k=0, \qquad A_k b_k=0.}</div>
+<p>The left relation is always nontrivial. The right relation is nontrivial whenever <code>k</code> is not a square.</p>
+<p>Thus the matrix is never an arbitrary binary matrix. Its row and column spaces are constrained simultaneously by the defining identity</p>
+<div class="math" role="math">4k-1=m.</div>
+<h2>5. Rank bounds</h2>
+<p>Let</p>
+<div class="math" role="math">r=\omega(m), \qquad s=\omega(k).</div>
+<p>The left conservation law gives</p>
+<div class="math" role="math">\operatorname{rank}(A_k)\le r-1.</div>
+<p>If <code>k</code> is not a square, the nonzero right conservation law also gives</p>
+<div class="math" role="math">\operatorname{rank}(A_k)\le s-1.</div>
+<p>Therefore:</p>
+<h3>Corollary for nonsquare k</h3>
+<div class="math" role="math">\boxed{ \operatorname{rank}(A_k) \le \min(r-1,s-1), }</div>
+<p>and hence</p>
+<div class="math" role="math">\boxed{ \kappa(k) =r-\operatorname{rank}(A_k) \ge \max(1,r-s+1). }</div>
+<h3>Corollary for square k</h3>
+<p>The canonical right parity vector vanishes, but the left law remains, so</p>
+<div class="math" role="math">\boxed{ \operatorname{rank}(A_k)\le\min(r-1,s), }</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{ \kappa(k)\ge\max(1,r-s). }</div>
+<p>These are elementary but useful candidate-independent lower bounds on the amount of quadratic quotient information available at a layer.</p>
+<h2>6. Exact interpretation of kappa=1</h2>
+<p>The condition</p>
+<div class="math" role="math">\kappa(k)=1</div>
+<p>means the canonical Jacobi vector <code>c_k</code> spans the <strong>entire</strong> left kernel:</p>
+<div class="math" role="math">\boxed{ \ker(A_k^T)=\langle c_k\rangle. }</div>
+<p>Equivalently, every linear local quadratic character that is trivial on all divisor signatures is generated by the ordinary Jacobi character.</p>
+<p>So the <code>kappa=1</code> layers are precisely those for which there is no hidden quadratic separator beyond Jacobi.</p>
+<p>This gives a matrix formulation of the automatic square-lift signature theorem:</p>
+<blockquote><p>if a squarefree ancestor has left nullity one, every square-lift divisor signature lies in the ancestor column space because reciprocity already places it in the Jacobi kernel.</p></blockquote>
+<h2>7. Exact interpretation of the reciprocity defect quotient</h2>
+<p>For a squarefree ancestor <code>a</code>, let <code>d=4a-1</code>. Then the vector <code>c_a</code> is the all-ones vector on the prime factors of <code>d</code>, because every exponent in squarefree <code>d</code> is odd.</p>
+<p>The defect quotient from <a href="reciprocity-defect-quotient.html">RECIPROCITY-DEFECT-QUOTIENT.md</a> is</p>
+<div class="math" role="math">\mathcal R_a=\ker(c_a^T)/\operatorname{col}(A_a).</div>
+<p>Its dimension is</p>
+<div class="math" role="math">\boxed{ \dim\mathcal R_a =\kappa(a)-1. }</div>
+<p>Thus the defect quotient is exactly the part of the left-null geometry that remains after the canonical Jacobi direction has been removed.</p>
+<p>A square-lift prime factor contributes a new signature obstruction only through this cokernel.</p>
+<h2>8. Right-kernel conservation as defect cancellation</h2>
+<p>For a square-lift depth</p>
+<div class="math" role="math">j=\prod_t q_t^{e_t},</div>
+<p>the parity vector</p>
+<div class="math" role="math">(e_t\bmod2)_t</div>
+<p>is the canonical right-kernel vector for the signature matrix measured against the squarefree ancestor primes.</p>
+<p>Passing to the ancestor defect quotient gives</p>
+<div class="math" role="math">\boxed{ \sum_t(e_t\bmod2)\delta_a(q_t)=0. }</div>
+<p>So the defect conservation theorem is not an isolated identity. It is the right-null law of the same reciprocity matrix whose left-null law is the Jacobi character.</p>
+<p>This gives a symmetric picture:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ccc} \text{Jacobi parity of }m &amp;\longrightarrow&amp; \ker(A_k^T)\\ &amp;&amp;\\[-2mm] A_k&amp;&amp;\\[-2mm] &amp;&amp;\\ \ker(A_k)&amp;\longleftarrow&amp;\text{prime-exponent parity of }k. \end{array}}</div>
+<p>The Type A/B relation <code>m=4k-1</code> constrains both sides at once.</p>
+<h2>9. Why this matters</h2>
+<p>The full quadratic-signature problem had appeared to involve many unrelated Legendre bits. The reciprocity matrix shows that those bits are organized by a highly constrained binary incidence object.</p>
+<p>Three previously separate observations become one structure:</p>
+<ol><li>every Type A/B trap has Jacobi sign <code>-1</code>;</li><li>higher local quadratic quotient dimensions are measured by the left nullity beyond the canonical Jacobi vector;</li><li>square-lift defect classes must cancel according to the exponent parity of the lifted depth.</li></ol>
+<p>The proof search for QDSC can therefore be reframed as a rank-and-support problem for a family of reciprocity matrices rather than an unconstrained Boolean covering problem.</p>
+<h2>10. New theorem targets</h2>
+<ol><li>classify when the rank bounds above are sharp;</li><li>characterize <code>kappa(k)=1</code> arithmetically without constructing the full matrix;</li><li>classify the possible low-dimensional defect quotients when <code>kappa(k)=2,3</code>;</li><li>prove that the norm-form constraint</li></ol>
+<div class="math" role="math">j=(1+d s^2)/4</div>
+<p>forces every nonzero defect configuration into a shadowed support pattern;</p>
+<ol><li>relate modulus ancestry maps to linear maps between the corresponding reciprocity matrices;</li><li>determine whether the five currently known layer-level quadratic-signature exceptions through <code>k&lt;=3000</code> arise from one common matrix normal form.</li></ol>
+<p>The fifth and sixth targets are particularly close to a universal QDSC theorem.</p>
+<h2>11. Novelty boundary</h2>
+<p>Legendre symbols, quadratic reciprocity, binary matrices, null spaces, and rank-nullity are classical. The candidate contribution is the <strong>two-sided reciprocity-matrix organization of the López Type A/B minimal-depth/shadow system</strong>, including its identification with the quadratic quotient and square-lift defect conservation structures.</p>
+<p>Publication priority remains subject to broader literature review and independent mathematical scrutiny.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

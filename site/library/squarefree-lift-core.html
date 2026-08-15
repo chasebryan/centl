@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Squarefree-lift localization of the Type A/B character residual — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/squarefree-lift-core.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/squarefree-lift-core.html">
+  <meta property="og:title" content="Squarefree-lift localization of the Type A/B character residual — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Squarefree-lift localization of the Type A/B character residual</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUAREFREE-LIFT-CORE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family plus finite replay target</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It refines the residual left by the character-shield theorems.</p>
+<p>Read with:</p>
+<ul><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="quadratic-signature-shield-k1200.html">QUADRATIC-SIGNATURE-SHIELD-K1200.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="theory.html">THEORY.md</a></li></ul>
+<h2>1. Squarefree ancestor</h2>
+<p>For an earlier layer <code>j</code>, write</p>
+<div class="math" role="math">m_j=4j-1.</div>
+<p>Let</p>
+<div class="math" role="math">d_j=\operatorname{sf}(m_j) =\prod_{v_p(m_j)\text{ odd}}p</div>
+<p>be the squarefree kernel of <code>m_j</code>. Then there is a unique odd integer <code>s_j&gt;=1</code> with</p>
+<div class="math" role="math">\boxed{m_j=d_j s_j^2.}</div>
+<p>Because every odd square is <code>1 mod 4</code> and <code>m_j=3 mod 4</code>,</p>
+<div class="math" role="math">d_j\equiv3\pmod4.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{a_j=\frac{d_j+1}{4}}</div>
+<p>is a positive integer and</p>
+<div class="math" role="math">\boxed{d_j=4a_j-1=m_{a_j}.}</div>
+<p>We call <code>a_j</code> the <strong>squarefree ancestor depth</strong> of <code>j</code>.</p>
+<p>Moreover <code>a_j&lt;=j</code>, with equality exactly when <code>m_j</code> is squarefree.</p>
+<h2>2. Squarefree character reduction</h2>
+<h3>Theorem</h3>
+<p>For every integer <code>x</code> coprime to <code>m_j</code>,</p>
+<div class="math" role="math">\boxed{ \left(\frac{x}{m_j}\right) = \left(\frac{x}{d_j}\right). }</div>
+<h3>Proof</h3>
+<p>Write</p>
+<div class="math" role="math">m_j=\prod_p p^{e_p}.</div>
+<p>The Jacobi symbol is</p>
+<div class="math" role="math">\left(\frac{x}{m_j}\right) = \prod_p\left(\frac{x}{p}\right)^{e_p}.</div>
+<p>Every even exponent contributes <code>1</code>; the odd exponents are exactly the primes occurring in <code>d_j</code>. QED.</p>
+<p>Thus the scalar quadratic character of a layer depends only on its squarefree ancestor modulus.</p>
+<h2>3. Fixed-negative layers are square-lifts</h2>
+<p>Fix a target candidate <code>(k,h,t)</code> and write</p>
+<div class="math" role="math">x\equiv r\pmod L, \qquad L=\operatorname{lcm}(840,m_k).</div>
+<p>An earlier layer <code>j&lt;k</code> is <strong>character-fixed</strong> when every prime occurring to odd exponent in <code>m_j</code> divides <code>L</code>. Equivalently,</p>
+<div class="math" role="math">\boxed{d_j\mid L.}</div>
+<p>For such a layer, the candidate progression fixes <code>x mod d_j</code>, and the previous theorem gives</p>
+<div class="math" role="math">\boxed{ \left(\frac{x}{m_j}\right) = \left(\frac{r}{d_j}\right) }</div>
+<p>for every reduced member of the progression.</p>
+<p>Therefore every immutable Jacobi-negative layer in the character residual is literally a square-lift over a smaller fixed modulus <code>d_j=m_{a_j}</code>.</p>
+<h2>4. Direct novelty at the ancestor</h2>
+<p>Suppose the target candidate is directly novel.</p>
+<p>If <code>d_j|L</code>, then the earlier ancestor modulus <code>m_{a_j}=d_j</code> divides the target progression modulus. Therefore the residue modulo <code>d_j</code> is fixed to <code>r mod d_j</code>.</p>
+<p>Direct novelty implies</p>
+<div class="math" role="math">\boxed{ r\bmod d_j\notin T_{a_j}.}</div>
+<p>Otherwise the ancestor layer <code>a_j</code> itself would directly shadow the target candidate.</p>
+<p>Hence every fixed-negative layer of a directly novel candidate sits over a residue satisfying</p>
+<div class="math" role="math">\boxed{ \left(\frac r{d_j}\right)=-1, \qquad r\bmod d_j\notin T_{a_j}. }</div>
+<p>In words: the character residual is built from <strong>nontrap quadratic nonresidues at squarefree ancestor layers</strong>.</p>
+<h2>5. Projection excess</h2>
+<p>The exact trap set at the lifted layer can be projected to the ancestor modulus:</p>
+<div class="math" role="math">\pi_j(T_j)=T_j\bmod d_j.</div>
+<p>Define the <strong>squarefree projection excess</strong></p>
+<div class="math" role="math">\boxed{ E_j = \pi_j(T_j)\setminus T_{a_j}. }</div>
+<h3>Projection-excess theorem</h3>
+<p>Let a directly novel target candidate have <code>d_j|L</code>. If</p>
+<div class="math" role="math">r\bmod d_j\notin E_j,</div>
+<p>then the candidate progression is automatically safe from the entire exact layer <code>j</code>.</p>
+<h3>Proof</h3>
+<p>Because the candidate is directly novel,</p>
+<div class="math" role="math">r\bmod d_j\notin T_{a_j}.</div>
+<p>If also <code>r mod d_j</code> is not in <code>E_j</code>, then</p>
+<div class="math" role="math">r\bmod d_j\notin T_j\bmod d_j.</div>
+<p>Every member of the candidate progression has the same residue <code>r mod d_j</code>. Therefore no member can lie in <code>T_j mod m_j</code>, since any such hit would project into <code>T_j mod d_j</code>. QED.</p>
+<h3>Corollary</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{E_j=\varnothing,}</div>
+<p>then every directly novel candidate for which <code>d_j|L</code> automatically avoids layer <code>j</code> exactly.</p>
+<p>Equivalently,</p>
+<div class="math" role="math">T_j\bmod d_j\subseteq T_{a_j}</div>
+<p>makes the lifted layer redundant over every directly novel progression that fixes its ancestor modulus.</p>
+<p>This is an exact shadow theorem along the squarefree-lift ancestry</p>
+<div class="math" role="math">\boxed{m_j=s_j^2m_{a_j}.}</div>
+<h2>6. Why this matters</h2>
+<p><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a> proves that scalar-character inconsistency comes only from immutable negative earlier layers.</p>
+<p>The present theorem shows that most of those immutable negative layers may still be removed <strong>exactly</strong>, without solving any global covering problem, by checking only whether their fixed ancestor residue lies in the projection excess <code>E_j</code>.</p>
+<p>The hierarchy is now</p>
+<div class="math" role="math">\boxed{ \text{character shield} \to \text{fixed-negative square-lifts} \to \text{projection excess }E_j \to \text{genuinely active exact lift core}. }</div>
+<p>The object <code>E_j</code> is therefore a sharper target than the entire Jacobi-negative half of the unit group.</p>
+<h2>7. Finite k &lt;= 1200 replay signal</h2>
+<p>A replay against the frozen <code>41,470</code> directly novel candidates through <code>k&lt;=1200</code> gives the following proof-mining statistics:</p>
+<pre><code class="language-text">layers through 1200:                         1,200
+non-squarefree moduli m_j:                    224
+layers with nonempty projection excess E_j:   115
+layers with empty projection excess:         1,085</code></pre>
+<p>Among the <code>41,470</code> directly novel candidates:</p>
+<pre><code class="language-text">character-shield inconsistent candidates:    11,056
+of those, no fixed-negative layer remains
+active after the exact projection-excess test: 7,608
+candidates with &gt;=1 active excess layer:       3,448
+maximum active excess layers in one candidate:    10</code></pre>
+<p>Across all candidates, <code>38,022/41,470</code> have zero active squarefree projection-excess layers.</p>
+<p>These numbers do <strong>not</strong> mean all <code>38,022</code> candidates are independently solved by this theorem alone. Collective character equations among non-fixed layers can still require additional choices. The result is a localization statement: the immutable exact-residue part of the character residual collapses to a much smaller family of projection-excess lifts.</p>
+<p>The largest observed excess size through <code>k&lt;=1200</code> is <code>22</code>, at</p>
+<pre><code class="language-text">j = 700
+m_j = 2799
+squarefree ancestor modulus d_j = 311
+ancestor depth a_j = 78</code></pre>
+<h2>8. Immediate theorem target</h2>
+<p>The next target is to classify exactly when</p>
+<div class="math" role="math">\boxed{E_j=\varnothing.}</div>
+<p>Because</p>
+<div class="math" role="math">m_j=s_j^2m_{a_j},</div>
+<p>this asks for a divisor-theoretic criterion under which</p>
+<div class="math" role="math">T_j\bmod m_{a_j}\subseteq T_{a_j}.</div>
+<p>A successful classification would produce an infinite family of exact square-lift shadow relations and isolate the exceptional lifts where new residue information is genuinely created.</p>
+<p>A second target is to combine the projection-excess core with the full local quadratic-signature quotient. The likely proof architecture is</p>
+<div class="math" role="math">\boxed{ \text{direct novelty} \to \text{signature shield} \to \text{squarefree projection excess} \to \text{fiber kernel} \to \text{tiny exact residual}. }</div>
+<h2>9. Novelty boundary</h2>
+<p>Squarefree kernels and the identity of Jacobi symbols under deletion of even prime exponents are classical. The candidate contribution is their use as an exact <strong>squarefree-lift localization and projection-excess reduction inside the Type A/B minimal-depth/shadow framework</strong>.</p>
+<p>Publication priority remains subject to broader literature review and independent mathematical scrutiny.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

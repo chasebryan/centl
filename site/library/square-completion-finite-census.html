@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Finite square-completion census through 50,000,000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-completion-finite-census.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-completion-finite-census.html">
+  <meta property="og:title" content="Finite square-completion census through 50,000,000 — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Finite square-completion census through 50,000,000</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-COMPLETION-FINITE-CENSUS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite computation; standalone reproducer checked in</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Reproducer:</strong> <code>square_completion_probe.py</code></p>
+<p><strong>Claim boundary:</strong> this is a finite statement only. <code>ES-SQUARE-COMPLETION-BACKBONE.md</code> proves that completed first-hit depth is unbounded, so no finite observed ceiling is promoted to a universal theorem.</p>
+<hr>
+<h2>Run domain</h2>
+<p>Prime domain:</p>
+<div class="math" role="math">\boxed{p\le50,000,000}</div>
+<p>restricted to Mordell-hard residue classes</p>
+<div class="math" role="math">\boxed{p\bmod840\in\{1,121,169,289,361,529\}.}</div>
+<p>Number of hard primes:</p>
+<div class="math" role="math">\boxed{93,457.}</div>
+<p>Completed layers searched:</p>
+<div class="math" role="math">\boxed{a\le1500.}</div>
+<p>For each layer</p>
+<div class="math" role="math">m_a=4a-1</div>
+<p>the exact square-completed trap is</p>
+<div class="math" role="math">S_a=\{-4D\pmod{m_a}:D\mid a^2\},</div>
+<p>with the validity check</p>
+<div class="math" role="math">p\nmid D.</div>
+<hr>
+<h2>Result</h2>
+<p>Every one of the <code>93,457</code> hard primes was captured.</p>
+<div class="math" role="math">\boxed{\text{unresolved}=0.}</div>
+<p>The deepest observed square-completed first hit was</p>
+<div class="math" role="math">\boxed{624.}</div>
+<p>It occurred for exactly one prime:</p>
+<div class="math" role="math">\boxed{p=2,031,121.}</div>
+<p>The witness is</p>
+<div class="math" role="math">\boxed{ a=624, \qquad D=576, \qquad m_a=2495, \qquad q=815.}</div>
+<p>Exact checks:</p>
+<div class="math" role="math">576\mid624^2,</div>
+<div class="math" role="math">2,031,121+4\cdot576 =2,033,425 =2495\cdot815,</div>
+<p>and, with</p>
+<div class="math" role="math">C=\frac{2,031,121+815}{4}=507,984,</div>
+<div class="math" role="math">576\mid C^2, \qquad 576+C=624\cdot815.</div>
+<p>Thus this is simultaneously a valid square-completed congruence witness and an exact standard Type-II divisor-square witness.</p>
+<hr>
+<h2>The deepest witness is genuinely mixed</h2>
+<p>Factor</p>
+<div class="math" role="math">624=2^4\cdot3\cdot13</div>
+<p>and</p>
+<div class="math" role="math">576=2^6\cdot3^2.</div>
+<p>Relative to the midpoint exponents of <code>624</code>, the square divisor <code>576</code> is</p>
+<ul><li>above the midpoint at <code>2</code>;</li><li>above the midpoint at <code>3</code>;</li><li>below the midpoint at <code>13</code>.</li></ul>
+<p>Therefore it lies in neither López boundary orthant.</p>
+<p>The completed depth is</p>
+<div class="math" role="math">\boxed{624,}</div>
+<p>whereas a direct López Type-A/B scan gives first depth</p>
+<div class="math" role="math">\boxed{1403}</div>
+<p>for the same prime.</p>
+<p>So the finite record is a genuine mixed-sign rescue rather than an old boundary hit written in new notation.</p>
+<hr>
+<h2>Record frontier observed in this run</h2>
+<p>As primes are ordered increasingly, the completed-depth records are:</p>
+<table class="directory"><thead><tr><th>prime <code>p</code></th><th>first completed depth <code>a</code></th><th>modulus <code>4a-1</code></th></tr></thead><tbody><tr><td>1009</td><td>3</td><td>11</td></tr><tr><td>1201</td><td>8</td><td>31</td></tr><tr><td>2521</td><td>12</td><td>47</td></tr><tr><td>3361</td><td>25</td><td>99</td></tr><tr><td>33289</td><td>39</td><td>155</td></tr><tr><td>90841</td><td>42</td><td>167</td></tr><tr><td>144169</td><td>48</td><td>191</td></tr><tr><td>167521</td><td>65</td><td>259</td></tr><tr><td>225289</td><td>70</td><td>279</td></tr><tr><td>361321</td><td>72</td><td>287</td></tr><tr><td>915961</td><td>76</td><td>303</td></tr><tr><td>954409</td><td>84</td><td>335</td></tr><tr><td>1853329</td><td>96</td><td>383</td></tr><tr><td>2031121</td><td>624</td><td>2495</td></tr></tbody></table>
+<p>No later hard prime through <code>50,000,000</code> exceeds depth <code>624</code> in this finite domain.</p>
+<p>Again, the unboundedness theorem proves that this plateau must eventually break.</p>
+<hr>
+<h2>Reproduction</h2>
+<p>From the repository root:</p>
+<pre><code class="language-bash">python3 research/erdos-straus/square_completion_probe.py \
+  --prime-limit 50000000 \
+  --a-max 1500 \
+  --compare-ab-max 5000</code></pre>
+<p>Expected headline values:</p>
+<pre><code class="language-text">hard_prime_count      93457
+captured              93457
+unresolved            0
+max_completed_depth   624
+deepest.p             2031121
+deepest.a             624
+deepest.D             576
+deepest.m             2495
+deepest.quotient      815
+lopez_ab_first_depth  1403</code></pre>
+<p>The script emits JSON including the exact witness checks and record frontier.</p>
+<hr>
+<h2>Interpretation</h2>
+<p>The finite data say two things at once:</p>
+<ol><li>square completion is not a small cosmetic enlargement of López A/B; it can sharply reduce difficult first-hit depths;</li><li>the compression does not imply bounded latency, because the completed prime-modulus backbone proves arbitrarily large exact finite depths.</li></ol>
+<p>The useful proof question is therefore not</p>
+<blockquote><p>“Is completed depth bounded?”</p></blockquote>
+<p>but</p>
+<blockquote><p>“Why can no prime avoid every symmetric completed layer, even though the first successful layer can occur arbitrarily late?”</p></blockquote>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

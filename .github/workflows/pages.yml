@@ -5,6 +5,12 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'research/**'
+      - 'docs/**'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSING.md'
+      - 'scripts/publish-site-library.py'
       - 'caravan/census.py'
       - 'caravan/coordinator.py'
       - 'caravan/retrieval.py'
@@ -114,6 +120,10 @@ jobs:
         run: |
           echo '::notice::GitHub Pages is not enabled for this repository yet. In Settings -> Pages, select GitHub Actions as the source, then re-run FCF Pages.'
 
+      - name: Publish research library and manuals
+        if: steps.pages.outcome == 'success'
+        run: python3 scripts/publish-site-library.py
+
       - name: Assemble static site
         if: steps.pages.outcome == 'success'
         env:
@@ -122,6 +132,8 @@ jobs:
           set -eu
           rm -rf _site
           mkdir -p _site/assets
+          rm -f site/caravan-census.js
+          find site -name '*.js' -delete
           cp -a site/. _site/
           census_input=site/pub/centl/caravan/lead-census-v1.json
           if [ -n "$FCF_CARAVAN_CENSUS_URL" ]; then

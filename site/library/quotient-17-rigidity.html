@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quotient-17 shadow rigidity — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-17-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-17-rigidity.html">
+  <meta property="og:title" content="Quotient-17 shadow rigidity — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quotient-17 shadow rigidity</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-17-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem inside the Type A/B minimal-depth/shadow program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Provenance:</strong> proved in Operator-02 lane (<code>operator-02/ANCESTRY-Q17-CLASSIFICATION.md</code>); promoted to parent theorem document</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. Does not prove universal DSC-P, López coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="prime-child-shadows.html">PRIME-CHILD-SHADOWS.md</a></li><li><a href="quotient-9-rigidity.html">QUOTIENT-9-RIGIDITY.md</a></li><li><a href="quotient-13-rigidity.html">QUOTIENT-13-RIGIDITY.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li></ul>
+<hr>
+<h2>Theorem</h2>
+<p>Let <code>K = 17j - 4</code> and <code>m = 4j - 1</code>. Then</p>
+<div class="math" role="math">\boxed{ T_K \bmod m \subseteq T_j \iff \begin{cases} K \text{ is prime},\quad\text{or}\\ K = 2p \text{ with } p \text{ an odd prime},\quad\text{or}\\ K = 4p \text{ with } p \text{ an odd prime},\quad\text{or}\\ (j,K) = (4, 64). \end{cases} }</div>
+<hr>
+<h2>Direct implications</h2>
+<ul><li><strong>Prime child:</strong> parent prime-child theorem.</li><li><strong>K = 2p:</strong> <code>j = 2d</code>, <code>p = 17d - 2 ≡ j/2 mod m</code>; divisors map to <code>{1,2,j/2,j}</code>.</li><li><strong>K = 4p:</strong> <code>j = 4d</code>, <code>p = 17d - 1 ≡ j/4 mod m</code>; divisors map into <code>{1,2,4,j/4,j/2,j}</code>.</li><li><strong>(4,64):</strong> explicit check; <code>S_4 = {1,2,4,8} mod 15</code> absorbs all powers of two.</li></ul>
+<hr>
+<h2>Converse outline</h2>
+<ol><li><strong>Odd j:</strong> <code>gcd(j,K) = 1</code>, <code>K</code> odd; least prime factor of composite <code>K</code> escapes <code>S_j</code> (<code>√K &lt; m</code> for <code>j ≥ 2</code>).</li><li><strong>v₂(K) = 1:</strong> write <code>K = 2N</code>; if <code>N</code> composite its least odd prime factor escapes <code>S_j</code>.</li><li><strong>v₂(K) = 2:</strong> write <code>K = 4N</code>; same if <code>N</code> composite.</li><li><strong>v₂(K) ≥ 3:</strong> forces <code>j ≡ 4 mod 8</code> and <code>v₂(j) = 2</code> exactly.</li></ol>
+<p>- <strong>v₂ ≥ 5, j &gt; 4:</strong> divisor <code>32 ∉ S_j</code>. - <strong>v₂ = 3 or 4:</strong> odd part <code>N</code> satisfies <code>j &lt; N &lt; m</code> and is odd, hence <code>N ∉ S_j</code>. - Only remaining shadow: <code>(4,64)</code>.</p>
+<p>Full case-by-case write-up: <code>operator-02/ANCESTRY-Q17-CLASSIFICATION.md</code>.</p>
+<hr>
+<h2>Structural remark</h2>
+<p>Unlike quotients with odd prime <code>s = (q-1)/4</code>, the case <code>s = 4 = 2²</code> produces a short 2-adic family rather than a single odd factor <code>s·p</code>. This is the first fully classified quotient whose composite-child list is governed by 2-adic valuation rather than a single odd prime factor.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

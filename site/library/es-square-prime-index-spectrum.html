@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-index spectrum of the square-completed Type-II layers — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-prime-index-spectrum.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-prime-index-spectrum.html">
+  <meta property="og:title" content="Prime-index spectrum of the square-completed Type-II layers — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-index spectrum of the square-completed Type-II layers</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-PRIME-INDEX-SPECTRUM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact classification</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code>, <code>ES-SQUARE-COMPLETION-BACKBONE.md</code>, <code>THEORY.md</code></p>
+<p><strong>Claim boundary:</strong> classifies square-completed minimal-depth realizability when the layer index itself is prime. It does not classify composite layer indices and does not prove universal Erdős--Straus coverage.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>For every positive layer index <code>a</code>, put</p>
+<div class="math" role="math">m_a=4a-1</div>
+<p>and define the square-completed Type-II trap</p>
+<div class="math" role="math">\boxed{ S_a=\{-4D\pmod{m_a}:D\mid a^2\}.}</div>
+<p>Call <code>a</code> an <strong>exact completed depth</strong> if there exists a prime <code>p</code> whose first hit among the layers <code>S_1,S_2,...</code> occurs exactly at <code>a</code>.</p>
+<p>The prime-modulus backbone already proves that every <code>a</code> with <code>m_a</code> prime greater than <code>7</code> is realized infinitely often, including by Mordell-hard primes.</p>
+<p>Here we prove the converse when <code>a</code> itself is prime.</p>
+<hr>
+<h2>2. A prime-index completed layer has only three parameters</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{a\text{ be prime}.}</div>
+<p>Then</p>
+<div class="math" role="math">\operatorname{Div}(a^2)=\{1,a,a^2\}.</div>
+<p>Therefore</p>
+<div class="math" role="math">S_a = \{-4,-4a,-4a^2\} \pmod{m_a}.</div>
+<p>Since</p>
+<div class="math" role="math">4a\equiv1\pmod{m_a},</div>
+<p>we have</p>
+<div class="math" role="math">-4a\equiv-1</div>
+<p>and</p>
+<div class="math" role="math">-4a^2 =-a(4a) \equiv-a.</div>
+<p>Hence:</p>
+<h3>Lemma — three-point prime layer</h3>
+<p>For prime <code>a</code>,</p>
+<div class="math" role="math">\boxed{ S_a=\{-4,-1,-a\}\pmod{4a-1}.}</div>
+<hr>
+<h2>3. Reduction along every modulus-ancestry edge</h2>
+<p>Suppose</p>
+<div class="math" role="math">1\le j&lt;a</div>
+<p>and</p>
+<div class="math" role="math">\boxed{m_j=4j-1\mid m_a=4a-1.}</div>
+<p>Since both</p>
+<div class="math" role="math">4a\equiv1\pmod{m_j}</div>
+<p>and</p>
+<div class="math" role="math">4j\equiv1\pmod{m_j},</div>
+<p>subtracting gives</p>
+<div class="math" role="math">4(a-j)\equiv0\pmod{m_j}.</div>
+<p>The modulus <code>m_j</code> is odd, so <code>4</code> is invertible modulo it. Thus</p>
+<div class="math" role="math">\boxed{a\equiv j\pmod{m_j}.}</div>
+<p>Reducing the three-point prime layer gives</p>
+<div class="math" role="math">S_a\bmod m_j = \{-4,-1,-j\}.</div>
+<p>But all three residues lie in the earlier completed layer <code>S_j</code>:</p>
+<ul><li><code>D=1</code> gives <code>-4</code>;</li><li><code>D=j</code> gives</li></ul>
+<div class="math" role="math">-4j\equiv-1;</div>
+<ul><li><code>D=j^2</code> gives</li></ul>
+<div class="math" role="math">-4j^2\equiv-j.</div>
+<p>Therefore:</p>
+<h3>Theorem — prime-index ancestry absorption</h3>
+<p>If <code>a</code> is prime and</p>
+<div class="math" role="math">4j-1\mid4a-1,</div>
+<p>then</p>
+<div class="math" role="math">\boxed{ S_a\bmod(4j-1) \subseteq S_j.}</div>
+<p>In fact the reduction is exactly the three canonical residues</p>
+<div class="math" role="math">\boxed{\{-4,-1,-j\}.}</div>
+<p>Thus <strong>every modulus-ancestry edge into a prime-index completed layer is a complete direct shadow</strong>.</p>
+<hr>
+<h2>4. Every composite modulus 4a-1 has an earlier 3 mod 4 prime divisor</h2>
+<p>Assume now that</p>
+<div class="math" role="math">a\text{ is prime}</div>
+<p>and</p>
+<div class="math" role="math">m_a=4a-1</div>
+<p>is composite.</p>
+<p>Because</p>
+<div class="math" role="math">m_a\equiv3\pmod4,</div>
+<p>its prime factorization contains at least one prime factor</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>with odd total multiplicity.</p>
+<p>Since <code>m_a</code> is composite, such a prime factor may be chosen with</p>
+<div class="math" role="math">q&lt;m_a.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{q=4j-1}</div>
+<p>with</p>
+<div class="math" role="math">j=\frac{q+1}{4}.</div>
+<p>Then</p>
+<div class="math" role="math">1\le j&lt;a</div>
+<p>and</p>
+<div class="math" role="math">4j-1=q\mid4a-1.</div>
+<p>By the prime-index ancestry theorem,</p>
+<div class="math" role="math">S_a\bmod q\subseteq S_j.</div>
+<p>Therefore every candidate captured by layer <code>a</code> is already captured by the earlier layer <code>j</code>.</p>
+<p>Hence:</p>
+<h3>Corollary — composite-modulus prime layers are structural gaps</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{a\text{ is prime}, \qquad 4a-1\text{ is composite},}</div>
+<p>then <code>a</code> cannot be a minimal square-completed depth for any integer, and in particular for any prime.</p>
+<p>The entire layer is directly redundant.</p>
+<hr>
+<h2>5. Converse: prime modulus gives infinitely many exact first hits</h2>
+<p>If instead</p>
+<div class="math" role="math">\boxed{4a-1&gt;7\text{ is prime},}</div>
+<p><code>ES-SQUARE-COMPLETION-BACKBONE.md</code> applies the CRT, the neutral-residue theorem</p>
+<div class="math" role="math">1\notin S_j,</div>
+<p>and Dirichlet&#x27;s theorem to produce infinitely many primes whose first completed hit is exactly <code>a</code>.</p>
+<p>Those primes may all be chosen in the Mordell-hard class</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840}.}</div>
+<hr>
+<h2>6. Exact classification</h2>
+<p>Combining the two directions gives the main result.</p>
+<h3>Theorem — prime-index completed spectrum</h3>
+<p>Let <code>a</code> be prime. Then</p>
+<div class="math" role="math">\boxed{ a\text{ is an exact square-completed first-hit depth} \iff 4a-1\text{ is prime}.}</div>
+<p>Moreover, in the positive case the depth is realized by infinitely many Mordell-hard primes.</p>
+<p>In the negative case the whole completed layer is directly shadowed by an earlier layer associated with any <code>3 mod 4</code> prime divisor of <code>4a-1</code>.</p>
+<hr>
+<h2>7. Relation to the prime-modulus backbone</h2>
+<p>The prime-modulus backbone is therefore not merely a sufficient infinite family inside the completed spectrum.</p>
+<p>Among <strong>prime-valued layer indices</strong>, it is complete.</p>
+<p>The remaining completed-depth spectrum problem is entirely concentrated on composite layer indices:</p>
+<div class="math" role="math">\boxed{ \text{new completed spectrum beyond the backbone} \subseteq \{a:\ a\text{ composite}\}.}</div>
+<p>This is a substantial sharpening of the spectrum geometry.</p>
+<hr>
+<h2>8. Why the completed layer makes the proof short</h2>
+<p>The theorem depends crucially on the square completion.</p>
+<p>At a prime index <code>a</code>, the full Type-II square layer contains the three natural divisor parameters</p>
+<div class="math" role="math">1,\ a,\ a^2,</div>
+<p>which reduce along ancestry to</p>
+<div class="math" role="math">1,\ j,\ j^2.</div>
+<p>Those are automatically available in every earlier completed layer <code>S_j</code>.</p>
+<p>In centered signed-box language, the prime layer is the one-dimensional box</p>
+<div class="math" role="math">\{-1,0,1\}</div>
+<p>and ancestry sends its three points directly into the canonical three-point subset of the earlier box.</p>
+<p>This is the first exact theorem obtained by combining the new square-completed internal geometry with the old modulus-ancestry shadow framework.</p>
+<hr>
+<h2>9. Next theorem target</h2>
+<p>The natural next question is the composite-index analogue:</p>
+<blockquote><p>For which composite <code>a</code> does every completed signed exponent vector reduce into an earlier completed layer along some ancestry divisor of <code>4a-1</code>?</p></blockquote>
+<p>The prime-index theorem suggests separating the composite spectrum by the factorization of both</p>
+<div class="math" role="math">a</div>
+<p>and</p>
+<div class="math" role="math">4a-1.</div>
+<p>The most promising first families are:</p>
+<ol><li>semiprime <code>a=uv</code>, where the mixed region has low dimension;</li><li>prime powers, where <code>S_a=T_a</code> and no mixed completion occurs;</li><li>indices whose modulus <code>4a-1</code> has a small <code>3 mod4</code> prime divisor, giving a strong ancestry coordinate.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

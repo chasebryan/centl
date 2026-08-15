@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Marsa is an anchorage. It is not an Oasis.">
+  <title>CENTL Marsa — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/marsa.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/marsa.html">
+  <meta property="og:title" content="CENTL Marsa — Free Computation Foundation">
+  <meta property="og:description" content="Marsa is an anchorage. It is not an Oasis.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL Marsa</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Marsa is an anchorage. It is not an Oasis.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/docs/CENTL-MARSA.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> harbor for the current Camp-stable software on macOS and Windows</p>
+<p><strong>SemVer effect:</strong> none</p>
+<p><strong>Oasis assurance effect:</strong> none</p>
+<blockquote><p>Marsa is an anchorage. It is not an Oasis.</p></blockquote>
+<h2>What this line is</h2>
+<p><code>CENTL-Marsa</code> is the long-lived harbor that ports the <strong>current FCF Camp stay</strong> to macOS and Windows. The software being ported is the inhabited Camp tree, not a new Oasis product.</p>
+<ul><li>CENTL v0.15.0 <strong>Al-Nur</strong> on <code>oasis</code> is the qualified GNU/Linux x86_64 product.</li><li>FCF Camp #1 on <code>main</code> / <code>mirage</code> is where the newest software and designs are inhabited on Linux.</li><li><code>CENTL-Marsa</code> takes the Camp-stable source and makes the same public CENTL surfaces available through the macOS and Windows harbor paths.</li></ul>
+<p>A successful Marsa build does not become Oasis. Three Horizons still requires independently qualified platform identities before a later three-platform Oasis declaration can exist.</p>
+<h2>What is supported today</h2>
+<table class="directory"><thead><tr><th>Surface</th><th>GNU/Linux</th><th>Marsa macOS</th><th>Marsa Windows</th></tr></thead><tbody><tr><td>Source checkout</td><td>yes</td><td>yes</td><td>yes</td></tr><tr><td>Qualified Oasis installer</td><td>yes, <code>linux-x86_64</code></td><td>no</td><td>no</td></tr><tr><td>Component-only install</td><td>prebuilt component archives</td><td>source-build component selection</td><td>source-build component selection</td></tr><tr><td><code>scripts/marsa-bootstrap</code></td><td>probe/reference only</td><td>Homebrew GMP/MPFR/FLINT/opam path</td><td>MSYS2 MinGW64 GMP/MPFR/FLINT path</td></tr><tr><td><code>centl</code> / <code>centl-physics</code> / <code>centl-sci</code> public command intent</td><td>yes</td><td>yes</td><td>yes</td></tr><tr><td>Full product CI smoke</td><td>Oasis/release workflows</td><td>yes</td><td>not yet enabled</td></tr><tr><td>Oasis declaration</td><td>v0.15.0 Al-Nur</td><td>no</td><td>no</td></tr></tbody></table>
+<p>The assurance distinction matters. macOS is built and smoke-tested as a Camp product in the Marsa workflow. Windows currently has the MSYS2/MinGW dependency and FLINT harbor gate, while the full Windows CENTL product job remains disabled until the OCaml/MinGW runtime and numeric-library toolchains are unified.</p>
+<p>That does <strong>not</strong> create different mathematics or physics. Marsa exists so the same CENTL interfaces can be brought to those operating systems without falsely labeling the port as an Oasis-qualified release.</p>
+<h2>Install only what you need</h2>
+<p>Marsa accepts an explicit component selection:</p>
+<pre><code class="language-text">--component centl
+--component physics
+--component sci
+--component all</code></pre>
+<p>The default remains <code>all</code> for compatibility. Scientists should normally select the smallest surface that matches their work.</p>
+<table class="directory"><thead><tr><th>Component</th><th>Installs</th></tr></thead><tbody><tr><td><code>centl</code></td><td>exact mathematics command only</td></tr><tr><td><code>physics</code></td><td><code>centl-physics</code> only</td></tr><tr><td><code>sci</code></td><td><code>centl-sci</code> only</td></tr><tr><td><code>all</code></td><td>all three public commands</td></tr></tbody></table>
+<p>Marsa currently builds from CENTL&#x27;s shared source graph. A component install therefore minimizes the <strong>installed command surface</strong>, while the source checkout still contains shared code required by the current build architecture. This is different from GNU/Linux Oasis, where command-only prebuilt archives let the download itself be component-specific.</p>
+<h2>macOS harbor installation 🍎</h2>
+<p>Homebrew is required. Clone only the Marsa branch and avoid repository history you do not need:</p>
+<pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
+cd centl</code></pre>
+<p>Then choose exactly one surface, for example:</p>
+<pre><code class="language-sh"># mathematics only
+sh scripts/marsa-install --component centl
+
+# physics only
+sh scripts/marsa-install --component physics
+
+# interpreter only
+sh scripts/marsa-install --component sci</code></pre>
+<p>Only use the complete install when you deliberately want everything:</p>
+<pre><code class="language-sh">sh scripts/marsa-install --component all</code></pre>
+<p>The bootstrap prepares GMP, MPFR, FLINT, <code>pkg-config</code>, and <code>opam</code> as needed. The default prefix is <code>~/.local</code>.</p>
+<h2>Windows harbor installation 🪟</h2>
+<p>Use an <strong>MSYS2 MinGW64 shell</strong>, not ordinary Command Prompt. Git and <code>opam</code> must be available in that environment.</p>
+<pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
+cd centl</code></pre>
+<p>Choose only the command you need:</p>
+<pre><code class="language-sh"># mathematics only -&gt; centl.exe
+sh scripts/marsa-install --component centl
+
+# physics only -&gt; centl-physics.exe
+sh scripts/marsa-install --component physics
+
+# interpreter only -&gt; centl-sci.exe
+sh scripts/marsa-install --component sci</code></pre>
+<p>The Windows bootstrap uses <code>pacman</code> to prepare the MinGW GMP, MPFR, FLINT, GCC, make, <code>pkg-config</code>, and supporting build tools.</p>
+<p>The full Windows product CI gate is deliberately still disabled. A local Marsa build is therefore a harbor build, not evidence of Oasis qualification.</p>
+<h2>Scientist onboarding</h2>
+<p>Scientists do not need to learn the branch or port architecture before using CENTL. Start from the field-specific guides instead:</p>
+<ul><li><a href="mathematicians.html">🧮 📐 Mathematician onboarding</a></li><li><a href="physicists.html">⚛️ 🔬 Physicist onboarding</a></li></ul>
+<p>Each guide begins with <strong>take only what you need</strong>, then covers GNU/Linux, macOS, and Windows before converging on the same scientific command surfaces.</p>
+<h2>Branch rule</h2>
+<p><code>CENTL-Marsa</code> is the long-lived Windows/macOS harbor. It is not a fourth release product. Ordinary feature work belongs on <code>mirage</code> / <code>main</code>; the harbor is replayed as the Camp stay moves.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

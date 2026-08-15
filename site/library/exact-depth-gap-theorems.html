@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Infinite exact-depth structural gap families — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/exact-depth-gap-theorems.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/exact-depth-gap-theorems.html">
+  <meta property="og:title" content="Infinite exact-depth structural gap families — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Infinite exact-depth structural gap families</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXACT-DEPTH-GAP-THEOREMS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollary family inside the Type A/B minimal-depth program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove the Erdős-Straus conjecture, universal López Type A/B coverage, or universal Direct-Shadow Completeness. It proves that the minimal Type A/B depth spectrum has explicit infinite structural gaps.</p>
+<p>Read with:</p>
+<ul><li><a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a></li><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li></ul>
+<h2>1. Exact-depth spectra</h2>
+<p>Define</p>
+<div class="math" role="math">\mathcal D_{\exists} = \{k\ge1:\exists\text{ prime }p\text{ with }C_{AB}(p)=k\}</div>
+<p>and the stronger infinite-realization spectrum</p>
+<div class="math" role="math">\mathcal D_{\infty} = \{k\ge1:\text{infinitely many primes }p\text{ satisfy }C_{AB}(p)=k\}.</div>
+<p>Clearly</p>
+<div class="math" role="math">\mathcal D_{\infty}\subseteq\mathcal D_{\exists}.</div>
+<p>A <strong>structural gap</strong> is a depth <code>k</code> at which every Type A/B hit is already forced to have occurred at an earlier layer. Such a depth lies outside <code>D_exists</code>, not merely outside a finite computation.</p>
+<h2>2. Reciprocity-gap theorem</h2>
+<h3>Theorem</h3>
+<p>For every integer <code>n&gt;=1</code>, none of the three depths</p>
+<div class="math" role="math">\boxed{3n^2+3n+1,}</div>
+<div class="math" role="math">\boxed{7n^2+7n+2,}</div>
+<p>or</p>
+<div class="math" role="math">\boxed{15n^2+15n+4}</div>
+<p>can be the first Type A/B hit of any prime.</p>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \{3n^2+3n+1:n\ge1\} \cup \{7n^2+7n+2:n\ge1\} \cup \{15n^2+15n+4:n\ge1\} \subseteq \mathbb N\setminus\mathcal D_{\exists}. }</div>
+<h3>Proof</h3>
+<p><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a> proves that these three target families are respectively fully shadowed by the earlier layers <code>1</code>, <code>2</code>, and <code>4</code>.</p>
+<p>If an integer, and in particular a prime, lands in the target trap set at one of those later depths, reduction to the corresponding earlier modulus lands in the earlier trap set. Therefore the later depth cannot be its first hit. QED.</p>
+<h2>3. Dyadic-gap theorem</h2>
+<h3>Theorem</h3>
+<p>Let</p>
+<div class="math" role="math">b\ge4</div>
+<p>and suppose</p>
+<div class="math" role="math">b+2</div>
+<p>is composite. Then</p>
+<div class="math" role="math">\boxed{2^b\notin\mathcal D_{\exists}.}</div>
+<h3>Proof</h3>
+<p>Put</p>
+<div class="math" role="math">r=b+2.</div>
+<p>Because <code>r&gt;=6</code> is composite, it has a proper divisor</p>
+<div class="math" role="math">d</div>
+<p>with</p>
+<div class="math" role="math">3\le d&lt;r.</div>
+<p>Set</p>
+<div class="math" role="math">a=d-2.</div>
+<p>Then</p>
+<div class="math" role="math">1\le a&lt;b</div>
+<p>and</p>
+<div class="math" role="math">a+2=d\mid r=b+2.</div>
+<p>The dyadic shadow theorem gives</p>
+<div class="math" role="math">T_{2^b}\bmod(2^{a+2}-1)=T_{2^a}.</div>
+<p>Thus every hit at depth <code>2^b</code> is already a hit at the earlier depth <code>2^a</code>, so <code>2^b</code> cannot be a first hit. QED.</p>
+<h3>Simple infinite subfamily</h3>
+<p>Every even <code>b&gt;=4</code> satisfies that <code>b+2</code> is even and at least <code>6</code>, hence composite. Therefore</p>
+<div class="math" role="math">\boxed{ 2^{2s}\notin\mathcal D_{\exists} \qquad(s\ge2). }</div>
+<p>So the exact-depth spectrum has an explicit infinite exponentially sparse family of permanent gaps in addition to the three quadratic families.</p>
+<h2>4. The complement is infinite and unbounded</h2>
+<p>The reciprocity-gap theorem alone gives three unbounded quadratic sequences outside <code>D_exists</code>. Therefore</p>
+<div class="math" role="math">\boxed{ \mathbb N\setminus\mathcal D_{\exists} \text{ is infinite and unbounded}. }</div>
+<p>This rules out any hypothesis that every sufficiently large depth eventually occurs as a minimal Type A/B witness depth.</p>
+<p>The missing depths are structural, not finite-search latency.</p>
+<h2>5. The realized spectrum is also infinite and unbounded</h2>
+<p>The prime-modulus backbone gives the opposite result.</p>
+<p>If</p>
+<div class="math" role="math">q=4k-1</div>
+<p>is prime and <code>q&gt;7</code>, then</p>
+<div class="math" role="math">\boxed{k\in\mathcal D_{\infty}.}</div>
+<p>Indeed infinitely many primes have exact depth <code>k</code>.</p>
+<p>There are infinitely many primes</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>so there are infinitely many corresponding depths</p>
+<div class="math" role="math">k=\frac{q+1}{4}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \mathcal D_{\infty} \text{ is infinite and unbounded}. }</div>
+<h2>6. Two-sided spectrum theorem</h2>
+<p>Combining the previous sections gives:</p>
+<h3>Theorem</h3>
+<p>The López Type A/B minimal witness-depth spectrum is permanently nontrivial in both directions:</p>
+<div class="math" role="math">\boxed{ \mathcal D_{\infty} \text{ is infinite and unbounded}, }</div>
+<p>while</p>
+<div class="math" role="math">\boxed{ \mathbb N\setminus\mathcal D_{\exists} \text{ is also infinite and unbounded}. }</div>
+<p>Thus the spectrum contains infinitely many depths supporting infinitely many prime first hits and infinitely many depths supporting <strong>no</strong> prime first hit at all.</p>
+<p>This is an exact theorem, not an empirical observation.</p>
+<h2>7. Structural gaps versus latency gaps</h2>
+<p>This theorem sharpens the distinction introduced in <a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a>.</p>
+<p>A <strong>latency gap</strong> is an apparently empty finite-search depth that eventually appears at a larger prime, as happened at <code>k=104</code>.</p>
+<p>A <strong>structural gap</strong> is impossible by theorem because the whole target layer is shadowed.</p>
+<p>The new infinite families provide explicit structural-gap certificates:</p>
+<pre><code class="language-text">reciprocity gap: target layer is shadowed by j=1,2,or4
+
+dyadic gap: target layer is shadowed by an earlier dyadic ancestor</code></pre>
+<p>No increase in the prime-search bound can ever populate these depths.</p>
+<h2>8. Interleaving with the backbone</h2>
+<p>The depth line therefore contains at least three kinds of locations:</p>
+<ol><li><strong>proved infinite-realization nodes</strong>, including every prime-modulus backbone depth;</li><li><strong>proved structural gaps</strong>, including the reciprocity and dyadic shadow families above;</li><li><strong>unclassified nodes</strong>, whose realization depends on the deeper shadow/tower/exact-residue theory.</li></ol>
+<p>The emerging problem is not to show that the spectrum is eventually full. It is to classify this interleaving.</p>
+<h2>9. Relation to Direct-Shadow Completeness</h2>
+<p>Universal DSC-P would turn direct shadowing into a complete exact-depth classification:</p>
+<div class="math" role="math">\boxed{ \text{directly shadowed} \iff \text{structural gap}, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \text{directly novel} \iff \text{infinitely prime-realizable}. }</div>
+<p>The theorem families in this note prove substantial infinite portions of the first direction without assuming DSC-P.</p>
+<p>The prime-modulus backbone proves an infinite portion of the second.</p>
+<p>This makes the universal DSC-P conjecture a proposed bridge between two already nontrivial infinite theorem families.</p>
+<h2>10. Research significance</h2>
+<p>The exact-depth spectrum is therefore not just a numerical record sequence attached to <code>C_AB</code>.</p>
+<p>It has proved arithmetic geometry:</p>
+<div class="math" role="math">\boxed{ \text{infinite arrival families} + \text{infinite forbidden families} + \text{shadow ancestry between them}. }</div>
+<p>A complete classification of that geometry would be a substantial structural theorem about the López Type A/B congruence system even independently of universal Erdős-Straus coverage.</p>
+<h2>11. Novelty boundary</h2>
+<p>Dirichlet&#x27;s theorem, quadratic reciprocity, Mersenne divisibility, and López Type A/B congruences are prior mathematics. The candidate contribution is the resulting <strong>minimal-depth spectrum with explicit infinite exact-depth arrival and structural-gap families generated by the shadow framework</strong>.</p>
+<p>Targeted searches through 2026-08-15 have not located this exact minimal-depth spectrum formulation in the existing Erdős-Straus literature. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

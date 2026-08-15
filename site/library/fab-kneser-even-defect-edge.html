@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Even-index FAB defects expose every quadratic-nonresidue factor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-kneser-even-defect-edge.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-kneser-even-defect-edge.html">
+  <meta property="og:title" content="Even-index FAB defects expose every quadratic-nonresidue factor — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Even-index FAB defects expose every quadratic-nonresidue factor</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-KNESER-EVEN-DEFECT-EDGE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem in the external-nonresidue prime-shift lane</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code></p>
+<p><strong>Claim boundary:</strong> gives a sharp lower bound on every even-index placement defect in terms of the quadratic-nonresidue valuation mass of the shifted factorization. It does not eliminate all odd-index defects and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime and let</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>be a prime satisfying</p>
+<div class="math" role="math">\left(\frac qp\right)=-1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+q}{4}}</div>
+<p>and let</p>
+<div class="math" role="math">R\subseteq G=(\mathbb Z/q\mathbb Z)^\times</div>
+<p>be the fixed-<code>q</code> signed divisor box.</p>
+<p>Assume the exact FAB target is missed. Let</p>
+<div class="math" role="math">\boxed{H=\operatorname{Stab}(R)}</div>
+<p>be the full stabilizer and set</p>
+<div class="math" role="math">\boxed{n=[G:H].}</div>
+<p>This note treats the case</p>
+<div class="math" role="math">\boxed{2\mid n.}</div>
+<p>Because <code>q≡3 mod4</code>,</p>
+<div class="math" role="math">q-1=2m</div>
+<p>with <code>m</code> odd. Hence every even divisor <code>n</code> of <code>q-1</code> satisfies</p>
+<div class="math" role="math">\boxed{n\equiv2\pmod4.}</div>
+<hr>
+<h2>2. The stabilizer lies inside the quadratic residues</h2>
+<p>The group <code>G</code> is cyclic. Choose a generator <code>g</code>.</p>
+<p>The unique subgroup of index <code>n</code> is</p>
+<div class="math" role="math">H=\langle g^n\rangle.</div>
+<p>Since <code>n</code> is even,</p>
+<div class="math" role="math">g^n=(g^2)^{n/2}</div>
+<p>is a square. Therefore every element of <code>H</code> is a square:</p>
+<div class="math" role="math">\boxed{H\subseteq G^2.}</div>
+<p>So every quadratic nonresidue modulo <code>q</code> lies outside the full defect stabilizer.</p>
+<h3>Corollary — the factor-cycle edge is always visible</h3>
+<p><code>EXTERNAL-NR-FACTOR-CYCLE.md</code> supplies, from this <code>3 mod4</code> source vertex <code>q</code>, a prime factor</p>
+<div class="math" role="math">r\mid C</div>
+<p>with</p>
+<div class="math" role="math">\left(\frac rp\right)=-1.</div>
+<p>The factorwise transfer theorem gives</p>
+<div class="math" role="math">\left(\frac rq\right)=-1.</div>
+<p>Hence in every even-index failure,</p>
+<div class="math" role="math">\boxed{r\notin H.}</div>
+<p>Thus the external-nonresidue descent edge cannot be hidden inside an even-index stabilizer.</p>
+<hr>
+<h2>3. Quadratic-nonresidue valuation mass</h2>
+<p>Write</p>
+<div class="math" role="math">C=\prod_s s^{e_s}.</div>
+<p>Define the total valuation mass carried by quadratic nonresidue prime factors modulo <code>q</code>:</p>
+<div class="math" role="math">\boxed{ E_q(C) := \sum_{ s^{e_s}\parallel C, (s/q)=-1 } e_s. }</div>
+<p>Every such prime factor lies outside <code>H</code>. Therefore</p>
+<div class="math" role="math">E_q(C) \le \sum_{s^{e_s}\parallel C,\ s\notin H} e_s.</div>
+<p>The full-stabilizer defect theorem gives</p>
+<div class="math" role="math">2\sum_{s^{e_s}\parallel C,\ s\notin H} e_s \le n-2.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{2E_q(C)\le n-2.}</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{n\ge2E_q(C)+2.}</div>
+<hr>
+<h2>4. Parity sharpens the bound by two more units</h2>
+<p>Because <code>(q/p)=-1</code> and both <code>p≡1 mod4</code>, <code>q≡3 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pq\right)=-1.</div>
+<p>Since <code>4</code> is a square modulo <code>q</code>,</p>
+<div class="math" role="math">\boxed{\left(\frac Cq\right)=-1.}</div>
+<p>Thus the total nonresidue valuation mass has odd parity:</p>
+<div class="math" role="math">\boxed{E_q(C)\equiv1\pmod2.}</div>
+<p>Consequently</p>
+<div class="math" role="math">2E_q(C)+2\equiv0\pmod4.</div>
+<p>But every even defect index satisfies</p>
+<div class="math" role="math">n\equiv2\pmod4.</div>
+<p>Therefore the first allowable even index at or above <code>2E_q(C)+2</code> is two units larger.</p>
+<h3>Theorem — even-defect edge bound</h3>
+<p>Every even-index failed fixed-<code>q</code> FAB box in the external-nonresidue lane satisfies</p>
+<div class="math" role="math">\boxed{ n\ge2E_q(C)+4.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ E_q(C)\le\frac{n-4}{2}. }</div>
+<p>This is sharper than the generic full-stabilizer bound because the external shift forces odd quadratic-nonresidue parity while <code>q≡3 mod4</code> forces the quotient index to have exactly one factor of two.</p>
+<hr>
+<h2>5. Individual projected-order bound for every nonresidue factor</h2>
+<p>Let</p>
+<div class="math" role="math">s^e\parallel C</div>
+<p>with</p>
+<div class="math" role="math">\left(\frac sq\right)=-1.</div>
+<p>Then <code>s notin H</code>. <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code> gives</p>
+<div class="math" role="math">\operatorname{ord}_{G/H}(sH)&gt;2e+1.</div>
+<p>Because <code>H⊆G^2</code> and <code>s</code> is a nonresidue, the quotient class <code>sH</code> remains outside the quotient&#x27;s square subgroup. Its order is therefore even.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G/H}(sH) \ge2e+2. }</div>
+<p>In particular the full quotient index obeys</p>
+<div class="math" role="math">\boxed{n\ge2e+2}</div>
+<p>for every nonresidue prime-power factor separately.</p>
+<p>Thus high valuation of even one quadratic-nonresidue factor forces a large defect quotient.</p>
+<hr>
+<h2>6. Small-index consequences</h2>
+<h3>Index 6</h3>
+<p>The theorem gives</p>
+<div class="math" role="math">E_q(C)\le1.</div>
+<p>Since <code>E_q(C)</code> is positive and odd,</p>
+<div class="math" role="math">\boxed{E_q(C)=1.}</div>
+<p>So an index-six failure contains exactly one unit of quadratic-nonresidue valuation mass. This is consistent with, and is strengthened by, the exact unique order-six atom classification in <code>FAB-KNESER-INDEX6-CLASSIFICATION.md</code>.</p>
+<h3>Index 10</h3>
+<div class="math" role="math">E_q(C)\le3.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{E_q(C)\in\{1,3\}.}</div>
+<p>So every index-ten failure has either one or three total nonresidue valuation units, never two or four.</p>
+<h3>Index 14</h3>
+<div class="math" role="math">E_q(C)\le5,</div>
+<p>and therefore</p>
+<div class="math" role="math">E_q(C)\in\{1,3,5\}.</div>
+<h3>Index 18</h3>
+<div class="math" role="math">E_q(C)\le7,</div>
+<p>so</p>
+<div class="math" role="math">E_q(C)\in\{1,3,5,7\}.</div>
+<p>The same parity ladder holds for every even defect index.</p>
+<hr>
+<h2>7. Contrapositive elimination rule</h2>
+<p>The theorem gives an exact test for excluding a candidate even defect index.</p>
+<p>If the shifted integer <code>C=(p+q)/4</code> has quadratic-nonresidue valuation mass <code>E</code>, then every even failed stabilizer quotient must satisfy</p>
+<div class="math" role="math">\boxed{n\ge2E+4.}</div>
+<p>Therefore all even quotient indices</p>
+<div class="math" role="math">2,6,10,\ldots,2E+2</div>
+<p>are automatically impossible.</p>
+<p>As the factorization accumulates more nonresidue valuation mass, the entire low-index even defect spectrum is pushed upward.</p>
+<p>This is the precise <code>entropy</code> side of the external factor-cycle program: every additional visible quadratic-nonresidue factor consumes stabilizer room that cannot be recovered by hiding it inside <code>H</code>.</p>
+<hr>
+<h2>8. Updated entropy-or-descent picture</h2>
+<p>At every <code>3 mod4</code> vertex of the external-nonresidue factor cycle:</p>
+<ol><li>if the FAB target is hit, the prime is solved;</li><li>if the target is missed with <strong>even</strong> defect index, the outgoing nonresidue edge is necessarily visible and the quotient index satisfies the sharp mass bound</li></ol>
+<div class="math" role="math">n\ge2E_q(C)+4;</div>
+<ol><li>if the target is missed with <strong>odd</strong> defect index, the nonresidue edge may be hidden inside the stabilizer, and the prime-index/cubic defect theorems control the first cases.</li></ol>
+<p>Thus the remaining all-prime problem splits naturally into:</p>
+<div class="math" role="math">\boxed{ \text{odd high-power-residue defects} \quad\text{versus}\quad \text{even visible-edge defects with growing index}.}</div>
+<p>A universal closure theorem can now attack these two branches separately rather than treating all fixed-<code>q</code> placement failures as one undifferentiated phenomenon.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

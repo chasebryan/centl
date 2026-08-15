@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The cryptology track now contains three progressively stricter probes.">
+  <title>WS-CAND-003 cryptology results — 2026-08-14 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cryptology-results-2026-08-14.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cryptology-results-2026-08-14.html">
+  <meta property="og:title" content="WS-CAND-003 cryptology results — 2026-08-14 — Free Computation Foundation">
+  <meta property="og:description" content="The cryptology track now contains three progressively stricter probes.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>WS-CAND-003 cryptology results — 2026-08-14</h1><p>Cryptology · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Cryptology</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Cryptology</p>
+          <p class="dek">The cryptology track now contains three progressively stricter probes.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CRYPTOLOGY-RESULTS-2026-08-14.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> controlled exploratory result</p>
+<p><strong>Cryptographic impact:</strong> none demonstrated</p>
+<p><strong>Primary conclusion:</strong> Type A/B fingerprints strongly detect deliberately planted or selection-induced structure at the factor level, but the public toy-RSA signal collapses to chance after the defining information is controlled. A second mathematical effect is now visible: much of the apparent late-layer signal induced by selecting for large <code>C_AB</code> disappears when directly shadowed layers are removed.</p>
+<h2>1. Experimental progression</h2>
+<p>The cryptology track now contains three progressively stricter probes.</p>
+<h3>v1: deliberately planted congruence source</h3>
+<p>The first pilot compared:</p>
+<ul><li>control: <code>p == 1 mod 840</code>;</li><li>structured: <code>p == 1 mod lcm(840,11,19,23)</code>.</li></ul>
+<p>It produced a large separation in <code>C_AB</code> depth and in public product-trap fingerprints. That experiment established sensitivity to planted modular structure, but it did not determine whether the Type A/B fingerprint carried information beyond the congruences explicitly planted by construction.</p>
+<h3>v2: repeated held-out negative control</h3>
+<p>The second probe used:</p>
+<ul><li>39-bit primes;</li><li>unique primes within each population;</li><li>cross-label duplicate primes excluded;</li><li>12 independently seeded trials;</li><li>160 primes per population per trial;</li><li>80 toy RSA moduli per population per trial;</li><li>5-fold held-out Bernoulli naive-Bayes classification;</li><li>shuffled-label baselines;</li><li>feature masks removing every Type A/B modulus sharing a factor with <code>11*19*23</code>;</li><li>a stronger deep mask also removing <code>k &lt;= 6</code>;</li><li>direct-shadow-compressed versions of the fingerprints.</li></ul>
+<h3>v3: high-depth source transmission</h3>
+<p>The third probe removed the explicit planted congruence source entirely. Both prime populations satisfy</p>
+<div class="math" role="math">p\equiv1\pmod{840}.</div>
+<p>The labels are defined only by Type A/B witness depth:</p>
+<ul><li>low-depth source: <code>C_AB(p) &lt; 25</code>;</li><li>high-depth source: <code>C_AB(p) &gt;= 25</code>.</li></ul>
+<p>Each of 12 trials again uses 160 primes per source, 80 same-source toy RSA moduli per source, and 5-fold held-out classification. The critical feature sets use only layers <code>k &gt;= 25</code>, so the classifier cannot simply read the no-hit conditions at <code>k &lt; 25</code> that define the high-depth source.</p>
+<p>All three probes ran in GitHub Actions. CENTL built from the checked-out repository commit and verified the exact planted-control algebra contracts. The generated JSON, reports, receipts, and hashes were uploaded as workflow artifacts.</p>
+<h2>2. Why the v1 pilot was expected to separate</h2>
+<p>For every <code>k &gt;= 1</code>, the residue <code>1</code> is not in the Type A/B trap set</p>
+<div class="math" role="math">T_k=\{-d,-4d\pmod{4k-1}:d\mid k\}.</div>
+<p>The structured source imposed</p>
+<div class="math" role="math">p\equiv1\pmod{11},\quad p\equiv1\pmod{19},\quad p\equiv1\pmod{23}.</div>
+<p>Since</p>
+<div class="math" role="math">11=4(3)-1,\qquad19=4(5)-1,\qquad23=4(6)-1,</div>
+<p>the source was forced to avoid Type A/B hits at <code>k=3,5,6</code>. The first pilot&#x27;s depth shift therefore contained a deterministic built-in signal.</p>
+<p>This is formalized separately in <code>CRYPTOLOGY-THEORY.md</code>.</p>
+<h2>3. v1 result at the larger 39-bit setting</h2>
+<p>At the 39-bit workflow setting:</p>
+<ul><li>control mean resolved <code>C_AB</code>: <code>8.20625</code>;</li><li>structured mean resolved <code>C_AB</code>: <code>18.025</code>;</li><li>control maximum resolved <code>C_AB</code>: <code>125</code>;</li><li>structured maximum resolved <code>C_AB</code>: <code>112</code>;</li><li>empirical <code>C_AB</code> histogram total-variation distance: <code>0.643750</code>.</li></ul>
+<p>This confirms that the deliberately structured source remains easily distinguishable before controlling for the planted congruences.</p>
+<h2>4. Repeated held-out v2 result</h2>
+<h3>4.1 Prime-source fingerprints</h3>
+<table class="directory"><thead><tr><th>feature set</th><th>observed mean accuracy</th><th>approximate 95% interval for mean</th><th>shuffled-label mean</th></tr></thead><tbody><tr><td>full</td><td>0.8367</td><td>0.8219 .. 0.8515</td><td>0.5073</td></tr><tr><td>coprime to planted modulus</td><td>0.4922</td><td>0.4730 .. 0.5114</td><td>0.4945</td></tr><tr><td>deep coprime</td><td>0.4969</td><td>0.4748 .. 0.5190</td><td>0.4964</td></tr><tr><td>shadow compressed</td><td>0.8177</td><td>0.8038 .. 0.8316</td><td>0.5049</td></tr><tr><td>shadow compressed + deep coprime</td><td>0.5039</td><td>0.4847 .. 0.5231</td><td>0.5073</td></tr></tbody></table>
+<p>The unmasked fingerprints strongly identify the deliberately structured prime source. Once every feature modulus sharing arithmetic information with the planted <code>11,19,23</code> conditions is removed, classification falls to chance.</p>
+<h3>4.2 Public toy-RSA fingerprints</h3>
+<p>Each public sample is <code>N=pq</code>. The classifier sees only the Type A/B product-trap fingerprint computed from <code>N</code>, not <code>p</code> or <code>q</code>.</p>
+<table class="directory"><thead><tr><th>feature set</th><th>observed mean accuracy</th><th>approximate 95% interval for mean</th><th>shuffled-label mean</th></tr></thead><tbody><tr><td>full</td><td>0.9771</td><td>0.9712 .. 0.9830</td><td>0.4948</td></tr><tr><td>coprime to planted modulus</td><td>0.5068</td><td>0.4865 .. 0.5271</td><td>0.5021</td></tr><tr><td>deep coprime</td><td>0.5120</td><td>0.4810 .. 0.5429</td><td>0.4833</td></tr><tr><td>shadow compressed</td><td>0.9526</td><td>0.9433 .. 0.9620</td><td>0.4943</td></tr><tr><td>shadow compressed + deep coprime</td><td>0.4969</td><td>0.4742 .. 0.5196</td><td>0.5083</td></tr></tbody></table>
+<p>The public modulus exposes the intentionally planted congruence structure extremely well in the full fingerprint. But after the relevant congruence information is masked, the public classifier also collapses to chance.</p>
+<p>This is a useful negative result: the first exciting public signal is explained by the planted congruences.</p>
+<h2>5. Repeated held-out v3 result</h2>
+<p>The v3 source selection is itself defined by <code>C_AB</code>, rather than by a short list of explicit congruences. The important question is whether later Type A/B layers retain information about the early survival history, and whether any such information remains visible through <code>N=pq</code>.</p>
+<h3>5.1 Prime-level classification</h3>
+<table class="directory"><thead><tr><th>feature set</th><th>observed mean accuracy</th><th>approximate 95% interval for mean</th><th>shuffled-label mean</th></tr></thead><tbody><tr><td>full</td><td>0.9547</td><td>0.9484 .. 0.9609</td><td>0.4945</td></tr><tr><td>post-selection, <code>k &gt;= 25</code></td><td>0.6672</td><td>0.6550 .. 0.6794</td><td>0.4904</td></tr><tr><td>post-selection + 5, <code>k &gt;= 30</code></td><td>0.6294</td><td>0.6104 .. 0.6485</td><td>0.4948</td></tr><tr><td>shadow-compressed post-selection</td><td>0.5167</td><td>0.4971 .. 0.5362</td><td>0.4997</td></tr><tr><td>shadow-compressed post-selection + 5</td><td>0.5086</td><td>0.4936 .. 0.5236</td><td>0.5000</td></tr></tbody></table>
+<p>The full classifier is expected to be strong because it sees the early layers that define the labels. More interestingly, later layers alone retain substantial predictive signal: <code>0.6672</code> for <code>k &gt;= 25</code> and <code>0.6294</code> for <code>k &gt;= 30</code>.</p>
+<p>However, this residual signal almost disappears when layers that are completely directly shadowed by earlier Type A/B layers are removed. The shadow-compressed post-selection classifiers are near chance.</p>
+<p>This is not a cryptographic leak. It is evidence that congruence shadowing carries a large portion of the measurable survival-history dependence between early and later Type A/B layers.</p>
+<h3>5.2 Public toy-RSA classification</h3>
+<table class="directory"><thead><tr><th>feature set</th><th>observed mean accuracy</th><th>approximate 95% interval for mean</th><th>shuffled-label mean</th></tr></thead><tbody><tr><td>full</td><td>0.5448</td><td>0.5176 .. 0.5720</td><td>0.4781</td></tr><tr><td>post-selection, <code>k &gt;= 25</code></td><td>0.5167</td><td>0.4915 .. 0.5418</td><td>0.5193</td></tr><tr><td>post-selection + 5, <code>k &gt;= 30</code></td><td>0.5203</td><td>0.4899 .. 0.5507</td><td>0.5036</td></tr><tr><td>shadow-compressed post-selection</td><td>0.5141</td><td>0.4984 .. 0.5297</td><td>0.5068</td></tr><tr><td>shadow-compressed post-selection + 5</td><td>0.5141</td><td>0.4889 .. 0.5393</td><td>0.4760</td></tr></tbody></table>
+<p>The public post-selection classifiers are effectively at chance and track the shuffled-label baselines. The experiment therefore provides no evidence that selecting secret factors by high versus low <code>C_AB</code> leaves a useful public product-trap fingerprint in <code>N=pq</code> once the defining early-layer information is excluded.</p>
+<p>No factorization or key-recovery result is present.</p>
+<h2>6. New mathematical interpretation: threshold shadowing</h2>
+<p>The v3 factor-level result suggests a sharper object than the binary label &quot;fully shadowed layer.&quot;</p>
+<p>Fix a survival threshold <code>D</code>. For a later layer <code>k &gt;= D</code>, let <code>A_k</code> be the admissible hard-class candidate set and define</p>
+<div class="math" role="math">S_{D,k}=\{a\in A_k:\text{the candidate }a\text{ is directly shadowed by at least one }j&lt;D\}.</div>
+<p>Define the <strong>pre-shadow load</strong></p>
+<div class="math" role="math">\boxed{\sigma_D(k)=\frac{|S_{D,k}|}{|A_k|}.}</div>
+<p>If a prime satisfies <code>C_AB(p) &gt;= D</code>, then it has escaped every layer <code>j&lt;D</code>. Therefore it cannot occupy any candidate in <code>S_{D,k}</code> at a later layer <code>k</code>.</p>
+<p>Thus conditioning on deep Type A/B survival deterministically removes a calculable subset of later trap classes. This gives a direct mechanism for the post-selection signal observed in v3.</p>
+<p>The next mathematical experiment should measure the per-layer depletion in the high-depth population and compare it with <code>sigma_D(k)</code>. A strong relation would convert the classifier observation into a quantitative theorem target about conditional survivor geometry.</p>
+<h2>7. Current scientific interpretation</h2>
+<p>The cryptology track has now produced two successive controlled negative results for public toy-RSA leakage:</p>
+<ol><li>an explicit congruence source is easily visible until the planted congruence information is masked, after which the signal vanishes;</li><li>a high-<code>C_AB</code> factor source has strong factor-level survival-history structure, but its post-selection public product fingerprint is at chance.</li></ol>
+<p>At the same time, v3 produced a positive mathematical clue: direct-shadow compression reduces factor-level post-selection classification from <code>0.6672</code> to <code>0.5167</code> at <code>k &gt;= 25</code>.</p>
+<p>That observation supports the hypothesis that the shadow graph is not merely a catalogue of redundant congruences. It appears to organize a substantial part of the statistical dependence created by conditioning on survival through earlier layers.</p>
+<h2>8. Next work</h2>
+<p>The immediate priority is no longer to make an RSA claim. It is to explain the v3 ablation mathematically.</p>
+<p>The research program should now:</p>
+<ol><li>compute <code>sigma_D(k)</code> for each later layer and hard residue class;</li><li>compare pre-shadow load against empirical later-layer depletion after conditioning on <code>C_AB &gt;= D</code>;</li><li>replace the coarse product-trap public feature with correctly trained multiplicative residue likelihoods only after the factor-level dependence is understood;</li><li>repeat at multiple depth thresholds and bit sizes;</li><li>treat any public signal as a source-distribution distinguisher first, never as factor recovery without a separate algorithmic result.</li></ol>
+<h2>9. Claim boundary</h2>
+<p>Current justified statement:</p>
+<blockquote><p>The Type A/B witness-depth and shadow framework detects deliberately planted prime-source structure, and shadowing explains a substantial portion of the late-layer dependence induced by selecting primes for deep Type A/B survival. In the controlled toy-RSA experiments completed so far, the corresponding public-modulus signal collapses to chance after the defining information is excluded. No cryptographic break or key-recovery result has been demonstrated.</p></blockquote>
+<p>No result here weakens RSA or any deployed cryptosystem.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

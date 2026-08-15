@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Full quadratic-signature coset for Type A/B traps — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quadratic-signature-coset.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quadratic-signature-coset.html">
+  <meta property="og:title" content="Full quadratic-signature coset for Type A/B traps — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Full quadratic-signature coset for Type A/B traps</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUADRATIC-SIGNATURE-COSET.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural theorem with finite proof-mining evidence</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. López 2024 records the Type B Jacobi-nonresidue property. The vector-valued local-signature packaging below is being treated as a novelty candidate within the minimal-depth/shadow program pending broader literature review.</p>
+<p>Read with:</p>
+<ul><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li><li><a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="diamond.html">DIAMOND.md</a></li></ul>
+<h2>1. Local signature map</h2>
+<p>Fix <code>k&gt;=1</code> and write</p>
+<div class="math" role="math">m=4k-1=\prod_{i=1}^r p_i^{a_i}.</div>
+<p>For every unit <code>x mod m</code>, define its local quadratic signature</p>
+<div class="math" role="math">\boxed{ \lambda_m(x)= \left( \ell_{p_1}(x),\ldots,\ell_{p_r}(x) \right) \in\mathbb F_2^r, }</div>
+<p>where</p>
+<div class="math" role="math">\left(\frac{x}{p_i}\right)=(-1)^{\ell_{p_i}(x)}.</div>
+<p>Thus each coordinate records the Legendre sign at one distinct prime divisor of <code>m</code>.</p>
+<p>Let</p>
+<div class="math" role="math">\eta_m=\lambda_m(-1).</div>
+<p>Its <code>p_i</code> coordinate is <code>1</code> exactly when <code>p_i=3 mod 4</code>.</p>
+<h2>2. Divisor-signature space</h2>
+<p>Let <code>P(k)</code> denote the distinct prime divisors of <code>k</code>, including <code>2</code> when appropriate. Define</p>
+<div class="math" role="math">\boxed{ V_k=\operatorname{span}_{\mathbb F_2} \{\lambda_m(\ell):\ell\in P(k)\}. }</div>
+<p>Every divisor <code>e|k</code> is obtained by choosing exponents of these primes. Since quadratic signatures only remember exponent parity, and a divisor may independently include or omit one copy of each prime divisor, the set of signatures attained by divisors of <code>k</code> is exactly</p>
+<div class="math" role="math">\boxed{ \{\lambda_m(e):e\mid k\}=V_k. }</div>
+<h2>3. Quadratic-signature trap theorem</h2>
+<p>Recall</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod m:e\mid k\}.</div>
+<h3>Theorem</h3>
+<p>The set of local quadratic signatures attained by the complete Type A/B trap set is the affine subspace</p>
+<div class="math" role="math">\boxed{ \lambda_m(T_k)=\eta_m+V_k. }</div>
+<h3>Proof</h3>
+<p>For <code>e|k</code>, multiplicativity of Legendre symbols gives</p>
+<div class="math" role="math">\lambda_m(-e)=\eta_m+\lambda_m(e).</div>
+<p>Because <code>4</code> is a square modulo every odd prime,</p>
+<div class="math" role="math">\lambda_m(4)=0,</div>
+<p>and therefore</p>
+<div class="math" role="math">\lambda_m(-4e)=\eta_m+\lambda_m(e).</div>
+<p>As <code>e</code> ranges over divisors of <code>k</code>, <code>lambda_m(e)</code> ranges over exactly <code>V_k</code>. Hence</p>
+<div class="math" role="math">\lambda_m(T_k)=\eta_m+V_k.</div>
+<p>QED.</p>
+<h2>4. Quadratic quotient dimension</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \kappa(k) =r-\dim V_k. }</div>
+<p>Then the trap signatures occupy exactly a fraction</p>
+<div class="math" role="math">\boxed{2^{-\kappa(k)}}</div>
+<p>of all possible local Legendre-sign vectors.</p>
+<p>The Jacobi theorem is the weakest universal projection of this statement. The product of the local Legendre signs is the Jacobi symbol, so the previous <code>Jacobi=-1</code> trap signature is one nonzero linear functional vanishing on <code>V_k</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\kappa(k)\ge1}</div>
+<p>for every <code>k</code>.</p>
+<p>When <code>kappa(k)&gt;1</code>, the vector-valued signature shield excludes strictly more unit classes than the single Jacobi bit can see.</p>
+<h2>5. Candidate restriction</h2>
+<p>For a target candidate at depth <code>K</code>, write</p>
+<div class="math" role="math">x\equiv r\pmod L, \qquad L=\operatorname{lcm}(840,4K-1).</div>
+<p>At an earlier layer <code>j&lt;K</code>, some prime-sign coordinates of <code>lambda_{m_j}(x)</code> are fixed by <code>x=r mod L</code>; the remaining coordinates are free choices obtainable by CRT.</p>
+<p>Intersect the affine trap-signature space</p>
+<div class="math" role="math">\eta_{m_j}+V_j</div>
+<p>with the fixed signs.</p>
+<p>The resulting forbidden set on the free sign coordinates is again an affine subspace. It therefore falls into four exact cases:</p>
+<ol><li><strong>empty:</strong> the earlier layer is automatically safe at quadratic-signature resolution;</li><li><strong>full:</strong> every free signature lands in the trap-signature envelope, giving one direct signature obstruction;</li><li><strong>codimension one:</strong> safety is equivalent to one linear XOR equation;</li><li><strong>higher codimension:</strong> only a smaller affine subset of free signatures is forbidden.</li></ol>
+<p>This converts the earlier residue system into a finite affine-subspace avoidance problem over <code>F_2</code>.</p>
+<h2>6. Signature shield theorem</h2>
+<p>If one can choose the free local Legendre signs so that, for every earlier <code>j&lt;K</code>, the resulting signature lies outside</p>
+<div class="math" role="math">\eta_{m_j}+V_j,</div>
+<p>then the target candidate has a reduced avoiding arithmetic progression and therefore infinitely many primes of exact Type A/B depth <code>K</code>.</p>
+<p>The proof is the same CRT/Dirichlet construction used for the scalar character shield, but with prescribed local Legendre signs at the relevant primes. A Type A/B trap would force its full local signature into the forbidden affine coset, contradicting the construction.</p>
+<p>This criterion is sufficient, not necessary: an integer can share a trap&#x27;s quadratic signature while still avoiding the much smaller exact residue set <code>T_j</code>.</p>
+<h2>7. Relation to the multiplicative trap coset</h2>
+<p>Let</p>
+<div class="math" role="math">H_k=\langle\ell\bmod m_k:\ell\mid k,\ \ell\text{ prime}\rangle.</div>
+<p>The multiplicative theorem gives</p>
+<div class="math" role="math">T_k\subseteq-H_k.</div>
+<p>Applying the local Legendre-sign map gives</p>
+<div class="math" role="math">\lambda_m(-H_k)=\eta_m+V_k.</div>
+<p>Thus the quadratic-signature theorem is exactly the maximal elementary-2 quotient visible through the individual Legendre characters of the full multiplicative trap coset.</p>
+<p>The hierarchy is</p>
+<div class="math" role="math">\boxed{ T_k \subseteq -H_k \longrightarrow \eta_m+V_k \longrightarrow \text{Jacobi }-1. }</div>
+<p>Each arrow discards information.</p>
+<h2>8. Finite replay through k &lt;= 1200</h2>
+<p>A proof-mining replay of the frozen <code>41,470</code> directly novel candidates through <code>k&lt;=1200</code> used this full local quadratic-signature system without consulting the stored exact avoiding witness.</p>
+<p>It found:</p>
+<pre><code class="language-text">full quadratic-signature shield solved: 30,786
+direct signature residual:              10,684
+collective linear inconsistency found:       0
+unresolved non-direct signature systems:     0</code></pre>
+<p>Every one of the <code>30,786</code> non-direct-signature candidates was solved by the deterministic base solution of the codimension-one XOR system; no randomized repair trial was needed in that replay.</p>
+<p>This is a finite diagnostic, not a universal theorem that collective quadratic-signature obstruction never occurs.</p>
+<p>The key conceptual observation is that the richer local signature geometry independently resolves candidates that the scalar Jacobi shield leaves in its negative core.</p>
+<h2>9. Next theorem target</h2>
+<p>The strongest finite pattern now asks for a signature-level analogue of Direct-Shadow Completeness:</p>
+<blockquote><p>If no single earlier layer is a full quadratic-signature obstruction, can the collection of earlier affine signature traps ever cover all globally compatible sign assignments?</p></blockquote>
+<p>The <code>k&lt;=1200</code> replay found no such collective obstruction.</p>
+<p>A proof would remove the entire elementary-2 quotient from the exact DSC-P problem and leave only:</p>
+<ul><li>direct signature residual layers;</li><li>higher-order multiplicative quotient information;</li><li>prime-power lifting inside a fixed signature;</li><li>the final exact divisor-generated residue sets.</li></ul>
+<p>That is a substantially smaller target than the original global covering system.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

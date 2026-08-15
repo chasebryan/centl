@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For each layer">
+  <title>The composite rescue core — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/composite-core.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/composite-core.html">
+  <meta property="og:title" content="The composite rescue core — Free Computation Foundation">
+  <meta property="og:description" content="For each layer">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>The composite rescue core</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For each layer</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/COMPOSITE-CORE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> reduction note</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> this note reorganizes the Type A/B congruence system around prime versus composite target moduli. It does not prove universal Type A/B coverage. The term <code>composite rescue core</code> is project terminology and no literature-priority claim is made without a separate prior-art review.</p>
+<h2>1. Prime-modulus capture</h2>
+<p>For each layer</p>
+<div class="math" role="math">k\ge1, \qquad m_k=4k-1,</div>
+<p>let</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<p>Call a prime <code>p</code> <strong>prime-modulus captured</strong> if there exists a layer <code>k</code> such that</p>
+<div class="math" role="math">m_k=4k-1\text{ is prime}</div>
+<p>and</p>
+<div class="math" role="math">p\bmod m_k\in T_k.</div>
+<p>Every such hit is a valid Type A or Type B witness.</p>
+<p>The exact survivor-density theorem shows more: the prime-modulus layers form independent new CRT coordinates, and their accumulated hazard forces the set of primes escaping every prime-modulus layer to have relative prime density zero.</p>
+<h2>2. The prime-modulus core</h2>
+<p>Define</p>
+<div class="math" role="math">\mathcal C_{\rm pm} = \left\{ p\text{ prime}: p\bmod q\notin T_{(q+1)/4} \text{ for every prime }q\equiv3\pmod4 \right\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ overline d_{\mathbb P}(\mathcal C_{\rm pm})=0. }</div>
+<p>Thus a relative density-one set of primes is already solved inside the prime-modulus backbone before any composite modulus is used.</p>
+<h2>3. Composite rescue</h2>
+<p>A prime in <code>C_pm</code> can still have a Type A/B solution. If it does, every minimal Type A/B witness for that prime necessarily occurs at a composite target modulus <code>4k-1</code>.</p>
+<p>Call such a hit a <strong>composite rescue</strong>.</p>
+<p>For a prime <code>p in C_pm</code> with finite <code>C_AB(p)</code>, define its composite rescue depth by</p>
+<div class="math" role="math">R_{\rm comp}(p)=C_{AB}(p).</div>
+<p>The universal Type A/B coverage conjecture is therefore equivalent to the following residual statement:</p>
+<div class="math" role="math">\boxed{ \text{Every prime in }\mathcal C_{\rm pm}\text{ has a composite rescue.} }</div>
+<p>This does not weaken the logical difficulty of the pointwise conjecture, but it isolates that difficulty inside a zero-density arithmetic core.</p>
+<h2>4. Why the core is not empty in the observed data</h2>
+<p>The prime <code>2521</code> is a canonical example.</p>
+<p>Its minimal Type A/B depth in the CENTL research data is</p>
+<div class="math" role="math">C_{AB}(2521)=22, \qquad m_{22}=87=3\cdot29.</div>
+<p>The López analysis identifies <code>2521</code> as lacking Type A solutions and states that its Type B solution is associated only with composite values <code>87</code> and <code>1275</code> for <code>4dn-1</code>.</p>
+<p>Thus <code>2521</code> is not merely difficult in a numerical sense. It demonstrates that composite rescue is genuinely necessary: the prime-modulus backbone alone cannot cover every prime.</p>
+<h2>5. A simpler density-one spine inside the backbone</h2>
+<p>The special Type B choice</p>
+<div class="math" role="math">n=1</div>
+<p>gives</p>
+<div class="math" role="math">p\equiv-1\pmod{4d-1}.</div>
+<p>Therefore, whenever <code>p+1</code> has a prime divisor</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>we may take</p>
+<div class="math" role="math">d=\frac{q+1}{4}</div>
+<p>and obtain a Type B witness.</p>
+<p>Equivalently, a prime escaping this one-parameter spine must have no odd prime factor <code>3 mod 4</code> in <code>p+1</code>.</p>
+<p>This particular divisor criterion is already represented in recent Erdős-Straus work and should not be treated as a project novelty. Its importance here is organizational: it shows that even a very thin slice of the prime-modulus backbone removes most primes, while the full trap set gives an exact multi-residue hazard.</p>
+<h2>6. The diamond-shaped residual problem</h2>
+<p>The Type A/B conjecture can now be decomposed into two qualitatively different regimes:</p>
+<h3>Density-one backbone</h3>
+<p>Prime moduli <code>q=4k-1</code> contribute independent exact hazards</p>
+<div class="math" role="math">h_k=\frac{|T_k|}{q-1}.</div>
+<p>Their product forces the prime-modulus survivor density to zero.</p>
+<h3>Zero-density composite core</h3>
+<p>The remaining primes have escaped every independent prime-modulus layer. To finish pointwise coverage one must show that the dependency-rich composite layers always rescue them.</p>
+<p>This is precisely the regime where the shadow graph, modulus ancestry, partial shadows, and joint shadow closure matter most.</p>
+<p>The deep problem is therefore no longer well described as &quot;find more congruences.&quot; It is:</p>
+<blockquote><p>Explain why every prime that escapes the independent backbone is forced into the composite shadow geometry.</p></blockquote>
+<h2>7. Immediate theorem targets</h2>
+<p>The strongest next targets are:</p>
+<ol><li>classify composite layers whose target modulus has a prescribed factorization pattern and prove exact rescue criteria;</li><li>determine whether every composite rescue can be reduced to a finite list of irreducible shadow-quotient patterns;</li><li>test whether record-high <code>C_AB</code> primes are statistically enriched in the prime-modulus core before their eventual composite rescue;</li><li>prove or refute direct-shadow completeness inside the composite core;</li><li>characterize the first composite-rescue depth as a function of the factorization of the shifted integers <code>p+n</code> and <code>p+4d</code>.</li></ol>
+<p>A successful structural theorem in this residual core would attack exactly the part of López&#x27;s conjecture that the density-one prime-modulus mechanism cannot touch.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

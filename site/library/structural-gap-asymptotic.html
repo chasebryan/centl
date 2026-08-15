@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>A structural-gap family of order X / sqrt(log X) — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/structural-gap-asymptotic.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/structural-gap-asymptotic.html">
+  <meta property="og:title" content="A structural-gap family of order X / sqrt(log X) — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>A structural-gap family of order X / sqrt(log X)</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRUCTURAL-GAP-ASYMPTOTIC.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved analytic consequence of the depth-1 semigroup shadow theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this is a counting theorem for one explicit family of Type A/B structural gaps. It does not determine the density of the full depth-spectrum complement and does not prove the Erdős-Straus conjecture. The analytic input is the classical Selberg-Delange theorem for multiplicative Dirichlet series.</p>
+<p>Read with:</p>
+<ul><li><a href="coset-source-semigroup-shadow.html">COSET-SOURCE-SEMIGROUP-SHADOW.md</a></li><li><a href="spectrum-counting-bounds.html">SPECTRUM-COUNTING-BOUNDS.md</a></li><li><a href="prime-depth-density.html">PRIME-DEPTH-DENSITY.md</a></li></ul>
+<h2>1. Structural semigroup</h2>
+<p>Define</p>
+<div class="math" role="math">\mathcal S_3 = \{n\ge1:\ p\mid n\Rightarrow p\equiv1\pmod3\}.</div>
+<p>The element <code>1</code> is included for multiplicative convenience.</p>
+<p>The depth-1 semigroup shadow theorem proves that every</p>
+<div class="math" role="math">n\in\mathcal S_3, \qquad n&gt;1,</div>
+<p>is globally impossible as a minimal Type A/B depth:</p>
+<div class="math" role="math">\boxed{C_{AB}(x)\ne n}</div>
+<p>for every integer <code>x</code> for which <code>C_AB(x)</code> is defined.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ \mathcal S_3\setminus\{1\} \subseteq \mathbb N\setminus\mathcal D_{\mathbb P}. }</div>
+<h2>2. Dirichlet series</h2>
+<p>Let</p>
+<div class="math" role="math">F(s) = \sum_{n\in\mathcal S_3}\frac1{n^s} = \prod_{p\equiv1\ (3)}(1-p^{-s})^{-1}, \qquad \Re s&gt;1.</div>
+<p>Let <code>chi_{-3}</code> be the nontrivial real Dirichlet character modulo <code>3</code>.</p>
+<p>The Euler products for <code>zeta(s)</code> and <code>L(s,chi_{-3})</code> give the exact identity</p>
+<div class="math" role="math">\boxed{ F(s)^2 = \zeta(s)L(s,\chi_{-3}) (1-3^{-s}) \prod_{p\equiv2\ (3)}(1-p^{-2s}). }</div>
+<p>Indeed:</p>
+<ul><li>at <code>p=1 mod 3</code>, the product <code>zeta L</code> contributes <code>(1-p^{-s})^{-2}</code>;</li><li>at <code>p=2 mod 3</code>, it contributes <code>(1-p^{-2s})^{-1}</code>, cancelled by the displayed correction factor;</li><li>at <code>p=3</code>, the zeta factor is cancelled by <code>1-3^{-s}</code>.</li></ul>
+<p>Therefore</p>
+<div class="math" role="math">F(s)=\zeta(s)^{1/2}G(s),</div>
+<p>where, in a neighborhood of <code>s=1</code>,</p>
+<div class="math" role="math">G(s) = \left[ L(s,\chi_{-3}) (1-3^{-s}) \prod_{p\equiv2\ (3)}(1-p^{-2s}) \right]^{1/2}</div>
+<p>is analytic and nonzero after choosing the positive real branch at <code>s=1</code>.</p>
+<h2>3. Selberg-Delange asymptotic</h2>
+<p>The classical Selberg-Delange theorem for a Dirichlet series of the form</p>
+<div class="math" role="math">\zeta(s)^zG(s)</div>
+<p>with <code>z=1/2</code> gives</p>
+<div class="math" role="math">\boxed{ S_3(X) :=
+<p>|\mathcal S_3\cap[1,X]| \sim \frac{G(1)}{\Gamma(1/2)} \frac{X}{\sqrt{\log X}}. }&lt;/div&gt;</p>
+<p>Since</p>
+<div class="math" role="math">\Gamma(1/2)=\sqrt\pi</div>
+<p>and</p>
+<div class="math" role="math">L(1,\chi_{-3})=\frac{\pi}{3\sqrt3},</div>
+<p>we obtain the explicit constant</p>
+<div class="math" role="math">\boxed{ C_3 = \sqrt{ \frac{2}{9\sqrt3} \prod_{p\equiv2\ (3)} \left(1-\frac1{p^2}\right) }. }</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ S_3(X) \sim C_3\frac{X}{\sqrt{\log X}}. }</div>
+<p>The Euler product converges absolutely to a positive number, so</p>
+<div class="math" role="math">C_3&gt;0.</div>
+<h2>4. Structural-gap lower bound</h2>
+<p>Let</p>
+<div class="math" role="math">G_{AB}(X) =
+<p>|[1,X]\setminus\mathcal D_{\mathbb P}|.&lt;/div&gt;</p>
+<p>Because every member of <code>S_3</code> except <code>1</code> is a global structural gap,</p>
+<div class="math" role="math">G_{AB}(X) \ge S_3(X)-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ G_{AB}(X) \ge (C_3+o(1)) \frac{X}{\sqrt{\log X}}. }</div>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{ G_{AB}(X) \gg \frac{X}{\sqrt{\log X}}. }</div>
+<p>The same bound applies to the complement of the hard-class infinite-realization spectrum because these depths are impossible for <strong>every integer</strong>, not only for hard-class primes.</p>
+<h2>5. Comparison with previous gap families</h2>
+<p>The known structural-gap lower bounds have now progressed through three scales:</p>
+<h3>Mersenne power-of-two lattice</h3>
+<div class="math" role="math">G_{AB}(X)\gg\log X.</div>
+<h3>Prime-depth ancestry</h3>
+<div class="math" role="math">G_{AB}(X)\gg X/\log X.</div>
+<h3>Depth-1 multiplicative semigroup</h3>
+<div class="math" role="math">\boxed{ G_{AB}(X)\gg X/\sqrt{\log X}. }</div>
+<p>Because</p>
+<div class="math" role="math">\frac{X}{\sqrt{\log X}} \gg \frac{X}{\log X},</div>
+<p>the multiplicative structural semigroup is asymptotically the strongest explicit deletion family currently proved in the project.</p>
+<h2>6. What this does not establish</h2>
+<p>Since</p>
+<div class="math" role="math">\frac{1}{\sqrt{\log X}}\to0,</div>
+<p>this family still has natural density zero among all positive depths.</p>
+<p>Therefore the theorem does <strong>not</strong> imply that the full depth spectrum has density less than one, nor does it determine whether the total complement has positive density.</p>
+<p>It proves something different and concrete: the complement contains an explicit multiplicatively defined family much larger than any previously isolated project family.</p>
+<h2>7. Research interpretation</h2>
+<p>The result shows that structural gaps are not rare isolated curiosities created only by Mersenne divisibility or prime target depths.</p>
+<p>They form a substantial multiplicative population:</p>
+<div class="math" role="math">\boxed{ \text{prime-factor restriction} \Longrightarrow \text{exact source-coset containment} \Longrightarrow \text{global impossible depth}. }</div>
+<p>The next natural question is whether the union of semigroup-shadow families from the other coset-saturated sources has a larger asymptotic order than <code>X/sqrt(log X)</code>, or even positive density.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

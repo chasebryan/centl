@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Jacobi character records only one bit from a composite modulus. This note keeps the complete vector of local Legendre signs at the distinct prime factors of mk=4k-1 and shows that the Type A/B trap signatures form one exact affine…">
+  <title>Full local quadratic signature quotient of Type A/B traps — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quadratic-signature-quotient.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quadratic-signature-quotient.html">
+  <meta property="og:title" content="Full local quadratic signature quotient of Type A/B traps — Free Computation Foundation">
+  <meta property="og:description" content="The Jacobi character records only one bit from a composite modulus. This note keeps the complete vector of local Legendre signs at the distinct prime factors of mk=4k-1 and shows that the Type A/B trap signatures form one exact affine…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Full local quadratic signature quotient of Type A/B traps</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">The Jacobi character records only one bit from a composite modulus. This note keeps the complete vector of local Legendre signs at the distinct prime factors of mk=4k-1 and shows that the Type A/B trap signatures form one exact affine…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUADRATIC-SIGNATURE-QUOTIENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact theorem note and active proof direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. López 2024 already contains the Type B Jacobi-nonresidue statement; see <a href="quadratic-prior-art-note.html">QUADRATIC-PRIOR-ART-NOTE.md</a>.</p>
+<p>The Jacobi character records only one bit from a composite modulus. This note keeps the complete vector of local Legendre signs at the distinct prime factors of <code>m_k=4k-1</code> and shows that the Type A/B trap signatures form one exact affine subspace.</p>
+<h2>1. Local signature map</h2>
+<p>Let</p>
+<div class="math" role="math">m=4k-1=\prod_{i=1}^r p_i^{a_i}.</div>
+<p>For every unit <code>u mod m</code>, define its local quadratic signature</p>
+<div class="math" role="math">\chi_m(u) = \left( \left(\frac{u}{p_1}\right),\ldots, \left(\frac{u}{p_r}\right) \right).</div>
+<p>Encode <code>+1</code> as <code>0</code> and <code>-1</code> as <code>1</code>, so signatures lie in</p>
+<div class="math" role="math">V_m=\mathbb F_2^r.</div>
+<p>The map is multiplicative, hence linear in this bit representation.</p>
+<h2>2. Divisor-signature subgroup</h2>
+<p>Let the distinct prime factors of <code>k</code> be</p>
+<div class="math" role="math">\ell_1,\ldots,\ell_s.</div>
+<p>Define</p>
+<div class="math" role="math">H_k = \operatorname{span}_{\mathbb F_2} \{\chi_m(\ell_1),\ldots,\chi_m(\ell_s)\} \subseteq V_m.</div>
+<h3>Lemma</h3>
+<p>As <code>e</code> ranges over the positive divisors of <code>k</code>, the set of signatures <code>chi_m(e)</code> is exactly <code>H_k</code>.</p>
+<h3>Proof</h3>
+<p>Every divisor</p>
+<div class="math" role="math">e=\prod_i\ell_i^{b_i}</div>
+<p>has signature</p>
+<div class="math" role="math">\chi_m(e)=\sum_i(b_i\bmod2)\chi_m(\ell_i),</div>
+<p>so all divisor signatures lie in <code>H_k</code>.</p>
+<p>Conversely, every binary choice of the generators is realized by the divisor obtained by using exponent <code>1</code> for the selected primes and exponent <code>0</code> for the others. QED.</p>
+<h2>3. Trap-signature coset theorem</h2>
+<p>Recall</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod m:e\mid k\}.</div>
+<p>Since <code>4</code> is a square modulo every odd prime,</p>
+<div class="math" role="math">\chi_m(4)=0.</div>
+<p>Therefore</p>
+<div class="math" role="math">\chi_m(-e)=\chi_m(-1)+\chi_m(e)</div>
+<p>and</p>
+<div class="math" role="math">\chi_m(-4e)=\chi_m(-1)+\chi_m(e).</div>
+<p>Using the divisor-signature lemma gives:</p>
+<h3>Theorem</h3>
+<p>The image of the complete Type A/B trap set under the local quadratic signature map is exactly the affine coset</p>
+<div class="math" role="math">\boxed{ \chi_m(T_k)=\chi_m(-1)+H_k. }</div>
+<p>Thus all exact trap residues occupy one distinguished point in the quotient</p>
+<div class="math" role="math">\boxed{ Q_k=V_m/H_k. }</div>
+<p>Every unit residue whose quotient signature differs from</p>
+<div class="math" role="math">[\chi_m(-1)]</div>
+<p>is automatically outside <code>T_k</code>.</p>
+<p>QED.</p>
+<h2>4. Relation to the Jacobi theorem</h2>
+<p>Because</p>
+<div class="math" role="math">4k\equiv1\pmod{p_i}</div>
+<p>for every <code>p_i|m</code>, the integer <code>k</code> is a quadratic residue modulo every prime factor of <code>m</code>:</p>
+<div class="math" role="math">\chi_m(k)=0.</div>
+<p>This imposes at least the parity relation corresponding to the Jacobi character. Equivalently, the divisor-signature subgroup lies in the kernel of the Jacobi functional, recovering the fact that every trap has global Jacobi sign <code>-1</code>.</p>
+<p>The quotient <code>Q_k</code> can be strictly larger than one bit. When</p>
+<div class="math" role="math">\dim Q_k&gt;1,</div>
+<p>there are independent quadratic characters that distinguish trap signatures more finely than the Jacobi symbol alone.</p>
+<h2>5. Annihilator formulation</h2>
+<p>Let</p>
+<div class="math" role="math">H_k^\perp \subseteq V_m^*</div>
+<p>be the annihilator of <code>H_k</code>.</p>
+<p>Every character <code>psi in H_k^perp</code> is constant on the trap-signature coset:</p>
+<div class="math" role="math">\psi(\chi_m(t))=\psi(\chi_m(-1)) \qquad(t\in T_k).</div>
+<p>Therefore a unit <code>x</code> is quadratically certified safe whenever there exists</p>
+<div class="math" role="math">\psi\in H_k^\perp</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{ \psi(\chi_m(x))\ne\psi(\chi_m(-1)). }</div>
+<p>The ordinary Jacobi symbol corresponds to one particular nonzero element of this annihilator. When <code>dim Q_k&gt;1</code>, additional independent separator characters exist.</p>
+<h2>6. Important special cases</h2>
+<h3>Prime target modulus</h3>
+<p>If <code>m=4k-1</code> is prime, <code>V_m</code> has dimension one and the quotient has dimension one. The local signature theorem reduces to the ordinary quadratic-residue/Jacobi distinction.</p>
+<h3>Prime k</h3>
+<p>If <code>k</code> itself is prime, then</p>
+<div class="math" role="math">k\equiv4^{-1}\pmod{p_i}</div>
+<p>for every <code>p_i|m</code>, so <code>chi_m(k)=0</code>. Since <code>k</code> has only one prime generator,</p>
+<div class="math" role="math">H_k=0.</div>
+<p>Hence the trap set occupies <strong>one single local Legendre-sign vector</strong> even when <code>m</code> is composite.</p>
+<p>More generally, an odd prime power <code>k=ell^a</code> with odd <code>a</code> also forces <code>chi_m(ell)=0</code>, so again <code>H_k=0</code>.</p>
+<h2>7. Finite structural signal through k=3000</h2>
+<p>An exact enumeration of the layer invariant through all <code>1&lt;=k&lt;=3000</code>, including the base layer <code>k=1</code>, gives quotient dimensions:</p>
+<pre><code class="language-text">dim Q_k = 1: 2026 layers
+dim Q_k = 2:  785 layers
+dim Q_k = 3:  173 layers
+dim Q_k = 4:   16 layers</code></pre>
+<p>The counts sum to all <code>3000</code> layers. An earlier draft listed <code>2025</code> in the first row and therefore omitted the base layer <code>k=1</code>; this has been corrected.</p>
+<p>Thus roughly one third of the tested layers carry <strong>more quadratic information than the Jacobi bit alone</strong>.</p>
+<p>These counts are finite proof-mining data, not an asymptotic theorem.</p>
+<h2>8. Quadratic signature shield</h2>
+<p>For an exact-depth target candidate, Legendre-sign variables at primes outside the fixed target modulus may be selected by CRT.</p>
+<p>For each earlier layer <code>j</code>, the unsafe local sign patterns form the affine subspace</p>
+<div class="math" role="math">\chi_{m_j}(-1)+H_j.</div>
+<p>Therefore simultaneous quadratic-signature avoidance becomes a finite Boolean problem:</p>
+<blockquote><p>choose the free local Legendre bits so that, for every earlier layer, the induced local signature does <strong>not</strong> lie in its trap-signature affine subspace.</p></blockquote>
+<p>The Jacobi character shield is the codimension-one projection of this stronger system.</p>
+<h2>9. Why this matters for the residual core</h2>
+<p><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a> proves that the Jacobi shield has no genuinely collective obstruction beyond a fixed-only Jacobi-negative earlier layer.</p>
+<p>The present quotient gives a way to split that residual negative half further. A fixed-negative layer may still be quadratically safe because its complete local signature can lie outside the much smaller coset <code>chi(-1)+H_j</code>.</p>
+<p>Thus the new hierarchy is</p>
+<div class="math" role="math">\boxed{ \text{Jacobi +1} \Rightarrow \text{safe} }</div>
+<p>but when Jacobi is <code>-1</code>, one may still have</p>
+<div class="math" role="math">\boxed{ [\chi_m(x)]\ne[\chi_m(-1)]\text{ in }Q_k \Rightarrow \text{safe}. }</div>
+<p>Only residues landing in the distinguished trap-signature quotient class require still finer exact residue analysis.</p>
+<h2>10. Next theorem target</h2>
+<p>The immediate computational/theoretical question is whether the simultaneous full-signature shield has its own direct-obstruction completeness property:</p>
+<div class="math" role="math">\boxed{ \text{if no single earlier layer is quadratically unavoidable, can all layers be avoided simultaneously?} }</div>
+<p>A positive answer would compress the exact shadow problem another major step before exact residue geometry is needed.</p>
+<h2>11. Novelty boundary</h2>
+<p>Local Legendre symbols, character groups, affine subspaces and annihilators are classical. The candidate contribution is the Type-A/B-specific identification of the entire trap-signature image as one quotient point and its integration into the minimal-depth/shadow/fiber theorem program.</p>
+<p>Publication priority remains subject to broader literature and external review.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

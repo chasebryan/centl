@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note sharpens FIBER-SHADOW-KERNEL.md by removing the candidate dependence from the fiber-width estimate. The key observation is that the affine pullback from a Type A/B trap set to the parameter line preserves CRT fiber…">
+  <title>Candidate-independent trap-fiber bounds — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/trap-fiber-bound.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/trap-fiber-bound.html">
+  <meta property="og:title" content="Candidate-independent trap-fiber bounds — Free Computation Foundation">
+  <meta property="og:description" content="This note sharpens FIBER-SHADOW-KERNEL.md by removing the candidate dependence from the fiber-width estimate. The key observation is that the affine pullback from a Type A/B trap set to the parameter line preserves CRT fiber…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Candidate-independent trap-fiber bounds</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This note sharpens FIBER-SHADOW-KERNEL.md by removing the candidate dependence from the fiber-width estimate. The key observation is that the affine pullback from a Type A/B trap set to the parameter line preserves CRT fiber…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/TRAP-FIBER-BOUND.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem note with exact finite evaluations</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>This note sharpens <a href="fiber-shadow-kernel.html">FIBER-SHADOW-KERNEL.md</a> by removing the candidate dependence from the fiber-width estimate. The key observation is that the affine pullback from a Type A/B trap set to the parameter line preserves CRT fiber multiplicities up to relabeling.</p>
+<p>The result gives a much smaller <strong>universal finite prime kernel</strong> than the coarse <code>|R_j|</code> load bound.</p>
+<h2>1. Setup</h2>
+<p>For an earlier layer <code>j</code>, put</p>
+<div class="math" role="math">m_j=4j-1, \qquad T_j=\{-e,-4e\pmod{m_j}:e\mid j\}.</div>
+<p>For a target candidate <code>x=r+Ls</code>, define</p>
+<div class="math" role="math">g_j=\gcd(L,m_j), \qquad q_j=m_j/g_j.</div>
+<p>The compatible traps are</p>
+<div class="math" role="math">U_j=\{u\in T_j:u\equiv r\pmod{g_j}\}.</div>
+<p>The pullback forbidden set is</p>
+<div class="math" role="math">R_j= \left\{ \frac{u-r}{g_j}\left(\frac{L}{g_j}\right)^{-1}\pmod{q_j} :u\in U_j \right\}.</div>
+<p>Fix a prime <code>p|q_j</code> and write</p>
+<div class="math" role="math">a=v_p(q_j), \qquad q_j=p^a c, \qquad(p,c)=1.</div>
+<h2>2. Affine fiber invariance</h2>
+<p>Multiplication by the unit</p>
+<div class="math" role="math">(L/g_j)^{-1}\pmod{q_j}</div>
+<p>is an automorphism of both CRT coordinates</p>
+<div class="math" role="math">\mathbb Z/q_j\mathbb Z \cong \mathbb Z/p^a\mathbb Z\times\mathbb Z/c\mathbb Z.</div>
+<p>Therefore it changes only the labels of the fibers, not their cardinalities.</p>
+<p>Before that unit scaling, fixing the non-<code>p</code> coordinate means fixing</p>
+<div class="math" role="math">\frac{u-r}{g_j}\pmod c.</div>
+<p>Equivalently, it fixes <code>u</code> modulo</p>
+<div class="math" role="math">g_jc = \frac{m_j}{p^a}.</div>
+<p>Hence the candidate-specific fiber width <code>f_{j,p}</code> from the fiber peeling theorem satisfies</p>
+<div class="math" role="math">\boxed{ f_{j,p} \le \kappa_{j,p^a}, }</div>
+<p>where</p>
+<div class="math" role="math">\boxed{ \kappa_{j,p^a} = \max_{b\bmod(m_j/p^a)} \#\{u\in T_j:u\equiv b\pmod{m_j/p^a}\}. }</div>
+<p>The quantity <code>kappa</code> depends only on the trap set <code>T_j</code> and the prime power dividing <code>m_j</code>. It does <strong>not</strong> depend on the target candidate <code>(k,h,t)</code>.</p>
+<h2>3. Candidate-independent local contribution</h2>
+<p>The exponent <code>a=v_p(q_j)</code> depends on the target candidate because the gcd with <code>L</code> may remove some <code>p</code>-power from <code>m_j</code>.</p>
+<p>To dominate every possible candidate, define</p>
+<div class="math" role="math">\boxed{ \beta_{j,p} = \max_{1\le a\le v_p(m_j)} \frac{\kappa_{j,p^a}}{p^a} }</div>
+<p>when <code>p|m_j</code>, and <code>beta_{j,p}=0</code> otherwise.</p>
+<p>For every target candidate and every active occurrence of <code>p</code> at earlier layer <code>j</code>,</p>
+<div class="math" role="math">\frac{f_{j,p}}{p^{v_p(q_j)}} \le \beta_{j,p}.</div>
+<h2>4. Universal reduced fiber load</h2>
+<p>For a depth bound <code>K</code>, define</p>
+<div class="math" role="math">\boxed{ \mathcal F_p(K) = \frac1p + \sum_{1\le j&lt;K}\beta_{j,p}. }</div>
+<p>The initial <code>1/p</code> is a worst-case allowance for the local reducedness condition. If <code>p|L</code>, that cost is actually zero, so this remains an upper bound.</p>
+<h3>Theorem</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{\mathcal F_p(K)&lt;1,}</div>
+<p>then the prime coordinate <code>p</code> is reduced-fiber-peelable for <strong>every</strong> admissible Type A/B target candidate at every depth</p>
+<div class="math" role="math">k\le K.</div>
+<h3>Proof</h3>
+<p>For a fixed candidate, sum the exact reduced fiber load</p>
+<div class="math" role="math">\Lambda_p^{\!*} = \epsilon_p + \sum_{j&lt;k,p\mid q_j} \frac{f_{j,p}}{p^{v_p(q_j)}}.</div>
+<p>Here <code>epsilon_p</code> is either <code>0</code> or <code>1/p</code>.</p>
+<p>Each active summand is at most <code>beta_{j,p}</code>, and the target range <code>k&lt;=K</code> only removes terms from the sum defining <code>F_p(K)</code>. Therefore</p>
+<div class="math" role="math">\Lambda_p^{\!*} \le \mathcal F_p(K)&lt;1.</div>
+<p>The reduced fiber-peeling theorem applies. QED.</p>
+<h2>5. Exact finite evaluations</h2>
+<p>The quantities below are obtained by exact enumeration of the finite trap sets and exact rational arithmetic. They are finite theorem bounds, not heuristic estimates.</p>
+<h3>Through K = 1000</h3>
+<p>The only primes for which the candidate-independent bound does <strong>not</strong> already prove peelability are</p>
+<div class="math" role="math">\boxed{ 3,5,7,11,13,17,19,23,29,31,37. }</div>
+<p>The last non-automatically-peelable prime is <code>37</code>. Therefore</p>
+<div class="math" role="math">\boxed{ p\ge41 \Longrightarrow p\text{ is reduced-fiber-peelable for every admissible candidate with }k\le1000. }</div>
+<p>This improves the earlier coarse universal threshold <code>p&gt;=113</code> dramatically.</p>
+<h3>Through K = 1200</h3>
+<p>The only primes not eliminated by the universal trap-fiber bound are</p>
+<div class="math" role="math">\boxed{ 3,5,7,11,13,17,19,23,29,31,37,41. }</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ p\ge43 \Longrightarrow p\text{ is universally reduced-fiber-peelable through }k=1200. }</div>
+<h3>Through K = 1500</h3>
+<p>The universal finite kernel is contained in</p>
+<div class="math" role="math">\boxed{ \{3,5,7,11,13,17,19,23,29,31,37,41,43,47\}. }</div>
+<p>Therefore every prime coordinate</p>
+<div class="math" role="math">\boxed{p\ge53}</div>
+<p>is automatically peelable for every admissible candidate through <code>k=1500</code>.</p>
+<h3>Through K = 3000</h3>
+<p>Even at the full depth used in the original hard-prime shadow map, the candidate-independent trap-fiber bound leaves only</p>
+<div class="math" role="math">\boxed{ 3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61. }</div>
+<p>as possible first-stage kernel primes.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ p\ge67}</div>
+<p>is universally reduced-fiber-peelable through <code>k=3000</code>.</p>
+<p>This is before using target-specific gcd cancellation, iterative removal of incident constraints, or the exact candidate-specific fibers. All three make the actual kernel smaller.</p>
+<h2>6. Why this is important</h2>
+<p>The union-shadow problem originally involved parameter periods containing many prime factors and hundreds of active congruence constraints.</p>
+<p>The coarse local-load theorem proved that sufficiently large coordinates can be peeled.</p>
+<p>The fiber theorem improved the candidate-specific load.</p>
+<p>The present bound adds the missing bridge:</p>
+<div class="math" role="math">\boxed{ \text{trap-set arithmetic itself} \Longrightarrow \text{candidate-independent fiber bounds} \Longrightarrow \text{small universal finite prime kernel}. }</div>
+<p>Through <code>k=3000</code>, before looking at a particular target residue, every potential obstruction has already been forced onto only seventeen small primes.</p>
+<p>This is not a universal-in-<code>k</code> bounded-prime theorem. The finite universal kernel can grow with <code>K</code>. But it is a major compression of the exact finite problem and a concrete route toward a structural proof.</p>
+<h2>7. New object: trap-fiber collision profile</h2>
+<p>For each earlier layer, the values</p>
+<div class="math" role="math">\kappa_{j,p^a}</div>
+<p>measure how strongly the divisor-generated Type A/B trap set collides when projected away from a prime-power coordinate.</p>
+<p>This <strong>trap-fiber collision profile</strong> is a new natural object in the current framework.</p>
+<p>The next analytic question is to bound or classify <code>kappa_{j,p^a}</code> directly from the divisor structure of <code>j</code> and the two trap maps</p>
+<div class="math" role="math">e\mapsto-e, \qquad e\mapsto-4e.</div>
+<p>A sufficiently sharp uniform bound on these collision profiles could turn the finite small-kernel phenomenon into an asymptotic theorem.</p>
+<h2>8. Immediate theorem targets</h2>
+<ol><li>derive closed bounds for <code>kappa_{j,p^a}</code> using the location of divisors <code>e|j</code> inside residue classes modulo <code>m_j/p^a</code>;</li><li>classify cross-collisions between the <code>-e</code> and <code>-4e</code> trap families inside one fiber;</li><li>determine whether iterative fiber peeling has an absolute residual-prime bound even though the first candidate-independent bound grows slowly with <code>K</code>;</li><li>classify the residual kernels on the small prime sets above;</li><li>prove those kernels always possess a reduced satisfying assignment when direct shadowing is absent.</li></ol>
+<p>The obstruction has now been compressed twice: first from congruence layers to prime-power coordinates, and then from arbitrary coordinate loads to exact trap-fiber collisions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

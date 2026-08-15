@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL&#x27;s build has three layers: a verified F core, an OCaml application, and native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is optional for ordinary development but required before merging mathematical changes.">
+  <title>Contributing to CENTL — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/contributing.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/contributing.html">
+  <meta property="og:title" content="Contributing to CENTL — Free Computation Foundation">
+  <meta property="og:description" content="CENTL&#x27;s build has three layers: a verified F core, an OCaml application, and native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is optional for ordinary development but required before merging mathematical changes.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Contributing to CENTL</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL&#x27;s build has three layers: a verified F core, an OCaml application, and native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is optional for ordinary development but required before merging mathematical changes.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/CONTRIBUTING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CENTL&#x27;s build has three layers: a verified F* core, an OCaml application, and native FLINT/GMP/MPFR bindings. The independent Julia/Nemo laboratory is optional for ordinary development but required before merging mathematical changes.</p>
+<p>CENTL uses three long-lived branches with different responsibilities. Read <a href="release-policy.html"><code>docs/RELEASE-POLICY.md</code></a> before choosing a pull-request target.</p>
+<ul><li><code>mirage</code> is the laboratory and the ordinary pull-request target.</li><li><code>main</code> is the developer distribution and the current <a href="https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md">FCF Camp</a> stay. Newest software and designs are used here. A camp is not Oasis.</li><li><code>oasis</code> is the qualified stable product. Do not open ordinary pull requests against it and do not declare Oasis from a camp.</li><li><code>CENTL-Marsa</code> is the undeletable Windows and macOS harbor of the Camp stay. Do not treat a Marsa build as Oasis.</li></ul>
+<p>The published Oasis is CENTL v0.15.0 <strong>Al-Nur</strong>. The canonical tag is <code>v0.15.0</code>. Development continues on <code>mirage</code> and <code>main</code>. Camp #1 remains the inhabited stay. Do not treat this branch as Oasis.</p>
+<p>If any part of that stack is unfamiliar, start with the <a href="../library/hunt-seed.html">documentation index</a> and then the <a href="onboarding.html">manual contributor onboarding</a>. The onboarding guide is a staged OCaml, F*, numerics, protocol, testing, and source-code curriculum. The public site hosts the same front-facing manuals and the research library at <a href="https://freecomputation.org/">freecomputation.org</a> as HTML and CSS only.</p>
+<p>Companies and other AI software that want a single written offer to use CENTL, contribute, and sponsor FCF should read <a href="proposal.html"><code>docs/FCF-PROPOSAL.md</code></a>. Organizational patches still use this guide, a <code>Signed-off-by</code> DCO line, and a draft pull request to <code>mirage</code>. Sponsorship does not skip review.</p>
+<p>The canonical versions are recorded in <a href="https://github.com/chasebryan/centl/blob/main/toolchain.lock"><code>toolchain.lock</code></a>. The checked-in <a href="https://github.com/chasebryan/centl/blob/main/centl.opam"><code>centl.opam</code></a> manifest gives opam exact constraints for the OCaml compiler, build tools, test libraries, and formatter.</p>
+<h2>Prerequisites</h2>
+<p>Install these system tools first:</p>
+<ul><li>opam 2.1 or newer</li><li>a C compiler, GNU Make, <code>pkg-config</code>, and development headers for FLINT 3, GMP, and MPFR</li><li><code>curl</code>, <code>tar</code>, and the <code>libzstd</code> runtime for the pinned F* distribution</li><li>Julia 1.12.6 when running the independent differential suite</li></ul>
+<p>On Ubuntu 24.04, the system layer can be installed with:</p>
+<pre><code class="language-sh">sudo apt-get update
+sudo apt-get install --yes \
+  build-essential ca-certificates curl libflint-dev libgmp-dev libmpfr-dev \
+  libzstd1 make opam pkg-config tar</code></pre>
+<p>Release packaging builds the exact GMP, MPFR, and FLINT versions in <code>toolchain.lock</code>; the distro packages above are the faster development setup.</p>
+<h2>Install the pinned F* verifier</h2>
+<p>The workflow uses the F* release and checksum below. Install it into a local tools directory, then add its <code>bin</code> directory to your shell&#x27;s <code>PATH</code>:</p>
+<pre><code class="language-sh">FSTAR_VERSION=2026.07.05
+FSTAR_SHA256=23829d496c909c67f7261c1471be34047ad0d508ee0b933607618b313cbae1a4
+mkdir -p .tools/fstar
+curl --fail --location \
+  &quot;https://github.com/FStarLang/FStar/releases/download/v${FSTAR_VERSION}/fstar-v${FSTAR_VERSION}-Linux-x86_64.tar.gz&quot; \
+  --output .tools/fstar.tar.gz
+printf &#x27;%s  %s\n&#x27; &quot;$FSTAR_SHA256&quot; .tools/fstar.tar.gz | sha256sum --check
+tar -xzf .tools/fstar.tar.gz -C .tools/fstar
+fstar=$(find .tools/fstar -type f -path &#x27;*/bin/fstar.exe&#x27; -print -quit)
+test -n &quot;$fstar&quot;
+export PATH=&quot;$(dirname &quot;$fstar&quot;):$PATH&quot;</code></pre>
+<p>F* ships the supported Z3 binary. Confirm both pins before building:</p>
+<pre><code class="language-sh">fstar.exe --version
+&quot;$(fstar.exe --locate_z3 4.13.3)&quot; --version</code></pre>
+<h2>Bootstrap the OCaml switch</h2>
+<p>From the repository root, run:</p>
+<pre><code class="language-sh">scripts/bootstrap-opam
+eval &quot;$(opam env --switch=centl)&quot;</code></pre>
+<p>The bootstrap creates the <code>centl</code> switch with OCaml 4.14.1 when needed and installs the exact dependencies from <code>centl.opam</code>. Set <code>CENTL_OPAM_SWITCH</code> to use a different switch name.</p>
+<h2>Build and test</h2>
+<p>Use the complete verified path at least once after changing F* or from a clean checkout:</p>
+<pre><code class="language-sh">make test</code></pre>
+<p>Extraction refreshes the checked-in OCaml snapshot under <code>src/generated/</code>. Commit that snapshot with every F<em> change; CI regenerates it with the pinned verifier and rejects stale output. Keeping the snapshot in source releases lets ordinary <code>opam install .</code> and Dune package builds run without an undeclared F</em> dependency. After a successful extraction, the shorter native loop is:</p>
+<pre><code class="language-sh">make native-build
+make native-test</code></pre>
+<p>Quality targets are checks and do not rewrite files:</p>
+<pre><code class="language-sh">make quality</code></pre>
+<p><code>make quality</code> also runs CENTL&#x27;s standard SHA-256 integrity process. It validates the SHA-256 implementation against published known-answer vectors, generates a deterministic <code>SHA256SUMS</code> manifest for every Git-tracked regular source file, verifies the manifest against the checkout, hashes the manifest itself, and checks the external supply-chain preservation pins. See <a href="https://github.com/chasebryan/centl/blob/main/docs/INTEGRITY.md"><code>docs/INTEGRITY.md</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/docs/SUPPLY-CHAIN.md"><code>docs/SUPPLY-CHAIN.md</code></a>.</p>
+<p>The integrity receipt can be generated directly with:</p>
+<pre><code class="language-sh">make integrity-source</code></pre>
+<p>The receipt is written below <code>_build/integrity/</code>. A checksum mismatch is a failure. Do not update an expected digest merely to make a mismatch pass.</p>
+<p><code>make format</code> checks OCaml and Dune formatting, while <code>make lint</code> compiles all modules with development warnings, validates <code>centl.opam</code>, and checks that toolchain pins agree. Apply formatter changes explicitly with <code>make format-fix</code>.</p>
+<h2>Supply-chain preservation</h2>
+<p>Maintainers should periodically preserve the complete current Linux development inputs to FCF-controlled storage. Preservation requires a clean tracked worktree so the source receipt can be bound to an exact Git commit:</p>
+<pre><code class="language-sh">make supply-chain-preserve \
+  MIRROR=/srv/centl-mirror \
+  MODEL=/path/to/active-centl-sci-model.gguf</code></pre>
+<p>This records the source SHA-256 receipt and commit alongside mirrored external artifacts, source repositories, opam material, the instantiated Julia/Nemo depot, and the exact CENTL-SCi model bytes. Copy the resulting mirror to a second FCF-controlled location and preferably one offline copy.</p>
+<h2>Differential testing</h2>
+<p>Instantiate the checked-in Julia manifest once, then run the seeded suite:</p>
+<pre><code class="language-sh">julia --startup-file=no --project=lab/julia \
+  -e &#x27;using Pkg; Pkg.instantiate()&#x27;
+make differential-test</code></pre>
+<p>The suite compares CENTL&#x27;s structured exact results with Nemo. Its random cases use fixed seeds, so failures are reproducible.</p>
+<h2>Pull requests and branch targets</h2>
+<p>Choose the target branch according to the maturity and purpose of the change:</p>
+<ul><li><strong><code>mirage</code></strong> is the normal target for experimental features, prototypes, research, speculative mathematics, architecture exploration, and other work that is not yet claiming stable-product quality.</li><li><strong><code>oasis</code></strong> is for the official snapshot of current <code>main</code> and <code>mirage</code>, plus release hardening and qualification repairs. That pull request must be a linear descendant of the oasis tip and must not be squash-merged.</li><li><strong><code>main</code></strong> is for repository-wide integration, documentation, tooling, or work whose purpose is the comprehensive developer/research distribution.</li></ul>
+<p>Do not target <code>oasis</code> merely to develop a feature. A change that originates in Mirage must satisfy the full Oasis qualification when it is promoted, regardless of what lighter development checks it previously passed.</p>
+<p>Include the behavior being changed and the commands used to validate it in every pull request. CI is branch-aware: Mirage receives development-oriented checks, Oasis receives the complete release qualification gate, and main receives integration checks appropriate to the comprehensive source tree. Oasis-only release qualification is intentionally not a universal requirement for every branch.</p>
+<h2>Developer Certificate of Origin</h2>
+<p>CENTL uses the <strong>Developer Certificate of Origin 1.1</strong> rather than a contributor license agreement or copyright assignment. Every contribution must be signed off by the contributor to certify that they have the right to submit it under the license applicable to the contributed path.</p>
+<p>Sign commits with:</p>
+<pre><code class="language-sh">git commit -s</code></pre>
+<p>This adds a line of the form:</p>
+<pre><code class="language-text">Signed-off-by: Your Name &lt;you@example.com&gt;</code></pre>
+<p>Use your real contribution identity and an email address you are authorized to use. The complete certificate is in <a href="https://github.com/chasebryan/centl/blob/main/DCO.md"><code>DCO.md</code></a>. By contributing, you are not assigning your copyright to FCF; you are certifying the provenance and licensing authority described by the DCO.</p>
+<p>Software contributions are normally accepted under <code>Apache-2.0</code>. Documentation and other paths may use the license identified in <a href="licensing.html"><code>LICENSING.md</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/.reuse/dep5"><code>.reuse/dep5</code></a>. Do not remove or overwrite valid third-party license notices.</p>
+<h2>Math contracts (0.12 foundation)</h2>
+<p>Local claim checking without a full release:</p>
+<pre><code class="language-sh">./centl verify --left &#x27;0.1 + 0.2&#x27; --relation equal --right &#x27;3/10&#x27;
+./centl verify --left &#x27;sqrt(2)&#x27; --relation less_than --right &#x27;2&#x27;
+./centl check tests/fixtures/contracts.centl
+./centl check tests/fixtures/contracts.centl --json</code></pre>
+<p>Protocol: <code>op: &quot;verify&quot;</code>. MCP: <code>centl_verify</code>. See <code>docs/PROTOCOL.md</code> and <code>docs/DESIGN_PATH.md</code>.</p>
+<p>CENTL-SCi can prepare a local pack with <code>pack contribution</code> and, after an explicit publish grant, open a <strong>draft</strong> pull request against <code>mirage</code>. That path does not store tokens, does not target <code>oasis</code>, and does not replace this human review. Oasis promotion requires a linear snapshot of the current stable main/mirage tree on the oasis tip so the published product does not regress.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

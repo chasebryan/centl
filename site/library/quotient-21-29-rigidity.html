@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Exact ancestry rigidity for quotients 21 and 29 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-21-29-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-21-29-rigidity.html">
+  <meta property="og:title" content="Exact ancestry rigidity for quotients 21 and 29 — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact ancestry rigidity for quotients 21 and 29</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-21-29-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact unrestricted-shadow classifications</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. Hard-class-conditioned shadowing can be stronger. This does not prove Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="ancestry-asymptotic-skeleton.html">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li><li><a href="quotient-9-rigidity.html">QUOTIENT-9-RIGIDITY.md</a></li></ul>
+<h2>1. Quotient 21</h2>
+<p>Set</p>
+<div class="math" role="math">K=21j-5, \qquad m=4j-1.</div>
+<p>This is the ancestry shift <code>s=5</code>.</p>
+<h3>Theorem 1</h3>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff \left( K\text{ is prime} \quad\text{or}\quad K=5p\text{ with }p\text{ prime} \right). }</div>
+<p>In the <code>5p</code> case, necessarily <code>5|j</code>.</p>
+<h3>Proof: direct implication</h3>
+<p>The divisor-child theorem with <code>s=5</code> has</p>
+<div class="math" role="math">a\mid5.</div>
+<p>Thus <code>a=1</code> gives prime children and <code>a=5</code> gives <code>5p</code> whenever <code>5|j</code>. Both are fully shadowed.</p>
+<h3>Proof: converse for j &gt;= 6</h3>
+<p>The odd-shift asymptotic skeleton applies because</p>
+<div class="math" role="math">j\ge s+1=6.</div>
+<p>Therefore full shadowing implies either:</p>
+<ol><li><code>K</code> is <code>5</code>-smooth, hence <code>K=5^u</code>; or</li><li><code>K=a p</code> with</li></ol>
+<div class="math" role="math">a\mid\gcd(j,5),</div>
+<p>so <code>a=1</code> or <code>5</code>.</p>
+<p>The second case is exactly the claimed prime/<code>5p</code> family.</p>
+<p>It remains to remove the smooth branch.</p>
+<p>For an odd shift, any smooth child larger than <code>s</code> has some prime exponent exceeding its exponent in <code>s</code>. Here that means divisor</p>
+<div class="math" role="math">25\mid K.</div>
+<p>If</p>
+<div class="math" role="math">25&lt;m,</div>
+<p>then the odd integer <code>25</code> is a divisor of <code>K</code> smaller than <code>m</code>. It cannot lie in <code>S_j</code> unless <code>25|j</code>. But</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,5)</div>
+<p>has <code>5</code>-valuation at most one, so <code>25∤j</code>. Thus smooth shadowing would require</p>
+<div class="math" role="math">m\le25.</div>
+<p>For <code>j&gt;=6</code>, this leaves only</p>
+<div class="math" role="math">j=6,\qquad m=23,\qquad K=121.</div>
+<p>But divisor <code>11</code> satisfies</p>
+<div class="math" role="math">1&lt;11&lt;m, \qquad11\nmid j,</div>
+<p>so <code>11∉S_j</code> and shadowing fails.</p>
+<p>Therefore no smooth exception occurs for <code>j&gt;=6</code>.</p>
+<h3>Small j = 1,...,5</h3>
+<p>The remaining cases are exact and tiny:</p>
+<pre><code class="language-text">j=1: K=16, m=3;  divisor 2 escapes S_1.
+j=2: K=37;        prime, hence shadowed.
+j=3: K=58, m=11; divisor 2 escapes S_3.
+j=4: K=79;        prime, hence shadowed.
+j=5: K=100,m=19; divisor 2 escapes S_5.</code></pre>
+<p>This completes the quotient-21 classification. QED.</p>
+<h2>2. Quotient 29</h2>
+<p>Set</p>
+<div class="math" role="math">K=29j-7, \qquad m=4j-1.</div>
+<p>This is the ancestry shift <code>s=7</code>.</p>
+<h3>Theorem 2</h3>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff \left( K\text{ is prime} \quad\text{or}\quad K=7p\text{ with }p\text{ prime} \right). }</div>
+<p>In the <code>7p</code> case, necessarily <code>7|j</code>.</p>
+<h3>Proof: direct implication</h3>
+<p>The divisor-child theorem with <code>s=7</code> has only</p>
+<div class="math" role="math">a=1\quad\text{or}\quad a=7.</div>
+<p>Thus prime children and <code>7p</code> children with <code>7|j</code> are fully shadowed.</p>
+<h3>Proof: converse for j &gt;= 8</h3>
+<p>The odd-shift skeleton applies for</p>
+<div class="math" role="math">j\ge s+1=8.</div>
+<p>Hence a full shadow is either prime/<code>7p</code>, or <code>7</code>-smooth:</p>
+<div class="math" role="math">K=7^u.</div>
+<p>A smooth child larger than <code>7</code> contains divisor</p>
+<div class="math" role="math">49.</div>
+<p>If</p>
+<div class="math" role="math">49&lt;m,</div>
+<p>then <code>49&lt;m</code> is an odd divisor of <code>K</code>. It cannot be in <code>S_j</code> unless <code>49|j</code>, but</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,7)</div>
+<p>has <code>7</code>-valuation at most one. Therefore a smooth full shadow requires</p>
+<div class="math" role="math">m\le49.</div>
+<p>For <code>j&gt;=8</code>, this leaves only</p>
+<div class="math" role="math">8\le j\le12.</div>
+<p>These five cases are checked explicitly below.</p>
+<h3>Exact small window j = 1,...,12</h3>
+<pre><code class="language-text">j=1:  K=22,  m=3;  divisor 2 escapes.
+j=2:  K=51,  m=7;  divisor 3 escapes.
+j=3:  K=80,  m=11; divisor 2 escapes.
+j=4:  K=109;        prime, hence shadowed.
+j=5:  K=138, m=19; divisor 2 escapes.
+j=6:  K=167;        prime, hence shadowed.
+j=7:  K=196, m=27; divisor 2 escapes.
+j=8:  K=225, m=31; divisor 3 escapes.
+j=9:  K=254, m=35; divisor 2 escapes.
+j=10: K=283;        prime, hence shadowed.
+j=11: K=312, m=43; divisor 2 escapes.
+j=12: K=341, m=47; divisor 11 escapes.</code></pre>
+<p>Every non-prime case in the smooth-exception window has an explicit divisor outside <code>S_j</code>.</p>
+<p>For <code>j&gt;=13</code>, the smooth branch is impossible by the <code>49&lt;m</code> argument, so the asymptotic skeleton leaves only prime or <code>7p</code>.</p>
+<p>This completes the quotient-29 classification. QED.</p>
+<h2>3. Ancestry ladder after these theorems</h2>
+<p>The exact unrestricted classifications now begin:</p>
+<table class="directory"><thead><tr><th>Quotient <code>Q</code></th><th>Shift <code>s</code></th><th>Full-shadow child shapes</th></tr></thead><tbody><tr><td>5</td><td>1</td><td>prime only</td></tr><tr><td>9</td><td>2</td><td>prime, <code>2p</code>, plus <code>(j,K)=(2,16)</code></td></tr><tr><td>13</td><td>3</td><td>prime, <code>3p</code></td></tr><tr><td>17</td><td>4</td><td>prime, <code>2p</code>, <code>4p</code>, plus <code>(j,K)=(4,64)</code></td></tr><tr><td>21</td><td>5</td><td>prime, <code>5p</code></td></tr><tr><td>29</td><td>7</td><td>prime, <code>7p</code></td></tr></tbody></table>
+<p>The quotient-21 and quotient-29 proofs are no longer separate ad hoc divisor searches. They are short corollaries of the universal odd-shift skeleton plus finite smooth-window elimination.</p>
+<h2>4. General prime-shift corollary template</h2>
+<p>Let <code>r</code> be an odd prime and set</p>
+<div class="math" role="math">Q=4r+1, \qquad K=Qj-r.</div>
+<p>For</p>
+<div class="math" role="math">j\ge r+1,</div>
+<p>the odd-shift skeleton gives</p>
+<div class="math" role="math">\boxed{ \text{full shadow} \Longrightarrow K=r^u \text{ or } K=p \text{ or } K=rp\ (r|j). }</div>
+<p>Any smooth case <code>K=r^u</code> with <code>u&gt;=2</code> contains divisor <code>r^2</code>. Once</p>
+<div class="math" role="math">r^2&lt;m=4j-1,</div>
+<p>that divisor cannot lie in <code>S_j</code>, because <code>r^2∤j</code> follows from</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,r).</div>
+<p>Thus every odd-prime shift has only a finite explicit smooth window</p>
+<div class="math" role="math">4j-1\le r^2</div>
+<p>to check.</p>
+<p>This turns exact classification for all prime shifts into a finite arithmetic problem after the universal theorem.</p>
+<h2>5. Next target</h2>
+<p>Automate the finite smooth-window check for odd prime shifts <code>r</code> and determine whether any prime shift admits a genuine smooth exception.</p>
+<p>If none do, then for every odd prime <code>r</code> we obtain the uniform exact theorem</p>
+<div class="math" role="math">\boxed{ T_{(4r+1)j-r}\bmod(4j-1)\subseteq T_j \iff K\text{ prime or }K=rp\text{ with }r|j. }</div>
+<p>That is now a sharply bounded theorem program rather than an open-ended search.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

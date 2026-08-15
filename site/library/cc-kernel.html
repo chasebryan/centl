@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fast hard-prime engine for the Erdős–Straus residual.">
+  <title>CC.kernel — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cc-kernel.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cc-kernel.html">
+  <meta property="og:title" content="CC.kernel — Free Computation Foundation">
+  <meta property="og:description" content="Fast hard-prime engine for the Erdős–Straus residual.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CC.kernel</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">Fast hard-prime engine for the Erdős–Straus residual.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel/README.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Fast hard-prime engine for the Erdős–Straus residual.</p>
+<p>One job: for each Mordell-hard prime, emit an explicit</p>
+<pre><code class="language-text">4/p = 1/x + 1/y + 1/z</code></pre>
+<p>or report that the declared menu missed. It does not prove the conjecture.</p>
+<p>Lives next to <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel"><code>../bb.kernel</code></a> (Python reference stack, also <code>B-BervigES.kernel</code>). Same two-target mathematics. bb.kernel covers general <code>n</code> and the full menu; this binary only attacks Mordell-hard primes.</p>
+<h2>Menu</h2>
+<ol><li><strong>theorem</strong> — <code>4p+1</code>, <code>p+4</code>, two-target <code>k ∈ {3,7,11,15}</code></li><li><strong>window</strong> — coprime <code>fab(a,b)</code> with <code>a,b ≤ 11</code></li><li><strong>search</strong> — two-target corridor <code>k = 4h+3</code> through <code>--k-max</code>, then aligned external-nonresidue shifts</li></ol>
+<p>Every hit is an explicit witness: method, <code>(k,A,B,D,T,kind)</code> when applicable, and the three denominators.</p>
+<h2>Build</h2>
+<pre><code class="language-sh">make
+./cc-kernel solve 9658489
+./cc-kernel residual 200000
+./cc-kernel residual 200000 --from 50000 --stream
+./cc-kernel hunt --until-proof --start 20000 --max-bound 200000
+./cc-kernel status</code></pre>
+<p>From the repo root, without rebuilding CENTL or touching SCi:</p>
+<pre><code class="language-sh">./centl es solve 1009
+./centl es go
+./centl es go --random
+./centl es letters
+./centl es status</code></pre>
+<p><code>./centl es go</code> is the infinite hunt. It resumes from <code>findings/seeds/current.json</code>, collects letters, and stops when you press Ctrl+C. <code>--random</code> begins a new hunt at a random start factor. A finished hunt is not a proof. <code>strike</code> stays false until a universal certificate exists.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

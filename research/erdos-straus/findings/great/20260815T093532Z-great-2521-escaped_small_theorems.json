@@ -1,0 +1,21 @@
+{
+  "event": {
+    "equation": "4/2521 = 1/652 + 1/18908 + 1/23833534",
+    "kernel": "CC.kernel",
+    "kind": "fab",
+    "layer": "window",
+    "method": "fab(2,1)",
+    "n": 2521,
+    "p": 2521,
+    "solved": true,
+    "x": "652",
+    "y": "18908",
+    "z": "23833534"
+  },
+  "file": "20260815T093532Z-great-2521-escaped_small_theorems.md",
+  "grade": "great",
+  "tags": [
+    "escaped_small_theorems",
+    "certified_hard_witness"
+  ]
+}

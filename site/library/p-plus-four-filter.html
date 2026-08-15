@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be an odd positive integer. Suppose q is a positive divisor of">
+  <title>Exact `p+4` factor rescue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/p-plus-four-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/p-plus-four-filter.html">
+  <meta property="og:title" content="Exact `p+4` factor rescue — Free Computation Foundation">
+  <meta property="og:description" content="Let p be an odd positive integer. Suppose q is a positive divisor of">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact `p+4` factor rescue</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p be an odd positive integer. Suppose q is a positive divisor of</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/P-PLUS-FOUR-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary sufficient family / necessary counterexample restriction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this does not prove Erdős–Straus. It adds another exact shifted-factor restriction to the hard-prime counterexample sieve.</p>
+<h2>Theorem</h2>
+<p>Let <code>p</code> be an odd positive integer. Suppose <code>q</code> is a positive divisor of</p>
+<div class="math" role="math">p+4</div>
+<p>with</p>
+<div class="math" role="math">q\equiv3\pmod4.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{m=\frac{q+1}{4}}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{v=\frac{mp+1}{q}}</div>
+<p>is a positive integer and</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1v + \frac1{mp} + \frac1{mpv}. }</div>
+<p>Thus any <code>3 mod 4</code> divisor of <code>p+4</code> gives an Erdős–Straus decomposition.</p>
+<p>In particular, any prime factor</p>
+<div class="math" role="math">q\mid p+4, \qquad q\equiv3\pmod4</div>
+<p>solves <code>p</code>.</p>
+<h2>Proof</h2>
+<p>Since <code>q=4m-1</code> and <code>q | p+4</code>,</p>
+<div class="math" role="math">4(mp+1) =(q+1)p+4 =qp+(p+4).</div>
+<p>The right side is divisible by <code>q</code>. Because <code>q</code> is odd, <code>q | mp+1</code>, so <code>v</code> is an integer.</p>
+<p>Now</p>
+<div class="math" role="math">qv=mp+1.</div>
+<p>Substitute <code>q=4m-1</code>:</p>
+<div class="math" role="math">(4m-1)v=mp+1,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{4mv=mp+v+1.}</div>
+<p>Divide by <code>mpv</code>:</p>
+<div class="math" role="math">\frac4p = \frac1v + \frac1{mp} + \frac1{mpv}.</div>
+<p>QED.</p>
+<h2>Corollary — counterexample restriction</h2>
+<p>If <code>p</code> is a counterexample, then <code>p+4</code> has no divisor <code>3 mod 4</code>. Since</p>
+<div class="math" role="math">p+4\equiv1\pmod4</div>
+<p>for Mordell-hard <code>p≡1 mod4</code>, this implies</p>
+<div class="math" role="math">\boxed{ q\mid p+4,\ q\text{ prime} \Longrightarrow q\equiv1\pmod4. }</div>
+<p>Thus a hard-prime counterexample forces <code>p+4</code> into the multiplicative semigroup generated by primes <code>1 mod 4</code>.</p>
+<h2>Quadratic-residue interpretation</h2>
+<p>For a hard prime <code>p≡1 mod4</code>, any prime <code>q|p+4</code> with <code>q≡1 mod4</code> obeys</p>
+<div class="math" role="math">p\equiv-4\pmod q.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac{p}{q}\right) = \left(\frac{-1}{q}\right) =+1.</div>
+<p>Since <code>p≡1 mod4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\boxed{\left(\frac{q}{p}\right)=+1.}</div>
+<p>So failure of the <code>p+4</code> rescue means <strong>every prime factor of <code>p+4</code> is a quadratic residue modulo <code>p</code></strong>.</p>
+<p>This aligns with <code>FOUR-P-PLUS-ONE-FILTER.md</code> and the earlier shifted-factor restrictions in <code>FAB-HARD-FIRST-FILTERS.md</code>: an increasingly large collection of nearby forms is forced to factor entirely over the quadratic-residue half modulo a hypothetical hard-prime counterexample.</p>
+<h2>Finite regression signal</h2>
+<p>On the exact four-filter survivor population among Mordell-hard primes through <code>10^7</code>, this theorem resolves <code>856</code> of the <code>2,173</code> survivors.</p>
+<p>Applied after <code>FOUR-P-PLUS-ONE-FILTER.md</code>, the first six exact factor restrictions leave <code>791</code> finite survivors through <code>10^7</code>.</p>
+<p>These counts are finite evidence only; the theorem above is universal.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

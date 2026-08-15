@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Square-lift quadratic-signature shadow theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-lift-signature.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-lift-signature.html">
+  <meta property="og:title" content="Square-lift quadratic-signature shadow theorem — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-lift quadratic-signature shadow theorem</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-LIFT-SIGNATURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family plus finite proof-mining signal</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, universal López Type A/B coverage, or the Erdős-Straus conjecture. It proves an infinite shadow family at the full local quadratic-signature resolution.</p>
+<p>Read with:</p>
+<ul><li><a href="square-lift-reciprocity.html">SQUARE-LIFT-RECIPROCITY.md</a></li><li><a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a></li><li><a href="quadratic-signature-shield-k1200.html">QUADRATIC-SIGNATURE-SHIELD-K1200.md</a></li><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree and let <code>s</code> be positive odd. Put</p>
+<div class="math" role="math">4j-1=d s^2.</div>
+<p>Thus <code>a</code> is the squarefree ancestor depth of <code>j</code>.</p>
+<p>Let the distinct prime divisors of <code>d</code> be</p>
+<div class="math" role="math">p_1,\ldots,p_r.</div>
+<p>For every unit <code>u mod d</code>, write</p>
+<div class="math" role="math">\lambda_d(u) = \left( \left(\frac{u}{p_1}\right),\ldots, \left(\frac{u}{p_r}\right) \right) \in\mathbb F_2^r,</div>
+<p>with <code>+1</code> encoded by <code>0</code> and <code>-1</code> by <code>1</code>.</p>
+<p>Let</p>
+<div class="math" role="math">V_a = \operatorname{span}_{\mathbb F_2} \{\lambda_d(\ell):\ell\mid a,\ \ell\text{ prime}\}.</div>
+<p>Then the ancestor trap-signature theorem gives</p>
+<div class="math" role="math">\lambda_d(T_a)=\eta_d+V_a,</div>
+<p>where</p>
+<div class="math" role="math">\eta_d=\lambda_d(-1).</div>
+<h2>2. Projected divisor-signature space</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ W_{j\to a} = \operatorname{span}_{\mathbb F_2} \{\lambda_d(\ell):\ell\mid j,\ \ell\text{ prime}\}. }</div>
+<p>Because signatures are multiplicative, as <code>e</code> ranges over the divisors of <code>j</code>, the set of signatures <code>lambda_d(e)</code> is exactly <code>W_{j-&gt;a}</code>.</p>
+<p>Since <code>4</code> is a square modulo every odd prime divisor of <code>d</code>, both Type A and Type B projected traps have the same signature shift by <code>eta_d</code>.</p>
+<h3>Theorem</h3>
+<p>The complete projected quadratic-signature image of the lifted trap set is</p>
+<div class="math" role="math">\boxed{ \lambda_d(T_j\bmod d) = \eta_d+W_{j\to a}. }</div>
+<h3>Proof</h3>
+<p>For every divisor <code>e|j</code>,</p>
+<div class="math" role="math">\lambda_d(-e)=\eta_d+\lambda_d(e)</div>
+<p>and</p>
+<div class="math" role="math">\lambda_d(-4e)=\eta_d+\lambda_d(e).</div>
+<p>The divisor signatures fill exactly the span <code>W_{j-&gt;a}</code>. QED.</p>
+<h2>3. Exact signature-shadow criterion</h2>
+<p>The ancestor trap signatures are</p>
+<div class="math" role="math">\eta_d+V_a.</div>
+<p>The lifted projected trap signatures are</p>
+<div class="math" role="math">\eta_d+W_{j\to a}.</div>
+<p>Therefore:</p>
+<h3>Theorem</h3>
+<p>The square-lift layer <code>j</code> is completely shadowed by its ancestor <code>a</code> at full local quadratic-signature resolution if and only if</p>
+<div class="math" role="math">\boxed{ W_{j\to a}\subseteq V_a. }</div>
+<p>Equivalently, it is enough to test the prime generators:</p>
+<div class="math" role="math">\boxed{ \lambda_d(\ell)\in V_a \quad\text{for every prime }\ell\mid j. }</div>
+<p>This is an exact finite-dimensional linear-algebra criterion. Unlike exact residue containment, there is no need to enumerate every divisor of <code>j</code> once the prime generators are known.</p>
+<h2>4. Reciprocity places every lift inside the Jacobi kernel</h2>
+<p><a href="square-lift-reciprocity.html">SQUARE-LIFT-RECIPROCITY.md</a> proves that for every divisor <code>e|j</code>,</p>
+<div class="math" role="math">\left(\frac e d\right)=+1.</div>
+<p>At the vector level this says every element of <code>W_{j-&gt;a}</code> lies in the kernel of the Jacobi functional</p>
+<div class="math" role="math">J_d:\mathbb F_2^r\to\mathbb F_2.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ W_{j\to a}\subseteq\ker J_d. }</div>
+<p>The ancestor divisor-signature space also lies in this kernel:</p>
+<div class="math" role="math">V_a\subseteq\ker J_d.</div>
+<h2>5. Quotient-dimension-one automatic shadow theorem</h2>
+<p>Let</p>
+<div class="math" role="math">\kappa(a)=r-\dim V_a</div>
+<p>be the quadratic quotient dimension from <a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a>.</p>
+<p>The Jacobi functional is nonzero and annihilates <code>V_a</code>, so <code>kappa(a)&gt;=1</code>.</p>
+<p>If</p>
+<div class="math" role="math">\boxed{\kappa(a)=1,}</div>
+<p>then <code>V_a</code> is a codimension-one subspace contained in the codimension-one Jacobi kernel. Therefore</p>
+<div class="math" role="math">\boxed{V_a=\ker J_d.}</div>
+<p>Combining this with square-lift reciprocity gives:</p>
+<h3>Theorem</h3>
+<p>If the squarefree ancestor <code>a</code> has</p>
+<div class="math" role="math">\boxed{\kappa(a)=1,}</div>
+<p>then <strong>every</strong> odd square-lift</p>
+<div class="math" role="math">4j-1=(4a-1)s^2</div>
+<p>satisfies</p>
+<div class="math" role="math">\boxed{ \lambda_d(T_j\bmod d) \subseteq \lambda_d(T_a). }</div>
+<p>Thus every such lifted layer is automatically shadowed by its squarefree ancestor at full local quadratic-signature resolution.</p>
+<p>QED.</p>
+<h2>6. Relation to Jacobi saturation</h2>
+<p><a href="jacobi-saturation.html">JACOBI-SATURATION.md</a> classified the much stronger exact-residue condition in which the ancestor trap set fills the entire Jacobi-negative half. That happens only for</p>
+<div class="math" role="math">a=1,2,4.</div>
+<p>The present theorem is broader because it asks only for equality after passing to local Legendre-sign vectors.</p>
+<p>Whenever <code>kappa(a)=1</code>, the ancestor trap <strong>signature coset</strong> fills the entire Jacobi-negative signature hyperplane even though the exact trap set is usually much smaller.</p>
+<p>Thus:</p>
+<div class="math" role="math">\boxed{ \text{exact Jacobi saturation} \Longrightarrow \text{signature saturation}, }</div>
+<p>but not conversely.</p>
+<h2>7. Finite signal through k &lt;= 1200</h2>
+<p>An exact replay of the non-squarefree layers through <code>j&lt;=1200</code> gives:</p>
+<pre><code class="language-text">non-squarefree layer moduli:              224
+square-lifts whose projected signatures
+are NOT contained in the ancestor coset:  17
+signature-shadowed square-lifts:          207</code></pre>
+<p>Every one of the 17 finite exceptions has a squarefree ancestor with</p>
+<div class="math" role="math">\kappa(a)&gt;1.</div>
+<p>Sixteen have <code>kappa(a)=2</code>; one has <code>kappa(a)=3</code>.</p>
+<p>The first exceptions are:</p>
+<pre><code class="language-text">j=115,  m=459,  ancestor a=13,  d=51
+j=205,  m=819,  ancestor a=23,  d=91
+j=259,  m=1035, ancestor a=29,  d=115
+j=319,  m=1275, ancestor a=13,  d=51
+j=520,  m=2079, ancestor a=58,  d=231</code></pre>
+<p>These counts are finite proof-mining data. The automatic-shadow theorem for <code>kappa(a)=1</code> is universal.</p>
+<h2>8. Why this matters for QDSC</h2>
+<p>The full quadratic-signature shield through <code>k&lt;=1200</code> found that collective higher-codimension signature constraints repeatedly collapse onto lower-codimension shadows.</p>
+<p>The theorem above supplies one infinite arithmetic mechanism for that collapse:</p>
+<div class="math" role="math">\boxed{ \text{square lift} + \kappa(a)=1 \Longrightarrow \text{ancestor signature shadow}. }</div>
+<p>So higher-order local sign information created by square factors is often not new at all. It is inherited from the squarefree ancestor.</p>
+<p>Only square lifts over ancestors with a genuinely higher-dimensional quotient</p>
+<div class="math" role="math">\kappa(a)&gt;1</div>
+<p>can create new quadratic-signature projection information.</p>
+<p>This localizes the square-lift part of the QDSC proof problem to the higher-quotient ancestor set.</p>
+<h2>9. Next theorem target</h2>
+<p>For <code>kappa(a)&gt;1</code>, classify the subspace</p>
+<div class="math" role="math">W_{j\to a}</div>
+<p>inside the Jacobi kernel and determine exactly when it escapes <code>V_a</code>.</p>
+<p>Because both spaces are generated by prime-factor signature vectors, this becomes a reciprocity-matrix problem rather than an exact residue enumeration problem.</p>
+<p>That is the next natural bridge from square-lift ancestry to the quadratic-signature direct-shadow theorem.</p>
+<h2>10. Novelty boundary</h2>
+<p>Local Legendre symbols, quadratic reciprocity, vector spaces over <code>F_2</code>, and affine signature cosets are classical. The candidate contribution is the exact square-lift projection theorem and the automatic ancestor-shadow criterion inside the López Type A/B minimal-depth/shadow framework.</p>
+<p>Publication priority remains subject to broader literature review and independent scrutiny.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

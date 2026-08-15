@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Reciprocity tower shadows — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/reciprocity-tower-shadows.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/reciprocity-tower-shadows.html">
+  <meta property="og:title" content="Reciprocity tower shadows — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Reciprocity tower shadows</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RECIPROCITY-TOWER-SHADOWS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family inside the Type A/B minimal-depth program</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It gives three exact infinite families of fully shadowed Type A/B layers.</p>
+<p>Read with:</p>
+<ul><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li><li><a href="square-lift-towers.html">SQUARE-LIFT-TOWERS.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li><li><a href="multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a></li></ul>
+<h2>1. Jacobi-saturated layers</h2>
+<p>For a Type A/B depth <code>j</code>, put</p>
+<div class="math" role="math">m=4j-1</div>
+<p>and let</p>
+<div class="math" role="math">N_m^-= \left\{ u\in(\mathbb Z/m\mathbb Z)^\times: \left(\frac{u}{m}\right)=-1 \right\}.</div>
+<p>The quadratic trap theorem gives</p>
+<div class="math" role="math">T_j\subseteq N_m^-.</div>
+<p>Call the layer <strong>Jacobi-saturated</strong> if</p>
+<div class="math" role="math">\boxed{T_j=N_m^-.}</div>
+<p>At such a layer, the single Jacobi bit already describes the exact Type A/B trap set.</p>
+<h2>2. Classification theorem</h2>
+<h3>Theorem</h3>
+<p>The Jacobi-saturated Type A/B layers are exactly</p>
+<div class="math" role="math">\boxed{j\in\{1,2,4\}.}</div>
+<p>Equivalently,</p>
+<pre><code class="language-text">j = 1,  m = 3
+j = 2,  m = 7
+j = 4,  m = 15</code></pre>
+<p>are the only layers for which every Jacobi-negative unit is an exact Type A/B trap.</p>
+<h3>Proof</h3>
+<p>Suppose <code>T_j=N_m^-</code>.</p>
+<p>From the multiplicative trap-coset theorem,</p>
+<div class="math" role="math">T_j\subseteq-D_j\subseteq N_m^-.</div>
+<p>Hence equality at the two ends forces</p>
+<div class="math" role="math">T_j=-D_j=N_m^-.</div>
+<p>The full multiplicative saturation classification in <a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a> therefore implies</p>
+<div class="math" role="math">j=2^a</div>
+<p>for some <code>a&gt;=0</code>.</p>
+<p>The endpoint <code>a=0</code> gives <code>j=1</code>, and direct inspection gives</p>
+<div class="math" role="math">T_1=\{2\}=N_3^-.</div>
+<p>Now let <code>a&gt;=1</code> and write</p>
+<div class="math" role="math">r=a+2, \qquad m=2^r-1.</div>
+<p>The dyadic theorem gives</p>
+<div class="math" role="math">D_j=\langle2\rangle, \qquad
+<p>|D_j|=r.&lt;/div&gt;</p>
+<p>If the layer is Jacobi-saturated, then <code>D_j</code> is the complete Jacobi-positive kernel, whose size is <code>phi(m)/2</code>. Thus every Jacobi-positive unit would have to be one of</p>
+<div class="math" role="math">1,2,2^2,\ldots,2^{r-1}\pmod m.</div>
+<p>For <code>r=3</code> and <code>r=4</code>, this is true:</p>
+<div class="math" role="math">j=2,\quad m=7,</div>
+<p>and</p>
+<div class="math" role="math">j=4,\quad m=15.</div>
+<p>We show it fails for every <code>r&gt;=5</code> by explicitly producing a Jacobi-positive unit below <code>m</code> that is not a power of two.</p>
+<p>Write</p>
+<div class="math" role="math">r=2^s u, \qquad u\text{ odd}.</div>
+<h3>Case 1: r is odd</h3>
+<p>Take</p>
+<div class="math" role="math">x=9=3^2.</div>
+<p>Since <code>r</code> is odd,</p>
+<div class="math" role="math">3\nmid2^r-1,</div>
+<p>so <code>x</code> is a unit modulo <code>m</code>. It is a square, hence Jacobi-positive. Also</p>
+<div class="math" role="math">9&lt;m</div>
+<p>for <code>r&gt;=5</code>, and <code>9</code> is not a power of two. Thus <code>x notin D_j</code>.</p>
+<h3>Case 2: u&gt;1</h3>
+<p>Take</p>
+<div class="math" role="math">t=2^s, \qquad x=(2^t+1)^2.</div>
+<p>Here</p>
+<div class="math" role="math">\frac r{\gcd(r,t)}=u</div>
+<p>is odd. The standard gcd identity</p>
+<div class="math" role="math">\gcd(2^r-1,2^t+1)=1</div>
+<p>therefore shows that <code>x</code> is a unit modulo <code>m</code>.</p>
+<p>Because <code>u&gt;=3</code>,</p>
+<div class="math" role="math">r\ge3t,</div>
+<p>and for <code>t&gt;=2</code>,</p>
+<div class="math" role="math">(2^t+1)^2&lt;2^{3t}-1\le2^r-1=m.</div>
+<p>The smallest relevant case <code>t=1,r&gt;=6</code> gives <code>x=9&lt;63&lt;=m</code> directly.</p>
+<p>Again <code>x</code> is a square, hence Jacobi-positive, and is visibly not a power of two. So <code>x notin D_j</code>.</p>
+<h3>Case 3: u=1</h3>
+<p>Then <code>r</code> is a power of two. Since <code>r&gt;=5</code>, in fact</p>
+<div class="math" role="math">r\ge8.</div>
+<p>Take</p>
+<div class="math" role="math">x=49=7^2.</div>
+<p>The order of <code>2 mod 7</code> is <code>3</code>, which does not divide a power of two. Hence</p>
+<div class="math" role="math">7\nmid2^r-1,</div>
+<p>so <code>x</code> is a unit modulo <code>m</code>.</p>
+<p>Also</p>
+<div class="math" role="math">49&lt;2^8-1\le m,</div>
+<p>and <code>49</code> is not a power of two. Again this is a Jacobi-positive unit outside <code>D_j</code>.</p>
+<p>Thus no <code>r&gt;=5</code> is Jacobi-saturated.</p>
+<p>Therefore the only Jacobi-saturated depths are</p>
+<div class="math" role="math">\boxed{1,2,4.}</div>
+<p>QED.</p>
+<h2>3. Reciprocity tower lemma</h2>
+<p>Let <code>j</code> be any Type A/B layer and put</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>For any positive odd integer <code>c</code>, define the square-lift depth</p>
+<div class="math" role="math">\boxed{ K_c=\frac{mc^2+1}{4}. }</div>
+<p>Then</p>
+<div class="math" role="math">4K_c-1=mc^2.</div>
+<h3>Lemma</h3>
+<p>For every divisor <code>e|K_c</code>,</p>
+<div class="math" role="math">\boxed{ \left(\frac e m\right)=+1. }</div>
+<h3>Proof</h3>
+<p>First,</p>
+<div class="math" role="math">4K_c=mc^2+1</div>
+<p>shows</p>
+<div class="math" role="math">\gcd(K_c,m)=1.</div>
+<p>Let <code>ell</code> be an odd prime divisor of <code>K_c</code>. Then</p>
+<div class="math" role="math">mc^2\equiv-1\pmod\ell.</div>
+<p>Also <code>ell</code> cannot divide <code>c</code>, since otherwise the same congruence would give <code>0=-1 mod ell</code>.</p>
+<p>Thus</p>
+<div class="math" role="math">-m\equiv c^{-2}\pmod\ell,</div>
+<p>so</p>
+<div class="math" role="math">\left(\frac{-m}{\ell}\right)=+1.</div>
+<p>Because</p>
+<div class="math" role="math">m\equiv3\pmod4,</div>
+<p>quadratic reciprocity gives the identity</p>
+<div class="math" role="math">\left(\frac{-m}{\ell}\right) = \left(\frac{\ell}{m}\right).</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac{\ell}{m}\right)=+1.</div>
+<p>If <code>2|K_c</code>, then <code>c^2=1 mod 8</code> and</p>
+<div class="math" role="math">mc^2+1\equiv0\pmod8,</div>
+<p>so</p>
+<div class="math" role="math">m\equiv7\pmod8.</div>
+<p>Hence</p>
+<div class="math" role="math">\left(\frac2m\right)=+1.</div>
+<p>Every prime divisor of <code>K_c</code> therefore has Jacobi symbol <code>+1 mod m</code>. Multiplicativity gives</p>
+<div class="math" role="math">\left(\frac e m\right)=+1</div>
+<p>for every <code>e|K_c</code>. QED.</p>
+<h2>4. Reciprocity tower shadow theorem</h2>
+<h3>Theorem</h3>
+<p>If the base layer <code>j</code> is Jacobi-saturated, then every odd square lift <code>K_c</code> is fully shadowed by <code>j</code>:</p>
+<div class="math" role="math">\boxed{ T_{K_c}\bmod m \subseteq T_j. }</div>
+<p>For <code>c&gt;1</code>, this is a genuine earlier-to-later direct shadow relation.</p>
+<h3>Proof</h3>
+<p>Take any target trap residue at the lifted layer. It is of the form</p>
+<div class="math" role="math">-e</div>
+<p>or</p>
+<div class="math" role="math">-4e</div>
+<p>with <code>e|K_c</code>.</p>
+<p>By the reciprocity tower lemma,</p>
+<div class="math" role="math">\left(\frac e m\right)=+1.</div>
+<p>Since <code>m=3 mod 4</code>,</p>
+<div class="math" role="math">\left(\frac{-1}{m}\right)=-1,</div>
+<p>and since <code>4</code> is a square,</p>
+<div class="math" role="math">\left(\frac4m\right)=+1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac{-e}{m}\right) = \left(\frac{-4e}{m}\right) =-1.</div>
+<p>The base is Jacobi-saturated, so every Jacobi-negative unit modulo <code>m</code> lies in <code>T_j</code>. Hence both reduced trap residues lie in <code>T_j</code>.</p>
+<p>Thus</p>
+<div class="math" role="math">T_{K_c}\bmod m\subseteq T_j.</div>
+<p>QED.</p>
+<h2>5. The three universal shadow towers</h2>
+<p>By the classification theorem, the only possible bases are</p>
+<div class="math" role="math">j=1,2,4.</div>
+<p>Therefore every positive odd <code>c</code> gives the exact shadow families</p>
+<div class="math" role="math">\boxed{ K_c^{(1)}=\frac{3c^2+1}{4}, }</div>
+<div class="math" role="math">\boxed{ K_c^{(2)}=\frac{7c^2+1}{4}, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ K_c^{(4)}=\frac{15c^2+1}{4}. }</div>
+<p>For every odd <code>c&gt;1</code>, respectively,</p>
+<div class="math" role="math">\boxed{ T_{K_c^{(1)}}\bmod3\subseteq T_1, }</div>
+<div class="math" role="math">\boxed{ T_{K_c^{(2)}}\bmod7\subseteq T_2, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ T_{K_c^{(4)}}\bmod15\subseteq T_4. }</div>
+<p>These are three explicit infinite families of later Type A/B layers that contribute no new exact trap information beyond one fixed earlier layer.</p>
+<h2>6. Polynomial form of the depth families</h2>
+<p>Writing</p>
+<div class="math" role="math">c=2n+1, \qquad n\ge0,</div>
+<p>the three depth families become</p>
+<div class="math" role="math">\boxed{ K_n^{(1)}=3n^2+3n+1, }</div>
+<div class="math" role="math">\boxed{ K_n^{(2)}=7n^2+7n+2, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ K_n^{(4)}=15n^2+15n+4. }</div>
+<p>For <code>n&gt;=1</code>, each is fully shadowed by the corresponding base layer <code>1</code>, <code>2</code>, or <code>4</code>.</p>
+<p>The first few values are:</p>
+<pre><code class="language-text">base j=1:  7, 19, 37, 61, 91, ...
+base j=2: 16, 44, 86, 142, 212, ...
+base j=4: 34, 94, 184, 304, 454, ...</code></pre>
+<h2>7. Relation to square-lift towers</h2>
+<p>The modulus relation is exactly</p>
+<div class="math" role="math">4K_c-1=(4j-1)c^2.</div>
+<p>So these are square-lift towers in the sense of <a href="square-lift-towers.html">SQUARE-LIFT-TOWERS.md</a>.</p>
+<p>The new theorem identifies the precise reason that these three towers are universally shadowed:</p>
+<blockquote><p>every divisor of the lifted depth is forced by quadratic reciprocity into the Jacobi-positive class of the base modulus, and at the three saturated bases the negative Jacobi class is already the exact trap set.</p></blockquote>
+<p>This is stronger than merely observing modulus divisibility.</p>
+<h2>8. Relation to the dyadic lattice</h2>
+<p>The base layers <code>1</code>, <code>2</code>, and <code>4</code> are also exactly the first three multiplicatively saturated dyadic layers.</p>
+<p>But the reciprocity tower theorem is not the same as the dyadic Mersenne shadow lattice.</p>
+<p>For example,</p>
+<div class="math" role="math">j=2,\quad c=3</div>
+<p>gives</p>
+<div class="math" role="math">K_c=16,</div>
+<p>which lies in both structures.</p>
+<p>Meanwhile</p>
+<div class="math" role="math">j=4,\quad c=3</div>
+<p>gives</p>
+<div class="math" role="math">K_c=34,</div>
+<p>which is not dyadic at all, yet it is still completely shadowed by layer <code>4</code>.</p>
+<p>Thus quadratic-reciprocity square lifts generate a substantially broader infinite shadow mechanism.</p>
+<h2>9. Immediate exact-depth consequence</h2>
+<p>No prime can have its <strong>first</strong> Type A/B hit at a layer belonging to one of these towers once the corresponding earlier layer is among the imposed history.</p>
+<p>In the unrestricted Type A/B system, for every odd <code>c&gt;1</code>,</p>
+<div class="math" role="math">\boxed{ C_{AB}(p)\ne K_c^{(1)}, \quad C_{AB}(p)\ne K_c^{(2)}, \quad C_{AB}(p)\ne K_c^{(4)} }</div>
+<p>for every prime <code>p</code> for which the congruence comparison is prime-compatible.</p>
+<p>More precisely, any prime landing in the lifted trap layer necessarily already lands in the corresponding earlier trap layer, so the lifted layer can never be a new first hit.</p>
+<h2>10. Why this matters</h2>
+<p>The shadow graph now contains at least two proved infinite algebraic mechanisms:</p>
+<ol><li><strong>Mersenne/dyadic cyclic ancestry</strong>, controlled by exponent divisibility;</li><li><strong>quadratic-reciprocity square-lift towers</strong>, controlled by Jacobi saturation.</li></ol>
+<p>So the large finite shadow map is no longer merely a collection of computational coincidences. Distinct infinite theorem families are beginning to emerge from different algebraic causes.</p>
+<p>That is exactly the kind of decomposition needed for a structural classification of the irredundant Type A/B core.</p>
+<h2>11. Next theorem targets</h2>
+<ol><li>classify square-lift shadows from non-saturated bases by replacing the Jacobi bit with the full local quadratic-signature quotient;</li><li>classify them again using the stronger multiplicative quotient <code>Gamma_j</code>;</li><li>determine whether every observed square-lift direct shadow is explained by one of these quotient mechanisms;</li><li>prove a general quotient-tower shadow criterion;</li><li>fold the resulting infinite families into an algebraic description of the exact-depth structural gaps.</li></ol>
+<h2>12. Novelty boundary</h2>
+<p>Quadratic reciprocity, Jacobi symbols, and the algebraic identity <code>4K-1=(4j-1)c^2</code> are classical. López&#x27;s Type A/B congruences are prior art.</p>
+<p>The candidate contribution is the <strong>Jacobi-saturation classification and resulting three infinite reciprocity-driven Type-A/B direct-shadow towers inside the minimal-depth/shadow framework</strong>.</p>
+<p>A targeted arXiv search on 2026-08-14 did not locate this exact formulation. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

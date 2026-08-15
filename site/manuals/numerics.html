@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Integer literals denote unbounded integers. A finite decimal literal denotes an exact rational with a power-of-ten denominator. Fractions are normalized to a positive denominator and relatively prime numerator and denominator.">
+  <title>Numerical contract — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/numerics.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/numerics.html">
+  <meta property="og:title" content="Numerical contract — Free Computation Foundation">
+  <meta property="og:description" content="Integer literals denote unbounded integers. A finite decimal literal denotes an exact rational with a power-of-ten denominator. Fractions are normalized to a positive denominator and relatively prime numerator and denominator.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Numerical contract</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Integer literals denote unbounded integers. A finite decimal literal denotes an exact rational with a power-of-ten denominator. Fractions are normalized to a positive denominator and relatively prime numerator and denominator.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/NUMERICS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<h2>Exact values</h2>
+<p>Integer literals denote unbounded integers. A finite decimal literal denotes an exact rational with a power-of-ten denominator. Fractions are normalized to a positive denominator and relatively prime numerator and denominator.</p>
+<p>For example:</p>
+<pre><code class="language-text">0.1        = 1/10
+1.2300     = 123/100
+0.1 + 0.2  = 3/10</code></pre>
+<p>Trailing zeros may be retained as presentation provenance without changing the mathematical value.</p>
+<p>An operation on exact inputs remains exact whenever its mathematical result is represented by the exact domain. Approximation never occurs merely because an exact computation is expensive.</p>
+<h2>Symbolic exact values</h2>
+<p>Named constants and formal expressions outside the rationals can remain exact without being numerically evaluated. Real quadratics returned by <code>solve</code> use a verified equation-local <code>center ± sqrt(radicand)</code> representation; CENTL does not yet expose a general algebraic-number scalar backend. A result is reported as exact only when its representation establishes the required property. Failure to establish a property yields unknown, not a guessed answer.</p>
+<p>Formal expressions and derivatives can also remain exact without being reduced to a closed form. Exactness means the expression is preserved symbolically; it does not claim that the expression is canonical, elementary, or numerically approximated.</p>
+<p>Polynomial canonicalization uses exact rational coefficient lists. A requested transformation outside its documented domain remains symbolic and unchanged; unsupported algebra is never interpreted as a successful factorization.</p>
+<p>The polynomial-integration slice uses the same coefficient model. For an accepted polynomial</p>
+<pre><code class="language-text">p(x) = c0 + c1*x + ... + cn*x^n</code></pre>
+<p>with exact rational coefficients, <code>integrate(p, x)</code> returns the canonical zero-constant antiderivative whose coefficient of <code>x^(k+1)</code> is <code>ck/(k+1)</code>. <code>integrate(p, x = a, b)</code> evaluates that exact polynomial at rational <code>a</code> and <code>b</code> and returns the exact difference. No rounding or numerical quadrature is involved. The accepted expression syntax uses positive powers no larger than</p>
+<ol><li>In particular, explicit zero powers remain residual rather than erasing a</li></ol>
+<p>possible <code>0^0</code> error. A divisor must be established as constant by the bounded host profile before verified coefficient conversion runs; algebraic cancellation is not used to bypass that preflight. An integrand or bound outside this domain remains an explicit <code>integrate(...)</code> expression.</p>
+<p>Polynomial integration is checked against the active expression-node, symbolic-work, exact-bit, and result-byte limits. Exceeding a budget is a structured resource failure; being outside the mathematical domain instead produces the visible residual expression.</p>
+<h2>Enclosures</h2>
+<p>An approximate real result denotes a set containing the mathematical result. The fundamental backend contract is inclusion:</p>
+<pre><code class="language-text">mathematical value is contained in returned enclosure</code></pre>
+<p>Internally, backend balls are transferred as exact dyadic components. The core checks sign, radius, exponent, finiteness, and size constraints before use.</p>
+<p>Operations on enclosures preserve inclusion. If dependency growth or an algorithmic limitation produces an enclosure too wide to satisfy the request, CENTL increases precision or reports the unresolved enclosure.</p>
+<h2>Precision requests</h2>
+<p>Users request a property of the result, not merely a working precision. Typical requests include:</p>
+<ul><li>at least <code>n</code> justified significant decimal digits;</li><li>an absolute enclosure width below a threshold;</li><li>a relative enclosure width below a threshold;</li><li>an explicit outward-rounded decimal interval.</li></ul>
+<p>The evaluator selects an initial binary precision, checks the resulting enclosure, and retries with higher precision within configured limits.</p>
+<p>The current calculator syntax is <code>approx(expression)</code> for 20 significant digits or <code>approx(expression, digits)</code> for an explicit request from 1 through 1000. Working precision starts above the decimal target with a guard margin and may double up to 16,384 bits. These are resource limits, not claims that every request can be resolved.</p>
+<p>Machine evaluation also bounds source bytes, expanded and resolved expression nodes, symbolic-transformation work, estimated exact-result bits, integer iterations, and session definitions before entering expensive operations. <code>centl --serve</code> reports the active ceilings through <code>describe</code> and accepts lower per-request limits.</p>
+<h2>Rendering</h2>
+<p>Exact values are rendered exactly. Enclosures may be rendered as a midpoint and radius, lower and upper endpoints, or a decimal prefix followed by explicit uncertainty.</p>
+<p>An unqualified decimal digit may be printed only when every value in the full enclosure has that digit in the chosen rounding interpretation. Otherwise CENTL must expose the uncertainty or request more precision.</p>
+<p>The renderer must not infer accuracy from the number of digits present in a backend string.</p>
+<p>The native backend does not provide CENTL&#x27;s displayed decimal. It returns exact integer endpoints and a shared binary exponent. CENTL converts those dyadics to rationals and rounds the lower endpoint down and the upper endpoint up at the requested significant-decimal scale. Success requires the exact dyadic width to be no more than half one unit at that scale; reaching the working-precision ceiling without satisfying that test is <code>insufficient_precision</code>.</p>
+<h2>Comparisons and domains</h2>
+<p>Comparisons over exact values are two-valued when decidable. Comparisons over enclosures are three-valued:</p>
+<pre><code class="language-text">certainly true
+certainly false
+unknown at this precision</code></pre>
+<p>Domain errors distinguish certainly invalid inputs from enclosures containing both valid and invalid points. Increasing precision may resolve the latter.</p>
+<p>Local assumptions can justify otherwise conditional symbolic identities. For example, cancellation in <code>x/x</code> requires a condition establishing <code>x != 0</code>. CENTL retains that condition in the result instead of silently widening the domain of the simplified expression.</p>
+<h2>Failures</h2>
+<p>Numerical failure is data, not fabricated output. Structured outcomes include:</p>
+<ul><li>invalid syntax;</li><li>mathematical domain error;</li><li>unknown comparison;</li><li>insufficient precision;</li><li>resource limit reached;</li><li>unsupported exact operation;</li><li>backend failure;</li><li>violated backend contract.</li></ul>
+<p>Every failure identifies the expression and mathematical condition involved without exposing irrelevant compiler internals.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

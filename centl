@@ -4,6 +4,14 @@ set -eu
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 binary="$project_root/_build/default/src/main.exe"
 
+# Erdős–Straus kernels plug in here. They do not use CENTL-SCi.
+case "${1:-}" in
+  es|erdos|erdos-straus)
+    shift
+    exec python3 "$project_root/research/erdos-straus/es" "$@"
+    ;;
+esac
+
 if [ -x "$binary" ]; then
   exec "$binary" "$@"
 fi

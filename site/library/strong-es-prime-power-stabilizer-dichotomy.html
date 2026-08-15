@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Prime-power stabilizer dichotomy: only powers of two are periodic — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-prime-power-stabilizer-dichotomy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-prime-power-stabilizer-dichotomy.html">
+  <meta property="og:title" content="Prime-power stabilizer dichotomy: only powers of two are periodic — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-power stabilizer dichotomy: only powers of two are periodic</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-PRIME-POWER-STABILIZER-DICHOTOMY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>MERSENNE-SHADOW-LATTICE.md</code>, <code>STRONG-ES-SHADOW-TOWER-STRUCTURAL-GAPS.md</code></p>
+<p><strong>Claim boundary:</strong> classifies the full stabilizer of every prime-power completed strong/Type-II layer. It does not classify non-prime-power stabilizers or prove universal Type-II coverage.</p>
+<hr>
+<h2>1. Prime-power completed layer</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{a=\ell^E}</div>
+<p>with <code>ell</code> prime and</p>
+<div class="math" role="math">E\ge1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{m=4\ell^E-1.}</div>
+<p>Because prime-power layers have no mixed orthants, the completed signed box is</p>
+<div class="math" role="math">\boxed{ R_a = \{\ell^z\pmod m:-E\le z\le E\}.}</div>
+<p>Let</p>
+<div class="math" role="math">d=\operatorname{ord}_m(\ell).</div>
+<p>The box is a consecutive symmetric exponent interval inside the cyclic subgroup</p>
+<div class="math" role="math">\langle\ell\rangle\cong C_d.</div>
+<hr>
+<h2>2. Stabilizer of a cyclic interval</h2>
+<p>Because</p>
+<div class="math" role="math">1\in R_a,</div>
+<p>every stabilizer element belongs to <code>R_a</code>, hence to <code>\langle ell\rangle</code>.</p>
+<p>If</p>
+<div class="math" role="math">d&gt;2E+1,</div>
+<p>then the exponent interval <code>[-E,E]</code> is a proper interval of length <code>2E+1</code> in <code>C_d</code>.</p>
+<p>A proper consecutive interval in a cyclic group has trivial translation stabilizer.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{d&gt;2E+1\Longrightarrow\operatorname{Stab}(R_a)=\{1\}.}</div>
+<p>If instead</p>
+<div class="math" role="math">d\le2E+1,</div>
+<p>the consecutive interval covers every residue class modulo <code>d</code>, so</p>
+<div class="math" role="math">R_a=\langle\ell\rangle</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\operatorname{Stab}(R_a)=\langle\ell\rangle.}</div>
+<p>Thus the prime-power stabilizer problem reduces exactly to the order comparison</p>
+<div class="math" role="math">\boxed{d\le2E+1?}</div>
+<hr>
+<h2>3. Binary case</h2>
+<p>Let</p>
+<div class="math" role="math">\ell=2.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{m=2^{E+2}-1.}</div>
+<p>By definition</p>
+<div class="math" role="math">2^{E+2}\equiv1\pmod m.</div>
+<p>No smaller positive exponent can give <code>1</code>, because if <code>d&lt;E+2</code> then</p>
+<div class="math" role="math">0&lt;2^d-1&lt;2^{E+2}-1=m,</div>
+<p>so <code>m</code> cannot divide <code>2^d-1</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\operatorname{ord}_m(2)=E+2.}</div>
+<p>Since</p>
+<div class="math" role="math">E+2\le2E+1</div>
+<p>for every <code>E&gt;=1</code>, the completed box saturates the cyclic subgroup:</p>
+<div class="math" role="math">\boxed{R_{2^E}=\langle2\rangle.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\operatorname{Stab}(R_{2^E})=\langle2\rangle.}</div>
+<p>This is exactly the periodic Mersenne family.</p>
+<hr>
+<h2>4. Odd-prime case: the order must exceed E</h2>
+<p>Now let</p>
+<div class="math" role="math">\boxed{\ell\ge3\text{ be prime}.}</div>
+<p>Suppose for contradiction that</p>
+<div class="math" role="math">\boxed{d\le2E+1.}</div>
+<p>Since</p>
+<div class="math" role="math">\ell^E&lt;m=4\ell^E-1,</div>
+<p>no exponent <code>d&lt;=E</code> can satisfy</p>
+<div class="math" role="math">m\mid\ell^d-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{d=E+s}</div>
+<p>for some</p>
+<div class="math" role="math">\boxed{1\le s\le E+1.}</div>
+<hr>
+<h2>5. Combine the order relation with 4 ell^E = 1</h2>
+<p>Modulo <code>m</code>,</p>
+<div class="math" role="math">4\ell^E\equiv1.</div>
+<p>Also</p>
+<div class="math" role="math">\ell^{E+s}\equiv1.</div>
+<p>Substituting the first relation into the second gives</p>
+<div class="math" role="math">\frac{\ell^s}{4}\equiv1\pmod m,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{\ell^s\equiv4\pmod m.}</div>
+<p>We split by <code>s</code>.</p>
+<hr>
+<h2>6. The case s &lt;= E is impossible by size</h2>
+<p>If</p>
+<div class="math" role="math">s\le E,</div>
+<p>then</p>
+<div class="math" role="math">0&lt;\ell^s&lt;m.</div>
+<p>Also</p>
+<div class="math" role="math">0&lt;4&lt;m</div>
+<p>for every odd prime-power layer.</p>
+<p>Thus the congruence</p>
+<div class="math" role="math">\ell^s\equiv4\pmod m</div>
+<p>forces equality</p>
+<div class="math" role="math">\ell^s=4.</div>
+<p>No odd prime power equals <code>4</code>.</p>
+<p>Contradiction.</p>
+<p>Therefore the only remaining possibility is</p>
+<div class="math" role="math">\boxed{s=E+1.}</div>
+<hr>
+<h2>7. The endpoint s = E+1 also fails</h2>
+<p>The congruence becomes</p>
+<div class="math" role="math">\ell^{E+1}\equiv4\pmod m.</div>
+<p>Hence for some positive integer <code>t</code>,</p>
+<div class="math" role="math">\boxed{ \ell^{E+1}-4 =t(4\ell^E-1).}</div>
+<p>Because</p>
+<div class="math" role="math">4\ell^E-1&gt;\ell^E</div>
+<p>and</p>
+<div class="math" role="math">\ell^{E+1}-4&lt;\ell^{E+1},</div>
+<p>we get</p>
+<div class="math" role="math">\boxed{0&lt;t&lt;\ell.}</div>
+<p>Reduce the equation modulo <code>ell</code>:</p>
+<div class="math" role="math">-4\equiv-t\pmod\ell.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{t\equiv4\pmod\ell.}</div>
+<p>For odd prime <code>ell&gt;=5</code>, the size bound <code>0&lt;t&lt;ell</code> forces</p>
+<div class="math" role="math">\boxed{t=4.}</div>
+<p>Substituting gives</p>
+<div class="math" role="math">\ell^{E+1}-4 =16\ell^E-4,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{\ell=16,}</div>
+<p>impossible.</p>
+<p>For <code>ell=3</code>, one has</p>
+<div class="math" role="math">\ell^{E+1}&lt;4\ell^E-1=m</div>
+<p>and the congruence would again force <code>3^{E+1}=4</code>, impossible.</p>
+<p>Therefore no odd prime can satisfy</p>
+<div class="math" role="math">d\le2E+1.</div>
+<hr>
+<h2>8. Exact dichotomy</h2>
+<p>We have proved:</p>
+<h3>Theorem — prime-power stabilizer dichotomy</h3>
+<p>For every prime <code>ell</code> and integer <code>E&gt;=1</code>, let</p>
+<div class="math" role="math">a=\ell^E.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ \operatorname{Stab}(R_a)\ne\{1\} \iff \ell=2.}</div>
+<p>More precisely:</p>
+<h3>Powers of two</h3>
+<div class="math" role="math">\boxed{ \operatorname{Stab}(R_{2^E}) =\langle2\rangle,}</div>
+<p>with</p>
+<div class="math" role="math">\operatorname{ord}_{2^{E+2}-1}(2)=E+2.</div>
+<h3>Odd prime powers</h3>
+<div class="math" role="math">\boxed{ \operatorname{Stab}(R_{\ell^E}) =\{1\} \qquad(\ell\text{ odd prime}).}</div>
+<p>Thus the binary/Mersenne family is uniquely periodic among all prime-power completed layers.</p>
+<hr>
+<h2>9. Shadow consequence</h2>
+<p>The shadow-tower theorem says an ancestor stabilizer creates infinite multiplicative structural-gap descendants.</p>
+<p>For odd prime-power bases there is no nontrivial stabilizer direction. Their multiplicative shadow descendants can therefore arise only from identity-class extension primes</p>
+<div class="math" role="math">r\equiv1\pmod{4\ell^E-1}.</div>
+<p>For powers of two, every prime residue in the cyclic subgroup</p>
+<div class="math" role="math">\langle2\rangle</div>
+<p>is a stabilizer direction and can participate in the larger Mersenne shadow tower.</p>
+<p>This sharply separates binary prime powers from all odd prime powers in the completed ancestry graph.</p>
+<hr>
+<h2>10. Relation to the computational signal</h2>
+<p>Finite computation had suggested that nontrivial completed full stabilizers are rare and, through the tested range, appeared only at powers of two.</p>
+<p>The theorem proves that observation <strong>completely on the prime-power locus</strong>.</p>
+<p>The remaining open stabilizer question is therefore restricted to genuinely multi-prime layer indices.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

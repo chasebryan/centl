@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Square-lift reciprocity and infinite ancestor-shadow families — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-lift-reciprocity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-lift-reciprocity.html">
+  <meta property="og:title" content="Square-lift reciprocity and infinite ancestor-shadow families — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-lift reciprocity and infinite ancestor-shadow families</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-LIFT-RECIPROCITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It gives an exact infinite family of shadow reductions inside the squarefree-lift core.</p>
+<p>Read with:</p>
+<ul><li><a href="squarefree-lift-core.html">SQUAREFREE-LIFT-CORE.md</a></li><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li><li><a href="theory.html">THEORY.md</a></li></ul>
+<h2>1. Square-lift setup</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree, and let <code>s</code> be any positive odd integer. Define</p>
+<div class="math" role="math">\boxed{ 4j-1=d s^2, \qquad j=\frac{d s^2+1}{4}. }</div>
+<p>Then the squarefree ancestor of the layer <code>j</code> is exactly <code>a</code>.</p>
+<p>The exact Type A/B traps are</p>
+<div class="math" role="math">T_j=\{-e,-4e\pmod{4j-1}:e\mid j\}.</div>
+<p>We study their projection modulo the ancestor modulus <code>d</code>.</p>
+<h2>2. Reciprocity theorem for divisors of j</h2>
+<h3>Theorem</h3>
+<p>For every divisor <code>e|j</code>,</p>
+<div class="math" role="math">\boxed{ \left(\frac e d\right)=+1. }</div>
+<p>Consequently,</p>
+<div class="math" role="math">\boxed{ \left(\frac{-e}{d}\right) = \left(\frac{-4e}{d}\right) =-1. }</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ T_j\bmod d \subseteq \{u\in(\mathbb Z/d\mathbb Z)^\times:(u/d)=-1\}. }</div>
+<h3>Proof</h3>
+<p>It is enough to prove the first claim for every prime divisor <code>ell|j</code>.</p>
+<p>Because <code>gcd(j,4j-1)=1</code>, the prime <code>ell</code> is coprime to <code>d s</code>.</p>
+<p>From</p>
+<div class="math" role="math">d s^2=4j-1</div>
+<p>and <code>ell|j</code>, we obtain</p>
+<div class="math" role="math">d s^2\equiv-1\pmod\ell.</div>
+<p>Hence</p>
+<div class="math" role="math">-d\equiv s^{-2}\pmod\ell,</div>
+<p>so <code>-d</code> is a quadratic residue modulo <code>ell</code>.</p>
+<h3>Odd ell</h3>
+<p>Because <code>d</code> is squarefree and <code>d=3 mod 4</code>, quadratic reciprocity for the Jacobi symbol gives</p>
+<div class="math" role="math">\left(\frac\ell d\right) = \left(\frac{-d}{\ell}\right).</div>
+<p>The right side is <code>+1</code> by the congruence above. Therefore</p>
+<div class="math" role="math">(\ell/d)=+1.</div>
+<h3>ell = 2</h3>
+<p>If <code>2|j</code>, then</p>
+<div class="math" role="math">4j-1\equiv7\pmod8.</div>
+<p>Since every odd square is <code>1 mod 8</code>, the identity <code>4j-1=d s^2</code> gives</p>
+<div class="math" role="math">d\equiv7\pmod8.</div>
+<p>Therefore</p>
+<div class="math" role="math">(2/d)=+1.</div>
+<p>By multiplicativity, every divisor <code>e|j</code> satisfies <code>(e/d)=+1</code>.</p>
+<p>Finally <code>d=3 mod 4</code>, so <code>(-1/d)=-1</code>, while <code>4</code> is a square modulo <code>d</code>. Hence</p>
+<div class="math" role="math">(-e/d)=(-4e/d)=-1.</div>
+<p>QED.</p>
+<h2>3. Interpretation</h2>
+<p>The square-lift operation cannot project Type A/B traps arbitrarily into the ancestor unit group.</p>
+<p>It is confined to the ancestor&#x27;s Jacobi-negative half.</p>
+<p>So the projection excess from <a href="squarefree-lift-core.html">SQUAREFREE-LIFT-CORE.md</a>,</p>
+<div class="math" role="math">E_j=(T_j\bmod d)\setminus T_a,</div>
+<p>always satisfies</p>
+<div class="math" role="math">\boxed{ E_j \subseteq \{u:(u/d)=-1\}\setminus T_a. }</div>
+<p>The only possible new projected residues are therefore <strong>nontrap quadratic nonresidues of the squarefree ancestor</strong>.</p>
+<p>This identifies the exact location where a square-lift can create genuinely new residue information.</p>
+<h2>4. Saturated-ancestor shadow theorem</h2>
+<p>Call the ancestor <code>a</code> <strong>Jacobi-saturated</strong> when</p>
+<div class="math" role="math">\boxed{ T_a = \{u\in(\mathbb Z/d\mathbb Z)^\times:(u/d)=-1\}. }</div>
+<h3>Theorem</h3>
+<p>If <code>a</code> is Jacobi-saturated, then every odd square-lift</p>
+<div class="math" role="math">4j-1=(4a-1)s^2</div>
+<p>satisfies</p>
+<div class="math" role="math">\boxed{ T_j\bmod(4a-1) \subseteq T_a. }</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{E_j=\varnothing.}</div>
+<h3>Proof</h3>
+<p>The reciprocity theorem places the projected trap set inside the complete Jacobi-negative half of the ancestor. Saturation identifies that half with <code>T_a</code>. QED.</p>
+<p>Thus every Jacobi-saturated ancestor generates an <strong>infinite square-lift direct-shadow family</strong>.</p>
+<h2>5. Three explicit infinite families</h2>
+<p>The first three ancestors are Jacobi-saturated.</p>
+<h3>a = 1</h3>
+<div class="math" role="math">d=3, \qquad T_1=\{2\},</div>
+<p>which is the complete Jacobi-negative unit set modulo <code>3</code>.</p>
+<p>Therefore for every odd <code>s</code>,</p>
+<div class="math" role="math">\boxed{ j=\frac{3s^2+1}{4}}</div>
+<p>has</p>
+<div class="math" role="math">T_j\bmod3\subseteq T_1.</div>
+<h3>a = 2</h3>
+<div class="math" role="math">d=7, \qquad T_2=\{3,5,6\},</div>
+<p>which is the complete quadratic-nonresidue set modulo <code>7</code>.</p>
+<p>Therefore for every odd <code>s</code>,</p>
+<div class="math" role="math">\boxed{ j=\frac{7s^2+1}{4}}</div>
+<p>has</p>
+<div class="math" role="math">T_j\bmod7\subseteq T_2.</div>
+<h3>a = 4</h3>
+<div class="math" role="math">d=15, \qquad T_4=\{7,11,13,14\},</div>
+<p>which is the complete Jacobi-negative unit set modulo <code>15</code>.</p>
+<p>Therefore for every odd <code>s</code>,</p>
+<div class="math" role="math">\boxed{ j=\frac{15s^2+1}{4}}</div>
+<p>has</p>
+<div class="math" role="math">T_j\bmod15\subseteq T_4.</div>
+<p>These are infinite exact shadow families, not finite empirical patterns.</p>
+<h2>6. Relation to the finite k &lt;= 1200 core</h2>
+<p>The <code>k&lt;=1200</code> squarefree-lift replay found many non-squarefree moduli whose projection excess is empty. The theorem above explains an infinite subcollection immediately: every lift with squarefree ancestor modulus <code>3</code>, <code>7</code>, or <code>15</code> is forced to have zero excess.</p>
+<p>It also explains why the exceptional projection layers cannot be arbitrary. They can only arise when the ancestor&#x27;s Jacobi-negative half is strictly larger than its exact Type A/B trap set.</p>
+<p>For example, the ancestor</p>
+<div class="math" role="math">a=3, \qquad d=11,</div>
+<p>has only three Type A/B trap residues while the Jacobi-negative half has five. Square-lifts over <code>11</code> can therefore create projection excess, and the first such example occurs at</p>
+<div class="math" role="math">j=25, \qquad 4j-1=99=11\cdot3^2.</div>
+<h2>7. New classification problem</h2>
+<p>The projection-excess question now splits cleanly into two pieces.</p>
+<p>First, classify the Jacobi-saturated ancestors:</p>
+<div class="math" role="math">\boxed{ T_a = \{u:(u/(4a-1))=-1\}. }</div>
+<p>Second, for a nonsaturated ancestor, determine which square multipliers <code>s^2</code> still satisfy</p>
+<div class="math" role="math">T_j\bmod(4a-1)\subseteq T_a.</div>
+<p>The finite data shows that both outcomes occur for the same ancestor, so saturation is sufficient but not necessary for an individual lift to be shadowed.</p>
+<h2>8. Why this sharpens the proof search</h2>
+<p>The residual hierarchy is now</p>
+<div class="math" role="math">\boxed{ \text{fixed-negative character layer} \to \text{squarefree ancestor} \to \text{Jacobi-negative projection} \to \text{ancestor trap vs. nontrap split} \to \text{projection excess only}. }</div>
+<p>A large half-space obstruction has collapsed to a small exact residue difference set.</p>
+<p>That difference set, rather than the whole lifted trap layer, is the object that must be controlled in the next Direct-Shadow Completeness proof stage.</p>
+<h2>9. Novelty boundary</h2>
+<p>Quadratic reciprocity and Jacobi symbols are classical. The candidate contribution is the square-lift specialization to the López Type A/B trap system and the resulting infinite ancestor-shadow families inside the minimal-depth/shadow framework.</p>
+<p>Publication priority remains subject to external review and a broader literature search.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

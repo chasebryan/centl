@@ -889,7 +889,59 @@ Thus no finite classification of low Kneser defect indices can finish exact ES.
 
 ---
 
-## 20. Current highest-priority proof targets
+## 20. Two-target corridor companions (2026-08-15)
+
+The exact two-target reformulation now has four additional corridor theorems on the original-ES side, not merely the strong/Type-II side.
+
+### Linear form `2p+1`
+
+`TWO-P-PLUS-ONE-FILTER.md` proves that a Mordell-hard prime is solved as soon as `2p+1` has a divisor `7\bmod8`. A counterexample must place `2p+1` in the same `{1,3}\bmod8` semigroup already forced on `p+2`.
+
+### `q=3` and `q=7` have no Type-I surplus
+
+At `q=3` the two targets coincide for hard primes. At `q=7`, `HARD-Q7-TYPE-I-NO-RESCUE.md` proves they fail together: the forced factor `2` fills the whole quadratic-residue subgroup, and every hard class is itself a residue modulo `7`. Combined failure equals the existing Type-II miss.
+
+### `q=11` has a genuine Type-I companion
+
+`Q11-TYPE-I-COMPANION.md` classifies the rescues. After a Type-II miss, Type I still hits on explicit residue classes modulo `11` once the QR box is full, and on the thinner set `{7,8,10}` when the box is only `{1,3,4}`. Through `2\cdot10^6` this companion solves `13` hard primes that Type II missed at the same shift.
+
+### Composite shift `k=15`
+
+`K15-TWO-TARGET-FILTER.md` identifies the two-primary subgroup
+
+\[
+H=\langle2\rangle=\{1,2,4,8\}\subset(\mathbb Z/15\mathbb Z)^\times.
+\]
+
+Both hard-class Type-I targets and the Type-II target lie outside `H`. Combined failure occurs exactly on the `H`-trap (every prime factor of `(p+15)/4` is `1,2,4,8\bmod15`) or on one thin `11`-packet. Any prime factor `7,13,14\bmod15`, or `11` with `v_2\ge2`, is an immediate Type-II hit.
+
+### Finite residual after `3,7,11`
+
+Through `2{,}000{,}000` there are `4519` Mordell-hard primes. Combined two-target failure at `3,7,11` leaves `711` primes, all solved by some later shift in
+
+\[
+\{15,19,23,27,31,35,39,43,47,51,55,59\}.
+\]
+
+The next exact target is the prime shift `k=19`.
+
+These are corridor theorems, not a bounded-window existence proof.
+
+### Independent covering obstruction
+
+A separate attack asked whether a fixed multiplier `M` can force `M\mid(p+k)/4` at the aligned shift `k\equiv-p\pmod{4M}` and hit Type II from the signed box of `M` alone. `HARD-SMOOTH-TYPEII-OBSTRUCTION.md` proves this is impossible whenever `M` is `{2,3,5,7}`-smooth: the whole forced box is Jacobi-positive, while `-1` is Jacobi-negative. Any uniform Type-II arithmetic-progression cover of a hard class must import an external prime `ℓ≥11`. Including `13` produces at least one explicit infinite family,
+
+\[
+p=10920t+10369,
+\qquad
+\frac4p=\frac1{546Tp}+\frac1{2730T}+\frac1{5Tp},\quad T=t+1.
+\]
+
+That family sits inside the single hard class `289\bmod840` and does not cover the class. Original Erdős--Straus remains open.
+
+---
+
+## 21. Current highest-priority proof targets
 
 ### A. Strong/Type-II cross-layer ancestry
 
@@ -919,17 +971,21 @@ The immediate questions are:
 
 ### C. Exact ES two-target lane
 
-Seek quotient-uniform principles rather than more low-index casework.
+Continue the corridor from the new `k=15` combined filter. The immediate exact target is `k=19`, then the already-classified Type-II shift `k=23` with its Type-I companion.
 
-The proven unbounded-defect forcing theorem means any final Kneser argument must survive arbitrarily large quotient complexity.
+The proven unbounded-defect forcing theorem still means no finite list of Kneser indices can finish the external-nonresidue lane. The corridor lane is a different finite-for-each-prime search and is not forbidden by that theorem.
 
 ### D. Prior-art review
 
 Continue tracing Thépault, Mizony, Rosati-Yamamoto, Mordell, Bradford, López, Chamberland, and BHB-F so all structural novelty claims remain conservative and publication-safe.
 
+### E. Public hunt
+
+The operator-facing attack is now a public infinite hunt: [`ES-HUNT.md`](ES-HUNT.md), kernels [`bb.kernel`](bb.kernel) and [`CC.kernel`](CC.kernel), findings under [`findings/`](findings/START-HERE.md). The recurrence is the windows \((s,s+\Delta]\) with no last interval. Letters are collected; the engine stops when the operator stops it. Letter numbers are the first 128 bits of SHA-256 of `ES-LETTER-v1` and do not depend on the start factor. A cleared window is not a proof.
+
 ---
 
-## 21. One-line status
+## 22. One-line status
 
 The main new research object is now clear:
 
@@ -942,4 +998,4 @@ The main new research object is now clear:
 -\text{symmetric signed divisor box}.}
 \]
 
-Its internal Kneser geometry and cross-layer shadow geometry are now partially unified, multiplicative ancestry is completely classified, every ancestry quotient has infinite exact gap families, the residual shadow problem has an exact exponent-lattice form, and four tiny fixed Type-II shifts already leave only an `O(X/(log X)^3)` prime survivor set. Original Erdős-Straus remains open.
+Its internal Kneser geometry and cross-layer shadow geometry are now partially unified, multiplicative ancestry is completely classified, every ancestry quotient has infinite exact gap families, the residual shadow problem has an exact exponent-lattice form, and four tiny fixed Type-II shifts already leave only an `O(X/(log X)^3)` prime survivor set. On the original-ES two-target corridor the first three prime shifts are now combined-exact, `2p+1` is an additional linear-form filter, and `k=15` is a complete two-target theorem. Original Erdős-Straus remains open.

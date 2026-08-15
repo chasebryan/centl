@@ -22,6 +22,7 @@ This synthesis is built from the earlier FCF/CENTL work and should be read toget
 
 - [WS-CAND-003: Erdős-Straus Type A/B shadow structure](../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md)
 - [Public research page](../../site/research-erdos-straus.html)
+- [Public hunt](ES-HUNT.md) — infinite hard-prime hunt, seeds, and letter numbers. Not a proof.
 
 ### Computational and structural foundation
 

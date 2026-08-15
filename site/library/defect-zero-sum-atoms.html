@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Zero-product atom decomposition of square-lift multiplicative defects — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/defect-zero-sum-atoms.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/defect-zero-sum-atoms.html">
+  <meta property="og:title" content="Zero-product atom decomposition of square-lift multiplicative defects — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Zero-product atom decomposition of square-lift multiplicative defects</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DEFECT-ZERO-SUM-ATOMS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved reduction using classical zero-sum theory</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> Davenport constants and zero-sum sequence theory in finite abelian groups are classical. This note applies them to the Type A/B square-lift multiplicative defect quotient. It does not prove exact Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="multiplicative-defect-quotient.html">MULTIPLICATIVE-DEFECT-QUOTIENT.md</a></li><li><a href="reciprocity-defect-quotient.html">RECIPROCITY-DEFECT-QUOTIENT.md</a></li><li><a href="multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a></li></ul>
+<h2>1. Defect sequence</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be a squarefree ancestor modulus and let</p>
+<div class="math" role="math">\mathcal M_a=K_a/D_a</div>
+<p>be the multiplicative reciprocity defect quotient.</p>
+<p>For a positive odd square lift</p>
+<div class="math" role="math">j=\frac{1+d s^2}{4},</div>
+<p>factor</p>
+<div class="math" role="math">j=\prod_q q^{e_q}.</div>
+<p>Each prime divisor has a defect class</p>
+<div class="math" role="math">\delta_a(q)\in\mathcal M_a.</div>
+<p>Form the finite sequence <code>S(j/a)</code> containing <code>e_q</code> copies of <code>delta_a(q)</code> for every prime <code>q|j</code>.</p>
+<p>Its length is</p>
+<div class="math" role="math">|S(j/a)|=\Omega(j),</div>
+<p>where <code>Omega</code> counts prime factors with multiplicity.</p>
+<p>The multiplicative conservation theorem gives</p>
+<div class="math" role="math">\boxed{ \prod_{g\in S(j/a)}g=1. }</div>
+<p>Thus every square lift produces a zero-product sequence in the finite abelian group <code>M_a</code>.</p>
+<h2>2. Minimal zero-product atoms</h2>
+<p>A nonempty sequence in a finite abelian group is a <strong>minimal zero-product sequence</strong> when its total product is <code>1</code> but no nonempty proper subsequence has product <code>1</code>.</p>
+<p>Every finite zero-product sequence admits a factorization into minimal zero-product subsequences: repeatedly choose a minimal nonempty zero-product subsequence and remove it. The remainder remains zero-product.</p>
+<p>Therefore:</p>
+<h3>Atom decomposition theorem</h3>
+<p>Every square-lift defect sequence admits a disjoint decomposition</p>
+<div class="math" role="math">\boxed{ S(j/a)=A_1\sqcup\cdots\sqcup A_r }</div>
+<p>such that each <code>A_i</code> is a minimal zero-product sequence in <code>M_a</code>.</p>
+<p>The decomposition need not be unique. Existence is enough for the structural reduction.</p>
+<h2>3. Davenport bound</h2>
+<p>Let</p>
+<div class="math" role="math">D(\mathcal M_a)</div>
+<p>be the Davenport constant of the finite abelian group <code>M_a</code>: the maximum length of a minimal zero-sum / zero-product sequence, equivalently the least <code>D</code> such that every sequence of length <code>D</code> contains a nonempty zero-product subsequence under the standard convention adjusted by one as appropriate.</p>
+<p>Using the convention that <code>D(G)</code> is the maximum atom length, every atom in the decomposition satisfies</p>
+<div class="math" role="math">\boxed{|A_i|\le D(\mathcal M_a).}</div>
+<p>Hence the globally large prime-factor configuration of an arbitrary square lift decomposes into defect packets whose size is bounded solely by the ancestor quotient.</p>
+<p>This bound is independent of the square multiplier <code>s</code> and the height of the lift.</p>
+<h2>4. Divisor interpretation</h2>
+<p>Each atom <code>A_i</code> corresponds to a divisor</p>
+<div class="math" role="math">e_i\mid j</div>
+<p>obtained by multiplying the prime powers selected by that subsequence.</p>
+<p>Because the atom has product defect <code>1</code>,</p>
+<div class="math" role="math">\boxed{ e_i\bmod d\in D_a.}</div>
+<p>Thus</p>
+<div class="math" role="math">-e_i,-4e_i\in-D_a.</div>
+<p>So every atom determines a divisor whose projected Type A/B residues lie inside the ancestor&#x27;s <strong>multiplicative trap coset</strong>.</p>
+<p>If the whole defect sequence splits into more than one atom, the square lift contains multiple proper divisors with this property.</p>
+<p>This is not yet exact ancestor trap membership because</p>
+<div class="math" role="math">T_a\subseteq-D_a</div>
+<p>may be strict. The remaining difference is precisely the ancestor two-box / divisor-sparsity problem.</p>
+<h2>5. Proper neutral divisors above the Davenport threshold</h2>
+<p>Suppose</p>
+<div class="math" role="math">\Omega(j)&gt;D(\mathcal M_a).</div>
+<p>Take any <code>D(M_a)</code> terms of the defect sequence. By the defining zero-product property of the Davenport constant, they contain a nonempty zero-product subsequence.</p>
+<p>Because at least one term of the full sequence lies outside those chosen terms, this zero-product subsequence is proper in the full factorization of <code>j</code>.</p>
+<p>Hence:</p>
+<h3>Corollary</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{ \Omega(j)&gt;D(\mathcal M_a), }</div>
+<p>then there exists a proper divisor</p>
+<div class="math" role="math">\boxed{1&lt;e&lt;j}</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{e\bmod d\in D_a.}</div>
+<p>Since the total defect is also trivial, the complementary divisor</p>
+<div class="math" role="math">f=j/e</div>
+<p>also satisfies</p>
+<div class="math" role="math">\boxed{f\bmod d\in D_a.}</div>
+<p>Thus sufficiently long square-lift factorizations always split into two nontrivial multiplicatively ancestor-neutral pieces.</p>
+<h2>6. Atomic lifts are bounded-complexity objects</h2>
+<p>Call a square-lift defect configuration <strong>multiplicatively atomic</strong> when its nontrivial defect sequence is itself minimal zero-product.</p>
+<p>Then necessarily</p>
+<div class="math" role="math">\boxed{ \Omega_{\rm defect}(j) \le D(\mathcal M_a), }</div>
+<p>where <code>Omega_defect</code> counts only prime factors carrying nontrivial defect, with multiplicity.</p>
+<p>Therefore any prospective genuinely primitive multiplicative exception at a fixed ancestor is forced into a bounded prime-factor complexity class.</p>
+<p>Large lifts can still exist, but their defect content decomposes into bounded atoms.</p>
+<h2>7. Standard invariant-factor bounds</h2>
+<p>If</p>
+<div class="math" role="math">\mathcal M_a \cong C_{n_1}\oplus\cdots\oplus C_{n_r}, \qquad n_1\mid\cdots\mid n_r,</div>
+<p>then the classical lower bound is</p>
+<div class="math" role="math">1+\sum_{i=1}^r(n_i-1) \le D(\mathcal M_a).</div>
+<p>Equality is known for important classes including finite <code>p</code>-groups and groups of rank at most two. General upper bounds from zero-sum theory may be used when exact <code>D(M_a)</code> is unavailable.</p>
+<p>For a cyclic defect quotient</p>
+<div class="math" role="math">\mathcal M_a\cong C_n,</div>
+<p>we have simply</p>
+<div class="math" role="math">\boxed{D(\mathcal M_a)=n.}</div>
+<p>For an elementary binary quotient</p>
+<div class="math" role="math">\mathcal M_a\cong C_2^r,</div>
+<div class="math" role="math">\boxed{D(\mathcal M_a)=r+1.}</div>
+<h2>8. Relation to the earlier binary conservation law</h2>
+<p>The reciprocity defect quotient</p>
+<div class="math" role="math">\mathcal R_a</div>
+<p>records only the quadratic image of <code>M_a</code>.</p>
+<p>Its conservation law sees prime exponents only modulo <code>2</code>.</p>
+<p>The present atom decomposition occurs in the full finite abelian group <code>M_a</code>, so it retains:</p>
+<ul><li>odd-order defect information;</li><li>higher prime-power orders;</li><li>full exponent multiplicities modulo the relevant group orders.</li></ul>
+<p>Thus the binary parity pairings observed in the <code>k&lt;=1200</code> data are the first visible special case of a general finite-abelian zero-product structure.</p>
+<h2>9. Why this is useful for exact shadowing</h2>
+<p>The unresolved exact problem inside an ancestor coset is the two-box set</p>
+<div class="math" role="math">-T_a = \phi_a(\mathcal B_{\mathbf b}) \cup \phi_a(\mathcal B_{\mathbf b}-\mathbf b) \subseteq D_a.</div>
+<p>The atom theorem says that arbitrary square-lift factorizations need not be studied as one huge collection of primes. Their multiplicative defect content can be reduced to bounded-size neutral divisor packets.</p>
+<p>This suggests a two-level proof strategy:</p>
+<ol><li>classify all possible zero-product atoms in <code>M_a</code> up to the Davenport bound;</li><li>for the corresponding neutral divisor residues in <code>D_a</code>, prove exact inclusion in the ancestor two-box trap or identify the finite exceptional residue types.</li></ol>
+<p>For ancestors with small <code>M_a</code>, this converts an unbounded factorization problem into a finite local classification.</p>
+<h2>10. Next computational and theorem targets</h2>
+<ol><li>compute invariant factors of <code>M_a</code> for squarefree ancestors appearing through the current research range;</li><li>compute exact Davenport constants whenever the group class permits it;</li><li>classify observed square-lift defect sequences into zero-product atom types;</li><li>compare each atom&#x27;s neutral divisor residue with <code>T_a</code> rather than merely <code>D_a</code>;</li><li>test whether every atom failing exact ancestor-trap membership is already shadowed by another earlier layer;</li><li>search for a uniform bound on the atom types needed in the directly novel candidate core.</li></ol>
+<p>The fifth target is a concrete route from classical zero-sum structure back to the exact Direct-Shadow Completeness theorem.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

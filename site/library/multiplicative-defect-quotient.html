@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Multiplicative reciprocity defect quotient for Type A/B square lifts — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/multiplicative-defect-quotient.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/multiplicative-defect-quotient.html">
+  <meta property="og:title" content="Multiplicative reciprocity defect quotient for Type A/B square lifts — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multiplicative reciprocity defect quotient for Type A/B square lifts</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTIPLICATIVE-DEFECT-QUOTIENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem and classification</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem is at multiplicative-coset resolution. It does not imply exact residue shadowing, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. The group theory, CRT, Dirichlet theorem, and quadratic reciprocity used in the proof are classical; the Type-A/B-specific organization is the research contribution under review.</p>
+<p>Read with:</p>
+<ul><li><a href="multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a></li><li><a href="reciprocity-defect-quotient.html">RECIPROCITY-DEFECT-QUOTIENT.md</a></li><li><a href="square-lift-signature-classification.html">SQUARE-LIFT-SIGNATURE-CLASSIFICATION.md</a></li><li><a href="square-lift-reciprocity.html">SQUARE-LIFT-RECIPROCITY.md</a></li><li><a href="quadratic-field-bridge.html">QUADRATIC-FIELD-BRIDGE.md</a></li></ul>
+<h2>1. Ancestor multiplicative groups</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree and put</p>
+<div class="math" role="math">G_a=(\mathbb Z/d\mathbb Z)^\times.</div>
+<p>Let</p>
+<div class="math" role="math">D_a = \langle \ell\bmod d:\ell\mid a,\ \ell\text{ prime}\rangle \le G_a.</div>
+<p>The multiplicative trap theorem gives</p>
+<div class="math" role="math">T_a\subseteq-D_a.</div>
+<p>Every generator of <code>D_a</code> has Jacobi symbol <code>+1</code> modulo <code>d</code>, so</p>
+<div class="math" role="math">D_a\subseteq K_a,</div>
+<p>where</p>
+<div class="math" role="math">\boxed{ K_a = \ker\left( (\mathbb Z/d\mathbb Z)^\times \xrightarrow{(\cdot/d)} \{\pm1\} \right) }</div>
+<p>is the Jacobi-positive subgroup.</p>
+<p>Since <code>d=3 mod 4</code>, the Jacobi character is nontrivial and</p>
+<div class="math" role="math">[G_a:K_a]=2.</div>
+<h2>2. The multiplicative defect quotient</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \mathcal M_a = K_a/D_a. }</div>
+<p>This is the <strong>multiplicative reciprocity defect quotient</strong> of the ancestor.</p>
+<p>Its order is</p>
+<div class="math" role="math">|\mathcal M_a| =[K_a:D_a] = \frac{[G_a:D_a]}{[G_a:K_a]} = \boxed{\frac{\iota(a)}2},</div>
+<p>where</p>
+<div class="math" role="math">\iota(a)=[G_a:D_a]</div>
+<p>is the multiplicative trap index.</p>
+<p>Using the quotient factorization</p>
+<div class="math" role="math">\iota(a)=2^{\kappa(a)}\Theta(a),</div>
+<p>we obtain</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal M_a| =2^{\kappa(a)-1}\Theta(a). }&lt;/div&gt;</p>
+<p>Thus <code>M_a</code> contains both:</p>
+<ol><li>the quadratic reciprocity-defect information of dimension <code>kappa(a)-1</code>;</li><li>all higher-order multiplicative information measured by <code>Theta(a)</code>.</li></ol>
+<h2>3. Square-lift prime defects</h2>
+<p>For positive odd <code>s</code>, define</p>
+<div class="math" role="math">j_s=\frac{1+d s^2}{4}, \qquad 4j_s-1=d s^2.</div>
+<p>Square-lift reciprocity proves that every prime</p>
+<div class="math" role="math">q\mid j_s</div>
+<p>satisfies</p>
+<div class="math" role="math">\left(\frac qd\right)=+1.</div>
+<p>Therefore</p>
+<div class="math" role="math">q\bmod d\in K_a</div>
+<p>and has a well-defined multiplicative defect class</p>
+<div class="math" role="math">\boxed{ \delta_a^{\rm mult}(q) =[q]\in\mathcal M_a. }</div>
+<p>The class is trivial exactly when</p>
+<div class="math" role="math">q\bmod d\in D_a.</div>
+<h2>4. Full multiplicative conservation law</h2>
+<p>Factor</p>
+<div class="math" role="math">j_s=\prod_q q^{e_q}.</div>
+<p>Because</p>
+<div class="math" role="math">4j_s=1+d s^2,</div>
+<p>we have</p>
+<div class="math" role="math">j_s\equiv4^{-1}\pmod d.</div>
+<p>But</p>
+<div class="math" role="math">4\in D_a</div>
+<p>because <code>4a=1 mod d</code> and <code>a in D_a</code>. Hence</p>
+<div class="math" role="math">[4^{-1}]=1 \quad\text{in }\mathcal M_a.</div>
+<p>Therefore</p>
+<div class="math" role="math">[j_s]=1 \quad\text{in }\mathcal M_a.</div>
+<p>By multiplicativity:</p>
+<h3>Theorem</h3>
+<p>Every square lift satisfies the exact finite-abelian conservation law</p>
+<div class="math" role="math">\boxed{ \prod_{q\mid j_s} \left(\delta_a^{\rm mult}(q)\right)^{e_q} =1 \quad\text{in }\mathcal M_a. }</div>
+<p>Unlike the earlier <code>F_2</code> conservation law, the exponents are retained in the full finite abelian group. Odd-order information is not discarded.</p>
+<h2>5. Multiplicative signature defect of a lift</h2>
+<p>Define</p>
+<div class="math" role="math">D_{j_s\to a} = \langle q\bmod d:q\mid j_s\rangle \le K_a.</div>
+<p>Its image in the defect quotient is</p>
+<div class="math" role="math">\boxed{ \Delta^{\rm mult}_{j_s\to a} = D_{j_s\to a}D_a/D_a \le\mathcal M_a. }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\Delta^{\rm mult}_{j_s\to a} = \langle\delta_a^{\rm mult}(q):q\mid j_s\rangle.</div>
+<p>The projected Type A/B trap set of the lift lies in</p>
+<div class="math" role="math">-D_{j_s\to a},</div>
+<p>while the ancestor trap lies in</p>
+<div class="math" role="math">-D_a.</div>
+<p>Thus the lift is ancestor-shadowed at <strong>multiplicative-coset resolution</strong> exactly when</p>
+<div class="math" role="math">\boxed{ \Delta^{\rm mult}_{j_s\to a}=1. }</div>
+<p>This is stronger than quadratic-signature shadowing.</p>
+<h2>6. Universal multiplicative-shadow classification</h2>
+<h3>Theorem</h3>
+<p>The following are equivalent:</p>
+<ol><li>\(\iota(a)=2\);</li><li>\(D_a=K_a\);</li><li>\(\mathcal M_a=1\);</li><li>every positive odd square lift has</li></ol>
+<div class="math" role="math">\Delta^{\rm mult}_{j_s\to a}=1;</div>
+<ol><li>every positive odd square lift is ancestor-shadowed at multiplicative-coset resolution.</li></ol>
+<h3>Proof</h3>
+<p>The equivalence of <code>1</code>, <code>2</code>, and <code>3</code> follows from</p>
+<div class="math" role="math">[G_a:K_a]=2</div>
+<p>and</p>
+<div class="math" role="math">D_a\subseteq K_a.</div>
+<p>If <code>D_a=K_a</code>, square-lift reciprocity puts every prime divisor of every lift in <code>K_a=D_a</code>, proving <code>4</code> and <code>5</code>.</p>
+<p>Conversely, if every lift is multiplicatively shadowed then no nontrivial class in <code>K_a/D_a</code> can ever be represented by a lift prime. Section 7 proves that every class of <code>K_a/D_a</code> is represented by infinitely many such primes, so the quotient must be trivial. QED.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \iota(a)=2 \iff \text{universal square-lift multiplicative shadowing}. }</div>
+<h2>7. Every multiplicative defect class is realized infinitely often</h2>
+<p>Assume</p>
+<div class="math" role="math">\mathcal M_a\ne1.</div>
+<p>Let</p>
+<div class="math" role="math">C\in\mathcal M_a</div>
+<p>be any class, nontrivial or trivial. Choose a unit residue</p>
+<div class="math" role="math">r\in K_a</div>
+<p>representing <code>C</code>.</p>
+<p>Use CRT to choose a reduced residue class <code>R mod 4d</code> satisfying</p>
+<div class="math" role="math">R\equiv1\pmod4, \qquad R\equiv r\pmod d.</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many primes</p>
+<div class="math" role="math">q\equiv R\pmod{4d}.</div>
+<p>For each such prime,</p>
+<div class="math" role="math">[q]=C\in\mathcal M_a.</div>
+<p>Because <code>q=1 mod 4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac{-d}{q}\right) = \left(\frac qd\right) =+1,</div>
+<p>since <code>r in K_a</code>.</p>
+<p>Therefore the congruence</p>
+<div class="math" role="math">d s^2\equiv-1\pmod q</div>
+<p>has a solution. Choose one odd solution <code>s_0</code>, and then every</p>
+<div class="math" role="math">\boxed{ s=s_0+2q n, \qquad n\ge0, }</div>
+<p>is positive odd and satisfies the same congruence.</p>
+<p>Hence</p>
+<div class="math" role="math">q\mid j_s</div>
+<p>for infinitely many distinct square lifts, and all such lifts contain the prescribed multiplicative defect class <code>C</code>.</p>
+<p>Thus:</p>
+<h3>Realization theorem</h3>
+<div class="math" role="math">\boxed{ \text{Every class of }\mathcal M_a \text{ is represented by infinitely many split primes}\ \text{and occurs in infinitely many square-lift depths.} }</div>
+<p>In particular, if</p>
+<div class="math" role="math">\iota(a)&gt;2,</div>
+<p>then infinitely many square lifts fail ancestor shadowing at multiplicative-coset resolution.</p>
+<h2>8. Relation to the quadratic defect quotient</h2>
+<p>The local quadratic-sign map induces a natural surjection</p>
+<div class="math" role="math">\boxed{ \mathcal M_a \twoheadrightarrow \mathcal R_a, }</div>
+<p>where</p>
+<div class="math" role="math">\mathcal R_a = \ker J_d/V_a</div>
+<p>is the earlier <code>F_2</code> reciprocity defect quotient.</p>
+<p>Its kernel contains precisely the defect information invisible to all local Legendre symbols.</p>
+<p>Numerically,</p>
+<div class="math" role="math">|\mathcal R_a|=2^{\kappa(a)-1},</div>
+<p>while</p>
+<div class="math" role="math">|\mathcal M_a| =2^{\kappa(a)-1}\Theta(a).</div>
+<p>Therefore the kernel has order</p>
+<div class="math" role="math">\boxed{\Theta(a).}</div>
+<p>So the previously defined deep multiplicative factor <code>Theta(a)</code> is exactly the amount of square-lift defect information discarded by the complete local quadratic-signature system.</p>
+<h2>9. Ray-class interpretation</h2>
+<p>Let</p>
+<div class="math" role="math">K=\mathbb Q(\sqrt{-d})</div>
+<p>and use the finite modulus</p>
+<div class="math" role="math">d\mathcal O_K.</div>
+<p>For an ideal <code>A</code> coprime to <code>d</code>, its absolute ideal norm gives a unit modulo <code>d</code>:</p>
+<div class="math" role="math">N(A)\bmod d\in(\mathbb Z/d\mathbb Z)^\times.</div>
+<p>If a principal ideal is generated by</p>
+<div class="math" role="math">\beta\equiv1\pmod{d\mathcal O_K},</div>
+<p>then</p>
+<div class="math" role="math">N(\beta)\equiv1\pmod d.</div>
+<p>Hence the norm-residue map factors through the ray class group modulo <code>d\mathcal O_K</code>.</p>
+<p>For the canonical selected prime ideals</p>
+<div class="math" role="math">\mathfrak p_{q,s}\mid(\alpha_s), \qquad N\mathfrak p_{q,s}=q,</div>
+<p>the ray norm-residue is exactly</p>
+<div class="math" role="math">q\bmod d.</div>
+<p>Composing the ray norm-residue map with</p>
+<div class="math" role="math">G_a\to\Gamma_a=G_a/D_a</div>
+<p>produces precisely the multiplicative defect classes above.</p>
+<p>Thus <code>M_a</code> is the concrete residue quotient seen by the norm map from the square-lift ray-class configuration. This does <strong>not</strong> identify <code>M_a</code> with the full ray class group; it identifies it as a canonical quotient of ray norm-residue data.</p>
+<h2>10. Why this sharpens the proof search</h2>
+<p>The hierarchy is now exact:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{principal norm identity}\\ \downarrow\\ \text{ray norm-residue classes}\\ \downarrow\\ \mathcal M_a=K_a/D_a\\ \downarrow\\ \mathcal R_a\text{ (quadratic quotient)}\\ \downarrow\\ \text{Jacobi bit} \end{array} }</div>
+<p>Every square-lift prime-factor configuration obeys a conservation law already in the full finite abelian group <code>M_a</code>, before any reduction to quadratic characters.</p>
+<p>This is a stronger constraint than the binary reciprocity-defect law and is a natural candidate mechanism for the strong overlap observed in the exact Type A/B covering systems.</p>
+<h2>11. Next theorem target</h2>
+<p>For an ancestor with</p>
+<div class="math" role="math">\iota(a)&gt;2,</div>
+<p>classify the finite zero-product configurations</p>
+<div class="math" role="math">\prod C_i^{e_i}=1 \quad(C_i\in\mathcal M_a)</div>
+<p>that can arise from square-lift prime factors, and determine how those configurations constrain the exact two-box trap image.</p>
+<p>The especially important case is when <code>M_a</code> is cyclic or has small Davenport constant. Zero-sum/zero-product theory in finite abelian groups may then force short cancelling subconfigurations that correspond to intermediate divisor depths or exact shadow ancestors.</p>
+<p>That is now a concrete bridge from the multiplicative defect quotient back to Direct-Shadow Completeness.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

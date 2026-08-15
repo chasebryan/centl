@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This record follows the synthesis in DIAMOND.md and attacks its strongest immediate structural conjecture at the individual candidate-class level, not merely at the layer level.">
+  <title>Direct-Shadow Completeness: candidatewise finite attack — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/direct-shadow-completeness.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/direct-shadow-completeness.html">
+  <meta property="og:title" content="Direct-Shadow Completeness: candidatewise finite attack — Free Computation Foundation">
+  <meta property="og:description" content="This record follows the synthesis in DIAMOND.md and attacks its strongest immediate structural conjecture at the individual candidate-class level, not merely at the layer level.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Direct-Shadow Completeness: candidatewise finite attack</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This record follows the synthesis in DIAMOND.md and attacks its strongest immediate structural conjecture at the individual candidate-class level, not merely at the layer level.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIRECT-SHADOW-COMPLETENESS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> strong finite theorem-certificate result; universal theorem remains open</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this document does not claim the Erdős-Straus conjecture, López Type A/B coverage, or universal Direct-Shadow Completeness has been proved.</p>
+<p>This record follows the synthesis in <a href="diamond.html">DIAMOND.md</a> and attacks its strongest immediate structural conjecture at the <strong>individual candidate-class level</strong>, not merely at the layer level.</p>
+<p>Related records:</p>
+<ul><li><a href="ws-cand-003-erdos-straus-type-ab-shadow-structure.html">WS-CAND-003</a></li><li><a href="diamond.html">DIAMOND.md</a></li><li><a href="theory.html">THEORY.md</a></li><li><a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a></li><li><a href="survivor-density.html">SURVIVOR-DENSITY.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li><li><a href="composite-core.html">COMPOSITE-CORE.md</a></li><li><a href="results-2026-08-14.html">RESULTS-2026-08-14.md</a></li></ul>
+<p>Automation:</p>
+<ul><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/direct_shadow_completeness_probe.py"><code>direct_shadow_completeness_probe.py</code></a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/verify_direct_shadow_completeness.py"><code>verify_direct_shadow_completeness.py</code></a></li><li><a href="https://github.com/chasebryan/centl/blob/main/.github/workflows/erdos-straus-direct-shadow-completeness.yml">GitHub Actions workflow</a></li></ul>
+<hr>
+<h2>1. The conjecture being attacked</h2>
+<p>For a Type A/B layer</p>
+<div class="math" role="math">m_k=4k-1, \qquad T_k=\{-e,-4e\pmod{m_k}:e\mid k\},</div>
+<p>fix a Mordell-hard residue class <code>h mod 840</code> and an admissible target residue <code>t in T_k</code>.</p>
+<p>The pair <code>(h,t)</code> defines a CRT candidate progression</p>
+<div class="math" role="math">x\equiv h\pmod{840}, \qquad x\equiv t\pmod{m_k},</div>
+<p>or equivalently</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,m_k).</div>
+<p>For every earlier layer <code>j&lt;k</code>, the hit condition induces a forbidden parameter set</p>
+<div class="math" role="math">R_j\subseteq\mathbb Z/q_j\mathbb Z, \qquad q_j=\frac{m_j}{\gcd(L,m_j)},</div>
+<p>such that</p>
+<div class="math" role="math">r+Ls\bmod m_j\in T_j \iff s\bmod q_j\in R_j.</div>
+<p>A <strong>direct shadow</strong> occurs when one earlier <code>j</code> alone forbids the entire parameter space. A <strong>union shadow</strong> would occur if no single <code>j</code> does so, but the union of the proper forbidden systems from several earlier layers nevertheless covers every integer <code>s</code>.</p>
+<p>The candidatewise form of Direct-Shadow Completeness is:</p>
+<blockquote><p>If an admissible Type A/B candidate is not directly shadowed by any single earlier layer, then the collection of earlier layers does not jointly cover it.</p></blockquote>
+<p>A stronger prime-realization form asks for an avoiding parameter <code>s0</code> for which</p>
+<div class="math" role="math">\gcd(r+Ls_0,LQ)=1, \qquad Q=\operatorname{lcm}\{q_j:R_j\ne\varnothing\}.</div>
+<p>Such a reduced avoiding class yields infinitely many primes of exact depth <code>k</code> by Dirichlet.</p>
+<hr>
+<h2>2. Why the previous <code>k &lt;= 300</code> result was not enough</h2>
+<p>The depth-spectrum run through <code>k=300</code> showed that every <strong>layer</strong> fell into one of three bins:</p>
+<ul><li>no admissible hard-prime candidate;</li><li>every candidate directly shadowed;</li><li>at least one candidate carrying a reduced exact-depth realization certificate.</li></ul>
+<p>That was strong evidence, but it did <strong>not</strong> establish candidatewise completeness. A layer could contain one realizable candidate and another directly novel candidate that is nevertheless jointly covered by several earlier layers.</p>
+<p>The present experiment tests every directly novel candidate separately.</p>
+<hr>
+<h2>3. Finite attack through <code>k &lt;= 600</code></h2>
+<p>The automated run used:</p>
+<ul><li>all six Mordell-hard classes modulo <code>840</code>;</li><li>every Type A/B layer through <code>k=600</code>;</li><li>every prime-compatible target residue at every layer;</li><li>parameter search <code>0 &lt;= s &lt;= 250000</code>;</li><li>a separate reduced-progression search;</li><li>an independent verifier that recomputes trap sets, CRT data, direct-shadow status, earlier-layer avoidance, periods, and gcd conditions;</li><li>CENTL exact polynomial certification of the hardest CRT progression identities.</li></ul>
+<p>The result was:</p>
+<pre><code class="language-text">admissible candidates:             25,566
+directly shadowed candidates:       6,550
+directly novel candidates:         19,016
+integer avoiding witnesses:        19,016
+reduced avoiding witnesses:        19,016
+unresolved integer candidates:          0
+unresolved reduced candidates:          0</code></pre>
+<p>Therefore, in the entire tested candidate space,</p>
+<div class="math" role="math">\boxed{ \text{every directly novel candidate through }k=600 \text{ is explicitly not union-shadowed.} }</div>
+<p>More strongly,</p>
+<div class="math" role="math">\boxed{ \text{every directly novel candidate through }k=600 \text{ has a reduced avoiding progression.} }</div>
+<p>Hence each of the <code>19,016</code> directly novel candidates has a certificate that its progression contains infinitely many primes whose first Type A/B hit occurs at that candidate&#x27;s layer.</p>
+<p>This is a finite-range theorem-certificate statement, not an extrapolation from sampling.</p>
+<hr>
+<h2>4. Independent verification</h2>
+<p>The independent verifier rechecked all <code>19,016</code> candidate records and returned:</p>
+<pre><code class="language-json">{
+  &quot;direct_novel_candidates_checked&quot;: 19016,
+  &quot;integer_witnesses_verified&quot;: 19016,
+  &quot;k_limit&quot;: 600,
+  &quot;reduced_witnesses_verified&quot;: 19016,
+  &quot;unresolved_integer_candidates&quot;: 0,
+  &quot;unresolved_reduced_candidates&quot;: 0,
+  &quot;verdict&quot;: &quot;VERIFIED&quot;
+}</code></pre>
+<p>The verifier is deliberately separate from the discovery code. It reconstructs the CRT candidate, checks that no single earlier layer directly shadows it, evaluates the witness against every earlier trap set, reconstructs the full parameter period, and verifies the reduced gcd condition.</p>
+<hr>
+<h2>5. CENTL certification</h2>
+<p>The discovery program selected the hardest reduced witnesses, ranked by the first avoiding parameter <code>s</code>, and generated symbolic CRT progression identities for CENTL.</p>
+<p>For each selected record, CENTL verified identities of the form</p>
+<div class="math" role="math">r+Ls = h+840(A+Bs)</div>
+<p>and</p>
+<div class="math" role="math">r+Ls = t+(4k-1)(C+Ds),</div>
+<p>showing exactly that the whole parameterized progression remains in both the intended hard class and target Type A/B trap class.</p>
+<p>All generated CENTL contracts verified successfully. Number-theoretic avoidance is intentionally left to the independent modular verifier rather than being smuggled into an algebraic identity checker.</p>
+<hr>
+<h2>6. Hardest witnesses in the first run</h2>
+<p>The largest reduced-avoiding parameters found included:</p>
+<table class="directory"><thead><tr><th>k</th><th>h</th><th>t</th><th>first reduced <code>s</code></th><th><code>x=r+Ls</code></th></tr></thead><tbody><tr><td>500</td><td>529</td><td>1979</td><td>190724</td><td>320257173289</td></tr><tr><td>596</td><td>289</td><td>2234</td><td>173132</td><td>346562802049</td></tr><tr><td>568</td><td>529</td><td>2239</td><td>151716</td><td>96473785489</td></tr><tr><td>600</td><td>289</td><td>2099</td><td>143641</td><td>289461350929</td></tr><tr><td>568</td><td>169</td><td>2269</td><td>134161</td><td>85310616889</td></tr><tr><td>578</td><td>121</td><td>2310</td><td>131035</td><td>254371635961</td></tr><tr><td>600</td><td>361</td><td>2351</td><td>128874</td><td>259702188001</td></tr><tr><td>582</td><td>289</td><td>2303</td><td>127262</td><td>248757880009</td></tr><tr><td>570</td><td>169</td><td>2159</td><td>126662</td><td>242477648449</td></tr><tr><td>590</td><td>121</td><td>2319</td><td>124720</td><td>35306018281</td></tr></tbody></table>
+<p>The existence of relatively late witnesses is useful: the test is not succeeding merely because every candidate has an immediate tiny escape parameter.</p>
+<hr>
+<h2>7. What this rules out in the tested range</h2>
+<p>Through <code>k=600</code>, there is <strong>no</strong> example of the following phenomenon:</p>
+<ol><li>every earlier layer fails to cover a candidate individually;</li><li>several earlier layers together cover the candidate completely.</li></ol>
+<p>That is exactly the counterexample shape we set out to find.</p>
+<p>The search did not find one because every directly novel candidate instead carries an explicit avoiding integer. Every such candidate also carries a reduced avoiding class.</p>
+<p>Thus the finite evidence has moved from</p>
+<blockquote><p>every apparently useful layer seems realizable</p></blockquote>
+<p>into the much stronger statement</p>
+<blockquote><p>every individual directly novel hard-compatible candidate tested is infinitely prime-realizable.</p></blockquote>
+<hr>
+<h2>8. What this does <strong>not</strong> prove</h2>
+<p>The universal implication</p>
+<div class="math" role="math">\text{directly novel} \Longrightarrow \text{reduced avoiding class}</div>
+<p>remains unproved.</p>
+<p>A counterexample might first occur above <code>k=600</code>. The bounded parameter search also would have reported an unresolved candidate rather than proving union coverage if a witness existed only beyond the search limit.</p>
+<p>The zero-unresolved result is strong precisely because every tested candidate has a positive certificate. It must not be converted into a universal theorem without a proof.</p>
+<hr>
+<h2>9. The sharpened theorem target</h2>
+<p>The result suggests separating two statements.</p>
+<h3>DSC-0: union-shadow collapse</h3>
+<p>For every admissible candidate,</p>
+<div class="math" role="math">\boxed{ \text{not directly shadowed} \Longrightarrow \text{not union-shadowed}. }</div>
+<h3>DSC-P: prime realization</h3>
+<p>Under the same compatibility assumptions,</p>
+<div class="math" role="math">\boxed{ \text{not directly shadowed} \Longrightarrow \text{there exists a reduced avoiding parameter class}. }</div>
+<p>DSC-P implies DSC-0 and, by Dirichlet, gives infinitely many exact-depth primes in every directly novel candidate.</p>
+<p>The <code>k&lt;=600</code> certificate bundle verifies both statements for every candidate in that finite range.</p>
+<hr>
+<h2>10. Why this materially enlarges the diamond</h2>
+<p>If DSC-P is proved in general, the global exact-depth problem changes dramatically.</p>
+<p>The difficult finite covering question</p>
+<div class="math" role="math">\bigcup_{j&lt;k}R_j=\mathbb Z \quad ?</div>
+<p>would collapse to the local question</p>
+<div class="math" role="math">\exists j&lt;k:\ R_j=\mathbb Z/q_j\mathbb Z \quad ?</div>
+<p>In words: collective coverage would add no new obstruction beyond a single direct shadow.</p>
+<p>Then the hard-class minimal-depth spectrum would be read directly from the local shadow graph. Each surviving candidate would automatically generate an infinite Dirichlet family of exact-depth primes.</p>
+<p>That would turn the shadow graph from a computational redundancy map into a complete obstruction theory for Type A/B first-hit realizability.</p>
+<p>This is now one of the highest-value theorem targets in the FCF/CENTL program.</p>
+<hr>
+<h2>11. Next attack</h2>
+<p>The next work should proceed on two fronts simultaneously:</p>
+<ol><li><strong>Push the candidatewise falsification range upward</strong>, preserving explicit reduced witnesses and independent verification.</li><li><strong>Search for the theorem mechanism</strong>, especially a structural reason that the special forbidden systems <code>R_j</code> cannot form a covering system unless one constituent already covers the entire parameter space.</li></ol>
+<p>The proof search should compare the Type A/B parameter-cover system with classical covering-system obstructions, but any general covering-system theorem must be specialized carefully to the moduli and residue sets arising here.</p>
+<p>The target is no longer merely to observe that no counterexample appears. It is to identify the arithmetic invariant that makes a counterexample impossible, or else to find the first counterexample and learn exactly where the local-shadow model breaks.</p>
+<hr>
+<h2>12. Current conclusion</h2>
+<p>The direct-shadow completeness conjecture survived its first candidatewise exhaustive structural attack:</p>
+<div class="math" role="math">\boxed{ 19,016/19,016 \text{ directly novel candidates through }k=600 \text{ have independently verified reduced avoiding progressions.} }</div>
+<p>That result substantially strengthens the empirical foundation of the <code>DIAMOND.md</code> theorem program while leaving the universal theorem honestly open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

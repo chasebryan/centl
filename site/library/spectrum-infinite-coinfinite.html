@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>The Type A/B minimal-depth spectrum is infinite and co-infinite — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/spectrum-infinite-coinfinite.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/spectrum-infinite-coinfinite.html">
+  <meta property="og:title" content="The Type A/B minimal-depth spectrum is infinite and co-infinite — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>The Type A/B minimal-depth spectrum is infinite and co-infinite</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SPECTRUM-INFINITE-COINFINITE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved synthesis theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem concerns the minimal depth spectrum inside López Type A/B congruence solutions. It does not prove that every prime has finite <code>C_AB</code>, and it does not prove the Erdős-Straus conjecture. Literature priority for this spectrum formulation remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li><li><a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a></li><li><a href="survivor-density.html">SURVIVOR-DENSITY.md</a></li></ul>
+<h2>1. Spectrum</h2>
+<p>Define the prime minimal-depth spectrum</p>
+<div class="math" role="math">\mathcal D_{\mathbb P} = \{k\ge1:\exists\text{ prime }p\text{ with }C_{AB}(p)=k\}.</div>
+<p>Define also the hard-class infinite-realization spectrum</p>
+<div class="math" role="math">\mathcal D_H = \{k:\text{infinitely many primes }p\equiv h\pmod{840} \text{ for some }h\in H\text{ satisfy }C_{AB}(p)=k\}.</div>
+<p>The prime-modulus backbone and the Mersenne shadow lattice give opposite infinite families.</p>
+<h2>2. Infinite realized side</h2>
+<p>Let</p>
+<div class="math" role="math">q=4k-1</div>
+<p>be prime with <code>q&gt;7</code>.</p>
+<p>The prime-modulus backbone theorem gives a target Type A/B candidate at depth <code>k</code> whose target modulus is a new CRT coordinate relative to all previous layers. Finite congruence avoidance plus Dirichlet then gives infinitely many primes, even in the hard class</p>
+<div class="math" role="math">p\equiv1\pmod{840},</div>
+<p>with</p>
+<div class="math" role="math">\boxed{C_{AB}(p)=k.}</div>
+<p>There are infinitely many primes</p>
+<div class="math" role="math">q\equiv3\pmod4,</div>
+<p>so there are infinitely many such depths</p>
+<div class="math" role="math">k=(q+1)/4.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\mathcal D_H\text{ is infinite}.}</div>
+<p>In particular</p>
+<div class="math" role="math">\boxed{\mathcal D_{\mathbb P}\text{ is infinite}.}</div>
+<h2>3. Infinite impossible side</h2>
+<p>The Mersenne shadow theorem gives, for <code>a,b&gt;=1</code>,</p>
+<div class="math" role="math">a+2\mid b+2, \quad a&lt;b \Longrightarrow T_{2^b}\text{ is completely shadowed by }T_{2^a}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{C_{AB}(n)\ne2^b}</div>
+<p>for every integer <code>n</code> whenever such a proper divisor relation exists.</p>
+<p>In particular, for every <code>r&gt;=2</code>, take</p>
+<div class="math" role="math">b=3r-2.</div>
+<p>Then</p>
+<div class="math" role="math">3\mid b+2,</div>
+<p>so depth</p>
+<div class="math" role="math">\boxed{2^{3r-2}}</div>
+<p>is completely shadowed by depth <code>2</code>.</p>
+<p>Thus there are infinitely many positive integers <code>k</code> that are not a minimal Type A/B depth for <strong>any</strong> integer, and therefore certainly not for any prime.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\mathbb N\setminus\mathcal D_{\mathbb P}\text{ is infinite}.}</div>
+<p>The same global gaps are absent from the hard-class spectrum, so</p>
+<div class="math" role="math">\boxed{\mathbb N\setminus\mathcal D_H\text{ is infinite}.}</div>
+<h2>4. Spectrum theorem</h2>
+<p>Combining the two sides:</p>
+<h3>Theorem</h3>
+<p>The Type A/B minimal-depth spectrum is infinite and co-infinite:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_{\mathbb P}|=\infty, \qquad</p>
+<p>|\mathbb N\setminus\mathcal D_{\mathbb P}|=\infty. }&lt;/div&gt;</p>
+<p>Moreover the hard-class infinite-realization spectrum is also infinite and co-infinite:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_H|=\infty, \qquad</p>
+<p>|\mathbb N\setminus\mathcal D_H|=\infty. }&lt;/div&gt;</p>
+<h2>5. Stronger binary subsequence statement</h2>
+<p>Inside the subsequence of depths</p>
+<div class="math" role="math">k=2^b,</div>
+<p>the Mersenne theorem proves that every <code>b&gt;=3</code> with composite <code>b+2</code> is structurally impossible.</p>
+<p>Only <code>b+2</code> prime can escape that particular obstruction.</p>
+<p>Therefore, if</p>
+<div class="math" role="math">E(B)=\#\{b\le B:2^b\text{ survives the Mersenne obstruction}\},</div>
+<p>then</p>
+<div class="math" role="math">E(B)\le\pi(B+2)+O(1),</div>
+<p>and hence</p>
+<div class="math" role="math">\boxed{E(B)/B\to0.}</div>
+<p>So the complement of the spectrum occupies a density-one set of exponents inside this explicit sparse subsequence.</p>
+<h2>6. Conceptual meaning</h2>
+<p>The minimal Type A/B depth parameter is therefore not simply an unbounded complexity statistic whose every sufficiently large value eventually appears.</p>
+<p>Its spectrum has two permanent arithmetic forces:</p>
+<ol><li><strong>arrival:</strong> independent prime-modulus coordinates create infinitely many realizable exact depths;</li><li><strong>deletion:</strong> modulus ancestry and exact trap containment create infinitely many structurally forbidden depths.</li></ol>
+<p>Thus the object is naturally a genuine arithmetic spectrum with both infinite support and infinite holes.</p>
+<h2>7. Paper-level consequence</h2>
+<p>The depth program can now state a clean unconditional theorem package:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} C_{AB}\text{ has unbounded finite values};\\ \text{infinitely many depths are infinitely prime-realizable};\\ \text{infinitely many depths are structurally impossible};\\ \text{therefore the minimal-depth spectrum is infinite and co-infinite.} \end{array} }</div>
+<p>This is independent of whether López&#x27;s universal Type A/B coverage conjecture is ultimately true.</p>
+<p>Even if every prime has finite <code>C_AB</code>, the <strong>set of values taken by <code>C_AB</code> still has an infinite deterministic gap structure</strong>.</p>
+<h2>8. Next questions</h2>
+<ul><li>What is the density of the spectrum among all positive depths?</li><li>Can additional infinite shadow lattices enlarge the known complement?</li><li>Can every non-shadowed depth be shown to lie in the spectrum under universal DSC-P?</li><li>What is the asymptotic counting function</li></ul>
+<div class="math" role="math">D(X)=|\mathcal D_{\mathbb P}\cap[1,X]|?</div>
+<ul><li>How does the spectrum decompose into prime-modulus backbone values, composite-rescue values, and structural gaps?</li></ul>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

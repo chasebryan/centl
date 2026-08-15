@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL uses separate production, verification, and numerical-laboratory tools. The canonical pins are recorded in toolchain.lock. The first exact-calculator slice is verified and tested with these versions:">
+  <title>Toolchain — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/toolchain.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/toolchain.html">
+  <meta property="og:title" content="Toolchain — Free Computation Foundation">
+  <meta property="og:description" content="CENTL uses separate production, verification, and numerical-laboratory tools. The canonical pins are recorded in toolchain.lock. The first exact-calculator slice is verified and tested with these versions:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Toolchain</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL uses separate production, verification, and numerical-laboratory tools. The canonical pins are recorded in toolchain.lock. The first exact-calculator slice is verified and tested with these versions:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/TOOLCHAIN.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CENTL uses separate production, verification, and numerical-laboratory tools. The canonical pins are recorded in <a href="https://github.com/chasebryan/centl/blob/main/toolchain.lock"><code>toolchain.lock</code></a>. The first exact-calculator slice is verified and tested with these versions:</p>
+<table class="directory"><thead><tr><th>Tool</th><th>Version</th></tr></thead><tbody><tr><td>F*</td><td>2026.07.05 (<code>2173bc4</code>)</td></tr><tr><td>Z3</td><td>4.13.3</td></tr><tr><td>OCaml</td><td>4.14.1</td></tr><tr><td>Dune</td><td>3.24.1</td></tr><tr><td>Zarith</td><td>1.14</td></tr><tr><td>Yojson</td><td>2.2.2</td></tr><tr><td>FLINT / Arb</td><td>3.0.1</td></tr><tr><td>GMP</td><td>6.3.0</td></tr><tr><td>MPFR</td><td>4.2.2</td></tr><tr><td>Alcotest</td><td>1.9.1</td></tr><tr><td>QCheck</td><td>0.91</td></tr><tr><td>OCamlFormat</td><td>0.29.0</td></tr><tr><td>Julia</td><td>1.12.6</td></tr><tr><td>Nemo</td><td>0.56.1</td></tr></tbody></table>
+<h2>Production and verification</h2>
+<ul><li>F* for executable definitions and proofs.</li><li>The Z3 version bundled with the selected F* release.</li><li>OCaml 4.14 and OPAM for extraction and the application host.</li><li>Dune for OCaml builds.</li><li>OCamlFormat for enforced source formatting.</li><li>Zarith for extracted unbounded integers.</li><li>FLINT 3, including Arb and Calcium, with GMP and MPFR.</li><li>A C compiler and GNU Make for native bindings.</li></ul>
+<p>The development OPAM switch is named <code>centl</code>.</p>
+<p>Activate it in a shell with:</p>
+<pre><code class="language-sh">eval &quot;$(opam env --switch=centl)&quot;</code></pre>
+<p>The Makefile also enters this switch automatically when <code>dune</code> is not already on <code>PATH</code>, so <code>make build</code> and <code>make test</code> work in an ordinary shell after the switch has been installed.</p>
+<h2>Numerical laboratory</h2>
+<ul><li>Julia installed through Juliaup.</li><li>Nemo for FLINT, Arb, and Calcium access.</li></ul>
+<p>The laboratory is an independent oracle. Production code must not depend on a Julia environment or Julia-generated formatting.</p>
+<h2>Smoke checks</h2>
+<pre><code class="language-sh">fstar.exe --version
+&quot;$(fstar.exe --locate_z3 4.13.3)&quot; --version
+ocamlopt -version
+dune --version
+ocamlformat --version
+pkg-config --modversion flint
+julia --version
+julia -e &#x27;using Nemo; println(Nemo.NEMO_VERSION); println(sqrt(ArbField(256)(2)))&#x27;</code></pre>
+<p>The checked-in laboratory environment and independent exact differential suite run with:</p>
+<pre><code class="language-sh">julia --project=lab/julia -e &#x27;using Pkg; Pkg.instantiate()&#x27;
+make differential-test</code></pre>
+<p>The laboratory has its own pinned manifest and is intentionally not part of the shipped executable&#x27;s dependency graph.</p>
+<p><code>make test</code> verifies the F* core, builds the native FLINT/Arb binding, and runs exact, symbolic, rigorous-containment, CLI, JSON, and property tests.</p>
+<p><code>make release VERSION=x.y.z</code> builds a Linux or macOS archive containing the executable and its private FLINT, GMP, and MPFR runtime libraries. On Windows, use <code>scripts/package-release.ps1 x.y.z</code>.</p>
+<p>Release automation verifies and extracts the F<em> core once, then runs native builds and installed-package tests on Linux x86_64, macOS x86_64, macOS arm64, and Windows x86_64. F</em>, GMP, MPFR, and FLINT source archives are accepted only when they match the canonical pins in <code>toolchain.lock</code> and the synchronized workflow checksums.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

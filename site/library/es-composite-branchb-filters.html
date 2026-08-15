@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Additional filters on the parity-cubic `3r` index-six defect — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-composite-branchb-filters.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-composite-branchb-filters.html">
+  <meta property="og:title" content="Additional filters on the parity-cubic `3r` index-six defect — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Additional filters on the parity-cubic `3r` index-six defect</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-COMPOSITE-BRANCHB-FILTERS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollaries of the Branch-B normal form</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-COMPOSITE-SUCCESSOR-INDEX6.md</code></p>
+<p><strong>Claim boundary:</strong> these restrictions sharpen the remaining parity-cubic index-six branch but do not eliminate it and therefore do not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Branch-B setup</h2>
+<p>Let <code>p</code> be Mordell-hard and let</p>
+<div class="math" role="math">r&lt;p, \qquad r\equiv1\pmod4, \qquad \left(\frac rp\right)=-1.</div>
+<p>At the natural composite shift</p>
+<div class="math" role="math">k=3r, \qquad C=\frac{p+3r}{4},</div>
+<p>assume a combined full-stabilizer index-six failure in Branch B of <code>ES-COMPOSITE-SUCCESSOR-INDEX6.md</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\boxed{ H=\ker\varepsilon\cap\ker\kappa,}</div>
+<p>where</p>
+<div class="math" role="math">\varepsilon(x)=\left(\frac x3\right)</div>
+<p>is the mod-3 parity character and <code>kappa</code> is the cubic-residue quotient modulo <code>r</code>.</p>
+<p>The quotient is</p>
+<div class="math" role="math">\bar G=G/H\cong C_6.</div>
+<p>The Branch-B theorem gives:</p>
+<ol><li><code>p∈H</code>, so <code>p</code> is a cubic residue modulo <code>r</code>;</li><li>every exceptional prime has order six in <code>bar G</code>;</li><li>every exceptional prime is <code>2 mod 3</code> and a cubic nonresidue modulo <code>r</code>;</li><li>the total exceptional valuation mass is exactly two;</li><li>every hidden factor is <code>1 mod 3</code> and cubic-residue-side;</li><li>the quotient box is</li></ol>
+<div class="math" role="math">\bar R=C_6\setminus\{3\}.</div>
+<p>We now exploit the exact identity</p>
+<div class="math" role="math">\boxed{4C\equiv p\pmod{3r}.}</div>
+<p>Since <code>p∈H</code>, this becomes in the quotient</p>
+<div class="math" role="math">\boxed{2[2]+[C]=0.}</div>
+<hr>
+<h2>2. The shifted integer C must be odd</h2>
+<p>Suppose</p>
+<div class="math" role="math">2\mid C.</div>
+<p>Because</p>
+<div class="math" role="math">\varepsilon(2)=-1,</div>
+<p>the prime <code>2</code> cannot lie in <code>H</code>. Hence it is one of the exceptional factors.</p>
+<p>Every exceptional factor has quotient order six. Therefore</p>
+<div class="math" role="math">\boxed{[2]\text{ has order }6.}</div>
+<p>Let</p>
+<div class="math" role="math">e=v_2(C).</div>
+<p>The total exceptional valuation mass is exactly two, so</p>
+<div class="math" role="math">e\in\{1,2\}.</div>
+<h3>Case e = 2</h3>
+<p>Then <code>2</code> uses the entire exceptional mass. All other factors lie in <code>H</code>, so</p>
+<div class="math" role="math">[C]=2[2].</div>
+<p>The identity <code>2[2]+[C]=0</code> gives</p>
+<div class="math" role="math">4[2]=0.</div>
+<p>But an element of order six is not annihilated by four. Contradiction.</p>
+<h3>Case e = 1</h3>
+<p>Then there is exactly one further simple exceptional prime <code>s</code>, whose quotient class also has order six.</p>
+<p>Thus</p>
+<div class="math" role="math">[C]=[2]+[s].</div>
+<p>The same identity gives</p>
+<div class="math" role="math">3[2]+[s]=0.</div>
+<p>For an order-six element, <code>3[2]</code> is the unique element of order two, namely class <code>3</code> in <code>C_6</code>. Hence</p>
+<div class="math" role="math">[s]=3,</div>
+<p>which has order two rather than six. Contradiction.</p>
+<p>Therefore:</p>
+<h3>Theorem — Branch B is odd</h3>
+<div class="math" role="math">\boxed{2\nmid C.}</div>
+<p>So every parity-cubic Branch-B defect satisfies</p>
+<div class="math" role="math">\boxed{C\text{ is odd}.}</div>
+<hr>
+<h2>3. The source prime satisfies r = 1 mod 24</h2>
+<p>Mordell-hard primes satisfy</p>
+<div class="math" role="math">p\equiv1\pmod8.</div>
+<p>Since</p>
+<div class="math" role="math">C=\frac{p+3r}{4}</div>
+<p>is odd, we must have</p>
+<div class="math" role="math">p+3r\equiv4\pmod8.</div>
+<p>With <code>p≡1 mod8</code>, this gives</p>
+<div class="math" role="math">3r\equiv3\pmod8,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod8.}</div>
+<p>The index-six classification already gives</p>
+<div class="math" role="math">r\equiv1\pmod3.</div>
+<p>Therefore:</p>
+<h3>Corollary — exact source congruence</h3>
+<div class="math" role="math">\boxed{r\equiv1\pmod{24}.}</div>
+<p>Thus the parity-cubic defect occupies only one of the six odd residue classes modulo <code>24</code> available to a general external prime.</p>
+<hr>
+<h2>4. The class of 2 records the exceptional orientation</h2>
+<p>Although <code>2</code> does not divide <code>C</code>, its quotient class still enters through</p>
+<div class="math" role="math">2[2]+[C]=0.</div>
+<p>Because</p>
+<div class="math" role="math">\varepsilon(2)=-1,</div>
+<p>the class <code>[2]</code> is one of the odd classes</p>
+<div class="math" role="math">1,3,5</div>
+<p>in <code>C_6</code>.</p>
+<p>The exceptional valuation mass two has two structural possibilities.</p>
+<h3>Configuration I: opposite simple atoms</h3>
+<p>Suppose there are two distinct simple exceptional primes with quotient classes</p>
+<div class="math" role="math">1\quad\text{and}\quad5.</div>
+<p>Then their total contribution to <code>C</code> is zero:</p>
+<div class="math" role="math">[C]=0.</div>
+<p>Hence</p>
+<div class="math" role="math">2[2]=0.</div>
+<p>Among the odd classes of <code>C_6</code>, only class <code>3</code> is killed by multiplication by two. Thus</p>
+<div class="math" role="math">\boxed{[2]=3.}</div>
+<p>So <code>2</code> has trivial cubic coordinate:</p>
+<div class="math" role="math">\boxed{2\text{ is a cubic residue modulo }r.}</div>
+<h3>Configuration II: aligned mass</h3>
+<p>If instead the exceptional contribution is</p>
+<div class="math" role="math">[C]=2 \quad\text{or}\quad [C]=4,</div>
+<p>which happens either when the two simple atoms have the same orientation or when one exceptional prime occurs to exponent two, then</p>
+<div class="math" role="math">2[2]=-[C]</div>
+<p>forces</p>
+<div class="math" role="math">[2]=1 \quad\text{or}\quad [2]=5.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{2\text{ is a cubic nonresidue modulo }r.}</div>
+<p>We obtain:</p>
+<h3>Theorem — cubic character of 2 distinguishes the two Branch-B shapes</h3>
+<p>In a parity-cubic Branch-B defect:</p>
+<div class="math" role="math">\boxed{ 2\text{ cubic residue mod }r \iff \text{the two simple exceptional classes are opposite}.}</div>
+<p>If <code>2</code> is a cubic nonresidue modulo <code>r</code>, then the exceptional valuation is aligned in one of the two classes <code>±1</code>: either one squared exceptional prime or two simple exceptional primes with the same orientation.</p>
+<hr>
+<h2>5. Strengthened Branch-B normal form</h2>
+<p>Every Branch-B index-six defect at <code>k=3r</code> therefore satisfies all of the following:</p>
+<div class="math" role="math">\boxed{ r\equiv1\pmod{24}, \qquad C=\frac{p+3r}{4}\text{ odd}.}</div>
+<p>Moreover:</p>
+<ul><li><code>p</code> is a cubic residue modulo <code>r</code>;</li><li>exactly two units of factor valuation are carried by primes <code>2 mod 3</code> that are cubic nonresidues modulo <code>r</code>;</li><li>every other factor is <code>1 mod 3</code> and cubic-residue-side;</li><li>the cubic character of <code>2</code> modulo <code>r</code> determines whether the two visible order-six atoms cancel or align in the quotient.</li></ul>
+<p>The remaining branch is now a simultaneous cubic splitting problem involving</p>
+<div class="math" role="math">p,\quad 2,\quad\text{and the complete factorization of }\frac{p+3r}{4}.</div>
+<hr>
+<h2>6. Next target</h2>
+<p>The most concrete closure targets are now:</p>
+<ol><li>use cubic reciprocity to compare the condition</li></ol>
+<div class="math" role="math">p\in((\mathbb Z/r\mathbb Z)^\times)^3</div>
+<p>with the prescribed cubic characters of the two inert-mod-3 exceptional primes;</p>
+<ol><li>use an explicit criterion for the cubic character of <code>2 mod r</code> together with</li></ol>
+<div class="math" role="math">r\equiv1\pmod{24}</div>
+<p>to separate or eliminate the aligned and cancelling configurations;</p>
+<ol><li>show that either configuration forces a new exact Type-I or Type-II divisor-square hit at a related admissible shift.</li></ol>
+<p>This is substantially narrower than the original composite-successor problem: the first non-primitive index-six obstruction now lives on one congruence class of source primes and only two units of visible factor valuation.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

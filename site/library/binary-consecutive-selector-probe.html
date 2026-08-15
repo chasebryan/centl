@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write a Mordell-hard prime as">
+  <title>Consecutive binary-selector probe — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-consecutive-selector-probe.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-consecutive-selector-probe.html">
+  <meta property="og:title" content="Consecutive binary-selector probe — Free Computation Foundation">
+  <meta property="og:description" content="Write a Mordell-hard prime as">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Consecutive binary-selector probe</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Write a Mordell-hard prime as</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-CONSECUTIVE-SELECTOR-PROBE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-mining record; proposed fixed bound <code>u&lt;=15</code> falsified</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-RESCUE.md</code>, <code>BINARY-R-DIVISOR-COLLISION.md</code></p>
+<p><strong>Claim boundary:</strong> finite exact evidence only. No fixed universal selector bound is claimed.</p>
+<h2>1. Consecutive parametrization</h2>
+<p>Write a Mordell-hard prime as</p>
+<div class="math" role="math">p=24n+1</div>
+<p>and put</p>
+<div class="math" role="math">P=\frac{p-1}{4}=6n.</div>
+<p>For every positive integer <code>u</code>, choose</p>
+<div class="math" role="math">\boxed{r_u=4u-1.}</div>
+<p>Then <code>r_u==3 mod 4</code> and the first denominator is exactly</p>
+<div class="math" role="math">\boxed{A_u=\frac{p+r_u}{4}=P+u.}</div>
+<p>Thus the binary program probes the multiplicative divisor geometry of the consecutive integers</p>
+<div class="math" role="math">P+1,P+2,P+3,\ldots</div>
+<p>without requiring <code>r_u</code> to be prime.</p>
+<h2>2. Important correction</h2>
+<p>Earlier prime-<code>r</code> probes skipped composite values such as</p>
+<div class="math" role="math">r=15,\ 39,\ 51,\ldots</div>
+<p>but the exact signed-divisor collision theorem only requires <code>r==3 mod4</code> and the relevant coprimality, not primality.</p>
+<p>Therefore composite numerators are legitimate and must be included in theorem mining.</p>
+<h2>3. Finite signal through two million</h2>
+<p>On the exact Mordell-hard prime population below approximately <code>2*10^6</code>, every tested prime had a binary rescue for some</p>
+<div class="math" role="math">1\le u\le15.</div>
+<p>This initially suggested a possible fixed-selector theorem.</p>
+<h2>4. Falsification through ten million</h2>
+<p>The full hard-prime census through</p>
+<div class="math" role="math">p\le10^7</div>
+<p>contains the explicit counterexample to the proposed bound</p>
+<div class="math" role="math">\boxed{p=8,803,369.}</div>
+<p>For this prime, the exact binary collision test fails for every</p>
+<div class="math" role="math">\boxed{1\le u\le15.}</div>
+<p>Its first hit in the consecutive selector is</p>
+<div class="math" role="math">\boxed{u=27,\qquad r=107.}</div>
+<p>Here</p>
+<div class="math" role="math">A_{27}=\frac{p+107}{4}=2,200,869 =3^2\cdot11^2\cdot43\cdot47.</div>
+<p>An explicit signed-divisor collision is</p>
+<div class="math" role="math">\boxed{1\equiv-18,189\pmod{107},}</div>
+<p>with</p>
+<div class="math" role="math">18,189=3^2\cdot43\cdot47\mid A_{27}.</div>
+<p>Indeed</p>
+<div class="math" role="math">18,189+1=18,190=107\cdot170.</div>
+<p>So the <code>u=27</code> rescue is exact, not a heuristic hit.</p>
+<h2>5. Research consequence</h2>
+<p>The attractive statement</p>
+<div class="math" role="math">\text{“the first 15 consecutive selectors always suffice”}</div>
+<p>is false and must not be used.</p>
+<p>The surviving signal is weaker but still useful:</p>
+<ul><li>allowing composite <code>r_u=4u-1</code> materially improves the selector program;</li><li>late hits correlate with a shifted integer <code>P+u</code> acquiring enough multiplicative residue diversity to create the signed collision;</li><li>the hard case is therefore about <strong>how long consecutive multiplicative compression can persist</strong>, not about primality of the binary numerator.</li></ul>
+<p>Any universal selector theorem must allow an adaptive or unbounded <code>u</code>, or prove a larger bound from genuine structure rather than finite data.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

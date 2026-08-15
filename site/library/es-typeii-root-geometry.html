@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Type-II root geometry: López A/B are the comparable-root cases — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-typeii-root-geometry.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-typeii-root-geometry.html">
+  <meta property="og:title" content="Type-II root geometry: López A/B are the comparable-root cases — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Type-II root geometry: López A/B are the comparable-root cases</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-TYPEII-ROOT-GEOMETRY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact parametrization and structural corollary</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TYPEII-SQUARE-COMPLETION-LOPEZ-A.md</code>, <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code></p>
+<p><strong>Claim boundary:</strong> this is an exact reparametrization of the square-completed standard Type-II theorem. It does not prove universal Type-II existence.</p>
+<hr>
+<h2>1. Squarefree-root decomposition</h2>
+<p>Let <code>p≡1 mod4</code> be prime and suppose a square-completed Type-II certificate is given by positive integers <code>a,d</code> with</p>
+<div class="math" role="math">\boxed{ d\mid a^2, \qquad p\nmid d, \qquad 4a-1\mid p+4d.}</div>
+<p>Because</p>
+<div class="math" role="math">d\cdot\frac{a^2}{d}=a^2</div>
+<p>is a square, the two integers</p>
+<div class="math" role="math">d \qquad\text{and}\qquad \frac{a^2}{d}</div>
+<p>have the same squarefree kernel.</p>
+<p>Therefore there are unique positive integers <code>s,b,c</code> with <code>s</code> squarefree such that</p>
+<div class="math" role="math">\boxed{ d=sb^2, \qquad \frac{a^2}{d}=sc^2.}</div>
+<p>Multiplying gives</p>
+<div class="math" role="math">a^2=s^2b^2c^2,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{a=sbc.}</div>
+<p>Thus every square-completed Type-II certificate has canonical root data</p>
+<div class="math" role="math">\boxed{(s,b,c),\qquad s\text{ squarefree}.}</div>
+<hr>
+<h2>2. The exact congruence in root coordinates</h2>
+<p>Let</p>
+<div class="math" role="math">q=rac{p+4d}{4a-1}.</div>
+<p>Substituting</p>
+<div class="math" role="math">d=sb^2, \qquad a=sbc</div>
+<p>gives</p>
+<div class="math" role="math">\boxed{ p+4sb^2=(4sbc-1)q.}</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{t=cq-b.}</div>
+<p>Then</p>
+<div class="math" role="math">\begin{aligned} p+q &amp;=4sbcq-4sb^2\\ &amp;=4sb(cq-b)\\ &amp;=4sbt, \end{aligned}</div>
+<p>so</p>
+<div class="math" role="math">\boxed{p+q=4sbt.}</div>
+<p>Since the left side is positive,</p>
+<div class="math" role="math">\boxed{t&gt;0.}</div>
+<p>Also by definition</p>
+<div class="math" role="math">\boxed{b+t=cq.}</div>
+<p>Thus the square-completed congruence is equivalent to the four positive parameters</p>
+<div class="math" role="math">\boxed{ p+q=4sbt, \qquad b+t=cq.}</div>
+<hr>
+<h2>3. Explicit Type-II decomposition</h2>
+<p>The two equations immediately give</p>
+<div class="math" role="math">\begin{aligned} \frac1{sctp} +\frac1{sbt} +\frac1{sbcp} &amp;= \frac{b+p c+t}{sbc tp}\\ &amp;= \frac{cq+pc}{sbc tp}\\ &amp;= \frac{c(p+q)}{sbc tp}\\ &amp;= \frac4p. \end{aligned}</div>
+<p>Therefore:</p>
+<h3>Theorem — explicit root decomposition</h3>
+<p>Every square-completed certificate</p>
+<div class="math" role="math">p+4sb^2=(4sbc-1)q</div>
+<p>with</p>
+<div class="math" role="math">t=cq-b&gt;0</div>
+<p>gives the exact standard Type-II identity</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{sctp} + \frac1{sbt} + \frac1{sbcp}.}</div>
+<p>Two of the three denominators carry the factor <code>p</code>, as expected for Type II.</p>
+<hr>
+<h2>4. López Type A is b | c</h2>
+<p>Recall</p>
+<div class="math" role="math">d=sb^2, \qquad a=sbc.</div>
+<p>The ordinary López Type-A boundary condition is</p>
+<div class="math" role="math">d\mid a.</div>
+<p>This is equivalent to</p>
+<div class="math" role="math">sb^2\mid sbc,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{b\mid c.}</div>
+<p>Therefore the lower López orthant is exactly the region where the first root divides the second.</p>
+<hr>
+<h2>5. López Type B is c | b</h2>
+<p>The upper square-divisor boundary corresponding to López Type B is</p>
+<div class="math" role="math">a\mid d.</div>
+<p>In root variables this is</p>
+<div class="math" role="math">sbc\mid sb^2,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{c\mid b.}</div>
+<p>Thus the upper López orthant is exactly the opposite divisibility order.</p>
+<hr>
+<h2>6. Exact comparability theorem</h2>
+<p>Combining the two cases:</p>
+<h3>Theorem — López A/B are the comparable-root Type-II certificates</h3>
+<p>A square-completed standard Type-II certificate belongs to one of the two López boundary families at the same layer if and only if</p>
+<div class="math" role="math">\boxed{b\mid c\quad\text{or}\quad c\mid b.}</div>
+<p>The genuinely square-only Type-II certificates are exactly those with</p>
+<div class="math" role="math">\boxed{b\nmid c \qquad\text{and}\qquad c\nmid b.}</div>
+<p>So the cross-orthant geometry has an elementary interpretation:</p>
+<blockquote><p>the two square roots are incomparable in the divisibility poset.</p></blockquote>
+<hr>
+<h2>7. Complement simply swaps the roots</h2>
+<p>The divisor complement is</p>
+<div class="math" role="math">d^*=\frac{a^2}{d}=sc^2.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{d\longleftrightarrow d^*}</div>
+<p>is exactly</p>
+<div class="math" role="math">\boxed{b\longleftrightarrow c.}</div>
+<p>This makes all previous symmetry transparent:</p>
+<ul><li>Type A (<code>b|c</code>) is sent to Type B (<code>c|b</code>);</li><li>mixed certificates (<code>b,c</code> incomparable) remain mixed;</li><li>inverse residue pairing is just root exchange.</li></ul>
+<p>The entire square-divisor complement theory therefore becomes a two-root symmetry.</p>
+<hr>
+<h2>8. Example p = 2521</h2>
+<p>The mixed certificate</p>
+<div class="math" role="math">a=12, \qquad d=16</div>
+<p>has</p>
+<div class="math" role="math">d=1\cdot4^2, \qquad \frac{a^2}{d}=9=1\cdot3^2.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{s=1, \qquad b=4, \qquad c=3.}</div>
+<p>The roots are incomparable:</p>
+<div class="math" role="math">4\nmid3, \qquad 3\nmid4.</div>
+<p>The congruence quotient is</p>
+<div class="math" role="math">q=55</div>
+<p>and</p>
+<div class="math" role="math">t=cq-b=3\cdot55-4=161.</div>
+<p>Hence</p>
+<div class="math" role="math">p+q=2521+55=2576=4\cdot1\cdot4\cdot161</div>
+<p>and</p>
+<div class="math" role="math">b+t=4+161=165=3\cdot55.</div>
+<p>The explicit decomposition is</p>
+<div class="math" role="math">\boxed{ \frac4{2521} = \frac1{3\cdot161\cdot2521} + \frac1{4\cdot161} + \frac1{4\cdot3\cdot2521}.}</div>
+<p>This is a standard Type-II solution represented by incomparable roots.</p>
+<hr>
+<h2>9. Strategic consequence</h2>
+<p>The López all-prime conjecture can now be interpreted inside standard Type II as a <strong>divisibility-comparability conjecture</strong>:</p>
+<blockquote><p>for every prime, find a Type-II certificate whose canonical roots can be chosen comparable by divisibility.</p></blockquote>
+<p>The complete Type-II problem drops that comparability requirement.</p>
+<p>This suggests two distinct proof directions:</p>
+<ol><li><strong>completion route:</strong> use all incomparable-root certificates directly, which is enough for standard Type II;</li><li><strong>descent route:</strong> try to transform any incomparable-root certificate into another certificate with a smaller incomparability measure until one root divides the other.</li></ol>
+<p>A natural descent statistic is obtained after writing</p>
+<div class="math" role="math">g=\gcd(b,c), \qquad b=gB, \qquad c=gC, \qquad \gcd(B,C)=1.</div>
+<p>The mixed case is precisely</p>
+<div class="math" role="math">B&gt;1, \qquad C&gt;1.</div>
+<p>Whether the exact equations</p>
+<div class="math" role="math">p+q=4sbt, \qquad b+t=cq</div>
+<p>admit a transformation that reduces <code>BC</code> while preserving <code>p</code> is now a concrete theorem target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

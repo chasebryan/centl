@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Square-lift towers in the character residual core — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-lift-towers.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-lift-towers.html">
+  <meta property="og:title" content="Square-lift towers in the character residual core — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Square-lift towers in the character residual core</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-LIFT-TOWERS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural reduction and active theorem direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, universal López Type A/B coverage, or the Erdős-Straus conjecture. It refines the square-lift reduction in <a href="square-lift-core.html">SQUARE-LIFT-CORE.md</a>.</p>
+<p>Read with:</p>
+<ul><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li><li><a href="square-lift-core.html">SQUARE-LIFT-CORE.md</a></li><li><a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a></li><li><a href="multiplicative-trap-quotient.html">MULTIPLICATIVE-TRAP-QUOTIENT.md</a></li><li><a href="fiber-selector-k1200.html">FIBER-SELECTOR-K1200.md</a></li></ul>
+<h2>1. Squarefree kernel</h2>
+<p>For an odd positive integer <code>n</code>, define its squarefree kernel</p>
+<div class="math" role="math">\operatorname{sf}(n) =\prod_{v_p(n)\text{ odd}}p.</div>
+<p>Thus uniquely</p>
+<div class="math" role="math">\boxed{n=\operatorname{sf}(n)b^2}</div>
+<p>for some positive integer <code>b</code>.</p>
+<p>Fix a target Type A/B candidate at depth <code>k</code>, with</p>
+<div class="math" role="math">M=4k-1, \qquad L=\operatorname{lcm}(840,M), \qquad x\equiv r\pmod L.</div>
+<p>For an earlier layer <code>j&lt;k</code>, write</p>
+<div class="math" role="math">m_j=4j-1.</div>
+<h2>2. Tower classification theorem</h2>
+<h3>Theorem</h3>
+<p>An earlier layer <code>j</code> is character-fixed with respect to the target progression if and only if</p>
+<div class="math" role="math">\boxed{ \operatorname{sf}(m_j)\mid\operatorname{rad}(L). }</div>
+<p>Equivalently, every character-fixed earlier modulus has the form</p>
+<div class="math" role="math">\boxed{ m_j=a b^2}</div>
+<p>where</p>
+<div class="math" role="math">a\mid\operatorname{rad}(L), \qquad a\text{ squarefree}.</div>
+<p>Because <code>m_j=3 mod 4</code>, necessarily</p>
+<div class="math" role="math">\boxed{a\equiv3\pmod4}</div>
+<p>and <code>b</code> is odd.</p>
+<h3>Proof</h3>
+<p>The character-fixed condition says precisely that every prime occurring to odd exponent in <code>m_j</code> already divides <code>L</code>. Those odd-exponent primes are exactly the prime factors of <code>sf(m_j)</code>. Hence</p>
+<div class="math" role="math">\operatorname{sf}(m_j)\mid\operatorname{rad}(L).</div>
+<p>The unique squarefree-square decomposition gives <code>m_j=a b^2</code>. Since <code>b^2=1 mod 4</code> for odd <code>b</code> and <code>m_j=3 mod 4</code>, we obtain <code>a=3 mod 4</code>. QED.</p>
+<h2>3. Square-lift towers</h2>
+<p>For a fixed squarefree integer</p>
+<div class="math" role="math">a\equiv3\pmod4,</div>
+<p>define its <strong>square-lift tower</strong> by</p>
+<div class="math" role="math">\boxed{ m(a,b)=a b^2,} \qquad b\text{ odd},</div>
+<p>with corresponding Type A/B layer index</p>
+<div class="math" role="math">\boxed{ j(a,b)=\frac{a b^2+1}{4}.}</div>
+<p>Every character-fixed earlier layer belongs to one such tower whose base <code>a</code> divides <code>rad(L)</code>.</p>
+<p>The tower is intrinsic to the modulus sequence <code>4j-1</code>; it does not depend on the target candidate. The target candidate decides only which tower bases are available through <code>a|rad(L)</code> and which of them are character-negative.</p>
+<h2>4. Character coherence theorem</h2>
+<h3>Theorem</h3>
+<p>For a fixed target progression <code>x=r mod L</code>, every character-fixed layer in the same square-lift tower has the same Jacobi sign:</p>
+<div class="math" role="math">\boxed{ \left(\frac r{a b^2}\right) = \left(\frac r a\right). }</div>
+<p>Therefore the sign is independent of the lift parameter <code>b</code>.</p>
+<h3>Proof</h3>
+<p>Prime exponents contributed by <code>b^2</code> are even and disappear from the Jacobi symbol. Hence only the squarefree kernel <code>a</code> contributes. QED.</p>
+<h3>Consequence</h3>
+<p>A tower is either entirely character-positive or entirely character-negative for a fixed target progression.</p>
+<p>Thus the character residual is not naturally indexed by hundreds of earlier layers. It is indexed first by a much smaller set of squarefree tower bases</p>
+<div class="math" role="math">\boxed{ \mathcal A_{k,r} = \left\{ a:\ a\mid\operatorname{rad}(L), \ a\equiv3\pmod4, \ \left(\frac r a\right)=-1 \right\}. }</div>
+<p>Only actual tower members <code>a b^2 &lt; M</code> contribute earlier rows.</p>
+<h2>5. Odd-square ancestry inside a tower</h2>
+<p>Suppose <code>b_1|b_2</code> and write</p>
+<div class="math" role="math">b_2=c b_1.</div>
+<p>Then <code>c</code> is odd and</p>
+<div class="math" role="math">m(a,b_2)=c^2m(a,b_1).</div>
+<p>Hence the corresponding layer indices satisfy</p>
+<div class="math" role="math">\boxed{ j(a,b_2) =c^2j(a,b_1)-\frac{c^2-1}{4}.}</div>
+<p>Because an odd square satisfies</p>
+<div class="math" role="math">c^2\equiv1\pmod8,</div>
+<p>this is a special square-quotient subfamily of the general modulus-ancestry relation</p>
+<div class="math" role="math">4j_1-1\mid4j_2-1.</div>
+<p>Thus every square-lift tower carries a canonical divisibility ancestry graph controlled simply by divisibility among the odd lift parameters <code>b</code>.</p>
+<h2>6. Pullback consequence</h2>
+<p>For a character-fixed row</p>
+<div class="math" role="math">m_j=a b^2,</div>
+<p>the candidate pullback modulus is</p>
+<div class="math" role="math">q_j=\frac{m_j}{\gcd(L,m_j)}.</div>
+<p>Every prime <code>p</code> not dividing <code>L</code> that occurs in <code>q_j</code> comes from <code>b^2</code>, and therefore</p>
+<div class="math" role="math">\boxed{v_p(q_j)\text{ is even}.}</div>
+<p>This recovers the square-lift theorem and now places those even powers inside an explicit tower indexed by <code>a</code>.</p>
+<p>Moreover, if such an outside prime <code>p</code> occurs at all, then</p>
+<div class="math" role="math">p^2\mid m_j&lt;M,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{p&lt;\sqrt{M}=\sqrt{4k-1}.}</div>
+<p>This gives a universal depth-dependent bound on genuinely new prime coordinates after character saturation.</p>
+<h2>7. Finite replay through k &lt;= 1200</h2>
+<p>The frozen candidate bundle from GitHub Actions run <code>31846146909</code> contains <code>41,470</code> directly novel candidates.</p>
+<p>Among the <code>11,056</code> candidates in the Jacobi character residual:</p>
+<pre><code class="language-text">median number of variable negative towers: 1
+mean number of variable negative towers:   about 1.110
+maximum variable negative towers:          10
+
+median variable fixed-negative rows:       1
+mean variable fixed-negative rows:         about 2.284
+maximum variable fixed-negative rows:      24</code></pre>
+<p>Only <code>3,756</code> candidates in the complete <code>41,470</code>-candidate bundle had more than one variable negative square-lift tower.</p>
+<p>One finite maximum-tower example occurs at the already important depth</p>
+<div class="math" role="math">\boxed{k=1050,}</div>
+<p>where one candidate has ten variable negative tower bases:</p>
+<pre><code class="language-text">19, 39, 51, 91, 95, 119, 195, 255, 399, 455</code></pre>
+<p>These counts are proof-mining observations, not universal bounds. The theorem is the tower decomposition and character coherence, not the finite numbers.</p>
+<h2>8. Why this matters</h2>
+<p>The residual problem after the character shield has now compressed in two independent directions.</p>
+<p>First, <a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a> removes genuinely collective squareclass inconsistency.</p>
+<p>Second, this note shows the remaining character-negative rows occur in coherent towers</p>
+<div class="math" role="math">\boxed{a b^2}</div>
+<p>and the Jacobi sign is determined entirely by the tower base <code>a</code>.</p>
+<p>So the unresolved exact arithmetic is more accurately viewed as</p>
+<div class="math" role="math">\boxed{ \text{a small family of negative squarefree bases} +\text{ higher p-adic square lifts} +\text{ exact divisor traps}. }</div>
+<p>That is substantially more rigid than a generic odd covering system.</p>
+<h2>9. New theorem target: tower escape</h2>
+<p>For one negative tower base <code>a</code>, the exact earlier constraints come from the finite lifts</p>
+<div class="math" role="math">a b^2&lt;M.</div>
+<p>The next question is:</p>
+<blockquote><p>Can all exact Type A/B traps belonging to one negative square-lift tower be avoided by one coherent choice of the higher <code>p</code>-adic digits, unless one layer is already an exact direct shadow?</p></blockquote>
+<p>If this can be proved tower by tower, the remaining interaction problem is only to combine the small number of towerwise escape choices.</p>
+<p>The hoped-for architecture becomes</p>
+<div class="math" role="math">\boxed{ \text{direct novelty} \to \text{character saturation} \to \text{negative square-lift towers} \to \text{towerwise p-adic escape} \to \text{reduced avoiding progression}. }</div>
+<p>This is now a primary route toward universal DSC-P.</p>
+<h2>10. Novelty boundary</h2>
+<p>Squarefree kernels, Jacobi symbols, and decompositions <code>n=a b^2</code> are classical. The candidate contribution is their use as a <strong>tower decomposition of the López Type A/B minimal-depth character residual</strong>, integrated with shadowing, fiber peeling, and exact-depth realization.</p>
+<p>Targeted arXiv searching on 2026-08-14 did not locate this exact tower organization in the López Type A/B minimal-depth setting. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

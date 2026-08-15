@@ -2,11 +2,22 @@
 
 This directory operationalizes the research program recorded in `docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md`.
 
+**Public library:** every public note here is hosted at
+[freecomputation.org/research.html](https://freecomputation.org/research.html).
+The program overview is
+[freecomputation.org/research-erdos-straus.html](https://freecomputation.org/research-erdos-straus.html).
+
 ## Research map
 
 **Current synthesis:** [`DIAMOND.md`](DIAMOND.md) records how the minimal Type A/B depth invariant, shadow graph, exact-depth spectrum, exact survivor hazard, prime-modulus backbone, composite rescue core, and Direct-Shadow Completeness program fit into one theorem architecture.
 
 **Moving frontier:** [`CURRENT-FRONTIER.md`](CURRENT-FRONTIER.md) is the shortest current-state record.
+
+**Two-target corridor (2026-08-15):** [`TWO-P-PLUS-ONE-FILTER.md`](TWO-P-PLUS-ONE-FILTER.md), [`HARD-Q7-TYPE-I-NO-RESCUE.md`](HARD-Q7-TYPE-I-NO-RESCUE.md), [`Q11-TYPE-I-COMPANION.md`](Q11-TYPE-I-COMPANION.md), and [`K15-TWO-TARGET-FILTER.md`](K15-TWO-TARGET-FILTER.md) make the original-ES corridor combined-exact at `3,7,11,15` and add the linear form `2p+1`.
+
+**Independent covering obstruction:** [`HARD-SMOOTH-TYPEII-OBSTRUCTION.md`](HARD-SMOOTH-TYPEII-OBSTRUCTION.md) proves that no `{2,3,5,7}`-smooth forced multiplier can produce a Type-II hit at the aligned shift `k≡-p (mod 4M)`.
+
+**Public hunt (2026-08-15):** [`ES-HUNT.md`](ES-HUNT.md) is the operator-facing record. [`bb.kernel`](bb.kernel) (also `B-BervigES.kernel`) is the Python reference; [`CC.kernel`](CC.kernel) is the fast hard-prime engine. Findings live in [`findings/`](findings/START-HERE.md). Letter numbers are content-addressed and identical on every machine that finds the same letter. From the repo root: `./centl es go` (or `./centl es` for the menu). A start factor of `0`, `--from N`, or `--random` chooses where a hunt begins. Erdős–Straus remains open.
 
 **Shared-factor CN (2026-08-15):** [`CN-SHARED-THEOREM.md`](CN-SHARED-THEOREM.md) proves lift-room, the odd totient-ratio lemma, the C2-thin reduction to complementary `q=3`, and the `205 → 10` absorption theorem. Unrestricted C2-shared is false. Directly novel admissible complementary covers are zero through `k ≤ 1500`; the replayable certificate is [`CN-SHARED-CERTIFICATE-2026-08-15.md`](CN-SHARED-CERTIFICATE-2026-08-15.md).
 
@@ -45,6 +56,7 @@ Core linked records:
 - [`COMPOSITE-CORE.md`](COMPOSITE-CORE.md) — zero-density prime-modulus survivor core and composite-rescue reduction;
 - [`PRIOR-ART.md`](PRIOR-ART.md) — literature and priority boundary;
 - [`CRYPTOLOGY.md`](CRYPTOLOGY.md), [`CRYPTOLOGY-THEORY.md`](CRYPTOLOGY-THEORY.md), and [`CRYPTOLOGY-RESULTS-2026-08-14.md`](CRYPTOLOGY-RESULTS-2026-08-14.md) — controlled cryptology side investigation;
+- [`ES-HUNT.md`](ES-HUNT.md) — public infinite hunt, seeds, and letter numbers;
 - [`../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md`](../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md) — formal Wellspring Candidate record.
 
 ## Automation

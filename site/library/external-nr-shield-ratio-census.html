@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External-nonresidue shield-ratio census through `p &lt;= 10^7` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-shield-ratio-census.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-shield-ratio-census.html">
+  <meta property="og:title" content="External-nonresidue shield-ratio census through `p &lt;= 10^7` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External-nonresidue shield-ratio census through `p &lt;= 10^7`</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-SHIELD-RATIO-CENSUS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-mining signal; replayable falsifier checked in</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-NR-M1-SYNCHRONIZATION.md</code>, <code>FAB-HARD-FIRST-FILTERS.md</code>, <code>external_nr_shield_ratio_probe.py</code></p>
+<p><strong>Claim boundary:</strong> this is finite evidence and a theorem falsifier. It is not a universal existence theorem and is not a proof of Erdős–Straus.</p>
+<hr>
+<h2>1. Rule tested</h2>
+<p>Restrict to Mordell-hard primes that survive all four exact necessary counterexample restrictions in <code>FAB-HARD-FIRST-FILTERS.md</code>.</p>
+<p>For each such prime <code>p</code>, scan primes</p>
+<div class="math" role="math">\ell\equiv3\pmod4, \qquad \left(\frac\ell p\right)=-1,</div>
+<p>in increasing order. Put</p>
+<div class="math" role="math">C=\frac{p+\ell}{4}.</div>
+<p>The exact fixed-k divisor-ratio theorem gives a strong sufficient certificate if</p>
+<div class="math" role="math">-p^{-1}\pmod\ell</div>
+<p>lies in the signed divisor-ratio box of <code>C</code>.</p>
+<p>This census imposes the much stronger restriction that the ratio must use <strong>only the hard-shield primes</strong>:</p>
+<div class="math" role="math">\boxed{ 2^{z_2}3^{z_3}5^{z_5}7^{z_7} \equiv-p^{-1}\pmod\ell, }</div>
+<p>with</p>
+<div class="math" role="math">-v_q(C)\le z_q\le v_q(C).</div>
+<p>Thus no prime factor of <code>C</code> outside <code>{2,3,5,7}</code> is permitted in the winning ratio.</p>
+<hr>
+<h2>2. Exact finite result</h2>
+<p>On the hard-prime population through</p>
+<div class="math" role="math">\boxed{p\le10^7},</div>
+<p>the census contains</p>
+<div class="math" role="math">20,513</div>
+<p>Mordell-hard primes in total and</p>
+<div class="math" role="math">\boxed{2,173}</div>
+<p>survivors of the four exact first filters.</p>
+<p>Using external primes</p>
+<div class="math" role="math">\ell\le100,000</div>
+<p>and allowing at most the first <code>300</code> eligible external primes for each <code>p</code>, the exact shield-only search found</p>
+<div class="math" role="math">\boxed{2,173/2,173}</div>
+<p>successful certificates.</p>
+<p>There were</p>
+<div class="math" role="math">\boxed{0}</div>
+<p>failures in this finite census.</p>
+<hr>
+<h2>3. Hardest observed finite case</h2>
+<p>The largest first-hit external rank observed was</p>
+<div class="math" role="math">\boxed{98}.</div>
+<p>It occurred at</p>
+<div class="math" role="math">\boxed{p=4,462,921}.</div>
+<p>The successful external prime was</p>
+<div class="math" role="math">\boxed{\ell=2,459}.</div>
+<p>Then</p>
+<div class="math" role="math">C=\frac{p+\ell}{4} =1,116,345.</div>
+<p>The successful shield ratio had signed exponent vector</p>
+<div class="math" role="math">(z_2,z_3,z_5,z_7)=(0,1,1,0),</div>
+<p>so the winning ratio was simply</p>
+<div class="math" role="math">\boxed{R=15}.</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{15p\equiv-1\pmod{2459}.}</div>
+<p>Both <code>3</code> and <code>5</code> divide <code>C</code>, so this ratio lies inside the exact allowed signed divisor box.</p>
+<p>This example is useful strategically: it demonstrates that the phenomenon is not a hidden fixed finite list of very small external primes. The adaptive external rank can grow substantially while the <strong>internal ratio remains tiny</strong>.</p>
+<hr>
+<h2>4. Interpretation</h2>
+<p>The finite evidence now separates the two jobs extremely cleanly:</p>
+<ol><li>choose an adaptive external prime <code>ell</code> to provide the required nonresidue modulus and force</li></ol>
+<div class="math" role="math">(C/p)=(C/\ell)=-1;</div>
+<ol><li>use only the already-frozen hard shield <code>{2,3,5,7}</code> inside <code>C</code> to place the exact ratio</li></ol>
+<div class="math" role="math">-p^{-1}\pmod\ell.</div>
+<p>The universal theorem suggested by the data is therefore <strong>not</strong> a bounded external-prime theorem. It is the cap-free statement:</p>
+<blockquote><p>For every Mordell-hard prime surviving the exact preliminary filters, there exists some external prime &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; \ell\equiv3\pmod4,</p></blockquote>
+<p>&amp;gt; \quad &amp;gt; (\ell/p)=-1, &amp;gt;&lt;/div&gt;</p>
+<blockquote><p>such that the available signed <code>{2,3,5,7}</code>-ratio box of &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; C=(p+\ell)/4</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<blockquote><p>contains <code>-p^{-1} mod ell</code>.</p></blockquote>
+<p>Proving that statement would provide a strong sufficient certificate for every remaining hard prime and would close the all-prime wall after the standard reductions.</p>
+<hr>
+<h2>5. Exact arithmetic form of a shield-only hit</h2>
+<p>Write the signed shield ratio as</p>
+<div class="math" role="math">R=\frac AB,</div>
+<p>where <code>A,B</code> are coprime <code>210</code>-smooth integers and</p>
+<div class="math" role="math">AB\mid C.</div>
+<p>Then</p>
+<div class="math" role="math">R\equiv-p^{-1}\pmod\ell</div>
+<p>is exactly</p>
+<div class="math" role="math">\boxed{\ell\mid pA+B.}</div>
+<p>The divisibility <code>AB|C</code> is exactly</p>
+<div class="math" role="math">\boxed{\ell\equiv-p\pmod{4AB}.}</div>
+<p>Thus every finite hit is a pair of simultaneous exact statements:</p>
+<div class="math" role="math">\boxed{ \ell\mid pA+B, \qquad \ell\equiv-p\pmod{4AB}, }</div>
+<p>with <code>A,B</code> supported only on <code>{2,3,5,7}</code>.</p>
+<p>This form should be the starting point for the universal descent: the external prime is not arbitrary; it is simultaneously a prime factor of one tiny-shield linear form and a prescribed residue modulo the shield denominator.</p>
+<hr>
+<h2>6. Replay</h2>
+<p>The checked-in standalone falsifier is</p>
+<p><code>external_nr_shield_ratio_probe.py</code>.</p>
+<p>A matching replay command is:</p>
+<pre><code class="language-bash">python3 research/erdos-straus/external_nr_shield_ratio_probe.py \
+  --limit 10000000 \
+  --ell-search-limit 100000 \
+  --max-external 300 \
+  --first-four-only</code></pre>
+<p>The script uses only the Python standard library and independently performs prime enumeration, the four preliminary theorem filters, Euler-criterion Legendre symbols, hard-shield valuation extraction, and exact signed-ratio dynamic programming.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

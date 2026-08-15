@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the composite shift `k=15` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k15-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k15-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the composite shift `k=15` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the composite shift `k=15`</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K15-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact group-theoretic filter</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-HARD-FIRST-FILTERS.md</code></p>
+<p><strong>Claim boundary:</strong> classifies the next corridor position after <code>3,7,11</code>. It does not prove that a <code>3,7,11</code> survivor must hit at <code>15</code>, and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">C=\frac{p+15}{4}=A+3, \qquad A=\frac{p+3}{4}.</div>
+<p>Then <code>C</code> is an integer. Because <code>p≡1\pmod8</code>,</p>
+<div class="math" role="math">p+15\equiv0\pmod8,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{2\mid C.}</div>
+<p>Hard residues modulo <code>5</code> are <code>1</code> or <code>4</code>, so <code>5\nmid C</code>. Also <code>C\equiv1\pmod3</code> whenever <code>A</code> is supported on primes <code>1\bmod3</code>, and in any case <code>3</code> need not divide <code>C</code>. Thus every odd prime factor of <code>C</code> is a unit modulo <code>15</code>.</p>
+<hr>
+<h2>2. The two-primary subgroup</h2>
+<p>The unit group</p>
+<div class="math" role="math">(\mathbb Z/15\mathbb Z)^\times = \{1,2,4,7,8,11,13,14\}</div>
+<p>has order eight. The residue <code>2</code> generates a cyclic subgroup of order four:</p>
+<div class="math" role="math">\boxed{ H=\langle2\rangle=\{1,2,4,8\}. }</div>
+<p>The two exact targets live outside <code>H</code>:</p>
+<div class="math" role="math">-1\equiv14\pmod{15}.</div>
+<p>The six hard classes occupy only two residues modulo <code>15</code>. Each is compatible with <code>p≡1\pmod3</code> and <code>p\equiv1</code> or <code>4\pmod5</code>:</p>
+<div class="math" role="math">\boxed{p\equiv1\text{ or }4\pmod{15}.}</div>
+<p>The Type-I targets are then</p>
+<div class="math" role="math">\begin{array}{c|c} p\bmod15 &amp; -p^{-1}\bmod15\\ \hline 1 &amp; 14\\ 4 &amp; 11 \end{array}</div>
+<p>Neither <code>14</code> nor <code>11</code> lies in <code>H</code>.</p>
+<hr>
+<h2>3. The signed box stays in <code>H</code> exactly on <code>H</code>-supported factorizations</h2>
+<h3>Theorem — <code>H</code>-trap</h3>
+<p>The signed divisor box of <code>C</code> modulo <code>15</code> is contained in <code>H</code> if and only if every prime factor of <code>C</code> is congruent to <code>1,2,4</code>, or <code>8</code> modulo <code>15</code>.</p>
+<p>In that case the box equals <code>H</code> as soon as <code>v_2(C)\ge2</code>, and equals <code>{1,2,4,8}</code> or the three-element set <code>{1,2,8}</code> according as <code>4</code> is or is not independently generated; in all such cases</p>
+<div class="math" role="math">\boxed{ H_{\mathrm{thin}}\subseteq\mathcal R_{15}(C)\subseteq H, }</div>
+<p>where <code>H_{\mathrm{thin}}=\{1,2,8\}</code> is the simple local set of the forced factor <code>2</code>.</p>
+<h3>Proof</h3>
+<p>Every prime <code>r\equiv1,2,4,8\pmod{15}</code> is already an element of <code>H</code>, so the signed box they generate stays in <code>H</code>. Conversely a prime outside <code>H</code> contributes a residue in <code>{7,11,13,14}</code> and the box meets the complement. QED.</p>
+<hr>
+<h2>4. Combined miss on the <code>H</code>-trap</h2>
+<h3>Theorem — <code>H</code>-trap misses both targets</h3>
+<p>If every prime factor of <code>C</code> lies in <code>{1,2,4,8}\bmod{15}</code>, then</p>
+<div class="math" role="math">\boxed{ -1\notin\mathcal R_{15}(C) \qquad\text{and}\qquad -p^{-1}\notin\mathcal R_{15}(C). }</div>
+<h3>Proof</h3>
+<p>The box lies in <code>H</code>, while both hard-class Type-I targets and the Type-II target lie in <code>{11,14}=(\mathbb Z/15\mathbb Z)^\times\setminus H</code>. QED.</p>
+<p>Thus on the <code>H</code>-trap, Type I contributes no extra coverage.</p>
+<hr>
+<h2>5. Prime factors outside <code>H</code> are almost always immediate hits</h2>
+<p>Let <code>r</code> be an odd prime divisor of <code>C</code>.</p>
+<h3><code>r\equiv14\pmod{15}</code></h3>
+<p>Then <code>-1</code> itself lies in the signed box. Type II hits.</p>
+<h3><code>r\equiv7\pmod{15}</code></h3>
+<p>One has <code>7^{-1}\equiv13</code>, so the local set is <code>{1,7,13}</code>. The forced factor <code>2</code> multiplies <code>7</code> to <code>14</code>. Type II hits.</p>
+<h3><code>r\equiv13\pmod{15}</code></h3>
+<p>The local set is again <code>{1,7,13}</code>, and <code>2\cdot7\equiv14</code>. Type II hits.</p>
+<h3><code>r\equiv11\pmod{15}</code></h3>
+<p>Here <code>11^{-1}\equiv11</code>, so the local set is <code>{1,11}</code>.</p>
+<ul><li>If <code>v_2(C)\ge2</code>, then <code>4</code> lies in the box and <code>4\cdot11\equiv14</code>. Type II hits.</li><li>If <code>v_2(C)=1</code> and every other prime factor lies in <code>H</code>, the box contains</li></ul>
+<div class="math" role="math">\{1,2,8\}\cdot\{1,11\}=\{1,2,7,8,11,13\}</div>
+<p>and misses <code>14</code>. Type II therefore misses. Type I hits if and only if the target is <code>11</code>, i.e. if and only if &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;\boxed{p\equiv4\pmod{15}.}&lt;/div&gt;</p>
+<p>For <code>p\equiv1\pmod{15}</code> both targets miss.</p>
+<p>The last bullet is the only combined-miss geometry that uses a prime outside <code>H</code>.</p>
+<hr>
+<h2>6. Exact combined miss theorem</h2>
+<h3>Theorem</h3>
+<p>For a Mordell-hard prime <code>p</code>, both exact targets miss at <code>k=15</code> if and only if one of the following holds:</p>
+<ol><li><strong><code>H</code>-trap:</strong> every prime factor of <code>(p+15)/4</code> is <code>1,2,4</code>, or <code>8\bmod{15}</code>;</li><li><strong>thin <code>11</code>-packet:</strong> <code>v_2(C)=1</code>, <code>p\equiv1\pmod{15}</code>, every nonresidue prime factor of <code>C</code> is <code>11\bmod{15}</code>, and there is no prime factor <code>7,13,14\bmod{15}</code>.</li></ol>
+<p>In every other case at least one of <code>-1</code> and <code>-p^{-1}</code> lies in the signed box, and <code>p</code> satisfies Erdős--Straus.</p>
+<hr>
+<h2>7. Corridor position</h2>
+<p>The integer <code>(p+15)/4</code> is the consecutive neighbour</p>
+<div class="math" role="math">A+3</div>
+<p>of the three already-classified forms <code>A</code>, <code>A+1</code>, <code>A+2</code>. A hypothetical counterexample that has escaped <code>q=3,7,11</code> must therefore place four consecutive integers in prescribed multiplicative semigroups, of which the fourth is the <code>H</code>-trap or the thin <code>11</code>-packet above.</p>
+<hr>
+<h2>8. Finite signal</h2>
+<p>Through <code>500{,}000</code>, every Mordell-hard <code>3,7,11</code> residual that misses <code>k=15</code> does so by the <code>H</code>-trap; the thin <code>11</code>-packet did not occur in that range. Through <code>2{,}000{,}000</code> the first two-target hit after a combined <code>3,7,11</code> miss is supported on</p>
+<div class="math" role="math">\{15,19,23,27,31,35,39,43,47,51,55,59\},</div>
+<p>with <code>15</code>, <code>19</code>, and <code>23</code> accounting for the great majority. No residual in that range was unresolved by shift <code>59</code>.</p>
+<p>This is finite evidence only. The next exact target is a combined classification of the prime shift <code>k=19</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GitHub Actions workflow:">
+  <title>Dyadic trap lattice automated regression results — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/dyadic-trap-lattice-results.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/dyadic-trap-lattice-results.html">
+  <meta property="og:title" content="Dyadic trap lattice automated regression results — Free Computation Foundation">
+  <meta property="og:description" content="GitHub Actions workflow:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Dyadic trap lattice automated regression results</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">GitHub Actions workflow:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DYADIC-TRAP-LATTICE-RESULTS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Status:</strong> completed green finite regression of proved theorem family</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the universal proofs are in <a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a>. The finite enumeration below is a regression/falsification run, not the proof itself.</p>
+<h2>Workflow provenance</h2>
+<p>GitHub Actions workflow:</p>
+<pre><code class="language-text">CENTL Erdős-Straus dyadic trap lattice</code></pre>
+<p>Completed run:</p>
+<pre><code class="language-text">run id:      31852068758
+head commit: 6c9fce67e20f80bdb81194c697584401443398f6
+conclusion:  success</code></pre>
+<p>Artifact:</p>
+<pre><code class="language-text">artifact id: 9237819599
+name:        dyadic-trap-lattice-6c9fce67e20f80bdb81194c697584401443398f6
+sha256:      5c1b2f4e70eaa724f39e7f449b2e0cf964b157c0bb40c89f4b658657828e226d</code></pre>
+<p>The artifact contains the JSON theorem-regression record, a human-readable report, and per-file SHA-256 hashes.</p>
+<h2>Finite full-saturation classification</h2>
+<p>The regression checked every Type A/B depth</p>
+<div class="math" role="math">1\le k\le50,000.</div>
+<p>The only layers satisfying</p>
+<div class="math" role="math">T_k=-D_k</div>
+<p>were:</p>
+<pre><code class="language-text">1,
+2,
+4,
+8,
+16,
+32,
+64,
+128,
+256,
+512,
+1024,
+2048,
+4096,
+8192,
+16384,
+32768</code></pre>
+<p>These are exactly the powers of two in the tested interval.</p>
+<p>This agrees with the universal theorem proved in <a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a>:</p>
+<div class="math" role="math">\boxed{T_k=-D_k\iff k\text{ is a power of }2.}</div>
+<h2>Cyclic dyadic regression</h2>
+<p>The run checked dyadic exponents through</p>
+<div class="math" role="math">0\le a\le18.</div>
+<p>The exceptional endpoint <code>a=0</code>, <code>k=1</code>, was verified separately:</p>
+<pre><code class="language-text">m = 3
+D_1 = {1}
+T_1 = {2} = -D_1</code></pre>
+<p>For every</p>
+<div class="math" role="math">1\le a\le18,</div>
+<p>the run verified</p>
+<div class="math" role="math">\boxed{ T_{2^a}=-\langle2\rangle }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{2^{a+2}-1}(2)=a+2. }</div>
+<p>Examples from the artifact:</p>
+<table class="directory"><thead><tr><th>a</th><th>k</th><th>4k-1</th><th>trap/subgroup size</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>7</td><td>3</td></tr><tr><td>3</td><td>8</td><td>31</td><td>5</td></tr><tr><td>5</td><td>32</td><td>127</td><td>7</td></tr><tr><td>11</td><td>2048</td><td>8191</td><td>13</td></tr><tr><td>15</td><td>32768</td><td>131071</td><td>17</td></tr><tr><td>18</td><td>262144</td><td>1048575</td><td>20</td></tr></tbody></table>
+<h2>Exact dyadic shadow edges</h2>
+<p>Through <code>a&lt;=18</code>, the analyzer checked <code>18</code> cyclic dyadic divisibility edges and verified that every one maps the later trap set <strong>onto</strong> the earlier trap set.</p>
+<p>Examples include:</p>
+<pre><code class="language-text">k=2    -&gt; k=16       7 | 63
+k=4    -&gt; k=64      15 | 255
+k=8    -&gt; k=256     31 | 1023
+k=16   -&gt; k=1024    63 | 4095
+k=32   -&gt; k=4096   127 | 16383</code></pre>
+<p>The largest checked edge in the configured exponent range was</p>
+<pre><code class="language-text">k=256 -&gt; k=262144
+1023 | 1048575</code></pre>
+<p>with quotient <code>1025</code>.</p>
+<p>The exact theorem is</p>
+<div class="math" role="math">\boxed{ 1\le a&lt;b,\quad a+2\mid b+2 \Longrightarrow T_{2^b}\bmod(2^{a+2}-1)=T_{2^a}. }</div>
+<h2>Regression caught and corrected a theorem-boundary bug</h2>
+<p>The first automated run failed immediately at <code>a=0</code> because the initial draft incorrectly identified the divisor-generated subgroup at <code>k=1</code> with <code>&lt;2&gt;</code>.</p>
+<p>That was false:</p>
+<pre><code class="language-text">D_1 is trivial because k=1 has no prime divisors.</code></pre>
+<p>The theorem and analyzer were corrected to treat <code>k=1</code> as an exceptional saturated endpoint and to begin the cyclic dyadic shadow lattice at <code>a=1</code>.</p>
+<p>The corrected run completed green.</p>
+<p>This is exactly the behavior desired from the research automation: the workflow is allowed to attack our theorem statement and force corrections before a result is frozen.</p>
+<h2>Current interpretation</h2>
+<p>The dyadic family is now a fully proved and independently automated model of the broader shadow program:</p>
+<div class="math" role="math">\boxed{ \text{dyadic depth} \to \text{Mersenne-type modulus} \to \text{exact multiplicative trap coset} \to \text{Mersenne divisibility} \to \text{infinite direct-shadow lattice}. }</div>
+<p>It supplies a clean regression family for attempts to prove more general algebraic shadow theorems.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

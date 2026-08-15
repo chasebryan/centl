@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note records a cryptology-facing research program arising from WS-CAND-003. It does not claim a break of RSA, discrete logarithm systems, elliptic-curve cryptography, post-quantum cryptography, or any deployed cryptosystem.">
+  <title>Cryptology research track for WS-CAND-003 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cryptology.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cryptology.html">
+  <meta property="og:title" content="Cryptology research track for WS-CAND-003 — Free Computation Foundation">
+  <meta property="og:description" content="This note records a cryptology-facing research program arising from WS-CAND-003. It does not claim a break of RSA, discrete logarithm systems, elliptic-curve cryptography, post-quantum cryptography, or any deployed cryptosystem.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Cryptology research track for WS-CAND-003</h1><p>Cryptology · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Cryptology</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Cryptology</p>
+          <p class="dek">This note records a cryptology-facing research program arising from WS-CAND-003. It does not claim a break of RSA, discrete logarithm systems, elliptic-curve cryptography, post-quantum cryptography, or any deployed cryptosystem.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CRYPTOLOGY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exploratory research only</p>
+<p><strong>Date opened:</strong> 2026-08-14</p>
+<p><strong>Scope:</strong> possible cryptologic relevance of Type A/B witness depth, trap geometry, and congruence shadowing</p>
+<p>This note records a cryptology-facing research program arising from WS-CAND-003. It does <strong>not</strong> claim a break of RSA, discrete logarithm systems, elliptic-curve cryptography, post-quantum cryptography, or any deployed cryptosystem.</p>
+<p>The motivating observation is that the current work has produced a deterministic arithmetic fingerprint of primes and an exact redundancy structure among modular constraints:</p>
+<div class="math" role="math">C_{AB}(p)=\min\{k\ge 1:p\bmod(4k-1)\in T_k\},</div>
+<p>with</p>
+<div class="math" role="math">T_k=\{-d,-4d\pmod{4k-1}:d\mid k\},</div>
+<p>plus a direct-shadow relation describing when one modular trap layer is implied by an earlier layer.</p>
+<p>Cryptology routinely depends on prime generation, modular arithmetic, structured-prime selection, sieving, and the absence of unintended arithmetic bias. This makes the new objects worth testing as <strong>cryptographic diagnostics and sieve structure</strong>, even though no cryptographic impact has yet been demonstrated.</p>
+<h2>1. The strongest plausible connection: prime-source fingerprinting</h2>
+<p><code>C_AB(p)</code> and the fuller hit/shadow profile of a prime can be treated as arithmetic features.</p>
+<p>Define a finite fingerprint through depth <code>K</code> by</p>
+<div class="math" role="math">F_K(p)=\left(C_{AB}(p),\;\mathbf 1[p\bmod m_k\in T_k]_{1\le k\le K},\;\text{shadow/novelty labels}\right).</div>
+<p>The first cryptologic question is whether the distribution of these features differs detectably between prime populations generated under different structural constraints.</p>
+<p>Candidate populations include:</p>
+<ul><li>unconstrained random probable primes of a fixed bit size;</li><li>Blum primes <code>p == 3 mod 4</code>;</li><li>safe primes <code>p=2r+1</code> with <code>r</code> prime;</li><li>primes restricted to selected residue classes;</li><li>primes produced by standards-oriented generation procedures, when reproducible test implementations are available;</li><li>deliberately structured toy prime families used as controls.</li></ul>
+<p>A measurable distinction would not itself imply weakness. It would establish that the Type A/B depth/shadow system is sensitive to prime-generation structure and could therefore serve as a <strong>prime-distribution audit statistic</strong>.</p>
+<h2>2. Prime-generation auditing and backdoor detection</h2>
+<p>Modern public-key systems depend on suitable prime or prime-field parameters. Standards such as NIST FIPS 186-5 specify RSA and signature-related parameter generation requirements, and NIST validation material explicitly treats properties of generated RSA primes as testable key-generation outputs.</p>
+<p>The research hypothesis is:</p>
+<blockquote><p>If a prime generator introduces hidden modular structure, a Type A/B depth or shadow fingerprint may detect distributional deviations even when ordinary low-modulus checks do not.</p></blockquote>
+<p>This is a detection hypothesis, not an assertion that any standardized generator is biased or vulnerable.</p>
+<p>A useful negative control is equally important: if <code>C_AB</code> fingerprints are statistically indistinguishable after conditioning on the generator&#x27;s explicit congruence requirements, that limits the cryptologic relevance of the invariant in this direction.</p>
+<h2>3. Structured-prime diagnostics</h2>
+<p>Cryptanalytic history contains many examples in which special arithmetic structure in parameters matters. Number-field-sieve variants exploit special-form finite-field primes, and lattice/Coppersmith techniques can exploit particular modular polynomial structure in vulnerable constructions.</p>
+<p>The current Type A/B framework should therefore be tested as a <strong>structure detector</strong>, not assumed to be an attack.</p>
+<p>Questions:</p>
+<ol><li>Do primes with unusually large or small <code>C_AB</code> exhibit correlations with known structured-prime families?</li><li>Does the ancestry/shadow profile detect arithmetic regularity not captured by a handful of small congruence tests?</li><li>Are record-depth primes unusually generic, unusually structured, or neither under standard prime statistics?</li><li>Can a shadow-compressed fingerprint identify deliberately planted toy prime-generation biases?</li></ol>
+<p>No positive answer should be promoted to a cryptographic weakness without a concrete reduction, distinguisher, key-recovery improvement, or parameter-generation failure.</p>
+<h2>4. Modular-sieve compression</h2>
+<p>The direct-shadow relation has an immediate algorithmic interpretation:</p>
+<blockquote><p>if one modular condition is implied by earlier modular conditions, it can be removed from a sieve without changing the accepted set.</p></blockquote>
+<p>The Type A/B system is not the number field sieve, quadratic sieve, or a cryptographic lattice attack. However, the mathematical pattern is close enough to motivate a generic question:</p>
+<div class="math" role="math">\text{Can shadow analysis compress other modular sieves or modular constraint systems?}</div>
+<p>The research should separate two levels:</p>
+<ul><li><strong>domain-specific result:</strong> exact compression of the Type A/B congruence sieve;</li><li><strong>transfer result:</strong> a generalized shadow criterion that improves a cryptologically relevant sieve or modular search problem.</li></ul>
+<p>Only the second would establish a direct cryptologic algorithmic impact.</p>
+<h2>5. RSA: what can and cannot currently be said</h2>
+<p>For an RSA modulus</p>
+<div class="math" role="math">N=pq,</div>
+<p>the factors <code>p</code> and <code>q</code> are secret, while <code>N</code> is public. A factor-specific value such as <code>C_AB(p)</code> is therefore not directly observable from the public key.</p>
+<p>The current research does <strong>not</strong> provide a factorization algorithm.</p>
+<p>There is nevertheless a concrete research question. For every <code>k</code>, public knowledge of</p>
+<div class="math" role="math">N\bmod m_k=(p\bmod m_k)(q\bmod m_k)\bmod m_k</div>
+<p>couples the two unknown factor residues. The trap sets <code>T_k</code>, together with cross-layer ancestry and shadow constraints, define finite residue systems for the possible factors.</p>
+<p>The experimental question is whether combining these public product constraints across many <strong>irredundant</strong> layers reduces the candidate factor-residue space faster than an appropriate random baseline.</p>
+<p>This must first be tested on toy RSA moduli where the true factors are retained only for scoring. A useful outcome may be either positive or negative:</p>
+<ul><li>positive: a measurable residue-space reduction beyond trivial congruence information, motivating deeper cryptanalysis;</li><li>negative: evidence that the factor-specific invariant does not leak usefully through the product modulus.</li></ul>
+<p>Until such an experiment succeeds, describing the work as an RSA attack would be incorrect.</p>
+<h2>6. Public-modulus fingerprint</h2>
+<p>For a modulus <code>N</code> and layer <code>k</code>, define the public product residue</p>
+<div class="math" role="math">r_k=N\bmod m_k.</div>
+<p>One simple diagnostic is the product-trap set</p>
+<div class="math" role="math">P_k=\{ab\bmod m_k:a,b\in T_k,\gcd(ab,m_k)=1\}.</div>
+<p>Then</p>
+<div class="math" role="math">G_K(N)=\left(\mathbf 1[r_k\in P_k]\right)_{1\le k\le K}</div>
+<p>is computable without factoring <code>N</code>.</p>
+<p>This does <strong>not</strong> prove that the actual secret factors are both in <code>T_k</code>; it only tests compatibility with that possibility. The purpose of <code>G_K</code> is empirical: determine whether different prime-generation families induce distinguishable public-modulus distributions after controlling for obvious residue constraints.</p>
+<h2>7. Immediate experiments</h2>
+<p>The cryptology track begins with deliberately modest, falsifiable experiments:</p>
+<ol><li>Generate equal-size samples of random primes, Blum primes, safe primes, hard-class primes, and deliberately biased toy primes.</li><li>Measure <code>C_AB</code>, hit-vector, direct-shadow, and ancestry statistics for every prime.</li><li>Compare empirical distributions using total-variation distance and simple held-out classification, with explicit controls for known congruence restrictions.</li><li>Form toy RSA moduli from each population and compute public product-trap fingerprints <code>G_K(N)</code>.</li><li>Measure whether the public fingerprints identify the source population beyond the information already implied by low-modulus constraints.</li><li>Test whether removing directly shadowed layers preserves all measured information while reducing work.</li><li>If a nontrivial signal survives, escalate to larger bit sizes and stronger statistical tests.</li></ol>
+<p>The initial experiments are diagnostic. They must not be described as key recovery or cryptographic breaks.</p>
+<h2>8. CENTL&#x27;s role</h2>
+<p>CENTL should remain the exact-verification layer rather than the statistical oracle.</p>
+<p>For each cryptology experiment it should certify, where expressible in the current language:</p>
+<ul><li>exact algebraic identities used to derive structured prime families;</li><li>modulus-ancestry polynomial identities;</li><li>exact rational summaries and derived formulas;</li><li>generated proof contracts for any claimed algebraic reduction.</li></ul>
+<p>Python or another dedicated finite-search engine may enumerate primes and residue classes, but the resulting algebraic claims should be replayed through CENTL and accompanied by deterministic artifacts and hashes, following the existing WS-CAND-003 methodology.</p>
+<h2>9. Claim discipline</h2>
+<p>Permitted current wording:</p>
+<blockquote><p>The Type A/B witness-depth and shadow framework has plausible cryptologic relevance as a new arithmetic fingerprint of primes and as a method for identifying redundant modular constraints. FCF is testing whether that structure yields useful prime-generation distinguishers, parameter-audit diagnostics, or modular-sieve compression.</p></blockquote>
+<p>Not currently justified:</p>
+<ul><li>&quot;FCF broke RSA.&quot;</li><li>&quot;The Erdős-Straus work weakens modern encryption.&quot;</li><li>&quot;C_AB leaks RSA factors.&quot;</li><li>&quot;The shadow graph improves the number field sieve.&quot;</li><li>&quot;Cryptographic standards generate weak primes.&quot;</li></ul>
+<p>Those require separate evidence.</p>
+<h2>10. Primary references for the cryptology bridge</h2>
+<ul><li>NIST, <em>FIPS 186-5: Digital Signature Standard</em>, 2023, https://doi.org/10.6028/NIST.FIPS.186-5</li><li>NIST ACVP RSA key-generation specification, including generated-prime properties and test modes, https://pages.nist.gov/ACVP/draft-celi-acvp-rsa.html</li><li>R. Barbulescu, P. Gaudry, T. Kleinjung, <em>The Tower Number Field Sieve</em>, IACR ePrint 2015/505. This is cited only as established evidence that special arithmetic form of cryptographic parameters can affect sieve complexity, not as evidence that <code>C_AB</code> has such an effect.</li><li>H. Davis, M. Green, N. Heninger, K. Ryan, A. Suhl, <em>On the Possibility of a Backdoor in the Micali-Schnorr Generator</em>, IACR ePrint 2023/440. This is cited as an example of cryptanalysis exploiting structured parameters with lattice techniques, not as an analogue already established for the present framework.</li></ul>
+<h2>11. Research target</h2>
+<p>The strongest near-term cryptology result would be one of the following:</p>
+<ol><li>a reproducible distinguisher showing that <code>F_K</code> detects a nontrivial prime-generation bias after conditioning on all obvious congruence information;</li><li>a public-modulus statistic derived from the shadow-compressed system that distinguishes structured toy RSA populations without access to the factors;</li><li>a general shadow-compression theorem that transfers to a recognized cryptologic modular sieve.</li></ol>
+<p>Until one of these is obtained, the cryptology connection remains a motivated research program rather than a cryptographic impact claim.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

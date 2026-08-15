@@ -38,10 +38,14 @@ Prefer the short human pages, then the matching manual:
 - Home: https://freecomputation.org/
 - CENTL: https://freecomputation.org/centl.html
 - Documentation: https://freecomputation.org/docs.html
+- Research library: https://freecomputation.org/research.html
+- Erdős–Straus program: https://freecomputation.org/research-erdos-straus.html
+- Erdős–Straus public hunt: https://freecomputation.org/library/es-hunt.html
 - Install: https://raw.githubusercontent.com/chasebryan/centl/oasis/install
-- Protocol: https://github.com/chasebryan/centl/blob/oasis/docs/PROTOCOL.md
-- MCP: https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md
-- Oasis standard: https://github.com/chasebryan/centl/blob/oasis/docs/OASIS.md
+- Hosted manuals: https://freecomputation.org/manuals/install.html
+- Protocol: https://freecomputation.org/manuals/protocol.html
+- MCP: https://freecomputation.org/manuals/mcp.html
+- Oasis standard: https://freecomputation.org/manuals/oasis.html
 
 ## How a machine should use CENTL
 

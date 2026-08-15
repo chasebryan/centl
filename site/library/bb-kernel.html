@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Also B-BervigES.kernel. Python reference stack for 4/n = 1/x + 1/y + 1/z.">
+  <title>bb.kernel — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/bb-kernel.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/bb-kernel.html">
+  <meta property="og:title" content="bb.kernel — Free Computation Foundation">
+  <meta property="og:description" content="Also B-BervigES.kernel. Python reference stack for 4/n = 1/x + 1/y + 1/z.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>bb.kernel</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">Also B-BervigES.kernel. Python reference stack for 4/n = 1/x + 1/y + 1/z.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/B-BervigES.kernel/README.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Also <code>B-BervigES.kernel</code>. Python reference stack for <code>4/n = 1/x + 1/y + 1/z</code>.</p>
+<p>This is the readable full-menu kernel. It coexists with <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CC.kernel"><code>../CC.kernel</code></a>, the fast hard-prime engine. Same mathematics, different job: bb.kernel covers general <code>n</code> and the full construction menu; CC.kernel only attacks Mordell-hard primes at C speed.</p>
+<p>It does <strong>not</strong> prove the Erdős–Straus conjecture. A solved range is a certificate for those <code>n</code> only.</p>
+<h2>Layers</h2>
+<table class="directory"><thead><tr><th>layer</th><th>meaning</th></tr></thead><tbody><tr><td><code>classical</code></td><td>even, <code>3 mod 4</code>, <code>2 mod 3</code>, <code>5 mod 8</code></td></tr><tr><td><code>theorem</code></td><td><code>4p+1</code>, <code>p+4</code>, two-target shifts <code>3,7,11,15</code></td></tr><tr><td><code>window</code></td><td>coprime <code>fab(a,b)</code> with <code>a,b ≤ 11</code></td></tr><tr><td><code>search</code></td><td>external-nonresidue shifts, later corridor, López A/B</td></tr></tbody></table>
+<h2>Commands</h2>
+<pre><code class="language-sh">python3 kernel.py solve 10369
+python3 kernel.py hunt --until-proof --max-bound 200000
+python3 kernel.py status
+python3 verify_kernel.py
+python3 verify_findings.py
+python3 verify_seed.py</code></pre>
+<p>From the repo root the live hunt is <code>./centl es go</code>.</p>
+<p><code>solve</code> and <code>hunt</code> prefer CC.kernel when the binary is present, then verify the witness in Python. <code>--through</code> still works on the Python menu if CC is unavailable.</p>
+<p><code>--through classical|theorem|window|search</code> stops the menu early so the residual of a given layer is visible.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

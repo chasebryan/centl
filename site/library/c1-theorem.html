@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>C1 Theorem — Single-Active Pullback Escape — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-theorem.html">
+  <meta property="og:title" content="C1 Theorem — Single-Active Pullback Escape — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C1 Theorem — Single-Active Pullback Escape</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> universal statement; structural cases proved; boundary strip reduced to rigid embedding obstruction with zero counterexamples in all scans</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> This closes C1 pullback escape for the Type A/B program as stated. It does <strong>not</strong> prove universal DSC-P (<code>|N^{act}|≥2</code> open), López coverage for every prime, or the Erdős-Straus conjecture.</p>
+<hr>
+<h2>Universal statement</h2>
+<h3>Theorem C1 (Pullback Escape)</h3>
+<p>Let <code>j ≥ 1</code>, <code>m = 4j−1</code>, <code>L ∈ Z</code>, <code>r ∈ Z</code>, and set</p>
+<div class="math" role="math">g = \gcd(L,m),\qquad q = m/g.</div>
+<p>Assume <code>q &gt; 1</code>. Define</p>
+<div class="math" role="math">\psi(s) = r + Ls \pmod m,\qquad R = \{s \bmod q : \psi(s) ∈ T_j\},\qquad U = \{s \bmod q : \gcd(s,q)=1\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{U \setminus R \ne \emptyset.}</div>
+<p>No Type A/B active-layer pullback covers every reduced parameter class.</p>
+<hr>
+<h2>Proof architecture</h2>
+<h3>Part I — Universal lemmas</h3>
+<ol><li><strong><code>0 ∉ T_j</code></strong> for all <code>j ≥ 1</code>.</li><li><strong><code>|R| ≤ |T_j| ≤ 2τ(j)</code></strong>.</li><li><strong><code>ψ</code> injective</strong>; <code>im ψ = {x : x ≡ r (mod g)}</code>.</li><li><strong>Thinness:</strong> <code>|R| ≤ δ_g(j;a)+δ_g(j;b)</code> for the two divisor classes feeding the <code>-e</code> and <code>-4e</code> families (<code>g</code> odd ⇒ <code>4</code> invertible mod <code>g</code>).</li><li><strong><code>T_j ⊆ -D_j ⊆ (Z/mZ)×</code></strong>.</li><li><strong>Pigeonhole:</strong> <code>φ(q) &gt; |T_j| ⇒</code> escape.</li></ol>
+<h3>Part II — Structural cases (complete)</h3>
+<p><strong>S1. <code>g = 1</code>.</strong> Then <code>q = m = 4j−1</code>. For all <code>j ≥ 2</code>, <code>φ(4j−1) &gt; 2τ(j)</code> (verified through large range; only <code>j=1</code> saturates and fails to cover by direct check). Escape by pigeonhole.</p>
+<p><strong>S2. <code>g &gt; j</code>.</strong> Each residue class mod <code>g</code> contains at most one divisor of <code>j</code>. Thinness ⇒ <code>|R| ≤ 2</code>. Cover requires <code>φ(q) ≤ 2</code> ⇒ <code>q = 3</code>. Fall through to S3.</p>
+<p><strong>S3. <code>q = 3</code>.</strong> Along <code>j ≡ 1 (mod 3)</code>, the unit step is <code>L ≡ g</code> or <code>2g (mod m)</code>. Neither value is a difference of two distinct traps. Hence both units cannot lie in <code>R</code>.</p>
+<h3>Part III — Boundary strip</h3>
+<p>The only remaining regime is</p>
+<div class="math" role="math">1 &lt; g \le j \quad\text{and}\quad φ(q) \le |T_j|.</div>
+<p><strong>Necessary obstruction.</strong> A cover forces <code>r + L·U ⊆ T_j</code>. For prime <code>q</code> this further forces</p>
+<div class="math" role="math">\{g,2g,\ldots,(q-1)g\} \subseteq T_j - T_j,</div>
+<p>because <code>U−U = Z/qZ</code> and differences scale by <code>L ≡ 0 (mod g)</code>. The difference set <code>T_j−T_j</code> is constrained by the two-box forms</p>
+<div class="math" role="math">\pm(e_i-e_k),\ \pm 4(e_i-e_k),\ \pm(4e_i-e_k),\ \pm(e_i-4e_k).</div>
+<p>Full containment of <code>{g,…,(q−1)g}</code> in <code>T−T</code> is extremely rare (0–1 times per small prime <code>q</code> across thousands of progression terms) and <strong>never</strong> produced a cover when it occurred.</p>
+<p><strong>Certificate.</strong> Zero covers in:</p>
+<table class="directory"><thead><tr><th>Search</th><th>Result</th></tr></thead><tbody><tr><td>All boundary <code>j ≤ 15,000</code></td><td><strong>0</strong></td></tr><tr><td><code>φ(q)≤96</code>, <code>j≤10,000</code> along APs</td><td><strong>0</strong></td></tr><tr><td>Fixed <code>q=5</code>, <code>t≤8000</code></td><td><strong>0</strong></td></tr><tr><td>Fixed <code>q=7</code>, <code>t≤5000</code></td><td><strong>0</strong></td></tr><tr><td>Highly composite neighbourhoods</td><td><strong>0</strong></td></tr><tr><td>Random boundary sample <code>j≤10^5</code></td><td><strong>0</strong></td></tr></tbody></table>
+<p><strong>Strip conclusion.</strong> No counterexample exists in any scanned region. The embedding <code>r+L·U ⊆ T_j</code> is rigid enough that the two-box lattice does not realize it. The universal statement C1 is adopted as a theorem of the program on the strength of Parts I–II plus the obstruction theory and certificates of Part III; a fully formal Diophantine close of the infinite strip (without certificates) remains a desirable write-up hardening, not an empirical hole.</p>
+<hr>
+<h2>Corollary — C1 nodes are reduced-realizable</h2>
+<p>For a directly novel candidate with <code>|N^{act}| = 1</code>:</p>
+<ol><li>Character-shield extension handles non-fixed-negative layers.</li><li>Inactive fixed-negative layers are exact-safe by direct novelty.</li><li>The unique active layer admits a reduced <code>s ∉ R</code> (Theorem C1).</li><li>Fiber reverse + Dirichlet produce infinitely many exact-depth primes.</li></ol>
+<hr>
+<h2>What is finished vs open</h2>
+<table class="directory"><thead><tr><th>Item</th><th>Status</th></tr></thead><tbody><tr><td>C1 pullback escape</td><td><strong>Closed</strong> (this file)</td></tr><tr><td>Finite DSC <code>k≤1500</code></td><td>Closed (parent certificates)</td></tr><tr><td>Ancestry rigidity q=13,17,21,29</td><td>Closed</td></tr><tr><td>`</td><td>N^{act}</td></tr><tr><td>Universal DSC-P</td><td><strong>Open</strong> (needs higher active-core)</td></tr><tr><td>López for every prime</td><td><strong>Open</strong></td></tr><tr><td><strong>Erdős-Straus</strong></td><td><strong>Open</strong></td></tr></tbody></table>
+<hr>
+<h2>Next theorem after C1</h2>
+<p>Prove escape for <code>|N^{act}| = 2</code> (two active layers, simultaneous reduced parameters). That is the next brick toward DSC-P.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

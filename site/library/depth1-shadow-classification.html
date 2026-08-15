@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with COSET-SOURCE-SEMIGROUP-SHADOW.md and STRUCTURAL-GAP-ASYMPTOTIC.md.">
+  <title>Complete classification of the depth-1 Type A/B shadow component — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/depth1-shadow-classification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/depth1-shadow-classification.html">
+  <meta property="og:title" content="Complete classification of the depth-1 Type A/B shadow component — Free Computation Foundation">
+  <meta property="og:description" content="Read with COSET-SOURCE-SEMIGROUP-SHADOW.md and STRUCTURAL-GAP-ASYMPTOTIC.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Complete classification of the depth-1 Type A/B shadow component</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with COSET-SOURCE-SEMIGROUP-SHADOW.md and STRUCTURAL-GAP-ASYMPTOTIC.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DEPTH1-SHADOW-CLASSIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact classification</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem classifies global direct shadowing by the first Type A/B layer. It does not classify all structural gaps and does not prove universal López Type A/B coverage or the Erdős-Straus conjecture.</p>
+<p>Read with <a href="coset-source-semigroup-shadow.html">COSET-SOURCE-SEMIGROUP-SHADOW.md</a> and <a href="structural-gap-asymptotic.html">STRUCTURAL-GAP-ASYMPTOTIC.md</a>.</p>
+<h2>1. First layer</h2>
+<p>At depth</p>
+<div class="math" role="math">j=1,</div>
+<p>we have</p>
+<div class="math" role="math">m_1=3</div>
+<p>and</p>
+<div class="math" role="math">T_1 = \{-1,-4\}\pmod3 = \{2\}.</div>
+<p>Call a later layer <code>k&gt;1</code> <strong>globally shadowed by depth 1</strong> when every integer satisfying a Type A/B trap congruence at depth <code>k</code> is automatically in the depth-1 trap modulo <code>3</code>.</p>
+<h2>2. Classification theorem</h2>
+<h3>Theorem</h3>
+<p>For every <code>k&gt;1</code>, the following are equivalent:</p>
+<ol><li>the complete Type A/B layer at depth <code>k</code> is globally directly shadowed by depth <code>1</code>;</li><li>every prime divisor <code>p|k</code> satisfies</li></ol>
+<div class="math" role="math">p\equiv1\pmod3;</div>
+<ol><li>every positive divisor <code>e|k</code> satisfies</li></ol>
+<div class="math" role="math">e\equiv1\pmod3.</div>
+<p>Thus the depth-1 shadow component is exactly the multiplicative semigroup</p>
+<div class="math" role="math">\boxed{ \mathcal S_3 = \{k&gt;1:p\mid k\Rightarrow p\equiv1\pmod3\}. }</div>
+<h3>Proof</h3>
+<p><code>(2) iff (3)</code> is immediate from unique factorization.</p>
+<h3>(2) implies (1)</h3>
+<p>If every prime divisor of <code>k</code> is <code>1 mod 3</code>, then every divisor <code>e|k</code> is <code>1 mod 3</code>, and in particular</p>
+<div class="math" role="math">k\equiv1\pmod3.</div>
+<p>Hence</p>
+<div class="math" role="math">3\mid4k-1=m_k.</div>
+<p>For every target trap residue,</p>
+<div class="math" role="math">-e\equiv-1\equiv2\pmod3</div>
+<p>and, because <code>4=1 mod 3</code>,</p>
+<div class="math" role="math">-4e\equiv-e\equiv2\pmod3.</div>
+<p>Therefore every target trap is contained in</p>
+<div class="math" role="math">T_1=\{2\}\pmod3.</div>
+<p>So depth <code>1</code> globally shadows depth <code>k</code>.</p>
+<h3>(1) implies (2)</h3>
+<p>Assume depth <code>1</code> globally shadows depth <code>k</code>.</p>
+<p>First, <code>3</code> must divide <code>m_k=4k-1</code>. If not, then</p>
+<div class="math" role="math">\gcd(m_k,3)=1.</div>
+<p>Take the target trap residue</p>
+<div class="math" role="math">x\equiv-1\pmod{m_k}.</div>
+<p>By CRT this progression contains integers in every residue class modulo <code>3</code>, including residues not equal to <code>2</code>. Such integers hit layer <code>k</code> but avoid <code>T_1</code>, contradicting global shadowing.</p>
+<p>Therefore</p>
+<div class="math" role="math">3\mid4k-1,</div>
+<p>so</p>
+<div class="math" role="math">k\equiv1\pmod3.</div>
+<p>Now let <code>p|k</code> be any prime divisor. Since <code>p</code> itself is a divisor of <code>k</code>, the target trap includes</p>
+<div class="math" role="math">x\equiv-p\pmod{m_k}.</div>
+<p>Because <code>3|m_k</code>, every integer in this progression has residue</p>
+<div class="math" role="math">x\equiv-p\pmod3.</div>
+<p>Global shadowing by depth <code>1</code> requires this residue to equal the unique trap residue <code>2 mod 3</code>. Thus</p>
+<div class="math" role="math">-p\equiv2\pmod3,</div>
+<p>and hence</p>
+<div class="math" role="math">p\equiv1\pmod3.</div>
+<p>This holds for every prime divisor <code>p|k</code>. QED.</p>
+<h2>3. Spectrum consequence</h2>
+<p>For every</p>
+<div class="math" role="math">k\in\mathcal S_3,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{C_{AB}(n)\ne k}</div>
+<p>for every integer <code>n</code> for which <code>C_AB(n)</code> is defined.</p>
+<p>So <code>S_3</code> is not merely an explicit subset of the gap set. It is exactly the portion of the global structural-gap set explained by the first Type A/B layer alone.</p>
+<h2>4. Counting consequence</h2>
+<p>The Selberg-Delange analysis in <a href="structural-gap-asymptotic.html">STRUCTURAL-GAP-ASYMPTOTIC.md</a> gives</p>
+<div class="math" role="math">|\mathcal S_3\cap[1,X]| \sim C_3\frac{X}{\sqrt{\log X}}</div>
+<p>with explicit <code>C_3&gt;0</code>.</p>
+<p>Therefore the <strong>single first layer</strong> already explains</p>
+<div class="math" role="math">\boxed{ (C_3+o(1))\frac{X}{\sqrt{\log X}} }</div>
+<p>global impossible depths up to <code>X</code>.</p>
+<p>This gives the current strongest proved lower bound for the full structural-gap counting function.</p>
+<h2>5. Why this matters</h2>
+<p>The first trap layer is extremely small:</p>
+<div class="math" role="math">T_1=\{2\}\pmod3.</div>
+<p>Yet its exact shadow basin in depth space has size of order</p>
+<div class="math" role="math">X/\sqrt{\log X}.</div>
+<p>This illustrates the central geometry of the project: tiny early congruence layers can cast very large multiplicative shadows over the later minimal-depth spectrum.</p>
+<h2>6. Next classification targets</h2>
+<p>The natural analogues are:</p>
+<ol><li>classify global direct shadowing by depth <code>2</code>, where</li></ol>
+<div class="math" role="math">m_2=7, \qquad T_2=-\langle2\rangle=\{3,5,6\};</div>
+<ol><li>classify shadowing by depth <code>4</code>, where</li></ol>
+<div class="math" role="math">m_4=15</div>
+<p>and the source is again coset-saturated;</p>
+<ol><li>determine whether the union of the exact depth-1, depth-2, and depth-4 shadow components has a sharper asymptotic than any one component;</li><li>extend exact source-basin classifications to every coset-saturated power-of-two source.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

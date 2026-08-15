@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p == 1 (mod 4) be prime and let r == 3 (mod 4) be an odd positive integer such that">
+  <title>Binary-r rescue as a signed divisor collision — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-r-divisor-collision.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-r-divisor-collision.html">
+  <meta property="og:title" content="Binary-r rescue as a signed divisor collision — Free Computation Foundation">
+  <meta property="og:description" content="Let p == 1 (mod 4) be prime and let r == 3 (mod 4) be an odd positive integer such that">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Binary-r rescue as a signed divisor collision</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let p == 1 (mod 4) be prime and let r == 3 (mod 4) be an odd positive integer such that</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-R-DIVISOR-COLLISION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact reformulation</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-RESCUE.md</code></p>
+<p><strong>Claim boundary:</strong> this converts the exact binary rescue condition into a finite multiplicative collision problem. It does not prove that such a collision always occurs.</p>
+<h2>1. Setup</h2>
+<p>Let <code>p == 1 (mod 4)</code> be prime and let <code>r == 3 (mod 4)</code> be an odd positive integer such that</p>
+<div class="math" role="math">\gcd(r,p)=1, \qquad A_r=\frac{p+r}{4}\in\mathbb Z, \qquad \gcd(r,A_r)=1.</div>
+<p>Put</p>
+<div class="math" role="math">N=N_r=pA_r.</div>
+<p>Then</p>
+<div class="math" role="math">\frac4p = \frac1{A_r} + \frac rN.</div>
+<p>By <code>BINARY-R-RESCUE.md</code>, the binary remainder splits if and only if there is a divisor</p>
+<div class="math" role="math">d\mid N^2</div>
+<p>with</p>
+<div class="math" role="math">\boxed{d\equiv-N\pmod r.}</div>
+<p>The argument below does not require <code>r</code> prime, only <code>gcd(N,r)=1</code>.</p>
+<hr>
+<h2>2. Every divisor of N^2 is a signed divisor ratio around N</h2>
+<p>Write</p>
+<div class="math" role="math">N=\prod_i q_i^{e_i}.</div>
+<p>A divisor</p>
+<div class="math" role="math">d=\prod_i q_i^{f_i}, \qquad 0\le f_i\le2e_i,</div>
+<p>can be written</p>
+<div class="math" role="math">\boxed{d=N\frac{x}{y}}</div>
+<p>where <code>x,y|N</code>.</p>
+<p>Indeed, for each prime put</p>
+<div class="math" role="math">z_i=f_i-e_i\in[-e_i,e_i].</div>
+<p>The positive <code>z_i</code> exponents form <code>x</code> and the negative exponents form <code>y</code>.</p>
+<p>Conversely, for any <code>x,y|N</code>,</p>
+<div class="math" role="math">N\frac{x}{y}</div>
+<p>is an integer divisor of <code>N^2</code>: primewise its exponent lies between <code>0</code> and <code>2e_i</code>.</p>
+<p>Because <code>gcd(N,r)=1</code>, every divisor of <code>N</code> is invertible modulo <code>r</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">d\equiv-N\pmod r</div>
+<p>is equivalent to</p>
+<div class="math" role="math">Nxy^{-1}\equiv-N\pmod r,</div>
+<p>hence to</p>
+<div class="math" role="math">\boxed{x\equiv-y\pmod r.}</div>
+<hr>
+<h2>3. Divisor-collision theorem</h2>
+<p>Let</p>
+<div class="math" role="math">D_r(N)=\{x\bmod r:x\mid N\} \subseteq(\mathbb Z/r\mathbb Z)^\times.</div>
+<p>Then the following are equivalent:</p>
+<ol><li>the binary-r remainder <code>r/N</code> splits into two unit fractions;</li><li>there is <code>d|N^2</code> with <code>d == -N (mod r)</code>;</li><li>there are divisors <code>x,y|N</code> with</li></ol>
+<div class="math" role="math">x\equiv-y\pmod r;</div>
+<ol><li>the divisor residue set meets its negative:</li></ol>
+<div class="math" role="math">\boxed{D_r(N)\cap(-D_r(N))\ne\varnothing;}</div>
+<ol><li><code>-1</code> lies in the ratio set</li></ol>
+<div class="math" role="math">\boxed{-1\in D_r(N)D_r(N)^{-1}.}</div>
+<p>Thus the fixed-r ES problem is a <strong>signed divisor collision</strong>, not an arbitrary search through all divisors of <code>N^2</code>.</p>
+<hr>
+<h2>4. Signed exponent-box formulation</h2>
+<p>With</p>
+<div class="math" role="math">N=\prod_i q_i^{e_i},</div>
+<p>the collision exists if and only if there are integers</p>
+<div class="math" role="math">-e_i\le z_i\le e_i</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{ \prod_i q_i^{z_i}\equiv-1\pmod r. }</div>
+<p>This is the exact multiplicative analogue of a bounded symmetric exponent box hitting one distinguished group element.</p>
+<p>It is structurally close to the two-box and defect-quotient machinery already developed in the Type A/B shadow program, but here the target is the actual Erdős–Straus decomposition rather than exact-depth realizability.</p>
+<hr>
+<h2>5. Pigeonhole escape</h2>
+<p>Since negation is a bijection of the unit group modulo <code>r</code>,</p>
+<div class="math" role="math">|D_r(N)|=|-D_r(N)|.</div>
+<p>Therefore, if</p>
+<div class="math" role="math">\boxed{2|D_r(N)|&gt;\varphi(r),}</div>
+<p>then the two sets must intersect and the binary-r rescue is automatic.</p>
+<p>For prime <code>r</code>, this is simply</p>
+<div class="math" role="math">\boxed{|D_r(N)|&gt;\frac{r-1}{2}.}</div>
+<p>Failure forces the divisor residues into at most half of the available unit classes.</p>
+<p>This gives a clean theorem-mining target: prove divisor-residue expansion past the half-group threshold, or classify every multiplicatively compressed exception.</p>
+<hr>
+<h2>6. Exact reciprocity bridge for prime r</h2>
+<p>Now assume <code>r</code> is prime and <code>r == 3 (mod 4)</code>.</p>
+<p>Let <code>q</code> be any odd prime divisor of</p>
+<div class="math" role="math">A_r=\frac{p+r}{4}.</div>
+<p>Then</p>
+<div class="math" role="math">p\equiv-r\pmod q.</div>
+<p>Because <code>p == 1 (mod 4)</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac qp\right) = \left(\frac pq\right) = \left(\frac{-r}{q}\right).</div>
+<p>Since <code>r == 3 (mod 4)</code>, reciprocity between <code>r</code> and <code>q</code> gives</p>
+<div class="math" role="math">\left(\frac rq\right) = \left(\frac{-1}{q}\right) \left(\frac qr\right).</div>
+<p>Hence</p>
+<div class="math" role="math">\left(\frac{-r}{q}\right) = \left(\frac{-1}{q}\right) \left(\frac rq\right) = \boxed{\left(\frac qr\right)}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ q\mid A_r \Longrightarrow \left(\frac qp\right)=\left(\frac qr\right). }</div>
+<p>So a prime factor of the shifted integer <code>A_r</code> is a quadratic nonresidue modulo <code>r</code> <strong>if and only if</strong> it is an external quadratic nonresidue modulo the hard prime <code>p</code>.</p>
+<p>This is an exact bridge from <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code> into the direct binary-r rescue.</p>
+<hr>
+<h2>7. Consecutive-translate interpretation</h2>
+<p>Put</p>
+<div class="math" role="math">A=\frac{p+3}{4}.</div>
+<p>For</p>
+<div class="math" role="math">r=4t+3,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{A_r=A+t.}</div>
+<p>Thus the prime-r program probes the divisor geometry of consecutive translates of the original Eisenstein-split neighbor:</p>
+<div class="math" role="math">A,\ A+1,\ A+2,\ A+4,\ A+5,\ A+7,\ldots</div>
+<p>for <code>r=3,7,11,19,23,31,...</code>.</p>
+<p>The finite first-hit histogram in <code>BINARY-R-RESCUE.md</code> is therefore evidence about a sequence of exact multiplicative collision problems on nearby translates, not a collection of unrelated congruence tricks.</p>
+<hr>
+<h2>8. New all-prime target</h2>
+<p>A sufficient universal theorem now has the sharply stated form:</p>
+<blockquote><p>For every Mordell-hard prime <code>p</code>, there exists an odd <code>r == 3 (mod 4)</code> with <code>gcd(r,pA_r)=1</code> such that the signed divisor exponent box of &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; N_r=pA_r</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<blockquote><p>contains <code>-1</code> modulo <code>r</code>.</p></blockquote>
+<p>For prime <code>r</code>, failure means a multiplicatively compressed divisor set of size at most <code>(r-1)/2</code>; every nonresidue prime entering <code>A_r</code> is simultaneously an external nonresidue of <code>p</code> by the reciprocity bridge.</p>
+<p>This is the current direct ES proof target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

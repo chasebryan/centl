@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Universal square-lift shadow classification — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/universal-square-lift-shadow-classification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/universal-square-lift-shadow-classification.html">
+  <meta property="og:title" content="Universal square-lift shadow classification — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Universal square-lift shadow classification</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/UNIVERSAL-SQUARE-LIFT-SHADOW-CLASSIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved classification theorem inside the Type A/B minimal-depth program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It completely classifies one natural infinite shadow mechanism: full shadowing of every odd square lift of a fixed Type A/B modulus.</p>
+<p>Read with:</p>
+<ul><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li><li><a href="square-lift-towers.html">SQUARE-LIFT-TOWERS.md</a></li><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a></li></ul>
+<h2>1. Universal square-lift shadow property</h2>
+<p>Fix a Type A/B depth <code>j</code> and put</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>For every positive odd integer <code>c</code>, define</p>
+<div class="math" role="math">K_c=\frac{mc^2+1}{4}, \qquad 4K_c-1=mc^2.</div>
+<p>Say that <code>j</code> has the <strong>universal square-lift shadow property</strong> if</p>
+<div class="math" role="math">\boxed{ T_{K_c}\bmod m\subseteq T_j \quad\text{for every positive odd }c. }</div>
+<p>For <code>c&gt;1</code>, this says every later layer in the entire square-lift tower is directly shadowed by the base.</p>
+<h2>2. Classification theorem</h2>
+<h3>Theorem</h3>
+<p>For a Type A/B depth <code>j</code>, the following are equivalent:</p>
+<ol><li><code>j</code> has the universal square-lift shadow property;</li><li>the base trap set is the complete Jacobi-negative half of the unit group,</li></ol>
+<div class="math" role="math">T_j=\left\{u:\left(\frac u{4j-1}\right)=-1\right\};</div>
+<ol><li><code>j</code> is one of</li></ol>
+<div class="math" role="math">\boxed{1,2,4.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \text{universal odd square-lift shadow bases} =\{1,2,4\}. }</div>
+<h2>3. Proof that Jacobi saturation implies universal shadowing</h2>
+<p>This direction is the reciprocity tower theorem already proved in <a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a>.</p>
+<p>If the base is Jacobi-saturated, then for every divisor <code>e|K_c</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac e m\right)=+1.</div>
+<p>Hence both lifted trap residues</p>
+<div class="math" role="math">-e, \qquad -4e</div>
+<p>have Jacobi sign <code>-1 mod m</code> and therefore belong to the saturated base trap set.</p>
+<p>Thus</p>
+<div class="math" role="math">T_{K_c}\bmod m\subseteq T_j</div>
+<p>for every odd <code>c</code>.</p>
+<h2>4. Converse: a non-saturated base always has an escaping square lift</h2>
+<p>Now assume the base is <strong>not</strong> Jacobi-saturated.</p>
+<p>The quadratic trap theorem still gives</p>
+<div class="math" role="math">T_j\subseteq N_m^-,</div>
+<p>where</p>
+<div class="math" role="math">N_m^-= \left\{u:\left(\frac u m\right)=-1\right\}.</div>
+<p>Since the inclusion is strict, choose</p>
+<div class="math" role="math">\boxed{v\in N_m^-\setminus T_j.}</div>
+<p>Set</p>
+<div class="math" role="math">\boxed{u=-v\pmod m.}</div>
+<p>Because</p>
+<div class="math" role="math">\left(\frac{-1}{m}\right)=-1,</div>
+<p>we have</p>
+<div class="math" role="math">\left(\frac u m\right) = \left(\frac{-1}{m}\right) \left(\frac v m\right) =( -1)( -1)=+1.</div>
+<p>Thus <code>u</code> is a Jacobi-positive unit modulo <code>m</code>.</p>
+<h3>Choose a prime in the positive class</h3>
+<p>By Dirichlet&#x27;s theorem, there exist infinitely many primes <code>ell</code> satisfying</p>
+<div class="math" role="math">\boxed{\ell\equiv u\pmod m.}</div>
+<p>Choose such an odd prime.</p>
+<p>Then</p>
+<div class="math" role="math">\left(\frac\ell m\right)=+1.</div>
+<p>Since <code>m=3 mod 4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\boxed{ \left(\frac{-m}{\ell}\right) = \left(\frac\ell m\right) =+1. }</div>
+<p>Therefore <code>-m</code> is a quadratic residue modulo <code>ell</code>. Equivalently, there exists <code>c_0</code> such that</p>
+<div class="math" role="math">\boxed{ c_0^2\equiv-m^{-1}\pmod\ell.}</div>
+<p>Choose an <strong>odd</strong> positive integer <code>c</code> in this residue class. This is always possible because <code>ell</code> is odd: adding <code>ell</code> flips parity without changing the residue class.</p>
+<p>Now</p>
+<div class="math" role="math">mc^2+1\equiv0\pmod\ell,</div>
+<p>so</p>
+<div class="math" role="math">\ell\mid K_c=\frac{mc^2+1}{4}.</div>
+<p>Therefore <code>ell</code> is a divisor of the lifted depth and</p>
+<div class="math" role="math">-\ell\in T_{K_c}.</div>
+<p>Reducing to the base modulus gives</p>
+<div class="math" role="math">-\ell \equiv -u \equiv v \pmod m.</div>
+<p>But <code>v</code> was chosen outside <code>T_j</code>. Hence</p>
+<div class="math" role="math">T_{K_c}\bmod m\not\subseteq T_j.</div>
+<p>So the square lift <code>K_c</code> escapes the base shadow.</p>
+<p>This proves:</p>
+<div class="math" role="math">\boxed{ \text{universal square-lift shadow} \Longrightarrow \text{Jacobi saturation}. }
+<h2>5. Finish the classification</h2>
+<p><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a> proves the exact Jacobi-saturation classification</p>
+<p>\[ \boxed{ T_j=N_{4j-1}^- \iff j\in\{1,2,4\}. }&lt;/div&gt;</p>
+<p>Combining both directions gives</p>
+<div class="math" role="math">\boxed{ \forall\text{ odd }c, \ T_{((4j-1)c^2+1)/4}\bmod(4j-1)\subseteq T_j \iff j\in\{1,2,4\}. }</div>
+<p>QED.</p>
+<h2>6. Constructive counter-lift certificate for every other base</h2>
+<p>The proof is constructive once one chooses a missing Jacobi-negative residue <code>v</code>.</p>
+<p>For every</p>
+<div class="math" role="math">j\notin\{1,2,4\},</div>
+<p>one can generate a finite certificate of failure of universal square-lift shadowing:</p>
+<ol><li>find</li></ol>
+<div class="math" role="math">v\in N_m^-\setminus T_j;</div>
+<ol><li>set <code>u=-v mod m</code>;</li><li>find a prime</li></ol>
+<div class="math" role="math">\ell\equiv u\pmod m;</div>
+<ol><li>solve</li></ol>
+<div class="math" role="math">c^2\equiv-m^{-1}\pmod\ell;</div>
+<ol><li>choose <code>c</code> odd;</li><li>form</li></ol>
+<div class="math" role="math">K=(mc^2+1)/4;</div>
+<ol><li>verify</li></ol>
+<div class="math" role="math">\ell\mid K;</div>
+<ol><li>verify the lifted trap residue</li></ol>
+<div class="math" role="math">-\ell\pmod m</div>
+<p>lies outside <code>T_j</code>.</p>
+<p>This gives an explicit later layer in the base&#x27;s square-lift tower that is <strong>not</strong> shadowed by the base.</p>
+<h2>7. Why the classification matters</h2>
+<p>Before the converse, the three towers based at <code>1</code>, <code>2</code>, and <code>4</code> were infinite sufficient shadow families.</p>
+<p>The converse upgrades the statement:</p>
+<blockquote><p>these are the <strong>only</strong> bases whose entire odd square-lift tower can collapse under one base layer.</p></blockquote>
+<p>Therefore any universal theorem for the many other square-lift shadows visible in the finite shadow graph must use additional information beyond the scalar Jacobi character.</p>
+<p>That pushes the theory naturally toward:</p>
+<ul><li>full local quadratic signatures;</li><li>multiplicative quotient classes;</li><li>exact two-box divisor geometry;</li><li>higher <code>p</code>-adic structure.</li></ul>
+<p>The hierarchy is not optional. The classification proves the scalar quadratic mechanism has been exhausted completely.</p>
+<h2>8. Relationship to the observed finite shadow map</h2>
+<p>The finite direct-shadow graph contains many square-lift ancestry edges where the base is not <code>1</code>, <code>2</code>, or <code>4</code>.</p>
+<p>This theorem says those cannot arise from a base that shadows <strong>every</strong> odd square lift merely because of Jacobi saturation.</p>
+<p>They must be selective:</p>
+<div class="math" role="math">\boxed{ \text{specific lift arithmetic} + \text{finer quotient/residue structure} }</div>
+<p>is responsible.</p>
+<p>This isolates the next classification problem very sharply.</p>
+<h2>9. New theorem target</h2>
+<p>Classify, for a general base <code>j</code>, the set</p>
+<div class="math" role="math">\boxed{ \mathcal C_j = \left\{ c\text{ odd}: T_{K_c}\bmod(4j-1)\subseteq T_j \right\}. }</div>
+<p>The present theorem gives the complete universal case:</p>
+<div class="math" role="math">\boxed{ \mathcal C_j=\{1,3,5,\ldots\} \iff j\in\{1,2,4\}. }</div>
+<p>For every other base, <code>C_j</code> is a proper subset of the odd integers.</p>
+<p>The next diamond question is whether <code>C_j</code> itself has a finite congruence, multiplicative, or automata-like description controlled by the quotient <code>Gamma_j</code> and the two-box trap geometry.</p>
+<h2>10. Novelty boundary</h2>
+<p>Dirichlet&#x27;s theorem and quadratic reciprocity are classical. López Type A/B congruences are prior art.</p>
+<p>The candidate contribution is the <strong>complete classification of universal Type-A/B square-lift shadow bases inside the minimal-depth/shadow framework</strong>, together with the constructive counter-lift mechanism for every non-saturated base.</p>
+<p>Targeted arXiv searches on 2026-08-15 did not locate this exact formulation. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

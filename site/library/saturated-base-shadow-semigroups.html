@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Shadow semigroups from the three Jacobi-saturated bases — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/saturated-base-shadow-semigroups.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/saturated-base-shadow-semigroups.html">
+  <meta property="og:title" content="Shadow semigroups from the three Jacobi-saturated bases — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Shadow semigroups from the three Jacobi-saturated bases</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SATURATED-BASE-SHADOW-SEMIGROUPS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem family inside the Type A/B minimal-depth program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It completely classifies all modulus-ancestry shadows whose source is one of the three Jacobi-saturated layers <code>1,2,4</code>.</p>
+<p>Read with:</p>
+<ul><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li><li><a href="universal-square-lift-shadow-classification.html">UNIVERSAL-SQUARE-LIFT-SHADOW-CLASSIFICATION.md</a></li><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">j\in\{1,2,4\}</div>
+<p>and put</p>
+<div class="math" role="math">m=4j-1\in\{3,7,15\}.</div>
+<p>These are exactly the Jacobi-saturated Type A/B layers:</p>
+<div class="math" role="math">\boxed{ T_j = \left\{ u\in(\mathbb Z/m\mathbb Z)^\times: \left(\frac u m\right)=-1 \right\}. }</div>
+<p>Let <code>K&gt;j</code> be any later depth satisfying the modulus-ancestry condition</p>
+<div class="math" role="math">\boxed{m\mid4K-1.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">K\equiv j\pmod m.</div>
+<h2>2. Exact saturated-base ancestry criterion</h2>
+<h3>Theorem</h3>
+<p>For <code>j in {1,2,4}</code> and any ancestry child <code>K</code>, the following are equivalent:</p>
+<ol><li>the complete later Type A/B trap layer is directly shadowed by <code>j</code>;</li><li>every divisor <code>e|K</code> has positive Jacobi symbol modulo <code>m</code>;</li><li>every prime divisor <code>ell|K</code> has positive Jacobi symbol modulo <code>m</code>.</li></ol>
+<p>In formulas,</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff \left(\frac e m\right)=+1 \ \forall e\mid K \iff \left(\frac\ell m\right)=+1 \ \forall \ell\mid K. }</div>
+<h3>Proof</h3>
+<p>Every target trap residue is</p>
+<div class="math" role="math">-e</div>
+<p>or</p>
+<div class="math" role="math">-4e</div>
+<p>for some divisor <code>e|K</code>.</p>
+<p>Since</p>
+<div class="math" role="math">\left(\frac{-1}{m}\right)=-1</div>
+<p>and</p>
+<div class="math" role="math">\left(\frac4m\right)=+1,</div>
+<p>we have</p>
+<div class="math" role="math">\left(\frac{-e}{m}\right) = \left(\frac{-4e}{m}\right) =-\left(\frac e m\right).</div>
+<p>Because the base trap set is <strong>exactly</strong> the Jacobi-negative units, both target residues land in <code>T_j</code> exactly when</p>
+<div class="math" role="math">\left(\frac e m\right)=+1.</div>
+<p>Thus full shadowing is equivalent to positivity for every divisor.</p>
+<p>By multiplicativity of the Jacobi symbol, every divisor is positive iff every prime divisor of <code>K</code> is positive. QED.</p>
+<h2>3. Base j = 1: an exact multiplicative semigroup</h2>
+<p>Here</p>
+<div class="math" role="math">m=3, \qquad K\equiv1\pmod3.</div>
+<p>For a prime <code>ell !=3</code>,</p>
+<div class="math" role="math">\left(\frac\ell3\right)=+1 \iff \ell\equiv1\pmod3.</div>
+<p>Therefore:</p>
+<h3>Corollary</h3>
+<p>A later depth <code>K&gt;1</code> is completely shadowed by layer <code>1</code> iff</p>
+<div class="math" role="math">\boxed{ \text{every prime divisor of }K\text{ is }1\pmod3. }</div>
+<p>The ancestry condition is then automatic because a product of such primes is itself <code>1 mod 3</code>.</p>
+<p>So layer <code>1</code> deletes the entire multiplicative semigroup</p>
+<div class="math" role="math">\boxed{ \mathcal S_3 = \left\{ K&gt;1:\ell\mid K\Longrightarrow\ell\equiv1\pmod3 \right\}. }</div>
+<p>Every <code>K in S_3</code> is a global structural gap in the minimal-depth spectrum.</p>
+<p>Examples include</p>
+<pre><code class="language-text">7, 13, 19, 31, 37, 43, ...
+49 = 7^2
+91 = 7*13
+133 = 7*19
+169 = 13^2
+247 = 13*19
+...</code></pre>
+<p>These are not finite-search absences. Every hit at such a depth already hits layer <code>1</code>.</p>
+<h2>4. Base j = 2: quadratic-residue semigroup modulo 7</h2>
+<p>Here</p>
+<div class="math" role="math">m=7, \qquad K\equiv2\pmod7.</div>
+<p>The positive Jacobi classes are the quadratic residues</p>
+<div class="math" role="math">\boxed{1,2,4\pmod7.}</div>
+<p>Therefore:</p>
+<h3>Corollary</h3>
+<p>An ancestry child <code>K&gt;2</code> is completely shadowed by layer <code>2</code> iff</p>
+<div class="math" role="math">\boxed{ \ell\bmod7\in\{1,2,4\} \quad\text{for every prime }\ell\mid K. }</div>
+<p>Together with the ancestry condition</p>
+<div class="math" role="math">K\equiv2\pmod7,</div>
+<p>this gives an exact multiplicative description of every full shadow sourced at layer <code>2</code>.</p>
+<p>For prime target depths this specializes immediately to</p>
+<div class="math" role="math">\boxed{ K\text{ prime},\quad K\equiv2\pmod7 \Longrightarrow 2\to K. }</div>
+<h2>5. Base j = 4: Jacobi-positive semigroup modulo 15</h2>
+<p>Here</p>
+<div class="math" role="math">m=15, \qquad K\equiv4\pmod{15}.</div>
+<p>For every prime divisor <code>ell</code> of such a child,</p>
+<div class="math" role="math">\gcd(\ell,15)=1.</div>
+<p>The exact criterion is</p>
+<div class="math" role="math">\boxed{ \left(\frac\ell{15}\right)=+1 \quad\forall\ell\mid K. }</div>
+<p>Thus the complete source-<code>4</code> shadow family is the intersection of the ancestry class</p>
+<div class="math" role="math">K\equiv4\pmod{15}</div>
+<p>with the multiplicative semigroup generated by Jacobi-positive prime classes modulo <code>15</code>.</p>
+<p>For prime depth <code>K</code>, the ancestry residue <code>4 mod 15</code> is itself Jacobi-positive, so every prime</p>
+<div class="math" role="math">\boxed{K\equiv4\pmod{15}}</div>
+<p>is automatically shadowed by layer <code>4</code>.</p>
+<h2>6. Reciprocity towers are a special case</h2>
+<p>The reciprocity tower theorem considered</p>
+<div class="math" role="math">K_c=\frac{mc^2+1}{4}.</div>
+<p>Quadratic reciprocity proved that <strong>every prime divisor of <code>K_c</code> is Jacobi-positive modulo the base <code>m</code></strong>.</p>
+<p>The saturated-base criterion now shows exactly why the tower theorem works:</p>
+<div class="math" role="math">\boxed{ \text{reciprocity forces the prime factors into the positive semigroup} \Longrightarrow \text{the saturated base shadows the whole target layer}. }</div>
+<p>So the three universal square-lift towers are structured subfamilies of the much larger source-<code>1</code>, source-<code>2</code>, and source-<code>4</code> shadow semigroups.</p>
+<h2>7. Prime-depth consequences</h2>
+<p>The source-<code>1</code> semigroup alone proves:</p>
+<div class="math" role="math">\boxed{ K\text{ prime},\quad K\equiv1\pmod3 \Longrightarrow K\notin\mathcal D_\exists. }</div>
+<p>Thus one half of the prime residue classes modulo <code>3</code> are explicit structural-gap depths.</p>
+<p>The source-<code>2</code> family independently gives</p>
+<div class="math" role="math">\boxed{ K\text{ prime},\quad K\equiv2\pmod7 \Longrightarrow K\notin\mathcal D_\exists. }</div>
+<p>And source <code>4</code> gives</p>
+<div class="math" role="math">\boxed{ K\text{ prime},\quad K\equiv4\pmod{15} \Longrightarrow K\notin\mathcal D_\exists. }</div>
+<p>These are all special cases of the complete prime-depth dichotomy, but here the actual <strong>shadow source</strong> is explicit.</p>
+<h2>8. Stronger structural-gap counting from source 1</h2>
+<p>Let</p>
+<div class="math" role="math">G(X)=\#\{k\le X:k\notin\mathcal D_\exists\}.</div>
+<p>Every prime</p>
+<div class="math" role="math">K\equiv1\pmod3</div>
+<p>is in the source-<code>1</code> shadow semigroup.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ G(X) \ge \pi(X;3,1)-O(1). }</div>
+<p>By the prime number theorem in arithmetic progressions,</p>
+<div class="math" role="math">\pi(X;3,1) \sim \frac12\frac{X}{\log X}.</div>
+<p>Hence the currently immediate prime-only lower bound strengthens to</p>
+<div class="math" role="math">\boxed{ G(X) \ge \left(\frac12+o(1)\right) \frac{X}{\log X}. }</div>
+<p>The full multiplicative semigroup <code>S_3</code> contains many composite depths too, so this analytic lower bound is not expected to be sharp for the source-<code>1</code> gap family itself.</p>
+<h2>9. Why this matters</h2>
+<p>The shadow graph is beginning to decompose into exact algebraic source families.</p>
+<p>For the first three saturated layers, there is no remaining mystery:</p>
+<div class="math" role="math">\boxed{ \text{ancestry child} + \text{prime-factor character signs} \Longleftrightarrow \text{full direct shadow}. }</div>
+<p>This turns three high-connectivity vertices of the shadow graph into fully classified multiplicative deletion operators.</p>
+<p>The hard classification problem therefore moves to non-saturated bases, where the Jacobi sign no longer describes the exact trap set.</p>
+<h2>10. Next theorem target</h2>
+<p>For a general non-saturated base <code>j</code>, replace the scalar character condition by progressively finer structures:</p>
+<div class="math" role="math">\boxed{ \text{Jacobi sign} \to \text{full local quadratic signature} \to \text{multiplicative quotient }\Gamma_j \to \text{two-box exact divisor geometry}. }</div>
+<p>The goal is to obtain an analogue of the saturated-base criterion at the first resolution fine enough to become exact.</p>
+<p>That is now a natural route to classifying the remaining composite-child direct shadows.</p>
+<h2>11. Novelty boundary</h2>
+<p>Quadratic residues, Jacobi characters, and multiplicative semigroups are classical. López Type A/B congruences are prior art.</p>
+<p>The candidate contribution is the <strong>exact source-wise shadow classification for the three Jacobi-saturated Type A/B layers inside the minimal-depth/shadow framework</strong>, and the resulting structural-gap semigroups.</p>
+<p>Targeted literature searches on 2026-08-15 did not locate this exact formulation. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

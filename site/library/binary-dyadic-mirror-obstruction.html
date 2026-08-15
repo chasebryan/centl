@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Pure-dyadic first denominators are universally obstructed on the hard-prime lane — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-dyadic-mirror-obstruction.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-dyadic-mirror-obstruction.html">
+  <meta property="og:title" content="Pure-dyadic first denominators are universally obstructed on the hard-prime lane — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Pure-dyadic first denominators are universally obstructed on the hard-prime lane</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-DYADIC-MIRROR-OBSTRUCTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal obstruction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-DIVISOR-COLLISION.md</code>, <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code></p>
+<p><strong>Claim boundary:</strong> this rules out an apparently attractive smooth-denominator strategy. It does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard. Then</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod8.}</div>
+<p>Choose any <code>n&gt;=1</code> such that</p>
+<div class="math" role="math">2^{n+2}&gt;p</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{A=2^n,\qquad r=4A-p=2^{n+2}-p.}</div>
+<p>Then <code>r&gt;0</code>, and because <code>p==1 mod 8</code>,</p>
+<div class="math" role="math">\boxed{r\equiv7\pmod8.}</div>
+<p>In particular <code>r</code> is odd and <code>r==3 mod 4</code>.</p>
+<p>The one-denominator subtraction is</p>
+<div class="math" role="math">\frac4p-\frac1A =\frac r{pA}.</div>
+<p>Put</p>
+<div class="math" role="math">N=pA=p2^n.</div>
+<p>By the binary divisor-collision theorem, the remainder can split into two unit fractions only if</p>
+<div class="math" role="math">-1\in D_r(N)D_r(N)^{-1}.</div>
+<hr>
+<h2>2. Every divisor ratio is dyadic modulo r</h2>
+<p>From</p>
+<div class="math" role="math">r=2^{n+2}-p</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{p\equiv2^{n+2}\pmod r.}</div>
+<p>Every divisor of <code>N=p2^n</code> has the form</p>
+<div class="math" role="math">p^\epsilon2^j, \qquad \epsilon\in\{0,1\},\quad0\le j\le n.</div>
+<p>Therefore every quotient of two divisors is, modulo <code>r</code>, a power of <code>2</code>:</p>
+<div class="math" role="math">\boxed{ D_r(N)D_r(N)^{-1} \subseteq \langle2\rangle. }</div>
+<p>Indeed replacing every occurrence of <code>p</code> by <code>2^(n+2)</code> makes this immediate.</p>
+<hr>
+<h2>3. Jacobi obstruction</h2>
+<p>For every odd positive integer</p>
+<div class="math" role="math">r\equiv7\pmod8,</div>
+<p>the Jacobi symbols satisfy</p>
+<div class="math" role="math">\boxed{\left(\frac2r\right)=+1}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\left(\frac{-1}r\right)=-1.}</div>
+<p>Hence every power of <code>2</code> has Jacobi sign <code>+1</code> modulo <code>r</code>, while <code>-1</code> has sign <code>-1</code>.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{-1\notin\langle2\rangle\pmod r.}</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ D_r(N)\cap(-D_r(N))=\varnothing, }</div>
+<p>and the binary remainder does not split.</p>
+<h3>Theorem</h3>
+<p>For every Mordell-hard prime <code>p</code> and every positive dyadic first denominator <code>A=2^n</code> with <code>4A&gt;p</code>, the associated binary numerator</p>
+<div class="math" role="math">r=4A-p</div>
+<p><strong>cannot</strong> rescue <code>p</code>.</p>
+<p>QED.</p>
+<hr>
+<h2>4. Why this matters</h2>
+<p>The obstruction is not lack of divisor count. It is a <strong>squareclass obstruction</strong>.</p>
+<p>The maximally smooth choice <code>A=2^n</code> collapses the entire signed divisor box into one Jacobi-positive subgroup, while the binary target <code>-1</code> is Jacobi-negative.</p>
+<p>Therefore a successful smooth-denominator construction must import at least one factor carrying the opposite character.</p>
+<p>On the Mordell-hard lane, the frozen small shield satisfies</p>
+<div class="math" role="math">\left(\frac2p\right) =\left(\frac3p\right) =\left(\frac5p\right) =\left(\frac7p\right)=+1.</div>
+<p>So the missing ingredient cannot be built solely from <code>2,3,5,7</code>. It must include a genuine external nonresidue prime or squareclass.</p>
+<p>This independently matches:</p>
+<ul><li><code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>;</li><li><code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code>;</li><li><code>FAB-GCD-SURFACE-REFORMULATION.md</code>.</li></ul>
+<p>All three routes now point to the same reduced design principle:</p>
+<div class="math" role="math">\boxed{ \text{large smooth/square bulk} +\text{one unavoidable external nonresidue defect}. }</div>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

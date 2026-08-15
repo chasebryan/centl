@@ -1,38 +1,129 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Start here: CENTL installation, numerical contract, research publications, and the rest of the manuals."><title>Documentation — Free Computation Foundation</title><link rel="canonical" href="https://freecomputation.org/docs.html"><meta name="robots" content="index,follow"><link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing"><meta property="og:type" content="website"><meta property="og:url" content="https://freecomputation.org/docs.html"><meta property="og:title" content="Documentation — Free Computation Foundation"><meta property="og:description" content="Start here, then read the manuals or research record you need."><meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png"><link rel="stylesheet" href="style.css"></head>
-<body><div class="shell"><header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>Documentation</h1><p>Start here, then open the manual or research record you need.</p></div></header>
-<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="funding.html">Funding</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">The Bazaar</a></li><li><a href="docs.html">Documentation</a></li></ul><h2>Research</h2><ul><li><a href="research-erdos-straus.html">Erdős-Straus Type A/B</a></li></ul><h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li><li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li><li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li></ul></nav>
-<main>
-<h2>Start here</h2>
-<table class="directory"><tr><th>Document</th><th>When to open it</th></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">Installation</a></td><td>You want CENTL running on GNU/Linux.</td></tr>
-<tr><td><a href="centl.html">CENTL</a></td><td>You want the product page, not a manual.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/NUMERICS.md">Numerical contract</a></td><td>You need to know what a printed digit means.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/SCI.md">CENTL-SCi</a></td><td>You will type English or extend the interpreter.</td></tr>
-</table>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Start here: CENTL installation, numerical contract, research publications, and the rest of the manuals.">
+  <title>Documentation — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/docs.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://freecomputation.org/docs.html">
+  <meta property="og:title" content="Documentation — Free Computation Foundation">
+  <meta property="og:description" content="Start here, then read the manuals or research record you need.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Documentation</h1><p>Start here, then open the manual or research record you need.</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p>These manuals are hosted on this site. The repository remains the canonical source. Type a title below for native suggestions, or open the <a href="research.html">research library</a> to search papers the same way.</p>
+      <form class="library-search" role="search" action="https://html.duckduckgo.com/html/" method="get">
+        <label for="docs-q">Search manuals and papers</label>
+        <div class="search-row">
+          <input id="docs-q" name="q" type="search" list="docs-suggestions" placeholder="Type a manual, theorem, or topic" autocomplete="off" spellcheck="false">
+          <input type="hidden" name="sites" value="freecomputation.org">
+          <button type="submit">Search</button>
+        </div>
+        <p class="small">Suggestions appear as you type. This page does not use JavaScript.</p>
+        <datalist id="docs-suggestions">
+          <option value="Installation"></option>
+          <option value="Numerical contract"></option>
+          <option value="CENTL-SCi"></option>
+          <option value="Syntax"></option>
+          <option value="Mathematics"></option>
+          <option value="Physics"></option>
+          <option value="Verification"></option>
+          <option value="Machine protocol"></option>
+          <option value="MCP adapter"></option>
+          <option value="Oasis"></option>
+          <option value="FCF Camps"></option>
+          <option value="CENTL Marsa"></option>
+          <option value="Mathematician onboarding"></option>
+          <option value="Physicist onboarding"></option>
+          <option value="Wellspring designation"></option>
+          <option value="Erdős-Straus Type A/B"></option>
+          <option value="WS-CAND-001 Authority cannot confer truth"></option>
+          <option value="WS-CAND-002 Justified decimal rendering"></option>
+          <option value="WS-CAND-003 Type A/B shadow structure"></option>
+          <option value="Diamond synthesis"></option>
+          <option value="Current frontier"></option>
+        </datalist>
+      </form>
 
-<h2>Research</h2>
-<table class="directory"><tr><th>Publication</th><th>Status and subject</th></tr>
-<tr><td><a href="research-erdos-straus.html">Erdős-Straus Type A/B witness depth and congruence shadows</a></td><td>Wellspring Candidate. Minimal Type A/B depth, exact trap structure, certified frontier, and congruence-layer redundancy. Novelty under review.</td></tr>
-</table>
+      <h2>Start here</h2>
+      <table class="directory">
+        <tr><th>Document</th><th>When to open it</th></tr>
+        <tr><td><a href="manuals/install.html">Installation</a></td><td>You want CENTL running on GNU/Linux.</td></tr>
+        <tr><td><a href="centl.html">CENTL</a></td><td>You want the product page, not a manual.</td></tr>
+        <tr><td><a href="manuals/numerics.html">Numerical contract</a></td><td>You need to know what a printed digit means.</td></tr>
+        <tr><td><a href="manuals/sci.html">CENTL-SCi</a></td><td>You will type English or extend the interpreter.</td></tr>
+        <tr><td><a href="manuals/mathematicians.html">Mathematician onboarding</a></td><td>You want only the mathematics command.</td></tr>
+        <tr><td><a href="manuals/physicists.html">Physicist onboarding</a></td><td>You want only typed physics.</td></tr>
+      </table>
 
-<h2>Use</h2>
-<table class="directory"><tr><th>Document</th><th>Subject</th></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/SYNTAX.md">Syntax</a></td><td>The CENTL language.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/MATHEMATICS.md">Mathematics</a></td><td>Supported operations and boundaries.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/PHYSICS.md">Physics</a></td><td>Typed exact-first physics.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/PROTOCOL.md">Machine protocol</a></td><td>JSON and programmatic use.</td></tr>
-<tr><td><a href="https://github.com/chasebryan/centl/blob/oasis/docs/MCP.md">MCP adapter</a></td><td>Local MCP-over-stdio.</td></tr>
-</table>
+      <h2>Research</h2>
+      <table class="directory">
+        <tr><th>Publication</th><th>Status and subject</th></tr>
+        <tr><td><a href="research.html">Research library</a></td><td>Every hosted paper, with search suggestions as you type.</td></tr>
+        <tr><td><a href="research-erdos-straus.html">Erdős-Straus Type A/B witness depth and congruence shadows</a></td><td>Wellspring Candidate. Minimal Type A/B depth, exact trap structure, certified frontier, congruence-layer redundancy, and a public hunt with machine-independent letter numbers. The conjecture remains open. Novelty under review.</td></tr>
+        <tr><td><a href="library/ws-cand-001-authority-cannot-confer-truth.html">WS-CAND-001</a></td><td>Authority cannot confer truth.</td></tr>
+        <tr><td><a href="library/ws-cand-002-justified-decimal-rendering.html">WS-CAND-002</a></td><td>Justified outward decimal rendering.</td></tr>
+        <tr><td><a href="library/ws-cand-003-erdos-straus-type-ab-shadow-structure.html">WS-CAND-003</a></td><td>Complete Type A/B shadow record.</td></tr>
+      </table>
 
-<h2>Go deeper</h2>
-<p>Everything else is a document, not a landing-page claim. Open the one that matches the question:</p>
-<ul>
-<li><a href="https://github.com/chasebryan/centl/blob/oasis/docs/OASIS.md">Oasis</a>, <a href="https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md">FCF Camps</a>, <a href="https://github.com/chasebryan/centl/blob/CENTL-Marsa/docs/CENTL-MARSA.md">CENTL Marsa</a>, and <a href="https://github.com/chasebryan/centl/blob/oasis/docs/RELEASE-POLICY.md">release policy</a></li>
-<li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/README.md">Wellspring records</a> and the complete <a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">WS-CAND-003 technical record</a></li>
-<li><a href="https://github.com/chasebryan/centl/blob/oasis/SECURITY.md">Security</a> and <a href="https://github.com/chasebryan/centl/blob/oasis/docs/INTEGRITY.md">integrity</a></li>
-<li><a href="https://github.com/chasebryan/centl/blob/oasis/CONTRIBUTING.md">Contributing</a> and <a href="https://github.com/chasebryan/centl/blob/oasis/docs/ONBOARDING.md">onboarding</a></li>
-<li><a href="https://github.com/chasebryan/centl/blob/oasis/docs/REPOSITORY-MAP.md">Repository map</a> for the rest of <code>docs/</code></li>
-</ul>
-<p>The repository copy of this index is <code>docs/README.md</code>. Machines that arrived looking for protocols can start at <a href="ai.html">Machines and AI</a>.</p>
-</main></div><footer>Free Computation Foundation · Documentation and research index.</footer></div></body></html>
+      <h2>Use</h2>
+      <table class="directory">
+        <tr><th>Document</th><th>Subject</th></tr>
+        <tr><td><a href="manuals/syntax.html">Syntax</a></td><td>The CENTL language.</td></tr>
+        <tr><td><a href="manuals/mathematics.html">Mathematics</a></td><td>Supported operations and boundaries.</td></tr>
+        <tr><td><a href="manuals/physics.html">Physics</a></td><td>Typed exact-first physics.</td></tr>
+        <tr><td><a href="manuals/protocol.html">Machine protocol</a></td><td>JSON and programmatic use.</td></tr>
+        <tr><td><a href="manuals/mcp.html">MCP adapter</a></td><td>Local MCP-over-stdio.</td></tr>
+      </table>
+
+      <h2>Go deeper</h2>
+      <p>Everything else is a document, not a landing-page claim. Open the one that matches the question:</p>
+      <ul>
+        <li><a href="manuals/oasis.html">Oasis</a>, <a href="https://github.com/chasebryan/centl/blob/main/docs/FCF-CAMPS.md">FCF-CAMPS.md</a>, <a href="manuals/marsa.html">CENTL Marsa</a>, and <a href="manuals/release-policy.html">release policy</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/README.md">Wellspring records</a> and the complete <a href="library/ws-cand-003-erdos-straus-type-ab-shadow-structure.html">WS-CAND-003 technical record</a></li>
+        <li><a href="manuals/security.html">Security</a> and <a href="manuals/contributing.html">contributing</a></li>
+        <li><a href="manuals/repository-map.html">Repository map</a> for the rest of <code>docs/</code></li>
+      </ul>
+      <p>The repository copy of this index is <code>docs/README.md</code>. Machines that arrived looking for protocols can start at <a href="ai.html">Machines and AI</a>.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Documentation and research index.</footer>
+</div>
+</body>
+</html>

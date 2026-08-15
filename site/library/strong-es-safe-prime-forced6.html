@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Safe-prime shifts q = 23 mod 24 carry a forced nine-class Type-II obstruction — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-safe-prime-forced6.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-safe-prime-forced6.html">
+  <meta property="og:title" content="Safe-prime shifts q = 23 mod 24 carry a forced nine-class Type-II obstruction — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Safe-prime shifts q = 23 mod 24 carry a forced nine-class Type-II obstruction</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-SAFE-PRIME-FORCED6.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved uniform finite-group theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-PRIME-SHIFT-KNESER-DICHOTOMY.md</code>, <code>STRONG-ES-Q23-EXACT-FILTER.md</code></p>
+<p><strong>Claim boundary:</strong> applies to any safe prime <code>q=2ell+1</code> in the residue class <code>23 mod24</code>. Infinitude of such safe primes is not known and is not assumed. The theorem gives a uniform local obstruction for every one that exists.</p>
+<hr>
+<h2>1. Safe-prime setup</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{q=2\ell+1}</div>
+<p>with both <code>q</code> and <code>ell</code> prime, and assume</p>
+<div class="math" role="math">\boxed{q\equiv23\pmod{24}.}</div>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+q}{4}.}</div>
+<p>Hard primes satisfy</p>
+<div class="math" role="math">p\equiv1\pmod{24}.</div>
+<p>Hence</p>
+<div class="math" role="math">p+q\equiv24\equiv0\pmod{24}</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{6\mid C.}</div>
+<p>So <code>2</code> and <code>3</code> are forced prime factors of the shifted integer.</p>
+<hr>
+<h2>2. Both forced factors generate the QR subgroup</h2>
+<p>The quadratic-residue subgroup</p>
+<div class="math" role="math">Q=(\mathbb Z/q\mathbb Z)^{\times 2}</div>
+<p>has prime order</p>
+<div class="math" role="math">\boxed{|Q|=\ell.}</div>
+<p>Because</p>
+<div class="math" role="math">q\equiv7\pmod8,</div>
+<p>quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac2q\right)=+1.</div>
+<p>Because</p>
+<div class="math" role="math">q\equiv-1\pmod{12},</div>
+<p>one has</p>
+<div class="math" role="math">\left(\frac3q\right)=+1.</div>
+<p>Neither <code>2</code> nor <code>3</code> is <code>1 mod q</code>.</p>
+<p>Since <code>Q</code> has prime order, every nonidentity element generates it. Therefore</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_q(2) = \operatorname{ord}_q(3) =\ell.}</div>
+<p>Use <code>2</code> as a generator of <code>Q</code> and write</p>
+<div class="math" role="math">\boxed{3\equiv2^c\pmod q}</div>
+<p>for a unique nonzero</p>
+<div class="math" role="math">c\in\mathbb Z/\ell\mathbb Z.</div>
+<hr>
+<h2>3. The forced two-factor QR box</h2>
+<p>Using only one copy of each forced factor, their signed exponent choices give the subset</p>
+<div class="math" role="math">\boxed{ F_q = \{x+cy\pmod\ell: x,y\in\{-1,0,1\}\}.}</div>
+<p>There are at most nine elements.</p>
+<p>We prove there are exactly nine.</p>
+<hr>
+<h2>4. Any collision forces one of six tiny ratios</h2>
+<p>Suppose</p>
+<div class="math" role="math">x_1+cy_1 \equiv x_2+cy_2 \pmod\ell</div>
+<p>for two distinct pairs in <code>{-1,0,1}^2</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\Delta x+c\Delta y\equiv0</div>
+<p>with</p>
+<div class="math" role="math">\Delta x,\Delta y\in\{-2,-1,0,1,2\}.</div>
+<p>If <code>Delta y=0</code>, then <code>Delta x=0</code> because <code>ell&gt;=11</code>, contradicting distinctness.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ c=-\Delta x/\Delta y.}</div>
+<p>The only nonzero ratios obtainable from the difference set are</p>
+<div class="math" role="math">\boxed{ \pm1, \quad \pm2, \quad \pm\frac12.}</div>
+<p>Thus a collision forces <code>c</code> into this six-element set.</p>
+<hr>
+<h2>5. Every exceptional ratio would force a small excluded prime q</h2>
+<p>Recall</p>
+<div class="math" role="math">3\equiv2^c\pmod q.</div>
+<h3>c = 1</h3>
+<p>Would give</p>
+<div class="math" role="math">3\equiv2\pmod q,</div>
+<p>impossible.</p>
+<h3>c = -1</h3>
+<p>Would give</p>
+<div class="math" role="math">3\equiv2^{-1},</div>
+<p>so</p>
+<div class="math" role="math">6\equiv1\pmod q,</div>
+<p>forcing <code>q=5</code>.</p>
+<h3>c = 2</h3>
+<p>Would give</p>
+<div class="math" role="math">3\equiv4\pmod q,</div>
+<p>impossible.</p>
+<h3>c = -2</h3>
+<p>Would give</p>
+<div class="math" role="math">3\equiv4^{-1},</div>
+<p>so</p>
+<div class="math" role="math">12\equiv1\pmod q,</div>
+<p>forcing <code>q=11</code>.</p>
+<h3>c = 1/2</h3>
+<p>Squaring gives</p>
+<div class="math" role="math">9\equiv2\pmod q,</div>
+<p>forcing <code>q=7</code>.</p>
+<h3>c = -1/2</h3>
+<p>Squaring gives</p>
+<div class="math" role="math">9\equiv2^{-1}\pmod q,</div>
+<p>so</p>
+<div class="math" role="math">18\equiv1\pmod q,</div>
+<p>forcing <code>q=17</code>.</p>
+<p>None is compatible with</p>
+<div class="math" role="math">q\equiv23\pmod{24}, \qquad q\ge23.</div>
+<p>Therefore no collision occurs.</p>
+<h3>Theorem — forced QR nine-set</h3>
+<div class="math" role="math">\boxed{|F_q|=9.}</div>
+<hr>
+<h2>6. Translate the nine QR classes into forbidden NR factors</h2>
+<p>The Type-II target is</p>
+<div class="math" role="math">-1.</div>
+<p>Every quadratic nonresidue can be written uniquely as</p>
+<div class="math" role="math">\boxed{x=-h}</div>
+<p>with</p>
+<div class="math" role="math">h\in Q.</div>
+<p>If the shifted integer <code>C</code> has a prime factor in the NR class <code>x=-h</code>, then the signed local set of that factor contains both <code>x</code> and <code>x^{-1}</code>.</p>
+<p>The target <code>-1</code> is obtained from <code>x</code> exactly when the existing QR box contains</p>
+<div class="math" role="math">h^{-1},</div>
+<p>and from <code>x^{-1}</code> exactly when it contains <code>h</code>.</p>
+<p>The forced set <code>F_q</code> is symmetric under inversion in additive coordinates.</p>
+<p>Therefore every NR class</p>
+<div class="math" role="math">\boxed{-h, \qquad h\in F_q}</div>
+<p>forces an immediate Type-II hit using only the forced factors <code>2,3</code> and that one NR factor.</p>
+<p>Since <code>|F_q|=9</code>, there are nine such forbidden NR prime residue classes.</p>
+<hr>
+<h2>7. Safe-prime miss dichotomy with a uniform exceptional obstruction</h2>
+<p>The safe-prime Kneser theorem says every miss is either:</p>
+<ol><li>pure quadratic splitting; or</li><li>a full-stabilizer-trivial aperiodic defect.</li></ol>
+<p>In the second branch, the nine NR classes above are still impossible as prime factors of <code>C</code>.</p>
+<p>Thus:</p>
+<h3>Theorem — forced-nine-class safe-prime obstruction</h3>
+<p>For every safe prime</p>
+<div class="math" role="math">q\equiv23\pmod{24},</div>
+<p>a Mordell-hard Type-II miss satisfies one of:</p>
+<h3>Branch A</h3>
+<p>Every prime factor of <code>(p+q)/4</code> is a quadratic residue modulo <code>q</code>.</p>
+<h3>Branch B</h3>
+<p>The signed box is aperiodic, and at minimum the nine quadratic-nonresidue residue classes</p>
+<div class="math" role="math">\boxed{-F_q}</div>
+<p>are forbidden as prime divisors of <code>(p+q)/4</code>.</p>
+<p>The branch may have additional restrictions; nine is a uniform guaranteed minimum.</p>
+<hr>
+<h2>8. Sieve contribution</h2>
+<p>Among the</p>
+<div class="math" role="math">q-1=2\ell</div>
+<p>reduced prime residue classes modulo <code>q</code>:</p>
+<ul><li>Branch A forbids all <code>ell</code> NR classes, density <code>1/2</code>;</li><li>Branch B forbids at least <code>9</code> classes, density</li></ul>
+<div class="math" role="math">\boxed{9/(q-1).}</div>
+<p>Therefore every miss branch contributes at least</p>
+<div class="math" role="math">\boxed{ \delta_q = \min\left(\frac12,\frac9{q-1}\right) = \frac9{q-1} }</div>
+<p>for <code>q&gt;=23</code>, before using any additional exact branch structure.</p>
+<p>For <code>q=23</code>, the dedicated exact theorem is much stronger than this generic bound.</p>
+<p>For <code>q=47</code>, the generic bound already contributes</p>
+<div class="math" role="math">\boxed{9/46}</div>
+<p>of a sieve dimension.</p>
+<hr>
+<h2>9. Important logical boundary</h2>
+<p>No claim is made that infinitely many safe primes</p>
+<div class="math" role="math">q\equiv23\pmod{24}</div>
+<p>exist.</p>
+<p>That is a Sophie-Germain/safe-prime type problem and is open.</p>
+<p>The theorem is conditional only in the harmless sense:</p>
+<blockquote><p>every safe prime in this progression that exists carries the stated nine-class obstruction.</p></blockquote>
+<p>Finite known shifts such as <code>23</code> and <code>47</code> can be used unconditionally in fixed-shift sieve arguments.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

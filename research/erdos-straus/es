@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""Unified Erdős–Straus driver for bb.kernel, CC.kernel, and `centl es`.
+
+CC.kernel is the theorem / attack engine. bb.kernel is the coupled
+reference stack. This process prefers CC for hard-prime work and hunt.
+It never claims a universal proof from a finished finite hunt.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ES_ROOT = Path(__file__).resolve().parent
+BB_ROOT = ES_ROOT / "bb.kernel"
+if not BB_ROOT.exists():
+    BB_ROOT = ES_ROOT / "B-BervigES.kernel"
+sys.path.insert(0, str(BB_ROOT))
+
+from bberviges.cc_bridge import cc_binary, solve_via_cc  # noqa: E402
+from bberviges.findings import FINDINGS, ingest_cc_blob  # noqa: E402
+from bberviges.live import cmd_go, cmd_menu, cmd_seed, print_look  # noqa: E402
+from bberviges.seed import format_seed, load_seed  # noqa: E402
+from bberviges.solve import Solver  # noqa: E402
+from bberviges.witness import verify_witness  # noqa: E402
+
+
+def emit(obj: dict) -> None:
+    import json
+
+    print(json.dumps(obj, indent=2, sort_keys=True))
+
+
+def cmd_solve(n: int, k_max: int, through: str, engine: str) -> int:
+    w = None
+    provider = None
+    if engine in ("auto", "cc"):
+        w = solve_via_cc(n, k_max=k_max, through=through)
+        if w is not None:
+            provider = "CC.kernel"
+    if w is None and engine != "cc":
+        solver = Solver(k_max=k_max, through_layer=through)
+        r = solver.solve(n)
+        w = r.witness
+        provider = "bb.kernel"
+    if w is None:
+        emit({"solved": False, "n": n, "kernel": engine})
+        return 2
+    assert verify_witness(w)
+    emit(
+        {
+            "solved": True,
+            "n": n,
+            "provider": provider,
+            "kernel": provider,
+            "equation": w.equation(),
+            **w.as_dict(),
+        }
+    )
+    return 0
+
+
+def cmd_cc(cmd: str, extra: list[str], *, file_hits: bool = False) -> tuple[int, list]:
+    binary = cc_binary()
+    if binary is None:
+        emit({"error": "CC.kernel binary missing; run make -C CC.kernel", "cmd": cmd})
+        return 2, []
+    proc = subprocess.run(
+        [str(binary), cmd, *extra],
+        cwd=str(binary.parent),
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+        if not proc.stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+    recs: list = []
+    if file_hits and proc.stdout:
+        recs = ingest_cc_blob(proc.stdout)
+        if recs:
+            print(
+                f"\nFiled {len(recs)} finding(s) in {FINDINGS}. "
+                "Read findings/START-HERE.md",
+                file=sys.stderr,
+            )
+            for rec in recs:
+                extra_id = ""
+                if rec.get("grade") == "letter" and rec.get("number") is not None:
+                    extra_id = f"  #{rec['number']}"
+                print(
+                    f"  [{rec['grade'].upper()}] n={rec.get('n')}{extra_id} "
+                    f"{', '.join(rec['tags'])} → {rec['file']}",
+                    file=sys.stderr,
+                )
+    return proc.returncode, recs
+
+
+def cmd_status() -> int:
+    print(format_seed(load_seed()))
+    print()
+    return cmd_cc("status", [])[0]
+
+
+def add_hunt_flags(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        "--step",
+        type=int,
+        default=None,
+        help="how far to advance the bound each window (default 50000)",
+    )
+    p.add_argument("--k-max", type=int, default=None, dest="k_max")
+    p.add_argument(
+        "--from",
+        type=int,
+        default=None,
+        dest="start_factor",
+        help="initiate a new hunt at this start factor",
+    )
+    p.add_argument(
+        "--random",
+        action="store_true",
+        help="initiate a new hunt at a random start factor",
+    )
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(
+        prog="centl es",
+        description="Coupled bb.kernel + CC.kernel Erdős–Straus driver",
+    )
+    ap.add_argument(
+        "--engine",
+        choices=("auto", "cc", "bb"),
+        default="auto",
+        help="auto prefers CC.kernel for attacks",
+    )
+    sub = ap.add_subparsers(dest="cmd")
+
+    p_solve = sub.add_parser("solve")
+    p_solve.add_argument("n", type=int)
+    p_solve.add_argument("--k-max", type=int, default=400)
+    p_solve.add_argument(
+        "--through",
+        choices=("classical", "theorem", "window", "search"),
+        default="search",
+    )
+
+    p_res = sub.add_parser("residual")
+    p_res.add_argument("limit", type=int)
+    p_res.add_argument("--k-max", type=int, default=400)
+    p_res.add_argument("--from", type=int, default=0, dest="from_p")
+
+    p_cen = sub.add_parser("census")
+    p_cen.add_argument("limit", type=int)
+    p_cen.add_argument("--k-max", type=int, default=400)
+    p_cen.add_argument("--from", type=int, default=0, dest="from_p")
+
+    sub.add_parser("status")
+    sub.add_parser("menu", help="interactive hunt menu")
+
+    p_hunt = sub.add_parser("hunt")
+    p_hunt.add_argument("--until-proof", action="store_true")
+    p_hunt.add_argument("--start", type=int, default=20000)
+    p_hunt.add_argument("--max-bound", type=int, default=200000)
+    p_hunt.add_argument("--rounds", type=int, default=3)
+    p_hunt.add_argument("--k-max", type=int, default=400)
+
+    p_start = sub.add_parser("start", help="one window from the seed")
+    p_start.add_argument("--through", type=int, default=None, dest="limit")
+    add_hunt_flags(p_start)
+
+    sub.add_parser("look", help="show the latest filed findings")
+    sub.add_parser("letters", help="show only LETTER findings")
+    p_go = sub.add_parser(
+        "go",
+        help="hunt forever from the seed; collect letters; stop with Ctrl+C",
+    )
+    add_hunt_flags(p_go)
+    p_cont = sub.add_parser("continue", help="same as go")
+    add_hunt_flags(p_cont)
+
+    p_seed = sub.add_parser("seed", help="show or reset the hunt cursor")
+    p_seed.add_argument("action", nargs="?", choices=("reset",))
+
+    args = ap.parse_args()
+    os.environ.setdefault(
+        "CC_KERNEL_LEDGER",
+        str(ES_ROOT / "CC.kernel" / "ledger" / "status.json"),
+    )
+    (ES_ROOT / "CC.kernel" / "ledger").mkdir(parents=True, exist_ok=True)
+
+    if not args.cmd:
+        raise SystemExit(cmd_menu())
+    if args.cmd == "menu":
+        raise SystemExit(cmd_menu())
+    if args.cmd == "solve":
+        raise SystemExit(cmd_solve(args.n, args.k_max, args.through, args.engine))
+    if args.cmd == "residual":
+        extra = [str(args.limit), "--k-max", str(args.k_max)]
+        if args.from_p:
+            extra.extend(["--from", str(args.from_p)])
+        raise SystemExit(cmd_cc("residual", extra, file_hits=True)[0])
+    if args.cmd == "census":
+        extra = [str(args.limit), "--k-max", str(args.k_max)]
+        if args.from_p:
+            extra.extend(["--from", str(args.from_p)])
+        raise SystemExit(cmd_cc("census", extra, file_hits=True)[0])
+    if args.cmd == "status":
+        raise SystemExit(cmd_status())
+    if args.cmd == "look":
+        raise SystemExit(print_look())
+    if args.cmd == "letters":
+        raise SystemExit(print_look(grade="letter"))
+    if args.cmd == "seed":
+        raise SystemExit(cmd_seed(args.action))
+    if args.cmd in {"go", "continue", "start"}:
+        once = args.cmd == "start"
+        step = args.step
+        persist_step = args.step is not None
+        if once and getattr(args, "limit", None) is not None:
+            seed = load_seed()
+            lo = int(seed.get("scanned_through") or 0)
+            if args.limit > lo:
+                step = args.limit - lo
+                persist_step = False
+        raise SystemExit(
+            cmd_go(
+                step=step,
+                kmax=args.k_max,
+                once=once,
+                start_factor=args.start_factor,
+                random_start=args.random,
+                menu_after=not once,
+                persist_step=persist_step,
+            )
+        )
+    if args.cmd == "hunt":
+        extra = [
+            "--start",
+            str(args.start),
+            "--max-bound",
+            str(args.max_bound),
+            "--rounds",
+            str(args.rounds),
+            "--k-max",
+            str(args.k_max),
+        ]
+        if args.until_proof:
+            extra.append("--until-proof")
+        raise SystemExit(cmd_cc("hunt", extra, file_hits=True)[0])
+
+
+if __name__ == "__main__":
+    main()

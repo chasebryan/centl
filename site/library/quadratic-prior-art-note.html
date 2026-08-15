@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The quadratic-character branch must be stated carefully.">
+  <title>Quadratic-character prior-art note — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quadratic-prior-art-note.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quadratic-prior-art-note.html">
+  <meta property="og:title" content="Quadratic-character prior-art note — Free Computation Foundation">
+  <meta property="og:description" content="The quadratic-character branch must be stated carefully.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quadratic-character prior-art note</h1><p>Prior art · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Prior art</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Prior art</p>
+          <p class="dek">The quadratic-character branch must be stated carefully.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUADRATIC-PRIOR-ART-NOTE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Purpose:</strong> claim calibration for <a href="quadratic-trap-signature.html"><code>QUADRATIC-TRAP-SIGNATURE.md</code></a></p>
+<p><strong>Status:</strong> primary-source correction and novelty boundary</p>
+<p>The quadratic-character branch must be stated carefully.</p>
+<h2>López 2024 already contains an essential part</h2>
+<p>Miguel Angel López, <em>A Complete Congruence System for the Erdos-Straus Conjecture</em> (arXiv:2404.01508), explicitly invokes Mordell&#x27;s restriction that a residue class supporting a polynomial Erdős-Straus identity cannot be a quadratic residue modulo the identity modulus.</p>
+<p>More specifically, López&#x27;s Corollary 1 states for Type B parameters <code>d,n</code> that</p>
+<div class="math" role="math">\left(\frac{-n}{4dn-1}\right)=-1.</div>
+<p>Therefore the Type B half of the FCF/CENTL observation that trap residues have Jacobi sign <code>-1</code> is <strong>prior art</strong> and must not be claimed as an FCF discovery.</p>
+<p>The current FCF theorem packages both Type B residues <code>-e</code> and Type A residues <code>-4e</code> for every divisor <code>e|k</code> into one trap-set statement</p>
+<div class="math" role="math">T_k=\{-e,-4e:e\mid k\} \subseteq \{u:(u/(4k-1))=-1\}.</div>
+<p>The Type A half is elementary from the same reciprocity calculation and is also consonant with Mordell&#x27;s general quadratic-residue restriction. It should therefore be treated as a useful unification/lemma, not advertised as a major standalone novelty claim.</p>
+<h2>Stronger candidate contribution</h2>
+<p>The potentially novel object is not merely the sign of one trap residue. It is the use of that sign inside the <strong>minimal-depth / shadow framework</strong> to construct a simultaneous character avoidance system.</p>
+<p>For a target candidate <code>x=r mod L</code>, FCF introduces one Legendre-sign variable for each free odd prime coordinate and imposes, for every earlier modulus <code>m_j</code>, the linear condition over <code>F_2</code> forcing</p>
+<div class="math" role="math">\left(\frac{x}{m_j}\right)=+1.</div>
+<p>A solution to that finite linear system produces a reduced arithmetic progression that avoids every earlier Type A/B trap simultaneously and therefore gives infinitely many exact-depth primes by Dirichlet.</p>
+<p>Targeted searching on 2026-08-14 did not locate this exact <strong>simultaneous character-shield construction for López Type A/B minimal witness depth</strong>, but that negative result does not establish priority.</p>
+<h2>Safe claim language</h2>
+<p>Safe:</p>
+<blockquote><p>López already records the quadratic-nonresidue property for Type B congruences. FCF is investigating a broader Type-A/B trap-set formulation and, more importantly, a simultaneous quadratic-character shield that turns exact-depth avoidance into a finite linear system over <code>F_2</code> inside the <code>C_AB</code>/shadow framework.</p></blockquote>
+<p>Unsafe:</p>
+<blockquote><p>FCF discovered that López Type B residues are quadratic nonresidues.</p></blockquote>
+<h2>Primary source</h2>
+<ul><li>Miguel Angel López, <em>A Complete Congruence System for the Erdos-Straus Conjecture</em>, arXiv:2404.01508, especially the introduction&#x27;s discussion of Mordell and Corollary 1 following the Type B perfect-square theorem.</li></ul>
+<p>This note should be consulted before any public novelty claim involving quadratic residues, Jacobi symbols, or the character shield.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

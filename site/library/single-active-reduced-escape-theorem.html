@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Universal reduced escape for a unique active fixed-negative row — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/single-active-reduced-escape-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/single-active-reduced-escape-theorem.html">
+  <meta property="og:title" content="Universal reduced escape for a unique active fixed-negative row — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Universal reduced escape for a unique active fixed-negative row</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem resolves the unique active fixed-negative row <strong>locally</strong>. It does not by itself solve the simultaneous nonfixed residual system, universal DSC-P, López Type A/B coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a></li><li><a href="single-active-local-escape.html">SINGLE-ACTIVE-LOCAL-ESCAPE.md</a></li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li><li><a href="trap-fiber-bound.html">TRAP-FIBER-BOUND.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Fix a directly novel target candidate</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1), \qquad \gcd(r,L)=1.</div>
+<p>Suppose the active fixed-negative core has exactly one layer <code>j</code>.</p>
+<p>Put</p>
+<div class="math" role="math">m=4j-1, \qquad g=\gcd(L,m), \qquad q=m/g.</div>
+<p>Let</p>
+<div class="math" role="math">R\subseteq\mathbb Z/q\mathbb Z</div>
+<p>be the exact forbidden pullback of <code>T_j</code> to the parameter <code>s</code>.</p>
+<p>Direct novelty gives</p>
+<div class="math" role="math">\boxed{R\ne\mathbb Z/q\mathbb Z.}</div>
+<p>The previously proved unique-active valuation theorem gives</p>
+<div class="math" role="math">\boxed{q=p\text{ or }p^2}</div>
+<p>for one odd prime <code>p</code>.</p>
+<h2>2. Exact pullback injection</h2>
+<p>The compatible trap residues are</p>
+<div class="math" role="math">U=\{u\in T_j:u\equiv r\pmod g\}.</div>
+<p>The pullback map is</p>
+<div class="math" role="math">u\longmapsto \frac{u-r}{g} \left(\frac Lg\right)^{-1} \pmod q.</div>
+<h3>Lemma 1</h3>
+<p>This map is injective on <code>U</code>.</p>
+<h3>Proof</h3>
+<p>If two compatible trap residues <code>u_1,u_2</code> have the same pullback class, then</p>
+<div class="math" role="math">\frac{u_1-u_2}{g}\equiv0\pmod q.</div>
+<p>Hence</p>
+<div class="math" role="math">u_1-u_2\equiv0\pmod{gq}=0\pmod m.</div>
+<p>But <code>u_1,u_2</code> are residues modulo <code>m</code>, so they are equal. QED.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{|R|=|U|.}</div>
+<p>No trap residue “multiplies” into several parameter classes at one layer. The pullback is an affine relabeling of the compatible trap fiber.</p>
+<h2>3. Class A case</h2>
+<p>Assume</p>
+<div class="math" role="math">p\mid L.</div>
+<p>This is Operator-02 Class A valuation excess.</p>
+<p>Since <code>R</code> is proper, choose any</p>
+<div class="math" role="math">s_0\notin R.</div>
+<p>Then the exact Type A/B condition at the unique active row is avoided.</p>
+<p>Reducedness at <code>p</code> is automatic because</p>
+<div class="math" role="math">r+Ls_0\equiv r\pmod p</div>
+<p>and</p>
+<div class="math" role="math">p\mid L, \qquad \gcd(r,L)=1.</div>
+<p>Thus</p>
+<div class="math" role="math">p\nmid r+Ls_0.</div>
+<p>So every Class-A unique active row has a reduced exact local escape.</p>
+<p>This recovers and extends the earlier Class-A note.</p>
+<h2>4. Class B shape</h2>
+<p>Assume now</p>
+<div class="math" role="math">p\nmid L.</div>
+<p>The unique-active prime-power theorem forces</p>
+<div class="math" role="math">\boxed{q=p^2.}</div>
+<p>Because</p>
+<div class="math" role="math">840\mid L,</div>
+<p>we also have</p>
+<div class="math" role="math">p\notin\{2,3,5,7\}.</div>
+<p>All Type A/B moduli are odd, so <code>p</code> is odd and therefore</p>
+<div class="math" role="math">\boxed{p\ge11.}</div>
+<p>We now bound the exact forbidden fiber.</p>
+<h2>5. Universal Class-B fiber bound</h2>
+<p>Since</p>
+<div class="math" role="math">m=g p^2=4j-1,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{j=\frac{gp^2+1}{4}}.</div>
+<p>Because <code>p^2=1 mod 4</code> and <code>m=3 mod 4</code>,</p>
+<div class="math" role="math">g\equiv3\pmod4.</div>
+<p>Hence</p>
+<div class="math" role="math">\frac jg = \frac{p^2}{4}+\frac{1}{4g}</div>
+<p>lies strictly between</p>
+<div class="math" role="math">\frac{p^2}{4} \quad\text{and}\quad \frac{p^2}{4}+\frac1{12}.</div>
+<p>Since <code>p</code> is odd,</p>
+<div class="math" role="math">p^2\equiv1\pmod4,</div>
+<p>so every fixed residue class modulo <code>g</code> contains at most</p>
+<div class="math" role="math">\boxed{\frac{p^2+3}{4}}</div>
+<p>integers in the interval <code>1&lt;=e&lt;=j</code>.</p>
+<p>Now split the Type A/B trap set into its two divisor families:</p>
+<div class="math" role="math">T_j=\{-e:e\mid j\}\cup\{-4e:e\mid j\}.</div>
+<p>For a trap <code>-e</code> to lie in the compatible fiber <code>u=r mod g</code>, the divisor <code>e</code> must occupy one fixed residue class modulo <code>g</code>.</p>
+<p>For a trap <code>-4e</code>, multiplication by <code>4</code> is invertible modulo odd <code>g</code>, so <code>e</code> again occupies one fixed residue class modulo <code>g</code>.</p>
+<p>Therefore each family contributes at most</p>
+<div class="math" role="math">\frac{p^2+3}{4}</div>
+<p>compatible traps.</p>
+<p>By Lemma 1,</p>
+<h3>Lemma 2</h3>
+<div class="math" role="math">\boxed{
+<p>|R| \le \frac{p^2+3}{2}. }&lt;/div&gt;</p>
+<p>This bound does not use the divisor condition beyond the fact that divisors lie in <code>[1,j]</code>; actual trap fibers are often much smaller.</p>
+<h2>6. Reduced parameter classes in Class B</h2>
+<p>Since <code>p∤L</code>, the non-reduced condition is</p>
+<div class="math" role="math">r+Ls\equiv0\pmod p.</div>
+<p>Because <code>L</code> is invertible modulo <code>p</code>, this excludes exactly one residue class modulo <code>p</code>.</p>
+<p>Thus among the <code>p^2</code> parameter classes modulo <code>p^2</code>, the number that remain reduced is exactly</p>
+<div class="math" role="math">\boxed{p^2-p=p(p-1).}</div>
+<p>For every</p>
+<div class="math" role="math">p\ge5,</div>
+<div class="math" role="math">\frac{p^2+3}{2}&lt;p^2-p,</div>
+<p>because the difference is</p>
+<div class="math" role="math">\frac{(p-3)(p+1)}2&gt;0.</div>
+<p>Class B has <code>p&gt;=11</code>, so the inequality is strict.</p>
+<p>Consequently the forbidden set <code>R</code> is too small to contain all reduced parameter classes.</p>
+<p>There exists at least one</p>
+<div class="math" role="math">s_0\pmod{p^2}</div>
+<p>such that simultaneously</p>
+<div class="math" role="math">s_0\notin R</div>
+<p>and</p>
+<div class="math" role="math">p\nmid r+Ls_0.</div>
+<h2>7. Main theorem</h2>
+<h3>Theorem</h3>
+<p>For every directly novel candidate with</p>
+<div class="math" role="math">\boxed{|\mathcal N^{\rm act}_{k,r}|=1,}</div>
+<p>the unique active fixed-negative layer admits an exact reduced local escape.</p>
+<p>This holds in both valuation regimes:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ll} \text{Class A:}&amp;\text{direct novelty + fixed reducedness},\\[1mm] \text{Class B:}&amp;q=p^2,\ p\ge11,\ |R|&lt;(p^2-p). \end{array}}</div>
+<p>Therefore the unique active fixed-negative row is <strong>never by itself a reduced covering obstruction</strong>.</p>
+<p>QED.</p>
+<h2>8. What this does and does not prove</h2>
+<p>This closes the local gap that had previously been phrased as:</p>
+<blockquote><p>could a proper Type A/B pullback still contain every reduced parameter class?</p></blockquote>
+<p>For a unique active fixed-negative row, the answer is now:</p>
+<div class="math" role="math">\boxed{\text{No.}}</div>
+<p>But C1 contains a second layer of difficulty.</p>
+<p>The independently verified <code>k&lt;=1500</code> census showed that after fiber peeling, the residual system is dominated by <strong>nonfixed earlier rows</strong>:</p>
+<pre><code class="language-text">single-active candidates:                       2,770
+nonempty final fiber kernels:                   1,480
+unique active row survives final kernel:            18
+nonfixed residual edge incidences:             69,672</code></pre>
+<p>So the remaining C1 problem is not local escape from the active row.</p>
+<p>It is:</p>
+<div class="math" role="math">\boxed{ \text{coordinate the guaranteed active-row escape} \text{ with all surviving nonfixed exact rows.} }</div>
+<p>That is the correct next theorem target.</p>
+<h2>9. Falsifier</h2>
+<p>A counterexample to this theorem would require either:</p>
+<ol><li>a unique-active quotient not of shape <code>p</code> or <code>p^2</code>, contradicting the earlier theorem;</li><li>a Class-A row where reducedness changes with <code>s</code>, contradicting <code>p|L</code>;</li><li>a Class-B exact trap fiber with more than <code>(p^2+3)/2</code> compatible trap residues;</li><li>or an arithmetic error in the parameter-fiber injection.</li></ol>
+<p>Each condition is explicit and independently testable.</p>
+<h2>10. Significance</h2>
+<p>The Class-C program has now separated two logically different phenomena:</p>
+<div class="math" role="math">\boxed{ \text{fixed-negative activity} \ne \text{final exact residual obstruction}. }</div>
+<p>The first is completely locally escapable in the single-active regime.</p>
+<p>The unresolved structure therefore lives in the interaction graph of the remaining nonfixed exact rows, not in a mysterious local failure of the unique character-negative row.</p>
+<p>This removes one entire candidate obstruction mechanism from C1.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

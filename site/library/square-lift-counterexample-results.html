@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Completed GitHub Actions run:">
+  <title>Constructive nonuniversal square-lift certificate results — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/square-lift-counterexample-results.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/square-lift-counterexample-results.html">
+  <meta property="og:title" content="Constructive nonuniversal square-lift certificate results — Free Computation Foundation">
+  <meta property="og:description" content="Completed GitHub Actions run:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Constructive nonuniversal square-lift certificate results</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">Completed GitHub Actions run:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SQUARE-LIFT-COUNTEREXAMPLE-RESULTS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Status:</strong> completed green finite regression of the universal square-lift classification</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the universal classification proof is in <a href="universal-square-lift-shadow-classification.html">UNIVERSAL-SQUARE-LIFT-SHADOW-CLASSIFICATION.md</a>. The finite certificates below are regression/falsification evidence.</p>
+<h2>Workflow provenance</h2>
+<p>Completed GitHub Actions run:</p>
+<pre><code class="language-text">workflow:     CENTL Erdős-Straus square-lift counterexamples
+run id:       31852781397
+head commit:  45adfb05f8f454b2564fe52338dc7255e425c05a
+conclusion:   success
+artifact id:  9238029825
+artifact sha256:
+9f221d7cf82f8a27ccd02beb35da98513852120837047fadf8ef11cff7666d87</code></pre>
+<h2>Result</h2>
+<p>Every base</p>
+<div class="math" role="math">1\le j\le5000</div>
+<p>except the three proved universal bases</p>
+<div class="math" role="math">\boxed{1,2,4}</div>
+<p>received an explicit constructive certificate showing that some odd square lift escapes the base shadow.</p>
+<p>Thus:</p>
+<pre><code class="language-text">bases checked:                         5,000
+universal bases skipped:               1,2,4
+nonuniversal bases certified:          4,997
+unresolved bases:                          0</code></pre>
+<p>For every certified base the artifact records:</p>
+<ol><li>a Jacobi-negative residue <code>v</code> outside the base trap set;</li><li>the positive class <code>u=-v mod (4j-1)</code>;</li><li>a prime <code>ell == u mod (4j-1)</code>;</li><li>an odd square-lift parameter <code>c</code> satisfying <code>c^2 == -(4j-1)^(-1) mod ell</code>;</li><li>the lifted depth</li></ol>
+<div class="math" role="math">K=((4j-1)c^2+1)/4;</div>
+<ol><li>the check <code>ell|K</code>;</li><li>the explicit lifted trap residue</li></ol>
+<div class="math" role="math">-\ell\equiv v\pmod{4j-1},</div>
+<p>which lies outside the base trap set.</p>
+<p>Each tuple therefore directly witnesses failure of universal square-lift shadowing for that base.</p>
+<h2>Search scale</h2>
+<p>Across all <code>4,997</code> nonuniversal bases:</p>
+<pre><code class="language-text">maximum progression prime used:         1,270,909
+maximum progression search steps:              68
+maximum constructed lift depth: 19,833,438,467,899,419</code></pre>
+<p>The enormous maximum lifted depth is not evidence that the theorem needs huge numbers. It reflects the deliberately direct constructive Dirichlet/reciprocity certificate mechanism.</p>
+<h2>Interpretation</h2>
+<p>The finite certification agrees perfectly with the universal theorem:</p>
+<div class="math" role="math">\boxed{ \text{base shadows every odd square lift} \iff j\in\{1,2,4\}. }</div>
+<p>The key methodological point is that every nonuniversal base receives a <strong>positive counterexample certificate</strong>, rather than merely failing to pass a finite shadow scan.</p>
+<p>This is a particularly strong regression design because any future change to the theorem machinery can be checked against thousands of explicit escape constructions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

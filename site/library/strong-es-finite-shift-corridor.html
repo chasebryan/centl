@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Finite shift corridor for the classical strong/Type-II conjecture — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-finite-shift-corridor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-finite-shift-corridor.html">
+  <meta property="og:title" content="Finite shift corridor for the classical strong/Type-II conjecture — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Finite shift corridor for the classical strong/Type-II conjecture</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-FINITE-SHIFT-CORRIDOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary reduction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>ES-TYPEII-ROOT-GEOMETRY.md</code>, <code>STRONG-ES-MIZONY-THEPAULT-PROVENANCE.md</code></p>
+<p><strong>Claim boundary:</strong> this is an elementary consequence of the standard Type-II factor form. It does not prove the strong conjecture or Erdős--Straus, and no novelty claim is made for the size bound itself.</p>
+<hr>
+<h2>1. Fixed-shift Type-II data</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime and let</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \gcd(q,p)=1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+q}{4}.}</div>
+<p>A standard Type-II hit at shift <code>q</code> is equivalent to a factorization</p>
+<div class="math" role="math">\boxed{C=BDT}</div>
+<p>with positive integers <code>B,D,T</code> such that</p>
+<div class="math" role="math">\boxed{q\mid B+D.}</div>
+<p>This is the normalized <code>-1</code> target in the signed divisor box.</p>
+<hr>
+<h2>2. Universal upper bound on a successful Type-II shift</h2>
+<p>Because</p>
+<div class="math" role="math">q\mid B+D</div>
+<p>and <code>B+D&gt;0</code>,</p>
+<div class="math" role="math">q\le B+D.</div>
+<p>For positive <code>B,D</code>,</p>
+<div class="math" role="math">B+D\le BD+1</div>
+<p>because</p>
+<div class="math" role="math">(B-1)(D-1)\ge0.</div>
+<p>Also</p>
+<div class="math" role="math">BD\le BDT=C.</div>
+<p>Therefore</p>
+<div class="math" role="math">q\le C+1.</div>
+<p>Substituting</p>
+<div class="math" role="math">C=\frac{p+q}{4}</div>
+<p>gives</p>
+<div class="math" role="math">4q\le p+q+4,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{3q\le p+4.}</div>
+<p>Thus:</p>
+<h3>Theorem — finite Type-II shift bound</h3>
+<p>Every standard Type-II solution for prime <code>p≡1 mod4</code> has an associated shift satisfying</p>
+<div class="math" role="math">\boxed{ q\le\frac{p+4}{3}.}</div>
+<p>So the strong/Type-II existence problem for a fixed prime has a finite admissible shift corridor.</p>
+<hr>
+<h2>3. Consecutive-integer parameterization</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{A=\frac{p+3}{4}.}</div>
+<p>Every positive shift congruent to <code>3 mod 4</code> has the form</p>
+<div class="math" role="math">\boxed{q_h=4h+3, \qquad h\ge0.}</div>
+<p>The corresponding shifted integer is</p>
+<div class="math" role="math">\begin{aligned} C_h &amp;=\frac{p+q_h}{4}\\ &amp;=\frac{p+3}{4}+h\\ &amp;=A+h. \end{aligned}</div>
+<p>Thus the fixed-shift Type-II problem runs through consecutive integers:</p>
+<div class="math" role="math">\boxed{C_h=A+h.}</div>
+<p>The shift bound becomes</p>
+<div class="math" role="math">4h+3\le\frac{p+4}{3}.</div>
+<p>Equivalently,</p>
+<div class="math" role="math">12h+9\le p+4,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{h\le\frac{p-5}{12}.}</div>
+<p>Hence only the initial corridor</p>
+<div class="math" role="math">\boxed{ A,\ A+1,\ \ldots,\ A+\left\lfloor\frac{p-5}{12}\right\rfloor }</div>
+<p>can support a standard Type-II shift.</p>
+<hr>
+<h2>4. Exact defect corridor for a hypothetical strong counterexample</h2>
+<p>Let</p>
+<div class="math" role="math">R_{q_h}(C_h)</div>
+<p>be the signed divisor box of <code>C_h</code> modulo <code>q_h</code>.</p>
+<p>A Type-II hit is exactly</p>
+<div class="math" role="math">-1\in R_{q_h}(C_h).</div>
+<p>Therefore a hypothetical prime counterexample to the strong/Type-II conjecture must satisfy simultaneously</p>
+<div class="math" role="math">\boxed{ -1\notin \mathcal R_{4h+3}(A+h) }</div>
+<p>for every integer</p>
+<div class="math" role="math">\boxed{ 0\le h\le\left\lfloor\frac{p-5}{12}\right\rfloor }</div>
+<p>except the irrelevant case <code>q_h=p</code>, where the shift is not coprime to <code>p</code>.</p>
+<p>This is a long finite sequence of coupled factorization defects on consecutive integers.</p>
+<hr>
+<h2>5. Root form across the corridor</h2>
+<p>The root geometry says a Type-II hit at <code>h</code> is equivalent to a factorization</p>
+<div class="math" role="math">\boxed{A+h=sbt}</div>
+<p>with <code>s</code> squarefree and</p>
+<div class="math" role="math">\boxed{b+t\equiv0\pmod{4h+3}.}</div>
+<p>Thus a strong counterexample must make every consecutive integer in the corridor avoid this complementary-root congruence.</p>
+<p>The modulus changes linearly with the position:</p>
+<div class="math" role="math">\boxed{q_h=4h+3.}</div>
+<p>So the obstruction is not a collection of independent arbitrary moduli. It is a synchronized pair</p>
+<div class="math" role="math">\boxed{(A+h,\,4h+3)}.</div>
+<hr>
+<h2>6. First two corridor positions</h2>
+<h3>h = 0</h3>
+<div class="math" role="math">q_0=3, \qquad C_0=A=\frac{p+3}{4}.</div>
+<p>For Mordell-hard <code>p</code>, the exact <code>q=3</code> theorem already gives:</p>
+<div class="math" role="math">\boxed{ q=3\text{ misses} \iff \text{every prime factor of }A\text{ is }1\pmod3.}</div>
+<h3>h = 1</h3>
+<div class="math" role="math">q_1=7, \qquad C_1=A+1=\frac{p+7}{4}.</div>
+<p>The next exact factorization defect can be classified completely in the cyclic group of order six; see the companion <code>q=7</code> filter note.</p>
+<p>Thus the corridor begins with two consecutive integers carrying sharply constrained but different local splitting laws.</p>
+<hr>
+<h2>7. Strategic consequence</h2>
+<p>The strong/Type-II route can be attacked as a <strong>consecutive defect corridor</strong> rather than as an unbounded auxiliary search.</p>
+<p>A hypothetical counterexample requires approximately</p>
+<div class="math" role="math">\frac p{12}</div>
+<p>simultaneous signed-box misses on consecutive integers, each with a linearly changing modulus.</p>
+<p>Potential proof tools now include:</p>
+<ol><li>exact small-shift factor restrictions (<code>q=3,7,11,...</code>);</li><li>sieve arguments across the consecutive integers <code>A+h</code>;</li><li>incompatibility of splitting conditions imposed by several small moduli;</li><li>average signed-divisor expansion as <code>h</code> ranges through the corridor;</li><li>identifying a short initial segment whose combined local conditions already force a hit.</li></ol>
+<p>The shift bound does not solve the strong conjecture, but it turns its fixed-prime search space into a highly structured finite interval.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Weak-Ancestor Redundancy — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-weak-redundancy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-weak-redundancy.html">
+  <meta property="og:title" content="q=3 Weak-Ancestor Redundancy — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Weak-Ancestor Redundancy</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-WEAK-REDUNDANCY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>Q3-ABSORPTION.md</code></p>
+<p><strong>Claim boundary:</strong> reduces the corrected q=3 shared-factor obstruction to base layers. Does not prove that base layers cannot cover the corrected parameter domain, universal DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>Setup</h2>
+<p>Let</p>
+<div class="math" role="math">m_j=4j-1, \qquad q_j=\frac{m_j}{\gcd(L,m_j)}.</div>
+<p>Call a layer <code>j</code> <strong>weak</strong> when there is an earlier layer <code>i&lt;j</code> such that</p>
+<div class="math" role="math">\boxed{m_i\mid m_j}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{T_j\bmod m_i\subseteq T_i,}</div>
+<p>but</p>
+<div class="math" role="math">\boxed{m_i\nmid m_j/3.}</div>
+<p>Thus <code>j</code> has a trap-reducing ancestor, but not a strong-absorption ancestor in the sense of <code>Q3-ABSORPTION.md</code>.</p>
+<hr>
+<h2>Theorem (weak q=3 redundancy)</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{q_j=3.}</div>
+<p>If <code>i</code> is a weak trap-reducing ancestor of <code>j</code>, then</p>
+<div class="math" role="math">\boxed{q_i=3}</div>
+<p>and, for the same candidate progression,</p>
+<div class="math" role="math">\boxed{R_j\subseteq R_i\subseteq\mathbb Z/3\mathbb Z.}</div>
+<p>Therefore a weak <code>q=3</code> layer contributes <strong>no forbidden parameter residue not already contributed by an earlier layer</strong>.</p>
+<h3>Proof</h3>
+<p>Put</p>
+<div class="math" role="math">g=\gcd(L,m_j).</div>
+<p>Since <code>q_j=3</code>,</p>
+<div class="math" role="math">\boxed{m_j=3g}</div>
+<p>and <code>g|L</code>.</p>
+<p>Because <code>m_i|m_j</code>, every common divisor of <code>L</code> and <code>m_i</code> is also a common divisor of <code>L</code> and <code>m_j</code>; hence</p>
+<div class="math" role="math">\gcd(L,m_i)=\gcd(g,m_i).</div>
+<p>Now <code>m_i|3g</code>. Therefore</p>
+<div class="math" role="math">\frac{m_i}{\gcd(g,m_i)}\mid3.</div>
+<p>The weak hypothesis says <code>m_i</code> does <strong>not</strong> divide <code>g=m_j/3</code>, so this quotient is greater than <code>1</code>. Since <code>3</code> is prime,</p>
+<div class="math" role="math">\boxed{ \frac{m_i}{\gcd(L,m_i)} = \frac{m_i}{\gcd(g,m_i)} =3. }</div>
+<p>Thus <code>q_i=3</code>.</p>
+<p>Now take any residue class</p>
+<div class="math" role="math">a\in R_j.</div>
+<p>By definition there is a parameter <code>s</code> with</p>
+<div class="math" role="math">s\equiv a\pmod3</div>
+<p>such that</p>
+<div class="math" role="math">x(s)=r+Ls\pmod{m_j}\in T_j.</div>
+<p>Reducing modulo <code>m_i</code> and using</p>
+<div class="math" role="math">T_j\bmod m_i\subseteq T_i</div>
+<p>gives</p>
+<div class="math" role="math">x(s)\pmod{m_i}\in T_i.</div>
+<p>Since <code>q_i=3</code>, this means exactly</p>
+<div class="math" role="math">s\bmod3\in R_i.</div>
+<p>Hence <code>a in R_i</code>, proving</p>
+<div class="math" role="math">\boxed{R_j\subseteq R_i.}</div>
+<p>QED.</p>
+<hr>
+<h2>Corollary 1 — weak layers can be deleted from q=3 covers</h2>
+<p>For any candidate progression, repeatedly delete every weak <code>q=3</code> layer and retain one of its earlier weak ancestors. The union of forbidden classes modulo <code>3</code> does not shrink:</p>
+<div class="math" role="math">\boxed{ \bigcup_{j\in\mathcal W}R_j \subseteq \bigcup_{i\in\mathcal A}R_i, }</div>
+<p>where <code>A</code> contains earlier ancestors reached by the reductions.</p>
+<p>Thus weak descendants are redundant for every q=3 covering question.</p>
+<hr>
+<h2>Corollary 2 — directly novel corrected q=3 obstruction = base-only obstruction</h2>
+<p>Combine this theorem with Strong q=3 absorption:</p>
+<ul><li><strong>strong</strong> layer: if <code>R_j != empty</code>, the candidate is directly shadowed and therefore cannot occur on a directly novel candidate;</li><li><strong>weak</strong> layer: <code>R_j</code> is contained in an earlier q=3 ancestor pullback and adds no new forbidden class;</li><li><strong>base</strong> layer: no trap-reducing ancestor is available from this hierarchy.</li></ul>
+<p>Therefore on directly novel candidates, every genuinely new forbidden residue in the q=3 coordinate can be represented by a <strong>base q=3 layer</strong>.</p>
+<p>In the exact Dirichlet parameter domain, <code>3|840|L</code>, so the local domain is all of</p>
+<div class="math" role="math">\mathbb Z/3\mathbb Z.</div>
+<p>A genuine q=3 local obstruction must therefore reduce to base layers whose pullbacks cover all three classes</p>
+<div class="math" role="math">\boxed{\{0,1,2\}.}</div>
+<p>The residual theorem target is no longer strong+weak+base, and no longer a complementary pair. It is:</p>
+<div class="math" role="math">\boxed{ \text{Can base q=3 layers cover }\mathbb Z/3\mathbb Z \text{ on a directly novel admissible candidate?} }</div>
+<hr>
+<h2>Consequence for the j&lt;=1500 ancestry census</h2>
+<p><code>Q3-ABSORPTION.md</code> records:</p>
+<pre><code class="language-text">strong absorb: 153
+weak only:      114
+base:           233</code></pre>
+<p>The first two populations are now structurally removed from the novel q=3 obstruction:</p>
+<ul><li>153 strong layers are novel-impossible when active;</li><li>114 weak layers are residue-redundant;</li><li>only the 233 base layers can contribute genuinely new q=3 forbidden classes in that finite census.</li></ul>
+<p>The counts are finite census data; the strong/weak reductions themselves are universal.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

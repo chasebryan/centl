@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>C1 Pullback Cardinality Bound — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-pullback-cardinality.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-pullback-cardinality.html">
+  <meta property="og:title" content="C1 Pullback Cardinality Bound — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C1 Pullback Cardinality Bound</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-PULLBACK-CARDINALITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved lemma; see also <code>C1-ESCAPE-CORE.md</code> for the expanded core</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> Advances C1. Does not prove universal DSC-P, López coverage, or Erdős-Straus.</p>
+<hr>
+<h2>Theorem (Pullback cardinality)</h2>
+<div class="math" role="math">\boxed{|R| \le |T_j|.}</div>
+<h3>Proof</h3>
+<p>Let <code>t ∈ T_j</code>. The congruence <code>L s ≡ t − r (mod m)</code> is solvable iff <code>g | (t − r)</code>. When solvable, <code>gcd(L/g, q)=1</code> gives a unique solution class <code>s mod q</code>. Distinct traps may collide, so <code>|R| ≤ |T_j|</code>.</p>
+<hr>
+<h2>Corollary (Pigeonhole escape)</h2>
+<div class="math" role="math">|T_j| &lt; φ(q) \implies U \setminus R \ne \emptyset.</div>
+<hr>
+<h2>Expanded core</h2>
+<p>Full injectivity, zero-trap, prime-modulus, and finite certificate results: <strong><a href="c1-escape-core.html">C1-ESCAPE-CORE.md</a></strong>.</p>
+<h2>Remaining gap</h2>
+<p>When <code>φ(q) ≤ |T_j|</code> and <code>0 ∉ R</code>, prove two-box geometry still blocks <code>U ⊆ R</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

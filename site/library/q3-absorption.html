@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Strong Absorption — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-absorption.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-absorption.html">
+  <meta property="og:title" content="q=3 Strong Absorption — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Strong Absorption</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-ABSORPTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>CN-SHARED-THEOREM.md</code> (205→10 special case)</p>
+<p><strong>Claim boundary:</strong> Kills a large family of complementary q=3 threats on directly novel candidates. Does not classify base q=3 layers. Does not prove DSC-P or Erdős-Straus.</p>
+<hr>
+<h2>Setup</h2>
+<p>Layer <code>j</code> with <code>m_j = 4j−1</code>. Write <code>q_j = m_j / gcd(L, m_j)</code>. Interest is the case <code>q_j = 3</code>, i.e.</p>
+<div class="math" role="math">\gcd(L,m_j) = m_j/3,</div>
+<p>so <code>3 ∦</code> necessarily, but the pullback modulus is exactly <code>3</code> and <code>L</code> is divisible by every prime-power factor of <code>m_j</code> except a residual factor <code>3</code>.</p>
+<hr>
+<h2>Theorem (Strong q=3 absorption)</h2>
+<p>Let <code>j &gt; i ≥ 1</code> satisfy:</p>
+<ol><li><code>m_i | (m_j / 3)</code>,</li><li><code>T_j \bmod m_i \subseteq T_i</code> (trap reduction / divisor-child inclusion).</li></ol>
+<p>If a candidate progression has <code>q_j = 3</code> and <code>R_j ≠ ∅</code>, then the progression is <strong>directly shadowed by layer <code>i</code></strong> (in particular it is not directly novel).</p>
+<h3>Proof</h3>
+<p><code>q_j = 3</code> means <code>gcd(L, m_j) = m_j/3</code>. Hypothesis (1) gives <code>m_i | (m_j/3)</code>, hence <code>m_i | L</code>. Therefore</p>
+<div class="math" role="math">q_i = m_i / \gcd(L,m_i) = 1:</div>
+<p>the progression is frozen modulo <code>m_i</code>:</p>
+<div class="math" role="math">x = r + Ls \equiv r \pmod{m_i}\qquad\text{for every }s.</div>
+<p>Nonempty <code>R_j</code> supplies some parameter with <code>x ∈ T_j</code>. Reducing modulo <code>m_i</code> and applying (2) yields <code>x ∈ T_i</code>. But every point of the progression has the same residue modulo <code>m_i</code>, so the whole progression lies in <code>T_i</code>. QED.</p>
+<h3>Corollary</h3>
+<p>On any <strong>directly novel</strong> candidate, a layer <code>j</code> with a strong absorption ancestor cannot participate in a complementary <code>q=3</code> cover.</p>
+<hr>
+<h2>Special case recovery</h2>
+<p>For <code>j = 205</code>, <code>m_{205} = 819</code>, <code>m_{205}/3 = 273</code>, and <code>m_{10} = 39 | 273</code> with trap reduction <code>T_{205} \bmod 39 \subseteq T_{10}</code>. The theorem recovers the parent <code>205 → 10</code> absorption.</p>
+<hr>
+<h2>Census through <code>j ≤ 1500</code></h2>
+<p>Among layers with <code>j ≡ 1 (mod 3)</code> (necessary for <code>3 | m_j</code>):</p>
+<table class="directory"><thead><tr><th>Class</th><th>Count</th></tr></thead><tbody><tr><td>Strong absorb (has <code>i</code> with `m_i</td><td>(m_j/3)` and trap reduction)</td></tr><tr><td>Weak only (trap reduction with some `m_i</td><td>m_j<code> but not </code></td></tr><tr><td>Base (no trap-reducing ancestor)</td><td>233</td></tr></tbody></table>
+<p>Every strong-absorb layer is novel-impossible as a <code>q=3</code> complementary participant.</p>
+<hr>
+<h2>Remaining q=3 threat</h2>
+<p>Complementary covers can only involve:</p>
+<ul><li><strong>base</strong> layers (no reducing ancestor), and/or</li><li><strong>weak-only</strong> layers (ancestor exists but may not freeze when <code>q_j=3</code>).</li></ul>
+<p>Admissible scan through <code>k ≤ 1500</code> found the only complementary failures inside the <code>205</code> family (strong-absorbed). Extending that scan past 1500 and classifying base/weak pairs is the next finite certificate.</p>
+<hr>
+<h2>What this is not</h2>
+<ul><li>Not a proof that every <code>q=3</code> layer is absorbed.</li><li>Not a universal shared-factor CN theorem.</li><li>Not Erdős-Straus.</li></ul>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

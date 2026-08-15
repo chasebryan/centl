@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Complete classification of Type A/B multiplicative coset saturation — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/coset-saturation-classification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/coset-saturation-classification.html">
+  <meta property="og:title" content="Complete classification of Type A/B multiplicative coset saturation — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Complete classification of Type A/B multiplicative coset saturation</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/COSET-SATURATION-CLASSIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal classification theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this classifies when the Type A/B trap set fills its divisor-generated multiplicative coset. It does not prove universal Type A/B coverage or the Erdős-Straus conjecture. Literature priority remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a></li><li><a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a></li><li><a href="prime-power-trap-dichotomy.html">PRIME-POWER-TRAP-DICHOTOMY.md</a></li><li><a href="coset-source-semigroup-shadow.html">COSET-SOURCE-SEMIGROUP-SHADOW.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>For <code>k&gt;=1</code>, let</p>
+<div class="math" role="math">m=4k-1, \qquad G_k=(\mathbb Z/m\mathbb Z)^\times,</div>
+<p>and</p>
+<div class="math" role="math">H_k = \langle\ell\bmod m:\ell\mid k,\ \ell\text{ prime}\rangle.</div>
+<p>The general multiplicative trap theorem gives</p>
+<div class="math" role="math">T_k\subseteq-H_k.</div>
+<p>We call <code>k</code> <strong>coset-saturated</strong> when</p>
+<div class="math" role="math">\boxed{T_k=-H_k.}</div>
+<h2>2. Positive cases</h2>
+<h3>k=1</h3>
+<p>Here</p>
+<div class="math" role="math">m=3, \qquad H_1=\{1\}, \qquad T_1=\{2\}=-H_1.</div>
+<h3>k=2^a</h3>
+<p>For every <code>a&gt;=1</code>, the Mersenne shadow theorem proves</p>
+<div class="math" role="math">\boxed{ T_{2^a} =-\langle2\rangle =-H_{2^a}. }</div>
+<p>Thus <code>1</code> and every positive power of <code>2</code> are coset-saturated.</p>
+<h2>3. Mixed even depths cannot saturate</h2>
+<h3>Lemma</h3>
+<p>Let</p>
+<div class="math" role="math">k=2^b u, \qquad b\ge1, \qquad u&gt;1\text{ odd}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{T_k\subsetneq-H_k.}</div>
+<h3>Proof</h3>
+<p>Because <code>2|k</code>, the element <code>2</code> is a generator of <code>H_k</code>. Hence</p>
+<div class="math" role="math">2^{b+3}\in H_k.</div>
+<p>Put</p>
+<div class="math" role="math">h=2^{b+3}.</div>
+<p>Since <code>u&gt;=3</code>,</p>
+<div class="math" role="math">h=2^{b+3} &lt;2^{b+2}u-1 =4k-1=m.</div>
+<p>Thus <code>h</code> is represented by its ordinary positive integer value modulo <code>m</code>.</p>
+<p>If <code>T_k=-H_k</code>, then</p>
+<div class="math" role="math">h\in H_k=-T_k,</div>
+<p>so <code>h</code> must be congruent modulo <code>m</code> to either</p>
+<div class="math" role="math">e</div>
+<p>or</p>
+<div class="math" role="math">4e</div>
+<p>for some divisor <code>e|k</code>.</p>
+<p>Since</p>
+<div class="math" role="math">1\le e\le k&lt;m</div>
+<p>and</p>
+<div class="math" role="math">4e\le4k=m+1,</div>
+<p>there is no possible wrap producing <code>h</code>: the alternative <code>4e=h+m</code> would exceed <code>m+1</code> because <code>h&gt;1</code>.</p>
+<p>Therefore we would need either</p>
+<div class="math" role="math">e=h=2^{b+3}</div>
+<p>or</p>
+<div class="math" role="math">e=h/4=2^{b+1}.</div>
+<p>Neither can divide <code>k=2^b u</code>, because both require a power of <code>2</code> larger than the exact <code>2</code>-adic exponent <code>b</code> of <code>k</code>.</p>
+<p>Contradiction. QED.</p>
+<h2>4. Odd depths with multiple prime factors cannot saturate</h2>
+<h3>Lemma</h3>
+<p>Let <code>k</code> be odd and have at least two distinct prime divisors. Then</p>
+<div class="math" role="math">\boxed{T_k\subsetneq-H_k.}</div>
+<h3>Proof</h3>
+<p>Let <code>p</code> be the smallest prime divisor of <code>k</code>, and write</p>
+<div class="math" role="math">k=p^a n, \qquad p\nmid n.</div>
+<p>Because <code>k</code> has another distinct prime factor and <code>p</code> is smallest,</p>
+<div class="math" role="math">n\ge p.</div>
+<p>Since <code>p</code> generates part of <code>H_k</code>,</p>
+<div class="math" role="math">h=p^{a+1}\in H_k.</div>
+<p>Also</p>
+<div class="math" role="math">h=p^{a+1} &lt;4p^a n-1 =4k-1=m,</div>
+<p>because <code>p&lt;4n</code> and in fact <code>n&gt;=p</code>.</p>
+<p>If <code>T_k=-H_k</code>, then <code>h</code> must be congruent to <code>e</code> or <code>4e</code> for some divisor <code>e|k</code>.</p>
+<p>Again <code>4e&lt;=m+1</code>, while <code>h&gt;1</code>, so a wrapped equality <code>4e=h+m</code> is impossible.</p>
+<p>The equality</p>
+<div class="math" role="math">h=e</div>
+<p>would require <code>p^{a+1}|k</code>, contradicting the exact exponent <code>a</code>.</p>
+<p>The equality</p>
+<div class="math" role="math">h=4e</div>
+<p>is impossible by parity because <code>h</code> is odd.</p>
+<p>Contradiction. QED.</p>
+<h2>5. Odd prime powers cannot saturate</h2>
+<p>The only remaining odd depths are</p>
+<div class="math" role="math">k=p^a</div>
+<p>with <code>p</code> an odd prime.</p>
+<p>The prime-power trap dichotomy proves</p>
+<div class="math" role="math">\operatorname{ord}_{4p^a-1}(p)&gt;2a+1</div>
+<p>while</p>
+<div class="math" role="math">|T_{p^a}|=2a+1.</div>
+<p>Since</p>
+<div class="math" role="math">H_{p^a}=\langle p\rangle,</div>
+<p>we have</p>
+<div class="math" role="math">|H_{p^a}|&gt;|T_{p^a}|,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{T_{p^a}\subsetneq-H_{p^a}.}</div>
+<h2>6. Classification theorem</h2>
+<p>The preceding cases exhaust all positive integers.</p>
+<h3>Theorem</h3>
+<p>For every <code>k&gt;=1</code>,</p>
+<div class="math" role="math">\boxed{ T_k=-H_k \iff k=1\text{ or }k=2^a\text{ for some }a\ge1. }</div>
+<p>Equivalently, the complete set of coset-saturated Type A/B depths is</p>
+<div class="math" role="math">\boxed{ \{1,2,4,8,16,32,\ldots\}. }</div>
+<h2>7. Meaning for the shadow program</h2>
+<p>The saturated-source mechanism in <a href="coset-source-semigroup-shadow.html">COSET-SOURCE-SEMIGROUP-SHADOW.md</a> is now completely classified.</p>
+<p>There are no hidden odd or mixed source families whose Type A/B traps fill the entire multiplicative coset.</p>
+<p>Thus every exact semigroup shadow family generated by <strong>full source-coset saturation</strong> originates from one of the binary sources</p>
+<div class="math" role="math">\boxed{1,2,4,8,\ldots.}</div>
+<p>This explains why the Mersenne structure kept reappearing in the global shadow graph: powers of two are not merely examples. They are the unique nontrivial saturated source family.</p>
+<h2>8. Relation to the exact divisor-sparsity factor</h2>
+<p>The quotient factorization gives</p>
+<div class="math" role="math">\frac{|T_k|}{\varphi(4k-1)} = 2^{-\kappa(k)}\Theta(k)^{-1} \frac{|T_k|}{|H_k|}.</div>
+<p>The classification says</p>
+<div class="math" role="math">\boxed{ \frac{|T_k|}{|H_k|}=1 \iff k=1\text{ or }2^a. }</div>
+<p>For every other depth,</p>
+<div class="math" role="math">\boxed{ \frac{|T_k|}{|H_k|}&lt;1. }</div>
+<p>So the exact divisor-sparsity factor is genuinely nontrivial everywhere outside the binary saturated spine.</p>
+<h2>9. Computational regression</h2>
+<p>Earlier finite search through <code>k&lt;=200000</code> had found exact saturation only at <code>1</code> and powers of two. That observation is now explained by the theorem and should be retained only as a regression test, not as evidence for an unproved classification.</p>
+<h2>10. Next targets</h2>
+<ol><li>classify <strong>near-saturation</strong>, for example depths with bounded ratio <code>|H_k|/|T_k|</code>;</li><li>determine whether near-saturated source layers generate additional infinite shadow families;</li><li>quantify how the divisor-sparsity factor grows away from the binary spine;</li><li>combine the complete saturated-source classification with direct-shadow completeness and the composite-depth spectrum.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

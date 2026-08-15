@@ -1,0 +1,13 @@
+{
+  "event": {
+    "bound": 20000,
+    "equation": "hunt round 1 cleared bound 20000",
+    "type": "cleared_bound",
+    "unsolved": 0
+  },
+  "file": "20260815T092847Z-great-20000-cleared_bound.md",
+  "grade": "great",
+  "tags": [
+    "cleared_bound"
+  ]
+}

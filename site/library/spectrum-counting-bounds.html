@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Counting bounds for the Type A/B minimal-depth spectrum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/spectrum-counting-bounds.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/spectrum-counting-bounds.html">
+  <meta property="og:title" content="Counting bounds for the Type A/B minimal-depth spectrum — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Counting bounds for the Type A/B minimal-depth spectrum</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SPECTRUM-COUNTING-BOUNDS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved quantitative synthesis theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> these bounds concern the López Type A/B minimal-depth spectrum. They do not prove universal Type A/B coverage or the Erdős-Straus conjecture. The analytic inputs are classical prime-number theorems in arithmetic progressions; the project-specific inputs are the prime-modulus backbone, prime-depth dichotomy, and Mersenne shadow lattice.</p>
+<p>Read with:</p>
+<ul><li><a href="spectrum-infinite-coinfinite.html">SPECTRUM-INFINITE-COINFINITE.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li><li><a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a></li></ul>
+<h2>1. Counting functions</h2>
+<p>Let</p>
+<div class="math" role="math">D_H(X)=|\mathcal D_H\cap[1,X]|,</div>
+<p>where <code>D_H</code> is the hard-class spectrum of depths realized by infinitely many primes.</p>
+<p>Let</p>
+<div class="math" role="math">D_{\mathbb P}(X)=|\mathcal D_{\mathbb P}\cap[1,X]|,</div>
+<p>and</p>
+<div class="math" role="math">G(X)=|[1,X]\setminus\mathcal D_{\mathbb P}|.</div>
+<p>Every depth impossible for all integers is absent from every prime spectrum, so a global structural-gap family also lower-bounds the complement of <code>D_H</code>.</p>
+<h2>2. Lower bound for realized depths</h2>
+<p>If</p>
+<div class="math" role="math">q=4k-1</div>
+<p>is prime with <code>q&gt;7</code>, the prime-modulus backbone gives infinitely many hard-class primes of exact depth <code>k</code>.</p>
+<p>Therefore every prime</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad q\le4X-1,</div>
+<p>apart from finitely many initial cases, contributes a distinct depth</p>
+<div class="math" role="math">k=(q+1)/4\le X.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ D_H(X) \ge \pi(4X-1;4,3)-O(1). }</div>
+<p>By the prime number theorem for arithmetic progressions,</p>
+<div class="math" role="math">\pi(Y;4,3) \sim \frac12\frac{Y}{\log Y},</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ D_H(X) \ge (2+o(1))\frac{X}{\log(4X)} \gg \frac{X}{\log X}. }</div>
+<p>The same lower bound applies to <code>D_P(X)</code>.</p>
+<h2>3. Macroscopic lower bound for structural gaps</h2>
+<p>The prime-depth dichotomy gives a much denser deletion family than the original Mersenne construction.</p>
+<p>Every prime depth</p>
+<div class="math" role="math">k\equiv4\pmod5</div>
+<p>satisfies</p>
+<div class="math" role="math">5\mid4k-1.</div>
+<p>Writing</p>
+<div class="math" role="math">k=5j-1</div>
+<p>gives</p>
+<div class="math" role="math">4k-1=5(4j-1),</div>
+<p>and because <code>k</code> is prime the complete target trap layer reduces into the earlier layer <code>j</code>. Thus every such prime <code>k</code> is a global structural gap:</p>
+<div class="math" role="math">\boxed{k\notin\mathcal D_{\mathbb P}.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ G(X) \ge \pi(X;5,4)-O(1). }</div>
+<p>The prime number theorem in arithmetic progressions gives</p>
+<div class="math" role="math">\pi(X;5,4) \sim \frac14\frac{X}{\log X},</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{ G(X) \ge \left(\frac14+o(1)\right)\frac{X}{\log X}. }</div>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{G(X)\gg X/\log X.}</div>
+<p>Because these depths are impossible for <strong>every integer</strong>, the same bound applies to the complement of the hard-class spectrum:</p>
+<div class="math" role="math">\boxed{
+<p>|[1,X]\setminus\mathcal D_H| \gg X/\log X. }&lt;/div&gt;</p>
+<h2>4. General ancestry residue families</h2>
+<p>The <code>mod 5</code> family is only the first member of an infinite collection.</p>
+<p>Fix <code>s&gt;=1</code> and put</p>
+<div class="math" role="math">A=4s+1.</div>
+<p>Every prime depth satisfying</p>
+<div class="math" role="math">\boxed{k\equiv-s\pmod A}</div>
+<p>has</p>
+<div class="math" role="math">A\mid4k-1</div>
+<p>and is directly shadowed by</p>
+<div class="math" role="math">j=(k+s)/A&lt;k.</div>
+<p>Since</p>
+<div class="math" role="math">\gcd(s,A)=1,</div>
+<p>Dirichlet gives infinitely many prime depths in each such shadow family.</p>
+<p>The families overlap, so their densities cannot simply be added. The single <code>s=1</code> family is enough for the unconditional <code>X/log X</code> lower bound above.</p>
+<h2>5. Mersenne gaps remain structurally distinct</h2>
+<p>The power-of-two Mersenne lattice still supplies a different kind of deletion:</p>
+<div class="math" role="math">2^b\notin\mathcal D_{\mathbb P}</div>
+<p>whenever <code>b&gt;=3</code> and <code>b+2</code> is composite.</p>
+<p>This gives</p>
+<div class="math" role="math">G(X) \ge (1-o(1))\log_2 X</div>
+<p>from the binary subsequence alone.</p>
+<p>That bound is now numerically weaker than the prime-depth <code>X/log X</code> bound, but it remains conceptually important because it comes from exact multiplicative-coset saturation rather than prime-target divisor sparsity.</p>
+<h2>6. Quantitative spectrum theorem</h2>
+<p>We now have unconditional lower bounds of the same broad order on both known sides:</p>
+<div class="math" role="math">\boxed{ D_H(X)\gg\frac{X}{\log X}, \qquad
+<p>|[1,X]\setminus\mathcal D_H| \gg\frac{X}{\log X}. }&lt;/div&gt;</p>
+<p>Likewise</p>
+<div class="math" role="math">\boxed{ D_{\mathbb P}(X)\gg\frac{X}{\log X}, \qquad G(X)\gg\frac{X}{\log X}. }</div>
+<p>More explicitly, the two current constructions give</p>
+<div class="math" role="math">D_H(X) \ge \pi(4X-1;4,3)-O(1)</div>
+<p>and</p>
+<div class="math" role="math">G(X) \ge \pi(X;5,4)-O(1).</div>
+<h2>7. What these bounds do not say</h2>
+<p>They do <strong>not</strong> determine the natural density of the full spectrum or its complement.</p>
+<p>Both <code>X/log X</code> lower bounds are compatible with density zero.</p>
+<p>The exact prime-depth dichotomy also shows that understanding the spectrum on prime values of <code>k</code> is equivalent to understanding prime pairs</p>
+<div class="math" role="math">k,\ 4k-1,</div>
+<p>on the realizable side. No infinitude of such prime pairs is assumed or needed for the global spectrum lower bound, because the prime-modulus backbone allows composite depths <code>k</code> as well.</p>
+<p>The central counting problem remains</p>
+<div class="math" role="math">\boxed{ D(X)=|\mathcal D\cap[1,X]|, \qquad X-D(X). }</div>
+<h2>8. Research significance</h2>
+<p>The spectrum now has four proven quantitative structures:</p>
+<ol><li>exact individual Dirichlet realization certificates;</li><li>at least <code>X/log X</code> realized depths from the prime-modulus backbone;</li><li>at least <code>X/log X</code> global structural gaps from one prime-depth ancestry family alone;</li><li>an independent infinite Mersenne deletion lattice dominating the power-of-two exponent subsequence.</li></ol>
+<p>The next counting objective is to understand the union of the prime-depth ancestry families and to find comparable infinite deletion mechanisms on composite depths.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

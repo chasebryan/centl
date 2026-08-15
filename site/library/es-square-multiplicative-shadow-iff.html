@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact classification of multiplicative-ancestry shadows — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-multiplicative-shadow-iff.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-multiplicative-shadow-iff.html">
+  <meta property="og:title" content="Exact classification of multiplicative-ancestry shadows — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact classification of multiplicative-ancestry shadows</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-MULTIPLICATIVE-SHADOW-IFF.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved necessary-and-sufficient theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-STABILIZER-EXTENSION-SHADOW.md</code>, <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>THEORY.md</code></p>
+<p><strong>Claim boundary:</strong> completely classifies direct shadow by <code>j</code> for square-completed descendants of the form <code>k=jB</code> along a modulus-ancestry edge. It does not classify ancestry edges for which <code>j</code> does not divide <code>k</code> and does not prove universal completed coverage.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix</p>
+<div class="math" role="math">\boxed{j\ge1}</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{m=4j-1.}</div>
+<p>Let</p>
+<div class="math" role="math">R_j=\mathcal R_m(j)</div>
+<p>be the completed signed divisor box of <code>j</code> reduced modulo its own modulus, and let</p>
+<div class="math" role="math">\boxed{H_j=\operatorname{Stab}(R_j).}</div>
+<p>Take an integer</p>
+<div class="math" role="math">\boxed{B\ge1}</div>
+<p>and define</p>
+<div class="math" role="math">\boxed{k=jB.}</div>
+<p>Assume the modulus-ancestry condition</p>
+<div class="math" role="math">\boxed{m_j\mid m_k.}</div>
+<p>Since <code>j</code> is a unit modulo <code>m</code>, this is equivalent to</p>
+<div class="math" role="math">\boxed{B\equiv1\pmod m.}</div>
+<hr>
+<h2>2. Exact product factorization</h2>
+<p>Write</p>
+<div class="math" role="math">j=\prod_p p^{E_p}, \qquad B=\prod_p p^{F_p}.</div>
+<p>Then</p>
+<div class="math" role="math">k=\prod_p p^{E_p+F_p}.</div>
+<p>The signed exponent interval satisfies</p>
+<div class="math" role="math">[-E_p-F_p,E_p+F_p] = [-E_p,E_p]+[-F_p,F_p].</div>
+<p>Therefore reduction modulo <code>m</code> gives the exact product-set identity</p>
+<div class="math" role="math">\boxed{ \mathcal R_m(k) =R_j\,R_B,}</div>
+<p>where</p>
+<div class="math" role="math">R_B=\mathcal R_m(B).</div>
+<p>Because the zero exponent is always allowed,</p>
+<div class="math" role="math">\boxed{1\in R_B.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{R_j\subseteq\mathcal R_m(k).}</div>
+<p>This one inclusion turns the direct-shadow condition into an equality condition.</p>
+<hr>
+<h2>3. Direct shadow forces equality</h2>
+<p>The completed trap is the negative signed box:</p>
+<div class="math" role="math">S_t=-\mathcal R_{m_t}(t).</div>
+<p>Along the ancestry edge, layer <code>k</code> is directly shadowed by <code>j</code> exactly when</p>
+<div class="math" role="math">S_k\bmod m\subseteq S_j.</div>
+<p>Multiplying by <code>-1</code>, this is</p>
+<div class="math" role="math">\mathcal R_m(k)\subseteq R_j.</div>
+<p>But the previous section already gave</p>
+<div class="math" role="math">R_j\subseteq\mathcal R_m(k).</div>
+<p>Therefore:</p>
+<h3>Lemma — multiplicative shadow is exact reduction</h3>
+<p>For <code>k=jB</code> on an ancestry edge,</p>
+<div class="math" role="math">\boxed{ S_k\bmod m_j\subseteq S_j \iff S_k\bmod m_j=S_j.}</div>
+<p>There is no proper completed containment in this multiplicative setting.</p>
+<hr>
+<h2>4. Necessity of stabilizer support</h2>
+<p>Assume direct shadow holds. Then</p>
+<div class="math" role="math">R_jR_B=R_j.</div>
+<p>Let <code>r</code> be any prime divisor of <code>B</code>.</p>
+<p>Because <code>v_r(B)&gt;=1</code>, the signed box <code>R_B</code> contains the residue <code>r</code>: choose exponent <code>+1</code> at <code>r</code> and zero at every other prime.</p>
+<p>Thus</p>
+<div class="math" role="math">r\in R_B.</div>
+<p>From</p>
+<div class="math" role="math">R_jR_B=R_j</div>
+<p>we obtain</p>
+<div class="math" role="math">R_jr\subseteq R_j.</div>
+<p>Multiplication by the unit <code>r mod m</code> is a bijection of the ambient unit group, so</p>
+<div class="math" role="math">|R_jr|=|R_j|.</div>
+<p>A finite subset contained in another subset of the same size must be equal. Hence</p>
+<div class="math" role="math">R_jr=R_j.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{r\in H_j.}</div>
+<p>Since <code>r</code> was arbitrary:</p>
+<div class="math" role="math">\boxed{ \text{direct shadow} \Longrightarrow r\bmod m_j\in H_j \text{ for every prime }r\mid B.}</div>
+<hr>
+<h2>5. Sufficiency</h2>
+<p>Conversely, suppose every prime divisor of <code>B</code> lies in <code>H_j</code> modulo <code>m</code>.</p>
+<p>Then every signed product formed from those primes also lies in the subgroup <code>H_j</code>, so</p>
+<div class="math" role="math">R_B\subseteq H_j.</div>
+<p>Hence</p>
+<div class="math" role="math">R_jR_B \subseteq R_jH_j =R_j.</div>
+<p>Since <code>1 in R_B</code>, the reverse inclusion holds. Therefore</p>
+<div class="math" role="math">R_jR_B=R_j.</div>
+<p>Thus</p>
+<div class="math" role="math">S_k\bmod m_j=S_j.</div>
+<hr>
+<h2>6. Exact iff theorem</h2>
+<p>Combining necessity and sufficiency:</p>
+<h3>Theorem — multiplicative-ancestry shadow classification</h3>
+<p>Let</p>
+<div class="math" role="math">\boxed{k=jB}</div>
+<p>and assume</p>
+<div class="math" role="math">\boxed{4j-1\mid4k-1,}</div>
+<p>equivalently</p>
+<div class="math" role="math">\boxed{B\equiv1\pmod{4j-1}.}</div>
+<p>Then the following are equivalent:</p>
+<ol><li>the completed layer <code>k</code> is directly shadowed by <code>j</code>;</li><li>the reduction is exactly equal:</li></ol>
+<div class="math" role="math">S_k\bmod(4j-1)=S_j;</div>
+<ol><li>every prime divisor <code>r</code> of <code>B</code> satisfies</li></ol>
+<div class="math" role="math">\boxed{r\bmod(4j-1)\in H_j.}</div>
+<p>Symbolically,</p>
+<div class="math" role="math">\boxed{ S_{jB}\bmod m_j\subseteq S_j \iff \operatorname{supp}(B)\bmod m_j\subseteq H_j.}</div>
+<p>This is a complete classification of direct shadows on multiplicative ancestry edges.</p>
+<hr>
+<h2>7. Irreducible multiplicative descendants</h2>
+<p>The theorem identifies the exact obstruction to shadowing.</p>
+<p>A multiplicative ancestry descendant <code>k=jB</code> can remain directly novel relative to <code>j</code> only if</p>
+<div class="math" role="math">\boxed{ \exists r\mid B: r\bmod m_j\notin H_j.}</div>
+<p>Such a prime is a genuinely new projected direction in the ancestor quotient</p>
+<div class="math" role="math">G_j/H_j.</div>
+<p>Therefore the natural <strong>multiplicative ancestry kernel</strong> of the extension is obtained by deleting all prime-power factors whose prime bases lie in <code>H_j</code>.</p>
+<p>If nothing remains, the descendant is exactly redundant.</p>
+<p>If something remains, Kneser theory should be applied only to those quotient-visible prime directions.</p>
+<hr>
+<h2>8. Prime extension as an immediate corollary</h2>
+<p>If <code>B=r</code> is prime, the ancestry condition itself gives</p>
+<div class="math" role="math">r\equiv1\pmod m.</div>
+<p>Thus <code>r</code> is automatically in <code>H_j</code>.</p>
+<p>Hence every prime multiplicative extension on an ancestry edge is completely shadowed:</p>
+<div class="math" role="math">\boxed{ k=jr,\quad m_j\mid m_k \Longrightarrow S_k\bmod m_j=S_j.}</div>
+<p>This recovers <code>ES-SQUARE-PRIME-EXTENSION-SHADOW.md</code> without a separate hypothesis beyond ancestry.</p>
+<hr>
+<h2>9. Relation to Kneser defect quotients</h2>
+<p>The theorem turns cross-layer novelty into a quotient statement.</p>
+<p>For a multiplicative descendant, every extension prime outside <code>H_j</code> has a nontrivial class in</p>
+<div class="math" role="math">G_j/H_j.</div>
+<p>Those are exactly the directions capable of enlarging the projected completed box.</p>
+<p>Thus:</p>
+<div class="math" role="math">\boxed{ \text{cross-layer novelty} = \text{nontrivial extension support in the ancestor stabilizer quotient}.}</div>
+<p>This is the exact algebraic merger of modulus ancestry and internal stabilizer theory for the divisible-index case.</p>
+<hr>
+<h2>10. Next target</h2>
+<p>The remaining ancestry problem splits cleanly:</p>
+<ol><li><strong>multiplicative ancestry</strong> <code>j|k</code>: solved by the theorem above;</li><li><strong>nonmultiplicative ancestry</strong> <code>j\nmid k</code>: still open and governed by the affine relation</li></ol>
+<div class="math" role="math">k=(4s+1)j-s.</div>
+<p>The second class is now the genuinely new cross-layer frontier.</p>
+<p>A useful next program is to determine whether those nonmultiplicative edges admit an analogous factorization after translating the layer index by the ancestry parameter <code>s</code>, or whether they require a different quotient object entirely.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

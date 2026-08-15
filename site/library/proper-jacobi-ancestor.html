@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Proper Jacobi ancestor theorem for higher Type A/B signature codimension — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/proper-jacobi-ancestor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/proper-jacobi-ancestor.html">
+  <meta property="og:title" content="Proper Jacobi ancestor theorem for higher Type A/B signature codimension — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Proper Jacobi ancestor theorem for higher Type A/B signature codimension</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PROPER-JACOBI-ANCESTOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal structural theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem concerns the quadratic-signature envelope of Type A/B traps. It does not prove exact Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. Literature priority for this formulation remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="quadratic-signature-coset.html">QUADRATIC-SIGNATURE-COSET.md</a></li><li><a href="quadratic-trap-signature.html">QUADRATIC-TRAP-SIGNATURE.md</a></li><li><a href="character-shield-completeness.html">CHARACTER-SHIELD-COMPLETENESS.md</a></li><li><a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Fix a layer <code>k</code> and write</p>
+<div class="math" role="math">m=4k-1=\prod_{i=1}^r p_i^{a_i}.</div>
+<p>Let</p>
+<div class="math" role="math">\lambda_m:(\mathbb Z/m\mathbb Z)^\times\to\mathbb F_2^r</div>
+<p>be the vector of local Legendre signs, let</p>
+<div class="math" role="math">\eta=\lambda_m(-1),</div>
+<p>and let</p>
+<div class="math" role="math">V_k=\operatorname{span}\{\lambda_m(\ell):\ell\mid k,\ \ell\text{ prime}\}.</div>
+<p>The exact quadratic-signature trap theorem gives</p>
+<div class="math" role="math">\lambda_m(T_k)=\eta+V_k.</div>
+<p>Define</p>
+<div class="math" role="math">\kappa(k)=r-\dim V_k=\dim V_k^\perp.</div>
+<p>Let</p>
+<div class="math" role="math">\alpha=(a_i\bmod2)_{i=1}^r.</div>
+<p>This is the exponent-parity vector defining the Jacobi character modulo <code>m</code>.</p>
+<h2>2. The Jacobi vector lies in the annihilator</h2>
+<p>For every prime divisor <code>ell|k</code>, the divisor-Jacobi theorem gives</p>
+<div class="math" role="math">\left(\frac{\ell}{m}\right)=+1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\alpha\cdot\lambda_m(\ell)=0 \pmod2</div>
+<p>for every generator of <code>V_k</code>, hence</p>
+<div class="math" role="math">\boxed{\alpha\in V_k^\perp.}</div>
+<p>Since <code>m=3 mod 4</code>,</p>
+<div class="math" role="math">\left(\frac{-1}{m}\right)=-1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{\alpha\cdot\eta=1.}</div>
+<p>Thus the usual Jacobi character is one nonzero affine annihilator of the trap-signature space.</p>
+<h2>3. Proper Jacobi ancestor theorem</h2>
+<h3>Theorem</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{\kappa(k)\ge2,}</div>
+<p>then there exists a squarefree divisor</p>
+<div class="math" role="math">\boxed{d\mid\operatorname{rad}(m)}</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{1&lt;d&lt;m,\qquad d\equiv3\pmod4,}</div>
+<p>and every Type A/B trap at layer <code>k</code> is Jacobi-negative modulo <code>d</code>:</p>
+<div class="math" role="math">\boxed{ \left(\frac{t}{d}\right)=-1 \qquad(t\in T_k). }</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{d=4s-1}</div>
+<p>for an earlier depth</p>
+<div class="math" role="math">\boxed{s=(d+1)/4&lt;k.}</div>
+<p>We call <code>s</code> a <strong>proper Jacobi ancestor</strong> of the higher-codimension signature layer <code>k</code>.</p>
+<h3>Proof</h3>
+<p>Because <code>kappa(k)&gt;=2</code>, the annihilator <code>V_k^perp</code> has dimension at least two. Choose</p>
+<div class="math" role="math">u\in V_k^\perp</div>
+<p>independent of <code>alpha</code>.</p>
+<p>If</p>
+<div class="math" role="math">u\cdot\eta=1,</div>
+<p>set <code>w=u</code>. Otherwise set</p>
+<div class="math" role="math">w=u+\alpha.</div>
+<p>Then in either case</p>
+<div class="math" role="math">\boxed{w\in V_k^\perp,\qquad w\cdot\eta=1.}</div>
+<p>Also <code>w</code> is nonzero and</p>
+<div class="math" role="math">\boxed{w\ne\alpha.}</div>
+<p>Define the squarefree divisor</p>
+<div class="math" role="math">d=\prod_{i:w_i=1}p_i.</div>
+<p>Because <code>w dot eta = 1</code>, an odd number of the selected primes are <code>3 mod 4</code>, so</p>
+<div class="math" role="math">\boxed{d\equiv3\pmod4.}</div>
+<p>Clearly</p>
+<div class="math" role="math">d\mid\operatorname{rad}(m).</div>
+<p>We claim <code>d&lt;m</code>. Since <code>d&lt;=rad(m)&lt;=m</code>, equality could occur only if <code>m</code> were squarefree and <code>w</code> selected every prime factor of <code>m</code>. But for squarefree <code>m</code>, the all-prime vector is exactly <code>alpha</code>, contradicting <code>w!=alpha</code>. Hence</p>
+<div class="math" role="math">\boxed{d&lt;m.}</div>
+<p>Now let <code>t in T_k</code>. Its local signature has the form</p>
+<div class="math" role="math">\lambda_m(t)=\eta+v, \qquad v\in V_k.</div>
+<p>Since <code>w in V_k^perp</code>,</p>
+<div class="math" role="math">w\cdot\lambda_m(t) =w\cdot\eta+w\cdot v =1.</div>
+<p>But <code>d</code> is squarefree and supported exactly on the coordinates selected by <code>w</code>, so</p>
+<div class="math" role="math">\left(\frac{t}{d}\right) =(-1)^{w\cdot\lambda_m(t)} =-1.</div>
+<p>Finally <code>d=3 mod 4</code> gives</p>
+<div class="math" role="math">d=4s-1</div>
+<p>for an integer <code>s</code>, and <code>d&lt;m=4k-1</code> gives <code>s&lt;k</code>. QED.</p>
+<h2>4. Meaning</h2>
+<p>Every signature layer with more than one independent quadratic restriction is already contained in the Jacobi-negative half-space of a <strong>strictly earlier</strong> modulus of the same <code>4s-1</code> form.</p>
+<p>Thus higher quadratic codimension is not primitive.</p>
+<p>At quadratic-signature resolution, the only layers that can be primitive are</p>
+<div class="math" role="math">\boxed{\kappa(k)=1.}</div>
+<p>For those layers the unique nonzero annihilator is the Jacobi character itself, so their trap-signature envelope is exactly the full Jacobi-negative hyperplane.</p>
+<p>This creates a sharp dichotomy:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ll} \kappa(k)=1 &amp;: \text{primitive quadratic layer;}\\[1mm] \kappa(k)\ge2 &amp;: \text{has a strict earlier Jacobi ancestor.} \end{array} }</div>
+<h2>5. Relation to signature shadowing</h2>
+<p>The theorem is a genuine ancestor/shadow statement at the <strong>character-envelope</strong> level:</p>
+<div class="math" role="math">\boxed{ \lambda_m(T_k) \subseteq \left\{x:\left(\frac{x}{d}\right)=-1\right\} }</div>
+<p>for some earlier modulus <code>d=4s-1</code>.</p>
+<p>It does <strong>not</strong> claim</p>
+<div class="math" role="math">T_k\subseteq T_s</div>
+<p>as exact residue sets. The earlier exact trap <code>T_s</code> is generally much smaller than the entire Jacobi-negative half modulo <code>d</code>.</p>
+<p>So this theorem explains redundancy in the quadratic envelope without overclaiming exact Direct-Shadow Completeness.</p>
+<h2>6. Why this is important for the proof program</h2>
+<p>The full local signature problem seemed to introduce increasingly complicated affine restrictions as the number of prime factors of <code>4k-1</code> grew.</p>
+<p>The theorem reverses that intuition:</p>
+<blockquote><p>every genuinely higher-dimensional quadratic trap envelope descends to a simpler, strictly earlier scalar Jacobi obstruction.</p></blockquote>
+<p>Therefore the primitive quadratic skeleton is made only of <code>kappa=1</code> layers.</p>
+<p>The remaining proof problem is to understand how target-fixed signs interact with this strict descent. In particular:</p>
+<ol><li>if the proper Jacobi ancestor is target-positive, the higher layer is automatically defeated;</li><li>if the ancestor is target-negative but still has higher signature codimension, descent can continue;</li><li>a descent chain can terminate at a primitive <code>kappa=1</code> layer;</li><li>if that terminal layer is fully fixed and negative, it is a direct signature obstruction;</li><li>otherwise its Jacobi sign supplies a free linear safety equation.</li></ol>
+<p>This is precisely the shape suggested by the zero-collective-obstruction finite replay through <code>k&lt;=1200</code>.</p>
+<h2>7. Next theorem target</h2>
+<p>The immediate target is now stronger and more concrete:</p>
+<blockquote><p>Prove that proper-Jacobi-ancestor descent, together with character-shield saturation, implies <strong>quadratic-signature Direct-Shadow Completeness</strong>: if no single earlier layer is a direct signature obstruction, then all earlier quadratic-signature trap envelopes can be avoided simultaneously.</p></blockquote>
+<p>If proved, the entire elementary quadratic quotient would disappear from the unresolved exact DSC-P problem.</p>
+<p>What would remain would be the genuinely higher-order arithmetic already isolated in <a href="square-lift-core.html">SQUARE-LIFT-CORE.md</a>: prime-power lifts and exact divisor-generated residues inside a fixed signature class.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

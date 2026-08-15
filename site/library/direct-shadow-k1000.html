@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This record extends the candidatewise falsification attack from k &lt;= 600 to k &lt;= 1000.">
+  <title>Direct-Shadow Completeness attack through k = 1000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/direct-shadow-k1000.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/direct-shadow-k1000.html">
+  <meta property="og:title" content="Direct-Shadow Completeness attack through k = 1000 — Free Computation Foundation">
+  <meta property="og:description" content="This record extends the candidatewise falsification attack from k &lt;= 600 to k &lt;= 1000.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Direct-Shadow Completeness attack through k = 1000</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This record extends the candidatewise falsification attack from k &lt;= 600 to k &lt;= 1000.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIRECT-SHADOW-K1000.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-certificate result; universal theorem remains open</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Research lineage:</strong> <a href="diamond.html">DIAMOND.md</a> -&gt; <a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a> -&gt; this record</p>
+<p>This record extends the candidatewise falsification attack from <code>k &lt;= 600</code> to <code>k &lt;= 1000</code>.</p>
+<p>It does <strong>not</strong> prove universal Direct-Shadow Completeness, Lopez Type A/B coverage, or the Erdos-Straus conjecture. Every positive statement below is either an exact finite certificate statement or a standard consequence of such a certificate together with Dirichlet&#x27;s theorem.</p>
+<h2>1. Candidatewise question</h2>
+<p>For a hard-class-compatible Type A/B candidate <code>(k,h,t)</code>, write</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1).</div>
+<p>Each earlier layer <code>j&lt;k</code> pulls back to a forbidden residue set</p>
+<div class="math" role="math">R_j\subseteq \mathbb Z/q_j\mathbb Z, \qquad q_j=\frac{4j-1}{\gcd(L,4j-1)}.</div>
+<p>A direct shadow means one <code>R_j</code> is already the complete parameter space. The stronger failure mode under attack is <strong>union shadowing</strong>: no single <code>R_j</code> is complete, but the union of several proper forbidden systems covers every integer <code>s</code>.</p>
+<p>The prime-realization form, DSC-P, asks whether every directly novel candidate contains an avoiding <code>s_0</code> satisfying</p>
+<div class="math" role="math">\gcd(r+Ls_0,LQ)=1, \qquad Q=\operatorname{lcm}\{q_j:R_j\neq\varnothing\}.</div>
+<p>Such a reduced class contains infinitely many primes whose first Type A/B hit occurs at depth <code>k</code>.</p>
+<h2>2. Exact k &lt;= 1000 run</h2>
+<p>The automated workflow used:</p>
+<ul><li>all six Mordell-hard classes modulo <code>840</code>;</li><li>every layer through <code>k=1000</code>;</li><li>every prime-compatible Type A/B target candidate;</li><li>witness search through <code>s=1,000,000</code>;</li><li>a discovery implementation;</li><li>a separate independent verifier;</li><li>CENTL exact certification of selected hardest CRT progression identities;</li><li>SHA-256 freezing and artifact publication.</li></ul>
+<p>Result:</p>
+<pre><code class="language-text">admissible candidates:             46,254
+directly shadowed candidates:      12,610
+directly novel candidates:         33,644
+integer avoiding witnesses:        33,644
+reduced avoiding witnesses:        33,644
+unresolved integer candidates:          0
+unresolved reduced candidates:          0</code></pre>
+<p>Therefore, throughout this finite domain,</p>
+<div class="math" role="math">\boxed{ 33,644/33,644 \text{ directly novel candidates are not union-shadowed.} }</div>
+<p>More strongly,</p>
+<div class="math" role="math">\boxed{ 33,644/33,644 \text{ directly novel candidates have reduced avoiding progressions.} }</div>
+<p>Thus every directly novel candidate through <code>k=1000</code> has an explicit infinite-prime exact-depth family.</p>
+<h2>3. Independent verification</h2>
+<p>The independent verifier returned</p>
+<pre><code class="language-json">{
+  &quot;direct_novel_candidates_checked&quot;: 33644,
+  &quot;integer_witnesses_verified&quot;: 33644,
+  &quot;k_limit&quot;: 1000,
+  &quot;reduced_witnesses_verified&quot;: 33644,
+  &quot;unresolved_integer_candidates&quot;: 0,
+  &quot;unresolved_reduced_candidates&quot;: 0,
+  &quot;verdict&quot;: &quot;VERIFIED&quot;
+}</code></pre>
+<p>The verifier independently reconstructs trap sets, CRT candidates, direct-shadow status, earlier-layer avoidance, the full parameter period, and the reduced gcd condition.</p>
+<h2>4. CENTL certification</h2>
+<p>CENTL separately verified the generated polynomial identities showing that selected hardest progressions remain simultaneously in the intended hard class and target Type A/B residue class for symbolic parameter <code>s</code>.</p>
+<p>The modular avoidance claim is not delegated to CENTL: it is checked independently by the number-theoretic verifier. This separation is intentional.</p>
+<h2>5. Hardest reduced witnesses</h2>
+<p>The largest first reduced parameters in this run include:</p>
+<table class="directory"><thead><tr><th>k</th><th>h</th><th>t</th><th>first reduced s</th><th>x = r + Ls</th></tr></thead><tbody><tr><td>987</td><td>169</td><td>3935</td><td>730101</td><td>2420638196089</td></tr><tr><td>992</td><td>289</td><td>3963</td><td>709237</td><td>2363376980449</td></tr><tr><td>950</td><td>169</td><td>3779</td><td>689094</td><td>2199011682169</td></tr><tr><td>1000</td><td>529</td><td>3979</td><td>685853</td><td>767963845009</td></tr><tr><td>915</td><td>289</td><td>3658</td><td>679831</td><td>2089502502649</td></tr><tr><td>902</td><td>289</td><td>3563</td><td>643752</td><td>1950492099649</td></tr><tr><td>804</td><td>529</td><td>3199</td><td>623459</td><td>336742774729</td></tr><tr><td>983</td><td>529</td><td>2948</td><td>605762</td><td>2000252995129</td></tr><tr><td>945</td><td>529</td><td>3671</td><td>593896</td><td>1885242060769</td></tr><tr><td>928</td><td>169</td><td>3583</td><td>574425</td><td>596873851729</td></tr></tbody></table>
+<p>The hardest examples are important because the finite success is not an artifact of every candidate escaping at a tiny parameter.</p>
+<h2>6. What changed from k &lt;= 600</h2>
+<p>The first candidatewise attack certified <code>19,016</code> directly novel candidates through <code>k=600</code>.</p>
+<p>The present run adds <code>14,628</code> additional directly novel candidates and again finds <strong>zero</strong> union-shadow counterexamples and <strong>zero</strong> failures of reduced prime realization.</p>
+<p>The implication</p>
+<div class="math" role="math">\text{directly novel}\Longrightarrow\text{reduced avoiding progression}</div>
+<p>has therefore survived candidatewise exact certification through one thousand layers, but remains a conjecture beyond the certified finite range.</p>
+<h2>7. Relation to covering systems</h2>
+<p>The pullback family</p>
+<div class="math" role="math">\mathscr R_{k,h,t}=\{(q_j,R_j):j&lt;k,\ R_j\neq\varnothing\}</div>
+<p>is a highly structured odd-modulus covering problem. General families of proper congruence classes can certainly cover the integers, so the finite result requires explanation from the special Type A/B arithmetic.</p>
+<p>The companion note <a href="shadow-cover-geometry.html">SHADOW-COVER-GEOMETRY.md</a> already shows that a simple density argument cannot explain the phenomenon: in the <code>k&lt;=600</code> bundle, roughly 99.3% of directly novel candidates had nominal forbidden cover mass greater than one, often much greater than one.</p>
+<p>The next proof target is therefore an invariant of the <strong>intersection geometry</strong> of the <code>R_j</code>, not merely their cardinalities.</p>
+<h2>8. New proof-search direction</h2>
+<p>The most promising constructive clue is to factor the parameter period into odd prime-power coordinates.</p>
+<p>For each candidate, first impose only the constraints supported on a single prime-power coordinate. Select a canonical allowed local value, preferring <code>1</code> whenever possible. Then inspect how many genuinely multi-prime constraints remain violated.</p>
+<p>Preliminary exact diagnostics on the certified bundle show that this simple coordinate construction already satisfies most tested candidates outright, while many failures appear repairable by changing only one or a few prime-power coordinates. This is not yet a theorem and is being promoted to a dedicated automated analyzer.</p>
+<p>If a bounded local-repair principle can be proved, DSC-P may reduce from a global covering-system problem to a finite local compatibility theorem on prime-power coordinates.</p>
+<h2>9. Current conclusion</h2>
+<p>The strongest finite statement is now</p>
+<div class="math" role="math">\boxed{ 33,644/33,644 \text{ directly novel hard-compatible candidates through }k=1000 \text{ possess independently verified reduced exact-depth progressions.} }</div>
+<p>No collective-shadow counterexample has appeared.</p>
+<p>The universal theorem remains open. The research priority is now to explain why the Type A/B pullback systems fail to cover despite large nominal cover mass and heavy congruence dependence.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

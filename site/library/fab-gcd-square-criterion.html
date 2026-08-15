@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p≡1 mod4 be prime and suppose coprime positive a,b give a fab certificate with divisor k:">
+  <title>GCD-square reformulation of coprime fab rescue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-gcd-square-criterion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-gcd-square-criterion.html">
+  <meta property="og:title" content="GCD-square reformulation of coprime fab rescue — Free Computation Foundation">
+  <meta property="og:description" content="Let p≡1 mod4 be prime and suppose coprime positive a,b give a fab certificate with divisor k:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>GCD-square reformulation of coprime fab rescue</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p≡1 mod4 be prime and suppose coprime positive a,b give a fab certificate with divisor k:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-GCD-SQUARE-CRITERION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact construction and converse on the coprime fab range</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code></p>
+<p><strong>Claim boundary:</strong> this is a new exact reformulation/construction. It does not prove that the required pair always exists, and therefore does not prove Erdős–Straus.</p>
+<h2>1. From a coprime fab certificate to two <code>3 mod 4</code> integers</h2>
+<p>Let <code>p≡1 mod4</code> be prime and suppose coprime positive <code>a,b</code> give a fab certificate with divisor <code>k</code>:</p>
+<div class="math" role="math">k\mid a+bp, \qquad k\equiv-p\pmod{4ab}.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{p+k=4abc}</div>
+<p>and</p>
+<div class="math" role="math">q=\frac{a+bp}{k}.</div>
+<p>The auxiliary factorization from <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code> gives</p>
+<div class="math" role="math">k(q+b)=a(1+4b^2c).</div>
+<p>Since <code>gcd(a,k)=1</code>, put</p>
+<div class="math" role="math">\boxed{kd=1+4b^2c.}</div>
+<p>Because <code>k≡3 mod4</code> and the right side is <code>1 mod4</code>,</p>
+<div class="math" role="math">\boxed{d\equiv3\pmod4.}</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{M=kd-1=4b^2c.}</div>
+<p>Then</p>
+<div class="math" role="math">p+k=4abc.</div>
+<p>Since <code>gcd(a,b)=1</code>,</p>
+<div class="math" role="math">\gcd(p+k,M) = \gcd(4abc,4b^2c) = \boxed{4bc}.</div>
+<p>Call this gcd <code>G</code>. Then</p>
+<div class="math" role="math">\boxed{G=4bc,} \qquad \boxed{M=4b^2c.}</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{G^2=4cM,}</div>
+<p>so in particular</p>
+<div class="math" role="math">\boxed{4M\mid G^2.}</div>
+<p>Moreover the original parameters are recovered exactly:</p>
+<div class="math" role="math">\boxed{ a=\frac{p+k}{G}, \qquad b=\frac{M}{G}, \qquad c=\frac{G^2}{4M}.}</div>
+<p>Thus every coprime fab certificate produces two <code>3 mod 4</code> integers <code>k,d</code> for which the two numbers</p>
+<div class="math" role="math">p+k, \qquad kd-1</div>
+<p>have unusually large square overlap.</p>
+<hr>
+<h2>2. Converse construction from a gcd-square overlap</h2>
+<p>Now start with an odd positive integer <code>p≡1 mod4</code> and positive integers</p>
+<div class="math" role="math">\boxed{k\equiv d\equiv3\pmod4.}</div>
+<p>Put</p>
+<div class="math" role="math">M=kd-1, \qquad G=\gcd(p+k,M).</div>
+<p>Assume the exact divisibility</p>
+<div class="math" role="math">\boxed{4M\mid G^2.}</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{ a=\frac{p+k}{G}, \qquad b=\frac{M}{G}, \qquad c=\frac{G^2}{4M}.}</div>
+<p>Then <code>a,b,c</code> are positive integers, and because <code>G</code> is the full gcd,</p>
+<div class="math" role="math">\boxed{\gcd(a,b)=1.}</div>
+<p>The definitions give</p>
+<div class="math" role="math">4abc =4\frac{p+k}{G}\frac{M}{G}\frac{G^2}{4M} =p+k,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{p+k=4abc.}</div>
+<p>They also give</p>
+<div class="math" role="math">4b^2c =4\frac{M^2}{G^2}\frac{G^2}{4M} =M=kd-1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{kd=1+4b^2c.}</div>
+<p>Set</p>
+<div class="math" role="math">\boxed{q=ad-b.}</div>
+<p>It is positive, because</p>
+<div class="math" role="math">q =\frac{d(p+k)-(kd-1)}{G} =\boxed{\frac{dp+1}{G}}&gt;0.</div>
+<p>Finally,</p>
+<div class="math" role="math">a+bp =a+b(4abc-k) =a+4ab^2c-bk =a+a(kd-1)-bk =k(ad-b) =kq.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{k\mid a+bp.}</div>
+<p>And since <code>p+k=4abc</code>,</p>
+<div class="math" role="math">\boxed{k\equiv-p\pmod{4ab}}.</div>
+<p>Thus the coprime divisor criterion is satisfied whenever its standard size hypotheses are desired. More strongly, the identities above directly produce the positive decomposition</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{abc} + \frac1{aqc} + \frac1{bpqc}, }</div>
+<p>so the construction itself does not need a separate bounded-parameter argument.</p>
+<hr>
+<h2>3. GCD-square rescue theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>p≡1 mod4</code> be a positive odd integer. If there exist positive</p>
+<div class="math" role="math">k\equiv d\equiv3\pmod4</div>
+<p>such that, with</p>
+<div class="math" role="math">M=kd-1, \qquad G=\gcd(p+k,M),</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{4M\mid G^2,}</div>
+<p>then <code>p</code> satisfies the Erdős–Straus equation.</p>
+<p>Every coprime fab certificate produces such a pair <code>(k,d)</code>, with the stronger identity</p>
+<div class="math" role="math">\boxed{G^2=4cM}</div>
+<p>for its leftover parameter <code>c</code>.</p>
+<hr>
+<h2>4. Structural interpretation</h2>
+<p>The all-prime divisor problem can therefore be attacked as a <strong>square-overlap problem</strong>:</p>
+<div class="math" role="math">\boxed{ \text{find }k,d\equiv3\pmod4 \text{ such that } kd-1 \text{ is supported deeply enough inside }p+k. }</div>
+<p>The condition is not merely that the two numbers share a factor. It requires their full gcd to contain at least half of every prime-power valuation of <code>4(kd-1)</code>:</p>
+<div class="math" role="math">2v_\ell(G)\ge v_\ell(4M) \qquad\text{for every prime }\ell.</div>
+<p>This valuation form may be better suited to a descent than the original divisor-in-one-residue-class statement.</p>
+<p>Two boundary cases recover familiar shifted-factor mechanisms:</p>
+<ul><li>if <code>M | p+k</code>, then <code>G=M</code>, and the condition reduces to <code>4|M</code>; since <code>k,d≡3 mod4</code>, this is automatic. Thus any factorization</li></ul>
+<div class="math" role="math">kd-1\mid p+k</div>
+<p>is an immediate rescue;</p>
+<ul><li>taking <code>M=p+k</code> gives</li></ul>
+<div class="math" role="math">k(d-1)=p+1,</div>
+<p>which contains the classical <code>p+1</code> / <code>3 mod4</code> divisor spine as a special case.</p>
+<p>The new target is to determine whether the exact hard-prime factor restrictions force such a square overlap for some controlled <code>(k,d)</code>, rather than continuing to enumerate unrelated <code>(a,b)</code> pairs.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

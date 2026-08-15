@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact index-six normal form for the combined FAB targets — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-index6-combined-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-index6-combined-defect.html">
+  <meta property="og:title" content="Exact index-six normal form for the combined FAB targets — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact index-six normal form for the combined FAB targets</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-INDEX6-COMBINED-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-TWO-TARGET-KNESER.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code></p>
+<p><strong>Claim boundary:</strong> classifies the first possible combined fixed-shift Kneser defect. It does not prove that index-six defects cannot occur, and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and let <code>q&lt;p</code> be an external quadratic-nonresidue prime with</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+q}{4} =\prod_i r_i^{e_i}, \qquad G=(\mathbb Z/q\mathbb Z)^\times,</div>
+<p>and let</p>
+<div class="math" role="math">R=\mathcal R_q(C)</div>
+<p>be the signed divisor box.</p>
+<p>Assume that both exact solution targets are missed:</p>
+<div class="math" role="math">\boxed{-p^{-1}\notin R,\qquad -1\notin R.}</div>
+<p>By inversion symmetry this also forces</p>
+<div class="math" role="math">\boxed{-p\notin R.}</div>
+<p>Let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R)</div>
+<p>and assume the first possible combined index:</p>
+<div class="math" role="math">\boxed{[G:H]=6.}</div>
+<p>By <code>FAB-TWO-TARGET-KNESER.md</code>, the symmetric combined defect budget is</p>
+<div class="math" role="math">\boxed{ \sum_i(s_i-1)\le2, }</div>
+<p>where</p>
+<div class="math" role="math">s_i=\min(2e_i+1,\operatorname{ord}_{G/H}(r_iH)).</div>
+<p>Because <code>G</code> is cyclic,</p>
+<div class="math" role="math">\boxed{G/H\cong C_6.}</div>
+<p>Since <code>H</code> has index six, it is the unique sixth-power subgroup</p>
+<div class="math" role="math">\boxed{H=G^6.}</div>
+<hr>
+<h2>2. Local contributions in C6</h2>
+<p>Write the quotient additively as <code>Z/6Z</code>.</p>
+<p>A prime factor whose image is trivial contributes <code>0</code> to the Kneser budget.</p>
+<p>For a nontrivial image there are only three possible orders.</p>
+<h3>Order two</h3>
+<p>The local signed interval projects to</p>
+<div class="math" role="math">\{0,3\},</div>
+<p>for every positive exponent, so</p>
+<div class="math" role="math">\boxed{s_i-1=1.}</div>
+<h3>Order three</h3>
+<p>The local signed interval fills</p>
+<div class="math" role="math">\{0,2,4\},</div>
+<p>and</p>
+<div class="math" role="math">\boxed{s_i-1=2.}</div>
+<h3>Order six</h3>
+<p>If <code>e_i=1</code>, the local image is</p>
+<div class="math" role="math">\{0,g,-g\}</div>
+<p>for a generator <code>g</code> of <code>C_6</code>, giving</p>
+<div class="math" role="math">\boxed{s_i-1=2.}</div>
+<p>If <code>e_i&gt;=2</code>, then</p>
+<div class="math" role="math">s_i\ge5,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{s_i-1\ge4,}</div>
+<p>which is impossible under the budget <code>2</code>.</p>
+<p>Thus every order-six factor must occur to exponent exactly one.</p>
+<hr>
+<h2>3. Aperiodicity forces an order-six factor</h2>
+<p>Pass to</p>
+<div class="math" role="math">\bar R=R/H\subseteq C_6.</div>
+<p>Because <code>H</code> is the full stabilizer of <code>R</code>, the quotient set <code>bar R</code> has trivial stabilizer.</p>
+<p>Suppose no prime factor has order six in the quotient.</p>
+<p>Then every nontrivial local set is one of the two proper subgroups</p>
+<div class="math" role="math">\{0,3\} \quad\text{or}\quad \{0,2,4\}.</div>
+<p>If only order-two factors occur, their sum remains the order-two subgroup and has nontrivial stabilizer.</p>
+<p>If only order-three factors occur, their sum remains the order-three subgroup and has nontrivial stabilizer.</p>
+<p>If both types occur, their sum is all of <code>C_6</code>, contradicting the target misses.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\text{at least one prime factor has order six modulo }H.}</div>
+<hr>
+<h2>4. The order-six factor consumes the full budget</h2>
+<p>An order-six factor already contributes exactly <code>2</code>, the entire available budget.</p>
+<p>Hence <strong>every other prime factor must have trivial image modulo <code>H</code></strong>.</p>
+<p>There can be no second order-six factor, no order-three factor, and not even an order-two factor.</p>
+<p>Therefore:</p>
+<h3>Theorem — single primitive sextic defect</h3>
+<p>A combined index-six failure has exactly one prime factor</p>
+<div class="math" role="math">\boxed{r\mid C}</div>
+<p>outside <code>H=G^6</code>. It satisfies</p>
+<div class="math" role="math">\boxed{v_r(C)=1}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\operatorname{ord}_{G/H}(rH)=6.}</div>
+<p>Every other prime factor of <code>C</code> lies in <code>G^6</code>.</p>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \bar R=\{H,rH,r^{-1}H\}. }</div>
+<p>After orienting the generator <code>rH</code> as class <code>1</code>,</p>
+<div class="math" role="math">\boxed{\bar R=\{0,1,5\}\subset C_6.}</div>
+<hr>
+<h2>5. Residue interpretation</h2>
+<p>Because <code>rH</code> has order six, <code>r</code> is neither a square nor a cube modulo <code>q</code>:</p>
+<div class="math" role="math">\boxed{ \left(\frac rq\right)=-1, \qquad r\notin G^3. }</div>
+<p>Every other prime factor <code>s|C</code> lies in <code>G^6</code>, hence is simultaneously a square and a cube modulo <code>q</code>.</p>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ C=rS, \qquad v_r(C)=1, }</div>
+<p>where every prime factor of <code>S</code> is a sixth-power residue modulo <code>q</code>.</p>
+<p>Since an index-six subgroup exists only when</p>
+<div class="math" role="math">6\mid q-1,</div>
+<p>and <code>q≡3 mod4</code>, necessarily</p>
+<div class="math" role="math">\boxed{q\equiv7\pmod{12}.}</div>
+<hr>
+<h2>6. The exceptional prime is the unique external nonresidue factor</h2>
+<p>For every prime factor <code>s</code> of</p>
+<div class="math" role="math">C=\frac{p+q}{4},</div>
+<p>the shifted-nonresidue transfer theorem gives</p>
+<div class="math" role="math">\boxed{ \left(\frac sp\right) = \left(\frac sq\right).}</div>
+<p>Every prime factor of <code>S</code> is a sixth power modulo <code>q</code>, hence a quadratic residue modulo <code>q</code> and therefore modulo <code>p</code>.</p>
+<p>The exceptional factor <code>r</code> is a quadratic nonresidue modulo <code>q</code>, hence</p>
+<div class="math" role="math">\boxed{ \left(\frac rp\right)=-1.}</div>
+<p>Therefore <code>r</code> is the <strong>unique external-nonresidue prime factor</strong> of <code>C</code>.</p>
+<p>The external factor graph has the forced edge</p>
+<div class="math" role="math">\boxed{q\longrightarrow r,}</div>
+<p>with</p>
+<div class="math" role="math">\boxed{r\ne q,\qquad r&lt;p.}</div>
+<p>At the first surviving combined defect, the formerly nondeterministic factor descent becomes deterministic.</p>
+<hr>
+<h2>7. The three missing quotient classes are exact</h2>
+<p>The quotient box occupies</p>
+<div class="math" role="math">\boxed{\{0,1,5\}.}</div>
+<p>The Type-II target</p>
+<div class="math" role="math">-1H</div>
+<p>is the unique order-two class, namely</p>
+<div class="math" role="math">\boxed{3.}</div>
+<p>The Type-I target <code>-p^{-1}</code> is a quadratic residue, so its quotient class is even. It is missed and nontrivial, therefore it is class <code>2</code> or <code>4</code>.</p>
+<p>Its inverse <code>-p</code> occupies the other one of those two classes.</p>
+<p>Consequently the six quotient classes split <strong>exactly</strong> as</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} \text{hit by }R &amp; 0,1,5\\ \hline -p^{-1}H &amp; 2\text{ or }4\\ -1H &amp; 3\\ -pH &amp; 4\text{ or }2 \end{array}}</div>
+<p>Thus the three excluded natural targets are precisely the three missing quotient classes.</p>
+<hr>
+<h2>8. A small-prime consequence</h2>
+<p>The unique exceptional factor <code>r</code> is a quadratic nonresidue modulo <code>p</code>. Mordell-hard primes satisfy</p>
+<div class="math" role="math">\left(\frac2p\right) = \left(\frac3p\right) = \left(\frac5p\right) = \left(\frac7p\right)=+1.</div>
+<p>Therefore none of <code>2,3,5,7</code> can be the exceptional factor.</p>
+<p>If any of these primes divides</p>
+<div class="math" role="math">C=\frac{p+q}{4},</div>
+<p>it must lie in the sixth-power subgroup modulo <code>q</code>.</p>
+<p>For example, if</p>
+<div class="math" role="math">q\equiv7\pmod8,</div>
+<p>then <code>C</code> is even, so a combined index-six defect forces</p>
+<div class="math" role="math">\boxed{2\in G^6.}</div>
+<p>Since <code>(2/q)=+1</code> in this congruence class, this adds the nontrivial requirement that <code>2</code> also be a cubic residue modulo <code>q</code>.</p>
+<p>This supplies an immediate local filter on index-six candidates.</p>
+<hr>
+<h2>9. Strategic consequence</h2>
+<p>The first possible combined Kneser obstruction is a one-prime defect:</p>
+<div class="math" role="math">\boxed{ \frac{p+q}{4}=rS, }</div>
+<p>where</p>
+<ol><li><code>r</code> occurs exactly once;</li><li><code>r</code> is simultaneously a quadratic and cubic nonresidue modulo <code>q</code>;</li><li>every prime factor of <code>S</code> is a sixth power modulo <code>q</code>;</li><li><code>r</code> is the unique external quadratic-nonresidue factor relative to <code>p</code>;</li><li>the external factor cycle is forced to take <code>q -&gt; r</code>;</li><li>the quotient box occupies exactly the three classes <code>0,±1</code>, while the three natural solution targets occupy exactly the complementary classes.</li></ol>
+<p>The next descent problem is therefore sharply defined: transport this primitive sextic defect through the forced successor <code>r</code>, including the <code>r≡1 mod4</code> case where the natural next admissible shift is composite (<code>3r</code>, or another <code>3 mod4</code> hard-residue multiplier times <code>r</code>).</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Dimension-two sieve from the exact q=3 and q=7 strong/Type-II filters — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-q3-q7-sieve.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-q3-q7-sieve.html">
+  <meta property="og:title" content="Dimension-two sieve from the exact q=3 and q=7 strong/Type-II filters — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Dimension-two sieve from the exact q=3 and q=7 strong/Type-II filters</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-Q3-Q7-SIEVE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved application of a classical upper-bound sieve</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-HARD-FIRST-FILTERS.md</code>, <code>STRONG-ES-Q7-EXACT-FILTER.md</code>, <code>STRONG-ES-FINITE-SHIFT-CORRIDOR.md</code></p>
+<p><strong>Imported classical tools:</strong> Selberg/Brun upper-bound sieve, prime number theorem in arithmetic progressions, bounded prime reciprocal sums for nonprincipal Dirichlet characters</p>
+<p><strong>Claim boundary:</strong> the sieve method and almost-all Erdős--Straus philosophy are classical; Vaughan and later Elsholtz prove much stronger exceptional-set estimates using larger parametric families. This note records the specific consequence of the exact <code>q=3,7</code> Type-II filters. It does not prove universal strong/Type-II coverage.</p>
+<hr>
+<h2>1. The two exact miss conditions</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">\boxed{A=\frac{p+3}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">\frac{p+7}{4}=A+1.</div>
+<p>The exact <code>q=3</code> theorem gives</p>
+<div class="math" role="math">\boxed{ q=3\text{ misses} \iff \text{every prime divisor of }A\text{ is }1\pmod3.}</div>
+<p>The exact <code>q=7</code> theorem gives</p>
+<div class="math" role="math">\boxed{ q=7\text{ misses} \iff \text{every prime divisor of }A+1\text{ is a quadratic residue mod }7.}</div>
+<p>Thus a simultaneous survivor must satisfy both splitting restrictions on two consecutive integers.</p>
+<hr>
+<h2>2. Convert the conditions into forbidden sieve residues</h2>
+<p>For every prime <code>ell&gt;7</code>, define three possible forbidden residues for the variable <code>A</code>.</p>
+<h3>Primality of p = 4A-3</h3>
+<p>If</p>
+<div class="math" role="math">A\equiv 3\cdot4^{-1}\pmod\ell,</div>
+<p>then</p>
+<div class="math" role="math">4A-3\equiv0\pmod\ell.</div>
+<p>Except for the single possibility <code>p=ell</code>, such an <code>A</code> cannot correspond to a prime <code>p</code>.</p>
+<p>Thus primality contributes one forbidden residue for every sieve prime.</p>
+<h3>q = 3 miss</h3>
+<p>If</p>
+<div class="math" role="math">\ell\equiv2\pmod3,</div>
+<p>then a simultaneous survivor cannot satisfy</p>
+<div class="math" role="math">A\equiv0\pmod\ell,</div>
+<p>because such an <code>ell</code> is forbidden as a prime divisor of <code>A</code>.</p>
+<h3>q = 7 miss</h3>
+<p>Let</p>
+<div class="math" role="math">\chi_7(\ell)=\left(\frac\ell7\right).</div>
+<p>If</p>
+<div class="math" role="math">\chi_7(\ell)=-1,</div>
+<p>then a simultaneous survivor cannot satisfy</p>
+<div class="math" role="math">A\equiv-1\pmod\ell,</div>
+<p>because <code>ell</code> would be a quadratic-nonresidue prime divisor of <code>A+1</code>.</p>
+<p>For every <code>ell&gt;7</code>, the three candidate residues</p>
+<div class="math" role="math">3\cdot4^{-1},\qquad0,\qquad-1</div>
+<p>are pairwise distinct whenever their corresponding conditions are active.</p>
+<hr>
+<h2>3. Local sieve dimension</h2>
+<p>For primes <code>ell&gt;7</code>, let</p>
+<div class="math" role="math">\rho(\ell) = 1 + \mathbf1_{\ell\equiv2\ (3)} + \mathbf1_{(\ell/7)=-1}.</div>
+<p>This is the number of distinct forbidden residue classes modulo <code>ell</code>.</p>
+<p>Write <code>chi_3</code> for the nonprincipal quadratic character modulo <code>3</code>. Away from the finitely many ramified primes,</p>
+<div class="math" role="math">\mathbf1_{\ell\equiv2\ (3)} = \frac{1-\chi_3(\ell)}2,</div>
+<p>and</p>
+<div class="math" role="math">\mathbf1_{(\ell/7)=-1} = \frac{1-\chi_7(\ell)}2.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \rho(\ell) = 2-rac{\chi_3(\ell)+\chi_7(\ell)}2.}</div>
+<p>Summing over primes and using the boundedness of prime reciprocal sums of nonprincipal Dirichlet characters gives</p>
+<div class="math" role="math">\boxed{ \sum_{\ell&lt;z}\frac{\rho(\ell)}\ell = 2\log\log z+O(1).}</div>
+<p>Thus the simultaneous primality-plus-two-filter problem has sieve dimension</p>
+<div class="math" role="math">\boxed{\kappa=2.}</div>
+<hr>
+<h2>4. Selberg upper bound</h2>
+<p>Apply the standard upper-bound Selberg sieve to the interval</p>
+<div class="math" role="math">1\le A\le Y</div>
+<p>with the residue sets above.</p>
+<p>The local density product satisfies</p>
+<div class="math" role="math">\prod_{\ell&lt;z} \left(1-\frac{\rho(\ell)}\ell\right) \asymp \frac1{(\log z)^2}.</div>
+<p>Taking a fixed positive power of <code>Y</code> as the sieve level gives</p>
+<div class="math" role="math">\boxed{ \#\left\{ A\le Y: \begin{array}{l} 4A-3\text{ prime},\\ q=3\text{ misses},\\ q=7\text{ misses} \end{array} \right\} \ll \frac{Y}{(\log Y)^2}.}</div>
+<p>The finitely many small sieve primes and the exceptional equality <code>4A-3=ell</code> contribute only lower-order terms.</p>
+<hr>
+<h2>5. Prime formulation</h2>
+<p>Since</p>
+<div class="math" role="math">p=4A-3,</div>
+<p>the same estimate becomes</p>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ p\text{ prime and both }q=3,7\text{ Type-II shifts miss}\} \ll \frac{X}{(\log X)^2}.}</div>
+<p>Restricting further to the six Mordell-hard residue classes can only decrease the count.</p>
+<p>Thus the exact <code>q=3</code> and <code>q=7</code> Type-II families alone leave at most a dimension-two sifted prime set.</p>
+<hr>
+<h2>6. Relative prime density</h2>
+<p>The prime number theorem gives</p>
+<div class="math" role="math">\pi(X)\sim\frac{X}{\log X}.</div>
+<p>Hence</p>
+<div class="math" role="math">\frac{ \#\{p\le X:\ q=3,7\text{ both miss}\} }{\pi(X)} \ll \frac1{\log X} \longrightarrow0.</div>
+<p>Therefore:</p>
+<h3>Theorem — two fixed Type-II shifts solve a relative density-one set of primes</h3>
+<div class="math" role="math">\boxed{ \text{The union of the }q=3\text{ and }q=7\text{ Type-II families captures a relative density-one set of primes.}}</div>
+<p>This is a statement about those two explicit strong/Type-II families, not about a universal proof.</p>
+<hr>
+<h2>7. Why the sieve dimension is exactly two</h2>
+<p>The local arithmetic has a useful interpretation.</p>
+<p>Among large primes <code>ell</code>:</p>
+<ul><li>primality of <code>4A-3</code> forbids one residue universally;</li><li>half of the primes also forbid <code>A=0</code> through the mod-3 splitting condition;</li><li>half also forbid <code>A=-1</code> through the mod-7 quadratic condition;</li><li>one quarter satisfy both splitting obstructions and therefore forbid two extra residues.</li></ul>
+<p>The average number of forbidden classes is</p>
+<div class="math" role="math">1 +\frac12 +\frac12 =2.</div>
+<p>Equivalently, sorting primes into the four independent character combinations gives</p>
+<div class="math" role="math">\frac14(1)+\frac14(2)+\frac14(2)+\frac14(3)=2.</div>
+<hr>
+<h2>8. Prior-art boundary</h2>
+<p>Almost-all results for Erdős--Straus are classical and substantially stronger than this specific bound.</p>
+<p>Vaughan&#x27;s 1970 work and later Elsholtz parametric-sieve results produce much thinner exceptional sets using richer families of solutions.</p>
+<p>Therefore the responsible interpretation is:</p>
+<blockquote><p>The exact FCF <code>q=3,7</code> factorization filters fit naturally into classical sieve theory and, by themselves, already have enough combined local dimension to capture a relative density-one set of primes.</p></blockquote>
+<p>No novelty claim is made for the sieve method or for density-one solvability in general.</p>
+<hr>
+<h2>9. Next analytic target</h2>
+<p>The <code>q=11</code> exact filter adds a third consecutive shifted integer <code>A+2</code>.</p>
+<p>Its main branch is another half-density quadratic splitting condition, while its exceptional branch contains at most two units of tightly prescribed nonresidue valuation.</p>
+<p>A natural next target is to prove a three-position bound of the shape</p>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ q=3,7,11\text{ all miss}\} \ll \frac{X(\log\log X)^{O(1)}}{(\log X)^{5/2}},}</div>
+<p>or stronger, by treating the thin <code>q=11</code> defect packet separately.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

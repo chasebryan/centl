@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This is the complete manual learning path for understanding, building, testing, and changing CENTL. It assumes no prior F or OCaml experience. AI tools are optional: every source of truth, command, and readiness exercise needed to work…">
+  <title>CENTL contributor onboarding — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/onboarding.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/onboarding.html">
+  <meta property="og:title" content="CENTL contributor onboarding — Free Computation Foundation">
+  <meta property="og:description" content="This is the complete manual learning path for understanding, building, testing, and changing CENTL. It assumes no prior F or OCaml experience. AI tools are optional: every source of truth, command, and readiness exercise needed to work…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL contributor onboarding</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">This is the complete manual learning path for understanding, building, testing, and changing CENTL. It assumes no prior F or OCaml experience. AI tools are optional: every source of truth, command, and readiness exercise needed to work…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/docs/ONBOARDING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This is the complete manual learning path for understanding, building, testing, and changing CENTL. It assumes no prior F* or OCaml experience. AI tools are optional: every source of truth, command, and readiness exercise needed to work on the project is listed here.</p>
+<p>The repository is the authority when this guide and an external tutorial disagree. In particular, use the exact versions in <a href="https://github.com/chasebryan/centl/blob/main/toolchain.lock"><code>toolchain.lock</code></a>, not the newest versions from a tutorial.</p>
+<h2>What fully onboarded means</h2>
+<p>A contributor is ready to work independently when they can:</p>
+<ul><li>build CENTL from a clean checkout and run the appropriate test suites;</li><li>explain why <code>0.1</code> is exact and why an approximation is displayed as an enclosure rather than an unjustified point value;</li><li>trace an expression from the parser, through exact evaluation, to terminal or structured JSON output;</li><li>decide whether a change belongs in F*, handwritten OCaml, the C/Arb bridge, the Julia laboratory, or documentation;</li><li>change and re-extract the verified F* core without editing generated OCaml;</li><li>add unit, CLI, adversarial, metamorphic, and differential coverage in the right places;</li><li>preserve CENTL&#x27;s numerical and verification contracts during review.</li></ul>
+<p>You do not have to learn the entire stack before making a documentation or small OCaml contribution. Follow the stages in order, and stop at the readiness gate appropriate to the part of the repository you plan to change.</p>
+<h2>The system in one picture</h2>
+<pre><code class="language-text">calculator / script / JSON Lines / MCP
+                    |
+                    v
+       handwritten OCaml application
+ parser, sessions, limits, protocols,
+ rendering, precision orchestration, CLI
+                    |
+                    v
+          extracted F* semantic core
+ exact values, algebra, calculus, boundary
+ validation, proof-backed algorithms
+                    |
+                    v
+          narrow OCaml -&gt; C boundary
+              FLINT / Arb / GMP / MPFR
+
+Independent oracle: Julia + Nemo differential tests</code></pre>
+<p>The implemented product is currently an exact-first calculator and numerical language. <a href="https://github.com/chasebryan/centl/blob/main/docs/DESIGN_PATH.md"><code>DESIGN_PATH.md</code></a> describes the longer-term direction toward checking mathematical claims; treat it as product direction, not a claim that every described capability already exists.</p>
+<h2>Stage 0: orient yourself</h2>
+<p>Read these project documents in order before changing behavior:</p>
+<ol><li><a href="../library/hunt-seed.html"><code>README.md</code></a> — product promise and user-facing examples.</li><li><a href="https://github.com/chasebryan/centl/blob/main/docs/DESIGN_PATH.md"><code>DESIGN_PATH.md</code></a> — intended product direction.</li><li><a href="design.html"><code>DESIGN.md</code></a> — implemented architecture, ownership, and trust boundary.</li><li><a href="numerics.html"><code>NUMERICS.md</code></a> — exactness, approximation, precision, and resource contracts.</li><li><a href="verification.html"><code>VERIFICATION.md</code></a> — what is proved, assumed, extracted, and tested.</li><li><a href="syntax.html"><code>SYNTAX.md</code></a> — complete public language surface.</li><li><a href="protocol.html"><code>PROTOCOL.md</code></a> and <a href="mcp.html"><code>MCP.md</code></a> — machine-facing interfaces.</li><li><a href="https://github.com/chasebryan/centl/blob/main/docs/ROADMAP.md"><code>ROADMAP.md</code></a> — current scope and sequencing.</li></ol>
+<p>For feature-level work, also use <a href="mathematics.html"><code>MATHEMATICS.md</code></a>, <a href="https://github.com/chasebryan/centl/blob/main/docs/ALGEBRA.md"><code>ALGEBRA.md</code></a>, <a href="https://github.com/chasebryan/centl/blob/main/docs/CALCULUS.md"><code>CALCULUS.md</code></a>, and <a href="https://github.com/chasebryan/centl/blob/main/docs/ITERATION.md"><code>ITERATION.md</code></a> as the implemented mathematical reference sheets.</p>
+<p>If a release or local build is already available, run a few expressions from the README and inspect their output. Otherwise, return to these after Stage 1:</p>
+<pre><code class="language-sh">./centl &#x27;0.1 + 0.2&#x27;
+./centl &#x27;1 / 3&#x27;
+./centl &#x27;approx(sin(pi / 6), 20)&#x27;
+./centl &#x27;solve(x^2 - 5*x + 6 = 0, x)&#x27;
+./centl &#x27;sequence(k^2, k = 1, 5)&#x27;</code></pre>
+<p>Readiness gate: explain the difference among an exact rational, an exact symbolic value, a real enclosure, a solution set, and an indeterminate result.</p>
+<h2>Stage 1: install and prove the baseline</h2>
+<p>Follow <a href="contributing.html"><code>CONTRIBUTING.md</code></a> for operating-system packages and the checksum-verified F* install. The reproducible development sequence is:</p>
+<pre><code class="language-sh">scripts/bootstrap-opam
+eval &quot;$(opam env --switch=centl)&quot;
+make test
+make quality</code></pre>
+<p><code>make test</code> verifies and extracts F*, builds the native application, and runs the normal Dune test suite. <code>make quality</code> checks formatting, warnings, the opam manifest, and agreement among pinned versions. Neither quality target rewrites source files.</p>
+<p>Install the independent mathematical oracle once:</p>
+<pre><code class="language-sh">julia --startup-file=no --project=lab/julia \
+  -e &#x27;using Pkg; Pkg.instantiate()&#x27;
+make differential-test</code></pre>
+<p>Run the full defensive suite before high-risk numerical, parser, native, or protocol work:</p>
+<pre><code class="language-sh">make hardening-test</code></pre>
+<p>Useful references:</p>
+<ul><li><a href="https://opam.ocaml.org/doc/Usage.html">opam usage</a> and <a href="https://opam.ocaml.org/doc/man/opam-switch.html">switches</a></li><li><a href="https://dune.readthedocs.io/en/stable/">Dune documentation</a> and its <a href="https://dune.readthedocs.io/en/stable/explanation/mental-model.html">mental model</a></li><li><a href="https://www.gnu.org/software/make/manual/">GNU Make manual</a></li><li><a href="https://git-scm.com/book/en/v2">Pro Git</a> if Git itself is new</li></ul>
+<p>Readiness gate: a clean <code>make test</code> and <code>make quality</code>, followed by a successful evaluation through the locally built <code>./centl</code> launcher.</p>
+<h2>Stage 2: learn the OCaml used by CENTL</h2>
+<p>OCaml is the host language. It owns parsing, sessions, iteration orchestration, resource limits, the CLI, history, JSON Lines, MCP, and the bridge to extracted semantics and native numerics.</p>
+<h3>Required OCaml concepts</h3>
+<p>Learn these in this order:</p>
+<ol><li>expressions, immutable <code>let</code> bindings, functions, recursion, and pipelines;</li><li>tuples, records, variants, pattern matching, lists, arrays, and <code>option</code>;</li><li>modules, signatures (<code>.mli</code>), namespaces, and compilation units;</li><li>labelled and optional arguments;</li><li>exceptions, <code>result</code>, mutable references, hash tables, and queues;</li><li>bytes versus strings and UTF-8 boundary awareness;</li><li>higher-order functions and tail recursion;</li><li>foreign function declarations for the C boundary.</li></ol>
+<p>Use the free official material:</p>
+<ul><li><a href="https://ocaml.org/learn">OCaml learning hub</a></li><li><a href="https://ocaml.org/docs/tour-of-ocaml">Tour of OCaml</a></li><li><a href="https://ocaml.org/manual/4.14/index.html">OCaml 4.14 reference manual</a></li><li><a href="https://ocaml.org/docs/labels">Labelled and optional arguments</a></li><li><a href="https://ocaml.org/manual/4.14/intfc.html">Interfacing C with OCaml</a></li><li><a href="https://ocaml.org/p/zarith/1.14/doc/index.html">Zarith 1.14 API</a> for exact integers and rationals</li><li><a href="https://ocaml.org/p/yojson/2.2.2/doc/index.html">Yojson 2.2.2 API</a> for JSON</li></ul>
+<h3>Read CENTL&#x27;s OCaml in this order</h3>
+<ol><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_syntax.ml"><code>centl_syntax.ml</code></a> — small catalogue of public syntax, examples, and completion names.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_request_queue.mli"><code>centl_request_queue.mli</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_request_queue.ml"><code>centl_request_queue.ml</code></a> — compact interface/implementation example with bounded state.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_history.ml"><code>centl_history.ml</code></a> — persistence, validation, locking, and bounded storage.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_parser.ml"><code>centl_parser.ml</code></a> — tokens, source spans, precedence, statements, and located errors.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_iteration.ml"><code>centl_iteration.ml</code></a> — finite iteration, recurrences, budgets, and stack-aware execution.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_protocol.ml"><code>centl_protocol.ml</code></a> — a small structured interface around the engine.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_engine.ml"><code>centl_engine.ml</code></a> — the main bridge; read one feature vertically rather than attempting the whole file at once.</li><li><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/main.ml"><code>main.ml</code></a> — CLI flags, input modes, REPL behavior, and top-level error handling.</li></ol>
+<p>Readiness exercise: add a harmless completion or syntax example, add/update its test, run the focused test and <code>make quality</code>, and explain every line of the diff. Revert the exercise if it is not a real product improvement.</p>
+<h2>Stage 3: understand Dune and the test ecosystem</h2>
+<p>CENTL uses Dune to compile OCaml, link foreign stubs, format source, and run several kinds of tests.</p>
+<p>Required references:</p>
+<ul><li><a href="https://dune.readthedocs.io/en/stable/tests.html">Dune tests</a></li><li><a href="https://dune.readthedocs.io/en/stable/reference/cram.html">Dune Cram tests</a></li><li><a href="https://dune.readthedocs.io/en/stable/reference/foreign-stubs.html">Dune foreign stubs</a></li><li><a href="https://ocaml.org/p/alcotest/1.9.1/doc/alcotest/Alcotest/index.html">Alcotest 1.9.1 API</a></li><li><a href="https://ocaml.org/p/qcheck-core/0.91/doc/qcheck-core/QCheck/index.html">QCheck 0.91 API</a></li><li><a href="https://ocaml.org/p/ocamlformat/0.29.0/doc/getting_started.html">OCamlFormat 0.29.0 getting started</a></li></ul>
+<p>Study <a href="https://github.com/chasebryan/centl/blob/main/src/dune"><code>src/dune</code></a>, <a href="https://github.com/chasebryan/centl/blob/main/src/native/dune"><code>src/native/dune</code></a>, and <a href="https://github.com/chasebryan/centl/blob/main/tests/dune"><code>tests/dune</code></a>. Then map the suites:</p>
+<ul><li><a href="https://github.com/chasebryan/centl/blob/main/tests/test_centl.ml"><code>test_centl.ml</code></a> covers the general semantic surface.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/test_iteration.ml"><code>test_iteration.ml</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/tests/test_sequence.ml"><code>test_sequence.ml</code></a> cover bounded iteration.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/test_adversarial.ml"><code>test_adversarial.ml</code></a> attacks resource and numerical boundaries.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/test_history.ml"><code>test_history.ml</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/tests/test_request_queue.ml"><code>test_request_queue.ml</code></a> cover stateful host infrastructure.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/cli.t"><code>cli.t</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/tests/installer.t"><code>installer.t</code></a> are end-to-end Cram transcripts.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/corpus"><code>tests/corpus/</code></a> contains deterministic malformed and edge inputs.</li><li><a href="https://github.com/chasebryan/centl/blob/main/tests/hardening"><code>tests/hardening/</code></a> contains fuzz-corpus, metamorphic, sanitizer, and performance checks.</li></ul>
+<p>Focused loops after the baseline has passed include:</p>
+<pre><code class="language-sh">dune exec tests/test_sequence.exe
+dune runtest tests/cli.t
+make adversarial-test
+make fuzz-test
+make metamorphic-test
+make performance-test</code></pre>
+<p>Use <code>make format-fix</code> only when you intend to rewrite formatting, and inspect its diff afterward.</p>
+<p>Readiness exercise: find one public behavior in <code>tests/cli.t</code>, identify the unit test beneath it, and describe what the Cram test catches that the unit test does not.</p>
+<h2>Stage 4: learn F* and the verified core</h2>
+<p>F<em> is a proof-oriented functional language. CENTL uses it for the semantic model and mathematical operations whose invariants should be explicit and machine checked. F</em> asks Z3 to discharge verification conditions, then extracts executable OCaml.</p>
+<p>No previous proof-assistant experience is required. Follow the official free <a href="https://fstar-lang.org/tutorial/book/index.html">Proof-Oriented Programming in F*</a> in this order:</p>
+<ol><li><a href="https://fstar-lang.org/tutorial/book/structure.html">How to use the book</a></li><li><a href="https://fstar-lang.org/tutorial/book/part1/part1_getting_off_the_ground.html">Getting off the ground</a></li><li><a href="https://fstar-lang.org/tutorial/book/part1/part1.html">Total functions and refinement types</a></li><li><a href="https://fstar-lang.org/tutorial/book/part1/part1_inductives.html">Inductive types</a></li><li><a href="https://fstar-lang.org/tutorial/book/part1/part1_lemmas.html">Lemmas and induction</a></li><li><a href="https://fstar-lang.org/tutorial/book/part1/part1_execution.html">Execution and extraction</a></li><li><a href="https://fstar-lang.org/tutorial/book/under_the_hood/under_the_hood.html">How SMT-based verification works</a></li></ol>
+<p>When a proof fails, use the official Z3 material to understand the solver rather than treating solver settings as magic:</p>
+<ul><li><a href="https://microsoft.github.io/z3guide/docs/logic/intro/">Z3 logic introduction</a></li><li><a href="https://microsoft.github.io/z3guide/docs/theories/Arithmetic/">Arithmetic theories</a></li><li><a href="https://microsoft.github.io/z3guide/docs/logic/Quantifiers/">Quantifiers</a></li></ul>
+<h3>Read CENTL&#x27;s F* in this order</h3>
+<ol><li><a href="https://github.com/chasebryan/centl/blob/main/src/fstar/Centl.Gcd.fst"><code>Centl.Gcd.fst</code></a> — the smallest complete local example of definitions, specifications, verification, and extraction.</li><li>The type and value definitions near the beginning of <a href="https://github.com/chasebryan/centl/blob/main/src/fstar/Centl.Core.fst"><code>Centl.Core.fst</code></a>.</li><li>Rational normalization and arithmetic.</li><li>Dyadic bounds and outward-rounded enclosure construction.</li><li>symbolic expression substitution and variable handling;</li><li>algebra, differentiation, integration, solving, validation, and rendering.</li></ol>
+<p>Use tests and documentation to choose a vertical slice before reading the large core file. For example, trace rational addition or differentiation from a test, into OCaml engine dispatch, into the F* definition, then back through the renderer.</p>
+<h3>The only safe F* edit loop</h3>
+<pre><code class="language-sh">make verify
+make extract
+git diff -- src/generated
+make native-test
+make quality</code></pre>
+<p>Never hand-edit <a href="https://github.com/chasebryan/centl/blob/main/src/generated"><code>src/generated/</code></a>. Those files are a checked-in build artifact produced from F<em>. An F</em> change includes the reviewed generated diff. CI re-extracts with the pinned verifier and rejects a stale snapshot.</p>
+<p>The adapters in <a href="https://github.com/chasebryan/centl/blob/main/src/runtime"><code>src/runtime/</code></a> map the F* extraction runtime to OCaml and Zarith. They are part of the executable trust path and should stay small.</p>
+<p>Readiness exercise: state a simple invariant in <code>Centl.Gcd.fst</code>, verify it, inspect its extracted OCaml, and explain which fact was proved versus merely tested. Do not keep a tutorial-only change.</p>
+<h2>Stage 5: learn exact and rigorous numerics</h2>
+<p>CENTL&#x27;s core promise is not just “many digits.” It distinguishes exact values from certified enclosures, rounds bounds outward, and refuses to print digits that are not justified.</p>
+<p>Learn these concepts:</p>
+<ul><li>arbitrary-precision integers and normalized rational numbers;</li><li>exact symbolic values versus numeric approximations;</li><li>interval/ball arithmetic and outward rounding;</li><li>absolute versus relative precision and cancellation;</li><li>real versus complex enclosures;</li><li>indeterminate values and explicit resource exhaustion;</li><li>why converting an enclosure to a floating-point midpoint can destroy the public contract.</li></ul>
+<p>Authoritative references:</p>
+<ul><li><a href="https://flintlib.org/download/flint-3.0.1.pdf">FLINT 3.0.1 manual</a></li><li><a href="https://flintlib.org/doc/using.html">Using Arb ball arithmetic</a></li><li><a href="https://flintlib.org/doc/arb.html">Arb real-ball API</a> and <a href="https://flintlib.org/doc/index_arb.html">Arb documentation index</a></li><li><a href="https://flintlib.org/doc/introduction_calcium.html">Calcium introduction</a> and <a href="https://flintlib.org/doc/ca.html"><code>ca</code> exact-number API</a></li><li><a href="https://gmplib.org/manual/index">GMP 6.3 manual</a></li><li><a href="https://www.mpfr.org/mpfr-current/">MPFR 4.2.2 manual</a></li></ul>
+<p>Trace one native call through all three layers:</p>
+<ol><li>its declaration in <a href="https://github.com/chasebryan/centl/blob/main/src/native/centl_arb.ml"><code>centl_arb.ml</code></a>;</li><li>its OCaml use in <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_engine.ml"><code>centl_engine.ml</code></a>;</li><li>its implementation and allocation/error cleanup in <a href="https://github.com/chasebryan/centl/blob/main/src/native/centl_arb_stubs.c"><code>centl_arb_stubs.c</code></a>.</li></ol>
+<p>The <a href="https://ocaml.org/manual/4.14/intfc.html">OCaml C interface manual</a> is required reading before editing the stubs. Pay particular attention to GC roots, ownership, blocking sections, exception boundaries, and allocation failure paths.</p>
+<p>If C is new, first complete the relevant parts of the free <a href="https://www.gnu.org/software/c-intro-and-ref/manual/html_node/index.html">GNU C Language Introduction and Reference Manual</a>. Use the <a href="https://wiki.sei.cmu.edu/confluence/display/c/SEI+CERT+C+Coding+Standard">SEI CERT C Coding Standard</a> as the defensive reference for native-boundary work.</p>
+<p>Readiness exercise: trace <code>approx(sin(pi / 6), 20)</code> and explain where precision is requested, where outward bounds are established, how failure is classified, and why the displayed endpoints are safe.</p>
+<h2>Stage 6: understand parsing, scope, and resource limits</h2>
+<p>The handwritten parser is inside the trusted application boundary. A parser bug can change the meaning of user mathematics before verified semantics sees it, so parser work requires semantic and adversarial tests.</p>
+<p>Read in this order:</p>
+<ol><li>the grammar and precedence contract in <a href="syntax.html"><code>SYNTAX.md</code></a>;</li><li>tokens, source locations, and precedence in <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_parser.ml"><code>centl_parser.ml</code></a>;</li><li>immutable definitions, functions, lookup, substitution, and rendering in <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_engine.ml"><code>centl_engine.ml</code></a>;</li><li>finite iteration budgets in <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_iteration.ml"><code>centl_iteration.ml</code></a>;</li><li>parser and multiline cases in <a href="https://github.com/chasebryan/centl/blob/main/tests"><code>tests/</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/tests/corpus"><code>tests/corpus/</code></a>.</li></ol>
+<p>For every new syntax form, test at least precedence, whitespace, multiline input, source locations, malformed input, nesting, budget limits, terminal output, and structured output. Avoid unbounded recursion on user-controlled input.</p>
+<p>Readiness exercise: trace a multiline function definition and one malformed variant from bytes to token, AST/statement, engine evaluation, and caret error.</p>
+<h2>Stage 7: understand machine protocols and MCP</h2>
+<p>CENTL&#x27;s human and machine interfaces must expose the same typed mathematical result. JSON must not silently collapse exact values or enclosures into ordinary floating-point numbers.</p>
+<p>Start with <a href="protocol.html"><code>PROTOCOL.md</code></a>, <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_protocol.ml"><code>centl_protocol.ml</code></a>, <a href="mcp.html"><code>MCP.md</code></a>, and <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_mcp.ml"><code>centl_mcp.ml</code></a>. Then read the request queue because long-running MCP work depends on bounded scheduling and cancellation: <a href="https://github.com/chasebryan/centl/blob/main/src/ocaml/centl_request_queue.mli"><code>centl_request_queue.mli</code></a>.</p>
+<p>Protocol references:</p>
+<ul><li><a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0 specification</a></li><li><a href="https://jsonlines.org/">JSON Lines format</a></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/server/index">MCP server overview</a></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/server/tools">MCP tools</a></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/cancellation">MCP cancellation</a></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/schema">MCP schema</a></li></ul>
+<p>Manual JSON Lines smoke test:</p>
+<pre><code class="language-sh">printf &#x27;%s\n&#x27; &#x27;{&quot;version&quot;:1,&quot;expression&quot;:&quot;0.1 + 0.2&quot;}&#x27; | ./centl --serve</code></pre>
+<p>Readiness exercise: explain how invalid JSON, an invalid expression, a limit failure, cancellation, and a valid exact result differ on the wire. Confirm each case is bounded and machine distinguishable.</p>
+<h2>Stage 8: understand the independent Julia/Nemo oracle</h2>
+<p>The Julia laboratory is intentionally independent of CENTL&#x27;s F*/OCaml implementation. It catches shared-assumption bugs that ordinary example tests may miss. It is required before merging changes to mathematical behavior.</p>
+<p>Learn only the Julia needed for the laboratory:</p>
+<ul><li><a href="https://julialang.org/learning/getting-started/">Julia getting started</a></li><li><a href="https://docs.julialang.org/en/v1/manual/getting-started/">Julia 1.x manual: getting started</a></li><li><a href="https://docs.julialang.org/en/v1/manual/modules/">Julia modules</a></li><li><a href="https://pkgdocs.julialang.org/v1/environments/">Pkg environments</a></li><li><a href="https://nemocas.github.io/Nemo.jl/stable/">Nemo documentation</a></li><li><a href="https://nemocas.github.io/Nemo.jl/stable/developer/introduction/">Nemo developer introduction</a></li></ul>
+<p>Then read <a href="../library/hunt-seed.html"><code>lab/julia/README.md</code></a>, <a href="https://github.com/chasebryan/centl/blob/main/lab/julia/Project.toml"><code>Project.toml</code></a>, and <a href="https://github.com/chasebryan/centl/blob/main/lab/julia/differential.jl"><code>differential.jl</code></a>. The checked-in manifest pins the oracle environment. Random cases are seeded and must remain reproducible.</p>
+<p>Readiness exercise: add a temporary deterministic oracle case, observe both sides&#x27; structured values, force a harmless mismatch, and understand the failure report. Remove the forced mismatch afterward.</p>
+<h2>Stage 9: hardening, packaging, and release work</h2>
+<p>Read <a href="https://github.com/chasebryan/centl/blob/main/docs/PERFORMANCE.md"><code>PERFORMANCE.md</code></a>, <a href="install.html"><code>INSTALL.md</code></a>, <a href="toolchain.html"><code>TOOLCHAIN.md</code></a>, the root <a href="https://github.com/chasebryan/centl/blob/main/Makefile"><code>Makefile</code></a>, and <a href="https://github.com/chasebryan/centl/blob/main/scripts"><code>scripts/</code></a> before changing build or release behavior.</p>
+<p>The defensive suites have different jobs:</p>
+<ul><li>adversarial tests target known dangerous boundaries;</li><li>the deterministic fuzz corpus mutates parsers and protocols;</li><li>metamorphic tests check relationships that should remain true across inputs;</li><li>native sanitizers look for C memory and undefined-behavior failures;</li><li>performance smoke tests protect explicit resource envelopes;</li><li>differential tests compare mathematical results with an independent system.</li></ul>
+<p>Release artifacts use exact native dependency pins, while ordinary local development may use compatible distribution packages. Do not change a version in only one file: update the canonical lock and all intentionally mirrored locations, then run <code>scripts/check-toolchain-pins</code> through <code>make quality</code>.</p>
+<p>FCF-owned CENTL software is licensed under <a href="https://github.com/chasebryan/centl/blob/main/LICENSE"><code>Apache-2.0</code></a>, while project documentation and branding follow the path-specific terms in <a href="licensing.html"><code>LICENSING.md</code></a> and <a href="https://github.com/chasebryan/centl/blob/main/.reuse/dep5"><code>.reuse/dep5</code></a>. Preserve SPDX, copyright, NOTICE, and valid third-party notices. Contributions must also carry the DCO sign-off described in <a href="contributing.html"><code>CONTRIBUTING.md</code></a>.</p>
+<p>Readiness gate: explain what each CI/release job protects and successfully run the local suite appropriate to the proposed packaging or dependency change.</p>
+<h2>Repository map</h2>
+<table class="directory"><thead><tr><th>Path</th><th>Responsibility</th><th>Change risk</th></tr></thead><tbody><tr><td><a href="https://github.com/chasebryan/centl/blob/main/src/fstar"><code>src/fstar/</code></a></td><td>Verified semantic model and mathematical operations</td><td>High: proof and semantic contract</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/src/generated"><code>src/generated/</code></a></td><td>Checked-in F* extraction output</td><td>Generated; never edit manually</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/src/runtime"><code>src/runtime/</code></a></td><td>F* extraction runtime adapters</td><td>High: execution/trust boundary</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/src/ocaml"><code>src/ocaml/</code></a></td><td>Parser, engine bridge, sessions, limits, protocols, CLI</td><td>Medium to high by feature</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/src/native"><code>src/native/</code></a></td><td>OCaml/C/Arb foreign interface</td><td>High: memory and numeric safety</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/tests"><code>tests/</code></a></td><td>Unit, Cram, adversarial, corpus, hardening tests</td><td>Required evidence</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/lab/julia"><code>lab/julia/</code></a></td><td>Independent Nemo oracle</td><td>Keep independent and deterministic</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/docs"><code>docs/</code></a></td><td>Product, syntax, numerical, protocol, and verification contracts</td><td>User-visible contract</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/scripts"><code>scripts/</code></a></td><td>Bootstrap, pin checks, sanitizers, packaging</td><td>High: developer/release integrity</td></tr><tr><td><a href="https://github.com/chasebryan/centl/blob/main/.github/workflows"><code>.github/workflows/</code></a></td><td>CI and release enforcement</td><td>High: repository-wide safety net</td></tr></tbody></table>
+<h2>Route a change before writing it</h2>
+<table class="directory"><thead><tr><th>Change</th><th>Primary location</th><th>Minimum validation</th></tr></thead><tbody><tr><td>Documentation only</td><td><code>README.md</code>, <code>docs/</code></td><td><code>make quality</code> where toolchain is available; review links/examples</td></tr><tr><td>CLI, REPL, history, queue</td><td><code>src/ocaml/</code>, focused tests</td><td><code>make native-test</code>, <code>make quality</code></td></tr><tr><td>Parser or syntax</td><td>parser, syntax catalogue, docs, unit/Cram/corpus tests</td><td><code>make native-test</code>, <code>make fuzz-test</code>, <code>make quality</code></td></tr><tr><td>Exact semantic or algebraic behavior</td><td><code>src/fstar/</code>, generated snapshot, tests</td><td><code>make test</code>, <code>make differential-test</code>, <code>make quality</code></td></tr><tr><td>Approximation/native numerics</td><td>F* plus <code>src/native/</code> as needed</td><td><code>make test</code>, <code>make hardening-test</code>, <code>make differential-test</code>, <code>make quality</code></td></tr><tr><td>JSON Lines or MCP</td><td>protocol/MCP/queue, docs, corpus tests</td><td><code>make native-test</code>, <code>make fuzz-test</code>, <code>make adversarial-test</code>, <code>make quality</code></td></tr><tr><td>Dependency or toolchain pin</td><td><code>toolchain.lock</code> and intentional mirrors</td><td>clean bootstrap/build, <code>make test</code>, <code>make quality</code></td></tr><tr><td>Packaging/release</td><td>scripts, installer tests, workflows, release docs</td><td>installer/package smoke tests plus complete build</td></tr></tbody></table>
+<p>“Minimum” is not a ceiling. Run the broader suite whenever a change crosses layers or could affect mathematical correctness, trust boundaries, memory safety, untrusted input, or resource use.</p>
+<h2>A reliable vertical-slice workflow</h2>
+<p>For any behavior change:</p>
+<ol><li>Write down the user-visible input, typed result, rendering, error behavior, and resource limit before editing.</li><li>Locate an existing neighboring test and trace it through the system.</li><li>Choose the owning layer using the routing table above.</li><li>Add the smallest failing test at the lowest useful layer.</li><li>Implement the change without weakening the numerical or verification contract.</li><li>If F* changed, verify, extract, and review generated output.</li><li>Add an end-to-end test for user-visible behavior and a structured-protocol test where applicable.</li><li>Add adversarial, metamorphic, sanitizer, performance, or differential evidence when the risk calls for it.</li><li>Update every affected contract document and syntax example.</li><li>Run focused checks, then the required full targets from the routing table.</li><li>Review <code>git diff</code> for generated noise, accidental formatting, secrets, temporary fixtures, and unrelated user changes.</li></ol>
+<h2>Common failures and where to look</h2>
+<table class="directory"><thead><tr><th>Symptom</th><th>First checks</th></tr></thead><tbody><tr><td><code>dune</code> or an OCaml package is missing</td><td>Run <code>eval &quot;$(opam env --switch=centl)&quot;</code>; inspect <code>opam switch</code> and <code>centl.opam</code></td></tr><tr><td>F* cannot find the expected Z3</td><td>Recheck the pinned F* install in <code>CONTRIBUTING.md</code>; use <code>fstar.exe --locate_z3 4.13.3</code></td></tr><tr><td>Generated files changed unexpectedly</td><td>Confirm the pinned F* version, run <code>make extract</code> once, and inspect only <code>src/generated/</code></td></tr><tr><td>Native link/load error for FLINT/GMP/MPFR</td><td>Check <code>pkg-config</code>, installed development/runtime libraries, <code>src/native/dune</code>, and platform loader paths</td></tr><tr><td>F* proof times out</td><td>Reduce to the failing definition, inspect the verification condition, relevant refinements, quantifiers, and solver limits; do not simply raise limits first</td></tr><tr><td>Correct-looking numeric point disagrees with the contract</td><td>Check whether the value should be exact or an outward enclosure; never discard the radius/bounds</td></tr><tr><td>Cram output changed</td><td>Decide whether behavior or only presentation changed; inspect terminal color, source locations, ordering, and protocol stability</td></tr><tr><td>Fuzz/metamorphic failure</td><td>Preserve the input and seed, minimize the case, then add it to the deterministic corpus or focused unit tests</td></tr><tr><td>Differential disagreement</td><td>Compare typed exact structures before text rendering; check whether CENTL or the oracle is outside its supported domain</td></tr><tr><td>Slow or nonterminating input</td><td>Identify the explicit budget, recursion depth, queue bound, or native-call limit before optimizing</td></tr></tbody></table>
+<h2>A low-risk first-contribution ladder</h2>
+<ol><li>Fix an inaccurate explanation or add a missing tested example in <code>docs/</code>.</li><li>Improve a diagnostic or completion in handwritten OCaml with a focused test.</li><li>Add a deterministic regression case for an already-understood behavior.</li><li>Make a bounded parser, history, queue, or protocol improvement.</li><li>Add a proved helper or small semantic change in F* and inspect extraction.</li><li>Change rigorous numerical or native behavior only after completing the numerics and FFI readiness exercises.</li></ol>
+<h2>Non-negotiable review checklist</h2>
+<ul><li>Decimal input never enters binary floating-point implicitly.</li><li>Exact results stay exact; approximation is visible and intentional.</li><li>Enclosures remain enclosures and are rounded outward.</li><li>No displayed digit claims more precision than has been established.</li><li>Human and machine interfaces represent the same typed result.</li><li>Invalid or oversized user input is rejected predictably and with bounded resource use.</li><li>Parser, protocol, queue, and history state have explicit size/depth limits.</li><li>F* assumptions remain reported as errors and generated OCaml is current.</li><li>C stubs preserve OCaml GC rules and native allocation ownership on every path.</li><li>Tests are deterministic; randomized failures include reproducible seeds.</li><li>The Julia oracle remains implementation-independent.</li><li>Public behavior changes update syntax, protocol, numerical, or verification documentation as appropriate.</li><li>No generated artifact, formatter rewrite, pin update, or unrelated worktree change is included accidentally.</li></ul>
+<h2>Glossary</h2>
+<p><strong>Exact value</strong></p>
+<p>: A value represented without approximation, such as an arbitrary-precision integer, normalized rational, or supported symbolic expression.</p>
+<p><strong>Enclosure</strong></p>
+<p>: A certified interval or ball known to contain the mathematical value. Its width records uncertainty.</p>
+<p><strong>Outward rounding</strong></p>
+<p>: Rounding a lower bound downward and an upper bound upward so the true value remains contained.</p>
+<p><strong>Refinement type</strong></p>
+<p>: A type restricted by a logical predicate, allowing F* to verify properties of values accepted or returned by a function.</p>
+<p><strong>Verification condition</strong></p>
+<p>: A logical obligation produced by F* and discharged by its type checker and SMT solver.</p>
+<p><strong>Extraction</strong></p>
+<p>: Translation of verified F* definitions into executable OCaml. Extraction preserves the program, not a runtime proof checker.</p>
+<p><strong>Trusted boundary</strong></p>
+<p>: Code or assumptions that verification relies on but does not itself prove, including parsing, runtime adapters, native libraries, and parts of the host application. See <a href="verification.html"><code>VERIFICATION.md</code></a> for the exact boundary.</p>
+<p><strong>Differential test</strong></p>
+<p>: A test that evaluates the same mathematical case in CENTL and an independent implementation, then compares structured results.</p>
+<p><strong>Metamorphic test</strong></p>
+<p>: A test of a relation between multiple executions, such as an identity or an invariance, when a complete expected output is inconvenient.</p>
+<h2>Final readiness checklist</h2>
+<p>Before claiming full-stack readiness, complete all of the following:</p>
+<ul><li>[ ] Read the project contract documents in Stage 0.</li><li>[ ] Bootstrap the pinned OCaml/F*/native toolchain from a clean checkout.</li><li>[ ] Pass <code>make test</code> and <code>make quality</code>.</li><li>[ ] Complete the OCaml, Dune/testing, and F* readiness exercises.</li><li>[ ] Trace one exact and one approximate expression end to end.</li><li>[ ] Trace one malformed parser input and one machine-protocol error.</li><li>[ ] Explain the verification and native trust boundaries.</li><li>[ ] Instantiate and run the Julia/Nemo differential suite.</li><li>[ ] Run the hardening suite relevant to the target contribution.</li><li>[ ] Make one small reviewed change using the vertical-slice workflow.</li><li>[ ] Demonstrate that the change preserves the non-negotiable checklist.</li></ul>
+<p>Once these boxes are complete, a contributor can work on CENTL manually without depending on an AI subscription or undocumented project knowledge.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

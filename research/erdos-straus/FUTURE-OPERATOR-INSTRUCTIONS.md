@@ -21,6 +21,8 @@ Keep the exact-depth / covering-core program separate from the all-prime ES prog
 
 ## Highest-priority proof targets
 
+0. **Corridor after `k=15`.** Combined two-target filters are now exact at `3,7,11,15` and the linear form `2p+1`. Classify `k=19` the same way, then the Type-I companion to the existing `q=23` Type-II theorem. Do not spend the main budget restoring DSC. Do not try to finish ES by a `{2,3,5,7}`-smooth aligned Type-II cover; that covering is false.
+
 1. **All-prime divisor criterion.** Build on `FAB-COPRIME-DIVISOR-CRITERION.md`:
    \[
    \fab(p,a,b)>0
@@ -58,12 +60,17 @@ and `REDUCED-PARAMETER-DOMAIN.md`.
 
 Never replace this by `gcd(s,Q)=1` without a proved special-case equivalence. Primes already dividing `L` impose no parameter restriction.
 
-### All-prime / fab bridge
+### All-prime / fab / two-target corridor
 
 - `FAB-COPRIME-DIVISOR-CRITERION.md`
 - `FAB-HARD-NONRESIDUE-BRIDGE.md`
 - `PRIME-MODULUS-BACKBONE.md`
 - `COMPOSITE-CORE.md`
+- `ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md`
+- `TWO-P-PLUS-ONE-FILTER.md`
+- `HARD-Q7-TYPE-I-NO-RESCUE.md`
+- `Q11-TYPE-I-COMPANION.md`
+- `K15-TWO-TARGET-FILTER.md`
 
 ## Recent-proof audit
 
@@ -92,3 +99,7 @@ Do not let this secondary track consume the main ES proof budget.
 - Calling parameter-unit coverage equivalent to exact Dirichlet reducedness.
 - Treating a finite bounded-parameter computation, a density-one result, or a conditional covering scheme as pointwise all-prime coverage.
 - Reusing Proposition 9.25 of arXiv:2511.07465v1 as stated; it has an explicit counterexample.
+
+## Computational hunt
+
+The operator-facing hunt is `./centl es go` (menu: `./centl es`). It is an infinite window recurrence from a seed. Letters are collected; the engine stops when the operator stops it. Letter numbers are content-addressed (`ES-LETTER-v1`) and must stay independent of start factor, clock, and host. Do not replace them with a discovery-order serial.

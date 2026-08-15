@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Pullbacks Are Singleton — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-singleton-pullback.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-singleton-pullback.html">
+  <meta property="og:title" content="q=3 Pullbacks Are Singleton — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Pullbacks Are Singleton</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-SINGLETON-PULLBACK.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> Type A/B trap definition</p>
+<p><strong>Claim boundary:</strong> proves a single <code>q=3</code> row forbids at most one parameter class in the full parameter ring. It does not prove that three distinct rows cannot cover all three classes, universal DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>Theorem</h2>
+<p>Let</p>
+<div class="math" role="math">m=4j-1, \qquad g=\gcd(L,m), \qquad q=m/g=3.</div>
+<p>For</p>
+<div class="math" role="math">T_j=\{-e,-4e\pmod m:e\mid j\},</div>
+<p>define the pullback</p>
+<div class="math" role="math">R_j=\{s\bmod3:r+Ls\bmod m\in T_j\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{|R_j|\le1.}</div>
+<p>Equivalently, no two distinct points in the attained three-point fibre differ by a nonzero element of that fibre and both lie in <code>T_j</code>.</p>
+<hr>
+<h2>Step 1 — what two hits would imply</h2>
+<p>Since <code>q=3</code>,</p>
+<div class="math" role="math">m=3g.</div>
+<p>The map <code>s -&gt; r+Ls mod m</code> is injective on <code>Z/3Z</code>; its three attained values form one coset modulo <code>g</code>. Any two distinct attained values differ modulo <code>m</code> by</p>
+<div class="math" role="math">\boxed{g\quad\text{or}\quad2g=-g\pmod m.}</div>
+<p>Thus two pullback classes would produce two distinct trap residues whose difference is congruent to <code>±g</code> modulo <code>m</code>.</p>
+<p>We prove that this cannot occur.</p>
+<p>Because <code>m=4j-1=3g</code>, for <code>j&gt;1</code></p>
+<div class="math" role="math">j&lt;g&lt;2j, \qquad g\equiv1\pmod4.</div>
+<p>The case <code>j=1</code> has only one distinct trap and is immediate.</p>
+<hr>
+<h2>Step 2 — same-box differences</h2>
+<p>Take divisors <code>e,f|j</code>.</p>
+<h3>A/A</h3>
+<p>A difference of two <code>-e</code> traps has representative</p>
+<div class="math" role="math">e-f.</div>
+<p>But</p>
+<div class="math" role="math">|e-f|&lt;j&lt;g,</div>
+<p>so it cannot represent <code>±g mod 3g</code>.</p>
+<h3>B/B</h3>
+<p>A difference of two <code>-4e</code> traps has representative</p>
+<div class="math" role="math">4(e-f).</div>
+<p>A residue congruent to <code>±g mod 3g</code> can be represented in the range of such a difference only by one of <code>±g,±2g</code>.</p>
+<p>But</p>
+<div class="math" role="math">g\equiv1\pmod4, \qquad 2g\equiv2\pmod4,</div>
+<p>whereas <code>4(e-f)</code> is divisible by <code>4</code>. Hence none of those values is possible.</p>
+<hr>
+<h2>Step 3 — mixed differences</h2>
+<p>It remains to consider</p>
+<div class="math" role="math">D=4e-f</div>
+<p>(the other mixed orientation is its negative after swapping the two traps).</p>
+<p>Since <code>e,f&lt;=j</code>,</p>
+<div class="math" role="math">4-j\le D\le4j-1=3g.</div>
+<p>Therefore <code>D≡±g (mod 3g)</code> can only occur through</p>
+<div class="math" role="math">D\in\{g,-g,2g,-2g\}.</div>
+<h3>The ±2g cases are impossible by size</h3>
+<p>If <code>e=j</code>, then</p>
+<div class="math" role="math">D=4j-f.</div>
+<p>The equation <code>D=2g</code> would require</p>
+<div class="math" role="math">f=4j-2g=g+1&gt;j,</div>
+<p>impossible. If <code>e&lt;j</code>, then <code>e&lt;=j/2</code>, so</p>
+<div class="math" role="math">D&lt;2j&lt;2g.</div>
+<p>Thus <code>D=2g</code> is impossible.</p>
+<p>Also</p>
+<div class="math" role="math">D\ge4-j&gt;-2g</div>
+<p>for <code>j&gt;1</code>, so <code>D=-2g</code> is impossible.</p>
+<h3>The +g case</h3>
+<p>Suppose</p>
+<div class="math" role="math">4e-f=g=\frac{4j-1}{3}.</div>
+<p>Then</p>
+<div class="math" role="math">12e-3f=4j-1.</div>
+<p>Reducing modulo <code>e</code> gives</p>
+<div class="math" role="math">3f\equiv1\pmod e.</div>
+<p>Hence</p>
+<div class="math" role="math">\gcd(e,f)=1.</div>
+<p>Since <code>e|j</code> and <code>f|j</code>, coprimality implies</p>
+<div class="math" role="math">ef\mid j.</div>
+<p>Write</p>
+<div class="math" role="math">j=efh, \qquad h\ge1.</div>
+<p>Substitution gives</p>
+<div class="math" role="math">4efh-12e+3f=1,</div>
+<p>or</p>
+<div class="math" role="math">\boxed{e(4fh-12)+3f=1.}</div>
+<p>If <code>fh&gt;=3</code>, the left side is at least <code>3</code>, impossible. If <code>fh=1</code>, then <code>f=h=1</code> and the equation becomes <code>-8e+3=1</code>, impossible. If <code>fh=2</code>, the possibilities <code>(f,h)=(1,2)</code> or <code>(2,1)</code> give respectively <code>-4e+3=1</code> or <code>-4e+6=1</code>, again impossible.</p>
+<p>Therefore <code>D=g</code> cannot occur.</p>
+<h3>The -g case</h3>
+<p>Suppose</p>
+<div class="math" role="math">4e-f=-g.</div>
+<p>Then</p>
+<div class="math" role="math">12e-3f=-4j+1,</div>
+<p>so</p>
+<div class="math" role="math">4j+12e-3f=1.</div>
+<p>Reducing modulo <code>e</code> again forces <code>gcd(e,f)=1</code>, hence <code>j=efh</code>. Therefore</p>
+<div class="math" role="math">4efh+12e-3f=1,</div>
+<p>i.e.</p>
+<div class="math" role="math">\boxed{f(4eh-3)+12e=1.}</div>
+<p>But <code>e,h&gt;=1</code> gives <code>4eh-3&gt;=1</code>, so the left side is at least <code>f+12e&gt;=13</code>, contradiction.</p>
+<p>Thus <code>D=-g</code> is impossible.</p>
+<p>All mixed cases are excluded.</p>
+<hr>
+<h2>Conclusion</h2>
+<p>No two distinct Type A/B traps differ by the nonzero displacement of a <code>q=3</code> fibre. Hence the fibre contains at most one trap:</p>
+<div class="math" role="math">\boxed{|R_j|\le1.}</div>
+<p>QED.</p>
+<hr>
+<h2>Corrected-domain consequence</h2>
+<p>For the Mordell-hard program,</p>
+<div class="math" role="math">3\mid840\mid L,</div>
+<p>so the exact Dirichlet parameter domain on a <code>q=3</code> coordinate is the full ring</p>
+<div class="math" role="math">\mathbb Z/3\mathbb Z.</div>
+<p>Therefore:</p>
+<ol><li>one q=3 row forbids at most one of the three classes;</li><li>two q=3 rows can never cover the exact local domain;</li><li>any genuine q=3 local obstruction requires at least <strong>three distinct rows</strong>, with singleton pullbacks covering exactly</li></ol>
+<div class="math" role="math">\boxed{\{0,1,2\}.}</div>
+<ol><li>after <code>Q3-ABSORPTION.md</code>, <code>Q3-WEAK-REDUNDANCY.md</code>, and <code>Q3-POINTWISE-ABSORPTION.md</code>, a directly novel obstruction would require three pointwise-primitive base contributions carrying three distinct classes.</li></ol>
+<p>This is now the precise q=3 theorem target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

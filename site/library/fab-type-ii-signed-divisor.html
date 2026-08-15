@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Normalized Type-II signed-divisor target — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-type-ii-signed-divisor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-type-ii-signed-divisor.html">
+  <meta property="og:title" content="Normalized Type-II signed-divisor target — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Normalized Type-II signed-divisor target</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-TYPE-II-SIGNED-DIVISOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact sufficient criterion; complete for prime Type-II solutions after canonical normalization</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>External framework:</strong> Bello-Hernández, Benito, Fernández, <em>A Divisor Parametrization for the Erdős--Straus Conjecture</em>, arXiv:2606.10922v1</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>, <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code></p>
+<p><strong>Claim boundary:</strong> this note does not prove Erdős--Straus. It identifies a second exact target in the same fixed-<code>k</code> signed divisor box used by the strong Type-I/FAB lane.</p>
+<hr>
+<h2>1. Fixed-k signed divisor box</h2>
+<p>Let <code>p</code> be a prime with</p>
+<div class="math" role="math">p\equiv1\pmod4,</div>
+<p>and let</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(p,k)=1.</div>
+<p>Put</p>
+<div class="math" role="math">C=\frac{p+k}{4} =\prod_i r_i^{e_i}.</div>
+<p>Because <code>gcd(C,k)=1</code>, define</p>
+<div class="math" role="math">\boxed{ \mathcal R_k(C) = \left\{ \prod_i r_i^{z_i}\pmod k: -e_i\le z_i\le e_i \right\} \subseteq(\mathbb Z/k\mathbb Z)^\times. }</div>
+<p>The existing strong fixed-<code>k</code> FAB theorem asks whether</p>
+<div class="math" role="math">-p^{-1}\in\mathcal R_k(C).</div>
+<p>There is a second natural target.</p>
+<hr>
+<h2>2. Type-II target theorem</h2>
+<h3>Theorem</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{-1\in\mathcal R_k(C),}</div>
+<p>then <code>p</code> satisfies the Erdős--Straus equation.</p>
+<h3>Proof</h3>
+<p>Choose exponents <code>z_i</code> with</p>
+<div class="math" role="math">-e_i\le z_i\le e_i</div>
+<p>such that</p>
+<div class="math" role="math">\prod_i r_i^{z_i}\equiv-1\pmod k.</div>
+<p>Split the prime powers of <code>C</code> into three positive integers <code>A,B,T</code> prime by prime:</p>
+<ul><li>if <code>z_i&lt;0</code>, put <code>r_i^{-z_i}</code> into <code>A</code>;</li><li>if <code>z_i&gt;0</code>, put <code>r_i^{z_i}</code> into <code>B</code>;</li><li>put the remaining <code>r_i^{e_i-|z_i|}</code> into <code>T</code>.</li></ul>
+<p>Then</p>
+<div class="math" role="math">\boxed{ABT=C,\qquad \gcd(A,B)=1,}</div>
+<p>and</p>
+<div class="math" role="math">BA^{-1}\equiv-1\pmod k.</div>
+<p>Since <code>A</code> is a unit modulo <code>k</code>, this is equivalent to</p>
+<div class="math" role="math">\boxed{k\mid A+B.}</div>
+<p>Put</p>
+<div class="math" role="math">Q=\frac{A+B}{k}.</div>
+<p>Also</p>
+<div class="math" role="math">p+k=4C=4ABT.</div>
+<p>Therefore</p>
+<div class="math" role="math">\begin{aligned} \frac1{ABT} +\frac1{pAQT} +\frac1{pBQT} &amp;= \frac{pQ+B+A}{pABQT}\\ &amp;= \frac{Q(p+k)}{pABQT}\\ &amp;= \frac4p. \end{aligned}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{ABT} + \frac1{pAQT} + \frac1{pBQT}. }</div>
+<p>This has the standard Type-II shape: two displayed denominators carry a factor <code>p</code>. QED.</p>
+<hr>
+<h2>3. Exact normalized Type-II lane</h2>
+<p>The theorem can be stated without the box notation.</p>
+<p>For <code>p≡1 mod4</code>, a normalized Type-II certificate consists of positive integers</p>
+<div class="math" role="math">A,B,T,Q,k</div>
+<p>satisfying</p>
+<div class="math" role="math">\boxed{ A+B=kQ, \qquad p+k=4ABT, \qquad k\equiv3\pmod4. }</div>
+<p>The associated identity is</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{ABT} + \frac1{pAQT} + \frac1{pBQT}. }</div>
+<p>At fixed <code>k</code>, the first two equations say exactly</p>
+<div class="math" role="math">AB\mid C=\frac{p+k}{4}</div>
+<p>and</p>
+<div class="math" role="math">B/A\equiv-1\pmod k.</div>
+<p>Every signed exponent vector in <code>[-e_i,e_i]</code> is exactly a coprime choice of the ratio <code>B/A</code> with the unused prime-power mass assigned to <code>T</code>. Hence the Type-II target is precisely</p>
+<div class="math" role="math">\boxed{\tau_{II}=-1.}</div>
+<hr>
+<h2>4. Completeness for prime Type-II solutions</h2>
+<p>The recent divisor-parametrization theorem is complete for Erdős--Straus decompositions after scaling by <code>4</code>. Its canonical construction can be normalized so that every prime Type-II solution lands in the target above.</p>
+<p>Start from a Type-II solution and scale it to</p>
+<div class="math" role="math">\frac1p=\frac1X+\frac1Y+\frac1Z, \qquad 4\mid X,Y,Z,</div>
+<p>choosing <code>X</code> to be the unique denominator not divisible by <code>p</code>, and <code>Y,Z</code> the two denominators divisible by <code>p</code>.</p>
+<p>Set</p>
+<div class="math" role="math">k=X-p, \qquad g=\gcd(X,Y), \qquad b=\frac Xg, \qquad q=\frac Yg, \qquad a=\frac{kY-pX}{g}=kq-pb.</div>
+<p>The completeness proof of Bello-Hernández--Benito--Fernández gives these as admissible FAB data.</p>
+<p>Because <code>p\nmid X</code>, one has <code>p\nmid k</code> and <code>p\nmid g</code>. Also <code>gcd(b,q)=1</code>. Further,</p>
+<div class="math" role="math">\gcd(a,b) = \gcd(kq-pb,b) = \gcd(kq,b) = \gcd(k,b).</div>
+<p>Any common divisor of <code>k</code> and <code>b</code> divides both <code>k</code> and <code>X=gb</code>, hence divides <code>X-k=p</code>. Since <code>p\nmid k</code>,</p>
+<div class="math" role="math">\boxed{\gcd(a,b)=1.}</div>
+<p>Because <code>p\mid Y</code> and <code>p\nmid g</code>, write</p>
+<div class="math" role="math">q=pQ.</div>
+<p>Then <code>kq=a+bp</code> forces <code>p\mid a</code>; write</p>
+<div class="math" role="math">a=pA.</div>
+<p>The divisor equation becomes</p>
+<div class="math" role="math">\boxed{kQ=A+b.}</div>
+<p>The third scaled denominator is</p>
+<div class="math" role="math">Z=\frac{pq(p+k)}{a}.</div>
+<p>Since <code>p\mid Z</code>, while <code>p\nmid k</code>, the normalized factor <code>A</code> cannot contain <code>p</code>: if <code>p\mid A</code>, then <code>gcd(A,Q)=1</code> and <code>p\nmid(p+k)</code>, so cancelling <code>a=pA</code> would remove the only remaining required <code>p</code>-factor from <code>Z</code> (and higher <code>p</code>-valuation in <code>A</code> would violate integrality). Hence</p>
+<div class="math" role="math">\boxed{p\nmid A.}</div>
+<p>Write</p>
+<div class="math" role="math">c=\frac{p+k}{4}.</div>
+<p>The two FAB divisibility conditions reduce, using the displayed coprimalities, to</p>
+<div class="math" role="math">b\mid c, \qquad A\mid c.</div>
+<p>Since <code>gcd(A,b)=1</code>,</p>
+<div class="math" role="math">\boxed{Ab\mid c.}</div>
+<p>Put</p>
+<div class="math" role="math">T=\frac c{Ab}.</div>
+<p>Then</p>
+<div class="math" role="math">A+b=kQ, \qquad p+k=4AbT,</div>
+<p>which is exactly the normalized Type-II lane above. Therefore every prime Type-II solution supplies a fixed-<code>k</code> signed-divisor hit at</p>
+<div class="math" role="math">\boxed{-1\in\mathcal R_k(C).}</div>
+<hr>
+<h2>5. Classical parameter match</h2>
+<p>The normalized equations are the standard Type-II surface in divisor coordinates. Eliminating <code>k</code> from</p>
+<div class="math" role="math">A+B=kQ, \qquad p+k=4ABT</div>
+<p>gives</p>
+<div class="math" role="math">\boxed{(4BQT-1)A=pQ+B.}</div>
+<p>Thus, with the standard Type-II parameters</p>
+<div class="math" role="math">(A_{\rm std},B_{\rm std},C_{\rm std},D_{\rm std}) =(Q,B,T,A),</div>
+<p>this is</p>
+<div class="math" role="math">(4A_{\rm std}B_{\rm std}C_{\rm std}-1)D_{\rm std} =A_{\rm std}p+B_{\rm std}.</div>
+<p>So the new point is not a new Type-II parametrization. The useful observation is that <strong>Type II and the strong fixed-k FAB/Type-I lane live in the same signed divisor box</strong>.</p>
+<hr>
+<h2>6. Two targets in one box</h2>
+<p>At fixed <code>k</code> and <code>C=(p+k)/4</code>, we now have</p>
+<div class="math" role="math">\boxed{ \begin{array}{rcl} \tau_I&amp;=&amp;-p^{-1}\pmod k,\\[2mm] \tau_{II}&amp;=&amp;-1\pmod k. \end{array}}</div>
+<p>Thus the same multiplicative expansion machinery can attack both classical solution types simultaneously.</p>
+<p>This observation is the input for <code>FAB-TWO-TARGET-KNESER.md</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

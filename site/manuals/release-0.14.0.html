@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL v0.14.0 is a deliberate consolidation release. The v0.13.0 development line reached a release-candidate state but was never formally published as a stable CENTL release. Rather than preserve that intermediate boundary as an…">
+  <title>CENTL v0.14.0 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/release-0.14.0.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/release-0.14.0.html">
+  <meta property="og:title" content="CENTL v0.14.0 — Free Computation Foundation">
+  <meta property="og:description" content="CENTL v0.14.0 is a deliberate consolidation release. The v0.13.0 development line reached a release-candidate state but was never formally published as a stable CENTL release. Rather than preserve that intermediate boundary as an…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL v0.14.0</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL v0.14.0 is a deliberate consolidation release. The v0.13.0 development line reached a release-candidate state but was never formally published as a stable CENTL release. Rather than preserve that intermediate boundary as an…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/releases/0.14.0.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Version:</strong> 0.14.0</p>
+<p><strong>Platform:</strong> GNU/Linux x86_64</p>
+<p><strong>Release posture:</strong> consolidated and hardened stable baseline</p>
+<p><strong>Oasis status:</strong> <strong>CENTL v0.14.0 is an Oasis release.</strong></p>
+<p>CENTL v0.14.0 is a deliberate consolidation release. The v0.13.0 development line reached a release-candidate state but was never formally published as a stable CENTL release. Rather than preserve that intermediate boundary as an artificial public release, v0.14.0 incorporates the validated work from that line together with bounded CARAVAN and MIRAGE work and establishes one reviewed stable baseline.</p>
+<h2>Oasis declaration</h2>
+<blockquote><p><strong>CENTL v0.14.0 is an Oasis release.</strong></p></blockquote>
+<p>Oasis is a repeatable release classification, not a version codename. The declaration belongs only to the exact source commit that passes the complete local and hosted Oasis gate, is promoted unchanged to the authoritative <code>oasis</code> branch, receives the exact <code>v0.14.0</code> tag, and publishes the already-qualified release bytes.</p>
+<p>This release branch intentionally carries the final declaration <strong>before</strong> qualification so the exact text and exact source tree are tested together. If the branch changes after qualification, it becomes a new candidate and the gate must run again.</p>
+<p>The v0.14.0 Oasis gate covers repository reconciliation, stable-boundary review, source and release metadata coherence, executing toolchain identity, F* verification and fresh extraction identity, deterministic/native/Python testing, mandatory sanitizer-backed hardening, fuzz/metamorphic/performance coverage, Julia/Nemo differential validation, SCi validation, CARAVAN Phase 1 validation, hostile archive validation, staged installer smoke tests, release-blocking GitHub security state, exact hosted check provenance, exact source/tag identity, and post-publication byte revalidation.</p>
+<h2>Native release boundary</h2>
+<p>The standard v0.14.0 native archive is deliberately <strong>GNU/Linux x86_64 only</strong> and installs exactly these public command surfaces:</p>
+<ul><li><code>centl</code>;</li><li><code>centl-physics</code>;</li><li><code>centl-sci</code>.</li></ul>
+<p>The release archive does <strong>not</strong> install <code>centl-mirage</code> or CARAVAN as public commands. Their admitted v0.14.0 work is present in the source baseline under the explicit source/laboratory boundaries below. Repository presence does not silently expand the supported installed product.</p>
+<p>Historical macOS and Windows implementation material may remain available in source history, but it is outside the active v0.14.0 Oasis release promise.</p>
+<h2>Included systems</h2>
+<h3>CENTL core</h3>
+<p>v0.14.0 retains CENTL&#x27;s exact-first numerical contract: exact input remains exact where the admitted mathematics permits, approximations carry explicit evidence, unsupported work remains visible, and machine-facing assurance classes cannot be promoted by untrusted semantic tooling.</p>
+<h3>CENTL-SCi v0.0.2-Caramels</h3>
+<p>Caramels is the current scientific interaction generation, including deterministic mathematics and physics interpretation, evidence-backed presentation, persistent user workspaces, and controlled BUILD/self-extension workflows.</p>
+<p>A configured local semantic model remains an interpreter of intent rather than mathematical authority. Model-produced semantics must cross CENTL&#x27;s typed and deterministic boundaries before a result can inherit mathematical meaning.</p>
+<h3>CENTL-MIRAGE</h3>
+<p>v0.14.0 includes the bounded local MIRAGE bootstrap in the source baseline: <strong>Mathematical Introspective Recursive Autonomous Growth Engine</strong>.</p>
+<p>The admitted boundary includes:</p>
+<ul><li>bounded local design-document ingestion;</li><li>SHA-256 source identity;</li><li>provenance-preserving Specification IR;</li><li>typed goal and capability graphs;</li><li>deterministic hard-requirement conflict detection;</li><li>capability-gap analysis and existing-capability reuse;</li><li>transaction-bound deterministic candidate materialization where supported;</li><li>authoritative parser evidence for exact staged source;</li><li>machine-readable evidence obligations and evidence-execution plans;</li><li>readiness, admission, evidence, and review artifacts that retain explicit authority boundaries;</li><li>non-mutating candidate transactions;</li><li>explicit blocking of ambiguous, conflicting, unsupported, or policy-prohibited requests.</li></ul>
+<p>v0.14.0 does <strong>not</strong> claim autonomous source mutation or autonomous promotion into verified core. Candidate material remains staged and must cross the appropriate engineering and assurance gates before activation. <code>centl-mirage</code> is not one of the public commands shipped in the v0.14.0 native archive.</p>
+<h3>CENTL CARAVAN Phase 1</h3>
+<p>v0.14.0 includes the completed CARAVAN Phase 1 <strong>local laboratory</strong> in the source baseline for content-addressed, authenticated artifact preservation and availability.</p>
+<p>The laboratory includes:</p>
+<ul><li>immutable content-addressed storage with whole-file and deterministic chunk SHA-256 identities;</li><li>Ed25519 pseudonymous carrier identity and proof of possession;</li><li>signed policy-acceptance receipts;</li><li>TUF-authenticated artifact catalog consumption;</li><li>outbound-only laboratory carrier/coordinator transport;</li><li>bounded transfer, session, challenge, polling, request, and storage behavior;</li><li>pre-transfer capacity enforcement and authenticated chunk-size validation;</li><li>serialized local store admission so concurrent transfers cannot race the configured storage ceiling;</li><li>verified multi-carrier retrieval with automatic bad-carrier quarantine/fallback;</li><li>hostile-transfer handling for corruption, reordering, truncation, appended data, and malformed authenticated manifests;</li><li>local join/status/leave lifecycle;</li><li>a reproducible local laboratory.</li></ul>
+<p>CARAVAN&#x27;s governing invariant remains:</p>
+<blockquote><p>A carrier may provide bytes, but a carrier may never define which bytes are trusted.</p></blockquote>
+<p>v0.14.0 does <strong>not</strong> enable arbitrary public volunteer enrollment. Production relay deployment, public enrollment, abuse operations, final telemetry/privacy policy, and other public-network rollout gates remain later work. CARAVAN is not installed as a public command in the standard v0.14.0 native archive.</p>
+<h2>Consolidation and repository hygiene</h2>
+<p>Oasis qualification treats repository state as part of release quality. Obsolete v0.13.0 one-shot tag/gate-observer automation and obsolete fixed-version publication machinery are removed from the active release path. Stale release references are reconciled, repository structure is documented, the branch model is explicit, and active pull-request state must be clear before publication.</p>
+<p>Historical branches may remain as preservation refs when unique history has not been proven redundant. A historical branch name is not part of the supported runtime surface and does not by itself prevent an Oasis declaration.</p>
+<h2>Security posture</h2>
+<p>Oasis qualification is gated on source remediation rather than alert suppression. Security work includes:</p>
+<ul><li>immutable GitHub Action pins with accurate version annotations;</li><li>least-privilege workflow permissions;</li><li>dependency and hosted security review;</li><li>release and installer supply-chain boundaries;</li><li>filesystem, path, symlink, archive-member, and atomic-write boundaries;</li><li>native/process/protocol resource limits;</li><li>CARAVAN trust, identity, metadata, transfer, storage, session, and quarantine boundaries;</li><li>MIRAGE provenance, materialization, workspace, evidence, and candidate-authority boundaries;</li><li>fail-closed verification that mandatory hosted Oasis checks actually exist, come from GitHub Actions, and succeed on the exact final SHA.</li></ul>
+<p>Security review establishes evidence for the declared release boundary; it is not a claim that any nontrivial software is free of every possible vulnerability.</p>
+<h2>Exact qualification and publication integrity</h2>
+<p>The final v0.14.0 path deliberately keeps one source identity from hosted qualification through publication.</p>
+<p>The final release branch is checked out by its literal head SHA. The build is stamped with that same SHA. The mandatory hosted jobs are:</p>
+<ul><li><code>Adversarial engine self-test</code>;</li><li><code>Full stable-product convergence</code>;</li><li><code>Release security state</code>.</li></ul>
+<p>The full convergence job builds and validates the release package and preserves the exact archive and checksum as an artifact named for that commit.</p>
+<p>The final release latch may run only after that same green SHA has been promoted unchanged to <code>origin/oasis</code> and its qualification pull request is closed. It then requires zero remaining open Oasis pull requests, confirms the mandatory check provenance and success, locates exactly one qualified artifact, revalidates the archive checksum and embedded build identity, creates <code>v0.14.0</code> at the exact Oasis SHA, publishes only those already-qualified bytes, downloads them again, and compares the published archive to the qualified archive.</p>
+<p>A tag never authorizes a substitute release build.</p>
+<h2>Version history note</h2>
+<p><code>0.13.0</code> remains visible in development history and documentation where historically useful, but it is not a formally published stable release. v0.14.0 is the stable successor to v0.12.0.</p>
+<h2>Release identity</h2>
+<p>Canonical Git tag:</p>
+<pre><code class="language-text">v0.14.0</code></pre>
+<p>Human release title:</p>
+<pre><code class="language-text">CENTL v0.14.0</code></pre>
+<p>Quality declaration:</p>
+<pre><code class="language-text">CENTL v0.14.0 is an Oasis release.</code></pre>
+<p>Semantic Versioning and the repeatable Oasis classification remain independent.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

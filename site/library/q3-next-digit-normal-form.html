@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Next-Digit Normal Form — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-next-digit-normal-form.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-next-digit-normal-form.html">
+  <meta property="og:title" content="q=3 Next-Digit Normal Form — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Next-Digit Normal Form</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-NEXT-DIGIT-NORMAL-FORM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>REDUCED-PARAMETER-DOMAIN.md</code>, <code>Q3-FIBER-INJECTIVITY.md</code></p>
+<p><strong>Claim boundary:</strong> normalizes every q=3 pullback on a fixed candidate into one common next 3-adic digit coordinate. It does not prove that three primitive base rows cannot occupy all three digits, universal DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix a candidate progression</p>
+<div class="math" role="math">x(s)=r+Ls.</div>
+<p>Let <code>j</code> be an earlier layer with</p>
+<div class="math" role="math">m_j=4j-1</div>
+<p>and</p>
+<div class="math" role="math">q_j=\frac{m_j}{\gcd(L,m_j)}=3.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{n_j=m_j/3=\gcd(L,m_j).}</div>
+<p>Let</p>
+<div class="math" role="math">b=v_3(n_j).</div>
+<p>Because <code>n_j|L</code> but <code>3n_j</code> does not divide <code>L</code>,</p>
+<div class="math" role="math">\boxed{v_3(L)=b.}</div>
+<p>Thus every q=3 layer active on the same candidate has the <strong>same</strong> value of <code>b</code>.</p>
+<p>Write</p>
+<div class="math" role="math">n_j=3^b\nu_j, \qquad L=3^b\Lambda,</div>
+<p>with</p>
+<div class="math" role="math">3\nmid\nu_j\Lambda.</div>
+<p>Since <code>n_j|L</code>, we also have <code>\nu_j|\Lambda</code>.</p>
+<hr>
+<h2>2. Theorem — layer modulus cancels</h2>
+<p>Suppose a trap <code>u in T_j</code> produces a nonempty pullback class</p>
+<div class="math" role="math">a\in R_j\subseteq\mathbb Z/3\mathbb Z.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ a\equiv \frac{u-r}{3^b}\,\Lambda^{-1} \pmod3. }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ a\equiv \left(\frac{u-r}{3^b}\right) \left(\frac{L}{3^b}\right)^{-1} \pmod3. }</div>
+<h3>Proof</h3>
+<p>Since <code>q_j=3</code>, the hit relation is</p>
+<div class="math" role="math">r+La\equiv u\pmod{3n_j}.</div>
+<p>Reducing modulo <code>n_j</code> gives</p>
+<div class="math" role="math">u\equiv r\pmod{n_j},</div>
+<p>so</p>
+<div class="math" role="math">D:=\frac{u-r}{n_j}</div>
+<p>is an integer, understood modulo <code>3</code>.</p>
+<p>Divide the hit relation by <code>n_j</code>:</p>
+<div class="math" role="math">\frac{L}{n_j}a\equiv D\pmod3.</div>
+<p>Because <code>q_j=3</code>, <code>L/n_j</code> is a unit modulo <code>3</code>, hence</p>
+<div class="math" role="math">a\equiv D\left(\frac{L}{n_j}\right)^{-1}\pmod3.</div>
+<p>Now</p>
+<div class="math" role="math">D =\frac{u-r}{3^b\nu_j} \equiv \frac{u-r}{3^b}\,\nu_j^{-1} \pmod3,</div>
+<p>while</p>
+<div class="math" role="math">\left(\frac{L}{n_j}\right)^{-1} = \left(\frac{\Lambda}{\nu_j}\right)^{-1} \equiv \nu_j\Lambda^{-1} \pmod3.</div>
+<p>The layer-specific factor <code>\nu_j</code> cancels:</p>
+<div class="math" role="math">a\equiv \frac{u-r}{3^b}\,\Lambda^{-1} \pmod3.</div>
+<p>QED.</p>
+<hr>
+<h2>3. Interpretation — every row paints one next 3-adic digit</h2>
+<p>The condition</p>
+<div class="math" role="math">u\equiv r\pmod{n_j}</div>
+<p>already implies</p>
+<div class="math" role="math">u\equiv r\pmod{3^b}.</div>
+<p>So a q=3 trap witness lies above the fixed <code>3^b</code>-adic prefix of the candidate and chooses one of the three lifts modulo <code>3^{b+1}</code>.</p>
+<p>The theorem says that the parameter class <code>a mod 3</code> is exactly that next digit, followed by one fixed multiplication by the common unit</p>
+<div class="math" role="math">\Lambda^{-1}=(L/3^b)^{-1}\pmod3.</div>
+<p>Therefore <strong>all q=3 layers on the candidate use the same coordinate system</strong>. No layer-specific rescaling remains.</p>
+<hr>
+<h2>4. Cover criterion in digit form</h2>
+<p>For a q=3 trap witness <code>u</code>, define its normalized next digit</p>
+<div class="math" role="math">\boxed{ \delta(u):= \frac{u-r}{3^b}\pmod3. }</div>
+<p>Multiplication by <code>\Lambda^{-1}</code> is a permutation of <code>F_3</code>, so</p>
+<div class="math" role="math">\bigcup_jR_j=\mathbb Z/3\mathbb Z</div>
+<p>if and only if the realized trap witnesses occupy all three normalized next digits:</p>
+<div class="math" role="math">\boxed{ \{\delta(u):u\text{ is a realized q=3 trap witness}\} =\mathbb F_3. }</div>
+<p>Combined with <code>Q3-FIBER-INJECTIVITY.md</code>, each individual q=3 layer contributes at most one such digit.</p>
+<hr>
+<h2>5. Directly novel form</h2>
+<p>Combine the q=3 hierarchy:</p>
+<ul><li>strong descendants are absent when nonempty on a directly novel candidate;</li><li>weak descendants are redundant;</li><li>every used trap must be pointwise primitive;</li><li>every surviving layer contributes at most one class;</li><li>every surviving class is one common next 3-adic digit.</li></ul>
+<p>Thus a genuine directly novel q=3 obstruction is precisely:</p>
+<div class="math" role="math">\boxed{ \text{at least three pointwise-primitive base trap witnesses} \text{ occupying all three lifts above one }3^b\text{-prefix}. }</div>
+<p>This is the exact residual local theorem target.</p>
+<hr>
+<h2>6. Special case b=1</h2>
+<p>When <code>v_3(L)=1</code>, every hard candidate satisfies <code>r=1 mod 3</code>, and the three possible trap residues modulo <code>9</code> are</p>
+<div class="math" role="math">1,4,7.</div>
+<p>A corrected q=3 cover is therefore equivalent to primitive realized traps occupying all three residues</p>
+<div class="math" role="math">\boxed{1,4,7\pmod9}</div>
+<p>(up to the common affine permutation determined by <code>r</code> and <code>L/3</code>).</p>
+<p>This gives a concrete small-modulus target for the base-triple analysis.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

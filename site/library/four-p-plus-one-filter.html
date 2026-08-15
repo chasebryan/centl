@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be an odd prime. If 4p+1 has a divisor">
+  <title>Exact `4p+1` factor filter — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/four-p-plus-one-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/four-p-plus-one-filter.html">
+  <meta property="og:title" content="Exact `4p+1` factor filter — Free Computation Foundation">
+  <meta property="og:description" content="Let p be an odd prime. If 4p+1 has a divisor">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact `4p+1` factor filter</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Let p be an odd prime. If 4p+1 has a divisor</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FOUR-P-PLUS-ONE-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary sufficient family / necessary counterexample restriction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this does not prove Erdős–Straus. It adds one exact shifted-factor restriction to the hard-prime counterexample sieve.</p>
+<h2>Theorem</h2>
+<p>Let <code>p</code> be an odd prime. If <code>4p+1</code> has a divisor</p>
+<div class="math" role="math">F\equiv3\pmod4</div>
+<p>with complementary divisor</p>
+<div class="math" role="math">G=\frac{4p+1}{F},</div>
+<p>then <code>G≡3 mod 4</code> as well, and <code>p</code> has an Erdős–Straus decomposition.</p>
+<p>In particular, if <code>4p+1</code> has <strong>any prime factor <code>3 mod 4</code></strong>, then <code>p</code> is solved.</p>
+<h2>Proof</h2>
+<p>Because</p>
+<div class="math" role="math">4p+1\equiv1\pmod4,</div>
+<p>if <code>F≡3 mod4</code>, then the complementary factor <code>G</code> is also <code>3 mod4</code>.</p>
+<p>Write</p>
+<div class="math" role="math">F=4u-1, \qquad G=4v-1</div>
+<p>with positive integers <code>u,v</code>. Then</p>
+<div class="math" role="math">4p+1=(4u-1)(4v-1) =16uv-4u-4v+1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{p=4uv-u-v.}</div>
+<p>Therefore</p>
+<div class="math" role="math">4uv=p+u+v.</div>
+<p>Dividing by <code>puv</code> gives the exact identity</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{uv} + \frac1{pv} + \frac1{pu}. }</div>
+<p>This is a positive three-unit-fraction decomposition. QED.</p>
+<h2>Corollary — exact counterexample restriction</h2>
+<p>A prime counterexample must satisfy</p>
+<div class="math" role="math">\boxed{ q\mid(4p+1),\ q\text{ prime} \Longrightarrow q\equiv1\pmod4. }</div>
+<p>Indeed, since <code>4p+1≡1 mod4</code>, any occurrence of a <code>3 mod4</code> prime factor has even total <code>3 mod4</code> valuation parity; taking one such factor (with odd exponent contribution) supplies a divisor <code>F≡3 mod4</code> and the complement is also <code>3 mod4</code>.</p>
+<p>Equivalently, <code>4p+1</code> must lie in the multiplicative semigroup generated by primes <code>1 mod4</code>.</p>
+<h2>Quadratic-residue interpretation on hard primes</h2>
+<p>If <code>q | 4p+1</code>, then</p>
+<div class="math" role="math">p\equiv-4^{-1}\pmod q.</div>
+<p>When <code>q≡1 mod4</code>,</p>
+<div class="math" role="math">\left(\frac{p}{q}\right) = \left(\frac{-1}{q}\right) =+1.</div>
+<p>For hard primes <code>p≡1 mod4</code>, reciprocity gives</p>
+<div class="math" role="math">\boxed{\left(\frac{q}{p}\right)=+1.}</div>
+<p>Thus failure of this filter means <strong>every prime factor of <code>4p+1</code> is a quadratic residue modulo <code>p</code></strong>.</p>
+<p>This matches the earlier exact hard-prime restrictions:</p>
+<ul><li>factors of <code>(p+1)/2</code> are <code>1 mod4</code>, hence quadratic residues of <code>p</code>;</li><li>factors of <code>(p+3)/4</code> are <code>1 mod3</code>, hence quadratic residues of <code>p</code>;</li><li>factors of <code>(3p+1)/4</code> are <code>1 mod3</code>, hence quadratic residues of <code>p</code>;</li><li>factors of <code>p+2</code> are <code>1 or 3 mod8</code>, hence quadratic residues of <code>p</code>;</li><li>now factors of <code>4p+1</code> are <code>1 mod4</code>, hence quadratic residues of <code>p</code>.</li></ul>
+<p>The all-prime wall can therefore be restated more sharply: a hard-prime counterexample forces several nearby linear forms to factor entirely over primes in the quadratic-residue half of <code>(Z/pZ)^*</code>, even though <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code> proves that any coprime fab certificate must import an external quadratic nonresidue.</p>
+<h2>Finite regression signal</h2>
+<p>On the exact four-filter survivor population among the <code>20,513</code> Mordell-hard primes through <code>10^7</code>, this additional theorem resolves <code>866</code> of the <code>2,173</code> survivors.</p>
+<p>This count is finite evidence only; the theorem itself is universal.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Primitive sextic defect chains and the neighbor-square recurrence — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-primitive-sextic-chain.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-primitive-sextic-chain.html">
+  <meta property="og:title" content="Primitive sextic defect chains and the neighbor-square recurrence — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Primitive sextic defect chains and the neighbor-square recurrence</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-PRIMITIVE-SEXTIC-CHAIN.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved local transition theorem with exact finite witness</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-TWO-TARGET-KNESER.md</code>, <code>FAB-INDEX6-COMBINED-DEFECT.md</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code></p>
+<p><strong>Claim boundary:</strong> this gives an exact recurrence for consecutive primitive index-six failures at <code>3 mod 4</code> external prime shifts. Consecutive primitive failures do occur, so this note does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Primitive index-six edge</h2>
+<p>Let <code>p</code> be Mordell-hard and let</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Assume the exact two-target signed box at the prime shift <code>k=q</code> misses both Type I and Type II and has full stabilizer index six.</p>
+<p>Then <code>FAB-INDEX6-COMBINED-DEFECT.md</code> gives</p>
+<div class="math" role="math">\boxed{ \frac{p+q}{4}=rS }</div>
+<p>where</p>
+<ul><li><code>r</code> is a simple prime factor;</li><li><code>r</code> is the unique quadratic-nonresidue factor relative to <code>p</code>;</li><li>modulo <code>q</code>, the class of <code>r</code> generates</li></ul>
+<div class="math" role="math">(\mathbb Z/q\mathbb Z)^\times/((\mathbb Z/q\mathbb Z)^\times)^6\cong C_6;</div>
+<ul><li>every prime factor of <code>S</code> is a sixth power modulo <code>q</code>.</li></ul>
+<p>Thus the external factor edge is forced:</p>
+<div class="math" role="math">\boxed{q\longrightarrow r.}</div>
+<p>If the source itself has index six, then necessarily</p>
+<div class="math" role="math">\boxed{q\equiv7\pmod{12}.}</div>
+<hr>
+<h2>2. What the previous vertex becomes at the successor</h2>
+<p>Assume now that the forced successor also satisfies</p>
+<div class="math" role="math">r\equiv3\pmod4</div>
+<p>and that the exact two-target box at <code>k=r</code> also has a primitive index-six failure.</p>
+<p>Because <code>r</code> divides <code>(p+q)/4</code>,</p>
+<div class="math" role="math">p+q\equiv0\pmod r.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{q\equiv-p\pmod r.}</div>
+<p>But <code>-p</code> is the inverse orientation of the exact Type-I target at the successor modulus <code>r</code>.</p>
+<p>For an index-six combined failure, the quotient box occupies the classes</p>
+<div class="math" role="math">0,\ \pm1</div>
+<p>while the inverse Type-I targets occupy</p>
+<div class="math" role="math">\boxed{\pm2}</div>
+<p>and Type II occupies class <code>3</code>.</p>
+<p>Hence the previous vertex has exact quotient order three:</p>
+<div class="math" role="math">\boxed{ q\,((\mathbb Z/r\mathbb Z)^\times)^6 \text{ has order }3.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ q\text{ is a quadratic residue but a cubic nonresidue modulo }r.}</div>
+<p>By contrast, the forward exceptional factor at the previous vertex has quotient order six:</p>
+<div class="math" role="math">\boxed{ r\text{ is both a quadratic and cubic nonresidue modulo }q.}</div>
+<p>Thus a consecutive primitive edge has the asymmetric sextic signature</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|cc} &amp; \text{quadratic} &amp; \text{cubic}\\ \hline r\pmod q &amp; - &amp; -\\ q\pmod r &amp; + &amp; - \end{array}}</div>
+<p>which is consistent with ordinary quadratic reciprocity for two <code>3 mod 4</code> primes.</p>
+<hr>
+<h2>3. Three consecutive primitive vertices</h2>
+<p>Suppose one step farther that</p>
+<div class="math" role="math">q_-\longrightarrow q\longrightarrow q_+</div>
+<p>are three consecutive external primes, all congruent to <code>3 mod 4</code>, and the exact two-target signed box has primitive index-six failure at the middle vertex <code>q</code>.</p>
+<p>The forward exceptional factor <code>q_+</code> occupies one of the quotient classes</p>
+<div class="math" role="math">\pm1.</div>
+<p>The previous vertex satisfies</p>
+<div class="math" role="math">q_-\equiv-p\pmod q</div>
+<p>and therefore occupies one of the inverse Type-I classes</p>
+<div class="math" role="math">\pm2.</div>
+<p>In the cyclic quotient <code>C_6</code>, every class <code>±2</code> is the square or inverse square of a class <code>±1</code>.</p>
+<p>Therefore:</p>
+<h3>Theorem — neighbor-square recurrence</h3>
+<p>There exists a sign</p>
+<div class="math" role="math">\varepsilon\in\{+1,-1\}</div>
+<p>and a unit <code>u mod q</code> such that</p>
+<div class="math" role="math">\boxed{ q_- \equiv q_+^{\,2\varepsilon}u^6 \pmod q.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ q_-\,q_+^{-2\varepsilon} \in ((\mathbb Z/q\mathbb Z)^\times)^6.}</div>
+<p>Thus every internal primitive sextic vertex obeys an exact second-neighbor recurrence modulo sixth powers.</p>
+<p>This is stronger than the pair of quadratic/cubic character statements: it identifies the complete quotient relation in <code>C_6</code>.</p>
+<hr>
+<h2>4. Concrete consecutive-defect witness</h2>
+<p>Consecutive combined primitive defects genuinely occur.</p>
+<p>Take</p>
+<div class="math" role="math">\boxed{p=808369.}</div>
+<p>This is Mordell-hard because</p>
+<div class="math" role="math">808369\equiv289\pmod{840}.</div>
+<h3>Vertex q = 43</h3>
+<div class="math" role="math">\frac{p+43}{4} =202103 =11\cdot19\cdot967.</div>
+<p>The exact two-target signed box misses both targets and has full stabilizer index</p>
+<div class="math" role="math">\boxed{6.}</div>
+<p>The unique external nonresidue factor is</p>
+<div class="math" role="math">\boxed{19,}</div>
+<p>so the edge is</p>
+<div class="math" role="math">43\to19.</div>
+<p>With primitive root <code>3 mod 43</code>, quotient exponents modulo six may be chosen so that</p>
+<div class="math" role="math">19\mapsto1,</div>
+<p>while</p>
+<div class="math" role="math">-p^{-1}\mapsto2, \qquad -1\mapsto3, \qquad -p\mapsto4.</div>
+<h3>Vertex q = 19</h3>
+<div class="math" role="math">\frac{p+19}{4} =202097 =7\cdot28871.</div>
+<p>Again the exact two-target signed box misses both targets and has full stabilizer index</p>
+<div class="math" role="math">\boxed{6.}</div>
+<p>The unique external factor is</p>
+<div class="math" role="math">\boxed{28871,}</div>
+<p>so</p>
+<div class="math" role="math">19\to28871.</div>
+<p>With primitive root <code>2 mod 19</code>, the quotient classes modulo six satisfy</p>
+<div class="math" role="math">28871\mapsto5,</div>
+<p>and the previous vertex</p>
+<div class="math" role="math">43\equiv-p\pmod{19}</div>
+<p>has class</p>
+<div class="math" role="math">\boxed{4=2\cdot5\pmod6.}</div>
+<p>Thus the neighbor-square recurrence holds explicitly.</p>
+<h3>Next vertex</h3>
+<p>At</p>
+<div class="math" role="math">q=28871,</div>
+<p>the exact two-target box still misses, but the full stabilizer index jumps to</p>
+<div class="math" role="math">\boxed{28870,}</div>
+<p>rather than remaining six.</p>
+<p>So the finite chain begins</p>
+<div class="math" role="math">\boxed{ 43\xrightarrow{\,6\,}19\xrightarrow{\,6\,}28871\xrightarrow{\,28870\,}\cdots }</div>
+<p>where the labels indicate the defect index at the source vertex.</p>
+<hr>
+<h2>5. Consequence for the proof search</h2>
+<p>The conjecture</p>
+<div class="math" role="math">\text{“primitive index six cannot occur twice consecutively”}</div>
+<p>is false.</p>
+<p>The correct local object is the recurrence</p>
+<div class="math" role="math">q_{i-1}\equiv q_{i+1}^{\pm2}\cdot(\text{sixth power})\pmod{q_i}.</div>
+<p>A cycle-level proof must therefore exploit one of:</p>
+<ol><li>higher reciprocity for the complete sextic quotient data;</li><li>incompatibility of these recurrences around a closed cycle;</li><li>forced growth or inflation of the full stabilizer index;</li><li>a transition to the composite <code>3r</code> parity-fibre regime when a successor is <code>1 mod 4</code>.</li></ol>
+<p>The exact witness above shows why a one-edge contradiction is too strong, but also shows the phenomenon to explain: primitive sextic behavior can repeat locally and then collapse into a much larger defect quotient.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

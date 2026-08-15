@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Squarefree semiprime layers always contain genuinely new mixed Type-II residues — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-squarefree-semiprime-mixed-residues.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-squarefree-semiprime-mixed-residues.html">
+  <meta property="og:title" content="Squarefree semiprime layers always contain genuinely new mixed Type-II residues — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Squarefree semiprime layers always contain genuinely new mixed Type-II residues</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUAREFREE-SEMIPRIME-MIXED-RESIDUES.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact layer theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-COMPLETION-TRAP-GEOMETRY.md</code>, <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code></p>
+<p><strong>Claim boundary:</strong> proves strict layerwise enlargement beyond López A/B for every squarefree semiprime layer. It does not prove that every prime is captured by one of these new residues.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{a=uv}</div>
+<p>with distinct primes</p>
+<div class="math" role="math">\boxed{u&lt;v.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{m=4uv-1.}</div>
+<p>The complete square-divisor parameter set is</p>
+<div class="math" role="math">D=u^i v^j, \qquad 0\le i,j\le2.</div>
+<p>The midpoint is <code>(1,1)</code>.</p>
+<p>The López lower and upper orthants contain every point except</p>
+<div class="math" role="math">\boxed{(2,0)\quad\text{and}\quad(0,2).}</div>
+<p>Thus the only mixed square divisors are</p>
+<div class="math" role="math">\boxed{D=u^2,\qquad D=v^2.}</div>
+<hr>
+<h2>2. Signed-box form</h2>
+<p>The centered exponent box is</p>
+<div class="math" role="math">(z_u,z_v)\in\{-1,0,1\}^2.</div>
+<p>By</p>
+<div class="math" role="math">S_a=-\mathcal R_m(a),</div>
+<p>the two mixed signed values are</p>
+<div class="math" role="math">\boxed{x=u\,v^{-1}\pmod m}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{x^{-1}=v\,u^{-1}\pmod m.}</div>
+<p>The López boundary signed values are</p>
+<div class="math" role="math">\boxed{ B= \{1,u,v,uv,u^{-1},v^{-1},(uv)^{-1}\} \subseteq(\mathbb Z/m\mathbb Z)^\times.}</div>
+<p>Therefore the mixed trap residue <code>-x</code> would collide with the López trap exactly if</p>
+<div class="math" role="math">\boxed{x\in B.}</div>
+<p>We prove this is impossible.</p>
+<hr>
+<h2>3. The easy boundary collisions</h2>
+<h3>x = 1</h3>
+<p>This would give</p>
+<div class="math" role="math">u\equiv v\pmod m.</div>
+<p>But</p>
+<div class="math" role="math">0&lt;v-u&lt;m,</div>
+<p>so it would force <code>u=v</code>, contradiction.</p>
+<h3>x = u</h3>
+<p>Cancelling the unit <code>u</code> gives</p>
+<div class="math" role="math">v^{-1}\equiv1\pmod m,</div>
+<p>hence</p>
+<div class="math" role="math">v\equiv1\pmod m.</div>
+<p>But</p>
+<div class="math" role="math">0&lt;v-1&lt;m.</div>
+<p>Impossible.</p>
+<h3>x = v^{-1}</h3>
+<p>Multiplying by <code>v</code> gives</p>
+<div class="math" role="math">u\equiv1\pmod m,</div>
+<p>again impossible because</p>
+<div class="math" role="math">0&lt;u-1&lt;m.</div>
+<h3>x = u^{-1}</h3>
+<p>This gives</p>
+<div class="math" role="math">u^2\equiv v\pmod m.</div>
+<p>Both <code>u^2</code> and <code>v</code> are strictly smaller than <code>m</code> because</p>
+<div class="math" role="math">u^2&lt;uv&lt;m</div>
+<p>and</p>
+<div class="math" role="math">v&lt;m.</div>
+<p>Thus the congruence would force</p>
+<div class="math" role="math">u^2=v,</div>
+<p>impossible for distinct primes.</p>
+<h3>x = (uv)^{-1}</h3>
+<p>Multiplying by <code>uv</code> gives</p>
+<div class="math" role="math">u^2\equiv1\pmod m.</div>
+<p>But</p>
+<div class="math" role="math">0&lt;u^2-1&lt;m,</div>
+<p>so this is impossible.</p>
+<hr>
+<h2>4. The collision x = v</h2>
+<p>Assume</p>
+<div class="math" role="math">u v^{-1}\equiv v\pmod m.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{v^2-u=t(4uv-1)}</div>
+<p>for some positive integer <code>t</code>.</p>
+<p>Because</p>
+<div class="math" role="math">4uv-1&gt;uv,</div>
+<p>we have</p>
+<div class="math" role="math">t&lt;\frac{v^2}{uv}=\frac vu&lt;v.</div>
+<p>Reduce the displayed equation modulo <code>v</code>:</p>
+<div class="math" role="math">-u\equiv-t\pmod v.</div>
+<p>Hence</p>
+<div class="math" role="math">t\equiv u\pmod v.</div>
+<p>Since</p>
+<div class="math" role="math">0&lt;t&lt;v</div>
+<p>and</p>
+<div class="math" role="math">0&lt;u&lt;v,</div>
+<p>we obtain</p>
+<div class="math" role="math">\boxed{t=u.}</div>
+<p>Substitution gives</p>
+<div class="math" role="math">v^2-u=u(4uv-1),</div>
+<p>so</p>
+<div class="math" role="math">v^2=4u^2v.</div>
+<p>Cancelling <code>v</code> yields</p>
+<div class="math" role="math">\boxed{v=4u^2,}</div>
+<p>which is composite. Contradiction.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{x\ne v.}</div>
+<hr>
+<h2>5. The collision x = uv</h2>
+<p>Assume</p>
+<div class="math" role="math">u v^{-1}\equiv uv\pmod m.</div>
+<p>Cancelling <code>u</code> gives</p>
+<div class="math" role="math">v^{-1}\equiv v\pmod m,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{v^2-1=t(4uv-1)}</div>
+<p>for some positive integer <code>t</code>.</p>
+<p>Again</p>
+<div class="math" role="math">t&lt;\frac vu&lt;v.</div>
+<p>Modulo <code>v</code>,</p>
+<div class="math" role="math">-1\equiv-t\pmod v,</div>
+<p>so</p>
+<div class="math" role="math">t\equiv1\pmod v.</div>
+<p>The size bound forces</p>
+<div class="math" role="math">\boxed{t=1.}</div>
+<p>Thus</p>
+<div class="math" role="math">v^2-1=4uv-1,</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{v=4u,}</div>
+<p>again impossible for the prime <code>v</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{x\ne uv.}</div>
+<hr>
+<h2>6. Exact strict-enlargement theorem</h2>
+<p>All seven López boundary possibilities have been excluded. Therefore</p>
+<div class="math" role="math">\boxed{x=u/v\notin B.}</div>
+<p>Since <code>B</code> is inversion-stable, its inverse also lies outside:</p>
+<div class="math" role="math">\boxed{x^{-1}=v/u\notin B.}</div>
+<p>Returning to trap residues, both mixed square-divisor parameters represent residues outside the old López layer unless the two mixed residues collide with each other. In all cases the completed residue set is strictly larger than the López set.</p>
+<p>Thus:</p>
+<h3>Theorem — squarefree semiprime strict completion</h3>
+<p>For every pair of distinct primes <code>u&lt;v</code>,</p>
+<div class="math" role="math">\boxed{ T_{uv}\subsetneq S_{uv}.}</div>
+<p>The strict enlargement is supplied by the mixed square divisors</p>
+<div class="math" role="math">\boxed{u^2\quad\text{and}\quad v^2,}</div>
+<p>whose signed ratios</p>
+<div class="math" role="math">\boxed{u/v\quad\text{and}\quad v/u}</div>
+<p>lie outside both López boundary orthants modulo <code>4uv-1</code>.</p>
+<hr>
+<h2>7. Dimension-two dichotomy</h2>
+<p>This yields a clean first classification by support dimension:</p>
+<h3>One prime in the layer index</h3>
+<p>If</p>
+<div class="math" role="math">\omega(a)=1,</div>
+<p>then</p>
+<div class="math" role="math">\boxed{S_a=T_a.}</div>
+<p>There is no mixed geometry.</p>
+<h3>Two distinct simple primes</h3>
+<p>If</p>
+<div class="math" role="math">a=uv, \qquad u\ne v\text{ prime},</div>
+<p>then</p>
+<div class="math" role="math">\boxed{T_a\subsetneq S_a.}</div>
+<p>The completion necessarily creates a genuine mixed inverse pair outside the López boundary.</p>
+<p>Thus the very first multidimensional layer family already exhibits unavoidable new Type-II residue geometry.</p>
+<hr>
+<h2>8. Next target</h2>
+<p>The next problem is no longer whether squarefree semiprime layers add new residues. They always do.</p>
+<p>The useful questions are:</p>
+<ol><li>when are the two mixed residues distinct from each other;</li><li>when does either mixed residue survive hard-class admissibility;</li><li>when is a mixed semiprime residue directly shadowed by an earlier completed layer;</li><li>whether semiprime mixed residues account for a positive proportion of the finite completed-depth improvements over López A/B.</li></ol>
+<p>Because the entire new region has only two parameters, this is the lowest-dimensional nontrivial testbed for the unified Kneser-plus-ancestry program.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

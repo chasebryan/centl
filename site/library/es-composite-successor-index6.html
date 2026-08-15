@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Composite successor `3r`: exact index-six defect classification — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-composite-successor-index6.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-composite-successor-index6.html">
+  <meta property="og:title" content="Composite successor `3r`: exact index-six defect classification — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Composite successor `3r`: exact index-six defect classification</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-COMPOSITE-SUCCESSOR-INDEX6.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-COMPOSITE-SUCCESSOR-3R.md</code>, <code>ES-COMPOSITE-SUCCESSOR-INDEX4.md</code>, <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code>, <code>EXTERNAL-NR-FACTOR-CYCLE.md</code></p>
+<p><strong>Claim boundary:</strong> classifies every full-stabilizer index-six failure at the natural composite successor <code>k=3r</code>. Genuine index-six failures exist, so this does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and let</p>
+<div class="math" role="math">r&lt;p, \qquad r\equiv1\pmod4, \qquad \left(\frac rp\right)=-1.</div>
+<p>Use the natural admissible shift</p>
+<div class="math" role="math">\boxed{k=3r}</div>
+<p>and put</p>
+<div class="math" role="math">\boxed{C=\frac{p+3r}{4}.}</div>
+<p>Let</p>
+<div class="math" role="math">G=(\mathbb Z/3r\mathbb Z)^\times, \qquad R=\mathcal R_{3r}(C), \qquad H=\operatorname{Stab}(R).</div>
+<p>Assume both exact targets miss and</p>
+<div class="math" role="math">\boxed{[G:H]=6.}</div>
+<p>Then</p>
+<div class="math" role="math">\bar G=G/H\cong C_6.</div>
+<p>Because an index-three quotient must exist in the <code>r</code>-component,</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod3.}</div>
+<p>Together with <code>r≡1 mod4</code>,</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod{12}.}</div>
+<p>Also hard <code>p≡1 mod3</code>, so</p>
+<div class="math" role="math">\boxed{C\equiv1\pmod3.}</div>
+<hr>
+<h2>2. The three quadratic characters</h2>
+<p>CRT gives</p>
+<div class="math" role="math">G \cong (\mathbb Z/3\mathbb Z)^\times \times (\mathbb Z/r\mathbb Z)^\times.</div>
+<p>Define the three nontrivial quadratic characters</p>
+<div class="math" role="math">\varepsilon(x)=\left(\frac x3\right), \qquad \eta(x)=\left(\frac xr\right), \qquad \chi(x)=\varepsilon(x)\eta(x).</div>
+<p>For hard <code>p</code> and external <code>r</code>,</p>
+<div class="math" role="math">\boxed{ \varepsilon(p)=+1, \qquad \eta(p)=-1, \qquad \chi(p)=-1.}</div>
+<p>For <code>-1</code>, since <code>r≡1 mod4</code>,</p>
+<div class="math" role="math">\boxed{ \varepsilon(-1)=-1, \qquad \eta(-1)=+1, \qquad \chi(-1)=-1.}</div>
+<p>The order-three quotient is the unique cubic-residue quotient of the <code>r</code>-component. Write its character abstractly as</p>
+<div class="math" role="math">\kappa:G\to C_3.</div>
+<p>Because <code>r≡1 mod12</code>, <code>-1</code> is a cube modulo <code>r</code>, so</p>
+<div class="math" role="math">\boxed{\kappa(-1)=0.}</div>
+<p>Every index-six subgroup with cyclic quotient is the intersection of the kernel of one of the three quadratic characters with the cubic-residue kernel.</p>
+<hr>
+<h2>3. The eta branch is impossible</h2>
+<p>Suppose the order-two quotient coordinate were <code>eta</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\eta(-1)=+1</div>
+<p>and</p>
+<div class="math" role="math">\kappa(-1)=0.</div>
+<p>Thus</p>
+<div class="math" role="math">-1\in H.</div>
+<p>Since <code>1∈R</code> and <code>R</code> is <code>H</code>-periodic,</p>
+<div class="math" role="math">H\subseteq R,</div>
+<p>so Type II would hit.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{H\text{ cannot use the quadratic character }\eta.}</div>
+<p>Only the <code>epsilon</code> and <code>chi=epsilon eta</code> branches remain.</p>
+<hr>
+<h2>4. Branch A: chi-cubic primitive defect</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{H=\ker\chi\cap\ker\kappa.}</div>
+<p>Since</p>
+<div class="math" role="math">\chi(p)=-1,</div>
+<p>the image of <code>p</code> has nontrivial order-two coordinate.</p>
+<p>If <code>p</code> were a cubic residue modulo <code>r</code>, its image in <code>C_6</code> would be the unique order-two class <code>3</code>. But then</p>
+<div class="math" role="math">[-p^{-1}]=[-1]-[p]=3-3=0,</div>
+<p>so the Type-I target would lie in <code>H⊆R</code>.</p>
+<p>Hence failure forces</p>
+<div class="math" role="math">\boxed{p\text{ is a cubic nonresidue modulo }r.}</div>
+<p>Therefore the image of <code>p</code> has order six. Orient <code>C_6</code> so that</p>
+<div class="math" role="math">[p]=1\text{ or }5.</div>
+<p>Then the three natural excluded target classes are exactly</p>
+<div class="math" role="math">\boxed{2,3,4.}</div>
+<p>Thus the quotient box occupies at most three classes.</p>
+<h3>Full-stabilizer atom restriction</h3>
+<p>For every prime-power factor</p>
+<div class="math" role="math">s^e\parallel C</div>
+<p>outside <code>H</code>, the full-stabilizer theorem gives</p>
+<div class="math" role="math">\operatorname{ord}_{\bar G}(sH)&gt;2e+1.</div>
+<p>Inside <code>C_6</code>, this forces order six. If <code>e&gt;=2</code>, its local signed set already has at least five quotient classes, impossible because the box may occupy at most three.</p>
+<p>Hence every exceptional atom is simple and contributes two units to the Kneser budget.</p>
+<p>Three distinct missing target cosets give the combined budget</p>
+<div class="math" role="math">\sum(s_i-1)\le2.</div>
+<p>Therefore exactly one exceptional atom exists.</p>
+<h3>Theorem — primitive mixed-character normal form</h3>
+<p>In Branch A there is a unique simple prime factor</p>
+<div class="math" role="math">\boxed{s\mid C}</div>
+<p>outside <code>H</code>, with</p>
+<div class="math" role="math">\boxed{v_s(C)=1,}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \chi(s)=-1, \qquad s\text{ is a cubic nonresidue modulo }r.}</div>
+<p>Every other prime factor of <code>C</code> lies in <code>H</code>, hence satisfies</p>
+<div class="math" role="math">\chi=+1</div>
+<p>and is a cubic residue modulo <code>r</code>.</p>
+<p>The quotient box is exactly</p>
+<div class="math" role="math">\boxed{\bar R=\{0,1,5\}.}</div>
+<p>This is the direct composite analogue of the primitive sextic defect at a <code>3 mod4</code> prime shift.</p>
+<hr>
+<h2>5. The unique primitive atom is the external successor in Branch A</h2>
+<p>The external factor-cycle theorem guarantees a prime factor</p>
+<div class="math" role="math">t\mid C</div>
+<p>with</p>
+<div class="math" role="math">\left(\frac tp\right)=-1.</div>
+<p>For a <code>1 mod4</code> source <code>r</code>, the exact transfer law gives</p>
+<div class="math" role="math">\left(\frac tr\right) =-\left(\frac{-3}{t}\right).</div>
+<p>For every odd prime <code>t!=3</code>, quadratic reciprocity gives the elementary identity</p>
+<div class="math" role="math">\boxed{ \left(\frac{-3}{t}\right) =\left(\frac t3\right) =\varepsilon(t).}</div>
+<p>Since <code>C≡1 mod3</code>, the prime <code>3</code> does not divide <code>C</code>. Therefore</p>
+<div class="math" role="math">\eta(t) =\left(\frac tr\right) =-\varepsilon(t),</div>
+<p>and hence</p>
+<div class="math" role="math">\boxed{ \chi(t)=\varepsilon(t)\eta(t)=-1.}</div>
+<p>But every hidden factor in Branch A has <code>chi=+1</code>. Thus every external nonresidue factor lies outside <code>H</code>.</p>
+<p>There is only one exceptional factor.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{ \text{the unique primitive atom }s \text{ is the unique external-nonresidue factor of }C.}</div>
+<p>So Branch A again has a forced descent edge</p>
+<div class="math" role="math">\boxed{r\longrightarrow s.}</div>
+<hr>
+<h2>6. Branch B: epsilon-cubic parity defect</h2>
+<p>Assume instead</p>
+<div class="math" role="math">\boxed{H=\ker\varepsilon\cap\ker\kappa.}</div>
+<p>Here</p>
+<div class="math" role="math">\varepsilon(p)=+1.</div>
+<p>If <code>p</code> were a cubic nonresidue modulo <code>r</code>, then its image in <code>C_6</code> would have order three, i.e. class <code>2</code> or <code>4</code>.</p>
+<p>The Type-II target is class <code>3</code>, while the two Type-I orientations would then be classes <code>1</code> and <code>5</code>.</p>
+<p>A symmetric quotient box avoiding <code>1,3,5</code> could only lie inside</p>
+<div class="math" role="math">\{0,2,4\},</div>
+<p>but that is the order-three subgroup of <code>C_6</code> and has nontrivial stabilizer, contradicting the definition of the full quotient.</p>
+<p>Therefore failure forces</p>
+<div class="math" role="math">\boxed{p\in H.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{p\text{ is a cubic residue modulo }r.}</div>
+<p>All three natural solution targets then collapse to the single quotient class</p>
+<div class="math" role="math">\boxed{3.}</div>
+<p>because <code>[-p]=[-p^{-1}]=[-1]</code> modulo <code>H</code>.</p>
+<hr>
+<h2>7. Exceptional valuation mass in Branch B is exactly two</h2>
+<p>Since only class <code>3</code> is forced missing, the one-target full-stabilizer mass bound at index six gives</p>
+<div class="math" role="math">\boxed{ \sum_{s^e\parallel C,\ s\notin H}e\le2.}</div>
+<p>Aperiodicity of the quotient box requires at least one factor outside <code>H</code>.</p>
+<p>Every nontrivial factor again must have projected order six. Hence every exceptional prime has</p>
+<div class="math" role="math">\boxed{ \varepsilon(s)=-1 }</div>
+<p>and is a cubic nonresidue modulo <code>r</code>.</p>
+<p>Thus every exceptional prime is</p>
+<div class="math" role="math">\boxed{s\equiv2\pmod3.}</div>
+<p>But</p>
+<div class="math" role="math">C\equiv1\pmod3.</div>
+<p>All hidden factors have <code>epsilon=+1</code>, so the total valuation mass of the <code>epsilon=-1</code> exceptional factors must be even.</p>
+<p>It is positive and at most two. Therefore</p>
+<div class="math" role="math">\boxed{ \sum_{s^e\parallel C,\ s\notin H}e=2.}</div>
+<p>There are exactly two possibilities:</p>
+<ol><li>one exceptional prime with exponent two;</li><li>two distinct simple exceptional primes.</li></ol>
+<p>In either case the quotient signed box is</p>
+<div class="math" role="math">\boxed{\bar R=\{0,1,2,4,5\}=C_6\setminus\{3\}.}</div>
+<h3>Theorem — parity-cubic double-defect normal form</h3>
+<p>Branch B is characterized by:</p>
+<div class="math" role="math">\boxed{ H=\ker\varepsilon\cap\ker\kappa, \qquad p\in H,}</div>
+<p>with exactly two units of exceptional valuation, each carried by primes</p>
+<div class="math" role="math">\boxed{ s\equiv2\pmod3 }</div>
+<p>that are cubic nonresidues modulo <code>r</code>.</p>
+<p>Every hidden prime factor is <code>1 mod3</code> and a cubic residue modulo <code>r</code>.</p>
+<p>Unlike Branch A, the external-nonresidue factor supplied by the factor-cycle theorem need not be the unique visible atom; it may lie in the hidden background because this branch does not constrain the quadratic character <code>eta</code> separately.</p>
+<hr>
+<h2>8. Complete index-six dichotomy</h2>
+<p>Every combined full-stabilizer index-six failure at the natural composite successor <code>k=3r</code> is exactly one of the following:</p>
+<h3>A. Primitive mixed-character defect</h3>
+<div class="math" role="math">\boxed{ H=\ker(\varepsilon\eta)\cap\ker\kappa}</div>
+<p>with:</p>
+<ul><li><code>p</code> cubic-nonresidue modulo <code>r</code>;</li><li>exactly one simple order-six exceptional prime;</li><li>that prime is the unique external-nonresidue factor and forces the next descent edge;</li><li>quotient box <code>C_6\setminus\{2,3,4\}</code>.</li></ul>
+<h3>B. Parity-cubic double defect</h3>
+<div class="math" role="math">\boxed{ H=\ker\varepsilon\cap\ker\kappa}</div>
+<p>with:</p>
+<ul><li><code>p</code> cubic-residue modulo <code>r</code>;</li><li>exceptional valuation mass exactly two;</li><li>every exceptional prime is <code>2 mod3</code> and cubic-nonresidue modulo <code>r</code>;</li><li>quotient box <code>C_6\setminus\{3\}</code>.</li></ul>
+<p>No third index-six geometry is possible.</p>
+<hr>
+<h2>9. Research consequence</h2>
+<p>Combined with the preceding <code>3r</code> theorems:</p>
+<ul><li>odd full-stabilizer index is impossible;</li><li>index two is restricted to the pure Eisenstein-split obstruction;</li><li>index four is impossible;</li><li>index six is now completely classified into the two normal forms above.</li></ul>
+<p>The next direct target is Branch B. Branch A still transports a unique primitive atom and can be joined to the sextic-chain machinery. Branch B is qualitatively different: it is the first place where the external descent edge can hide inside the stabilizer while exactly two inert-mod-3 cubic defects remain visible.</p>
+<p>A closure theorem for the parity-cubic double defect would remove the first genuinely new composite obstruction beyond the prime-shift primitive sextic geometry.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

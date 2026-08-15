@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>C1 conditioned-fiber collapse on the `{3,11,13}` residual family — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-conditioned-fiber-31113.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-conditioned-fiber-31113.html">
+  <meta property="og:title" content="C1 conditioned-fiber collapse on the `{3,11,13}` residual family — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C1 conditioned-fiber collapse on the `{3,11,13}` residual family</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-CONDITIONED-FIBER-31113.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> finite theorem-certificate target; exact structure identified through the frozen <code>k&lt;=1500</code> C1 bundle</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note records an exact finite structural pattern on the 336 C1 residual systems with prime signature <code>{3,11,13}</code>. It is not yet a universal-in-<code>k</code> theorem and does not prove full C1, universal DSC-P, López universal coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li><li><a href="single-active-reduced-escape-theorem.html">SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md</a></li><li><a href="trap-fiber-bound.html">TRAP-FIBER-BOUND.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FUTURE-OPERATOR-INSTRUCTIONS.md">FUTURE-OPERATOR-INSTRUCTIONS.md</a></li></ul>
+<h2>1. Why this family matters</h2>
+<p>The independently verified C1 census through <code>k&lt;=1500</code> contains</p>
+<div class="math" role="math">\boxed{336}</div>
+<p>single-active candidates whose final nonempty fiber kernel has exactly the prime support</p>
+<div class="math" role="math">\boxed{\{3,11,13\}}.</div>
+<p>This is the most frequent small residual kernel after the larger seven-prime family and the cleanest recurring system in which genuine three-coordinate coupling remains.</p>
+<p>The question is not merely whether each finite system has one solution. That was already known from the bounded selector certificate.</p>
+<p>The question is whether there is a <strong>uniform elimination invariant</strong> explaining why these systems cannot close.</p>
+<p>The answer in the frozen range is yes.</p>
+<h2>2. Exact elimination order</h2>
+<p>For every one of the 336 systems, use the coordinate order</p>
+<div class="math" role="math">\boxed{11\longrightarrow13\longrightarrow3.}</div>
+<p>The residual moduli involve powers no larger than</p>
+<div class="math" role="math">3^4,\qquad11^3,\qquad13^2.</div>
+<p>Start by applying:</p>
+<ol><li>all unary exact Type A/B constraints on each coordinate;</li><li>the correct reducedness condition on <code>x=r+Ls</code>;</li><li>then the mixed rows in the order described below.</li></ol>
+<p>The resulting finite CSP has an unexpectedly strong extension property.</p>
+<h2>3. Unary 11-adic room</h2>
+<p>After unary 11-adic rows and reducedness:</p>
+<ul><li>the number of surviving base residue classes modulo <code>11</code> is always <code>6</code> or <code>7</code>;</li><li>the full 11-adic domain is never empty;</li><li>the smallest full 11-adic domain over all 336 systems has size</li></ul>
+<div class="math" role="math">\boxed{6}.</div>
+<p>Thus the first variable always has room before any mixed row is considered.</p>
+<h2>4. Unary 13-adic room</h2>
+<p>After unary 13-adic rows and reducedness, the number of surviving base classes modulo <code>13</code> is always between</p>
+<div class="math" role="math">\boxed{5\text{ and }8}.</div>
+<p>The full 13-coordinate may be modulo <code>13</code> or <code>13^2</code>, depending on the candidate.</p>
+<h2>5. The 11-to-13 conditioned fiber</h2>
+<p>Now fix <strong>any</strong> surviving full 11-adic value.</p>
+<p>Apply every residual row whose support is contained in <code>{11,13}</code>.</p>
+<h3>Finite structural result</h3>
+<p>For every candidate and every surviving full 11-adic value:</p>
+<div class="math" role="math">\boxed{\text{at least 4 base classes modulo }13\text{ remain safe}.}</div>
+<p>Equivalently, the mixed 11/13 rows remove at most two of the unary-safe base 13 classes.</p>
+<p>The observed minimum number of surviving <strong>full</strong> 13-adic values per surviving 11-adic value is</p>
+<div class="math" role="math">\boxed{5}.</div>
+<p>When the 13-coordinate has exponent two, the surviving fibers occur in complete mod-13 classes after the finer row is accounted for.</p>
+<h3>Fine <code>13^2</code> row is conditionally redundant</h3>
+<p>The residual row with quotient</p>
+<div class="math" role="math">1859=11\cdot13^2</div>
+<p>appears in many of these systems.</p>
+<p>Across the entire 336-system family, every forbidden value from a mixed row with 13-exponent greater than one is already removed by unary constraints or by a coarser mixed 11/13 row.</p>
+<p>Thus the fine 13-adic row introduces</p>
+<div class="math" role="math">\boxed{0}</div>
+<p>new forbidden points after the coarse 11/13 stage.</p>
+<p>This is a finite exact masking statement, not an assumption.</p>
+<h2>6. The conditioned 3-adic fiber</h2>
+<p>Fix any surviving <code>(11,13)</code> assignment after the preceding stage.</p>
+<p>Now inspect all residual rows containing the prime <code>3</code>.</p>
+<p>The common coarse rows live at moduli including</p>
+<div class="math" role="math">33=3\cdot11, \quad 117=3^2\cdot13, \quad 39=3\cdot13, \quad 429=3\cdot11\cdot13,</div>
+<p>with optional higher rows such as</p>
+<div class="math" role="math">99=3^2\cdot11, \qquad 1053=3^4\cdot13.</div>
+<h3>Mod-3 collapse</h3>
+<p>Across every unary-safe base <code>(11,13)</code> pair in every one of the 336 systems, the rows whose 3-part is exactly <code>3</code> collectively forbid at most</p>
+<div class="math" role="math">\boxed{1}</div>
+<p>of the three residues modulo <code>3</code>.</p>
+<p>So at least two mod-3 classes survive before the mod-9 refinements are considered.</p>
+<h3>Mod-9 collapse</h3>
+<p>After lifting that forbidden mod-3 class to modulo <code>9</code> and adding every row with 3-part <code>9</code>, the total forbidden set modulo <code>9</code> has cardinality at most</p>
+<div class="math" role="math">\boxed{4}.</div>
+<p>Therefore at least</p>
+<div class="math" role="math">\boxed{5\text{ of the }9}</div>
+<p>3-adic residue classes remain safe.</p>
+<h3>Fine <code>3^4</code> row is conditionally redundant</h3>
+<p>Whenever the row with 3-part <code>81</code> occurs, every one of its forbidden values already lies over a mod-9 class forbidden by the coarser rows.</p>
+<p>It contributes</p>
+<div class="math" role="math">\boxed{0}</div>
+<p>new forbidden 3-adic values after the mod-9 stage.</p>
+<p>Hence the exact number of safe full 3-adic values conditioned on a surviving <code>(11,13)</code> pair belongs to</p>
+<div class="math" role="math">\boxed{ \{5,6,8,9,45,54,72,81\}. }</div>
+<p>The second half is exactly nine times the first half because safe mod-9 classes lift freely through the <code>3^4</code> coordinate.</p>
+<p>The global minimum is</p>
+<div class="math" role="math">\boxed{5}.</div>
+<h2>7. Nested extension theorem for the frozen family</h2>
+<p>Combining the stages gives the following exact finite statement.</p>
+<h3>Finite theorem-certificate</h3>
+<p>For every one of the 336 C1 residual systems with signature <code>{3,11,13}</code> through <code>k&lt;=1500</code>:</p>
+<ol><li>at least one unary-safe 11-adic value exists;</li><li><strong>every</strong> unary-safe 11-adic value extends to at least five full 13-adic values after all 11/13 rows;</li><li><strong>every</strong> surviving <code>(11,13)</code> pair extends to at least five full 3-adic values after every remaining row.</li></ol>
+<p>Therefore every initial 11-adic branch has at least</p>
+<div class="math" role="math">\boxed{25}</div>
+<p>full <code>(13,3)</code> extensions.</p>
+<p>This is much stronger than the existence of one bounded selector.</p>
+<p>It proves a branch-survival property for the entire finite family.</p>
+<h2>8. Relation to the two <code>{11,13}</code> systems</h2>
+<p>The two smallest C1 residual systems, both at target depth <code>k=574</code>, exhibit the same phenomenon without the 3-coordinate.</p>
+<p>In each case:</p>
+<ul><li><code>725</code> full 11-adic values survive unary constraints;</li><li>the unary 13-adic domain contains <code>78</code> values, six complete residue classes modulo 13;</li><li>all mixed rows except the <code>j=36</code> row are masked by the unary safe sets;</li><li>the <code>j=36</code> row removes exactly one 13-class for one special residue modulo 11.</li></ul>
+<p>Thus the conditioned 13-fiber has size</p>
+<div class="math" role="math">65\quad\text{or}\quad78,</div>
+<p>and the exact full safe count is</p>
+<div class="math" role="math">605\cdot78+120\cdot65 = \boxed{54,990}.</div>
+<p>The <code>{3,11,13}</code> family is therefore a genuine lift of the same conditioned-fiber geometry.</p>
+<h2>9. What this suggests universally</h2>
+<p>The original residual systems have nominal cover mass greater than one, so global density bounds fail.</p>
+<p>The conditioned-fiber result shows why that statistic is misleading.</p>
+<p>The constraints overlap in a way that is exposed only after conditioning coordinate by coordinate:</p>
+<div class="math" role="math">\boxed{ \text{large global cover mass} \quad\text{but}\quad \text{uniformly positive local extension fibers}. }</div>
+<p>The theorem target is now:</p>
+<h3>Conditioned Fiber Positivity Conjecture</h3>
+<p>For every directly novel C1 residual system, there exists an elimination order on the residual prime-power coordinates such that every surviving partial assignment has a positive exact extension fiber at the next coordinate.</p>
+<p>A weaker version allowing some partial branches to die while preserving at least one branch would also suffice for C1.</p>
+<p>This is not proved universally.</p>
+<h2>10. Immediate proof questions</h2>
+<ol><li>Why do the <code>3</code>-linear rows forbid at most one mod-3 class after unary-safe 11/13 conditioning?</li><li>Why can the mod-9 rows add at most one additional residue outside that lifted class?</li><li>Why are the <code>13^2</code> and <code>3^4</code> rows always masked by coarser rows in this family?</li><li>Which parts follow from ancestry/shadow relations among the fixed row depths <code>25,36,88,179,205,322,465,520,790</code>?</li><li>Can the exact masking be turned into a universal row-domination lemma rather than a finite observation?</li></ol>
+<p>Those questions are now considerably sharper than the former “why does a selector exist?” question.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

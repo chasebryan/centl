@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Quantitative infinite-coinfinite spectrum for square-completed Type-II depth — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-spectrum-infinite-coinfinite.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-spectrum-infinite-coinfinite.html">
+  <meta property="og:title" content="Quantitative infinite-coinfinite spectrum for square-completed Type-II depth — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quantitative infinite-coinfinite spectrum for square-completed Type-II depth</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-SPECTRUM-INFINITE-COINFINITE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-COMPLETION-BACKBONE.md</code>, <code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code>, <code>ES-SQUARE-ALL-QUOTIENT-FACTOR-LIFT.md</code></p>
+<p><strong>Imported classical tool:</strong> prime number theorem in arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> proves quantitative lower bounds for both realized exact depths and structural-gap depths in the classical strong/Type-II completed system. It does not prove that every prime has a Type-II solution.</p>
+<hr>
+<h2>1. Completed minimal-depth spectrum</h2>
+<p>For each layer</p>
+<div class="math" role="math">a\ge1,</div>
+<p>define</p>
+<div class="math" role="math">m_a=4a-1</div>
+<p>and the completed strong/Type-II trap</p>
+<div class="math" role="math">S_a=\{-4D\pmod{m_a}:D\mid a^2\}.</div>
+<p>Let</p>
+<div class="math" role="math">\boxed{\mathcal D_{\rm sq}}</div>
+<p>denote the set of layer indices <code>a</code> that occur as exact first completed depths for infinitely many Mordell-hard primes.</p>
+<p>Let</p>
+<div class="math" role="math">\boxed{\mathcal G_{\rm sq}}</div>
+<p>denote the set of <strong>structural gaps</strong>, meaning layer indices that cannot be the first completed hit of any integer because the whole layer is already shadowed by an earlier layer.</p>
+<p>The two sets are disjoint.</p>
+<hr>
+<h2>2. Realized-depth lower bound from the prime-modulus backbone</h2>
+<p><code>ES-SQUARE-COMPLETION-BACKBONE.md</code> proves that whenever</p>
+<div class="math" role="math">q=4a-1&gt;7</div>
+<p>is prime, the depth <code>a</code> is realized by infinitely many Mordell-hard primes.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \left\{\frac{q+1}{4}:q&gt;7\text{ prime},\ q\equiv3\pmod4\right\} \subseteq \mathcal D_{\rm sq}.}</div>
+<p>Hence</p>
+<div class="math" role="math">|\mathcal D_{\rm sq}\cap[1,K]| \ge \pi(4K-1;4,3)+O(1).</div>
+<p>The prime number theorem in arithmetic progressions gives</p>
+<div class="math" role="math">\pi(x;4,3) \sim \frac12\operatorname{Li}(x).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_{\rm sq}\cap[1,K]| \ge (1+o(1))\frac{2K}{\log(4K)}.}&lt;/div&gt;</p>
+<p>In particular the completed exact-depth spectrum is infinite.</p>
+<hr>
+<h2>3. Structural-gap lower bound from the quotient-nine family</h2>
+<p><code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code> proves that for every prime</p>
+<div class="math" role="math">\boxed{r\equiv8\pmod9,}</div>
+<p>the layer</p>
+<div class="math" role="math">\boxed{k=2r}</div>
+<p>is completely directly shadowed by</p>
+<div class="math" role="math">\boxed{j=\frac{2(r+1)}9.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \{2r:r\text{ prime},\ r\equiv8\pmod9\} \subseteq \mathcal G_{\rm sq}.}</div>
+<p>If</p>
+<div class="math" role="math">k=2r\le K,</div>
+<p>then</p>
+<div class="math" role="math">r\le K/2.</div>
+<p>Thus</p>
+<div class="math" role="math">|\mathcal G_{\rm sq}\cap[1,K]| \ge \pi(K/2;9,8)+O(1).</div>
+<p>Since</p>
+<div class="math" role="math">\varphi(9)=6,</div>
+<p>the prime number theorem in arithmetic progressions gives</p>
+<div class="math" role="math">\pi(x;9,8) \sim \frac16\operatorname{Li}(x).</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal G_{\rm sq}\cap[1,K]| \ge (1+o(1))\frac{K}{12\log K}.}&lt;/div&gt;</p>
+<p>In particular the structural-gap set is infinite.</p>
+<hr>
+<h2>4. Infinite and coinfinite</h2>
+<p>Because</p>
+<div class="math" role="math">\mathcal D_{\rm sq}</div>
+<p>contains infinitely many realized prime-modulus depths, while</p>
+<div class="math" role="math">\mathcal G_{\rm sq}</div>
+<p>contains infinitely many impossible quotient-nine depths, the completed minimal-depth spectrum is neither finite nor cofinite.</p>
+<h3>Theorem — completed spectrum is infinite and coinfinite</h3>
+<div class="math" role="math">\boxed{ \mathcal D_{\rm sq}\text{ is infinite and has infinite complement}.}</div>
+<p>More quantitatively, both sides already contain explicit arithmetic subfamilies of order</p>
+<div class="math" role="math">\boxed{K/\log K.}</div>
+<hr>
+<h2>5. Arithmetic backbone and anti-backbone</h2>
+<p>The two explicit families have complementary meanings.</p>
+<h3>Backbone</h3>
+<p>Prime target moduli</p>
+<div class="math" role="math">4a-1\text{ prime}</div>
+<p>produce independent CRT coordinates and guarantee infinitely many exact arrivals.</p>
+<h3>Anti-backbone</h3>
+<p>The quotient-nine semiprime layers</p>
+<div class="math" role="math">a=2r, \qquad r\equiv8\pmod9</div>
+<p>are exact factor-lift descendants and can never be first arrivals.</p>
+<p>Thus the completed spectrum contains both:</p>
+<div class="math" role="math">\boxed{ \text{an infinite arithmetic backbone of necessary depths}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \text{an infinite arithmetic anti-backbone of forbidden depths}.}</div>
+<hr>
+<h2>6. Comparison of scales</h2>
+<p>The explicit realized family has lower-bound scale</p>
+<div class="math" role="math">\frac{2K}{\log(4K)},</div>
+<p>while the single quotient-nine gap family already has scale</p>
+<div class="math" role="math">\frac{K}{12\log K}.</div>
+<p>The all-quotient factor-lift theorem supplies many additional structural-gap families, so the latter constant is not expected to be optimal.</p>
+<p>No asymptotic density for the full spectrum or full gap set is claimed here.</p>
+<p>The point is only that neither side is a sparse logarithmic curiosity: both have at least prime-counting order.</p>
+<hr>
+<h2>7. Consequence for first-depth modeling</h2>
+<p>Any model that treats completed depth as a nearly contiguous set with occasional exceptional gaps is false.</p>
+<p>Any model that treats the spectrum as only the prime-modulus backbone is also false in finite data, because many composite-index depths are realized.</p>
+<p>The correct object has three components:</p>
+<ol><li>guaranteed prime-modulus arrivals;</li><li>guaranteed ancestry/factor-lift structural gaps;</li><li>a genuinely arithmetic composite residual spectrum.</li></ol>
+<p>The current proof program should focus on the third component rather than trying to remove either of the first two.</p>
+<hr>
+<h2>8. Strong-conjecture boundary</h2>
+<p>These depth statements belong to the completed strong/Type-II system.</p>
+<p>They do <strong>not</strong> say that every prime has a Type-II hit.</p>
+<p>A hypothetical failure of the strong conjecture could still avoid every completed layer, even though the set of realizable layer depths itself is infinite and arithmetically rich.</p>
+<p>Thus spectrum structure and universal prime coverage remain logically distinct questions.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

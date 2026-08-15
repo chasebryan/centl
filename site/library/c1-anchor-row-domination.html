@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Exact anchor-row domination inside the C1 residual core — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-anchor-row-domination.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-anchor-row-domination.html">
+  <meta property="og:title" content="Exact anchor-row domination inside the C1 residual core — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact anchor-row domination inside the C1 residual core</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-ANCHOR-ROW-DOMINATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved row-domination lemmas; hard-class union-shadow lemma for <code>j=322</code></p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> these lemmas remove specific earlier rows from any simultaneous residual system once their anchors are avoided. They do not prove full C1, universal DSC-P, López coverage, or Erdős-Straus.</p>
+<p>Read with:</p>
+<ul><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="c1-conditioned-fiber-31113.html">C1-CONDITIONED-FIBER-31113.md</a></li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li></ul>
+<h2>1. Pullback-domination principle</h2>
+<p>Let <code>a&lt;b</code> be earlier Type A/B layers with moduli</p>
+<div class="math" role="math">m_a=4a-1, \qquad m_b=4b-1.</div>
+<p>Suppose</p>
+<div class="math" role="math">m_a\mid m_b</div>
+<p>and</p>
+<div class="math" role="math">\boxed{T_b\bmod m_a\subseteq T_a.}</div>
+<p>Then for every integer <code>x</code>,</p>
+<div class="math" role="math">x\bmod m_b\in T_b \Longrightarrow x\bmod m_a\in T_a.</div>
+<p>Therefore in <strong>any</strong> target progression <code>x=r+Ls</code>, once layer <code>a</code> is avoided, layer <code>b</code> is automatically avoided.</p>
+<p>At parameter level the child forbidden pullback is consequently dominated by the ancestor pullback after projection to the common parameter line.</p>
+<p>This is an exact logical implication, independent of probability, fiber bounds, or a finite search range.</p>
+<h2>2. The <code>j=179</code> row is dominated by <code>j=36</code></h2>
+<p>We have</p>
+<div class="math" role="math">4(179)-1=715=5\cdot143=5(4(36)-1).</div>
+<p>This is ancestry shift <code>s=1</code>, and the child depth</p>
+<div class="math" role="math">179</div>
+<p>is prime.</p>
+<p>By the prime-child theorem,</p>
+<div class="math" role="math">\boxed{T_{179}\bmod143\subseteq T_{36}.}</div>
+<p>Hence every exact <code>j=179</code> hit is already a <code>j=36</code> hit.</p>
+<p>So after the <code>j=36</code> mixed 11/13 row is avoided, <code>j=179</code> contributes no new restriction.</p>
+<p>This explains its complete redundancy in the two <code>{11,13}</code> C1 systems and throughout the recurring <code>{3,11,13}</code> family.</p>
+<h2>3. The <code>j=205</code> row is dominated by <code>j=10</code></h2>
+<p>We have</p>
+<div class="math" role="math">4(205)-1=819=21\cdot39=21(4(10)-1).</div>
+<p>Here the ancestry shift is <code>s=5</code> because</p>
+<div class="math" role="math">21=4(5)+1.</div>
+<p>Also</p>
+<div class="math" role="math">205=5\cdot41,</div>
+<p>with <code>41</code> prime, and</p>
+<div class="math" role="math">5\mid\gcd(10,5).</div>
+<p>The divisor-child theorem therefore gives</p>
+<div class="math" role="math">\boxed{T_{205}\bmod39\subseteq T_{10}.}</div>
+<p>Thus the <code>j=205</code> 3/13 row is exactly redundant once the unary <code>j=10</code> row is avoided.</p>
+<p>This is why it contributes no surviving conditioned 3-adic restriction in the <code>{3,11,13}</code> systems.</p>
+<h2>4. The <code>j=790</code> row is dominated by <code>j=10</code></h2>
+<p>Likewise</p>
+<div class="math" role="math">4(790)-1=3159=81\cdot39=81(4(10)-1).</div>
+<p>Now</p>
+<div class="math" role="math">81=4(20)+1,</div>
+<p>so the ancestry shift is <code>s=20</code>.</p>
+<p>The child depth factors as</p>
+<div class="math" role="math">790=10\cdot79,</div>
+<p>with <code>79</code> prime, and</p>
+<div class="math" role="math">10\mid\gcd(10,20).</div>
+<p>The divisor-child theorem gives</p>
+<div class="math" role="math">\boxed{T_{790}\bmod39\subseteq T_{10}.}</div>
+<p>Therefore the apparently finer row whose residual 3-part reaches</p>
+<div class="math" role="math">3^4=81</div>
+<p>is completely dominated by the <code>j=10</code> anchor.</p>
+<p>Once <code>j=10</code> is avoided, <code>j=790</code> can introduce <strong>no</strong> new 3-adic obstruction at any depth or target progression where both rows are present.</p>
+<p>This converts the finite observation</p>
+<blockquote><p>the fine <code>3^4</code> row adds zero new hits</p></blockquote>
+<p>into an exact ancestry theorem.</p>
+<h2>5. Hard-compatible union domination of <code>j=322</code></h2>
+<p>The common triple row is</p>
+<div class="math" role="math">j=322, \qquad m_{322}=1287=9\cdot11\cdot13.</div>
+<p>It is not fully shadowed by either <code>j=3</code> or <code>j=10</code> individually.</p>
+<p>However, the Mordell-hard target classes satisfy</p>
+<div class="math" role="math">\boxed{h\equiv1\pmod3.}</div>
+<p>Because</p>
+<div class="math" role="math">\gcd(840,1287)=3,</div>
+<p>any hard-compatible <code>j=322</code> trap must therefore satisfy</p>
+<div class="math" role="math">t\equiv1\pmod3.</div>
+<h3>Exact trap table</h3>
+<p>The 15 distinct residues in <code>T_322</code> are:</p>
+<table class="directory"><thead><tr><th><code>t</code></th><th><code>t mod 3</code></th><th><code>t mod 11 in T_3</code></th><th><code>t mod 39 in T_10</code></th></tr></thead><tbody><tr><td>643</td><td>1</td><td>no</td><td>yes</td></tr><tr><td>965</td><td>2</td><td>yes</td><td>yes</td></tr><tr><td>1103</td><td>2</td><td>no</td><td>no</td></tr><tr><td>1126</td><td>1</td><td>no</td><td>yes</td></tr><tr><td>1195</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>1231</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>1241</td><td>2</td><td>no</td><td>no</td></tr><tr><td>1259</td><td>2</td><td>no</td><td>no</td></tr><tr><td>1264</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>1273</td><td>1</td><td>yes</td><td>no</td></tr><tr><td>1279</td><td>1</td><td>no</td><td>yes</td></tr><tr><td>1280</td><td>2</td><td>no</td><td>no</td></tr><tr><td>1283</td><td>2</td><td>yes</td><td>yes</td></tr><tr><td>1285</td><td>1</td><td>no</td><td>yes</td></tr><tr><td>1286</td><td>2</td><td>yes</td><td>yes</td></tr></tbody></table>
+<p>Every residue in <code>T_322</code> that is <code>1 mod 3</code> is caught by at least one of the two anchors:</p>
+<div class="math" role="math">\boxed{ \{t\in T_{322}:t\equiv1\pmod3\} \subseteq \pi_{11}^{-1}(T_3) \cup \pi_{39}^{-1}(T_{10}). }</div>
+<p>The only residues missed by both anchors are</p>
+<div class="math" role="math">1103,1241,1259,1280,</div>
+<p>and all four are</p>
+<div class="math" role="math">2\pmod3.</div>
+<h3>Hard-class union-shadow theorem</h3>
+<p>For every integer <code>x</code> with</p>
+<div class="math" role="math">x\equiv1\pmod3,</div>
+<div class="math" role="math">\boxed{ x\bmod1287\in T_{322} \Longrightarrow \left( x\bmod11\in T_3 \quad\text{or}\quad x\bmod39\in T_{10} \right).}</div>
+<p>Therefore, once the unary anchor rows <code>j=3</code> and <code>j=10</code> are avoided, the triple row <code>j=322</code> is automatically avoided for every Mordell-hard-compatible progression.</p>
+<p>This is a genuine <strong>two-anchor union shadow</strong>, not a single-layer direct shadow.</p>
+<h2>6. Consequence for the <code>{3,11,13}</code> conditioned fiber</h2>
+<p>Before these lemmas, the recurring 3-coordinate appeared to receive restrictions from rows including</p>
+<div class="math" role="math">25,88,205,322,520,790.</div>
+<p>The exact domination theorems remove:</p>
+<div class="math" role="math">\boxed{205,322,790}</div>
+<p>once the unary anchors are safe.</p>
+<p>The effective 3-adic rows are therefore reduced to</p>
+<div class="math" role="math">\boxed{25,88,520}</div>
+<p>inside the frozen <code>{3,11,13}</code> C1 family.</p>
+<p>This explains a substantial part of the observed overlap:</p>
+<ul><li><code>j=205</code> contributes no new restriction because it is a divisor-child of <code>j=10</code>;</li><li><code>j=790</code> contributes no fine <code>3^4</code> restriction because it is another divisor-child of <code>j=10</code>;</li><li><code>j=322</code> contributes no restriction on hard-compatible unary-safe pairs because its compatible trap fiber is union-shadowed by <code>j=3</code> and <code>j=10</code>.</li></ul>
+<h2>7. The remaining 3-adic question is tiny</h2>
+<p>The entire finite mod-3/mod-9 extension problem is now concentrated in three rows:</p>
+<ol><li><code>j=25</code>, residual support <code>3·11</code>;</li><li><code>j=88</code>, residual support <code>3^2·13</code>;</li><li><code>j=520</code>, residual support <code>3^2·11</code>.</li></ol>
+<p>The finite conditioned-fiber certificate shows:</p>
+<ul><li><code>j=25</code> supplies at most one forbidden residue modulo <code>3</code> after conditioning on the 11-coordinate;</li><li><code>j=520</code> never introduces a mod-3 class outside the class already forbidden by <code>j=25</code>;</li><li><code>j=88</code> can add at most one further residue modulo <code>9</code>.</li></ul>
+<p>Therefore at most four of the nine mod-9 classes are removed, leaving at least five.</p>
+<p>The first and third bounds are small exact fiber statements. The middle containment is now the highest-value remaining row relation to prove universally in the relevant hard-compatible residual geometry.</p>
+<h2>8. New theorem target: projected ancestry domination</h2>
+<p>Although <code>j=520</code> is not fully shadowed by <code>j=25</code>, their moduli satisfy</p>
+<div class="math" role="math">4(520)-1=21(4(25)-1).</div>
+<p>The finite C1 data indicate a weaker projection law:</p>
+<blockquote><p>after the shared fixed factors are removed, every compatible <code>j=520</code> restriction on the mod-3 coordinate lies inside the mod-3 class already forbidden by <code>j=25</code>.</p></blockquote>
+<p>This is a <strong>projected ancestry shadow</strong> rather than full trap shadowing.</p>
+<p>Proving that relation would turn the entire 3-adic conditioned-fiber lower bound of <code>5/9</code> from finite evidence into a theorem for this residual row pattern.</p>
+<p>That is the next local algebra target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

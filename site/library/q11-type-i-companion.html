@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Type-I companion to the exact `q=11` filter — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q11-type-i-companion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q11-type-i-companion.html">
+  <meta property="og:title" content="Type-I companion to the exact `q=11` filter — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Type-I companion to the exact `q=11` filter</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q11-TYPE-I-COMPANION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact companion</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-Q11-EXACT-FILTER.md</code>, <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>HARD-Q7-TYPE-I-NO-RESCUE.md</code></p>
+<p><strong>Claim boundary:</strong> classifies when Type I rescues a hard-prime Type-II miss at shift <code>11</code>. It does not prove that one of the two targets always hits, and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Forced factor and the two boxes</h2>
+<p>Let <code>p</code> be Mordell-hard and</p>
+<div class="math" role="math">C=\frac{p+11}{4}.</div>
+<p>Then <code>3\mid C</code> and <code>C</code> is odd. Write <code>Q</code> for the quadratic-residue subgroup modulo <code>11</code>:</p>
+<div class="math" role="math">Q=\{1,3,4,5,9\}.</div>
+<p>The forced prime <code>3</code> generates <code>Q</code>. Its simple local set is</p>
+<div class="math" role="math">\{3^{-1},1,3\}=\{4,1,3\}.</div>
+<p>Call this the <strong>thin QR box</strong></p>
+<div class="math" role="math">Q_{\mathrm{thin}}=\{1,3,4\}.</div>
+<p>The complementary QR classes are <code>5</code> and <code>9</code>. The existing Type-II theorem says that if the total nontrivial QR valuation of <code>C</code> is at least two, then the signed box contains all of <code>Q</code>.</p>
+<hr>
+<h2>2. Location of the Type-I target</h2>
+<p>Because <code>11≡3\pmod4</code> and <code>p≡1\pmod4</code>,</p>
+<div class="math" role="math">\Bigl(\frac{-p^{-1}}{11}\Bigr) = -\Bigl(\frac p{11}\Bigr).</div>
+<p>Thus the Type-I target is a quadratic residue if and only if <code>p</code> is a nonresidue modulo <code>11</code>. The ten nonzero classes give:</p>
+<div class="math" role="math">\begin{array}{c|c|c} p\bmod11 &amp; -p^{-1}\bmod11 &amp; \text{side}\\ \hline 1 &amp; 10 &amp; \mathrm{NR}\\ 2 &amp; 5 &amp; \mathrm{QR}\\ 3 &amp; 7 &amp; \mathrm{NR}\\ 4 &amp; 8 &amp; \mathrm{NR}\\ 5 &amp; 2 &amp; \mathrm{NR}\\ 6 &amp; 9 &amp; \mathrm{QR}\\ 7 &amp; 3 &amp; \mathrm{QR}\\ 8 &amp; 4 &amp; \mathrm{QR}\\ 9 &amp; 6 &amp; \mathrm{NR}\\ 10 &amp; 1 &amp; \mathrm{QR} \end{array}</div>
+<p>The Type-II target is always <code>10</code>.</p>
+<hr>
+<h2>3. Full-QR Type-II misses</h2>
+<h3>Theorem — full-QR rescue</h3>
+<p>Suppose every prime factor of <code>C</code> is a quadratic residue modulo <code>11</code>, and the nontrivial QR valuation is at least two. Then the signed box equals <code>Q</code>, Type II misses, and Type I hits if and only if</p>
+<div class="math" role="math">\boxed{\Bigl(\frac p{11}\Bigr)=-1,}</div>
+<p>equivalently <code>p\equiv2,6,7,8,10\pmod{11}</code>.</p>
+<h3>Proof</h3>
+<p>Valuation at least two fills <code>Q</code> by the existing <code>q=11</code> lemma. The Type-II target <code>10</code> lies outside <code>Q</code>. The Type-I target lies in <code>Q</code> precisely on the nonresidue classes listed above. QED.</p>
+<hr>
+<h2>4. Thin QR Type-II misses</h2>
+<h3>Theorem — thin-QR rescue</h3>
+<p>Suppose <code>v_3(C)=1</code> and every other prime factor of <code>C</code> is <code>1\bmod{11}</code>. Then the signed box equals the thin QR box <code>{1,3,4}</code>, Type II misses, and Type I hits if and only if</p>
+<div class="math" role="math">\boxed{p\equiv7,8,10\pmod{11}.}</div>
+<h3>Proof</h3>
+<p>The local set of <code>3</code> is exactly <code>{1,3,4}</code>, and primes <code>1\bmod{11}</code> do not enlarge it. The Type-I target lies in that three-element set precisely for the three rows <code>p\equiv7,8,10</code> of the table. QED.</p>
+<p>The two remaining nonresidue classes <code>p\equiv2,6</code> have Type-I targets <code>5</code> and <code>9</code>, which lie in <code>Q\setminus Q_{\mathrm{thin}}</code>. Those classes are rescued only when extra QR valuation fills the whole subgroup.</p>
+<hr>
+<h2>5. Combined <code>q=11</code> miss</h2>
+<p>Combining the Type-II classification with the two rescue theorems:</p>
+<h3>Theorem — combined hard-prime miss at <code>11</code></h3>
+<p>A Mordell-hard prime misses both exact targets at shift <code>11</code> if and only if it is a Type-II miss of one of the following kinds:</p>
+<ol><li><strong>full-QR miss with residue side:</strong> every prime factor of <code>C</code> is QR modulo <code>11</code>, the QR box is full, and <code>p</code> is itself a quadratic residue modulo <code>11</code>;</li><li><strong>thin-QR miss outside <code>{7,8,10}</code>:</strong> <code>v_3(C)=1</code>, every other QR prime is <code>1\bmod{11}</code>, there is no primitive nonresidue packet, and <code>p\not\equiv7,8,10\pmod{11}</code>;</li><li><strong>thin primitive Branch B:</strong> the existing Type-II Branch B holds, and the Type-I target additionally avoids the resulting signed box.</li></ol>
+<p>In particular Type I <strong>does</strong> contribute new hard-prime coverage at <code>q=11</code>, unlike <code>q=3</code> and <code>q=7</code>.</p>
+<hr>
+<h2>6. Finite signal</h2>
+<p>Through <code>2{,}000{,}000</code> there are <code>4519</code> Mordell-hard primes. After the exact <code>q=3</code> and <code>q=7</code> combined misses, the Type-II <code>q=11</code> filter solves <code>1057</code> further primes, and the Type-I companion solves an additional <code>13</code> primes that Type II missed. The remaining combined <code>3,7,11</code> core has size <code>711</code>.</p>
+<p>Those <code>13</code> Type-I-only rescues are the first concrete corridor primes at which the second target is essential for original Erdős--Straus rather than for the strong/Type-II conjecture.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

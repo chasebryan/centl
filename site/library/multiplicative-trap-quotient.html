@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Multiplicative trap quotient — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/multiplicative-trap-quotient.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/multiplicative-trap-quotient.html">
+  <meta property="og:title" content="Multiplicative trap quotient — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multiplicative trap quotient</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTIPLICATIVE-TRAP-QUOTIENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact theorem note and active proof direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove Direct-Shadow Completeness, universal López Type A/B coverage, or the Erdős-Straus conjecture. López 2024 already notes the mutual-inverse relationship between the Type A and Type B divisor residues. The quotient construction below is being treated as a potentially novel organization of that structure pending broader prior-art review.</p>
+<p>Read with:</p>
+<ul><li><a href="quadratic-prior-art-note.html">QUADRATIC-PRIOR-ART-NOTE.md</a></li><li><a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a></li><li><a href="quadratic-signature-shield-k1200.html">QUADRATIC-SIGNATURE-SHIELD-K1200.md</a></li><li><a href="direct-shadow-k1200.html">DIRECT-SHADOW-K1200.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>For a Type A/B depth <code>k</code>, put</p>
+<div class="math" role="math">m_k=4k-1</div>
+<p>and</p>
+<div class="math" role="math">G_k=(\mathbb Z/m_k\mathbb Z)^\times.</div>
+<p>Let the distinct prime divisors of <code>k</code> be</p>
+<div class="math" role="math">\ell_1,\ldots,\ell_r.</div>
+<p>Define the multiplicative subgroup</p>
+<div class="math" role="math">\boxed{ D_k=\langle \ell_1,\ldots,\ell_r\rangle\le G_k. }</div>
+<p>The Type A/B trap set is</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<h2>2. Multiplicative trap-coset theorem</h2>
+<h3>Theorem</h3>
+<p>For every <code>k&gt;=1</code>,</p>
+<div class="math" role="math">\boxed{T_k\subseteq -D_k.}</div>
+<h3>Proof</h3>
+<p>Every divisor <code>e|k</code> is a product of powers of the prime divisors of <code>k</code>, so</p>
+<div class="math" role="math">e\in D_k.</div>
+<p>Also</p>
+<div class="math" role="math">4k\equiv1\pmod{4k-1}.</div>
+<p>Since <code>k in D_k</code>, its inverse belongs to <code>D_k</code>, and therefore</p>
+<div class="math" role="math">4\equiv k^{-1}\in D_k.</div>
+<p>Hence</p>
+<div class="math" role="math">4e\in D_k</div>
+<p>for every <code>e|k</code>.</p>
+<p>Multiplication by <code>-1</code> now gives</p>
+<div class="math" role="math">-e,-4e\in-D_k.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{T_k\subseteq-D_k.}</div>
+<p>QED.</p>
+<h2>3. The quotient</h2>
+<p>Define the finite abelian quotient</p>
+<div class="math" role="math">\boxed{ \Gamma_k=G_k/D_k. }</div>
+<p>Every Type A/B trap has the same image in this quotient:</p>
+<div class="math" role="math">\boxed{ [t]=[-1]\in\Gamma_k \qquad(t\in T_k). }</div>
+<p>Therefore:</p>
+<h3>Multiplicative quotient shield</h3>
+<p>If a unit residue <code>x mod m_k</code> satisfies</p>
+<div class="math" role="math">\boxed{[x]\ne[-1]\text{ in }\Gamma_k,}</div>
+<p>then</p>
+<div class="math" role="math">x\notin T_k.</div>
+<p>This is an exact sufficient non-hit certificate.</p>
+<h2>4. Multiplicative trap index</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \iota(k)=[G_k:D_k]. }</div>
+<p>This measures how many multiplicative cosets remain after quotienting by the subgroup generated by the prime divisors of <code>k</code>.</p>
+<p>The trap set occupies exactly <strong>one distinguished quotient class</strong>.</p>
+<p>A large value of <code>iota(k)</code> therefore gives a much finer coarse partition than the single Jacobi bit.</p>
+<h2>5. Relation to the quadratic-signature quotient</h2>
+<p>Let</p>
+<div class="math" role="math">\chi_k:G_k\to V_k</div>
+<p>be the vector of local Legendre symbols at the distinct prime factors of <code>m_k</code>, encoded over <code>F_2</code>.</p>
+<p>As recorded in <a href="quadratic-signature-quotient.html">QUADRATIC-SIGNATURE-QUOTIENT.md</a>,</p>
+<div class="math" role="math">H_k=\chi_k(D_k)</div>
+<p>and the quadratic quotient is</p>
+<div class="math" role="math">Q_k=V_k/H_k.</div>
+<p>Because <code>D_k</code> lies in the kernel of the composite map</p>
+<div class="math" role="math">G_k\xrightarrow{\chi_k}V_k\to Q_k,</div>
+<p>the map factors through <code>Gamma_k</code>:</p>
+<div class="math" role="math">\boxed{ \Gamma_k\twoheadrightarrow Q_k. }</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{|Q_k|\mid\iota(k).}</div>
+<p>The ordinary Jacobi character is a further one-bit quotient.</p>
+<p>Thus the avoidance hierarchy is</p>
+<div class="math" role="math">\boxed{ T_k \subseteq -D_k \subseteq \chi_k^{-1}(\chi_k(-1)+H_k) \subseteq \{u:(u/m_k)=-1\}. }</div>
+<p>Each step moving left is a finer approximation to the exact Type A/B trap set.</p>
+<h2>6. Why this is stronger than quadratic signs</h2>
+<p>The quadratic-signature quotient is necessarily a <code>2</code>-group quotient. The multiplicative quotient need not be.</p>
+<p>For example, finite computations show indices such as</p>
+<div class="math" role="math">6,10,12,18,30,\ldots</div>
+<p>and much larger values.</p>
+<p>Those odd factors encode multiplicative information invisible to every quadratic character.</p>
+<p>Therefore a candidate trapped on the correct Jacobi side, and even in the correct complete local quadratic-signature coset, may still lie outside <code>-D_k</code> and be certified safe by <code>Gamma_k</code>.</p>
+<h2>7. Finite structure through k &lt;= 3000</h2>
+<p>Exact subgroup enumeration through <code>k&lt;=3000</code> gives:</p>
+<pre><code class="language-text">index iota(k) = 2: 1763 layers
+index iota(k) &gt; 2: 1237 layers
+number of distinct observed indices: 54</code></pre>
+<p>The most common larger indices begin:</p>
+<pre><code class="language-text">4:  368 layers
+6:  186
+8:  156
+12: 115
+16: 111
+24:  46
+48:  36
+10:  30
+32:  23</code></pre>
+<p>The largest observed value in this range is</p>
+<div class="math" role="math">\boxed{\iota(2819)=800,}</div>
+<p>with</p>
+<div class="math" role="math">4(2819)-1=11275, \qquad \varphi(11275)=8000, \qquad
+<p>|D_{2819}|=10.&lt;/div&gt;</p>
+<p>These are finite structural data, not an asymptotic theorem.</p>
+<h2>8. Direct residual refinement on the frozen k &lt;= 1200 bundle</h2>
+<p>The exact <code>k&lt;=1200</code> candidate bundle contains <code>41,470</code> directly novel candidates.</p>
+<p>At the successive coarse resolutions:</p>
+<pre><code class="language-text">Jacobi character residual:             11,056
+full quadratic-signature residual:     10,684
+direct multiplicative-coset residual:  10,258</code></pre>
+<p>Thus the full local quadratic vector locally rescues</p>
+<div class="math" role="math">11056-10684=372</div>
+<p>candidates beyond the Jacobi shield, while the still-finer multiplicative quotient locally rescues</p>
+<div class="math" role="math">11056-10258=798</div>
+<p>beyond the Jacobi direct residual.</p>
+<p>Equivalently, it locally rescues another</p>
+<div class="math" role="math">\boxed{426}</div>
+<p>candidates beyond the full quadratic-signature resolution.</p>
+<p>The word <strong>locally</strong> is essential here. These counts ask only whether one earlier layer by itself makes the quotient class unavoidable. They do not yet prove that all multiplicative-coset constraints can be avoided simultaneously.</p>
+<h2>9. The exact residual inside -D_k</h2>
+<p>The subgroup coset remains a coarse superset of the true trap set, often a very large one.</p>
+<p>Normalize by multiplication by <code>-1</code>. Then</p>
+<div class="math" role="math">-T_k=\{e,4e:e\mid k\}\subseteq D_k.</div>
+<p>Write</p>
+<div class="math" role="math">k=\prod_{i=1}^r\ell_i^{a_i}</div>
+<p>and let</p>
+<div class="math" role="math">\phi_k:\mathbb Z^r\to D_k, \qquad (b_1,\ldots,b_r)\mapsto\prod_i\ell_i^{b_i}\pmod{m_k}.</div>
+<p>If</p>
+<div class="math" role="math">\mathbf a=(a_1,\ldots,a_r)</div>
+<p>and</p>
+<div class="math" role="math">\mathcal B_{\mathbf a}=\{\mathbf b:0\le b_i\le a_i\},</div>
+<p>then the divisor family is <code>phi_k(B_a)</code>.</p>
+<p>Since</p>
+<div class="math" role="math">4\equiv k^{-1}=\phi_k(-\mathbf a),</div>
+<p>the second Type A/B family is the translated box</p>
+<div class="math" role="math">\phi_k(\mathcal B_{\mathbf a}-\mathbf a).</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ -T_k = \phi_k(\mathcal B_{\mathbf a}) \cup \phi_k(\mathcal B_{\mathbf a}-\mathbf a). }</div>
+<p>This is an exact <strong>two-box representation</strong> of the Type A/B trap set inside the subgroup <code>D_k</code>.</p>
+<p>It identifies the next refinement after the multiplicative quotient: once a candidate is forced into <code>-D_k</code>, the remaining exact obstruction is not an arbitrary subset of the subgroup but the image of two tightly constrained exponent boxes.</p>
+<h2>10. Connection to López prior art</h2>
+<p>López 2024 explicitly observes that the Type <code>-n</code> and Type <code>-4d</code> divisor sets are mutual inverses modulo <code>4dn-1</code>. That inversion relation is prior art and must not be presented as an FCF discovery.</p>
+<p>The present research uses that same arithmetic in a different structural organization:</p>
+<ol><li>collect all divisors at fixed product depth <code>k=dn</code>;</li><li>pass to the subgroup generated by the prime divisors of <code>k</code>;</li><li>quotient the full unit group by that subgroup;</li><li>identify all Type A/B traps with one quotient class;</li><li>retain the exact trap set inside the class as two exponent boxes.</li></ol>
+<p>Targeted searching on 2026-08-14 did not locate this exact quotient-plus-two-box formulation inside the minimal-depth/shadow framework, but that negative search does not establish priority.</p>
+<h2>11. New theorem program</h2>
+<p>The hierarchy now reads</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{Jacobi character}\\ \downarrow\\ \text{full quadratic signature}\\ \downarrow\\ \text{multiplicative quotient }\Gamma_k\\ \downarrow\\ \text{two-box geometry inside }D_k\\ \downarrow\\ \text{exact Type A/B traps} \end{array} }</div>
+<p>Each level gives a more precise description of what a Type A/B trap can look like.</p>
+<p>The immediate questions are:</p>
+<ol><li>Does the multiplicative quotient shield have a direct-shadow completeness theorem analogous to the quadratic-signature finite collapse?</li><li>What are the invariant factors of <code>Gamma_k</code>, and which of them create the large observed indices?</li><li>Can the two-box representation explain the exact direct-shadow relation between layers?</li><li>Can modulus ancestry induce homomorphisms between the quotients <code>Gamma_j</code> and <code>Gamma_k</code> that force trap-coset shadowing?</li><li>Inside a direct multiplicative residual, can the two exponent boxes always be avoided unless an exact direct shadow already exists?</li></ol>
+<p>The fifth question is now a particularly direct bridge back toward DSC-P.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

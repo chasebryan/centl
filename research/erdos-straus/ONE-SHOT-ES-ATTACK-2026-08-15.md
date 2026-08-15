@@ -270,8 +270,22 @@ A likely language for that step is the ideal/ray-class factorization in `Q(sqrt(
 
 The one-shot attack should therefore attempt to identify the target ray class with a forced half-factor of the principal ideal, rather than merely enumerate more small `(a,b)` pairs.
 
-## 11. Next exact checks
+## 11. Corridor theorems proved this session
 
+The `a=1` / `c=\ell` factor-pair construction is **not** universal: through `500{,}000` it misses most of the post-linear residual. Least-external-NR prime shifts also miss a positive fraction of that residual.
+
+What did close exactly:
+
+1. `TWO-P-PLUS-ONE-FILTER.md` — divisor `7\bmod8` of `2p+1`;
+2. `HARD-Q7-TYPE-I-NO-RESCUE.md` — Type I never rescues a hard `q=7` miss;
+3. `Q11-TYPE-I-COMPANION.md` — Type I does rescue an explicit list of hard `q=11` misses;
+4. `K15-TWO-TARGET-FILTER.md` — combined miss is the subgroup `{1,2,4,8}` or one thin packet.
+
+The one-shot target is unchanged: every remaining residual prime needs one later two-target hit. The next exact check is `k=19`.
+
+## 12. Next exact checks
+
+0. classify the combined two-target miss at `k=19`, then the Type-I companion to `q=23`;
 1. formalize the `a=1` ray-class interpretation;
 2. determine the exact ray class represented by `k\equiv-p (mod 4c)`;
 3. factor the principal ideal `(p+2 sqrt(-c))` and express the rational factor selection as a finite-abelian subset-product problem;

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Kneser defect theorem for external binary-r rescue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-r-kneser-defect.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-r-kneser-defect.html">
+  <meta property="og:title" content="Kneser defect theorem for external binary-r rescue — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Kneser defect theorem for external binary-r rescue</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-R-KNESER-DEFECT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem in the external-nonresidue binary-rescue lane</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-DIVISOR-COLLISION.md</code>, <code>FAB-KNESER-FULL-STABILIZER-DEFECT.md</code>, <code>SHIFTED-NONRESIDUE-TRANSFER.md</code></p>
+<p><strong>Claim boundary:</strong> proves that every failed external binary-r collision has an even stabilizer quotient and sharply bounds its visible nonresidue valuation mass. It does not prove that some r must succeed for every hard prime and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime and let</p>
+<div class="math" role="math">r\equiv3\pmod4</div>
+<p>be a prime satisfying</p>
+<div class="math" role="math">\boxed{\left(\frac rp\right)=-1.}</div>
+<p>Put</p>
+<div class="math" role="math">A=\frac{p+r}{4}, \qquad N=pA.</div>
+<p><code>BINARY-R-DIVISOR-COLLISION.md</code> proves that the exact binary rescue exists if and only if the signed divisor exponent box</p>
+<div class="math" role="math">\boxed{ R= \left\{ \prod_{s^e\parallel N}s^z\pmod r: -e\le z\le e \right\} \subseteq G=(\mathbb Z/r\mathbb Z)^\times }</div>
+<p>contains</p>
+<div class="math" role="math">\boxed{-1.}</div>
+<p>Assume the binary rescue fails:</p>
+<div class="math" role="math">\boxed{-1\notin R.}</div>
+<p>Let</p>
+<div class="math" role="math">H=\operatorname{Stab}(R), \qquad n=[G:H].</div>
+<p>Because <code>r</code> is prime, <code>G</code> is cyclic of order <code>r-1</code>.</p>
+<hr>
+<h2>2. Odd defect index is impossible</h2>
+<p>Suppose</p>
+<div class="math" role="math">2\nmid n.</div>
+<p>Write <code>G=&lt;g&gt;</code>. The unique subgroup of index <code>n</code> is</p>
+<div class="math" role="math">H=\langle g^n\rangle.</div>
+<p>Since <code>n|(r-1)</code> and <code>n</code> is odd,</p>
+<div class="math" role="math">n\mid\frac{r-1}{2}.</div>
+<p>Therefore</p>
+<div class="math" role="math">-1 =g^{(r-1)/2} \in H.</div>
+<p>But <code>1 in R</code>, and <code>R</code> is <code>H</code>-periodic. Hence</p>
+<div class="math" role="math">H\subseteq R.</div>
+<p>Thus</p>
+<div class="math" role="math">-1\in R,</div>
+<p>contradicting binary-rescue failure.</p>
+<h3>Theorem — no odd binary defect</h3>
+<p>Every failed external binary-r divisor collision has</p>
+<div class="math" role="math">\boxed{2\mid n.}</div>
+<p>Since</p>
+<div class="math" role="math">r\equiv3\pmod4,</div>
+<p>we have</p>
+<div class="math" role="math">v_2(r-1)=1.</div>
+<p>Therefore every even defect index satisfies</p>
+<div class="math" role="math">\boxed{n\equiv2\pmod4.}</div>
+<p>So the complete defect spectrum is</p>
+<div class="math" role="math">\boxed{n=2,6,10,14,18,\ldots}</div>
+<p>before the additional Kneser constraints are imposed.</p>
+<hr>
+<h2>3. Index two is also impossible</h2>
+<p>If</p>
+<div class="math" role="math">n=2,</div>
+<p>then <code>H</code> is the quadratic-residue subgroup of <code>G</code>.</p>
+<p>Quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pr\right) = \left(\frac rp\right) =-1</div>
+<p>because <code>p≡1 mod4</code>.</p>
+<p>Thus the distinguished prime factor <code>p||N</code> lies outside <code>H</code>.</p>
+<p>Its local signed set is</p>
+<div class="math" role="math">\{p^{-1},1,p\}.</div>
+<p>Modulo <code>H</code>, the element <code>pH</code> has order two, so this local set already fills the whole quotient</p>
+<div class="math" role="math">G/H.</div>
+<p>That would make the full signed box project onto the whole quotient, including the class of <code>-1</code>, contradicting failure.</p>
+<p>Equivalently, this is the projected-order gap from the full-stabilizer theorem: an exponent-one factor outside <code>H</code> would require quotient order strictly greater than <code>3</code>, not <code>2</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{n\ne2.}</div>
+<p>Combining with the previous section:</p>
+<div class="math" role="math">\boxed{n\ge6,\qquad n\equiv2\pmod4.}</div>
+<hr>
+<h2>4. Both p and A are quadratic nonresidues modulo r</h2>
+<p>We already have</p>
+<div class="math" role="math">\left(\frac pr\right)=-1.</div>
+<p>Also</p>
+<div class="math" role="math">A=\frac{p+r}{4} \equiv\frac p4\pmod r,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{\left(\frac Ar\right)=-1.}</div>
+<p>Therefore the total quadratic-nonresidue valuation mass inside the factorization of <code>A</code> is odd.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{ E_r(A) = \sum_{ s^e\parallel A, (s/r)=-1 }e. }</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{E_r(A)\equiv1\pmod2.}</div>
+<p>Because <code>p</code> does not divide <code>A</code>, the corresponding nonresidue valuation mass in</p>
+<div class="math" role="math">N=pA</div>
+<p>is exactly</p>
+<div class="math" role="math">\boxed{E_r(N)=1+E_r(A).}</div>
+<p>Thus <code>E_r(N)</code> is positive and even.</p>
+<hr>
+<h2>5. Every quadratic-nonresidue factor is visible</h2>
+<p>Every failed defect index is even. As in <code>FAB-KNESER-EVEN-DEFECT-EDGE.md</code>, this implies</p>
+<div class="math" role="math">H\subseteq G^2.</div>
+<p>Therefore every prime factor of <code>N</code> that is a quadratic nonresidue modulo <code>r</code> lies outside <code>H</code>.</p>
+<p>The full-stabilizer Kneser theorem gives</p>
+<div class="math" role="math">2\sum_{s^e\parallel N,\ s\notin H}e \le n-2.</div>
+<p>Hence</p>
+<div class="math" role="math">2E_r(N)\le n-2.</div>
+<p>Substituting <code>E_r(N)=1+E_r(A)</code> yields:</p>
+<h3>Theorem — external binary defect mass bound</h3>
+<p>Every failed external binary-r collision satisfies</p>
+<div class="math" role="math">\boxed{ n\ge2E_r(A)+4.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ E_r(A)\le\frac{n-4}{2}. }</div>
+<p>Because <code>E_r(A)</code> is odd and <code>n≡2 mod4</code>, this parity is exact, not merely an inequality artifact.</p>
+<p>Every additional nonresidue valuation unit in the shifted integer <code>(p+r)/4</code> eliminates another low even defect index.</p>
+<hr>
+<h2>6. Projected-order bound</h2>
+<p>Let</p>
+<div class="math" role="math">s^e\parallel N</div>
+<p>with</p>
+<div class="math" role="math">\left(\frac sr\right)=-1.</div>
+<p>Then <code>s notin H</code>. The full-stabilizer theorem gives</p>
+<div class="math" role="math">\operatorname{ord}_{G/H}(sH)&gt;2e+1.</div>
+<p>Because <code>sH</code> remains quadratic-nonresidue-side in the even quotient, its order is even. Therefore</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G/H}(sH) \ge2e+2. }</div>
+<p>In particular, the distinguished factor <code>p</code> has exponent one, so</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{G/H}(pH)\ge4. }</div>
+<p>But the quotient order is <code>2 mod4</code>, so the first possible order is actually</p>
+<div class="math" role="math">\boxed{6.}</div>
+<p>This is another direct proof that no index-two defect can survive.</p>
+<hr>
+<h2>7. Exact index-six classification</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{n=6.}</div>
+<p>The mass bound gives</p>
+<div class="math" role="math">E_r(A)\le1.</div>
+<p>Since <code>E_r(A)</code> is positive and odd,</p>
+<div class="math" role="math">\boxed{E_r(A)=1.}</div>
+<p>Thus <code>A</code> contains exactly one unit of quadratic-nonresidue valuation mass: there is a unique prime</p>
+<div class="math" role="math">s\parallel A</div>
+<p>with <code>(s/r)=-1</code>, and every other prime factor of <code>A</code> is a quadratic residue modulo <code>r</code>.</p>
+<p>The two nonresidue prime factors of <code>N=pA</code> are therefore precisely the simple factors</p>
+<div class="math" role="math">p \quad\text{and}\quad s.</div>
+<p>They already consume the full outside-stabilizer valuation budget:</p>
+<div class="math" role="math">2(1+1)=4=n-2.</div>
+<p>Hence every other prime factor of <code>N</code> lies in <code>H</code>.</p>
+<p>The projected-order gap excludes orders <code>2</code> and <code>3</code>; in the cyclic quotient of order six, both <code>pH</code> and <code>sH</code> therefore have exact order six.</p>
+<p>Let <code>x</code> generate <code>G/H</code>. Every generator is <code>x</code> or <code>x^{-1}</code>, so each of the two simple nontrivial local sets is</p>
+<div class="math" role="math">\{x^{-1},1,x\}.</div>
+<p>Their product is</p>
+<div class="math" role="math">\boxed{ R/H = \{x^{-2},x^{-1},1,x,x^2\}, }</div>
+<p>which is every quotient class except the unique order-two class</p>
+<div class="math" role="math">x^3.</div>
+<p>Because <code>r≡3 mod4</code> and <code>H⊂G^2</code>, the image of <code>-1</code> in <code>G/H</code> is exactly that order-two class.</p>
+<p>Therefore:</p>
+<h3>Theorem — exact binary index-six defect</h3>
+<p>A binary-r failure has stabilizer index six if and only if, in the quotient geometry forced above, the shifted factorization has exactly two simple primitive order-six atoms <code>p</code> and <code>s</code>, all other factor mass lies in <code>H</code>, and</p>
+<div class="math" role="math">\boxed{ R/H=(G/H)\setminus\{-1H\}. }</div>
+<p>So index six is the extremal one-hole failure: the signed divisor box covers five of the six quotient classes and misses <strong>only the required ES target</strong>.</p>
+<hr>
+<h2>8. Why the binary route is cleaner than the FAB target route</h2>
+<p>For the strong fixed-q FAB target, odd-index defects can survive and must be treated separately.</p>
+<p>For the binary-r target, the distinguished class is exactly <code>-1</code>. Since <code>-1</code> belongs to every odd-index subgroup of a cyclic group of order <code>2 mod4</code>, <strong>all odd-index defects vanish immediately</strong>.</p>
+<p>Thus every external binary-r failure has the same architecture:</p>
+<div class="math" role="math">\boxed{ \text{even quotient} \Longrightarrow H\subseteq\text{quadratic residues} \Longrightarrow \text{every nonresidue factor is visible} \Longrightarrow \text{Kneser mass forces the quotient upward}. }</div>
+<p>This removes the odd high-power-residue branch from the entropy-or-descent program entirely.</p>
+<hr>
+<h2>9. New direct ES target</h2>
+<p>For every Mordell-hard prime <code>p</code>, choose an external nonresidue prime</p>
+<div class="math" role="math">r\equiv3\pmod4, \qquad (r/p)=-1.</div>
+<p>If the binary collision at <code>r</code> fails, its full stabilizer index obeys</p>
+<div class="math" role="math">\boxed{ n\ge2E_r((p+r)/4)+4, \qquad n\mid r-1, \qquad n\equiv2\pmod4. }</div>
+<p>Therefore a universal proof can aim to force</p>
+<div class="math" role="math">2E_r((p+r)/4)+4&gt;r-1</div>
+<p>for some external <code>r</code>, or more generally show that the finite external-nonresidue factor cycle cannot support the required sequence of increasingly structured even defects.</p>
+<p>Unlike the FAB route, there is no odd-defect escape hatch.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

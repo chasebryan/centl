@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Odd-prime-shift ancestry rigidity above the small-ancestor window — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/odd-prime-shift-asymptotic-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/odd-prime-shift-asymptotic-rigidity.html">
+  <meta property="og:title" content="Odd-prime-shift ancestry rigidity above the small-ancestor window — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Odd-prime-shift ancestry rigidity above the small-ancestor window</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. The theorem applies for <code>j&gt;=s+1</code>. Small <code>j</code> can contain additional full-shadow children and is a separate exception problem. This does not prove Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="ancestry-asymptotic-skeleton.html">ANCESTRY-ASYMPTOTIC-SKELETON.md</a></li><li><a href="ancestry-divisor-child-theorem.html">ANCESTRY-DIVISOR-CHILD-THEOREM.md</a></li><li><a href="quotient-odd-prime-s-rigidity.html">QUOTIENT-ODD-PRIME-S-RIGIDITY.md</a> — corrected/retracted all-<code>j</code> claim</li></ul>
+<h2>1. Setup</h2>
+<p>Let <code>r&gt;=3</code> be an odd prime and put</p>
+<div class="math" role="math">Q=4r+1, \qquad K=Qj-r, \qquad m=4j-1.</div>
+<p>No primality assumption on <code>Q</code> is required.</p>
+<p>Assume</p>
+<div class="math" role="math">\boxed{j\ge r+1.}</div>
+<h2>2. The theorem</h2>
+<h3>Theorem</h3>
+<p>For every odd prime <code>r</code> and every <code>j&gt;=r+1</code>,</p>
+<div class="math" role="math">\boxed{ T_K\bmod m\subseteq T_j \iff \left( K\text{ is prime} \quad\text{or}\quad K=r p\text{ with }p\text{ prime} \right). }</div>
+<p>In the second alternative necessarily</p>
+<div class="math" role="math">r\mid j.</div>
+<p>Thus above the explicit small-ancestor window, the entire unrestricted full-shadow structure of an odd-prime shift is exactly the divisor-child family.</p>
+<h2>3. Direct implication</h2>
+<p>The divisor-child theorem applies with shift <code>s=r</code>.</p>
+<p>Since <code>r</code> is prime, the only divisors of <code>r</code> are</p>
+<div class="math" role="math">a=1,r.</div>
+<ul><li><code>a=1</code> gives prime children;</li><li><code>a=r</code> gives <code>K=rp</code> when <code>r|j</code>.</li></ul>
+<p>Hence both stated shapes are fully shadowed.</p>
+<h2>4. Converse from the asymptotic skeleton</h2>
+<p>Because <code>r</code> is odd and <code>j&gt;=r+1</code>, the odd-shift asymptotic skeleton applies.</p>
+<p>Therefore a fully shadowed child satisfies exactly one of:</p>
+<ol><li><code>K</code> is <code>r</code>-smooth;</li><li><code>K=a p</code> with</li></ol>
+<div class="math" role="math">a\mid\gcd(j,r),</div>
+<p>and <code>p</code> prime.</p>
+<p>Since <code>r</code> is prime, the second case is already</p>
+<div class="math" role="math">K=p\quad\text{or}\quad K=rp.</div>
+<p>It remains only to eliminate the smooth branch.</p>
+<h2>5. Elimination of smooth children</h2>
+<p>If <code>K</code> is <code>r</code>-smooth, then</p>
+<div class="math" role="math">K=r^u</div>
+<p>for some integer <code>u&gt;=1</code>.</p>
+<p>The ancestry equation gives</p>
+<div class="math" role="math">r^u=(4r+1)j-r,</div>
+<p>hence</p>
+<div class="math" role="math">\boxed{ j=\frac{r^u+r}{4r+1}.}</div>
+<h3>u = 1</h3>
+<p>Then</p>
+<div class="math" role="math">j=\frac{2r}{4r+1}&lt;1,</div>
+<p>impossible.</p>
+<h3>u = 2</h3>
+<p>Integrality would require</p>
+<div class="math" role="math">4r+1\mid r+1,</div>
+<p>because <code>gcd(r,4r+1)=1</code>.</p>
+<p>But</p>
+<div class="math" role="math">0&lt;r+1&lt;4r+1,</div>
+<p>impossible.</p>
+<h3>u = 3</h3>
+<p>Integrality requires</p>
+<div class="math" role="math">4r+1\mid r^2+1.</div>
+<p>Use the exact identity</p>
+<div class="math" role="math">16(r^2+1)-(4r+1)(4r-1)=17.</div>
+<p>Therefore</p>
+<div class="math" role="math">4r+1\mid17.</div>
+<p>For odd prime <code>r&gt;=3</code>,</p>
+<div class="math" role="math">4r+1\ge13.</div>
+<p>The only positive divisors of <code>17</code> at least <code>13</code> are <code>17</code> itself, which would give</p>
+<div class="math" role="math">r=4,</div>
+<p>not an odd prime.</p>
+<p>Thus <code>u=3</code> is impossible.</p>
+<h3>u &gt;= 4</h3>
+<p>The child modulus relation gives</p>
+<div class="math" role="math">m=\frac{4r^u-1}{4r+1}.</div>
+<p>For every <code>r&gt;=3</code> and <code>u&gt;=4</code>,</p>
+<div class="math" role="math">\boxed{m&gt;r^2.}</div>
+<p>Indeed it is enough to check <code>u=4</code>:</p>
+<div class="math" role="math">4r^4-1&gt;r^2(4r+1),</div>
+<p>which is equivalent to</p>
+<div class="math" role="math">4r^4-4r^3-r^2-1&gt;0,</div>
+<p>true for <code>r&gt;=3</code>.</p>
+<p>But <code>r^2</code> is a divisor of <code>K=r^u</code> and satisfies</p>
+<div class="math" role="math">1&lt;r^2&lt;m.</div>
+<p>Also</p>
+<div class="math" role="math">\gcd(j,K)=\gcd(j,r),</div>
+<p>so</p>
+<div class="math" role="math">r^2\nmid j.</div>
+<p>Because <code>r^2</code> is odd, it cannot be of the form <code>4e</code> for a divisor <code>e|j</code>. Hence</p>
+<div class="math" role="math">r^2\notin S_j.</div>
+<p>This contradicts full shadowing.</p>
+<p>Therefore no <code>r</code>-smooth full-shadow child exists.</p>
+<p>The converse is complete. QED.</p>
+<h2>6. Why Q need not be prime</h2>
+<p>The proof uses only</p>
+<div class="math" role="math">Q=4r+1\equiv1\pmod4</div>
+<p>for modulus ancestry and the arithmetic identity defining <code>K</code>.</p>
+<p>It does not require <code>Q</code> itself to be prime.</p>
+<p>Thus the theorem simultaneously contains:</p>
+<ul><li><code>r=3</code>, <code>Q=13</code>;</li><li><code>r=5</code>, <code>Q=21</code>;</li><li><code>r=7</code>, <code>Q=29</code>;</li><li><code>r=11</code>, <code>Q=45</code>;</li><li>and every later odd-prime shift.</li></ul>
+<p>For the first few shifts, existing exact quotient-specific theorems additionally handle the finite small range <code>j&lt;=r</code>.</p>
+<h2>7. Small-j exceptions really exist</h2>
+<p>The threshold <code>j&gt;=r+1</code> cannot simply be deleted.</p>
+<p>For example,</p>
+<div class="math" role="math">r=17, \qquad j=2, \qquad K=121, \qquad m=7.</div>
+<p>Then</p>
+<div class="math" role="math">S_2=\{1,2,4\}\pmod7</div>
+<p>and the divisors <code>1,11,121</code> reduce to <code>1,4,2</code>, so full shadowing holds even though <code>K</code> is neither prime nor <code>17p</code>.</p>
+<p>Other small-window examples include:</p>
+<pre><code class="language-text">r=19, j=4:  K=289=17^2
+r=53, j=4:  K=799=17*47
+r=71, j=8:  K=2209=47^2
+r=83, j=2:  K=583=11*53</code></pre>
+<p>These are governed by the exact multiplicative structure of the small ancestor <code>S_j</code>, not by the large-<code>j</code> factor-size mechanism.</p>
+<h2>8. Structural interpretation</h2>
+<p>The theorem separates odd-prime-shift ancestry into two regimes:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} 1\le j\le r\\ \text{small-ancestor multiplicative exceptions possible} \end{array} }</div>
+<p>versus</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} j\ge r+1\\ \text{full shadow}\iff\text{prime or }rp \end{array} }</div>
+<p>So the apparent infinite quotient-by-quotient complexity is actually concentrated into a finite-width diagonal strip <code>j&lt;=r</code>.</p>
+<p>Outside that strip, every odd-prime shift has exactly the same rigidity law.</p>
+<h2>9. Next target</h2>
+<p>Classify the small-ancestor exception strip</p>
+<div class="math" role="math">\boxed{1\le j\le r}</div>
+<p>as <code>r</code> varies over odd primes.</p>
+<p>For fixed <code>j</code>, the normalized ancestor trap set <code>S_j</code> is fixed, while</p>
+<div class="math" role="math">K=r(4j-1)+j</div>
+<p>varies linearly with <code>r</code>.</p>
+<p>Thus the exception problem becomes:</p>
+<blockquote><p>classify prime parameters <code>r</code> for which every divisor of <code>r(4j-1)+j</code> lies inside the fixed finite residue set <code>S_j</code> modulo <code>4j-1</code>.</p></blockquote>
+<p>At dyadic ancestors <code>j=2^a</code>, the earlier Mersenne theorem gives</p>
+<div class="math" role="math">S_j=\langle2\rangle,</div>
+<p>turning the condition into a concrete multiplicative-subgroup factorization problem.</p>
+<p>That is the correct next layer of the ancestry diamond.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

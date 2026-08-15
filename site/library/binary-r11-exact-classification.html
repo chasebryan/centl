@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact `r=11` binary rescue classification for Mordell-hard primes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/binary-r11-exact-classification.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/binary-r11-exact-classification.html">
+  <meta property="og:title" content="Exact `r=11` binary rescue classification for Mordell-hard primes — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact `r=11` binary rescue classification for Mordell-hard primes</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BINARY-R11-EXACT-CLASSIFICATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved iff classification</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-RESCUE.md</code>, <code>BINARY-R-DIVISOR-COLLISION.md</code></p>
+<p><strong>Claim boundary:</strong> this completely closes the fixed binary numerator <code>r=11</code>. It does not prove that every Mordell-hard prime is rescued at <code>r=11</code>, and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Hard-prime normalization</h2>
+<p>Let <code>p</code> be Mordell-hard. Then</p>
+<div class="math" role="math">p\equiv1\pmod{24}.</div>
+<p>For the binary numerator</p>
+<div class="math" role="math">\boxed{r=11}</div>
+<p>put</p>
+<div class="math" role="math">A_{11}=\frac{p+11}{4}.</div>
+<p>Because <code>p==1 mod 3</code>,</p>
+<div class="math" role="math">3\mid A_{11}.</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{A_{11}=3B,\qquad B=\frac{p+11}{12}.}</div>
+<p>Modulo <code>11</code>, since <code>12==1</code>,</p>
+<div class="math" role="math">\boxed{B\equiv p\pmod{11}.}</div>
+<p>The binary denominator is</p>
+<div class="math" role="math">N_{11}=pA_{11}=3pB.</div>
+<p>By <code>BINARY-R-DIVISOR-COLLISION.md</code>, rescue at <code>r=11</code> is equivalent to</p>
+<div class="math" role="math">\boxed{-1\in D_{11}(N_{11})D_{11}(N_{11})^{-1}.}</div>
+<p>Equivalently, the signed divisor-exponent box of <code>N_11</code> must hit <code>-1 mod 11</code>.</p>
+<hr>
+<h2>2. Discrete-log coordinates</h2>
+<p>Use <code>2</code> as a primitive root modulo <code>11</code>:</p>
+<div class="math" role="math">\begin{array}{c|cccccccccc} e&amp;0&amp;1&amp;2&amp;3&amp;4&amp;5&amp;6&amp;7&amp;8&amp;9\\ \hline 2^e\bmod11&amp;1&amp;2&amp;4&amp;8&amp;5&amp;10&amp;9&amp;7&amp;3&amp;6. \end{array}</div>
+<p>Write</p>
+<div class="math" role="math">\lambda(x)=\log_2(x)\in\mathbb Z/10\mathbb Z.</div>
+<p>Then</p>
+<div class="math" role="math">\lambda(-1)=5, \qquad \lambda(3)=8=-2.</div>
+<p>Put</p>
+<div class="math" role="math">\alpha=\lambda(p\bmod11).</div>
+<p>Factor</p>
+<div class="math" role="math">B=\prod_q q^{e_q}</div>
+<p>and put</p>
+<div class="math" role="math">\beta_q=\lambda(q\bmod11).</div>
+<p>Because <code>B==p mod 11</code>,</p>
+<div class="math" role="math">\boxed{\sum_q e_q\beta_q\equiv\alpha\pmod{10}.}</div>
+<p>The signed-divisor collision exists iff there are</p>
+<div class="math" role="math">z_3,z_p\in\{-1,0,1\}, \qquad -e_q\le z_q\le e_q</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{ 8z_3+\alpha z_p+\sum_q\beta_qz_q\equiv5\pmod{10}. }</div>
+<p>This single finite cyclic-group equation gives the complete classification below.</p>
+<hr>
+<h2>3. Three residue classes are automatic</h2>
+<p>If</p>
+<div class="math" role="math">\alpha\in\{3,5,7\},</div>
+<p>then the fixed factors <code>3</code> and <code>p</code> already hit exponent <code>5</code>; no factorization information about <code>B</code> is needed.</p>
+<p>These exponents correspond to</p>
+<div class="math" role="math">p\bmod11\in\{8,10,7\}.</div>
+<h3>Theorem A</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{p\equiv7,8,10\pmod{11},}</div>
+<p>then <code>r=11</code> always rescues <code>p</code>.</p>
+<h3>Proof</h3>
+<p>For each <code>alpha in {3,5,7}</code>, the set</p>
+<div class="math" role="math">\{8z_3+\alpha z_p:z_3,z_p\in\{-1,0,1\}\}</div>
+<p>contains <code>5 mod 10</code>. QED.</p>
+<hr>
+<h2>4. Nonzero quadratic-residue classes</h2>
+<p>The nonzero even exponents are</p>
+<div class="math" role="math">\alpha\in\{2,4,6,8\},</div>
+<p>corresponding to</p>
+<div class="math" role="math">p\bmod11\in\{4,5,9,3\}.</div>
+<p>For every such <code>alpha</code>, the fixed factors <code>3</code> and <code>p</code> generate <strong>all five even exponents</strong>:</p>
+<div class="math" role="math">\boxed{ \{8z_3+\alpha z_p\} =\{0,2,4,6,8\}. }</div>
+<p>A prime factor <code>q|B</code> is a quadratic nonresidue modulo <code>11</code> exactly when <code>beta_q</code> is odd. Adding one occurrence of any odd exponent to the full even set hits every odd exponent, in particular <code>5</code>.</p>
+<p>Conversely, if every prime factor of <code>B</code> is a quadratic residue modulo <code>11</code>, every signed exponent contribution is even, so exponent <code>5</code> is impossible.</p>
+<h3>Theorem B</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{p\equiv3,4,5,9\pmod{11},}</div>
+<p>then</p>
+<div class="math" role="math">\boxed{ \text{`r=11` rescues `p`} \iff B=\frac{p+11}{12} \text{ has a prime factor that is a quadratic nonresidue mod }11. }</div>
+<p>Equivalently, failure occurs iff every prime factor of <code>B</code> belongs to</p>
+<div class="math" role="math">\boxed{\{1,3,4,5,9\}\pmod{11}.}</div>
+<hr>
+<h2>5. The two <code>±1</code> exponent classes</h2>
+<p>Now</p>
+<div class="math" role="math">\alpha\in\{1,9\},</div>
+<p>corresponding to</p>
+<div class="math" role="math">p\bmod11\in\{2,6\}.</div>
+<p>The fixed factors <code>3,p</code> produce</p>
+<div class="math" role="math">\boxed{\{0,1,2,3,7,8,9\},}</div>
+<p>missing only <code>4,5,6</code>.</p>
+<p>Therefore the presence of any prime-factor exponent</p>
+<div class="math" role="math">\beta_q\in\{2,3,4,5,6,7,8\}</div>
+<p>immediately forces rescue.</p>
+<p>Suppose no such factor occurs. Then every nontrivial prime factor of <code>B</code> has exponent class <code>1</code> or <code>9=-1</code>; factors of class <code>0</code> are inert in the signed box. If the total multiplicity of these <code>±1</code> occurrences is at least <code>2</code>, their signed contribution can supply <code>±2</code>, and the fixed exponent <code>3</code> then reaches <code>5</code>. Thus failure requires exactly one nontrivial occurrence.</p>
+<p>The total-product constraint</p>
+<div class="math" role="math">B\equiv p\pmod{11}</div>
+<p>then fixes its direction.</p>
+<h3>Theorem C</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{p\equiv2\pmod{11},}</div>
+<p>then <code>r=11</code> fails <strong>iff</strong></p>
+<ul><li>exactly one prime-factor occurrence of <code>B</code> is <code>2 mod 11</code>, with valuation exactly <code>1</code>;</li><li>every other prime factor of <code>B</code> is <code>1 mod 11</code>.</li></ul>
+<p>If</p>
+<div class="math" role="math">\boxed{p\equiv6\pmod{11},}</div>
+<p>then <code>r=11</code> fails <strong>iff</strong></p>
+<ul><li>exactly one prime-factor occurrence of <code>B</code> is <code>6 mod 11</code>, with valuation exactly <code>1</code>;</li><li>every other prime factor of <code>B</code> is <code>1 mod 11</code>.</li></ul>
+<p>All other factorizations rescue.</p>
+<hr>
+<h2>6. The class <code>p == 1 mod 11</code></h2>
+<p>Finally let</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{11}.}</div>
+<p>Then <code>alpha=0</code>, so the fixed factor <code>p</code> contributes nothing in log coordinates and the factor <code>3</code> contributes the symmetric set</p>
+<div class="math" role="math">\boxed{\{0,2,8\}=\{0,\pm2\}.}</div>
+<p>Thus rescue is equivalent to the signed exponent box of <code>B</code> meeting</p>
+<div class="math" role="math">\boxed{\{3,5,7\}.}</div>
+<p>because adding <code>0,±2</code> must reach target <code>5</code>.</p>
+<p>There are exactly two ways this can fail.</p>
+<h3>Failure family I — entirely quadratic-residue support</h3>
+<p>If every prime factor of <code>B</code> is a quadratic residue modulo <code>11</code>, every signed exponent is even, so the odd target set <code>{3,5,7}</code> is unreachable.</p>
+<p>Thus every factor may lie in</p>
+<div class="math" role="math">\boxed{\{1,3,4,5,9\}\pmod{11}.}</div>
+<h3>Failure family II — one cancelling <code>2/6</code> pair</h3>
+<p>The only nonresidue-support exception that still avoids <code>{3,5,7}</code> is:</p>
+<ul><li>one prime-factor occurrence <code>2 mod 11</code>, valuation <code>1</code>;</li><li>one prime-factor occurrence <code>6 mod 11</code>, valuation <code>1</code>;</li><li>every other prime factor <code>1 mod 11</code>.</li></ul>
+<p>Indeed the two nontrivial logs are <code>+1</code> and <code>-1</code>; their signed box is</p>
+<div class="math" role="math">\{0,\pm1,\pm2\},</div>
+<p>which, after adding <code>0,±2</code>, still avoids <code>5</code> exactly in this minimal cancelling configuration. Any additional nontrivial occurrence, or any factor from another residue class, expands the signed box into <code>{3,5,7}</code> and forces rescue.</p>
+<p>The total-product constraint <code>B==1 mod 11</code> is automatically respected by the cancelling pair.</p>
+<h3>Theorem D</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{11},}</div>
+<p>then <code>r=11</code> fails iff exactly one of the following holds:</p>
+<ol><li>every prime factor of <code>B</code> is a quadratic residue modulo <code>11</code>; or</li><li><code>B</code> has exactly one occurrence of a prime <code>2 mod 11</code> and exactly one occurrence of a prime <code>6 mod 11</code>, each to valuation <code>1</code>, and every remaining prime factor is <code>1 mod 11</code>.</li></ol>
+<p>Every other factorization rescues.</p>
+<hr>
+<h2>7. Consolidated classification</h2>
+<p>Let</p>
+<div class="math" role="math">\boxed{B=\frac{p+11}{12}.}</div>
+<p>For a Mordell-hard prime <code>p</code>, fixed binary numerator <code>r=11</code> behaves as follows.</p>
+<table class="directory"><thead><tr><th><code>p mod 11</code></th><th>Exact <code>r=11</code> status</th></tr></thead><tbody><tr><td><code>7,8,10</code></td><td><strong>always rescued</strong></td></tr><tr><td><code>3,4,5,9</code></td><td>rescued iff <code>B</code> has a quadratic-nonresidue prime factor mod <code>11</code></td></tr><tr><td><code>2</code></td><td>fails iff exactly one <code>2 mod 11</code> prime occurrence and all others <code>1 mod 11</code></td></tr><tr><td><code>6</code></td><td>fails iff exactly one <code>6 mod 11</code> prime occurrence and all others <code>1 mod 11</code></td></tr><tr><td><code>1</code></td><td>fails iff all factors are QR mod <code>11</code>, or the unique minimal <code>2/6</code> cancelling pair occurs</td></tr></tbody></table>
+<p>This is an iff theorem, not a finite-range pattern.</p>
+<hr>
+<h2>8. Independent finite regression</h2>
+<p>The classification was independently compared against the exact binary-divisor collision test for every Mordell-hard prime below</p>
+<div class="math" role="math">10^6.</div>
+<p>Population:</p>
+<div class="math" role="math">\boxed{2,370\text{ hard primes}.}</div>
+<p>Result:</p>
+<div class="math" role="math">\boxed{0\text{ classification mismatches}.}</div>
+<p>This finite regression is supporting evidence only; the theorem is the cyclic-group proof above.</p>
+<hr>
+<h2>9. Research consequence</h2>
+<p>The first three binary stages are now unusually explicit:</p>
+<ul><li><code>r=3</code>: failure forces every prime factor of <code>(p+3)/4</code> onto the <code>1 mod 3</code> side;</li><li><code>r=7</code>: failure forces every prime factor of <code>(p+7)/4</code> onto the quadratic-residue side modulo <code>7</code>;</li><li><code>r=11</code>: failure is now classified exactly by the table above.</li></ul>
+<p>Writing</p>
+<div class="math" role="math">P=\frac{p-1}{4},</div>
+<p>these are the consecutive translates</p>
+<div class="math" role="math">\boxed{P+1,\quad P+2,\quad P+3.}</div>
+<p>For hard primes <code>P</code> is divisible by <code>6</code>. A hypothetical counterexample must therefore make three consecutive translates satisfy three different, exact multiplicative-compression laws.</p>
+<p>The next theorem target is no longer “understand r=11.” It is to exploit the simultaneous incompatibility, if any, of the exact <code>r=3</code>, <code>r=7</code>, and <code>r=11</code> failure patterns, and then incorporate <code>r=19/23</code> only if genuine survivors remain.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

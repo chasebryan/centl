@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Cubic-log sieve bound from q=3,7,11,23 Type-II filters — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/strong-es-q3-q7-q11-q23-sieve.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/strong-es-q3-q7-q11-q23-sieve.html">
+  <meta property="og:title" content="Cubic-log sieve bound from q=3,7,11,23 Type-II filters — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Cubic-log sieve bound from q=3,7,11,23 Type-II filters</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/STRONG-ES-Q3-Q7-Q11-Q23-SIEVE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved application of a classical upper-bound sieve</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>STRONG-ES-Q3-Q7-Q11-SIEVE.md</code>, <code>STRONG-ES-Q23-EXACT-FILTER.md</code></p>
+<p><strong>Imported classical tools:</strong> Selberg/Brun upper-bound sieve, prime number theorem in arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> this is a specific quantitative consequence of four exact fixed Type-II filters. Classical full Erdős--Straus exceptional-set estimates are stronger. This does not prove universal strong/Type-II coverage.</p>
+<hr>
+<h2>1. Existing three-shift branches</h2>
+<p>Let</p>
+<div class="math" role="math">A=\frac{p+3}{4}.</div>
+<p>The exact <code>q=3,7,11</code> analysis splits the survivor set into two <code>q=11</code> branches.</p>
+<h3>q=11 Branch A</h3>
+<p>The sieve dimension is</p>
+<div class="math" role="math">\boxed{5/2.}</div>
+<h3>q=11 Branch B</h3>
+<p>After harmlessly enlarging the exact thin defect branch, the sieve dimension is at least</p>
+<div class="math" role="math">\boxed{27/10.}</div>
+<p>Therefore every three-shift survivor belongs to a branch of dimension at least</p>
+<div class="math" role="math">\boxed{5/2.}</div>
+<hr>
+<h2>2. q=23 acts at a new shifted residue</h2>
+<p>The <code>q=23</code> shifted integer is</p>
+<div class="math" role="math">\boxed{A+5.}</div>
+<p>Thus every prime-factor exclusion at this position forbids the residue</p>
+<div class="math" role="math">\boxed{A\equiv-5\pmod\ell}</div>
+<p>for the relevant sieve primes <code>ell</code>.</p>
+<p>For all sufficiently large <code>ell</code>, this residue is distinct from:</p>
+<ul><li>the primality residue for <code>4A-3</code>;</li><li><code>0</code>, used by the <code>q=3</code> filter;</li><li><code>-1</code>, used by <code>q=7</code>;</li><li><code>-2</code>, used by <code>q=11</code>.</li></ul>
+<p>Hence the local sieve dimensions add directly. The finitely many collision primes do not affect the logarithmic exponent.</p>
+<hr>
+<h2>3. q=23 Branch A adds one-half</h2>
+<p>The main <code>q=23</code> miss branch requires every prime factor of <code>A+5</code> to be a quadratic residue modulo <code>23</code>.</p>
+<p>Quadratic nonresidue primes modulo <code>23</code> have density</p>
+<div class="math" role="math">\boxed{1/2.}</div>
+<p>among primes.</p>
+<p>Therefore Branch A adds exactly one-half unit of sieve dimension.</p>
+<p>Applied to the weaker existing <code>q=11</code> Branch A:</p>
+<div class="math" role="math">\boxed{ \frac52+\frac12=3.}</div>
+<p>This will be the dominant combined branch.</p>
+<hr>
+<h2>4. q=23 Branch B is substantially thinner</h2>
+<p>The thin <code>q=23</code> branch allows ordinary prime divisors of <code>A+5</code> only in the three residue classes</p>
+<div class="math" role="math">\boxed{1,5,14\pmod{23},}</div>
+<p>apart from the fixed forced primes <code>2,3</code>.</p>
+<p>Thus it forbids</p>
+<div class="math" role="math">\boxed{19/22}</div>
+<p>of the reduced prime residue classes modulo <code>23</code>.</p>
+<p>So any branch using the thin <code>q=23</code> geometry gains at least</p>
+<div class="math" role="math">\boxed{19/22&gt;1/2}</div>
+<p>of sieve dimension.</p>
+<p>The exact valuation cap on the two allowed nonresidue classes makes the true branch even smaller.</p>
+<hr>
+<h2>5. Four branch combinations</h2>
+<p>Combine the two <code>q=11</code> branches with the two <code>q=23</code> branches.</p>
+<p>The resulting lower bounds for sieve dimension are:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c|c} q=11 &amp; q=23 &amp; \text{dimension lower bound}\\ \hline A &amp; A &amp; 5/2+1/2=3\\ A &amp; B &amp; 5/2+19/22&gt;3\\ B &amp; A &amp; 27/10+1/2=16/5&gt;3\\ B &amp; B &amp; 27/10+19/22&gt;3. \end{array}}</div>
+<p>Thus every simultaneous four-shift survivor belongs to a sieve problem of dimension at least three.</p>
+<hr>
+<h2>6. Main theorem</h2>
+<p>Applying the classical upper-bound sieve branchwise and summing the four bounds gives:</p>
+<h3>Theorem — four fixed Type-II shifts leave a dimension-three prime set</h3>
+<div class="math" role="math">\boxed{ \#\{p\le X:\ p\text{ prime and }q=3,7,11,23\text{ all miss}\} \ll \frac{X}{(\log X)^3}.}</div>
+<p>The same estimate holds after restricting to Mordell-hard primes.</p>
+<hr>
+<h2>7. Relative prime density</h2>
+<p>Since</p>
+<div class="math" role="math">\pi(X)\sim X/\log X,</div>
+<p>the relative density of four-shift survivors among primes satisfies</p>
+<div class="math" role="math">\boxed{ O\left((\log X)^{-2}\right).}</div>
+<p>Thus four explicit small Type-II shifts already remove all but a doubly-logarithmically thin relative subset of primes.</p>
+<hr>
+<h2>8. Interpretation</h2>
+<p>The logarithmic exponent has increased as follows:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} \text{fixed shifts used} &amp; \text{upper-bound sieve dimension}\\ \hline 3,7 &amp; 2\\ 3,7,11 &amp; 5/2\\ 3,7,11,23 &amp; 3. \end{array}}</div>
+<p>Each useful corridor position contributes an explicit positive-density prime-factor exclusion on a new shifted integer <code>A+h</code>.</p>
+<p>The exceptional finite-group defect branches do not reduce the current dominant exponent because they are more restrictive than the main splitting branches.</p>
+<hr>
+<h2>9. Prior-art boundary</h2>
+<p>The method remains classical sieve theory, and the best known full-ES exceptional-set estimates are much stronger.</p>
+<p>The point of the present calculation is structural:</p>
+<ul><li>the exact fixed-shift Type-II classifications produce a transparent local density ledger;</li><li>the shifted residues <code>0,-1,-2,-5</code> are distinct;</li><li>the sieve dimensions add visibly.</li></ul>
+<p>This creates a bridge between the finite-group signed-box analysis and analytic exceptional-set estimates.</p>
+<hr>
+<h2>10. Next target</h2>
+<p>Search for additional corridor primes <code>q</code> for which hard congruences force enough quadratic-residue generators into <code>(p+q)/4</code> that every miss branch excludes a uniformly positive density of prime residue classes.</p>
+<p>If an infinite sequence of such shifts can be controlled uniformly, the fixed-shift sieve dimension would grow without bound. Turning that growth into a universal theorem would require constants and uniformity far beyond the present fixed-family argument, but it is now a precise analytic direction.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

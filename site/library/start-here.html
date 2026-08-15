@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This folder is written by the hunt. You do not need to know Python.">
+  <title>Findings library — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/start-here.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/start-here.html">
+  <meta property="og:title" content="Findings library — Free Computation Foundation">
+  <meta property="og:description" content="This folder is written by the hunt. You do not need to know Python.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Findings library</h1><p>Finding · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Finding</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Finding</p>
+          <p class="dek">This folder is written by the hunt. You do not need to know Python.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/findings/START-HERE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This folder is written by the hunt. You do not need to know Python.</p>
+<h2>The only commands you need</h2>
+<p>From the CENTL folder:</p>
+<pre><code class="language-text">./centl es</code></pre>
+<p>That opens the menu. Or, without the menu:</p>
+<pre><code class="language-text">./centl es go</code></pre>
+<p>That is the long hunt. It remembers a <strong>seed</strong> (where it stopped) so it never starts from scratch. It runs until you press Ctrl+C. Letters are collected as they appear; the hunt does not stop on the first one.</p>
+<pre><code class="language-text">./centl es go --random</code></pre>
+<p>starts a <strong>new</strong> hunt at a random start factor, so two people can explore different stretches of the number line. Resume later with plain <code>go</code> — that uses the saved seed, not a new random place.</p>
+<pre><code class="language-text">./centl es go --from 1000000</code></pre>
+<p>starts at a start factor you choose.</p>
+<pre><code class="language-text">./centl es look
+./centl es letters
+./centl es seed</code></pre>
+<p><code>look</code> shows the latest findings. <code>letters</code> shows only the rarest files, each with its letter number. <code>seed</code> shows the cursor.</p>
+<h2>The infinite hunt</h2>
+<p>Let <code>s</code> be the number <code>scanned_through</code> in <code>findings/seeds/current.json</code>, and let <code>Δ</code> be the window (default 50 000). The hunt is the sequence of intervals</p>
+<pre><code class="language-text">(s, s+Δ],   (s+Δ, s+2Δ],   (s+2Δ, s+3Δ],   …</code></pre>
+<p>with no last interval. <code>s</code> begins at the <strong>start factor</strong> (0, a number you typed, or a random integer). After each interval, <code>s</code> moves forward. Ctrl+C stops the engine and writes <code>s</code>. The next <code>go</code> starts at <code>s</code>.</p>
+<p>A finished interval is not a proof of the conjecture.</p>
+<h2>Letter numbers</h2>
+<p>Every letter has a number printed at the top of its file.</p>
+<p>That number is not assigned by a machine, a clock, or a person. It is the first 128 bits of SHA-256 of a fixed description of <em>what was found</em> (the rule, and the prime). Anyone who finds the same letter, on any computer, at any time, computes the same number.</p>
+<p>If you and someone else both find the same unsolved prime, you will both hold the same letter file name and the same letter number. Compare them.</p>
+<p>A worldwide serial number (#1, #2 in the order of discovery) cannot work without a shared counter. This can.</p>
+<p>The start factor is <strong>not</strong> part of the letter. Two hunts that begin in different places and later meet the same prime write the same letter.</p>
+<h2>What the three stamps mean</h2>
+<table class="directory"><thead><tr><th>stamp</th><th>folder</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td><code>good/</code></td><td>A solid, checked identity or a new construction. Worth keeping.</td></tr><tr><td>GREAT</td><td><code>great/</code></td><td>A hard prime escaped the small theorems, or a Type I rescue, or a new depth record, or a whole bound was cleared. This is the remaining shape of the conjecture.</td></tr><tr><td>LETTER</td><td><code>letters/</code></td><td>An unsolved hard prime, a broken <code>a,b ≤ 11</code> window, or a claimed universal proof. Collect them. Read them.</td></tr></tbody></table>
+<p>The rules are written in <code>HOW-GRADES-WORK.md</code>. They are mechanical. The computer is not guessing.</p>
+<h2>How to check a finding yourself</h2>
+<p>Open the file. If it shows</p>
+<pre><code class="language-text">4/n = 1/x + 1/y + 1/z</code></pre>
+<p>ask CENTL:</p>
+<pre><code class="language-text">./centl es solve n</code></pre>
+<p>or compute <code>4xyz</code> and <code>n(yz + xz + xy)</code> with any exact calculator. They must be equal.</p>
+<h2>What is not in here</h2>
+<p>Ordinary easy identities (<code>n</code> even, <code>n ≡ 3 mod 4</code>, <code>k = 3</code> or <code>7</code>) are not copied into these folders. They are logged in <code>log.jsonl</code> only when they meet a filing rule. The library is meant to stay readable.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>C1 Partial Theorems Toward DSC-P — corrected — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c1-partial-theorems.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c1-partial-theorems.html">
+  <meta property="og:title" content="C1 Partial Theorems Toward DSC-P — corrected — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C1 Partial Theorems Toward DSC-P — corrected</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-PARTIAL-THEOREMS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved local C1 theorems + explicit remaining global obstruction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> does <strong>not</strong> prove Erdős-Straus, López Type A/B coverage, universal DSC-P, or full C1. It does prove that the unique active fixed-negative row is never by itself a reduced covering obstruction.</p>
+<p>Read with:</p>
+<ul><li><a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a></li><li><a href="single-active-reduced-escape-theorem.html">SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md</a></li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li><li><a href="class-c-residual-core.html">CLASS-C-RESIDUAL-CORE.md</a></li></ul>
+<h2>1. Correction to the previous draft</h2>
+<p>An earlier version of this file labeled the following as a theorem:</p>
+<blockquote><p>if <code>q=p^a</code> and <code>R</code> is a proper subset of <code>Z/qZ</code>, then a reduced class exists outside <code>R</code>.</p></blockquote>
+<p>That statement is false in general. A proper forbidden set can contain every reduced class while omitting only non-reduced classes.</p>
+<p>The previous text itself noticed this possibility, so the theorem label was inconsistent with its own proof.</p>
+<p>The false general statement is withdrawn.</p>
+<p>A second correction: at one exact Type A/B layer, the compatible-trap pullback does <strong>not</strong> multiply one trap into several parameter classes. The affine pullback map is injective on the compatible trap fiber.</p>
+<p>Both points are now handled exactly in <a href="single-active-reduced-escape-theorem.html">SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md</a>.</p>
+<h2>2. C1 setup</h2>
+<p>Let a directly novel target candidate have</p>
+<div class="math" role="math">x=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1), \qquad \gcd(r,L)=1.</div>
+<p>Assume</p>
+<div class="math" role="math">\boxed{|\mathcal N^{\rm act}_{k,r}|=1.}</div>
+<p>Let <code>j0</code> be the unique active fixed-negative layer and put</p>
+<div class="math" role="math">m=4j_0-1, \qquad g=\gcd(L,m), \qquad q=m/g.</div>
+<p>Let</p>
+<div class="math" role="math">R\subseteq\mathbb Z/q\mathbb Z</div>
+<p>be its exact Type A/B forbidden pullback.</p>
+<p>Direct novelty gives</p>
+<div class="math" role="math">R\ne\mathbb Z/q\mathbb Z.</div>
+<h2>3. Prime-power shape theorem</h2>
+<p>The previously proved unique-active valuation theorem gives</p>
+<div class="math" role="math">\boxed{q=p\text{ or }p^2}</div>
+<p>for one odd prime <code>p</code>.</p>
+<p>If <code>p∤L</code> (Operator-02 Class B), then fixed-squareclass parity forces</p>
+<div class="math" role="math">\boxed{q=p^2.}</div>
+<p>Since <code>840|L</code>, a Class-B prime satisfies</p>
+<div class="math" role="math">\boxed{p\ge11.}</div>
+<h2>4. Exact pullback injection</h2>
+<p>Let</p>
+<div class="math" role="math">U=\{u\in T_{j_0}:u\equiv r\pmod g\}.</div>
+<p>The map</p>
+<div class="math" role="math">u\mapsto \frac{u-r}{g} \left(\frac Lg\right)^{-1} \pmod q</div>
+<p>is injective on <code>U</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{|R|=|U|.}</div>
+<p>This is an exact fact, not a heuristic fiber-size assumption.</p>
+<h2>5. Class-A local theorem</h2>
+<p>If</p>
+<div class="math" role="math">p\mid L,</div>
+<p>then reducedness at <code>p</code> does not depend on the parameter:</p>
+<div class="math" role="math">r+Ls\equiv r\pmod p.</div>
+<p>Because <code>gcd(r,L)=1</code>, every parameter class is reduced at <code>p</code>.</p>
+<p>Since <code>R</code> is proper, choose any</p>
+<div class="math" role="math">s_0\notin R.</div>
+<p>Then the unique active row is avoided exactly and reducedness holds automatically.</p>
+<p>Thus every Class-A unique active row has a reduced local escape.</p>
+<h2>6. Class-B local theorem</h2>
+<p>Assume</p>
+<div class="math" role="math">p\nmid L.</div>
+<p>Then</p>
+<div class="math" role="math">q=p^2, \qquad m=g p^2=4j_0-1.</div>
+<p>Because <code>p</code> is odd,</p>
+<div class="math" role="math">g\equiv3\pmod4</div>
+<p>and</p>
+<div class="math" role="math">j_0=\frac{g p^2+1}{4}.</div>
+<p>For either trap family</p>
+<div class="math" role="math">-e \quad\text{or}\quad -4e, \qquad e\mid j_0,</div>
+<p>compatibility modulo <code>g</code> forces <code>e</code> into one fixed residue class modulo <code>g</code>.</p>
+<p>Any residue class modulo <code>g</code> contains at most</p>
+<div class="math" role="math">\frac{p^2+3}{4}</div>
+<p>integers in the interval <code>1&lt;=e&lt;=j_0</code>.</p>
+<p>Therefore the two trap families together give</p>
+<div class="math" role="math">\boxed{|R|\le\frac{p^2+3}{2}.}</div>
+<p>Since <code>p∤L</code>, non-reduced parameters form exactly one class modulo <code>p</code>, so the number of reduced parameter classes modulo <code>p^2</code> is</p>
+<div class="math" role="math">\boxed{p^2-p.}</div>
+<p>For <code>p&gt;=5</code>,</p>
+<div class="math" role="math">\frac{p^2+3}{2}&lt;p^2-p.</div>
+<p>Class B has <code>p&gt;=11</code>, so the forbidden set is strictly too small to contain every reduced class.</p>
+<p>Hence every Class-B unique active row also has a reduced local escape.</p>
+<h2>7. Universal local C1 theorem</h2>
+<p>Combining the two cases:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal N^{\rm act}_{k,r}|=1 \Longrightarrow \text{the unique active fixed-negative row admits a reduced exact local escape.} }&lt;/div&gt;</p>
+<p>This is now proved universally.</p>
+<p>The former local “two-box pullback gap” is therefore <strong>closed</strong> in the single-active regime.</p>
+<h2>8. Why full C1 is still open</h2>
+<p>The <code>k&lt;=1500</code> independently verified census showed:</p>
+<pre><code class="language-text">single-active candidates:                       2,770
+fiber kernel nonempty:                          1,480
+unique active row survives final kernel:            18
+nonfixed residual edge incidences:             69,672</code></pre>
+<p>So after the local active row is understood, the actual residual system is dominated by <strong>nonfixed exact rows</strong>.</p>
+<p>The remaining theorem is not</p>
+<blockquote><p>can the active row leave one reduced class?</p></blockquote>
+<p>That is solved.</p>
+<p>The remaining theorem is:</p>
+<div class="math" role="math">\boxed{ \text{Can one choose a parameter that simultaneously} \text{ realizes the guaranteed active-row escape and avoids} \text{ every surviving nonfixed exact row?} }</div>
+<p>This is an interaction/coordination problem among the residual rows.</p>
+<h2>9. Correct C1 target</h2>
+<p>A sufficient theorem would be:</p>
+<h3>C1 coordination theorem candidate</h3>
+<p>For every directly novel candidate with <code>|N^act|=1</code>, after exact fiber peeling of the nonfixed rows, at least one reduced assignment survives that is compatible with the guaranteed local active-row escape.</p>
+<p>If proved, this would establish C1 and give infinitely many exact-depth primes for every single-active directly novel candidate by Dirichlet.</p>
+<p>It still would not prove universal DSC-P, since <code>|N^act|&gt;1</code> cases would remain.</p>
+<h2>10. Finite evidence</h2>
+<p>Through <code>k&lt;=1500</code>, every one of the <code>2,770</code> single-active candidates is globally resolved.</p>
+<p>Among the <code>1,480</code> nonempty residual kernels, the fixed selector menu</p>
+<div class="math" role="math">\{0,\pm1,\ldots,\pm64\}</div>
+<p>found a reduced global escape in</p>
+<div class="math" role="math">\boxed{1,480/1,480}</div>
+<p>cases, with maximum radius <code>48</code>.</p>
+<p>That is strong finite evidence for the coordination theorem, not a proof.</p>
+<h2>11. Next proof actions</h2>
+<ol><li>classify the nonfixed residual rows that survive in C1;</li><li>prove why the unique active row is peeled in <code>1,462/1,480</code> nonempty finite kernels;</li><li>solve the two smallest residual signature cases <code>{11,13}</code> exactly;</li><li>solve the recurring <code>{3,11,13}</code> signature structurally;</li><li>search for a local product/character invariant forcing overlap among the nonfixed rows;</li><li>only then promote from C1 to bounded <code>|N^act|&gt;1</code>.</li></ol>
+<h2>12. Wall statement</h2>
+<p>Erdős-Straus remains open. López universal Type A/B coverage remains open. Universal DSC-P remains open. Full C1 remains open.</p>
+<p>The local active-row obstruction is no longer open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

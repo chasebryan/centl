@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Multiplicative semigroup shadow families from saturated Type A/B sources — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/coset-source-semigroup-shadow.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/coset-source-semigroup-shadow.html">
+  <meta property="og:title" content="Multiplicative semigroup shadow families from saturated Type A/B sources — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multiplicative semigroup shadow families from saturated Type A/B sources</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/COSET-SOURCE-SEMIGROUP-SHADOW.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved general shadow theorem with infinite composite-depth families</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem gives exact structural gaps inside the López Type A/B minimal-depth spectrum. It does not prove universal Type A/B coverage or the Erdős-Straus conjecture. Literature priority remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a></li><li><a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a></li><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li><li><a href="spectrum-counting-bounds.html">SPECTRUM-COUNTING-BOUNDS.md</a></li></ul>
+<h2>1. Saturated source</h2>
+<p>For a source depth <code>j</code>, put</p>
+<div class="math" role="math">m_j=4j-1</div>
+<p>and</p>
+<div class="math" role="math">H_j=\langle\ell\bmod m_j:\ell\mid j,\ \ell\text{ prime}\rangle.</div>
+<p>The general multiplicative theorem gives</p>
+<div class="math" role="math">T_j\subseteq-H_j.</div>
+<p>Call <code>j</code> <strong>coset-saturated</strong> when</p>
+<div class="math" role="math">\boxed{T_j=-H_j.}</div>
+<p>Every power-of-two depth is coset-saturated by the Mersenne theorem. The initial depth <code>j=1</code> is also saturated, with</p>
+<div class="math" role="math">H_1=\{1\}\pmod3, \qquad T_1=\{2\}=-H_1.</div>
+<h2>2. Semigroup shadow theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>j</code> be coset-saturated. Let <code>k&gt;j</code> satisfy</p>
+<div class="math" role="math">\boxed{m_j\mid m_k}</div>
+<p>and suppose every prime divisor <code>p|k</code> satisfies</p>
+<div class="math" role="math">\boxed{p\bmod m_j\in H_j.}</div>
+<p>Then the complete Type A/B layer at depth <code>k</code> is directly shadowed by depth <code>j</code>:</p>
+<div class="math" role="math">\boxed{ T_k\bmod m_j\subseteq T_j. }</div>
+<h3>Proof</h3>
+<p>Every divisor <code>e|k</code> is a product of prime divisors of <code>k</code>. Since each such prime lies in the subgroup <code>H_j</code>,</p>
+<div class="math" role="math">e\bmod m_j\in H_j.</div>
+<p>Also</p>
+<div class="math" role="math">4j\equiv1\pmod{m_j},</div>
+<p>and <code>j in H_j</code>, so</p>
+<div class="math" role="math">4\equiv j^{-1}\pmod{m_j}</div>
+<p>lies in <code>H_j</code> as well.</p>
+<p>Therefore</p>
+<div class="math" role="math">e,4e\in H_j</div>
+<p>for every <code>e|k</code>, and hence</p>
+<div class="math" role="math">-e,-4e\in-H_j=T_j.</div>
+<p>Thus every target trap reduces into the source trap set. QED.</p>
+<h2>3. The depth-1 structural semigroup</h2>
+<p>Take</p>
+<div class="math" role="math">j=1.</div>
+<p>Then</p>
+<div class="math" role="math">m_1=3, \qquad H_1=\{1\}, \qquad T_1=\{2\}.</div>
+<p>Suppose every prime divisor of <code>k&gt;1</code> satisfies</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod3.}</div>
+<p>Then every divisor <code>e|k</code> is also <code>1 mod 3</code>, and <code>k=1 mod 3</code>. Consequently</p>
+<div class="math" role="math">3\mid4k-1,</div>
+<p>so the modulus-ancestry condition is automatic.</p>
+<p>The semigroup shadow theorem gives:</p>
+<h3>Corollary</h3>
+<p>If <code>k&gt;1</code> has no prime divisor outside the residue class <code>1 mod 3</code>, then</p>
+<div class="math" role="math">\boxed{T_k\bmod3=T_1=\{2\},}</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{C_{AB}(n)\ne k}</div>
+<p>for every integer <code>n</code> for which <code>C_AB(n)</code> is defined.</p>
+<p>So the multiplicative semigroup</p>
+<div class="math" role="math">\boxed{ \mathcal S_3 = \{k&gt;1:p\mid k\Rightarrow p\equiv1\pmod3\} }</div>
+<p>is an infinite family of global structural gaps.</p>
+<p>Examples include</p>
+<pre><code class="language-text">7, 13, 19, 31, 37, ...
+7^2 = 49
+7*13 = 91
+13^2 = 169
+7*19 = 133
+7*13*19 = 1729</code></pre>
+<p>The composite examples are not consequences of the prime-depth dichotomy; they are new instances supplied by multiplicative source saturation.</p>
+<h2>4. Binary saturated sources</h2>
+<p>For every <code>a&gt;=1</code>, take</p>
+<div class="math" role="math">j=2^a, \qquad m_j=2^{a+2}-1, \qquad H_j=\langle2\rangle.</div>
+<p>The Mersenne theorem gives</p>
+<div class="math" role="math">T_j=-H_j.</div>
+<p>Therefore any <code>k&gt;j</code> satisfying</p>
+<div class="math" role="math">k\equiv j\pmod{m_j}</div>
+<p>and</p>
+<div class="math" role="math">p\bmod m_j\in\langle2\rangle \qquad\text{for every }p\mid k</div>
+<p>is directly shadowed by <code>j</code>.</p>
+<p>This produces a hierarchy of multiplicatively defined structural-gap families attached to the saturated binary sources.</p>
+<p>The original Mersenne shadow lattice is the special case where the later target itself is another power of two.</p>
+<h2>5. Why the semigroup condition is natural</h2>
+<p>The trap-coset theorem says the target divisor set matters multiplicatively.</p>
+<p>If the source trap fills an entire coset <code>-H_j</code>, then exact shadowing no longer requires checking target divisors one by one. It is enough that the prime generators of the target divisor monoid map into <code>H_j</code>.</p>
+<p>Thus coset saturation converts an exact residue problem into a prime-factor membership test.</p>
+<p>This gives a new general mechanism:</p>
+<div class="math" role="math">\boxed{ \text{source coset saturation} + \text{target prime-factor containment} + \text{modulus ancestry} \Longrightarrow \text{complete direct shadow}. }</div>
+<h2>6. Counting consequence from the depth-1 semigroup</h2>
+<p>Even without using the full asymptotic theory of multiplicative sets, the family already strengthens the supply of explicit composite structural gaps.</p>
+<p>For example, every product</p>
+<div class="math" role="math">k=pq</div>
+<p>of primes</p>
+<div class="math" role="math">p\equiv q\equiv1\pmod3</div>
+<p>lies in <code>S_3</code> and is globally impossible as a minimal depth.</p>
+<p>Classical multiplicative-set methods such as Wirsing or Selberg-Delange predict and prove much denser counting asymptotics for the full semigroup. A publication version should state the sharp asymptotic only after the constant and analytic hypotheses are written carefully.</p>
+<p>The exact shadow theorem itself is elementary and independent of those counting refinements.</p>
+<h2>7. Next theorem targets</h2>
+<ol><li>classify all coset-saturated depths <code>j</code> satisfying <code>T_j=-H_j</code>;</li><li>the finite search currently suggests <code>j=1</code> and the powers of two may be the complete list, but this is <strong>not proved</strong>;</li><li>derive sharp counting asymptotics for the structural semigroup <code>S_3</code>;</li><li>classify intersections and unions of the saturated-source semigroup families;</li><li>determine whether their union has positive density among all depth values;</li><li>use saturated-source shadows as exact deletions before attacking the remaining composite-depth DSC-P problem.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

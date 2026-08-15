@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>q=3 Pointwise Absorption — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/q3-pointwise-absorption.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/q3-pointwise-absorption.html">
+  <meta property="og:title" content="q=3 Pointwise Absorption — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>q=3 Pointwise Absorption</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/Q3-POINTWISE-ABSORPTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>Q3-ABSORPTION.md</code>, <code>Q3-WEAK-REDUNDANCY.md</code></p>
+<p><strong>Claim boundary:</strong> sharpens q=3 direct-shadow detection from whole-layer ancestry to the actual trap point used by a candidate. Does not by itself prove that pointwise-primitive base traps cannot cover the corrected parameter domain, universal DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>Setup</h2>
+<p>Fix a candidate progression</p>
+<div class="math" role="math">x(s)=r+Ls.</div>
+<p>Let <code>j</code> be an earlier layer with</p>
+<div class="math" role="math">m_j=4j-1</div>
+<p>and</p>
+<div class="math" role="math">q_j=\frac{m_j}{\gcd(L,m_j)}=3.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{n_j=m_j/3.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{n_j\mid L.}</div>
+<p>A class <code>a mod 3</code> belongs to <code>R_j</code> precisely when there is a trap residue <code>u in T_j</code> such that</p>
+<div class="math" role="math">r+La\equiv u\pmod{m_j}.</div>
+<p>In particular</p>
+<div class="math" role="math">\boxed{u\equiv r\pmod{n_j}.}</div>
+<hr>
+<h2>Theorem (pointwise q=3 absorption)</h2>
+<p>Assume <code>a in R_j</code>, witnessed by <code>u in T_j</code>.</p>
+<p>If there is any earlier layer <code>i&lt;j</code> satisfying</p>
+<div class="math" role="math">\boxed{m_i\mid n_j}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{u\bmod m_i\in T_i,}</div>
+<p>then the entire candidate progression is directly shadowed by layer <code>i</code>.</p>
+<h3>Proof</h3>
+<p>Since</p>
+<div class="math" role="math">m_i\mid n_j\mid L,</div>
+<p>the progression is frozen modulo <code>m_i</code>:</p>
+<div class="math" role="math">x(s)\equiv r\pmod{m_i} \qquad\text{for all }s.</div>
+<p>The witness relation gives</p>
+<div class="math" role="math">u\equiv r\pmod{n_j},</div>
+<p>hence also</p>
+<div class="math" role="math">u\equiv r\pmod{m_i}.</div>
+<p>By hypothesis <code>u mod m_i in T_i</code>. Therefore</p>
+<div class="math" role="math">r\bmod m_i\in T_i.</div>
+<p>Since every point of the progression has that same residue modulo <code>m_i</code>, every point lies in the earlier Type A/B layer <code>i</code>. Thus the candidate is directly shadowed. QED.</p>
+<hr>
+<h2>Definition — pointwise-primitive q=3 trap</h2>
+<p>For a q=3 layer <code>j</code>, call a trap residue <code>u in T_j</code> <strong>pointwise primitive</strong> if</p>
+<div class="math" role="math">\boxed{ \forall i&lt;j\text{ with }m_i\mid m_j/3, \quad u\bmod m_i\notin T_i. }</div>
+<p>This is a property of the actual trap point, not of the whole layer.</p>
+<h3>Corollary</h3>
+<p>On a directly novel candidate, every trap witness responsible for every nonempty q=3 pullback must be pointwise primitive.</p>
+<p>Equivalently:</p>
+<div class="math" role="math">\boxed{ \text{non-primitive q=3 trap witness} \Longrightarrow \text{direct shadow}. }</div>
+<hr>
+<h2>Relation to strong absorption</h2>
+<p>Strong absorption assumes one ancestor <code>i</code> satisfies</p>
+<div class="math" role="math">T_j\bmod m_i\subseteq T_i.</div>
+<p>That makes <strong>every</strong> trap of <code>j</code> non-primitive and therefore kills the entire layer whenever <code>R_j</code> is nonempty.</p>
+<p>Pointwise absorption is strictly finer: even a base layer with no whole-set reducing ancestor can be dead for a particular candidate if the specific trap point selected by that candidate reduces into an earlier frozen trap.</p>
+<p>Thus the true residual q=3 threat is smaller than the base-layer population:</p>
+<div class="math" role="math">\boxed{ \text{base layers} \supseteq \text{base layers with primitive traps} \supseteq \text{primitive traps actually alignable on one candidate}. }</div>
+<hr>
+<h2>Corrected q=3 cover target</h2>
+<p>Because <code>3|840|L</code>, the exact Dirichlet parameter domain at q=3 is all of</p>
+<div class="math" role="math">\mathbb Z/3\mathbb Z.</div>
+<p>After strong absorption, weak redundancy, and pointwise absorption, a directly novel q=3 obstruction would require pointwise-primitive trap witnesses whose pullbacks jointly cover</p>
+<div class="math" role="math">\boxed{\{0,1,2\}.}</div>
+<p>This is the next exact search/theorem target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

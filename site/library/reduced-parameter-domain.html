@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For an admissible target candidate write">
+  <title>Exact reduced-parameter domain — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/reduced-parameter-domain.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/reduced-parameter-domain.html">
+  <meta property="og:title" content="Exact reduced-parameter domain — Free Computation Foundation">
+  <meta property="og:description" content="For an admissible target candidate write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact reduced-parameter domain</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For an admissible target candidate write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/REDUCED-PARAMETER-DOMAIN.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Claim boundary:</strong> this corrects the local parameter domain used in some C1/C2/CN proof-mining notes. It does not prove universal Type A/B coverage or Erdős-Straus.</p>
+<h2>Setup</h2>
+<p>For an admissible target candidate write</p>
+<div class="math" role="math">x(s)=r+Ls, \qquad L=\operatorname{lcm}(840,4k-1).</div>
+<p>Let</p>
+<div class="math" role="math">Q=\operatorname{lcm}\{q_j:R_j\ne\varnothing\}.</div>
+<p>The exact Dirichlet condition needed for a prime progression is</p>
+<div class="math" role="math">\boxed{\gcd(r+Ls,LQ)=1.}</div>
+<p>The parameter itself need not be a unit modulo <code>Q</code>.</p>
+<p>Every admissible CRT base satisfies</p>
+<div class="math" role="math">\boxed{\gcd(r,L)=1.}</div>
+<p>because the hard residue is coprime to <code>840</code> and every Type A/B target trap is a unit modulo its target modulus.</p>
+<h2>Theorem</h2>
+<p>Assume <code>gcd(r,L)=1</code>. For every prime <code>p|Q</code>:</p>
+<ul><li>if <code>p|L</code>, then</li></ul>
+<div class="math" role="math">r+Ls\equiv r\not\equiv0\pmod p</div>
+<p>for every <code>s</code>;</p>
+<ul><li>if <code>p\nmid L</code>, then <code>L</code> is invertible modulo <code>p</code>, and</li></ul>
+<div class="math" role="math">p\mid r+Ls \iff s\equiv-rL^{-1}\pmod p.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \gcd(r+Ls,LQ)=1 \iff s\not\equiv-rL^{-1}\pmod p \text{ for every }p\mid Q,\ p\nmid L. }</div>
+<p>Higher powers of <code>p</code> in <code>Q</code> do not change the gcd condition.</p>
+<p>Define</p>
+<div class="math" role="math">\mathcal D_{r,L}(Q) =\{s\bmod Q:\gcd(r+Ls,LQ)=1\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_{r,L}(Q)| =Q\prod_{\substack{p\mid Q\\p\nmid L}} \left(1-\frac1p\right). }&lt;/div&gt;</p>
+<h2>Important correction</h2>
+<p>The auxiliary set</p>
+<div class="math" role="math">(\mathbb Z/Q\mathbb Z)^*</div>
+<p>is generally not the exact reduced parameter domain.</p>
+<p>In particular, for the hard-class program</p>
+<div class="math" role="math">3\cdot5\cdot7\mid840\mid L.</div>
+<p>Hence any local coordinate supported only on <code>3,5,7</code> carries the <strong>full residue-ring parameter domain</strong> as far as Dirichlet reducedness is concerned.</p>
+<p>For <code>q=3</code> specifically,</p>
+<div class="math" role="math">\boxed{\mathcal D_{r,L}(3)=\mathbb Z/3\mathbb Z.}</div>
+<p>Thus two singleton rows forbidding <code>{1}</code> and <code>{2}</code> do not form a reduced obstruction: <code>s=0 mod3</code> remains prime-compatible.</p>
+<p>Combined with <code>Q3-SINGLETON-PULLBACK.md</code>, a genuine q=3 local cover requires three distinct singleton rows covering</p>
+<div class="math" role="math">\boxed{\{0,1,2\}.}</div>
+<p>The constructive core in <code>DSC-COUNTEREXAMPLE.md</code> shows that such a three-row cover can in fact occur.</p>
+<h2>Research rule</h2>
+<p>Future local escape and covering arguments must distinguish:</p>
+<ol><li>primes already dividing <code>L</code>, where parameter residues are unrestricted by reducedness;</li><li>primes outside <code>L</code>, where exactly one affine class modulo <code>p</code> is excluded.</li></ol>
+<p>Do not replace this exact affine condition by <code>gcd(s,Q)=1</code> unless an equivalence has been proved for the stated special case.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Complete dichotomy for prime Type A/B minimal depths — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-depth-dichotomy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-depth-dichotomy.html">
+  <meta property="og:title" content="Complete dichotomy for prime Type A/B minimal depths — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Complete dichotomy for prime Type A/B minimal depths</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-DEPTH-DICHOTOMY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal structural theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem classifies <strong>prime values of the depth parameter</strong> <code>k</code> inside the López Type A/B minimal-depth system. It does not prove that every prime input has finite <code>C_AB</code>, and it does not prove the Erdős-Straus conjecture. Literature priority for this minimal-depth formulation remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="theory.html">THEORY.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li><li><a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a></li><li><a href="spectrum-infinite-coinfinite.html">SPECTRUM-INFINITE-COINFINITE.md</a></li><li><a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>For a depth <code>k</code>, put</p>
+<div class="math" role="math">m_k=4k-1</div>
+<p>and</p>
+<div class="math" role="math">T_k=\{-e,-4e\pmod{m_k}:e\mid k\}.</div>
+<p>When <code>k</code> itself is prime, its only divisors are <code>1</code> and <code>k</code>, so</p>
+<div class="math" role="math">\boxed{ T_k=\{-1,-4,-k,-4k\}\pmod{m_k}. }</div>
+<p>Since</p>
+<div class="math" role="math">4k\equiv1\pmod{m_k},</div>
+<p>the last residue duplicates <code>-1</code>, but keeping all four forms makes the ancestry argument transparent.</p>
+<h2>2. Composite target modulus always has a 1 mod 4 factor</h2>
+<h3>Lemma</h3>
+<p>Let <code>m&gt;1</code> satisfy</p>
+<div class="math" role="math">m\equiv3\pmod4.</div>
+<p>If <code>m</code> is composite, then there is a proper factorization</p>
+<div class="math" role="math">\boxed{m=AB}</div>
+<p>with</p>
+<div class="math" role="math">\boxed{1&lt;A&lt;m,\qquad A\equiv1\pmod4,\qquad B\equiv3\pmod4.}</div>
+<h3>Proof</h3>
+<p>Factor <code>m</code> into primes with multiplicity.</p>
+<p>If some prime divisor is <code>1 mod 4</code>, choose that prime as <code>A</code>; the complementary factor is then <code>3 mod 4</code>.</p>
+<p>Otherwise every prime divisor is <code>3 mod 4</code>. Since the total product is <code>3 mod 4</code>, the number of prime factors counted with multiplicity is odd. Composite then means there are at least three. Choose any two of them for <code>A</code>; their product is <code>1 mod 4</code>, and the nontrivial complementary factor remains <code>3 mod 4</code>.</p>
+<p>QED.</p>
+<p>Write</p>
+<div class="math" role="math">A=4s+1, \qquad B=4j-1.</div>
+<p>Then</p>
+<div class="math" role="math">m_k=(4s+1)(4j-1).</div>
+<p>Expanding gives</p>
+<div class="math" role="math">\boxed{k=(4s+1)j-s.}</div>
+<p>Thus <code>j&lt;k</code> and this is exactly a modulus-ancestry relation</p>
+<div class="math" role="math">\boxed{m_k=(4s+1)m_j.}</div>
+<h2>3. Prime-target ancestry shadow theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>k</code> be prime. If</p>
+<div class="math" role="math">4k-1</div>
+<p>is composite, then the complete Type A/B layer at depth <code>k</code> is directly shadowed by an earlier depth <code>j&lt;k</code>.</p>
+<h3>Proof</h3>
+<p>Use the factorization above:</p>
+<div class="math" role="math">4k-1=(4s+1)(4j-1).</div>
+<p>Hence</p>
+<div class="math" role="math">k=(4s+1)j-s=s(4j-1)+j,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{k\equiv j\pmod{4j-1}.}</div>
+<p>Also</p>
+<div class="math" role="math">4k=(4s+1)(4j-1)+1,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{4k\equiv1\pmod{4j-1}.}</div>
+<p>Because <code>k</code> is prime,</p>
+<div class="math" role="math">T_k=\{-1,-4,-k,-4k\}.</div>
+<p>Reducing these residues modulo <code>m_j=4j-1</code> gives</p>
+<div class="math" role="math">\{-1,-4,-j,-1\}.</div>
+<p>But <code>1|j</code> and <code>j|j</code>, so</p>
+<div class="math" role="math">-1,-4,-j\in T_j.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ T_k\bmod m_j\subseteq T_j. }</div>
+<p>Every integer hitting layer <code>k</code> already hits layer <code>j&lt;k</code>. Hence <code>k</code> can never be a minimal Type A/B depth. QED.</p>
+<h2>4. Prime-modulus realization</h2>
+<p>If instead</p>
+<div class="math" role="math">4k-1</div>
+<p>is prime and greater than <code>7</code>, the prime-modulus backbone theorem applies directly. The target modulus contributes a new CRT coordinate relative to all earlier Type A/B moduli, and one obtains reduced arithmetic progressions containing infinitely many primes with exact depth <code>k</code>.</p>
+<p>The only prime-depth initial case not covered by the <code>&gt;7</code> statement is</p>
+<div class="math" role="math">k=2, \qquad m_2=7.</div>
+<p>Here</p>
+<div class="math" role="math">T_2=\{3,5,6\}\pmod7.</div>
+<p>The hard class</p>
+<div class="math" role="math">p\equiv1\pmod{840}</div>
+<p>already avoids the only earlier layer <code>k=1</code>, because it is <code>1 mod 3</code> while</p>
+<div class="math" role="math">T_1=\{2\}\pmod3.</div>
+<p>Choosing, for example,</p>
+<div class="math" role="math">p\equiv3\pmod7</div>
+<p>is compatible by CRT and gives a reduced arithmetic progression. Dirichlet therefore supplies infinitely many hard-class primes with</p>
+<div class="math" role="math">C_{AB}(p)=2.</div>
+<p>Thus for <strong>every</strong> prime depth <code>k</code> with <code>4k-1</code> prime, including <code>k=2</code>, infinitely many primes in the hard class <code>1 mod 840</code> have exact depth <code>k</code>.</p>
+<p>See <a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a>.</p>
+<h2>5. Prime-depth classification theorem</h2>
+<p>Combining the two directions gives:</p>
+<h3>Theorem</h3>
+<p>For every prime depth <code>k</code>, exactly one of the following occurs.</p>
+<h3>Realized side</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{4k-1\text{ is prime},}</div>
+<p>then infinitely many primes, including infinitely many in the hard class <code>1 mod 840</code>, satisfy</p>
+<div class="math" role="math">\boxed{C_{AB}(p)=k.}</div>
+<h3>Structural-gap side</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{4k-1\text{ is composite},}</div>
+<p>then layer <code>k</code> is completely directly shadowed by an earlier layer, and</p>
+<div class="math" role="math">\boxed{C_{AB}(n)\ne k}</div>
+<p>for every integer <code>n</code> for which <code>C_AB(n)</code> is defined.</p>
+<p>Equivalently, for prime <code>k</code>,</p>
+<div class="math" role="math">\boxed{ k\in\mathcal D_H \iff k\in\mathcal D_{\mathbb P} \iff 4k-1\text{ is prime}.}</div>
+<p>This is a complete exact classification of the spectrum on the prime-depth subsequence.</p>
+<h2>6. Infinite ancestry families</h2>
+<p>The proof can be read constructively.</p>
+<p>Fix any</p>
+<div class="math" role="math">s\ge1, \qquad A=4s+1.</div>
+<p>If a prime depth <code>k</code> satisfies</p>
+<div class="math" role="math">\boxed{k\equiv-s\pmod A,}</div>
+<p>then</p>
+<div class="math" role="math">A\mid4k-1.</div>
+<p>Writing</p>
+<div class="math" role="math">4k-1=A(4j-1)</div>
+<p>gives an earlier source depth</p>
+<div class="math" role="math">\boxed{j=(k+s)/A}</div>
+<p>that directly shadows <code>k</code>.</p>
+<p>Because</p>
+<div class="math" role="math">\gcd(s,4s+1)=1,</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many prime depths in each such residue class.</p>
+<p>The first family is</p>
+<div class="math" role="math">s=1, \qquad A=5,</div>
+<p>so every prime depth</p>
+<div class="math" role="math">\boxed{k\equiv4\pmod5}</div>
+<p>is completely shadowed by</p>
+<div class="math" role="math">\boxed{j=(k+1)/5.}</div>
+<p>Examples:</p>
+<pre><code class="language-text">k=19  -&gt; j=4,  m_k=75 = 5*15
+k=29  -&gt; j=6,  m_k=115 = 5*23
+k=59  -&gt; j=12, m_k=235 = 5*47
+k=79  -&gt; j=16, m_k=315 = 5*63</code></pre>
+<p>Every listed prime depth is structurally impossible, irrespective of how far one searches over input primes.</p>
+<h2>7. Stronger structural-gap counting bound</h2>
+<p>Let</p>
+<div class="math" role="math">G(X)=|[1,X]\setminus\mathcal D_{\mathbb P}|.</div>
+<p>Every prime</p>
+<div class="math" role="math">k\le X, \qquad k\equiv4\pmod5</div>
+<p>is a global structural gap by the <code>s=1</code> ancestry family.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ G(X)\ge\pi(X;5,4)-O(1). }</div>
+<p>By the prime number theorem in arithmetic progressions,</p>
+<div class="math" role="math">\pi(X;5,4) \sim \frac{1}{4}\frac{X}{\log X}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ G(X)\ge \left(\frac14+o(1)\right)\frac{X}{\log X}. }</div>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{G(X)\gg X/\log X.}</div>
+<p>This improves the previously recorded logarithmic lower bound coming only from the sparse power-of-two Mersenne family.</p>
+<p>The same lower bound applies to the complement of the hard-class infinite-realization spectrum because these are global gaps for every integer.</p>
+<h2>8. Relation to the Mersenne lattice</h2>
+<p>The Mersenne lattice and the prime-depth dichotomy are two different exact deletion mechanisms:</p>
+<ul><li>the Mersenne theorem uses <strong>coset saturation</strong> in the binary power-of-two family;</li><li>the prime-depth theorem uses <strong>extreme divisor sparsity</strong> of a prime target depth together with any nontrivial modulus ancestry factorization.</li></ul>
+<p>Together they show that structural gaps are produced both by highly structured target divisor sets and by maximally sparse target divisor sets.</p>
+<h2>9. Research significance</h2>
+<p>This theorem gives a complete infinite-subsequence classification with no unresolved union-shadow issue:</p>
+<div class="math" role="math">\boxed{ \text{prime depth }k \longleftrightarrow \begin{cases} 4k-1\text{ prime}: &amp; \text{infinitely realized},\\ 4k-1\text{ composite}: &amp; \text{globally impossible}. \end{cases} }</div>
+<p>The remaining spectrum problem therefore begins in earnest on <strong>composite target depths</strong>.</p>
+<p>That sharply localizes the hard part of Direct-Shadow Completeness and the exact-depth spectrum.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

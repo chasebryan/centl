@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Unique-active valuation excess is a first prime-power lift — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/single-active-excess-prime-power.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/single-active-excess-prime-power.html">
+  <meta property="og:title" content="Unique-active valuation excess is a first prime-power lift — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Unique-active valuation excess is a first prime-power lift</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-EXCESS-PRIME-POWER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Coordinator:</strong> Operator-01 / primary research lead</p>
+<p><strong>Partner input:</strong> Operator-02 active fixed-negative core and valuation criterion</p>
+<p><strong>Claim boundary:</strong> this theorem classifies the shape of the excess quotient of a unique active fixed-negative row. It does not prove the observed hard-class restriction <code>q in {3,5,9}</code>, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li><li><a href="single-active-local-escape.html">SINGLE-ACTIVE-LOCAL-ESCAPE.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIAMOND-VALUATION-CRITERION.md">operator-02/DIAMOND-VALUATION-CRITERION.md</a></li><li><a href="square-lift-core.html">SQUARE-LIFT-CORE.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>Fix a target progression modulus <code>L</code> and a fixed-negative earlier layer <code>j</code> with</p>
+<div class="math" role="math">m_j=4j-1.</div>
+<p>Because the layer is fixed at squareclass level, write</p>
+<div class="math" role="math">\boxed{m_j=d s^2}</div>
+<p>with <code>d</code> squarefree and every prime dividing <code>d</code> already dividing <code>L</code>.</p>
+<p>The Jacobi sign of the target residue on this entire square-lift tower depends only on <code>d</code>:</p>
+<div class="math" role="math">\left(\frac r{d s^2}\right)=\left(\frac r d\right).</div>
+<p>Thus replacing <code>s</code> by a divisor of <code>s</code> preserves the fixed-negative character sign whenever the resulting layer is earlier and active.</p>
+<p>Define the active excess quotient</p>
+<div class="math" role="math">q_j=\frac{m_j}{\gcd(L,m_j)}.</div>
+<p>Assume <code>j</code> is the <strong>unique</strong> member of the active fixed-negative core:</p>
+<div class="math" role="math">\boxed{|\mathcal N^{\rm act}_{k,r}|=1.}</div>
+<h2>2. The theorem</h2>
+<h3>Theorem</h3>
+<p>For the unique active fixed-negative layer,</p>
+<div class="math" role="math">\boxed{q_j=p^a}</div>
+<p>for one prime <code>p</code>, with</p>
+<div class="math" role="math">\boxed{a\in\{1,2\}.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{q_j=p\quad\text{or}\quad p^2.}</div>
+<h3>Proof</h3>
+<p>For a prime <code>p</code>, write</p>
+<div class="math" role="math">v_p(m_j)=v_p(d)+2v_p(s).</div>
+<p>Let</p>
+<div class="math" role="math">b_p=v_p(L).</div>
+<p>Then</p>
+<div class="math" role="math">v_p(q_j)=\max(v_p(m_j)-b_p,0).</div>
+<p>Because <code>j</code> is active, at least one exponent is positive.</p>
+<h3>Step 1: only one prime can divide q_j</h3>
+<p>Suppose two distinct primes <code>p</code> and <code>ell</code> divide <code>q_j</code>.</p>
+<p>Then both satisfy</p>
+<div class="math" role="math">v_p(m_j)&gt;b_p, \qquad v_\ell(m_j)&gt;b_\ell.</div>
+<p>Since the squarefree part <code>d</code> is already supported on primes dividing <code>L</code>, every valuation excess comes from the square factor <code>s^2</code> beyond the amount absorbed by <code>L</code>.</p>
+<p>Choose one excess prime, say <code>p</code>, and replace</p>
+<div class="math" role="math">s\mapsto s/p.</div>
+<p>The resulting modulus</p>
+<div class="math" role="math">m&#x27;=d(s/p)^2</div>
+<p>is smaller than <code>m_j</code>, hence its corresponding depth is earlier than <code>j</code> and therefore earlier than the target depth.</p>
+<p>Its squarefree part is still <code>d</code>, so it has the same fixed-negative Jacobi sign.</p>
+<p>Removing one factor of <code>p</code> from <code>s</code> reduces the <code>p</code>-valuation of the modulus by exactly two but leaves the <code>ell</code>-valuation unchanged. Since <code>ell</code> was already in valuation excess,</p>
+<div class="math" role="math">v_\ell(m&#x27;)=v_\ell(m_j)&gt;b_\ell.</div>
+<p>Therefore the earlier layer <code>m&#x27;</code> remains active.</p>
+<p>This produces a second active fixed-negative layer, contradicting uniqueness.</p>
+<p>Hence <code>q_j</code> has support on only one prime:</p>
+<div class="math" role="math">q_j=p^a.</div>
+<h3>Step 2: the excess exponent is at most two</h3>
+<p>Suppose</p>
+<div class="math" role="math">a=v_p(q_j)\ge3.</div>
+<p>Again replace <code>s</code> by <code>s/p</code>. The new layer has the same squarefree part <code>d</code> and therefore the same fixed-negative sign.</p>
+<p>Its <code>p</code>-valuation is lower by exactly two, so its remaining excess above <code>L</code> is</p>
+<div class="math" role="math">a-2\ge1.</div>
+<p>Thus the earlier layer is still active, again contradicting uniqueness.</p>
+<p>Therefore</p>
+<div class="math" role="math">a\le2.</div>
+<p>Since the layer is active, <code>a&gt;=1</code>, giving</p>
+<div class="math" role="math">\boxed{a\in\{1,2\}.}</div>
+<p>QED.</p>
+<h2>3. Class-B corollary</h2>
+<p>Recall Operator-02 Class B means the excess prime is absent from <code>L</code> and appears to even exponent in the fixed-squareclass layer.</p>
+<h3>Corollary</h3>
+<p>If the unique active fixed-negative layer is Class B, then necessarily</p>
+<div class="math" role="math">\boxed{q_j=p^2}</div>
+<p>for a prime <code>p</code> not dividing <code>L</code>.</p>
+<h3>Proof</h3>
+<p>If <code>p</code> does not divide <code>L</code>, then</p>
+<div class="math" role="math">v_p(q_j)=v_p(m_j).</div>
+<p>Fixed-squareclass support requires a prime absent from <code>L</code> to occur to even exponent. The theorem restricts the positive exponent to <code>1</code> or <code>2</code>, so it must equal <code>2</code>. QED.</p>
+<p>Thus the unique-active universe splits cleanly into:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ll} \text{Class A:}&amp;q=p\text{ or }p^2,\quad p\mid L,\\ \text{Class B:}&amp;q=p^2,\quad p\nmid L. \end{array}}</div>
+<h2>4. First-excess interpretation</h2>
+<p>The theorem says a unique active fixed-negative row is literally the <strong>first active prime-power lift</strong> of its negative squarefree ancestor along one prime direction.</p>
+<p>If more than one prime direction were already excessive, a smaller active row would exist by removing one direction.</p>
+<p>If one direction had more than two units of valuation excess, a smaller active row would exist by removing one square factor.</p>
+<p>So uniqueness forces the active layer onto the first shell of the valuation lattice.</p>
+<h2>5. Relation to the k &lt;= 1500 census</h2>
+<p>The independently verified census found</p>
+<pre><code class="language-text">2,770 single-active candidates
+q=3: 1,322
+q=5:    34
+q=9: 1,414
+Class A only: 2,770
+Class B/mixed: 0</code></pre>
+<p>The theorem explains why only prime or prime-square quotients can occur.</p>
+<p>It does <strong>not</strong> yet explain why the only observed prime directions are <code>3</code> and <code>5</code>, why <code>7</code> is absent, why no prime <code>&gt;=11</code> occurs, or why <code>25</code> is absent.</p>
+<p>Those are now isolated as a sharper theorem candidate rather than being mixed together with the already solved prime-power question.</p>
+<h2>6. Hard-class small-prime collapse conjecture</h2>
+<p>The finite data suggests:</p>
+<blockquote><p>For Mordell-hard target classes modulo 840, if a fixed-negative active core has exactly one layer, then its first-excess quotient belongs to &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;&amp;gt; \boxed{\{3,5,9\}}.</p></blockquote>
+<p>&amp;gt;&lt;/div&gt;</p>
+<p>&gt;</p>
+<blockquote><p>In particular the unique active row is Class A, never Class B.</p></blockquote>
+<p>This statement is <strong>not proved</strong> here.</p>
+<p>The next attack should exploit the additional hard-class facts at primes <code>3,5,7</code>, the square-lift ancestor structure, and target-modulus divisibility. A counterexample would be a hard-compatible target with <code>|N^act|=1</code> and quotient <code>7</code>, <code>25</code>, <code>p&gt;=11</code>, or <code>p^2</code> for a free prime.</p>
+<h2>7. Why this matters</h2>
+<p>The Class-C problem began with arbitrary active valuation excess.</p>
+<p>The theorem reduces the single-active branch to one prime and at most one square-lift step:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal N^{act}|=1 \Longrightarrow \text{one prime direction} \Longrightarrow q=p\text{ or }p^2. }&lt;/div&gt;</p>
+<p>That is a genuine universal compression of C1 and gives the <code>3,5,9</code> observation a precise remaining burden of proof.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

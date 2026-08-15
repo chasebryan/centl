@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.">
+  <title>CENTL-SCi — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/sci.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/sci.html">
+  <meta property="og:title" content="CENTL-SCi — Free Computation Foundation">
+  <meta property="og:description" content="Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CENTL-SCi</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">Status: active development toward CENTL-SCi v0.0.2-Caramels. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/SCI.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>Status: active development toward <strong>CENTL-SCi <code>v0.0.2-Caramels</code></strong>. This document describes the Caramels development branch; it is not a claim that the release has been tagged or published.</p>
+<p><strong>CENTL-SCi means Specific CENTL Interpreter.</strong> It is developed as part of CENTL under the Free Computation Foundation.</p>
+<blockquote><p>Free for science.</p></blockquote>
+<p>CENTL-SCi is a local interaction and interpretation layer for mathematics, physics, and user-owned CENTL extension. It is not a general-purpose chatbot and it is not a second mathematical or physics evaluator.</p>
+<p>Its scientific job is to interpret a problem, produce a validated representation, dispatch that representation to CENTL&#x27;s deterministic machinery, and present only what the resulting evidence justifies.</p>
+<p>Its BUILD job is different: help the user inspect, extend, modify, and own their downstream CENTL environment while keeping local/generated/external assurance visibly separate from verified core assurance.</p>
+<h2>Caramels interaction model</h2>
+<p>Caramels exposes four explicit modes:</p>
+<pre><code class="language-text">MATH&gt;    mathematics-first interaction
+PHYS&gt;    physics-first interaction
+HYBRID&gt;  mixed scientific interaction; default
+BUILD&gt;   downstream programming and system extension</code></pre>
+<p>Switch mode inside the REPL with:</p>
+<pre><code class="language-text">:mode math
+:mode physics
+:mode hybrid
+:mode build</code></pre>
+<p>The terminal interaction layer provides:</p>
+<ul><li>cursor-aware editing;</li><li>Up/Down and Ctrl-P/Ctrl-N history navigation;</li><li>Home/End and Ctrl-A/Ctrl-E movement;</li><li>backspace/delete editing;</li><li>durable input history unless disabled;</li><li>mode-aware Tab completion;</li><li>noncommitted ghost/shadow suggestions;</li><li>Ctrl-C interruption and Ctrl-D/EOF exit;</li><li>canonical input fallback outside a compatible terminal.</li></ul>
+<p>A shadow suggestion is not part of submitted input until the user explicitly accepts it. Structural suggestions that would invent missing scientific content are display-only.</p>
+<p>Ask what the system can do without reading this document first:</p>
+<pre><code class="language-text">HYBRID&gt; what can you do
+BUILD&gt; catalog
+BUILD&gt; products
+BUILD&gt; extend add a local helper for my lab protocol</code></pre>
+<p><code>catalog</code> lists deterministic capabilities and examples. <code>products</code> names the FCF family without collapsing Oasis, MIRAGE, CARAVAN, Wellspring, or Camp. <code>extend</code> starts a local MIRAGE cycle from the request; it does not activate source or promote assurance. Unsolved work now points to those surfaces instead of ending at a dead “cannot solve this yet.”</p>
+<h2>Input recovery and interpretation</h2>
+<p>Before model inference, Caramels applies conservative deterministic normalization:</p>
+<ul><li>whitespace normalization;</li><li><code>×</code> -&gt; <code>*</code>;</li><li><code>÷</code> -&gt; <code>/</code>;</li><li>Unicode minus -&gt; <code>-</code>;</li><li><code>²</code> / <code>³</code> -&gt; <code>^2</code> / <code>^3</code>;</li><li><code>½</code> -&gt; <code>1/2</code>;</li><li><code>π</code> -&gt; <code>pi</code>;</li><li>selected safe typo repair;</li><li>ordinary polite wrappers such as <code>please</code>, <code>could you</code>, and <code>can you</code>;</li><li>a small set of unambiguous intent canonicalizations such as roots/zeros and unit-conversion phrasing.</li></ul>
+<p>Identifiers and user expressions are not globally lowercased.</p>
+<p>Interpretation order is:</p>
+<pre><code class="language-text">input
+  -&gt; normalization
+  -&gt; deterministic intent classification
+  -&gt; deterministic canonicalization/recovery
+  -&gt; Tier-0 deterministic interpreter
+  -&gt; useful clarification if required fields are missing
+  -&gt; local semantic model only when semantic interpretation is genuinely required
+  -&gt; validated Problem IR
+  -&gt; authoritative CENTL / CENTL Physics execution</code></pre>
+<p>The semantic model remains untrusted. Model output is validated before lowering and cannot confer mathematical truth or verified-core status.</p>
+<h2>Scientific Problem IR</h2>
+<p>Caramels currently has typed deterministic paths for:</p>
+<table class="directory"><thead><tr><th>Problem class</th><th>Domain</th><th>Execution</th></tr></thead><tbody><tr><td><code>exact_expression</code></td><td>mathematics</td><td>CENTL <code>compute</code></td></tr><tr><td><code>polynomial_equation</code></td><td>mathematics</td><td>CENTL <code>solve</code></td></tr><tr><td><code>verification_claim</code></td><td>mathematics</td><td>read-only CENTL <code>verify</code> protocol</td></tr><tr><td><code>unit_conversion</code></td><td>physics</td><td>typed CENTL Physics conversion</td></tr><tr><td><code>physical_constant</code></td><td>physics</td><td>typed CENTL Physics exact defining/conventional constant lookup</td></tr><tr><td><code>uniform_gravity_particle</code></td><td>physics</td><td>typed CENTL Physics <code>simulate_particle</code></td></tr><tr><td><code>unsupported</code></td><td>either/outside scope</td><td>no fabricated computation</td></tr></tbody></table>
+<p>The deterministic natural-language surface also lowers supported differentiation, integration, substitution, simplification, expansion, factoring, and approximation requests into existing native CENTL expressions instead of creating separate implementations.</p>
+<p>The canonical SCI JSON schema includes the closed <code>verification_claim</code> class. The optional local-model GBNF remains deliberately narrower in this Caramels slice: model generation admits exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. Supported closed verification phrasing is handled deterministically rather than delegated to the model.</p>
+<h2>Deterministic approximation</h2>
+<p>Caramels lowers explicit approximation requests into CENTL&#x27;s existing bounded-enclosure operation rather than inventing a second numerical evaluator.</p>
+<p>Examples:</p>
+<pre><code class="language-text">MATH&gt; approximate pi
+MATH&gt; approximate sqrt(2) to 30 significant digits</code></pre>
+<p>These lower to native forms such as:</p>
+<pre><code class="language-text">approx(pi)
+approx(sqrt(2), 30)</code></pre>
+<p>CENTL remains responsible for the numerical contract: requested digits must be justified by the returned enclosure, and unresolved precision remains visible rather than being replaced by guessed decimal output.</p>
+<h2>Closed mathematical claim verification</h2>
+<p>Caramels has a first deterministic natural-language route into CENTL&#x27;s existing mathematical contract checker.</p>
+<p>Examples:</p>
+<pre><code class="language-text">MATH&gt; verify 0.1 + 0.2 equals 3/10
+MATH&gt; check whether 1/3 &lt; 1/2</code></pre>
+<p>The request becomes typed <code>verification_claim</code> IR and lowers to the additive, read-only protocol operation:</p>
+<pre><code class="language-json">{&quot;version&quot;:1,&quot;op&quot;:&quot;verify&quot;,&quot;left&quot;:&quot;0.1 + 0.2&quot;,&quot;relation&quot;:&quot;equal&quot;,&quot;right&quot;:&quot;3/10&quot;}</code></pre>
+<p>The accepted relation vocabulary maps to the verifier&#x27;s existing protocol relations:</p>
+<ul><li><code>equal</code>;</li><li><code>not_equal</code>;</li><li><code>less_than</code>;</li><li><code>less_or_equal</code>;</li><li><code>greater_than</code>;</li><li><code>greater_or_equal</code>.</li></ul>
+<p>Verifier verdicts remain explicit:</p>
+<ul><li><code>verified</code> and <code>refuted</code> are authoritative established outcomes;</li><li><code>unknown</code> and <code>invalid</code> remain unresolved and visible rather than being guessed into a truth value.</li></ul>
+<p>This first Caramels route is deliberately limited to <strong>closed claims</strong>. CENTL-SCi does not infer quantified variables, domains, or free-form assumptions from natural language for this class. Requests containing phrases such as <code>for all</code> or <code>assuming</code> receive clarification instead of silent formalization. The underlying CENTL verifier already has richer explicit contract machinery; expanding natural-language access to that machinery is a later slice.</p>
+<h2>Exact physical constants</h2>
+<p>Caramels exposes the deliberately narrow exact CENTL Physics constant catalog:</p>
+<ul><li>speed of light in vacuum, <code>c</code>;</li><li>Planck constant, <code>h</code>;</li><li>elementary charge, <code>e</code>;</li><li>Boltzmann constant, <code>k_B</code>;</li><li>Avogadro constant, <code>N_A</code>;</li><li>standard acceleration of gravity, <code>g0</code>.</li></ul>
+<p>These are defining or conventional exact values already represented by CENTL Physics with provenance. Natural-language requests for those constants use the deterministic fast path and do not require a model.</p>
+<p>Measured constants are not silently promoted to exactness. For example, a request for the Newtonian gravitational constant <code>G</code> is explicitly refused by this route because CENTL does not yet have first-class measured-uncertainty/provenance semantics for that catalog entry.</p>
+<h2>Narrow mechanics class</h2>
+<p>Caramels exposes a first narrow natural-language mechanics class: a particle under explicit uniform gravity.</p>
+<p>Example:</p>
+<pre><code class="language-text">PHYS&gt; simulate a particle with mass 2 kg, position (0,0,10) m, velocity (1,0,0) m/s, gravity (0,0,-10) m/s^2, dt 1/10 s, steps 10</code></pre>
+<p>All required physical data must be supplied by the user:</p>
+<ul><li>mass;</li><li>initial position;</li><li>initial velocity;</li><li>gravity vector;</li><li>timestep;</li><li>number of steps.</li></ul>
+<p>CENTL-SCi does not invent missing initial conditions or a default gravity constant for this request class. Missing fields produce clarification.</p>
+<p>The request lowers into the existing deterministic CENTL Physics <code>simulate_particle</code> protocol using its uniform-gravity force model. Human/details output identifies the discrete symplectic-Euler integrator. A discrete integration result is not presented as the analytic continuous-time trajectory.</p>
+<h2>Answer-first output</h2>
+<p>The default scientific output stays compact:</p>
+<pre><code class="language-sh">centl-sci &#x27;What is 0.1 plus 0.2?&#x27;</code></pre>
+<pre><code class="language-text">3/10</code></pre>
+<pre><code class="language-sh">centl-sci &#x27;Solve x squared minus 5x plus 6 equals zero.&#x27;</code></pre>
+<pre><code class="language-text">x = 2 or x = 3</code></pre>
+<p>Exact values remain exact. Approximation qualifications remain visible. Verification verdicts remain explicit. If CENTL cannot establish a result, the presenter does not manufacture one.</p>
+<h2>Evidence explanation</h2>
+<p><code>--details</code> adds concise scientific metadata.</p>
+<p><code>--explain</code> adds a structured evidence view grounded in the actual interpretation/execution path. It records information such as:</p>
+<ul><li>normalized input;</li><li>mode;</li><li>deterministic intent classification;</li><li>typed IR domain, problem class, and operation;</li><li>interpreter-introduced assumptions;</li><li>interpreter path;</li><li>authoritative executor;</li><li>the executor request actually sent to CENTL/CENTL Physics;</li><li>runtime status;</li><li>workspace revision where available;</li><li>execution/evidence events;</li><li>resulting value/text.</li></ul>
+<p>For verification claims, the details surface can also expose the verifier verdict, scope, method, assurance class/theorem, and evidence reason supplied by the authoritative verifier response.</p>
+<p>The explanation renderer does not ask a language model to invent a derivation after the fact.</p>
+<p><code>--json</code> preserves the structured machine result.</p>
+<p><code>--json</code> is mutually exclusive with the human details/explanation views.</p>
+<h2>Result recall</h2>
+<p>Input history and result recall are separate concepts.</p>
+<p>The REPL includes session-scoped structured result records:</p>
+<pre><code class="language-text">:last
+:result
+:results
+:recall N</code></pre>
+<p>A result record keeps the original input, normalized input, mode, intent, rendered result/details, and workspace revision where available.</p>
+<h2>BUILD mode</h2>
+<p>BUILD is the first-class downstream extension surface.</p>
+<p>Examples of direct native CENTL definitions:</p>
+<pre><code class="language-text">BUILD&gt; create function kinetic_energy(mass, velocity) = 1/2 * mass * velocity^2
+BUILD&gt; create value tau = 2*pi
+BUILD&gt; modify function kinetic_energy(mass, velocity) = mass * velocity^2 / 2</code></pre>
+<p>Caramels also implements a first English-to-CENTL generation grammar:</p>
+<pre><code class="language-text">BUILD&gt; create a function named kinetic_energy that takes mass and velocity and computes 1/2 * mass * velocity^2
+BUILD&gt; create a value named tau equal to 2*pi
+BUILD&gt; modify a function named square that takes x and returns x^2</code></pre>
+<p>The flow is deliberately layered:</p>
+<pre><code class="language-text">English BUILD request
+  -&gt; structured change-request IR
+  -&gt; native CENTL source generation
+  -&gt; existing CENTL parser validation
+  -&gt; reversible workspace snapshot
+  -&gt; source + manifest write
+  -&gt; local workspace revision
+  -&gt; reload enabled native definitions into the downstream CENTL session</code></pre>
+<p>Generated text does not bypass the existing parser boundary.</p>
+<h2>Beyond the calculator</h2>
+<p>Caramels can now grow from inside the live session.</p>
+<p>Type ordinary English and SCi will create a local program, load it immediately, teach the session the spoken phrase, evaluate a first example, and say whether you must restart.</p>
+<pre><code class="language-text">HYBRID&gt; make a function called square that takes x and computes x^2
+HYBRID&gt; square(6)
+36
+HYBRID&gt; what is the square of 6
+36
+HYBRID&gt; make a kinetic energy function
+HYBRID&gt; kinetic_energy(2, 3)
+9
+HYBRID&gt; teach yourself to compute the harmonic mean of a and b as 2 / ((1/a) + (1/b))
+HYBRID&gt; what is the harmonic mean of 3 and 4
+24/7</code></pre>
+<p>Three growth classes stay distinct:</p>
+<table class="directory"><thead><tr><th>What you asked</th><th>What SCi does</th><th>Restart</th></tr></thead><tbody><tr><td>A local function or value</td><td>Writes <code>modules/NAME.centl</code>, enables it, hot-loads the running session, and installs a spoken alias under <code>spoken/</code></td><td>No restart</td></tr><tr><td><code>teach yourself</code> / <code>extend yourself</code> without an exact body</td><td>Starts a local MIRAGE cycle. Nothing is activated</td><td>No restart to inspect</td></tr><tr><td><code>patch your source</code> / compiled-host change</td><td>Writes a reviewable host-growth proposal under <code>generated/host-patches/</code></td><td>Rebuild with <code>dune build</code>, then restart <code>centl-sci</code></td></tr></tbody></table>
+<p>If a named exact definition is already in the local recipe catalog — kinetic energy, harmonic mean, and similar algebraic identities — SCi may use that conventional definition and say so. If the name is already a CENTL built-in, SCi reuses it, refuses to shadow it, and can still install a spoken English alias. It does not invent measured constants or unverified physics.</p>
+<p>The files are the product. Edit the <code>.centl</code> source, edit the spoken JSON, <code>disable NAME</code>, or <code>undo</code>. Local programs are never presented as verified CENTL core.</p>
+<pre><code class="language-text">:programs
+:spoken
+:dialect
+:journal
+:host-patches</code></pre>
+<p>The live dialect is the user&#x27;s CENTL: local programs, spoken aliases, and a growth journal under <code>history/growth/</code>. It is not verified core. Replay it with <code>centl --file dialect.centl</code>. Export it with <code>export dialect</code>.</p>
+<p>Chain a creation into a first use:</p>
+<pre><code class="language-text">HYBRID&gt; let square(x) = x^2 and then square(6)
+36</code></pre>
+<p>If a call names a program that does not exist yet, SCi keeps the symbolic form and tells you how to create it. New programs that call existing ones report <code>Uses:</code> so composition stays visible.</p>
+<h2>Reviewed publish, not a backdoor</h2>
+<p>CENTL can prepare local work for <code>chasebryan/centl</code>. It cannot silently upgrade the official repository.</p>
+<pre><code class="language-text">BUILD&gt; publish status
+BUILD&gt; pack contribution
+BUILD&gt; grant contributor publish
+BUILD&gt; stage contribution</code></pre>
+<p>Owner-only, after an explicit acceptance phrase:</p>
+<pre><code class="language-text">BUILD&gt; grant owner publish I accept local git and gh without storing tokens
+BUILD&gt; commit contribution
+BUILD&gt; open draft pull request</code></pre>
+<p>Rules that stay in the code, not in a comment:</p>
+<ul><li>no tokens or passwords are stored;</li><li>English is never interpolated into a shell;</li><li>only allowlisted <code>git</code> / <code>gh</code> argv arrays run;</li><li>pull requests are <strong>draft</strong> and target <strong><code>mirage</code></strong>, never <code>oasis</code>;</li><li>force-push is not available;</li><li>contributor grants cannot commit or open PRs;</li><li>GitHub human review is the approval authority for everyone, including the owner;</li><li>out-of-scope requests (malware, credential theft, illegal or abusive content) are refused.</li></ul>
+<p>This is not a claim that software is 100% secure. It is a narrow, reviewable publish path so you can grow CENTL from inside CENTL without using an external AI as the upgrade tool.</p>
+<p>Official promotion logic, which overrides informal “just ship Oasis” requests:</p>
+<pre><code class="language-text">feature work -&gt; mirage (experimental, installable if you choose)
+                     |
+                     | stabilize + scripts/oasis.py on a clean oasis commit
+                     v
+                   oasis  -&gt;  SemVer tag  -&gt;  “CENTL vX.Y.Z is an Oasis release.”</code></pre>
+<p><code>main</code> is the complete developer/research tree, not Oasis. Mirage is never a full release. CENTL v0.15.0 Al-Nur is the published Oasis. <code>declare oasis</code>, <code>approve this pull request</code>, <code>merge to oasis</code>, and <code>create a release</code> are refused by CENTL-SCi. GitHub human review and the Oasis gate remain the authorities.</p>
+<h2>Reuse before invention</h2>
+<p>Generic BUILD planning searches a capability inventory before proposing new machinery. That inventory includes existing mathematical/physics surfaces, Caramels runtime mechanisms, downstream extensions, and local packages.</p>
+<p>Useful inspection forms include:</p>
+<pre><code class="language-text">BUILD&gt; capabilities
+BUILD&gt; show capability integration
+BUILD&gt; validate NAME
+BUILD&gt; validate package NAME
+BUILD&gt; dependencies
+BUILD&gt; revisions
+BUILD&gt; assurance
+BUILD&gt; audit workspace</code></pre>
+<p>The inventory includes reusable Caramels capabilities such as workspace audit, structural extension validation, extension dependency validation, package validation, assurance explanation, bounded revision history, reversible workspace portability, and English-to-CENTL extension generation.</p>
+<p>The goal is to answer questions such as:</p>
+<ul><li>Does CENTL already solve this class?</li><li>Is there an existing deterministic physics operation?</li><li>Is there already a local extension with a related name?</li><li>Can the request be expressed as a native CENTL definition rather than a new backend?</li><li>Does the request genuinely need an external or native extension boundary?</li></ul>
+<p>BUILD planning currently distinguishes:</p>
+<ol><li>declarative/local extension;</li><li>native CENTL module/package;</li><li>controlled external adapter;</li><li>generated native extension;</li><li>downstream core patch;</li><li>upstream contribution preparation.</li></ol>
+<p>Core-patch-classified requests create persistent downstream JSON and Markdown plan artifacts. Planning does not silently edit or publish trusted core source.</p>
+<h2>User-owned workspace</h2>
+<p>The default downstream workspace is:</p>
+<pre><code class="language-text">~/.centl/workspaces/default/</code></pre>
+<p>Override it with <code>CENTL_WORKSPACE</code>.</p>
+<p>Layout:</p>
+<pre><code class="language-text">workspace.json
+extensions/
+modules/
+spoken/
+tests/
+data/
+config/
+history/
+packages/
+generated/
+  host-patches/</code></pre>
+<p><code>workspace.json</code> identifies the environment as user-owned downstream state and records the rule that local extensions never silently inherit verified-core assurance.</p>
+<p>Each workspace mutation increments a local revision and records a JSONL revision event. Caramels also exposes a bounded read-only revision-history view over the durable ledger; the view does not itself mutate workspace state.</p>
+<h2>Extension manifests and assurance</h2>
+<p>Extension manifests record, where applicable:</p>
+<ul><li>name and kind;</li><li>enabled/disabled state;</li><li>source;</li><li>summary;</li><li>provenance;</li><li>dependencies;</li><li>generated/declared tests;</li><li>workspace revision;</li><li>assurance category;</li><li>timestamp.</li></ul>
+<p>Current assurance labels include distinctions for verified extensions, validated native extensions, locally tested extensions, external backends, experimental local extensions, and unverified generated extensions.</p>
+<p>A locally generated capability is never silently presented as verified CENTL core.</p>
+<p><code>validate NAME</code> performs structural checks appropriate to the extension kind. Structural validation does not upgrade assurance to verified core.</p>
+<p>Native extensions are revalidated before activation. A missing, unparsable, non-definition, or non-native source cannot be enabled through the native CENTL definition loader.</p>
+<p>The read-only assurance catalog explains what each label establishes and, equally importantly, what it does <strong>not</strong> establish. Per-extension assurance inspection combines the label with manifest provenance without changing the manifest.</p>
+<h2>Extension dependencies</h2>
+<p>Local extension dependencies are explicit manifest metadata.</p>
+<p>The first structural convention is:</p>
+<pre><code class="language-text">extension:NAME</code></pre>
+<p>for another local downstream extension. <code>external:NAME</code> is preserved as external provenance rather than falsely validated as a local dependency; unprefixed legacy dependency strings remain opaque provenance.</p>
+<p>Caramels validates the local dependency graph and reports:</p>
+<ul><li>missing local dependencies;</li><li>disabled local dependencies;</li><li>dependency cycles;</li><li>external and opaque dependency provenance.</li></ul>
+<p>Enabled native definitions are ordered dependency-first when loading into the downstream core session. Activation refuses missing, disabled, self, or non-native declared local prerequisites before mutating workspace state. Workspace import also rejects dependency-invalid or activation-incomplete extension graphs before replacing the current downstream surface.</p>
+<p>Read-only inspection is available through:</p>
+<pre><code class="language-text">BUILD&gt; dependencies
+BUILD&gt; show dependency graph
+BUILD&gt; audit workspace</code></pre>
+<p>Dependency validation is a structural workspace property; it does not promote any extension&#x27;s assurance.</p>
+<h2>Packages</h2>
+<p>Local packages group downstream extensions without creating a separate package-level assurance claim.</p>
+<p>Package validation reports every member&#x27;s:</p>
+<ul><li>presence/missing state;</li><li>enabled/disabled state;</li><li>extension kind;</li><li>individual assurance label.</li></ul>
+<p>Package composition never promotes member assurance.</p>
+<h2>Inspect, disable, remove, undo</h2>
+<p>BUILD exposes lifecycle foundations for downstream ownership:</p>
+<pre><code class="language-text">show workspace
+show extensions
+inspect NAME
+disable NAME
+enable NAME
+remove NAME
+undo</code></pre>
+<p>The REPL also exposes colon forms for the common inspection/lifecycle operations implemented by the current app.</p>
+<p>Mutating operations create a reversible snapshot first. Snapshot payloads cover manifests, native modules, packages, tests, data, and generated extension scaffolds while deliberately excluding the revision/history ledger, workspace identity/configuration, and snapshot store itself.</p>
+<p>Removal archives local files instead of silently pretending the extension never existed.</p>
+<h2>Workspace audit</h2>
+<p><code>audit workspace</code> is a read-only structural inventory across local extensions, packages, and the dependency graph. It reports activation/validation warnings while explicitly recording that the audit itself did not modify verified core.</p>
+<p>The machine audit includes <code>verified_core_modified=false</code>. This is an audit-scope statement, not a claim that arbitrary external processes could never have changed files outside the audited downstream workspace.</p>
+<h2>Workspace portability</h2>
+<p>Caramels implements a revision-stamped downstream workspace bundle format.</p>
+<p>A safe read-only export is exposed through BUILD:</p>
+<pre><code class="language-text">BUILD&gt; export workspace
+BUILD&gt; export workspace /path/to/bundle</code></pre>
+<p>A validated reversible import is also live through BUILD:</p>
+<pre><code class="language-text">BUILD&gt; import workspace /path/to/bundle</code></pre>
+<p>The bundle includes downstream extension manifests, native modules, packages, tests, data, and generated scaffolds. It excludes verified core, history, undo snapshots, prior exports, and local workspace identity/configuration.</p>
+<p>Import validates bundle metadata, rejects symlinks/unsupported filesystem objects, validates extension manifests and structural extension checks, checks package membership, validates the local dependency/activation graph, and snapshots the existing downstream workspace <strong>before mutation</strong>. Only then are downstream surfaces replaced.</p>
+<p>A successful BUILD import returns <code>changed=true</code>; the existing CENTL-SCi app path then rebuilds the active downstream core session and reloads enabled native definitions immediately. The prior downstream state remains available through <code>undo</code>.</p>
+<p>Verified CENTL core, workspace identity, configuration, and history are not replaced by import.</p>
+<h2>External and native extension scaffolds</h2>
+<p>Caramels can generate <strong>inactive</strong> first-pass scaffolds:</p>
+<pre><code class="language-text">BUILD&gt; scaffold python adapter telescope_reader astropy
+BUILD&gt; scaffold native extension sparse_backend sparse-matrix-solver</code></pre>
+<p>A scaffold includes:</p>
+<ul><li>machine-readable <code>scaffold.json</code> contract;</li><li>JSONL-over-stdio boundary declaration;</li><li>inactive implementation source/stub;</li><li>test/validation placeholder;</li><li>manifest provenance;</li><li>explicit assurance category;</li><li>no automatically granted network/filesystem privilege;</li><li>disabled activation state.</li></ul>
+<p>Scaffold generation is not successful validation and does not make external/native code verified core.</p>
+<h2>Upstream contribution preparation</h2>
+<p>A downstream user can prepare a local review artifact with:</p>
+<pre><code class="language-text">BUILD&gt; prepare upstream contribution</code></pre>
+<p>The artifact records the workspace revision, current local extension inventory, assurance/source information, and review work required before publication.</p>
+<p>This command does <strong>not</strong> create a Git branch, commit, push, pull request, or publication. Upstream publication remains an explicit user choice.</p>
+<h2>Contribution and privacy model</h2>
+<p>Scientific contribution capture remains opt-in and <strong>off by default</strong>.</p>
+<ul><li><code>diagnostics</code> captures metadata/errors without raw problem text;</li><li><code>examples</code> may capture raw problem text only after explicit opt-in;</li><li>no contribution mode performs hidden network upload;</li><li>exported data is intended for user review before sharing.</li></ul>
+<p>BUILD workspace state is local user-owned data and is conceptually separate from model-training contribution capture.</p>
+<h2>Platform priority</h2>
+<p><strong>Linux is the reference platform for Caramels development.</strong></p>
+<p>The first implementation pass prioritizes complete end-to-end Linux functionality. macOS/Windows portability, exhaustive hardening, and non-blocking platform-specific problems are subsequent passes unless a defect reveals a shared correctness or trust-boundary problem.</p>
+<h2>Human-variation gate</h2>
+<p>Caramels includes a generated human-variation corpus in the requested 250–500 range. The current corpus contains <strong>450 prompt variants</strong> spanning mathematics, approximation, closed verification, physics, exact constants, measured-constant refusal, mechanics, incomplete requests, and BUILD-oriented input.</p>
+<p>The corpus varies:</p>
+<ul><li>capitalization;</li><li>whitespace;</li><li>punctuation;</li><li>polite wrappers;</li><li>selected typos;</li><li>Unicode mathematical symbols;</li><li>complete vs incomplete requests.</li></ul>
+<p>The test surface includes a target of at least <strong>95% useful interpretation or useful clarification</strong> on this supported-operation corpus.</p>
+<h2>Local model boundary</h2>
+<p>A local model remains optional for requests that genuinely need semantic inference. Deterministic Tier-0 requests do not require a model.</p>
+<p>The reference local model boundaries remain <code>llama-cli</code> and loopback <code>llama-server</code>, configured explicitly. The current Caramels model grammars admit exact expression, polynomial equation, unit conversion, exact physical constant, explicit uniform-gravity particle, and unsupported classes. Closed verification is intentionally handled by the deterministic route and is present in the canonical SCI JSON schema without being added to model generation yet.</p>
+<p>The model cannot select arbitrary shell commands, declare its own output mathematically authoritative, or silently promote external/generated code into verified core.</p>
+<h2>Development sequence for <code>v0.0.2-Caramels</code></h2>
+<p>Caramels is intentionally being developed in passes:</p>
+<ol><li><strong>Breadth pass:</strong> implement the full interaction/self-extension vision across the repository on Linux, accepting rough edges while the architecture is still being connected end to end.</li><li><strong>Improvement pass:</strong> improve natural-language coverage, terminal ergonomics, structural completion, package/adapter behavior, generated tests, capability reuse, documentation, and implementation quality.</li><li><strong>Repair/hardening passes:</strong> systematically address build/CI failures, edge cases, invariant violations, performance, security hardening, and cross-platform portability.</li></ol>
+<p>A failing non-blocking check does not define the sequencing of the breadth pass. A failure that prevents further implementation or invalidates the trust boundary does.</p>
+<p>The governing rule remains:</p>
+<blockquote><p>The interpreter may infer intent. CENTL computes and verifies scientific results. The user owns the downstream system and can extend it without silently changing what “verified core” means.</p></blockquote>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

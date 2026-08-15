@@ -22,12 +22,15 @@ This does **not** move Erdős-Straus backward. A collectively shadowed target is
 - Direct-shadow smoothness
 - Explicit counterexample showing universal DSC-0 / DSC-P are false
 - Ancestry rigidity and the existing Type A/B local structure
+- Exact two-target corridor companions at `q=3,7,11` and `k=15`, plus the linear form `2p+1`
+- `{2,3,5,7}`-smooth aligned Type-II covering is impossible (external prime `ℓ≥11` is necessary)
+- A public infinite hard-prime hunt with content-addressed letter numbers (`ES-HUNT.md`). Finite coverage, not a proof
 
 ## Still required for the ES route
 
-### 1. All-prime Type A/B coverage
+### 1. All-prime two-target coverage
 
-Prove that **every** prime has some Type A/B decomposition. The density-one theorem is not enough.
+Prove that **every** prime has some Type A/B decomposition, or more generally some two-target signed-box hit. The density-one theorem is not enough. López A/B would suffice but is stronger than original ES requires.
 
 After the prime-modulus backbone, the pointwise burden is concentrated in the zero-density survivor core:
 
@@ -56,4 +59,4 @@ These belong to the separate covering-core / exact-depth program.
 
 ## Honest floor
 
-A density-one set of primes is structurally captured. The remaining all-prime problem is a zero-density composite-rescue core. The repo now also contains an explicit proof that direct-shadow graphs alone cannot encode all redundancy, so future ES work should attack **existence of some Type A/B hit**, not universal exact-depth realizability.
+A density-one set of primes is structurally captured. The remaining all-prime problem is a zero-density core: some later two-target shift must hit. Direct-shadow graphs alone cannot encode all redundancy, so future ES work should attack **existence of some Type I or Type II hit**, not universal exact-depth realizability. The next exact corridor target is `k=19`.

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note separates proved elementary structure from computational conjecture targets for WS-CAND-003.">
+  <title>Type A/B shadow ancestry: formal working lemmas — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/theory.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/theory.html">
+  <meta property="og:title" content="Type A/B shadow ancestry: formal working lemmas — Free Computation Foundation">
+  <meta property="og:description" content="This note separates proved elementary structure from computational conjecture targets for WS-CAND-003.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Type A/B shadow ancestry: formal working lemmas</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">This note separates proved elementary structure from computational conjecture targets for WS-CAND-003.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/THEORY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This note separates proved elementary structure from computational conjecture targets for WS-CAND-003.</p>
+<h2>Definitions</h2>
+<p>For <code>k &gt;= 1</code>, write</p>
+<div class="math" role="math">m_k=4k-1,</div>
+<p>and</p>
+<div class="math" role="math">T_k=\{-d,-4d\pmod{m_k}:d\mid k\}.</div>
+<p>Let</p>
+<div class="math" role="math">H=\{1,121,169,289,361,529\}\pmod{840}.</div>
+<p>A hard-class-compatible candidate at layer <code>k</code> is a pair <code>(h,t)</code> with <code>h in H</code>, <code>t in T_k</code>, <code>gcd(t,m_k)=1</code>, and</p>
+<div class="math" role="math">t\equiv h\pmod{\gcd(840,m_k)}.</div>
+<p>It defines the CRT progression</p>
+<div class="math" role="math">x\equiv h\pmod{840},\qquad x\equiv t\pmod{m_k}.</div>
+<p>A candidate is <strong>directly shadowed by layer <code>j&lt;k</code></strong> when every integer in that CRT progression lies in <code>T_j</code> modulo <code>m_j</code>.</p>
+<h2>Lemma 1: modulus ancestry</h2>
+<p>For integers <code>1 &lt;= j &lt; k</code>,</p>
+<div class="math" role="math">m_j\mid m_k</div>
+<p>if and only if there exists an integer <code>s &gt;= 1</code> such that</p>
+<div class="math" role="math">\boxed{m_k=(4s+1)m_j}</div>
+<p>and equivalently</p>
+<div class="math" role="math">\boxed{k=(4s+1)j-s.}</div>
+<h3>Proof</h3>
+<p>If <code>m_j | m_k</code>, let <code>q=m_k/m_j</code>. Since both moduli are congruent to <code>3 mod 4</code>,</p>
+<div class="math" role="math">3q\equiv3\pmod4,</div>
+<p>so <code>q == 1 mod 4</code>. Write <code>q=4s+1</code>. Then</p>
+<div class="math" role="math">4k-1=(4s+1)(4j-1)</div>
+<p>and expansion gives</p>
+<div class="math" role="math">k=(4s+1)j-s.</div>
+<p>The converse follows by substituting that expression for <code>k</code>. QED.</p>
+<p>For fixed <code>s</code>, the identity</p>
+<div class="math" role="math">4((4s+1)j-s)-1=(4s+1)(4j-1)</div>
+<p>is a univariate polynomial identity in <code>j</code>. The automated harness asks CENTL to certify the fixed-quotient identity for every ancestry quotient actually observed in the finite shadow graph.</p>
+<p>The first nontrivial ancestry family is <code>s=1</code>, hence</p>
+<div class="math" role="math">\boxed{k=5j-1,\qquad m_k=5m_j.}</div>
+<h2>Lemma 2: direct shadow collapses to residue reduction along ancestry</h2>
+<p>Assume <code>j&lt;k</code> and <code>m_j | m_k</code>. Let <code>(h,t)</code> be an admissible candidate at layer <code>k</code>. Then <code>(h,t)</code> is directly shadowed by <code>j</code> if and only if</p>
+<div class="math" role="math">\boxed{t\bmod m_j\in T_j.}</div>
+<h3>Proof</h3>
+<p>Every integer in the current candidate progression satisfies</p>
+<div class="math" role="math">x\equiv t\pmod{m_k}.</div>
+<p>Since <code>m_j | m_k</code>, this forces</p>
+<div class="math" role="math">x\equiv t\pmod{m_j}</div>
+<p>for every member of the progression. Therefore every member is captured by layer <code>j</code> exactly when that one forced residue belongs to <code>T_j</code>. QED.</p>
+<p>This removes the need for a general CRT fibre computation on modulus-ancestry edges. The general fibre criterion is still needed for shadow edges where <code>m_j</code> does not divide <code>m_k</code>.</p>
+<h2>Corollary: exact full-shadow test on an ancestry edge</h2>
+<p>If <code>m_j | m_k</code>, then layer <code>k</code> is completely directly shadowed by <code>j</code> on the hard-prime population exactly when every admissible candidate <code>(h,t)</code> at layer <code>k</code> satisfies</p>
+<div class="math" role="math">t\bmod m_j\in T_j.</div>
+<p>This is a finite divisor-generated residue condition. It is the natural starting point for classifying infinite shadow families.</p>
+<h2>Lemma 3: first-hit primes certify global non-union-shadowing</h2>
+<p>Suppose a prime <code>p</code> has</p>
+<div class="math" role="math">C_{AB}(p)=k.</div>
+<p>Set</p>
+<div class="math" role="math">h=p\bmod840,\qquad t=p\bmod m_k.</div>
+<p>Then the current candidate class <code>(h,t)</code> is <strong>not</strong> covered by the union of all earlier Type A/B trap layers.</p>
+<h3>Proof</h3>
+<p>The prime <code>p</code> itself belongs to the current CRT class. By the definition of <code>C_AB(p)=k</code>, it lies in no trap <code>T_j</code> for <code>j&lt;k</code>. Hence the union of earlier layers cannot cover the entire current class. QED.</p>
+<p>This is stronger than <code>direct_novel</code>: the latter excludes only one-layer containment, whereas a first-hit prime excludes collective coverage by all previous layers at once.</p>
+<p>For the current finite record,</p>
+<div class="math" role="math">C_{AB}(9658489)=2622,</div>
+<p>so its <code>(169,10449)</code> candidate class at modulus <code>10487</code> has an explicit globally non-union-shadowed witness.</p>
+<h2>Theorem target A: classify <code>k=5j-1</code></h2>
+<p>The automation observes all three possibilities along the first ancestry family:</p>
+<ul><li>complete direct shadow;</li><li>partial direct shadow;</li><li>no direct shadow from the immediate ancestor.</li></ul>
+<p>The research target is a necessary-and-sufficient condition on <code>j</code> for</p>
+<div class="math" role="math">T_{5j-1}^{\mathrm{admissible}}\bmod(4j-1)\subseteq T_j.</div>
+<p>A finite list of observed examples is not an infinite-family theorem. The automated <code>ancestry-candidate-families.json</code> exists to discover candidate conditions that can then be proved separately.</p>
+<h2>Theorem target B: irredundant core</h2>
+<p>For candidates without an explicit first-hit prime, determine whether several earlier layers can jointly cover the current CRT progression even though no one earlier layer covers it. The exact target is collective <strong>union shadowing</strong>.</p>
+<p>The checked-in automation currently makes only two rigorous union-level statements:</p>
+<ol><li>a completely directly shadowed class is certainly union-shadowed;</li><li>a class containing a verified first-hit prime is certainly not union-shadowed.</li></ol>
+<p>All classes between those two categories remain open to stronger exact covering analysis.</p>
+<h2>Theorem target C: growth and distribution of <code>C_AB</code></h2>
+<p>The existing unboundedness theorem rules out any universal constant ceiling. Useful next questions are therefore growth, record frequency, hard-class distribution, and whether the irredundant ancestry structure yields nontrivial upper bounds for large families of primes.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

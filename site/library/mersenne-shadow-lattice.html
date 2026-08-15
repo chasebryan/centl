@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Mersenne shadow lattice: an infinite exact family of impossible Type A/B minimal depths — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mersenne-shadow-lattice.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mersenne-shadow-lattice.html">
+  <meta property="og:title" content="Mersenne shadow lattice: an infinite exact family of impossible Type A/B minimal depths — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mersenne shadow lattice: an infinite exact family of impossible Type A/B minimal depths</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MERSENNE-SHADOW-LATTICE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved infinite exact shadow family</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem does not prove universal López Type A/B coverage or the Erdős-Straus conjecture. It proves an infinite family of exact redundancies inside the López Type A/B depth system. Literature priority for this formulation remains under review.</p>
+<p>Read with:</p>
+<ul><li><a href="theory.html">THEORY.md</a></li><li><a href="direct-shadow-completeness.html">DIRECT-SHADOW-COMPLETENESS.md</a></li><li><a href="depth-spectrum.html">DEPTH-SPECTRUM.md</a></li><li><a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a></li><li><a href="trap-quotient-factorization.html">TRAP-QUOTIENT-FACTORIZATION.md</a></li><li><a href="prime-power-trap-dichotomy.html">PRIME-POWER-TRAP-DICHOTOMY.md</a></li></ul>
+<h2>1. Power-of-two layers</h2>
+<p>Let</p>
+<div class="math" role="math">k_a=2^a, \qquad a\ge1,</div>
+<p>and put</p>
+<div class="math" role="math">m_a=4k_a-1=2^{a+2}-1.</div>
+<p>The Type A/B trap set is</p>
+<div class="math" role="math">T_{k_a} = \{-e,-4e\pmod{m_a}:e\mid2^a\}.</div>
+<h2>2. Exact power-of-two coset theorem</h2>
+<h3>Theorem</h3>
+<p>For every <code>a&gt;=1</code>,</p>
+<div class="math" role="math">\boxed{ T_{2^a} =-\langle2\rangle \pmod{2^{a+2}-1}. }</div>
+<p>Moreover</p>
+<div class="math" role="math">\boxed{|T_{2^a}|=a+2}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{2^{a+2}-1}(2)=a+2. }</div>
+<h3>Proof</h3>
+<p>Because</p>
+<div class="math" role="math">2^{a+2}\equiv1\pmod{2^{a+2}-1},</div>
+<p>the order of <code>2</code> divides <code>a+2</code>.</p>
+<p>If <code>1&lt;=d&lt;a+2</code>, then</p>
+<div class="math" role="math">0&lt;2^d-1&lt;2^{a+2}-1,</div>
+<p>so the modulus cannot divide <code>2^d-1</code>. Hence no smaller positive exponent gives <code>1</code>, and therefore</p>
+<div class="math" role="math">\operatorname{ord}_{m_a}(2)=a+2.</div>
+<p>Thus</p>
+<div class="math" role="math">|\langle2\rangle|=a+2.</div>
+<p>The divisors of <code>2^a</code> are <code>2^i</code>, <code>0&lt;=i&lt;=a</code>. The Type A/B trap families are</p>
+<div class="math" role="math">-2^i</div>
+<p>and</p>
+<div class="math" role="math">-4\cdot2^i=-2^{i+2}.</div>
+<p>Together these exponents cover one complete cycle modulo the order <code>a+2</code>. Hence</p>
+<div class="math" role="math">T_{2^a}=-\langle2\rangle.</div>
+<p>Equivalently, the general trap-cardinality formula gives the same cardinality. QED.</p>
+<h2>3. Mersenne divisibility</h2>
+<p>The moduli satisfy</p>
+<div class="math" role="math">2^u-1\mid2^v-1 \iff u\mid v.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ m_a\mid m_b\iff a+2\mid b+2.}</div>
+<h2>4. Exact shadow theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>1&lt;=a&lt;b</code>. If</p>
+<div class="math" role="math">\boxed{a+2\mid b+2,}</div>
+<p>then the entire Type A/B layer at depth <code>2^b</code> is directly shadowed by the earlier layer at depth <code>2^a</code>:</p>
+<div class="math" role="math">\boxed{ T_{2^b}\bmod m_a \subseteq T_{2^a}. }</div>
+<h3>Proof</h3>
+<p>The divisibility assumption gives <code>m_a|m_b</code>. By the power-of-two coset theorem,</p>
+<div class="math" role="math">T_{2^b}=-\langle2\rangle\pmod{m_b}.</div>
+<p>Reducing <code>-2^r mod m_b</code> modulo <code>m_a</code> gives <code>-2^r mod m_a</code>, which belongs to</p>
+<div class="math" role="math">-\langle2\rangle=T_{2^a}.</div>
+<p>So every later hit is already an earlier hit. QED.</p>
+<h2>5. Infinite structural gaps</h2>
+<p>If there exists <code>a</code> with</p>
+<div class="math" role="math">1\le a&lt;b, \qquad a+2\mid b+2,</div>
+<p>then</p>
+<div class="math" role="math">\boxed{C_{AB}(n)\ne2^b}</div>
+<p>for every integer <code>n</code> for which <code>C_AB(n)</code> is defined.</p>
+<p>In particular, choosing</p>
+<div class="math" role="math">b=3r-2, \qquad r\ge2,</div>
+<p>gives</p>
+<div class="math" role="math">3\mid b+2</div>
+<p>and therefore</p>
+<div class="math" role="math">\boxed{2^{3r-2}\text{ is completely shadowed by depth }2.}</div>
+<p>Hence the exact-depth spectrum has infinitely many structural gaps.</p>
+<h2>6. Near-classification inside the power-of-two subsequence</h2>
+<p>For <code>b&gt;=3</code>, if <code>b+2</code> is composite, it has a proper divisor <code>d&gt;=3</code>. Taking</p>
+<div class="math" role="math">a=d-2</div>
+<p>gives</p>
+<div class="math" role="math">1\le a&lt;b, \qquad a+2\mid b+2.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ b\ge3,\ b+2\text{ composite} \Longrightarrow 2^b\text{ is structurally impossible as a minimal Type A/B depth.} }</div>
+<p>Thus only exponents with</p>
+<div class="math" role="math">\boxed{b+2\text{ prime}}</div>
+<p>can escape this particular Mersenne-ancestry obstruction once <code>b&gt;=3</code>.</p>
+<p>This is necessary, not sufficient, for realization.</p>
+<p>Examples:</p>
+<pre><code class="language-text">k=8     : b=3,  b+2=5 prime       -&gt; not killed by this family
+k=16    : b=4,  b+2=6 composite   -&gt; shadowed by k=2
+k=32    : b=5,  b+2=7 prime       -&gt; not killed by this family
+k=64    : b=6,  b+2=8 composite   -&gt; shadowed by k=4
+k=128   : b=7,  b+2=9 composite   -&gt; shadowed by k=2
+k=256   : b=8,  b+2=10 composite  -&gt; shadowed by k=8
+k=512   : b=9,  b+2=11 prime      -&gt; not killed by this family
+k=1024  : b=10, b+2=12 composite  -&gt; shadowed by k=2 and k=4</code></pre>
+<h2>7. Density-one structural deletion inside the binary subsequence</h2>
+<p>Let</p>
+<div class="math" role="math">E(B)=\#\{3\le b\le B:\ 2^b\text{ is not killed by the Mersenne shadow theorem}\}.</div>
+<p>The necessary condition above gives</p>
+<div class="math" role="math">E(B)\le\#\{3\le b\le B:b+2\text{ prime}\}.</div>
+<p>Therefore</p>
+<div class="math" role="math">E(B)\le\pi(B+2)+O(1).</div>
+<p>By the prime number theorem,</p>
+<div class="math" role="math">\pi(B+2)\sim\frac{B}{\log B},</div>
+<p>so</p>
+<div class="math" role="math">\boxed{ \frac{E(B)}{B}\to0. }</div>
+<p>Equivalently:</p>
+<div class="math" role="math">\boxed{ \text{among the power-of-two depth sequence }2^b, \text{ a density-one set of exponents is structurally impossible.} }</div>
+<p>This is a density statement <strong>within the exponent-indexed binary subsequence</strong>, not a density claim among all positive depths <code>k</code>.</p>
+<h2>8. Shadow-lattice interpretation</h2>
+<p>Label the power-of-two node <code>2^a</code> by</p>
+<div class="math" role="math">n=a+2.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ n_a\mid n_b \Longrightarrow 2^b\to2^a \text{ in the direct-shadow graph.} }</div>
+<p>The power-of-two subgraph is therefore a reversed divisibility lattice on the shifted exponents.</p>
+<p>This is the first explicit infinite sublattice isolated inside the Type A/B shadow graph.</p>
+<h2>9. Binary exceptionalism among prime powers</h2>
+<p>The companion theorem <a href="prime-power-trap-dichotomy.html">PRIME-POWER-TRAP-DICHOTOMY.md</a> proves that this exact coset saturation is special to <code>p=2</code>.</p>
+<p>For odd prime powers</p>
+<div class="math" role="math">k=p^a,</div>
+<p>the trap set has the exponent-window form</p>
+<div class="math" role="math">T_{p^a}=\{-p^j:-a\le j\le a\},</div>
+<p>but</p>
+<div class="math" role="math">\boxed{T_{p^a}\subsetneq-\langle p\rangle.}</div>
+<p>Thus the Mersenne lattice is a genuinely binary phenomenon, not generic prime-power behavior.</p>
+<h2>10. Why this matters</h2>
+<p>The depth-spectrum program distinguishes:</p>
+<ol><li><strong>latency gaps</strong>, where a realizable depth simply appears beyond a finite prime cutoff;</li><li><strong>structural gaps</strong>, where congruence ancestry makes minimal realization impossible.</li></ol>
+<p>The Mersenne shadow lattice proves not merely that structural gaps exist, but that they occur in an explicit infinite family and dominate the power-of-two subsequence in exponent density.</p>
+<p>So the minimal Type A/B spectrum contains deterministic arithmetic holes on every scale.</p>
+<h2>11. Next targets</h2>
+<ol><li>classify all <code>k</code> for which <code>T_k=-H_k</code>;</li><li>derive additional infinite shadow lattices from exact or near-exact subgroup saturation;</li><li>determine whether analogous lattices exist for products of a bounded number of primes;</li><li>intersect infinite structural-gap families with hard-compatible candidates;</li><li>determine the density of structural gaps among all depths, not merely within special subsequences;</li><li>integrate these infinite gap families into a publication-grade exact-depth spectrum theorem.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

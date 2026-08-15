@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External-nonresidue shield certificates carry a synchronized nonresidue triple — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-shield-triple-conservation.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-shield-triple-conservation.html">
+  <meta property="og:title" content="External-nonresidue shield certificates carry a synchronized nonresidue triple — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External-nonresidue shield certificates carry a synchronized nonresidue triple</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-SHIELD-TRIPLE-CONSERVATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem for shield-supported strong certificates</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-NR-M1-SYNCHRONIZATION.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>, <code>FAB-DUAL-DESCENT-SYSTEM.md</code></p>
+<p><strong>Claim boundary:</strong> this proves a character conservation law inside every shield-supported certificate. It does not prove that such a certificate exists for every hard prime and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard. Let <code>A,B</code> be coprime positive integers supported only on</p>
+<div class="math" role="math">\{2,3,5,7\}.</div>
+<p>Suppose an odd prime <code>ell</code> gives a shield-supported strong certificate:</p>
+<div class="math" role="math">\boxed{\ell\mid pA+B}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{4AB\mid p+\ell.}</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{\ell q=pA+B}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{p+\ell=4ABc}</div>
+<p>with positive integers <code>q,c</code>.</p>
+<p>Because the hard classes satisfy</p>
+<div class="math" role="math">\left(\frac2p\right) =\left(\frac3p\right) =\left(\frac5p\right) =\left(\frac7p\right)=+1,</div>
+<p>every shield-supported integer has quadratic character <code>+1</code> modulo <code>p</code> after removing square factors.</p>
+<hr>
+<h2>2. The overlap defect has the same sign as ell</h2>
+<p>Reduce</p>
+<div class="math" role="math">p+\ell=4ABc</div>
+<p>modulo <code>p</code>:</p>
+<div class="math" role="math">\ell\equiv4ABc\pmod p.</div>
+<p>The factor <code>4AB</code> is quadratic-residue-side modulo <code>p</code>. Hence</p>
+<div class="math" role="math">\boxed{ \left(\frac\ell p\right) = \left(\frac c p\right). }</div>
+<p>Thus an external <code>ell</code> forces the overlap defect <code>c</code> to be external as well.</p>
+<p>This recovers the hard-nonresidue bridge directly in the shield-supported lane.</p>
+<hr>
+<h2>3. The complementary cofactor has the same sign as ell</h2>
+<p>Reduce</p>
+<div class="math" role="math">\ell q=pA+B</div>
+<p>modulo <code>p</code>:</p>
+<div class="math" role="math">\ell q\equiv B\pmod p.</div>
+<p>Since <code>B</code> is shield-supported,</p>
+<div class="math" role="math">\left(\frac Bp\right)=+1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\left(\frac\ell p\right) \left(\frac q p\right)=+1.</div>
+<p>Every nonzero quadratic character is its own inverse, so</p>
+<div class="math" role="math">\boxed{ \left(\frac q p\right) = \left(\frac\ell p\right). }</div>
+<p>Here <code>(q/p)</code> is the Jacobi symbol, equivalently the product of prime-factor Legendre symbols with valuation parity.</p>
+<hr>
+<h2>4. Triple conservation theorem</h2>
+<p>Combining the two identities gives</p>
+<div class="math" role="math">\boxed{ \left(\frac\ell p\right) = \left(\frac q p\right) = \left(\frac c p\right). }</div>
+<p>Hence if the chosen certificate modulus is external,</p>
+<div class="math" role="math">\boxed{ \left(\frac\ell p\right)=-1, }</div>
+<p>then automatically</p>
+<div class="math" role="math">\boxed{ \left(\frac q p\right) = \left(\frac c p\right)=-1. }</div>
+<p>So every external shield-supported certificate carries a synchronized <strong>nonresidue triple</strong></p>
+<div class="math" role="math">\boxed{(\ell,q,c)}.</div>
+<p>In particular <code>q</code> contains an odd valuation contribution from at least one prime that is external to <code>p</code>.</p>
+<hr>
+<h2>5. Relation to the dual descent system</h2>
+<p>In the master variables of <code>FAB-DUAL-DESCENT-SYSTEM.md</code>, take</p>
+<div class="math" role="math">a=B, \qquad b=A.</div>
+<p>The certificate identities become</p>
+<div class="math" role="math">4ABcq=B+p(A+q),</div>
+<p>and the hidden <code>3 mod 4</code> cofactor <code>d</code> is defined by</p>
+<div class="math" role="math">\boxed{A+q=Bd.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{pd+1=4Acq.}</div>
+<p>The new theorem says that the two factors <code>c</code> and <code>q</code> on the right already carry the same external sign modulo <code>p</code> as <code>ell</code>.</p>
+<p>Thus the external-prime lane and the dual-descent lane are not separate mechanisms. The shield certificate automatically feeds external nonresidue content into the dual factorization.</p>
+<p>When <code>c</code> is odd, the existing dual theorem further gives</p>
+<div class="math" role="math">\boxed{\left(\frac c d\right)=-1.}</div>
+<p>So the same defect <code>c</code> is a nonresidue simultaneously across the original hard prime and the hidden dual cofactor.</p>
+<hr>
+<h2>6. Research consequence</h2>
+<p>The cap-free shield-ratio target should no longer be viewed as</p>
+<blockquote><p>find one lucky external prime.</p></blockquote>
+<p>A successful hit creates a rigid packet</p>
+<div class="math" role="math">\boxed{ \ell q=pA+B, \qquad p+\ell=4ABc, \qquad A+q=Bd, \qquad pd+1=4Acq, }</div>
+<p>with synchronized nonresidue data.</p>
+<p>This suggests an actual descent target:</p>
+<ol><li>assume a hard prime has no shield-supported external certificate;</li><li>study the external prime factors forced into the complementary cofactors of the linear forms <code>pA+B</code>;</li><li>show that avoiding the target residue at every external factor would force a closed nonresidue packet under the <code>(p,d)</code> dual transfer;</li><li>rule out such a closed packet by size, parity, or a finite character quotient.</li></ol>
+<p>The theorem proved here supplies the conservation law needed for that program. The closure step remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

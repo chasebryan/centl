@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Almost all prime depth values are structural gaps — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-depth-density.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-depth-density.html">
+  <meta property="og:title" content="Almost all prime depth values are structural gaps — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Almost all prime depth values are structural gaps</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-DEPTH-DENSITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved analytic corollary of the prime-depth dichotomy</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this is a density statement about <strong>prime values of the depth parameter</strong> <code>k</code>. It does not claim that almost all input primes fail Type A/B, and it does not prove the Erdős-Straus conjecture. The analytic ingredient is the classical Brun/Selberg upper-bound sieve for two linear forms.</p>
+<p>Read with:</p>
+<ul><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li><li><a href="prime-depth-backbone-projection.html">PRIME-DEPTH-BACKBONE-PROJECTION.md</a></li><li><a href="spectrum-counting-bounds.html">SPECTRUM-COUNTING-BOUNDS.md</a></li></ul>
+<h2>1. Prime-depth realization is a prime-pair condition</h2>
+<p>The prime-depth dichotomy proves that for prime <code>k</code>,</p>
+<div class="math" role="math">\boxed{ k\text{ is a realizable minimal Type A/B depth} \iff 4k-1\text{ is prime}.}</div>
+<p>Thus the number of realizable prime depth values up to <code>X</code> is</p>
+<div class="math" role="math">R_{\rm prime}(X) = \#\{k\le X:k\text{ prime and }4k-1\text{ prime}\}.</div>
+<p>This is a two-linear-form prime problem.</p>
+<h2>2. Upper-bound sieve</h2>
+<p>Consider</p>
+<div class="math" role="math">F(n)=n(4n-1).</div>
+<p>For every odd prime <code>ell</code>, the congruence</p>
+<div class="math" role="math">F(n)\equiv0\pmod\ell</div>
+<p>has exactly two residue classes:</p>
+<div class="math" role="math">n\equiv0\pmod\ell</div>
+<p>or</p>
+<div class="math" role="math">n\equiv4^{-1}\pmod\ell.</div>
+<p>They are distinct. The prime <code>2</code> contributes one harmless local condition.</p>
+<p>This is therefore an admissible dimension-two sieve problem. The classical Brun/Selberg upper-bound sieve gives</p>
+<div class="math" role="math">\boxed{ R_{\rm prime}(X) \ll \frac{X}{(\log X)^2}. }</div>
+<p>No conjecture about the infinitude of the prime pairs <code>k,4k-1</code> is used.</p>
+<h2>3. Relative density among prime depths</h2>
+<p>The total number of prime depth values up to <code>X</code> is</p>
+<div class="math" role="math">\pi(X) \sim \frac{X}{\log X}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\frac{R_{\rm prime}(X)}{\pi(X)} \ll \frac1{\log X} \to0.</div>
+<p>Hence:</p>
+<h3>Theorem</h3>
+<div class="math" role="math">\boxed{ \text{Among prime depth values }k, \text{ a relative density-one set are structural gaps.} }</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \#\{k\le X:k\text{ prime and }k\notin\mathcal D_{\mathbb P}\} = (1-o(1))\pi(X). }</div>
+<p>Using the prime number theorem,</p>
+<div class="math" role="math">\boxed{ \#\{k\le X:k\text{ prime and structurally impossible}\} = (1-o(1))\frac{X}{\log X}. }</div>
+<h2>4. Stronger global gap lower bound</h2>
+<p>Every structurally impossible prime depth is also a gap in the full depth spectrum. Therefore, if</p>
+<div class="math" role="math">G(X)=|[1,X]\setminus\mathcal D_{\mathbb P}|,</div>
+<p>then</p>
+<div class="math" role="math">G(X) \ge \pi(X)-R_{\rm prime}(X).</div>
+<p>The sieve estimate gives</p>
+<div class="math" role="math">\boxed{ G(X) \ge (1-o(1))\frac{X}{\log X}. }</div>
+<p>This strengthens the explicit single-residue-family bound</p>
+<div class="math" role="math">G(X)\ge\left(\frac14+o(1)\right)\frac{X}{\log X}</div>
+<p>coming from prime depths <code>k=4 mod 5</code>.</p>
+<p>Because these prime-depth gaps are impossible for every integer, the same lower bound applies to the complement of the hard-class spectrum.</p>
+<h2>5. Graph interpretation</h2>
+<p>The prime-depth backbone projection shows that every impossible prime depth is directly shadowed by at least one prime-modulus backbone parent.</p>
+<p>Thus the relative-density theorem may be read graphically:</p>
+<blockquote><p>almost every prime-valued node in the depth graph is not a new spectrum vertex at all; it is a one-edge satellite of an earlier backbone vertex.</p></blockquote>
+<p>Only the sparse prime-pair nodes</p>
+<div class="math" role="math">k,\quad4k-1\text{ both prime}</div>
+<p>remain as genuine prime-depth spectrum vertices.</p>
+<h2>6. What remains unknown</h2>
+<p>The sieve theorem is an <strong>upper bound</strong>. It does not prove that infinitely many prime depths are realizable.</p>
+<p>Infinitude of prime <code>k</code> for which <code>4k-1</code> is also prime is a separate prime-pair problem not resolved here.</p>
+<p>This does not affect the global spectrum&#x27;s infinitude because the prime-modulus backbone produces infinitely many realized depths <code>k=(q+1)/4</code> as <code>q</code> ranges over primes <code>3 mod 4</code>, and those depth values need not themselves be prime.</p>
+<h2>7. Structural message</h2>
+<p>The depth spectrum is now known to have a remarkable asymmetry on the prime subsequence:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{all prime depths}\\ \downarrow\\ \text{almost all: composite target modulus}\\ \downarrow\\ \text{directly shadowed by backbone}\\ \downarrow\\ \text{structural gaps} \end{array}}</div>
+<p>The genuinely difficult spectrum classification is therefore overwhelmingly a problem about <strong>composite depth values</strong>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Single-active hard-class quotient collapse through k = 100,000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/single-active-hard-collapse-k100000.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/single-active-hard-collapse-k100000.html">
+  <meta property="og:title" content="Single-active hard-class quotient collapse through k = 100,000 — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Single-active hard-class quotient collapse through k = 100,000</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite theorem-certificate / falsification result</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> the universal theorem currently proves only <code>q=p</code> or <code>p^2</code> for a unique active fixed-negative layer. The sharper restriction <code>q in {3,5,9}</code> for Mordell-hard target candidates remains a theorem candidate, not a proof.</p>
+<p>Read with:</p>
+<ul><li><a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a></li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a></li><li><a href="class-c-c1-single-active.html">CLASS-C-C1-SINGLE-ACTIVE.md</a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/OPERATOR-COORDINATION.md">OPERATOR-COORDINATION.md</a></li></ul>
+<h2>1. Question attacked</h2>
+<p>For the six Mordell-hard residue classes</p>
+<div class="math" role="math">H=\{1,121,169,289,361,529\}\pmod{840},</div>
+<p>consider every hard-compatible Type A/B target candidate through a target depth <code>k</code>.</p>
+<p>For the target progression, let</p>
+<div class="math" role="math">\mathcal N^{\rm act}_{k,r}</div>
+<p>be the active fixed-negative core.</p>
+<p>The conjecture under attack was:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal N^{\rm act}_{k,r}|=1 \Longrightarrow q_{j_0}\in\{3,5,9\} \text{ and the valuation excess is Class A.} }&lt;/div&gt;</p>
+<p>The universal theorem in <a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a> already reduces the possible quotient to</p>
+<div class="math" role="math">q_{j_0}=p\text{ or }p^2.</div>
+<p>This run attacks the remaining prime-direction restriction.</p>
+<h2>2. Two independent constructions</h2>
+<p>The primary implementation constructs every fixed-squareclass earlier layer directly as</p>
+<div class="math" role="math">m=d s^2,</div>
+<p>where <code>d</code> is a squarefree divisor of the target fixed-prime support.</p>
+<p>The independent verifier does <strong>not</strong> use that construction. It first enumerates every actual earlier modulus</p>
+<div class="math" role="math">m_j=4j-1,</div>
+<p>computes its squarefree kernel, groups the earlier layers by that kernel, and queries those groups for each target.</p>
+<p>Thus the finite result is checked by two different constructions of the fixed-squareclass tower system.</p>
+<h2>3. Workflow provenance</h2>
+<p>GitHub Actions:</p>
+<pre><code class="language-text">workflow run: 31854964168
+head commit:  2a8d59aa5cd1558d38ba103de640b15106225757
+artifact id:  9238743256
+artifact sha256:
+f390c20afe0c8fc97d9046c34117f4e0b2c8e56f255d6a31c732b337d16d2159</code></pre>
+<p>The artifact contains the primary JSON/report, independent verifier output, provenance, and an internally checked SHA-256 manifest.</p>
+<h2>4. Exact result</h2>
+<p>Range:</p>
+<div class="math" role="math">\boxed{k\le100,000}.</div>
+<p>Total hard-compatible Type A/B target candidates examined:</p>
+<div class="math" role="math">\boxed{8,021,288}.</div>
+<p>Candidates with exactly one active fixed-negative layer:</p>
+<div class="math" role="math">\boxed{419,123}.</div>
+<p>Their excess quotient distribution was exactly:</p>
+<pre><code class="language-text">q = 3: 252,832
+q = 5:   4,173
+q = 9: 162,118</code></pre>
+<p>Valuation-source distribution:</p>
+<pre><code class="language-text">Class A: 419,123
+Class B:       0
+other:         0</code></pre>
+<p>Counterexamples to the tested collapse:</p>
+<div class="math" role="math">\boxed{0}.</div>
+<h2>5. Independent verifier</h2>
+<p>The second implementation returned:</p>
+<pre><code class="language-json">{
+  &quot;actual&quot;: {
+    &quot;counterexample_count&quot;: 0,
+    &quot;hard_compatible_target_candidates&quot;: 8021288,
+    &quot;q_histogram&quot;: {
+      &quot;3&quot;: 252832,
+      &quot;5&quot;: 4173,
+      &quot;9&quot;: 162118
+    },
+    &quot;single_active_candidates&quot;: 419123,
+    &quot;valuation_source_histogram&quot;: {
+      &quot;A&quot;: 419123
+    }
+  },
+  &quot;independent_construction&quot;: &quot;enumerated earlier m_j grouped by squarefree kernel&quot;,
+  &quot;k_limit&quot;: 100000,
+  &quot;mismatched_fields&quot;: [],
+  &quot;verdict&quot;: &quot;VERIFIED&quot;
+}</code></pre>
+<p>No census field disagreed.</p>
+<h2>6. First observed examples</h2>
+<p>The first examples in each quotient family are:</p>
+<h3>q = 3</h3>
+<pre><code class="language-text">k = 36
+M = 143
+d = 11
+h = 1
+t = 131</code></pre>
+<h3>q = 5</h3>
+<pre><code class="language-text">k = 484
+M = 1935
+d = 43
+h = 1
+t = 1891</code></pre>
+<h3>q = 9</h3>
+<pre><code class="language-text">k = 114
+M = 455
+d = 39
+h = 169
+t = 449</code></pre>
+<p>These are regression fixtures, not privileged theoretical cases.</p>
+<h2>7. Distribution across hard classes</h2>
+<p>The single-active cases are broadly distributed across all six hard classes:</p>
+<pre><code class="language-text">h=1:   70,058
+h=121: 70,076
+h=169: 69,957
+h=289: 69,478
+h=361: 70,076
+h=529: 69,478</code></pre>
+<p>So the observed collapse is not being driven by one exceptional hard residue class.</p>
+<h2>8. Interpretation</h2>
+<p>The theorem-plus-computation stack is now:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal N^{act}|=1 \overset{\text{proved}}{\Longrightarrow} q=p\text{ or }p^2 \overset{k\le100000}{\Longrightarrow} q\in\{3,5,9\}\text{ only}. }&lt;/div&gt;</p>
+<p>The first implication is universal.</p>
+<p>The second arrow is still finite evidence.</p>
+<p>But the absence of <code>7</code>, <code>25</code>, every prime <code>&gt;=11</code>, and every Class-B prime square over more than eight million hard-compatible target candidates sharply isolates the missing arithmetic statement.</p>
+<h2>9. Proof direction</h2>
+<p>Write the unique negative square-lift tower as</p>
+<div class="math" role="math">m=d s^2.</div>
+<p>Uniqueness has a stronger consequence than merely <code>q=p</code> or <code>p^2</code>:</p>
+<ul><li>removing any prime factor from <code>s</code> must destroy activity, otherwise a smaller member of the same negative tower would be a second active layer;</li><li>any <em>other</em> square lift <code>d u^2</code> below the target modulus must be absorbed by <code>L</code>, otherwise it too would be active and negative.</li></ul>
+<p>Thus the unique active layer is a first valuation shell in an otherwise absorbed negative tower.</p>
+<p>The remaining proof problem is to combine this first-shell structure with the hard-class local-square conditions at <code>3,5,7</code> and target Type A/B compatibility.</p>
+<p>The desired theorem is:</p>
+<div class="math" role="math">\boxed{ \text{hard-compatible first active shell} \Longrightarrow s=3\text{ or }5, }</div>
+<p>with the valuation of <code>3</code> distinguishing <code>q=3</code> from <code>q=9</code>.</p>
+<h2>10. Falsifier</h2>
+<p>A single hard-compatible candidate with</p>
+<div class="math" role="math">|\mathcal N^{act}|=1</div>
+<p>and one of</p>
+<pre><code class="language-text">q = 7,
+q = 25,
+q = p or p^2 for p &gt;= 11,
+Class-B q = p^2,</code></pre>
+<p>would immediately falsify the small-prime-collapse conjecture while leaving the proved <code>p/p^2</code> theorem intact.</p>
+<p>No such candidate exists through <code>k=100,000</code> in the exact double-construction search.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

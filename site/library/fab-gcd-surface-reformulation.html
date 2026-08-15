@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write">
+  <title>Cubic-surface form of the gcd-square rescue — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-gcd-surface-reformulation.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-gcd-surface-reformulation.html">
+  <meta property="og:title" content="Cubic-surface form of the gcd-square rescue — Free Computation Foundation">
+  <meta property="og:description" content="Write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Cubic-surface form of the gcd-square rescue</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">Write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-GCD-SURFACE-REFORMULATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact reformulation and square obstruction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-GCD-SQUARE-CRITERION.md</code></p>
+<p><strong>Claim boundary:</strong> this sharpens the exact rescue target. It does not prove universal existence and therefore does not prove Erdős–Straus.</p>
+<h2>1. Replace the two <code>3 mod 4</code> integers by depth coordinates</h2>
+<p>Write</p>
+<div class="math" role="math">\boxed{k=4u-1,\qquad d=4v-1}</div>
+<p>with <code>u,v&gt;=1</code>.</p>
+<p>Then</p>
+<div class="math" role="math">kd-1 =(4u-1)(4v-1)-1 =4(4uv-u-v).</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{w=4uv-u-v.}</div>
+<p>For a prime <code>p≡1 mod4</code>, also define</p>
+<div class="math" role="math">\boxed{A_u=\frac{p+4u-1}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">p+k=4A_u, \qquad M=kd-1=4w.</div>
+<p>Hence</p>
+<div class="math" role="math">G=\gcd(p+k,M) =4\gcd(A_u,w).</div>
+<p>The gcd-square criterion</p>
+<div class="math" role="math">4M\mid G^2</div>
+<p>therefore becomes exactly</p>
+<div class="math" role="math">\boxed{ w\mid\gcd(A_u,w)^2.}</div>
+<hr>
+<h2>2. Square-root closure</h2>
+<p>For a positive integer</p>
+<div class="math" role="math">w=\prod_\ell \ell^{e_\ell},</div>
+<p>define its least square-root closure</p>
+<div class="math" role="math">\boxed{ \operatorname{src}(w) :=\prod_\ell \ell^{\lceil e_\ell/2\rceil}. }</div>
+<p>This is the least positive integer <code>h</code> such that</p>
+<div class="math" role="math">w\mid h^2.</div>
+<p>Then</p>
+<div class="math" role="math">w\mid\gcd(A_u,w)^2 \iff \boxed{\operatorname{src}(w)\mid A_u}.</div>
+<p>Thus:</p>
+<h3>Surface rescue criterion</h3>
+<p>If there exist <code>u,v&gt;=1</code> such that, with</p>
+<div class="math" role="math">w=4uv-u-v,</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{ \operatorname{src}(w) \mid \frac{p+4u-1}{4}, }</div>
+<p>then <code>p</code> satisfies the Erdős–Straus equation.</p>
+<p>This is exactly the gcd-square construction in the coordinates naturally attached to the shifted cubic surface.</p>
+<hr>
+<h2>3. Explicit recovered parameters</h2>
+<p>Put</p>
+<div class="math" role="math">g=\gcd(A_u,w).</div>
+<p>When <code>w|g^2</code>, the parameters in <code>FAB-GCD-SQUARE-CRITERION.md</code> become</p>
+<div class="math" role="math">\boxed{ a=\frac{A_u}{g}, \qquad b=\frac{w}{g}, \qquad c=\frac{g^2}{w}.}</div>
+<p>Thus the leftover <code>c</code> is precisely the square-overlap excess.</p>
+<p>The auxiliary quotient is</p>
+<div class="math" role="math">q =\frac{(4v-1)p+1}{4g}.</div>
+<p>The resulting positive decomposition is</p>
+<div class="math" role="math">\frac4p = \frac1{abc} + \frac1{aqc} + \frac1{bpqc}.</div>
+<hr>
+<h2>4. The seductive perfect-square move is impossible</h2>
+<p>The strongest possible compression would be to make</p>
+<div class="math" role="math">w=s^2,</div>
+<p>because then</p>
+<div class="math" role="math">\operatorname{src}(w)=s.</div>
+<p>But this can never happen for positive <code>u,v</code>.</p>
+<p>Indeed,</p>
+<div class="math" role="math">(4u-1)(4v-1) =4w+1.</div>
+<p>If <code>w=s^2</code>, then</p>
+<div class="math" role="math">\boxed{(4u-1)(4v-1)=4s^2+1.}</div>
+<p>Every odd prime divisor <code>r</code> of <code>4s^2+1</code> satisfies</p>
+<div class="math" role="math">(2s)^2\equiv-1\pmod r,</div>
+<p>so <code>-1</code> is a quadratic residue modulo <code>r</code>; hence</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod4.}</div>
+<p>Therefore every positive divisor of <code>4s^2+1</code> is <code>1 mod4</code>.</p>
+<p>But both</p>
+<div class="math" role="math">4u-1\equiv4v-1\equiv3\pmod4,</div>
+<p>contradiction.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{4uv-u-v\text{ is never a perfect square}.}</div>
+<p>This is an exact structural obstruction, not a search observation.</p>
+<hr>
+<h2>5. The unavoidable defect is the useful object</h2>
+<p>Write schematically</p>
+<div class="math" role="math">w=c s^2</div>
+<p>when the valuation pattern permits a square part <code>s^2</code> and a squarefree defect <code>c</code> (or use the squarefree kernel when exponents are not exactly <code>0/1 mod 2</code>).</p>
+<p>Then the square-root closure contains the defect:</p>
+<div class="math" role="math">\operatorname{src}(w)\supseteq c s.</div>
+<p>So the surface criterion can succeed only when the non-square defect is absorbed into <code>A_u</code>.</p>
+<p>This aligns exactly with <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>: on a Mordell-hard prime, a genuine coprime fab certificate cannot have its leftover squareclass supported only on the hard quadratic-residue primes <code>2,3,5,7</code>; it must import an external quadratic nonresidue.</p>
+<p>Thus the failed perfect-square idea is not wasted. It identifies the actual object that must be controlled:</p>
+<div class="math" role="math">\boxed{ \text{square part of }w \quad+\quad \text{one unavoidable nonresidue defect}. }</div>
+<p>The remaining theorem target is to force that square-root closure into <code>A_u</code> for some adaptive surface point <code>(u,v)</code>.</p>
+<hr>
+<h2>6. A useful infinite near-square subfamily</h2>
+<p>The congruence condition for <code>u^2 | w</code> has an exact polynomial family. Since</p>
+<div class="math" role="math">w=v(4u-1)-u,</div>
+<p>requiring <code>u^2|w</code> gives</p>
+<div class="math" role="math">v\equiv u(u-1)\pmod{u^2}.</div>
+<p>Taking the least positive representative</p>
+<div class="math" role="math">\boxed{v=u(u-1)}</div>
+<p>yields</p>
+<div class="math" role="math">\boxed{ w=u^2(4u-5).}</div>
+<p>More generally,</p>
+<div class="math" role="math">\boxed{v=u(nu-1)}</div>
+<p>gives</p>
+<div class="math" role="math">\boxed{ w=u^2\bigl(4nu-n-4\bigr).}</div>
+<p>These families isolate a large square automatically and expose a single linear defect. They are therefore natural theorem-mining families for the next stage, although no claim is made that they alone cover all hard primes.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

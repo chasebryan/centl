@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quotient-13 shadow rigidity — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quotient-13-rigidity.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quotient-13-rigidity.html">
+  <meta property="og:title" content="Quotient-13 shadow rigidity — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quotient-13 shadow rigidity</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-13-RIGIDITY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem inside the Type A/B minimal-depth/shadow program</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Provenance:</strong> proved in Operator-02 lane (<code>operator-02/ANCESTRY-Q13-CLASSIFICATION.md</code>); promoted to parent theorem document</p>
+<p><strong>Claim boundary:</strong> unrestricted Type A/B trap-set shadowing only. Does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>Read with:</p>
+<ul><li><a href="prime-child-shadows.html">PRIME-CHILD-SHADOWS.md</a></li><li><a href="quotient-9-rigidity.html">QUOTIENT-9-RIGIDITY.md</a></li><li><a href="quotient-17-rigidity.html">QUOTIENT-17-RIGIDITY.md</a></li><li><a href="quotient-21-rigidity.html">QUOTIENT-21-RIGIDITY.md</a></li></ul>
+<hr>
+<h2>1. Quotient-13 ancestry</h2>
+<p>Fix source depth <code>j &gt;= 1</code> and set</p>
+<div class="math" role="math">K = 13j - 3.</div>
+<p>Then</p>
+<div class="math" role="math">4K - 1 = 13(4j - 1),</div>
+<p>so this is ancestry of quotient <code>q = 13 = 4·3 + 1</code>.</p>
+<hr>
+<h2>2. Classification theorem</h2>
+<h3>Theorem</h3>
+<p>Let</p>
+<div class="math" role="math">m = 4j - 1.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ T_K \bmod m \subseteq T_j \iff \begin{cases} K \text{ is prime},\quad\text{or}\\ K = 3p \text{ with } p \text{ prime}. \end{cases} }</div>
+<p>In the second alternative necessarily <code>3 | j</code> and <code>p = (13j-3)/3</code>.</p>
+<hr>
+<h2>3. Normalized criterion</h2>
+<p>Define</p>
+<div class="math" role="math">S_j = -T_j = \{e,\, 4e \bmod m : e \mid j\}.</div>
+<p>The set <code>S_j</code> is inverse-closed. Full unrestricted shadowing holds if and only if every divisor of <code>K</code> has residue in <code>S_j</code>.</p>
+<hr>
+<h2>4. Direct implications</h2>
+<h3>Prime child</h3>
+<p>Immediate from the prime-child ancestry theorem.</p>
+<h3>Thrice-prime child</h3>
+<p>Suppose <code>K = 3p</code> with <code>p</code> prime. Then <code>3 | K</code>, so <code>3 | j</code>. Write <code>j = 3d</code>. Then</p>
+<div class="math" role="math">p = 13d - 1,\qquad m = 12d - 1,</div>
+<p>and <code>p ≡ d = j/3 mod m</code>. Divisors of <code>K</code> are <code>{1, 3, p, K}</code>, reducing to <code>{1, 3, j/3, j}</code>, all of which divide <code>j</code>. Full shadowing holds.</p>
+<hr>
+<h2>5. Converse</h2>
+<p>Assume full shadowing.</p>
+<h3>Odd j</h3>
+<p>If <code>j</code> is odd then <code>K</code> is even. If <code>K</code> is composite then <code>2 | K</code>, so it suffices that <code>2 ∉ S_j</code>. For odd <code>j</code>: <code>2 ∤ j</code>; unwrapped <code>4e ≥ 4</code>; wrapped endpoint <code>4j ≡ 1 mod m</code>. Hence <code>2 ∉ S_j</code> and shadowing fails. Thus odd <code>j</code> forces <code>K</code> prime.</p>
+<h3>Even j with 3 ∤ j</h3>
+<p>Then <code>gcd(j,K) = 1</code>. If <code>K</code> is composite, its least prime factor <code>ℓ</code> satisfies <code>ℓ ≤ √K &lt; m</code> for <code>j ≥ 2</code> (because <code>K &lt; m²</code>). Also <code>K</code> is odd, so <code>ℓ</code> is odd, <code>ℓ ∤ j</code>, and therefore <code>ℓ ∉ S_j</code>.</p>
+<h3>Even j with 3 | j</h3>
+<p>Write <code>j = 3d</code> and <code>N = 13d - 1</code>, so <code>K = 3N</code>. If <code>N</code> is prime we are done. Assume <code>N</code> composite and let <code>ℓ</code> be its least prime factor.</p>
+<ul><li>If <code>ℓ ≠ 3</code>: then <code>ℓ ∤ j</code> (using <code>gcd(N,d) = 1</code>), so <code>ℓ ∉ S_j</code>.</li><li>If <code>ℓ = 3</code>: then <code>5 ∤</code> wait — <code>3 | N</code> forces <code>d ≡ 1 mod 3</code>, hence <code>3 ∤ d</code> and <code>9 ∤ j</code>. The divisor <code>9</code> of <code>K</code> satisfies <code>9 ∉ S_j</code> (not a divisor of <code>j</code>; not of the form <code>4e</code> with <code>e | j</code>). Shadowing fails.</li></ul>
+<p>(Note: <code>3 | d</code> and <code>3 | N</code> cannot occur simultaneously, since <code>N = 13d - 1 ≡ -1 mod 3</code> when <code>3 | d</code>.)</p>
+<hr>
+<h2>6. Infinite families</h2>
+<p>Dirichlet gives infinitely many primes <code>K ≡ 10 mod 13</code> and infinitely many primes <code>p ≡ 12 mod 13</code> yielding <code>K = 3p</code> shadows.</p>
+<hr>
+<h2>7. Novelty boundary</h2>
+<p>Elementary arithmetic and the prime-child theorem are prior within this program. The contribution is the exact unrestricted quotient-13 composite-child classification.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

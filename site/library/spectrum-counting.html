@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quantitative counting in the Type A/B exact-depth spectrum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/spectrum-counting.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/spectrum-counting.html">
+  <meta property="og:title" content="Quantitative counting in the Type A/B exact-depth spectrum — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quantitative counting in the Type A/B exact-depth spectrum</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SPECTRUM-COUNTING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollaries from the prime-modulus backbone, prime-depth dichotomy, and shadow-gap theorems</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not classify the full exact-depth spectrum and does not prove universal Type A/B coverage or Erdős-Straus. It gives rigorous lower bounds for both infinitely realized depths and structurally forbidden depths.</p>
+<p>Read with:</p>
+<ul><li><a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a></li><li><a href="prime-child-shadows.html">PRIME-CHILD-SHADOWS.md</a></li><li><a href="exact-depth-gap-theorems.html">EXACT-DEPTH-GAP-THEOREMS.md</a></li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a></li><li><a href="reciprocity-tower-shadows.html">RECIPROCITY-TOWER-SHADOWS.md</a></li></ul>
+<h2>1. Counting functions</h2>
+<p>Let</p>
+<div class="math" role="math">R(X) = \#\{k\le X:k\in\mathcal D_\infty\},</div>
+<p>where <code>D_infty</code> is the set of depths realized by infinitely many primes.</p>
+<p>Let</p>
+<div class="math" role="math">G(X) = \#\{k\le X:k\notin\mathcal D_\exists\},</div>
+<p>where <code>D_exists</code> is the set of depths realized by at least one prime.</p>
+<p>The full functions are unknown. The theorem families now give order-<code>X/log X</code> lower bounds for <strong>both</strong> sides.</p>
+<h2>2. Prime-modulus backbone count</h2>
+<p>Define the prime-modulus backbone</p>
+<div class="math" role="math">\mathcal B = \{k:4k-1\text{ is prime and }&gt;7\}.</div>
+<p>The prime-modulus backbone theorem gives</p>
+<div class="math" role="math">\boxed{ \mathcal B\subseteq\mathcal D_\infty. }</div>
+<p>The map</p>
+<div class="math" role="math">k\mapsto q=4k-1</div>
+<p>is a bijection between backbone depths <code>k&lt;=X</code> and primes</p>
+<div class="math" role="math">q\le4X-1, \qquad q\equiv3\pmod4, \qquad q&gt;7.</div>
+<p>Thus</p>
+<div class="math" role="math">\boxed{ \#(\mathcal B\cap[1,X]) = \pi_{3\bmod4}(4X-1)-2. }</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ R(X) \ge \pi_{3\bmod4}(4X-1)-2. }</div>
+<p>The prime number theorem in arithmetic progressions gives</p>
+<div class="math" role="math">\pi_{3\bmod4}(x) \sim \frac{x}{2\log x}.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ R(X) \ge \left(2+o(1)\right) \frac{X}{\log(4X)} }</div>
+<p>and in particular</p>
+<div class="math" role="math">\boxed{R(X)\gg X/\log X.}</div>
+<p>This is only a lower bound. Composite target moduli contribute many additional realized depths.</p>
+<h2>3. Prime-child gaps give an X/log X structural-gap lower bound</h2>
+<p>The quotient-5 prime-child theorem says:</p>
+<div class="math" role="math">\boxed{ k\text{ prime},\quad k\equiv4\pmod5 \Longrightarrow k\notin\mathcal D_\exists.}</div>
+<p>Indeed every such prime depth can be written</p>
+<div class="math" role="math">k=5j-1</div>
+<p>and is fully shadowed by the earlier layer <code>j</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ G(X) \ge \pi(X;5,4)-O(1). }</div>
+<p>By the prime number theorem in arithmetic progressions,</p>
+<div class="math" role="math">\pi(X;5,4) \sim \frac14\frac{X}{\log X}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ G(X) \ge \left(\frac14+o(1)\right) \frac{X}{\log X}. }</div>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{G(X)\gg X/\log X.}</div>
+<p>This supersedes the earlier square-root lower bound as the strongest currently recorded unconditional gap count from one explicit shadow family.</p>
+<h2>4. Prime-depth dichotomy gives the exact prime slice</h2>
+<p>For every prime-valued depth <code>k</code>, <a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a> proves</p>
+<div class="math" role="math">\boxed{ k\in\mathcal D_\infty \iff 4k-1\text{ is prime},}</div>
+<p>and if <code>4k-1</code> is composite then</p>
+<div class="math" role="math">\boxed{k\notin\mathcal D_\exists.}</div>
+<p>Thus the prime-depth subsequence contains no intermediate finitely-realized case.</p>
+<p>The quotient-5 count above uses only one easy subfamily of the composite-modulus side. The complete dichotomy says every prime <code>k</code> with composite <code>4k-1</code> is actually a structural gap.</p>
+<p>Any sharper analytic estimate for prime pairs</p>
+<div class="math" role="math">k,\quad4k-1</div>
+<p>would immediately sharpen the structural-gap count among prime depth indices, but no such extra estimate is required for the present <code>X/log X</code> theorem.</p>
+<h2>5. A separate square-root gap family remains explicit</h2>
+<p>The first reciprocity-gap sequence is</p>
+<div class="math" role="math">A_n=3n^2+3n+1, \qquad n\ge1.</div>
+<p>Every <code>A_n</code> is a structural gap, and</p>
+<div class="math" role="math">A_n\le X \iff n\le \frac{\sqrt{12X-3}-3}{6}.</div>
+<p>Hence, independently of prime-depth arguments,</p>
+<div class="math" role="math">\boxed{ G(X) \ge \left\lfloor \frac{\sqrt{12X-3}-3}{6} \right\rfloor }</div>
+<p>for <code>X&gt;=7</code>.</p>
+<p>This family is no longer the strongest counting bound, but remains valuable because it consists of explicit polynomial depth gaps rather than a prime residue class.</p>
+<h2>6. Quantitative two-sided spectrum theorem</h2>
+<p>The current exact theorem package gives simultaneously</p>
+<div class="math" role="math">\boxed{ R(X)\gg\frac{X}{\log X} }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ G(X)\gg\frac{X}{\log X}. }</div>
+<p>More explicitly, the proved mechanisms give</p>
+<div class="math" role="math">R(X) \ge \pi_{3\bmod4}(4X-1)-2 \sim \frac{2X}{\log(4X)},</div>
+<p>while</p>
+<div class="math" role="math">G(X) \ge \pi(X;5,4)-O(1) \sim \frac{X}{4\log X}.</div>
+<p>These are lower bounds on opposite sides of the same minimal-depth spectrum.</p>
+<p>Thus both infinite-arrival nodes and permanent structural gaps occur at least at prime-scale frequency among depth indices.</p>
+<h2>7. Interpretation</h2>
+<p>The <code>C_AB</code> depth line is not a nearly full set with a few exotic holes, nor a thin list of isolated arrivals.</p>
+<p>Already-proved arithmetic mechanisms force substantial populations on both sides:</p>
+<div class="math" role="math">\boxed{ \text{many infinitely realized depths} + \text{many impossible depths}. }</div>
+<p>The remaining problem is to classify the composite-depth region not already decided by ancestry, quotient, or shadow theorems.</p>
+<h2>8. Paper-level use</h2>
+<p>The quantitative spectrum can now be summarized as:</p>
+<ol><li>the realized spectrum is infinite and grows at least like <code>X/log X</code>;</li><li>the structural-gap set is infinite and also grows at least like <code>X/log X</code>;</li><li>prime depths are completely classified by primality of <code>4k-1</code>;</li><li>explicit polynomial and Mersenne shadow families give additional deterministic gaps;</li><li>universal DSC-P would classify every remaining directly novel composite depth as infinitely prime-realizable.</li></ol>
+<h2>9. Novelty boundary</h2>
+<p>The prime number theorem in arithmetic progressions and related analytic counting are classical. The candidate contribution is their application to the Type-A/B minimal-depth spectrum after the prime-child and prime-depth shadow theorems identify explicit realized and forbidden depth families.</p>
+<p>No claim is made that the analytic counting theorems themselves are new.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

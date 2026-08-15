@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Large-prime defect forcing by CRT starvation — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-large-prime-defect-forcing.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-large-prime-defect-forcing.html">
+  <meta property="og:title" content="Large-prime defect forcing by CRT starvation — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Large-prime defect forcing by CRT starvation</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-LARGE-PRIME-DEFECT-FORCING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved theorem</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-UNBOUNDED-DEFECT-FORCING.md</code>, <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-TWO-TARGET-KNESER.md</code>, <code>FAB-KNESER-EVEN-DEFECT-EDGE.md</code></p>
+<p><strong>Imported classical tools:</strong> Chinese remainder theorem and Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> strengthens unbounded-defect forcing by showing that a hypothetical prime counterexample requires failed external shifts whose stabilizer quotients have arbitrarily large least odd prime factor. It does not itself rule out those large-prime defects and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix a Mordell-hard prime <code>p</code> and suppose, for contradiction-program purposes, that <code>p</code> is an Erdős--Straus counterexample.</p>
+<p>Then every admissible shift misses both exact signed-box targets.</p>
+<p>Fix arbitrary integers</p>
+<div class="math" role="math">\boxed{Y\ge3}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{B\ge1.}</div>
+<p>We will construct infinitely many external prime shifts <code>q</code> such that the corresponding full-stabilizer defect index</p>
+<div class="math" role="math">n_q=[(\mathbb Z/q\mathbb Z)^\times:H_q]</div>
+<p>satisfies simultaneously:</p>
+<ol><li><code>n_q&gt;B</code>;</li><li>no odd prime <code>s&lt;=Y</code> divides <code>n_q</code>.</li></ol>
+<p>Thus every odd prime divisor of <code>n_q</code> is greater than <code>Y</code>.</p>
+<hr>
+<h2>2. Choose a prescribed nonresidue load above the starvation bound</h2>
+<p>The quadratic character modulo <code>p</code> is nontrivial. Choose one nonzero quadratic-nonresidue residue class</p>
+<div class="math" role="math">a\pmod p.</div>
+<p>Dirichlet&#x27;s theorem supplies infinitely many primes in that class, so there are infinitely many primes <code>ell</code> with</p>
+<div class="math" role="math">\left(\frac\ell p\right)=-1.</div>
+<p>Choose distinct such primes</p>
+<div class="math" role="math">\ell_1,\ldots,\ell_t&gt;Y</div>
+<p>and positive exponents</p>
+<div class="math" role="math">e_1,\ldots,e_t</div>
+<p>so that</p>
+<div class="math" role="math">\boxed{2\sum_{i=1}^t e_i+4&gt;B.}</div>
+<p>Put</p>
+<div class="math" role="math">M=\prod_i\ell_i^{e_i}.</div>
+<p>The loaded primes are all larger than <code>Y</code>, so they do not overlap the small-prime starvation conditions imposed below.</p>
+<hr>
+<h2>3. Starve q-1 of every small odd prime</h2>
+<p>Let</p>
+<div class="math" role="math">\mathcal S_Y = \{s\le Y:s\text{ is an odd prime},\ s\ne p\}.</div>
+<p>For every <code>s in S_Y</code>, impose</p>
+<div class="math" role="math">\boxed{q\equiv2\pmod s.}</div>
+<p>This residue is nonzero and is not <code>1 mod s</code>, so any resulting prime <code>q</code> satisfies</p>
+<div class="math" role="math">\boxed{s\nmid q-1.}</div>
+<p>If <code>p&lt;=Y</code>, no extra condition at <code>p</code> is needed: the chosen quadratic-nonresidue class <code>a mod p</code> is automatically neither <code>0</code> nor <code>1</code>, since <code>1</code> is a quadratic residue. Therefore</p>
+<div class="math" role="math">p\nmid q-1</div>
+<p>as well.</p>
+<hr>
+<h2>4. Simultaneously force the nonresidue load into (p+q)/4</h2>
+<p>Impose the full CRT system</p>
+<div class="math" role="math">\boxed{ \begin{aligned} q&amp;\equiv3\pmod4,\\ q&amp;\equiv a\pmod p,\\ q&amp;\equiv-p\pmod{\ell_i^{e_i}} \qquad(1\le i\le t),\\ q&amp;\equiv2\pmod s \qquad(s\in\mathcal S_Y). \end{aligned}}</div>
+<p>All moduli are pairwise coprime except for the deliberately omitted duplicate <code>p</code> condition, so CRT gives one class modulo</p>
+<div class="math" role="math">L =4pM\prod_{s\in\mathcal S_Y}s.</div>
+<p>The class is reduced modulo <code>L</code>:</p>
+<ul><li>it is odd;</li><li><code>a</code> is nonzero modulo <code>p</code>;</li><li><code>-p</code> is nonzero modulo every loaded <code>ell_i</code>;</li><li><code>2</code> is nonzero modulo every odd <code>s</code>.</li></ul>
+<p>Therefore Dirichlet supplies infinitely many primes <code>q</code> in this class.</p>
+<p>Every such <code>q</code> satisfies</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Put</p>
+<div class="math" role="math">C_q=\frac{p+q}{4}.</div>
+<p>As in <code>ES-UNBOUNDED-DEFECT-FORCING.md</code>, the congruences</p>
+<div class="math" role="math">q\equiv-p\pmod{\ell_i^{e_i}}</div>
+<p>together with the common factor four imply</p>
+<div class="math" role="math">\boxed{\ell_i^{e_i}\mid C_q.}</div>
+<p>Quadratic reciprocity gives</p>
+<div class="math" role="math">\boxed{ \left(\frac{\ell_i}{q}\right) = \left(\frac{\ell_i}{p}\right) =-1. }</div>
+<p>Thus the full prescribed load remains visible quadratic-nonresidue valuation at the new prime shift.</p>
+<hr>
+<h2>5. The defect index is simultaneously large and small-prime-free</h2>
+<p>Let</p>
+<div class="math" role="math">R_q=\mathcal R_q(C_q), \qquad H_q=\operatorname{Stab}(R_q), \qquad n_q=[(\mathbb Z/q\mathbb Z)^\times:H_q].</div>
+<p>Under the hypothetical-counterexample assumption, both exact targets miss.</p>
+<p>The external nonresidue Kneser bound gives</p>
+<div class="math" role="math">n_q \ge 2E_q(C_q)+4 \ge 2\sum_i e_i+4 &gt;B.</div>
+<p>So</p>
+<div class="math" role="math">\boxed{n_q&gt;B.}</div>
+<p>Also</p>
+<div class="math" role="math">\boxed{n_q\mid q-1}</div>
+<p>because the ambient unit group modulo prime <code>q</code> has order <code>q-1</code>.</p>
+<p>For every odd prime <code>s&lt;=Y</code>, the CRT starvation conditions give</p>
+<div class="math" role="math">s\nmid q-1.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{s\nmid n_q.}</div>
+<p>Since <code>q=3 mod4</code>,</p>
+<div class="math" role="math">v_2(q-1)=1.</div>
+<p>Every combined failure has even defect index and index two is impossible, so</p>
+<div class="math" role="math">n_q=2m_q</div>
+<p>with</p>
+<div class="math" role="math">\boxed{m_q&gt;1\text{ odd}.}</div>
+<p>Every prime divisor of <code>m_q</code> is therefore strictly greater than <code>Y</code>.</p>
+<hr>
+<h2>6. Theorem — arbitrarily large least odd defect prime</h2>
+<p>For every pair of bounds <code>B,Y</code>, a hypothetical Mordell-hard prime counterexample <code>p</code> admits infinitely many external prime shifts <code>q</code> such that</p>
+<div class="math" role="math">\boxed{n_q&gt;B}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \min\{\lambda:\lambda\text{ odd prime},\ \lambda\mid n_q\}&gt;Y. }</div>
+<p>Equivalently, the least odd prime factor of the full-stabilizer quotient index is unbounded over the failed external prime shifts.</p>
+<p>In particular, no counterexample can be supported by defect indices whose odd parts are built from any fixed finite collection of primes.</p>
+<hr>
+<h2>7. Consequences for proof architecture</h2>
+<p>The earlier unbounded-defect theorem ruled out a bounded list of indices.</p>
+<p>The present theorem is stronger. It rules out every model in which the obstruction lives indefinitely inside a fixed finite menu of character orders.</p>
+<p>For example, a hypothetical counterexample cannot have all failed external shifts supported only by quotients with odd prime factors among</p>
+<div class="math" role="math">\{3,5,7,11,13\}</div>
+<p>or any other fixed finite set.</p>
+<p>For arbitrarily large <code>Y</code>, one is forced into a quotient</p>
+<div class="math" role="math">\boxed{C_{2m}}</div>
+<p>whose odd part has no prime factor at most <code>Y</code>.</p>
+<p>Thus any universal closure theorem must work uniformly across genuinely new high-order character directions.</p>
+<p>This makes two kinds of completion strategy especially natural:</p>
+<ol><li>a <strong>uniform expansion theorem</strong> that is independent of the prime factors of the defect index;</li><li>a <strong>high-order reciprocity obstruction</strong> showing that the required low-entropy signed boxes cannot persist when the least odd quotient prime tends to infinity.</li></ol>
+<p>Finite case-by-case classification of <code>6,10,14,...</code> is provably insufficient as a final proof strategy.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

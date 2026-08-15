@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Standard Type II as the square-divisor completion of López Type A — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-typeii-square-completion-lopez-a.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-typeii-square-completion-lopez-a.html">
+  <meta property="og:title" content="Standard Type II as the square-divisor completion of López Type A — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Standard Type II as the square-divisor completion of López Type A</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-TYPEII-SQUARE-COMPLETION-LOPEZ-A.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact equivalence</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code></p>
+<p><strong>External background:</strong> Miguel Angel López, <em>A Complete Congruence System for the Erdos-Straus Conjecture</em>, arXiv:2404.01508, especially Theorem 7</p>
+<p><strong>Claim boundary:</strong> this identifies an exact structural relation between standard prime Type II and the López Type-A congruence family. It does not prove universal existence and no literature-priority claim is made without a separate prior-art review.</p>
+<hr>
+<h2>1. Exact Type-II divisor-square starting point</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime.</p>
+<p><code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code> proves that a standard Type-II solution at an admissible shift</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1</div>
+<p>is equivalent to the existence of</p>
+<div class="math" role="math">C=\frac{p+k}{4}</div>
+<p>and a divisor</p>
+<div class="math" role="math">\boxed{d\mid C^2}</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{d\equiv-C\pmod k.}</div>
+<p>Write</p>
+<div class="math" role="math">\boxed{d+C=ak}</div>
+<p>for a positive integer <code>a</code>.</p>
+<hr>
+<h2>2. Eliminate the shift</h2>
+<p>Using</p>
+<div class="math" role="math">4C=p+k,</div>
+<p>multiply <code>d+C=ak</code> by four:</p>
+<div class="math" role="math">4d+p+k=4ak.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{p+4d=(4a-1)k.}</div>
+<p>Therefore every Type-II certificate gives the López-shaped congruence</p>
+<div class="math" role="math">\boxed{4a-1\mid p+4d,}</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{p\equiv-4d\pmod{4a-1}.}</div>
+<p>This is exactly the residue shape occurring in López Type A.</p>
+<hr>
+<h2>3. The square-divisor condition collapses to d | a^2</h2>
+<p>Because</p>
+<div class="math" role="math">d\mid C^2</div>
+<p>and</p>
+<div class="math" role="math">\gcd(C,k)=1,</div>
+<p>we have</p>
+<div class="math" role="math">\gcd(d,k)=1.</div>
+<p>Modulo <code>d</code>, the equation</p>
+<div class="math" role="math">d+C=ak</div>
+<p>gives</p>
+<div class="math" role="math">C\equiv ak\pmod d.</div>
+<p>Squaring,</p>
+<div class="math" role="math">C^2\equiv a^2k^2\pmod d.</div>
+<p>Since <code>d|C^2</code> and <code>k</code> is invertible modulo <code>d</code>,</p>
+<div class="math" role="math">\boxed{d\mid a^2.}</div>
+<p>Thus every standard Type-II solution yields positive integers <code>a,d</code> satisfying</p>
+<div class="math" role="math">\boxed{ d\mid a^2, \qquad 4a-1\mid p+4d.}</div>
+<p>Also <code>p</code> does not divide <code>d</code>, because <code>d|C^2</code> and <code>p</code> does not divide <code>C</code>.</p>
+<hr>
+<h2>4. Converse construction</h2>
+<p>Now suppose positive integers <code>a,d</code> satisfy</p>
+<div class="math" role="math">\boxed{ d\mid a^2, \qquad p\nmid d, \qquad 4a-1\mid p+4d.}</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{k=\frac{p+4d}{4a-1}.}</div>
+<p>Because</p>
+<div class="math" role="math">p+4d\equiv1\pmod4</div>
+<p>and</p>
+<div class="math" role="math">4a-1\equiv3\pmod4,</div>
+<p>we obtain</p>
+<div class="math" role="math">\boxed{k\equiv3\pmod4.}</div>
+<p>If <code>p|k</code>, then from</p>
+<div class="math" role="math">(4a-1)k=p+4d</div>
+<p>we would get <code>p|d</code>, contradiction. Hence</p>
+<div class="math" role="math">\boxed{\gcd(k,p)=1.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+k}{4}.}</div>
+<p>The defining equations give</p>
+<div class="math" role="math">\boxed{(4a-1)C=ap+d.}</div>
+<p>Since any common divisor of <code>d</code> and <code>4a-1</code> divides <code>a</code> and then divides <code>1</code>,</p>
+<div class="math" role="math">\boxed{\gcd(d,4a-1)=1.}</div>
+<p>Modulo <code>d</code>,</p>
+<div class="math" role="math">(4a-1)C\equiv ap\pmod d.</div>
+<p>Squaring and using <code>d|a^2</code>, together with <code>p</code> and <code>4a-1</code> invertible modulo <code>d</code>, gives</p>
+<div class="math" role="math">\boxed{d\mid C^2.}</div>
+<p>Finally,</p>
+<div class="math" role="math">\begin{aligned} (4a-1)(d+C) &amp;=(4a-1)d+ap+d\\ &amp;=a(p+4d)\\ &amp;=a(4a-1)k, \end{aligned}</div>
+<p>so</p>
+<div class="math" role="math">\boxed{d+C=ak.}</div>
+<p>Therefore</p>
+<div class="math" role="math">d\equiv-C\pmod k,</div>
+<p>and the exact Type-II divisor-square criterion applies.</p>
+<hr>
+<h2>5. Exact theorem</h2>
+<h3>Theorem — square-completed Type A equals standard prime Type II</h3>
+<p>For a prime</p>
+<div class="math" role="math">p\equiv1\pmod4,</div>
+<p>the following are equivalent:</p>
+<ol><li><code>p</code> has a standard Type-II Erdős--Straus solution;</li><li>there exist positive integers <code>a,d</code> such that</li></ol>
+<div class="math" role="math">\boxed{ d\mid a^2, \qquad p\nmid d, \qquad 4a-1\mid p+4d.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \text{Type II} \iff \exists a,d&gt;0: d\mid a^2, \quad p\equiv-4d\pmod{4a-1}, \quad p\nmid d.}</div>
+<hr>
+<h2>6. Relation to López Type A</h2>
+<p>López Theorem 7 states that a prime has a Type-A solution exactly when there exist positive <code>d,n</code> such that</p>
+<div class="math" role="math">\boxed{p\equiv-4d\pmod{4dn-1}.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{a=dn.}</div>
+<p>Then López Type A is precisely the subfamily</p>
+<div class="math" role="math">\boxed{ d\mid a, \qquad p\equiv-4d\pmod{4a-1}.}</div>
+<p>The standard Type-II theorem above enlarges only the divisor condition:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ccl} \text{López Type A} &amp;:&amp; d\mid a,\\[1mm] \text{standard Type II} &amp;:&amp; d\mid a^2, \end{array}}</div>
+<p>with the <strong>same modulus</strong> <code>4a-1</code> and the <strong>same target residue</strong> <code>-4d</code>.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{ \text{standard prime Type II is the square-divisor completion of López Type A}.}</div>
+<p>Every López Type-A solution is automatically contained in the square-completed family, because</p>
+<div class="math" role="math">d\mid a\Longrightarrow d\mid a^2.</div>
+<p>The converse need not hold.</p>
+<hr>
+<h2>7. Genuine square-only witness: p = 2521</h2>
+<p>López records <code>2521</code> among the exceptional primes lacking Type-A solutions in the finite analysis of that paper.</p>
+<p>Take</p>
+<div class="math" role="math">\boxed{p=2521, \qquad a=12, \qquad d=16.}</div>
+<p>Then</p>
+<div class="math" role="math">16\mid12^2=144,</div>
+<p>but</p>
+<div class="math" role="math">\boxed{16\nmid12.}</div>
+<p>Thus this is genuinely outside the ordinary López Type-A divisor condition.</p>
+<p>Nevertheless</p>
+<div class="math" role="math">4a-1=47</div>
+<p>and</p>
+<div class="math" role="math">p+4d=2521+64=2585=47\cdot55.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{47\mid p+4d.}</div>
+<p>The corresponding exact signed-box shift is</p>
+<div class="math" role="math">\boxed{k=55,}</div>
+<p>with</p>
+<div class="math" role="math">C=\frac{2521+55}{4}=644.</div>
+<p>Indeed</p>
+<div class="math" role="math">16\mid644^2</div>
+<p>and</p>
+<div class="math" role="math">16+644=660=12\cdot55.</div>
+<p>So the square-completed congruence supplies a standard Type-II solution for <code>2521</code> even though this certificate is not a López Type-A certificate.</p>
+<p>The complementary divisor is</p>
+<div class="math" role="math">\frac{644^2}{16}=25921=161^2,</div>
+<p>so the normalized factor pair is especially transparent:</p>
+<div class="math" role="math">16=4^2, \qquad 25921=161^2, \qquad 55\mid4+161.</div>
+<hr>
+<h2>8. Strategic consequence</h2>
+<p>The old Type-A/B program and the complete Type-I/II program are not separate languages.</p>
+<p>At least on the Type-A side there is an exact completion map:</p>
+<div class="math" role="math">\boxed{ d\mid a \quad\leadsto\quad d\mid a^2.}</div>
+<p>The congruence itself does not change.</p>
+<p>This suggests a new direct proof strategy:</p>
+<ol><li>retain all López Type-A congruence and shadow machinery;</li><li>replace the divisor lattice <code>Div(a)</code> by the square divisor lattice <code>Div(a^2)</code>;</li><li>study whether the additional square-only residues close the zero-density composite-rescue core;</li><li>compare the resulting square-completed trap system with the exact Type-II signed-divisor box and its Kneser quotient defects.</li></ol>
+<p>The square completion may therefore provide the missing bridge by which the mature Type-A/B machinery can be reused inside the exact prime Erdős--Straus formulation rather than abandoned.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

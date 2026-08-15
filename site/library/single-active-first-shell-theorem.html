@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Single-active first-shell collapse — retracted proof attempt — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/single-active-first-shell-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/single-active-first-shell-theorem.html">
+  <meta property="og:title" content="Single-active first-shell collapse — retracted proof attempt — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Single-active first-shell collapse — retracted proof attempt</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/SINGLE-ACTIVE-FIRST-SHELL-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> <code>REVISE / RETRACTED PROOF</code></p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Coordinator:</strong> Operator-01 / primary research lead</p>
+<p><strong>Claim boundary:</strong> the former proof in this file is invalid. The <code>q in {3,5,9}</code> hard-class collapse remains an independently verified finite theorem-certificate through <code>k&lt;=100000</code>, not a universal theorem. The earlier universal theorem <code>|N^act|=1 =&gt; q=p or p^2</code> remains unaffected.</p>
+<p>Read with:</p>
+<ul><li><a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a> — still proved;</li><li><a href="single-active-hard-collapse-k100000.html">SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md</a> — verified finite result;</li><li><a href="class-c-census-k1500.html">CLASS-C-CENSUS-K1500.md</a>;</li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/operator-02/DIRECTIVE-FIRST-SHELL-REVIEW.md">operator-02/DIRECTIVE-FIRST-SHELL-REVIEW.md</a>.</li></ul>
+<h2>1. Retraction</h2>
+<p>An earlier version of this file claimed the universal implication</p>
+<div class="math" role="math">|\mathcal N^{\rm act}_{k,r}|=1 \Longrightarrow s\in\{3,5\} \Longrightarrow q\in\{3,5,9,25\},</div>
+<p>followed by a hard-class elimination of <code>q=25</code>.</p>
+<p>That proof used a false intermediate assertion.</p>
+<p>The assertion was:</p>
+<blockquote><p>if <code>m=d s^2</code> is a fixed-negative squareclass layer, then every earlier layer <code>d u^2</code> in the same squarefree tower has the same negative Jacobi sign.</p></blockquote>
+<p>The correct statement is</p>
+<div class="math" role="math">\left(\frac r{d u^2}\right) = \left(\frac r d\right)</div>
+<p><strong>only when</strong></p>
+<div class="math" role="math">\gcd(r,u)=1.</div>
+<p>If a prime dividing <code>u</code> also divides <code>r</code>, then the Jacobi symbol is <code>0</code>, not <code>-1</code>.</p>
+<p>The invalid proof compared the active shell with unrelated odd values such as <code>N</code>, <code>N-2</code>, <code>3</code>, <code>5</code>, and <code>7</code> without first proving those values are coprime to <code>r</code>. Therefore uniqueness of the active <strong>fixed-negative</strong> core does not imply that all those comparison shells are inactive. Some may simply fail to be fixed-negative because their Jacobi symbol is zero.</p>
+<p>The product/lcm interval contradictions built from those unrelated shells are therefore unsupported.</p>
+<h2>2. What remains proved</h2>
+<p>The theorem in <a href="single-active-excess-prime-power.html">SINGLE-ACTIVE-EXCESS-PRIME-POWER.md</a> survives this correction.</p>
+<p>Its argument only replaces the actual active square parameter <code>s</code> by a divisor such as <code>s/p</code>.</p>
+<p>Because the original layer has Jacobi sign <code>-1</code>,</p>
+<div class="math" role="math">\gcd(r,s)=1.</div>
+<p>Hence every divisor of <code>s</code> is also coprime to <code>r</code>, and removing an actual factor preserves the negative squareclass sign.</p>
+<p>Thus the universal statement remains:</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal N^{\rm act}_{k,r}|=1 \Longrightarrow q=p\text{ or }p^2 }&lt;/div&gt;</p>
+<p>for one prime <code>p</code>.</p>
+<p>The Class-B corollary also remains:</p>
+<div class="math" role="math">\boxed{ \text{Class B single-active} \Longrightarrow q=p^2,\quad p\nmid L. }</div>
+<h2>3. What remains independently verified finite evidence</h2>
+<p>The two-construction GitHub workflow through</p>
+<div class="math" role="math">k\le100000</div>
+<p>examined</p>
+<div class="math" role="math">8,021,288</div>
+<p>hard-compatible Type A/B target candidates and found</p>
+<div class="math" role="math">419,123</div>
+<p>single-active candidates, with exact quotient distribution</p>
+<pre><code class="language-text">q=3: 252,832
+q=5:   4,173
+q=9: 162,118
+other:      0
+Class B:    0</code></pre>
+<p>The independent verifier had zero mismatched fields.</p>
+<p>Workflow provenance:</p>
+<pre><code class="language-text">run:      31854964168
+artifact: 9238743256
+artifact sha256:
+f390c20afe0c8fc97d9046c34117f4e0b2c8e56f255d6a31c732b337d16d2159</code></pre>
+<p>Therefore the sharp statement</p>
+<div class="math" role="math">\boxed{ \text{hard-compatible }|N^{act}|=1 \Longrightarrow q\in\{3,5,9\}\text{ and Class A} }</div>
+<p>is a <strong>strong theorem candidate with exact finite verification through <code>k&lt;=100000</code></strong>, not a proved theorem.</p>
+<h2>4. Correct proof target</h2>
+<p>The missing ingredient must use information that distinguishes a hard-compatible Type A/B target residue from an arbitrary reduced residue.</p>
+<p>For a target layer</p>
+<div class="math" role="math">M=4k-1,</div>
+<p>the candidate residue is not arbitrary. It satisfies</p>
+<div class="math" role="math">r\equiv -e\quad\text{or}\quad -4e\pmod M</div>
+<p>for some</p>
+<div class="math" role="math">e\mid k.</div>
+<p>At the same time, an active fixed-negative layer</p>
+<div class="math" role="math">m=d s^2</div>
+<p>satisfies</p>
+<div class="math" role="math">\left(\frac r d\right)=-1, \qquad \gcd(r,s)=1, \qquad q=m/\gcd(L,m)=p\text{ or }p^2.</div>
+<p>The new theorem search must exploit the <strong>target trap residue</strong> together with quadratic reciprocity / divisor arithmetic, rather than assuming arbitrary shells in the same squarefree tower are negative.</p>
+<h2>5. Revised attack directions</h2>
+<h3>A. Target-trap reciprocity</h3>
+<p>Substitute</p>
+<div class="math" role="math">r\equiv-e\text{ or }-4e\pmod M</div>
+<p>into the fixed-negative condition modulo the squarefree kernel <code>d</code>.</p>
+<p>Because</p>
+<div class="math" role="math">e\mid k, \qquad 4k\equiv1\pmod d</div>
+<p>whenever <code>d|M</code>, divisor residues may force local quadratic constraints on the excess prime <code>p</code>.</p>
+<p>The key question is whether the condition</p>
+<div class="math" role="math">(r/d)=-1</div>
+<p>can coexist with a first active shell at a prime <code>p&gt;=7</code> or a Class-B square once the target residue is a Type A/B trap.</p>
+<h3>B. Actual-divisor shell reductions only</h3>
+<p>All universally valid square-tower reductions should use divisors of the actual active shell <code>s</code>, because those preserve coprimality with <code>r</code> automatically.</p>
+<p>No comparison with an unrelated <code>u</code> may be called fixed-negative without proving <code>gcd(r,u)=1</code>.</p>
+<h3>C. Explain the observed absence of Class B</h3>
+<p>For Class B,</p>
+<div class="math" role="math">q=p^2, \qquad p\nmid L.</div>
+<p>Since <code>p</code> is absent from both <code>840</code> and the target modulus <code>M</code>, it is a genuinely new square coordinate in the earlier fixed-negative layer.</p>
+<p>The finite data suggest Type A/B target compatibility forbids such a coordinate in a unique active core. That is now a clean separate theorem target.</p>
+<h3>D. Preserve the finite falsifier</h3>
+<p>The <code>k&lt;=100000</code> double-construction test remains valuable and should be extended only as a regression/falsifier, not used as a substitute for proof.</p>
+<h2>6. Scientific correction protocol</h2>
+<p>This correction was made immediately upon finding the gap, before publication-grade promotion.</p>
+<p>The invalid proof remains recoverable in Git history at commit</p>
+<pre><code class="language-text">a7a0ccb17d59c8797e6c6f0b315ccc08db66ba87</code></pre>
+<p>but must not be cited as a theorem.</p>
+<p>The repository is the canonical record of both the proposed proof and its retraction.</p>
+<h2>7. Current status table</h2>
+<pre><code class="language-text">|N^act|=1 =&gt; q=p or p^2:                    PROVED
+Class-B single-active =&gt; q=p^2, p not in L: PROVED
+hard single-active q in {3,5,9}:            FINITE-CERTIFIED through k&lt;=100000
+hard single-active Class-A only:             FINITE-CERTIFIED through k&lt;=100000
+former first-shell proof:                    RETRACTED / INVALID
+universal hard-collapse theorem:             OPEN</code></pre>
+<p>This is the active proof frontier.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

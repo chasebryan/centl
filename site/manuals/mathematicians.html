@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This page is deliberately narrow. It is for mathematicians who want to use CENTL for pure mathematics and do not want to learn the rest of the repository first.">
+  <title>Mathematician onboarding 🧮 📐 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/mathematicians.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/mathematicians.html">
+  <meta property="og:title" content="Mathematician onboarding 🧮 📐 — Free Computation Foundation">
+  <meta property="og:description" content="This page is deliberately narrow. It is for mathematicians who want to use CENTL for pure mathematics and do not want to learn the rest of the repository first.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mathematician onboarding 🧮 📐</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">This page is deliberately narrow. It is for mathematicians who want to use CENTL for pure mathematics and do not want to learn the rest of the repository first.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/docs/MATHEMATICIANS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This page is deliberately narrow. It is for mathematicians who want to use CENTL for <strong>pure mathematics</strong> and do not want to learn the rest of the repository first.</p>
+<p>If that is you, you can ignore CENTL Physics, CARAVAN, networking, repository infrastructure, release engineering, and contributor workflows unless you later choose to explore them.</p>
+<h2>Take only what you need</h2>
+<p>A pure mathematician does <strong>not</strong> need to install the whole CENTL product family.</p>
+<table class="directory"><thead><tr><th>What you want</th><th>Install</th><th>What you do <strong>not</strong> get</th></tr></thead><tbody><tr><td>Formal exact mathematics only</td><td><code>centl</code></td><td><code>centl-physics</code>, <code>centl-sci</code></td></tr><tr><td>Mathematics in ordinary language only</td><td><code>centl-sci</code></td><td>the separate <code>centl</code> and <code>centl-physics</code> commands</td></tr><tr><td>Formal mathematics + ordinary-language mathematics</td><td><code>centl</code> + <code>centl-sci</code></td><td><code>centl-physics</code></td></tr><tr><td>Everything</td><td>full CENTL bundle</td><td>nothing omitted</td></tr></tbody></table>
+<p><strong>For pure mathematics, <code>centl</code> alone is the recommended minimum.</strong> Install SCi only if you actually want its mathematics-first interpretation layer.</p>
+<p>On GNU/Linux, the component installer downloads a <strong>component-specific archive</strong>. Choosing <code>centl</code> does not first download an archive containing the Physics or SCi executables. Required runtime libraries, license texts, provenance metadata, and the selected executable are retained because they are part of making that command runnable and redistributable.</p>
+<h2>Start here: choose your operating system 🐧 🍎 🪟</h2>
+<p>CENTL currently has three scientist-facing operating-system paths. The mathematical interface is the same after installation; what differs is how the software reaches your machine.</p>
+<table class="directory"><thead><tr><th>Platform</th><th>Current path</th><th>Assurance / distribution status</th></tr></thead><tbody><tr><td>🐧 <strong>GNU/Linux x86_64</strong></td><td>Oasis component archives or full Oasis installer</td><td>Qualified stable CENTL product. This is the reference release path.</td></tr><tr><td>🍎 <strong>macOS</strong></td><td><code>CENTL-Marsa</code> component build</td><td>Current Camp software built from source through the macOS harbor. It is not an Oasis declaration.</td></tr><tr><td>🪟 <strong>Windows</strong></td><td><code>CENTL-Marsa</code> component build under MSYS2 MinGW64</td><td>Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled.</td></tr></tbody></table>
+<p>The distinction above is about release assurance, <strong>not different mathematics</strong>.</p>
+<h3>🐧 GNU/Linux x86_64 — download only <code>centl</code></h3>
+<p>Download the small component installer and ask for the mathematics engine only:</p>
+<pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
+sh install-component --component centl</code></pre>
+<p>That installs the <code>centl</code> command and no <code>centl-physics</code> or <code>centl-sci</code> command.</p>
+<p>If you also want mathematics-first CENTL-SCi, add it separately:</p>
+<pre><code class="language-sh">sh install-component --component sci</code></pre>
+<p>You can therefore choose exactly one of these shapes:</p>
+<pre><code class="language-sh"># pure formal mathematics only
+sh install-component --component centl
+
+# ordinary-language scientific interpreter only
+sh install-component --component sci
+
+# both mathematics surfaces, still no Physics command
+sh install-component --component centl
+sh install-component --component sci</code></pre>
+<p>If you intentionally want the complete three-command bundle instead, use the ordinary Oasis installer:</p>
+<pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+sh install --channel oasis</code></pre>
+<h3>🍎 macOS — build and install only the component you want</h3>
+<p>macOS uses the <code>CENTL-Marsa</code> harbor. Homebrew is required; the Marsa bootstrap prepares the numeric stack and OCaml/opam environment.</p>
+<pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
+cd centl
+sh scripts/marsa-install --component centl</code></pre>
+<p>That installs only the <code>centl</code> command. To add SCi later:</p>
+<pre><code class="language-sh">sh scripts/marsa-install --component sci</code></pre>
+<p>Or, only when you really want all three public commands:</p>
+<pre><code class="language-sh">sh scripts/marsa-install --component all</code></pre>
+<p>By default commands are installed below <code>~/.local/bin</code>. If needed:</p>
+<pre><code class="language-sh">export PATH=&quot;$HOME/.local/bin:$PATH&quot;</code></pre>
+<p>Marsa currently builds from the shared source graph, so the source checkout contains shared build dependencies even when only one command is installed. The <strong>installed product surface</strong>, however, is component-selective. macOS Marsa is the Camp harbor, not an Oasis-qualified release.</p>
+<h3>🪟 Windows — install only the selected command</h3>
+<p>Windows currently uses <code>CENTL-Marsa</code> from an <strong>MSYS2 MinGW64 shell</strong>, not ordinary Command Prompt. You need Git and <code>opam</code> available in that environment; the Marsa bootstrap uses <code>pacman</code> to prepare the MinGW numeric and build dependencies.</p>
+<p>From the MSYS2 MinGW64 shell:</p>
+<pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
+cd centl
+sh scripts/marsa-install --component centl</code></pre>
+<p>That installs only <code>centl.exe</code>. Add SCi only if wanted:</p>
+<pre><code class="language-sh">sh scripts/marsa-install --component sci</code></pre>
+<p>The installed executables live below the selected prefix, normally <code>~/.local/bin</code>. MSYS2 resolves the ordinary command names once that directory is on <code>PATH</code>:</p>
+<pre><code class="language-sh">export PATH=&quot;$HOME/.local/bin:$PATH&quot;</code></pre>
+<p>Windows support is presently a Marsa harbor/source-build path. The repository&#x27;s Windows dependency/FLINT harbor is CI-checked, but the full Windows CENTL product job remains disabled until the OCaml/MinGW runtime and library toolchains are unified. Do not interpret a successful Windows source build as an Oasis declaration.</p>
+<p>For the detailed port status and harbor rules, see <a href="marsa.html">CENTL Marsa</a>.</p>
+<h2>Verify your mathematics installation</h2>
+<p>On <strong>GNU/Linux, macOS, or Windows/MSYS2</strong>, check the exact arithmetic contract:</p>
+<pre><code class="language-sh">centl &#x27;0.1 + 0.2&#x27;</code></pre>
+<p>Expected result:</p>
+<pre><code class="language-text">3/10</code></pre>
+<p>Then try a few mathematical operations:</p>
+<pre><code class="language-sh">centl &#x27;solve(x^2 - 5*x + 6 = 0, x)&#x27;
+centl &#x27;diff(x^3 + 2*x + 1, x)&#x27;
+centl &#x27;integrate(x^2, x = 0, 1)&#x27;
+centl &#x27;approx(sqrt(2), 30)&#x27;
+centl verify --left &#x27;0.1 + 0.2&#x27; --relation equal --right &#x27;3/10&#x27;</code></pre>
+<p>If you chose to install CENTL-SCi, start it with:</p>
+<pre><code class="language-sh">centl-sci</code></pre>
+<p>and select mathematics-first interaction:</p>
+<pre><code class="language-text">:mode math</code></pre>
+<p>You are now on the mathematics path. Nothing else in CENTL is required reading before you begin.</p>
+<h2>Which command should a mathematician use?</h2>
+<h3><code>centl</code> — the authoritative mathematical engine</h3>
+<p>Use <code>centl</code> when you want direct, deterministic mathematical input and output.</p>
+<p>Examples:</p>
+<pre><code class="language-sh">centl &#x27;simplify(2*x + 3*x)&#x27;
+centl &#x27;expand((x + 1)^3)&#x27;
+centl &#x27;factor(x^2 - 1)&#x27;
+centl &#x27;solve(2*x + 3 = 11, x)&#x27;
+centl &#x27;substitute(x^2 + 1, x = 3)&#x27;
+centl &#x27;diff(sin(x) + x^3, x)&#x27;
+centl &#x27;integrate(3*x^2 + 2*x + 1, x)&#x27;
+centl &#x27;assuming(x / x, x != 0)&#x27;</code></pre>
+<h3><code>centl-sci</code> — the optional mathematics interpreter</h3>
+<p>Use <code>centl-sci</code> when you want to describe a supported mathematical task in ordinary language while keeping CENTL&#x27;s deterministic machinery authoritative. It is optional for mathematicians.</p>
+<p>Examples:</p>
+<pre><code class="language-text">MATH&gt; what is 0.1 plus 0.2
+MATH&gt; solve x squared minus 5x plus 6 equals zero
+MATH&gt; approximate sqrt(2) to 30 significant digits
+MATH&gt; verify 0.1 + 0.2 equals 3/10</code></pre>
+<p>CENTL-SCi is not a second mathematics engine. It interprets the request, constructs a validated problem representation, and dispatches the admitted operation to CENTL&#x27;s deterministic machinery. A semantic model is not required for deterministic supported paths.</p>
+<p>For more evidence about how a request was interpreted and executed, use the SCi details and explanation surfaces:</p>
+<pre><code class="language-sh">centl-sci --details &#x27;Solve x squared minus 5x plus 6 equals zero.&#x27;
+centl-sci --explain &#x27;Verify 0.1 + 0.2 equals 3/10.&#x27;</code></pre>
+<h2>The mathematical contract you should understand</h2>
+<p>CENTL is <strong>exact-first</strong>.</p>
+<p>A finite decimal literal is an exact rational value, not an IEEE floating-point approximation. Therefore:</p>
+<pre><code class="language-text">0.1        = 1/10
+1.2300     = 123/100
+0.1 + 0.2  = 3/10</code></pre>
+<p>Exact inputs remain exact whenever the mathematical result is represented by CENTL&#x27;s exact domain.</p>
+<p>When you explicitly request an approximation, CENTL uses a bounded enclosure and prints digits only when the enclosure justifies them. An approximate answer is therefore a claim with a numerical evidence boundary, not a decorative decimal rendering.</p>
+<p>Unsupported work is also part of the contract. CENTL does not silently turn an unsupported operation into a guessed answer. A residual symbolic expression or an <code>unsupported</code>, <code>unknown</code>, or unresolved status means exactly that.</p>
+<h2>What mathematics is useful today?</h2>
+<h3>Exact arithmetic</h3>
+<p>CENTL supports arbitrary-precision integers and exact rational arithmetic. Finite decimal input is treated exactly.</p>
+<h3>Exact symbolic polynomial algebra</h3>
+<p>For supported univariate rational polynomials, CENTL can simplify, expand, factor within its documented factorization classes, and perform exact coefficient arithmetic.</p>
+<p>Polynomial expansion is deliberately bounded. Unsupported transformations remain visible rather than being reported as successful algebra.</p>
+<h3>Equations</h3>
+<p>CENTL solves admitted linear equations and real quadratic equations with exact rational coefficients. Irrational real quadratic roots can remain in exact symbolic square-root form.</p>
+<p>Higher-degree or unsupported equations remain unresolved rather than being guessed numerically.</p>
+<h3>Differentiation</h3>
+<p>CENTL has exact derivative rules for arithmetic, integer powers, and supported functions including trigonometric, inverse trigonometric, hyperbolic, exponential, logarithmic, and square-root forms.</p>
+<p>When no verified rule is available, the derivative remains visible as an unsupported residual expression.</p>
+<h3>Integration</h3>
+<p>CENTL performs exact indefinite and definite integration for its admitted rational-coefficient univariate polynomial domain.</p>
+<p>For example:</p>
+<pre><code class="language-sh">centl &#x27;integrate(x^2, x = 0, 1)&#x27;</code></pre>
+<p>returns:</p>
+<pre><code class="language-text">1/3</code></pre>
+<p>This is exact polynomial integration, not numerical quadrature. General symbolic integration is not implied.</p>
+<h3>Substitution and explicit assumptions</h3>
+<p>You can substitute exact expressions and attach local assumptions without hiding them:</p>
+<pre><code class="language-sh">centl &#x27;substitute(x^2 + 1, x = 3)&#x27;
+centl &#x27;assuming(x / x, x != 0)&#x27;</code></pre>
+<p>CENTL preserves assumptions in the result rather than silently widening the mathematical domain of an identity.</p>
+<h3>Rigorous approximation</h3>
+<p>Use:</p>
+<pre><code class="language-sh">centl &#x27;approx(pi)&#x27;
+centl &#x27;approx(sqrt(2), 50)&#x27;</code></pre>
+<p>The explicit digit request is a requirement to justify those digits. If CENTL cannot establish the requested precision within its resource limits, it reports that instead of inventing a cleaner-looking decimal.</p>
+<h3>Closed mathematical claim verification</h3>
+<p>For closed comparisons, use the verifier directly:</p>
+<pre><code class="language-sh">centl verify --left &#x27;1/3&#x27; --relation less_than --right &#x27;1/2&#x27;</code></pre>
+<p>or through SCi, if installed:</p>
+<pre><code class="language-text">MATH&gt; check whether 1/3 &lt; 1/2</code></pre>
+<p><code>verified</code> and <code>refuted</code> are established outcomes. <code>unknown</code> and <code>invalid</code> remain unresolved outcomes, not hidden guesses.</p>
+<h2>What should you <em>not</em> assume?</h2>
+<p>CENTL is not claiming to be a universal computer algebra system or a general theorem prover.</p>
+<p>In particular, do not assume that it currently provides:</p>
+<ul><li>arbitrary symbolic integration;</li><li>arbitrary higher-degree equation solving;</li><li>a general algebraic-number scalar backend for every expression;</li><li>automatic proof of quantified free-variable theorems from ordinary language;</li><li>success merely because an expression was returned unchanged;</li><li>approximate digits beyond what the returned enclosure establishes.</li></ul>
+<p>The refusal boundary is intentional. CENTL would rather leave mathematics unresolved than manufacture mathematical certainty.</p>
+<h2>Recommended mathematician workflow</h2>
+<ol><li><strong>Install only the surface you need.</strong> For most pure mathematicians, that is <code>centl</code> alone.</li><li><strong>Choose the correct platform path:</strong> Oasis component archive on GNU/Linux x86_64, Marsa component build on macOS or Windows.</li><li><strong>Use <code>centl</code> first</strong> when you know the formal expression you want evaluated.</li><li><strong>Add <code>centl-sci</code> only when you want ordinary-language mathematics.</strong></li><li><strong>Keep exact forms exact</strong> unless approximation is part of your actual task.</li><li><strong>Read the resolution status</strong>, not only the displayed expression.</li><li><strong>Use <code>--details</code> or <code>--explain</code></strong> when you need to inspect SCi&#x27;s interpretation path.</li><li><strong>Treat unsupported or unknown results as information</strong>, not as an invitation to infer a missing answer.</li></ol>
+<h2>Read next, and only when you need it</h2>
+<ul><li><a href="numerics.html">Numerical contract</a> — exactness, enclosures, precision, comparisons, and failure semantics.</li><li><a href="https://github.com/chasebryan/centl/blob/main/docs/ALGEBRA.md">Exact symbolic algebra</a> — simplification, expansion, factoring, assumptions, and equations.</li><li><a href="https://github.com/chasebryan/centl/blob/main/docs/CALCULUS.md">Symbolic calculus</a> — differentiation, integration, and substitution.</li><li><a href="sci.html">CENTL-SCi</a> — optional mathematics-first natural-language interaction and evidence surfaces.</li><li><a href="install.html">Installation</a> — GNU/Linux Oasis/Mirage channels, offline installation, and source builds.</li><li><a href="marsa.html">CENTL Marsa</a> — macOS and Windows Camp harbor, dependencies, and assurance boundary.</li></ul>
+<p>That is the complete starting map for a mathematician. The rest of the repository can stay outside your working set until your mathematics actually requires it.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with MERSENNE-SHADOW-LATTICE.md and MULTIPLICATIVE-TRAP-COSET.md.">
+  <title>Prime-power Type A/B trap dichotomy — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-power-trap-dichotomy.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-power-trap-dichotomy.html">
+  <meta property="og:title" content="Prime-power Type A/B trap dichotomy — Free Computation Foundation">
+  <meta property="og:description" content="Read with MERSENNE-SHADOW-LATTICE.md and MULTIPLICATIVE-TRAP-COSET.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-power Type A/B trap dichotomy</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with MERSENNE-SHADOW-LATTICE.md and MULTIPLICATIVE-TRAP-COSET.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-POWER-TRAP-DICHOTOMY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved structural theorem</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this theorem concerns the internal structure of Type A/B trap layers. It does not prove universal Type A/B coverage or the Erdős-Straus conjecture. Literature priority remains under review.</p>
+<p>Read with <a href="mersenne-shadow-lattice.html">MERSENNE-SHADOW-LATTICE.md</a> and <a href="multiplicative-trap-coset.html">MULTIPLICATIVE-TRAP-COSET.md</a>.</p>
+<h2>1. General prime-power layer</h2>
+<p>Let</p>
+<div class="math" role="math">k=p^a</div>
+<p>with <code>p</code> prime and <code>a&gt;=1</code>, and put</p>
+<div class="math" role="math">m=4p^a-1.</div>
+<p>The divisor-generated subgroup is</p>
+<div class="math" role="math">H=\langle p\rangle\le(\mathbb Z/m\mathbb Z)^\times.</div>
+<p>Since</p>
+<div class="math" role="math">4p^a\equiv1\pmod m,</div>
+<p>we have</p>
+<div class="math" role="math">4\equiv p^{-a}\pmod m.</div>
+<p>The divisors of <code>p^a</code> are <code>p^i</code>, <code>0&lt;=i&lt;=a</code>. Therefore the two trap families become</p>
+<div class="math" role="math">-p^i</div>
+<p>and</p>
+<div class="math" role="math">-4p^i\equiv-p^{i-a}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{ T_{p^a} =\{-p^j:-a\le j\le a\} \subseteq-\langle p\rangle. }</div>
+<p>This is an exact exponent-window description.</p>
+<h2>2. Odd prime case</h2>
+<p>Assume <code>p</code> is odd.</p>
+<p>Because <code>4</code> does not divide <code>p^a</code>, the exact trap-cardinality theorem gives</p>
+<div class="math" role="math">\boxed{|T_{p^a}|=2a+1.}</div>
+<p>Let</p>
+<div class="math" role="math">r=\operatorname{ord}_{m}(p).</div>
+<p>The exponent-window description shows</p>
+<div class="math" role="math">2a+1\le r.</div>
+<h3>Theorem</h3>
+<p>For every odd prime <code>p</code> and <code>a&gt;=1</code>,</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{4p^a-1}(p)&gt;2a+1. }</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{ T_{p^a}\subsetneq-\langle p\rangle. }</div>
+<h3>Proof</h3>
+<p>Suppose for contradiction that</p>
+<div class="math" role="math">r=2a+1.</div>
+<p>Then</p>
+<div class="math" role="math">p^{2a+1}\equiv1\pmod m.</div>
+<p>Write <code>n=p^a</code>. Since</p>
+<div class="math" role="math">4n\equiv1\pmod m,</div>
+<p>we have</p>
+<div class="math" role="math">16n^2\equiv1\pmod m.</div>
+<p>But</p>
+<div class="math" role="math">p^{2a+1}=pn^2\equiv1\pmod m.</div>
+<p>Multiplying the latter congruence by <code>16</code> gives</p>
+<div class="math" role="math">p\equiv16\pmod m.</div>
+<p>For all odd prime-power cases except <code>(p,a)=(3,1)</code>,</p>
+<div class="math" role="math">m=4p^a-1&gt;|p-16|,</div>
+<p>so this congruence would force <code>p=16</code>, impossible for a prime. The exceptional numerical case has <code>m=11</code> and <code>3</code> is not congruent to <code>16 mod 11</code> either.</p>
+<p>Thus equality cannot occur. Since <code>r&gt;=2a+1</code>, we obtain</p>
+<div class="math" role="math">r&gt;2a+1.</div>
+<p>Therefore the <code>2a+1</code> trap residues cannot exhaust the cyclic subgroup. QED.</p>
+<h2>3. Binary case</h2>
+<p>For <code>p=2</code>, the situation changes because</p>
+<div class="math" role="math">4=2^2</div>
+<p>is itself a power of the subgroup generator.</p>
+<p>The Mersenne theorem gives</p>
+<div class="math" role="math">\boxed{ \operatorname{ord}_{2^{a+2}-1}(2)=a+2 }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ T_{2^a}=-\langle2\rangle. }</div>
+<p>Thus binary prime powers saturate the divisor-generated multiplicative coset exactly, whereas odd prime powers never do.</p>
+<h2>4. Dichotomy</h2>
+<p>We therefore have the clean prime-power split</p>
+<div class="math" role="math">\boxed{ \begin{array}{ll} p=2 &amp;: T_{2^a}=-H_{2^a};\\[1mm] p\text{ odd} &amp;: T_{p^a}\subsetneq-H_{p^a}. \end{array} }</div>
+<p>The infinite Mersenne shadow lattice is therefore a genuinely binary phenomenon inside the prime-power family, not a generic consequence of prime-power divisor structure.</p>
+<h2>5. Consequences for the theorem program</h2>
+<ol><li>exact multiplicative-coset saturation has a distinguished infinite binary family;</li><li>odd prime-power layers retain an intrinsic <strong>divisor-sparsity gap</strong> even after the full multiplicative quotient has been used;</li><li>attempts to generalize the Mersenne shadow lattice to odd prime powers must exploit something other than full coset equality;</li><li>the exact density factor <code>|T_k|/|H_k|</code> from <a href="trap-quotient-factorization.html">TRAP-QUOTIENT-FACTORIZATION.md</a> is therefore essential, not merely a technical remainder.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

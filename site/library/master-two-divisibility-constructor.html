@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Two-divisibility constructor for the fab master equation — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/master-two-divisibility-constructor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/master-two-divisibility-constructor.html">
+  <meta property="og:title" content="Two-divisibility constructor for the fab master equation — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Two-divisibility constructor for the fab master equation</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MASTER-TWO-DIVISIBILITY-CONSTRUCTOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact sufficient construction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-DUAL-DESCENT-SYSTEM.md</code>, <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code></p>
+<p><strong>Claim boundary:</strong> this converts one four-variable certificate search into two elementary divisibilities and generates explicit congruence families. It does not prove that one such family covers every Mordell-hard prime and therefore does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Constructor</h2>
+<p>Let <code>p</code> be a positive odd integer. Choose positive integers</p>
+<div class="math" role="math">B,Q,s</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{s\mid pQ+B}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{4BQ\mid p+s.}</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{A=\frac{pQ+B}{s}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{c=\frac{p+s}{4BQ}}.</div>
+<p>Then <code>A,c</code> are positive integers.</p>
+<p>The two defining divisibilities imply the exact master identity</p>
+<div class="math" role="math">\boxed{4ABcQ=B+p(A+Q).}</div>
+<h3>Proof</h3>
+<p>Because <code>sA=pQ+B</code>,</p>
+<div class="math" role="math">A(p+s) =pA+sA =pA+pQ+B =B+p(A+Q).</div>
+<p>But <code>p+s=4BQc</code>, so</p>
+<div class="math" role="math">A(p+s)=4ABQc.</div>
+<p>Therefore</p>
+<div class="math" role="math">4ABcQ=B+p(A+Q).</div>
+<p>QED.</p>
+<hr>
+<h2>2. Immediate Erdős-Straus certificate</h2>
+<p>Put</p>
+<div class="math" role="math">\boxed{k=4ABc-p.}</div>
+<p>From the master identity,</p>
+<div class="math" role="math">Qk =Q(4ABc-p) =B+pA.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{k\mid B+pA}</div>
+<p>with quotient exactly <code>Q</code>.</p>
+<p>Also</p>
+<div class="math" role="math">\boxed{p+k=4ABc.}</div>
+<p>Thus the unbounded sufficient fab identity applies with</p>
+<div class="math" role="math">a=B, \qquad b=A, \qquad q=Q, \qquad t=c.</div>
+<p>The resulting positive decomposition is</p>
+<div class="math" role="math">\boxed{ \frac4p = \frac1{ABc} + \frac1{BQc} + \frac1{ApQc}. }</div>
+<p>Therefore:</p>
+<h3>Two-divisibility rescue theorem</h3>
+<p>If there exist positive <code>B,Q,s</code> satisfying</p>
+<div class="math" role="math">\boxed{ s\mid pQ+B, \qquad 4BQ\mid p+s, }</div>
+<p>then <code>p</code> satisfies the Erdős-Straus equation.</p>
+<p>No primality condition on <code>s</code>, <code>Q</code>, or the resulting <code>k</code> is required.</p>
+<hr>
+<h2>3. Congruence-family form</h2>
+<p>For fixed <code>B,Q,s</code>, the two conditions are simply</p>
+<div class="math" role="math">\boxed{p\equiv-s\pmod{4BQ}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{Qp\equiv-B\pmod s.}</div>
+<p>Thus every fixed triple <code>(B,Q,s)</code> defines either an empty congruence system or an explicit arithmetic progression of integers solved by one closed formula.</p>
+<p>If</p>
+<div class="math" role="math">g=\gcd(Q,s),</div>
+<p>the second congruence is soluble exactly when</p>
+<div class="math" role="math">\boxed{g\mid B.}</div>
+<p>After division by <code>g</code>, it becomes one residue class modulo <code>s/g</code>; compatibility with the first congruence is then an ordinary CRT test.</p>
+<p>This gives a systematic generator of exact ES congruence families directly from the master equation.</p>
+<hr>
+<h2>4. Relation to the dual system</h2>
+<p>The variables are exactly the dual variables already present in <code>FAB-DUAL-DESCENT-SYSTEM.md</code>.</p>
+<p>Under the identification</p>
+<div class="math" role="math">a=B, \qquad b=A, \qquad q=Q,</div>
+<p>the new variable <code>s</code> is the <strong>swapped dual certificate divisor</strong> <code>k&#x27;</code>, because the dual identity is</p>
+<div class="math" role="math">\boxed{k&#x27; b=a+pq.}</div>
+<p>Indeed here</p>
+<div class="math" role="math">\boxed{sA=B+pQ.}</div>
+<p>The second constructor condition is exactly the corresponding dual divisibility</p>
+<div class="math" role="math">\boxed{p+s=4BcQ,}</div>
+<p>which is the swapped form of</p>
+<div class="math" role="math">p+k&#x27;=4acq.</div>
+<p>The hidden <code>3 mod 4</code> cofactor from the dual-descent system is a different variable, say <code>d</code>, and is recovered only after the certificate exists through</p>
+<div class="math" role="math">\boxed{A+Q=Bd.}</div>
+<p>So the constructor should be read as choosing the <strong>dual certificate divisor <code>s=k&#x27;</code> first</strong>, not as choosing the hidden cofactor.</p>
+<p>The point is operational: instead of searching four positive variables subject to</p>
+<div class="math" role="math">4ABcQ=B+p(A+Q),</div>
+<p>one may choose the three simpler variables <code>B,Q,s</code> and check only two divisibilities.</p>
+<hr>
+<h2>5. Finite-cover falsification checkpoint</h2>
+<p>As a theorem-mining test, small triples were generated and converted to their exact CRT progressions. Restricting to families whose combined moduli divide</p>
+<div class="math" role="math">840\cdot11\cdot13\cdot17\cdot19,</div>
+<p>a search over <code>B,Q&lt;=30</code> and <code>s&lt;=100</code> produced <code>3,126</code> distinct compatible progression families in that modulus envelope.</p>
+<p>Their union does <strong>not</strong> cover the six Mordell-hard progressions. Large exact residue cores remain in every hard class.</p>
+<p>This finite negative result is not a theorem that no finite covering exists. It only rules out the tempting small-parameter cover tested here and prevents confusing the constructor itself with a completed proof.</p>
+<hr>
+<h2>6. Research use</h2>
+<p>The theorem creates a clean fork for the remaining attack:</p>
+<ol><li><strong>covering route:</strong> find a genuinely complete finite or structured infinite family of triples <code>(B,Q,s)</code>;</li><li><strong>descent route:</strong> assume the two divisibilities fail throughout a controlled family and translate that failure into factor/character restrictions;</li><li><strong>external-nonresidue route:</strong> choose the dual divisor <code>s</code> or the original certificate divisor <code>k</code> from the synchronized external-nonresidue packet and use the hard shield to force the complementary divisibility.</li></ol>
+<p>The useful object is now the pair</p>
+<div class="math" role="math">\boxed{ s\mid pQ+B, \qquad p\equiv-s\pmod{4BQ}, }</div>
+<p>rather than the original four-variable master equation.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

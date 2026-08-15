@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Take the Mordell-hard prime">
+  <title>Counterexample to naive hit-on-cycle / least-entry conjectures — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nr-cycle-hit-counterexample.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nr-cycle-hit-counterexample.html">
+  <meta property="og:title" content="Counterexample to naive hit-on-cycle / least-entry conjectures — Free Computation Foundation">
+  <meta property="og:description" content="Take the Mordell-hard prime">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Counterexample to naive hit-on-cycle / least-entry conjectures</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Take the Mordell-hard prime</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NR-CYCLE-HIT-COUNTEREXAMPLE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite counterexample</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-NR-FACTOR-CYCLE.md</code>, fixed-k signed-divisor criterion</p>
+<p><strong>Claim boundary:</strong> this does not weaken the universal factor-cycle theorem. It falsifies stronger conjectures that a cycle itself, or the component entered from the least external nonresidue, must contain a successful fixed-k FAB placement.</p>
+<h2>1. Prime</h2>
+<p>Take the Mordell-hard prime</p>
+<div class="math" role="math">\boxed{p=5569.}</div>
+<p>Its least external quadratic-nonresidue prime is</p>
+<div class="math" role="math">\boxed{q_1=13.}</div>
+<p>Using the canonical shift multiplier</p>
+<div class="math" role="math">\sigma(q)=\begin{cases}1,&amp;q\equiv3\pmod4,\\3,&amp;q\equiv1\pmod4,\end{cases}</div>
+<p>the natural least-external-factor map gives the exact cycle</p>
+<div class="math" role="math">\boxed{13\to701\to137\to13.}</div>
+<p>Every vertex is <code>1 mod 4</code>, so the fixed-k auxiliary is <code>k=3q</code> at each stage.</p>
+<h2>2. Vertex 13</h2>
+<div class="math" role="math">k=39, \qquad C=\frac{5569+39}{4}=1402=2\cdot701.</div>
+<p>The signed divisor box modulo <code>39</code> is</p>
+<div class="math" role="math">\{1,2,19,20,37,38\}.</div>
+<p>The exact target is</p>
+<div class="math" role="math">-p^{-1}\equiv5\pmod{39},</div>
+<p>which is absent. Thus the vertex fails.</p>
+<p>The external factor <code>701|C</code> supplies the edge</p>
+<div class="math" role="math">13\to701.</div>
+<h2>3. Vertex 701</h2>
+<div class="math" role="math">k=2103, \qquad C=\frac{5569+2103}{4}=1918=2\cdot7\cdot137.</div>
+<p>The signed divisor box has <code>27</code> residues modulo <code>2103</code>; its exact target is</p>
+<div class="math" role="math">-p^{-1}\equiv719\pmod{2103},</div>
+<p>which is absent.</p>
+<p>The external factor <code>137|C</code> gives</p>
+<div class="math" role="math">701\to137.</div>
+<h2>4. Vertex 137</h2>
+<div class="math" role="math">k=411, \qquad C=\frac{5569+411}{4}=1495=5\cdot13\cdot23.</div>
+<p>The signed divisor box has <code>23</code> residues modulo <code>411</code>; its exact target is</p>
+<div class="math" role="math">-p^{-1}\equiv20\pmod{411},</div>
+<p>which is absent.</p>
+<p>The external factor <code>13|C</code> closes the cycle:</p>
+<div class="math" role="math">137\to13.</div>
+<h2>5. Consequence</h2>
+<p>Therefore both statements are false:</p>
+<ol><li>every external-nonresidue factor cycle contains a fixed-k FAB hit;</li><li>the component entered from the least external nonresidue must contain a hit before returning to a cycle.</li></ol>
+<p>The factor-cycle theorem remains valuable as a <strong>defect transport mechanism</strong>, but the universal ES argument must use additional information, such as the Kneser full-stabilizer defect attached to failed vertices, or a global argument over multiple components / external primes.</p>
+<p>In particular, a proof cannot rest on a purely graph-theoretic no-cycle or extremal-entry claim.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

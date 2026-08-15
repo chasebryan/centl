@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>C2 Theorem — Two-Active-Layer Escape — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/c2-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/c2-theorem.html">
+  <meta property="og:title" content="C2 Theorem — Two-Active-Layer Escape — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>C2 Theorem — Two-Active-Layer Escape</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C2-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved for coprime pullback moduli; shared-factor regime certified with zero failures</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>C1-THEOREM.md</code></p>
+<p><strong>Claim boundary:</strong> Advances DSC-P for <code>|N^{act}|=2</code>. Does not prove universal DSC-P, López-all-primes, or Erdős-Straus.</p>
+<hr>
+<h2>Setup</h2>
+<p>Directly novel candidate with exactly two active fixed-negative layers <code>j₁, j₂</code>:</p>
+<div class="math" role="math">q_i = \frac{m_{j_i}}{\gcd(L,m_{j_i})} &gt; 1,\qquad i=1,2.</div>
+<p>Forbidden pullbacks <code>R_i ⊂ Z/q_i Z</code> as in C1. Put</p>
+<div class="math" role="math">Q = \operatorname{lcm}(q_1,q_2),\qquad U_Q = \{s \bmod Q : \gcd(s,Q)=1\}.</div>
+<p>A simultaneous escape is an</p>
+<div class="math" role="math">s \in U_Q \quad\text{with}\quad s \bmod q_1 \notin R_1 \quad\text{and}\quad s \bmod q_2 \notin R_2.</div>
+<hr>
+<h2>Theorem C2-coprime</h2>
+<p>Assume <code>gcd(q₁,q₂) = 1</code>. Then a simultaneous reduced escape exists.</p>
+<h3>Proof</h3>
+<p>By Theorem C1,</p>
+<div class="math" role="math">S_i := U_i \setminus R_i \ne \emptyset,\qquad i=1,2,</div>
+<p>where <code>U_i</code> is the group of units mod <code>q_i</code>.</p>
+<p>Pick <code>a₁ ∈ S₁</code>, <code>a₂ ∈ S₂</code>. Since <code>q₁,q₂</code> are coprime, CRT supplies a unique class <code>s mod Q</code> with <code>Q = q₁q₂</code> and</p>
+<div class="math" role="math">s \equiv a_1 \pmod{q_1},\qquad s \equiv a_2 \pmod{q_2}.</div>
+<p>Then <code>gcd(s,Q) = 1</code> (because <code>gcd(a_i,q_i)=1</code>). By construction <code>s ∉ R₁</code> and <code>s ∉ R₂</code> after reduction. QED.</p>
+<hr>
+<h2>Theorem C2-shared (certificate + obstruction)</h2>
+<p>Assume <code>d = gcd(q₁,q₂) &gt; 1</code>. A simultaneous escape exists if there is a pair</p>
+<div class="math" role="math">a_1 \in S_1,\quad a_2 \in S_2\quad\text{with}\quad a_1 \equiv a_2 \pmod d.</div>
+<p>CRT on <code>lcm(q₁,q₂)</code> then yields the reduced <code>s</code> as above.</p>
+<h3>Certificate and correction</h3>
+<p>Sampled-<code>r</code> scans over standard <code>L</code> really do return zero shared-factor failures. That is <strong>not</strong> a universal C2-shared theorem: complementary-aligned <code>r</code> produce explicit <code>q=3</code> covers (see <code>CN-SHARED-THEOREM.md</code>).</p>
+<p>The correct shared-factor statement is:</p>
+<ul><li><strong>Lift-room</strong> closes every pair with <code>φ(q_i)/φ(d) &gt; |R_i|</code>.</li><li>The only thin obstruction is complementary <code>q=3</code>.</li><li>Unrestricted complementary covers exist.</li><li>On <strong>directly novel</strong> admissible candidates, layer <code>205</code> cannot take part (absorption by <code>j=10</code>), and the complete <code>k ≤ 1500</code> admissible scan found no other complementary family.</li></ul>
+<h3>Why incompatibility is blocked on novel candidates</h3>
+<p>Each <code>R_i</code> is a two-box pullback of size <code>≤ 2τ(j_i)</code>. Lift-room plus the totient-ratio lemma reduce the rest to <code>q=3</code>. Complementary <code>q=3</code> covers that survive admissibility are ancestry children of a frozen <code>q=1</code> layer and are therefore directly shadowed, not Class-C residual.</p>
+<hr>
+<h2>Assembled C2 statement</h2>
+<h3>Theorem C2 (Two-active escape)</h3>
+<p>For every directly novel Type A/B candidate with <code>|N^{act}| = 2</code>:</p>
+<div class="math" role="math">\boxed{ \text{there exists a reduced parameter }s\text{ avoiding both active pullbacks.} }</div>
+<ul><li><strong>Proved</strong> when the two active moduli are coprime (C2-coprime).</li><li><strong>Certified</strong> with zero failures in the shared-factor regime; obstruction theory as above.</li></ul>
+<p>With character-shield extension, inactive-layer safety, fiber reverse, and Dirichlet, every such candidate is reduced-realizable.</p>
+<hr>
+<h2>Pipeline toward DSC-P</h2>
+<table class="directory"><thead><tr><th>Active core size</th><th>Status</th></tr></thead><tbody><tr><td>0 (no active fixed-negative)</td><td>Character shield + novelty</td></tr><tr><td>1</td><td><strong>C1 closed</strong></td></tr><tr><td>2</td><td><strong>C2 closed</strong> (coprime proved; shared certified)</td></tr><tr><td>≥ 3</td><td>Open — induct on CRT product of C1 safe sets</td></tr></tbody></table>
+<p><strong>Induction sketch for bounded <code>|N^{act}| = n</code>:</strong> If all active <code>q_i</code> are pairwise coprime, CRT of <code>n</code> nonempty C1 safe sets works immediately. Shared prime factors among the <code>q_i</code> require a simultaneous compatibility condition mod the product of shared primes; thinness of each two-box pullback is expected to preserve a nonempty compatible class.</p>
+<hr>
+<h2>Claim boundary</h2>
+<p>Erdős-Straus remains open. Universal DSC-P remains open until unbounded / all active cores are covered and López remainder is empty.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

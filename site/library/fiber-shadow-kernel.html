@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This strengthens the prime-power peeling lemma in SHADOW-KERNEL.md. The earlier load used the full size |Rj| of a forbidden pullback set against every prime coordinate dividing its modulus. That is deliberately coarse. Once the other…">
+  <title>Fiber shadow kernel: a sharper local elimination theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fiber-shadow-kernel.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fiber-shadow-kernel.html">
+  <meta property="og:title" content="Fiber shadow kernel: a sharper local elimination theorem — Free Computation Foundation">
+  <meta property="og:description" content="This strengthens the prime-power peeling lemma in SHADOW-KERNEL.md. The earlier load used the full size |Rj| of a forbidden pullback set against every prime coordinate dividing its modulus. That is deliberately coarse. Once the other…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Fiber shadow kernel: a sharper local elimination theorem</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">This strengthens the prime-power peeling lemma in SHADOW-KERNEL.md. The earlier load used the full size |Rj| of a forbidden pullback set against every prime coordinate dividing its modulus. That is deliberately coarse. Once the other…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FIBER-SHADOW-KERNEL.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem note and active proof direction</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this note does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>This strengthens the prime-power peeling lemma in <a href="shadow-kernel.html">SHADOW-KERNEL.md</a>. The earlier load used the full size <code>|R_j|</code> of a forbidden pullback set against every prime coordinate dividing its modulus. That is deliberately coarse. Once the other coordinates are fixed, only one <strong>fiber</strong> of <code>R_j</code> can matter.</p>
+<p>The resulting fiber load is strictly sharper and appears to compress the candidatewise obstruction dramatically.</p>
+<p>Read with:</p>
+<ul><li><a href="diamond.html">DIAMOND.md</a></li><li><a href="direct-shadow-k1000.html">DIRECT-SHADOW-K1000.md</a></li><li><a href="odd-covering-bridge.html">ODD-COVERING-BRIDGE.md</a></li><li><a href="shadow-cover-geometry.html">SHADOW-COVER-GEOMETRY.md</a></li><li><a href="shadow-kernel.html">SHADOW-KERNEL.md</a></li></ul>
+<h2>1. Setup</h2>
+<p>For a fixed admissible Type A/B candidate write</p>
+<div class="math" role="math">x=r+Ls.</div>
+<p>Every earlier active layer gives</p>
+<div class="math" role="math">s\bmod q_j\in R_j, \qquad q_j=\frac{4j-1}{\gcd(L,4j-1)}.</div>
+<p>Let</p>
+<div class="math" role="math">Q=\operatorname{lcm}\{q_j:R_j\neq\varnothing\} =\prod_p p^{A_p}.</div>
+<p>Fix a prime <code>p|Q</code>. For one active constraint write</p>
+<div class="math" role="math">q_j=p^{a_{j,p}}c_{j,p}, \qquad \gcd(p,c_{j,p})=1.</div>
+<p>CRT identifies</p>
+<div class="math" role="math">\mathbb Z/q_j\mathbb Z \cong \mathbb Z/p^{a_{j,p}}\mathbb Z \times \mathbb Z/c_{j,p}\mathbb Z.</div>
+<h2>2. Fiber width</h2>
+<p>For <code>b mod c_{j,p}</code>, define the <code>p</code>-fiber of the forbidden set</p>
+<div class="math" role="math">F_{j,p}(b) = \left\{ a\bmod p^{a_{j,p}}: (a,b)\text{ corresponds by CRT to an element of }R_j \right\}.</div>
+<p>Define its maximum width</p>
+<div class="math" role="math">\boxed{ f_{j,p}=\max_{b\bmod c_{j,p}}|F_{j,p}(b)|. }</div>
+<p>Necessarily</p>
+<div class="math" role="math">1\le f_{j,p}\le \min(|R_j|,p^{a_{j,p}})</div>
+<p>for an active incident constraint.</p>
+<p>The coarse peeling lemma replaced <code>f_{j,p}</code> by <code>|R_j|</code>. The difference can be substantial because the forbidden residues may be distributed over many settings of the other prime coordinates.</p>
+<h2>3. Fiber peeling lemma</h2>
+<h3>Theorem</h3>
+<p>Define the fiber load</p>
+<div class="math" role="math">\boxed{ \Lambda_p = \sum_{\substack{j&lt;k\\p\mid q_j}} \frac{f_{j,p}}{p^{a_{j,p}}}. }</div>
+<p>If</p>
+<div class="math" role="math">\boxed{\Lambda_p&lt;1,}</div>
+<p>then the prime-power coordinate <code>p^{A_p}</code> is peelable: every assignment of all other prime-power coordinates satisfying all constraints not involving <code>p</code> extends to at least one value of the <code>p^{A_p}</code> coordinate satisfying every constraint involving <code>p</code>.</p>
+<h3>Proof</h3>
+<p>Fix all coordinates other than <code>p</code>.</p>
+<p>For an incident constraint <code>j</code>, the fixed non-<code>p</code> coordinates determine one residue</p>
+<div class="math" role="math">b\bmod c_{j,p}.</div>
+<p>The constraint can therefore forbid only the fiber</p>
+<div class="math" role="math">F_{j,p}(b),</div>
+<p>whose size is at most <code>f_{j,p}</code> modulo <code>p^{a_{j,p}}</code>.</p>
+<p>Each forbidden value modulo <code>p^{a_{j,p}}</code> has exactly</p>
+<div class="math" role="math">p^{A_p-a_{j,p}}</div>
+<p>lifts modulo <code>p^{A_p}</code>. Thus constraint <code>j</code> excludes at most</p>
+<div class="math" role="math">f_{j,p}p^{A_p-a_{j,p}}</div>
+<p>full-coordinate values.</p>
+<p>All incident constraints together exclude at most</p>
+<div class="math" role="math">p^{A_p} \sum_{p\mid q_j} \frac{f_{j,p}}{p^{a_{j,p}}} = p^{A_p}\Lambda_p.</div>
+<p>If <code>Lambda_p&lt;1</code>, fewer than all <code>p^{A_p}</code> values are excluded. At least one extension survives. QED.</p>
+<h2>4. Reduced fiber peeling</h2>
+<p>For prime realization we additionally require</p>
+<div class="math" role="math">\gcd(r+Ls,LQ)=1.</div>
+<p>When <code>p</code> does not divide <code>L</code>, reducedness forbids one residue modulo <code>p</code> and therefore contributes exactly <code>1/p</code> to the local load. When <code>p|L</code>, admissibility already gives <code>p</code> not dividing <code>r</code>, so no additional local restriction is needed.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \Lambda_p^{\!*} = \Lambda_p + \begin{cases} 1/p,&amp;p\nmid L,\\ 0,&amp;p\mid L. \end{cases} }</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{\Lambda_p^{\!*}&lt;1}</div>
+<p>is an exact sufficient condition for peeling <code>p</code> while preserving the possibility of a reduced final progression.</p>
+<h2>5. Iterated fiber kernel</h2>
+<p>When a coordinate is peeled, every constraint incident to it can be removed from the residual problem. This can only decrease the fiber loads of the remaining coordinates.</p>
+<p>Therefore fiber peeling can be iterated until no remaining coordinate satisfies the strict load inequality.</p>
+<p>The residual system is the <strong>fiber shadow kernel</strong>.</p>
+<p>If the fiber shadow kernel is empty, then a reduced avoiding assignment exists by constructive reverse extension, independently of the large sequential witness scan. Dirichlet then gives infinitely many exact-depth primes in the candidate.</p>
+<p>This gives a new sufficient theorem for DSC-P on any candidate whose fiber kernel vanishes.</p>
+<h2>6. Why this is materially stronger</h2>
+<p>The original global cover mass</p>
+<div class="math" role="math">W=\sum_j|R_j|/q_j</div>
+<p>is often far above one. The coarse coordinate load can also remain above one on small primes.</p>
+<p>Fiber load asks a different question:</p>
+<blockquote><p>after the other coordinates have been fixed, how many values can this constraint actually remove from this one coordinate?</p></blockquote>
+<p>That is the correct quantity for variable elimination.</p>
+<p>It captures overlap <strong>inside each forbidden set</strong>, before overlap among different layers is even considered.</p>
+<h2>7. Exploratory proof-mining signal from the certified k &lt;= 1000 bundle</h2>
+<p>The exact theorem above is unconditional. The following finite numbers are exploratory diagnostics from the already verified <code>k&lt;=1000</code> candidate bundle and are being moved into automated certificate generation before they should be treated as frozen project results.</p>
+<p>An evenly distributed diagnostic sample of <code>5,000</code> of the <code>33,644</code> certified directly novel candidates gave:</p>
+<pre><code class="language-text">fiber kernel empty:              3,686 / 5,000
+residual kernel size 2:              3
+residual kernel size 3:            523
+residual kernel size 5:              1
+residual kernel size 6:             18
+residual kernel size 7:            769</code></pre>
+<p>Thus roughly <code>73.7%</code> of this diagnostic sample were already proved reduced-realizable by fiber peeling alone, without using their stored avoiding witness.</p>
+<p>More strikingly, every residual kernel in this sample was supported on primes at most</p>
+<div class="math" role="math">\boxed{23}.</div>
+<p>The two overwhelmingly dominant nonempty prime signatures were</p>
+<div class="math" role="math">\boxed{\{3,11,13\}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\{3,5,11,13,17,19,23\}}.</div>
+<p>These sample statistics are not a universal theorem and are not yet a complete <code>33,644</code>-candidate enumeration. Their significance is that the stronger exact elimination rule appears to collapse hundreds of active congruence layers to a tiny recurring small-prime interior.</p>
+<h2>8. Two difficult examples</h2>
+<p>Exploratory exact reconstruction gives two useful examples.</p>
+<p>For the high-search-parameter candidate</p>
+<div class="math" role="math">(k,h,t)=(987,169,3935),</div>
+<p>whose independently certified reduced witness first appeared at <code>s=730101</code>, fiber peeling reduces the entire earlier-layer system to only</p>
+<div class="math" role="math">\boxed{\{3,11,13\}}.</div>
+<p>The residual system contains fourteen constraints. The local assignment <code>s=1</code> on all three remaining prime-power coordinates satisfies those residual constraints and the local reducedness requirements. Thus this apparently difficult global witness hides a very small local core.</p>
+<p>For the earlier proof-mining outlier</p>
+<div class="math" role="math">(k,h,t)=(648,529,2585),</div>
+<p>fiber peeling removes the entire residual coordinate system: its fiber shadow kernel is empty.</p>
+<p>These examples must be independently frozen by the automated analyzer before being promoted from proof-mining evidence to regression fixtures.</p>
+<h2>9. The emerging theorem architecture</h2>
+<p>The union-shadow problem now has three scales:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{hundreds of raw earlier constraints}\\ \downarrow\\ \text{prime-power decomposition}\\ \downarrow\\ \text{coarse local-load peeling}\\ \downarrow\\ \text{fiber-load peeling}\\ \downarrow\\ \text{tiny recurring small-prime kernel} \end{array} }</div>
+<p>The research problem has therefore sharpened again.</p>
+<p>Instead of proving directly that hundreds of odd congruence systems cannot cover, it may be enough to:</p>
+<ol><li>prove that fiber peeling always removes every prime outside a bounded small set;</li><li>classify the finitely structured residual kernel types;</li><li>prove each kernel type has a reduced satisfying assignment whenever no direct shadow exists.</li></ol>
+<h2>10. Immediate next work</h2>
+<ol><li>run the fiber-kernel analyzer over <strong>all</strong> <code>33,644</code> certified candidates through <code>k=1000</code>;</li><li>run it automatically on the in-progress <code>k&lt;=1200</code> certificate bundle;</li><li>hash and independently verify the fiber-width calculations;</li><li>classify residual kernel signatures up to prime-coordinate relabeling and residue translation;</li><li>test whether every residual kernel is solved by a canonical all-ones basepoint plus at most one or two local coordinate repairs;</li><li>derive trap-specific bounds on <code>f_{j,p}</code>, rather than using them only computationally;</li><li>search for an absolute small-prime bound for the fiber kernel.</li></ol>
+<h2>11. Current interpretation</h2>
+<p>The first peeling lemma proved that the obstruction has a small-prime interior.</p>
+<p>The fiber refinement now suggests that the interior may be <strong>dramatically smaller and highly repetitive</strong>.</p>
+<p>That is exactly the kind of compression one would hope to see before a finite computational phenomenon turns into a structural proof.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

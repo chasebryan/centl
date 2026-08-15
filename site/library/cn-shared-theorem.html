@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>CN-Shared Theorem — Lift-Room, Tight Clusters, and Admissible Escape — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cn-shared-theorem.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cn-shared-theorem.html">
+  <meta property="og:title" content="CN-Shared Theorem — Lift-Room, Tight Clusters, and Admissible Escape — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CN-Shared Theorem — Lift-Room, Tight Clusters, and Admissible Escape</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CN-SHARED-THEOREM.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> lift-room and totient-ratio lemmas proved; unrestricted shared-factor C2 is false; admissible program C2-shared certified on the remaining tight cluster</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>C1-THEOREM.md</code>, <code>C2-THEOREM.md</code>, <code>CN-THEOREM.md</code></p>
+<p><strong>Claim boundary:</strong> Does not prove Erdős-Straus, López-all-primes, or universal DSC-P. Closes the analytic reduction of shared-factor CN to a 3-adic complementary-cover problem, and certifies that problem on every admissible hard Type A/B candidate through <code>k ≤ 1500</code>.</p>
+<p>Read with:</p>
+<ul><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/cn_shared_analyzer.py"><code>cn_shared_analyzer.py</code></a></li><li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/verify_cn_shared.py"><code>verify_cn_shared.py</code></a></li></ul>
+<hr>
+<h2>1. Setup</h2>
+<p>As in C1/C2, a directly novel candidate at target depth <code>k</code> has progression</p>
+<div class="math" role="math">x=r+Ls,\qquad L=\operatorname{lcm}(840,4k-1),</div>
+<p>with <code>r</code> the CRT combination of a Mordell-hard class <code>h ∈ H</code> and a trap <code>t ∈ T_k</code>. For each earlier layer <code>j</code>,</p>
+<div class="math" role="math">m_j=4j-1,\qquad g_j=\gcd(L,m_j),\qquad q_j=m_j/g_j,</div>
+<p>and <code>R_j</code> is the affine pullback of <code>T_j</code> to <code>s \bmod q_j</code>. Write <code>S_j = U_j \setminus R_j</code> with <code>U_j = (\mathbb Z/q_j\mathbb Z)^\times</code>.</p>
+<p>A simultaneous reduced escape is an <code>s</code> with <code>gcd(s,Q)=1</code> and <code>s \bmod q_j \in S_j</code> for every active <code>j</code>, where <code>Q=\operatorname{lcm}(q_j)</code>.</p>
+<hr>
+<h2>2. Lemma (odd totient ratio)</h2>
+<p>Let <code>d \mid q</code> with <code>1 \le d &lt; q</code> and <code>q</code> odd. Then</p>
+<div class="math" role="math">\boxed{\frac{\varphi(q)}{\varphi(d)}\ge 2.}</div>
+<h3>Proof</h3>
+<p>Write <code>q=dm</code> with <code>m\ge 3</code> odd. Euler&#x27;s product gives</p>
+<div class="math" role="math">\frac{\varphi(q)}{\varphi(d)} = m\prod_{\substack{p\mid q\\ p\nmid d}}\Bigl(1-\frac1p\Bigr).</div>
+<p>If every prime of <code>m</code> already divides <code>d</code>, the product is empty and the ratio equals <code>m \ge 3</code>. If <code>m</code> contributes a new prime, the product is at least <code>φ(m_{\mathrm{new}})/m_{\mathrm{new}}</code> times an integer <code>≥ 3</code> factor, and for odd <code>m_{\mathrm{new}}≥3</code> one has <code>φ(m_{\mathrm{new}})≥2</code>. In all cases the ratio is an integer at least <code>2</code>.</p>
+<p>Checked for every odd <code>q ≤ 5000</code> and every proper divisor: minimum ratio <code>2</code>, zero failures.</p>
+<hr>
+<h2>3. Theorem (lift-room)</h2>
+<p>Let <code>d=\gcd(q_1,q_2)&gt;1</code>. Write <code>P_i</code> for the set of residues <code>a \bmod d</code> that lift to at least one element of <code>S_i</code>. If</p>
+<div class="math" role="math">\frac{\varphi(q_i)}{\varphi(d)} &gt; |R_i|</div>
+<p>for some <code>i</code>, then <code>P_i</code> contains every unit modulo <code>d</code>. Combined with C1 on the other layer, <code>P_1 ∩ P_2 \ne \emptyset</code>, and CRT supplies a reduced simultaneous escape.</p>
+<h3>Proof</h3>
+<p>The reduction <code>U_i \to (\mathbb Z/d\mathbb Z)^\times</code> is surjective with fibres of size <code>φ(q_i)/φ(d)</code>. A residue <code>a \bmod d</code> fails to lie in <code>P_i</code> only if that entire fibre sits in <code>R_i</code>, which requires at least <code>φ(q_i)/φ(d)</code> forbidden units. This is impossible if the displayed inequality holds. C1 supplies some <code>a&#x27; ∈ S_{3-i}</code>; its projection is a unit modulo <code>d</code> and therefore lies in the full <code>P_i</code>. QED.</p>
+<h3>Uniform form (independent of <code>r</code>)</h3>
+<p>Since <code>|R_i| \le |T_{j_i}| \le 2\tau(j_i)</code>,</p>
+<div class="math" role="math">2\tau(j_i) &lt; \frac{\varphi(q_i)}{\varphi(d)}</div>
+<p>implies lift-room for every <code>r</code>.</p>
+<hr>
+<h2>4. Theorem (C2-thin reduction)</h2>
+<p>Assume <code>|R_1| \le 1</code> and <code>|R_2| \le 1</code>. Then a shared-factor C2 failure can occur only if</p>
+<div class="math" role="math">\boxed{q_1=q_2=3}</div>
+<p>and the two singleton forbidden sets are complementary in <code>{1,2}</code>.</p>
+<h3>Proof</h3>
+<p>If <code>d &lt; q_i</code>, the totient-ratio lemma gives <code>φ(q_i)/φ(d) ≥ 2 &gt; |R_i|</code>, so that layer has lift-room. Thus both layers fail lift-room only if <code>q_1=d=q_2</code>. For equal moduli, <code>|R_1 ∪ R_2| ≤ 2</code>, so the units are covered only if <code>φ(q) ≤ 2</code>. The only odd <code>q&gt;1</code> with <code>φ(q)=2</code> is <code>q=3</code>. QED.</p>
+<p>Census through <code>k ≤ 1500</code> found <code>|R| ∈ \{0,1\}</code> on every single-active row. The thin reduction is therefore the generic remaining C2 hole.</p>
+<hr>
+<h2>5. Unrestricted C2-shared is false</h2>
+<p>The previous C2 write-up claimed zero shared-factor failures for “standard <code>L</code> and multiple <code>r</code>”. That scan did not hit the complementary-producing residue classes.</p>
+<p>An exact search — every <code>r</code> satisfying</p>
+<div class="math" role="math">r+\sigma_1 L \in T_{j_1}\pmod{m_{j_1}},\qquad r+\sigma_2 L \in T_{j_2}\pmod{m_{j_2}}</div>
+<p>with <code>{σ_1,σ_2}={1,2}</code> — finds complementary <code>q=3</code> covers. First examples:</p>
+<table class="directory"><thead><tr><th><code>L</code></th><th><code>j1</code></th><th><code>j2</code></th><th><code>r</code></th><th><code>R1</code></th><th><code>R2</code></th></tr></thead><tbody><tr><td>55440</td><td>7</td><td>520</td><td>653</td><td><code>{2}</code></td><td><code>{1}</code></td></tr><tr><td>360360</td><td>88</td><td>520</td><td>3361</td><td><code>{2}</code></td><td><code>{1}</code></td></tr><tr><td>360360</td><td>34</td><td>88</td><td>223</td><td><code>{2}</code></td><td><code>{1}</code></td></tr></tbody></table>
+<p>So C2-shared is <strong>not a theorem for arbitrary</strong> <code>(L,r,j_1,j_2)</code>.</p>
+<p>The Type A/B program does not use arbitrary <code>r</code>. A candidate is <strong>admissible</strong> when</p>
+<div class="math" role="math">r \equiv h \pmod{840},\qquad r \equiv t \pmod{4k-1}</div>
+<p>for some hard <code>h</code> and some <code>t ∈ T_k</code>, and <code>L=\operatorname{lcm}(840,4k-1)</code>.</p>
+<hr>
+<h2>6. Theorem (205-ancestor absorption)</h2>
+<p>Let <code>j=205</code>. Then</p>
+<div class="math" role="math">m_{205}=819=21\cdot 39=21\cdot m_{10},</div>
+<p>and the divisor-child theorem gives <code>T_{205} \bmod 39 \subseteq T_{10}</code>.</p>
+<h3>Theorem</h3>
+<p>If <code>q_{205}=3</code> and <code>R_{205} \ne \emptyset</code>, the candidate is directly shadowed by layer <code>10</code>.</p>
+<h3>Proof</h3>
+<p><code>m_{205}=3^2\cdot 7\cdot 13</code>. The condition <code>q_{205}=3</code> means</p>
+<div class="math" role="math">\gcd(L,819)=273=3\cdot 7\cdot 13,</div>
+<p>so <code>13 \mid L</code>. Already <code>3 \mid 840 \mid L</code>, hence <code>39 \mid L</code>. Therefore <code>q_{10}=1</code> and the entire progression is frozen modulo <code>39</code>:</p>
+<div class="math" role="math">x=r+Ls \equiv r \pmod{39} \qquad\text{for every }s.</div>
+<p>Nonempty <code>R_{205}</code> supplies some parameter whose point lies in <code>T_{205}</code>. Reducing modulo <code>39</code> and applying the divisor-child inclusion puts that point in <code>T_{10}</code>. But every point of the progression has the same residue modulo <code>39</code>, so the whole progression lies in <code>T_{10}</code>. QED.</p>
+<h3>Corollary</h3>
+<p>Layer <code>205</code> cannot participate in a complementary <code>q=3</code> cover on any <strong>directly novel</strong> candidate.</p>
+<hr>
+<h2>7. Admissible complementary covers through <code>k ≤ 1500</code></h2>
+<p>Replayable tight scan on all <code>73,814</code> hard-compatible admissible candidates with <code>k ≤ 1500</code> (this is the same candidate population as the frozen DSC-P <code>k≤1500</code> bundle):</p>
+<pre><code class="language-text">tight q&lt;=9 shared pairs checked:     1,365,222
+pair escapes:                        1,365,201
+pair failures:                              21
+C1 failures:                                 0
+tight q&lt;=9 triples checked:          3,994,891
+triple failures:                             0</code></pre>
+<p>The <code>21</code> pair failures are <strong>all</strong> complementary <code>q=3</code> covers, and <strong>all</strong> contain layer <code>205</code>:</p>
+<table class="directory"><thead><tr><th>pair</th><th>count</th></tr></thead><tbody><tr><td><code>(205, 322)</code></td><td>9</td></tr><tr><td><code>(52, 205)</code></td><td>5</td></tr><tr><td><code>(70, 205)</code></td><td>4</td></tr><tr><td><code>(205, 556)</code></td><td>2</td></tr><tr><td><code>(25, 205)</code></td><td>1</td></tr></tbody></table>
+<p>Each of the <code>21</code> is directly shadowed by layer <code>10</code> (and usually by one more <code>q=1</code> ancestor such as <code>6</code>, <code>8</code>, or <code>36</code>), exactly as the absorption theorem predicts.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{ \text{directly novel admissible candidates through }k\le 1500 \text{ have zero complementary }q=3\text{ covers.} }</div>
+<p>A residue-class search that only reduces complementary <code>r</code> modulo <code>lcm(m_{j_1},m_{j_2})</code> can miss these <code>21</code> lifts; the admissible-first scan is the complete check.</p>
+<hr>
+<h2>8. Theorem CN-shared (program form)</h2>
+<p>For every directly novel admissible Type A/B candidate with target depth <code>k</code>:</p>
+<ol><li><strong>Coprime active moduli</strong> escape by CN-coprime (already proved).</li><li><strong>Any layer with lift-room</strong> over <code>gcd(q, lcm(q_{\mathrm{rest}}))</code> extends a solution of the complementary cluster (lift-room theorem).</li><li><strong>Uniformly roomy pairs</strong> (<code>2τ(j) &lt; φ(q)/φ(d)</code>, or same-<code>q</code> with <code>2τ(j_1)+2τ(j_2) &lt; φ(q)</code>) escape independently of <code>r</code>.</li><li>The only remaining C2-thin obstruction is a complementary <code>q=3</code> pair. Every admissible example through <code>k ≤ 1500</code> uses layer <code>205</code> and is directly shadowed by layer <code>10</code>. Directly novel candidates have <strong>zero</strong> such covers in the range.</li><li>Tight <code>q ≤ 9</code> triples on admissible candidates: <code>3,994,891</code> checks, <strong>0</strong> failures.</li></ol>
+<p>Thus every <strong>directly novel</strong> admissible shared-factor pair in the completed range has a reduced simultaneous escape.</p>
+<p>This upgrades the C2/CN shared-factor story from “sampled <code>r</code>, zero fails” to:</p>
+<ul><li>a proved reduction to one local obstruction;</li><li>an explicit counterexample to the unrestricted statement;</li><li>a proved absorption theorem that kills the <code>205</code> family on novel candidates;</li><li>an exact certificate that no other complementary family appears through <code>k ≤ 1500</code>.</li></ul>
+<hr>
+<h2>9. Finite certificates (replayable)</h2>
+<table class="directory"><thead><tr><th>Scan</th><th>Result</th></tr></thead><tbody><tr><td>Totient-ratio, odd <code>q ≤ 5000</code></td><td>min ratio <code>2</code>, <strong>0</strong> fails</td></tr><tr><td>Standard-<code>L</code> pairs <code>j ≤ 180</code>, mixed <code>r</code></td><td>358,188 pairs, <strong>0</strong> fails, <strong>0</strong> C1 fails</td></tr><tr><td>Program <code>L=\mathrm{lcm}(840,4k-1)</code>, hard <code>r</code>, <code>k ≤ 200</code></td><td>7,184,124 pairs, <strong>0</strong> fails</td></tr><tr><td>Exact complementary <code>q=3</code> search, standard <code>L</code></td><td>124 unrestricted covers; <strong>0</strong> on <code>L=840</code> and <code>L=2520</code></td></tr><tr><td>Tight <code>q ≤ 9</code> admissible pairs, <code>k ≤ 1500</code></td><td>1,365,222 checks; 21 complementary fails, all <code>205</code>-family, all directly shadowed by <code>10</code></td></tr><tr><td>Tight <code>q ≤ 9</code> admissible triples, <code>k ≤ 1500</code></td><td>3,994,891 checks, <strong>0</strong> fails</td></tr></tbody></table>
+<p>Independent control flow: <code>verify_cn_shared.py</code> rebuilds blocked projections from Euler&#x27;s product and rechecks the totient-ratio lemma, the <code>4j-1 \mid qL</code> classification of exact-<code>q</code> layers, and a program-<code>L</code> sample.</p>
+<hr>
+<h2>10. Correction to earlier C2/C3/C4 claims</h2>
+<p><code>C2-THEOREM.md</code> and <code>CN-THEOREM.md</code> reported zero shared-factor failures for standard <code>L</code> and sampled <code>r</code>. That is true of those samples and is <strong>not</strong> a universal C2-shared theorem. Complementary-aligned <code>r</code> produce covers. The correct claim is the program-admissible statement in §7.</p>
+<hr>
+<h2>11. Scoreboard</h2>
+<table class="directory"><thead><tr><th>Result</th><th>Status</th></tr></thead><tbody><tr><td>Totient-ratio lemma</td><td><strong>Proved</strong></td></tr><tr><td>Lift-room theorem</td><td><strong>Proved</strong></td></tr><tr><td>Uniform lift-room / same-<code>q</code> pigeonhole</td><td><strong>Proved</strong></td></tr><tr><td>C2-thin reduction to <code>q=3</code></td><td><strong>Proved</strong></td></tr><tr><td>Unrestricted C2-shared</td><td><strong>False</strong> (explicit covers)</td></tr><tr><td><code>205</code>-ancestor absorption</td><td><strong>Proved</strong></td></tr><tr><td>Directly novel complementary <code>q=3</code>, <code>k ≤ 1500</code></td><td><strong>0</strong> (exact)</td></tr><tr><td>Other complementary families for all <code>k</code></td><td>Open (none through 1500)</td></tr><tr><td>Shared-factor CN for all finite clusters</td><td>Open beyond the lift-room peel + tight certificate</td></tr><tr><td>Universal DSC-P</td><td>Open</td></tr><tr><td>López all primes</td><td>Open</td></tr><tr><td>Erdős-Straus</td><td>Open</td></tr></tbody></table>
+<hr>
+<h2>12. Next</h2>
+<ol><li>Classify every <code>q=3</code> layer as an ancestry child of a <code>q=1</code> anchor, generalising the <code>205 → 10</code> absorption.</li><li>Peel every roomy layer from an arbitrary finite active core; only a 3/5/7-adic tight cluster remains.</li><li>Bound <code>|N^{act} ∩ tight|</code> on Class-C residuals, then assemble DSC-P.</li></ol>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

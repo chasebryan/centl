@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with PRIME-DEPTH-DICHOTOMY.md and PRIME-MODULUS-BACKBONE.md.">
+  <title>Prime-depth backbone projection — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-depth-backbone-projection.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-depth-backbone-projection.html">
+  <meta property="og:title" content="Prime-depth backbone projection — Free Computation Foundation">
+  <meta property="og:description" content="Read with PRIME-DEPTH-DICHOTOMY.md and PRIME-MODULUS-BACKBONE.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-depth backbone projection</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Read with PRIME-DEPTH-DICHOTOMY.md and PRIME-MODULUS-BACKBONE.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-DEPTH-BACKBONE-PROJECTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollary of the prime-depth dichotomy</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this classifies the direct-shadow source available for a prime depth with composite target modulus. It does not prove universal López Type A/B coverage or the Erdős-Straus conjecture.</p>
+<p>Read with <a href="prime-depth-dichotomy.html">PRIME-DEPTH-DICHOTOMY.md</a> and <a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a>.</p>
+<h2>Theorem</h2>
+<p>Let <code>k</code> be a prime depth and put</p>
+<div class="math" role="math">m_k=4k-1.</div>
+<p>If <code>m_k</code> is composite, then there exists a prime</p>
+<div class="math" role="math">q\mid m_k, \qquad q\equiv3\pmod4, \qquad q&lt;m_k.</div>
+<p>Set</p>
+<div class="math" role="math">j=(q+1)/4.</div>
+<p>Then</p>
+<div class="math" role="math">m_j=q</div>
+<p>is itself prime, so <code>j</code> is a prime-modulus backbone depth, and</p>
+<div class="math" role="math">\boxed{T_k\bmod q\subseteq T_j.}</div>
+<p>Thus every structurally impossible prime depth is directly shadowed by a prime-modulus backbone layer.</p>
+<h3>Proof</h3>
+<p>Because</p>
+<div class="math" role="math">m_k\equiv3\pmod4,</div>
+<p>its prime factorization contains at least one prime factor <code>q=3 mod 4</code>. Since <code>m_k</code> is composite, choose such a factor with <code>q&lt;m_k</code>.</p>
+<p>Write</p>
+<div class="math" role="math">m_k=Aq.</div>
+<p>Because both <code>m_k</code> and <code>q</code> are <code>3 mod 4</code>,</p>
+<div class="math" role="math">A\equiv1\pmod4.</div>
+<p>Write</p>
+<div class="math" role="math">A=4s+1, \qquad q=4j-1.</div>
+<p>Then</p>
+<div class="math" role="math">4k-1=(4s+1)(4j-1),</div>
+<p>so</p>
+<div class="math" role="math">k=s(4j-1)+j</div>
+<p>and</p>
+<div class="math" role="math">4k=(4s+1)(4j-1)+1.</div>
+<p>Therefore</p>
+<div class="math" role="math">k\equiv j\pmod q, \qquad 4k\equiv1\pmod q.</div>
+<p>Since <code>k</code> is prime,</p>
+<div class="math" role="math">T_k=\{-1,-4,-k,-4k\}.</div>
+<p>Reducing modulo <code>q=m_j</code> gives</p>
+<div class="math" role="math">\{-1,-4,-j,-1\}\subseteq T_j,</div>
+<p>because <code>1|j</code> and <code>j|j</code>.</p>
+<p>QED.</p>
+<h2>Graph interpretation</h2>
+<p>On the subsequence of prime depth values, every node has one of two forms:</p>
+<div class="math" role="math">\boxed{ \text{prime depth }k \to \begin{cases} \text{backbone node}, &amp; 4k-1\text{ prime},\\ \text{direct edge to a backbone node}, &amp; 4k-1\text{ composite}. \end{cases}}</div>
+<p>So the prime-depth part of the shadow graph has depth at most one above the prime-modulus backbone.</p>
+<p>This is substantially stronger than merely knowing that composite <code>4k-1</code> produces some earlier shadow source.</p>
+<h2>Multiple backbone parents</h2>
+<p>Every distinct prime divisor</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>of <code>4k-1</code> supplies a backbone shadow parent</p>
+<div class="math" role="math">j=(q+1)/4.</div>
+<p>Thus the set of prime-modulus parents of an impossible prime depth is read directly from the <code>3 mod 4</code> prime factors of its target modulus.</p>
+<p>Examples:</p>
+<pre><code class="language-text">k=19:  4k-1=75=3*5^2
+       q=3  -&gt; j=1
+
+k=29:  4k-1=115=5*23
+       q=23 -&gt; j=6
+
+k=79:  4k-1=315=3^2*5*7
+       q=3  -&gt; j=1
+       q=7  -&gt; j=2</code></pre>
+<h2>Consequence</h2>
+<p>The genuinely difficult part of the depth spectrum is therefore even more concentrated on <strong>composite depth values</strong>.</p>
+<p>Prime depth values do not create long new shadow ancestry chains. They are either independent backbone layers themselves or are removed immediately by a backbone parent.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

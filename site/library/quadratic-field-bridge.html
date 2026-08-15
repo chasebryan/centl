@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read with:">
+  <title>Quadratic-field bridge for the square-lift core — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/quadratic-field-bridge.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/quadratic-field-bridge.html">
+  <meta property="og:title" content="Quadratic-field bridge for the square-lift core — Free Computation Foundation">
+  <meta property="og:description" content="Read with:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Quadratic-field bridge for the square-lift core</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">Read with:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUADRATIC-FIELD-BRIDGE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact theorem note plus prior-art boundary</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> norm forms, splitting of primes in quadratic fields, genus characters, class groups, and Rédei matrices are classical. This note does not claim those objects as new. Its purpose is to identify the classical arithmetic underneath the Type A/B square-lift/defect machinery and to state exactly what remains specific to the present minimal-depth/shadow program.</p>
+<p>Read with:</p>
+<ul><li><a href="square-lift-reciprocity.html">SQUARE-LIFT-RECIPROCITY.md</a></li><li><a href="reciprocity-defect-quotient.html">RECIPROCITY-DEFECT-QUOTIENT.md</a></li><li><a href="reciprocity-matrix.html">RECIPROCITY-MATRIX.md</a></li><li><a href="squarefree-lift-core.html">SQUAREFREE-LIFT-CORE.md</a></li><li><a href="prior-art.html">PRIOR-ART.md</a></li></ul>
+<h2>1. The square-lift depth is a quadratic norm</h2>
+<p>Let</p>
+<div class="math" role="math">d=4a-1</div>
+<p>be squarefree and let <code>s</code> be positive odd. Put</p>
+<div class="math" role="math">\boxed{ j=\frac{1+d s^2}{4}.}</div>
+<p>Because <code>d=3 mod 4</code>, the imaginary quadratic field</p>
+<div class="math" role="math">K_d=\mathbb Q(\sqrt{-d})</div>
+<p>has ring of integers</p>
+<div class="math" role="math">\mathcal O_d =\mathbb Z\left[\frac{1+\sqrt{-d}}2\right].</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{ \alpha_s=\frac{1+s\sqrt{-d}}2\in\mathcal O_d. }</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{ N_{K_d/\mathbb Q}(\alpha_s) =\frac{1+d s^2}{4} =j. }</div>
+<p>Thus every square-lift depth is the norm of one distinguished algebraic integer.</p>
+<p>The ancestor depth is the special case</p>
+<div class="math" role="math">a=N(\alpha_1).</div>
+<h2>2. Every rational prime dividing j splits</h2>
+<h3>Theorem</h3>
+<p>Every rational prime <code>ell|j</code> splits in <code>K_d</code>.</p>
+<p>For odd <code>ell</code>, equivalently,</p>
+<div class="math" role="math">\boxed{ \left(\frac{-d}{\ell}\right)=+1. }</div>
+<p>If <code>2|j</code>, then <code>2</code> also splits in <code>K_d</code>.</p>
+<h3>Proof for odd ell</h3>
+<p>From</p>
+<div class="math" role="math">4j=1+d s^2</div>
+<p>and <code>ell|j</code>, we have</p>
+<div class="math" role="math">d s^2\equiv-1\pmod\ell.</div>
+<p>Also <code>gcd(ell,s)=1</code>, because any common divisor of <code>j</code> and <code>s</code> would divide <code>1</code> in the displayed identity. Hence</p>
+<div class="math" role="math">-d\equiv s^{-2}\pmod\ell,</div>
+<p>so <code>-d</code> is a nonzero square modulo <code>ell</code>. Therefore <code>ell</code> splits in the quadratic field.</p>
+<h3>The prime 2</h3>
+<p>If <code>2|j</code>, then</p>
+<div class="math" role="math">1+d s^2\equiv0\pmod8.</div>
+<p>Every odd square is <code>1 mod 8</code>, so</p>
+<div class="math" role="math">d\equiv7\pmod8.</div>
+<p>The fundamental discriminant is <code>-d</code>, hence</p>
+<div class="math" role="math">-d\equiv1\pmod8,</div>
+<p>which is exactly the split case for <code>2</code> in the quadratic field. QED.</p>
+<p>This is the field-theoretic form of the reciprocity statement proved earlier for the divisor primes of a square lift.</p>
+<h2>3. A canonical prime above every divisor prime</h2>
+<p>Because</p>
+<div class="math" role="math">N(\alpha_s)=j,</div>
+<p>every rational prime <code>ell|j</code> divides the principal ideal <code>(alpha_s)</code>.</p>
+<p>Since <code>ell</code> splits, write</p>
+<div class="math" role="math">(\ell)=\mathfrak p_{\ell,s}\,\overline{\mathfrak p}_{\ell,s}.</div>
+<p>Exactly one of the two primes above <code>ell</code> divides <code>(alpha_s)</code>.</p>
+<p>Indeed, if both divided <code>(alpha_s)</code>, then <code>(ell)</code> would divide <code>(alpha_s)</code>, so <code>alpha_s in ell O_d</code>. Taking traces would imply</p>
+<div class="math" role="math">\ell\mid\operatorname{Tr}(\alpha_s)=1,</div>
+<p>impossible.</p>
+<p>Thus the element <code>alpha_s</code> canonically selects one prime ideal above every rational prime factor of <code>j</code>.</p>
+<p>For odd <code>ell</code>, one may describe this selected prime using the square root</p>
+<div class="math" role="math">\sqrt{-d}\equiv-s^{-1}\pmod\ell</div>
+<p>forced by <code>alpha_s</code>.</p>
+<h2>4. Ideal-factorization conservation law</h2>
+<p>Factor</p>
+<div class="math" role="math">j=\prod_{\ell\mid j}\ell^{e_\ell}.</div>
+<p>The selected split primes satisfy</p>
+<div class="math" role="math">\boxed{ (\alpha_s) = \prod_{\ell\mid j} \mathfrak p_{\ell,s}^{e_\ell}. }</div>
+<p>Both sides have norm <code>j</code>, and the preceding section shows which prime above each split rational prime can occur.</p>
+<p>Passing to the ideal class group gives the exact conservation law</p>
+<div class="math" role="math">\boxed{ \sum_{\ell\mid j} e_\ell[\mathfrak p_{\ell,s}] =0 \quad\text{in }\operatorname{Cl}(K_d). }</div>
+<p>This is strictly stronger in principle than the binary defect-conservation law, which retains only selected quadratic-character information.</p>
+<p>The earlier relation</p>
+<div class="math" role="math">\sum_\ell(e_\ell\bmod2)\delta_a(\ell)=0</div>
+<p>should therefore be viewed as a coarse quadratic-character shadow of the principal-ideal identity above.</p>
+<h2>5. Why genus theory is relevant</h2>
+<p>For a quadratic field, genus characters are the order-two characters of the ideal class group. Their values on split prime ideals are described by quadratic residue symbols associated with the prime discriminants dividing the field discriminant.</p>
+<p>Our local vectors</p>
+<div class="math" role="math">\lambda_d(\ell) = \left(\left(\frac\ell p\right)\right)_{p\mid d}</div>
+<p>therefore live in the same classical quadratic-character ecosystem as genus theory.</p>
+<p>This is a warning and an opportunity:</p>
+<ul><li>the use of Legendre-symbol vectors and <code>F_2</code> linear algebra is not by itself a novelty claim;</li><li>the extra null directions beyond Jacobi may have a genus-theoretic interpretation;</li><li>classical Rédei matrices also package quadratic residue symbols into binary matrices and use their rank to study higher <code>2</code>-primary class-group structure;</li><li>our rectangular <code>A_k</code>, however, has different row and column sets: rows come from primes dividing <code>4k-1</code>, while columns come from primes dividing <code>k</code>.</li></ul>
+<p>Therefore the Type A/B reciprocity matrix must <strong>not</strong> be called a Rédei matrix without a proved equivalence. The responsible current statement is that there is a strong structural analogy and a likely genus-theoretic bridge that requires formal identification.</p>
+<h2>6. Classical Rédei warning</h2>
+<p>Classical Rédei matrices are built from quadratic symbols between prime discriminant factors of a quadratic-field discriminant. Their rank controls the <code>4</code>-rank of quadratic ideal class groups.</p>
+<p>The Type A/B reciprocity matrix</p>
+<div class="math" role="math">A_k= \left( \left(\frac{\ell_j}{p_i}\right) \right)</div>
+<p>is generally rectangular and mixes two arithmetically linked factorizations:</p>
+<div class="math" role="math">k=\prod\ell_j^{\beta_j}, \qquad 4k-1=\prod p_i^{\alpha_i}.</div>
+<p>Its canonical null vectors arise from</p>
+<div class="math" role="math">4k\equiv1</div>
+<p>and the López divisor-Jacobi relation.</p>
+<p>The correct research question is therefore:</p>
+<blockquote><p>Can <code>A_k</code>, or the square-lift defect quotient derived from it, be identified with a natural restriction, presentation, or evaluation map in the genus/class-group theory of <code>Q(sqrt(-(4a-1)))</code>?</p></blockquote>
+<p>Until that is proved, the connection remains a bridge, not an identification.</p>
+<h2>7. The next level beyond genus characters</h2>
+<p>The exact Type A/B trap sets depend on actual residues</p>
+<div class="math" role="math">-e, \qquad -4e \pmod d,</div>
+<p>not merely on their quadratic characters.</p>
+<p>So even complete genus-character information cannot recover the exact projection excess</p>
+<div class="math" role="math">E_j=(T_j\bmod d)\setminus T_a.</div>
+<p>A likely hierarchy is</p>
+<div class="math" role="math">\boxed{ \text{principal norm identity} \to \text{ideal-class conservation} \to \text{genus / quadratic characters} \to \text{reciprocity defect quotient} \to \text{multiplicative residue quotient} \to \text{exact Type A/B divisor residues}. }</div>
+<p>The exact-residue end may naturally involve ray class information rather than only the ordinary ideal class group, because congruence modulo the ancestor modulus is finer than ideal-class equivalence.</p>
+<p>This is now a serious theory target.</p>
+<h2>8. Why this may be the hidden mechanism</h2>
+<p>The computational phenomenon we are trying to explain is that hundreds of earlier modular constraints overlap so strongly that directly novel candidates repeatedly retain reduced escape progressions.</p>
+<p>The norm-form viewpoint says the square-lift part of the system is not a generic collection of congruences. The factor primes of each lifted depth are forced to:</p>
+<ol><li>split in one fixed imaginary quadratic field;</li><li>choose prime ideals whose weighted product is principal;</li><li>satisfy every genus-character conservation law induced by that principal identity;</li><li>satisfy the finer Type A/B residue relations inherited from the same norm equation.</li></ol>
+<p>That is a much more rigid arithmetic source than a random covering system.</p>
+<h2>9. Immediate theorem targets</h2>
+<ol><li>identify the precise genus-theoretic meaning of <code>V_a</code> and <code>R_a</code>;</li><li>determine whether <code>dim R_a</code> is expressible through a classical class-group invariant plus the subgroup generated by the prime ideals selected by <code>alpha_1</code>;</li><li>compare <code>A_a</code> rigorously with the classical Rédei matrix of discriminant <code>-d</code>;</li><li>lift the binary defect conservation law from genus characters to the full ideal class group using the principal factorization of <code>(alpha_s)</code>;</li><li>determine what ray-class quotient encodes the exact residue projection <code>T_j mod d</code>;</li><li>test whether direct shadowing corresponds to triviality in that ray-class quotient.</li></ol>
+<p>The fifth and sixth questions could connect the exact shadow graph to standard algebraic number theory rather than leaving it as a bespoke congruence phenomenon.</p>
+<h2>10. Prior-art boundary</h2>
+<p>The following are classical and are not FCF novelty claims:</p>
+<ul><li>representation by quadratic norm forms;</li><li>splitting criteria using Kronecker/Legendre symbols;</li><li>ideal class groups and principal ideal relations;</li><li>genus characters;</li><li>Rédei matrices and their use in quadratic class-group <code>4</code>-rank questions.</li></ul>
+<p>The candidate contribution remains the Type-A/B-specific <strong>minimal-depth, shadow, survivor, square-lift, projection-excess and exact-residue architecture</strong>, together with any new theorem proved about how those objects interact.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

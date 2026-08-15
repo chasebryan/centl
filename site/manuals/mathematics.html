@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL keeps exact expressions exact and approximates only when asked.">
+  <title>Mathematical functions — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/manuals/mathematics.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/manuals/mathematics.html">
+  <meta property="og:title" content="Mathematical functions — Free Computation Foundation">
+  <meta property="og:description" content="CENTL keeps exact expressions exact and approximates only when asked.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mathematical functions</h1><p>Manual · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../docs.html">Documentation</a> · Manual</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Manual</p>
+          <p class="dek">CENTL keeps exact expressions exact and approximates only when asked.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/oasis/docs/MATHEMATICS.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>CENTL keeps exact expressions exact and approximates only when asked.</p>
+<pre><code class="language-text">sqrt(4/9)                    = 2/3
+circle_area(3)               = 9 * pi
+approx(sqrt(2), 20)          ≈ [1.4142135623730950488, 1.4142135623730950489]</code></pre>
+<p><code>approx(expression)</code> requests 20 significant decimal digits. <code>approx(expression, digits)</code> requests between 1 and 1000. The result is an outward-rounded interval containing the mathematical value, not a point estimate disguised as an exact answer. Because an enclosure is not an exact scalar, <code>approx(...)</code> must be the outermost evaluation request; embedding it in exact arithmetic, conditions, or symbolic transformations returns <code>approximation_not_expression</code>.</p>
+<h2>Trigonometry and elementary functions</h2>
+<p>Angles are radians unless converted explicitly with <code>radians(degrees)</code> or <code>degrees(radians)</code>.</p>
+<pre><code class="language-text">sin(x)   cos(x)   tan(x)
+asin(x)  acos(x)  atan(x)  atan2(y, x)
+sinh(x)  cosh(x)  tanh(x)
+sqrt(x)  exp(x)   log(x)   abs(x)</code></pre>
+<p>The exact constants are <code>pi</code>, <code>e</code>, and <code>tau</code>. Trigonometric expressions remain symbolic until approximation is requested. Differentiation understands the one-argument functions above except <code>abs</code>.</p>
+<h2>Exact polynomial integration</h2>
+<p>CENTL 0.9.0 integrates exact rational-coefficient univariate polynomials:</p>
+<pre><code class="language-text">integrate(3*x^2 + 2*x + 1, x) = x^3 + x^2 + x
+integrate(x^2, x = 0, 1)      = 1/3</code></pre>
+<p>The two-argument form chooses the canonical antiderivative with integration constant zero. The bounded form requires exact rational bounds and returns the exact difference between endpoint values. Unsupported integrands, including transcendental and multivariate cases, remain visible as <code>integrate(...)</code> instead of being approximated. Accepted polynomial powers are positive and at most 64. Explicit zero powers also remain visible so CENTL does not erase the undefined <code>0^0</code> point. See <a href="https://github.com/chasebryan/centl/blob/main/docs/CALCULUS.md">symbolic calculus</a>.</p>
+<h2>Geometry</h2>
+<p>The initial geometry vocabulary is deliberately direct:</p>
+<pre><code class="language-text">square_area(side)
+rectangle_area(width, height)
+rectangle_perimeter(width, height)
+triangle_area(base, height)
+trapezoid_area(base1, base2, height)
+circle_area(radius)
+circumference(radius)
+sphere_area(radius)
+sphere_volume(radius)
+cylinder_volume(radius, height)
+hypot(a, b)
+distance(x1, y1, x2, y2)
+slope(x1, y1, x2, y2)</code></pre>
+<p>These are exact formula expansions. Rational inputs therefore produce exact rational results, while results involving <code>pi</code> or an irrational square root remain exact symbolic expressions. Wrap any result in <code>approx</code> for a rigorous real enclosure.</p>
+<h2>Concrete mathematics</h2>
+<p>CENTL currently includes exact unbounded-integer primitives for:</p>
+<pre><code class="language-text">gcd(a, b)             lcm(a, b)
+factorial(n)           fibonacci(n)
+choose(n, k)           permutations(n, k)</code></pre>
+<p>Finite sums, products, recurrences, sequences, and generating functions form the concrete-mathematics layer. The implemented bounded exact forms are:</p>
+<pre><code class="language-text">sum(expression, variable = lower, upper)
+product(expression, variable = lower, upper)
+sequence(expression, variable = lower, upper)
+recurrence(initial, previous = step, index = lower, upper)</code></pre>
+<p>Bounds are inclusive exact integers. Empty sums are <code>0</code>, empty products are <code>1</code>, and empty sequences and recurrences are <code>[]</code>. A recurrence&#x27;s initial value occupies its lower index, and its step receives the preceding exact value and each later index. Sequence elements and recurrence terms remain exact scalar values within the active machine resource limits. See <a href="https://github.com/chasebryan/centl/blob/main/docs/ITERATION.md">exact finite iteration and sequences</a>. Generating functions remain a later extension and will use the same exact-first value model rather than a separate subsystem.</p>
+<h2>Current limits</h2>
+<ul><li>Approximation supports real arithmetic, integer powers, the constants above, and the listed elementary functions.</li><li>Unresolved variables cannot be approximated until they are substituted.</li><li>Complex values, units, geometric objects, limits, series, and integration outside the exact univariate-polynomial domain are planned but are not silently simulated by the evaluator.</li><li>A failed domain proof or exhausted precision budget is a structured error.</li></ul>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

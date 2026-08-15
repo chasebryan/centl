@@ -1,0 +1,21 @@
+{
+  "event": {
+    "equation": "4/9601 = 1/2428 + 1/210022 + 1/4032842444",
+    "kernel": "CC.kernel",
+    "kind": "fab",
+    "layer": "window",
+    "method": "fab(1,2)",
+    "n": 9601,
+    "p": 9601,
+    "solved": true,
+    "x": "2428",
+    "y": "210022",
+    "z": "4032842444"
+  },
+  "file": "20260815T093532Z-great-9601-escaped_small_theorems.md",
+  "grade": "great",
+  "tags": [
+    "escaped_small_theorems",
+    "certified_hard_witness"
+  ]
+}

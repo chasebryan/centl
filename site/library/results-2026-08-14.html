@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note freezes the first successful automated run of the CENTL Erdős-Straus research harness. It records finite computational results only and must be read with the claim boundaries in PRIOR-ART.md and THEORY.md.">
+  <title>Automated WS-CAND-003 results — 2026-08-14 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/results-2026-08-14.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/results-2026-08-14.html">
+  <meta property="og:title" content="Automated WS-CAND-003 results — 2026-08-14 — Free Computation Foundation">
+  <meta property="og:description" content="This note freezes the first successful automated run of the CENTL Erdős-Straus research harness. It records finite computational results only and must be read with the claim boundaries in PRIOR-ART.md and THEORY.md.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Automated WS-CAND-003 results — 2026-08-14</h1><p>Synthesis · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Synthesis</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Synthesis</p>
+          <p class="dek">This note freezes the first successful automated run of the CENTL Erdős-Straus research harness. It records finite computational results only and must be read with the claim boundaries in PRIOR-ART.md and THEORY.md.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/RESULTS-2026-08-14.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p>This note freezes the first successful automated run of the CENTL Erdős-Straus research harness. It records finite computational results only and must be read with the claim boundaries in <code>PRIOR-ART.md</code> and <code>THEORY.md</code>.</p>
+<h2>Run configuration</h2>
+<ul><li>hard-prime limit: <code>10,000,000</code></li><li>Type A/B layer limit: <code>k=3000</code></li><li>hard residue classes modulo 840: <code>1, 121, 169, 289, 361, 529</code></li><li>selected hard primes: <code>20,513</code></li><li>selected hard primes resolved: <code>20,513</code></li><li>unresolved: <code>0</code></li></ul>
+<h2>Frontier</h2>
+<p>The independently rechecked record frontier remained:</p>
+<pre><code class="language-text">1009       -&gt; C_AB 3
+1201       -&gt; C_AB 8
+2521       -&gt; C_AB 22
+3361       -&gt; C_AB 25
+9601       -&gt; C_AB 28
+33289      -&gt; C_AB 45
+76441      -&gt; C_AB 70
+83449      -&gt; C_AB 170
+1095481    -&gt; C_AB 245
+1423321    -&gt; C_AB 1050
+2031121    -&gt; C_AB 1403
+4728649    -&gt; C_AB 1435
+9658489    -&gt; C_AB 2622</code></pre>
+<h2>Shadow geometry through k=3000</h2>
+<p>The automated direct-shadow map found:</p>
+<ul><li><code>460</code> fully directly shadowed layers;</li><li><code>1,108</code> completely direct-fresh layers;</li><li><code>875</code> partially directly shadowed layers;</li><li><code>3,544</code> unique direct-shadow layer edges;</li><li><code>1,808</code> shadow edges for which the earlier modulus divides the later modulus;</li><li><code>1,736</code> shadow edges not explained by simple modulus divisibility alone.</li></ul>
+<p>This shows that modulus ancestry is a major part of the graph but not the entire shadow mechanism.</p>
+<h2>Global non-union-shadow witnesses</h2>
+<p>The first-hit computation produced <code>1,164</code> distinct hard-class/current-trap CRT classes containing at least one first-hit prime. Every such prime is an explicit witness that its current class is not covered by the union of all earlier Type A/B layers.</p>
+<p>The independent verifier rechecked all <code>20,513</code> first-hit primes against all smaller layers required by their claimed depth.</p>
+<p>The current record class is</p>
+<pre><code class="language-text">k = 2622
+m_k = 10487
+h = 169 mod 840
+t = 10449 mod 10487
+witness prime = 9658489</code></pre>
+<p>and is therefore globally non-union-shadowed by explicit witness.</p>
+<h2>Independent-verifier totals</h2>
+<p>The first successful workflow run independently checked:</p>
+<ul><li><code>7,113</code> rejected lower frontier levels;</li><li><code>3,000</code> trap-cardinality layers;</li><li><code>10,710</code> direct-shadow certificates;</li><li><code>1,164</code> witnessed globally non-union-shadowed classes;</li><li><code>20,513</code> first-hit prime witnesses;</li><li><code>3,544</code> ancestry-edge arithmetic records.</li></ul>
+<p>Final verifier verdict: <code>VERIFIED</code>.</p>
+<h2>CENTL certification</h2>
+<p>The workflow built CENTL from the checked-out repository commit and used it to certify:</p>
+<ul><li><code>13</code> closed exact Egyptian-fraction identities, one for every frontier record;</li><li><code>13</code> fixed-parameter polynomial Type A/B families, one for every frontier witness;</li><li><code>214</code> distinct observed modulus-ancestry quotient identities;</li><li>the dedicated polynomial family for the current record <code>p=9,658,489</code>, <code>C_AB=2622</code>.</li></ul>
+<p>Final CENTL certification verdict: <code>CENTL exact contracts verified</code>.</p>
+<h2>Modulus-ancestry families</h2>
+<p>For an ancestry quotient <code>q=4s+1</code>, the arithmetic relation is</p>
+<div class="math" role="math">4k-1=q(4j-1),\qquad k=qj-s.</div>
+<p>The automation grouped fully shadowed layers having a common modulus-dividing ancestor into finite candidate families. The largest groups in the first run were:</p>
+<table class="directory"><thead><tr><th>quotient <code>q</code></th><th><code>s=(q-1)/4</code></th><th>observed uniform full-shadow points</th></tr></thead><tbody><tr><td>5</td><td>1</td><td>130</td></tr><tr><td>9</td><td>2</td><td>38</td></tr><tr><td>17</td><td>4</td><td>31</td></tr><tr><td>25</td><td>6</td><td>31</td></tr><tr><td>13</td><td>3</td><td>29</td></tr><tr><td>21</td><td>5</td><td>22</td></tr><tr><td>33</td><td>8</td><td>14</td></tr><tr><td>41</td><td>10</td><td>13</td></tr><tr><td>65</td><td>16</td><td>11</td></tr><tr><td>37</td><td>9</td><td>10</td></tr><tr><td>73</td><td>18</td><td>10</td></tr><tr><td>81</td><td>20</td><td>10</td></tr></tbody></table>
+<p>The strongest first theorem target is therefore the <code>q=5</code> ancestry family</p>
+<div class="math" role="math">\boxed{k=5j-1,\qquad m_k=5m_j.}</div>
+<p>The <code>130</code> observed points are evidence for studying this family, not a claim that all <code>j</code> satisfy full shadowing. The run contains examples of full, partial, and absent immediate-ancestor shadowing, so the mathematical problem is to derive the exact condition on <code>j</code>.</p>
+<h2>Important interpretation</h2>
+<p><code>direct-fresh</code> does not mean globally irredundant. It only means no single earlier layer covers the complete class. The stronger non-union conclusion is currently made only when an explicit first-hit prime supplies a counterexample to collective earlier coverage.</p>
+<p>The finite ancestry groups are theorem candidates, not infinite-family theorems. A future proof must supply necessary-and-sufficient arithmetic conditions rather than extrapolate from these counts.</p>
+<h2>Reproducibility</h2>
+<p>The successful workflow uploaded a complete research artifact bundle containing generated JSON, direct-shadow certificates, independent-verifier output, CENTL receipts, the generated <code>.centl</code> contract, build information, and SHA-256 manifests.</p>
+<p>GitHub workflow: <code>.github/workflows/erdos-straus-research.yml</code></p>
+<p>Research harness: <code>research/erdos-straus/</code></p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

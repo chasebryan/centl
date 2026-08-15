@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="This note connects:">
+  <title>Mersenne-prime backbone inside the Type A/B depth spectrum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mersenne-backbone.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mersenne-backbone.html">
+  <meta property="og:title" content="Mersenne-prime backbone inside the Type A/B depth spectrum — Free Computation Foundation">
+  <meta property="og:description" content="This note connects:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Mersenne-prime backbone inside the Type A/B depth spectrum</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">This note connects:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MERSENNE-BACKBONE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved corollary combining two established project theorems</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Claim boundary:</strong> this does not prove infinitely many Mersenne primes, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.</p>
+<p>This note connects:</p>
+<ul><li><a href="dyadic-trap-lattice.html">DYADIC-TRAP-LATTICE.md</a>, and</li><li><a href="prime-modulus-backbone.html">PRIME-MODULUS-BACKBONE.md</a>.</li></ul>
+<p>The intersection produces an exact infinite-prime realization theorem at every dyadic depth whose Mersenne-type modulus happens to be prime.</p>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">q\ge5</div>
+<p>be a prime exponent such that</p>
+<div class="math" role="math">\boxed{M_q=2^q-1}</div>
+<p>is prime.</p>
+<p>Set</p>
+<div class="math" role="math">\boxed{k=2^{q-2}.}</div>
+<p>Then</p>
+<div class="math" role="math">4k-1 =2^q-1 =M_q.</div>
+<p>Thus the target Type A/B modulus is a Mersenne prime.</p>
+<h2>2. Exact trap set</h2>
+<p>The dyadic trap theorem gives</p>
+<div class="math" role="math">\boxed{ T_k=-\langle2\rangle\pmod{M_q}. }</div>
+<p>Because</p>
+<div class="math" role="math">\operatorname{ord}_{M_q}(2)=q,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{|T_k|=q.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ T_k=\{-1,-2,-2^2,\ldots,-2^{q-1}\}\pmod{M_q}. }</div>
+<p>So an apparently large divisor-generated Type A/B layer becomes one cyclic orbit of length <code>q</code>.</p>
+<h2>3. Independence from the previous depth history</h2>
+<p>Because <code>M_q=4k-1</code> is prime and every earlier modulus <code>4j-1</code> is strictly smaller than <code>M_q</code>, the target prime modulus is coprime to the complete previous lcm.</p>
+<p>Therefore it introduces a genuinely new CRT coordinate at depth <code>k</code>.</p>
+<p>The exact conditional Type A/B first-hit hazard is consequently</p>
+<div class="math" role="math">\boxed{ h_k=\frac{|T_k|}{M_q-1}.}</div>
+<p>Substituting the dyadic trap size gives</p>
+<div class="math" role="math">\boxed{ h_{2^{q-2}} =\frac{q}{2^q-2}.}</div>
+<p>This is an exact arithmetic probability over prime residue classes conditioned on survival through every earlier Type A/B layer. It is not a heuristic independence approximation.</p>
+<h2>4. Infinite exact-depth primes</h2>
+<p>The prime-modulus backbone theorem also gives:</p>
+<h3>Theorem</h3>
+<p>For every Mersenne prime exponent <code>q&gt;=5</code>, infinitely many primes <code>p</code> satisfy</p>
+<div class="math" role="math">\boxed{C_{AB}(p)=2^{q-2}.}</div>
+<p>Moreover these primes can be chosen in a Mordell-hard residue class such as</p>
+<div class="math" role="math">p\equiv1\pmod{840}.</div>
+<h3>Reason</h3>
+<p>Choose a residue class that avoids every previous Type A/B trap, for example the universal residue <code>1</code> modulo the lcm of the earlier moduli, and independently choose any target trap residue</p>
+<div class="math" role="math">t\in T_k</div>
+<p>modulo the new prime <code>M_q</code>.</p>
+<p>CRT combines the conditions because the target modulus is coprime to the previous lcm. The resulting progression is reduced, and Dirichlet supplies infinitely many primes in it.</p>
+<p>Every such prime survives all earlier layers and hits at depth <code>k</code>.</p>
+<h2>5. q distinct target trap families</h2>
+<p>Because the target trap set has exactly <code>q</code> residues and the target modulus is a new independent coordinate, each</p>
+<div class="math" role="math">-2^r\pmod{M_q}, \qquad0\le r&lt;q,</div>
+<p>can be paired with a fixed earlier-survivor progression.</p>
+<p>Thus each Mersenne-prime dyadic depth carries <code>q</code> explicit target trap classes, each giving an infinite Dirichlet family after the earlier survivor conditions are imposed.</p>
+<p>This does not assert that the resulting arithmetic progressions have the same prime density in finite intervals. It is an exact existence and residue-structure statement.</p>
+<h2>6. Examples</h2>
+<h3>q = 5</h3>
+<div class="math" role="math">M_5=31, \qquad k=2^3=8.</div>
+<p>Then</p>
+<div class="math" role="math">|T_8|=5</div>
+<p>and</p>
+<div class="math" role="math">\boxed{h_8=\frac5{30}=\frac16.}</div>
+<p>This is the same <code>k=8</code> layer that appeared prominently in the early hard-prime hazard experiments, now explained as a Mersenne-prime dyadic backbone layer.</p>
+<h3>q = 7</h3>
+<div class="math" role="math">M_7=127, \qquad k=2^5=32,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{h_{32}=\frac7{126}=\frac1{18}.}</div>
+<h3>q = 13</h3>
+<div class="math" role="math">M_{13}=8191, \qquad k=2^{11}=2048.</div>
+<p>Therefore, without extending the finite candidate search to that depth, the theory already proves</p>
+<div class="math" role="math">\boxed{ \text{infinitely many primes have }C_{AB}(p)=2048. }</div>
+<p>The exact conditional hazard is</p>
+<div class="math" role="math">\boxed{h_{2048}=\frac{13}{8190}.}</div>
+<p>This is an example of the structural theory outrunning the current brute-force depth frontier.</p>
+<h2>7. Relation to dyadic irredundancy</h2>
+<p>When <code>M_q</code> is prime, its exponent <code>q</code> is prime. Hence the dyadic node</p>
+<div class="math" role="math">k=2^{q-2}</div>
+<p>has no earlier cyclic dyadic shadow ancestor.</p>
+<p>So a Mersenne-prime backbone node is simultaneously:</p>
+<ol><li>an exact saturated dyadic trap coset;</li><li>irredundant inside the earlier cyclic dyadic shadow lattice;</li><li>a new prime CRT coordinate relative to <strong>all</strong> earlier Type A/B moduli;</li><li>an infinite exact-depth prime source.</li></ol>
+<p>This is an unusually clean meeting point of the shadow, quotient, spectrum, and hazard theories.</p>
+<h2>8. No claim about infinitely many such layers</h2>
+<p>The statement</p>
+<div class="math" role="math">\text{infinitely many Mersenne primes exist}</div>
+<p>is itself open.</p>
+<p>Therefore this note does <strong>not</strong> use the Mersenne-prime family to prove unboundedness of <code>C_AB</code>. Finite-value unboundedness was already proved by the general prime-modulus backbone using all primes <code>4k-1</code>, not only Mersenne primes.</p>
+<p>The Mersenne family is valuable because its trap set has a complete closed multiplicative description.</p>
+<h2>9. Theorem-program significance</h2>
+<p>The Mersenne-prime nodes provide exact laboratory points where several layers of the theory collapse simultaneously:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c} \text{Type A/B exact traps}\\ =\\ \text{one cyclic multiplicative coset}\\ \downarrow\\ \text{new prime CRT coordinate}\\ \downarrow\\ \text{closed exact hazard }q/(2^q-2)\\ \downarrow\\ \text{infinitely many exact-depth primes} \end{array} }</div>
+<p>They should be used as regression fixtures and model cases when attempting a more general multiplicative-quotient proof of DSC-P.</p>
+<h2>10. Novelty boundary</h2>
+<p>Mersenne numbers, their divisibility properties, and orders of <code>2</code> modulo <code>2^q-1</code> are classical. López Type A/B congruences are prior art. The candidate contribution is the way these facts combine inside the <code>C_AB</code> minimal-depth, exact-hazard, and shadow framework.</p>
+<p>A targeted arXiv search on 2026-08-14 did not locate this exact Mersenne-prime Type-A/B depth-spectrum formulation. That negative search does not establish publication priority.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

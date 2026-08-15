@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Unbounded strong sufficient certificates and the fixed-k divisor-ratio box — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/fab-unbounded-divisor-ratio-certificate.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/fab-unbounded-divisor-ratio-certificate.html">
+  <meta property="og:title" content="Unbounded strong sufficient certificates and the fixed-k divisor-ratio box — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Unbounded strong sufficient certificates and the fixed-k divisor-ratio box</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact algebraic reduction for a strong sufficient subclass</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Project:</strong> Free Computation Foundation / CENTL</p>
+<p><strong>Depends on:</strong> <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>, <code>FAB-SHIFTED-FACTOR-DESCENT.md</code></p>
+<p><strong>Claim boundary:</strong> Bello-Hernández–Benito–Fernández define <code>fab(n,a,b)</code> for arbitrary positive <code>a,b</code>; they do <strong>not</strong> impose <code>a,b&lt;n</code>. The bounds <code>a,b&lt;p</code> entered the FCF coprime simplification in <code>FAB-COPRIME-DIVISOR-CRITERION.md</code>. This note removes that auxiliary size restriction only for the stronger sufficient congruence/divisibility subclass below. It does not claim to characterize every <code>fab</code> certificate and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Strong sufficient identity</h2>
+<p>Let <code>n,a,b,k</code> be positive integers and assume</p>
+<div class="math" role="math">\boxed{k\mid a+bn}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{4ab\mid n+k.}</div>
+<p>Put</p>
+<div class="math" role="math">q=\frac{a+bn}{k}, \qquad t=\frac{n+k}{4ab}.</div>
+<p>Then</p>
+<div class="math" role="math">kq=a+bn, \qquad k=4abt-n.</div>
+<p>Substitution gives</p>
+<div class="math" role="math">(4abt-n)q=a+bn,</div>
+<p>so</p>
+<div class="math" role="math">\boxed{4abqt=a+n(b+q).}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \frac4n = \frac1{abt} + \frac1{aqt} + \frac1{bnqt}. }</div>
+<p>This identity is exact and requires no size bound on <code>a,b</code>.</p>
+<h3>Provenance correction</h3>
+<p>The original 2026 <code>fab</code> definition already allows arbitrary positive <code>a,b</code>. The restriction <code>a,b&lt;p</code> was used only in the FCF <strong>coprime divisor criterion</strong> to collapse the full <code>fab</code> admissibility conditions to the single congruence</p>
+<div class="math" role="math">k\equiv-p\pmod{4ab}.</div>
+<p>The two conditions in this section are stronger than general <code>fab</code> admissibility, but they are sufficient for an Erdős–Straus decomposition and remain valid for arbitrarily large auxiliaries.</p>
+<p>We call such data a <strong>strong sufficient certificate</strong> in this note.</p>
+<hr>
+<h2>2. Fixed-k setup</h2>
+<p>Let <code>p</code> be an odd prime and <code>k</code> a positive integer with</p>
+<div class="math" role="math">\gcd(p,k)=1, \qquad p+k\equiv0\pmod4.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+k}{4}.}</div>
+<p>Then</p>
+<div class="math" role="math">\gcd(C,k)=1.</div>
+<p>A strong sufficient certificate using this <code>k</code> is equivalent to positive <code>a,b,c</code> satisfying</p>
+<div class="math" role="math">abc=C</div>
+<p>and</p>
+<div class="math" role="math">k\mid a+bp,</div>
+<p>because <code>p+k=4abc</code> then automatically gives <code>4ab|p+k</code>.</p>
+<hr>
+<h2>3. Divisor-square equivalence for the strong subclass</h2>
+<p>For</p>
+<div class="math" role="math">C=abc</div>
+<p>we have</p>
+<div class="math" role="math">p=4abc-k.</div>
+<p>Hence</p>
+<div class="math" role="math">a+bp =a+4ab^2c-bk =a(1+4b^2c)-bk.</div>
+<p>Since <code>a|C</code> and <code>gcd(C,k)=1</code>,</p>
+<div class="math" role="math">\gcd(a,k)=1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ k\mid a+bp \iff k\mid1+4b^2c.}</div>
+<p>Put</p>
+<div class="math" role="math">u=b^2c.</div>
+<p>Then <code>u|C^2</code>.</p>
+<p>Conversely, every divisor <code>u|C^2</code> can be realized as <code>b^2c</code> inside a factorization <code>abc=C</code> with <code>gcd(a,b)=1</code>. Prime by prime, if</p>
+<div class="math" role="math">v_r(C)=E, \qquad v_r(u)=U, \qquad 0\le U\le2E,</div>
+<p>choose exponent triples <code>(alpha,beta,gamma)</code> for <code>(a,b,c)</code> by</p>
+<div class="math" role="math">(\alpha,\beta,\gamma)=(E-U,0,U)</div>
+<p>when <code>U&lt;=E</code>, and</p>
+<div class="math" role="math">(\alpha,\beta,\gamma)=(0,U-E,2E-U)</div>
+<p>when <code>U&gt;=E</code>.</p>
+<p>Thus:</p>
+<h3>Theorem — fixed-k strong divisor-square certificate</h3>
+<p>For odd prime <code>p</code> and positive <code>k</code> with</p>
+<div class="math" role="math">\gcd(p,k)=1, \qquad p+k\equiv0\pmod4,</div>
+<p>there exists a <strong>strong sufficient certificate</strong> using this <code>k</code> if and only if</p>
+<div class="math" role="math">\boxed{ \exists u\mid C^2: \quad 4u\equiv-1\pmod k, \qquad C=\frac{p+k}{4}. }</div>
+<p>This is not asserted to characterize every possible <code>fab</code> certificate with that <code>k</code>; it characterizes the stronger <code>4ab|p+k</code> subclass.</p>
+<hr>
+<h2>4. Divisor-ratio box</h2>
+<p>Because</p>
+<div class="math" role="math">\frac{u}{C} = \frac{b^2c}{abc} = \frac ba,</div>
+<p>and</p>
+<div class="math" role="math">4C\equiv p\pmod k,</div>
+<p>the target congruence becomes</p>
+<div class="math" role="math">\boxed{ \frac ba\equiv-p^{-1}\pmod k. }</div>
+<p>If</p>
+<div class="math" role="math">C=\prod_r r^{E_r},</div>
+<p>the possible ratios <code>b/a</code> are exactly the signed exponent box</p>
+<div class="math" role="math">\boxed{ \mathcal R_k(C) = \left\{ \prod_r r^{z_r}\bmod k: -E_r\le z_r\le E_r \right\}. }</div>
+<p>Hence:</p>
+<h3>Theorem — fixed-k strong divisor-ratio box</h3>
+<div class="math" role="math">\boxed{ \text{strong sufficient certificate with divisor }k \iff -p^{-1}\in\mathcal R_k(C), \qquad C=\frac{p+k}{4}. }</div>
+<p>This gives a precise multiplicative-box subproblem inside the larger all-prime <code>fab</code> wall.</p>
+<hr>
+<h2>5. Three canonical points of the strong box</h2>
+<h3>Center: b/a = 1</h3>
+<p>Here <code>u=C</code>. The target condition gives</p>
+<div class="math" role="math">4C\equiv-1\pmod k.</div>
+<p>Since <code>4C=p+k</code>,</p>
+<div class="math" role="math">\boxed{k\mid p+1.}</div>
+<p>This is the familiar simplest Type-B / <code>p+1</code> spine.</p>
+<h3>Upper endpoint: b/a = C</h3>
+<p>Here <code>u=C^2</code>. The target becomes</p>
+<div class="math" role="math">k\mid4C^2+1,</div>
+<p>which modulo <code>k</code> is equivalent to</p>
+<div class="math" role="math">\boxed{k\mid p^2+4.}</div>
+<p>after multiplication by <code>4</code>.</p>
+<p>For a hard prime <code>p≡1 mod4</code>, any <code>k</code> with <code>p+k≡0 mod4</code> satisfies <code>k≡3 mod4</code>. Such a <code>k&gt;1</code> has a prime divisor <code>q≡3 mod4</code>. But a <code>3 mod4</code> prime cannot divide the coprime sum of two squares</p>
+<div class="math" role="math">p^2+2^2.</div>
+<p>Therefore the upper endpoint cannot solve a hard prime.</p>
+<h3>Lower endpoint: b/a = C^{-1}</h3>
+<p>Here <code>u=1</code>, so <code>k|5</code>. Positive divisors of <code>5</code> are <code>1 mod4</code>, while the hard-prime shift <code>k</code> is <code>3 mod4</code>. Thus the lower endpoint also cannot solve a hard prime.</p>
+<hr>
+<h2>6. Structural consequence</h2>
+<p>Within this strong sufficient subclass, a hard prime escaping the <code>p+1</code> spine can be rescued only by a genuinely asymmetric interior signed divisor of</p>
+<div class="math" role="math">C=\frac{p+k}{4}.</div>
+<p>The three canonical box points are</p>
+<div class="math" role="math">\boxed{ C^{-1}:\text{ impossible}, \qquad 1:\text{ the }p+1\text{ spine}, \qquad C:\text{ impossible by sums of two squares}. }</div>
+<p>This is a useful local theorem target for the repository&#x27;s multiplicative quotient / defect / zero-sum machinery, but the all-prime proof must remember that general <code>fab</code> admissibility is broader than this strong box.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

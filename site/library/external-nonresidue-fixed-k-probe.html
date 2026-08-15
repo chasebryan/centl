@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External-nonresidue × hard-shield fixed-k probe — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-nonresidue-fixed-k-probe.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-nonresidue-fixed-k-probe.html">
+  <meta property="og:title" content="External-nonresidue × hard-shield fixed-k probe — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External-nonresidue × hard-shield fixed-k probe</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-NONRESIDUE-FIXED-K-PROBE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite exploratory signal; standalone falsifier checked in</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md</code>, <code>FAB-HARD-NONRESIDUE-BRIDGE.md</code>, <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code></p>
+<p><strong>Claim boundary:</strong> this is <strong>not</strong> a universal theorem and <strong>not</strong> a proof of Erdős-Straus. The zero-failure observation below is finite and must remain labelled computational until promoted by a theorem.</p>
+<hr>
+<h2>1. Motivation</h2>
+<p>The mirror-character theorem proves that reflecting a shifted factor whose prime support is already quadratic-residue-safe cannot supply the fixed-k target. Therefore the fixed-k construction must deliberately import external nonresidue support.</p>
+<p>For a Mordell-hard prime <code>p</code>, call a prime</p>
+<div class="math" role="math">\ell\ge11</div>
+<p><strong>external</strong> when</p>
+<div class="math" role="math">\boxed{\left(\frac\ell p\right)=-1.}</div>
+<p>The hard shield gives</p>
+<div class="math" role="math">\left(\frac2p\right) = \left(\frac3p\right) = \left(\frac5p\right) = \left(\frac7p\right)=+1.</div>
+<p>This suggests combining one genuinely new nonresidue prime with the existing small shield.</p>
+<hr>
+<h2>2. Exact rule tested</h2>
+<p>For each hard prime <code>p</code>:</p>
+<ol><li>list the first eight primes <code>ell&gt;=11</code> with <code>(ell/p)=-1</code>;</li><li>for each such <code>ell</code>, try</li></ol>
+<div class="math" role="math">\boxed{k=m\ell,\qquad m\in\{1,3,5,7\},}</div>
+<p>retaining only <code>k==3 mod4</code>;</p>
+<ol><li>put</li></ol>
+<div class="math" role="math">C=\frac{p+k}{4};</div>
+<ol><li>apply the proved fixed-k theorem exactly:</li></ol>
+<div class="math" role="math">\boxed{ \exists u\mid C^2,\qquad4u\equiv-1\pmod k. }</div>
+<p>A hit therefore gives a genuine sufficient Egyptian-fraction certificate. The only non-theorem part is the assertion that this menu always contains a hit.</p>
+<hr>
+<h2>3. Exploratory finite result through 10^7</h2>
+<p>On the six Mordell-hard classes modulo <code>840</code>, the exploratory exact run covered</p>
+<div class="math" role="math">\boxed{20,513/20,513}</div>
+<p>hard primes <code>p&lt;=10^7</code>.</p>
+<p>Observed first-hit multiplier counts were:</p>
+<pre><code class="language-text">m = 1 : 11,935
+m = 3 :  6,000
+m = 5 :    867
+m = 7 :  1,711</code></pre>
+<p>The successful external-nonresidue rank was heavily front-loaded:</p>
+<pre><code class="language-text">rank 1 : 18,774
+rank 2 :  1,458
+rank 3 :    216
+rank 4 :     46
+rank 5 :     12
+rank 6 :      6
+rank 7 :      1</code></pre>
+<p>No first hit in this run required the eighth nonresidue, although the checked-in falsifier deliberately keeps an eight-prime menu for margin.</p>
+<p>For the successful shifted factor <code>C=(p+k)/4</code>, the gcd with the hard shield <code>105=3*5*7</code> was distributed as:</p>
+<pre><code class="language-text">gcd(C,105)= 1 : 2,747
+             3 : 6,415
+             5 : 4,231
+             7 :   527
+            15 : 6,187
+            21 :    35
+            35 :   371</code></pre>
+<p>So most hits acquire a <code>3</code> or <code>5</code> coordinate, but the mechanism is not merely divisibility by <code>105</code>: <code>2,747</code> successful cases had <code>gcd(C,105)=1</code>.</p>
+<hr>
+<h2>4. Why this signal is stronger than another bounded box</h2>
+<p>The menu is not a generic search over arbitrary <code>(a,b)</code>.</p>
+<p>It has the specific structural form</p>
+<div class="math" role="math">\boxed{ \text{external nonresidue} \times \text{hard-shield multiplier }\{1,3,5,7\}. }</div>
+<p>The external factor supplies the quadratic sign that the mirror theorem proves is necessary; the multiplier comes entirely from the already-frozen small-prime hard shield.</p>
+<p>This makes the observed rule a plausible theorem target rather than a naked numerical cutoff.</p>
+<hr>
+<h2>5. Standalone replay</h2>
+<p>The exact finite falsifier is checked in as</p>
+<p><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/external_nr_fixed_k_probe.py"><code>external_nr_fixed_k_probe.py</code></a>.</p>
+<p>It uses only the Python standard library and independently performs:</p>
+<ul><li>prime enumeration;</li><li>Mordell-hard residue filtering;</li><li>Euler-criterion Legendre symbols;</li><li>exact factorization of <code>C</code>;</li><li>exact residue dynamic programming over all divisors of <code>C^2</code>.</li></ul>
+<p>Recommended replay:</p>
+<pre><code class="language-bash">python3 research/erdos-straus/external_nr_fixed_k_probe.py \
+  --limit 10000000 \
+  --nr-count 8 \
+  --json</code></pre>
+<p>A hosted/independent replay should be frozen before treating the finite counts as a formal certificate artifact.</p>
+<hr>
+<h2>6. The theorem we actually need</h2>
+<p>The finite observation points to the following sharply stated target.</p>
+<h3>External-nonresidue shield-rescue target</h3>
+<p>For every Mordell-hard prime <code>p</code>, there exists an external prime <code>ell&gt;=11</code> with</p>
+<div class="math" role="math">\left(\frac\ell p\right)=-1</div>
+<p>and a multiplier</p>
+<div class="math" role="math">m\in\{1,3,5,7\}</div>
+<p>such that</p>
+<div class="math" role="math">k=m\ell\equiv3\pmod4</div>
+<p>and, with</p>
+<div class="math" role="math">C=\frac{p+k}{4},</div>
+<p>the square-divisor box hits the fixed target:</p>
+<div class="math" role="math">\boxed{ \exists u\mid C^2: 4u\equiv-1\pmod k. }</div>
+<p>Proving this statement would give a pointwise sufficient fab certificate for every Mordell-hard prime. Combined with the classical reductions for the non-hard classes and scaling from prime divisors, it would close Erdős-Straus.</p>
+<p>The number <code>8</code> from the finite probe is <strong>not</strong> part of the theorem target. It is evidence that the external prime may be chosen very early, not a claimed universal bound.</p>
+<hr>
+<h2>7. Immediate proof question</h2>
+<p>For <code>k=m ell</code>, the CRT decomposition of the target separates into:</p>
+<ol><li>an external <code>ell</code> coordinate where <code>(ell/p)=-1</code> forces a nontrivial character condition on</li></ol>
+<div class="math" role="math">C=(p+m\ell)/4;</div>
+<ol><li>a tiny <code>m</code> coordinate supported entirely on <code>3,5,7</code>.</li></ol>
+<p>The next proof step is therefore to determine whether the divisor-square residue set of <code>C</code> can fail simultaneously on both coordinates for <strong>every</strong> external nonresidue <code>ell</code>.</p>
+<p>That is the present one-shot target.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

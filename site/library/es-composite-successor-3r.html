@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Composite successor `3r`: parity-constrained signed-box theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-composite-successor-3r.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-composite-successor-3r.html">
+  <meta property="og:title" content="Composite successor `3r`: parity-constrained signed-box theorem — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Composite successor `3r`: parity-constrained signed-box theorem</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-COMPOSITE-SUCCESSOR-3R.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact local reduction and index-two classification</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>FAB-TWO-TARGET-KNESER.md</code>, <code>FAB-INDEX6-COMBINED-DEFECT.md</code>, <code>FAB-HARD-FIRST-FILTERS.md</code></p>
+<p><strong>Claim boundary:</strong> this treats the natural composite successor when the forced external-nonresidue prime has residue <code>1 mod 4</code>. It does not prove that the successor shift must hit a target and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Why <code>3r</code> is the natural successor</h2>
+<p>Let <code>p</code> be a Mordell-hard prime. Then</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{12}.}</div>
+<p>Let <code>r&lt;p</code> be an external quadratic-nonresidue prime for <code>p</code> with</p>
+<div class="math" role="math">\boxed{r\equiv1\pmod4, \qquad \left(\frac rp\right)=-1.}</div>
+<p>The prime shift <code>k=r</code> is not admissible in the two-target formulation because it is <code>1 mod 4</code>.</p>
+<p>Multiply by the hard-residue prime <code>3</code> and put</p>
+<div class="math" role="math">\boxed{k=3r.}</div>
+<p>Then</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1.</div>
+<p>Set</p>
+<div class="math" role="math">\boxed{C=\frac{p+3r}{4}.}</div>
+<p>Because <code>p≡1 mod3</code>,</p>
+<div class="math" role="math">\boxed{C\equiv1\pmod3,}</div>
+<p>and because <code>r\ne p</code>,</p>
+<div class="math" role="math">\boxed{\gcd(C,3r)=1.}</div>
+<p>Thus the exact two-target signed box is defined at the composite shift <code>3r</code>.</p>
+<hr>
+<h2>2. CRT split of the signed box</h2>
+<p>Factor</p>
+<div class="math" role="math">C=\prod_i s_i^{e_i}.</div>
+<p>CRT gives</p>
+<div class="math" role="math">\boxed{ (\mathbb Z/3r\mathbb Z)^\times \cong (\mathbb Z/3\mathbb Z)^\times \times (\mathbb Z/r\mathbb Z)^\times.}</div>
+<p>The first factor has order two. For every prime divisor <code>s_i</code> of <code>C</code>, define</p>
+<div class="math" role="math">\boxed{ \epsilon_i= \begin{cases} +1,&amp;s_i\equiv1\pmod3,\\ -1,&amp;s_i\equiv2\pmod3. \end{cases}}</div>
+<p>For a signed exponent vector</p>
+<div class="math" role="math">z=(z_i), \qquad -e_i\le z_i\le e_i,</div>
+<p>the mod-<code>3</code> coordinate of the corresponding signed divisor is</p>
+<div class="math" role="math">\boxed{\epsilon(z)=\prod_i\epsilon_i^{z_i}\in\{+1,-1\}.}</div>
+<p>Define the two parity fibres projected to the prime modulus <code>r</code>:</p>
+<div class="math" role="math">\boxed{ \mathcal R_{r}^{\pm}(C) = \left\{ \prod_i s_i^{z_i}\pmod r: -e_i\le z_i\le e_i, \quad \epsilon(z)=\pm1 \right\}.}</div>
+<p>The full signed box modulo <code>3r</code> is exactly the CRT union of these two fibres.</p>
+<hr>
+<h2>3. All three natural targets lie in the negative parity fibre</h2>
+<p>The exact two-target theorem uses</p>
+<div class="math" role="math">\tau_I=-p^{-1}, \qquad \tau_{II}=-1,</div>
+<p>and inversion symmetry adds</p>
+<div class="math" role="math">\tau_I^{-1}=-p.</div>
+<p>Since <code>p≡1 mod3</code>, all three satisfy</p>
+<div class="math" role="math">\boxed{ -p^{-1}\equiv-p\equiv-1\equiv-1\pmod3.}</div>
+<p>Therefore target membership modulo <code>3r</code> reduces exactly to the negative parity fibre modulo <code>r</code>:</p>
+<div class="math" role="math">\boxed{ -p^{-1}\in\mathcal R_{3r}(C) \iff -p^{-1}\pmod r\in\mathcal R_r^{-}(C),}</div>
+<div class="math" role="math">\boxed{ -1\in\mathcal R_{3r}(C) \iff -1\pmod r\in\mathcal R_r^{-}(C).}</div>
+<p>By inversion symmetry the same holds for <code>-p</code>.</p>
+<h3>Theorem — exact composite-successor fibre criterion</h3>
+<p>The shift <code>k=3r</code> produces an Erdős--Straus certificate if and only if</p>
+<div class="math" role="math">\boxed{ \mathcal R_r^{-}(C) \cap \{-p^{-1},-1\} \ne\varnothing, \qquad C=\frac{p+3r}{4}.}</div>
+<p>Thus the composite modulus introduces only <strong>one binary parity constraint</strong> beyond a prime-modulus signed divisor problem.</p>
+<hr>
+<h2>4. The empty-fibre obstruction is exactly Eisenstein splitting</h2>
+<p>The negative fibre is empty precisely when no signed exponent vector has odd mod-<code>3</code> parity.</p>
+<p>If every prime factor of <code>C</code> is <code>1 mod 3</code>, then every <code>epsilon_i=+1</code>, so</p>
+<div class="math" role="math">\boxed{\mathcal R_r^{-}(C)=\varnothing.}</div>
+<p>Conversely, if some prime factor</p>
+<div class="math" role="math">s\mid C</div>
+<p>satisfies</p>
+<div class="math" role="math">s\equiv2\pmod3,</div>
+<p>then choosing exponent <code>z_s=1</code> and all other exponents zero gives a negative-parity element. Hence</p>
+<div class="math" role="math">\boxed{ \mathcal R_r^{-}(C)=\varnothing \iff \text{every prime factor of }C\text{ is }1\pmod3.}</div>
+<p>So the first obstruction at the composite successor is exactly another simultaneous-splitting condition in the Eisenstein direction already visible in <code>FAB-HARD-FIRST-FILTERS.md</code>.</p>
+<hr>
+<h2>5. Target character positions modulo r</h2>
+<p>Because both <code>p</code> and <code>r</code> are <code>1 mod 4</code>, quadratic reciprocity gives</p>
+<div class="math" role="math">\left(\frac pr\right) = \left(\frac rp\right) =-1.</div>
+<p>Also</p>
+<div class="math" role="math">\left(\frac{-1}{r}\right)=+1.</div>
+<p>Therefore, modulo <code>r</code>,</p>
+<div class="math" role="math">\boxed{ \left(\frac{-p^{-1}}r\right)=-1, \qquad \left(\frac{-p}r\right)=-1, \qquad \left(\frac{-1}r\right)=+1.}</div>
+<p>So the two Type-I orientations and Type II still occupy opposite quadratic sides, but the roles are reversed from the <code>q≡3 mod4</code> prime-shift case.</p>
+<hr>
+<h2>6. Odd stabilizer index still cannot support failure</h2>
+<p>Let</p>
+<div class="math" role="math">\widetilde G=(\mathbb Z/3r\mathbb Z)^\times</div>
+<p>and let</p>
+<div class="math" role="math">H=\operatorname{Stab}(\mathcal R_{3r}(C)).</div>
+<p>If</p>
+<div class="math" role="math">[\widetilde G:H]</div>
+<p>is odd, then the quotient <code>\widetilde G/H</code> has odd order. Every element of order two in <code>\widetilde G</code> must therefore map to the identity.</p>
+<p>In particular the element <code>-1 mod 3r</code> lies in <code>H</code>.</p>
+<p>Since the signed box contains <code>1</code> and is <code>H</code>-periodic,</p>
+<div class="math" role="math">H\subseteq\mathcal R_{3r}(C).</div>
+<p>Hence</p>
+<div class="math" role="math">-1\in\mathcal R_{3r}(C),</div>
+<p>which is a Type-II hit.</p>
+<p>Therefore:</p>
+<div class="math" role="math">\boxed{ \text{combined failure at }3r \Longrightarrow [\widetilde G:H]\text{ is even}.}</div>
+<p>The odd-index collapse is not a prime-modulus accident.</p>
+<hr>
+<h2>7. Exact index-two classification</h2>
+<p>Assume now</p>
+<div class="math" role="math">\boxed{[\widetilde G:H]=2}</div>
+<p>and that both exact targets are missed.</p>
+<p>Because</p>
+<div class="math" role="math">\widetilde G \cong C_2\times(\mathbb Z/r\mathbb Z)^\times</div>
+<p>with the second factor cyclic of even order, there are exactly three nontrivial quadratic characters on <code>\widetilde G</code>:</p>
+<ol><li>the mod-<code>3</code> parity character <code>epsilon</code>;</li><li>the Legendre character <code>eta=(\cdot/r)</code>;</li><li>their product <code>epsilon eta</code>.</li></ol>
+<p>Thus the three index-two subgroups are the kernels of these characters.</p>
+<p>The target signatures are</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|ccc} &amp; \epsilon &amp; \eta &amp; \epsilon\eta\\ \hline -p^{-1} &amp; -1 &amp; -1 &amp; +1\\ -p      &amp; -1 &amp; -1 &amp; +1\\ -1      &amp; -1 &amp; +1 &amp; -1 \end{array}}</div>
+<p>because <code>p≡1 mod3</code>, <code>(p/r)=-1</code>, and <code>(-1/r)=+1</code>.</p>
+<h3>Case 1: H = ker eta</h3>
+<p>Then <code>-1</code> has <code>eta=+1</code>, so</p>
+<div class="math" role="math">-1\in H\subseteq\mathcal R_{3r}(C),</div>
+<p>a Type-II hit. Impossible.</p>
+<h3>Case 2: H = ker(epsilon eta)</h3>
+<p>Then <code>-p^{-1}</code> has <code>epsilon eta=+1</code>, so</p>
+<div class="math" role="math">-p^{-1}\in H\subseteq\mathcal R_{3r}(C),</div>
+<p>a Type-I hit. Impossible.</p>
+<h3>Case 3: H = ker epsilon</h3>
+<p>This is the only index-two subgroup that contains neither solution target.</p>
+<p>But if any prime factor <code>s|C</code> satisfies</p>
+<div class="math" role="math">s\equiv2\pmod3,</div>
+<p>then the signed box contains the element represented by exponent <code>z_s=1</code>, which lies outside <code>H=ker epsilon</code>.</p>
+<p>Since the box is <code>H</code>-periodic, contains <code>H</code>, and <code>H</code> has index two, one element outside <code>H</code> forces</p>
+<div class="math" role="math">\mathcal R_{3r}(C)=\widetilde G,</div>
+<p>contradicting target failure.</p>
+<p>Therefore every prime factor of <code>C</code> must be <code>1 mod3</code>.</p>
+<h3>Theorem — index-two successor defect is pure Eisenstein splitting</h3>
+<p>If the composite successor shift <code>k=3r</code> misses both exact targets and its signed box has stabilizer index two, then necessarily</p>
+<div class="math" role="math">\boxed{ H=\ker\epsilon }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \text{every prime factor of } \frac{p+3r}{4} \text{ is }1\pmod3.}</div>
+<p>Equivalently, the entire negative parity fibre is empty.</p>
+<p>Thus <strong>every non-Eisenstein-split composite successor automatically eliminates the index-two defect</strong>.</p>
+<hr>
+<h2>8. New successor dichotomy</h2>
+<p>For a forced external-nonresidue successor <code>r≡1 mod4</code>, the natural admissible shift <code>3r</code> therefore has a clean first dichotomy:</p>
+<h3>Split obstruction</h3>
+<p>If</p>
+<div class="math" role="math">\frac{p+3r}{4}</div>
+<p>is composed entirely of primes <code>1 mod3</code>, then the negative target fibre is empty and the shift cannot solve <code>p</code>.</p>
+<h3>Non-split regime</h3>
+<p>If the shifted integer has even one prime factor <code>2 mod3</code>, then the negative fibre is nonempty and <strong>stabilizer index two is impossible</strong>. Any combined failure must move to a finer even quotient.</p>
+<p>This is the composite analogue of the earlier prime-shift Kneser collapse.</p>
+<hr>
+<h2>9. Next theorem target</h2>
+<p>The forced-successor problem has now split into two precise cases:</p>
+<ol><li>eliminate or descend through the Eisenstein-split condition</li></ol>
+<div class="math" role="math">\operatorname{supp}\left(\frac{p+3r}{4}\right)\subseteq\{\ell:\ell\equiv1\pmod3\};</div>
+<ol><li>in the non-split case, classify the first possible even stabilizer defect above index two inside</li></ol>
+<div class="math" role="math">(\mathbb Z/3r\mathbb Z)^\times,</div>
+<p>using the same three-target symmetry and Kneser expansion.</p>
+<p>The important reduction is that a <code>1 mod4</code> successor no longer requires a general composite-modulus search. It is a <strong>prime-r divisor-placement problem with one parity bit</strong>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

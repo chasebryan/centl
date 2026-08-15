@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Prime-modulus backbone of the Type A/B depth spectrum — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-modulus-backbone.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-modulus-backbone.html">
+  <meta property="og:title" content="Prime-modulus backbone of the Type A/B depth spectrum — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Prime-modulus backbone of the Type A/B depth spectrum</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-MODULUS-BACKBONE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> theorem note</p>
+<p><strong>Date:</strong> 2026-08-14</p>
+<p><strong>Claim boundary:</strong> this note applies classical CRT, Dirichlet&#x27;s theorem on primes in arithmetic progressions, and the Type A/B congruence characterization. It does not claim the Erdős-Straus conjecture is solved, and it does not make a literature-priority claim without a separate prior-art review.</p>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">m_k=4k-1, \qquad T_k=\{-e,-4e\pmod{m_k}:e\mid k\},</div>
+<p>and for a prime <code>p</code> define</p>
+<div class="math" role="math">C_{AB}(p)=\min\{k\ge1:p\bmod m_k\in T_k\},</div>
+<p>with <code>C_AB(p)=infinity</code> if no such <code>k</code> exists.</p>
+<p>The elementary control lemma used below is</p>
+<div class="math" role="math">1\notin T_j\qquad\text{for every }j\ge1.</div>
+<h2>2. Prime-modulus exact-depth theorem</h2>
+<h3>Theorem</h3>
+<p>Let <code>k</code> be such that</p>
+<div class="math" role="math">q=4k-1</div>
+<p>is a prime greater than <code>7</code>. Then there exist infinitely many primes <code>p</code> satisfying</p>
+<div class="math" role="math">\boxed{C_{AB}(p)=k}.</div>
+<p>Moreover all of these primes may be chosen in the Mordell hard class</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840}}.</div>
+<h3>Proof</h3>
+<p>Define</p>
+<div class="math" role="math">L_{k-1}=\operatorname{lcm}\bigl(840,\{4j-1:1\le j&lt;k\}\bigr).</div>
+<p>Because <code>q=4k-1</code> is prime and</p>
+<div class="math" role="math">q&gt;4j-1</div>
+<p>for every <code>j&lt;k</code>, the prime <code>q</code> divides none of the earlier moduli <code>4j-1</code>. Since <code>q&gt;7</code>, it also divides neither <code>840</code>. Therefore</p>
+<div class="math" role="math">\gcd(q,L_{k-1})=1.</div>
+<p>By CRT there is a unique residue class <code>a mod qL_{k-1}</code> satisfying</p>
+<div class="math" role="math">a\equiv1\pmod{L_{k-1}}, \qquad a\equiv-1\pmod q.</div>
+<p>This residue is reduced:</p>
+<div class="math" role="math">\gcd(a,qL_{k-1})=1,</div>
+<p>because it is <code>1</code> modulo every prime divisor of <code>L_{k-1}</code> and <code>-1</code> modulo <code>q</code>.</p>
+<p>Dirichlet&#x27;s theorem now gives infinitely many primes</p>
+<div class="math" role="math">p\equiv a\pmod{qL_{k-1}}.</div>
+<p>For every earlier layer <code>j&lt;k</code>,</p>
+<div class="math" role="math">p\equiv1\pmod{4j-1}.</div>
+<p>Since <code>1</code> is never a Type A/B trap residue,</p>
+<div class="math" role="math">p\bmod(4j-1)\notin T_j.</div>
+<p>At the target layer,</p>
+<div class="math" role="math">p\equiv-1\pmod{4k-1}.</div>
+<p>Because <code>1|k</code>, the residue <code>-1</code> belongs to <code>T_k</code>. Therefore the first Type A/B hit is exactly <code>k</code>:</p>
+<div class="math" role="math">\boxed{C_{AB}(p)=k}.</div>
+<p>Finally, <code>840|L_{k-1}</code>, so all these primes satisfy <code>p=1 mod 840</code>. QED.</p>
+<h2>3. Consequence: finite C_AB values are unbounded</h2>
+<p>There are infinitely many primes</p>
+<div class="math" role="math">q\equiv3\pmod4.</div>
+<p>Every such prime <code>q&gt;7</code> can be written uniquely as</p>
+<div class="math" role="math">q=4k-1</div>
+<p>with</p>
+<div class="math" role="math">k=\frac{q+1}{4}.</div>
+<p>Applying the theorem to each such <code>k</code> produces infinitely many distinct exact finite values of <code>C_AB</code>.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{C_{AB}(p)\text{ is unbounded even when restricted to finite values.}}</div>
+<p>This is stronger than the earlier observation that, for every <code>K</code>, infinitely many primes can be forced to have <code>C_AB(p)&gt;K</code> or <code>C_AB(p)=infinity</code>. The prime-modulus construction exhibits arbitrarily large layers that are definitely reached, and reached by infinitely many primes.</p>
+<h2>4. Prime-modulus backbone</h2>
+<p>Let <code>D_H</code> denote the hard-class minimal-depth spectrum:</p>
+<div class="math" role="math">\mathcal D_H = \{k:\text{infinitely many primes }p\equiv h\pmod{840},\ h\in H,\ C_{AB}(p)=k\}.</div>
+<p>Define</p>
+<div class="math" role="math">\mathcal B = \left\{\frac{q+1}{4}:q&gt;7\text{ prime},\ q\equiv3\pmod4\right\}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{\mathcal B\subseteq\mathcal D_H.}</div>
+<p>In fact every depth in <code>B</code> is realized infinitely often already inside the single hard class <code>1 mod 840</code>.</p>
+<p>We call <code>B</code> the <strong>prime-modulus backbone</strong> of the Type A/B minimal-depth spectrum.</p>
+<h2>5. Quantitative lower bound for the spectrum</h2>
+<p>The prime number theorem for arithmetic progressions gives</p>
+<div class="math" role="math">\pi(x;4,3)\sim\frac12\operatorname{Li}(x).</div>
+<p>Therefore the number of prime-modulus backbone depths up to <code>K</code> satisfies</p>
+<div class="math" role="math">|\mathcal B\cap[1,K]| = \pi(4K-1;4,3)+O(1) \sim \frac{2K}{\log(4K)}.</div>
+<p>Consequently</p>
+<div class="math" role="math">\boxed{
+<p>|\mathcal D_H\cap[1,K]| \ge (1+o(1))\frac{2K}{\log(4K)}. }&lt;/div&gt;</p>
+<p>This is only a lower bound. Composite target moduli <code>4k-1</code> contribute many additional realized depths in the computational spectrum.</p>
+<h2>6. Explicit Type B family on every backbone depth</h2>
+<p>The target residue in the proof is</p>
+<div class="math" role="math">p\equiv-1\pmod{4k-1}.</div>
+<p>This is a Type B congruence with</p>
+<div class="math" role="math">d=k, \qquad n=1.</div>
+<p>Write</p>
+<div class="math" role="math">p=(4k-1)t-1.</div>
+<p>Then the standard Type B construction gives</p>
+<div class="math" role="math">x=kt, \qquad y=ktp, \qquad z=kp.</div>
+<p>Indeed,</p>
+<div class="math" role="math">\frac1{kt}+\frac1{ktp}+\frac1{kp} = \frac{p+1+t}{ktp} = \frac{(4k-1)t+t}{ktp} = \frac4p.</div>
+<p>Thus every prime produced by the theorem comes with an explicit exact Erdős-Straus decomposition.</p>
+<h2>7. Why this matters for the shadow program</h2>
+<p>The prime-modulus backbone gives an infinite family of layers that cannot be structural gaps.</p>
+<p>For these <code>k</code>, the earlier shadow closure is guaranteed to have an uncovered reduced class. Therefore any proposed global theory of the shadow graph must contain an infinite irreducible backbone indexed by primes <code>4k-1</code>.</p>
+<p>This creates a sharper theorem target:</p>
+<ul><li>understand the guaranteed prime-modulus backbone;</li><li>characterize which composite <code>4k-1</code> layers join it;</li><li>characterize which composite layers are structural gaps because of admissibility or shadow closure;</li><li>study the arrival function on both the backbone and the additional composite-modulus spectrum.</li></ul>
+<p>The hard-class minimal-depth spectrum is therefore provably infinite before any conjectural Type A/B coverage assumption is used.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

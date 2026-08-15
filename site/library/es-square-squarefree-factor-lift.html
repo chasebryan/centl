@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Squarefree factor-lift shadows and an infinite quotient-nine family — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-squarefree-factor-lift.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-squarefree-factor-lift.html">
+  <meta property="og:title" content="Squarefree factor-lift shadows and an infinite quotient-nine family — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Squarefree factor-lift shadows and an infinite quotient-nine family</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact sufficient theorem and infinite nonmultiplicative shadow family</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-TRAP-SIGNED-BOX-IDENTITY.md</code>, <code>ES-SQUARE-MULTIPLICATIVE-SHADOW-IFF.md</code>, <code>THEORY.md</code></p>
+<p><strong>Imported classical tool:</strong> Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> gives a broad sufficient mechanism for completed shadows when the later layer index is squarefree, including an infinite family not covered by multiplicative ancestry. It does not classify all nonmultiplicative ancestry edges or prove universal completed coverage.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Fix an ancestry edge</p>
+<div class="math" role="math">\boxed{1\le j&lt;k, \qquad m_j=4j-1\mid m_k=4k-1.}</div>
+<p>Let</p>
+<div class="math" role="math">R_t=\mathcal R_{m_j}(t)</div>
+<p>denote the centered signed divisor box of an integer <code>t</code>, reduced modulo the <strong>ancestor modulus</strong> <code>m_j</code>.</p>
+<p>The completed trap reduction is</p>
+<div class="math" role="math">S_k\bmod m_j=-R_k, \qquad S_j=-R_j.</div>
+<p>Assume the later index is squarefree:</p>
+<div class="math" role="math">\boxed{k=r_1r_2\cdots r_t}</div>
+<p>with distinct primes <code>r_i</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\boxed{ R_k = \prod_{i=1}^t \{r_i^{-1},1,r_i\}.}</div>
+<hr>
+<h2>2. Factor-lift hypothesis</h2>
+<p>Suppose the earlier index admits a factorization</p>
+<div class="math" role="math">\boxed{j=A_1A_2\cdots A_t}</div>
+<p>into positive integers, not necessarily coprime, such that after a permutation of the factors,</p>
+<div class="math" role="math">\boxed{r_i\equiv A_i\pmod{m_j}}</div>
+<p>for every <code>i</code>.</p>
+<p>Then</p>
+<div class="math" role="math">\{r_i^{-1},1,r_i\} = \{A_i^{-1},1,A_i\} \pmod{m_j}.</div>
+<p>But the signed divisor box of <code>A_i</code> always contains its two extreme points and the center:</p>
+<div class="math" role="math">\boxed{ \{A_i^{-1},1,A_i\} \subseteq \mathcal R_{m_j}(A_i).}</div>
+<p>Therefore</p>
+<div class="math" role="math">R_k \subseteq \prod_i\mathcal R_{m_j}(A_i).</div>
+<p>Signed exponent intervals add under multiplication of integers, so</p>
+<div class="math" role="math">\prod_i\mathcal R_{m_j}(A_i) = \mathcal R_{m_j}\left(\prod_iA_i\right) = R_j.</div>
+<p>Hence:</p>
+<h3>Theorem — squarefree factor-lift shadow</h3>
+<p>If</p>
+<div class="math" role="math">\boxed{ k=\prod_i r_i\text{ is squarefree}, \qquad j=\prod_i A_i, \qquad r_i\equiv A_i\pmod{4j-1},}</div>
+<p>and <code>m_j|m_k</code>, then</p>
+<div class="math" role="math">\boxed{ S_k\bmod(4j-1) \subseteq S_j.}</div>
+<p>Thus the entire later completed layer is directly shadowed by <code>j</code>.</p>
+<hr>
+<h2>3. Prime-index theorem as the one-factor case</h2>
+<p>If <code>k</code> is prime, take</p>
+<div class="math" role="math">t=1, \qquad A_1=j.</div>
+<p>Ancestry gives</p>
+<div class="math" role="math">k\equiv j\pmod{m_j}.</div>
+<p>Therefore the factor-lift theorem gives</p>
+<div class="math" role="math">S_k\bmod m_j\subseteq S_j.</div>
+<p>This recovers the direct-shadow half of <code>ES-SQUARE-PRIME-INDEX-SPECTRUM.md</code>.</p>
+<p>So prime-index absorption is the rank-one case of a more general factor-lifting principle.</p>
+<hr>
+<h2>4. Quotient-nine ancestry</h2>
+<p>Now specialize to ancestry quotient</p>
+<div class="math" role="math">\boxed{\frac{m_k}{m_j}=9.}</div>
+<p>The standard ancestry formula is</p>
+<div class="math" role="math">\boxed{k=9j-2.}</div>
+<p>Suppose <code>j</code> is even and write</p>
+<div class="math" role="math">\boxed{j=2h.}</div>
+<p>Then</p>
+<div class="math" role="math">k=18h-2=2(9h-1).</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{r=9h-1.}</div>
+<p>If <code>r</code> is prime, then</p>
+<div class="math" role="math">\boxed{k=2r}</div>
+<p>is squarefree except for the impossible case <code>r=2</code>, which does not occur here.</p>
+<p>Modulo</p>
+<div class="math" role="math">m_j=8h-1,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{2\equiv2}</div>
+<p>and</p>
+<div class="math" role="math">r=9h-1 \equiv h =\frac j2 \pmod{m_j}.</div>
+<p>The earlier index factorization is</p>
+<div class="math" role="math">\boxed{j=2\cdot\frac j2.}</div>
+<p>Thus the two prime factors of <code>k</code> lift exactly to the two factors of <code>j</code>.</p>
+<p>The factor-lift theorem applies and gives</p>
+<div class="math" role="math">\boxed{ S_{2r}\bmod(4j-1) \subseteq S_j.}</div>
+<hr>
+<h2>5. Parameterization by primes r = 8 mod 9</h2>
+<p>The relation</p>
+<div class="math" role="math">r=9h-1</div>
+<p>is equivalent to</p>
+<div class="math" role="math">\boxed{r\equiv8\pmod9.}</div>
+<p>Conversely, let <code>r</code> be any prime in that residue class and define</p>
+<div class="math" role="math">\boxed{ h=\frac{r+1}{9}, \qquad j=2h=\frac{2(r+1)}9, \qquad k=2r.}</div>
+<p>Then</p>
+<div class="math" role="math">4j-1 = \frac{8(r+1)}9-1 = \frac{8r-1}{9},</div>
+<p>while</p>
+<div class="math" role="math">4k-1=8r-1.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ 4k-1=9(4j-1).}</div>
+<p>So this is an exact quotient-nine ancestry edge.</p>
+<p>And the factor congruences are precisely</p>
+<div class="math" role="math">2\equiv2, \qquad r\equiv\frac j2 \pmod{4j-1}.</div>
+<p>Hence:</p>
+<h3>Theorem — quotient-nine semiprime shadow family</h3>
+<p>For every prime</p>
+<div class="math" role="math">\boxed{r\equiv8\pmod9,}</div>
+<p>the layer</p>
+<div class="math" role="math">\boxed{k=2r}</div>
+<p>is completely directly shadowed by</p>
+<div class="math" role="math">\boxed{j=\frac{2(r+1)}9.}</div>
+<p>The moduli satisfy</p>
+<div class="math" role="math">\boxed{m_k=9m_j.}</div>
+<p>Thus <code>2r</code> is impossible as a square-completed minimal depth.</p>
+<hr>
+<h2>6. Infinite family</h2>
+<p>Because</p>
+<div class="math" role="math">\gcd(8,9)=1,</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many primes</p>
+<div class="math" role="math">\boxed{r\equiv8\pmod9.}</div>
+<p>Therefore the quotient-nine theorem supplies infinitely many squarefree semiprime structural gaps</p>
+<div class="math" role="math">\boxed{k=2r.}</div>
+<p>This family is genuinely nonmultiplicative:</p>
+<div class="math" role="math">j\nmid k</div>
+<p>for all but trivial impossible coincidences.</p>
+<p>So it lies outside the exact multiplicative-extension classification of <code>ES-SQUARE-MULTIPLICATIVE-SHADOW-IFF.md</code>.</p>
+<hr>
+<h2>7. Examples</h2>
+<h3>r = 17</h3>
+<div class="math" role="math">r\equiv8\pmod9, \qquad j=4, \qquad k=34.</div>
+<p>Then</p>
+<div class="math" role="math">m_j=15, \qquad m_k=135=9\cdot15,</div>
+<p>and</p>
+<div class="math" role="math">S_{34}\bmod15\subseteq S_4.</div>
+<h3>r = 53</h3>
+<div class="math" role="math">j=12, \qquad k=106,</div>
+<p>with</p>
+<div class="math" role="math">423=9\cdot47.</div>
+<p>Thus</p>
+<div class="math" role="math">S_{106}\bmod47\subseteq S_{12}.</div>
+<h3>r = 71</h3>
+<div class="math" role="math">j=16, \qquad k=142,</div>
+<p>and</p>
+<div class="math" role="math">567=9\cdot63.</div>
+<p>Again the later completed layer is directly redundant.</p>
+<hr>
+<h2>8. Why factor lifting is different from stabilizer extension</h2>
+<p>The multiplicative-extension theorem treats</p>
+<div class="math" role="math">k=jB</div>
+<p>and explains shadowing through the stabilizer of the ancestor box.</p>
+<p>The present theorem treats a different mechanism:</p>
+<ul><li><code>j</code> need not divide <code>k</code>;</li><li>the <strong>prime factors of the later index</strong> project to whole multiplicative factors of the earlier index;</li><li>each three-point prime direction of the later box embeds into the larger signed box of its lifted ancestor factor.</li></ul>
+<p>Thus there are now two exact cross-layer mechanisms:</p>
+<div class="math" role="math">\boxed{ \begin{array}{ll} \text{stabilizer extension}:&amp; \text{new directions are invisible},\\[1mm] \text{factor lift}:&amp; \text{new prime directions become existing ancestor factors}. \end{array}}</div>
+<p>The quotient-nine family proves that nonmultiplicative completed ancestry has infinite exact structure rather than being only sporadic finite overlap.</p>
+<hr>
+<h2>9. Next target</h2>
+<p>The natural generalization is to ancestry quotient</p>
+<div class="math" role="math">Q=4s+1</div>
+<p>with</p>
+<div class="math" role="math">k=Qj-s.</div>
+<p>Search for factorizations of <code>k</code> into few prime factors whose residues modulo <code>m_j</code> lift a factorization of <code>j</code>.</p>
+<p>The first targets are:</p>
+<ol><li>other fixed quotients <code>Q=13,17,21,...</code>;</li><li>two-prime later indices <code>k=uv</code>;</li><li>systematic CRT/Dirichlet constructions producing infinite factor-lift families.</li></ol>
+<p>A successful classification would turn the remaining nonmultiplicative ancestry graph into a finite collection of factor-lift templates rather than a raw residue-containment problem.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Infinite squarefree factor-lift families at every ancestry quotient — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-square-all-quotient-factor-lift.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-square-all-quotient-factor-lift.html">
+  <meta property="og:title" content="Infinite squarefree factor-lift families at every ancestry quotient — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Infinite squarefree factor-lift families at every ancestry quotient</h1><p>Ancestry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Ancestry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Ancestry</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-SQUARE-ALL-QUOTIENT-FACTOR-LIFT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved infinite exact construction</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code>, <code>THEORY.md</code></p>
+<p><strong>Imported classical tool:</strong> Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> constructs infinite exact completed-shadow families for every allowed modulus-ancestry quotient. It does not classify all shadows at a fixed quotient or prove universal completed coverage.</p>
+<hr>
+<h2>1. Allowed ancestry quotients</h2>
+<p>Every modulus-ancestry quotient between layers has the form</p>
+<div class="math" role="math">\boxed{Q=4s+1}</div>
+<p>with</p>
+<div class="math" role="math">\boxed{s\ge1.}</div>
+<p>The corresponding ancestry relation is</p>
+<div class="math" role="math">\boxed{k=Qj-s}</div>
+<p>or equivalently</p>
+<div class="math" role="math">\boxed{k=j+s(4j-1).}</div>
+<p>We now construct infinitely many exact squarefree factor-lift shadows for <strong>every</strong> such <code>Q</code>.</p>
+<hr>
+<h2>2. Choose a squarefree divisor of the ancestry parameter</h2>
+<p>Fix</p>
+<div class="math" role="math">\boxed{Q=4s+1.}</div>
+<p>Choose any squarefree positive divisor</p>
+<div class="math" role="math">\boxed{A\mid s.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{t=s/A.}</div>
+<p>Because</p>
+<div class="math" role="math">Q=4s+1,</div>
+<p>we have</p>
+<div class="math" role="math">\boxed{\gcd(t,Q)=1.}</div>
+<p>Indeed every common divisor of <code>t|s</code> and <code>4s+1</code> divides <code>1</code>.</p>
+<hr>
+<h2>3. Choose the lifted prime</h2>
+<p>Let <code>r</code> be a prime satisfying</p>
+<div class="math" role="math">\boxed{r\equiv-t\pmod Q.}</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{B=\frac{r+t}{Q}}</div>
+<p>is a positive integer.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{j=AB}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{k=Ar.}</div>
+<p>For all sufficiently large choices of <code>r</code>, one may also assume</p>
+<div class="math" role="math">\gcd(r,A)=1,</div>
+<p>so <code>k</code> is squarefree because <code>A</code> was chosen squarefree.</p>
+<hr>
+<h2>4. Exact ancestry identity</h2>
+<p>Using</p>
+<div class="math" role="math">r=QB-t,</div>
+<p>we obtain</p>
+<div class="math" role="math">\begin{aligned} k &amp;=Ar\\ &amp;=A(QB-t)\\ &amp;=QAB-At\\ &amp;=Qj-s. \end{aligned}</div>
+<p>Thus <code>j,k</code> satisfy the exact ancestry relation.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{4k-1=Q(4j-1).}</div>
+<p>So the modulus quotient is exactly the prescribed value <code>Q</code>.</p>
+<hr>
+<h2>5. The new prime lifts the missing ancestor factor</h2>
+<p>Let</p>
+<div class="math" role="math">m=4j-1.</div>
+<p>Since</p>
+<div class="math" role="math">j=AB,</div>
+<p>we have</p>
+<div class="math" role="math">m=4AB-1.</div>
+<p>Now</p>
+<div class="math" role="math">\begin{aligned} r-B &amp;=QB-t-B\\ &amp;=(Q-1)B-t\\ &amp;=4sB-t\\ &amp;=4AtB-t\\ &amp;=t(4AB-1)\\ &amp;=tm. \end{aligned}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{r\equiv B\pmod m.}</div>
+<p>This is the exact factor-lift congruence.</p>
+<hr>
+<h2>6. Factorization match</h2>
+<p>Write the squarefree divisor <code>A</code> as</p>
+<div class="math" role="math">\boxed{A=p_1p_2\cdots p_h}</div>
+<p>with distinct primes <code>p_i</code>.</p>
+<p>Then the later squarefree index is</p>
+<div class="math" role="math">\boxed{k=p_1p_2\cdots p_h r.}</div>
+<p>The earlier index has the factorization</p>
+<div class="math" role="math">\boxed{j=p_1p_2\cdots p_h B.}</div>
+<p>Modulo <code>m</code>:</p>
+<ul><li>each shared prime factor <code>p_i</code> maps to itself;</li><li>the new prime <code>r</code> maps to the remaining ancestor factor <code>B</code>.</li></ul>
+<p>Thus the prime factors of <code>k</code> lift a complete factorization of <code>j</code>.</p>
+<p><code>ES-SQUARE-SQUAREFREE-FACTOR-LIFT.md</code> applies and gives</p>
+<div class="math" role="math">\boxed{ S_k\bmod m \subseteq S_j.}</div>
+<p>Therefore <code>k</code> is structurally impossible as a completed minimal depth.</p>
+<hr>
+<h2>7. Infinite family by Dirichlet</h2>
+<p>The target prime residue class is</p>
+<div class="math" role="math">\boxed{-t\pmod Q.}</div>
+<p>Because</p>
+<div class="math" role="math">\gcd(t,Q)=1,</div>
+<p>this is a reduced class.</p>
+<p>Dirichlet&#x27;s theorem therefore supplies infinitely many primes</p>
+<div class="math" role="math">\boxed{r\equiv-t\pmod Q.}</div>
+<p>Discarding finitely many primes that divide <code>A</code>, infinitely many remain with</p>
+<div class="math" role="math">\gcd(r,A)=1.</div>
+<p>Hence:</p>
+<h3>Theorem — all-quotient factor-lift family</h3>
+<p>For every ancestry quotient</p>
+<div class="math" role="math">\boxed{Q=4s+1}</div>
+<p>and every squarefree divisor</p>
+<div class="math" role="math">\boxed{A\mid s,}</div>
+<p>there exist infinitely many ancestry pairs <code>j&lt;k</code> satisfying</p>
+<div class="math" role="math">\boxed{4k-1=Q(4j-1)}</div>
+<p>for which the later index <code>k</code> is squarefree and</p>
+<div class="math" role="math">\boxed{S_k\bmod(4j-1)\subseteq S_j.}</div>
+<p>Thus <strong>every allowed ancestry quotient supports infinitely many exact completed structural gaps</strong>.</p>
+<hr>
+<h2>8. Quotient nine recovered</h2>
+<p>Take</p>
+<div class="math" role="math">Q=9, \qquad s=2.</div>
+<p>Choose</p>
+<div class="math" role="math">A=2, \qquad t=1.</div>
+<p>Then</p>
+<div class="math" role="math">r\equiv-1\equiv8\pmod9,</div>
+<div class="math" role="math">B=\frac{r+1}{9},</div>
+<div class="math" role="math">j=2B=\frac{2(r+1)}9,</div>
+<p>and</p>
+<div class="math" role="math">k=2r.</div>
+<p>This is exactly the quotient-nine semiprime family already isolated.</p>
+<hr>
+<h2>9. Quotient thirteen</h2>
+<p>Take</p>
+<div class="math" role="math">Q=13, \qquad s=3, \qquad A=3, \qquad t=1.</div>
+<p>Every prime</p>
+<div class="math" role="math">\boxed{r\equiv12\pmod{13}}</div>
+<p>gives</p>
+<div class="math" role="math">B=\frac{r+1}{13}, \qquad j=3B, \qquad k=3r,</div>
+<p>with</p>
+<div class="math" role="math">\boxed{4k-1=13(4j-1)}</div>
+<p>and complete direct shadow by <code>j</code>.</p>
+<p>For example</p>
+<div class="math" role="math">r=103</div>
+<p>gives</p>
+<div class="math" role="math">\boxed{j=24, \qquad k=309.}</div>
+<hr>
+<h2>10. Multiple families at one quotient</h2>
+<p>When <code>s</code> has several squarefree divisors, one quotient supports several distinct factor-lift templates.</p>
+<p>For</p>
+<div class="math" role="math">Q=25, \qquad s=6,</div>
+<p>one may choose</p>
+<div class="math" role="math">A=2,\ 3,\ 6</div>
+<p>with corresponding</p>
+<div class="math" role="math">t=3,\ 2,\ 1.</div>
+<p>This yields prime progressions</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} A &amp; r\pmod{25}\\ \hline 2 &amp; 22\\ 3 &amp; 23\\ 6 &amp; 24 \end{array}}</div>
+<p>and three infinite shadow families at the same ancestry quotient.</p>
+<p>So the factorization of the ancestry parameter <code>s</code> controls the multiplicity of explicit shadow templates.</p>
+<hr>
+<h2>11. The rank-one case A = 1</h2>
+<p>The divisor</p>
+<div class="math" role="math">A=1</div>
+<p>is squarefree and always allowed.</p>
+<p>Then</p>
+<div class="math" role="math">t=s, \qquad j=B, \qquad k=r</div>
+<p>is prime.</p>
+<p>The construction reduces to the prime-index ancestry absorption theorem.</p>
+<p>Thus the all-quotient theorem continuously interpolates from:</p>
+<ul><li>rank-one prime target shadows (<code>A=1</code>);</li><li>semiprime target shadows (<code>A</code> prime);</li><li>higher squarefree target shadows (<code>omega(A)&gt;1</code>).</li></ul>
+<hr>
+<h2>12. Structural interpretation</h2>
+<p>For fixed quotient</p>
+<div class="math" role="math">Q=4s+1,</div>
+<p>the ancestry parameter <code>s</code> is not just an additive offset.</p>
+<p>Its squarefree divisors specify how much of the earlier layer factorization can be <strong>carried unchanged</strong> into the later index.</p>
+<p>The remaining ancestor factor <code>B</code> is then replaced by one new prime <code>r</code> in a Dirichlet progression chosen so that</p>
+<div class="math" role="math">r\equiv B\pmod{m_j}.</div>
+<p>Therefore the fixed-quotient shadow geometry has an explicit arithmetic template:</p>
+<div class="math" role="math">\boxed{ \text{shared squarefree factor} +\text{one lifted prime} \Longrightarrow \text{complete shadow}.}</div>
+<hr>
+<h2>13. Consequence for the nonmultiplicative frontier</h2>
+<p>The nonmultiplicative ancestry graph is not a collection of isolated coincidences.</p>
+<p>It contains infinite exact shadow families at <strong>every</strong> allowed quotient and often several independent families at the same quotient.</p>
+<p>The remaining classification problem is therefore:</p>
+<ol><li>determine which shadows are generated by these one-prime factor lifts;</li><li>allow several new primes lifting several factors of <code>j</code>;</li><li>characterize the residual ancestry edges not decomposable into stabilizer extensions or factor lifts.</li></ol>
+<p>A successful theorem would turn nonmultiplicative shadowing into a finite factorization-matching problem attached to <code>s=(Q-1)/4</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
