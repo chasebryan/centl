@@ -1,0 +1,59 @@
+name: CENTL Erdős-Straus square-lift counterexamples
+
+on:
+  workflow_dispatch:
+    inputs:
+      j_limit:
+        description: Base layers to certify nonuniversal
+        required: false
+        default: "5000"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/UNIVERSAL-SQUARE-LIFT-SHADOW-CLASSIFICATION.md'
+      - 'research/erdos-straus/square_lift_counterexample_analyzer.py'
+      - '.github/workflows/erdos-straus-square-lift-counterexamples.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Construct escaping square lifts for every nonuniversal base
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve parameters
+        id: p
+        env:
+          J: ${{ github.event.inputs.j_limit }}
+        run: echo "j=${J:-5000}" >> "$GITHUB_OUTPUT"
+
+      - name: Construct and verify counter-lift certificates
+        run: |
+          rm -rf square-lift-counterexample-output
+          python3 research/erdos-straus/square_lift_counterexample_analyzer.py \
+            --j-limit '${{ steps.p.outputs.j }}' \
+            --out square-lift-counterexample-output
+
+      - name: Freeze hashes
+        run: |
+          cd square-lift-counterexample-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat square-lift-counterexample-output/square-lift-counterexamples-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: square-lift-counterexamples-${{ github.sha }}
+          path: square-lift-counterexample-output/
+          if-no-files-found: error
+          retention-days: 90
