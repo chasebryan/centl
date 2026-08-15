@@ -5,7 +5,6 @@
 #include <iostream>
 #include <numeric>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -41,10 +40,10 @@ static bool direct_fab_hit(i64 n,int a,int b){
     for(i64 k:ds){
         if(k%4!=3) continue;
         i64 q=N/k;
-        i128 s=(i128)q*(n+k);
-        if(s%(4LL*b)!=0) continue;
-        i128 z=(i128)n*q*(n+k);
-        if(z%(4LL*a)!=0) continue;
+        i128 first=(i128)q*(n+k);
+        if(first%(4LL*b)!=0) continue;
+        i128 second=(i128)n*q*(n+k);
+        if(second%(4LL*a)!=0) continue;
         return true;
     }
     return false;
@@ -62,12 +61,13 @@ int main(int argc,char**argv){
         if(1LL*i*i<=bound)for(i64 j=1LL*i*i;j<=bound;j+=i)s[(size_t)j]=false;
     }
 
+    // Independent control flow: enumerate only coprime pairs, then test the
+    // original published fab divisibility conditions directly for every
+    // divisor k. No use is made of the one-congruence theorem here.
     std::vector<std::pair<int,int>> pairs;
-    for(int a=1;a<=CMAX;++a)for(int b=1;b<=CMAX;++b){
-        bool axis=(a==1||b==1);
-        bool plane=(std::gcd(a,b)==1 && ((a&1)!=(b&1)));
-        if(axis||plane)pairs.push_back({a,b});
-    }
+    for(int a=1;a<=CMAX;++a)for(int b=1;b<=CMAX;++b)
+        if(std::gcd(a,b)==1) pairs.push_back({a,b});
+
     std::sort(pairs.begin(),pairs.end(),[](auto x,auto y){
         int cx=std::max(x.first,x.second),cy=std::max(y.first,y.second);
         if(cx!=cy)return cx<cy;
@@ -91,7 +91,7 @@ int main(int argc,char**argv){
     }
 
     std::ofstream f(out);
-    f<<"{\n  \"status\": \"independent original-fab verification of simplified subsystem\",\n";
+    f<<"{\n  \"status\": \"independent original-fab verification of coprime plane\",\n";
     f<<"  \"limit\": "<<LIMIT<<",\n  \"parameter_bound\": "<<CMAX<<",\n";
     f<<"  \"hard_primes_checked\": "<<hard<<",\n  \"survivors\": "<<survivors<<",\n  \"survivor_examples\": [";
     for(size_t i=0;i<examples.size();++i){if(i)f<<", ";f<<examples[i];}
