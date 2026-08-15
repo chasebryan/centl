@@ -8,6 +8,8 @@ This directory operationalizes the research program recorded in `docs/wellspring
 
 **Moving frontier:** [`CURRENT-FRONTIER.md`](CURRENT-FRONTIER.md) is the shortest current-state record.
 
+**Shared-factor CN (2026-08-15):** [`CN-SHARED-THEOREM.md`](CN-SHARED-THEOREM.md) proves lift-room, the odd totient-ratio lemma, the C2-thin reduction to complementary `q=3`, and the `205 → 10` absorption theorem. Unrestricted C2-shared is false. Directly novel admissible complementary covers are zero through `k ≤ 1500`; the replayable certificate is [`CN-SHARED-CERTIFICATE-2026-08-15.md`](CN-SHARED-CERTIFICATE-2026-08-15.md).
+
 **Durable checkpoint:** [`RESEARCH-BACKUP-2026-08-14.md`](RESEARCH-BACKUP-2026-08-14.md) freezes independently verified workflow/artifact provenance so the research state is recoverable from the repository independently of chat or local scratch data.
 
 Core linked records:

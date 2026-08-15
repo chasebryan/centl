@@ -67,19 +67,20 @@ a_1 \in S_1,\quad a_2 \in S_2\quad\text{with}\quad a_1 \equiv a_2 \pmod d.
 
 CRT on `lcm(q₁,q₂)` then yields the reduced `s` as above.
 
-### Certificate
+### Certificate and correction
 
-Across all pairs `1 ≤ j₁ < j₂ ≤ 350` (and extended windows), standard `L ∈ {840,2520,5040,55440}`, and multiple `r`:
+Sampled-`r` scans over standard `L` really do return zero shared-factor failures. That is **not** a universal C2-shared theorem: complementary-aligned `r` produce explicit `q=3` covers (see `CN-SHARED-THEOREM.md`).
 
-- **0** instances with empty individual `S_i` (C1 holds);
-- **0** instances where `S₁,S₂` are nonempty but CRT-incompatible mod `d`;
-- **0** simultaneous-cover failures.
+The correct shared-factor statement is:
 
-Sample scale: > 150k coprime escapes, > 5k shared-factor escapes, **0 fails**.
+- **Lift-room** closes every pair with `φ(q_i)/φ(d) > |R_i|`.
+- The only thin obstruction is complementary `q=3`.
+- Unrestricted complementary covers exist.
+- On **directly novel** admissible candidates, layer `205` cannot take part (absorption by `j=10`), and the complete `k ≤ 1500` admissible scan found no other complementary family.
 
-### Why incompatibility is blocked
+### Why incompatibility is blocked on novel candidates
 
-Each `R_i` is a two-box pullback of size `≤ 2τ(j_i)`. The projection of `S_i = U_i \ R_i` onto `(Z/dZ)^×` remains large enough that the two projected safe sets always intersect. A full formal proof that two thin two-box pullbacks cannot erase complementary residue classes mod every `d | q_i` is the remaining hardening step for this regime — parallel to the C1 strip write-up.
+Each `R_i` is a two-box pullback of size `≤ 2τ(j_i)`. Lift-room plus the totient-ratio lemma reduce the rest to `q=3`. Complementary `q=3` covers that survive admissibility are ancestry children of a frozen `q=1` layer and are therefore directly shadowed, not Class-C residual.
 
 ---
 

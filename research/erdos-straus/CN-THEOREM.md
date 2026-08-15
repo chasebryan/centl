@@ -47,17 +47,18 @@ has a unique solution mod `Q = q_1···q_n` by the Chinese Remainder Theorem. M
 
 When the `q_i` share prime factors, compatibility conditions mod those primes are required.
 
-### Certificate C3
+### Certificate C3 / C4 (tight, admissible)
 
-All triples `1 ≤ j₁ < j₂ < j₃ ≤ 120` under standard `L,r`: **0** simultaneous-cover failures (`> 4·10^5` checks).
+See `CN-SHARED-THEOREM.md`. On the `73,814` admissible hard candidates through `k ≤ 1500`:
 
-### Certificate C4
+- tight `q ≤ 9` triples: `3,994,891` checks, **0** failures;
+- the only shared-pair failures are `21` complementary `q=3` covers in the `205` family, all directly shadowed by layer `10`.
 
-All quadruples in windows up to ~70: **0** failures (`> 2·10^5` checks).
+Sampled-`r` C3/C4 scans remain valid as samples. They are not a universal shared-factor theorem. Unrestricted complementary `q=3` covers exist.
 
 ### Obstruction pattern
 
-Each `R_i` is two-box-thin (`|R_i| ≤ 2τ(j_i)`). Projections of `S_i` onto shared prime-power factors remain large enough that the multi-CRT compatibility region is nonempty in every scanned case. A fully formal proof for arbitrary shared geometries is open; the thinness mechanism is the expected path.
+Lift-room peels every layer with `φ(q)/φ(d) > |R|`. The totient-ratio lemma makes this automatic whenever `d < q` and `|R| ≤ 1`. The residual tight cluster is 3-adic. Complementary covers there are either non-admissible or ancestry-absorbed (`205 → 10`). A fully formal proof that every `q=3` layer is an absorbed child of a `q=1` anchor is the remaining shared-CN path.
 
 ---
 
@@ -81,8 +82,9 @@ Any directly novel candidate whose active fixed-negative moduli are pairwise cop
 | C2-coprime | Closed |
 | C2-shared | Certified 0-fail |
 | CN-coprime (all n) | **Closed** |
-| C3/C4 shared | Certified 0-fail |
-| Arbitrary shared CN | Open (thinness path) |
+| C3/C4 shared | Tight admissible 0-fail; unrestricted C2-shared false |
+| 205-absorption | **Closed** (`CN-SHARED-THEOREM.md`) |
+| Arbitrary shared CN | Open (remaining `q=3` families) |
 | Universal DSC-P | Open |
 | López all primes | Open |
 | Erdős-Straus | Open |
