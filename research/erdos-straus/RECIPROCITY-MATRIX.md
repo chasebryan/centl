@@ -1,0 +1,401 @@
+# The Type A/B reciprocity matrix
+
+**Status:** proved structural theorem and active proof direction  
+**Date:** 2026-08-14  
+**Project:** Free Computation Foundation / CENTL  
+**Claim boundary:** this note does not prove QDSC, universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture. It packages the quadratic-signature structure of one Type A/B layer into a binary matrix with canonical left and right conservation laws.
+
+Read with:
+
+- [QUADRATIC-SIGNATURE-QUOTIENT.md](QUADRATIC-SIGNATURE-QUOTIENT.md)
+- [RECIPROCITY-DEFECT-QUOTIENT.md](RECIPROCITY-DEFECT-QUOTIENT.md)
+- [SQUARE-LIFT-SIGNATURE.md](SQUARE-LIFT-SIGNATURE.md)
+- [QUADRATIC-TRAP-SIGNATURE.md](QUADRATIC-TRAP-SIGNATURE.md)
+
+## 1. Matrix definition
+
+Fix a depth `k>=1` and write
+
+\[
+m=4k-1.
+\]
+
+Let the distinct prime factors of `m` be
+
+\[
+p_1,\ldots,p_r
+\]
+
+and the distinct prime factors of `k` be
+
+\[
+\ell_1,\ldots,\ell_s.
+\]
+
+Because `gcd(k,m)=1`, every Legendre symbol below is defined.
+
+Define the binary **Type A/B reciprocity matrix**
+
+\[
+\boxed{
+A_k=(a_{ij})\in M_{r\times s}(\mathbb F_2),
+}
+\]
+
+where
+
+\[
+\left(\frac{\ell_j}{p_i}\right)=(-1)^{a_{ij}}.
+\]
+
+Thus column `j` is exactly the local quadratic-signature vector
+
+\[
+\lambda_m(\ell_j).
+\]
+
+Consequently
+
+\[
+\boxed{
+\operatorname{col}(A_k)=V_k,
+}
+\]
+
+where `V_k` is the divisor-signature space from [QUADRATIC-SIGNATURE-QUOTIENT.md](QUADRATIC-SIGNATURE-QUOTIENT.md).
+
+In particular,
+
+\[
+\boxed{
+\kappa(k)=r-\operatorname{rank}(A_k).
+}
+\]
+
+So the quadratic quotient dimension is the left nullity of the reciprocity matrix.
+
+## 2. Canonical left null vector
+
+Factor
+
+\[
+m=\prod_{i=1}^r p_i^{\alpha_i}.
+\]
+
+Let
+
+\[
+\boxed{
+c_k=(\alpha_i\bmod2)_{i=1}^r\in\mathbb F_2^r.}
+\]
+
+This is the squarefree-kernel parity vector of `m`.
+
+Because `m=3 mod 4`, `m` is not a perfect square, so
+
+\[
+\boxed{c_k\ne0.}
+\]
+
+For every prime `ell_j|k`, the divisor-Jacobi theorem gives
+
+\[
+\left(\frac{\ell_j}{m}\right)=+1.
+\]
+
+Expanding the Jacobi symbol over the prime powers of `m` gives
+
+\[
+\prod_i
+\left(\frac{\ell_j}{p_i}\right)^{\alpha_i}=+1.
+\]
+
+In bit form,
+
+\[
+\sum_i(\alpha_i\bmod2)a_{ij}=0.
+\]
+
+Therefore
+
+\[
+\boxed{
+c_k^T A_k=0.}
+\]
+
+### Consequence
+
+Every reciprocity matrix has nontrivial left kernel, so
+
+\[
+\boxed{\kappa(k)\ge1.}
+\]
+
+This recovers the universal Jacobi quotient as the canonical first left-null direction.
+
+## 3. Canonical right null vector
+
+Factor
+
+\[
+k=\prod_{j=1}^s\ell_j^{\beta_j}
+\]
+
+and put
+
+\[
+\boxed{
+b_k=(\beta_j\bmod2)_{j=1}^s\in\mathbb F_2^s.}
+\]
+
+Modulo every prime `p_i|m`,
+
+\[
+4k\equiv1\pmod{p_i},
+\]
+
+hence
+
+\[
+k\equiv4^{-1}\pmod{p_i}.
+\]
+
+Since `4^{-1}` is a square modulo `p_i`,
+
+\[
+\left(\frac{k}{p_i}\right)=+1.
+\]
+
+By multiplicativity,
+
+\[
+\prod_j
+\left(\frac{\ell_j}{p_i}\right)^{\beta_j}=+1.
+\]
+
+In bit form,
+
+\[
+\sum_j(\beta_j\bmod2)a_{ij}=0.
+\]
+
+Therefore
+
+\[
+\boxed{
+A_k b_k=0.
+}
+\]
+
+When `k` is not a perfect square, `b_k` is nonzero. Thus every nonsquare depth has a canonical nontrivial right-kernel relation among the prime-factor signature columns.
+
+This is the layer-level version of the square-lift defect conservation law.
+
+## 4. Double conservation theorem
+
+Combining the previous sections gives:
+
+### Theorem
+
+For every Type A/B depth `k`, the reciprocity matrix satisfies
+
+\[
+\boxed{
+c_k^T A_k=0,
+\qquad
+A_k b_k=0.}
+\]
+
+The left relation is always nontrivial. The right relation is nontrivial whenever `k` is not a square.
+
+Thus the matrix is never an arbitrary binary matrix. Its row and column spaces are constrained simultaneously by the defining identity
+
+\[
+4k-1=m.
+\]
+
+## 5. Rank bounds
+
+Let
+
+\[
+r=\omega(m),
+\qquad
+s=\omega(k).
+\]
+
+The left conservation law gives
+
+\[
+\operatorname{rank}(A_k)\le r-1.
+\]
+
+If `k` is not a square, the nonzero right conservation law also gives
+
+\[
+\operatorname{rank}(A_k)\le s-1.
+\]
+
+Therefore:
+
+### Corollary for nonsquare k
+
+\[
+\boxed{
+\operatorname{rank}(A_k)
+\le
+\min(r-1,s-1),
+}
+\]
+
+and hence
+
+\[
+\boxed{
+\kappa(k)
+=r-\operatorname{rank}(A_k)
+\ge
+\max(1,r-s+1).
+}
+\]
+
+### Corollary for square k
+
+The canonical right parity vector vanishes, but the left law remains, so
+
+\[
+\boxed{
+\operatorname{rank}(A_k)\le\min(r-1,s),
+}
+\]
+
+and therefore
+
+\[
+\boxed{
+\kappa(k)\ge\max(1,r-s).
+}
+\]
+
+These are elementary but useful candidate-independent lower bounds on the amount of quadratic quotient information available at a layer.
+
+## 6. Exact interpretation of kappa=1
+
+The condition
+
+\[
+\kappa(k)=1
+\]
+
+means the canonical Jacobi vector `c_k` spans the **entire** left kernel:
+
+\[
+\boxed{
+\ker(A_k^T)=\langle c_k\rangle.
+}
+\]
+
+Equivalently, every linear local quadratic character that is trivial on all divisor signatures is generated by the ordinary Jacobi character.
+
+So the `kappa=1` layers are precisely those for which there is no hidden quadratic separator beyond Jacobi.
+
+This gives a matrix formulation of the automatic square-lift signature theorem:
+
+> if a squarefree ancestor has left nullity one, every square-lift divisor signature lies in the ancestor column space because reciprocity already places it in the Jacobi kernel.
+
+## 7. Exact interpretation of the reciprocity defect quotient
+
+For a squarefree ancestor `a`, let `d=4a-1`. Then the vector `c_a` is the all-ones vector on the prime factors of `d`, because every exponent in squarefree `d` is odd.
+
+The defect quotient from [RECIPROCITY-DEFECT-QUOTIENT.md](RECIPROCITY-DEFECT-QUOTIENT.md) is
+
+\[
+\mathcal R_a=\ker(c_a^T)/\operatorname{col}(A_a).
+\]
+
+Its dimension is
+
+\[
+\boxed{
+\dim\mathcal R_a
+=\kappa(a)-1.
+}
+\]
+
+Thus the defect quotient is exactly the part of the left-null geometry that remains after the canonical Jacobi direction has been removed.
+
+A square-lift prime factor contributes a new signature obstruction only through this cokernel.
+
+## 8. Right-kernel conservation as defect cancellation
+
+For a square-lift depth
+
+\[
+j=\prod_t q_t^{e_t},
+\]
+
+the parity vector
+
+\[
+(e_t\bmod2)_t
+\]
+
+is the canonical right-kernel vector for the signature matrix measured against the squarefree ancestor primes.
+
+Passing to the ancestor defect quotient gives
+
+\[
+\boxed{
+\sum_t(e_t\bmod2)\delta_a(q_t)=0.
+}
+\]
+
+So the defect conservation theorem is not an isolated identity. It is the right-null law of the same reciprocity matrix whose left-null law is the Jacobi character.
+
+This gives a symmetric picture:
+
+\[
+\boxed{
+\begin{array}{ccc}
+\text{Jacobi parity of }m &\longrightarrow& \ker(A_k^T)\\
+&&\\[-2mm]
+A_k&&\\[-2mm]
+&&\\
+\ker(A_k)&\longleftarrow&\text{prime-exponent parity of }k.
+\end{array}}
+\]
+
+The Type A/B relation `m=4k-1` constrains both sides at once.
+
+## 9. Why this matters
+
+The full quadratic-signature problem had appeared to involve many unrelated Legendre bits. The reciprocity matrix shows that those bits are organized by a highly constrained binary incidence object.
+
+Three previously separate observations become one structure:
+
+1. every Type A/B trap has Jacobi sign `-1`;
+2. higher local quadratic quotient dimensions are measured by the left nullity beyond the canonical Jacobi vector;
+3. square-lift defect classes must cancel according to the exponent parity of the lifted depth.
+
+The proof search for QDSC can therefore be reframed as a rank-and-support problem for a family of reciprocity matrices rather than an unconstrained Boolean covering problem.
+
+## 10. New theorem targets
+
+1. classify when the rank bounds above are sharp;
+2. characterize `kappa(k)=1` arithmetically without constructing the full matrix;
+3. classify the possible low-dimensional defect quotients when `kappa(k)=2,3`;
+4. prove that the norm-form constraint
+   \[
+   j=(1+d s^2)/4
+   \]
+   forces every nonzero defect configuration into a shadowed support pattern;
+5. relate modulus ancestry maps to linear maps between the corresponding reciprocity matrices;
+6. determine whether the five currently known layer-level quadratic-signature exceptions through `k<=3000` arise from one common matrix normal form.
+
+The fifth and sixth targets are particularly close to a universal QDSC theorem.
+
+## 11. Novelty boundary
+
+Legendre symbols, quadratic reciprocity, binary matrices, null spaces, and rank-nullity are classical. The candidate contribution is the **two-sided reciprocity-matrix organization of the López Type A/B minimal-depth/shadow system**, including its identification with the quadratic quotient and square-lift defect conservation structures.
+
+Publication priority remains subject to broader literature review and independent mathematical scrutiny.
