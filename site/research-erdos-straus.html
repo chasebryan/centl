@@ -3,22 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="FCF research note on minimal Type A/B witness depth and congruence shadow structure in the Erdős-Straus problem.">
+  <meta name="description" content="FCF research on Type A/B witness depth, congruence shadows, ancestry rigidity, and Direct-Shadow Completeness toward the Erdős-Straus problem.">
   <title>Erdős-Straus Type A/B shadow research — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/research-erdos-straus.html">
   <meta name="robots" content="index,follow">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/research-erdos-straus.html">
-  <meta property="og:title" content="Erdős-Straus Type A/B witness depth and congruence shadow structure">
-  <meta property="og:description" content="A Wellspring Candidate from FCF research: a minimal Type A/B depth invariant, certified frontier, exact trap cardinality, and congruence-layer shadow relation.">
+  <meta property="og:title" content="Erdős-Straus Type A/B shadow research — August 2026 update">
+  <meta property="og:description" content="Ancestry rigidity theorems, finite DSC certificates through k≤1500, C1 pullback cardinality, and an honest wall: Erdős-Straus remains open.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Erdős-Straus Type A/B shadow research — FCF">
+  <meta name="twitter:description" content="Ancestry rigidity, finite DSC certificates, C1 cardinality bound. The conjecture remains open.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="shell">
   <header class="masthead">
     <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
-    <div class="title"><h1>Erdős-Straus Type A/B shadow research</h1><p>Wellspring Candidate · identified August 14, 2026</p></div>
+    <div class="title"><h1>Erdős-Straus Type A/B shadow research</h1><p>Wellspring Candidate · updated August 15, 2026</p></div>
   </header>
   <div class="layout">
     <nav aria-label="Primary">
@@ -37,23 +40,52 @@
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">Complete technical record</a></li>
+        <li><a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus">Research harness</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CURRENT-FRONTIER.md">Current frontier</a></li>
       </ul>
     </nav>
     <main>
-      <p><strong>Status: Wellspring Candidate.</strong> This page reports a potentially new structural lens on the Type A/B congruence system used in research on the Erdős-Straus conjecture. Novelty and priority remain under review. The Erdős-Straus conjecture remains open.</p>
+      <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness (DSC-P) remains open. This page reports exact theorems and finite certificates inside the Type A/B shadow program — not a solution of the conjecture.</p>
 
-      <h2>What the candidate contribution is</h2>
-      <p>The Type A and Type B solution forms are not new. Miguel Angel López introduced and studied those structures and conjectured that every prime has a Type A or Type B solution. The FCF candidate contribution is the structure built on top of that framework: a minimal first-hit depth, exact layer cardinality, a proof that the depth is unbounded over primes, and a CRT-based shadow relation showing that many later congruence layers are mathematically redundant.</p>
+      <h2>August 15, 2026 — what advanced</h2>
+      <p>New parent theorem documents on the ancestry-rigidity line, plus a C1 cardinality bound that shrinks the residual escape problem:</p>
+      <ul>
+        <li><strong>Quotient-13 rigidity:</strong> unrestricted full shadow along <code>K = 13j − 3</code> holds iff <code>K</code> is prime or <code>K = 3p</code>.</li>
+        <li><strong>Quotient-17 rigidity:</strong> iff prime, <code>2p</code>, <code>4p</code>, or the single exception <code>(j,K)=(4,64)</code>.</li>
+        <li><strong>Quotient-21 rigidity:</strong> iff prime or <code>5p</code>.</li>
+        <li><strong>Quotient-29 rigidity:</strong> iff prime or <code>7p</code>.</li>
+        <li><strong>C1 pullback cardinality:</strong> the forbidden parameter set satisfies <code>|R| ≤ |T_j|</code>; when <code>φ(q) &gt; |T_j|</code>, a reduced safe residue is forced.</li>
+      </ul>
+      <p>Primary sources:</p>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-13-RIGIDITY.md">QUOTIENT-13-RIGIDITY.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-17-RIGIDITY.md">QUOTIENT-17-RIGIDITY.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-21-RIGIDITY.md">QUOTIENT-21-RIGIDITY.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/QUOTIENT-29-RIGIDITY.md">QUOTIENT-29-RIGIDITY.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/C1-PULLBACK-CARDINALITY.md">C1-PULLBACK-CARDINALITY.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ERDOS-STRAUS-WALL.md">ERDOS-STRAUS-WALL.md</a> (honest wall statement)</li>
+      </ul>
 
-      <p>Define <code>m(k)=4k-1</code> and the Type A/B trap set</p>
-      <pre><code>T_k = {-d, -4d mod (4k-1) : d divides k}.</code></pre>
+      <h2>What the program is</h2>
+      <p>Miguel Angel López introduced Type A/B solution forms and conjectured that every prime has such a solution. FCF’s contribution sits on top of that framework: a minimal first-hit depth <code>C_AB(p)</code>, exact layer cardinality, a shadow graph on congruence layers, finite Direct-Shadow certificates, fiber peeling, character shields, multiplicative two-box geometry, and a residual Class-C attack aimed at universal DSC-P.</p>
+
+      <p>Define <code>m(k)=4k−1</code> and the Type A/B trap set</p>
+      <pre><code>T_k = {−d, −4d mod (4k−1) : d divides k}.</code></pre>
       <p>The Type A/B witness depth is</p>
-      <pre><code>C_AB(p) = min { k &gt;= 1 : p mod (4k-1) is in T_k }.</code></pre>
-      <p>This is the minimum product <code>d*n</code> among López Type A/B witnesses. It is intentionally called <code>C_AB</code>, not a global Erdős-Straus complexity measure.</p>
+      <pre><code>C_AB(p) = min { k ≥ 1 : p mod (4k−1) is in T_k }.</code></pre>
+
+      <h2>Finite DSC certificates</h2>
+      <p>Candidatewise Direct-Shadow attack through <code>k ≤ 1200</code> (independently verified):</p>
+      <pre><code>admissible candidates:             57,367
+directly shadowed candidates:      15,897
+directly novel candidates:         41,470
+reduced avoiding witnesses:        41,470
+unresolved reduced candidates:          0</code></pre>
+      <p>Through <code>k ≤ 1500</code>: <strong>53,240 / 53,240</strong> directly novel candidates resolved by fiber peeling + bounded residual selector (largest selector radius used: 54; residual primes ≤ 31).</p>
+      <p>These are exact finite theorem-certificate statements for their ranges — not universal DSC-P.</p>
 
       <h2>Certified frontier through 10,000,000</h2>
-      <p>FCF searched the six classical difficult residue classes modulo 840: <code>1, 121, 169, 289, 361, 529</code>. There were 20,513 selected primes through 10,000,000. Every one received a Type A/B witness by depth 2622.</p>
+      <p>Hard classes mod 840: <code>1, 121, 169, 289, 361, 529</code>. Every selected prime through 10,000,000 received a Type A/B witness by depth 2622.</p>
       <table class="directory">
         <tr><th>p</th><th>C_AB(p)</th><th>Type</th><th>d,n</th><th>m</th></tr>
         <tr><td>1009</td><td>3</td><td>B</td><td>1, 3</td><td>11</td></tr>
@@ -70,75 +102,48 @@
         <tr><td>4728649</td><td>1435</td><td>B</td><td>5, 287</td><td>5739</td></tr>
         <tr><td>9658489</td><td><strong>2622</strong></td><td>B</td><td>69, 38</td><td>10487</td></tr>
       </table>
-      <p>A separate verifier exhaustively rejected every smaller Type A/B layer for each of the thirteen frontier records. For 9,658,489 it rejected layers 1 through 2621 before finding the Type B witness <code>d=69, n=38, q=921</code> at layer 2622.</p>
 
-      <h2>CENTL exact verification</h2>
-      <p>The record witness gives the exact unit-fraction identity</p>
-      <pre><code>4/9658489
-= 1/2414862
-+ 1/613787317461
-+ 1/25324558158</code></pre>
-      <p>CENTL verified the closed exact rational equality and separately verified the full polynomial family</p>
-      <pre><code>P(t) = 10487*t - 38
-X(t) = 2622*t
-Y(t) = 69*t*(10487*t - 38)
-Z(t) = 2622*(10487*t - 38)</code></pre>
-      <p>through the cross-multiplied identity <code>4XYZ = PYZ + PXZ + PXY</code>. At <code>t=921</code>, <code>P(t)=9658489</code>.</p>
-
-      <h2>Exact trap cardinality</h2>
-      <p>If <code>tau(k)</code> denotes the number of divisors of <code>k</code>, the experiment produced and checked the exact formula</p>
-      <pre><code>|T_k| = 2*tau(k) - 1 - [4 divides k]*tau(k/4).</code></pre>
-      <p>The subtraction comes from one universal cross-collision and an additional family of collisions exactly when 4 divides <code>k</code>. For <code>k=2622</code>, <code>tau(k)=16</code>, so the layer contains exactly 31 distinct Type A/B trap residues.</p>
-
-      <h2>No universal constant depth</h2>
-      <p>For every fixed <code>K</code>, let <code>L_K</code> be the least common multiple of 840 and all <code>4k-1</code> with <code>1 &lt;= k &lt;= K</code>. Dirichlet's theorem supplies infinitely many primes <code>p = 1 mod L_K</code>. Such primes lie in the hard class <code>1 mod 840</code> and reduce to 1 at every Type A/B modulus through level <code>K</code>. But 1 cannot equal any trap residue <code>-d</code> or <code>-4d</code> at those levels. Therefore <code>C_AB(p) &gt; K</code>.</p>
-      <p>So if López's Type A/B coverage conjecture is true, its witnesses must still occur at unbounded depths. A finite universal cutoff cannot prove the conjecture.</p>
-
-      <h2>Congruence shadowing</h2>
-      <p>The most revealing experimental turn came from conditional hazard analysis. Several layers had exactly zero first hits even though a prime-conditioned model expected many. The missing variable was survival history.</p>
-      <p>An admissible trap class at layer <code>k</code> combines a hard residue <code>h mod 840</code> with a trap residue <code>t mod (4k-1)</code>. CRT turns that into one progression <code>r mod L</code>. At an earlier layer <code>j</code>, the progression occupies exactly the residue fibre congruent to <code>r mod gcd(L,4j-1)</code>. If that entire fibre lies in <code>T_j</code>, the later class is already covered and is directly shadowed.</p>
-
-      <h3>Example: k = 14 is mathematically redundant</h3>
-      <p>For <code>k=14</code>, the modulus is 55. The relevant admissible trap residues reduce modulo 11 to <code>8, 7, 10</code>. But layer 3 has modulus 11 and trap set <code>{7,8,10}</code>. Therefore every admissible hard-prime hit at layer 14 was already a hit at layer 3.</p>
-      <pre><code>k=14  m=55  classes=9  shadowed=9  novel=0  sources=[3]</code></pre>
-      <p>Consequently no selected hard prime can have <code>C_AB(p)=14</code>. The observed zero at layer 14 is an exact congruence consequence, not a statistical accident.</p>
-
-      <h2>Selected shadow-map results</h2>
+      <h2>Ancestry rigidity (August 15)</h2>
+      <p>For ancestry quotient <code>q = 4s+1</code>, child depth <code>K = qj − s</code>, unrestricted full trap-set shadowing is now classified for several quotients:</p>
       <table class="directory">
-        <tr><th>k</th><th>classes</th><th>shadowed</th><th>directly novel</th><th>novelty fraction</th></tr>
-        <tr><td>14</td><td>9</td><td>9</td><td>0</td><td>0.0000</td></tr>
-        <tr><td>24</td><td>15</td><td>9</td><td>6</td><td>0.4000</td></tr>
-        <tr><td>25</td><td>12</td><td>0</td><td>12</td><td>1.0000</td></tr>
-        <tr><td>36</td><td>84</td><td>60</td><td>24</td><td>0.2857</td></tr>
-        <tr><td>40</td><td>36</td><td>0</td><td>36</td><td>1.0000</td></tr>
-        <tr><td>51</td><td>8</td><td>0</td><td>8</td><td>1.0000</td></tr>
-        <tr><td>62</td><td>42</td><td>42</td><td>0</td><td>0.0000</td></tr>
-        <tr><td>70</td><td>48</td><td>24</td><td>24</td><td>0.5000</td></tr>
-        <tr><td>75</td><td>66</td><td>66</td><td>0</td><td>0.0000</td></tr>
-        <tr><td>170</td><td>16</td><td>0</td><td>16</td><td>1.0000</td></tr>
-        <tr><td>1050</td><td>282</td><td>216</td><td>66</td><td>0.2340</td></tr>
-        <tr><td>1403</td><td>42</td><td>18</td><td>24</td><td>0.5714</td></tr>
-        <tr><td>1435</td><td>48</td><td>0</td><td>48</td><td>1.0000</td></tr>
-        <tr><td>2622</td><td>186</td><td>0</td><td>186</td><td>1.0000</td></tr>
+        <tr><th>q</th><th>s</th><th>Composite full-shadow shapes</th><th>Status</th></tr>
+        <tr><td>5</td><td>1</td><td>none</td><td>parent</td></tr>
+        <tr><td>9</td><td>2</td><td>2p + (2,16)</td><td>parent</td></tr>
+        <tr><td>13</td><td>3</td><td>3p</td><td>proved</td></tr>
+        <tr><td>17</td><td>4</td><td>2p, 4p + (4,64)</td><td>proved</td></tr>
+        <tr><td>21</td><td>5</td><td>5p</td><td>proved</td></tr>
+        <tr><td>29</td><td>7</td><td>7p</td><td>proved</td></tr>
       </table>
-      <p>The optimized computation found hundreds of fully directly shadowed layers through <code>k=3000</code>. Examples begin <code>14&lt;-3</code>, <code>29&lt;-6</code>, <code>39&lt;-8</code>, <code>59&lt;-12</code>, <code>62&lt;-5,10,24</code>, and <code>75&lt;-6,10,29</code>.</p>
+      <p>For odd prime <code>s</code>, the composite unrestricted shape is exactly <code>s·p</code>. The method is uniform across this family.</p>
 
-      <h2>The remaining caveat: union shadowing</h2>
-      <p>A directly fresh class is one that no single earlier layer covers completely. Several earlier layers might still cover different pieces whose union covers the whole class. The current shadow map has not yet solved that stronger union-shadow problem.</p>
-      <p>The particular class containing <code>p=9658489</code> is known to contain at least one globally surviving point through layer 2621 because the independent minimality verifier checked the prime itself. That does not automatically establish union irredundancy for all 186 admissible classes at layer 2622.</p>
+      <h2>C1 and the residual wall</h2>
+      <p>When a directly novel candidate has a single active fixed-negative layer (C1), the forbidden parameter set <code>R</code> pulled back from the trap set satisfies</p>
+      <pre><code>|R| ≤ |T_j| ≤ 2 τ(j).</code></pre>
+      <p>Whenever <code>φ(q) &gt; |T_j|</code>, a reduced safe residue is forced by pigeonhole. The remaining gap is the small-modulus regime <code>φ(q) ≤ |T_j|</code>: prove that two-box pullbacks still cannot cover all of <code>(Z/qZ)×</code>. Finite checks through <code>j ≤ 2000</code> found zero full reduced covers.</p>
+      <p>Closing that gap promotes C1 to an infinite DSC-P fragment. It does not, by itself, solve Erdős-Straus.</p>
 
-      <h2>Novelty status</h2>
-      <p>The current novelty candidate is the package consisting of <strong>minimal Type A/B witness depth, certified frontier behavior, exact trap cardinality, unboundedness, and the CRT congruence-shadow hierarchy that exposes redundant Type A/B layers</strong>.</p>
-      <p>A targeted 2026 primary-literature search did not find this exact invariant and shadow structure. That is not a priority proof. FCF will keep the result at Wellspring Candidate status until a broader prior-art review, independent mathematical review, and stronger union-shadow analysis are complete.</p>
+      <h2>What solving Erdős-Straus still requires</h2>
+      <ol>
+        <li>Universal DSC-P (every directly novel candidate is reduced-realizable).</li>
+        <li>López Type A/B coverage for <em>every</em> prime (density one is not enough).</li>
+        <li>Composite <code>n</code> arguments wired to the same structure.</li>
+      </ol>
+      <p>See <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ERDOS-STRAUS-WALL.md">ERDOS-STRAUS-WALL.md</a>.</p>
 
-      <h2>What comes next</h2>
-      <p>The immediate research target is the irredundant Type A/B sieve: classify completely redundant depths, compute union shadowing, identify infinite shadow families, study the growth of <code>C_AB</code>, and determine whether the remaining irredundant congruence structure can illuminate López's global Type A/B coverage conjecture.</p>
+      <h2>Research map</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/DIAMOND.md">DIAMOND.md</a> — full synthesis</li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CURRENT-FRONTIER.md">CURRENT-FRONTIER.md</a> — moving edge</li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CLASS-C-RESIDUAL-CORE.md">CLASS-C-RESIDUAL-CORE.md</a> — residual node</li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTIPLICATIVE-TRAP-QUOTIENT.md">MULTIPLICATIVE-TRAP-QUOTIENT.md</a> — two-box geometry</li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">WS-CAND-003</a> — formal Wellspring Candidate record</li>
+      </ul>
 
-      <p><strong>Complete technical record:</strong> <a href="https://github.com/chasebryan/centl/blob/main/docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md">WS-CAND-003 on GitHub</a>.</p>
       <p><strong>Primary prior work:</strong> <a href="https://arxiv.org/abs/2404.01508">López, A Complete Congruence System for the Erdos-Straus Conjecture</a>.</p>
+      <p class="small">Repository is canonical. Chat is exploratory. Free for science.</p>
     </main>
   </div>
-  <footer>Free Computation Foundation · Research publication · Candidate status, not a claim that Erdős-Straus is solved.</footer>
+  <footer>Free Computation Foundation · Research publication · Candidate status — not a claim that Erdős-Straus is solved.</footer>
 </div>
 </body>
 </html>
