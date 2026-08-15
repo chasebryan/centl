@@ -1,0 +1,75 @@
+name: CENTL Erdős-Straus single-active hard collapse
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Maximum target depth
+        required: false
+        default: "100000"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/single_active_hard_collapse_probe.py'
+      - 'research/erdos-straus/verify_single_active_hard_collapse.py'
+      - 'research/erdos-straus/SINGLE-ACTIVE-EXCESS-PRIME-POWER.md'
+      - '.github/workflows/erdos-straus-single-active-hard-collapse.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  falsify:
+    name: Two-construction hard-class quotient collapse attack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve depth
+        id: p
+        env:
+          K: ${{ github.event.inputs.k_limit }}
+        run: echo "k=${K:-100000}" >> "$GITHUB_OUTPUT"
+
+      - name: Primary square-lift tower construction
+        run: |
+          rm -rf single-active-collapse-output
+          python3 research/erdos-straus/single_active_hard_collapse_probe.py \
+            --k-limit '${{ steps.p.outputs.k }}' \
+            --out single-active-collapse-output
+
+      - name: Independent earlier-layer construction
+        run: |
+          python3 research/erdos-straus/verify_single_active_hard_collapse.py \
+            --primary single-active-collapse-output/single-active-hard-collapse.json \
+            --out single-active-collapse-output
+
+      - name: Freeze provenance and hashes
+        run: |
+          cat > single-active-collapse-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          k_limit=${{ steps.p.outputs.k }}
+          repository=${GITHUB_REPOSITORY}
+          EOF
+          cd single-active-collapse-output
+          sha256sum single-active-hard-collapse.json \
+                    single-active-hard-collapse-report.md \
+                    single-active-hard-collapse-independent-verifier.json \
+                    provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat single-active-collapse-output/single-active-hard-collapse-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload certificate bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: single-active-hard-collapse-${{ github.sha }}
+          path: single-active-collapse-output/
+          if-no-files-found: error
+          retention-days: 90
