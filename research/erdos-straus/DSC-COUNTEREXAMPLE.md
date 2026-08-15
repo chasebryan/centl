@@ -1,6 +1,6 @@
 # Constructive counterexample to universal Direct-Shadow Completeness
 
-**Status:** exact constructive counterexample; independent local replay passed; hosted replay pending at initial deposit  
+**Status:** exact constructive counterexample; independently replayed and frozen in GitHub Actions  
 **Date:** 2026-08-15  
 **Claim boundary:** this falsifies the universal conjectures DSC-0 and DSC-P as stated in the research program. It does **not** falsify the Erdős-Straus conjecture, and it does not falsify López Type A/B coverage. The target candidate is collectively redundant rather than directly redundant.
 
@@ -8,6 +8,17 @@ Verifier:
 
 - `verify_dsc_counterexample.py`
 - `DIRECT-SHADOW-SMOOTHNESS.md`
+
+Hosted certificate:
+
+```text
+workflow run: 31862644146
+head SHA:     ee08dd722164843da6cfa417fc6439d5ac09447d
+artifact id:  9241048158
+artifact digest:
+sha256:7a8ee6c11d77b1d637238de10fae033be64b3099388c43e17942748b38b354df
+verdict:      SUCCESS
+```
 
 ---
 
@@ -312,7 +323,24 @@ Thus both candidates are **directly novel**.
 
 ---
 
-## 5. Exact conclusion
+## 5. Independent hosted replay
+
+The GitHub Actions verifier reconstructs the target factorization, candidate CRT data, all three q=3 pullbacks, the complete smooth direct-shadow search space, and every attained fibre without consulting a stored verdict.
+
+The first hosted run completed successfully:
+
+```text
+run id:      31862644146
+head:        ee08dd722164843da6cfa417fc6439d5ac09447d
+artifact:    9241048158
+archive sha: 7a8ee6c11d77b1d637238de10fae033be64b3099388c43e17942748b38b354df
+```
+
+Thus the counterexample is now frozen as a replayable theorem-certificate, not merely a local search observation.
+
+---
+
+## 6. Exact conclusion
 
 For each of the two hard siblings:
 
@@ -338,23 +366,26 @@ and
 \centernot\Longrightarrow
 \text{reduced prime-realizable}.
 }
+\]
 
 The finite `k<=1500` and related DSC certificates remain correct **finite statements**. What fails is their universal extrapolation.
 
 ---
 
-## 6. What this means for the research program
+## 7. What this means for the research program
 
 This result removes the proposed DSC shortcut. The shadow graph is not a complete obstruction theory when only direct edges are retained.
 
 The replacement object must preserve **collective local covers**. At minimum, the correct structure needs hyperedges / covering cores rather than only single-layer ancestry edges.
 
-The immediate program should pivot to:
+For the Erdős-Straus goal, however, this is not a negative result: a union-shadowed target candidate is already covered by earlier Type A/B decompositions. Exact-depth prime realizability was a stronger auxiliary objective than pointwise Type A/B coverage requires.
 
-1. classify minimal union-shadow cores, beginning with the explicit three-row q=3 core above;
-2. retain Strong Absorption, Weak Redundancy, Pointwise Absorption, and singleton q=3 pullbacks as reduction tools;
-3. replace DSC-P with a theorem describing which reduced cores admit an avoiding class and which are genuinely covering;
-4. keep López-all-primes separate: this counterexample concerns minimal-depth realizability of a particular Type A/B candidate, not existence of Type A/B decompositions for primes;
-5. keep the Erdős-Straus wall unchanged.
+The immediate program should therefore split cleanly:
 
-The project has learned something stronger than another finite survival bound: **the universal bridge itself has been falsified constructively.**
+1. **Depth-spectrum track:** classify minimal union-shadow cores and replace DSC with a hypergraph/covering-core theory.
+2. **Erdős-Straus track:** attack pointwise Type A/B coverage directly, especially the zero-density prime-modulus survivor/composite-rescue core.
+3. Retain Strong Absorption, Weak Redundancy, Pointwise Absorption, singleton q=3 pullbacks, and direct-shadow smoothness as exact reduction tools.
+4. Keep López-all-primes separate: this counterexample concerns minimal-depth realizability of one target candidate, not existence of some Type A/B decomposition for a prime.
+5. Keep the Erdős-Straus wall honest until the all-prime/composite remainder is actually closed.
+
+The project has learned something stronger than another finite survival bound: **the universal bridge itself has been falsified constructively, and the ES route can now discard that unnecessary burden.**
