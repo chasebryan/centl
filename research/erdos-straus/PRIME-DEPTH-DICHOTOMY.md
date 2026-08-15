@@ -181,19 +181,47 @@ If instead
 4k-1
 \]
 
-is prime, the prime-modulus backbone theorem applies. The target modulus contributes a new CRT coordinate relative to all earlier Type A/B moduli, and one obtains reduced arithmetic progressions containing infinitely many primes with exact depth `k`.
+is prime and greater than `7`, the prime-modulus backbone theorem applies directly. The target modulus contributes a new CRT coordinate relative to all earlier Type A/B moduli, and one obtains reduced arithmetic progressions containing infinitely many primes with exact depth `k`.
 
-In particular, even within the Mordell-hard class
-
-\[
-p\equiv1\pmod{840},
-\]
-
-there are infinitely many primes `p` satisfying
+The only prime-depth initial case not covered by the `>7` statement is
 
 \[
-\boxed{C_{AB}(p)=k.}
+k=2,
+\qquad
+m_2=7.
 \]
+
+Here
+
+\[
+T_2=\{3,5,6\}\pmod7.
+\]
+
+The hard class
+
+\[
+p\equiv1\pmod{840}
+\]
+
+already avoids the only earlier layer `k=1`, because it is `1 mod 3` while
+
+\[
+T_1=\{2\}\pmod3.
+\]
+
+Choosing, for example,
+
+\[
+p\equiv3\pmod7
+\]
+
+is compatible by CRT and gives a reduced arithmetic progression. Dirichlet therefore supplies infinitely many hard-class primes with
+
+\[
+C_{AB}(p)=2.
+\]
+
+Thus for **every** prime depth `k` with `4k-1` prime, including `k=2`, infinitely many primes in the hard class `1 mod 840` have exact depth `k`.
 
 See [PRIME-MODULUS-BACKBONE.md](PRIME-MODULUS-BACKBONE.md).
 
