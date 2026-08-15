@@ -22,8 +22,8 @@ sys.path.insert(0, str(BB_ROOT))
 
 from bberviges.cc_bridge import cc_binary, solve_via_cc  # noqa: E402
 from bberviges.findings import FINDINGS, ingest_cc_blob  # noqa: E402
-from bberviges.live import cmd_go, cmd_menu, cmd_seed, print_look  # noqa: E402
-from bberviges.seed import format_seed, load_seed  # noqa: E402
+from bberviges.live import cmd_go, cmd_hunts, cmd_menu, cmd_seed, print_look  # noqa: E402
+from bberviges.seed import format_roster, format_seed, load_seed  # noqa: E402
 from bberviges.solve import Solver  # noqa: E402
 from bberviges.witness import verify_witness  # noqa: E402
 
@@ -107,6 +107,8 @@ def cmd_cc(cmd: str, extra: list[str], *, file_hits: bool = False) -> tuple[int,
 def cmd_status() -> int:
     print(format_seed(load_seed()))
     print()
+    print(format_roster())
+    print()
     return cmd_cc("status", [])[0]
 
 
@@ -123,12 +125,18 @@ def add_hunt_flags(p: argparse.ArgumentParser) -> None:
         type=int,
         default=None,
         dest="start_factor",
-        help="initiate a new hunt at this start factor",
+        help="start or resume a sibling hunt at this factor; does not replace other hunts",
     )
     p.add_argument(
         "--random",
         action="store_true",
-        help="initiate a new hunt at a random start factor",
+        help="start or resume a sibling hunt at a random factor; does not replace other hunts",
+    )
+    p.add_argument(
+        "--hunt",
+        default=None,
+        dest="hunt_id",
+        help="resume this named hunt (see: centl es hunts)",
     )
 
 
@@ -188,8 +196,10 @@ def main() -> None:
     p_cont = sub.add_parser("continue", help="same as go")
     add_hunt_flags(p_cont)
 
-    p_seed = sub.add_parser("seed", help="show or reset the hunt cursor")
-    p_seed.add_argument("action", nargs="?", choices=("reset",))
+    sub.add_parser("hunts", help="list every hunt cursor in this tree")
+    p_seed = sub.add_parser("seed", help="show hunt cursors, or reset one hunt")
+    p_seed.add_argument("action", nargs="?", choices=("reset", "list"))
+    p_seed.add_argument("--hunt", default=None, dest="hunt_id")
 
     args = ap.parse_args()
     os.environ.setdefault(
@@ -220,8 +230,10 @@ def main() -> None:
         raise SystemExit(print_look())
     if args.cmd == "letters":
         raise SystemExit(print_look(grade="letter"))
+    if args.cmd == "hunts":
+        raise SystemExit(cmd_hunts())
     if args.cmd == "seed":
-        raise SystemExit(cmd_seed(args.action))
+        raise SystemExit(cmd_seed(args.action, hunt_id=getattr(args, "hunt_id", None)))
     if args.cmd in {"go", "continue", "start"}:
         once = args.cmd == "start"
         step = args.step
@@ -241,6 +253,7 @@ def main() -> None:
                 random_start=args.random,
                 menu_after=not once,
                 persist_step=persist_step,
+                hunt_id=getattr(args, "hunt_id", None),
             )
         )
     if args.cmd == "hunt":

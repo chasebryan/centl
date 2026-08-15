@@ -10,16 +10,22 @@ from collections import deque
 
 from .cc_bridge import cc_binary, solve_via_cc
 from .findings import FINDINGS, file_event, latest, load_catalog
+from .locks import FileLock
 from .seed import (
+    MAIN_HUNT,
     apply_window,
+    claim_window,
     cleared_milestones,
+    format_roster,
     format_seed,
     initiate_hunt,
+    join_lane,
     load_seed,
     next_window,
     random_start_factor,
     reset_seed,
     save_seed,
+    seed_lock_path,
     seed_path,
 )
 
@@ -49,7 +55,7 @@ def draw_dashboard(state: dict) -> None:
     lo, hi, _step = state.get("window") or (0, 0, 0)
     lines = [
         bar,
-        f"  Erdős–Straus hunt          {status:>12}",
+        f"  Erdős–Straus hunt {seed.get('hunt_id') or 'main':<12} {status:>8}",
         f"  start factor {seed.get('start_factor', 0)}",
         f"  now at {cur}     window ({lo}, {hi}]",
         f"  scanned {seed.get('scanned_through')}     "
@@ -215,14 +221,22 @@ def cmd_go(
     random_start: bool = False,
     menu_after: bool = True,
     persist_step: bool = True,
+    hunt_id: str | None = None,
 ) -> int:
+    import os
+
     if random_start:
         start_factor = random_start_factor()
     if start_factor is not None:
-        seed = initiate_hunt(start_factor=start_factor)
-        print(f"New hunt. Start factor: {seed['start_factor']}")
+        seed = initiate_hunt(start_factor=start_factor, hunt_id=hunt_id)
+        print(
+            f"Hunt {seed['hunt_id']} at start factor {seed['start_factor']}. "
+            f"Other hunts were left alone."
+        )
+    elif hunt_id:
+        seed = load_seed(hunt_id)
     else:
-        seed = load_seed()
+        seed = load_seed(MAIN_HUNT)
 
     if kmax is not None:
         seed["kmax"] = int(kmax)
@@ -231,6 +245,20 @@ def cmd_go(
     if cc_binary() is None:
         print("CC.kernel binary missing; run make -C research/erdos-straus/CC.kernel")
         return 2
+
+    lock = FileLock(seed_lock_path(str(seed.get("hunt_id") or MAIN_HUNT)))
+    if not lock.acquire(blocking=False):
+        print(
+            f"Hunt {seed.get('hunt_id')} is already running. "
+            "Starting a sibling on the same lane; the first hunt is unchanged."
+        )
+        seed = join_lane(seed)
+        lock = FileLock(seed_lock_path(str(seed["hunt_id"])))
+        if not lock.acquire(blocking=False):
+            print("Could not lock the sibling hunt. Try --from N for a new stretch.")
+            return 2
+        print(f"Sibling hunt {seed['hunt_id']} will take the next free windows.")
+    lock.record_pid(os.getpid())
 
     halt = False
 
@@ -245,11 +273,13 @@ def cmd_go(
             except OSError:
                 pass
 
+    used_step = int(step if step is not None else seed.get("step") or 50_000)
+    first = claim_window(seed, used_step)
     state = {
         "seed": seed,
         "halt": False,
         "current_p": seed.get("scanned_through"),
-        "window": next_window(seed, step),
+        "window": first,
         "recent": deque(maxlen=6),
         "proc": None,
     }
@@ -257,12 +287,13 @@ def cmd_go(
     prev_int = signal.signal(signal.SIGINT, _stop)
     prev_term = signal.signal(signal.SIGTERM, _stop)
     seed["status"] = "running"
+    seed["pid"] = os.getpid()
     save_seed(seed)
     draw_dashboard(state)
 
     try:
+        lo, hi, used = first
         while not halt and not state["halt"]:
-            lo, hi, used = next_window(seed, step)
             state["window"] = (lo, hi, used)
             old_cleared = int(seed.get("cleared_through") or 0)
             scanned_to, unsolved, letters = run_window(seed, lo, hi, state)
@@ -290,11 +321,14 @@ def cmd_go(
             draw_dashboard(state)
             if action == "once" or once:
                 break
-            if state["halt"]:
+            if state["halt"] or halt:
                 break
+            lo, hi, used = claim_window(seed, step)
     finally:
         seed["status"] = "idle"
+        seed["pid"] = None
         save_seed(seed)
+        lock.release()
         signal.signal(signal.SIGINT, prev_int)
         signal.signal(signal.SIGTERM, prev_term)
 
@@ -325,11 +359,20 @@ def print_look(grade: str | None = None) -> int:
     return 0
 
 
-def cmd_seed(action: str | None = None) -> int:
+def cmd_hunts() -> int:
+    print(format_roster())
+    return 0
+
+
+def cmd_seed(action: str | None = None, hunt_id: str | None = None) -> int:
     if action == "reset":
-        reset_seed()
-        print("Seed reset to start factor 0.")
-    print(format_seed(load_seed()))
+        reset_seed(hunt_id)
+        print(f"Hunt {hunt_id or MAIN_HUNT} reset to start factor 0.")
+        print("Other hunts were not touched.")
+    if action == "list" or action is None:
+        print(format_roster())
+        print()
+    print(format_seed(load_seed(hunt_id)))
     return 0
 
 
@@ -343,7 +386,8 @@ def cmd_menu() -> int:
     print(f"  letters in the library: {_counts()['letter']}")
     print()
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
-    print("  [r] random    new hunt from a random start factor")
+    print("  [r] random    another hunt at a random place (does not replace this one)")
+    print("  [h] hunts     list every hunt cursor")
     print("  [l] letters   collected letters, with numbers")
     print("  [k] look      latest findings")
     print("  [s] seed      show the cursor")
@@ -358,6 +402,9 @@ def cmd_menu() -> int:
         return cmd_go(menu_after=True)
     if choice in {"r", "random"}:
         return cmd_go(random_start=True, menu_after=True)
+    if choice in {"h", "hunts"}:
+        cmd_hunts()
+        return cmd_menu()
     if choice in {"l", "letters"}:
         print_look(grade="letter")
         return cmd_menu()

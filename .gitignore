@@ -15,5 +15,8 @@ __pycache__/
 research/erdos-straus/CC.kernel/cc-kernel
 research/erdos-straus/CC.kernel/ledger/
 research/erdos-straus/findings/seeds/current.json
+research/erdos-straus/findings/seeds/*.json
+research/erdos-straus/findings/seeds/.*
 research/erdos-straus/findings/seeds/*.tmp
+research/erdos-straus/findings/.catalog.lock
 research/erdos-straus/findings/log.jsonl

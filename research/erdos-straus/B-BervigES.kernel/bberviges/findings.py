@@ -7,12 +7,14 @@ Grades are exact predicates, not opinions. A finding is filed only after
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .arithmetic import HARD
 from .letter_id import finding_id
+from .locks import FileLock
 from .witness import Witness, make_witness, verify_witness
 
 ES_ROOT = Path(__file__).resolve().parents[2]
@@ -106,14 +108,20 @@ def _as_int(v):
 
 
 def findings_root() -> Path:
-    FINDINGS.mkdir(parents=True, exist_ok=True)
+    override = os.environ.get("ES_FINDINGS")
+    root = Path(override) if override else FINDINGS
+    root.mkdir(parents=True, exist_ok=True)
     for name in ("good", "great", "letters"):
-        (FINDINGS / name).mkdir(exist_ok=True)
-    return FINDINGS
+        (root / name).mkdir(exist_ok=True)
+    return root
 
 
 def catalog_path() -> Path:
     return findings_root() / "catalog.json"
+
+
+def catalog_lock_path() -> Path:
+    return findings_root() / ".catalog.lock"
 
 
 def load_catalog() -> dict:
@@ -128,7 +136,10 @@ def load_catalog() -> dict:
 
 
 def save_catalog(cat: dict) -> None:
-    catalog_path().write_text(json.dumps(cat, indent=2, sort_keys=True) + "\n")
+    path = catalog_path()
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(cat, indent=2, sort_keys=True) + "\n")
+    tmp.replace(path)
 
 
 def is_hard(n: int) -> bool:
@@ -318,7 +329,6 @@ def rebuild_index(cat: dict) -> None:
 
 def file_event(event: dict) -> dict | None:
     """Verify if needed, grade, file, update catalog. Returns the record or None."""
-    cat = load_catalog()
     if event.get("x") is not None and event.get("solved", True):
         n = int(event.get("n") or event.get("p"))
         w = make_witness(
@@ -335,48 +345,50 @@ def file_event(event: dict) -> dict | None:
         event = dict(event)
         event["equation"] = w.equation()
         event["n"] = n
-    tags = tags_for_event(event, cat)
-    grade = grade_of(tags)
-    if grade is None:
-        return None
-    n = _as_int(event.get("n") or event.get("p") or event.get("bound"))
-    ident = finding_id(grade, tags, event)
-    for old in cat["items"]:
-        if old.get("hex") == ident["hex"]:
+    with FileLock(catalog_lock_path()):
+        cat = load_catalog()
+        tags = tags_for_event(event, cat)
+        grade = grade_of(tags)
+        if grade is None:
             return None
-        if _as_int(old.get("n")) == n and old.get("grade") == grade:
-            return None
-    path = write_finding(event, tags, grade)
-    rec = {
-        "grade": grade,
-        "tags": tags,
-        "n": n,
-        "file": str(path.relative_to(findings_root())),
-        "method": event.get("method"),
-        "id": ident["display"],
-        "number": ident["number"],
-        "hex": ident["hex"],
-    }
-    cat["items"].append(rec)
-    if event.get("method") and event["method"] not in cat["methods"]:
-        cat["methods"].append(event["method"])
-    k = event.get("k")
-    try:
-        k_int = int(k) if k is not None else None
-    except (TypeError, ValueError):
-        k_int = None
-    if k_int is not None and k_int > int(cat["records"].get("max_shift_k") or 0):
-        cat["records"]["max_shift_k"] = k_int
-    if event.get("type") == "cleared_bound":
-        bound = int(event.get("bound") or 0)
-        if bound > int(cat["records"].get("max_cleared_bound") or 0):
-            cat["records"]["max_cleared_bound"] = bound
-    save_catalog(cat)
-    rebuild_index(cat)
-    log = findings_root() / "log.jsonl"
-    with log.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps({"grade": grade, "tags": tags, "event": event}) + "\n")
-    return rec
+        n = _as_int(event.get("n") or event.get("p") or event.get("bound"))
+        ident = finding_id(grade, tags, event)
+        for old in cat["items"]:
+            if old.get("hex") == ident["hex"]:
+                return None
+            if _as_int(old.get("n")) == n and old.get("grade") == grade:
+                return None
+        path = write_finding(event, tags, grade)
+        rec = {
+            "grade": grade,
+            "tags": tags,
+            "n": n,
+            "file": str(path.relative_to(findings_root())),
+            "method": event.get("method"),
+            "id": ident["display"],
+            "number": ident["number"],
+            "hex": ident["hex"],
+        }
+        cat["items"].append(rec)
+        if event.get("method") and event["method"] not in cat["methods"]:
+            cat["methods"].append(event["method"])
+        k = event.get("k")
+        try:
+            k_int = int(k) if k is not None else None
+        except (TypeError, ValueError):
+            k_int = None
+        if k_int is not None and k_int > int(cat["records"].get("max_shift_k") or 0):
+            cat["records"]["max_shift_k"] = k_int
+        if event.get("type") == "cleared_bound":
+            bound = int(event.get("bound") or 0)
+            if bound > int(cat["records"].get("max_cleared_bound") or 0):
+                cat["records"]["max_cleared_bound"] = bound
+        save_catalog(cat)
+        rebuild_index(cat)
+        log = findings_root() / "log.jsonl"
+        with log.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"grade": grade, "tags": tags, "event": event}) + "\n")
+        return rec
 
 
 def ingest_cc_blob(text: str) -> list[dict]:

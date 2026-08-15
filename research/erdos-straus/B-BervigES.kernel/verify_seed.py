@@ -8,8 +8,20 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import os
+import tempfile
+
 from bberviges.letter_id import id_from_key, letter_id, letter_key
-from bberviges.seed import apply_window, default_seed, next_window, random_start_factor
+from bberviges.seed import (
+    apply_window,
+    claim_window,
+    default_seed,
+    initiate_hunt,
+    load_seed,
+    next_window,
+    random_start_factor,
+    save_seed,
+)
 
 
 def check(cond, msg):
@@ -71,6 +83,35 @@ def main() -> None:
     r2 = random_start_factor()
     check(1_000_000 <= r1 < 10_000_000_000, r1)
     check(r1 != r2 or r1 != 0, "random start should vary")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["ES_FINDINGS"] = tmp
+        first = default_seed("main", 1_000_000)
+        save_seed(first)
+        first["scanned_through"] = 1_050_000
+        save_seed(first)
+        second = initiate_hunt(start_factor=9_000_000_000)
+        check(second["hunt_id"] == "h-9000000000", second)
+        check(second["start_factor"] == 9_000_000_000, second)
+        main = load_seed("main")
+        check(main["scanned_through"] == 1_050_000, "second hunt must not destroy the first")
+        check(main["start_factor"] == 1_000_000, main)
+        again = initiate_hunt(start_factor=9_000_000_000)
+        check(again["scanned_through"] == 9_000_000_000, "re-init must resume, not wipe")
+        second["scanned_through"] = 9_000_050_000
+        save_seed(second)
+        again = initiate_hunt(start_factor=9_000_000_000)
+        check(again["scanned_through"] == 9_000_050_000, "re-init kept progress")
+
+        lead = load_seed("main")
+        worker = dict(lead)
+        worker["hunt_id"] = "w-test"
+        lo1, hi1, st = claim_window(lead, 50_000)
+        lo2, hi2, _ = claim_window(worker, 50_000)
+        check(st == 50_000, st)
+        check(hi1 == lo2, f"windows must abut, got {lo1,hi1} then {lo2,hi2}")
+        check(hi1 <= lo2, "windows must not overlap")
+        os.environ.pop("ES_FINDINGS", None)
 
     print("OK seed and letter numbers")
     print(f"  sample letter n=2521 unsolved number={a['number']}")

@@ -74,10 +74,14 @@ Letters are collected. The hunt does not stop on the first letter.
 A start factor chooses *where* a hunt begins. It is stored with the seed and does not change for that hunt.
 
 ```text
-./centl es go              # resume the saved hunt
-./centl es go --random     # new hunt at a random start factor
-./centl es go --from N     # new hunt beginning at N
+./centl es go              # resume the default hunt
+./centl es go --random     # another hunt, random stretch; does not replace the first
+./centl es go --from N     # another hunt beginning at N; does not replace the first
+./centl es go --hunt NAME  # resume a named hunt
+./centl es hunts           # list every hunt cursor in this tree
 ```
+
+`--from` and `--random` used to overwrite the only seed file. They no longer do. Each hunt keeps its own cursor under `findings/seeds/`. Two `go` processes on the same hunt become siblings and claim distinct windows on that line.
 
 Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter's identity.
 

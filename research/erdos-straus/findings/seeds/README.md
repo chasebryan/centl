@@ -1,11 +1,13 @@
-# Hunt seed
+# Hunt seeds
 
-`current.json` is a resume cursor, not a random-number seed.
+Each hunt has its own cursor. `current.json` is the default hunt (`main`). Sibling hunts live beside it as `h-<start>.json` or `w-<pid>.json`. Starting `--from` or `--random` creates or resumes a sibling. It does not overwrite `current.json`.
 
-- `start_factor` — where this hunt began (0, a number you chose, or a random integer).
-- `scanned_through` — the last integer the engine has looked at.
-- `cleared_through` — the last bound whose hard primes all have checked witnesses.
+- `hunt_id` — name of this hunt
+- `lane` — hunts that share a start factor share a lane and claim distinct windows
+- `start_factor` — where this hunt began
+- `scanned_through` — the last integer this hunt has looked at
+- `cleared_through` — the last bound whose hard primes all have checked witnesses
 
-The next interval is `(scanned_through, scanned_through + step]`.
+The next interval is claimed from the lane so two processes do not scan the same stretch.
 
-Letter numbers do not depend on any field in this file.
+Letter numbers do not depend on any field in these files.
