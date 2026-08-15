@@ -1,0 +1,67 @@
+name: CENTL Erdős-Straus reciprocity tower shadows
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Jacobi saturation regression depth
+        required: false
+        default: "50000"
+      c_limit:
+        description: Maximum odd square-lift parameter per base
+        required: false
+        default: "1001"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/RECIPROCITY-TOWER-SHADOWS.md'
+      - 'research/erdos-straus/reciprocity_tower_shadow_analyzer.py'
+      - '.github/workflows/erdos-straus-reciprocity-tower.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify reciprocity tower shadows
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve parameters
+        id: p
+        env:
+          K: ${{ github.event.inputs.k_limit }}
+          C: ${{ github.event.inputs.c_limit }}
+        run: |
+          echo "k=${K:-50000}" >> "$GITHUB_OUTPUT"
+          echo "c=${C:-1001}" >> "$GITHUB_OUTPUT"
+
+      - name: Run exact reciprocity tower regression
+        run: |
+          rm -rf reciprocity-tower-output
+          python3 research/erdos-straus/reciprocity_tower_shadow_analyzer.py \
+            --k-limit '${{ steps.p.outputs.k }}' \
+            --c-limit '${{ steps.p.outputs.c }}' \
+            --out reciprocity-tower-output
+
+      - name: Freeze hashes
+        run: |
+          cd reciprocity-tower-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat reciprocity-tower-output/reciprocity-tower-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reciprocity-tower-${{ github.sha }}
+          path: reciprocity-tower-output/
+          if-no-files-found: error
+          retention-days: 90
