@@ -22,6 +22,7 @@ from .seed import (
     join_lane,
     load_seed,
     next_window,
+    parse_start_factor,
     random_start_factor,
     reset_seed,
     save_seed,
@@ -386,10 +387,11 @@ def cmd_menu() -> int:
     print(f"  letters in the library: {_counts()['letter']}")
     print()
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
-    print("  [0] from 0    another hunt beginning at the origin (does not replace this one)")
-    print("  [r] random    another hunt at a random place (does not replace this one)")
+    print("  [0] from 0    another hunt beginning at the origin")
+    print("  [n] from N    another hunt at any number you type (0 is allowed)")
+    print("  [r] random    another hunt at a random place")
     print("  [h] hunts     list every hunt cursor")
-    print("  or type a number to start another hunt there, including 0")
+    print("  or type a number directly (0, 1000, 2e9, 20_000_000_000)")
     print("  [l] letters   collected letters, with numbers")
     print("  [k] look      latest findings")
     print("  [s] seed      show the cursor")
@@ -404,8 +406,21 @@ def cmd_menu() -> int:
         return cmd_go(menu_after=True)
     if choice in {"0", "origin", "from0", "from 0"}:
         return cmd_go(start_factor=0, menu_after=True)
-    if choice.isdigit():
-        return cmd_go(start_factor=int(choice), menu_after=True)
+    if choice in {"n", "from", "from n", "number"}:
+        try:
+            raw = input("  start at (any integer; 0 is allowed)? ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return 0
+        try:
+            return cmd_go(start_factor=parse_start_factor(raw), menu_after=True)
+        except ValueError as exc:
+            print(f"  {exc}")
+            return cmd_menu()
+    try:
+        return cmd_go(start_factor=parse_start_factor(choice), menu_after=True)
+    except ValueError:
+        pass
     if choice in {"r", "random"}:
         return cmd_go(random_start=True, menu_after=True)
     if choice in {"h", "hunts"}:

@@ -19,6 +19,7 @@ from bberviges.seed import (
     initiate_hunt,
     load_seed,
     next_window,
+    parse_start_factor,
     random_start_factor,
     save_seed,
 )
@@ -78,6 +79,15 @@ def main() -> None:
     hexid, number = id_from_key(key)
     check(hexid == a["hex"] and number == a["number"], "id_from_key mismatch")
     check("start" not in key and "host" not in key and "time" not in key, key)
+
+    check(parse_start_factor("0") == 0, "zero")
+    check(parse_start_factor("origin") == 0, "origin word")
+    check(parse_start_factor("1000") == 1000, "plain")
+    check(parse_start_factor("1_000_000") == 1_000_000, "underscores")
+    check(parse_start_factor("1,000,000") == 1_000_000, "commas")
+    check(parse_start_factor("2e9") == 2_000_000_000, "scientific")
+    check(parse_start_factor("20_000_000_000") == 20_000_000_000, "big")
+    check(parse_start_factor("-3") == 0, "negative clamps to 0")
 
     r1 = random_start_factor()
     r2 = random_start_factor()

@@ -21,11 +21,14 @@ That is the long hunt. It remembers a **seed** (where it stopped) so it never st
 ```text
 ./centl es go --from 0
 ./centl es go --origin
-./centl es go --from 1000000
+./centl es go 0
+./centl es go --from 20000000000
+./centl es go 20000000000
+./centl es go --from 2e9
 ./centl es go --random
 ```
 
-starts **another** hunt. `--from 0` and `--origin` begin at the origin. The hunt you already had keeps its cursor. Findings still go in this shared library. Resume a named hunt with `./centl es go --hunt NAME`. List them with `./centl es hunts`.
+starts **another** hunt at 0 or at any number you choose. The hunt you already had keeps its cursor. Findings still go in this shared library. Resume a named hunt with `./centl es go --hunt NAME`. List them with `./centl es hunts`.
 
 If you type `go` in a second terminal while the first hunt is still running, that second process joins as a sibling and takes the next free windows. It does not reset the first.
 

@@ -45,6 +45,27 @@ MAIN_HUNT = "main"
 _HUNT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
+def parse_start_factor(text: str) -> int:
+    """Accept 0, 1000, 1_000, 1,000,000, 2e9. Negative values become 0."""
+    raw = str(text).strip().lower().replace(",", "").replace("_", "").replace(" ", "")
+    if raw in {"", "origin", "zero"}:
+        return 0
+    if raw.startswith("+"):
+        raw = raw[1:]
+    if "e" in raw:
+        try:
+            value = int(float(raw))
+        except ValueError as exc:
+            raise ValueError(f"not a start factor: {text!r}") from exc
+    else:
+        if raw.startswith("-"):
+            return 0
+        if not raw.isdigit():
+            raise ValueError(f"not a start factor: {text!r}")
+        value = int(raw)
+    return 0 if value < 0 else value
+
+
 def seeds_dir() -> Path:
     d = findings_root() / "seeds"
     d.mkdir(parents=True, exist_ok=True)

@@ -23,7 +23,12 @@ sys.path.insert(0, str(BB_ROOT))
 from bberviges.cc_bridge import cc_binary, solve_via_cc  # noqa: E402
 from bberviges.findings import FINDINGS, ingest_cc_blob  # noqa: E402
 from bberviges.live import cmd_go, cmd_hunts, cmd_menu, cmd_seed, print_look  # noqa: E402
-from bberviges.seed import format_roster, format_seed, load_seed  # noqa: E402
+from bberviges.seed import (  # noqa: E402
+    format_roster,
+    format_seed,
+    load_seed,
+    parse_start_factor,
+)
 from bberviges.solve import Solver  # noqa: E402
 from bberviges.witness import verify_witness  # noqa: E402
 
@@ -112,6 +117,13 @@ def cmd_status() -> int:
     return cmd_cc("status", [])[0]
 
 
+def _start_arg(text: str) -> int:
+    try:
+        return parse_start_factor(text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+
+
 def add_hunt_flags(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--step",
@@ -122,10 +134,10 @@ def add_hunt_flags(p: argparse.ArgumentParser) -> None:
     p.add_argument("--k-max", type=int, default=None, dest="k_max")
     p.add_argument(
         "--from",
-        type=int,
+        type=_start_arg,
         default=None,
         dest="start_factor",
-        help="start or resume a sibling hunt at this factor, including 0; "
+        help="start or resume a sibling hunt at any integer, including 0; "
         "does not replace other hunts",
     )
     p.add_argument(
@@ -199,8 +211,15 @@ def main() -> None:
         help="hunt forever from the seed; collect letters; stop with Ctrl+C",
     )
     add_hunt_flags(p_go)
+    p_go.add_argument(
+        "at",
+        nargs="?",
+        type=_start_arg,
+        help="start at this number (same as --from N; 0 is allowed)",
+    )
     p_cont = sub.add_parser("continue", help="same as go")
     add_hunt_flags(p_cont)
+    p_cont.add_argument("at", nargs="?", type=_start_arg)
 
     sub.add_parser("hunts", help="list every hunt cursor in this tree")
     p_seed = sub.add_parser("seed", help="show hunt cursors, or reset one hunt")
@@ -251,6 +270,11 @@ def main() -> None:
                 step = args.limit - lo
                 persist_step = False
         start = args.start_factor
+        if getattr(args, "at", None) is not None:
+            if start is None:
+                start = args.at
+            elif start != args.at:
+                raise SystemExit("use either --from N or a positional start, not both")
         if getattr(args, "origin", False):
             start = 0
         raise SystemExit(
