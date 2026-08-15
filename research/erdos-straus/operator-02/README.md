@@ -45,6 +45,8 @@ No content from those files is copied or rewritten here. Citations are by path o
 | 2026-08-14 | Ancestry family q = 5 structural questions                               | `ANCESTRY-Q5-NOTES.md` |
 | 2026-08-14 | Structural notes on second dominant residual signature                   | `RESIDUAL-SIGNATURE-357.md` |
 | 2026-08-14 | Working synthesis of the residual obstruction after both filters         | `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` |
+| 2026-08-14 | Census template for future primary fiber/character output                | `CENSUS-TEMPLATE.md` |
+| 2026-08-14 | Arithmetic exploration of q = 5 full-shadow condition                    | `ANCESTRY-Q5-ARITHMETIC.md` |
 | 2026-08-14 | Running status snapshot                                                  | `STATUS-2026-08-14.md` |
 
 ## Claim discipline
