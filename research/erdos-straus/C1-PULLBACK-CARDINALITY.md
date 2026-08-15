@@ -1,133 +1,325 @@
-# C1 Pullback Cardinality Bound
+# C1 pullback cardinality and reduced-parameter count — corrected
 
-**Status:** proved lemma + conditional escape theorem  
+**Status:** proved exact pullback lemma; former local C1 gap superseded  
 **Date:** 2026-08-15  
-**Claim boundary:** Advances C1. Does not prove universal DSC-P, López coverage, or Erdős-Straus.
+**Claim boundary:** the exact cardinality statements below are universal. The unique-active local reduced-escape problem is solved in `SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md`. Full C1, universal DSC-P, López universal coverage, and Erdős-Straus remain open.
 
----
+Read with:
 
-## Setup
+- [SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md](SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md)
+- [SINGLE-ACTIVE-EXCESS-PRIME-POWER.md](SINGLE-ACTIVE-EXCESS-PRIME-POWER.md)
+- [C1-PARTIAL-THEOREMS.md](C1-PARTIAL-THEOREMS.md)
 
-Candidate progression `x ≡ r (mod L)`. Earlier layer `j` with modulus `m = 4j − 1`. Put
+## 1. Setup
 
-\[
-g = \gcd(L, m),\qquad q = m/g.
-\]
-
-Assume `q > 1` (active layer). The parameter `s` enters through
+Let
 
 \[
-x \equiv r + Ls \pmod m
+x=r+Ls
 \]
 
-and is well-defined modulo `q`. The forbidden parameter set is
+be a target progression with
 
 \[
-R = \{ s \bmod q : r + Ls \in T_j \},
+\gcd(r,L)=1.
 \]
 
-where `T_j` is the Type A/B trap set of layer `j`.
-
-Direct novelty of the candidate means the layer does not force a total cover for the fixed residue alone; for the active pullback one still has `R ≠ Z/qZ` only after accounting for the global construction — the local cardinality bound below is unconditional.
-
----
-
-## Theorem (Pullback cardinality)
+For an earlier layer `j`, put
 
 \[
-\boxed{|R| \le |T_j|.}
+m=4j-1,
+\qquad
+g=\gcd(L,m),
+\qquad
+q=m/g.
 \]
 
-### Proof
-
-Let `t ∈ T_j`. The congruence
+Let
 
 \[
-Ls \equiv t - r \pmod m
+T_j=\{-e,-4e\pmod m:e\mid j\}.
 \]
 
-is solvable if and only if `g | (t − r)`. When it is solvable, write `L = g L'`, `m = g q`, `t − r = g c`. Then
-
-\[
-L' s \equiv c \pmod q.
-\]
-
-Since `gcd(L', q) = 1`, there is a unique solution class `s mod q`. Distinct traps may collide on the same class, so the map from solvable traps to `R` is surjective onto `R` and therefore
-
-\[
-|R| \le |T_j|.
-\]
-
-QED.
-
----
-
-## Corollary (Pigeonhole escape)
-
-Let `U = { s mod q : gcd(s, q) = 1 }` be the reduced residues (coprime to every prime dividing `q`). Then
+The compatible trap fiber is
 
 \[
 \boxed{
-|T_j| < φ(q) \implies U \setminus R \ne \emptyset.
+U_{j,r}=\{t\in T_j:t\equiv r\pmod g\}.
 }
+\]
+
+The exact forbidden parameter set is
+
+\[
+\boxed{
+R_{j,r}=\{s\pmod q:r+Ls\pmod m\in T_j\}.
+}
+\]
+
+## 2. Exact pullback cardinality
+
+### Theorem
+
+The affine pullback map
+
+\[
+\Psi:U_{j,r}\to\mathbb Z/q\mathbb Z,
+\qquad
+\Psi(t)
+=
+\frac{t-r}{g}
+\left(\frac Lg\right)^{-1}
+\pmod q
+\]
+
+is a bijection from `U_{j,r}` onto `R_{j,r}`.
+
+Consequently
+
+\[
+\boxed{|R_{j,r}|=|U_{j,r}|\le|T_j|.}
 \]
 
 ### Proof
 
-`|R| ≤ |T_j| < φ(q) = |U|`, so `R` cannot contain `U`. QED.
-
----
-
-## Size of trap sets
-
-For every `j ≥ 1`,
+For `t∈U_{j,r}`, write
 
 \[
-|T_j| \le 2τ(j),
+t-r=gc,
+\qquad
+L=gL',
+\qquad
+m=gq.
 \]
 
-with a slightly tighter count after identifying the overlap between the `{e}` and `{4e}` families when `4 | j`.
-
-In particular `|T_j|` is `j^ε` for every `ε > 0` outside a density-zero set of highly composite `j`, and is at most a few dozen for all `j ≤ 1500`.
-
----
-
-## When the corollary applies automatically
-
-If the pullback modulus `q` satisfies `φ(q) > 2τ(j)`, escape is unconditional from the cardinality bound.
-
-Typical C1 residual moduli arising from valuation excess against `L = lcm(840, 4k−1)` are either:
-
-- a large prime factor of `m_j` (then `φ(q) = q − 1 ≫ |T_j|`), or
-- a product of small residual primes.
-
-The second regime is the only place the corollary can fail, and only when `φ(q) ≤ |T_j|`.
-
----
-
-## Computational certificate (finite)
-
-Through `j ≤ 2000` and `L ∈ {12, 60, 420, 840, 2520, 5040, 55440, 720720}`:
-
-- every pair with `|T_j| ≥ φ(q)` was checked;
-- **zero** instances had `R` containing every reduced residue class.
-
-This is finite evidence only, not a universal theorem for the boundary regime `φ(q) ≤ |T_j|`.
-
----
-
-## Remaining gap (precise)
-
-Prove: if `R` is a Type A/B pullback of cardinality at most `|T_j|`, then even when `φ(q) ≤ |T_j|`,
+Because `g=gcd(L,m)`,
 
 \[
-U \setminus R \ne \emptyset.
+\gcd(L',q)=1.
 \]
 
-Equivalent geometric form: the image of the two exponent boxes under the affine pullback map never covers the full unit group of `Z/qZ`.
+The congruence
 
----
+\[
+r+Ls\equiv t\pmod m
+\]
 
-## Conditional C1 theorem
+is equivalent to
 
-Assume the gap above. Then every directly novel candidate with `|N^{act}| = 1` admits a reduced safe parameter at the unique active layer. With the parent character-shield extension and fiber reverse construction, that candidate is reduced-realizable, and Dirichlet supplies infinitely many exact-depth primes.
+\[
+L's\equiv c\pmod q,
+\]
+
+which has the unique solution
+
+\[
+s\equiv c(L')^{-1}\pmod q.
+\]
+
+Thus every compatible trap gives exactly one forbidden parameter class, so `Psi` is surjective onto `R_{j,r}`.
+
+If `Psi(t_1)=Psi(t_2)`, then
+
+\[
+(t_1-t_2)/g\equiv0\pmod q,
+\]
+
+hence
+
+\[
+t_1\equiv t_2\pmod{gq}=\pmod m.
+\]
+
+Therefore the two trap residues are identical in `Z/mZ`. So `Psi` is injective. QED.
+
+### Correction to the former draft
+
+The earlier version said distinct compatible traps could collide on the same parameter class. They cannot. The pullback is an exact affine relabeling of the compatible trap fiber.
+
+## 3. Actual reducedness is a condition on x, not on s
+
+The earlier draft called
+
+\[
+\gcd(s,q)=1
+\]
+
+"reducedness." That is not the relevant arithmetic condition.
+
+What matters for eventual prime realization is that
+
+\[
+x=r+Ls
+\]
+
+be coprime to the modulus used for the final arithmetic progression.
+
+For the prime divisors of `q`, define
+
+\[
+P_{\rm free}=\{p:p\mid q,\ p\nmid L\}.
+\]
+
+If `p|q` and `p|L`, then
+
+\[
+x\equiv r\pmod p,
+\]
+
+and `gcd(r,L)=1` makes `x` automatically nonzero modulo `p` for every parameter `s`.
+
+If `p|q` and `p∤L`, then `L` is invertible modulo `p` and
+
+\[
+r+Ls\equiv0\pmod p
+\]
+
+excludes exactly one parameter residue class modulo `p`.
+
+By CRT, the number of parameter classes modulo `q` that are reduced at every prime dividing `q` is therefore
+
+\[
+\boxed{
+A(q,L)
+=
+q\prod_{\substack{p\mid q\\p\nmid L}}
+\left(1-\frac1p\right).
+}
+\]
+
+This is the correct local reduced-parameter count.
+
+It equals `phi(q)` only in the special case that **every** prime divisor of `q` is absent from `L`.
+
+## 4. Correct pigeonhole corollary
+
+### Corollary
+
+If
+
+\[
+\boxed{|R_{j,r}|<A(q,L),}
+\]
+
+then at least one exact trap-avoiding parameter class is reduced at every prime dividing `q`.
+
+In particular, the sufficient bound
+
+\[
+\boxed{|T_j|<A(q,L)}
+\]
+
+also forces a reduced local escape.
+
+This is elementary pigeonhole using the correct reduced set.
+
+## 5. Why the unique-active case is now completely solved locally
+
+For
+
+\[
+|\mathcal N^{\rm act}_{k,r}|=1,
+\]
+
+the unique-active valuation theorem gives
+
+\[
+q=p\quad\text{or}\quad p^2.
+\]
+
+### Class A
+
+If `p|L`, then
+
+\[
+A(q,L)=q.
+\]
+
+Direct novelty says
+
+\[
+R\ne\mathbb Z/q\mathbb Z,
+\]
+
+so
+
+\[
+|R|<q=A(q,L).
+\]
+
+A reduced exact local escape follows immediately.
+
+### Class B
+
+If `p∤L`, then necessarily
+
+\[
+q=p^2,
+\qquad p\ge11.
+\]
+
+The stronger compatible-fiber estimate proved in
+[SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md](SINGLE-ACTIVE-REDUCED-ESCAPE-THEOREM.md) gives
+
+\[
+|R|\le\frac{p^2+3}{2}.
+\]
+
+Here
+
+\[
+A(p^2,L)=p^2-p,
+\]
+
+and
+
+\[
+\frac{p^2+3}{2}<p^2-p.
+\]
+
+Therefore a reduced exact local escape also exists in Class B.
+
+Hence the old boundary problem
+
+> can the unique active Type A/B pullback cover every reduced parameter class?
+
+is closed:
+
+\[
+\boxed{\text{No, not when }|N^{act}|=1.}
+\]
+
+## 6. What remains open in C1
+
+The local active row is no longer the obstruction.
+
+The `k<=1500` census shows that nonfixed exact rows dominate the surviving residual system after fiber peeling. Full C1 therefore asks whether the guaranteed active-row escape can be coordinated with **all surviving nonfixed rows simultaneously**.
+
+That global coordination question remains open.
+
+The former instruction to prove a standalone "two-box pullback never covers all units" lemma is therefore no longer the primary C1 wall. It was also phrased using the wrong notion of reduced parameter.
+
+## 7. General usefulness beyond C1
+
+The exact identity
+
+\[
+|R_{j,r}|=|U_{j,r}|
+\]
+
+and the reduced-parameter count
+
+\[
+A(q,L)
+=
+q\prod_{p\mid q,\ p\nmid L}(1-1/p)
+\]
+
+remain useful for multi-row residual systems.
+
+They separate two independent questions:
+
+1. **trap-fiber size:** how many parameter classes a row forbids;
+2. **reducedness geometry:** which prime coordinates actually move with the parameter.
+
+That distinction should be preserved in all later Class-C proofs.
