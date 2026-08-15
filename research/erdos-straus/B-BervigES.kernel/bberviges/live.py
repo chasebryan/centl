@@ -438,6 +438,7 @@ def cmd_menu() -> int:
     print(f"  collecting {collect_label(seed)}")
     print()
     print("  [c] cbap      letter targeting (C; start 0 / resume)")
+    print("  [i] cbis      ES+ inverse sieve (C; letters only)")
     print("  [a] all three file GOOD, GREAT, and LETTER")
     print("  [t] letters   file LETTER only (does not grow GREAT/GOOD)")
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
@@ -460,6 +461,12 @@ def cmd_menu() -> int:
         binary = Path(__file__).resolve().parents[2] / "cbap.kernel" / "cbap"
         if not binary.is_file():
             print("  build first: make -C research/erdos-straus/cbap.kernel")
+            return cmd_menu()
+        return subprocess.call([str(binary)])
+    if choice in {"i", "cbis"}:
+        binary = Path(__file__).resolve().parents[2] / "cbis.kernel" / "cbis"
+        if not binary.is_file():
+            print("  build first: make -C research/erdos-straus/cbis.kernel")
             return cmd_menu()
         return subprocess.call([str(binary)])
     if choice in {"a", "all", "all three"}:

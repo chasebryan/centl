@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **cbis.kernel** (CB Inverse Sieve) implements the ES+ letter
+  equation: it builds \(\mathcal C_K\) from \(C\) and stores only
+  \(\Lambda_K\). `./centl es cbis` starts at 0 and resumes.
 - ES+ records the letter equation: \(\Lambda_K\) is the complement of
   the inverse signed-box cover. The note is
   `research/erdos-straus/ES-plus/LETTER-EQUATION.md`. Mathematics only.

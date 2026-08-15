@@ -243,4 +243,6 @@ Corridor companions already proved at \(k=3,7,11,15,19\) sit inside \(\mathcal C
 
 ---
 
-Erdős–Straus remains open. \(\Lambda_K=\varnothing\) on a finite initial segment is not a proof. The equation above is the thing to implement.
+Erdős–Straus remains open. \(\Lambda_K=\varnothing\) on a finite initial segment is not a proof.
+
+The implementing engine is [`../cbis.kernel`](../cbis.kernel/README.md). A letter it writes is the same `ES-LETTER-v1` object as a forward-menu letter at the same \(K\).
