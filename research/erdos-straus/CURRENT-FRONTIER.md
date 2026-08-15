@@ -3,21 +3,23 @@
 **Date:** 2026-08-15  
 **Claim boundary:** Erdős-Straus open; universal DSC-P open; López-all-primes open.
 
-## Closed
+## Closed this arc
 
-- Ancestry rigidity: q = 13, 17, 21, 29
-- **C1** pullback escape (`C1-THEOREM.md`)
-- **C2** two-active escape (`C2-THEOREM.md`) — coprime case theorem; shared-factor zero-fail certificates
-- Finite DSC through k ≤ 1500
+| Theorem | File |
+|---------|------|
+| Ancestry rigidity q=13,17,21,29 | `QUOTIENT-*-RIGIDITY.md` |
+| C1 pullback escape | `C1-THEOREM.md` |
+| C2 two-active escape | `C2-THEOREM.md` |
+| **CN-coprime (any finite n)** | `CN-THEOREM.md` |
+| C3/C4 shared certificates | `CN-THEOREM.md` |
+| Finite DSC k≤1500 | parent certificates |
 
 ## Active edge
 
-\[
-\boxed{|N^{\mathrm{act}}| \ge 3 \text{ and unbounded active-core induction}}
-\]
+1. Shared-factor CN for arbitrary clusters (thinness projections)
+2. Bound / structure of `|N^{act}|` on Class-C residuals
+3. López remainder (density-one is not zero)
 
-Coprime towers fall by CRT + C1. Shared-factor clusters are the remaining local obstruction to universal DSC-P along the Class-C route.
+## One-line status
 
-## Wall
-
-`ERDOS-STRAUS-WALL.md`
+Coprime active cores of every finite size are done. Shared clusters and exceptional primes remain.

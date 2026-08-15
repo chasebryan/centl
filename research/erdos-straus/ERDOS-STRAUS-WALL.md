@@ -2,19 +2,21 @@
 
 **Status: OPEN**
 
-## Closed on the Type A/B route
+## Closed on this route
 
 - Density-one Type A/B coverage of primes
 - Finite DSC through k ≤ 1500
-- Ancestry rigidity (q = 13,17,21,29)
-- **C1** single-active pullback escape
-- **C2** two-active escape (coprime proved; shared certified)
+- Ancestry rigidity (13,17,21,29)
+- C1, C2, **CN-coprime for all finite n**
+- C3/C4 shared-factor certificates (0 failures)
 
-## Still required for ES
+## Still required
 
-1. Escape for all finite active-core sizes (induction past C2)
-2. Universal DSC-P
-3. López for every prime
-4. Composite n
+1. Shared-factor CN in full generality
+2. Universal DSC-P (all residual geometries)
+3. López Type A/B for **every** prime
+4. Composite `n`
 
-C1 and C2 are necessary bricks. They do not finish the wall.
+## Honest floor
+
+Finite active cores with pairwise-coprime pullback moduli are reduced-realizable. That is a genuine infinite DSC-P fragment. It is not Erdős-Straus.
