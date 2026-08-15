@@ -1,23 +1,15 @@
-<p align="center">
+<p>
   <img src="assets/branding/fcf-centl-banner.png" alt="Free Computation Foundation — CENTL">
 </p>
 
-<h1 align="center">CENTL</h1>
+# CENTL
 
-<p align="center">
-  <strong>Exact-first mathematics, physics, and scientific computation.</strong>
-</p>
+**Exact-first mathematics, physics, and scientific computation.**
 
-<p align="center">
-  <em>Good maths should be free.<br>
-  Never manufacture mathematical certainty.</em>
-</p>
+*Good maths should be free.*  
+*Never manufacture mathematical certainty.*
 
-<p align="center">
-  <strong>Oasis v0.15.0 · Al-Nur</strong>
-  · <a href="https://freecomputation.org/">freecomputation.org</a>
-  · Apache-2.0
-</p>
+**Oasis v0.15.0 · Al-Nur** · [freecomputation.org](https://freecomputation.org/) · Apache-2.0
 
 ---
 
@@ -155,4 +147,4 @@ Branding is separate: [LICENSING.md](LICENSING.md).
 
 Developed under the **Free Computation Foundation**.
 
-<p align="center"><strong>Free for science.</strong></p>
+**Free for science.**
