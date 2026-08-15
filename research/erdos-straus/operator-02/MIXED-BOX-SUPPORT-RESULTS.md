@@ -1,39 +1,40 @@
-# Mixed-Box Minimal Support — Finite Results on Parent List
+# Mixed-Box Minimal Support — Finite Results
 
 **Author:** Operator-02  
 **Date:** 2026-08-15  
 **Status:** FINITE OBSERVATION  
 **Type:** FINITE OBSERVATION  
-**Parent list:** `../MIXED-BOX-OBSTRUCTION.md` (15 mixed-only failures, j ≤ 20,000)
+**Parent:** `../MIXED-BOX-OBSTRUCTION.md`
 
 ---
 
-## Results
+## Search A — parent list (j ≤ 20,000)
 
-For every parent mixed-only failure, after confirming all prime-power axes land in U_a:
+All 15 published mixed-only failures: **min support = 2**.
 
-| j | a | d | n_failing | min ω(failing e) |
-|--:|--:|--:|----------:|-----------------:|
-| 696 | 6 | 23 | 2 | **2** |
-| 1180 | 10 | 39 | 1 | **2** |
-| 2076 | 6 | 23 | 1 | **2** |
-| 2324 | 14 | 55 | 1 | **2** |
-| 6408 | 18 | 71 | 4 | **2** |
-| 7044 | 6 | 23 | 1 | **2** |
-| 8319 | 3 | 11 | 1 | **2** |
-| 9592 | 22 | 87 | 2 | **2** |
-| 10024 | 14 | 55 | 2 | **2** |
-| 10632 | 6 | 23 | 2 | **2** |
-| 10740 | 30 | 119 | 3 | **2** |
-| 12702 | 6 | 23 | 2 | **2** |
-| 16152 | 6 | 23 | 2 | **2** |
-| 19752 | 12 | 47 | 1 | **2** |
-| 19869 | 3 | 11 | 1 | **2** |
+## Search B — independent enumeration j ≤ 50,000
 
-**No support-3 counterexample** on the parent published list.
+Among non-squarefree moduli 4j−1:
+
+| Class | Count |
+|-------|------:|
+| Exact projection contained | 2,705 |
+| Axis (prime-power) failure visible | 6,736 |
+| Mixed-only failure | **25** |
+| Mixed-only with min support ≥ 3 | **0** |
+
+Min-support histogram among mixed-only: `{2: 25}`.
+
+Additional mixed-only j beyond parent list (partial): 21009, 21396, 30040, 31165, 33940, …
 
 ---
 
-## Boundary
+## Interpretation
 
-Does not prove that every mixed-box defect is witnessed by a support-≤2 divisor. Extending the search range remains open. A single support-3 example anywhere would falsify the bounded-support conjecture.
+Through j ≤ 50,000 every mixed-box defect is witnessed by a divisor with exactly two distinct prime factors. The bounded-support conjecture (support ≤ 2) **survives** this range.
+
+---
+
+## Claim boundary
+
+Finite only. Not a theorem. A single support-3 example at larger j would falsify the conjecture. Coordinator may promote to theorem-candidate only with a proof or much larger certified range.
