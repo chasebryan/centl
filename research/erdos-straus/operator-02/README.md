@@ -17,6 +17,7 @@ Rules of engagement (strict):
 - Work only from the readable resources currently present in the repository.
 - Any code, lemmas, or notes produced here are subordinate and must be clearly labeled as Operator-02 material.
 - Coupling to the main program is by reference only.
+- Every finished piece is uploaded to `main` concurrently.
 
 ## Coupling to the main program
 
@@ -34,20 +35,22 @@ This container is intentionally coupled to the following authoritative documents
 
 No content from those files is copied or rewritten here. Citations are by path only.
 
-## Operator-02 activity log
+## Complete document inventory
 
-| Date       | Activity                                                                 | Document |
-|------------|--------------------------------------------------------------------------|----------|
-| 2026-08-14 | Container established; initial independent reading of frontier and tools | `ANALYSIS-2026-08-14.md`, `NEXT-TARGETS.md` |
-| 2026-08-14 | Fiber-kernel residual structure analysis                                 | `FIBER-KERNEL-RESIDUALS.md` |
-| 2026-08-14 | Structural notes on dominant residual signature {3,11,13}                | `RESIDUAL-SIGNATURE-31113.md` |
-| 2026-08-14 | Character-shield / fiber-kernel interaction partition                    | `CHARACTER-FIBER-INTERACTION.md` |
-| 2026-08-14 | Ancestry family q = 5 structural questions                               | `ANCESTRY-Q5-NOTES.md` |
-| 2026-08-14 | Structural notes on second dominant residual signature                   | `RESIDUAL-SIGNATURE-357.md` |
-| 2026-08-14 | Working synthesis of the residual obstruction after both filters         | `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` |
-| 2026-08-14 | Census template for future primary fiber/character output                | `CENSUS-TEMPLATE.md` |
-| 2026-08-14 | Arithmetic exploration of q = 5 full-shadow condition                    | `ANCESTRY-Q5-ARITHMETIC.md` |
-| 2026-08-14 | Running status snapshot                                                  | `STATUS-2026-08-14.md` |
+| File | Purpose |
+|------|---------|
+| `README.md` | This charter |
+| `ANALYSIS-2026-08-14.md` | Independent reading of frontier and tools |
+| `NEXT-TARGETS.md` | Prioritized analysis queue |
+| `FIBER-KERNEL-RESIDUALS.md` | Compression cascade and residual structure |
+| `RESIDUAL-SIGNATURE-31113.md` | Notes on residual signature {3,11,13} |
+| `RESIDUAL-SIGNATURE-357.md` | Notes on residual signature {3,5,11,13,17,19,23} |
+| `CHARACTER-FIBER-INTERACTION.md` | Classes A–D; Class C as residual obstruction |
+| `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` | Working picture after both sufficient filters |
+| `ANCESTRY-Q5-NOTES.md` | Structural questions for q = 5 family |
+| `ANCESTRY-Q5-ARITHMETIC.md` | Necessary conditions for full shadowing |
+| `CENSUS-TEMPLATE.md` | Template for future primary-output census |
+| `STATUS-2026-08-14.md` | Running inventory and open queue |
 
 ## Claim discipline
 
