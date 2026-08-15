@@ -1,0 +1,76 @@
+name: CENTL Erdős-Straus C1 conditioned fiber
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_artifact_id:
+        description: Frozen direct-shadow k1500 artifact ID
+        required: false
+        default: "9238241616"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/c1_conditioned_fiber.py'
+      - 'research/erdos-straus/verify_c1_conditioned_fiber.py'
+      - 'research/erdos-straus/C1-CONDITIONED-FIBER-31113.md'
+      - '.github/workflows/erdos-straus-c1-conditioned-fiber.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  conditioned-fiber:
+    name: Replay and independently verify C1 conditioned fibers
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SOURCE_ARTIFACT_ID: ${{ github.event.inputs.source_artifact_id || '9238241616' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download frozen k1500 source artifact
+        run: |
+          mkdir -p source-output conditioned-output
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" > source.zip
+          unzip -q source.zip -d source-output
+          test -f source-output/direct-shadow-completeness.json
+
+      - name: Run primary conditioned-fiber analyzer
+        run: python3 research/erdos-straus/c1_conditioned_fiber.py --out source-output
+
+      - name: Run independent conditioned-fiber verifier
+        run: python3 research/erdos-straus/verify_c1_conditioned_fiber.py --out source-output
+
+      - name: Freeze certificate bundle
+        run: |
+          cp source-output/c1-conditioned-fiber.json conditioned-output/
+          cp source-output/c1-conditioned-fiber-report.md conditioned-output/
+          cp source-output/c1-conditioned-fiber-independent-verifier.json conditioned-output/
+          cat > conditioned-output/provenance.txt <<EOF
+          source_artifact_id=${SOURCE_ARTIFACT_ID}
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          EOF
+          cd conditioned-output
+          sha256sum c1-conditioned-fiber.json \
+                    c1-conditioned-fiber-report.md \
+                    c1-conditioned-fiber-independent-verifier.json \
+                    provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat conditioned-output/c1-conditioned-fiber-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload conditioned-fiber certificate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-c1-conditioned-fiber-${{ github.sha }}
+          path: conditioned-output/
+          if-no-files-found: error
+          retention-days: 90
