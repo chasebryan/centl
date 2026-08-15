@@ -22,3 +22,12 @@ research/erdos-straus/findings/.catalog.lock
 research/erdos-straus/findings/log.jsonl
 research/erdos-straus/findings/counts.json
 research/erdos-straus/findings/catalog.jsonl
+research/erdos-straus/findings/.pack/
+research/erdos-straus/findings/great.jsonl
+research/erdos-straus/findings/good.jsonl
+research/erdos-straus/findings/great/*.json
+research/erdos-straus/findings/great/*.md
+research/erdos-straus/findings/good/*.json
+research/erdos-straus/findings/good/*.md
+research/erdos-straus/findings/letters/*.json
+research/erdos-straus/findings/letters/*.md

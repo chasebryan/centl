@@ -9,6 +9,7 @@ It never claims a universal proof from a finished finite hunt.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -21,8 +22,9 @@ if not BB_ROOT.exists():
 sys.path.insert(0, str(BB_ROOT))
 
 from bberviges.cc_bridge import cc_binary, solve_via_cc  # noqa: E402
-from bberviges.findings import FINDINGS, ingest_cc_blob  # noqa: E402
+from bberviges.findings import FINDINGS, compact_library, ingest_cc_blob  # noqa: E402
 from bberviges.live import cmd_go, cmd_hunts, cmd_menu, cmd_seed, print_look  # noqa: E402
+from bberviges.store import fetch_grades, find_record, publish_release, render_record  # noqa: E402
 from bberviges.seed import (  # noqa: E402
     format_roster,
     format_seed,
@@ -156,6 +158,18 @@ def add_hunt_flags(p: argparse.ArgumentParser) -> None:
         dest="hunt_id",
         help="resume this named hunt (see: centl es hunts)",
     )
+    collect = p.add_mutually_exclusive_group()
+    collect.add_argument(
+        "--letters-only",
+        action="store_true",
+        help="file only LETTER; do not write GOOD or GREAT",
+    )
+    collect.add_argument(
+        "--all",
+        action="store_true",
+        dest="collect_all",
+        help="file GOOD, GREAT, and LETTER (default unless the seed says otherwise)",
+    )
 
 
 def main() -> None:
@@ -226,6 +240,28 @@ def main() -> None:
     p_seed.add_argument("action", nargs="?", choices=("reset", "list"))
     p_seed.add_argument("--hunt", default=None, dest="hunt_id")
 
+    sub.add_parser(
+        "compact",
+        help="fold loose GREAT/GOOD files into the compact ledger and delete the pile",
+    )
+    p_fetch = sub.add_parser(
+        "fetch",
+        help="download published findings; they are not in a git clone",
+    )
+    p_fetch.add_argument(
+        "grade",
+        nargs="*",
+        choices=("great", "good", "letters", "all"),
+        help="which archives to fetch (default: all)",
+    )
+    p_show = sub.add_parser("show", help="print one compact finding by id")
+    p_show.add_argument("ident")
+    p_pub = sub.add_parser(
+        "publish-findings",
+        help="pack the ledgers and upload them as a GitHub Release (not Latest)",
+    )
+    p_pub.add_argument("--tag", default=None)
+
     args = ap.parse_args()
     os.environ.setdefault(
         "CC_KERNEL_LEDGER",
@@ -287,8 +323,29 @@ def main() -> None:
                 menu_after=not once,
                 persist_step=persist_step,
                 hunt_id=getattr(args, "hunt_id", None),
+                letters_only=getattr(args, "letters_only", False),
+                collect_all=getattr(args, "collect_all", False),
             )
         )
+    if args.cmd == "compact":
+        report = compact_library()
+        print(json.dumps(report, indent=2, sort_keys=True))
+        raise SystemExit(0)
+    if args.cmd == "fetch":
+        done = fetch_grades(FINDINGS, list(args.grade or []))
+        print("fetched:", ", ".join(done) if done else "(nothing)")
+        raise SystemExit(0)
+    if args.cmd == "show":
+        rec = find_record(FINDINGS, args.ident)
+        if rec is None:
+            print(f"no finding {args.ident}", file=sys.stderr)
+            raise SystemExit(2)
+        print(render_record(rec))
+        raise SystemExit(0)
+    if args.cmd == "publish-findings":
+        remote = publish_release(FINDINGS, tag=args.tag)
+        print(json.dumps(remote, indent=2, sort_keys=True))
+        raise SystemExit(0)
     if args.cmd == "hunt":
         extra = [
             "--start",

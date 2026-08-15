@@ -16,6 +16,14 @@ from pathlib import Path
 from .arithmetic import HARD
 from .letter_id import finding_id
 from .locks import FileLock
+from .store import (
+    append_record,
+    compact_loose,
+    count_records,
+    ledger_has,
+    record_from_parts,
+    tail_records,
+)
 from .witness import Witness, make_witness, verify_witness
 
 ES_ROOT = Path(__file__).resolve().parents[2]
@@ -300,9 +308,13 @@ def _slug(parts: list[str]) -> str:
 
 def write_finding(event: dict, tags: list[str], grade: str) -> Path:
     root = findings_root()
-    folder = {"good": "good", "great": "great", "letter": "letters"}[grade]
     ident = finding_id(grade, tags, event)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    if grade in {"great", "good"}:
+        rec = record_from_parts(event, tags, grade, ident, stamp)
+        path = append_record(root, rec)
+        return path
+    folder = {"letter": "letters"}[grade]
     path = root / folder / f"{ident['display']}.md"
     title = {
         "letter": "LETTER",
@@ -393,9 +405,9 @@ def rebuild_index(cat: dict) -> None:
         "",
         "Read [`START-HERE.md`](START-HERE.md) first.",
         "",
-        f"- letters: {sum(1 for i in cat['items'] if i['grade']=='letter')}",
-        f"- great: {sum(1 for i in cat['items'] if i['grade']=='great')}",
-        f"- good: {sum(1 for i in cat['items'] if i['grade']=='good')}",
+        f"- letters: {cat.get('letter_count', sum(1 for i in cat['items'] if i.get('grade')=='letter'))}",
+        f"- great: {cat.get('great_count', sum(1 for i in cat['items'] if i.get('grade')=='great'))}",
+        f"- good: {cat.get('good_count', sum(1 for i in cat['items'] if i.get('grade')=='good'))}",
         f"- record first-hit k: {cat['records'].get('max_shift_k', 0)}",
         f"- largest cleared bound: {cat['records'].get('max_cleared_bound', 0)}",
         "",
@@ -404,9 +416,10 @@ def rebuild_index(cat: dict) -> None:
     ]
     for item in reversed(cat["items"][-200:]):
         num = item.get("number") if item.get("grade") == "letter" else ""
+        loc = item.get("file") or item.get("id") or ""
         lines.append(
-            f"| {item['grade']} | {item.get('n','')} | {num} | "
-            f"{', '.join(item['tags'])} | `{item['file']}` |"
+            f"| {item.get('grade','')} | {item.get('n','')} | {num} | "
+            f"{', '.join(item.get('tags') or [])} | `{loc}` |"
         )
     index = root / "INDEX.md"
     tmp = root / f"INDEX.md.tmp.{os.getpid()}"
@@ -445,18 +458,29 @@ def file_event(event: dict) -> dict | None:
         grade = grade_of(tags)
         if grade is None:
             return None
+        if event.get("type") == "cleared_bound" or tags == ["cleared_bound"]:
+            bound = int(event.get("bound") or 0)
+            if bound > int(stats.get("max_cleared_bound") or 0):
+                stats["max_cleared_bound"] = bound
+                save_stats(stats)
+            return None
+        if grade in {"great", "good"} and os.environ.get("ES_LETTERS_ONLY"):
+            return None
         n = _as_int(event.get("n") or event.get("p") or event.get("bound"))
         ident = finding_id(grade, tags, event)
-        folder = {"good": "good", "great": "great", "letter": "letters"}[grade]
-        dest = findings_root() / folder / f"{ident['display']}.md"
-        if dest.is_file():
+        root = findings_root()
+        if grade == "letter":
+            dest = root / "letters" / f"{ident['display']}.md"
+            if dest.is_file():
+                return None
+        elif ledger_has(root, grade, ident["display"]):
             return None
         path = write_finding(event, tags, grade)
         rec = {
             "grade": grade,
             "tags": tags,
             "n": n,
-            "file": str(path.relative_to(findings_root())),
+            "file": str(path.relative_to(root)),
             "method": event.get("method"),
             "id": ident["display"],
             "number": ident["number"],
@@ -472,17 +496,14 @@ def file_event(event: dict) -> dict | None:
             k_int = None
         if k_int is not None and k_int > int(stats.get("max_shift_k") or 0):
             stats["max_shift_k"] = k_int
-        if event.get("type") == "cleared_bound":
-            bound = int(event.get("bound") or 0)
-            if bound > int(stats.get("max_cleared_bound") or 0):
-                stats["max_cleared_bound"] = bound
         stats["since_rebuild"] = int(stats.get("since_rebuild") or 0) + 1
         save_stats(stats)
-        with catalog_jsonl_path().open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(rec, sort_keys=True) + "\n")
-        log = findings_root() / "log.jsonl"
-        with log.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"grade": grade, "tags": tags, "event": event}) + "\n")
+        if grade == "letter":
+            with catalog_jsonl_path().open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, sort_keys=True) + "\n")
+            log = root / "log.jsonl"
+            with log.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({"grade": grade, "tags": tags, "event": event}) + "\n")
         if stats["since_rebuild"] >= 50 or grade == "letter":
             _rebuild_catalog_unlocked(stats)
             stats["since_rebuild"] = 0
@@ -491,16 +512,63 @@ def file_event(event: dict) -> dict | None:
 
 
 def _rebuild_catalog_unlocked(stats: dict) -> None:
-    """Rebuild INDEX.md from the tiny stats file. Do not rewrite catalog.json here."""
+    """Rebuild INDEX.md from stats plus the compact ledgers. No catalog.json rewrite."""
+    root = findings_root()
+    items = tail_records(root, "great", 80)
+    items.extend(tail_records(root, "good", 40))
+    items.extend(_tail_jsonl(catalog_jsonl_path(), 80))
     cat = {
         "records": {
             "max_shift_k": stats.get("max_shift_k") or 0,
             "max_cleared_bound": stats.get("max_cleared_bound") or 0,
         },
         "methods": list(stats.get("methods") or []),
-        "items": _tail_jsonl(catalog_jsonl_path(), 200),
+        "items": items[-200:],
+        "letter_count": int(stats.get("letter") or 0),
+        "great_count": int(stats.get("great") or 0),
+        "good_count": int(stats.get("good") or 0),
     }
     rebuild_index(cat)
+
+
+def compact_library() -> dict:
+    """Fold loose GREAT/GOOD pair-files into the ledgers and recount."""
+    root = findings_root()
+    with FileLock(catalog_lock_path()):
+        report = compact_loose(root)
+        stats = load_stats()
+        stats["great"] = count_records(root, "great")
+        stats["good"] = count_records(root, "good")
+        if report.get("max_cleared_bound", 0) > int(stats.get("max_cleared_bound") or 0):
+            stats["max_cleared_bound"] = report["max_cleared_bound"]
+        letter_dir = root / "letters"
+        if letter_dir.is_dir():
+            stats["letter"] = sum(
+                1 for p in letter_dir.iterdir() if p.is_file() and p.suffix == ".md"
+            )
+        save_stats(stats)
+        _rebuild_catalog_unlocked(stats)
+        save_catalog(
+            {
+                "records": {
+                    "max_shift_k": stats.get("max_shift_k") or 0,
+                    "max_cleared_bound": stats.get("max_cleared_bound") or 0,
+                },
+                "methods": list(stats.get("methods") or []),
+                "items": _tail_jsonl(catalog_jsonl_path(), 200),
+            }
+        )
+        for name in ("catalog.jsonl", "log.jsonl"):
+            path = root / name
+            if not path.is_file():
+                continue
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except OSError:
+                continue
+            keep = lines[-200:]
+            path.write_text("\n".join(keep) + ("\n" if keep else ""))
+        return report
 
 
 def _tail_jsonl(path: Path, limit: int) -> list[dict]:
@@ -583,10 +651,19 @@ def ingest_obj(obj: dict) -> list[dict]:
 
 
 def latest(grade: str | None = None, limit: int = 20) -> list[dict]:
-    items = _tail_jsonl(catalog_jsonl_path(), max(limit * 8, 80))
-    if not items:
-        items = load_catalog(required=False).get("items") or []
+    root = findings_root()
+    want = None
     if grade:
         want = "letter" if grade in {"letter", "letters"} else grade
-        items = [i for i in items if i.get("grade") == want]
+    items: list[dict] = []
+    if want in {None, "great"}:
+        items.extend(tail_records(root, "great", limit if want else max(limit, 20)))
+    if want in {None, "good"}:
+        items.extend(tail_records(root, "good", limit if want else max(limit, 10)))
+    if want in {None, "letter"}:
+        items.extend(_tail_jsonl(catalog_jsonl_path(), max(limit * 4, 40)))
+        if not items:
+            items.extend(load_catalog(required=False).get("items") or [])
+        if want == "letter":
+            items = [i for i in items if i.get("grade") == "letter"]
     return list(reversed(items[-limit:]))

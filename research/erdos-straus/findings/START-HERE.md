@@ -10,7 +10,15 @@ From the CENTL folder:
 ./centl es
 ```
 
-That opens the menu. Or, without the menu:
+That opens the menu. Choose what to file before you go:
+
+```text
+[a] all three   GOOD, GREAT, and LETTER
+[t] letters     LETTER only — does not grow the GREAT/GOOD ledger
+[g] go
+```
+
+The choice is remembered on that hunt. Or, without the menu:
 
 ```text
 ./centl es go
@@ -66,11 +74,36 @@ The start factor is **not** part of the letter. Two hunts that begin in differen
 
 ## What the three stamps mean
 
-| stamp | folder | meaning |
+| stamp | where it lives | meaning |
 |---|---|---|
-| GOOD | `good/` | A solid, checked identity or a new construction. Worth keeping. |
-| GREAT | `great/` | A hard prime escaped the small theorems, or a Type I rescue, or a new depth record, or a whole bound was cleared. This is the remaining shape of the conjecture. |
-| LETTER | `letters/` | An unsolved hard prime, a broken `a,b ≤ 11` window, or a claimed universal proof. Collect them. Read them. |
+| GOOD | `good.jsonl` | A solid, checked identity or a new construction. Worth keeping. |
+| GREAT | `great.jsonl` | A hard prime escaped the small theorems, a Type I rescue, or a new depth record. One JSON line each — not a pair of files. |
+| LETTER | `letters/` | An unsolved hard prime, a broken `a,b ≤ 11` window, or a claimed universal proof. These stay individual files. |
+
+A cleared bound is the number `max_cleared_bound` in `counts.json`. It is not a new GREAT row on every window.
+
+The GREAT/GOOD ledgers are **not** in a `git clone`. Download them on purpose:
+
+```text
+./centl es fetch
+./centl es fetch great
+./centl es show G-<id>
+```
+
+To hunt without growing the GREAT ledger:
+
+```text
+./centl es go --letters-only
+./centl es go --all
+```
+
+If an old tree still has a `great/` pile of files:
+
+```text
+./centl es compact
+```
+
+That folds witnesses into `great.jsonl` and deletes the pair-files. Do not delete the witnesses themselves unless you only want letters.
 
 The rules are written in `HOW-GRADES-WORK.md`. They are mechanical. The computer is not guessing.
 

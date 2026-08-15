@@ -130,6 +130,7 @@ def default_seed(hunt_id: str = MAIN_HUNT, start_factor: int = 0) -> dict:
         "letter_kind": None,
         "letter_number": None,
         "letters_found": 0,
+        "collect": "all",
         "skipped_unsolved": [],
         "windows_done": 0,
         "updated": None,
@@ -151,7 +152,28 @@ def _normalize(data: dict, hunt_id: str) -> dict:
         base["lane"] = lane_id_for_hunt(hunt_id, int(base["start_factor"]))
     if not isinstance(base.get("skipped_unsolved"), list):
         base["skipped_unsolved"] = []
+    base["collect"] = collect_mode(base)
     return base
+
+
+def collect_mode(seed: dict | None = None) -> str:
+    raw = str((seed or {}).get("collect") or "all").strip().lower()
+    if raw in {"letters", "letter", "l"}:
+        return "letters"
+    return "all"
+
+
+def collect_label(seed: dict | None = None) -> str:
+    if collect_mode(seed) == "letters":
+        return "LETTER only"
+    return "GOOD, GREAT, and LETTER"
+
+
+def set_collect(mode: str, hunt_id: str | None = None) -> dict:
+    seed = load_seed(hunt_id)
+    seed["collect"] = collect_mode({"collect": mode})
+    save_seed(seed)
+    return seed
 
 
 def load_seed(hunt_id: str | None = None) -> dict:
@@ -233,6 +255,8 @@ def initiate_hunt(*, start_factor: int, hunt_id: str | None = None) -> dict:
         seed = load_seed(hunt_id)
         return seed
     seed = default_seed(hunt_id, start_factor)
+    if os.environ.get("ES_LETTERS_ONLY"):
+        seed["collect"] = "letters"
     save_seed(seed)
     return seed
 
@@ -395,6 +419,7 @@ def format_seed(seed: dict) -> str:
         f"Next window: ({lo}, {hi}]   step={step}   kmax={seed.get('kmax')}",
         f"Windows done: {seed.get('windows_done')}",
         f"Letters collected on this hunt: {seed.get('letters_found') or 0}",
+        f"Collect: {collect_label(seed)}",
     ]
     skipped = seed.get("skipped_unsolved") or []
     if skipped:

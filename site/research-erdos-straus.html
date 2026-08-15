@@ -59,7 +59,11 @@
       <pre><code>./centl es go
 ./centl es go --from 0
 ./centl es go 20000000000
+./centl es go --all
+./centl es go --letters-only
+./centl es fetch
 ./centl es hunts</code></pre>
+      <p>GREAT and GOOD records are a compact ledger, not a file pile, and are not part of a git clone. <code>./centl es fetch</code> downloads them on purpose. <code>./centl es go --letters-only</code> collects only LETTERS. A cleared bound is the running <code>max_cleared_bound</code>, not a new GREAT row on every window.</p>
       <p>The hunt is the sequence of intervals <code>(s, s+Δ]</code> with no last interval. It collects letters instead of stopping on the first one. Every letter carries a number that is the first 128 bits of SHA-256 of a fixed description of what was found. Two people who find the same letter on different machines compute the same number and the same file name. The start factor is not part of that identity. A cleared window is a finite certificate, not a proof of the conjecture.</p>
       <p>Primary sources:</p>
       <ul>

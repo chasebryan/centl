@@ -112,13 +112,15 @@ FCF publishes reproducible research candidates. The current program is **Erd≈ës‚
 
 The public library is static HTML. No JavaScript is required.
 
-A public hunt files findings with machine-independent letter numbers. Two named hunts can run in different terminals; a second start does not replace the first.
+A public hunt files findings with machine-independent letter numbers. Two named hunts can run in different terminals; a second start does not replace the first. GREAT records are a compact ledger (not a file pile) and are **not** in a git clone.
 
 ```sh
-./centl es go              # resume the default hunt
-./centl es go --from 0     # another hunt, beginning at the origin
-./centl es go --from N     # another hunt, beginning at any chosen N
-./centl es hunts           # list hunts on this machine
+./centl es go                 # resume the default hunt
+./centl es go --from 0        # another hunt, beginning at the origin
+./centl es go --all           # file GOOD, GREAT, and LETTER
+./centl es go --letters-only  # file LETTER only
+./centl es fetch              # download published letters / greats / goods
+./centl es hunts              # list hunts on this machine
 ```
 
 A finished hunt is not a proof of the conjecture.

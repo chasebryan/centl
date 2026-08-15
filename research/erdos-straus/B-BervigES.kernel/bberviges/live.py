@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import signal
 import subprocess
 import sys
@@ -17,6 +18,8 @@ from .seed import (
     apply_window,
     claim_window,
     cleared_milestones,
+    collect_label,
+    collect_mode,
     format_roster,
     format_seed,
     initiate_hunt,
@@ -29,6 +32,7 @@ from .seed import (
     save_seed,
     seed_lock_path,
     seed_path,
+    set_collect,
 )
 
 
@@ -85,6 +89,7 @@ def _draw_dashboard(state: dict) -> None:
         f"  now at {cur}     window ({lo}, {hi}]",
         f"  scanned {seed.get('scanned_through')}     "
         f"cleared {seed.get('cleared_through')}     kmax {seed.get('kmax')}",
+        f"  collect {collect_label(seed)}",
         bar,
         f"  LETTERS  {counts['letter']:<6}  GREAT  {counts['great']:<6}  "
         f"GOOD  {counts['good']}",
@@ -247,8 +252,18 @@ def cmd_go(
     menu_after: bool = True,
     persist_step: bool = True,
     hunt_id: str | None = None,
+    letters_only: bool = False,
+    collect_all: bool = False,
 ) -> int:
     import os
+
+    if letters_only and collect_all:
+        print("use either --letters-only or --all, not both")
+        return 2
+    if letters_only:
+        os.environ["ES_LETTERS_ONLY"] = "1"
+    elif collect_all:
+        os.environ.pop("ES_LETTERS_ONLY", None)
 
     if random_start:
         start_factor = random_start_factor()
@@ -267,6 +282,16 @@ def cmd_go(
         seed["kmax"] = int(kmax)
     if persist_step and step is not None and step > 0:
         seed["step"] = int(step)
+    if letters_only:
+        seed["collect"] = "letters"
+    elif collect_all:
+        seed["collect"] = "all"
+    if collect_mode(seed) == "letters":
+        os.environ["ES_LETTERS_ONLY"] = "1"
+    else:
+        os.environ.pop("ES_LETTERS_ONLY", None)
+    save_seed(seed)
+    print(f"Collecting {collect_label(seed)}.")
     if cc_binary() is None:
         print("CC.kernel binary missing; run make -C research/erdos-straus/CC.kernel")
         return 2
@@ -409,14 +434,17 @@ def cmd_menu() -> int:
     print(f"  start factor {seed.get('start_factor', 0)}")
     print(f"  scanned through {seed.get('scanned_through')}")
     print(f"  letters in the library: {_counts()['letter']}")
+    print(f"  collecting {collect_label(seed)}")
     print()
+    print("  [a] all three file GOOD, GREAT, and LETTER")
+    print("  [t] letters   file LETTER only (does not grow GREAT/GOOD)")
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
     print("  [0] from 0    another hunt beginning at the origin")
     print("  [n] from N    another hunt at any number you type (0 is allowed)")
     print("  [r] random    another hunt at a random place")
     print("  [h] hunts     list every hunt cursor")
     print("  or type a number directly (0, 1000, 2e9, 20_000_000_000)")
-    print("  [l] letters   collected letters, with numbers")
+    print("  [l] look at letters   collected letters, with numbers")
     print("  [k] look      latest findings")
     print("  [s] seed      show the cursor")
     print("  [q] quit")
@@ -426,6 +454,14 @@ def cmd_menu() -> int:
     except (EOFError, KeyboardInterrupt):
         print()
         return 0
+    if choice in {"a", "all", "all three"}:
+        set_collect("all")
+        os.environ.pop("ES_LETTERS_ONLY", None)
+        return cmd_menu()
+    if choice in {"t", "letter-only", "letters-only", "letters only"}:
+        set_collect("letters")
+        os.environ["ES_LETTERS_ONLY"] = "1"
+        return cmd_menu()
     if choice in {"g", "go", ""}:
         return cmd_go(menu_after=True)
     if choice in {"0", "origin", "from0", "from 0"}:

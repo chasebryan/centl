@@ -35,6 +35,15 @@ From the CENTL root:
 
 `./centl es` opens a menu. `go` is the infinite hunt. Ctrl+C stops it and saves the seed.
 
+GREAT and GOOD records are a compact ledger, not hundreds of thousands of files. They are **not** in a git clone. Fetch them, compact an old pile, or hunt letters only:
+
+```text
+./centl es fetch
+./centl es compact
+./centl es go --all
+./centl es go --letters-only
+```
+
 ---
 
 ## 2. Two kernels
@@ -115,7 +124,7 @@ The three letter rules are mechanical. They are written in [`findings/HOW-GRADES
 | stamp | meaning |
 |---|---|
 | GOOD | A checked hard identity that is not a routine small-shift hit. |
-| GREAT | Escaped the small theorems, Type I only, a deep first hit, or a cleared bound. |
+| GREAT | Escaped the small theorems, Type I only, or a deep first hit. Stored as one line in `findings/great.jsonl`. A cleared bound is the running `max_cleared_bound`, not a new row. |
 | LETTER | Unsolved after the full menu, \(a,b\le 11\) failed, or a claimed universal proof. |
 
 A finding is refused if it claims three denominators that fail \(4xyz = n(yz+xz+xy)\).

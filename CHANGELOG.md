@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The hunt lets the operator file all three stamps or LETTER only.
+  Menu `[a]` / `[t]`, or `./centl es go --all` / `--letters-only`.
+  The choice is stored on that hunt. GREAT/GOOD are compact JSONL, not
+  a pair of files per hit. `./centl es compact` deletes an old file pile.
 - The Erdős–Straus program now has a public infinite hunt (`./centl es go`),
   coupled bb.kernel / CC.kernel engines, resume seeds, and content-addressed
   letter numbers. The record is `research/erdos-straus/ES-HUNT.md`. A finished

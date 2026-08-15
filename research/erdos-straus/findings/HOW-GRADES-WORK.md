@@ -32,6 +32,7 @@ The same letter is the same number on every machine. The hunt's start factor, th
 3. `deep_shift` — first two-target hit has `k ≥ 19`.
 4. `record_shift` — that `k` is larger than any previously filed `k`.
 5. `cleared_bound` — every hard prime below a stated bound has a checked witness.
+   This updates `max_cleared_bound` only. It is not stored as another GREAT row.
 
 ## GOOD
 
