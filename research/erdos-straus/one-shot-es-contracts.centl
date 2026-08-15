@@ -1,0 +1,37 @@
+# Exact algebraic contracts for the one-shot Erdős–Straus attack.
+#
+# These certify identities only. They do NOT certify the universal existence
+# of the integer parameters appearing in those identities.
+
+# 4p+1 factor family:
+# p = 4*u*v - u - v
+# => 4/p = 1/(u*v) + 1/(p*u) + 1/(p*v)
+equal | 4*(u*v)*(p*u)*(p*v) | p*(p*u)*(p*v) + (u*v)*(p*v) + (u*v)*(p*u) | p:rational u:rational v:rational
+
+# Equivalent factorization identity:
+# (4u-1)(4v-1) = 4p+1 when p=4uv-u-v.
+equal | (4*u-1)*(4*v-1) | 4*(4*u*v-u-v)+1 | u:rational v:rational
+
+# p+4 rescue family.
+# q=4*m-1, v*q=m*p+1
+# => 4/p = 1/v + 1/(m*p) + 1/(m*p*v)
+equal | 4*v*m*p*(m*p*v) | p*m*p*(m*p*v) + p*v*(m*p*v) + p*v*m*p | p:rational m:rational v:rational
+
+# General symmetric m-family:
+# m*p = 4*m*u*v-u-v
+# => 4/p = 1/(u*v) + 1/(m*p*u) + 1/(m*p*v)
+equal | 4*(u*v)*(m*p*u)*(m*p*v) | p*(m*p*u)*(m*p*v) + p*(u*v)*(m*p*v) + p*(u*v)*(m*p*u) | p:rational m:rational u:rational v:rational
+
+# Factorization for that family:
+# (4*m*u-1)(4*m*v-1)=4*m^2*p+1 under m*p=4*m*u*v-u-v.
+equal | (4*m*u-1)*(4*m*v-1) | 4*m*(4*m*u*v-u-v)+1 | m:rational u:rational v:rational
+
+# Quadratic-shift c-family:
+# m*p = 4*c*m*d*v-d-v
+# => 4/p = 1/(c*d*v) + 1/(c*m*p*d) + 1/(c*m*p*v)
+equal | 4*(c*d*v)*(c*m*p*d)*(c*m*p*v) | p*(c*m*p*d)*(c*m*p*v) + p*(c*d*v)*(c*m*p*v) + p*(c*d*v)*(c*m*p*d) | p:rational c:rational m:rational d:rational v:rational
+
+# Factorization for the quadratic-shift c-family:
+# (4*c*m*d-1)(4*c*m*v-1)=4*c*m^2*p+1
+# under m*p=4*c*m*d*v-d-v.
+equal | (4*c*m*d-1)*(4*c*m*v-1) | 4*c*m*(4*c*m*d*v-d-v)+1 | c:rational m:rational d:rational v:rational
