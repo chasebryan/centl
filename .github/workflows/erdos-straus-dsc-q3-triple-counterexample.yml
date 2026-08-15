@@ -1,0 +1,107 @@
+name: CENTL Erdős-Straus DSC q=3 triple counterexample
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/DSC-Q3-TRIPLE-COUNTEREXAMPLE.md'
+      - 'research/erdos-straus/dsc_q3_triple_counterexample_verify.cpp'
+      - 'research/erdos-straus/verify_dsc_q3_triple_counterexample.py'
+      - '.github/workflows/erdos-straus-dsc-q3-triple-counterexample.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-counterexample:
+    name: Independently verify primitive q=3 collective shadow
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile exhaustive verifier
+        run: |
+          g++ -O3 -std=c++17 \
+            research/erdos-straus/dsc_q3_triple_counterexample_verify.cpp \
+            -o /tmp/dsc-q3-primary
+
+      - name: Run exhaustive C++ verification
+        run: |
+          mkdir -p dsc-q3-counterexample-output
+          /tmp/dsc-q3-primary \
+            > dsc-q3-counterexample-output/primary.json
+
+      - name: Run independent Python verification
+        run: |
+          python3 research/erdos-straus/verify_dsc_q3_triple_counterexample.py \
+            > dsc-q3-counterexample-output/independent.json
+
+      - name: Enforce exact regression
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('dsc-q3-counterexample-output')
+          p = json.loads((root / 'primary.json').read_text())
+          v = json.loads((root / 'independent.json').read_text())
+
+          assert p['verdict'] == 'VERIFIED', p
+          assert v['verdict'] == 'VERIFIED', v
+
+          for obj in (p, v):
+              assert obj['k'] == 15_290_696, obj
+              assert obj['M'] == 61_162_783, obj
+              assert obj['h'] == 1, obj
+              assert obj['t'] == 61_162_019, obj
+              assert obj['r'] == 41_284_877_761, obj
+              assert obj['L'] == 51_376_737_720, obj
+              assert obj['exact_cardinality_candidates'] == 297, obj
+              assert len(obj['direct_shadows']) == 0 if isinstance(obj['direct_shadows'], list) else obj['direct_shadows'] == 0
+
+          assert p['R25'] == [1]
+          assert p['R70'] == [2]
+          assert p['R187'] == [0]
+          assert v['cover'] == {'25': [1], '70': [2], '187': [0]}
+          assert p['max_tau_before_k'] == 504
+          assert p['max_tau_at'] == 14_414_400
+          assert v['coarse_candidates'] == 111_057
+          PY
+
+      - name: Freeze provenance and checksums
+        run: |
+          cat > dsc-q3-counterexample-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          target_k=15290696
+          EOF
+          cd dsc-q3-counterexample-output
+          sha256sum primary.json independent.json provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: |
+          {
+            echo '## DSC q=3 triple counterexample'
+            echo
+            echo 'Exact target: `k=15,290,696`, `h=1`.'
+            echo
+            echo 'Rows `25,70,187` cover the full corrected q=3 parameter domain while exhaustive verification finds zero direct-shadow sources.'
+            echo
+            echo 'This falsifies universal DSC-0/DSC-P, not Erdős-Straus.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload certificate bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-dsc-q3-triple-counterexample-${{ github.sha }}
+          path: dsc-q3-counterexample-output/
+          if-no-files-found: error
+          retention-days: 90
