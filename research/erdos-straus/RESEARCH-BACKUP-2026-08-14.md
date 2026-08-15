@@ -4,29 +4,37 @@
 **Purpose:** durable checkpoint of the active Type A/B theorem program  
 **Claim boundary:** this checkpoint does not claim a proof of the Erdős-Straus conjecture, universal López Type A/B coverage, or universal Direct-Shadow Completeness.
 
-This file exists specifically so the live research state is recoverable from the repository even if chat context, local scratch files, or workflow artifacts are later unavailable.
+This file exists specifically so the live research state is recoverable from the repository even if chat context, local scratch files, or workflow artifacts later disappear.
 
 ## Canonical research chain
 
 - [WS-CAND-003](../../docs/wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md)
 - [DIAMOND.md](DIAMOND.md)
 - [CURRENT-FRONTIER.md](CURRENT-FRONTIER.md)
+- [DEPTH-SPECTRUM.md](DEPTH-SPECTRUM.md)
+- [SPECTRUM-INFINITE-COINFINITE.md](SPECTRUM-INFINITE-COINFINITE.md)
 - [DIRECT-SHADOW-COMPLETENESS.md](DIRECT-SHADOW-COMPLETENESS.md)
 - [DIRECT-SHADOW-K1000.md](DIRECT-SHADOW-K1000.md)
 - [DIRECT-SHADOW-K1200.md](DIRECT-SHADOW-K1200.md)
+- [FIBER-SELECTOR-K1200.md](FIBER-SELECTOR-K1200.md)
 - [SHADOW-COVER-GEOMETRY.md](SHADOW-COVER-GEOMETRY.md)
-- [ODD-COVERING-BRIDGE.md](ODD-COVERING-BRIDGE.md)
 - [SHADOW-KERNEL.md](SHADOW-KERNEL.md)
 - [FIBER-SHADOW-KERNEL.md](FIBER-SHADOW-KERNEL.md)
-- [SMALL-SELECTOR-HYPOTHESIS.md](SMALL-SELECTOR-HYPOTHESIS.md)
 - [QUADRATIC-TRAP-SIGNATURE.md](QUADRATIC-TRAP-SIGNATURE.md)
-- [DEPTH-SPECTRUM.md](DEPTH-SPECTRUM.md)
-- [SURVIVOR-DENSITY.md](SURVIVOR-DENSITY.md)
+- [CHARACTER-SHIELD-COMPLETENESS.md](CHARACTER-SHIELD-COMPLETENESS.md)
+- [QUADRATIC-SIGNATURE-COSET.md](QUADRATIC-SIGNATURE-COSET.md)
+- [PROPER-JACOBI-ANCESTOR.md](PROPER-JACOBI-ANCESTOR.md)
+- [MULTIPLICATIVE-TRAP-COSET.md](MULTIPLICATIVE-TRAP-COSET.md)
+- [TRAP-QUOTIENT-FACTORIZATION.md](TRAP-QUOTIENT-FACTORIZATION.md)
+- [SQUARE-LIFT-CORE.md](SQUARE-LIFT-CORE.md)
+- [MERSENNE-SHADOW-LATTICE.md](MERSENNE-SHADOW-LATTICE.md)
+- [PRIME-POWER-TRAP-DICHOTOMY.md](PRIME-POWER-TRAP-DICHOTOMY.md)
 - [PRIME-MODULUS-BACKBONE.md](PRIME-MODULUS-BACKBONE.md)
+- [SURVIVOR-DENSITY.md](SURVIVOR-DENSITY.md)
 - [COMPOSITE-CORE.md](COMPOSITE-CORE.md)
 - [PRIOR-ART.md](PRIOR-ART.md)
 
-## Exact finite frontier frozen here
+## Latest fully frozen finite certificate frontier
 
 The completed candidatewise Direct-Shadow attack through `k<=1200` produced:
 
@@ -41,155 +49,286 @@ unresolved reduced candidates:          0
 independent verifier:              VERIFIED
 ```
 
-Thus every directly novel hard-compatible candidate tested through depth 1200 has an explicit reduced avoiding progression and hence an infinite exact-depth prime progression by Dirichlet.
+Every directly novel hard-compatible candidate through depth 1200 therefore has an explicit reduced avoiding progression and an infinite exact-depth prime family by Dirichlet.
 
-This is an exact finite certificate statement only. Universal DSC-P remains open.
-
-## Coordinate-locality result
-
-Across all `41,470` directly novel candidates through `k<=1200`:
-
-```text
-canonical unary-safe basepoint solved: 15,715 / 41,470 = 37.895%
-maximum guided repair count:            9 prime-power coordinates
-```
-
-Cumulative guided repair upper bounds:
-
-```text
-0 changes: 37.895%
-<=1:       71.264%
-<=2:       88.847%
-<=3:       96.122%
-<=4:       98.727%
-<=5:       99.612%
-<=6:       99.908%
-<=7:       99.990%
-<=8:       99.998%
-<=9:      100.000%
-```
-
-The guided-repair count is not asserted minimal. The stored reduced witness guides the replacement values, after which the resulting local assignment is checked exactly.
-
-## Completed automated run provenance
-
-GitHub Actions run:
+Completed workflow provenance:
 
 ```text
 run id:       31846146909
 head commit:  ef88f759a68907e517430e82432c5054f463edc5
 artifact id:  9236427053
+artifact sha256:
+a2479a4113d693af2e647ffc2e007d3d7b1cf628ce7190f72c4ad6282a98ba14
 ```
 
-Artifact ZIP digest:
+This is finite and does not prove universal DSC-P.
+
+## Independent fiber-selector replay of the same frozen bundle
+
+The later theorem-driven replay did not use the stored sequential witness to decide fiber peelability or selector success.
+
+Exact augmented fiber peeling completely removed the residual system for
+
+\[
+\boxed{26,044/41,470}
+\]
+
+candidates.
+
+All remaining
+
+\[
+\boxed{15,426/15,426}
+\]
+
+nonempty fiber kernels were solved by the fixed selector menu
+
+\[
+\boxed{0,\pm1,\ldots,\pm64}.
+\]
+
+Largest selector radius actually required:
+
+\[
+\boxed{54}.
+\]
+
+Unresolved residual kernels:
+
+\[
+\boxed{0}.
+\]
+
+Every nonempty residual kernel in this finite replay used primes at most `23`.
+
+See [FIBER-SELECTOR-K1200.md](FIBER-SELECTOR-K1200.md).
+
+## Exact theorem expansion frozen after the k<=1200 run
+
+### Character obstruction completeness
+
+At the scalar Jacobi/squareclass level,
+
+\[
+\boxed{W_k\cap F_k=U_k.}
+\]
+
+Thus collective quadratic-character inconsistency occurs if and only if one fixed-only earlier layer is already Jacobi-negative. There is no genuinely collective new obstruction at this scalar character level.
+
+### Full local quadratic-signature coset
+
+If
+
+\[
+m_k=\prod p_i^{a_i},
+\]
+
+and `lambda` records the vector of local Legendre signs, then
+
+\[
+\boxed{\lambda(T_k)=\eta_k+V_k.}
+\]
+
+The trap signatures form one exact affine subspace. The scalar Jacobi `-1` theorem is only one projection.
+
+A finite replay through `k<=1200` found:
 
 ```text
-sha256:a2479a4113d693af2e647ffc2e007d3d7b1cf628ce7190f72c4ad6282a98ba14
+full local quadratic-signature shield solved: 30,786
+direct signature residual:                    10,684
+collective linear inconsistency:                   0
+unresolved non-direct signature systems:           0
 ```
 
-The run completed successfully through discovery, independent verification, coordinate-core proof mining, CENTL exact symbolic certification, per-file SHA-256 verification, and artifact upload.
+This finite absence of collective signature obstruction is not yet a universal theorem.
 
-## Exact theorem machinery now in the repository
+### Proper Jacobi ancestor theorem
 
-### Prime-power peeling
-
-For a candidate pullback system with parameter moduli `q_j`, the local load
+If the local signature codimension satisfies
 
 \[
-\lambda_p=\sum_{p\mid q_j}\frac{|R_j|}{p^{v_p(q_j)}}
+\kappa(k)\ge2,
 \]
 
-is an exact sufficient elimination criterion: `lambda_p<1` makes the `p` coordinate peelable. The augmented form includes the one local residue excluded by reducedness.
-
-### Fiber peeling
-
-Writing `q_j=p^a c`, the sharper fiber width `f_{j,p}` records the maximum number of forbidden `p^a` residues above one fixed value modulo `c`. The exact fiber load
+then there is a proper squarefree divisor
 
 \[
-\Lambda_p=\sum_{p\mid q_j}\frac{f_{j,p}}{p^{v_p(q_j)}}
+d\mid\operatorname{rad}(4k-1),
+\qquad d<4k-1,
+\qquad d\equiv3\pmod4,
 \]
 
-is therefore strictly sharper. If the augmented `Lambda_p*<1`, the coordinate is peelable while preserving reduced prime realization.
+such that every Type A/B trap at depth `k` is Jacobi-negative modulo `d`.
 
-### Quadratic trap signature
+Thus every higher-codimension quadratic trap envelope has a strictly earlier Jacobi ancestor.
 
-For `m=4k-1` and every divisor `e|k`, the exact theorem now recorded in the repository is
+### Multiplicative trap coset
+
+Let
+
+\[
+H_k=\langle\ell\bmod(4k-1):\ell\mid k,\ \ell\text{ prime}\rangle.
+\]
+
+Then
+
+\[
+\boxed{T_k\subseteq-H_k}
+\]
+
+and
+
+\[
+\boxed{-1\notin H_k.}
+\]
+
+### Exact quotient factorization
+
+Let
+
+\[
+\iota(k)=[(\mathbb Z/(4k-1)\mathbb Z)^\times:H_k]
+\]
+
+and let `kappa(k)` be the quadratic-signature codimension. Then
+
+\[
+\boxed{\iota(k)=2^{\kappa(k)}\Theta(k)}
+\]
+
+with
+
+\[
+\Theta(k)=[\ker\lambda:H_k\cap\ker\lambda].
+\]
+
+Therefore the exact unit trap density factors as
 
 \[
 \boxed{
-\left(\frac{-e}{m}\right)
-=\left(\frac{-4e}{m}\right)
-=-1.
+\frac{|T_k|}{\varphi(4k-1)}
+=2^{-\kappa(k)}\Theta(k)^{-1}\frac{|T_k|}{|H_k|}.
 }
 \]
 
-Thus every Type A/B trap lies in the Jacobi-negative part of the unit group. This yields the **quadratic character shield**: if the candidate progression can be assigned local Legendre signs making every earlier modulus have Jacobi sign `+1`, then all earlier Type A/B traps are avoided automatically. The sign-selection problem is a finite linear system over `F_2`.
+This separates quadratic-signature filtering, higher-order multiplicative filtering, and exact divisor sparsity.
 
-A solvable character system therefore gives a reduced exact-depth progression independently of the stored sequential witness.
+### Square-lift core
 
-### Small-selector residual-kernel experiment
-
-After exact fiber peeling, [`shadow_small_selector_analyzer.py`](shadow_small_selector_analyzer.py) tests whether the residual small-prime kernel is already solved by a fixed menu
+If an earlier layer is fixed at squareclass level, every prime outside the target progression modulus occurs to even exponent. The post-character residual therefore has the form
 
 \[
-0,\pm1,\ldots,\pm64.
+q_j=c_js_j^2
 \]
 
-Selector success is an independent constructive existence proof when combined with reverse fiber extension. Failure of the bounded menu is only a proof-mining failure, not a DSC-P counterexample.
+with the new-prime part carried by squares. The remaining character residual is a higher `p`-adic lifting problem rather than another free quadratic-sign problem.
+
+## Infinite exact structural-gap theorem
+
+For power-of-two depths
+
+\[
+k=2^a,
+\qquad m=2^{a+2}-1,
+\]
+
+we proved
+
+\[
+\boxed{T_{2^a}=-\langle2\rangle.}
+\]
+
+If
+
+\[
+a+2\mid b+2,
+\qquad a<b,
+\]
+
+then
+
+\[
+\boxed{T_{2^b}\text{ is completely directly shadowed by }T_{2^a}.}
+\]
+
+Hence infinitely many depths can never be minimal `C_AB` values for any integer.
+
+For every `b>=3` with `b+2` composite,
+
+\[
+\boxed{2^b\text{ is structurally impossible as a minimal Type A/B depth}.}
+\]
+
+Within the exponent-indexed power-of-two subsequence, a density-one set of exponents is therefore killed by this exact Mersenne ancestry.
+
+The companion prime-power theorem proves this full coset saturation is binary exceptionalism: for every odd prime `p`,
+
+\[
+\boxed{T_{p^a}\subsetneq-\langle p\rangle.}
+\]
+
+## Spectrum synthesis
+
+The prime-modulus backbone gives infinitely many exact depths realized by infinitely many hard-class primes.
+
+The Mersenne shadow lattice gives infinitely many depths impossible for every integer.
+
+Therefore the prime Type A/B minimal-depth spectrum and the hard-class infinite-realization spectrum are both
+
+\[
+\boxed{\text{infinite and co-infinite}.}
+\]
+
+See [SPECTRUM-INFINITE-COINFINITE.md](SPECTRUM-INFINITE-COINFINITE.md).
+
+## Current k<=1500 assault
+
+Workflow run:
+
+```text
+run id: 31849103304
+k_limit: 1500
+search_limit: 3,000,000
+```
+
+At this checkpoint:
+
+```text
+candidate attack:            SUCCESS
+independent verifier:        SUCCESS
+coordinate-core mining:      SUCCESS
+coarse shadow-kernel stage:  IN PROGRESS
+remaining stages:            pending
+```
+
+The successful attack and independent verifier already mean the candidatewise search itself did not find a counterexample before depth 1500. **No final numerical counts are promoted here until the complete workflow, CENTL certification, hashes, and artifact upload finish green.**
 
 ## Active proof architecture
 
 \[
 \boxed{
-\text{direct novelty}
-\to
-\text{coarse peel}
-\to
-\text{fiber peel}
-\to
-\text{quadratic shield / small selector}
-\to
-\text{bounded small-prime core}
-\to
-\text{reduced avoiding class}
-\to
-\text{DSC-P}.
+\begin{array}{c}
+C_{AB}\text{ and exact-depth spectrum}\\
+\downarrow\\
+\text{direct shadow graph / infinite shadow lattices}\\
+\downarrow\\
+\text{fiber peeling and bounded local selectors}\\
+\downarrow\\
+\text{scalar character saturation}\\
+\downarrow\\
+\text{full local quadratic signature}\\
+\downarrow\\
+\text{deep multiplicative quotient}\\
+\downarrow\\
+\text{square-lift / higher p-adic core}\\
+\downarrow\\
+\text{exact divisor-generated residue avoidance}\\
+\downarrow\\
+\text{universal DSC-P target}
+\end{array}
 }
 \]
 
-## Current k<=1500 assault
-
-The combined workflow commit is:
-
-```text
-c508994fb48e6f701f15577352f275df5646cd78
-```
-
-The resulting GitHub Actions run is:
-
-```text
-run id: 31849103304
-status at checkpoint: in progress
-k_limit: 1500
-search_limit: 3,000,000
-selector menu after fiber peeling: 0, ±1, ..., ±64
-```
-
-The workflow now executes:
-
-1. exhaustive candidate discovery;
-2. independent verifier;
-3. coordinate-core locality analysis;
-4. coarse shadow-kernel peeling;
-5. fiber shadow-kernel peeling;
-6. bounded small-selector residual-kernel attack;
-7. quadratic character-shield analysis;
-8. CENTL symbolic certification;
-9. SHA-256 freezing;
-10. artifact publication.
-
-No numerical conclusion from this `k<=1500` run is established until every stage completes successfully and the final artifact digest is frozen into the repository.
-
 ## Research rule
 
-Every material theorem, conjecture, computational frontier, counterexample search, workflow result, artifact digest, and change in claim boundary should be committed to this repository. Chat discussion is exploratory; **the repository is canonical**.
+Every material theorem, conjecture, computational frontier, counterexample search, workflow result, artifact digest, and change in claim boundary is to be committed to this repository. Chat discussion is exploratory; **the repository is canonical**.
