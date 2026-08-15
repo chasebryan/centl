@@ -1,44 +1,22 @@
 # Current research frontier
 
 **Date:** 2026-08-15  
-**Status:** active theorem program  
-**Claim boundary:** Erdős-Straus remains open; universal López Type A/B coverage and universal DSC-P remain unproved.
+**Claim boundary:** Erdős-Straus open; universal DSC-P open; López-all-primes open.
 
-## Headline advances (2026-08-15)
+## Closed this arc
 
-1. **Ancestry rigidity** proved for quotients 13, 17, 21, 29 (parent theorem files).
-2. **C1 escape core** — thinness, pigeonhole, structural cases `g=1`, `g>j`, `q=3` fully closed.
-3. **C1 effective theorem** — every active pullback with `j ≤ 15,000` has a reduced safe residue; zero unit covers on the entire boundary strip in that range (`C1-THEOREM.md`).
-4. Finite DSC certificates through `k ≤ 1500` remain in force (53,240/53,240).
+- Ancestry rigidity: q = 13, 17, 21, 29
+- C1 pullback escape (universal statement + structural proof + strip certificates): `C1-THEOREM.md`
+- Finite DSC through k ≤ 1500
 
-## The problem we are actually trying to solve now
+## Active edge
 
 \[
-\boxed{
-\begin{array}{c}
-\text{exact Type A/B pullbacks}\\
-\downarrow\\
-\text{direct shadow graph}\\
-\downarrow\\
-\text{fiber peeling + selector}\\
-\downarrow\\
-\text{character / signature / multiplicative shields}\\
-\downarrow\\
-\text{Class-C residual / C1 escape (largely closed)}\\
-\downarrow\\
-\text{bounded }|N^{act}|\text{ and universal C1 strip}\\
-\downarrow\\
-\text{universal DSC-P}
-\end{array}
-}
+\boxed{|N^{\mathrm{act}}| = 2 \text{ local escape}}
 \]
 
-Immediate targets:
+Then unbounded active cores → universal DSC-P → pressure on López remainder → ES still requires composite `n` and no exceptional primes.
 
-- close the C1 boundary strip for all `j` (thinness + fixed-`q` analytic);
-- `|N^{act}| = 2` local systems;
-- atom-to-shadow bridge.
+## Wall
 
-## Open wall
-
-Erdős-Straus, López-all-primes, universal DSC-P: **open**. See `ERDOS-STRAUS-WALL.md`.
+`ERDOS-STRAUS-WALL.md`

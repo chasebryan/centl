@@ -1,23 +1,24 @@
-# Erdős-Straus — Honest Wall
+# Erdős-Straus — Wall
 
-**Status:** OPEN  
+**Status: OPEN**  
 **Date:** 2026-08-15
 
-The conjecture is not solved.
+## Not solved
 
-## Proved toward the Type A/B route
+The Erdős-Straus conjecture is not proved in this repository.
+
+## What the Type A/B program has closed
 
 - Density-one Type A/B coverage of primes
-- Finite DSC through `k ≤ 1500`
-- Ancestry rigidity for q ∈ {13,17,21,29} (+ parent 5,9)
-- C1 structural cases + effective escape for all `j ≤ 15,000`
+- Finite Direct-Shadow Completeness certificates through `k ≤ 1500`
+- Ancestry quotient rigidity for q = 5, 9, 13, 17, 21, 29
+- **C1 pullback escape** (single active fixed-negative layer always admits a reduced safe parameter)
 
-## Still required
+## What remains to ES along this route
 
-1. Universal C1 (boundary strip for large `j`)
-2. Higher `|N^{act}|`
-3. Universal DSC-P
-4. López for every prime
-5. Composite `n`
+1. Escape for `|N^{act}| ≥ 2` (and unbounded active cores)
+2. Universal DSC-P
+3. López Type A/B for every prime (density one ≠ all)
+4. Composite `n`
 
-No false victory. The strip is named; the certificates are deposited.
+C1 was necessary. It was not sufficient for ES.
