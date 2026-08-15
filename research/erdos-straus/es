@@ -34,6 +34,18 @@ from bberviges.seed import (  # noqa: E402
 from bberviges.solve import Solver  # noqa: E402
 from bberviges.witness import verify_witness  # noqa: E402
 
+CBAP = ES_ROOT / "cbap.kernel" / "cbap"
+
+
+def cmd_cbap(argv: list[str]) -> int:
+    if not CBAP.is_file():
+        print(
+            "cbap.kernel binary missing; run: make -C research/erdos-straus/cbap.kernel",
+            file=sys.stderr,
+        )
+        return 2
+    return subprocess.call([str(CBAP), *argv])
+
 
 def emit(obj: dict) -> None:
     import json
@@ -262,6 +274,12 @@ def main() -> None:
     )
     p_pub.add_argument("--tag", default=None)
 
+    p_cbap = sub.add_parser(
+        "cbap",
+        help="CBAP letter targeting (C); start 0, --random, resume",
+    )
+    p_cbap.add_argument("rest", nargs=argparse.REMAINDER)
+
     args = ap.parse_args()
     os.environ.setdefault(
         "CC_KERNEL_LEDGER",
@@ -346,6 +364,8 @@ def main() -> None:
         remote = publish_release(FINDINGS, tag=args.tag)
         print(json.dumps(remote, indent=2, sort_keys=True))
         raise SystemExit(0)
+    if args.cmd == "cbap":
+        raise SystemExit(cmd_cbap(list(args.rest)))
     if args.cmd == "hunt":
         extra = [
             "--start",

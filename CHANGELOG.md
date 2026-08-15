@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **cbap.kernel** (CB-Advanced-Processing) is a C letter-targeting
+  engine: channels A/B/C acquire, lock, and track Mordell-hard primes
+  on three CRT spectra; channel D sets LETTER true or drops the prime.
+  `./centl es cbap` starts at 0 and resumes; `--random` sets the first
+  start. GREAT is not stored. Letters go to `cbap.kernel/letters/`.
 - The hunt lets the operator file all three stamps or LETTER only.
   Menu `[a]` / `[t]`, or `./centl es go --all` / `--letters-only`.
   The choice is stored on that hunt. GREAT/GOOD are compact JSONL, not

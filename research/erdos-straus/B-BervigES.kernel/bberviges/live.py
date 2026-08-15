@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 from collections import deque
+from pathlib import Path
 
 from .cc_bridge import cc_binary, solve_via_cc
 from .findings import FINDINGS, file_event, latest, load_stats
@@ -436,6 +437,7 @@ def cmd_menu() -> int:
     print(f"  letters in the library: {_counts()['letter']}")
     print(f"  collecting {collect_label(seed)}")
     print()
+    print("  [c] cbap      letter targeting (C; start 0 / resume)")
     print("  [a] all three file GOOD, GREAT, and LETTER")
     print("  [t] letters   file LETTER only (does not grow GREAT/GOOD)")
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
@@ -454,6 +456,12 @@ def cmd_menu() -> int:
     except (EOFError, KeyboardInterrupt):
         print()
         return 0
+    if choice in {"c", "cbap"}:
+        binary = Path(__file__).resolve().parents[2] / "cbap.kernel" / "cbap"
+        if not binary.is_file():
+            print("  build first: make -C research/erdos-straus/cbap.kernel")
+            return cmd_menu()
+        return subprocess.call([str(binary)])
     if choice in {"a", "all", "all three"}:
         set_collect("all")
         os.environ.pop("ES_LETTERS_ONLY", None)

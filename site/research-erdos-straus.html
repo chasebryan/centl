@@ -53,8 +53,16 @@
       <p class="hero-actions"><a class="sponsor-button" href="research.html">Search the full research library</a></p>
       <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness is <strong>false</strong>. This page reports exact theorems and finite certificates inside the Type A/B shadow program, not a solution of the conjecture.</p>
 
+      <h2>CBAP.kernel — letter targeting</h2>
+      <p><strong>cbap.kernel</strong> (CB-Advanced-Processing) is the letter-only C engine. It is built from the bb.kernel menu and the CC.kernel attack. Channel A acquires Mordell-hard primes on three CRT spectra. Channel B locks the theorem and <code>fab(a,b≤11)</code> window — a hit would have been GREAT and is dropped. Channel C tracks the two-target corridor. Channel D sets <code>LETTER = TRUE</code> only if A–C miss, then writes the letter at once. GREAT is not stored.</p>
+      <pre><code>make -C research/erdos-straus/cbap.kernel
+./centl es cbap
+./centl es cbap go --random
+./centl es cbap letters</code></pre>
+      <p>The first session starts at 0 (or a random n with <code>--random</code>). Later sessions resume. Letters live in <code>research/erdos-straus/cbap.kernel/letters/</code>. A finished hunt is not a proof. Source: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbap.kernel">cbap.kernel</a>.</p>
+
       <h2>August 15, 2026 — public hunt</h2>
-      <p>The theorem notes now have an operator-facing hunt. Two kernels coexist: <strong>bb.kernel</strong> (Python reference, also <code>B-BervigES.kernel</code>) and <strong>CC.kernel</strong> (C attack engine). From the CENTL root the commands are <code>./centl es</code> for the menu and <code>./centl es go</code> for the infinite hunt. A start factor of <code>0</code>, any chosen integer, or <code>--random</code> chooses where a hunt begins. The seed is a resume cursor, not a random-number seed. Ctrl+C stops the engine and writes the cursor. The next <code>go</code> continues from there.</p>
+      <p>The theorem notes also have the earlier operator-facing hunt. Two kernels coexist: <strong>bb.kernel</strong> (Python reference, also <code>B-BervigES.kernel</code>) and <strong>CC.kernel</strong> (C attack engine). From the CENTL root the commands are <code>./centl es</code> for the menu and <code>./centl es go</code> for the infinite hunt. A start factor of <code>0</code>, any chosen integer, or <code>--random</code> chooses where a hunt begins. The seed is a resume cursor, not a random-number seed. Ctrl+C stops the engine and writes the cursor. The next <code>go</code> continues from there.</p>
       <p><strong>Two processes on one machine are supported.</strong> Confirmed 15 August 2026: two <code>./centl es go</code> hunts can run in two terminals in the same checkout. Each hunt has its own cursor. <code>--from N</code>, <code>go N</code>, <code>--origin</code>, and <code>--random</code> start or resume a sibling without replacing the first. Two processes on the same line claim distinct windows. They share the findings library. Letters do not stop the hunt. A catalog race that could crash the dashboard is closed. This is an operational fact about the hunt, not a proof of the conjecture.</p>
       <pre><code>./centl es go
 ./centl es go --from 0

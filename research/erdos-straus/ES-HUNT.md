@@ -23,7 +23,15 @@ in positive integers. The remaining computational burden, after the classical id
 
 This note records the public hunt that attacks those primes, files readable findings, and can be resumed on any machine. It is the operator-facing surface of the same two-target mathematics used in the theorem notes. It is not a new existence theorem.
 
-From the CENTL root:
+From the CENTL root, the letter-only C engine is **cbap.kernel**:
+
+```text
+./centl es cbap
+./centl es cbap go --random
+./centl es cbap letters
+```
+
+The older coupled hunt is still:
 
 ```text
 ./centl es

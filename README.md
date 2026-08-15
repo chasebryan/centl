@@ -98,6 +98,21 @@ Details: [Oasis](docs/OASIS.md) · [CENTL Marsa](docs/CENTL-MARSA.md) · [FCF Ca
 
 The public research program is currently focused on **Erdős–Straus Type A/B witness depth and congruence shadow structure**.
 
+### CBAP.kernel — letter targeting
+
+**[cbap.kernel](research/erdos-straus/cbap.kernel/README.md)** (CB-Advanced-Processing) is the letter-only C engine. Three CRT spectra feed channels A/B/C; channel D sets `LETTER = TRUE` or drops the prime. GREAT is not stored.
+
+```sh
+make -C research/erdos-straus/cbap.kernel
+./centl es cbap              # start at 0, later resume
+./centl es cbap go --random  # first session at a random n; later resume
+./centl es cbap letters      # journal of TARGET COLLECTED
+```
+
+Letters are written at once to `research/erdos-straus/cbap.kernel/letters/`.
+
+The older hunt still exists if you want GOOD/GREAT as well:
+
 ```sh
 ./centl es go --letters-only --random   # start a random letters-only hunt
 ./centl es go                           # resume the default hunt
@@ -108,6 +123,13 @@ The public research program is currently focused on **Erdős–Straus Type A/B w
 
 A finished hunt is not a proof of the conjecture.  
 Public library (static HTML, no JavaScript): [freecomputation.org/research.html](https://freecomputation.org/research.html)
+
+| Resource | What it is |
+| --- | --- |
+| [CBAP.kernel](research/erdos-straus/cbap.kernel/README.md) | Letter targeting, C |
+| [Research library](https://freecomputation.org/research.html) | Hosted papers, certificates, and Wellspring candidates |
+| [Erdős–Straus program](https://freecomputation.org/research-erdos-straus.html) | Program overview |
+| [Hunt record](research/erdos-straus/ES-HUNT.md) | Operator-facing hunt (bb + CC) |
 
 ---
 
