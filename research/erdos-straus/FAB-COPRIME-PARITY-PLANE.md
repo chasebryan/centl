@@ -1,9 +1,11 @@
-# Coprime Opposite-Parity `fab` Plane
+# Exact Coprime `fab` Plane
+
+> Historical filename: `FAB-COPRIME-PARITY-PLANE.md`. The original draft unnecessarily assumed opposite parity. The theorem is stronger: **all coprime parameter pairs** are covered.
 
 **Status:** proved exact specialization of the 2026 divisor parametrization  
 **Date:** 2026-08-15  
 **Prior-art basis:** Bello-Hernández, Benito, Fernández (2026), `fab` identity.  
-**Claim boundary:** the published parametrization is prior art. This note identifies a broad exact subfamily in which both admissibility divisibilities collapse to one divisor congruence. It does not prove universal prime coverage.
+**Claim boundary:** the published parametrization is prior art. This note proves that on the coprime `(a,b)` plane the two published admissibility tests collapse to one divisor congruence. It does not prove universal prime coverage.
 
 ---
 
@@ -15,7 +17,7 @@ Let
 n\equiv1\pmod4
 \]
 
-be odd, and take positive integers `a,b` satisfying
+be odd. Take positive integers `a,b` with
 
 \[
 \boxed{\gcd(a,b)=1}
@@ -27,64 +29,35 @@ and
 \boxed{\gcd(a,n)=1.}
 \]
 
-Assume `a,b` have opposite parity.
-
 Let
 
 \[
-k\mid a+bn
+k\mid a+bn,
+\qquad
+q=\frac{a+bn}{k},
+\qquad
+k\equiv3\pmod4.
 \]
 
-and put
-
-\[
-q=\frac{a+bn}{k}.
-\]
-
-Because `a,b` have opposite parity and `n` is odd,
-
-\[
-\boxed{a+bn\text{ is odd}.}
-\]
-
-Hence
-
-\[
-\boxed{k,q\text{ are odd}.}
-\]
-
----
-
-## 2. Coprimality with the parameter product
-
-Since
+Because
 
 \[
 \gcd(b,a+bn)=\gcd(a,b)=1,
 \]
 
+and
+
+\[
+\gcd(a,a+bn)=\gcd(a,bn)=1,
+\]
+
 we have
 
 \[
-\gcd(b,q)=1.
+\boxed{\gcd(b,q)=1}
 \]
 
-Also
-
-\[
-\gcd(a,a+bn)
-=
-\gcd(a,bn)
-=1
-\]
-
-by the two coprimality assumptions. Hence
-
-\[
-\gcd(a,q)=1.
-\]
-
-Together with `gcd(a,n)=1`,
+and
 
 \[
 \boxed{\gcd(a,nq)=1.}
@@ -92,89 +65,143 @@ Together with `gcd(a,n)=1`,
 
 ---
 
-## 3. Exact collapse of the two `fab` divisibility conditions
+## 2. The unavoidable factor 4 already lies in n+k
 
-The published admissibility conditions are
+Since
 
 \[
-4b\mid q(n+k)
+n\equiv1\pmod4
 \]
 
 and
 
 \[
+k\equiv3\pmod4,
+\]
+
+we always have
+
+\[
+\boxed{4\mid n+k.}
+\]
+
+This observation removes the parity restriction from the first draft.
+
+---
+
+## 3. First published divisibility condition
+
+The first `fab` condition is
+
+\[
+4b\mid q(n+k).
+\]
+
+Because `gcd(b,q)=1`, its `b`-part forces
+
+\[
+b\mid n+k.
+\]
+
+Now split only to account for the 2-adic part.
+
+- If `b` is odd, `gcd(4,b)=1`; combining `b|n+k` with `4|n+k` gives `4b|n+k`.
+- If `b` is even, coprimality forces `a` odd, hence `a+bn` is odd. Therefore `q` is odd. Since `q` is also coprime to `b`, in fact `gcd(q,4b)=1`, so the original condition directly forces `4b|n+k`.
+
+Thus in **all** coprime cases,
+
+\[
+\boxed{
+4b\mid q(n+k)
+\iff
+4b\mid n+k.
+}
+\]
+
+---
+
+## 4. Second published divisibility condition
+
+The second condition is
+
+\[
 4a\mid nq(n+k).
 \]
 
-Because `q` is odd and coprime to `b`, the first is equivalent to
+Because `gcd(a,nq)=1`, its `a`-part forces
 
 \[
-\boxed{4b\mid n+k.}
+a\mid n+k.
 \]
 
-Because `nq` is odd and coprime to `a`, the second is equivalent to
+Again:
+
+- if `a` is odd, combine `a|n+k` with `4|n+k`;
+- if `a` is even, coprimality forces `b` odd, so `a+bn` and hence `q` are odd; then `nq` is odd and coprime to `4a`, forcing the full `4a` into `n+k`.
+
+Therefore
 
 \[
-\boxed{4a\mid n+k.}
+\boxed{
+4a\mid nq(n+k)
+\iff
+4a\mid n+k.
+}
 \]
 
-Now `gcd(a,b)=1` gives
+---
+
+## 5. Exact theorem
+
+Since
 
 \[
-\operatorname{lcm}(4a,4b)=4ab
+\gcd(a,b)=1,
 \]
 
-when `a,b` have opposite parity.
+we have
 
-Therefore the two conditions are simultaneously equivalent to
+\[
+\operatorname{lcm}(4a,4b)=4ab.
+\]
+
+Hence the two published `fab` admissibility conditions are simultaneously equivalent to
 
 \[
 \boxed{4ab\mid n+k.}
 \]
 
-or, equivalently,
+or
 
 \[
 \boxed{k\equiv-n\pmod{4ab}.}
 \]
 
-This congruence automatically implies
-
-\[
-k\equiv3\pmod4.
-\]
-
----
-
-## 4. Theorem — exact coprime-parity criterion
+### Theorem
 
 Let
 
 \[
 n\equiv1\pmod4,
-\]
-
-and let positive `a,b` satisfy
-
-\[
+\qquad
 \gcd(a,b)=1,
 \qquad
-\gcd(a,n)=1,
+\gcd(a,n)=1.
 \]
 
-with opposite parity.
-
-Then `(a,b)` gives a valid `fab` certificate **if and only if** there is a divisor
+Then the pair `(a,b)` gives a valid `fab` certificate **if and only if** there is a divisor
 
 \[
 \boxed{k\mid a+bn}
 \]
 
-with
+such that
 
 \[
 \boxed{k\equiv-n\pmod{4ab}.}
 \]
+
+The congruence automatically implies `k≡3 mod4`.
 
 With
 
@@ -182,23 +209,19 @@ With
 q=\frac{a+bn}{k},
 \]
 
-the Erdős-Straus denominators are
+the decomposition is
 
 \[
-\boxed{x=\frac{n+k}{4}}
-\]
-
-\[
-\boxed{y=\frac{q(n+k)}{4b}}
-\]
-
-\[
-\boxed{z=\frac{nq(n+k)}{4a}.}
+\boxed{x=\frac{n+k}{4}},
+\qquad
+\boxed{y=\frac{q(n+k)}{4b}},
+\qquad
+\boxed{z=\frac{nq(n+k)}{4a}}.
 \]
 
 ---
 
-## 5. Prime specialization
+## 6. Prime specialization
 
 For prime
 
@@ -206,16 +229,14 @@ For prime
 p\equiv1\pmod4,
 \]
 
-the condition `gcd(a,p)=1` is automatic for every
+`gcd(a,p)=1` is automatic for every `1<=a<p`.
 
-\[
-1\le a<p.
-\]
-
-Thus for small coprime opposite-parity parameter pairs `(a,b)` the test is purely:
+Thus the **entire coprime parameter plane** has the exact test
 
 \[
 \boxed{
+\gcd(a,b)=1,
+\qquad
 \exists k\mid a+bp:
 \quad
 k\equiv-p\pmod{4ab}.
@@ -224,124 +245,92 @@ k\equiv-p\pmod{4ab}.
 
 No secondary divisibility test remains.
 
-The exact one-parameter axes in `FAB-ONE-PARAMETER-AXES.md` are boundary cases of this plane when the parity hypotheses give the corresponding simplification.
+The exact one-parameter axes are contained in this theorem because `gcd(1,b)=gcd(a,1)=1`.
 
 ---
 
-## 6. First interior laboratory: p = 351289
+## 7. Interior examples
 
-In an exact finite scan of Mordell-hard primes below `500000`, using both one-parameter axes with parameters at most 11, the first and only survivor of those two axis windows is
+### p = 351289
+
+The certificate
 
 \[
-\boxed{p=351289.}
+(a,b,k)=(3,2,23)
 \]
 
-It is immediately caught by the interior coprime-parity pair
+satisfies
 
 \[
-\boxed{(a,b)=(3,2).}
-\]
-
-Indeed
-
-\[
-a+bp
-=3+2(351289)
-=702581
-=11\cdot23\cdot2777,
-\]
-
-so
-
-\[
-\boxed{k=23\mid a+bp.}
-\]
-
-Moreover
-
-\[
-4ab=24
+23\mid3+2p
 \]
 
 and
 
 \[
-\boxed{23\equiv-351289\pmod{24}.}
+23\equiv-p\pmod{24}.
 \]
 
-Hence `(3,2,23)` is admissible.
+### Same-parity example p = 5101441
 
-The quotient is
+The pair
 
 \[
-q=\frac{702581}{23}=30547.
+(a,b)=(7,3)
 \]
 
-Therefore
+is **also** inside the exact coprime plane, despite both parameters being odd.
+
+A certificate is
 
 \[
-\frac4{351289}
-=
-\frac1x+rac1y+rac1z
+k=15335,
 \]
 
 with
 
 \[
-x=\frac{351289+23}{4}=87828,
-\]
-
-\[
-y=\frac{30547(351289+23)}8,
-\]
-
-\[
-z=\frac{351289\cdot30547(351289+23)}{12}.
-\]
-
----
-
-## 7. Geometry of the simplified plane
-
-For fixed coprime opposite-parity `(a,b,k)`, the certificate requires
-
-\[
-p\equiv-k\pmod{4ab}
+15335\mid7+3p
 \]
 
 and
 
 \[
-a+bp\equiv0\pmod k.
+15335\equiv-p\pmod{84}.
 \]
 
-When the congruences are compatible, CRT therefore gives an arithmetic progression of solved primes.
-
-Thus a finite parameter window yields a finite congruence cover problem, while allowing `(a,b,k)` to grow produces a divisor-adaptive covering system.
-
-This is structurally parallel to the Type A/B trap program but lives on the complete divisor parametrization rather than on one Type A/B subclass.
+This example is what exposed the unnecessary parity assumption.
 
 ---
 
-## 8. New all-prime target
+## 8. Correct simplified subsystem
 
-The computational fact reported in the 2026 paper is that every tested prime
+The natural simplified subsystem is no longer
 
 \[
-p\equiv1\pmod4,
-\qquad p<10^{14},
+\text{axes} + \text{opposite-parity interior}.
 \]
 
-is detected somewhere in the small full window `1<=a,b<=11`.
+It is simply
 
-The FCF/CENTL proof target should be sharper than assuming a universal finite window:
+\[
+\boxed{\text{the coprime }(a,b)\text{ plane}.}
+\]
+
+Non-coprime parameter pairs are the only part of the full `fab` window not covered by the one-congruence theorem.
+
+This is a much sharper comparison with the published computation `1<=a,b<=11`.
+
+---
+
+## 9. Active all-prime target
+
+The finite evidence now motivates the stronger question
 
 \[
 \boxed{
-\text{Can a prime survive every coprime opposite-parity divisor plane?}
+\text{Can a prime }p\equiv1\pmod4\text{ survive every coprime pair }(a,b)?
 }
 \]
 
-If not, the complete all-prime theorem follows without requiring the harder same-parity portion of `fab` at all.
-
-The next experiments should therefore classify survivors of this exact simplified plane before spending effort on the rest of the two-dimensional parametrization.
+If the answer is no, the non-coprime part of the complete divisor parametrization is unnecessary for the full theorem.
