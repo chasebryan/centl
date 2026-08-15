@@ -185,27 +185,47 @@ This gives a systematic generator of exact ES congruence families directly from 
 
 The variables are exactly the dual variables already present in `FAB-DUAL-DESCENT-SYSTEM.md`.
 
-The relation
+Under the identification
 
 \[
-sA=pQ+B
+a=B,
+\qquad b=A,
+\qquad q=Q,
 \]
 
-is equivalent to
+the new variable `s` is the **swapped dual certificate divisor** `k'`, because the dual identity is
 
 \[
-\boxed{A+Q=Bd}
+\boxed{k' b=a+pq.}
 \]
 
-for the hidden dual cofactor after the corresponding variable identification, while
+Indeed here
 
 \[
-p+s=4BQc
+\boxed{sA=B+pQ.}
 \]
 
-supplies the square-overlap side of the same certificate geometry.
+The second constructor condition is exactly the corresponding dual divisibility
 
-The point of the present theorem is operational: instead of searching four positive variables subject to
+\[
+\boxed{p+s=4BcQ,}
+\]
+
+which is the swapped form of
+
+\[
+p+k'=4acq.
+\]
+
+The hidden `3 mod 4` cofactor from the dual-descent system is a different variable, say `d`, and is recovered only after the certificate exists through
+
+\[
+\boxed{A+Q=Bd.}
+\]
+
+So the constructor should be read as choosing the **dual certificate divisor `s=k'` first**, not as choosing the hidden cofactor.
+
+The point is operational: instead of searching four positive variables subject to
 
 \[
 4ABcQ=B+p(A+Q),
@@ -237,7 +257,7 @@ The theorem creates a clean fork for the remaining attack:
 
 1. **covering route:** find a genuinely complete finite or structured infinite family of triples `(B,Q,s)`;
 2. **descent route:** assume the two divisibilities fail throughout a controlled family and translate that failure into factor/character restrictions;
-3. **external-nonresidue route:** choose `s` or the resulting certificate divisor from the synchronized external-nonresidue packet and use the hard shield to force the second divisibility.
+3. **external-nonresidue route:** choose the dual divisor `s` or the original certificate divisor `k` from the synchronized external-nonresidue packet and use the hard shield to force the complementary divisibility.
 
 The useful object is now the pair
 
