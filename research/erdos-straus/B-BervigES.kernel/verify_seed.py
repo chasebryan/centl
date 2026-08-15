@@ -31,6 +31,8 @@ def check(cond, msg):
 
 
 def main() -> None:
+    tmp = tempfile.TemporaryDirectory()
+    os.environ["ES_FINDINGS"] = tmp.name
     seed = default_seed()
     lo, hi, step = next_window(seed)
     check(lo == 0 and hi == 50_000 and step == 50_000, f"first window {lo,hi,step}")
@@ -94,8 +96,8 @@ def main() -> None:
     check(1_000_000 <= r1 < 10_000_000_000, r1)
     check(r1 != r2 or r1 != 0, "random start should vary")
 
-    with tempfile.TemporaryDirectory() as tmp:
-        os.environ["ES_FINDINGS"] = tmp
+    with tempfile.TemporaryDirectory() as isolated:
+        os.environ["ES_FINDINGS"] = isolated
         first = default_seed("main", 1_000_000)
         save_seed(first)
         first["scanned_through"] = 1_050_000

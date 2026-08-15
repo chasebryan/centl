@@ -36,8 +36,11 @@ def _tty() -> bool:
 
 
 def _counts() -> dict[str, int]:
-    cat = load_catalog()
     out = {"letter": 0, "great": 0, "good": 0}
+    try:
+        cat = load_catalog(required=False)
+    except Exception:
+        return out
     for item in cat.get("items") or []:
         g = item.get("grade")
         if g in out:
@@ -46,6 +49,14 @@ def _counts() -> dict[str, int]:
 
 
 def draw_dashboard(state: dict) -> None:
+    try:
+        _draw_dashboard(state)
+    except Exception:
+        # A torn catalog or a short write must not kill a running hunt.
+        return
+
+
+def _draw_dashboard(state: dict) -> None:
     counts = _counts()
     seed = state["seed"]
     latest_lines = state.get("recent") or []

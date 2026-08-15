@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -124,20 +125,51 @@ def catalog_lock_path() -> Path:
     return findings_root() / ".catalog.lock"
 
 
-def load_catalog() -> dict:
+def empty_catalog() -> dict:
+    return {
+        "records": {"max_shift_k": 0, "max_cleared_bound": 0},
+        "methods": [],
+        "items": [],
+    }
+
+
+def load_catalog(*, required: bool = False) -> dict:
+    """Read catalog.json. Concurrent hunts can briefly see an empty file.
+
+    required=True raises after retries (do not save over a good catalog).
+    required=False returns an empty catalog for display-only callers.
+    """
     path = catalog_path()
-    if not path.is_file():
-        return {
-            "records": {"max_shift_k": 0, "max_cleared_bound": 0},
-            "methods": [],
-            "items": [],
-        }
-    return json.loads(path.read_text())
+    last: Exception | None = None
+    empty_hits = 0
+    for attempt in range(12):
+        try:
+            if not path.is_file():
+                return empty_catalog()
+            if path.stat().st_size == 0:
+                empty_hits += 1
+                if not required and empty_hits >= 2:
+                    return empty_catalog()
+                time.sleep(0.03 * (attempt + 1))
+                continue
+            data = json.loads(path.read_text())
+            if not isinstance(data, dict):
+                raise json.JSONDecodeError("catalog is not an object", "", 0)
+            data.setdefault("records", {"max_shift_k": 0, "max_cleared_bound": 0})
+            data.setdefault("methods", [])
+            data.setdefault("items", [])
+            return data
+        except (OSError, json.JSONDecodeError) as exc:
+            last = exc
+            time.sleep(0.03 * (attempt + 1))
+    if required:
+        raise RuntimeError(f"catalog.json unreadable after retries: {last}") from last
+    return empty_catalog()
 
 
 def save_catalog(cat: dict) -> None:
     path = catalog_path()
-    tmp = path.with_name(path.name + ".tmp")
+    tmp = path.with_name(f"catalog.json.tmp.{os.getpid()}.{time.time_ns()}")
     tmp.write_text(json.dumps(cat, indent=2, sort_keys=True) + "\n")
     tmp.replace(path)
 
@@ -324,7 +356,10 @@ def rebuild_index(cat: dict) -> None:
             f"| {item['grade']} | {item.get('n','')} | {num} | "
             f"{', '.join(item['tags'])} | `{item['file']}` |"
         )
-    (root / "INDEX.md").write_text("\n".join(lines) + "\n")
+    index = root / "INDEX.md"
+    tmp = root / f"INDEX.md.tmp.{os.getpid()}"
+    tmp.write_text("\n".join(lines) + "\n")
+    tmp.replace(index)
 
 
 def file_event(event: dict) -> dict | None:
@@ -346,7 +381,7 @@ def file_event(event: dict) -> dict | None:
         event["equation"] = w.equation()
         event["n"] = n
     with FileLock(catalog_lock_path()):
-        cat = load_catalog()
+        cat = load_catalog(required=True)
         tags = tags_for_event(event, cat)
         grade = grade_of(tags)
         if grade is None:
