@@ -1,0 +1,59 @@
+name: CENTL Erdős-Straus quotient-9 rigidity
+
+on:
+  workflow_dispatch:
+    inputs:
+      j_limit:
+        description: Base-depth range for quotient-9 rigidity
+        required: false
+        default: "100000"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/QUOTIENT-9-RIGIDITY.md'
+      - 'research/erdos-straus/quotient_9_rigidity_analyzer.py'
+      - '.github/workflows/erdos-straus-quotient-9-rigidity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify exact quotient-9 shadow classification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve parameters
+        id: p
+        env:
+          J: ${{ github.event.inputs.j_limit }}
+        run: echo "j=${J:-100000}" >> "$GITHUB_OUTPUT"
+
+      - name: Run exact quotient-9 regression
+        run: |
+          rm -rf quotient-9-output
+          python3 research/erdos-straus/quotient_9_rigidity_analyzer.py \
+            --j-limit '${{ steps.p.outputs.j }}' \
+            --out quotient-9-output
+
+      - name: Freeze hashes
+        run: |
+          cd quotient-9-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat quotient-9-output/quotient-9-rigidity-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quotient-9-rigidity-${{ github.sha }}
+          path: quotient-9-output/
+          if-no-files-found: error
+          retention-days: 90
