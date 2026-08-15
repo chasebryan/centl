@@ -40,6 +40,12 @@ Assume that both exact solution targets are missed:
 \boxed{-p^{-1}\notin R,\qquad -1\notin R.}
 \]
 
+By inversion symmetry this also forces
+
+\[
+\boxed{-p\notin R.}
+\]
+
 Let
 
 \[
@@ -52,11 +58,11 @@ and assume the first possible combined index:
 \boxed{[G:H]=6.}
 \]
 
-By `FAB-TWO-TARGET-KNESER.md`, the two-target defect budget is
+By `FAB-TWO-TARGET-KNESER.md`, the symmetric combined defect budget is
 
 \[
 \boxed{
-\sum_i(s_i-1)\le3,
+\sum_i(s_i-1)\le2,
 }
 \]
 
@@ -66,7 +72,7 @@ where
 s_i=\min(2e_i+1,\operatorname{ord}_{G/H}(r_iH)).
 \]
 
-Because `G` is cyclic, the quotient
+Because `G` is cyclic,
 
 \[
 \boxed{G/H\cong C_6.}
@@ -96,7 +102,7 @@ The local signed interval projects to
 \{0,3\},
 \]
 
-for every positive exponent. Hence
+for every positive exponent, so
 
 \[
 \boxed{s_i-1=1.}
@@ -104,13 +110,13 @@ for every positive exponent. Hence
 
 ### Order three
 
-The local signed interval already fills
+The local signed interval fills
 
 \[
 \{0,2,4\},
 \]
 
-so
+and
 
 \[
 \boxed{s_i-1=2.}
@@ -136,15 +142,15 @@ If `e_i>=2`, then
 s_i\ge5,
 \]
 
-and therefore
+so
 
 \[
 \boxed{s_i-1\ge4,}
 \]
 
-which exceeds the entire two-target budget.
+which is impossible under the budget `2`.
 
-Thus every order-six factor in a combined index-six defect must occur to exponent exactly one.
+Thus every order-six factor must occur to exponent exactly one.
 
 ---
 
@@ -160,7 +166,7 @@ Because `H` is the full stabilizer of `R`, the quotient set `bar R` has trivial 
 
 Suppose no prime factor has order six in the quotient.
 
-Then every nontrivial local set is one of the two subgroups
+Then every nontrivial local set is one of the two proper subgroups
 
 \[
 \{0,3\}
@@ -172,11 +178,9 @@ If only order-two factors occur, their sum remains the order-two subgroup and ha
 
 If only order-three factors occur, their sum remains the order-three subgroup and has nontrivial stabilizer.
 
-If both types occur, their sum is all of `C_6`, so neither target can be missed.
+If both types occur, their sum is all of `C_6`, contradicting the target misses.
 
-All three possibilities contradict the assumed combined defect.
-
-Therefore:
+Therefore
 
 \[
 \boxed{\text{at least one prime factor has order six modulo }H.}
@@ -184,41 +188,15 @@ Therefore:
 
 ---
 
-## 4. The order-six factor is unique
+## 4. The order-six factor consumes the full budget
 
-One order-six factor already consumes two units of the budget.
+An order-six factor already contributes exactly `2`, the entire available budget.
 
-A second order-six or order-three factor would consume at least two more units, violating
+Hence **every other prime factor must have trivial image modulo `H`**.
 
-\[
-\sum_i(s_i-1)\le3.
-\]
+There can be no second order-six factor, no order-three factor, and not even an order-two factor.
 
-The only possible additional nontrivial local factor would therefore have order two, contributing one unit.
-
-But adding the order-two local set to an order-six `e=1` local set gives
-
-\[
-\{0,g,-g\}+\{0,3\}=C_6.
-\]
-
-Indeed, after choosing `g=1`, the two sets are
-
-\[
-\{0,1,5\}
-\quad\text{and}\quad
-\{0,3\},
-\]
-
-whose sum is
-
-\[
-\{0,1,2,3,4,5\}.
-\]
-
-That would hit both targets.
-
-Hence no additional nontrivial quotient factor can occur.
+Therefore:
 
 ### Theorem — single primitive sextic defect
 
@@ -250,6 +228,12 @@ Equivalently,
 }
 \]
 
+After orienting the generator `rH` as class `1`,
+
+\[
+\boxed{\bar R=\{0,1,5\}\subset C_6.}
+\]
+
 ---
 
 ## 5. Residue interpretation
@@ -266,19 +250,14 @@ r\notin G^3.
 
 Every other prime factor `s|C` lies in `G^6`, hence is simultaneously a square and a cube modulo `q`.
 
-Thus the shifted integer has the exact factor pattern
+Thus
 
 \[
 \boxed{
-C=r\,S,
+C=rS,
+\qquad
+v_r(C)=1,
 }
-\]
-
-with
-
-\[
-\boxed{
-v_r(C)=1,}
 \]
 
 where every prime factor of `S` is a sixth-power residue modulo `q`.
@@ -305,98 +284,132 @@ For every prime factor `s` of
 C=\frac{p+q}{4},
 \]
 
-the shifted-nonresidue transfer theorem gives, because `q≡3 mod4`,
+the shifted-nonresidue transfer theorem gives
 
 \[
 \boxed{
 \left(\frac sp\right)
 =
-\left(\frac sq\right).
-}
+\left(\frac sq\right).}
 \]
 
-All prime factors of `S` are sixth powers modulo `q`, so they are quadratic residues modulo `q` and therefore quadratic residues modulo `p`.
+Every prime factor of `S` is a sixth power modulo `q`, hence a quadratic residue modulo `q` and therefore modulo `p`.
 
 The exceptional factor `r` is a quadratic nonresidue modulo `q`, hence
 
 \[
 \boxed{
-\left(\frac rp\right)=-1.
-}
+\left(\frac rp\right)=-1.}
 \]
 
-Therefore `r` is not merely one possible outgoing edge in the external-nonresidue factor graph. It is the **unique external-nonresidue prime factor** of `C`.
+Therefore `r` is the **unique external-nonresidue prime factor** of `C`.
 
-Thus an index-six combined failure forces the edge
+The external factor graph has the forced edge
 
 \[
-\boxed{q\longrightarrow r}
+\boxed{q\longrightarrow r,}
 \]
 
-uniquely, with
+with
 
 \[
 \boxed{r\ne q,\qquad r<p.}
 \]
 
-The former nondeterministic factor descent becomes deterministic at the first surviving combined defect.
+At the first surviving combined defect, the formerly nondeterministic factor descent becomes deterministic.
 
 ---
 
-## 7. Positions of the two missed targets
+## 7. The three missing quotient classes are exact
 
-In the quotient `C_6`, the Type-II target
+The quotient box occupies
+
+\[
+\boxed{\{0,1,5\}.}
+\]
+
+The Type-II target
 
 \[
 -1H
 \]
 
-is the unique element of order two, i.e. class `3`.
-
-The box occupies only
+is the unique order-two class, namely
 
 \[
-\{0,1,5\}
+\boxed{3.}
 \]
 
-after choosing the exceptional generator orientation.
+The Type-I target `-p^{-1}` is a quadratic residue, so its quotient class is even. It is missed and nontrivial, therefore it is class `2` or `4`.
 
-The Type-I target is a quadratic residue, so its quotient class is even. Because it is missed, it cannot be class `0`. Therefore
+Its inverse `-p` occupies the other one of those two classes.
 
-\[
-\boxed{
-(-p^{-1})H
-\text{ has quotient class }2\text{ or }4,
-}
-\]
-
-and hence exact quotient order three.
-
-So the complete six quotient classes separate as
+Consequently the six quotient classes split **exactly** as
 
 \[
 \boxed{
 \begin{array}{c|c}
-\text{classes hit by }R & 0,1,5\\
+\text{hit by }R & 0,1,5\\
 \hline
-\text{Type-II miss} & 3\\
-\text{Type-I miss} & 2\text{ or }4
+-p^{-1}H & 2\text{ or }4\\
+-1H & 3\\
+-pH & 4\text{ or }2
 \end{array}}
 \]
 
-with the remaining class `4` or `2` also absent.
+Thus the three excluded natural targets are precisely the three missing quotient classes.
 
 ---
 
-## 8. Strategic consequence
+## 8. A small-prime consequence
 
-The first possible combined Kneser obstruction is therefore not a general index-six factorization pattern. It is a one-prime defect:
+The unique exceptional factor `r` is a quadratic nonresidue modulo `p`. Mordell-hard primes satisfy
+
+\[
+\left(\frac2p\right)
+=
+\left(\frac3p\right)
+=
+\left(\frac5p\right)
+=
+\left(\frac7p\right)=+1.
+\]
+
+Therefore none of `2,3,5,7` can be the exceptional factor.
+
+If any of these primes divides
+
+\[
+C=\frac{p+q}{4},
+\]
+
+it must lie in the sixth-power subgroup modulo `q`.
+
+For example, if
+
+\[
+q\equiv7\pmod8,
+\]
+
+then `C` is even, so a combined index-six defect forces
+
+\[
+\boxed{2\in G^6.}
+\]
+
+Since `(2/q)=+1` in this congruence class, this adds the nontrivial requirement that `2` also be a cubic residue modulo `q`.
+
+This supplies an immediate local filter on index-six candidates.
+
+---
+
+## 9. Strategic consequence
+
+The first possible combined Kneser obstruction is a one-prime defect:
 
 \[
 \boxed{
-\frac{p+q}{4}
-=
- r\cdot S,
+\frac{p+q}{4}=rS,
 }
 \]
 
@@ -406,8 +419,7 @@ where
 2. `r` is simultaneously a quadratic and cubic nonresidue modulo `q`;
 3. every prime factor of `S` is a sixth power modulo `q`;
 4. `r` is the unique external quadratic-nonresidue factor relative to `p`;
-5. the external factor cycle is forced to take the edge `q -> r`.
+5. the external factor cycle is forced to take `q -> r`;
+6. the quotient box occupies exactly the three classes `0,±1`, while the three natural solution targets occupy exactly the complementary classes.
 
-This is the next descent object.
-
-The next theorem target is to show that this primitive sextic defect cannot persist around the external-nonresidue factor cycle, or that its forced successor `r` produces a fixed shift whose combined defect index is strictly larger and has correspondingly less Kneser room.
+The next descent problem is therefore sharply defined: transport this primitive sextic defect through the forced successor `r`, including the `r≡1 mod4` case where the natural next admissible shift is composite (`3r`, or another `3 mod4` hard-residue multiplier times `r`).
