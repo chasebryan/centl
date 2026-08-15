@@ -12,11 +12,10 @@ Checks:
   * optional binary-remainder divisor coverage for prime r == 3 (mod 4).
 
 For r == 3 (mod 4), put A=(p+r)/4 and N=p*A.  After subtracting
-1/A from 4/p, the remaining binary fraction is 4r/N.  It splits into
-two unit fractions iff N^2 has a divisor d == -N (mod 4r).  Because N
-is divisible by 4 here, this implementation checks the equivalent
-normalized residue condition modulo r, while separately retaining the
-2-adic factor in the construction assumptions.
+1/A from 4/p, the remaining binary fraction is r/N.  It splits into
+two unit fractions iff N^2 has a divisor d == -N (mod r).  For prime
+r != p, gcd(N,r)=1, so the complementary divisor N^2/d automatically
+lies in the same target class and both binary denominators are integral.
 """
 from __future__ import annotations
 
