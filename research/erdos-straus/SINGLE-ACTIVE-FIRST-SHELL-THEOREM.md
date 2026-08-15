@@ -1,569 +1,103 @@
-# Single-active first-shell theorem and hard-class 3/5/9 collapse
+# Single-active first-shell collapse — retracted proof attempt
 
-**Status:** proved theorem and hard-class corollary; pending external mathematical review  
+**Status:** `REVISE / RETRACTED PROOF`  
 **Date:** 2026-08-14  
 **Project:** Free Computation Foundation / CENTL  
 **Coordinator:** Operator-01 / primary research lead  
-**Partner framework:** Operator-02 active fixed-negative core / valuation criterion  
-**Claim boundary:** this theorem is a structural result inside the Type A/B minimal-depth program. It does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.
+**Claim boundary:** the former proof in this file is invalid. The `q in {3,5,9}` hard-class collapse remains an independently verified finite theorem-certificate through `k<=100000`, not a universal theorem. The earlier universal theorem `|N^act|=1 => q=p or p^2` remains unaffected.
 
 Read with:
 
-- [SINGLE-ACTIVE-EXCESS-PRIME-POWER.md](SINGLE-ACTIVE-EXCESS-PRIME-POWER.md)
-- [SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md](SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md)
-- [CLASS-C-CENSUS-K1500.md](CLASS-C-CENSUS-K1500.md)
-- [operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md](operator-02/DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md)
-- [operator-02/DIAMOND-VALUATION-CRITERION.md](operator-02/DIAMOND-VALUATION-CRITERION.md)
+- [SINGLE-ACTIVE-EXCESS-PRIME-POWER.md](SINGLE-ACTIVE-EXCESS-PRIME-POWER.md) — still proved;
+- [SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md](SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md) — verified finite result;
+- [CLASS-C-CENSUS-K1500.md](CLASS-C-CENSUS-K1500.md);
+- [operator-02/DIRECTIVE-FIRST-SHELL-REVIEW.md](operator-02/DIRECTIVE-FIRST-SHELL-REVIEW.md).
 
-## 1. Setup
+## 1. Retraction
 
-Let the target Type A/B candidate have modulus
+An earlier version of this file claimed the universal implication
 
 \[
-M=4k-1
+|\mathcal N^{\rm act}_{k,r}|=1
+\Longrightarrow
+s\in\{3,5\}
+\Longrightarrow
+q\in\{3,5,9,25\},
 \]
 
-and progression modulus
+followed by a hard-class elimination of `q=25`.
 
-\[
-L=\operatorname{lcm}(840,M).
-\]
-
-Let an earlier fixed-negative layer have modulus
-
-\[
-m=4j-1.
-\]
-
-Write its squarefree kernel as `d`. Since the layer is fixed at squareclass level,
-
-\[
-\boxed{m=d s^2}
-\]
-
-for a positive odd integer `s`, where
-
-\[
-d\equiv3\pmod4,
-\qquad d\mid L.
-\]
-
-For the target residue `r`, the Jacobi sign on the whole `d`-tower is constant:
-
-\[
-\left(\frac r{d u^2}\right)=\left(\frac r d\right)
-\]
-
-whenever the symbol is defined.
-
-A tower layer `d u^2<M` is active exactly when
-
-\[
-du^2\nmid L.
-\]
-
-Assume that the global active fixed-negative core has exactly one member. Then the negative `d`-tower containing that member has exactly one active layer.
-
-The goal is to classify that unique active shell.
-
-## 2. Tower normalization
-
-Define
-
-\[
-A=\frac Ld.
-\]
-
-Because `d` is odd and `M` is odd,
-
-\[
-\boxed{v_2(A)=3.}
-\]
-
-Indeed `v_2(L)=v_2(840)=3`.
-
-Let
-
-\[
-c=\frac LM
-=\frac{840}{\gcd(840,M)}.
-\]
-
-Then
-
-\[
-\boxed{
-A=c\frac Md.
-}
-\]
-
-and `c` is an integer divisor of `840` with exact 2-adic valuation `3`.
-
-Let `s` be the unique active square parameter in the negative tower, and let `N` be the largest positive odd integer satisfying
-
-\[
-dN^2<M.
-\]
-
-Thus
-
-\[
-N^2<\frac Md\le(N+2)^2
-\]
-
-and consequently
-
-\[
-\boxed{
-cN^2<A\le c(N+2)^2.}
-\]
-
-Every other odd `u<=N`, `u!=s`, is an earlier fixed-negative layer. Uniqueness of the active core forces it inactive:
-
-\[
-du^2\mid L.
-\]
-
-Since `d|L`, this is equivalent to
-
-\[
-\boxed{u^2\mid A.}
-\]
-
-The active shell itself satisfies
-
-\[
-\boxed{s^2\nmid A.}
-\]
-
-We now show this can happen only at `s=3` or `s=5`.
-
-## 3. Elimination of s >= 9
-
-Assume
-
-\[
-s\ge9.
-\]
-
-Then the tower layers `u=3,5,7` are all earlier than the active shell and hence inactive. Therefore
-
-\[
-9d\mid L,
-\qquad
-25d\mid L,
-\qquad
-49d\mid L.
-\]
-
-For each of the primes `3,5,7`, the exponent contributed by the square is at least `2`, while `840` contains that prime only to exponent `1`. Hence the required exponent must occur in `M`.
-
-Thus
-
-\[
-3\cdot5\cdot7=105\mid M,
-\]
-
-so
-
-\[
-\gcd(840,M)=105
-\]
-
-and therefore
-
-\[
-\boxed{c=8.}
-\]
-
-Since `N>=s>=9`, consider the two largest odd positions.
-
-### Case 1: s is neither N nor N-2
-
-Then both `N` and `N-2` are inactive. They are coprime because they are odd and differ by `2`. Hence
-
-\[
-N^2(N-2)^2\mid A.
-\]
-
-But for every odd `N>=9`,
-
-\[
-N^2(N-2)^2>8(N+2)^2,
-\]
-
-contradicting
-
-\[
-A\le8(N+2)^2.
-\]
-
-### Case 2: s=N
-
-Then `N-2` and `N-4` are inactive and coprime. Hence
-
-\[
-(N-2)^2(N-4)^2\mid A.
-\]
-
-For `N>=9`,
-
-\[
-(N-2)^2(N-4)^2>8(N+2)^2,
-\]
-
-again impossible.
-
-### Case 3: s=N-2
-
-Then `N` and `N-4` are inactive. Since `N` is odd,
-
-\[
-\gcd(N,N-4)=\gcd(N,4)=1.
-\]
-
-Therefore
-
-\[
-N^2(N-4)^2\mid A,
-\]
-
-while for `N>=9`,
-
-\[
-N^2(N-4)^2>8(N+2)^2.
-\]
-
-Contradiction.
-
-Thus
-
-\[
-\boxed{s<9.}
-\]
-
-## 4. Elimination of s = 7
-
-Assume
-
-\[
-s=7.
-\]
-
-The `u=3` and `u=5` layers are earlier and inactive, so
-
-\[
-9d\mid L,
-\qquad25d\mid L.
-\]
+That proof used a false intermediate assertion.
 
-As above, the necessary exponents of `3` and `5` cannot come from `840` alone, hence
-
-\[
-15\mid M.
-\]
-
-Therefore
-
-\[
-\gcd(840,M)\in\{15,105\}
-\]
-
-and
-
-\[
-\boxed{c\in\{56,8\}.}
-\]
-
-### If N >= 11
-
-Then `N` and `N-2` are both different from the active value `7`, so both are inactive and coprime. Hence
-
-\[
-N^2(N-2)^2\mid A.
-\]
-
-For every odd `N>=11`,
-
-\[
-N^2(N-2)^2>56(N+2)^2.
-\]
-
-Since `c<=56`, this contradicts
-
-\[
-A\le c(N+2)^2.
-\]
-
-So only `N=7` or `N=9` remain.
-
-### If N = 9
-
-The inactive values `3,5,9` give
-
-\[
-\operatorname{lcm}(3^2,5^2,9^2)
-=2025
-\mid A.
-\]
-
-If `c=8`, then
-
-\[
-648<A\le968,
-\]
-
-which contains no positive multiple of `2025`.
-
-If `c=56`, then
-
-\[
-4536<A\le6776.
-\]
-
-The only multiple of `2025` in this interval is
-
-\[
-A=6075,
-\]
-
-but
-
-\[
-v_2(6075)=0\ne3=v_2(A),
-\]
-
-contradiction.
-
-### If N = 7
-
-The inactive values `3,5` imply
-
-\[
-225\mid A.
-\]
-
-If `c=8`, then
-
-\[
-392<A\le648.
-\]
-
-The only multiple of `225` is `450`, with
-
-\[
-v_2(450)=1\ne3.
-\]
-
-If `c=56`, then
-
-\[
-2744<A\le4536.
-\]
-
-Write
-
-\[
-A=225m.
-\]
-
-The interval forces
-
-\[
-13\le m\le20.
-\]
-
-Since `225` is odd, the condition `v_2(A)=3` would require
-
-\[
-v_2(m)=3.
-\]
-
-But among the integers `13,...,20`, the only multiple of `8` is `16`, whose 2-adic valuation is `4`, not `3`.
-
-Contradiction.
-
-Hence
-
-\[
-\boxed{s\ne7.}
-\]
-
-Combining with the previous section and the fact that `s=1` is inactive because `d|L`, we obtain the main theorem.
-
-## 5. Universal first-shell theorem
-
-### Theorem
-
-If a negative fixed-squareclass tower contains exactly one active layer below the target modulus, then its unique active square parameter is
-
-\[
-\boxed{s\in\{3,5\}.}
-\]
-
-Consequently, if the global active fixed-negative core has size one, its unique excess quotient satisfies
-
-\[
-\boxed{q\in\{3,5,9,25\}.}
-\]
-
-### Quotient classification
-
-If `s=3`, then
-
-\[
-v_3(d3^2)=v_3(d)+2\le3,
-\]
-
-while `v_3(L)>=1`. Activity therefore leaves quotient exponent at most `2`:
-
-\[
-\boxed{q\in\{3,9\}.}
-\]
-
-If `s=5`, the same argument gives
-
-\[
-\boxed{q\in\{5,25\}.}
-\]
-
-This strengthens the earlier general `q=p` or `p^2` theorem by identifying the only possible prime directions in a unique active tower.
-
-## 6. Hard-class elimination of q = 25
-
-Now impose the Mordell-hard target classes
-
-\[
-H=\{1,121,169,289,361,529\}\pmod{840}.
-\]
-
-Every class in `H` is a nonzero quadratic residue modulo `5`:
-
-\[
-H\pmod5\subseteq\{1,4\}.
-\]
-
-Therefore the target residue satisfies
-
-\[
-\boxed{\left(\frac r5\right)=+1.}
-\]
-
-Assume for contradiction that the unique active fixed-negative layer has
-
-\[
-q=25.
-\]
-
-By the universal theorem it must have `s=5`, so
-
-\[
-m=d5^2.
-\]
-
-For the quotient to contain `5^2`, the squarefree kernel must contain `5` and `L` must contain only one power of `5`:
-
-\[
-5\mid d,
-\qquad
-v_5(L)=1.
-\]
-
-Indeed, if `5` did not divide `d`, then `m` would contain only `5^2` while `L` already contains one factor of `5`, leaving at most a single factor `5` in the quotient.
-
-Put
-
-\[
-d'=d/5.
-\]
-
-Because `5=1 mod 4` and `d=3 mod 4`,
-
-\[
-d'\equiv3\pmod4.
-\]
+The assertion was:
 
-Also `d'` is squarefree and supported on primes dividing `L`.
+> if `m=d s^2` is a fixed-negative squareclass layer, then every earlier layer `d u^2` in the same squarefree tower has the same negative Jacobi sign.
 
-The hard-class quadratic residue condition gives
+The correct statement is
 
 \[
-\left(\frac r{d'}\right)
+\left(\frac r{d u^2}\right)
 =
 \left(\frac r d\right)
-\left(\frac r5\right)^{-1}
-=-1.
 \]
 
-So `d'` defines another fixed-negative tower.
-
-Now consider its `s=5` layer:
+**only when**
 
 \[
-m'=d'5^2=m/5<m<M.
+\gcd(r,u)=1.
 \]
 
-Its `5`-valuation is `2`, while `v_5(L)=1`, hence
+If a prime dividing `u` also divides `r`, then the Jacobi symbol is `0`, not `-1`.
+
+The invalid proof compared the active shell with unrelated odd values such as `N`, `N-2`, `3`, `5`, and `7` without first proving those values are coprime to `r`. Therefore uniqueness of the active **fixed-negative** core does not imply that all those comparison shells are inactive. Some may simply fail to be fixed-negative because their Jacobi symbol is zero.
+
+The product/lcm interval contradictions built from those unrelated shells are therefore unsupported.
+
+## 2. What remains proved
+
+The theorem in [SINGLE-ACTIVE-EXCESS-PRIME-POWER.md](SINGLE-ACTIVE-EXCESS-PRIME-POWER.md) survives this correction.
+
+Its argument only replaces the actual active square parameter `s` by a divisor such as `s/p`.
+
+Because the original layer has Jacobi sign `-1`,
 
 \[
-q'=rac{m'}{\gcd(L,m')}=5>1.
+\gcd(r,s)=1.
 \]
 
-Thus `m'` is a **second active fixed-negative earlier layer**, contradicting
+Hence every divisor of `s` is also coprime to `r`, and removing an actual factor preserves the negative squareclass sign.
 
-\[
-|\mathcal N^{\rm act}|=1.
-\]
-
-Therefore
-
-\[
-\boxed{q\ne25}
-\]
-
-for hard-compatible single-active candidates.
-
-## 7. Hard-class 3/5/9 collapse theorem
-
-### Corollary
-
-For every Mordell-hard compatible Type A/B target candidate,
+Thus the universal statement remains:
 
 \[
 \boxed{
 |\mathcal N^{\rm act}_{k,r}|=1
 \Longrightarrow
-q_{j_0}\in\{3,5,9\}.
+q=p\text{ or }p^2
 }
 \]
 
-Moreover the excess is necessarily Operator-02 **Class A**, because both primes `3` and `5` already divide
+for one prime `p`.
 
-\[
-L=\operatorname{lcm}(840,M).
-\]
-
-Thus
+The Class-B corollary also remains:
 
 \[
 \boxed{
-\text{hard-compatible single-active}
+\text{Class B single-active}
 \Longrightarrow
-\text{Class A only, with }q=3,5,\text{ or }9.
+q=p^2,\quad p\nmid L.
 }
 \]
 
-QED.
+## 3. What remains independently verified finite evidence
 
-## 8. Independent finite regression
-
-This theorem exactly explains the independently verified computation through
+The two-construction GitHub workflow through
 
 \[
-k\le100,000,
+k\le100000
 \]
 
-which examined
+examined
 
 \[
 8,021,288
@@ -575,7 +109,7 @@ hard-compatible Type A/B target candidates and found
 419,123
 \]
 
-single-active cases:
+single-active candidates, with exact quotient distribution
 
 ```text
 q=3: 252,832
@@ -585,30 +119,145 @@ other:      0
 Class B:    0
 ```
 
-See [SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md](SINGLE-ACTIVE-HARD-COLLAPSE-K100000.md).
+The independent verifier had zero mismatched fields.
 
-The finite run is now best viewed as a large regression/falsification check of the theorem rather than the basis for the theorem.
+Workflow provenance:
 
-## 9. What this removes from C1
+```text
+run:      31854964168
+artifact: 9238743256
+artifact sha256:
+f390c20afe0c8fc97d9046c34117f4e0b2c8e56f255d6a31c732b337d16d2159
+```
 
-The single-active branch no longer contains arbitrary valuation geometry.
-
-It has exactly three hard-compatible quotient shapes:
+Therefore the sharp statement
 
 \[
-\boxed{3,5,9.}
+\boxed{
+\text{hard-compatible }|N^{act}|=1
+\Longrightarrow
+q\in\{3,5,9\}\text{ and Class A}
+}
 \]
 
-Combined with [SINGLE-ACTIVE-LOCAL-ESCAPE.md](SINGLE-ACTIVE-LOCAL-ESCAPE.md), the unique active fixed-negative row itself always admits a reduced exact local escape.
+is a **strong theorem candidate with exact finite verification through `k<=100000`**, not a proved theorem.
 
-Therefore the remaining C1 problem is not to understand an arbitrary active row. It is to coordinate one of three tiny Class-A local shells with the nonfixed exact rows that survive fiber peeling.
+## 4. Correct proof target
 
-That is a substantially smaller theorem target.
+The missing ingredient must use information that distinguishes a hard-compatible Type A/B target residue from an arbitrary reduced residue.
 
-## 10. Review and novelty boundary
+For a target layer
 
-The proof uses only elementary valuation arithmetic, Jacobi-symbol invariance under square factors, lcm divisibility, and the fixed modulus `840`. Those ingredients are classical.
+\[
+M=4k-1,
+\]
 
-The research contribution under review is the Type-A/B-specific active-core formulation and the first-shell classification inside the minimal-depth/shadow program.
+the candidate residue is not arbitrary. It satisfies
 
-This note should receive independent mathematical review, including Operator-02 adversarial review, before being treated as publication-ready.
+\[
+r\equiv -e\quad\text{or}\quad -4e\pmod M
+\]
+
+for some
+
+\[
+e\mid k.
+\]
+
+At the same time, an active fixed-negative layer
+
+\[
+m=d s^2
+\]
+
+satisfies
+
+\[
+\left(\frac r d\right)=-1,
+\qquad
+\gcd(r,s)=1,
+\qquad
+q=m/\gcd(L,m)=p\text{ or }p^2.
+\]
+
+The new theorem search must exploit the **target trap residue** together with quadratic reciprocity / divisor arithmetic, rather than assuming arbitrary shells in the same squarefree tower are negative.
+
+## 5. Revised attack directions
+
+### A. Target-trap reciprocity
+
+Substitute
+
+\[
+r\equiv-e\text{ or }-4e\pmod M
+\]
+
+into the fixed-negative condition modulo the squarefree kernel `d`.
+
+Because
+
+\[
+e\mid k,
+\qquad
+4k\equiv1\pmod d
+\]
+
+whenever `d|M`, divisor residues may force local quadratic constraints on the excess prime `p`.
+
+The key question is whether the condition
+
+\[
+(r/d)=-1
+\]
+
+can coexist with a first active shell at a prime `p>=7` or a Class-B square once the target residue is a Type A/B trap.
+
+### B. Actual-divisor shell reductions only
+
+All universally valid square-tower reductions should use divisors of the actual active shell `s`, because those preserve coprimality with `r` automatically.
+
+No comparison with an unrelated `u` may be called fixed-negative without proving `gcd(r,u)=1`.
+
+### C. Explain the observed absence of Class B
+
+For Class B,
+
+\[
+q=p^2,
+\qquad p\nmid L.
+\]
+
+Since `p` is absent from both `840` and the target modulus `M`, it is a genuinely new square coordinate in the earlier fixed-negative layer.
+
+The finite data suggest Type A/B target compatibility forbids such a coordinate in a unique active core. That is now a clean separate theorem target.
+
+### D. Preserve the finite falsifier
+
+The `k<=100000` double-construction test remains valuable and should be extended only as a regression/falsifier, not used as a substitute for proof.
+
+## 6. Scientific correction protocol
+
+This correction was made immediately upon finding the gap, before publication-grade promotion.
+
+The invalid proof remains recoverable in Git history at commit
+
+```text
+a7a0ccb17d59c8797e6c6f0b315ccc08db66ba87
+```
+
+but must not be cited as a theorem.
+
+The repository is the canonical record of both the proposed proof and its retraction.
+
+## 7. Current status table
+
+```text
+|N^act|=1 => q=p or p^2:                    PROVED
+Class-B single-active => q=p^2, p not in L: PROVED
+hard single-active q in {3,5,9}:            FINITE-CERTIFIED through k<=100000
+hard single-active Class-A only:             FINITE-CERTIFIED through k<=100000
+former first-shell proof:                    RETRACTED / INVALID
+universal hard-collapse theorem:             OPEN
+```
+
+This is the active proof frontier.
