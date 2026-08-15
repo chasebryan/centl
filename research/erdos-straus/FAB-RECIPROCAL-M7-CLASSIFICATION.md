@@ -1,0 +1,211 @@
+# Exact m=7 failure classification for the reciprocal double sieve
+
+**Status:** proved exact local theorem  
+**Date:** 2026-08-15  
+**Depends on:** `FAB-RECIPROCAL-SIGNED-TARGET.md`  
+**Claim boundary:** this classifies the fixed `m=7` obstruction. It is not a universal Erdős–Straus proof.
+
+## 1. Signed exponent language modulo 7
+
+The unit group modulo `7` is cyclic of order `6`. Use the generator
+
+\[
+3,
+\]
+
+so
+
+\[
+3^0,3^1,3^2,3^3,3^4,3^5
+\equiv
+1,3,2,6,4,5
+\pmod7.
+\]
+
+If
+
+\[
+n=\prod_i r_i
+\]
+
+lists prime factors with multiplicity and
+
+\[
+r_i\equiv3^{\alpha_i}\pmod7,
+\qquad
+\alpha_i\in\mathbf Z/6\mathbf Z,
+\]
+
+then the bounded signed divisor set is represented by all sums
+
+\[
+\boxed{
+\sum_i\varepsilon_i\alpha_i\pmod6,
+\qquad
+\varepsilon_i\in\{-1,0,1\}.
+}
+\]
+
+Grouping repeated primes gives exactly the exponent box in `FAB-RECIPROCAL-SIGNED-TARGET.md`.
+
+The quadratic residues modulo `7` are
+
+\[
+\boxed{1,2,4,}
+\]
+
+corresponding to the even exponents `0,2,4`.
+
+## 2. Reciprocal lane
+
+Put
+
+\[
+Y=\frac{7p+1}{4}.
+\]
+
+For every prime `p!=7`,
+
+\[
+Y\equiv4^{-1}\equiv2\equiv3^2\pmod7.
+\]
+
+By the reciprocal signed-target theorem, the lane succeeds exactly when `-1=6=3^3` lies in the signed divisor set.
+
+Hence the total factor exponent satisfies
+
+\[
+\sum_i\alpha_i\equiv2\pmod6,
+\]
+
+and failure means that no signed sum is `3 mod6`.
+
+### Theorem — reciprocal m=7 failure
+
+The reciprocal `m=7` lane fails if and only if exactly one of the following holds.
+
+### R7-A: quadratic-residue support
+
+Every prime factor of `Y`, counted with arbitrary multiplicity, lies in
+
+\[
+\boxed{\{1,2,4\}\pmod7.}
+\]
+
+### R7-B: exceptional two-factor atom
+
+Exactly two prime factors of `Y`, counted with multiplicity, are
+
+\[
+\boxed{3\pmod7,}
+\]
+
+and every remaining prime factor is
+
+\[
+\boxed{1\pmod7.}
+\]
+
+### Proof
+
+If all factor exponents are even, every signed sum is even, so exponent `3` is impossible. This proves R7-A is a failure family.
+
+For R7-B the only nonzero exponents are two copies of `1`. Their signed sums are
+
+\[
+-2,-1,0,1,2,
+\]
+
+which never equal `3 mod6`. The total exponent is `2`, as required by `Y=2 mod7`.
+
+Conversely suppose failure occurs and at least one factor exponent is odd. Exponent `3` itself would immediately succeed, so all odd exponents are `1` or `5`.
+
+Because the total exponent is even, the number of odd exponents is even.
+
+- If there are at least four odd exponents, then either three are equal, giving signed sum `3` (`1+1+1` or `5+5+5`), or there are two of each, in which case `1+1-5=3 mod6`.
+- Hence exactly two odd exponents remain.
+- A pair `5,5` has total exponent `4`, so the even-exponent factors must contribute `4 mod6`. Any nonzero even factor then combines with a `5` to give signed target `3`: `5-2=3` or `5+4=3 mod6`.
+- A pair `1,5` has total exponent `0`, so the even factors contribute `2 mod6`; again a `2` gives `1+2=3`, while if only `4` occurs then at least two copies are required and `5+4=3 mod6`.
+- Therefore the only possible odd pair is `1,1`. Any nonzero even exponent then gives `1+2=3` or `-1+4=3`. Thus all remaining exponents are `0`.
+
+This is exactly R7-B. QED.
+
+## 3. Forward lane for hard primes
+
+Put
+
+\[
+X=\frac{p+7}{4}.
+\]
+
+Since `4^{-1}=2 mod7`,
+
+\[
+X\equiv2p\pmod7.
+\]
+
+The forward signed target is `-p`. Mordell-hard primes are quadratic residues modulo `7`, hence
+
+\[
+p\bmod7\in\{1,2,4\}.
+\]
+
+The exact failure classification is:
+
+### p = 1 mod 7
+
+Then `X=2 mod7` and the target is `6`. The classification is identical to the reciprocal lane:
+
+- all prime factors of `X` lie in `{1,2,4} mod7`; or
+- exactly two prime factors are `3 mod7` and all remaining prime factors are `1 mod7`.
+
+### p = 2 mod 7
+
+Then `X=4 mod7` and the target is `5 mod7`.
+
+Failure occurs **if and only if every prime factor of `X` is a quadratic residue modulo 7**:
+
+\[
+\boxed{r\mid X\Longrightarrow r\bmod7\in\{1,2,4\}.}
+\]
+
+### p = 4 mod 7
+
+Then `X=1 mod7` and the target is `3 mod7`.
+
+Failure occurs if and only if either
+
+- every prime factor of `X` is a quadratic residue modulo `7`; or
+- exactly two prime factors of `X`, counted with multiplicity, are `6 mod7` and every remaining prime factor is `1 mod7`.
+
+Each statement follows by the same cyclic-exponent argument above, with total exponent and target exponent changed accordingly.
+
+## 4. Combined obstruction at m=7
+
+Therefore a hypothetical hard prime surviving both `m=7` lanes must force **two different linear forms**
+
+\[
+\boxed{
+X=\frac{p+7}{4},
+\qquad
+Y=\frac{7p+1}{4}
+}
+\]
+
+into the small factorization families above.
+
+They satisfy
+
+\[
+\boxed{7X-Y=12}
+\]
+
+and hence
+
+\[
+\boxed{\gcd(X,Y)\mid12.}
+\]
+
+So away from the fixed support `{2,3}`, the prime factors producing the forward and reciprocal failure signatures are disjoint.
+
+The next proof target is to combine this exact `m=7` classification with the already-proved `m=3` Eisenstein split restrictions and then with `m=11`. The goal is a contradiction or a forced external nonresidue, not a larger finite census.
