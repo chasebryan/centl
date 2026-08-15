@@ -119,6 +119,58 @@ Independently solve or falsify the smallest coordinated Class-C systems, priorit
 
 Every proposed rule must include an explicit exact-trap falsifier. A coarse quadratic signature failure is not an exact obstruction.
 
+## Coordinator C1 handoff — verify independently
+
+The primary lane has now frozen [`../CLASS-C-C1-SINGLE-ACTIVE.md`](../CLASS-C-C1-SINGLE-ACTIVE.md), [`../SINGLE-ACTIVE-LOCAL-ESCAPE.md`](../SINGLE-ACTIVE-LOCAL-ESCAPE.md), and the replayable census workflow.
+
+A preliminary exact replay of the frozen `k<=1500` bundle gives the following C1 figures. **Do not adopt them as independently verified Operator-02 results until your lane recomputes them.**
+
+```text
+N = empty:                                  38,658
+N^act = empty:                              43,968
+N nonempty but N^act empty:                  5,310
+|N^act| = 1:                                 2,770
+
+single-active q distribution:
+  q=3:                                       1,322
+  q=5:                                          34
+  q=9:                                       1,414
+
+single-active valuation source:
+  Class A only:                              2,770
+  Class B / mixed:                               0
+
+unique active pullback R_j0:
+  empty:                                     2,644
+  singleton:                                   126
+
+single-active fiber result:
+  fiber empty:                               1,290
+  fiber nonempty:                            1,480
+  unique active row survives final kernel:      18
+  unique active row peeled before residual:  1,462
+
+residual edge sources across nonempty C1 kernels:
+  nonfixed earlier rows:                    69,672
+  unique active fixed-negative row:             18
+  other fixed-negative/fixed-positive rows:      0
+
+bounded selector on nonempty C1 kernels:
+  solved:                                    1,480 / 1,480
+  maximum radius:                               48
+```
+
+### Operator-02 C1 tasks
+
+1. Recompute the counts above independently from artifact `9238241616`.
+2. Explain why the unique active row disappears from `1,462/1,480` nonempty final fiber kernels while nonfixed rows dominate the residual edge set.
+3. Test whether the `q in {3,5,9}` and Class-A-only pattern is a finite-range accident or follows from a structural restriction on the `|N^act|=1` regime.
+4. Attack the two size-2 residual kernels and the `{3,11,13}` size-3 family exactly, not merely by signature.
+5. Review the proved local lemma in `SINGLE-ACTIVE-LOCAL-ESCAPE.md` adversarially. In particular, try to find a hidden compatibility condition invalidating the CRT-independence corollary as stated.
+6. If the lemma survives review, identify the smallest additional statement needed to coordinate that local active-row escape with the nonfixed residual rows.
+
+The primary lane's current interpretation is that **`N^act` and the final fiber residual are distinct obstruction resolutions**. The unique active fixed-negative row is usually not the finite bottleneck once fiber peeling is applied. Any universal Class-C theorem must account for this rather than treating `N^act` as the complete exact row set.
+
 ## Reporting protocol
 
 Every completed item must include:
