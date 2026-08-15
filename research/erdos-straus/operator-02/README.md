@@ -1,61 +1,27 @@
 # Operator-02 Research Container
 
 **Role:** Operator #2 (analysis, verification support, and furtherance)  
-**Coordinator:** primary research lead (repository owner)  
+**Coordinator:** primary research lead  
 **Status:** active, subordinate, non-destructive  
 **Date established:** 2026-08-14
 
 ## Mandate
 
-This container exists solely for Operator-02 analysis, findings, and supporting notes on the Erdős–Straus Type A/B research program documented in the parent directory.
+Analysis-only container. No modification of any parent document, script, or data file. All new material lives exclusively under `operator-02/`. Coupling by reference only. Every finished piece uploaded to `main` concurrently.
 
-Rules of engagement (strict):
+## Diamond candidates produced this session
 
-- Do **not** modify, delete, rename, or regress any existing document, script, or data file in `research/erdos-straus/` or elsewhere in the repository.
-- Do **not** alter the claim boundaries, finite certificates, or theorem statements already published by the primary research.
-- All new material lives exclusively under `research/erdos-straus/operator-02/`.
-- Work only from the readable resources currently present in the repository.
-- Any code, lemmas, or notes produced here are subordinate and must be clearly labeled as Operator-02 material.
-- Coupling to the main program is by reference only.
-- Every finished piece is uploaded to `main` concurrently.
+| File | Diamond content |
+|------|-----------------|
+| `DIAMOND-FIXED-NEGATIVE-PULLBACK-SPLIT.md` | Active vs inactive fixed-negative layers; only q_j > 1 feeds the s-system |
+| `DIAMOND-RESIDUAL-SIGNATURE-SUPPORT.md` | Residual kernels through k≤1200 ⊆ U_{1200} (12 primes); face only N^{act} |
+| `DIAMOND-VALUATION-CRITERION.md` | Exact valuation criterion; Class A fixed-prime excess vs Class B even-powered free primes |
+| `DIAMOND-SIGNATURE-COSET-TARGET.md` | Precise residual target = stay off trap-signature cosets of layers in N^{act} |
 
-## Coupling to the main program
+## Full inventory
 
-Read-only references:
-
-- [`../README.md`](../README.md), [`../DIAMOND.md`](../DIAMOND.md), [`../CURRENT-FRONTIER.md`](../CURRENT-FRONTIER.md)
-- [`../DIRECT-SHADOW-K1200.md`](../DIRECT-SHADOW-K1200.md), [`../FIBER-SHADOW-KERNEL.md`](../FIBER-SHADOW-KERNEL.md), [`../SHADOW-KERNEL.md`](../SHADOW-KERNEL.md)
-- [`../TRAP-FIBER-BOUND.md`](../TRAP-FIBER-BOUND.md), [`../QUADRATIC-TRAP-SIGNATURE.md`](../QUADRATIC-TRAP-SIGNATURE.md), [`../CHARACTER-SHIELD-COMPLETENESS.md`](../CHARACTER-SHIELD-COMPLETENESS.md)
-- [`../SMALL-SELECTOR-HYPOTHESIS.md`](../SMALL-SELECTOR-HYPOTHESIS.md), [`../THEORY.md`](../THEORY.md), [`../RESULTS-2026-08-14.md`](../RESULTS-2026-08-14.md)
-- [`../ODD-COVERING-BRIDGE.md`](../ODD-COVERING-BRIDGE.md), [`../PRIME-MODULUS-BACKBONE.md`](../PRIME-MODULUS-BACKBONE.md), [`../COMPOSITE-CORE.md`](../COMPOSITE-CORE.md)
-
-## Complete document inventory
-
-| File | Purpose |
-|------|---------|
-| `README.md` | This charter |
-| `ANALYSIS-2026-08-14.md` | Independent reading of frontier and tools |
-| `NEXT-TARGETS.md` | Prioritized analysis queue |
-| `FIBER-KERNEL-RESIDUALS.md` | Compression cascade and residual structure |
-| `RESIDUAL-SIGNATURE-31113.md` | Notes on residual signature {3,11,13} |
-| `RESIDUAL-SIGNATURE-357.md` | Notes on residual signature {3,5,11,13,17,19,23} |
-| `CHARACTER-FIBER-INTERACTION.md` | Original Classes A–D partition |
-| `CHARACTER-SHIELD-COMPLETENESS-READING.md` | Reading of parent completeness theorem; refined Class C |
-| `UNIVERSAL-FIBER-KERNEL-BOUNDS.md` | Reading of parent trap-fiber universal bounds |
-| `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` | Working picture after all parent sufficiency tools |
-| `ANCESTRY-Q5-NOTES.md` | Structural questions for q = 5 family |
-| `ANCESTRY-Q5-ARITHMETIC.md` | Necessary conditions for full shadowing |
-| `CENSUS-TEMPLATE.md` | Template for future primary-output census |
-| `STATUS-2026-08-14.md` | Running inventory and open queue |
+`ANALYSIS-2026-08-14.md`, `NEXT-TARGETS.md`, `FIBER-KERNEL-RESIDUALS.md`, `RESIDUAL-SIGNATURE-31113.md`, `RESIDUAL-SIGNATURE-357.md`, `CHARACTER-FIBER-INTERACTION.md`, `CHARACTER-SHIELD-COMPLETENESS-READING.md`, `UNIVERSAL-FIBER-KERNEL-BOUNDS.md`, `RESIDUAL-OBSTRUCTION-SYNTHESIS.md`, `ANCESTRY-Q5-NOTES.md`, `ANCESTRY-Q5-ARITHMETIC.md`, `CENSUS-TEMPLATE.md`, `STATUS-2026-08-14.md`, and the four DIAMOND-*.md files above.
 
 ## Claim discipline
 
-Operator-02 inherits the claim boundaries of the primary program:
-
-- The Erdős-Straus conjecture remains open.
-- Universal López Type A/B coverage remains unproved.
-- Universal Direct-Shadow Completeness remains unproved.
-- Finite candidatewise results are theorem-certificate statements for their stated ranges only.
-- Residual kernels, failed bounded selectors, or incomplete character-shield systems are **not** evidence of counterexamples.
-
-Any statement that exceeds these boundaries will be corrected immediately.
+Erdős-Straus open. López coverage open. Universal DSC-P open. Finite certificates range-limited. Residual kernels and failed selectors are not counterexamples. Operator-02 diamond candidates are compressions and formulations derived from parent material; primary priority is absolute.
