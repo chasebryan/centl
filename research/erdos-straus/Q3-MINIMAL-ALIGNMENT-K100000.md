@@ -1,9 +1,39 @@
 # Ancestry-Minimal q=3 Alignment through k = 100,000
 
-**Status:** exact finite theorem-certificate; independently verified  
+**Status:** exact finite theorem-certificate; independently verified; **universal extrapolation refuted above the certified range**  
 **Date:** 2026-08-15  
 **Depends on:** `Q3-POINTWISE-DIVISOR-REDUCTION.md`, `Q3-NEXT-DIGIT-THEOREM.md`, `Q3-FACTOR-PAIR-TYPES.md`  
-**Claim boundary:** finite alignment certificate only. It does not prove the universal alignment theorem, universal DSC-P, López-all-primes, or Erdős-Straus.
+**Claim boundary:** finite alignment certificate only. `DSC-COUNTEREXAMPLE.md` gives an explicit three-species ancestry-minimal full cover at `k=4,478,950`, so the former universal alignment candidate is false.
+
+---
+
+## Superseding warning
+
+The finite result in this document remains exact and independently verified through
+
+\[
+\boxed{k\le100000.}
+\]
+
+It must **not** be extrapolated universally.
+
+`DSC-COUNTEREXAMPLE.md` constructs and exhaustively verifies a later admissible target at
+
+\[
+\boxed{k=4,478,950}
+\]
+
+with ancestry-minimal q=3 rows
+
+\[
+\boxed{25,70,187}
+\]
+
+occupying all three next 3-adic digits. That example refutes the stronger alignment conjecture suggested by this finite certificate.
+
+The correct interpretation is now:
+
+> no three-species ancestry-minimal cover occurs through `k<=100000`; the first explicit constructed cover currently recorded lies above that frontier.
 
 ---
 
@@ -44,7 +74,7 @@ Primary and independent verifier completed successfully.
 
 ---
 
-## 3. Exact result
+## 3. Exact finite result
 
 Admissible candidates checked:
 
@@ -52,7 +82,7 @@ Admissible candidates checked:
 \boxed{3,567,030.}
 \]
 
-Maximum number of ancestry-minimal q=3 rows simultaneously hitting one candidate:
+Maximum number of ancestry-minimal q=3 rows simultaneously hitting one candidate in this range:
 
 \[
 \boxed{3.}
@@ -70,7 +100,7 @@ Among those 12, candidates occupying two or more next digits:
 \boxed{0.}
 \]
 
-Full ancestry-minimal q=3 covers:
+Full ancestry-minimal q=3 covers through the certified range:
 
 \[
 \boxed{0.}
@@ -87,11 +117,11 @@ Full ancestry-minimal q=3 covers:
 | 2 | 6,566 |
 | 3 | **12** |
 
-No candidate in the tested range has four or more ancestry-minimal q=3 rows.
+No candidate through `k<=100000` has four or more ancestry-minimal q=3 rows.
 
 ---
 
-## 5. The twelve three-row cases are perfectly aligned
+## 5. The twelve three-row cases inside the certified range
 
 Their union masks are:
 
@@ -101,9 +131,7 @@ Their union masks are:
 | `2 = {1}` | 6 |
 | `4 = {2}` | 3 |
 
-There are **no** masks `3`, `5`, `6`, or `7` among the three-row population.
-
-Thus every three-row case is maximally non-covering: three distinct ancestry-minimal rows all forbid the **same** global next 3-adic digit.
+There are **no** masks `3`, `5`, `6`, or `7` among the three-row population in the certified range.
 
 The first is
 
@@ -114,6 +142,8 @@ t = 92699
 mask = 4
 rows = 25, 286, 754
 ```
+
+This finite alignment is real; it is not a universal law.
 
 ---
 
@@ -155,24 +185,10 @@ bdc883a7a491cc923bf7a41851c6e51b3c604f8a9ac271b3336d470fab0b5ffa  provenance.txt
 
 ---
 
-## 8. Stronger theorem suggested by the certificate
+## 8. What this finite certificate taught us
 
-The data no longer merely suggests
+The absence of multi-digit three-row cases through `100000` suggested a rigidity phenomenon worth attacking. The adversarial factor-pair construction then falsified that universal hypothesis and produced the first explicit DSC counterexample.
 
-\[
-\text{no full q=3 cover}.
-\]
+That is exactly the proper role of this certificate: it exposed an apparently rigid low-range pattern whose eventual failure revealed the **collective-core** mechanism.
 
-It suggests a much more rigid statement:
-
-> **Ancestry-minimal alignment candidate.** Whenever at least three ancestry-minimal q=3 rows align on one admissible hard Type A/B target, their factor-pair species coincide, hence they forbid one common next 3-adic digit.
-
-By `Q3-FACTOR-PAIR-TYPES.md`, the three digits correspond to
-
-\[
-(w,a)\pmod9
-\in
-\{(2,5),(5,2),(8,8)\}.
-\]
-
-So the analytic target is now to prove that one admissible target factor pair cannot simultaneously align ancestry-minimal local pairs of all three species.
+The active theory now lives in `DSC-COUNTEREXAMPLE.md` and the collective-core program, not in a universal q=3 alignment conjecture.
