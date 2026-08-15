@@ -150,8 +150,8 @@ def main() -> None:
     # Independent direct-novelty route.
     # tau(j) <= 2*sqrt(j), so |T_j| <= 2*tau(j) <= 4*sqrt(j).
     # Therefore a direct shadow must have q_j <= 4*sqrt(j), and hence
-    # q_j <= 4*sqrt(K-1) over the whole earlier range.
-    coarse_bound = 4 * math.isqrt(K - 1) + 4
+    # q_j <= floor(4*sqrt(K-1)) over the whole earlier range.
+    coarse_bound = math.isqrt(16 * (K - 1))
     coarse: list[tuple[int, int]] = []
     for j in range(1, K):
         m = 4 * j - 1
@@ -171,6 +171,7 @@ def main() -> None:
         if len(Rj) == q:
             direct_shadows.append({"j": j, "q": q})
 
+    assert coarse_bound == 15_641
     assert len(coarse) == 111_057
     assert len(exact_candidates) == 297
     assert direct_shadows == []
