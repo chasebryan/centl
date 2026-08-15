@@ -1,9 +1,9 @@
 # Current research frontier
 
 **Date:** 2026-08-15  
-**Claim boundary:** Erdős-Straus open; universal DSC-P open; López-all-primes open.
+**Claim boundary:** Erdős-Straus open; universal DSC-P open; all-prime coverage open.
 
-## Correction now governing the shared-factor program
+## Governing correction
 
 The exact Dirichlet condition is
 
@@ -13,58 +13,151 @@ The exact Dirichlet condition is
 
 not `gcd(s,Q)=1`.
 
-`REDUCED-PARAMETER-DOMAIN.md` proves the exact parameter domain:
+`REDUCED-PARAMETER-DOMAIN.md` proves:
 
-- primes `p|Q` already dividing `L` impose **no** restriction on `s`;
-- primes `p|Q` with `p∤L` exclude exactly the affine class `s=-rL^{-1} (mod p)`.
+- if `p|Q` and `p|L`, the prime `p` imposes **no** restriction on the parameter class;
+- if `p|Q` and `p∤L`, exactly one affine class `s=-rL^{-1} (mod p)` is excluded.
 
-Therefore the old complementary `q=3` pair obstruction is only an obstruction inside the auxiliary unit-parameter subset. Since `3|840|L`, the true local domain at `q=3` is all of `Z/3Z`; singleton rows `{1}` and `{2}` leave `s=0`.
+Hence for `q=3`, because `3|840|L`, the exact local domain is all of
 
-## Closed / retained this arc
+\[
+\boxed{\mathbb Z/3\mathbb Z.}
+\]
+
+The former complementary pair `{1},{2}` is not a true reduced obstruction.
+
+---
+
+## Closed / retained structural reductions
 
 | Result | File |
-|---------|------|
-| Ancestry rigidity q=13,17,21,29 | `QUOTIENT-*-RIGIDITY.md` |
-| Exact reduced-parameter domain | `REDUCED-PARAMETER-DOMAIN.md` |
-| CN-coprime CRT mechanism | `CN-THEOREM.md` (domain bridge must be reread through the correction) |
-| Lift-room / totient-ratio machinery | `CN-SHARED-THEOREM.md` (unit-domain version retained as proof-mining asset) |
-| `205 -> 10` ancestry absorption | `CN-SHARED-THEOREM.md` |
-| Finite candidatewise DSC through `k<=1500` | `DIRECT-SHADOW-K1500.md` |
+|---|---|
+| Exact reduced parameter domain | `REDUCED-PARAMETER-DOMAIN.md` |
+| Strong q=3 absorption | `Q3-ABSORPTION.md` |
+| Weak q=3 redundancy (`R_j subseteq R_i`) | `Q3-WEAK-REDUNDANCY.md` |
+| Pointwise frozen absorption | `Q3-POINTWISE-ABSORPTION.md` |
+| Pointwise divisor descent (`q_i in {1,3}`) | `Q3-POINTWISE-DIVISOR-REDUCTION.md` |
+| One global next 3-adic digit | `Q3-NEXT-DIGIT-THEOREM.md` |
+| Three factor-pair species / target congruence | `Q3-FACTOR-PAIR-TYPES.md` |
+| Prime reduction for full ES | `PRIME-REDUCTION.md` |
+| Original finite DSC through `k<=1500` | `DIRECT-SHADOW-K1500.md` |
 
-The original direct-shadow certificates remain authoritative because their verifier checks `gcd(r+Ls,LQ)=1` directly.
+The original finite DSC verifier remains valid because it checks `gcd(r+Ls,LQ)=1` directly.
 
-## New finite frontier under the corrected domain
+---
 
-Two independent local constructions have been used during this correction pass:
+## Frozen corrected-domain finite frontiers
 
-1. tight layers generated from the exact divisor condition `m_j | qL`;
-2. every earlier `j` scanned directly and each pullback class enumerated from the defining congruence.
+### Corrected tight cluster through k <= 8500
 
-They agree through `k<=8500` on the corrected `q<=9` tight cluster:
+Hosted replay proved:
 
-- first full corrected-domain tight covers occur at `k=8378`;
-- the decisive 3-adic rows are `j=52,70,106`, which cover residues `0,1,2 mod 3`;
-- all 12 hard-compatible failures at that target are already directly shadowed by frozen earlier layers `j=6` and `j=12`;
-- directly novel corrected-domain tight failures: **0** through the independently replayed range.
+- first full corrected-domain tight covers at `k=8378`;
+- q=3 rows `52,70,106` occupy `0,1,2`;
+- all 12 such candidate failures are already directly shadowed by frozen rows `6,12`;
+- directly novel corrected-domain tight failures: **0**.
 
-The primary probe is `reduced_domain_tight_probe.py`; the independent construction is `verify_reduced_domain_tight.py`. Freeze a formal finite certificate only after the branch workflow replay is green.
+### Pointwise-primitive q=3 through k <= 100000
+
+`Q3-PRIMITIVE-COVER-K100000.md` freezes:
+
+```text
+admissible candidates evaluated: 3,567,030
+full primitive q=3 covers:                0
+```
+
+Complete union masks:
+
+```text
+0: 3320884
+1:   77008
+2:   82372
+3:     146
+4:   86322
+5:     145
+6:     153
+7:       0
+```
+
+### Ancestry-minimal alignment through k <= 100000
+
+`Q3-MINIMAL-ALIGNMENT-K100000.md` freezes the sharper descent:
+
+```text
+minimal rows on candidate:
+0: 3320884
+1:  239568
+2:    6566
+3:      12
+
+maximum minimal rows: 3
+three-or-more-row candidates: 12
+three-or-more rows occupying >=2 digits: 0
+full minimal q=3 covers: 0
+```
+
+All twelve three-row candidates put all three rows on one common next digit.
+
+---
+
+## Exact q=3 formulation now
+
+Every q=3 trap has an ordered factor pair
+
+\[
+wa=m+1.
+\]
+
+In the common `v3(L)=1` regime, hard compatibility forces exactly three modulo-9 species:
+
+\[
+\boxed{(w,a)\equiv(2,5),(5,2),(8,8)\pmod9.}
+\]
+
+These are exactly the three global next 3-adic digits.
+
+For a target trap factor pair
+
+\[
+WA=M+1,
+\]
+
+and any shared target divisor `b`, an aligned local pair satisfies
+
+\[
+\boxed{(W,A)\equiv(w,a)\pmod b}
+\]
+
+and therefore
+
+\[
+\boxed{b\mid(Wa-wA).}
+\]
+
+On a directly novel candidate every q=3 forbidden digit descends to an **ancestry-minimal** factor pair without changing the digit.
+
+Thus the active universal q=3 target is:
+
+\[
+\boxed{
+\text{one admissible target factor pair cannot align ancestry-minimal local pairs of all three modulo-9 species.}
+}
+\]
+
+A proof closes the corrected q=3 local covering obstruction.
+
+---
 
 ## Active edge
 
-1. Replay and independently certify the corrected-domain `q<=9` scan on the branch.
-2. Promote the exact affine reduced-domain theorem into C1/C2/CN notation and remove language equating reducedness with parameter units.
-3. Prove the first real 3-adic obstruction theorem:
-   \[
-   R_{j_1}\cup R_{j_2}\cup R_{j_3}=\mathbb Z/3\mathbb Z
-   \Longrightarrow
-   \text{direct shadow}
-   \]
-   under hard-compatible admissibility, or find a directly novel counterexample.
-4. Generalize corrected lift-room on the `3/5/7`-adic cluster using full residue-ring fibers for primes already in `L`.
-5. Re-run the Class-C active-core reduction using the exact affine domain for free primes.
-6. Assemble corrected DSC-P only after both exact avoidance and exact Dirichlet reducedness are preserved.
-7. López remainder remains separate: density one is not pointwise coverage.
+1. **Prove the ancestry-minimal factor-pair species theorem.** Use simultaneous target congruences and determinant divisibility `b|(Wa-wA)`; do not expand k merely for comfort.
+2. Generalize corrected full-ring lift-room to arbitrary shared clusters. In particular `3,5,7|840|L`, so those coordinates use full residue rings rather than unit groups.
+3. Re-run the Class-C active-core reduction on the exact affine domain and assemble corrected DSC-P.
+4. Attack the all-prime remainder with more than one parametrization. López Type A/B is the primary structure, not a logically mandatory exclusive route.
+5. Use `PRIME-REDUCTION.md`: once every prime is solved, Erdős-Straus is solved for every integer automatically. There is no separate composite-n endgame.
+
+---
 
 ## One-line status
 
-The previous `q=3` complementary-pair bottleneck was an artifact of restricting the parameter to units. The exact reduced domain moves the first possible 3-adic cover to at least three classes; the first observed three-class cover at `k=8378` is already directly shadowed. Universal DSC-P and Erdős-Straus remain open.
+The artificial unit-parameter q=3 bottleneck is gone. The actual q=3 obstruction has been reduced to an ancestry-minimal three-species factor-pair alignment problem, with **zero full covers in two independent hosted constructions through k<=100000**. Universal DSC-P and all-prime Erdős-Straus coverage remain open.
