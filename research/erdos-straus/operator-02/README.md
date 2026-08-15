@@ -21,19 +21,13 @@ Rules of engagement (strict):
 
 ## Coupling to the main program
 
-This container is intentionally coupled to the following authoritative documents (read-only):
+Read-only references:
 
-- [`../README.md`](../README.md) — program overview and harness description
-- [`../DIAMOND.md`](../DIAMOND.md) — synthesis and theorem architecture
-- [`../CURRENT-FRONTIER.md`](../CURRENT-FRONTIER.md) — moving edge (2026-08-14)
-- [`../DIRECT-SHADOW-K1200.md`](../DIRECT-SHADOW-K1200.md) — strongest finite DSC certificate to date
-- [`../FIBER-SHADOW-KERNEL.md`](../FIBER-SHADOW-KERNEL.md) — fiber peeling theorem
-- [`../SHADOW-KERNEL.md`](../SHADOW-KERNEL.md) — prime-power peeling
-- [`../QUADRATIC-TRAP-SIGNATURE.md`](../QUADRATIC-TRAP-SIGNATURE.md) — Jacobi character shield
-- [`../SMALL-SELECTOR-HYPOTHESIS.md`](../SMALL-SELECTOR-HYPOTHESIS.md)
-- [`../THEORY.md`](../THEORY.md), [`../RESULTS-2026-08-14.md`](../RESULTS-2026-08-14.md), [`../ODD-COVERING-BRIDGE.md`](../ODD-COVERING-BRIDGE.md), and the remaining structural notes
-
-No content from those files is copied or rewritten here. Citations are by path only.
+- [`../README.md`](../README.md), [`../DIAMOND.md`](../DIAMOND.md), [`../CURRENT-FRONTIER.md`](../CURRENT-FRONTIER.md)
+- [`../DIRECT-SHADOW-K1200.md`](../DIRECT-SHADOW-K1200.md), [`../FIBER-SHADOW-KERNEL.md`](../FIBER-SHADOW-KERNEL.md), [`../SHADOW-KERNEL.md`](../SHADOW-KERNEL.md)
+- [`../TRAP-FIBER-BOUND.md`](../TRAP-FIBER-BOUND.md), [`../QUADRATIC-TRAP-SIGNATURE.md`](../QUADRATIC-TRAP-SIGNATURE.md), [`../CHARACTER-SHIELD-COMPLETENESS.md`](../CHARACTER-SHIELD-COMPLETENESS.md)
+- [`../SMALL-SELECTOR-HYPOTHESIS.md`](../SMALL-SELECTOR-HYPOTHESIS.md), [`../THEORY.md`](../THEORY.md), [`../RESULTS-2026-08-14.md`](../RESULTS-2026-08-14.md)
+- [`../ODD-COVERING-BRIDGE.md`](../ODD-COVERING-BRIDGE.md), [`../PRIME-MODULUS-BACKBONE.md`](../PRIME-MODULUS-BACKBONE.md), [`../COMPOSITE-CORE.md`](../COMPOSITE-CORE.md)
 
 ## Complete document inventory
 
@@ -45,8 +39,10 @@ No content from those files is copied or rewritten here. Citations are by path o
 | `FIBER-KERNEL-RESIDUALS.md` | Compression cascade and residual structure |
 | `RESIDUAL-SIGNATURE-31113.md` | Notes on residual signature {3,11,13} |
 | `RESIDUAL-SIGNATURE-357.md` | Notes on residual signature {3,5,11,13,17,19,23} |
-| `CHARACTER-FIBER-INTERACTION.md` | Classes A–D; Class C as residual obstruction |
-| `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` | Working picture after both sufficient filters |
+| `CHARACTER-FIBER-INTERACTION.md` | Original Classes A–D partition |
+| `CHARACTER-SHIELD-COMPLETENESS-READING.md` | Reading of parent completeness theorem; refined Class C |
+| `UNIVERSAL-FIBER-KERNEL-BOUNDS.md` | Reading of parent trap-fiber universal bounds |
+| `RESIDUAL-OBSTRUCTION-SYNTHESIS.md` | Working picture after all parent sufficiency tools |
 | `ANCESTRY-Q5-NOTES.md` | Structural questions for q = 5 family |
 | `ANCESTRY-Q5-ARITHMETIC.md` | Necessary conditions for full shadowing |
 | `CENSUS-TEMPLATE.md` | Template for future primary-output census |
