@@ -26,9 +26,18 @@ Core linked records:
 - [`SMALL-SELECTOR-HYPOTHESIS.md`](SMALL-SELECTOR-HYPOTHESIS.md) — bounded integer-selector attack on residual fiber kernels;
 - [`QUADRATIC-TRAP-SIGNATURE.md`](QUADRATIC-TRAP-SIGNATURE.md) — exact Jacobi `-1` signature of every Type A/B trap and quadratic character shield;
 - [`CHARACTER-SHIELD-COMPLETENESS.md`](CHARACTER-SHIELD-COMPLETENESS.md) — proved collapse of collective scalar-character obstruction to fixed negative earlier layers;
-- [`QUADRATIC-SIGNATURE-COSET.md`](QUADRATIC-SIGNATURE-COSET.md) — exact vector-valued Legendre-signature affine coset of every Type A/B trap set;
-- [`MULTIPLICATIVE-TRAP-COSET.md`](MULTIPLICATIVE-TRAP-COSET.md) — proved multiplicative envelope `T_k subset -H_k` and quotient index `iota(k)`;
-- [`SQUARE-LIFT-CORE.md`](SQUARE-LIFT-CORE.md) — proved reduction showing genuinely new primes in the fixed character core enter only to even exponent, isolating a higher `p`-adic lifting problem;
+- [`QUADRATIC-SIGNATURE-QUOTIENT.md`](QUADRATIC-SIGNATURE-QUOTIENT.md) and [`QUADRATIC-SIGNATURE-COSET.md`](QUADRATIC-SIGNATURE-COSET.md) — complete vector-valued Legendre-signature quotient/coset of every Type A/B trap set;
+- [`MULTIPLICATIVE-TRAP-COSET.md`](MULTIPLICATIVE-TRAP-COSET.md) and [`MULTIPLICATIVE-TRAP-QUOTIENT.md`](MULTIPLICATIVE-TRAP-QUOTIENT.md) — multiplicative envelope, quotient shield, and exact two-box trap geometry;
+- [`DYADIC-TRAP-LATTICE.md`](DYADIC-TRAP-LATTICE.md) — exact power-of-two trap saturation and infinite Mersenne-type shadow lattice;
+- [`SQUARE-LIFT-CORE.md`](SQUARE-LIFT-CORE.md) — fixed-character residual primes outside the target modulus can enter only through even powers;
+- [`SQUAREFREE-LIFT-CORE.md`](SQUAREFREE-LIFT-CORE.md) — squarefree-ancestor localization and exact projection-excess reduction;
+- [`SQUARE-LIFT-RECIPROCITY.md`](SQUARE-LIFT-RECIPROCITY.md) — quadratic reciprocity forces every square-lift divisor onto the Jacobi-positive side of its squarefree ancestor, yielding infinite shadow families;
+- [`JACOBI-SATURATION.md`](JACOBI-SATURATION.md) — classification of exact Jacobi-saturated Type A/B layers: only `k=1,2,4`;
+- [`SQUARE-LIFT-SIGNATURE.md`](SQUARE-LIFT-SIGNATURE.md) — exact projected local-signature space and automatic ancestor shadowing whenever `kappa(a)=1`;
+- [`RECIPROCITY-DEFECT-QUOTIENT.md`](RECIPROCITY-DEFECT-QUOTIENT.md) — defect quotient `R_a`, its dimension `kappa(a)-1`, and the prime-factor defect conservation law;
+- [`SQUARE-LIFT-SIGNATURE-CLASSIFICATION.md`](SQUARE-LIFT-SIGNATURE-CLASSIFICATION.md) — if-and-only-if theorem: `kappa(a)=1` exactly when every square lift is ancestor-shadowed at quadratic-signature resolution; `kappa(a)>1` produces infinitely many signature exceptions;
+- [`RECIPROCITY-MATRIX.md`](RECIPROCITY-MATRIX.md) — binary Type A/B reciprocity matrix with canonical left Jacobi null vector and right exponent-parity null vector;
+- [`QUADRATIC-FIELD-BRIDGE.md`](QUADRATIC-FIELD-BRIDGE.md) — norm-form, split-prime, ideal-class conservation, and explicit genus/Rédei prior-art boundary for the square-lift theory;
 - [`PRIME-MODULUS-BACKBONE.md`](PRIME-MODULUS-BACKBONE.md) — infinite exact-depth prime-modulus backbone;
 - [`SURVIVOR-DENSITY.md`](SURVIVOR-DENSITY.md) — exact finite-depth density, mass, and conditional hazard;
 - [`COMPOSITE-CORE.md`](COMPOSITE-CORE.md) — zero-density prime-modulus survivor core and composite-rescue reduction;
@@ -60,7 +69,8 @@ Additional theorem falsifiers and proof-mining analyzers now include:
 
 - [`trap_coset_analyzer.py`](trap_coset_analyzer.py) — exact finite regression of the multiplicative trap-coset theorem;
 - [`quadratic_signature_shield_analyzer.py`](quadratic_signature_shield_analyzer.py) — exact affine local Legendre-signature shield;
-- [`square_lift_core_analyzer.py`](square_lift_core_analyzer.py) — exact parity check and finite classification of the post-character square-lift core.
+- [`square_lift_core_analyzer.py`](square_lift_core_analyzer.py) — parity check and finite classification of the post-character square-lift core;
+- [`squarefree_lift_core_analyzer.py`](squarefree_lift_core_analyzer.py) — exact squarefree-ancestor projection-excess localization on a candidate bundle.
 
 ## Latest frozen finite result
 
@@ -92,7 +102,12 @@ The project now contains a hierarchy of exact sufficient mechanisms and envelope
 - **character obstruction completeness:** collective scalar-character inconsistency adds no obstruction beyond one fixed-negative earlier layer;
 - **full quadratic-signature coset:** the complete vector of local Legendre signs of `T_k` is the affine space `eta_k+V_k`;
 - **multiplicative trap coset:** the exact trap set sits inside one proper coset `-H_k` in the unit group;
-- **square-lift core:** after squareclass information is fixed, any genuinely new prime in the remaining character core can occur only to even exponent.
+- **squarefree-lift localization:** every character-fixed layer has a squarefree ancestor modulus and only its projection excess can remain exactly active;
+- **square-lift reciprocity:** every divisor prime of a lift splits in the ancestor quadratic field;
+- **signature-shadow classification:** `kappa(a)=1` is exactly the universal square-lift signature-shadow regime;
+- **reciprocity defect conservation:** higher-quotient lift defects must cancel according to prime-exponent parity;
+- **reciprocity matrix:** the Legendre-symbol matrix has canonical conservation laws on both its left and right null spaces;
+- **quadratic-field norm bridge:** square-lift depths are norms of `(1+s sqrt(-d))/2`, giving a principal-ideal conservation law stronger than its quadratic-character projection.
 
 Each stage deliberately preserves the claim boundary: failure of a coarse shield or a bounded selector does **not** imply exact Type A/B coverage. It only says finer geometry remains.
 
@@ -117,7 +132,7 @@ Finite candidatewise results are theorem-certificate statements for their stated
 
 The active theorem program is now:
 
-`Type A/B witnesses -> C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> direct-shadow completeness -> fiber kernel -> bounded selector -> scalar character saturation -> local quadratic signatures -> multiplicative quotient -> square-lift/p-adic core -> composite rescue`.
+`Type A/B witnesses -> C_AB -> shadow graph -> exact-depth spectrum -> exact survivor process -> direct-shadow completeness -> fiber kernel -> bounded selector -> scalar character saturation -> local quadratic signatures -> reciprocity matrix/defect quotient -> multiplicative quotient -> exact square-lift/ray-class residue core -> composite rescue`.
 
 The immediate goal is to convert the increasingly tiny residual core into a universal local escape theorem. If achieved, the direct-shadow graph would become a complete obstruction theory for exact Type A/B first-hit realizability.
 
