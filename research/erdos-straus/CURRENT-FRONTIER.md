@@ -1,188 +1,179 @@
 # Current research frontier
 
 **Date:** 2026-08-15  
-**Claim boundary:** Erdős-Straus open; López Type A/B coverage for every prime open. Universal DSC-0 and DSC-P are **false**, by explicit hosted-verified counterexample.
+**Claim boundary:** Erdős--Straus remains open. Universal López Type A/B coverage remains open. Universal DSC-0 and DSC-P are false by explicit hosted-verified counterexample. The new signed-box results below are exact reformulations and obstruction theorems, not a complete proof.
 
-## Major correction
+## 1. DSC is closed as the main route
 
-The exact Dirichlet parameter condition is
+The exact reduced-parameter condition is
 
 \[
 \gcd(r+Ls,LQ)=1,
 \]
 
-not `gcd(s,Q)=1`. See `REDUCED-PARAMETER-DOMAIN.md`.
+not `gcd(s,Q)=1`; see `REDUCED-PARAMETER-DOMAIN.md`.
 
-For primes already dividing `L`, including `3,5,7`, reducedness imposes no restriction on the parameter coordinate. Thus the exact q=3 domain is all of `Z/3Z`.
-
-## Major falsification
-
-`DSC-COUNTEREXAMPLE.md` gives two explicit Mordell-hard admissible target candidates at
+`DSC-COUNTEREXAMPLE.md` gives explicit directly novel but collectively union-shadowed candidates. Therefore
 
 \[
-k=4,217,870,554,934,815,548
+\boxed{\mathrm{DSC\!\!-0}\text{ is false}},
+\qquad
+\boxed{\mathrm{DSC\!\!-P}\text{ is false}}.
 \]
 
-that are:
+The finite shadow certificates and the strong/weak/pointwise `q=3` theorems remain valid local structure, but DSC is no longer the main Erdős--Straus bridge.
 
-- directly novel: no earlier layer directly shadows them;
-- union-shadowed: rows `6820`, `8602`, `9790` have q=3 singleton pullbacks covering `0,1,2`.
+---
 
-The standalone verifier checks every possible direct-shadow modulus using `DIRECT-SHADOW-SMOOTHNESS.md` and was replayed successfully in GitHub Actions:
+## 2. Exact prime Erdős--Straus reformulation
 
-```text
-run:      31862644146
-artifact: 9241048158
-```
+The direct route now uses the complete standard prime Type-I/Type-II parametrization.
 
-Therefore
+For a prime
 
 \[
-\boxed{\text{DSC-0 is false}}
-\qquad\text{and}\qquad
-\boxed{\text{DSC-P is false}.}
+p\equiv1\pmod4
 \]
 
-All finite DSC certificates through `k<=1500` remain valid finite statements.
-
-## Closed and retained
-
-| Theorem/result | File |
-|---|---|
-| Exact reduced-parameter domain | `REDUCED-PARAMETER-DOMAIN.md` |
-| Direct-shadow smoothness | `DIRECT-SHADOW-SMOOTHNESS.md` |
-| Strong q=3 absorption | `Q3-ABSORPTION.md` |
-| Weak q=3 redundancy | `Q3-WEAK-REDUNDANCY.md` |
-| Pointwise q=3 absorption | `Q3-POINTWISE-ABSORPTION.md` |
-| q=3 pullbacks are singleton | `Q3-SINGLETON-PULLBACK.md` |
-| Explicit DSC counterexample | `DSC-COUNTEREXAMPLE.md` |
-| Prime-modulus backbone / density-one prime capture | `PRIME-MODULUS-BACKBONE.md`, `COMPOSITE-CORE.md` |
-| Coprime FAB divisor criterion | `FAB-COPRIME-DIVISOR-CRITERION.md` |
-| Fixed-k signed divisor box / Kneser defect | `FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md`, `FAB-KNESER-DIVISOR-DEFECT.md` |
-| Normalized Type-II target in the same signed box | `FAB-TYPE-II-SIGNED-DIVISOR.md` |
-| Symmetric combined Kneser collapse | `FAB-TWO-TARGET-KNESER.md` |
-| Exact first combined defect | `FAB-INDEX6-COMBINED-DEFECT.md` |
-| Finite candidatewise DSC through k<=1500 | parent certificates |
-
-## New direct-ES correction: López-all-primes is not required
-
-Universal López Type A/B coverage remains an important and experimentally strong conjecture, but it is **stronger than what is logically required to prove Erdős-Straus**.
-
-The 2026 Bello-Hernández--Benito--Fernández divisor parametrization is complete for Erdős-Straus decompositions after the standard factor-4 scaling. The post-DSC direct route should therefore use the complete FAB / standard Type-I/II geometry rather than require every prime to pass through the López Type A/B subfamily.
-
-López-all-primes remains a parallel theorem target, not a prerequisite for the shortest direct ES route.
-
-## Same fixed-k box, two exact solution targets
-
-Fix a prime `p≡1 mod4` and a coprime shift
+and a positive shift
 
 \[
-k\equiv3\pmod4.
+k\equiv3\pmod4,
+\qquad
+\gcd(k,p)=1,
 \]
 
-Put
+put
 
 \[
-C=\frac{p+k}{4}
+C_k=\frac{p+k}{4}
 =\prod_i r_i^{e_i}
 \]
 
 and define the signed divisor box
 
 \[
-\mathcal R_k(C)
+\boxed{
+\mathcal R_k(C_k)
 =
 \left\{
 \prod_i r_i^{z_i}\pmod k:
 -e_i\le z_i\le e_i
-\right\}.
+\right\}.}
 \]
 
-The strong FAB / normalized Type-I lane uses
-
-\[
-\boxed{\tau_I=-p^{-1}\pmod k.}
-\]
-
-`FAB-TYPE-II-SIGNED-DIVISOR.md` proves that the standard normalized Type-II lane uses the **same** box with target
-
-\[
-\boxed{\tau_{II}=-1\pmod k.}
-\]
-
-Thus
+`ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md` proves the exact equivalence
 
 \[
 \boxed{
-\tau_I\in\mathcal R_k(C)
-\quad\text{or}\quad
-\tau_{II}\in\mathcal R_k(C)
-\Longrightarrow
-p\text{ is solved}.}
+ p\text{ satisfies Erdős--Straus}
+\iff
+\exists k\equiv3\pmod4,\ \gcd(k,p)=1:
+\{-p^{-1},-1\}\cap\mathcal R_k(C_k)\ne\varnothing.}
 \]
 
-The box is inversion-symmetric. Therefore a Type-I miss at `-p^{-1}` automatically also misses its inverse
+The two targets are precisely the standard solution types:
 
 \[
-\boxed{-p.}
+\boxed{\tau_I=-p^{-1}}
 \]
 
-So a genuine combined failure excludes the three natural residues
+for Type I, and
 
 \[
-\boxed{-p^{-1},\quad -p,\quad -1.}
+\boxed{\tau_{II}=-1}
 \]
 
-## External-nonresidue Kneser collapse
+for Type II.
 
-Let `q<p` be an external quadratic-nonresidue prime with
+Because the signed box is inversion-symmetric,
 
 \[
+-p^{-1}\in\mathcal R_k(C_k)
+\iff
+-p\in\mathcal R_k(C_k).
+\]
+
+Therefore an unsolved fixed shift must avoid the three natural residues
+
+\[
+\boxed{-p^{-1},\quad -p,\quad -1,}
+\]
+
+where the first two are the two orientations of the same Type-I ratio.
+
+This is now the primary direct-ES coordinate system.
+
+---
+
+## 3. Consequence for López Type A/B
+
+Universal López Type A/B coverage is still a strong and mathematically valuable conjecture, but it is **not logically required** for the shortest direct proof of Erdős--Straus.
+
+The direct proof can work in the complete Type-I/Type-II signed-box formulation above. López-all-primes and the zero-density Type-A/B composite-rescue core remain a parallel research track.
+
+---
+
+## 4. External nonresidue prime shifts
+
+Let `p` be Mordell-hard and choose an external quadratic-nonresidue prime
+
+\[
+q<p,
+\qquad
 q\equiv3\pmod4,
 \qquad
-\left(\frac qp\right)=-1,
+\left(\frac qp\right)=-1.
 \]
 
-and use the fixed shift `k=q`.
-
-Let
+Put
 
 \[
-H=\operatorname{Stab}(\mathcal R_q((p+q)/4)),
+C_q=\frac{p+q}{4},
 \qquad
-n=[(\mathbb Z/q\mathbb Z)^\times:H].
+G_q=(\mathbb Z/q\mathbb Z)^\times,
 \]
 
-If both exact solution targets are missed, then `FAB-TWO-TARGET-KNESER.md` proves:
+and let
+
+\[
+H=\operatorname{Stab}(\mathcal R_q(C_q)),
+\qquad
+n=[G_q:H].
+\]
+
+`FAB-TWO-TARGET-KNESER.md` proves that if both exact solution targets miss, then:
 
 1. `n` cannot be odd, because every odd-index stabilizer contains `-1`, which is the Type-II target;
-2. `n` cannot be `2`, because the Type-I target is a quadratic residue and lies in the index-two stabilizer;
-3. therefore
+2. `n` cannot be `2`, because the Type-I target lies in the quadratic-residue subgroup;
+3. hence
    \[
    \boxed{n\ge6\text{ and }n\text{ is even};}
    \]
-4. the three excluded residues `-p^{-1}`, `-p`, `-1` occupy **three distinct** `H`-cosets;
-5. inversion symmetry therefore sharpens the Kneser budget from the one-target bound `n-2` all the way to
+4. the three excluded residues `-p^{-1}`, `-p`, and `-1` occupy three distinct `H`-cosets;
+5. Kneser's theorem therefore gives the strengthened symmetric budget
    \[
    \boxed{
    \sum_i
    \left(
-   \min(2e_i+1,\operatorname{ord}_{G/H}(r_iH))-1
+   \min(2e_i+1,\operatorname{ord}_{G_q/H}(r_iH))-1
    \right)
-   \le n-4.
-   }
+   \le n-4.}
    \]
 
-Consequently the former cubic-first hierarchy is no longer the direct ES wall:
+Thus every odd-index Type-I defect is automatically rescued by Type II at the same shift. The former cubic/fifth/seventh-power defect hierarchy is not the direct ES wall.
+
+---
+
+## 5. First surviving prime-shift defect: index six
+
+At
 
 \[
-\boxed{
-\text{every odd-index Type-I Kneser defect is automatically rescued by Type II}.}
+n=6,
 \]
 
-## First surviving combined defect: index six
-
-At index `6`, the symmetric budget is only
+the symmetric Kneser budget is only
 
 \[
 \boxed{\sum_i(s_i-1)\le2.}
@@ -190,84 +181,204 @@ At index `6`, the symmetric budget is only
 
 `FAB-INDEX6-COMBINED-DEFECT.md` classifies this case exactly.
 
-If both targets miss and the stabilizer index is `6`, then
+A combined index-six failure forces
 
 \[
-H=G^6
+\boxed{
+C_q=\frac{p+q}{4}=rS
+}
+\]
+
+with:
+
+1. exactly one prime factor `r` outside the sixth-power subgroup `G_q^6`;
+2. `v_r(C_q)=1`;
+3. `rG_q^6` generates `G_q/G_q^6\cong C_6`;
+4. every prime factor of `S` is a sixth-power residue modulo `q`;
+5. `r` is both a quadratic and cubic nonresidue modulo `q`;
+6. shifted-nonresidue transfer makes `r` the **unique** external quadratic-nonresidue prime factor relative to `p`;
+7. the external factor graph therefore has the forced edge
+   \[
+   \boxed{q\longrightarrow r;}
+   \]
+8. the quotient signed box occupies exactly `0,±1`, while the three excluded natural targets occupy exactly `±2,3`.
+
+Thus the first surviving obstruction is a **single primitive sextic defect**, not an uncontrolled index-six factorization pattern.
+
+---
+
+## 6. Forced successor with r = 3 mod 4
+
+If the unique exceptional successor satisfies
+
+\[
+r\equiv3\pmod4,
+\]
+
+then `k=r` is itself another admissible prime shift.
+
+The next goal in this branch is to compare the primitive sextic defect at `q` with the exact two-target Kneser structure at `r` and prove that compatible primitive defects cannot persist around the finite external-nonresidue factor cycle.
+
+Finite experiments show that one can have more than one consecutive index-six step, so a one-edge contradiction is too strong. The theorem must use cycle-level or monotonic defect information.
+
+---
+
+## 7. Forced successor with r = 1 mod 4
+
+If instead
+
+\[
+r\equiv1\pmod4,
+\]
+
+the prime shift `r` is not admissible. The natural next shift is
+
+\[
+\boxed{k=3r.}
+\]
+
+`ES-COMPOSITE-SUCCESSOR-3R.md` proves that this composite shift is still clean.
+
+Put
+
+\[
+C=\frac{p+3r}{4}.
+\]
+
+Since `p\equiv1 mod3`, one has
+
+\[
+C\equiv1\pmod3.
+\]
+
+CRT splits the signed box modulo `3r` into a mod-`3` parity bit and a prime-`r` residue coordinate. Define the negative-parity fibre
+
+\[
+\mathcal R_r^-(C)
+=
+\left\{
+\prod_i s_i^{z_i}\pmod r:
+-e_i\le z_i\le e_i,
+\quad
+\prod_i (s_i\bmod3)^{z_i}=-1
+\right\}.
+\]
+
+All three natural excluded residues are `-1 mod3`, and the exact fixed-shift criterion becomes
+
+\[
+\boxed{
+ k=3r\text{ solves }p
+\iff
+\mathcal R_r^-(C)\cap\{-p^{-1},-1\}\ne\varnothing.}
+\]
+
+Thus the composite successor is only a **prime-r divisor-placement problem plus one parity bit**.
+
+### Empty-fibre theorem
+
+\[
+\boxed{
+\mathcal R_r^-(C)=\varnothing
+\iff
+\text{every prime factor of }C\text{ is }1\pmod3.}
+\]
+
+So the first composite-successor obstruction is exactly Eisenstein splitting.
+
+### Index-two theorem
+
+Let
+
+\[
+\widetilde G=(\mathbb Z/3r\mathbb Z)^\times
+\]
+
+and `H` be the stabilizer of the full signed box.
+
+Odd stabilizer index again cannot support a combined failure because it forces `-1\in H` and therefore a Type-II hit.
+
+If a combined failure has stabilizer index `2`, then necessarily
+
+\[
+\boxed{H=\ker(\text{mod-3 parity})}
 \]
 
 and
 
 \[
 \boxed{
-\frac{p+q}{4}=rS
-}
+\text{every prime factor of }
+\frac{p+3r}{4}
+\text{ is }1\pmod3.}
 \]
 
-with the following rigid structure:
+Therefore **every non-Eisenstein-split `3r` successor automatically eliminates index two** and must move to a finer even quotient if it still fails.
 
-1. there is exactly one prime factor `r` outside the sixth-power subgroup `G^6`;
-2. `v_r((p+q)/4)=1`;
-3. `rG^6` generates `G/G^6≅C_6`;
-4. every prime factor of `S` is a sixth-power residue modulo `q`;
-5. `r` is simultaneously a quadratic and cubic nonresidue modulo `q`;
-6. shifted-nonresidue transfer makes `r` the **unique** external quadratic-nonresidue prime factor relative to `p`;
-7. therefore the external-nonresidue factor graph has a forced edge
-   \[
-   \boxed{q\to r;}
-   \]
-8. the quotient box occupies exactly the classes `0,±1`, while the three natural excluded residues occupy exactly the complementary classes `±2,3`.
+---
 
-The first combined obstruction is therefore a **single primitive sextic defect**, not a general index-six cloud.
+## 8. Closed and retained theorem stack
 
-A further local filter follows immediately: none of `2,3,5,7` can be the exceptional factor for a Mordell-hard `p`. Hence any one of those primes dividing `(p+q)/4` must itself be a sixth-power residue modulo `q`. In particular, if `q≡7 mod8`, then `(p+q)/4` is even and index-six failure forces `2` to be a sixth power modulo `q`.
+| Result | File |
+|---|---|
+| Exact prime two-target signed-box equivalence | `ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md` |
+| Normalized Type-II target | `FAB-TYPE-II-SIGNED-DIVISOR.md` |
+| Coprime FAB divisor criterion | `FAB-COPRIME-DIVISOR-CRITERION.md` |
+| Fixed-k signed divisor box | `FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md` |
+| One-target Kneser defect theorem | `FAB-KNESER-DIVISOR-DEFECT.md` |
+| Symmetric combined Kneser collapse | `FAB-TWO-TARGET-KNESER.md` |
+| Primitive index-six defect theorem | `FAB-INDEX6-COMBINED-DEFECT.md` |
+| External nonresidue factor cycle | `EXTERNAL-NR-FACTOR-CYCLE.md` |
+| Composite `3r` successor theorem | `ES-COMPOSITE-SUCCESSOR-3R.md` |
+| Shifted-factor descent / norm bridge | `FAB-SHIFTED-FACTOR-DESCENT.md` |
+| GCD-square reformulation | `FAB-GCD-SQUARE-CRITERION.md` |
+| Hard-prime first factor filters | `FAB-HARD-FIRST-FILTERS.md` |
+| Prime-modulus Type A/B backbone | `PRIME-MODULUS-BACKBONE.md` |
+| Type A/B composite-rescue core | `COMPOSITE-CORE.md` |
+| Strong/weak/pointwise q=3 shadow results | parent q=3 theorem notes |
 
-## Research split
+---
 
-### A. Direct Erdős-Straus track: highest priority
+## 9. Research priorities
 
-The current shortest route is now:
+### A. Direct Erdős--Straus track: highest priority
 
-1. work in the complete FAB / standard Type-I/II framework;
-2. use the two solution targets in the same fixed-shift signed divisor box and the inverse Type-I orientation;
-3. choose external nonresidue prime shifts to kill the quadratic obstruction;
-4. exploit the fact that every genuine combined failure has even stabilizer index at least `6` and symmetric budget at most `n-4`;
-5. attack the exact index-six primitive sextic defect and its forced external-nonresidue successor;
-6. handle separately the forced-successor case `r≡1 mod4`, where the natural next admissible shift is composite (`3r`, or another `3 mod4` hard-residue multiplier times `r`);
-7. only if index six survives this transfer, move to the next even quotient under the same stronger budget;
-8. once every prime is covered, apply the standard divisor/scaling reduction for composite `n`.
-
-The next theorem target is:
-
-\[
-\boxed{
-\text{primitive sextic defect at }q
-\Longrightarrow
-\text{forced successor }r\text{ cannot sustain a compatible combined defect cycle}.}
-\]
+1. Treat `ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md` as the primary exact statement.
+2. Choose external nonresidue shifts and apply the symmetric `n-4` Kneser budget.
+3. Attack the primitive sextic index-six defect.
+4. For a forced successor `r≡3 mod4`, seek a cycle invariant preventing persistent primitive sextic defects.
+5. For `r≡1 mod4`, use the exact `3r` parity-fibre theorem:
+   - eliminate the Eisenstein-split empty-fibre branch, or
+   - classify the first even defect above index two in the non-split branch.
+6. If index six cannot persist, iterate the same argument at the next possible even quotient.
+7. After prime coverage, use the standard divisor/scaling reduction for composite `n`.
 
 ### B. López Type A/B track
 
-Continue studying
+Continue the all-prime Type A/B problem and the zero-density composite-rescue core as a parallel route. It remains potentially powerful but is not imposed as a prerequisite for direct ES.
+
+### C. Depth-spectrum / shadow track
+
+Continue the covering-core and hypergraph theory after the universal DSC falsification. Preserve strong/weak/pointwise absorption and finite exact-depth certificates as independent mathematical results.
+
+---
+
+## 10. Immediate theorem target
+
+The proof search has now reduced to a two-branch forced-successor problem:
 
 \[
-\boxed{\text{every Mordell-hard prime has at least one Type A/B hit}}
+\boxed{
+\begin{array}{ll}
+r\equiv3\pmod4:&
+\text{primitive sextic defect cycle obstruction},\\[1mm]
+r\equiv1\pmod4:&
+\text{Eisenstein split or finer-even-defect obstruction at }3r.
+\end{array}}
 \]
 
-and the zero-density composite-rescue core. This remains mathematically valuable and may still produce the final proof, but it is no longer imposed as a prerequisite for the direct ES route.
-
-### C. Depth-spectrum track
-
-Replace the false direct-shadow graph completeness conjecture by a **covering-core / hypergraph** theory.
-
-Priority:
-
-1. classify minimal union-shadow cores, beginning with the three-row q=3 core in `DSC-COUNTEREXAMPLE.md`;
-2. retain strong/weak/pointwise absorption as hyperedge reductions;
-3. determine which candidate classes are exact-depth realizable after collective cores are included.
-
-This remains mathematically valuable but is no longer the shortest ES route.
+The most promising next move is to extract a monotone or reciprocity-sensitive invariant from these successor transitions rather than enumerate more unrelated shifts.
 
 ## One-line status
 
-The direct proof search has moved past DSC and past the one-target cubic Kneser wall: **Type I and Type II are coupled in one signed divisor box, inversion exposes three distinct excluded target cosets, every odd-index defect collapses, and the first surviving all-prime obstruction is a forced single-prime index-six sextic defect with budget only two.**
+**Prime Erdős--Straus is now exactly a two-target signed-divisor-box problem; external nonresidue shifts collapse every odd Kneser defect, index six reduces to one forced sextic prime, and the awkward `1 mod 4` successor reduces exactly to a prime-modulus box with one parity bit.**
