@@ -1,0 +1,73 @@
+name: CENTL Erdős-Straus Class-C census
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_artifact_id:
+        description: Frozen direct-shadow artifact ID to replay
+        required: false
+        default: "9238241616"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/class_c_census.py'
+      - 'research/erdos-straus/verify_class_c_census.py'
+      - 'research/erdos-straus/CLASS-C-C1-SINGLE-ACTIVE.md'
+      - '.github/workflows/erdos-straus-class-c-census.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  census:
+    name: Replay frozen candidate bundle and verify Class-C census
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_ARTIFACT_ID: ${{ github.event.inputs.source_artifact_id || '9238241616' }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download frozen direct-shadow artifact
+        run: |
+          mkdir -p source-output census-output
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" > source.zip
+          unzip -q source.zip -d source-output
+          test -f source-output/direct-shadow-completeness.json
+
+      - name: Run primary Class-C census
+        run: python3 research/erdos-straus/class_c_census.py --out source-output --selector-bound 64
+
+      - name: Run independent Class-C verifier
+        run: python3 research/erdos-straus/verify_class_c_census.py --out source-output
+
+      - name: Freeze census outputs
+        run: |
+          cp source-output/class-c-census.json census-output/
+          cp source-output/class-c-census-report.md census-output/
+          cp source-output/class-c-census-independent-verifier.json census-output/
+          cat > census-output/provenance.txt <<EOF
+          source_artifact_id=${SOURCE_ARTIFACT_ID}
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          EOF
+          cd census-output
+          sha256sum class-c-census.json class-c-census-report.md class-c-census-independent-verifier.json provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat census-output/class-c-census-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload census certificate bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-class-c-census-${{ github.sha }}
+          path: census-output/
+          if-no-files-found: error
+          retention-days: 90
