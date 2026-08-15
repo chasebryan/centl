@@ -1,13 +1,13 @@
-# Primitive reduction and the p-entangled Type-II sector
+# Primitive reduction and the p-entangled size sector
 
 **Status:** proved exact structural theorem  
 **Date:** 2026-08-15  
 **Depends on:** `FAB-GCD-NORMAL-FORM.md`  
-**Claim boundary:** this classifies where genuinely new non-coprime fab behavior can occur. It does not prove that either sector exists for every prime.
+**Claim boundary:** this proves gcd-coprimality is without loss of generality for prime existence after reordering. It does not prove the remaining primitive certificate exists for every prime.
 
 ## 1. GCD-normal data
 
-Use the normalization
+For a general fab certificate write
 
 \[
 a=shA,
@@ -22,13 +22,33 @@ with
 \kappa Q=A+Bp.
 \]
 
-Assume first
+The factor `h` is inessential, and the exact normalized conditions are
 
 \[
-\boxed{p\nmid A.}
+4sB\mid Q(p+s\kappa),
 \]
 
-Then `FAB-GCD-NORMAL-FORM.md` gives
+\[
+4sA\mid pQ(p+s\kappa).
+\]
+
+We now assume
+
+\[
+\boxed{p\nmid k.}
+\]
+
+Hence `p` divides neither `s` nor `kappa`.
+
+## 2. Case p does not divide A
+
+When
+
+\[
+p\nmid A,
+\]
+
+`FAB-GCD-NORMAL-FORM.md` gives
 
 \[
 AB\mid p+s\kappa.
@@ -37,65 +57,25 @@ AB\mid p+s\kappa.
 Write
 
 \[
-\boxed{p+s\kappa=ABc.}
+p+s\kappa=ABc.
 \]
 
-The remaining admissibility condition is exactly
+The remaining condition is
 
 \[
-\boxed{4s\mid Qc.}
+4s\mid Qc.
 \]
 
-## 2. Primitive reduction when p does not divide k
-
-Assume in addition
-
-\[
-\boxed{p\nmid k.}
-\]
-
-Then `p` does not divide `s`.
-
-Since
-
-\[
-p+s\kappa\equiv p\pmod s,
-\]
-
-we have
+Since `p` does not divide `s`,
 
 \[
 \gcd(s,p+s\kappa)=1.
 \]
 
-But
+Thus `s` is coprime to `ABc`, and
 
 \[
-p+s\kappa=ABc,
-\]
-
-so
-
-\[
-\boxed{\gcd(s,ABc)=1.}
-\]
-
-In particular
-
-\[
-\gcd(s,c)=1.
-\]
-
-The condition
-
-\[
-4s\mid Qc
-\]
-
-therefore forces
-
-\[
-\boxed{s\mid Q.}
+s\mid Q.
 \]
 
 Write
@@ -107,254 +87,167 @@ Q=sQ_0.
 Then
 
 \[
-A+Bp
-=\kappa Q
-=s\kappa Q_0
-=kQ_0,
-\]
-
-so
-
-\[
-\boxed{k\mid A+Bp.}
-\]
-
-Also
-
-\[
-4s\mid sQ_0c
-\]
-
-gives
-
-\[
-\boxed{4\mid Q_0c.}
-\]
-
-Now test the original fab conditions directly on the **primitive coprime pair** `(A,B)` with the same divisor `k` and quotient `Q_0`.
-
-Because
-
-\[
-p+k=ABc,
-\]
-
-we have
-
-\[
-Q_0(p+k)=Q_0ABc.
-\]
-
-The factor `4|Q_0c` gives
-
-\[
-4B\mid Q_0(p+k)
+A+Bp=kQ_0
 \]
 
 and
 
 \[
-4A\mid pQ_0(p+k).
+4\mid Q_0c.
 \]
 
-Therefore `(A,B,k)` is itself fab-admissible.
+Therefore the primitive pair `(A,B)` with the same `k` satisfies the original fab conditions.
 
-### Theorem — primitive reduction
+## 3. Case p divides A
 
-Every general fab certificate satisfying
+Write
 
 \[
-\boxed{p\nmid A,
-\qquad p\nmid k}
+\boxed{A=p^eA_0,
+\qquad p\nmid A_0.}
 \]
 
-reduces to a coprime fab certificate on the primitive pair
-
-\[
-\boxed{\gcd(A,B)=1}
-\]
-
-with the **same admissible divisor `k`**.
-
-Thus non-coprime scaling creates no new solution in this sector.
-
-## 3. Where genuinely new non-coprime behavior can live
-
-The contrapositive is immediate:
-
-### Corollary
-
-A general fab certificate that cannot be reduced to a coprime certificate by primitive gcd removal must satisfy at least one of
-
-\[
-\boxed{p\mid A}
-\]
-
-or
-
-\[
-\boxed{p\mid k.}
-\]
-
-So the entire genuinely non-coprime remainder is **p-entangled**.
-
-This is far narrower than arbitrary `gcd(a,b)>1`.
-
-## 4. The sector p | A and p does not divide k
-
-Assume
-
-\[
-\boxed{A=pA_0,
-\qquad p\nmid k.}
-\]
-
-Since `gcd(A,B)=1`,
+Because `gcd(A,B)=1`,
 
 \[
 p\nmid B.
 \]
 
-Also `p` does not divide `s` or `kappa`.
-
-The primitive linear form is
+Also
 
 \[
 A+Bp
-=p(A_0+B).
+=p\left(p^{e-1}A_0+B\right).
 \]
 
-Because
+Since `p` does not divide `kappa`,
 
 \[
-\kappa\mid p(A_0+B)
-\]
-
-and `p` is coprime to `kappa`,
-
-\[
-\boxed{\kappa\mid A_0+B.}
+\boxed{\kappa\mid p^{e-1}A_0+B.}
 \]
 
 Put
 
 \[
-\boxed{C=\frac{A_0+B}{\kappa}.}
+C=\frac{p^{e-1}A_0+B}{\kappa}.
 \]
 
 Then
 
 \[
-Q=pC,
+Q=pC.
+\]
+
+Both `C` and
+
+\[
+R=p+s\kappa
+\]
+
+are coprime to `p`.
+
+The second normalized fab condition contains only `p^2` on its right-hand side:
+
+\[
+4sp^eA_0\mid p^2CR.
+\]
+
+Therefore
+
+\[
+\boxed{e\le2.}
+\]
+
+For either `e=1` or `e=2`, cancelling the available powers of `p` reduces the two normalized conditions to
+
+\[
+4sB\mid CR,
 \qquad
-q=hpC.
+4sA_0\mid CR.
 \]
 
-The normalized divisibility conditions become
+Since `gcd(A_0,B)=1`,
 
 \[
-4sB\mid pC(p+s\kappa),
+\boxed{4sA_0B\mid CR.}
 \]
 
-and
+Again `gcd(s,R)=1`, so
 
 \[
-4spA_0\mid p^2C(p+s\kappa).
+\boxed{s\mid C.}
 \]
 
-Since `p` is coprime to `4sA_0B`, these reduce exactly to
+Write
 
 \[
-4sB\mid C(p+s\kappa)
+C=sC_0.
 \]
 
-and
+Then
 
 \[
-4sA_0\mid C(p+s\kappa).
+A+Bp
+=p\kappa C
+=p\kappa sC_0
+=k(pC_0),
 \]
 
-Because `gcd(A_0,B)=1`, their least common multiple is
+so the same divisor `k` divides the primitive linear form `A+Bp`.
+
+The primitive fab quotient is
 
 \[
-4sA_0B.
+Q_0=pC_0.
 \]
 
-Hence:
-
-### Theorem — p-entangled reduced criterion
-
-When `A=pA_0` and `p` does not divide `k`, general fab admissibility is equivalent to
+The condition
 
 \[
-\boxed{
-\begin{aligned}
-&s\kappa\equiv3\pmod4,\\
-&\kappa\mid A_0+B,\\
-&4sA_0B\mid C(p+s\kappa),
-\qquad C=(A_0+B)/\kappa.
-\end{aligned}}
+4A_0B\mid C_0R
 \]
 
-The divisor condition has lost the large linear form `A+Bp`: its primitive factorization is now controlled by the **small p-independent integer `A_0+B`**.
+checks the two original fab divisibilities directly for the primitive pair `(A,B)`.
 
-## 5. Type-II denominator pattern
+Hence `(A,B,k)` is again fab-admissible.
 
-The fab decomposition of `1/p` has denominators
+## 4. Primitive-reduction theorem
+
+Combining the two cases gives:
+
+### Theorem
+
+Let `p` be prime. Every general fab certificate with
 
 \[
-p+k,
+\boxed{p\nmid k}
 \]
+
+reduces, by dividing `a,b` by their common gcd, to a certificate with
 
 \[
-\frac{q(p+k)}{b},
+\boxed{\gcd(a,b)=1}
 \]
 
-and
+and the **same admissible divisor `k`**.
+
+So common gcd scaling contributes no essential solution power whenever the chosen fab divisor is not itself divisible by the target prime.
+
+## 5. Gcd-coprimality is WLOG for prime existence
+
+Suppose an Erdős–Straus solution exists for a prime `p`.
+
+At least one of its three denominators is not divisible by `p`. Otherwise all three denominators would be `p` times positive integers and multiplying
 
 \[
-\frac{pq(p+k)}{a}.
+\frac4p=\frac1x+\frac1y+\frac1z
 \]
 
-In the present sector,
+by `p` would express `4` as a sum of three unit fractions, each at most `1`, which is impossible.
 
-\[
-q=hpC,
-\qquad
-b=shB,
-\qquad
-a=shpA_0.
-\]
+Pass to the corresponding decomposition of `1/p` with all denominators multiplied by `4`, and choose a non-`p` denominator as the first denominator `x` in the completeness construction of the fab parametrization.
 
-Therefore the second denominator contains a factor `p`, and after cancelling the single `p` in `a`, the third denominator still contains a factor `p` as well.
-
-Meanwhile
-
-\[
-p\nmid p+k
-\]
-
-because `p` does not divide `k`.
-
-Thus the pattern is exactly
-
-\[
-\boxed{
-\text{one denominator not divisible by }p,
-\qquad
-\text{two denominators divisible by }p.
-}
-\]
-
-This is the classical Type-II divisibility pattern.
-
-So the non-coprime sector not already reduced to coprime fab is not amorphous: its `p|A, p not| k` branch is the p-entangled/Type-II side of the standard dichotomy.
-
-## 6. The sector p | k is not needed as the only representation
-
-Any Erdős–Straus solution for prime `p` has at least one denominator not divisible by `p`; if all three denominators were multiples of `p`, multiplying the equation by `p` would make the sum of three positive unit fractions equal `4`, impossible because each is at most `1`.
-
-When the complete fab construction is applied with such a non-`p` denominator chosen as the first denominator, its
+Then
 
 \[
 k=x-p
@@ -362,21 +255,82 @@ k=x-p
 
 is not divisible by `p`.
 
-Therefore, for an existence proof, one never needs to rely exclusively on fab representations with
+The primitive-reduction theorem applies.
+
+Therefore:
+
+### Corollary — primitive fab completeness for prime existence
+
+If the Erdős–Straus equation is solvable for a prime `p`, then there exists a fab certificate with
 
 \[
-p\mid k.
+\boxed{\gcd(a,b)=1.}
 \]
 
-After reordering an actual solution, the relevant genuinely non-coprime alternative to the coprime program is the `p|A, p not|k` Type-II sector above.
+Thus gcd-coprimality itself is without loss of generality for the prime problem.
 
-## 7. Revised all-prime wall
+## 6. What the current coprime divisor criterion still misses
 
-The complete prime problem can therefore be attacked as a two-sector existence problem:
+The repository theorem `FAB-COPRIME-DIVISOR-CRITERION.md` additionally assumes the primitive parameters lie below `p`, which ensures
 
-1. **primitive/coprime sector:** find a coprime fab certificate, where the reciprocal signed-target and nonresidue machinery applies;
-2. **p-entangled Type-II sector:** find parameters satisfying the reduced p-entangled criterion.
+\[
+p\nmid a.
+\]
 
-A proof need not establish universal coprime coverage if every coprime survivor can instead be forced into the Type-II sector.
+The primitive-reduction theorem does **not** imply that size condition.
 
-That is a strictly weaker and potentially more realistic target than the current all-coprime conjectural wall.
+For a primitive certificate with `p not| k`, if
+
+\[
+p\mid a,
+\]
+then the p-adic argument above shows
+
+\[
+\boxed{v_p(a)\in\{1,2\}.}
+\]
+
+Write
+
+\[
+a=p^eA_0,
+\qquad e\in\{1,2\},
+\qquad p\nmid A_0.
+\]
+
+Then `k` divides the much smaller factor
+
+\[
+\boxed{k\mid p^{e-1}A_0+b.}
+\]
+
+If
+
+\[
+C_0=\frac{p^{e-1}A_0+b}{k},
+\]
+
+the remaining exact condition is
+
+\[
+\boxed{4A_0b\mid C_0(p+k).}
+\]
+
+For `e=1`, the divisor relation is completely independent of `p`:
+
+\[
+\boxed{k\mid A_0+b.}
+\]
+
+This is the primitive p-entangled / classical Type-II-shaped sector.
+
+## 7. Revised complete proof target
+
+The prime problem can now be split without any arbitrary gcd restriction:
+
+1. **ordinary primitive sector** `p not| a`, where the coprime divisor criterion and reciprocal signed-target machinery apply;
+2. **p-entangled primitive sector** `a=p^eA_0`, `e=1 or2`, governed by the reduced criterion above.
+
+A universal proof may close either sector pointwise. It does **not** need a genuinely non-coprime fab theorem.
+
+This is a sharper boundary than the earlier draft of this file, which incorrectly treated the `p|A` branch as essentially non-coprime after normalization.
