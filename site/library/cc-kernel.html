@@ -77,7 +77,7 @@
 ./centl es go --random
 ./centl es letters
 ./centl es status</code></pre>
-<p><code>./centl es go</code> is the infinite hunt. It resumes from <code>findings/seeds/current.json</code>, collects letters, and stops when you press Ctrl+C. <code>--random</code> begins a new hunt at a random start factor. A finished hunt is not a proof. <code>strike</code> stays false until a universal certificate exists.</p>
+<p><code>./centl es go</code> is the infinite hunt. It resumes the default cursor, collects letters, and stops when you press Ctrl+C. <code>--random</code>, <code>--from N</code>, <code>go N</code>, and <code>--from 0</code> / <code>--origin</code> start another hunt at any chosen number without destroying the first. Two <code>go</code> processes on the same hunt claim distinct windows. A finished hunt is not a proof. <code>strike</code> stays false until a universal certificate exists.</p>
         </div>
       </article>
     </main>

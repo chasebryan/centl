@@ -90,9 +90,17 @@
 <hr>
 <h2>4. Start factor</h2>
 <p>A start factor chooses <em>where</em> a hunt begins. It is stored with the seed and does not change for that hunt.</p>
-<pre><code class="language-text">./centl es go              # resume the saved hunt
-./centl es go --random     # new hunt at a random start factor
-./centl es go --from N     # new hunt beginning at N</code></pre>
+<pre><code class="language-text">./centl es go              # resume the default hunt
+./centl es go --from 0     # another hunt beginning at the origin
+./centl es go --origin     # same as --from 0
+./centl es go 0            # same as --from 0
+./centl es go --from N     # another hunt beginning at any chosen N
+./centl es go N            # same as --from N (0, 1000, 2e9, 20_000_000_000)
+./centl es go --random     # another hunt, random stretch; does not replace the first
+./centl es go --hunt NAME  # resume a named hunt
+./centl es hunts           # list every hunt cursor in this tree</code></pre>
+<p><code>--from</code> and <code>--random</code> used to overwrite the only seed file. They no longer do. Each hunt keeps its own cursor under <code>findings/seeds/</code>. Two <code>go</code> processes on the same hunt become siblings and claim distinct windows on that line.</p>
+<p><strong>Confirmed on one machine (2026-08-15):</strong> two concurrent <code>./centl es go</code> processes can run in two terminals on the same checkout. They share the findings library. They do not replace each other&#x27;s cursors. They claim distinct windows. A catalog race that could crash the dashboard has been closed. This is an operational capability, not a proof of the conjecture.</p>
 <p>Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter&#x27;s identity.</p>
 <hr>
 <h2>5. Letter numbers</h2>

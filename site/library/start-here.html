@@ -63,10 +63,15 @@
 <p>That opens the menu. Or, without the menu:</p>
 <pre><code class="language-text">./centl es go</code></pre>
 <p>That is the long hunt. It remembers a <strong>seed</strong> (where it stopped) so it never starts from scratch. It runs until you press Ctrl+C. Letters are collected as they appear; the hunt does not stop on the first one.</p>
-<pre><code class="language-text">./centl es go --random</code></pre>
-<p>starts a <strong>new</strong> hunt at a random start factor, so two people can explore different stretches of the number line. Resume later with plain <code>go</code> — that uses the saved seed, not a new random place.</p>
-<pre><code class="language-text">./centl es go --from 1000000</code></pre>
-<p>starts at a start factor you choose.</p>
+<pre><code class="language-text">./centl es go --from 0
+./centl es go --origin
+./centl es go 0
+./centl es go --from 20000000000
+./centl es go 20000000000
+./centl es go --from 2e9
+./centl es go --random</code></pre>
+<p>starts <strong>another</strong> hunt at 0 or at any number you choose. The hunt you already had keeps its cursor. Findings still go in this shared library. Resume a named hunt with <code>./centl es go --hunt NAME</code>. List them with <code>./centl es hunts</code>.</p>
+<p>If you type <code>go</code> in a second terminal while the first hunt is still running, that second process joins as a sibling and takes the next free windows. It does not reset the first.</p>
 <pre><code class="language-text">./centl es look
 ./centl es letters
 ./centl es seed</code></pre>

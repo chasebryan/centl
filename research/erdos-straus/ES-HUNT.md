@@ -87,6 +87,8 @@ A start factor chooses *where* a hunt begins. It is stored with the seed and doe
 
 `--from` and `--random` used to overwrite the only seed file. They no longer do. Each hunt keeps its own cursor under `findings/seeds/`. Two `go` processes on the same hunt become siblings and claim distinct windows on that line.
 
+**Confirmed on one machine (2026-08-15):** two concurrent `./centl es go` processes can run in two terminals on the same checkout. They share the findings library. They do not replace each other's cursors. They claim distinct windows. A catalog race that could crash the dashboard has been closed. This is an operational capability, not a proof of the conjecture.
+
 Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter's identity.
 
 ---
