@@ -1,4 +1,4 @@
-name: CENTL Erdős-Straus simplified fab billion
+name: CENTL Erdős-Straus coprime fab billion
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
           g++ -O3 -std=c++17 research/erdos-straus/fab_simplified_scan.cpp -o /tmp/fab-primary
           g++ -O3 -std=c++17 research/erdos-straus/verify_fab_simplified_scan.cpp -o /tmp/fab-independent
 
-      - name: Run simplified divisor-congruence scanner
+      - name: Run coprime divisor-congruence scanner
         run: |
           mkdir -p fab-simplified-output
           /tmp/fab-primary "${LIMIT}" fab-simplified-output/fab-simplified-primary.json 11 \
@@ -61,9 +61,9 @@ jobs:
           assert p['survivors']==v['survivors']==0, (p,v)
           assert p['verdict']==v['verdict']=='ZERO_SURVIVORS'
           crit={row['p'] for row in p['critical_bound_11_examples']}
-          assert crit=={5_101_441,84_525_841}, crit
+          assert crit=={84_525_841}, crit
           hist={int(k):int(n) for k,n in p['minimal_parameter_bound_histogram'].items()}
-          assert hist.get(11)==2, hist
+          assert hist.get(11)==1, hist
           assert sum(hist.values())==1_587_581, hist
           PY
 
@@ -75,11 +75,11 @@ jobs:
           root=Path('fab-simplified-output')
           p=json.loads((root/'fab-simplified-primary.json').read_text())
           lines=[
-              '# Simplified fab subsystem finite certificate',
+              '# Coprime fab-plane finite certificate',
               '',
               f'- prime bound: `{p["limit"]:,}`',
               f'- Mordell-hard primes checked: `{p["hard_primes_checked"]:,}`',
-              f'- survivors with exact axes + coprime opposite-parity interior, `a,b<=11`: **`{p["survivors"]}`**',
+              f'- survivors with coprime `a,b<=11`: **`{p["survivors"]}`**',
               '',
               '## Minimal parameter bound histogram',
               '',
@@ -90,16 +90,16 @@ jobs:
               lines.append(f'| {c} | {n:,} |')
           lines += [
               '',
-              '## Bound 11 is necessary in this finite range',
+              '## Bound 11 is necessary in this finite coprime window',
               '',
           ]
           for row in p['critical_bound_11_examples']:
               lines.append(f'- `p={row["p"]:,}`: `(a,b,k,q)=({row["a"]},{row["b"]},{row["k"]},{row["q"]})`')
           lines += [
               '',
-              'The independent verifier evaluates the original published fab divisibility conditions rather than the simplified divisor-congruence theorem.',
+              'The independent verifier enumerates the same coprime parameter pairs but checks the original published fab divisibility conditions directly rather than the one-congruence theorem.',
               '',
-              'Finite coverage is evidence and a theorem-certificate for the stated bound, not a universal proof.',
+              'Finite coverage is an exact theorem-certificate for the stated bound, not a universal proof.',
               '',
           ]
           (root/'fab-simplified-report.md').write_text('\n'.join(lines))
@@ -125,7 +125,7 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: erdos-straus-fab-simplified-${{ github.sha }}
+          name: erdos-straus-fab-coprime-${{ github.sha }}
           path: fab-simplified-output/
           if-no-files-found: error
           retention-days: 90
