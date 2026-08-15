@@ -87,7 +87,7 @@ A start factor chooses *where* a hunt begins. It is stored with the seed and doe
 
 `--from` and `--random` used to overwrite the only seed file. They no longer do. Each hunt keeps its own cursor under `findings/seeds/`. Two `go` processes on the same hunt become siblings and claim distinct windows on that line.
 
-**Confirmed on one machine (2026-08-15):** two concurrent `./centl es go` processes can run in two terminals on the same checkout. They share the findings library. They do not replace each other's cursors. They claim distinct windows. Filing no longer rewrites the whole catalog on every GREAT hit (that made the origin hunt look frozen). A catalog race that could crash the dashboard has been closed. This is an operational capability, not a proof of the conjecture. Restart both hunts after pulling this change.
+**Two hunts on one machine:** each named hunt has its own lane. `main` and `h-0` must not share a cursor. A bug briefly put `main` on `lane-0`, so starting `h-0` jumped to five billion and looked frozen. That is fixed: `h-0` continues from its own `scanned_through`. Two `go` processes on the *same* named hunt still split windows. You can also run only `./centl es go` and ignore siblings. Not a proof of the conjecture.
 
 Two people who begin at different start factors explore different stretches of the line. That is the only role of the factor. It is not part of a letter's identity.
 

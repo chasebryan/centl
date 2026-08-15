@@ -128,6 +128,17 @@ def main() -> None:
         check(st == 50_000, st)
         check(hi1 == lo2, f"windows must abut, got {lo1,hi1} then {lo2,hi2}")
         check(hi1 <= lo2, "windows must not overlap")
+
+        big = default_seed("main", 4_773_818_782)
+        big["scanned_through"] = 5_241_307_929
+        save_seed(big)
+        origin = initiate_hunt(start_factor=0)
+        origin["scanned_through"] = 550_000
+        save_seed(origin)
+        check(load_seed("main")["lane"] != load_seed("h-0")["lane"], "main must not share h-0 lane")
+        olo, ohi, _ = claim_window(load_seed("h-0"), 50_000)
+        check(olo == 550_000, f"h-0 must not jump onto main, got {olo}")
+        check(ohi == 600_000, ohi)
         os.environ.pop("ES_FINDINGS", None)
 
     print("OK seed and letter numbers")

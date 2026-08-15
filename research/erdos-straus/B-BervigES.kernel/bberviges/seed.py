@@ -95,6 +95,14 @@ def lane_id_for(start_factor: int) -> str:
     return f"lane-{int(start_factor)}"
 
 
+def lane_id_for_hunt(hunt_id: str, start_factor: int = 0) -> str:
+    """One lane per hunt. Never put main and h-0 on the same cursor."""
+    hid = sanitize_hunt_id(hunt_id)
+    if hid.startswith("w-"):
+        return lane_id_for(int(start_factor))
+    return f"lane-{hid}"
+
+
 def lane_path(lane: str) -> Path:
     return seeds_dir() / f".{lane}.json"
 
@@ -109,7 +117,7 @@ def default_seed(hunt_id: str = MAIN_HUNT, start_factor: int = 0) -> dict:
     return {
         "schema": SEED_SCHEMA,
         "hunt_id": hunt_id,
-        "lane": lane_id_for(start_factor),
+        "lane": lane_id_for_hunt(hunt_id, start_factor),
         "start_factor": start_factor,
         "cleared_through": start_factor,
         "scanned_through": start_factor,
@@ -130,15 +138,17 @@ def default_seed(hunt_id: str = MAIN_HUNT, start_factor: int = 0) -> dict:
 
 
 def _normalize(data: dict, hunt_id: str) -> dict:
-    base = default_seed(hunt_id)
+    start = int(data.get("start_factor") if "start_factor" in data else 0)
+    base = default_seed(hunt_id, start)
     base.update(data)
     base["hunt_id"] = hunt_id
     if "scanned_through" not in data:
         base["scanned_through"] = int(base.get("cleared_through") or 0)
-    if "start_factor" not in data:
-        base["start_factor"] = 0
-    if not base.get("lane"):
-        base["lane"] = lane_id_for(int(base.get("start_factor") or 0))
+    base["start_factor"] = start if "start_factor" in data else int(base.get("start_factor") or 0)
+    if not str(hunt_id).startswith("w-"):
+        base["lane"] = lane_id_for_hunt(hunt_id, int(base["start_factor"]))
+    elif not base.get("lane"):
+        base["lane"] = lane_id_for_hunt(hunt_id, int(base["start_factor"]))
     if not isinstance(base.get("skipped_unsolved"), list):
         base["skipped_unsolved"] = []
     return base
@@ -196,8 +206,10 @@ def save_seed(seed: dict) -> Path:
     seed = dict(seed)
     seed["schema"] = SEED_SCHEMA
     seed["hunt_id"] = hunt_id
-    if not seed.get("lane"):
-        seed["lane"] = lane_id_for(int(seed.get("start_factor") or 0))
+    if not str(hunt_id).startswith("w-"):
+        seed["lane"] = lane_id_for_hunt(hunt_id, int(seed.get("start_factor") or 0))
+    elif not seed.get("lane"):
+        seed["lane"] = lane_id_for_hunt(hunt_id, int(seed.get("start_factor") or 0))
     seed["updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     path = seed_path(hunt_id)
     tmp = path.with_name(path.name + ".tmp")
@@ -227,7 +239,13 @@ def initiate_hunt(*, start_factor: int, hunt_id: str | None = None) -> dict:
 
 def join_lane(leader: dict) -> dict:
     """Create a sibling worker on the leader's lane. Does not touch the leader seed."""
-    lane = str(leader.get("lane") or lane_id_for(int(leader.get("start_factor") or 0)))
+    lane = str(
+        leader.get("lane")
+        or lane_id_for_hunt(
+            str(leader.get("hunt_id") or MAIN_HUNT),
+            int(leader.get("start_factor") or 0),
+        )
+    )
     hunt_id = f"w-{os.getpid()}"
     lo, _hi, _step = peek_lane_next(lane, int(leader.get("step") or DEFAULT_STEP))
     seed = default_seed(hunt_id, int(leader.get("start_factor") or 0))
