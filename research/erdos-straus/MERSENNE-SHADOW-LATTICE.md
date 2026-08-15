@@ -12,6 +12,7 @@ Read with:
 - [DEPTH-SPECTRUM.md](DEPTH-SPECTRUM.md)
 - [MULTIPLICATIVE-TRAP-COSET.md](MULTIPLICATIVE-TRAP-COSET.md)
 - [TRAP-QUOTIENT-FACTORIZATION.md](TRAP-QUOTIENT-FACTORIZATION.md)
+- [PRIME-POWER-TRAP-DICHOTOMY.md](PRIME-POWER-TRAP-DICHOTOMY.md)
 
 ## 1. Power-of-two layers
 
@@ -36,14 +37,6 @@ T_{k_a}
 \{-e,-4e\pmod{m_a}:e\mid2^a\}.
 \]
 
-Since the divisors of `2^a` are exactly
-
-\[
-1,2,\ldots,2^a,
-\]
-
-we obtain powers of `2` throughout the trap set.
-
 ## 2. Exact power-of-two coset theorem
 
 ### Theorem
@@ -61,9 +54,7 @@ T_{2^a}
 Moreover
 
 \[
-\boxed{
-|T_{2^a}|=a+2
-}
+\boxed{|T_{2^a}|=a+2}
 \]
 
 and
@@ -102,7 +93,7 @@ Thus
 |\langle2\rangle|=a+2.
 \]
 
-Now the divisors `e|2^a` are `2^i` for `0<=i<=a`. The two Type A/B trap families are
+The divisors of `2^a` are `2^i`, `0<=i<=a`. The Type A/B trap families are
 
 \[
 -2^i
@@ -114,25 +105,17 @@ and
 -4\cdot2^i=-2^{i+2}.
 \]
 
-Together their exponents cover a complete residue cycle modulo the order `a+2`. Hence the resulting set is exactly
+Together these exponents cover one complete cycle modulo the order `a+2`. Hence
 
 \[
--\langle2\rangle.
+T_{2^a}=-\langle2\rangle.
 \]
 
-Equivalently, the general trap-cardinality theorem gives
-
-\[
-|T_{2^a}|
-=2\tau(2^a)-1-\tau(2^{a-2})
-=a+2
-\]
-
-for `a>=2`, with `a=1` checked directly. Since the trap set is contained in the coset and both have cardinality `a+2`, equality follows. QED.
+Equivalently, the general trap-cardinality formula gives the same cardinality. QED.
 
 ## 3. Mersenne divisibility
 
-The moduli satisfy the classical identity
+The moduli satisfy
 
 \[
 2^u-1\mid2^v-1
@@ -140,13 +123,11 @@ The moduli satisfy the classical identity
 u\mid v.
 \]
 
-Therefore, for `a,b>=1`,
+Therefore
 
 \[
 \boxed{
-m_a\mid m_b
-\iff
-a+2\mid b+2.}
+m_a\mid m_b\iff a+2\mid b+2.}
 \]
 
 ## 4. Exact shadow theorem
@@ -159,9 +140,7 @@ Let `1<=a<b`. If
 \boxed{a+2\mid b+2,}
 \]
 
-then the entire Type A/B layer at depth `2^b` is directly shadowed by the earlier layer at depth `2^a`.
-
-Equivalently,
+then the entire Type A/B layer at depth `2^b` is directly shadowed by the earlier layer at depth `2^a`:
 
 \[
 \boxed{
@@ -173,50 +152,26 @@ T_{2^a}.
 
 ### Proof
 
-The divisibility assumption gives
-
-\[
-m_a\mid m_b.
-\]
-
-By the exact power-of-two coset theorem,
+The divisibility assumption gives `m_a|m_b`. By the power-of-two coset theorem,
 
 \[
 T_{2^b}=-\langle2\rangle\pmod{m_b}.
 \]
 
-Reducing any element
-
-\[
--2^r\pmod{m_b}
-\]
-
-modulo `m_a` gives
-
-\[
--2^r\pmod{m_a},
-\]
-
-which belongs to
+Reducing `-2^r mod m_b` modulo `m_a` gives `-2^r mod m_a`, which belongs to
 
 \[
 -\langle2\rangle=T_{2^a}.
 \]
 
-Thus every integer hitting the later layer automatically hits the earlier layer. QED.
+So every later hit is already an earlier hit. QED.
 
-## 5. Infinite structural gaps in the minimal-depth spectrum
+## 5. Infinite structural gaps
 
-A depth `k` can occur as a minimal Type A/B witness depth only if some integer reaches `T_k` while avoiding every earlier trap layer.
-
-The shadow theorem therefore gives:
-
-### Corollary
-
-If `b>=1` and there exists `a` with
+If there exists `a` with
 
 \[
-1<=a<b,
+1\le a<b,
 \qquad
 a+2\mid b+2,
 \]
@@ -224,38 +179,31 @@ a+2\mid b+2,
 then
 
 \[
-\boxed{
-C_{AB}(n)\ne2^b
-}
+\boxed{C_{AB}(n)\ne2^b}
 \]
 
 for every integer `n` for which `C_AB(n)` is defined.
 
-In particular, there are infinitely many structurally impossible finite depths.
-
-For example, choose
+In particular, choosing
 
 \[
 b=3r-2,
-\qquad r\ge2.
+\qquad r\ge2,
 \]
 
-Then
+gives
 
 \[
-3=a+2\mid b+2=3r
+3\mid b+2
 \]
 
-with `a=1`, so
+and therefore
 
 \[
-\boxed{
-2^{3r-2}
-\text{ is completely shadowed by depth }2.
-}
+\boxed{2^{3r-2}\text{ is completely shadowed by depth }2.}
 \]
 
-Hence the exact-depth spectrum has infinitely many gaps.
+Hence the exact-depth spectrum has infinitely many structural gaps.
 
 ## 6. Near-classification inside the power-of-two subsequence
 
@@ -265,13 +213,15 @@ For `b>=3`, if `b+2` is composite, it has a proper divisor `d>=3`. Taking
 a=d-2
 \]
 
-gives `1<=a<b` and
+gives
 
 \[
-a+2=d\mid b+2.
+1\le a<b,
+\qquad
+a+2\mid b+2.
 \]
 
-Therefore:
+Therefore
 
 \[
 \boxed{
@@ -281,15 +231,15 @@ Therefore:
 }
 \]
 
-Thus, among power-of-two depths beyond the initial cases, only exponents satisfying
+Thus only exponents with
 
 \[
 \boxed{b+2\text{ prime}}
 \]
 
-can escape this particular Mersenne-ancestry obstruction.
+can escape this particular Mersenne-ancestry obstruction once `b>=3`.
 
-This is a necessary condition within the power-of-two subsequence, not a proof that every such remaining depth is realizable.
+This is necessary, not sufficient, for realization.
 
 Examples:
 
@@ -304,15 +254,60 @@ k=512   : b=9,  b+2=11 prime      -> not killed by this family
 k=1024  : b=10, b+2=12 composite  -> shadowed by k=2 and k=4
 ```
 
-## 7. Shadow-lattice interpretation
+## 7. Density-one structural deletion inside the binary subsequence
 
-Inside the power-of-two subsequence, define the node label
+Let
+
+\[
+E(B)=\#\{3\le b\le B:\ 2^b\text{ is not killed by the Mersenne shadow theorem}\}.
+\]
+
+The necessary condition above gives
+
+\[
+E(B)\le\#\{3\le b\le B:b+2\text{ prime}\}.
+\]
+
+Therefore
+
+\[
+E(B)\le\pi(B+2)+O(1).
+\]
+
+By the prime number theorem,
+
+\[
+\pi(B+2)\sim\frac{B}{\log B},
+\]
+
+so
+
+\[
+\boxed{
+\frac{E(B)}{B}\to0.
+}
+\]
+
+Equivalently:
+
+\[
+\boxed{
+\text{among the power-of-two depth sequence }2^b,
+\text{ a density-one set of exponents is structurally impossible.}
+}
+\]
+
+This is a density statement **within the exponent-indexed binary subsequence**, not a density claim among all positive depths `k`.
+
+## 8. Shadow-lattice interpretation
+
+Label the power-of-two node `2^a` by
 
 \[
 n=a+2.
 \]
 
-Then modulus divisibility and direct shadow ancestry are controlled by ordinary divisibility of the labels:
+Then
 
 \[
 \boxed{
@@ -323,26 +318,50 @@ n_a\mid n_b
 }
 \]
 
-The resulting subgraph is therefore a reversed divisibility lattice on the shifted exponents `a+2`.
+The power-of-two subgraph is therefore a reversed divisibility lattice on the shifted exponents.
 
-This is the first explicit infinite sublattice currently isolated inside the Type A/B shadow graph.
+This is the first explicit infinite sublattice isolated inside the Type A/B shadow graph.
 
-## 8. Why this matters
+## 9. Binary exceptionalism among prime powers
 
-The depth-spectrum work previously distinguished two reasons for an absent finite depth:
+The companion theorem [PRIME-POWER-TRAP-DICHOTOMY.md](PRIME-POWER-TRAP-DICHOTOMY.md) proves that this exact coset saturation is special to `p=2`.
 
-1. **latency:** a realizable depth whose first observed prime lies beyond the search bound;
-2. **structure:** a depth prohibited by exact congruence ancestry.
+For odd prime powers
 
-The Mersenne shadow lattice proves that the second phenomenon occurs infinitely often.
+\[
+k=p^a,
+\]
 
-So the minimal Type A/B depth spectrum is not merely sparse because primes arrive late. It has an infinite deterministic deletion mechanism built into the arithmetic of the moduli themselves.
+the trap set has the exponent-window form
 
-## 9. Next targets
+\[
+T_{p^a}=\{-p^j:-a\le j\le a\},
+\]
 
-1. search for analogous exact-coset families at `k=p^a` for odd primes `p`;
-2. classify all `k` for which `T_k=-H_k`;
-3. derive additional infinite shadow lattices from exact subgroup equality;
-4. intersect these lattices with the hard-compatible spectrum;
-5. determine whether structural gaps have a positive or zero density among depths;
-6. incorporate proved infinite gap families into the exact-depth spectrum theorem program.
+but
+
+\[
+\boxed{T_{p^a}\subsetneq-\langle p\rangle.}
+\]
+
+Thus the Mersenne lattice is a genuinely binary phenomenon, not generic prime-power behavior.
+
+## 10. Why this matters
+
+The depth-spectrum program distinguishes:
+
+1. **latency gaps**, where a realizable depth simply appears beyond a finite prime cutoff;
+2. **structural gaps**, where congruence ancestry makes minimal realization impossible.
+
+The Mersenne shadow lattice proves not merely that structural gaps exist, but that they occur in an explicit infinite family and dominate the power-of-two subsequence in exponent density.
+
+So the minimal Type A/B spectrum contains deterministic arithmetic holes on every scale.
+
+## 11. Next targets
+
+1. classify all `k` for which `T_k=-H_k`;
+2. derive additional infinite shadow lattices from exact or near-exact subgroup saturation;
+3. determine whether analogous lattices exist for products of a bounded number of primes;
+4. intersect infinite structural-gap families with hard-compatible candidates;
+5. determine the density of structural gaps among all depths, not merely within special subsequences;
+6. integrate these infinite gap families into a publication-grade exact-depth spectrum theorem.
