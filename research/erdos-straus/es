@@ -125,7 +125,13 @@ def add_hunt_flags(p: argparse.ArgumentParser) -> None:
         type=int,
         default=None,
         dest="start_factor",
-        help="start or resume a sibling hunt at this factor; does not replace other hunts",
+        help="start or resume a sibling hunt at this factor, including 0; "
+        "does not replace other hunts",
+    )
+    p.add_argument(
+        "--origin",
+        action="store_true",
+        help="same as --from 0: another hunt beginning at the origin",
     )
     p.add_argument(
         "--random",
@@ -244,12 +250,15 @@ def main() -> None:
             if args.limit > lo:
                 step = args.limit - lo
                 persist_step = False
+        start = args.start_factor
+        if getattr(args, "origin", False):
+            start = 0
         raise SystemExit(
             cmd_go(
                 step=step,
                 kmax=args.k_max,
                 once=once,
-                start_factor=args.start_factor,
+                start_factor=start,
                 random_start=args.random,
                 menu_after=not once,
                 persist_step=persist_step,

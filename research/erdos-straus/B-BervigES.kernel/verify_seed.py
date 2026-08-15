@@ -90,12 +90,17 @@ def main() -> None:
         save_seed(first)
         first["scanned_through"] = 1_050_000
         save_seed(first)
+        origin = initiate_hunt(start_factor=0)
+        check(origin["hunt_id"] == "h-0", origin)
+        check(origin["start_factor"] == 0, origin)
+        check(origin["scanned_through"] == 0, origin)
         second = initiate_hunt(start_factor=9_000_000_000)
         check(second["hunt_id"] == "h-9000000000", second)
         check(second["start_factor"] == 9_000_000_000, second)
         main = load_seed("main")
         check(main["scanned_through"] == 1_050_000, "second hunt must not destroy the first")
         check(main["start_factor"] == 1_000_000, main)
+        check(load_seed("h-0")["scanned_through"] == 0, "origin hunt stays at 0")
         again = initiate_hunt(start_factor=9_000_000_000)
         check(again["scanned_through"] == 9_000_000_000, "re-init must resume, not wipe")
         second["scanned_through"] = 9_000_050_000

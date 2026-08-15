@@ -386,8 +386,10 @@ def cmd_menu() -> int:
     print(f"  letters in the library: {_counts()['letter']}")
     print()
     print("  [g] go        continue this hunt (infinite; Ctrl+C to stop)")
+    print("  [0] from 0    another hunt beginning at the origin (does not replace this one)")
     print("  [r] random    another hunt at a random place (does not replace this one)")
     print("  [h] hunts     list every hunt cursor")
+    print("  or type a number to start another hunt there, including 0")
     print("  [l] letters   collected letters, with numbers")
     print("  [k] look      latest findings")
     print("  [s] seed      show the cursor")
@@ -400,6 +402,10 @@ def cmd_menu() -> int:
         return 0
     if choice in {"g", "go", ""}:
         return cmd_go(menu_after=True)
+    if choice in {"0", "origin", "from0", "from 0"}:
+        return cmd_go(start_factor=0, menu_after=True)
+    if choice.isdigit():
+        return cmd_go(start_factor=int(choice), menu_after=True)
     if choice in {"r", "random"}:
         return cmd_go(random_start=True, menu_after=True)
     if choice in {"h", "hunts"}:

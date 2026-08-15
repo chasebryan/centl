@@ -41,4 +41,4 @@ From the repo root, without rebuilding CENTL or touching SCi:
 ./centl es status
 ```
 
-`./centl es go` is the infinite hunt. It resumes the default cursor, collects letters, and stops when you press Ctrl+C. `--random` and `--from N` start another hunt without destroying the first. Two `go` processes on the same hunt claim distinct windows. A finished hunt is not a proof. `strike` stays false until a universal certificate exists.
+`./centl es go` is the infinite hunt. It resumes the default cursor, collects letters, and stops when you press Ctrl+C. `--random`, `--from N`, and `--from 0` / `--origin` start another hunt without destroying the first. Two `go` processes on the same hunt claim distinct windows. A finished hunt is not a proof. `strike` stays false until a universal certificate exists.

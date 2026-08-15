@@ -75,6 +75,8 @@ A start factor chooses *where* a hunt begins. It is stored with the seed and doe
 
 ```text
 ./centl es go              # resume the default hunt
+./centl es go --from 0     # another hunt beginning at the origin
+./centl es go --origin     # same as --from 0
 ./centl es go --random     # another hunt, random stretch; does not replace the first
 ./centl es go --from N     # another hunt beginning at N; does not replace the first
 ./centl es go --hunt NAME  # resume a named hunt
