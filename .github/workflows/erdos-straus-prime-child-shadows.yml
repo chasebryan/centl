@@ -1,0 +1,74 @@
+name: CENTL Erdős-Straus prime-child shadows
+
+on:
+  workflow_dispatch:
+    inputs:
+      q_max:
+        description: Largest ancestry quotient q=1 mod 4
+        required: false
+        default: "101"
+      j_general:
+        description: Base-depth range for all quotients
+        required: false
+        default: "2000"
+      j_q5:
+        description: Base-depth range for q=5 rigidity
+        required: false
+        default: "50000"
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/PRIME-CHILD-SHADOWS.md'
+      - 'research/erdos-straus/prime_child_shadow_analyzer.py'
+      - '.github/workflows/erdos-straus-prime-child-shadows.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify prime-child and q=5 rigidity theorems
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve parameters
+        id: p
+        env:
+          Q: ${{ github.event.inputs.q_max }}
+          JG: ${{ github.event.inputs.j_general }}
+          J5: ${{ github.event.inputs.j_q5 }}
+        run: |
+          echo "q=${Q:-101}" >> "$GITHUB_OUTPUT"
+          echo "jg=${JG:-2000}" >> "$GITHUB_OUTPUT"
+          echo "j5=${J5:-50000}" >> "$GITHUB_OUTPUT"
+
+      - name: Run exact prime-child regression
+        run: |
+          rm -rf prime-child-output
+          python3 research/erdos-straus/prime_child_shadow_analyzer.py \
+            --q-max '${{ steps.p.outputs.q }}' \
+            --j-general '${{ steps.p.outputs.jg }}' \
+            --j-q5 '${{ steps.p.outputs.j5 }}' \
+            --out prime-child-output
+
+      - name: Freeze hashes
+        run: |
+          cd prime-child-output
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' | LC_ALL=C sort | while IFS= read -r f; do sha256sum "$f"; done > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat prime-child-output/prime-child-shadow-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: prime-child-shadows-${{ github.sha }}
+          path: prime-child-output/
+          if-no-files-found: error
+          retention-days: 90
