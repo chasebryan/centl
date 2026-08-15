@@ -2,8 +2,7 @@
 """Publish FCF research papers and manuals as static HTML.
 
 The public site is HTML and CSS only. This writer never emits executable
-JavaScript. Typeahead on the library page uses a native <datalist>. Topic
-and letter filters use CSS :has().
+JavaScript. Typeahead on the library page uses a native <datalist>.
 """
 
 from __future__ import annotations
@@ -13,7 +12,6 @@ import html
 import itertools
 import re
 import sys
-from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -304,9 +302,6 @@ def collect_research() -> list[Record]:
         ROOT / "research" / "erdos-straus" / "B-BervigES.kernel" / "README.md",
         ROOT / "research" / "erdos-straus" / "findings" / "seeds" / "README.md",
         *sorted((ROOT / "research" / "erdos-straus" / "findings").glob("*.md")),
-        *sorted((ROOT / "research" / "erdos-straus" / "findings" / "great").glob("*.md")),
-        *sorted((ROOT / "research" / "erdos-straus" / "findings" / "letters").glob("*.md")),
-        *sorted((ROOT / "research" / "erdos-straus" / "findings" / "good").glob("*.md")),
     ]
     extra_ok = {
         ROOT / "research" / "erdos-straus" / "CC.kernel" / "PROOF.md",
@@ -651,9 +646,11 @@ def wrap_page(
     dek: str,
     body: str,
     extra_head: str = "",
+    css_query: str = "",
     footer: str = "Free Computation Foundation · Free for science. · HTML and CSS only.",
 ) -> str:
     prefix = "../" * depth
+    css_href = f"{prefix}style.css{css_query}"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -669,7 +666,7 @@ def wrap_page(
   <meta property="og:title" content="{html.escape(title)} — Free Computation Foundation">
   <meta property="og:description" content="{html.escape(description)}">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
-  <link rel="stylesheet" href="{prefix}style.css">
+  <link rel="stylesheet" href="{html.escape(css_href, quote=True)}">
   {extra_head}
 </head>
 <body>
@@ -753,29 +750,6 @@ def render_cards(records: list[Record]) -> str:
     return "\n".join(cards)
 
 
-def render_topic_filters(options: list[tuple[str, str]]) -> str:
-    parts = [
-        '      <fieldset class="filter-bar">',
-        "        <legend>Browse one shelf</legend>",
-    ]
-    for index, (value, label) in enumerate(options):
-        checked = " checked" if index == 0 else ""
-        parts.append(
-            f'        <input class="filter-input" type="radio" name="topic" id="topic-{value}" value="{value}"{checked}>'
-        )
-    parts.append('        <div class="pill-row">')
-    for value, label in options:
-        parts.append(
-            f'          <label class="pill" for="topic-{value}">{html.escape(label)}</label>'
-        )
-    parts.append("        </div>")
-    parts.append(
-        '        <p class="small">One shelf at a time. The search field above finds a title on every shelf.</p>'
-    )
-    parts.append("      </fieldset>")
-    return "\n".join(parts)
-
-
 def write_folder_index(
     dest: Path,
     *,
@@ -810,24 +784,13 @@ def write_folder_index(
 
 
 def write_research_index(papers: list[Record], manuals: list[Record], dest: Path) -> None:
-    counts = Counter(record.topic for record in papers)
-    topics = [
-        ("all", f"All {len(papers)}"),
-        ("wellspring", f"Wellsprings {counts['wellspring']}"),
-        ("synthesis", f"Program overviews {counts['synthesis']}"),
-        ("theorem", f"Theorems {counts['theorem']}"),
-        ("certificate", f"Certificates {counts['certificate']}"),
-        ("corridor", f"Two-target corridor {counts['corridor']}"),
-        ("ancestry", f"Ancestry {counts['ancestry']}"),
-        ("shadow", f"Shadows and fibers {counts['shadow']}"),
-        ("geometry", f"Square-lift geometry {counts['geometry']}"),
-        ("prior-art", f"Prior art {counts['prior-art']}"),
-        ("cryptology", f"Cryptology {counts['cryptology']}"),
-        ("finding", f"Hunt findings {counts['finding']}"),
-    ]
     suggestions = datalist_options(papers + manuals)
+    suggest_links = "\n".join(
+        f'          <li><a href="{html.escape(record.href)}">{html.escape(record.title)}</a></li>'
+        for record in papers
+    )
     body = f"""      <p class="notice"><strong>The library is hosted here.</strong> Every public research note below is readable on this site as HTML. The repository remains canonical. The Erdős–Straus conjecture remains open. Novelty and priority stay under review.</p>
-      <p>There are {len(papers)} research records and {len(manuals)} hosted manuals. Type a title for native suggestions. Choose one shelf to browse. Filters use ordinary CSS. No JavaScript is used.</p>
+      <p>There are {len(papers)} research records and {len(manuals)} hosted manuals. Type in the field to see native suggestions. No JavaScript is used.</p>
 
       <form class="library-search" role="search" action="https://html.duckduckgo.com/html/" method="get">
         <label for="library-q">Search papers and manuals</label>
@@ -836,18 +799,22 @@ def write_research_index(papers: list[Record], manuals: list[Record], dest: Path
           <input type="hidden" name="sites" value="freecomputation.org">
           <button type="submit">Search</button>
         </div>
-        <p class="small">Suggestions appear as you type. Choose one, then open the matching card below. The button searches the published site.</p>
+        <p class="small">Suggestions appear as you type. Choose one, then open the matching card. The button searches the published site.</p>
         <datalist id="library-suggestions">
 {suggestions}
         </datalist>
+        <div class="suggest-panel" aria-label="All hosted papers">
+          <p class="kicker">Open a paper</p>
+          <ul class="suggest-list">
+{suggest_links}
+          </ul>
+        </div>
       </form>
 
       <div class="library" id="catalog">
-{render_topic_filters(topics)}
         <div class="paper-grid">
 {render_cards(papers)}
         </div>
-        <p class="library-empty">That shelf is empty. Choose another shelf, or <a href="#library-q">search by title</a>.</p>
       </div>
 
       <h2>Hosted manuals</h2>
@@ -865,6 +832,7 @@ def write_research_index(papers: list[Record], manuals: list[Record], dest: Path
             dek="Every public research record, readable here. Search as you type.",
             body=body,
             extra_head='<meta property="og:type" content="website">',
+            css_query="?v=catalog-1",
             footer="Free Computation Foundation · Research library · HTML and CSS only.",
         ),
         encoding="utf-8",
