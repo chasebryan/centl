@@ -1,9 +1,10 @@
 # q=3 Factor-Pair Types and Target Alignment
 
-**Status:** proved universal algebraic reduction  
+**Status:** proved universal algebraic reduction; the former three-species impossibility target is **refuted**  
 **Date:** 2026-08-15  
 **Depends on:** `Q3-NEXT-DIGIT-THEOREM.md`, `Q3-POINTWISE-DIVISOR-REDUCTION.md`  
-**Claim boundary:** converts the q=3 digit problem into an exact factor-pair alignment problem. It does not yet prove that all three species cannot align on one admissible target.
+**Read with:** `DSC-COUNTEREXAMPLE.md`  
+**Claim boundary:** the factor-pair identities below are proved. They do **not** prohibit all three species from aligning; `DSC-COUNTEREXAMPLE.md` explicitly realizes all three on one directly novel target.
 
 ---
 
@@ -31,7 +32,7 @@ w=4e
 
 for a divisor `e|j`.
 
-In either case `w` divides `4j=m+1`. Define the complementary positive integer
+In either case `w` divides `4j=m+1`. Define
 
 \[
 \boxed{a=\frac{m+1}{w}.}
@@ -55,7 +56,7 @@ Assume the trap can occur on a Mordell-hard progression at a q=3 layer. Every ha
 1\pmod3.
 \]
 
-Therefore the trap residue must satisfy
+Therefore
 
 \[
 u\equiv1\pmod3.
@@ -79,7 +80,7 @@ so
 \boxed{a\equiv2\pmod3.}
 \]
 
-When `v3(m)=2` (the common `v3(L)=1` q=3 regime),
+When `v3(m)=2`,
 
 \[
 wa\equiv1\pmod9.
@@ -91,17 +92,18 @@ The units modulo 9 that are `2 mod 3` are exactly
 \{2,5,8\}.
 \]
 
-Their inverses modulo 9 are
+Their inverses are
 
 \[
 2^{-1}=5,
 \qquad
 5^{-1}=2,
 \qquad
-8^{-1}=8.
+8^{-1}=8
+\pmod9.
 \]
 
-Hence there are exactly three possible ordered q=3 factor-pair types:
+Hence exactly three ordered species occur:
 
 \[
 \boxed{
@@ -121,7 +123,7 @@ The trap residue is
 u\equiv-w\pmod9.
 \]
 
-Therefore the three factor-pair species produce
+Therefore
 
 \[
 \begin{array}{c|c}
@@ -133,25 +135,17 @@ Therefore the three factor-pair species produce
 \end{array}
 \]
 
-By `Q3-NEXT-DIGIT-THEOREM.md`, `{1,4,7}` are precisely the three possible lifts of the common frozen `1 mod 3` prefix and are carried bijectively to the three parameter classes `0,1,2` by one common affine relabeling.
+By `Q3-NEXT-DIGIT-THEOREM.md`, `{1,4,7}` are the three possible lifts of the common frozen `1 mod 3` prefix and are carried bijectively to the three parameter classes by one common affine relabeling.
 
-Thus a full corrected-domain q=3 cover is equivalent to realizing **all three factor-pair species** among the aligned surviving trap witnesses.
+Thus a full corrected-domain q=3 cover is equivalent to realizing all three factor-pair species among aligned surviving trap witnesses.
 
-On a directly novel candidate we may sharpen `surviving` to **ancestry-minimal** by `Q3-POINTWISE-DIVISOR-REDUCTION.md`.
-
-Hence the universal local target becomes
-
-\[
-\boxed{
-\text{Can one admissible target align ancestry-minimal q=3 pairs of all three types }(2,5),(5,2),(8,8)?
-}
-\]
+This equivalence is now not merely conceptual: `DSC-COUNTEREXAMPLE.md` realizes all three species simultaneously.
 
 ---
 
 ## 4. Target factor pair
 
-Now let the target depth be `k`, with
+Let the target depth be `k`, with
 
 \[
 M=4k-1.
@@ -183,7 +177,7 @@ Suppose a positive integer `b` divides both local and target moduli:
 \boxed{b\mid m,\qquad b\mid M.}
 \]
 
-If the target and local trap residues are compatible on this shared coordinate,
+If target and local trap residues are compatible on this coordinate,
 
 \[
 t\equiv u\pmod b,
@@ -213,13 +207,13 @@ and
 wa\equiv1\pmod b,
 \]
 
-and `W,w` are units modulo `b`, their inverses agree. Therefore
+we also obtain
 
 \[
 \boxed{A\equiv a\pmod b.}
 \]
 
-So the complete ordered factor pair aligns coordinatewise:
+Therefore
 
 \[
 \boxed{(W,A)\equiv(w,a)\pmod b.}
@@ -229,53 +223,68 @@ So the complete ordered factor pair aligns coordinatewise:
 
 ## 5. Determinant divisibility
 
-The coordinatewise congruence immediately gives
+The coordinatewise congruence gives
 
 \[
 \boxed{b\mid(Wa-wA).}
 \]
 
-Thus every aligned q=3 row supplies an exact divisor of the cross-determinant between the target and local factor-pair vectors.
+Each aligned q=3 row therefore supplies a divisor of the cross-determinant between target and local factor-pair vectors.
 
-This is a useful rigidity invariant because the local row also satisfies
-
-\[
-wa=m+1,
-\]
-
-while the target satisfies
-
-\[
-WA=M+1.
-\]
-
-The remaining proof search can therefore be phrased in terms of simultaneous divisor constraints on
-
-\[
-Wa-wA
-\]
-
-for ancestry-minimal local pairs of the three distinct modulo-9 species.
+This remains a useful invariant even though it does not force impossibility.
 
 ---
 
-## 6. Why this is sharper than residue bookkeeping
+## 6. Explicit realization of all three species
 
-The previous q=3 formulation stored only a forbidden digit.
-
-The factor-pair formulation retains:
-
-1. the digit species modulo 9;
-2. the exact divisor identity `wa=m+1`;
-3. the exact target identity `WA=M+1`;
-4. coordinatewise congruence on every shared target factor;
-5. determinant divisibility.
-
-A universal q=3 closure theorem can now target a concrete Diophantine impossibility:
+`DSC-COUNTEREXAMPLE.md` uses
 
 \[
-\boxed{
-\text{one target factor pair cannot support ancestry-minimal aligned local pairs of all three mod-9 species.}
-}
+\begin{array}{c|c|c}
+ j & (w,a) & \text{species mod }9\\
+\hline
+25  & (20,5)  & (2,5)\\
+70  & (14,20) & (5,2)\\
+187 & (44,17) & (8,8)
+\end{array}
+\]
 
-This is the active analytic target.
+on shared target coordinates `11,31,83`.
+
+CRT gives target factor pair
+
+\[
+\boxed{(W,A)=(23450,764)}
+\]
+
+and hence
+
+\[
+WA-1=17,915,799=4(4,478,950)-1.
+\]
+
+The resulting admissible candidate is directly novel and the three rows occupy all three q=3 classes.
+
+Therefore the former conjectural statement
+
+\[
+\text{“one target factor pair cannot support all three species”}
+\]
+
+is false.
+
+---
+
+## 7. New use of the factor-pair formalism
+
+The factor-pair framework is now a **construction theory**, not an impossibility theory.
+
+It can be used to:
+
+1. synthesize collective cores by CRT-gluing local factor pairs;
+2. classify which local species can coexist on a target;
+3. derive exact target arithmetic from a proposed core;
+4. search for smaller or infinite families of collective-shadow examples;
+5. connect collective cores to divisor parametrizations for the all-prime problem.
+
+The active question is therefore no longer whether all three species can align. They can. The question is how the resulting collective cores are organized and whether that organization helps prove eventual Type A/B coverage of every prime.
