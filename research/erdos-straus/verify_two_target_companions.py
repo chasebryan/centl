@@ -13,6 +13,8 @@ import sys
 HARD = (1, 121, 169, 289, 361, 529)
 QR7 = {1, 2, 4}
 H15 = {1, 2, 4, 8}
+QR19 = {1, 4, 5, 6, 7, 9, 11, 16, 17}
+GAMMA19 = {2: 9, 10: 17, 3: 6, 13: 16, 8: 7, 12: 11, 14: 4, 15: 5}
 
 
 def sieve(n: int) -> list[int]:
@@ -124,6 +126,69 @@ def check_k15_htrap(hard: list[int], trial: list[int]) -> None:
     print(f"OK k=15 H-trap / outside-H hits: {len(hard)}")
 
 
+def check_k19_qr_trap(hard: list[int], trial: list[int]) -> None:
+    for p in hard:
+        if p == 19:
+            continue
+        C = (p + 19) // 4
+        fac = factor(C, trial)
+        if any(q % 19 == 0 for q in fac):
+            raise SystemExit(f"19 divided C at p={p}")
+        B = box(fac, 19)
+        qr_only = all(q % 19 in QR19 for q in fac)
+        t_i = (-pow(p, -1, 19)) % 19
+        p_qr = (p % 19) in QR19
+        if qr_only:
+            if 18 in B:
+                raise SystemExit(f"k19 QR-trap Type II hit p={p}")
+            if p_qr and t_i in B:
+                raise SystemExit(f"k19 QR-trap residue-side Type I hit p={p}")
+        if p % 840 == 121:
+            if not (C % 35 == 0):
+                raise SystemExit(f"class 121 missed 5*7 p={p} C={C}")
+            qr_fac = {r: e for r, e in fac.items() if r % 19 in QR19}
+            K = box(qr_fac, 19)
+            if not QR19 <= K:
+                raise SystemExit(f"class 121 QR box not full p={p} K={K}")
+            if (not qr_only) and 18 not in B:
+                raise SystemExit(f"class 121 NR factor missed Type II p={p}")
+            if qr_only and p_qr and (18 in B or t_i in B):
+                raise SystemExit(f"class 121 QR-trap both-miss failed p={p}")
+    print(f"OK k=19 QR-trap / class 121: {len(hard)}")
+
+
+def check_k19_one_pair(hard: list[int], trial: list[int]) -> None:
+    pairs = ((2, 10), (3, 13), (8, 12), (14, 15))
+    checked = 0
+    for p in hard:
+        if p == 19:
+            continue
+        C = (p + 19) // 4
+        fac = factor(C, trial)
+        nr = {q % 19 for q in fac if q % 19 not in QR19}
+        if 18 in nr:
+            if 18 not in box(fac, 19):
+                raise SystemExit(f"k19 factor 18 missed Type II p={p}")
+            continue
+        pair = None
+        for a, b in pairs:
+            if nr and nr <= {a, b}:
+                pair = (a, b)
+                break
+        if pair is None:
+            continue
+        qr_fac = {r: e for r, e in fac.items() if r % 19 in QR19}
+        K = box(qr_fac, 19)
+        r = next(iter(nr))
+        pred = GAMMA19[r] in K
+        if pred != (18 in box(fac, 19)):
+            raise SystemExit(f"k19 gamma mismatch p={p} nr={nr} K={K}")
+        checked += 1
+    if checked == 0:
+        raise SystemExit("no k=19 one-pair samples")
+    print(f"OK k=19 one-pair gamma: {checked}")
+
+
 def check_hard_residues_mod15(hard: list[int]) -> None:
     bad = [p for p in hard if p % 15 not in (1, 4)]
     if bad:
@@ -139,6 +204,8 @@ def main() -> None:
     check_two_p_plus_one(hard, trial)
     check_q7_equivalence(hard, trial)
     check_k15_htrap(hard, trial)
+    check_k19_qr_trap(hard, trial)
+    check_k19_one_pair(hard, trial)
     print("ALL CHECKS PASSED")
 
 

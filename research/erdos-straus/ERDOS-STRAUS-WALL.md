@@ -22,7 +22,7 @@ This does **not** move Erdős-Straus backward. A collectively shadowed target is
 - Direct-shadow smoothness
 - Explicit counterexample showing universal DSC-0 / DSC-P are false
 - Ancestry rigidity and the existing Type A/B local structure
-- Exact two-target corridor companions at `q=3,7,11` and `k=15`, plus the linear form `2p+1`
+- Exact two-target corridor companions at `q=3,7,11` and `k=15,19`, plus the linear form `2p+1`
 - `{2,3,5,7}`-smooth aligned Type-II covering is impossible (external prime `ℓ≥11` is necessary)
 - A public infinite hard-prime hunt with content-addressed letter numbers (`ES-HUNT.md`). Finite coverage, not a proof
 
@@ -59,4 +59,4 @@ These belong to the separate covering-core / exact-depth program.
 
 ## Honest floor
 
-A density-one set of primes is structurally captured. The remaining all-prime problem is a zero-density core: some later two-target shift must hit. Direct-shadow graphs alone cannot encode all redundancy, so future ES work should attack **existence of some Type I or Type II hit**, not universal exact-depth realizability. The next exact corridor target is `k=19`.
+A density-one set of primes is structurally captured. The remaining all-prime problem is a zero-density core: some later two-target shift must hit. Direct-shadow graphs alone cannot encode all redundancy, so future ES work should attack **existence of some Type I or Type II hit**, not universal exact-depth realizability. The next exact corridor target is the Type-I companion at `q=23`.

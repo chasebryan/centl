@@ -21,7 +21,7 @@ Keep the exact-depth / covering-core program separate from the all-prime ES prog
 
 ## Highest-priority proof targets
 
-0. **Corridor after `k=15`.** Combined two-target filters are now exact at `3,7,11,15` and the linear form `2p+1`. Classify `k=19` the same way, then the Type-I companion to the existing `q=23` Type-II theorem. Do not spend the main budget restoring DSC. Do not try to finish ES by a `{2,3,5,7}`-smooth aligned Type-II cover; that covering is false.
+0. **Corridor after `k=19`.** Combined two-target filters are now exact at `3,7,11,15,19` and the linear form `2p+1`. The next exact target is the Type-I companion to the existing `q=23` Type-II theorem. Do not spend the main budget restoring DSC. Do not try to finish ES by a `{2,3,5,7}`-smooth aligned Type-II cover; that covering is false.
 
 1. **All-prime divisor criterion.** Build on `FAB-COPRIME-DIVISOR-CRITERION.md`:
    \[

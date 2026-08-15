@@ -476,6 +476,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k19-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/es-two-target-signed-box-equivalence.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

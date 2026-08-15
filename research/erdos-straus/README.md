@@ -13,7 +13,7 @@ The program overview is
 
 **Moving frontier:** [`CURRENT-FRONTIER.md`](CURRENT-FRONTIER.md) is the shortest current-state record.
 
-**Two-target corridor (2026-08-15):** [`TWO-P-PLUS-ONE-FILTER.md`](TWO-P-PLUS-ONE-FILTER.md), [`HARD-Q7-TYPE-I-NO-RESCUE.md`](HARD-Q7-TYPE-I-NO-RESCUE.md), [`Q11-TYPE-I-COMPANION.md`](Q11-TYPE-I-COMPANION.md), and [`K15-TWO-TARGET-FILTER.md`](K15-TWO-TARGET-FILTER.md) make the original-ES corridor combined-exact at `3,7,11,15` and add the linear form `2p+1`.
+**Two-target corridor (2026-08-15):** [`TWO-P-PLUS-ONE-FILTER.md`](TWO-P-PLUS-ONE-FILTER.md), [`HARD-Q7-TYPE-I-NO-RESCUE.md`](HARD-Q7-TYPE-I-NO-RESCUE.md), [`Q11-TYPE-I-COMPANION.md`](Q11-TYPE-I-COMPANION.md), [`K15-TWO-TARGET-FILTER.md`](K15-TWO-TARGET-FILTER.md), and [`K19-TWO-TARGET-FILTER.md`](K19-TWO-TARGET-FILTER.md) make the original-ES corridor combined-exact at `3,7,11,15,19` and add the linear form `2p+1`.
 
 **Independent covering obstruction:** [`HARD-SMOOTH-TYPEII-OBSTRUCTION.md`](HARD-SMOOTH-TYPEII-OBSTRUCTION.md) proves that no `{2,3,5,7}`-smooth forced multiplier can produce a Type-II hit at the aligned shift `k≡-p (mod 4M)`.
 

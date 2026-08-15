@@ -202,6 +202,7 @@ def classify_research(path: Path) -> str:
             "HARD-SMOOTH",
             "Q11-TYPE",
             "K15-TWO",
+            "K19-TWO",
         )
     ):
         return "corridor"

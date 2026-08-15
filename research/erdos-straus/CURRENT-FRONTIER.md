@@ -923,7 +923,7 @@ Through `2{,}000{,}000` there are `4519` Mordell-hard primes. Combined two-targe
 \{15,19,23,27,31,35,39,43,47,51,55,59\}.
 \]
 
-The next exact target is the prime shift `k=19`.
+The next exact target after `k=19` is the Type-I companion to the existing `q=23` Type-II theorem.
 
 These are corridor theorems, not a bounded-window existence proof.
 
@@ -971,7 +971,7 @@ The immediate questions are:
 
 ### C. Exact ES two-target lane
 
-Continue the corridor from the new `k=15` combined filter. The immediate exact target is `k=19`, then the already-classified Type-II shift `k=23` with its Type-I companion.
+Continue the corridor from the new `k=19` combined filter. The immediate exact target is the Type-I companion to the already-classified Type-II shift `k=23`.
 
 The proven unbounded-defect forcing theorem still means no finite list of Kneser indices can finish the external-nonresidue lane. The corridor lane is a different finite-for-each-prime search and is not forbidden by that theorem.
 
@@ -998,4 +998,4 @@ The main new research object is now clear:
 -\text{symmetric signed divisor box}.}
 \]
 
-Its internal Kneser geometry and cross-layer shadow geometry are now partially unified, multiplicative ancestry is completely classified, every ancestry quotient has infinite exact gap families, the residual shadow problem has an exact exponent-lattice form, and four tiny fixed Type-II shifts already leave only an `O(X/(log X)^3)` prime survivor set. On the original-ES two-target corridor the first three prime shifts are now combined-exact, `2p+1` is an additional linear-form filter, and `k=15` is a complete two-target theorem. Original Erdős-Straus remains open.
+Its internal Kneser geometry and cross-layer shadow geometry are now partially unified, multiplicative ancestry is completely classified, every ancestry quotient has infinite exact gap families, the residual shadow problem has an exact exponent-lattice form, and four tiny fixed Type-II shifts already leave only an `O(X/(log X)^3)` prime survivor set. On the original-ES two-target corridor the first three prime shifts are now combined-exact, `2p+1` is an additional linear-form filter, `k=15` is a complete two-target theorem, and `k=19` is now a complete two-target theorem (QR-trap, class-`121` filling of `Q`, and a one-pair Type-II companion table). Original Erdős-Straus remains open.

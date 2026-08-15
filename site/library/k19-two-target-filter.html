@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the prime shift `k=19` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k19-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k19-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the prime shift `k=19` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the prime shift `k=19`</h1><p>Corridor · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../funding.html">Funding</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../mirrors.html">The Bazaar</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Corridor</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K19-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact group-theoretic filter</p>
+<p><strong>Date:</strong> 2026-08-15</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-SIGNED-BOX-EQUIVALENCE.md</code>, <code>K15-TWO-TARGET-FILTER.md</code>, <code>Q11-TYPE-I-COMPANION.md</code></p>
+<p><strong>Claim boundary:</strong> classifies both exact targets at the next corridor prime after <code>15</code>. It does not prove that a <code>3,7,11,15</code> survivor must hit at <code>19</code>, and therefore does not prove Erdős--Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and <code>p\neq19</code>. Put</p>
+<div class="math" role="math">C=\frac{p+19}{4}.</div>
+<p>Then <code>C</code> is an integer. Because every hard class satisfies <code>p\equiv1\pmod8</code>,</p>
+<div class="math" role="math">p+19\equiv20\equiv4\pmod8,</div>
+<p>so <code>C</code> is odd. Also <code>p\not\equiv0\pmod{19}</code>, hence <code>19\nmid C</code> and every prime factor of <code>C</code> is a unit modulo <code>19</code>.</p>
+<p>Unlike <code>q=7</code> (forced factor <code>2</code>) and <code>q=11</code> (forced factor <code>3</code>), there is <strong>no prime that divides <code>C</code> for every hard class</strong>. The six classes give</p>
+<div class="math" role="math">\begin{array}{c|c|c} p\bmod840 &amp; C\bmod210 &amp; \text{forced primes}\\ \hline 1 &amp; 5 &amp; 5\\ 121 &amp; 35 &amp; 5,7\\ 169 &amp; 47 &amp; \text{none}\\ 289 &amp; 77 &amp; 7\\ 361 &amp; 95 &amp; 5\\ 529 &amp; 137 &amp; \text{none} \end{array}</div>
+<p>The classification is therefore by the residue support of <code>C</code>, not by a single forced generator.</p>
+<hr>
+<h2>2. The unit group and the two targets</h2>
+<p>The group \((\mathbb Z/19\mathbb Z)^\times\) is cyclic of order eighteen. The residue <code>2</code> is a primitive root. Quadratic residues are</p>
+<div class="math" role="math">\boxed{ Q=\{1,4,5,6,7,9,11,16,17\}. }</div>
+<p>The complementary nonresidues are</p>
+<div class="math" role="math">N=\{2,3,8,10,12,13,14,15,18\}.</div>
+<p>Since <code>19\equiv3\pmod4</code>, <code>-1</code> is a nonresidue:</p>
+<div class="math" role="math">-1\equiv18\pmod{19}.</div>
+<p>That is the Type-II target. The Type-I target is <code>-p^{-1}\bmod{19}</code>. Quadratic reciprocity of the Jacobi symbol gives</p>
+<div class="math" role="math">\Bigl(\frac{-p^{-1}}{19}\Bigr) = \Bigl(\frac{-1}{19}\Bigr) \Bigl(\frac p{19}\Bigr) = -\Bigl(\frac p{19}\Bigr).</div>
+<p>Thus the Type-I target lies in <code>Q</code> if and only if <code>p</code> is a nonresidue modulo <code>19</code>. Explicitly:</p>
+<div class="math" role="math">\begin{array}{c|c|c} p\bmod19 &amp; -p^{-1}\bmod19 &amp; \text{side}\\ \hline 1 &amp; 18 &amp; N\\ 4 &amp; 14 &amp; N\\ 5 &amp; 15 &amp; N\\ 6 &amp; 3 &amp; N\\ 7 &amp; 8 &amp; N\\ 9 &amp; 2 &amp; N\\ 11 &amp; 12 &amp; N\\ 16 &amp; 13 &amp; N\\ 17 &amp; 10 &amp; N\\ 2 &amp; 9 &amp; Q\\ 3 &amp; 6 &amp; Q\\ 8 &amp; 7 &amp; Q\\ 10 &amp; 17 &amp; Q\\ 12 &amp; 11 &amp; Q\\ 13 &amp; 16 &amp; Q\\ 14 &amp; 4 &amp; Q\\ 15 &amp; 5 &amp; Q\\ 18 &amp; 1 &amp; Q \end{array}</div>
+<p>The nine residue classes in the first block are exactly <code>Q</code>. On those classes both exact targets are nonresidues.</p>
+<hr>
+<h2>3. The QR-trap</h2>
+<p>Write \(\mathcal R_{19}(C)\) for the signed divisor box of <code>C</code> modulo <code>19</code>. Write <code>K</code> for the signed box of the quadratic-residue part of <code>C</code> (so <code>K=\{1\}</code> if every prime factor is a nonresidue).</p>
+<h3>Theorem — QR-trap misses Type II</h3>
+<p>If every prime factor of <code>C</code> lies in <code>Q</code>, then \(\mathcal R_{19}(C)\subseteq Q\), hence</p>
+<div class="math" role="math">\boxed{-1\notin\mathcal R_{19}(C).}</div>
+<h3>Proof</h3>
+<p><code>Q</code> is a subgroup. Every generator is already in <code>Q</code>, so the signed box they generate stays in <code>Q</code>. The Type-II target <code>18</code> lies outside <code>Q</code>. QED.</p>
+<h3>Theorem — QR-trap Type I</h3>
+<p>Under the same hypothesis,</p>
+<div class="math" role="math">\boxed{ -p^{-1}\notin\mathcal R_{19}(C) \quad\text{whenever}\quad \Bigl(\frac p{19}\Bigr)=+1. }</div>
+<p>If instead \(\bigl(\frac p{19}\bigr)=-1\), the Type-I target lies in <code>Q</code>, and Type I hits if and only if that residue already lies in the (possibly thin) box <code>K</code>.</p>
+<h3>Proof</h3>
+<p>On a residue class the Type-I target is a nonresidue, by the table in Section 2, hence cannot lie in a box contained in <code>Q</code>. On a nonresidue class the target is in <code>Q</code>, so membership is exactly membership in <code>K</code>. QED.</p>
+<p>In particular, if the QR box is the full subgroup <code>Q</code>, then a QR-trap combined miss occurs if and only if <code>p</code> itself is a residue modulo <code>19</code>. Type I then contributes extra coverage precisely on the nine nonresidue classes of <code>p</code>.</p>
+<hr>
+<h2>4. Forced <code>5</code> and <code>7</code> fill <code>Q</code> on one hard class</h2>
+<p>Both <code>5</code> and <code>7</code> are quadratic residues modulo <code>19</code>. Their simple local sets are</p>
+<div class="math" role="math">\{5^{-1},1,5\}=\{1,4,5\}, \qquad \{7^{-1},1,7\}=\{1,7,11\}.</div>
+<p>The product is already the whole subgroup:</p>
+<div class="math" role="math">\{1,4,5\}\cdot\{1,7,11\} = Q.</div>
+<h3>Theorem — class <code>121</code></h3>
+<p>If <code>p\equiv121\pmod{840}</code>, then <code>5\mid C</code> and <code>7\mid C</code>, so <code>K=Q</code>. Consequently:</p>
+<ol><li>if every prime factor of <code>C</code> is a quadratic residue modulo <code>19</code>, then Type II misses, and Type I hits if and only if \(\bigl(\frac p{19}\bigr)=-1\);</li><li>if some prime factor of <code>C</code> is a nonresidue, then <code>Q</code> translated by that nonresidue fills the nonresidue coset, so Type II hits and <code>p</code> satisfies Erdős--Straus at <code>k=19</code>.</li></ol>
+<p>Combined miss on this class is therefore exactly</p>
+<div class="math" role="math">\boxed{ \text{every prime factor of }C\text{ is in }Q \quad\text{and}\quad \Bigl(\frac p{19}\Bigr)=+1. }</div>
+<h3>Proof</h3>
+<p><code>p=840t+121</code> gives <code>C=210t+35=5\cdot7\cdot(6t+1)</code>. The product of the two local sets is <code>Q</code> as computed above. A nonresidue factor multiplies <code>Q</code> onto <code>N</code>, which contains <code>18</code>. The QR-trap case is Section 3 with <code>K=Q</code>. QED.</p>
+<p>On the other four classes that force only <code>5</code> or only <code>7</code>, the QR box contains <code>{1,4,5}</code> or <code>{1,7,11}</code> respectively and need not be all of <code>Q</code>.</p>
+<hr>
+<h2>5. A single nonresidue inverse pair</h2>
+<p>The nonresidues pair under inversion:</p>
+<div class="math" role="math">\{2,10\},\quad\{3,13\},\quad\{8,12\},\quad\{14,15\},\quad\{18\}.</div>
+<p>A prime <code>r\equiv18\pmod{19}</code> contributes <code>-1</code> itself, so Type II hits.</p>
+<p>For each of the other four pairs, a single such prime to the first power has local set of size three, none of which is <code>18</code>. Type II then hits if and only if the QR box already contains a definite companion residue.</p>
+<h3>Theorem — one inverse pair</h3>
+<p>Suppose every nonresidue prime factor of <code>C</code> is congruent to <code>r</code> or <code>r^{-1}</code> modulo <code>19</code>, for a single <code>r\in N\setminus\{18\}</code>, and write <code>K</code> for the QR box. Then</p>
+<div class="math" role="math">-1\in\mathcal R_{19}(C) \quad\Longleftrightarrow\quad \gamma(r)\in K,</div>
+<p>where</p>
+<div class="math" role="math">\begin{array}{c|c} r\bmod19 &amp; \gamma(r)\\ \hline 2 &amp; 9\\ 10 &amp; 17\\ 3 &amp; 6\\ 13 &amp; 16\\ 8 &amp; 7\\ 12 &amp; 11\\ 14 &amp; 4\\ 15 &amp; 5 \end{array}</div>
+<h3>Proof</h3>
+<p>The nonresidue elements of the box are <code>{r,r^{-1}}\cdot K</code>. This set contains <code>18</code> if and only if <code>K</code> contains <code>18\cdot r^{-1}</code> or <code>18\cdot r</code>. Those two companions are the displayed values of <code>\gamma</code> (they coincide with the two rows of each inverse pair). QED.</p>
+<p>Two distinct inverse pairs, with no extra QR mass, produce only four nonresidue residues and still miss <code>18</code>, because a product of two nonresidues is a residue. Extra QR mass or a factor <code>18\bmod{19}</code> is required to finish Type II in that case.</p>
+<hr>
+<h2>6. Combined miss theorem</h2>
+<h3>Theorem</h3>
+<p>For a Mordell-hard prime <code>p\neq19</code>, both exact targets miss at <code>k=19</code> if and only if <code>-1</code> and <code>-p^{-1}</code> both lie outside \(\mathcal R_{19}(C)\). Structurally this is one of the following:</p>
+<ol><li><strong>QR-trap, residue side:</strong> every prime factor of <code>C</code> is in <code>Q</code>, and \(\bigl(\frac p{19}\bigr)=+1\);</li><li><strong>QR-trap, thin nonresidue side:</strong> every prime factor of <code>C</code> is in <code>Q</code>, \(\bigl(\frac p{19}\bigr)=-1\), and the Type-I target does not lie in the thin QR box <code>K</code>;</li><li><strong>nonresidue packet that misses <code>18</code>:</strong> the nonresidue support of <code>C</code> does not place <code>18</code> in the signed box (Section 5), and the Type-I target also misses that box.</li></ol>
+<p>In every other case at least one target hits, and <code>p</code> satisfies Erdős--Straus.</p>
+<p>On the single hard class <code>p\equiv121\pmod{840}</code>, cases 2 and 3 with a nonresidue factor cannot occur: case 2 is absorbed into a full-<code>Q</code> Type-I hit, and a nonresidue factor is a Type-II hit. Combined miss on that class is exactly case 1.</p>
+<hr>
+<h2>7. Corridor position</h2>
+<p>The integer <code>(p+19)/4</code> is the next neighbour after the four already-classified forms</p>
+<div class="math" role="math">A,\quad A+1,\quad A+2,\quad A+3 \qquad\bigl(A=(p+3)/4\bigr).</div>
+<p>A hypothetical counterexample that has escaped <code>q=3,7,11</code> and <code>k=15</code> must place this fifth consecutive integer into a QR-trap of residue type, a thin QR box that misses the Type-I target, or a nonresidue packet that misses both <code>18</code> and <code>-p^{-1}</code>.</p>
+<p>Type I <strong>does</strong> contribute extra coverage at <code>k=19</code>, unlike <code>q=3</code> and <code>q=7</code>, and like <code>q=11</code>. The extra coverage is exactly the QR-trap on nonresidue classes of <code>p</code> for which the QR box contains the Type-I target, together with those nonresidue packets whose box happens to contain <code>-p^{-1}</code> but not <code>18</code>.</p>
+<hr>
+<h2>8. Finite signal</h2>
+<p>Through <code>400{,}000</code> there are <code>1005</code> Mordell-hard primes above <code>19</code>. Of these, <code>331</code> are QR-traps and <code>500</code> are a single nonresidue inverse pair. The QR-trap Type-II lemma, the class-<code>121</code> filling of <code>Q</code>, and the companion table <code>\gamma</code> have no exceptions in that range. The identities are proved above; the count is only a census.</p>
+<p>The next exact corridor target is the Type-I companion to the existing <code>q=23</code> Type-II theorem.</p>
+<p>Independent checks live in <code>verify_two_target_companions.py</code>.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
