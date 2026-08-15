@@ -1,26 +1,76 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Install CENTL: Oasis installer, source checkout, and published identities."><title>Software — Free Computation Foundation</title><link rel="canonical" href="https://freecomputation.org/software.html"><meta name="robots" content="index,follow"><link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing"><meta property="og:type" content="website"><meta property="og:url" content="https://freecomputation.org/software.html"><meta property="og:title" content="Software — Free Computation Foundation"><meta property="og:description" content="Source, Oasis releases, and installers."><meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png"><link rel="stylesheet" href="style.css"></head>
-<body><div class="shell"><header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>Software</h1><p>Source, stable releases, and installers.</p></div></header>
-<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="funding.html">Funding</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">The Bazaar</a></li><li><a href="docs.html">Documentation</a></li></ul><h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li><li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li><li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li></ul></nav>
-<main>
-<h2>Install CENTL</h2>
-<pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install CENTL: Oasis installer, source checkout, and published identities.">
+  <title>Software — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/software.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://freecomputation.org/software.html">
+  <meta property="og:title" content="Software — Free Computation Foundation">
+  <meta property="og:description" content="Source, Oasis releases, and installers.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Software</h1><p>Source, stable releases, and installers.</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <h2>Install CENTL</h2>
+      <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install</code></pre>
-<p>CENTL v0.15.0 Al-Nur is the published Oasis release for GNU/Linux x86_64. The installer verifies the archive, then activates. See the <a href="https://github.com/chasebryan/centl/blob/oasis/docs/INSTALL.md">installation guide</a>.</p>
+      <p>CENTL v0.15.0 Al-Nur is the published Oasis release for GNU/Linux x86_64. The installer verifies the archive, then activates. See the <a href="manuals/install.html">installation guide</a>.</p>
 
-<h2>Published identities</h2>
-<table class="directory"><tr><th>Name</th><th>What it is</th><th>Where</th></tr>
-<tr><td>CENTL v0.15.0 Al-Nur</td><td>Oasis product</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">release v0.15.0</a></td></tr>
-<tr><td>CENTL v0.14.0 Al-Khayma</td><td>Previous Oasis</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.14.0">release v0.14.0</a></td></tr>
-<tr><td>FCF Camp #1</td><td>Current stay</td><td><a href="https://github.com/chasebryan/centl/releases/tag/fcf-camp-001">fcf-camp-001</a></td></tr>
-<tr><td>CENTL Marsa</td><td>Windows/macOS harbor</td><td><a href="https://github.com/chasebryan/centl/tree/CENTL-Marsa">branch CENTL-Marsa</a></td></tr>
-<tr><td><code>install</code></td><td>Stable GNU/Linux installer</td><td><a href="https://raw.githubusercontent.com/chasebryan/centl/oasis/install">oasis/install</a></td></tr>
-<tr><td>CENTL source</td><td>Developer tree and Camp stay</td><td><a href="https://github.com/chasebryan/centl">github.com/chasebryan/centl</a> on <code>main</code></td></tr>
-</table>
-<p>Checksums, signing, and preservation contracts are in the <a href="docs.html">documentation index</a>. Public byte status is recorded in <a href="mirrors.html">The Bazaar</a>.</p>
+      <h2>Published identities</h2>
+      <table class="directory">
+        <tr><th>Name</th><th>What it is</th><th>Where</th></tr>
+        <tr><td>CENTL v0.15.0 Al-Nur</td><td>Oasis product</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">release v0.15.0</a></td></tr>
+        <tr><td>CENTL v0.14.0 Al-Khayma</td><td>Previous Oasis</td><td><a href="https://github.com/chasebryan/centl/releases/tag/v0.14.0">release v0.14.0</a></td></tr>
+        <tr><td>FCF Camp #1</td><td>Current stay</td><td><a href="https://github.com/chasebryan/centl/releases/tag/fcf-camp-001">fcf-camp-001</a></td></tr>
+        <tr><td>CENTL Marsa</td><td>Windows/macOS harbor</td><td><a href="https://github.com/chasebryan/centl/tree/CENTL-Marsa">branch CENTL-Marsa</a></td></tr>
+        <tr><td><code>install</code></td><td>Stable GNU/Linux installer</td><td><a href="https://raw.githubusercontent.com/chasebryan/centl/oasis/install">oasis/install</a></td></tr>
+        <tr><td>CENTL source</td><td>Developer tree and Camp stay</td><td><a href="https://github.com/chasebryan/centl">github.com/chasebryan/centl</a> on <code>main</code></td></tr>
+      </table>
+      <p>Checksums, signing, and preservation contracts are in the <a href="docs.html">documentation index</a>. Public byte status is recorded in <a href="mirrors.html">The Bazaar</a>.</p>
 
-<h2>Source checkout</h2>
-<pre><code>git clone https://github.com/chasebryan/centl.git
+      <h2>Source checkout</h2>
+      <pre><code>git clone https://github.com/chasebryan/centl.git
 cd centl</code></pre>
-<p>The default checkout is the developer distribution. Stable product authority is the <code>oasis</code> branch.</p>
-</main></div><footer>Free Computation Foundation · Software distribution index.</footer></div></body></html>
+      <p>The default checkout is the developer distribution. Stable product authority is the <code>oasis</code> branch.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Software distribution index.</footer>
+</div>
+</body>
+</html>

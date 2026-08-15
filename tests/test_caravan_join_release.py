@@ -288,6 +288,8 @@ class CaravanJoinReleaseTests(unittest.TestCase):
         self.assertIn("guided", html)
         self.assertIn("No repository checkout, Tailscale membership, or special tooling is required", html)
         self.assertIn("Read the manual path", html)
+        self.assertNotIn("<script>", html)
+        self.assertNotIn("caravan-census.js", html)
 
 
 if __name__ == "__main__":

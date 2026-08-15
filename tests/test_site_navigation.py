@@ -56,20 +56,33 @@ class SiteNavigationTests(unittest.TestCase):
         self.assertIn('class="caravan-join-button caravan-join-action"', join)
         self.assertIn("CARAVAN-HOST-POLICY.md", join)
 
-    def test_join_page_generates_a_signed_option_specific_launcher(self) -> None:
+    def test_join_page_offers_signed_option_specific_launchers_without_javascript(self) -> None:
         join = (ROOT / "site" / "join.html").read_text(encoding="utf-8")
-        self.assertIn('id="download-caravan-launcher"', join)
-        self.assertIn("new Blob", join)
+        self.assertNotIn("<script", join)
+        self.assertNotIn("new Blob", join)
         self.assertIn("fcf-caravan-join-1.0.8", join)
         self.assertIn("fcf-signify-x86_64-glibc", join)
         self.assertIn("EXPECTED_HELPER_SHA256", join)
         self.assertIn("-V -q", join)
-        self.assertIn('--missions \\\"$MISSIONS\\\"', join)
-        self.assertIn('--transport \\\"$TRANSPORT\\\"', join)
+        self.assertIn('--missions "$MISSIONS"', join)
+        self.assertIn('--transport "$TRANSPORT"', join)
         self.assertNotIn("releases/tag/fcf-caravan-join-1.0.5", join)
+        launcher = (
+            ROOT
+            / "site"
+            / "pub"
+            / "caravan"
+            / "launchers"
+            / "fcf-caravan-join-1.0.8-source-releases-https.sh"
+        )
+        self.assertTrue(launcher.is_file())
+        text = launcher.read_text(encoding="utf-8")
+        self.assertIn("fcf-caravan-join-1.0.8", text)
+        self.assertIn("--missions", text)
+        self.assertIn("--transport", text)
 
     def test_every_html_page_uses_the_same_primary_navigation(self) -> None:
-        expected_headings = ["Foundation", "External"]
+        expected_headings = ["Foundation", "Research", "External"]
         expected_labels = [
             "Home",
             "About FCF",
@@ -78,6 +91,8 @@ class SiteNavigationTests(unittest.TestCase):
             "Software",
             "The Bazaar",
             "Documentation",
+            "Research library",
+            "Erdős–Straus program",
             "CENTL on GitHub",
             "Latest release",
             "GitHub Sponsors",

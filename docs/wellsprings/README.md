@@ -18,6 +18,9 @@ the CENTL release identity.
 
 Under-designation is required. Independent review has not occurred.
 
+Hosted copies are in the public
+[research library](https://freecomputation.org/research.html).
+
 Render the same records locally with:
 
 ```sh

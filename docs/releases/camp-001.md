@@ -67,8 +67,8 @@ inherit Oasis assurance:
 - Wellspring designation
 - public volunteer CARAVAN as a production network
 - verified-core rewrite by SCi or a model
-- changes to the signed join-caravan scheme
-- website visual redesign
+- changes to the signed join-caravan cryptographic scheme
+- JavaScript on the public site
 - a rebuilt native archive pretending to be `v0.14.0`
 
 The signed join installer remains `fcf-caravan-join-1.0.8`. This camp does

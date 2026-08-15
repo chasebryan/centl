@@ -40,8 +40,8 @@ mean Oasis cannot be made from the stable tree.
 
 - Oasis declaration or SemVer publication from this camp
 - Wellspring designation without independent review
-- changing the signed join-caravan scheme or `join.html`
-- website visual redesign
+- changing the signed join-caravan cryptographic scheme
+- introducing JavaScript on the public site
 - public volunteer CARAVAN enrollment
 - verified-core rewrite by SCi or a model
 

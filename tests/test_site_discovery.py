@@ -43,6 +43,8 @@ class SiteDiscoveryTests(unittest.TestCase):
             SITE / "centl.html",
             SITE / "software.html",
             SITE / "docs.html",
+            SITE / "research.html",
+            SITE / "research-erdos-straus.html",
             SITE / "funding.html",
             SITE / "mirrors.html",
             SITE / "join.html",
@@ -71,6 +73,7 @@ class SiteDiscoveryTests(unittest.TestCase):
         for loc in (
             "https://freecomputation.org/",
             "https://freecomputation.org/centl.html",
+            "https://freecomputation.org/research.html",
             "https://freecomputation.org/ai.html",
             "https://freecomputation.org/proposal.html",
             "https://freecomputation.org/join.html",

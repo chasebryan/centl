@@ -1,14 +1,21 @@
 # CENTL documentation
 
-This directory is the manual set. The public site points here instead of
-repeating every surface on the landing pages.
+This directory is the manual set. The public site hosts the same front-facing
+manuals as HTML at [freecomputation.org/docs.html](https://freecomputation.org/docs.html)
+and every public research record at
+[freecomputation.org/research.html](https://freecomputation.org/research.html).
+The repository remains canonical.
 
 ## Start here
 
-- [INSTALL.md](INSTALL.md) — GNU/Linux install
-- [NUMERICS.md](NUMERICS.md) — what a printed digit means
-- [SCI.md](SCI.md) — CENTL-SCi
-- [SYNTAX.md](SYNTAX.md) — language
+| Document | When to open it |
+| --- | --- |
+| [INSTALL.md](INSTALL.md) · [hosted](https://freecomputation.org/manuals/install.html) | GNU/Linux install |
+| [NUMERICS.md](NUMERICS.md) · [hosted](https://freecomputation.org/manuals/numerics.html) | what a printed digit means |
+| [SCI.md](SCI.md) · [hosted](https://freecomputation.org/manuals/sci.html) | CENTL-SCi |
+| [SYNTAX.md](SYNTAX.md) · [hosted](https://freecomputation.org/manuals/syntax.html) | language |
+| [MATHEMATICIANS.md](MATHEMATICIANS.md) · [hosted](https://freecomputation.org/manuals/mathematicians.html) | mathematics only |
+| [PHYSICISTS.md](PHYSICISTS.md) · [hosted](https://freecomputation.org/manuals/physicists.html) | typed physics only |
 
 ## Use
 
@@ -28,6 +35,21 @@ repeating every surface on the landing pages.
 - [releases/0.14.0.md](releases/0.14.0.md)
 - [releases/camp-001.md](releases/camp-001.md)
 - [REPOSITORY-MAP.md](REPOSITORY-MAP.md)
+
+## Research
+
+Public research is hosted, searchable, and readable without JavaScript:
+
+- [Research library](https://freecomputation.org/research.html)
+- [Erdős–Straus program](https://freecomputation.org/research-erdos-straus.html)
+- [Wellspring records](wellsprings/README.md)
+- [WS-CAND-003](wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md)
+
+Regenerate the hosted HTML after editing papers or manuals:
+
+```sh
+python3 scripts/publish-site-library.py
+```
 
 ## Open only when you need it
 

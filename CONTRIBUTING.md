@@ -26,6 +26,8 @@ If any part of that stack is unfamiliar, start with the
 [documentation index](docs/README.md) and then the
 [manual contributor onboarding](docs/ONBOARDING.md). The onboarding guide is a
 staged OCaml, F*, numerics, protocol, testing, and source-code curriculum.
+The public site hosts the same front-facing manuals and the research library
+at [freecomputation.org](https://freecomputation.org/) as HTML and CSS only.
 
 Companies and other AI software that want a single written offer to use
 CENTL, contribute, and sponsor FCF should read

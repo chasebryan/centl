@@ -1,128 +1,133 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Join the FCF CARAVAN with a consent-gated signed Linux launcher."><title>Join the CARAVAN — Free Computation Foundation</title><link rel="canonical" href="https://freecomputation.org/join.html"><meta name="robots" content="index,follow"><link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing"><meta property="og:type" content="website"><meta property="og:url" content="https://freecomputation.org/join.html"><meta property="og:title" content="Join the CARAVAN — Free Computation Foundation"><meta property="og:description" content="Choose your cargo, accept the contract, download your launcher."><meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png"><link rel="stylesheet" href="style.css"></head>
-<body><div class="shell"><header class="masthead"><div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div><div class="title"><h1>Join the CARAVAN</h1><p>Choose your cargo, accept the contract, download your launcher.</p></div></header>
-<div class="layout"><nav aria-label="Primary"><h2>Foundation</h2><ul><li><a href="index.html">Home</a></li><li><a href="about.html">About FCF</a></li><li><a href="funding.html">Funding</a></li><li><a href="centl.html">CENTL</a></li><li><a href="software.html">Software</a></li><li><a href="mirrors.html">The Bazaar</a></li><li><a href="docs.html">Documentation</a></li></ul><h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li><li><a href="https://github.com/chasebryan/centl/releases/latest">Latest release</a></li><li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li></ul></nav>
-<main><h2>🐪 Prepare this camel</h2><p>Choose what this Linux machine should help preserve, accept the short host contract, and download one launcher made for those choices. When you execute it, the launcher verifies the signed FCF release, installs the current CENTL Oasis release, enrolls the machine, assigns its live Caravan number, and starts the outbound heartbeat.</p><p>No repository checkout or Tailscale membership is required. The launcher uses ordinary HTTPS by default; Tor is optional.</p>
-<section class="caravan-join-flow" aria-labelledby="provisions-heading"><h2 id="provisions-heading">Choose the FCF-approved provisions</h2><fieldset class="caravan-options"><legend>What should this camel carry?</legend><label><input type="checkbox" name="mission" value="source" checked> CENTL source snapshots</label><label><input type="checkbox" name="mission" value="releases" checked> CENTL Oasis and signed FCF releases</label><label><input type="checkbox" name="mission" value="semantic"> CENTL-SCi approved semantic artifacts</label><label><input type="checkbox" name="mission" value="recovery"> FCF recovery and toolchain artifacts</label></fieldset><p class="small">These choices filter authenticated FCF-approved cargo only. They never authorize arbitrary files, uploads, or software.</p>
-<h2 id="contract-heading">Short host contract</h2><p>By joining, you choose to contribute bounded storage, bandwidth, and availability to authenticated FCF public-approved material. Your home files are never cargo. The carrier runs rootless, opens no public inbound port, accepts no arbitrary uploads, and publishes no hostname, username, IP address, or public node listing. You may leave with <code>fcf-caravan-withdraw</code>.</p><p><a href="https://github.com/chasebryan/centl/blob/main/docs/CARAVAN-HOST-POLICY.md">Read the complete CARAVAN host policy</a></p>
-<fieldset class="caravan-options"><legend>Coordinator route</legend><label><input type="radio" name="transport" value="https" checked> HTTPS — ordinary Internet route</label><label><input type="radio" name="transport" value="tor"> Tor — requires local <code>tor</code> and <code>torsocks</code></label></fieldset><label class="caravan-consent"><input id="caravan-consent" type="checkbox"> I have authority to use this machine and accept the CARAVAN host policy.</label><p class="small">Your downloaded launcher contains the exact provisions and route you selected. It does not execute automatically: you review the downloaded file and run it on your Linux machine.</p><button type="button" id="download-caravan-launcher" class="caravan-join-button caravan-join-action" disabled>🐪 Download my FCF-CARAVAN launcher</button><p id="download-status" class="small" role="status" aria-live="polite"></p></section>
-<p>After execution, the welcome message reports everything installed, the provisions accepted, your live Caravan number, funding links, and other ways to help. Funding is optional: <a href="funding.html">support FCF</a>, preserve source and releases, test the carrier, improve documentation, review policy, or report bugs.</p>
-<script>
-(() => {
-  const releaseVersion = "1.0.8";
-  const releaseBase = "https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.8";
-  const publicKeySha256 = "450a55addaade128814788a02662a3f10230411f15d91d1060fa17543c288aa8";
-  const helperAsset = "fcf-signify-x86_64-glibc";
-  const helperSha256 = "5fb7cf62bf9f01d4957ff3b2cbed9f6137cffd5cddf9392e7d4a2eecfeb54530";
-  const consent = document.getElementById("caravan-consent");
-  const download = document.getElementById("download-caravan-launcher");
-  const status = document.getElementById("download-status");
-  const downloader = String.raw`import sys
-from pathlib import Path
-from urllib.request import Request, urlopen
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Join the FCF CARAVAN with a consent-gated signed Linux launcher.">
+  <title>Join the CARAVAN — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/join.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://freecomputation.org/join.html">
+  <meta property="og:title" content="Join the CARAVAN — Free Computation Foundation">
+  <meta property="og:description" content="Choose your cargo, accept the contract, download your launcher.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="join-launchers.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Join the CARAVAN</h1><p>Choose your cargo, accept the contract, download your launcher.</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding</a></li>
+        <li><a href="centl.html">CENTL</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <h2>🐪 Prepare this camel</h2>
+      <p>Choose what this Linux machine should help preserve, accept the short host contract, and download one launcher made for those choices. When you execute it, the launcher verifies the signed FCF release, installs the current CENTL Oasis release, enrolls the machine, assigns its live Caravan number, and starts the outbound heartbeat.</p>
+      <p>No repository checkout or Tailscale membership is required. The launcher uses ordinary HTTPS by default; Tor is optional. This page does not run JavaScript. The matching download appears after you accept the contract.</p>
 
-work, base, version = sys.argv[1:]
-root = Path(work)
-names = (
-    f"fcf-caravan-join-{version}.tar.gz",
-    "FCF-CARAVAN-JOIN.pub",
-    "SHA256SUMS",
-    "SHA256SUMS.sig",
-    "fcf-signify-x86_64-glibc",
-)
-for name in names:
-    request = Request(
-        f"{base.rstrip('/')}/{name}",
-        headers={
-            "Accept": "application/octet-stream",
-            "User-Agent": f"FCF-CARAVAN-web-launcher/{version}",
-        },
-    )
-    output = root / name
-    total = 0
-    with urlopen(request, timeout=60) as response, output.open("wb") as stream:
-        while True:
-            chunk = response.read(1024 * 1024)
-            if not chunk:
-                break
-            total += len(chunk)
-            if total > 64 * 1024 * 1024:
-                raise SystemExit(f"download too large: {name}")
-            stream.write(chunk)
-`;
-  const shellQuote = value => `'${value.replaceAll("'", "'\\''")}'`;
-  const buildLauncher = (missions, transport) => [
-    "#!/bin/sh",
-    "set -eu",
-    "",
-    "# FCF CARAVAN launcher generated after explicit host-policy consent.",
-    `# FCF-approved provisions: ${missions.join(",")}`,
-    `# Coordinator route: ${transport}`,
-    `RELEASE_VERSION=${shellQuote(releaseVersion)}`,
-    `MISSIONS=${shellQuote(missions.join(","))}`,
-    `TRANSPORT=${shellQuote(transport)}`,
-    `ASSET_BASE=${shellQuote(releaseBase)}`,
-    `EXPECTED_KEY_SHA256=${shellQuote(publicKeySha256)}`,
-    "HELPER_ASSET='fcf-signify-x86_64-glibc'",
-    "EXPECTED_HELPER_SHA256='5fb7cf62bf9f01d4957ff3b2cbed9f6137cffd5cddf9392e7d4a2eecfeb54530'",
-    "fail() { printf '%s\\n' \"FCF CARAVAN launcher: $*\" >&2; exit 1; }",
-    "for command in python3 sha256sum tar; do command -v \"$command\" >/dev/null 2>&1 || fail \"$command is required for signed setup\"; done",
-    "work=\"$(mktemp -d \"${TMPDIR:-/tmp}/fcf-caravan-join.XXXXXXXX\")\"",
-    "cleanup() { rm -rf -- \"$work\"; }",
-    "trap cleanup EXIT HUP INT TERM",
-    "python3 - \"$work\" \"$ASSET_BASE\" \"$RELEASE_VERSION\" <<'PY'",
-    downloader,
-    "PY",
-    "actual_key_sha256=\"$(sha256sum \"$work/FCF-CARAVAN-JOIN.pub\" | awk '{print $1}')\"",
-    "[ \"$actual_key_sha256\" = \"$EXPECTED_KEY_SHA256\" ] || fail \"the downloaded FCF trust key fingerprint is unexpected\"",
-    "signify_command=\"$(command -v signify 2>/dev/null || true)\"",
-    "if [ -z \"$signify_command\" ]; then",
-    "  case \"$(uname -m)\" in",
-    "    x86_64|amd64)",
-    "      helper_sha256=\"$(sha256sum \"$work/$HELPER_ASSET\" | awk '{print $1}')\"",
-    "      [ \"$helper_sha256\" = \"$EXPECTED_HELPER_SHA256\" ] || fail \"the FCF signify helper fingerprint is unexpected\"",
-    "      helper_dir=\"$HOME/.local/bin\"",
-    "      helper_target=\"$helper_dir/signify\"",
-    "      mkdir -p -m 0755 \"$helper_dir\"",
-    "      if [ -e \"$helper_target\" ] || [ -L \"$helper_target\" ]; then",
-    "        [ \"$(sha256sum \"$helper_target\" | awk '{print $1}')\" = \"$EXPECTED_HELPER_SHA256\" ] || fail \"an unexpected user-local signify already exists\"",
-    "      else",
-    "        cp \"$work/$HELPER_ASSET\" \"$helper_target\"",
-    "        chmod 0755 \"$helper_target\"",
-    "      fi",
-    "      signify_command=\"$helper_target\"",
-    "      PATH=\"$helper_dir:$PATH\"; export PATH",
-    "      ;;",
-    "    *) fail \"signify is missing and this architecture has no FCF-hosted helper yet\" ;;",
-    "  esac",
-    "fi",
-    "\"$signify_command\" -V -q -p \"$work/FCF-CARAVAN-JOIN.pub\" -x \"$work/SHA256SUMS.sig\" -m \"$work/SHA256SUMS\" || fail \"FCF release signature verification failed\"",
-    "(cd \"$work\" && sha256sum -c SHA256SUMS >/dev/null) || fail \"FCF release checksum verification failed\"",
-    "tar -xzf \"$work/fcf-caravan-join-$RELEASE_VERSION.tar.gz\" -C \"$work\" || fail \"signed FCF release could not be unpacked\"",
-    "signed_join=\"$work/fcf-caravan-join-$RELEASE_VERSION/join-caravan\"",
-    "[ -f \"$signed_join\" ] && [ ! -L \"$signed_join\" ] || fail \"signed join launcher is missing\"",
-    "\"$signed_join\" --missions \"$MISSIONS\" --transport \"$TRANSPORT\"",
-  ].join("\n") + "\n";
-  const updateButton = () => { download.disabled = !consent.checked; };
-  consent.addEventListener("change", updateButton);
-  download.addEventListener("click", () => {
-    const missions = [...document.querySelectorAll('input[name="mission"]:checked')].map(input => input.value);
-    const transport = document.querySelector('input[name="transport"]:checked').value;
-    if (!missions.length) {
-      status.textContent = "Choose at least one FCF-approved provision first.";
-      return;
-    }
-    const filename = `fcf-caravan-join-${releaseVersion}-${missions.join("-")}-${transport}.sh`;
-    const url = URL.createObjectURL(new Blob([buildLauncher(missions, transport)], { type: "text/plain" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    status.textContent = `Downloaded ${filename}. Run it from your terminal with: bash ~/Downloads/${filename}`;
-  });
-  updateButton();
-})();
-</script></main></div><footer>Free Computation Foundation · CARAVAN participation is voluntary.</footer></div></body></html>
+      <section class="caravan-join-flow" aria-labelledby="provisions-heading">
+        <h2 id="provisions-heading">Choose the FCF-approved provisions</h2>
+        <fieldset class="caravan-options">
+          <legend>What should this camel carry?</legend>
+          <label><input id="m-source" type="checkbox" name="mission" value="source" checked> CENTL source snapshots</label>
+          <label><input id="m-releases" type="checkbox" name="mission" value="releases" checked> CENTL Oasis and signed FCF releases</label>
+          <label><input id="m-semantic" type="checkbox" name="mission" value="semantic"> CENTL-SCi approved semantic artifacts</label>
+          <label><input id="m-recovery" type="checkbox" name="mission" value="recovery"> FCF recovery and toolchain artifacts</label>
+        </fieldset>
+        <p class="small">These choices filter authenticated FCF-approved cargo only. They never authorize arbitrary files, uploads, or software.</p>
+
+        <h2 id="contract-heading">Short host contract</h2>
+        <p>By joining, you choose to contribute bounded storage, bandwidth, and availability to authenticated FCF public-approved material. Your home files are never cargo. The carrier runs rootless, opens no public inbound port, accepts no arbitrary uploads, and publishes no hostname, username, IP address, or public node listing. You may leave with <code>fcf-caravan-withdraw</code>.</p>
+        <p><a href="https://github.com/chasebryan/centl/blob/main/docs/CARAVAN-HOST-POLICY.md">Read the complete CARAVAN host policy</a></p>
+        <fieldset class="caravan-options">
+          <legend>Coordinator route</legend>
+          <label><input id="t-https" type="radio" name="transport" value="https" checked> HTTPS — ordinary Internet route</label>
+          <label><input id="t-tor" type="radio" name="transport" value="tor"> Tor — requires local <code>tor</code> and <code>torsocks</code></label>
+        </fieldset>
+        <label class="caravan-consent"><input id="caravan-consent" type="checkbox"> I have authority to use this machine and accept the CARAVAN host policy.</label>
+        <p class="small">Your downloaded launcher contains the exact provisions and route you selected. It does not execute automatically: you review the downloaded file and run it on your Linux machine.</p>
+        <p class="need-mission">Choose at least one FCF-approved provision first.</p>
+        <div class="after-consent">
+          <p>
+            <a class="caravan-join-button caravan-join-action" data-key="source-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-https.sh" download>Download source HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-https.sh" download>Download releases HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="semantic-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-semantic-https.sh" download>Download semantic HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-recovery-https.sh" download>Download recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-https.sh" download>Download source+releases HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-semantic-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-semantic-https.sh" download>Download source+semantic HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-recovery-https.sh" download>Download source+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-semantic-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-semantic-https.sh" download>Download releases+semantic HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-recovery-https.sh" download>Download releases+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="semantic-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-semantic-recovery-https.sh" download>Download semantic+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-semantic-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-semantic-https.sh" download>Download source+releases+semantic HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-recovery-https.sh" download>Download source+releases+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-semantic-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-semantic-recovery-https.sh" download>Download source+semantic+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-semantic-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-semantic-recovery-https.sh" download>Download releases+semantic+recovery HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-semantic-recovery-https" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-semantic-recovery-https.sh" download>Download all-provisions HTTPS launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-tor.sh" download>Download source Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-tor.sh" download>Download releases Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="semantic-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-semantic-tor.sh" download>Download semantic Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-recovery-tor.sh" download>Download recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-tor.sh" download>Download source+releases Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-semantic-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-semantic-tor.sh" download>Download source+semantic Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-recovery-tor.sh" download>Download source+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-semantic-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-semantic-tor.sh" download>Download releases+semantic Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-recovery-tor.sh" download>Download releases+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="semantic-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-semantic-recovery-tor.sh" download>Download semantic+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-semantic-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-semantic-tor.sh" download>Download source+releases+semantic Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-recovery-tor.sh" download>Download source+releases+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-semantic-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-semantic-recovery-tor.sh" download>Download source+semantic+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="releases-semantic-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-releases-semantic-recovery-tor.sh" download>Download releases+semantic+recovery Tor launcher</a>
+            <a class="caravan-join-button caravan-join-action" data-key="source-releases-semantic-recovery-tor" href="pub/caravan/launchers/fcf-caravan-join-1.0.8-source-releases-semantic-recovery-tor.sh" download>Download all-provisions Tor launcher</a>
+          </p>
+          <div class="launcher-card" data-key="source-releases-https">
+            <p>Default choice: source and releases over HTTPS. After download:</p>
+            <pre><code>bash ~/Downloads/fcf-caravan-join-1.0.8-source-releases-https.sh</code></pre>
+          </div>
+          <p class="small">Each launcher downloads <code>fcf-caravan-join-1.0.8</code>, verifies <code>FCF-CARAVAN-JOIN.pub</code>, checks <code>EXPECTED_HELPER_SHA256</code> for <code>fcf-signify-x86_64-glibc</code>, and runs <code>signify -V -q</code> before <code>join-caravan --missions "$MISSIONS" --transport "$TRANSPORT"</code>.</p>
+        </div>
+      </section>
+
+      <h2>Signed release assets</h2>
+      <p>You may also fetch the official signed join release and run it yourself:</p>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.8/fcf-caravan-join-1.0.8.tar.gz">fcf-caravan-join-1.0.8.tar.gz</a></li>
+        <li><a href="https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.8/SHA256SUMS">SHA256SUMS</a> and <a href="https://github.com/chasebryan/centl/releases/download/fcf-caravan-join-1.0.8/SHA256SUMS.sig">SHA256SUMS.sig</a></li>
+        <li><a href="pub/centl/caravan/FCF-CARAVAN-JOIN-2026.pub">FCF join public key</a></li>
+      </ul>
+      <pre><code>tar -xzf fcf-caravan-join-1.0.8.tar.gz
+./fcf-caravan-join-1.0.8/join-caravan --missions source,releases --transport https</code></pre>
+      <p>After execution, the welcome message reports everything installed, the provisions accepted, your live Caravan number, funding links, and other ways to help. Funding is optional: <a href="funding.html">support FCF</a>, preserve source and releases, test the carrier, improve documentation, review policy, or report bugs.</p>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · CARAVAN participation is voluntary.</footer>
+</div>
+</body>
+</html>

@@ -6,9 +6,10 @@ Standard: Free for science.
 /* SITE */
 Language: English
 Doctype: HTML5
-Standards: HTML, CSS. No required JavaScript.
-Last update: 2026-08-14
+Standards: HTML, CSS. No JavaScript is served.
+Last update: 2026-08-15
 Software: CENTL v0.15.0 Al-Nur Oasis release
+Research: https://freecomputation.org/research.html
 Source: https://github.com/chasebryan/centl
 
 /* MACHINES */

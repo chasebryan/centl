@@ -41,7 +41,9 @@
     "llms-full.txt": "https://freecomputation.org/llms-full.txt",
     "html": "https://freecomputation.org/ai.html",
     "proposal": "https://freecomputation.org/proposal.html",
-    "proposal_json": "https://freecomputation.org/pub/proposal.json"
+    "proposal_json": "https://freecomputation.org/pub/proposal.json",
+    "research": "https://freecomputation.org/research.html",
+    "documentation": "https://freecomputation.org/docs.html"
   },
   "source": "https://github.com/chasebryan/centl",
   "install": "https://raw.githubusercontent.com/chasebryan/centl/oasis/install"

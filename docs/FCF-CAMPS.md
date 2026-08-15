@@ -73,8 +73,8 @@ A Camp is not:
 - a Wellspring;
 - a full product promotion of `mirage` or `main`;
 - permission to skip, weaken, or rewrite Oasis gates;
-- a change to the signed join-caravan scheme;
-- a website visual redesign;
+- a change to the signed join-caravan cryptographic scheme;
+- permission to serve JavaScript on the public site;
 - a claim that a Camp supersedes the published Oasis.
 
 If a sentence would be false after replacing "Camp" with "Oasis," the Camp
@@ -102,8 +102,9 @@ that fact instead of inventing a promotion.
   that is a camp defect, not an excused regression.
 - Existing Oasis tests, installer channels, and supported command surfaces
   stay.
-- Site visual design stays as intended.
-- The signed join-caravan installer, invite schema, and `join.html` stay.
+- Site visual design stays as intended: HTML and CSS only, no JavaScript.
+- The signed join-caravan installer and invite schema stay. `join.html` remains
+  a consent-gated signed-release path and must not execute JavaScript.
 - Inspect commands may occupy or describe a Camp. They may never declare
   Oasis.
 

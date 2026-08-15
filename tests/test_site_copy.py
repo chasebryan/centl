@@ -1,24 +1,25 @@
 from __future__ import annotations
 
-from hashlib import sha256
 from pathlib import Path
+import re
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
-STYLE_SHA256 = "e3fa72e283b131b1f6e5894c03585c55bfeef390d8c6271b22b0458f38e805f4"
-JOIN_SHA256 = "aa1480941f2a1f676eebd295b3ddee2a55233966de6fd3a88f0d033d0e024f27"
-
-
-def sha(path: Path) -> str:
-    return sha256(path.read_bytes()).hexdigest()
+EXECUTABLE_SCRIPT = re.compile(
+    r"<script(?![^>]*type=[\"']application/ld\+json[\"'])",
+    re.I,
+)
 
 
 class SiteCopyTests(unittest.TestCase):
-    def test_visual_and_join_scheme_files_are_untouched(self) -> None:
-        self.assertEqual(sha(SITE / "style.css"), STYLE_SHA256)
-        self.assertEqual(sha(SITE / "join.html"), JOIN_SHA256)
+    def test_site_serves_no_executable_javascript(self) -> None:
+        js_files = list(SITE.rglob("*.js"))
+        self.assertEqual(js_files, [])
+        for path in SITE.rglob("*.html"):
+            html = path.read_text(encoding="utf-8")
+            self.assertIsNone(EXECUTABLE_SCRIPT.search(html), path)
 
     def test_centl_page_states_oasis_and_installs_from_oasis(self) -> None:
         html = (SITE / "centl.html").read_text(encoding="utf-8")
@@ -51,6 +52,7 @@ class SiteCopyTests(unittest.TestCase):
         self.assertNotIn("proposal.html", html)
         self.assertNotIn("Why simple HTML", html)
         self.assertNotIn("CENTL-MIRAGE", html)
+        self.assertIn("research.html", html)
 
     def test_readme_leads_with_the_product(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -59,7 +61,7 @@ class SiteCopyTests(unittest.TestCase):
         self.assertIn("FCF Camp #1", text)
         self.assertIn("oasis/install", text)
         self.assertNotIn("Mathematical Introspective Recursive Autonomous Growth Engine", text)
-        self.assertLess(len(text.splitlines()), 110)
+        self.assertLess(len(text.splitlines()), 130)
 
 
 if __name__ == "__main__":

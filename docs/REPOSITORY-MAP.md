@@ -16,6 +16,7 @@ Key surfaces include:
 
 - `README.md` — public project entry point: install and the three Oasis commands;
 - `docs/README.md` — start-here index for the rest of the manuals;
+- `site/` — public HTML/CSS site, including the hosted research library;
 - `CHANGELOG.md` — chronological version history;
 - `LICENSE`, `LICENSING.md`, `THIRD_PARTY_NOTICES.md`, `TRADEMARKS.md` — licensing and identity policy;
 - `SECURITY.md` — supported security boundary, threat model, and reporting policy;
@@ -67,6 +68,9 @@ and operational helpers that are not themselves the primary shipped implementati
 A script that becomes a required runtime component should be promoted into an
 appropriate implementation/package surface rather than remaining an accidental
 helper.
+
+`scripts/publish-site-library.py` turns public research notes and front-facing
+manuals into the static HTML tree under `site/library/` and `site/manuals/`.
 
 Release-specific repair scripts should be removed or archived once they no longer
 serve a supported release path.

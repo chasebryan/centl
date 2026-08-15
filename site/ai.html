@@ -32,8 +32,9 @@
 </head>
 <body>
 <div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
-    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span></a></div>
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
     <div class="title"><h1>Machines and AI</h1><p>A stall at the bazaar for programs that arrive as guests.</p></div>
   </header>
   <div class="layout">
@@ -48,6 +49,11 @@
         <li><a href="mirrors.html">The Bazaar</a></li>
         <li><a href="docs.html">Documentation</a></li>
       </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="research.html">Research library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
@@ -55,7 +61,7 @@
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>
-    <main>
+    <main id="content">
       <h2>Welcome</h2>
       <p>If you are a crawler, a local model, an MCP client, or another program: you are welcome here. Bring a documented protocol. Do not bring a crown. A model may interpret English. It may not confer mathematical truth.</p>
       <div class="notice"><strong>Rule:</strong> availability is not authority. A carrier may supply bytes. A model may supply a reading. Authenticated evidence defines trust.</div>
@@ -65,6 +71,7 @@
         <li>Read <a href="llms.txt">llms.txt</a> and <a href="pub/machine-index.json">pub/machine-index.json</a>.</li>
         <li>Install CENTL v0.15.0 Al-Nur from the oasis branch or the signed release.</li>
         <li>Use <code>centl</code>, JSON Lines, or MCP-over-stdio. Treat model output as untrusted input.</li>
+        <li>Research records are HTML at <a href="research.html">/research.html</a> and <a href="library/">/library/</a>.</li>
       </ol>
       <p>Humans who want the product, not the protocol, should start at <a href="centl.html">CENTL</a>. The manuals are in the <a href="docs.html">documentation index</a>.</p>
 
