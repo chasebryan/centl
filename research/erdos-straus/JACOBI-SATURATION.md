@@ -90,9 +90,13 @@ k\text{ is a power of }2.
 Hence write
 
 \[
-k=2^r,
-\qquad
-n=r+2.
+k=2^r.
+\]
+
+The case `r=0`, namely `k=1`, is exceptional because the two trap families coincide modulo `3`; it is checked directly below. Assume first that `r>=1`, and put
+
+\[
+n=r+2\ge3.
 \]
 
 Then
@@ -104,14 +108,18 @@ m_k=2^n-1.
 The dyadic trap theorem gives
 
 \[
-T_k=-\langle2\rangle,
-\qquad
+T_k=-\langle2\rangle
+\]
+
+and
+
+\[
 |T_k|=n,
 \]
 
 because the order of `2 mod (2^n-1)` is exactly `n`.
 
-If the layer is Jacobi-saturated, the Jacobi-negative half has size `phi(m_k)/2`, so
+If the layer is Jacobi-saturated, the Jacobi-negative half has size `phi(m_k)/2`. Therefore, for `r>=1`, saturation forces
 
 \[
 \boxed{
@@ -119,7 +127,7 @@ If the layer is Jacobi-saturated, the Jacobi-negative half has size `phi(m_k)/2`
 }
 \]
 
-We now show this can occur only for `n=2,3,4`.
+We show this can occur only for `n=3,4`.
 
 ### An elementary phi bound
 
@@ -151,7 +159,7 @@ For `n>=9`,
 2n.
 \]
 
-The strict inequality holds at `n=9` and remains true thereafter because the left scale grows exponentially while `2n` grows linearly.
+The strict inequality holds at `n=9` and remains true thereafter.
 
 The remaining values `5<=n<=8` are explicit:
 
@@ -164,23 +172,17 @@ n=8:  2^n-1=255, phi=128 >16
 
 Thus `phi(2^n-1)=2n` is impossible for every `n>=5`.
 
-For `n=2,3,4`, direct evaluation gives:
+For the remaining dyadic depths:
 
 ```text
-n=2: m=3,  phi=2 = 2n? 2 = 4 is false as written if n=2
+k=1 (r=0): |T_1|=1, phi(3)/2=1
+k=2 (r=1, n=3): |T_2|=3, phi(7)/2=3
+k=4 (r=2, n=4): |T_4|=4, phi(15)/2=4
 ```
 
-At this point we must remember that `|T_k|=n` in the dyadic theorem uses `n=r+2`, while Jacobi saturation requires `|T_k|=phi(m)/2`. The actual checks are:
+Direct enumeration shows that each of these trap sets is exactly the Jacobi-negative unit set.
 
-```text
-k=1 (r=0, n=2): |T|=1, phi(3)/2=1
-k=2 (r=1, n=3): |T|=3, phi(7)/2=3
-k=4 (r=2, n=4): |T|=4, phi(15)/2=4
-```
-
-The apparent `|T|=n` formula has the exceptional `k=1` overlap where the two Type A/B residues coincide. For every `r>=1`, the dyadic theorem gives `|T|=r+2=n`; `k=1` is checked separately.
-
-For `r>=1`, saturation therefore requires `phi(2^n-1)=2n`, which holds at `n=3,4` and fails for `n>=5`. Together with the direct `k=1` check, the only saturated depths are
+Therefore the only Jacobi-saturated depths are
 
 \[
 \boxed{1,2,4.}
