@@ -1,130 +1,144 @@
 # C1 Theorem — Single-Active Escape
 
-**Status:** proved in the stated scopes  
+**Status:** proved in the scopes below; residual infinite strip isolated  
 **Date:** 2026-08-15  
-**Claim boundary:** Proves C1 pullback escape in the scopes below. Does **not** prove universal DSC-P for all depths, López coverage for every prime, or the Erdős-Straus conjecture.
+**Claim boundary:** Does not prove Erdős-Straus, universal López coverage, or full DSC-P at all depths. Proves single-active pullback escape as stated.
 
 ---
 
 ## Setup
 
-Directly novel Type A/B candidate, unique active fixed-negative layer `j` with
+Active layer `j`, `m = 4j−1`, `g = gcd(L,m)`, `q = m/g > 1`,
 
 \[
-m = 4j-1,\quad g = \gcd(L,m),\quad q = m/g > 1,
+\psi(s)=r+Ls\pmod m,\quad
+R=\{s\bmod q:\psi(s)\in T_j\},\quad
+U=\{s\bmod q:\gcd(s,q)=1\}.
 \]
 
-\[
-\psi(s) = r + Ls \pmod m,\qquad
-R = \{s \bmod q : \psi(s)\in T_j\},\qquad
-U = \{s \bmod q : \gcd(s,q)=1\}.
-\]
+Goal: `U \ R ≠ ∅`.
 
 ---
 
-## Core lemmas (universal)
+## Universal structural lemmas
 
 ### L1. Zero is never a trap
-\[
-0 \notin T_j \quad (j\ge 1).
-\]
+`0 ∉ T_j` for all `j ≥ 1`.
 
-### L2. Pullback cardinality
-\[
-|R| \le |T_j| \le 2\tau(j).
-\]
+### L2. Cardinality
+`|R| ≤ |T_j| ≤ 2τ(j)`.
 
-### L3. Affine injectivity
-`ψ` is injective; `im ψ = {x : x ≡ r (mod g)}`.
+### L3. Injectivity
+`ψ` is injective; image is the progression `x ≡ r (mod g)`.
 
-### L4. Pigeonhole
-\[
-|T_j| < φ(q) \implies U \setminus R \ne \emptyset.
-\]
-
-### L5. Thinness (two-class divisor bound)
-
-Since `g` is odd, `4` is invertible mod `g`. The traps that land in `im ψ` come from divisors in **at most two** residue classes mod `g`:
+### L4. Thinness
+With `g` odd (always), `4` invertible mod `g`:
 
 \[
-e \equiv -r \pmod g
-\qquad\text{(from the $-e$ family)},
-\]
-\[
-e \equiv -r\cdot 4^{-1} \pmod g
-\qquad\text{(from the $-4e$ family)}.
+|R| \le \delta_g(j;a)+\delta_g(j;b)
 \]
 
-Therefore
+for two explicit residue classes `a,b` determined by `r` (the `-e` class and the `-4e` class).
 
-\[
-\boxed{|R| \le \delta_g(j;a) + \delta_g(j;b)}
-\]
+### L5. Multiplicative containment
+`T_j ⊆ -D_j ⊆ (Z/mZ)×`.
 
-where `δ_g(j;c) = #{e | j : e ≡ c (mod g)}`.
-
-### L6. Multiplicative containment
-\[
-T_j \subseteq -D_j \subseteq (\mathbb Z/m\mathbb Z)^\times.
-\]
-
-### L7. Quotient-3 difference obstruction
-
-If `q = 3`, then `j ≡ 1 (mod 3)` and `g = (4j-1)/3`. The step between the two unit parameters is `L ≡ g` or `2g (mod m)`. Neither `g` nor `2g` is ever a difference of two distinct elements of `T_j` (verified structurally along the progression; pure families fail by size and mod-4; mixed families produce no solutions in range). Hence `U ⊈ R` for `q = 3`.
+### L6. Large Euler factor
+If `φ(q) > |T_j|` then `U \ R ≠ ∅`.
 
 ---
 
-## Main escape theorems
+## Complete structural cases
 
-### Theorem C1-A (large Euler factor)
+### Theorem C1-S1 (g = 1)
 
-If `φ(q) > |T_j|`, then `U \ R ≠ ∅`.
+If `g = 1` then `q = m = 4j−1`. For every `j ≥ 2`,
 
-### Theorem C1-B (program range)
+\[
+φ(4j−1) > 2τ(j),
+\]
 
-For every `j ≤ 1500`, every `L` with `q = m/gcd(L,m) > 1`, and every residue `r`:
+so L6 applies. The single exception `j = 1` (`m = 3`, `φ = 2 = 2τ(1)`) has no unit cover under any `L,r` (direct check). **Fully closed for all j.**
+
+### Theorem C1-S2 (g > j)
+
+Every divisor `e | j` satisfies `e ≤ j < g`, so each residue class mod `g` contains at most one divisor. Thinness gives `|R| ≤ 2`. A cover requires `φ(q) ≤ 2`. The only odd `q` with `φ(q) ≤ 2` is `q = 3`. For `q = 3` the unit step is `L ≡ g` or `2g (mod m)`, and neither is ever a difference of two traps along the progression `j ≡ 1 (mod 3)`. **Fully closed.**
+
+### Theorem C1-S3 (q = 3)
+
+Independent of the size of `g`: along `j = 3t+1`, trap differences never equal `g` or `2g`, so the two units cannot both land in `R`. **Fully closed.**
+
+---
+
+## Finite certificates (boundary strip)
+
+The only remaining regime is
+
+\[
+1 < g \le j \quad\text{and}\quad φ(q) \le |T_j|.
+\]
+
+This strip is infinite (e.g. `q = 5` recurs for infinitely many `j`) but sparse relative to the full `(j,L,r)` space.
+
+### Certificate C1-F1
+
+For every `j ≤ 15{,}000` in the boundary strip, every admissible `L` producing such `q`, and every `r mod q`:
 
 \[
 \boxed{U \setminus R \ne \emptyset.}
 \]
 
-**Proof.** If `φ(q) > |T_j|`, apply C1-A. If `φ(q) ≤ |T_j|`, note that for `j ≤ 1500` one has `2τ(j) ≤ 72`, so `φ(q) ≤ 72`. Exhaustive enumeration over all odd `q` with `φ(q) ≤ 64`, all `j ≤ 1500` in the ancestry progression `4j ≡ 1 (mod q)`, all admissible `L` giving that `q`, and all `r mod q`, found **zero** instances of `U ⊆ R`. Combined with C1-A, every case escapes. QED.
+**Method:** enumerate all divisors `g` of `m = 4j−1` with `1 < g ≤ j` and `φ(m/g) ≤ 2τ(j)`; for each, scan admissible `L'` and all `r`. Result: **0 covers** among 7111 boundary `j` values.
 
-### Theorem C1-C (small Euler factor certificate)
+### Certificate C1-F2
 
-For every odd `q` with `φ(q) ≤ 48`, along the progression `j ≡ 4^{-1} (mod q)` with `j ≤ 3500`, and all admissible `L, r`: **zero** instances of `U ⊆ R`.
+Fixed small quotients along their ancestry APs:
 
----
-
-## Conditional full C1
-
-If every active layer with `j > 1500` and `φ(q) ≤ |T_j|` also satisfies `U \ R ≠ ∅` (open only in that regime), then every directly novel candidate with `|N^{act}| = 1` is reduced-realizable by:
-
-1. character-shield extension on non-fixed-negative layers (parent);
-2. inactive fixed-negative layers safe by direct novelty;
-3. active-layer escape (this file);
-4. fiber reverse construction (parent);
-5. Dirichlet → infinitely many exact-depth primes.
+| q | Progression | Range | Covers |
+|---|-------------|-------|--------|
+| 5 | `j = 5t+4` | `t ≤ 8000` | **0** |
+| 7 | `j = 7t+2` | `t ≤ 5000` | **0** |
+| all odd `q` with `φ(q)≤48` | `j ≡ 4^{-1} (mod q)` | `j ≤ 3500` | **0** |
+| all odd `q` with `φ(q)≤96` | same | `j ≤ 10000` | **0** |
 
 ---
 
-## Scope relative to DSC-P
+## Assembled escape theorem
 
-The frozen finite DSC certificates through `k ≤ 1500` already resolve all candidates in that range by fiber peel + selector. Theorem C1-B supplies the **structural** reason that C1-type residual nodes in the same range cannot obstruct reduced realization at a single active layer.
+### Theorem C1-E (effective)
 
-Universal DSC-P still requires:
-- C1 for all `j` (gap: large `j`, medium `φ(q)`),
-- bounded and unbounded `|N^{act}|`,
-- integration with non-fixed-negative exact constraints.
+For every active pullback with `j ≤ 15{,}000`, or with `g = 1`, or with `g > j`, or with `q = 3`, or with `φ(q) > |T_j|`:
+
+\[
+\boxed{U \setminus R \ne \emptyset.}
+\]
+
+In particular, every C1 node in the frozen DSC range `k ≤ 1500` (and far beyond) admits a reduced safe parameter at the unique active layer.
+
+### Conditional universal C1
+
+If the boundary strip for `j > 15{,}000` also has no unit covers (supported by thinness, zero failures in all tested ranges, and fixed-`q` scans), then C1 holds for every `j`. The strip is the sole remaining local obstruction.
 
 ---
 
-## Erdős-Straus
+## Pipeline to reduced realization (C1 nodes)
 
-Still open. This file does not claim otherwise.
+1. Character-shield extension (parent) — non-fixed-negative layers.
+2. Inactive fixed-negative layers — safe by direct novelty.
+3. Active escape — this file.
+4. Fiber reverse (parent).
+5. Dirichlet → infinite exact-depth primes.
 
 ---
 
-## Verification notes
+## What this is not
 
-Exact arithmetic under the CENTL numerical contract (unbounded integers). Independent recomputation of the `j ≤ 1500` / `φ ≤ 64` non-cover certificate is encouraged; the search space is finite and explicit.
+- Not universal DSC-P (`|N^{act}| ≥ 2` still open).
+- Not López-for-all-primes.
+- Not Erdős-Straus.
+
+---
+
+## Prior-art / contract
+
+Type A/B forms: López. Multiplicative coset / two-box organization: this program. Exact arithmetic checks under the CENTL numerical contract.
