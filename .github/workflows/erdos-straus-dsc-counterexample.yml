@@ -1,0 +1,65 @@
+name: CENTL Erdős-Straus DSC counterexample
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/verify_dsc_counterexample.py'
+      - 'research/erdos-straus/DSC-COUNTEREXAMPLE.md'
+      - 'research/erdos-straus/DIRECT-SHADOW-SMOOTHNESS.md'
+      - '.github/workflows/erdos-straus-dsc-counterexample.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify directly-novel union-shadow counterexample
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run exact verifier
+        run: python3 research/erdos-straus/verify_dsc_counterexample.py
+
+      - name: Freeze certificate
+        run: |
+          mkdir -p dsc-counterexample-output
+          mv dsc-counterexample.json dsc-counterexample-output/
+          cat > dsc-counterexample-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          EOF
+          cd dsc-counterexample-output
+          sha256sum dsc-counterexample.json provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          x=json.load(open('dsc-counterexample-output/dsc-counterexample.json'))
+          print('# DSC counterexample verified')
+          print()
+          print(f"Target k: `{x['target']['k']}`")
+          print(f"Smooth moduli: `{x['smooth_numbers_below_target']}`")
+          print(f"Type A/B moduli checked: `{x['type_ab_smooth_moduli_below_target']}`")
+          for row in x['hard_siblings']:
+              print(f"- h={row['h']}: {row['verdict']}; classes={row['covered_parameter_classes_mod_3']}; direct shadows={len(row['direct_shadows'])}")
+          print()
+          print('Universal DSC-0 and DSC-P are falsified by this construction. Erdős-Straus is not decided by this result.')
+          PY
+
+      - name: Upload certificate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-dsc-counterexample-${{ github.sha }}
+          path: dsc-counterexample-output/
+          if-no-files-found: error
+          retention-days: 90
