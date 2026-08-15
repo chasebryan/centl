@@ -62,8 +62,11 @@ jobs:
               assert obj['t'] == 61_162_019, obj
               assert obj['r'] == 41_284_877_761, obj
               assert obj['L'] == 51_376_737_720, obj
-              assert obj['exact_cardinality_candidates'] == 297, obj
-              assert len(obj['direct_shadows']) == 0 if isinstance(obj['direct_shadows'], list) else obj['direct_shadows'] == 0
+
+          assert p['exact_direct_shadow_candidates'] == 297, p
+          assert v['exact_cardinality_candidates'] == 297, v
+          assert p['direct_shadows'] == 0, p
+          assert v['direct_shadows'] == [], v
 
           assert p['R25'] == [1]
           assert p['R70'] == [2]
@@ -71,6 +74,7 @@ jobs:
           assert v['cover'] == {'25': [1], '70': [2], '187': [0]}
           assert p['max_tau_before_k'] == 504
           assert p['max_tau_at'] == 14_414_400
+          assert v['coarse_q_bound'] == 15_641
           assert v['coarse_candidates'] == 111_057
           PY
 
