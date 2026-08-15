@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- ES+ records the letter equation: \(\Lambda_K\) is the complement of
+  the inverse signed-box cover. The note is
+  `research/erdos-straus/ES-plus/LETTER-EQUATION.md`. Mathematics only.
 - **cbap.kernel** (CB-Advanced-Processing) is a C letter-targeting
   engine: channels A/B/C acquire, lock, and track Mordell-hard primes
   on three CRT spectra; channel D sets LETTER true or drops the prime.

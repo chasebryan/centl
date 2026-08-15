@@ -96,32 +96,19 @@ The public research program is currently focused on **Erdős–Straus Type A/B w
 
 ```sh
 make -C research/erdos-straus/cbap.kernel
-./centl es cbap              # start at 0, later resume
-./centl es cbap go --random  # first session at a random n; later resume
-./centl es cbap letters      # journal of TARGET COLLECTED
+./centl es cbap
+./centl es cbap go --random
+./centl es cbap letters
 ```
 
-Letters are written at once to `research/erdos-straus/cbap.kernel/letters/`.
+### ES+
 
-The older hunt still exists if you want GOOD/GREAT as well:
+The letter spectrum is the complement of an inversely generated signed-box cover. Do not test primes one by one. For each admissible shift \(k\), generate every Type I / Type II hit from \(C\), mark \(p=4C-k\), and keep only the unmarked Mordell-hard primes. That set is \(\Lambda_K\).
 
-```sh
-./centl es go --letters-only --random   # start a random letters-only hunt
-./centl es go                           # resume the default hunt
-./centl es go --from 0                  # start another hunt at the origin
-./centl es go --all                     # file GOOD, GREAT, and LETTER
-./centl es hunts                        # list hunts on this machine
-```
+The equation: [`research/erdos-straus/ES-plus/LETTER-EQUATION.md`](research/erdos-straus/ES-plus/LETTER-EQUATION.md). Mathematics only. Not a proof of Erdős–Straus.
 
 A finished hunt is not a proof of the conjecture.  
 Public library (static HTML, no JavaScript): [freecomputation.org/research.html](https://freecomputation.org/research.html)
-
-| Resource | What it is |
-| --- | --- |
-| [CBAP.kernel](research/erdos-straus/cbap.kernel/README.md) | Letter targeting, C |
-| [Research library](https://freecomputation.org/research.html) | Hosted papers, certificates, and Wellspring candidates |
-| [Erdős–Straus program](https://freecomputation.org/research-erdos-straus.html) | Program overview |
-| [Hunt record](research/erdos-straus/ES-HUNT.md) | Operator-facing hunt (bb + CC) |
 
 ---
 
