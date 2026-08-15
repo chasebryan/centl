@@ -60,7 +60,7 @@ All finite DSC certificates through `k<=1500` remain valid finite statements.
 | Coprime FAB divisor criterion | `FAB-COPRIME-DIVISOR-CRITERION.md` |
 | Fixed-k signed divisor box / Kneser defect | `FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md`, `FAB-KNESER-DIVISOR-DEFECT.md` |
 | Normalized Type-II target in the same signed box | `FAB-TYPE-II-SIGNED-DIVISOR.md` |
-| Two-target Kneser collapse | `FAB-TWO-TARGET-KNESER.md` |
+| Symmetric combined Kneser collapse | `FAB-TWO-TARGET-KNESER.md` |
 | Exact first combined defect | `FAB-INDEX6-COMBINED-DEFECT.md` |
 | Finite candidatewise DSC through k<=1500 | parent certificates |
 
@@ -68,7 +68,7 @@ All finite DSC certificates through `k<=1500` remain valid finite statements.
 
 Universal López Type A/B coverage remains an important and experimentally strong conjecture, but it is **stronger than what is logically required to prove Erdős-Straus**.
 
-The 2026 Bello-Hernández--Benito--Fernández divisor parametrization is complete for Erdős--Straus decompositions after the standard factor-4 scaling. The post-DSC direct route should therefore use the complete FAB/Type-I/Type-II geometry rather than require every prime to pass through the López Type A/B subfamily.
+The 2026 Bello-Hernández--Benito--Fernández divisor parametrization is complete for Erdős-Straus decompositions after the standard factor-4 scaling. The post-DSC direct route should therefore use the complete FAB / standard Type-I/II geometry rather than require every prime to pass through the López Type A/B subfamily.
 
 López-all-primes remains a parallel theorem target, not a prerequisite for the shortest direct ES route.
 
@@ -98,7 +98,7 @@ and define the signed divisor box
 \right\}.
 \]
 
-The existing strong FAB / normalized Type-I lane uses the target
+The strong FAB / normalized Type-I lane uses
 
 \[
 \boxed{\tau_I=-p^{-1}\pmod k.}
@@ -121,7 +121,17 @@ Thus
 p\text{ is solved}.}
 \]
 
-This is the present direct-ES collision point.
+The box is inversion-symmetric. Therefore a Type-I miss at `-p^{-1}` automatically also misses its inverse
+
+\[
+\boxed{-p.}
+\]
+
+So a genuine combined failure excludes the three natural residues
+
+\[
+\boxed{-p^{-1},\quad -p,\quad -1.}
+\]
 
 ## External-nonresidue Kneser collapse
 
@@ -143,7 +153,7 @@ H=\operatorname{Stab}(\mathcal R_q((p+q)/4)),
 n=[(\mathbb Z/q\mathbb Z)^\times:H].
 \]
 
-If both exact targets are missed, then `FAB-TWO-TARGET-KNESER.md` proves:
+If both exact solution targets are missed, then `FAB-TWO-TARGET-KNESER.md` proves:
 
 1. `n` cannot be odd, because every odd-index stabilizer contains `-1`, which is the Type-II target;
 2. `n` cannot be `2`, because the Type-I target is a quadratic residue and lies in the index-two stabilizer;
@@ -151,15 +161,15 @@ If both exact targets are missed, then `FAB-TWO-TARGET-KNESER.md` proves:
    \[
    \boxed{n\ge6\text{ and }n\text{ is even};}
    \]
-4. the two missed targets occupy distinct `H`-cosets;
-5. the Kneser budget strengthens from the one-target bound `n-2` to
+4. the three excluded residues `-p^{-1}`, `-p`, `-1` occupy **three distinct** `H`-cosets;
+5. inversion symmetry therefore sharpens the Kneser budget from the one-target bound `n-2` all the way to
    \[
    \boxed{
    \sum_i
    \left(
    \min(2e_i+1,\operatorname{ord}_{G/H}(r_iH))-1
    \right)
-   \le n-3.
+   \le n-4.
    }
    \]
 
@@ -172,7 +182,13 @@ Consequently the former cubic-first hierarchy is no longer the direct ES wall:
 
 ## First surviving combined defect: index six
 
-`FAB-INDEX6-COMBINED-DEFECT.md` classifies the first possible case exactly.
+At index `6`, the symmetric budget is only
+
+\[
+\boxed{\sum_i(s_i-1)\le2.}
+\]
+
+`FAB-INDEX6-COMBINED-DEFECT.md` classifies this case exactly.
 
 If both targets miss and the stabilizer index is `6`, then
 
@@ -198,10 +214,13 @@ with the following rigid structure:
 6. shifted-nonresidue transfer makes `r` the **unique** external quadratic-nonresidue prime factor relative to `p`;
 7. therefore the external-nonresidue factor graph has a forced edge
    \[
-   \boxed{q\to r.}
+   \boxed{q\to r;}
    \]
+8. the quotient box occupies exactly the classes `0,±1`, while the three natural excluded residues occupy exactly the complementary classes `±2,3`.
 
 The first combined obstruction is therefore a **single primitive sextic defect**, not a general index-six cloud.
+
+A further local filter follows immediately: none of `2,3,5,7` can be the exceptional factor for a Mordell-hard `p`. Hence any one of those primes dividing `(p+q)/4` must itself be a sixth-power residue modulo `q`. In particular, if `q≡7 mod8`, then `(p+q)/4` is even and index-six failure forces `2` to be a sixth power modulo `q`.
 
 ## Research split
 
@@ -210,12 +229,13 @@ The first combined obstruction is therefore a **single primitive sextic defect**
 The current shortest route is now:
 
 1. work in the complete FAB / standard Type-I/II framework;
-2. use the two targets in the same fixed-shift signed divisor box;
+2. use the two solution targets in the same fixed-shift signed divisor box and the inverse Type-I orientation;
 3. choose external nonresidue prime shifts to kill the quadratic obstruction;
-4. exploit the fact that every genuine combined failure has even stabilizer index at least `6`;
+4. exploit the fact that every genuine combined failure has even stabilizer index at least `6` and symmetric budget at most `n-4`;
 5. attack the exact index-six primitive sextic defect and its forced external-nonresidue successor;
-6. only if index six survives, move to the next even quotient under the stronger `n-3` budget;
-7. once every prime is covered, apply the standard divisor/scaling reduction for composite `n`.
+6. handle separately the forced-successor case `r≡1 mod4`, where the natural next admissible shift is composite (`3r`, or another `3 mod4` hard-residue multiplier times `r`);
+7. only if index six survives this transfer, move to the next even quotient under the same stronger budget;
+8. once every prime is covered, apply the standard divisor/scaling reduction for composite `n`.
 
 The next theorem target is:
 
@@ -250,4 +270,4 @@ This remains mathematically valuable but is no longer the shortest ES route.
 
 ## One-line status
 
-The direct proof search has moved past DSC and past the one-target cubic Kneser wall: **Type I and Type II are now coupled in one signed divisor box, every odd-index defect collapses, and the first surviving all-prime obstruction is a forced single-prime index-six sextic defect.**
+The direct proof search has moved past DSC and past the one-target cubic Kneser wall: **Type I and Type II are coupled in one signed divisor box, inversion exposes three distinct excluded target cosets, every odd-index defect collapses, and the first surviving all-prime obstruction is a forced single-prime index-six sextic defect with budget only two.**
