@@ -5,64 +5,90 @@
 **Project:** Free Computation Foundation / CENTL  
 **Claim boundary:** unrestricted Type A/B trap-set shadowing only. Does not prove universal DSC-P, López coverage, or Erdős-Straus.
 
----
+Read with:
+
+- [ANCESTRY-DIVISOR-CHILD-THEOREM.md](ANCESTRY-DIVISOR-CHILD-THEOREM.md)
+- [ANCESTRY-ASYMPTOTIC-SKELETON.md](ANCESTRY-ASYMPTOTIC-SKELETON.md)
+- [QUOTIENT-21-29-RIGIDITY.md](QUOTIENT-21-29-RIGIDITY.md)
 
 ## Theorem
 
-Let `K = 29j - 7` and `m = 4j - 1`. Then
+Let
+
+\[
+K=29j-7,
+\qquad
+m=4j-1.
+\]
+
+Then
 
 \[
 \boxed{
-T_K \bmod m \subseteq T_j
+T_K\bmod m\subseteq T_j
 \iff
-K \text{ is prime or } K = 7p \text{ with } p \text{ prime}.
+K\text{ is prime or }K=7p\text{ with }p\text{ prime}.
 }
 \]
 
----
+In the second alternative necessarily `7|j`.
 
-## Direct implications
+## Direct implication
 
-- **Prime child:** parent prime-child theorem (`q = 29 ≡ 1 mod 4`).
-- **K = 7p:** write `j = 7d`. Then `p = 29d - 1` and `m = 28d - 1`, so `p ≡ d = j/7 mod m`. Divisors `{1,7,p,K} → {1,7,j/7,j}`.
+This is the divisor-child theorem with shift `s=7`.
 
----
+The only divisors of `7` are `1` and `7`, giving prime children and `7p` children when `7|j`.
 
-## Converse
+## Converse for j >= 8
 
-`gcd(j,K) = gcd(j,7)`.
+Because `s=7` is odd and `j>=s+1`, the odd-shift asymptotic skeleton applies.
 
-### 7 ∤ j
+Hence every full shadow is either:
 
-`gcd = 1`. If `K` composite, let `ℓ` be least prime factor.
+1. `7`-smooth, so `K=7^u`; or
+2. prime or `7p`.
 
-- For all `j ≥ 1` with composite `K ≤ 10^6` one has `ℓ < m` (verified computationally as a finite gate; the inequality `K < m²` holds for all `j ≥ 8`, and the range `j ≤ 7` is exhausted by hand).
-- `ℓ ∤ j`. If `ℓ` odd then `ℓ ∉ S_j`. If `ℓ = 2` then `j` is odd and `2 ∉ S_j`.
+If `K=7^u>7`, then `49|K`. Whenever `49<m`, the odd divisor `49` lies below `m`, while
 
-### 7 | j
+\[
+\gcd(j,K)=\gcd(j,7)
+\]
 
-Write `j = 7d`, `N = 29d - 1`, `K = 7N`. If `N` prime we are done. Assume `N` composite.
+shows `49∤j`. Thus `49∉S_j`, impossible.
 
-`gcd(N,d) = 1`.
+Therefore a smooth exception requires
 
-- If least prime factor `ℓ` of `N` satisfies `ℓ ≠ 7`: then `ℓ ∤ j`, and the same escape applies (`N` may be even when `d` is odd: then `ℓ = 2` and one uses whether `2 ∈ S_j`; if `2 | j` then `2 | d`, but `d` odd is the even-`N` case — contradiction. So when `N` even one has `d` odd, hence `2 ∤ j`, hence `2 ∉ S_j`).
-- If `ℓ = 7`: then `7 | N`, so `49 | K`. Also `29d ≡ 1 mod 7` ⇒ `d ≡ 1 mod 7` (29≡1), so `7 ∤ d` and `49 ∤ j`. The divisor `49` is not in `S_j`: not a divisor of `j`; `49 = 4e` forces non-integral `e`; wraparound `4e = 49 + m = 4j + 48` gives `e = j + 12 > j`. Thus `49 ∉ S_j`.
+\[
+m\le49.
+\]
 
----
+With `j>=8`, this leaves only
 
-## Finite certificate
+\[
+8\le j\le12.
+\]
 
-Through `K ≤ 30,000`: zero composite full shadows outside the `7p` family. Independent of the proof, this is a consistency check.
+## Exact finite window j = 1,...,12
 
----
+```text
+j=1:  K=22,  m=3;  divisor 2 escapes.
+j=2:  K=51,  m=7;  divisor 3 escapes.
+j=3:  K=80,  m=11; divisor 2 escapes.
+j=4:  K=109;        prime, shadowed.
+j=5:  K=138, m=19; divisor 2 escapes.
+j=6:  K=167;        prime, shadowed.
+j=7:  K=196, m=27; divisor 2 escapes.
+j=8:  K=225, m=31; divisor 3 escapes.
+j=9:  K=254, m=35; divisor 2 escapes.
+j=10: K=283;        prime, shadowed.
+j=11: K=312, m=43; divisor 2 escapes.
+j=12: K=341, m=47; divisor 11 escapes.
+```
 
-## Placement
+Thus no smooth or other exceptional child survives the finite window. For `j>=13`, the skeleton leaves only prime or `7p`.
 
-| q | s | Composite shapes | Status |
-|---|---|------------------|--------|
-| 5 | 1 | none | parent |
-| 9 | 2 | 2p+(2,16) | parent |
-| 13 | 3 | 3p | proved |
-| 17 | 4 | 2p,4p+(4,64) | proved |
-| 21 | 5 | 5p | proved |
-| **29** | **7** | **7p** | **proved** |
+This completes the classification. QED.
+
+## Regression note
+
+Earlier drafts referred to a bounded computational gate in the small range. The canonical proof no longer needs that gate: all twelve small values are displayed with explicit escaping divisors or primality.
