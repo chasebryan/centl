@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 #include <numeric>
-#include <set>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -91,11 +90,13 @@ int main(int argc,char**argv) {
             for (i64 j=1LL*i*i;j<=prime_bound;j+=i) sieve[(size_t)j]=false;
     }
 
+    // Exact simplified subsystem: every coprime parameter pair.
+    // FAB-COPRIME-PARITY-PLANE.md (historical filename) proves that for
+    // gcd(a,b)=1 and prime p>a, the original fab conditions are equivalent to
+    // one divisor congruence k | a+bp, k == -p (mod 4ab).
     std::vector<Pair> pairs;
     for (int a=1;a<=CMAX;++a) for (int b=1;b<=CMAX;++b) {
-        bool axis=(a==1 || b==1);
-        bool interior=(std::gcd(a,b)==1 && ((a&1)!=(b&1)));
-        if (axis || interior) pairs.push_back({a,b,std::max(a,b)});
+        if (std::gcd(a,b)==1) pairs.push_back({a,b,std::max(a,b)});
     }
     std::sort(pairs.begin(),pairs.end(),[](const Pair&x,const Pair&y){
         if (x.C!=y.C) return x.C<y.C;
@@ -131,7 +132,7 @@ int main(int argc,char**argv) {
 
     std::ofstream f(out);
     f << "{\n";
-    f << "  \"status\": \"exact simplified fab scan\",\n";
+    f << "  \"status\": \"exact coprime fab-plane scan\",\n";
     f << "  \"limit\": "<<LIMIT<<",\n";
     f << "  \"parameter_bound\": "<<CMAX<<",\n";
     f << "  \"hard_primes_checked\": "<<hard_primes<<",\n";
