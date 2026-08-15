@@ -7,6 +7,15 @@ on:
         description: Pointwise-primitive q=3 finite replay limit
         required: false
         default: "100000"
+  push:
+    branches: [research/es-reduced-parameter-domain]
+    paths:
+      - 'research/erdos-straus/q3_primitive_cover_probe.py'
+      - 'research/erdos-straus/verify_q3_primitive_cover.py'
+      - 'research/erdos-straus/Q3-NEXT-DIGIT-THEOREM.md'
+      - 'research/erdos-straus/Q3-POINTWISE-ABSORPTION.md'
+      - 'research/erdos-straus/Q3-WEAK-REDUNDANCY.md'
+      - '.github/workflows/erdos-straus-q3-primitive-cover.yml'
   pull_request:
     branches: [main]
     paths:
