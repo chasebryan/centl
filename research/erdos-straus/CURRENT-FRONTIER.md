@@ -1,9 +1,11 @@
 # Current research frontier
 
 **Date:** 2026-08-15  
-**Claim boundary:** Erdős-Straus open; all-prime Type A/B coverage open. **Universal DSC-0 and DSC-P are false.**
+**Claim boundary:** Erdős-Straus remains open. Universal DSC-0 and DSC-P are false. The strongest current all-prime reduction is the complete coprime `fab` formulation plus the exact Type I sector.
 
-## Major correction and falsification
+---
+
+## 1. Direct-Shadow Completeness is refuted
 
 The exact Dirichlet condition is
 
@@ -13,14 +15,7 @@ The exact Dirichlet condition is
 
 not `gcd(s,Q)=1`.
 
-After correcting that domain, the research program found and independently verified an explicit counterexample to Direct-Shadow Completeness.
-
-See:
-
-- `REDUCED-PARAMETER-DOMAIN.md`
-- `DSC-COUNTEREXAMPLE.md`
-
-The counterexample is
+After correcting that domain, the program produced and independently verified the explicit directly-novel union shadow in `DSC-COUNTEREXAMPLE.md`:
 
 ```text
 k = 4,478,950
@@ -29,164 +24,350 @@ h = 1
 t = 17,892,349
 r = 1,236,166,681
 L = 5,016,423,720
+q=3 core = {25,70,187}
+union mask = {0,1,2}
+direct-shadow sources = 0
 ```
 
-It has **zero** direct-shadow sources among all `4,478,949` earlier layers, but the three ancestry-minimal q=3 rows
+Hosted provenance:
 
 ```text
-j=70  -> s=0 mod 3
-j=25  -> s=1 mod 3
-j=187 -> s=2 mod 3
+run:      31863463072
+sha:      566520c0649b30151c1120c902030c8a758844f2
+artifact: 9241281418
+digest:   sha256:021bb1142fdd5b069ee8492b92405d0e3dcad2ada9647f8e22c8af951b175b91
 ```
-
-cover every integer parameter.
 
 Therefore
 
 \[
-\boxed{\text{DSC-0 is false}}
+\boxed{\text{DSC-0 is false}},
+\qquad
+\boxed{\text{DSC-P is false}}.
+\]
+
+The replacement local object is the **collective core**, formalized in `COLLECTIVE-CORE.md`.
+
+The prototype core
+
+\[
+\mathcal C=\{25,70,187\}
+\]
+
+is rank three, supported on `q=3`, and load-tight:
+
+\[
+\lambda(\mathcal C)=\frac13+\frac13+\frac13=1.
+\]
+
+`Q3-COLLECTIVE-SYNTHESIS.md` constructs an infinite arithmetic family carrying this same three-row cover.
+
+---
+
+## 2. Prime reduction removes the composite endgame
+
+`PRIME-REDUCTION.md` proves:
+
+\[
+\boxed{
+\text{ES for all primes}
+\Longrightarrow
+\text{ES for all integers }n\ge2.
+}
+\]
+
+So the true final wall is **all-prime solvability**. There is no separate composite-`n` theorem after the prime case.
+
+---
+
+## 3. Complete divisor-parametrization route
+
+The 2026 `fab` parametrization is now integrated as a second, complete language for prime solutions.
+
+### Coprime completeness
+
+`FAB-COPRIME-COMPLETENESS.md` proves:
+
+\[
+\boxed{
+\text{prime ES solvability}
+\iff
+\text{existence of some admissible coprime }(a,b)\text{ `fab` certificate}.
+}
+\]
+
+The proof uses the published inverse map but orders two scaled solution denominators by `p`-adic valuation. If
+
+\[
+g=\gcd(x,y),
+\qquad
+b=x/g,
+\qquad
+q=y/g,
+\qquad
+k=x-p,
+\qquad
+a=kq-pb,
+\]
+
+then
+
+\[
+\gcd(a,b)=\gcd(k,b)=\gcd(p,b)=1.
+\]
+
+Thus **non-coprime `fab` parameters are universally redundant for prime targets**.
+
+---
+
+## 4. Exact Type I sector
+
+`FAB-TYPE-I-EQUIVALENCE.md` proves:
+
+\[
+\boxed{
+\text{Type I solution}
+\iff
+\text{coprime `fab` certificate with }p\nmid a.
+}
+\]
+
+On this p-primitive sector the complete published admissibility conditions collapse to one divisor congruence:
+
+\[
+\boxed{
+\gcd(a,b)=1,
+\quad
+p\nmid a,
+\quad
+k\mid a+bp,
+\quad
+k\equiv-p\pmod{4ab}.
+}
+\]
+
+Equivalently, writing
+
+\[
+p+k=4abc,
+\]
+
+one has the classical Type I divisor equation
+
+\[
+\boxed{k\mid1+4b^2c.}
+\]
+
+This is exactly the Elsholtz-Tao Type I variety under the variable crosswalk
+
+\[
+(a_{ET},c_{ET},d_{ET},f)
+=(b_{fab},a_{fab},c_{fab},k).
+\]
+
+---
+
+## 5. Character bridge on the Type I / primitive sector
+
+`FAB-CHARACTER-BRIDGE.md` proves
+
+\[
+\left(\frac ck\right)=-1
 \]
 
 and
 
 \[
-\boxed{\text{DSC-P is false}.}
-\]
-
-Do not rebuild either conjecture under a renamed form.
-
----
-
-## Hosted counterexample provenance
-
-```text
-workflow run: 31863463072
-workflow sha: 566520c0649b30151c1120c902030c8a758844f2
-artifact id:  9241281418
-artifact digest:
-sha256:021bb1142fdd5b069ee8492b92405d0e3dcad2ada9647f8e22c8af951b175b91
-```
-
-Two independent exhaustive verifiers agree:
-
-```text
-primary:
-  earlier layers: 4,478,949
-  q>2*tau pruned: 4,478,643
-  exact candidates tested: 306
-  direct shadows: 0
-
-independent:
-  sqrt-bound survivors: 24,795
-  exact |T| survivors: 277
-  direct shadows: 0
-
-q=3 union mask: 7 = {0,1,2}
-verdict: DIRECTLY_NOVEL_UNION_SHADOW
-```
-
----
-
-## Structural results retained
-
-The counterexample kills the universal **collapse** from collective coverage to direct coverage. It does not invalidate the underlying local theorems.
-
-| Result | Status |
-|---|---|
-| Exact reduced parameter domain | proved |
-| Strong q=3 absorption | proved |
-| Weak q=3 redundancy | proved |
-| Pointwise frozen absorption | proved |
-| Pointwise divisor descent | proved |
-| One global q=3 next digit | proved |
-| q=3 factor-pair species | proved |
-| Ancestry / quotient rigidity theorems | retained in stated scopes |
-| Character / signature / multiplicative tools | retained |
-| Fiber peeling | retained |
-| CN-coprime CRT statement | retained in pairwise-coprime hypothesis |
-| Finite DSC certificates through `k<=1500` | still true finite statements |
-| Universal DSC-0 | **false** |
-| Universal DSC-P | **false** |
-
-The `k<=100000` primitive/minimal q=3 zero-cover certificates also remain true finite results; the first constructed full minimal cover lies later at `k=4,478,950`.
-
----
-
-## New first-class object: the collective core
-
-The correct obstruction object is a minimal family of proper pullbacks whose union covers the candidate parameter domain even though no single member covers it.
-
-Call such a family a **collective core**.
-
-The counterexample supplies the first explicit irreducible core of this program:
-
-\[
-\boxed{\mathcal C=\{25,70,187\}.}
-\]
-
-All three have `q=3`, and their factor-pair species are
-
-\[
-(2,5),\qquad(5,2),\qquad(8,8)\pmod9.
-\]
-
-They realize the complete three-symbol next-digit alphabet.
-
-This is not a failure of Type A/B coverage. It is a **successful earlier-layer rescue** of an otherwise directly novel target candidate.
-
----
-
-## New research architecture
-
-For each admissible target candidate:
-
-1. reconstruct exact pullbacks on the exact affine Dirichlet domain;
-2. remove direct/frozen absorption;
-3. descend pointwise along divisor ancestry;
-4. merge duplicate/residue-redundant constraints;
-5. apply exact fiber peeling / character / multiplicative quotients;
-6. identify the irreducible residual hypergraph;
-7. determine whether it:
-   - has an avoiding parameter, or
-   - contains a collective core covering the domain.
-
-The global theorem target is no longer `direct novelty -> realization`.
-
-It is to classify the terminal alternatives and use them to control the all-prime survivor process.
-
----
-
-## Prime endgame
-
-`PRIME-REDUCTION.md` proves the elementary divisor-scaling reduction:
-
-\[
 \boxed{
-\text{Erdős-Straus for all primes}
-\Longrightarrow
-\text{Erdős-Straus for all integers }n\ge2.
+\left(\frac kp\right)
+=-\left(\frac ak\right).
 }
 \]
 
-Thus there is no separate composite-`n` endgame.
+`FAB-ELEVEN-BARRIER.md` then shows that for a Mordell-hard prime, every certificate with `a` supported only on
 
-The main unresolved wall is **all-prime coverage**.
+\[
+\{2,3,5,7\}
+\]
 
-López Type A/B is a powerful primary route, but it need not be an exclusive route: any rigorously proved auxiliary parametrization may cover residual primes.
+has
+
+\[
+\left(\frac ak\right)=+1.
+\]
+
+Hence `a=11` is the first possible numerator parameter capable of crossing into the positive-target-character mode.
+
+This is a character barrier, not a proof that the universal parameter bound is 11.
 
 ---
 
-## Active edge
+## 6. Verified Type I frontier through 10^9
 
-1. **Formalize collective cores**: minimality, projection, ancestry reduction, core rank, and exact covering certificates.
-2. Build a collective-core census/falsifier beyond the constructed example; determine whether every union shadow admits a small prime-power core.
-3. Replace the old DSC survivor process with a **realizable-or-collectively-covered** recursion.
-4. Correct shared-core lift-room/fiber theorems to use full residue rings at primes dividing `L`.
-5. Return to the all-prime remainder. Density-one is not enough.
-6. Use independent divisor parametrizations as a secondary sieve against any hypothetical Type A/B survivor.
+`FAB-COPRIME-K1E9.md` freezes two independent exact computations on all Mordell-hard primes below one billion.
+
+Hosted provenance:
+
+```text
+run:      31864821526
+sha:      ae0e89847642acb550bbbae467c6b0c569aa00e9
+artifact: 9241686442
+digest:   sha256:37537df7a3bc8f3521c31815db101ee285c0d3ebfcc3d4cca823a20e1bc9dd76
+```
+
+Result:
+
+```text
+Mordell-hard primes checked: 1,587,581
+coprime a,b<=11 survivors:           0
+```
+
+Because `a<=11<p` throughout the nontrivial hard range, all of these certificates lie in the p-primitive sector. Therefore:
+
+\[
+\boxed{
+\text{every Mordell-hard prime below }10^9
+\text{ has a Type I solution.}
+}
+\]
+
+Minimal parameter-box distribution:
+
+```text
+C=max(a,b)
+1: 776829
+2: 592090
+3: 198370
+4: 15697
+5: 4366
+6: 169
+7: 50
+8: 7
+9: 2
+10: 0
+11: 1
+```
+
+The unique hard prime in the range requiring `C=11` is
+
+\[
+84,525,841
+\]
+
+with certificate
+
+\[
+(a,b,k,q)=(11,4,71375,4737).
+\]
+
+---
+
+## 7. Exact remaining p-adic sector
+
+Coprime completeness does **not** prove that every prime is Type I.
+
+The complete coprime parameter space splits into:
+
+### Sector I
+
+\[
+p\nmid a.
+\]
+
+This is exactly Type I and is governed by the one-congruence divisor equation above.
+
+### Residual sector
+
+\[
+\boxed{p\mid a.}
+\]
+
+The parameters can remain coprime because `p∤b`, but the target factor `p` may supply part of the second published divisibility condition. The one-congruence collapse is therefore no longer automatic.
+
+A prime with no Type I solution, if ES is true for it, must be rescued in this residual sector. In classical language, only Type II geometry remains.
+
+---
+
+## 8. Relation to López Type A/B
+
+López Type A and Type B are both proved subclasses of Type II.
+
+Therefore the two active prime programs now have a precise handoff:
+
+\[
+\boxed{
+\text{Type I: complete primitive coprime divisor plane}
+\quad\cup\quad
+\text{Type II: López A/B + broader Type II residual}.
+}
+\]
+
+The program no longer needs to force Type A/B to solve primes that already have Type I solutions.
+
+A sharper possible sufficient theorem is:
+
+\[
+\boxed{
+\text{every prime without Type I has Type A or Type B}.
+}
+\]
+
+This is weaker than López's conjecture that every prime has A or B, but is still unproved.
+
+---
+
+## 9. Prior-art audits
+
+Two recent headline proof claims were audited and are **not accepted as complete proofs**:
+
+- `DYACHENKO-2025-AUDIT.md`: false lattice uniqueness / rectangle-hitting statements and an unsupported nonlinear existence step.
+- `BRADFORD-2026-AUDIT.md`: the manuscript explicitly reaches the statement that the remaining task is to prove its residue families form a covering system, but does not provide that covering proof.
+
+Their valid algebraic families may still be reused with attribution.
+
+---
+
+## 10. Active theorem edge
+
+### A. Type I universality attack
+
+Determine whether every prime
+
+\[
+p\equiv1\pmod4
+\]
+
+admits p-primitive coprime parameters, equivalently a Type I solution.
+
+Use the exact equation
+
+\[
+\boxed{
+p=4abc-k,\qquad k\mid1+4b^2c,\qquad \gcd(a,b)=1.}
+\]
+
+Do not confuse the billion-prime finite result with a proof.
+
+### B. Residual Type II handoff
+
+If a Type I obstruction is found or derived, pass it immediately to:
+
+- López Type A/B congruence layers;
+- full classical Type II parametrization;
+- exact collective-core reductions.
+
+The true combined target is not “A/B for every prime”; it is **Type I or Type II for every prime**, with A/B as a structured Type II rescue.
+
+### C. Collective-core theory
+
+Continue classifying irreducible collective shadows because they are positive coverage certificates inside the Type A/B branch. Do not resurrect DSC.
+
+### D. Character synthesis
+
+Unify the Type I character bridge with the existing Type A/B character/signature machinery. A hypothetical all-prime survivor must evade both character systems simultaneously.
 
 ---
 
 ## One-line status
 
-Direct-shadow completeness is dead by explicit verified counterexample. The research has moved to **collective-core theory**: directly novel target candidates can be rescued by irreducible unions of earlier Type A/B layers. Erdős-Straus remains open, and all-prime coverage is now the true endgame.
+Direct-shadow completeness is false, but the prime problem is now more sharply organized: every prime solution has a coprime `fab` representation; the p-primitive coprime sector is exactly Type I and has zero Mordell-hard survivors below `10^9`; any genuine Type I survivor must be rescued by the coprime p-divisible / Type II sector. Erdős-Straus remains open.
