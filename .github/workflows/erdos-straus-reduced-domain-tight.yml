@@ -16,6 +16,15 @@ on:
       - 'research/erdos-straus/CURRENT-FRONTIER.md'
       - 'research/erdos-straus/FUTURE-OPERATOR-INSTRUCTIONS.md'
       - '.github/workflows/erdos-straus-reduced-domain-tight.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/reduced_domain_tight_probe.py'
+      - 'research/erdos-straus/verify_reduced_domain_tight.py'
+      - 'research/erdos-straus/REDUCED-PARAMETER-DOMAIN.md'
+      - 'research/erdos-straus/CURRENT-FRONTIER.md'
+      - 'research/erdos-straus/FUTURE-OPERATOR-INSTRUCTIONS.md'
+      - '.github/workflows/erdos-straus-reduced-domain-tight.yml'
 
 permissions:
   contents: read
