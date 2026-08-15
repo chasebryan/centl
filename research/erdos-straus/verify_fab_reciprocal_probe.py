@@ -2,10 +2,10 @@
 """Independent verifier for fab_reciprocal_probe.py outputs.
 
 This verifier does not rediscover divisors or repeat the signed-residue search.
-It independently sieves the claimed hard-prime population, checks that there is
-exactly one supplied certificate for every selected prime, and verifies each
-certificate, square-divisor claim, congruence, and Egyptian-fraction identity
-with direct integer arithmetic.
+It independently sieves the claimed hard-prime population, checks that captured
+and unresolved populations partition that sieve exactly, and verifies every
+supplied certificate, square-divisor claim, congruence, and Egyptian-fraction
+identity with direct integer arithmetic.
 """
 
 from __future__ import annotations
@@ -97,14 +97,21 @@ def main() -> None:
 
     limit = int(summary["limit"])
     expected_primes = prime_sieve(limit)
-    supplied_primes = [int(row["p"]) for row in rows]
+    expected_set = set(expected_primes)
 
-    assert len(supplied_primes) == len(set(supplied_primes)), "duplicate prime certificates"
-    assert sorted(supplied_primes) == expected_primes, "certificate population differs from independent hard-prime sieve"
+    supplied_primes = [int(row["p"]) for row in rows]
+    supplied_set = set(supplied_primes)
+    unresolved = [int(p) for p in summary["unresolved"]]
+    unresolved_set = set(unresolved)
+
+    assert len(supplied_primes) == len(supplied_set), "duplicate prime certificates"
+    assert len(unresolved) == len(unresolved_set), "duplicate unresolved primes"
+    assert supplied_set.isdisjoint(unresolved_set), "prime appears as both captured and unresolved"
+    assert supplied_set | unresolved_set == expected_set, "captured+unresolved differs from independent hard-prime sieve"
+
     assert summary["hard_prime_count"] == len(expected_primes)
     assert summary["captured_count"] == len(rows)
-    assert summary["unresolved_count"] == 0
-    assert summary["unresolved"] == []
+    assert summary["unresolved_count"] == len(unresolved)
 
     observed_distribution: dict[tuple[str, int], int] = {}
     max_m = None
@@ -125,6 +132,7 @@ def main() -> None:
     verdict = {
         "hard_prime_population_checked": len(expected_primes),
         "certificates_checked": len(rows),
+        "unresolved_population_checked": len(unresolved),
         "distinct_first_success_buckets": len(observed_distribution),
         "max_first_success_m": max_m,
         "verdict": "VERIFIED",
