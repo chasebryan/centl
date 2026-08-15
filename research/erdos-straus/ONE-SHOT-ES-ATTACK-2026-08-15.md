@@ -63,24 +63,220 @@ Thus the same small-prime boundary (`11,13,...`) reached by the earlier shadow/k
 
 A tempting route was to combine pointwise q=3 absorption with quotient-9 ancestry rigidity to prove that every q=3 singleton descends. This cannot be universal because the canonical repo now contains an independently verified three-row q=3 union-shadow core. The route is retained only as depth-spectrum structure, not as the ES bridge.
 
-## 6. Active one-shot hypothesis
+## 6. Exact fixed-k / b=1 complement lemma
 
-The current target is to exploit the **intersection** of the four shifted-factor restrictions rather than add many unrelated congruence families.
+Take `b=1` in the coprime divisor criterion and fix an integer
 
-The desired theorem shape is:
+\[
+k\equiv3\pmod4.
+\]
 
-> For every hard prime `p`, if the first four exact filters all fail to give a certificate, then one fixed additional coprime pair `(a,b)` (or one finite algebraically forced family) must satisfy the divisor criterion.
+A certificate using this exact `k` requires
 
-The strongest candidate should be selected by exact computation on the simultaneous-factorization survivor set, then proved from the survivor restrictions themselves.
+\[
+4a\mid p+k,
+\qquad
+k\mid p+a.
+\]
 
-## 7. Next exact checks
+Put
 
-1. enumerate hard primes over a substantial range;
-2. keep only primes satisfying all four necessary counterexample restrictions;
-3. for small coprime `(a,b)`, test the exact divisor criterion on these survivors;
-4. identify whether one pair or a tiny family kills the entire survivor population;
-5. inspect the factorization congruence responsible for the winning pair;
-6. attempt to prove that factorization pattern universally from the four survivor restrictions;
-7. certify any resulting Egyptian-fraction identity in CENTL form.
+\[
+N_k=\frac{p+k}{4}=ac.
+\]
+
+Modulo `k`, `p\equiv4N_k=4ac`. Therefore
+
+\[
+p+a\equiv a(4c+1)\pmod k.
+\]
+
+In the coprime range `gcd(a,k)=1`, hence
+
+\[
+\boxed{
+k\mid p+a\iff 4c+1\equiv0\pmod k.}
+\]
+
+Equivalently, a fixed-`k`, `b=1` certificate exists iff `N_k=(p+k)/4` has a complementary divisor `c` satisfying
+
+\[
+\boxed{
+c\equiv-4^{-1}\pmod k.}
+\]
+
+The striking feature is that the target residue for `c` is **independent of p**.
+
+For `k=3`, this is exactly the previously proved filter: `(p+3)/4` must have a divisor `2 mod 3`.
+
+Writing `k=4t+3` and `A=(p+3)/4`,
+
+\[
+N_k=A+t.
+\]
+
+Thus the fixed-k hierarchy is a divisor-residue sieve on the consecutive translates
+
+\[
+A, A+1, A+2,\ldots
+\]
+
+with target residue `-4^{-1} mod (4t+3)`.
+
+## 7. Exact a=1 symmetric-factor lemma
+
+Now take `a=1`. Write
+
+\[
+p+k=4bc
+\]
+
+with `c>0`. Then `b=(p+k)/(4c)`. The remaining divisor condition is
+
+\[
+k\mid1+bp.
+\]
+
+Substituting for `b` gives
+
+\[
+1+bp
+=1+\frac{p(p+k)}{4c},
+\]
+
+so modulo `k`
+
+\[
+\boxed{k\mid p^2+4c.}
+\]
+
+The congruence part of the fab criterion is
+
+\[
+\boxed{k\equiv-p\pmod{4c}.}
+\]
+
+If
+
+\[
+p^2+4c=kd,
+\]
+
+then, because `p` is a unit modulo `4c`, the complement automatically obeys the same congruence:
+
+\[
+\boxed{d\equiv-p\pmod{4c}.}
+\]
+
+Hence:
+
+### Symmetric factor-pair criterion
+
+For hard prime `p` and `c<p`, the `a=1` branch has a coprime fab certificate exactly when
+
+\[
+\boxed{
+p^2+4c=kd,
+\qquad
+k\equiv d\equiv-p\pmod{4c},
+}
+\]
+
+for positive factors `k,d` (with the usual size conditions on the induced `b`).
+
+Writing
+
+\[
+k=4cx-p,
+\qquad
+d=4cy-p,
+\]
+
+this is equivalent to the two-variable equation
+
+\[
+\boxed{4cxy-p(x+y)=1.}
+\]
+
+So the `a=1` fab search is a symmetric factorization / binary quadratic-form problem.
+
+## 8. Character obstruction and why the first useful c is external
+
+Every odd prime factor `q` of
+
+\[
+p^2+4c
+\]
+
+with `q\nmid c` satisfies
+
+\[
+p^2\equiv-4c\pmod q,
+\]
+
+therefore
+
+\[
+\left(\frac{-c}{q}\right)=+1.
+\]
+
+Thus every divisor of `p^2+4c` lies in the splitting side of the quadratic character attached to `-c` (away from the ramified support).
+
+The target factor class `k\equiv-p (mod 4c)` can only occur when that target also lies on the splitting side. This reproduces the nonresidue necessity from `FAB-HARD-NONRESIDUE-BRIDGE.md`: for hard `p`, a viable `c` must satisfy
+
+\[
+\boxed{(c/p)=-1.}
+\]
+
+In particular the hard classes have `(2/p)=(3/p)=(5/p)=(7/p)=+1`, so no `c` supported only on `2,3,5,7` can be the genuinely new ingredient.
+
+Concrete universal failures of the `a=1` branch:
+
+- `c=1`: every prime divisor of `p^2+4` is `1 mod 4`, while the target factor is `3 mod 4`;
+- `c=2`: every prime divisor of `p^2+8` satisfies `(-2/q)=1`, hence is `1 or 3 mod 8`, while hard `p` demands target `7 mod 8`;
+- `c=3`: every prime divisor of `p^2+12` satisfies `(-3/q)=1`, hence lies in the split mod-3 classes (mod 12, `1 or 7`), while hard `p` demands target `11 mod 12`.
+
+These are exact character obstructions, not computational observations.
+
+## 9. Exact finite signal through 10^7
+
+Using the six hard residue classes modulo `840` and exact integer factorization:
+
+- hard primes through `10^7`: `20,513`;
+- primes surviving all four theorems in `FAB-HARD-FIRST-FILTERS.md`: `2,173`.
+
+Among those theorem-survivors, the strongest individual small coprime `(a,b)<=11` criteria are headed by:
+
+- `(1,5)`: 1,040 survivors rescued;
+- `(5,1)`: 1,002;
+- `(1,2)`: 977;
+- `(1,6)`: 824;
+- `(3,2)`: 814;
+- `(2,3)`: 811.
+
+A greedy exact cover using pairs in the bounded `a,b<=11` window resolves the entire finite survivor population, consistent with the Bello-Hernández–Benito–Fernández computation but **not** a universal theorem.
+
+A separate fixed-`k`, `b=1` scan on those same survivors is dominated by `k=11`, followed by `7,23,47,31,...`, again pointing at the external-prime boundary already visible in the shadow/kernel and nonresidue analyses.
+
+## 10. Active one-shot hypothesis
+
+The strongest conceptual target is now:
+
+> Let `ell>=11` be an external prime with `(ell/p)=-1`. Use the symmetric factor-pair formulation of `p^2+4ell`, or a controlled multiple/squareclass of `ell`, to force a factor in the ray class `-p mod 4ell`.
+
+This is not yet a theorem. The missing step is an exact **factor-selection theorem** inside the split-prime factorization of `p^2+4ell`.
+
+A likely language for that step is the ideal/ray-class factorization in `Q(sqrt(-ell))`: the norm `p^2+4ell` is principal, every rational prime factor is split, and the desired rational divisor is a subset product in one specified ray class. This is structurally parallel to the already-developed multiplicative defect / zero-product atom machinery in the Type A/B shadow program.
+
+The one-shot attack should therefore attempt to identify the target ray class with a forced half-factor of the principal ideal, rather than merely enumerate more small `(a,b)` pairs.
+
+## 11. Next exact checks
+
+1. formalize the `a=1` ray-class interpretation;
+2. determine the exact ray class represented by `k\equiv-p (mod 4c)`;
+3. factor the principal ideal `(p+2 sqrt(-c))` and express the rational factor selection as a finite-abelian subset-product problem;
+4. test whether choosing `c` as the least external prime nonresidue forces that subset product by genus/class-group constraints;
+5. if not, identify the minimal controlled modification of `c` that does;
+6. certify any resulting Egyptian-fraction identity in CENTL form.
 
 This file is intentionally updated as the proof hunt advances so a chat/runtime failure does not destroy the research state.
