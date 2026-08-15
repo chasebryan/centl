@@ -30,7 +30,7 @@ This container is intentionally coupled to the following authoritative documents
 - [`../SHADOW-KERNEL.md`](../SHADOW-KERNEL.md) — prime-power peeling
 - [`../QUADRATIC-TRAP-SIGNATURE.md`](../QUADRATIC-TRAP-SIGNATURE.md) — Jacobi character shield
 - [`../SMALL-SELECTOR-HYPOTHESIS.md`](../SMALL-SELECTOR-HYPOTHESIS.md)
-- [`../THEORY.md`](../THEORY.md), [`../RESULTS-2026-08-14.md`](../RESULTS-2026-08-14.md), and the remaining structural notes
+- [`../THEORY.md`](../THEORY.md), [`../RESULTS-2026-08-14.md`](../RESULTS-2026-08-14.md), [`../ODD-COVERING-BRIDGE.md`](../ODD-COVERING-BRIDGE.md), and the remaining structural notes
 
 No content from those files is copied or rewritten here. Citations are by path only.
 
@@ -39,7 +39,10 @@ No content from those files is copied or rewritten here. Citations are by path o
 | Date       | Activity                                                                 | Document |
 |------------|--------------------------------------------------------------------------|----------|
 | 2026-08-14 | Container established; initial independent reading of frontier and tools | `ANALYSIS-2026-08-14.md`, `NEXT-TARGETS.md` |
-| 2026-08-14 | Fiber-kernel residual structure analysis (read-only of parent theorems)  | `FIBER-KERNEL-RESIDUALS.md` |
+| 2026-08-14 | Fiber-kernel residual structure analysis                                 | `FIBER-KERNEL-RESIDUALS.md` |
+| 2026-08-14 | Structural notes on dominant residual signature {3,11,13}                | `RESIDUAL-SIGNATURE-31113.md` |
+| 2026-08-14 | Character-shield / fiber-kernel interaction partition                    | `CHARACTER-FIBER-INTERACTION.md` |
+| 2026-08-14 | Ancestry family q = 5 structural questions                               | `ANCESTRY-Q5-NOTES.md` |
 
 ## Claim discipline
 
