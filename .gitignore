@@ -20,3 +20,5 @@ research/erdos-straus/findings/seeds/.*
 research/erdos-straus/findings/seeds/*.tmp
 research/erdos-straus/findings/.catalog.lock
 research/erdos-straus/findings/log.jsonl
+research/erdos-straus/findings/counts.json
+research/erdos-straus/findings/catalog.jsonl

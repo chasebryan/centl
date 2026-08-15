@@ -125,6 +125,14 @@ def catalog_lock_path() -> Path:
     return findings_root() / ".catalog.lock"
 
 
+def counts_path() -> Path:
+    return findings_root() / "counts.json"
+
+
+def catalog_jsonl_path() -> Path:
+    return findings_root() / "catalog.jsonl"
+
+
 def empty_catalog() -> dict:
     return {
         "records": {"max_shift_k": 0, "max_cleared_bound": 0},
@@ -171,6 +179,50 @@ def save_catalog(cat: dict) -> None:
     path = catalog_path()
     tmp = path.with_name(f"catalog.json.tmp.{os.getpid()}.{time.time_ns()}")
     tmp.write_text(json.dumps(cat, indent=2, sort_keys=True) + "\n")
+    tmp.replace(path)
+
+
+def default_stats() -> dict:
+    return {
+        "letter": 0,
+        "great": 0,
+        "good": 0,
+        "max_shift_k": 0,
+        "max_cleared_bound": 0,
+        "methods": [],
+        "since_rebuild": 0,
+    }
+
+
+def load_stats() -> dict:
+    path = counts_path()
+    if path.is_file() and path.stat().st_size:
+        try:
+            data = json.loads(path.read_text())
+            base = default_stats()
+            base.update(data)
+            if not isinstance(base.get("methods"), list):
+                base["methods"] = []
+            return base
+        except (OSError, json.JSONDecodeError):
+            pass
+    cat = load_catalog(required=False)
+    stats = default_stats()
+    for item in cat.get("items") or []:
+        g = item.get("grade")
+        if g in stats:
+            stats[g] += 1
+    recs = cat.get("records") or {}
+    stats["max_shift_k"] = int(recs.get("max_shift_k") or 0)
+    stats["max_cleared_bound"] = int(recs.get("max_cleared_bound") or 0)
+    stats["methods"] = list(cat.get("methods") or [])
+    return stats
+
+
+def save_stats(stats: dict) -> None:
+    path = counts_path()
+    tmp = path.with_name(f"counts.json.tmp.{os.getpid()}.{time.time_ns()}")
+    tmp.write_text(json.dumps(stats, indent=2, sort_keys=True) + "\n")
     tmp.replace(path)
 
 
@@ -363,7 +415,7 @@ def rebuild_index(cat: dict) -> None:
 
 
 def file_event(event: dict) -> dict | None:
-    """Verify if needed, grade, file, update catalog. Returns the record or None."""
+    """Verify if needed, grade, file. Do not rewrite catalog.json on every hit."""
     if event.get("x") is not None and event.get("solved", True):
         n = int(event.get("n") or event.get("p"))
         w = make_witness(
@@ -381,18 +433,24 @@ def file_event(event: dict) -> dict | None:
         event["equation"] = w.equation()
         event["n"] = n
     with FileLock(catalog_lock_path()):
-        cat = load_catalog(required=True)
-        tags = tags_for_event(event, cat)
+        stats = load_stats()
+        cat_view = {
+            "records": {
+                "max_shift_k": stats.get("max_shift_k") or 0,
+                "max_cleared_bound": stats.get("max_cleared_bound") or 0,
+            },
+            "methods": list(stats.get("methods") or []),
+        }
+        tags = tags_for_event(event, cat_view)
         grade = grade_of(tags)
         if grade is None:
             return None
         n = _as_int(event.get("n") or event.get("p") or event.get("bound"))
         ident = finding_id(grade, tags, event)
-        for old in cat["items"]:
-            if old.get("hex") == ident["hex"]:
-                return None
-            if _as_int(old.get("n")) == n and old.get("grade") == grade:
-                return None
+        folder = {"good": "good", "great": "great", "letter": "letters"}[grade]
+        dest = findings_root() / folder / f"{ident['display']}.md"
+        if dest.is_file():
+            return None
         path = write_finding(event, tags, grade)
         rec = {
             "grade": grade,
@@ -404,26 +462,66 @@ def file_event(event: dict) -> dict | None:
             "number": ident["number"],
             "hex": ident["hex"],
         }
-        cat["items"].append(rec)
-        if event.get("method") and event["method"] not in cat["methods"]:
-            cat["methods"].append(event["method"])
+        stats[grade] = int(stats.get(grade) or 0) + 1
+        if event.get("method") and event["method"] not in stats["methods"]:
+            stats["methods"].append(event["method"])
         k = event.get("k")
         try:
             k_int = int(k) if k is not None else None
         except (TypeError, ValueError):
             k_int = None
-        if k_int is not None and k_int > int(cat["records"].get("max_shift_k") or 0):
-            cat["records"]["max_shift_k"] = k_int
+        if k_int is not None and k_int > int(stats.get("max_shift_k") or 0):
+            stats["max_shift_k"] = k_int
         if event.get("type") == "cleared_bound":
             bound = int(event.get("bound") or 0)
-            if bound > int(cat["records"].get("max_cleared_bound") or 0):
-                cat["records"]["max_cleared_bound"] = bound
-        save_catalog(cat)
-        rebuild_index(cat)
+            if bound > int(stats.get("max_cleared_bound") or 0):
+                stats["max_cleared_bound"] = bound
+        stats["since_rebuild"] = int(stats.get("since_rebuild") or 0) + 1
+        save_stats(stats)
+        with catalog_jsonl_path().open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, sort_keys=True) + "\n")
         log = findings_root() / "log.jsonl"
         with log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"grade": grade, "tags": tags, "event": event}) + "\n")
+        if stats["since_rebuild"] >= 50 or grade == "letter":
+            _rebuild_catalog_unlocked(stats)
+            stats["since_rebuild"] = 0
+            save_stats(stats)
         return rec
+
+
+def _rebuild_catalog_unlocked(stats: dict) -> None:
+    """Rebuild INDEX.md from the tiny stats file. Do not rewrite catalog.json here."""
+    cat = {
+        "records": {
+            "max_shift_k": stats.get("max_shift_k") or 0,
+            "max_cleared_bound": stats.get("max_cleared_bound") or 0,
+        },
+        "methods": list(stats.get("methods") or []),
+        "items": _tail_jsonl(catalog_jsonl_path(), 200),
+    }
+    rebuild_index(cat)
+
+
+def _tail_jsonl(path: Path, limit: int) -> list[dict]:
+    if not path.is_file():
+        return []
+    try:
+        raw = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    out: list[dict] = []
+    for line in raw[-limit:]:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            out.append(obj)
+    return out
 
 
 def ingest_cc_blob(text: str) -> list[dict]:
@@ -485,9 +583,10 @@ def ingest_obj(obj: dict) -> list[dict]:
 
 
 def latest(grade: str | None = None, limit: int = 20) -> list[dict]:
-    cat = load_catalog()
-    items = cat["items"]
+    items = _tail_jsonl(catalog_jsonl_path(), max(limit * 8, 80))
+    if not items:
+        items = load_catalog(required=False).get("items") or []
     if grade:
         want = "letter" if grade in {"letter", "letters"} else grade
-        items = [i for i in items if i["grade"] == want]
+        items = [i for i in items if i.get("grade") == want]
     return list(reversed(items[-limit:]))

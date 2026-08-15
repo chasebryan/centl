@@ -6,10 +6,11 @@ import json
 import signal
 import subprocess
 import sys
+import time
 from collections import deque
 
 from .cc_bridge import cc_binary, solve_via_cc
-from .findings import FINDINGS, file_event, latest, load_catalog
+from .findings import FINDINGS, file_event, latest, load_stats
 from .locks import FileLock
 from .seed import (
     MAIN_HUNT,
@@ -35,20 +36,32 @@ def _tty() -> bool:
     return sys.stdout.isatty()
 
 
+_COUNT_CACHE: dict = {"t": 0.0, "v": {"letter": 0, "great": 0, "good": 0}}
+_DASH_LAST = 0.0
+
+
 def _counts() -> dict[str, int]:
+    now = time.monotonic()
+    if now - float(_COUNT_CACHE["t"]) < 1.0:
+        return dict(_COUNT_CACHE["v"])
     out = {"letter": 0, "great": 0, "good": 0}
     try:
-        cat = load_catalog(required=False)
+        stats = load_stats()
+        for key in out:
+            out[key] = int(stats.get(key) or 0)
     except Exception:
-        return out
-    for item in cat.get("items") or []:
-        g = item.get("grade")
-        if g in out:
-            out[g] += 1
-    return out
+        return dict(_COUNT_CACHE["v"])
+    _COUNT_CACHE["t"] = now
+    _COUNT_CACHE["v"] = out
+    return dict(out)
 
 
 def draw_dashboard(state: dict) -> None:
+    global _DASH_LAST
+    now = time.monotonic()
+    if now - _DASH_LAST < 0.25 and not state.get("halt"):
+        return
+    _DASH_LAST = now
     try:
         _draw_dashboard(state)
     except Exception:
@@ -163,7 +176,7 @@ def run_window(seed: dict, lo: int, hi: int, state: dict) -> tuple[int, list, li
         cmd,
         cwd=str(binary.parent),
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
         text=True,
         start_new_session=True,
     )
