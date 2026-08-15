@@ -1,9 +1,9 @@
 # Current research frontier
 
 **Date:** 2026-08-15  
-**Claim boundary:** Erdős-Straus open; universal DSC-P open; all-prime coverage open.
+**Claim boundary:** Erdős-Straus open; all-prime Type A/B coverage open. **Universal DSC-0 and DSC-P are false.**
 
-## Governing correction
+## Major correction and falsification
 
 The exact Dirichlet condition is
 
@@ -13,151 +13,180 @@ The exact Dirichlet condition is
 
 not `gcd(s,Q)=1`.
 
-`REDUCED-PARAMETER-DOMAIN.md` proves:
+After correcting that domain, the research program found and independently verified an explicit counterexample to Direct-Shadow Completeness.
 
-- if `p|Q` and `p|L`, the prime `p` imposes **no** restriction on the parameter class;
-- if `p|Q` and `p∤L`, exactly one affine class `s=-rL^{-1} (mod p)` is excluded.
+See:
 
-Hence for `q=3`, because `3|840|L`, the exact local domain is all of
+- `REDUCED-PARAMETER-DOMAIN.md`
+- `DSC-COUNTEREXAMPLE.md`
+
+The counterexample is
+
+```text
+k = 4,478,950
+m = 17,915,799
+h = 1
+t = 17,892,349
+r = 1,236,166,681
+L = 5,016,423,720
+```
+
+It has **zero** direct-shadow sources among all `4,478,949` earlier layers, but the three ancestry-minimal q=3 rows
+
+```text
+j=70  -> s=0 mod 3
+j=25  -> s=1 mod 3
+j=187 -> s=2 mod 3
+```
+
+cover every integer parameter.
+
+Therefore
 
 \[
-\boxed{\mathbb Z/3\mathbb Z.}
+\boxed{\text{DSC-0 is false}}
 \]
 
-The former complementary pair `{1},{2}` is not a true reduced obstruction.
+and
+
+\[
+\boxed{\text{DSC-P is false}.}
+\]
+
+Do not rebuild either conjecture under a renamed form.
 
 ---
 
-## Closed / retained structural reductions
+## Hosted counterexample provenance
 
-| Result | File |
+```text
+workflow run: 31863463072
+workflow sha: 566520c0649b30151c1120c902030c8a758844f2
+artifact id:  9241281418
+artifact digest:
+sha256:021bb1142fdd5b069ee8492b92405d0e3dcad2ada9647f8e22c8af951b175b91
+```
+
+Two independent exhaustive verifiers agree:
+
+```text
+primary:
+  earlier layers: 4,478,949
+  q>2*tau pruned: 4,478,643
+  exact candidates tested: 306
+  direct shadows: 0
+
+independent:
+  sqrt-bound survivors: 24,795
+  exact |T| survivors: 277
+  direct shadows: 0
+
+q=3 union mask: 7 = {0,1,2}
+verdict: DIRECTLY_NOVEL_UNION_SHADOW
+```
+
+---
+
+## Structural results retained
+
+The counterexample kills the universal **collapse** from collective coverage to direct coverage. It does not invalidate the underlying local theorems.
+
+| Result | Status |
 |---|---|
-| Exact reduced parameter domain | `REDUCED-PARAMETER-DOMAIN.md` |
-| Strong q=3 absorption | `Q3-ABSORPTION.md` |
-| Weak q=3 redundancy (`R_j subseteq R_i`) | `Q3-WEAK-REDUNDANCY.md` |
-| Pointwise frozen absorption | `Q3-POINTWISE-ABSORPTION.md` |
-| Pointwise divisor descent (`q_i in {1,3}`) | `Q3-POINTWISE-DIVISOR-REDUCTION.md` |
-| One global next 3-adic digit | `Q3-NEXT-DIGIT-THEOREM.md` |
-| Three factor-pair species / target congruence | `Q3-FACTOR-PAIR-TYPES.md` |
-| Prime reduction for full ES | `PRIME-REDUCTION.md` |
-| Original finite DSC through `k<=1500` | `DIRECT-SHADOW-K1500.md` |
+| Exact reduced parameter domain | proved |
+| Strong q=3 absorption | proved |
+| Weak q=3 redundancy | proved |
+| Pointwise frozen absorption | proved |
+| Pointwise divisor descent | proved |
+| One global q=3 next digit | proved |
+| q=3 factor-pair species | proved |
+| Ancestry / quotient rigidity theorems | retained in stated scopes |
+| Character / signature / multiplicative tools | retained |
+| Fiber peeling | retained |
+| CN-coprime CRT statement | retained in pairwise-coprime hypothesis |
+| Finite DSC certificates through `k<=1500` | still true finite statements |
+| Universal DSC-0 | **false** |
+| Universal DSC-P | **false** |
 
-The original finite DSC verifier remains valid because it checks `gcd(r+Ls,LQ)=1` directly.
-
----
-
-## Frozen corrected-domain finite frontiers
-
-### Corrected tight cluster through k <= 8500
-
-Hosted replay proved:
-
-- first full corrected-domain tight covers at `k=8378`;
-- q=3 rows `52,70,106` occupy `0,1,2`;
-- all 12 such candidate failures are already directly shadowed by frozen rows `6,12`;
-- directly novel corrected-domain tight failures: **0**.
-
-### Pointwise-primitive q=3 through k <= 100000
-
-`Q3-PRIMITIVE-COVER-K100000.md` freezes:
-
-```text
-admissible candidates evaluated: 3,567,030
-full primitive q=3 covers:                0
-```
-
-Complete union masks:
-
-```text
-0: 3320884
-1:   77008
-2:   82372
-3:     146
-4:   86322
-5:     145
-6:     153
-7:       0
-```
-
-### Ancestry-minimal alignment through k <= 100000
-
-`Q3-MINIMAL-ALIGNMENT-K100000.md` freezes the sharper descent:
-
-```text
-minimal rows on candidate:
-0: 3320884
-1:  239568
-2:    6566
-3:      12
-
-maximum minimal rows: 3
-three-or-more-row candidates: 12
-three-or-more rows occupying >=2 digits: 0
-full minimal q=3 covers: 0
-```
-
-All twelve three-row candidates put all three rows on one common next digit.
+The `k<=100000` primitive/minimal q=3 zero-cover certificates also remain true finite results; the first constructed full minimal cover lies later at `k=4,478,950`.
 
 ---
 
-## Exact q=3 formulation now
+## New first-class object: the collective core
 
-Every q=3 trap has an ordered factor pair
+The correct obstruction object is a minimal family of proper pullbacks whose union covers the candidate parameter domain even though no single member covers it.
 
-\[
-wa=m+1.
-\]
+Call such a family a **collective core**.
 
-In the common `v3(L)=1` regime, hard compatibility forces exactly three modulo-9 species:
+The counterexample supplies the first explicit irreducible core of this program:
 
 \[
-\boxed{(w,a)\equiv(2,5),(5,2),(8,8)\pmod9.}
+\boxed{\mathcal C=\{25,70,187\}.}
 \]
 
-These are exactly the three global next 3-adic digits.
-
-For a target trap factor pair
+All three have `q=3`, and their factor-pair species are
 
 \[
-WA=M+1,
+(2,5),\qquad(5,2),\qquad(8,8)\pmod9.
 \]
 
-and any shared target divisor `b`, an aligned local pair satisfies
+They realize the complete three-symbol next-digit alphabet.
 
-\[
-\boxed{(W,A)\equiv(w,a)\pmod b}
-\]
+This is not a failure of Type A/B coverage. It is a **successful earlier-layer rescue** of an otherwise directly novel target candidate.
 
-and therefore
+---
 
-\[
-\boxed{b\mid(Wa-wA).}
-\]
+## New research architecture
 
-On a directly novel candidate every q=3 forbidden digit descends to an **ancestry-minimal** factor pair without changing the digit.
+For each admissible target candidate:
 
-Thus the active universal q=3 target is:
+1. reconstruct exact pullbacks on the exact affine Dirichlet domain;
+2. remove direct/frozen absorption;
+3. descend pointwise along divisor ancestry;
+4. merge duplicate/residue-redundant constraints;
+5. apply exact fiber peeling / character / multiplicative quotients;
+6. identify the irreducible residual hypergraph;
+7. determine whether it:
+   - has an avoiding parameter, or
+   - contains a collective core covering the domain.
+
+The global theorem target is no longer `direct novelty -> realization`.
+
+It is to classify the terminal alternatives and use them to control the all-prime survivor process.
+
+---
+
+## Prime endgame
+
+`PRIME-REDUCTION.md` proves the elementary divisor-scaling reduction:
 
 \[
 \boxed{
-\text{one admissible target factor pair cannot align ancestry-minimal local pairs of all three modulo-9 species.}
+\text{Erdős-Straus for all primes}
+\Longrightarrow
+\text{Erdős-Straus for all integers }n\ge2.
 }
 \]
 
-A proof closes the corrected q=3 local covering obstruction.
+Thus there is no separate composite-`n` endgame.
+
+The main unresolved wall is **all-prime coverage**.
+
+López Type A/B is a powerful primary route, but it need not be an exclusive route: any rigorously proved auxiliary parametrization may cover residual primes.
 
 ---
 
 ## Active edge
 
-1. **Prove the ancestry-minimal factor-pair species theorem.** Use simultaneous target congruences and determinant divisibility `b|(Wa-wA)`; do not expand k merely for comfort.
-2. Generalize corrected full-ring lift-room to arbitrary shared clusters. In particular `3,5,7|840|L`, so those coordinates use full residue rings rather than unit groups.
-3. Re-run the Class-C active-core reduction on the exact affine domain and assemble corrected DSC-P.
-4. Attack the all-prime remainder with more than one parametrization. López Type A/B is the primary structure, not a logically mandatory exclusive route.
-5. Use `PRIME-REDUCTION.md`: once every prime is solved, Erdős-Straus is solved for every integer automatically. There is no separate composite-n endgame.
+1. **Formalize collective cores**: minimality, projection, ancestry reduction, core rank, and exact covering certificates.
+2. Build a collective-core census/falsifier beyond the constructed example; determine whether every union shadow admits a small prime-power core.
+3. Replace the old DSC survivor process with a **realizable-or-collectively-covered** recursion.
+4. Correct shared-core lift-room/fiber theorems to use full residue rings at primes dividing `L`.
+5. Return to the all-prime remainder. Density-one is not enough.
+6. Use independent divisor parametrizations as a secondary sieve against any hypothetical Type A/B survivor.
 
 ---
 
 ## One-line status
 
-The artificial unit-parameter q=3 bottleneck is gone. The actual q=3 obstruction has been reduced to an ancestry-minimal three-species factor-pair alignment problem, with **zero full covers in two independent hosted constructions through k<=100000**. Universal DSC-P and all-prime Erdős-Straus coverage remain open.
+Direct-shadow completeness is dead by explicit verified counterexample. The research has moved to **collective-core theory**: directly novel target candidates can be rescued by irreducible unions of earlier Type A/B layers. Erdős-Straus remains open, and all-prime coverage is now the true endgame.
