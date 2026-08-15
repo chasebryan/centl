@@ -1,0 +1,91 @@
+name: CENTL Erdős-Straus primitive q=3 cover
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Pointwise-primitive q=3 finite replay limit
+        required: false
+        default: "100000"
+  pull_request:
+    branches: [main]
+    paths:
+      - 'research/erdos-straus/q3_primitive_cover_probe.py'
+      - 'research/erdos-straus/verify_q3_primitive_cover.py'
+      - 'research/erdos-straus/Q3-NEXT-DIGIT-THEOREM.md'
+      - 'research/erdos-straus/Q3-POINTWISE-ABSORPTION.md'
+      - 'research/erdos-straus/Q3-WEAK-REDUNDANCY.md'
+      - '.github/workflows/erdos-straus-q3-primitive-cover.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  primitive-q3:
+    name: Replay primitive q=3 cover falsifier
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      K_LIMIT: ${{ github.event.inputs.k_limit || '100000' }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run primary primitive-cover falsifier
+        run: |
+          python3 research/erdos-straus/q3_primitive_cover_probe.py \
+            --k-limit "${K_LIMIT}" \
+            --out q3-primitive-output
+
+      - name: Run independent direct-evaluation verifier
+        run: |
+          python3 research/erdos-straus/verify_q3_primitive_cover.py \
+            --k-limit "${K_LIMIT}" \
+            --out q3-primitive-output \
+            --compare-primary
+
+      - name: Enforce k100000 regression
+        if: env.K_LIMIT == '100000'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('q3-primitive-output')
+          p = json.loads((root / 'q3-primitive-cover.json').read_text())
+          v = json.loads((root / 'q3-primitive-cover-independent-verifier.json').read_text())
+
+          assert p['counts'].get('full_primitive_q3_covers', 0) == 0, p
+          assert p['first_full_primitive_q3_cover'] is None, p
+          assert v['verdict'] == 'VERIFIED', v
+          assert v.get('primary_comparison') == 'MATCH', v
+          assert v.get('primary_mismatches') == [], v
+          PY
+
+      - name: Freeze certificate bundle
+        run: |
+          cat > q3-primitive-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          k_limit=${K_LIMIT}
+          EOF
+          cd q3-primitive-output
+          sha256sum q3-primitive-cover.json \
+                    q3-primitive-cover-report.md \
+                    q3-primitive-cover-independent-verifier.json \
+                    provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat q3-primitive-output/q3-primitive-cover-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload primitive-cover certificate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-q3-primitive-cover-${{ github.sha }}
+          path: q3-primitive-output/
+          if-no-files-found: error
+          retention-days: 90
