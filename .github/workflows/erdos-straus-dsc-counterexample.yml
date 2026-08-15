@@ -63,24 +63,26 @@ jobs:
           root=Path('dsc-counterexample-output')
           p=json.loads((root/'dsc-counterexample-primary.json').read_text())
           v=json.loads((root/'dsc-counterexample-independent-verifier.json').read_text())
-          report=f'''# Direct-Shadow Completeness counterexample certificate
-
-- target: `k={p["k"]}`, `m={p["m"]}`
-- hard class: `h={p["h"]}`
-- target trap: `t={p["t"]}`
-- progression: `r={p["r"]}`, `L={p["L"]}`
-- q=3 union mask: `{p["q3_union_mask"]}` = `{{0,1,2}}`
-- earlier layers checked: `{p["earlier_layers"]}`
-- primary exact direct-shadow candidates tested: `{p["exact_direct_candidates_tested"]}`
-- primary direct-shadow sources: **`{p["direct_shadow_sources"]}`**
-- independent exact trap-size survivors: `{v["exact_trap_size_survivors"]}`
-- independent direct-shadow sources: **`{v["direct_shadow_sources"]}`**
-
-Verdict: **DIRECTLY NOVEL UNION SHADOW**.
-
-This is a counterexample to Direct-Shadow Completeness / DSC-0. It does not disprove López Type A/B coverage or Erdős-Straus.
-'''
-          (root/'dsc-counterexample-report.md').write_text(report)
+          lines=[
+              '# Direct-Shadow Completeness counterexample certificate',
+              '',
+              f'- target: `k={p["k"]}`, `m={p["m"]}`',
+              f'- hard class: `h={p["h"]}`',
+              f'- target trap: `t={p["t"]}`',
+              f'- progression: `r={p["r"]}`, `L={p["L"]}`',
+              f'- q=3 union mask: `{p["q3_union_mask"]}` = `{{0,1,2}}`',
+              f'- earlier layers checked: `{p["earlier_layers"]}`',
+              f'- primary exact direct-shadow candidates tested: `{p["exact_direct_candidates_tested"]}`',
+              f'- primary direct-shadow sources: **`{p["direct_shadow_sources"]}`**',
+              f'- independent exact trap-size survivors: `{v["exact_trap_size_survivors"]}`',
+              f'- independent direct-shadow sources: **`{v["direct_shadow_sources"]}`**',
+              '',
+              'Verdict: **DIRECTLY NOVEL UNION SHADOW**.',
+              '',
+              'This is a counterexample to Direct-Shadow Completeness / DSC-0. It does not disprove López Type A/B coverage or Erdős-Straus.',
+              '',
+          ]
+          (root/'dsc-counterexample-report.md').write_text('\n'.join(lines))
           PY
           cat > dsc-counterexample-output/provenance.txt <<EOF
           workflow_run=${GITHUB_RUN_ID}
