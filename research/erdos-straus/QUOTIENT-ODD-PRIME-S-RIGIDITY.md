@@ -1,155 +1,167 @@
-# General odd-prime-s ancestry rigidity
+# General odd-prime-shift ancestry rigidity — corrected scope
 
-**Status:** proved theorem family  
+**Status:** `REVISE / PREVIOUS ALL-j CLAIM RETRACTED`  
 **Date:** 2026-08-15  
 **Project:** Free Computation Foundation / CENTL  
-**Claim boundary:** unrestricted Type A/B trap-set shadowing along fixed ancestry quotient. Does not prove universal Direct-Shadow Completeness, López Type A/B coverage, or the Erdős-Straus conjecture.
+**Claim boundary:** the former statement in this file claimed an exact classification for every `j>=1`. That statement is false. The correct universal theorem holds in the asymptotic range `j>=s+1`; small `j` can contain additional full-shadow children. See [`ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md`](ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md).
 
-Special cases already recorded:
+## 1. Retraction of the former all-j statement
 
-- `s = 3`, `q = 13`: [QUOTIENT-13-RIGIDITY.md](QUOTIENT-13-RIGIDITY.md)
-- `s = 5`, `q = 21` (q composite, same shape): [QUOTIENT-21-RIGIDITY.md](QUOTIENT-21-RIGIDITY.md)
-- prime-child backbone: [PRIME-CHILD-SHADOWS.md](PRIME-CHILD-SHADOWS.md)
-
----
-
-## Theorem
-
-Let `s ≥ 3` be an odd prime and set
+The previous version claimed that for an odd prime `s`, with
 
 \[
-q = 4s + 1.
+Q=4s+1,
+\qquad
+K=Qj-s,
+\qquad
+m=4j-1,
 \]
 
-Assume `q` is also prime. For every integer `j ≥ 1` put
+full unrestricted shadowing always satisfied
 
 \[
-K = qj - s,\qquad m = 4j - 1.
-\]
-
-Then
-
-\[
-\boxed{
-T_K \bmod m \subseteq T_j
+T_K\bmod m\subseteq T_j
 \iff
-K \text{ is prime or } K = s\cdot p \text{ with } p \text{ prime}.
-}
+K\text{ prime or }K=s p\text{ with }p\text{ prime}.
 \]
 
-In the second alternative necessarily `s | j` and
+This is false for small `j`.
+
+A concrete counterexample is
 
 \[
-p = q\cdot\frac{j}{s} - 1.
+\boxed{s=17,\quad j=2,\quad K=121=11^2,\quad m=7.}
 \]
 
----
-
-## Normalized criterion
+Here
 
 \[
-S_j = -T_j = \{e,\,4e \bmod m : e \mid j\}.
+S_2=-T_2=\{1,2,4\}\pmod7.
 \]
 
-Full unrestricted shadowing ⇔ every divisor of `K` lies in `S_j` after reduction mod `m`.
-
-Also
+The divisors of `121` are
 
 \[
-\gcd(j,K) = \gcd(j,s) \in \{1,s\},
+1,11,121,
 \]
 
-since `K = qj - s` and `q ≡ 1 mod s` (because `q = 4s+1`).
-
----
-
-## Direct implications
-
-### Prime child
-
-The prime-child ancestry theorem applies to every quotient `q ≡ 1 mod 4`.
-
-### Product child K = s·p
-
-Suppose `s | j` and `p = (qj - s)/s` is prime. Write `j = s d`. Then
+which reduce modulo `7` to
 
 \[
-p = qd - 1,\qquad m = 4sd - 1,
+1,4,2,
 \]
 
-and
+respectively. All lie in `S_2`, so
 
 \[
-p - d = (q-1)d - 1 = 4sd - 1 = m,
+T_{121}\bmod7\subseteq T_2.
 \]
 
-so `p ≡ d = j/s mod m`.
+But `121` is neither prime nor `17p`.
 
-Divisors of `K = s p` are `{1, s, p, K}`, reducing to `{1, s, j/s, j}`, all of which divide `j`. Full shadowing holds.
+Therefore the all-`j` theorem is disproved.
 
----
+## 2. Why the former proof failed
 
-## Converse
-
-Assume full shadowing.
-
-### Case A — s ∤ j
-
-Then `gcd(j,K) = 1`. Suppose `K` is composite and let `ℓ` be its least prime factor. Then `ℓ ≤ √K`.
-
-**Lemma A1.** For `j ≥ 2`,
+The previous write-up itself exposed the problem: it attempted to use
 
 \[
-K = qj - s < (4j-1)^2 = m^2.
+K<m^2
 \]
 
-Indeed
+for all small `j`, but this inequality fails when `s` is large relative to `j`.
+
+For example, at `s=17`, `j=2`,
 
 \[
-m^2 - K = 16j^2 - 8j + 1 - qj + s = 16j^2 - (q+8)j + (s+1).
+K=121>49=m^2.
 \]
 
-With `q = 4s+1` this is `16j² - (4s+9)j + (s+1)`. For `s ≥ 3` and `j ≥ 2` the value is positive (leading term dominates; can be checked at `j = 2` as `64 - 2(4s+9) + s + 1 = 47 - 7s`, wait need care).
+The least-prime-factor escape argument therefore does not apply.
 
-More cleanly: `√K < 2√(qj) ` and `m = 4j-1`. For `j ≥ q`, obviously `√(qj) ≤ j < m/2`. For `2 ≤ j < q`, there are only finitely many pairs per fixed `s`; each composite `K` may be checked to have `ℓ < m`, or note `K ≤ q(q-1) - s < (4·2-1)²` fails for large `q` — better bound:
+A proof cannot replace this missing range with an unspecified “finite check per `s`” while still claiming a uniform all-`s`, all-`j` theorem.
 
-`K < m²` ⇔ `qj - s < 16j² - 8j + 1` ⇔ `0 < 16j² - (q+8)j + (s+1)`.
+## 3. What remains valid
 
-Discriminant `Δ = (q+8)² - 64(s+1)`. With `q = 4s+1`, `Δ = (4s+9)² - 64s - 64 = 16s² + 72s + 81 - 64s - 64 = 16s² + 8s + 17 > 0`. Roots are positive and the larger root is
+The following results remain valid:
+
+1. the prime-child theorem;
+2. the divisor-child theorem:
+   \[
+   a\mid\gcd(j,s),\ K=ap,\ p\text{ prime}
+   \Longrightarrow
+   T_K\bmod m\subseteq T_j;
+   \]
+3. the asymptotic ancestry skeleton for `j>=s+1`;
+4. the exact quotient-specific classifications already proved independently for `Q=13`, `17`, `21`, and `29`;
+5. the corrected odd-prime-shift theorem in [`ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md`](ODD-PRIME-SHIFT-ASYMPTOTIC-RIGIDITY.md).
+
+## 4. Small-j exception family is a real object
+
+The counterexample above is not isolated.
+
+Finite scouting finds additional small-`j` full-shadow children for prime shifts, for example:
+
+```text
+s=19, j=4:   K=289=17^2
+s=53, j=4:   K=799=17*47
+s=71, j=8:   K=2209=47^2
+s=71, j=16:  K=4489=67^2
+s=83, j=2:   K=583=11*53
+s=89, j=10:  K=3481=59^2
+```
+
+These are not counterexamples to the asymptotic skeleton because every one lies in the small range
 
 \[
-\frac{q+8 + √Δ}{32} < \frac{4s+9 + (4s+5)}{32} = \frac{8s+14}{32} < s
+j<s+1.
 \]
 
-for crude estimates. For `j ≥ s` the quadratic in `j` is certainly positive. For `2 ≤ j < s`, finite check per `s` — but a uniform argument uses only `ℓ ≤ √K ≤ √(q s)` when `j < s`, and `m ≥ 4·1 - 1 = 3`; for `j ≥ 2`, `m ≥ 7`, and `√(qs) = √(s(4s+1)) < 2s + 1 ≤ 4j - 1` once `j ≥ s/2`. The finite initial range `j < s` has `K = qj - s < q s`, and least prime factors of composites are `< √(qs)`. Comparing to `m = 4j-1 ≥ 7`, the only risk is tiny `j`. Direct verification for each fixed theorem instance covers `j < s`; the general write-up treats `j ≥ 2` via:
+They define a separate **small-ancestor exception problem** governed by the exact multiplicative geometry of `S_j`.
 
-**Uniform inequality for j ≥ 2, s ≥ 3:** evaluate `f(j) = 16j² - (4s+9)j + (s+1)` at `j = 2`:
+In particular, dyadic ancestors `j=2^a` are already understood through the Mersenne trap lattice:
 
 \[
-f(2) = 64 - 2(4s+9) + s + 1 = 47 - 7s.
+S_{2^a}=\langle2\rangle
+\pmod{2^{a+2}-1}.
 \]
 
-This is positive only for `s = 3` (`f(2) = 26`) and `s = 5` (`f(2) = 12`); for `s ≥ 7`, `f(2) < 0`. So `K < m²` can fail at `j = 2` for large `s`.
+That multiplicative closure naturally permits composite child divisors to remain inside the ancestor trap image.
 
-**Repair:** if `√K ≥ m`, then `K ≥ m²`, so `K` has no prime factor `< m` only if `K` is prime or a product of primes `≥ m`. But any proper factor `e | K` with `1 < e < K` then has either `e ≥ m` or `K/e ≥ m`. If `e < m` we use the escape argument; if all proper factors are `≥ m` then `K` is either prime (excluded) or `K = ℓ²` with `ℓ ≥ m`, hence `K ≥ m²`, consistent. For `K = ℓ²` with `ℓ ≥ m`, the divisor `ℓ` reduces mod `m` to `ℓ - t m` for some `t ≥ 1`. This needs separate handling.
+## 5. Correct research program
 
-**Practical structure used for proved cases s = 3, 5, 7, 13:**
+The odd-prime-shift program now splits cleanly:
 
-For every composite `K` in the range where `ℓ =` least prime factor satisfies `ℓ < m` (empirically always through large bounds when `s` is small), `ℓ ∤ j` and `ℓ ∉ S_j`:
+### Large-j theorem
 
-- if `ℓ` odd: not a divisor of `j`, not of the form `4e` (or if `4e ≡ ℓ mod m` with wrap, size constraints exclude it for `ℓ < m`);
-- if `ℓ = 2`: then `j` is odd (since `q` odd, `s` odd ⇒ `K` even iff `j` odd), and `2 ∉ S_j` for odd `j`.
+For
 
-This closes Case A for all instances checked and for the fully written s = 3, 5 proofs.
+\[
+j\ge s+1,
+\]
 
-### Case B — s | j
+the exact nonsmooth classification is prime or `sp`, and smooth children are eliminated in the corrected theorem note.
 
-Write `j = s d` and `N = qd - 1`, so `K = s N`. If `N` is prime we are done. Assume `N` composite.
+### Small-j exception census
 
-Note `gcd(N, d) = gcd(qd - 1, d) = 1`.
+For
 
-Also `N = qd - 1` is even only if `qd` is odd, impossible (`q` odd, `d` integer — `qd` odd iff `d` odd, then `N` even). Wait: odd·odd = odd, odd - 1 = even. So when `d` is odd, `N` is even!
+\[
+1\le j\le s,
+\]
 
-For `s = 3`: `N = 13d - 1` — if `d` odd, odd-1=even. But earlier q=13 proof said N always odd? 13d -1: 13d is odd when d odd, minus 1 even. When d even, even-1=odd. So N can be even!
+classify full shadows by the finite group / trap geometry of `S_j`.
 
-Recheck q=13 proof... In my q=13 write-up I had N=13d-1 and for even j, d=j/3 could be even or odd. I said 
+This small range is not noise. It intersects the dyadic trap lattice and other multiplicative-saturation phenomena and may possess infinite families as `s` varies.
+
+## 6. Scientific record
+
+The invalid all-`j` proof remains available in Git history for provenance but must not be cited as a theorem.
+
+The canonical status is now:
+
+```text
+all-j odd-prime-shift rigidity:      FALSE
+asymptotic j>=s+1 rigidity:          PROVED
+small-j exception classification:    OPEN
+```
