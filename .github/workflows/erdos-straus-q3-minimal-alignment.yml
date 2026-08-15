@@ -1,0 +1,83 @@
+name: CENTL Erdős-Straus minimal q=3 alignment
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Ancestry-minimal q=3 alignment replay limit
+        required: false
+        default: "100000"
+  push:
+    branches: [research/es-reduced-parameter-domain]
+    paths:
+      - 'research/erdos-straus/q3_minimal_alignment_probe.py'
+      - 'research/erdos-straus/verify_q3_minimal_alignment.py'
+      - 'research/erdos-straus/Q3-POINTWISE-DIVISOR-REDUCTION.md'
+      - '.github/workflows/erdos-straus-q3-minimal-alignment.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  minimal-q3:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      K_LIMIT: ${{ github.event.inputs.k_limit || '100000' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run ancestry-minimal alignment falsifier
+        run: |
+          python3 research/erdos-straus/q3_minimal_alignment_probe.py \
+            --k-limit "${K_LIMIT}" --out q3-minimal-output
+
+      - name: Run independent affine verifier
+        run: |
+          python3 research/erdos-straus/verify_q3_minimal_alignment.py \
+            --k-limit "${K_LIMIT}" --out q3-minimal-output --compare-primary
+
+      - name: Enforce k100000 frontier
+        if: env.K_LIMIT == '100000'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('q3-minimal-output')
+          p=json.loads((root/'q3-minimal-alignment.json').read_text())
+          v=json.loads((root/'q3-minimal-alignment-independent-verifier.json').read_text())
+          c=p['counts']
+          assert p['maximum_minimal_rows_on_one_candidate'] == 3, p
+          assert c.get('candidates_with_three_or_more_minimal_rows',0) == 12, c
+          assert c.get('three_plus_rows_with_multiple_digits',0) == 0, c
+          assert c.get('full_minimal_q3_covers',0) == 0, c
+          assert v['verdict'] == 'VERIFIED', v
+          assert v.get('primary_comparison') == 'MATCH', v
+          PY
+
+      - name: Freeze certificate
+        run: |
+          cat > q3-minimal-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          k_limit=${K_LIMIT}
+          EOF
+          cd q3-minimal-output
+          sha256sum q3-minimal-alignment.json \
+                    q3-minimal-alignment-report.md \
+                    q3-minimal-alignment-independent-verifier.json \
+                    provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat q3-minimal-output/q3-minimal-alignment-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-q3-minimal-alignment-${{ github.sha }}
+          path: q3-minimal-output/
+          if-no-files-found: error
+          retention-days: 90
