@@ -1,0 +1,99 @@
+name: CENTL Erdős-Straus corrected reduced domain
+
+on:
+  workflow_dispatch:
+    inputs:
+      k_limit:
+        description: Corrected-domain finite replay limit
+        required: false
+        default: "8500"
+  push:
+    branches: [research/es-reduced-parameter-domain]
+    paths:
+      - 'research/erdos-straus/reduced_domain_tight_probe.py'
+      - 'research/erdos-straus/verify_reduced_domain_tight.py'
+      - 'research/erdos-straus/REDUCED-PARAMETER-DOMAIN.md'
+      - 'research/erdos-straus/CURRENT-FRONTIER.md'
+      - 'research/erdos-straus/FUTURE-OPERATOR-INSTRUCTIONS.md'
+      - '.github/workflows/erdos-straus-reduced-domain-tight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  corrected-domain:
+    name: Replay exact reduced-domain tight cluster
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      K_LIMIT: ${{ github.event.inputs.k_limit || '8500' }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run primary corrected-domain probe
+        run: |
+          python3 research/erdos-straus/reduced_domain_tight_probe.py \
+            --k-limit "${K_LIMIT}" \
+            --q-max 9 \
+            --out reduced-domain-tight-output
+
+      - name: Run independent direct-j verifier
+        run: |
+          python3 research/erdos-straus/verify_reduced_domain_tight.py \
+            --k-limit "${K_LIMIT}" \
+            --q-max 9 \
+            --out reduced-domain-tight-output \
+            --compare-primary
+
+      - name: Enforce corrected frontier regression
+        if: env.K_LIMIT == '8500'
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('reduced-domain-tight-output')
+          primary = json.loads((root / 'reduced-domain-tight.json').read_text())
+          verify = json.loads((root / 'reduced-domain-tight-independent-verifier.json').read_text())
+
+          c = primary['counts']
+          assert c.get('direct_novel_tight_failures', 0) == 0, c
+          assert c.get('tight_full_domain_failures', 0) == 12, c
+          assert c.get('tight_failures_already_direct_shadowed', 0) == 12, c
+          first = primary['first_q3_three_class_cover']
+          assert first is not None and first['k'] == 8378, first
+          assert {row['j'] for row in first['constraints'] if row['q'] == 3} >= {52, 70, 106}, first
+          assert {row['j'] for row in first['direct_shadows']} >= {6, 12}, first
+          assert verify['verdict'] == 'VERIFIED', verify
+          assert verify.get('primary_comparison') == 'MATCH', verify
+          PY
+
+      - name: Freeze certificate bundle
+        run: |
+          cat > reduced-domain-tight-output/provenance.txt <<EOF
+          workflow_run=${GITHUB_RUN_ID}
+          workflow_sha=${GITHUB_SHA}
+          repository=${GITHUB_REPOSITORY}
+          k_limit=${K_LIMIT}
+          q_max=9
+          EOF
+          cd reduced-domain-tight-output
+          sha256sum reduced-domain-tight.json \
+                    reduced-domain-tight-report.md \
+                    reduced-domain-tight-independent-verifier.json \
+                    provenance.txt > SHA256SUMS
+          sha256sum -c SHA256SUMS
+
+      - name: Publish summary
+        run: cat reduced-domain-tight-output/reduced-domain-tight-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload corrected-domain certificate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: erdos-straus-reduced-domain-tight-${{ github.sha }}
+          path: reduced-domain-tight-output/
+          if-no-files-found: error
+          retention-days: 90
