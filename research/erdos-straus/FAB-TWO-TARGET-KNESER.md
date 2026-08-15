@@ -3,7 +3,7 @@
 **Status:** proved theorem  
 **Date:** 2026-08-15  
 **Depends on:** `FAB-KNESER-DIVISOR-DEFECT.md`, `FAB-TYPE-II-SIGNED-DIVISOR.md`, `FAB-UNBOUNDED-DIVISOR-RATIO-CERTIFICATE.md`, `EXTERNAL-NR-FACTOR-CYCLE.md`  
-**Claim boundary:** this removes every odd-index Kneser stabilizer defect from the combined Type-I/Type-II Erdős--Straus problem at an external nonresidue prime shift. It does not eliminate the remaining even-index defects and therefore does not prove Erdős--Straus.
+**Claim boundary:** this removes every odd-index Kneser stabilizer defect from the combined Type-I/Type-II Erdős--Straus problem at an external nonresidue prime shift and strengthens the remaining Kneser budget by exploiting inversion symmetry. It does not eliminate the remaining even-index defects and therefore does not prove Erdős--Straus.
 
 ---
 
@@ -21,12 +21,8 @@ Put
 
 \[
 C=\frac{p+q}{4}
-=\prod_i r_i^{e_i}
-\]
-
-and
-
-\[
+=\prod_i r_i^{e_i},
+\qquad
 G=(\mathbb Z/q\mathbb Z)^\times.
 \]
 
@@ -42,25 +38,27 @@ R=
 }
 \]
 
-Two exact sufficient targets now live in this same set:
+It is inversion-symmetric:
 
 \[
-\boxed{
-\tau_I=-p^{-1}\pmod q
-}
+\boxed{R^{-1}=R.}
 \]
 
-from the strong fixed-`q` FAB/Type-I lane, and
+Two exact sufficient targets live in the same box:
 
 \[
-\boxed{
-\tau_{II}=-1\pmod q
-}
+\boxed{\tau_I=-p^{-1}\pmod q}
+\]
+
+from the strong fixed-`q` FAB / normalized Type-I lane, and
+
+\[
+\boxed{\tau_{II}=-1\pmod q}
 \]
 
 from the normalized Type-II lane.
 
-Therefore
+Hence
 
 \[
 \boxed{
@@ -71,11 +69,21 @@ Therefore
 p\text{ satisfies Erdős--Straus}.}
 \]
 
-The rest of this note studies what is forced if **both** targets are missed.
+Because `R=R^{-1}`, a Type-I miss automatically also misses
+
+\[
+\boxed{\tau_I^{-1}=-p.}
+\]
+
+Thus a genuine combined failure excludes three natural residues:
+
+\[
+\boxed{-p^{-1},\quad -p,\quad -1.}
+\]
 
 ---
 
-## 2. Character positions of the two targets
+## 2. Quadratic character positions
 
 Because `p≡1 mod4`, quadratic reciprocity gives
 
@@ -92,39 +100,28 @@ Also `q≡3 mod4`, so
 \left(\frac{-1}{q}\right)=-1.
 \]
 
-Hence
+Therefore
 
 \[
 \boxed{
-\left(\frac{\tau_I}{q}\right)
-=
-\left(\frac{-p^{-1}}q\right)
-=+1,
+\left(\frac{-p^{-1}}q\right)=+1,
+\qquad
+\left(\frac{-p}q\right)=+1,
+\qquad
+\left(\frac{-1}q\right)=-1.
 }
 \]
 
-while
-
-\[
-\boxed{
-\left(\frac{\tau_{II}}q\right)
-=-1.
-}
-\]
-
-Thus the Type-I target is on the quadratic-residue side and the Type-II target is on the quadratic-nonresidue side.
-
-This complementary placement is what collapses the previous odd-index defect hierarchy.
+The two inverse Type-I orientations lie on the quadratic-residue side, while the Type-II target lies on the quadratic-nonresidue side.
 
 ---
 
-## 3. Stabilizer setup
+## 3. Stabilizer and Kneser setup
 
 Let
 
 \[
 H=\operatorname{Stab}(R)
-=\{g\in G:gR=R\}
 \]
 
 and put
@@ -143,11 +140,7 @@ For each prime factor `r_i` of `C`, define
 
 \[
 d_i=\operatorname{ord}_{G/H}(r_iH),
-\]
-
-and
-
-\[
+\qquad
 s_i=\min(2e_i+1,d_i).
 \]
 
@@ -163,105 +156,68 @@ Kneser's theorem gives
 
 ---
 
-## 4. Odd stabilizer index is impossible for a combined failure
+## 4. Odd stabilizer index is impossible
 
-Assume
+Assume both solution targets are missed.
 
-\[
-\boxed{\tau_I\notin R,\qquad \tau_{II}\notin R.}
-\]
-
-Suppose first that `n` is odd.
-
-Since `q≡3 mod4`,
+If `n` were odd, then because
 
 \[
 q-1=2m
 \]
 
-with `m` odd. If `n` is odd, then
+with `m` odd, the subgroup `H` would have even order. The cyclic group `G` has a unique element of order two, namely `-1`, so every even-order subgroup contains `-1`.
+
+Hence
 
 \[
-|H|=\frac{q-1}{n}
+-1\in H\subseteq R,
 \]
 
-is even.
+contradicting the Type-II miss.
 
-The cyclic group `G` has a unique element of order two, namely `-1`. Every even-order subgroup contains that element. Therefore
+Therefore
 
 \[
--1\in H.
+\boxed{n\text{ is even}.}
 \]
 
-But `H⊆R`, so
-
-\[
-\tau_{II}=-1\in R,
-\]
-
-contradicting the assumed combined failure.
-
-Thus:
-
-### Theorem — odd-index collapse
-
-If both fixed-`q` targets are missed, then
-
-\[
-\boxed{[G:H]\text{ is even}.}
-\]
-
-In particular **no odd stabilizer index can support a genuine combined Type-I/Type-II failure**.
+This eliminates every odd-index Type-I Kneser defect from the combined Erdős--Straus obstruction.
 
 ---
 
-## 5. Index two is also impossible
+## 5. Index two is impossible
 
-If
-
-\[
-[G:H]=2,
-\]
-
-then `H` is the unique quadratic-residue subgroup of `G`.
-
-The Type-I target `tau_I` is a quadratic residue. Hence
+If `n=2`, then `H` is the quadratic-residue subgroup. The Type-I target `-p^{-1}` is a quadratic residue, so
 
 \[
-\tau_I\in H\subseteq R,
+-p^{-1}\in H\subseteq R,
 \]
 
-again contradicting combined failure.
+contradicting failure.
 
-Therefore:
-
-### Corollary — first possible combined defect
-
-At an external nonresidue prime shift,
+Thus
 
 \[
 \boxed{
-\tau_I,\tau_{II}\notin R
+\text{combined failure}
 \Longrightarrow
-[G:H]\ge6
-\text{ and }[G:H]\text{ is even}.}
+n\ge6\text{ and }n\text{ is even}.}
 \]
 
 Since `v_2(q-1)=1`, every possible combined defect index has the form
 
 \[
-\boxed{2m,\qquad m\ge3\text{ odd}.}
+\boxed{n=2m,\qquad m\ge3\text{ odd}.}
 \]
 
-The first possible index is therefore `6`, not `3`.
-
-This removes the entire odd-prime-index hierarchy (`3,5,7,11,...`) from the **combined Erdős--Straus obstruction**, even though those indices remain legitimate one-target defects for the Type-I box considered in isolation.
+The first possible index is `6`, not `3`.
 
 ---
 
-## 6. The two missed H-cosets are distinct
+## 6. Three distinct missed H-cosets
 
-Continue to assume both targets are missed. Since the index `n` is even and `v_2(q-1)=1`, the subgroup `H` has odd order. Hence
+For an even combined defect index, `H` has odd order. Hence
 
 \[
 H\subseteq G^2,
@@ -269,59 +225,70 @@ H\subseteq G^2,
 
 the quadratic-residue subgroup.
 
-The quotient of the two targets is
+The Type-II target `-1` is a quadratic nonresidue, while `-p^{-1}` and `-p` are quadratic residues. Therefore
 
 \[
-\frac{\tau_I}{\tau_{II}}
-=
-\frac{-p^{-1}}{-1}
-=p^{-1}.
+(-1)H
 \]
 
-If the two targets belonged to the same `H`-coset, then
+is distinct from both Type-I target cosets.
+
+It remains to compare the inverse Type-I cosets.
+
+Because `H` has odd order, the quotient
 
 \[
-p^{-1}\in H,
+G^2/H
 \]
 
-hence `p∈H`. But `H` contains only quadratic residues, while
+also has odd order. The class of `-p^{-1}` lies in this quotient. If
 
 \[
-\left(\frac pq\right)=-1.
+(-p^{-1})H=(-p)H,
 \]
 
-Contradiction.
-
-Therefore
+then the class of `-p^{-1}` would equal its inverse and therefore have order at most two. An odd-order group has no nontrivial element of order two, so this would force
 
 \[
-\boxed{\tau_IH\ne\tau_{II}H.}
+-p^{-1}\in H\subseteq R,
 \]
 
-A combined failure misses **at least two distinct quotient cosets**.
+contradicting the assumed Type-I miss.
+
+Hence
+
+\[
+\boxed{
+(-p^{-1})H,
+\quad
+(-p)H,
+\quad
+(-1)H
+\text{ are three distinct }H\text{-cosets}.}
+\]
 
 ---
 
-## 7. Improved two-target Kneser budget
+## 7. Symmetric three-coset Kneser budget
 
-Because `R` is `H`-periodic and misses the two distinct cosets above,
+A combined failure therefore misses at least three distinct `H`-cosets. Since `R` is `H`-periodic,
 
 \[
-\boxed{|R|\le(n-2)|H|.}
+\boxed{|R|\le(n-3)|H|.}
 \]
 
-Combining this with the Kneser lower bound yields
+Combining with the Kneser lower bound gives
 
 \[
 1+\sum_i(s_i-1)
-\le n-2.
+\le n-3.
 \]
 
-Therefore:
+Thus:
 
-### Theorem — two-target defect budget
+### Theorem — symmetric combined defect budget
 
-If both the Type-I and Type-II targets are missed at an external nonresidue prime shift, then
+If both Type I and Type II miss at an external nonresidue prime shift, then
 
 \[
 \boxed{
@@ -329,102 +296,77 @@ If both the Type-I and Type-II targets are missed at an external nonresidue prim
 \left(
 \min(2e_i+1,\operatorname{ord}_{G/H}(r_iH))-1
 \right)
-\le n-3,
+\le n-4,
 \qquad n=[G:H].
 }
 \]
 
-This improves the previous one-target budget
-
-\[
-\sum_i(s_i-1)\le n-2
-\]
-
-by one full unit of quotient room.
+This improves the original one-target budget `n-2` by **two full units of quotient room**.
 
 ---
 
-## 8. Cubic defects are automatically rescued
+## 8. Odd-index defects are automatically Type-II rescued
 
-The previous one-target Kneser analysis identified index `3` as the first possible Type-I placement defect and derived a rigid cubic-residue normal form.
+The one-target analysis previously identified cubic index `3` as the first possible Type-I defect, followed by prime indices `5,7,11,...`.
 
-For the full Erdős--Straus problem, that cubic case is no obstruction at all.
+For the full equation, none of those odd-index defects can survive. At any odd index, `-1∈H⊆R`, so the Type-II target is already hit at the same fixed shift.
 
-Indeed, an index-three stabilizer has even order, hence contains `-1`. Because `H⊆R`,
-
-\[
-\boxed{-1\in R.}
-\]
-
-Thus the normalized Type-II target hits at the same fixed shift.
-
-So:
+In particular,
 
 \[
 \boxed{
 \text{Type-I cubic defect}
 \Longrightarrow
-\text{Type-II rescue at the same }q.
-}
+\text{Type-II rescue at the same }q.}
 \]
 
-The same statement holds for **every odd stabilizer index**, not merely index three.
+The same implication holds for every odd stabilizer index.
 
 ---
 
-## 9. Strategic consequence
+## 9. First combined case: index six
 
-For the direct Erdős--Straus route, the Kneser search should no longer spend its main effort classifying cubic, fifth-power, seventh-power, or other odd-index Type-I defects one by one.
+At
 
-Those defects matter if one insists on the Type-I/strong-FAB target alone, but the second target shows that they cannot be genuine failures of the full equation.
+\[
+n=6,
+\]
 
-The new residual wall is:
+the symmetric combined budget becomes
+
+\[
+\boxed{
+\sum_i(s_i-1)\le2.}
+\]
+
+Moreover the quotient has six classes. Because a combined failure misses exactly the three distinguished target-side classes at minimum,
+
+\[
+(-p^{-1})H,
+\quad
+(-p)H,
+\quad
+(-1)H,
+\]
+
+only three quotient classes can remain occupied by the signed box.
+
+`FAB-INDEX6-COMBINED-DEFECT.md` proves that this forces a single primitive sextic factor.
+
+---
+
+## 10. Strategic consequence
+
+The direct ES search should no longer classify odd-prime Kneser defects one by one.
+
+The residual wall is now
 
 \[
 \boxed{
 \text{external nonresidue }q
-+\text{both targets missed}
++\text{three target cosets missed}
 +\text{even stabilizer index }n\ge6
-+\text{two-target budget }\le n-3.
-}
++\text{symmetric budget }\le n-4.}
 \]
 
-The first exact case to classify is therefore
-
-\[
-\boxed{n=6.}
-\]
-
-At index six the entire expansion budget is only
-
-\[
-\boxed{\sum_i(s_i-1)\le3.}
-\]
-
-That is a much smaller obstruction than the former unrestricted cubic-first hierarchy.
-
----
-
-## 10. Next theorem target
-
-Classify all aperiodic symmetric signed boxes in the cyclic quotient `C_6` satisfying
-
-\[
-\sum_i(s_i-1)\le3
-\]
-
-while simultaneously missing
-
-\[
-\tau_{II}H=(-1)H
-\]
-
-and
-
-\[
-\tau_IH=(-p^{-1})H.
-\]
-
-Then transport the resulting finite list through the external-nonresidue factor cycle.
-
-If index six can be eliminated, the next possible combined defect index jumps to the next even divisor `2m` of `q-1` with odd `m>3`, again under the strengthened two-target budget.
+The first case is index six with budget only `2`. If index six is eliminated, the search jumps directly to the next even quotient `2m` under the same stronger symmetric budget.
