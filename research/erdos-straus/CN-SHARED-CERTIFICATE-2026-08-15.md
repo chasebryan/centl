@@ -12,18 +12,34 @@ python3 research/erdos-straus/verify_cn_shared.py \
   --out /tmp/cn-shared-output --j-limit 120 --k-limit 180
 ```
 
-## Exact counts already recomputed this session
+## Official machine replay
+
+Artifacts in [`certificates/`](certificates/):
+
+- [`certificates/cn-shared-report.md`](certificates/cn-shared-report.md)
+- [`certificates/cn-shared.json`](certificates/cn-shared.json)
+- [`certificates/cn-shared-independent-verifier.json`](certificates/cn-shared-independent-verifier.json)
+
+Independent verifier: **VERIFIED**.
+
+SHA-256 (`certificates/SHA256SUMS`):
+
+```text
+aed869f84500e109b1477d08cc24c7486bbe60397040bbe209ae285aada2a52e  cn-shared.json
+741958030cfed41f56a7fb9e7faf728ca97110954bd21e016c27d9410fd8b0b0  cn-shared-report.md
+2239aeb27765bc7515a7cfaa0dae83ebb0350a746bcae7eb718c97b82c124c78  cn-shared-independent-verifier.json
+```
 
 | Scan | Result |
 |------|--------|
-| Totient-ratio, odd `q ≤ 5000` | 721–3570+ checks depending on cutoff; min ratio `2`; **0** fails |
-| Standard-`L` pairs `j ≤ 180`, mixed `r` | 358,188 pairs; **0** fails; **0** C1 fails |
+| Totient-ratio, odd `q ≤ 5000` | 10,071 checks; min ratio `2`; **0** fails |
+| Standard-`L` pairs `j ≤ 160`, mixed `r` | 980,238 pairs; **0** fails; **0** C1 fails |
 | Program `L`, hard `r`, `k ≤ 200` | 7,184,124 pairs; **0** fails |
 | Exact complementary `q=3` on standard `L` | 124 unrestricted covers; **0** on `L=840` and `L=2520` |
-| Admissible tight `q ≤ 9` pairs, `k ≤ 1500` | 73,814 candidates; 1,365,201 escapes; **21** complementary fails |
-| Those 21 vs layer `10` | **21/21** directly shadowed by `j=10` |
-| Directly novel complementary `q=3` | **0** |
+| Admissible tight `q ≤ 9` pairs, `k ≤ 1500` | 73,814 candidates; 1,365,201 escapes; **21** complementary fails; **0** novel fails |
 | Tight `q ≤ 9` triples, `k ≤ 1500` | 3,994,891 checks; **0** fails |
+| Independent pair-mask recheck | 306,564 pairs; **0** disagreements |
+| Independent program sample `k ≤ 180` | 5,186,154 pairs; **0** fails |
 
 ## The 21 admissible complementary covers
 

@@ -1,0 +1,31 @@
+{
+  "absorption_205": {
+    "checked": 0,
+    "violations": []
+  },
+  "pairs": {
+    "checked": 306564,
+    "mask_disagreements": 0,
+    "mask_fails": 0
+  },
+  "program_sample": {
+    "checked": 5186154,
+    "fails": 0
+  },
+  "q3_layers": {
+    "Ls": [
+      840,
+      2520,
+      5040,
+      55440,
+      720720
+    ],
+    "mismatches": []
+  },
+  "ratio_lemma": {
+    "checked": 7838,
+    "fails": 0,
+    "min_ratio": 2
+  },
+  "verdict": "VERIFIED"
+}
