@@ -1,97 +1,103 @@
-# Residual Obstruction Synthesis — Operator-02 Working View
+# Residual Obstruction Synthesis — Operator-02 Working View (updated)
 
 **Author:** Operator-02  
 **Date:** 2026-08-14  
-**Status:** working synthesis of the residual obstruction after the two sufficient mechanisms  
+**Status:** working synthesis after incorporation of character-shield completeness and universal trap-fiber bounds  
 **Claim boundary:** inherits all parent claim boundaries. This is an organizing document only. It does not prove DSC-P or any strengthening of the parent theorems.
 
 ---
 
-## 1. Position after the parent tools
+## 1. Position after the full set of parent tools
 
-The primary program has reduced the Direct-Shadow Completeness problem, for any fixed candidate, to a residual question that sits behind two exact sufficient filters:
+The primary program now supplies, for any fixed candidate, a cascade of exact reductions:
 
-1. Fiber peeling (empty kernel ⇒ done).
-2. Quadratic character shield (solvable linear system ⇒ done).
+1. **Universal trap-fiber bound** (`../TRAP-FIBER-BOUND.md`)  
+   Forces every prime coordinate outside a small finite set (depending only on the depth bound K) to be reduced-fiber-peelable, independently of the candidate.
 
-Everything that survives both filters is a Class-C candidate in the terminology of `CHARACTER-FIBER-INTERACTION.md`: nonempty fiber kernel together with an inconsistent character-shield system. The residual exact-residue constraints on that kernel constitute the present obstruction set.
+2. **Candidate-specific fiber peeling** (`../FIBER-SHADOW-KERNEL.md`)  
+   Further removes coordinates whose exact fiber load is still < 1. Empty kernel ⇒ reduced avoiding class.
 
----
+3. **Character-shield completeness** (`../CHARACTER-SHIELD-COMPLETENESS.md`)  
+   Shield solvable ⇔ every fixed-only earlier layer has Jacobi sign +1.  
+   Inconsistency ⇔ nonempty fixed-negative core \(\mathcal N_{k,r}\).  
+   No collective character obstruction exists.
 
-## 2. Shape of the residual obstruction (from published diagnostics)
-
-Parent diagnostics through k ≤ 1000 indicate:
-
-- a large majority of candidates already fall into Class A (empty fiber kernel);
-- residual kernels, when nonempty, are supported on primes ≤ 23;
-- two signatures dominate: `{3,11,13}` and `{3,5,11,13,17,19,23}`.
-
-If these patterns persist on the complete k ≤ 1200 and k ≤ 1500 corpora, the residual obstruction is finite, small-prime, and highly repetitive. That is the strongest structural compression the parent program has so far exhibited.
+4. **Exact trap avoidance inside \(\mathcal N_{k,r}\)**  
+   Required only when the character shield fails; must distinguish the candidate residue from the trap sets T_j inside their Jacobi −1 regions.
 
 ---
 
-## 3. Operator-02 working picture
+## 2. Refined Class partition
+
+| Class | Fiber kernel | Fixed-negative core \(\mathcal N_{k,r}\) | Status |
+|-------|--------------|------------------------------------------|--------|
+| A     | empty        | (any)                                    | proved realizable by fiber peeling |
+| B     | nonempty     | empty                                    | proved realizable by character shield |
+| C     | nonempty     | nonempty                                 | residual exact-residue problem |
+
+Class C is the sole remaining obstruction set for a proof of DSC-P that proceeds by these routes.
+
+---
+
+## 3. Shape of Class C (from published material)
+
+- Universal first-stage kernel through k ≤ 1200 ⊆ {3,5,7,11,13,17,19,23,29,31,37,41}.
+- Diagnostic sample (k ≤ 1000): every residual supported on primes ≤ 23; dominant signatures {3,11,13} and {3,5,11,13,17,19,23}.
+- Character inconsistency through k ≤ 1200 is exactly explained by fixed-only Jacobi-negative layers (11 056 = 11 056).
+
+Thus Class C, when it occurs, is confined to a small-prime residual kernel that must still avoid the exact traps of a nonempty but finite and explicitly identifiable set of earlier layers.
+
+---
+
+## 4. Working picture
 
 ```
                     directly novel candidate
                               |
-              +---------------+---------------+
-              |                               |
-     character shield                   fiber peeling
-         solvable?                         empty?
-              |                               |
-             yes                             yes
-              |                               |
-              +--------→ reduced avoiding class
+              universal trap-fiber bound
                               |
-                             no
+              candidate-specific fiber peel
                               |
-                    residual kernel K
-                    (Class C when shield also fails)
-                              |
-              +---------------+---------------+
-              |                               |
-     signature {3,11,13}          signature {3,5,11,13,17,19,23}
-     (and minor variants)         (and minor variants)
-              |                               |
-              +--------→ local solvability questions
-                         (basepoint, selector, uniform residue)
+                    +---------+---------+
+                    |                   |
+               empty kernel        nonempty kernel
+                    |                   |
+                    |         character-shield completeness test
+                    |                   |
+                    |         +---------+---------+
+                    |         |                   |
+                    |    N_{k,r} empty       N_{k,r} nonempty
+                    |         |                   |
+                    +----→ reduced avoiding    Class C
+                           class (done)      (exact trap avoidance
+                                              on residual kernel
+                                              against layers in N)
 ```
 
-The only open node required for a proof of DSC-P along this route is local solvability of the residual kernels that appear in Class C.
+The only open node is local solvability of Class-C residual systems.
 
 ---
 
-## 4. What would close the node
+## 5. What would close the node
 
-Any one of the following, once proved rather than observed, would close the residual node for the signatures that actually occur:
+Any one of the following, once proved rather than observed, would close the residual node for the signatures that actually occur inside Class C:
 
-- a uniform residue class modulo the product of the residual primes that avoids every residual forbidden set for that signature;
-- a proof that a fixed bounded selector menu always succeeds on the residual system;
-- a case analysis on the possible residual moduli and forbidden sets that arise from the Type A/B pullback construction, showing each case is solvable.
+- a uniform residue class modulo the product of the residual primes that avoids every residual forbidden set arising from layers in \(\mathcal N_{k,r}\);
+- a proof that a fixed bounded selector menu always succeeds on Class-C residual systems;
+- a case analysis on the possible residual moduli and forbidden sets generated by the Type A/B pullback construction restricted to layers in \(\mathcal N_{k,r}\).
 
 None of these is claimed here. They are the natural theorem targets suggested by the compression already achieved by the primary program.
 
 ---
 
-## 5. Standing Operator-02 posture
+## 6. Coupling to the larger diamond
 
-Until the primary automation freezes complete fiber-kernel and character-shield outcomes, Operator-02 work remains structural and preparatory:
-
-- keep the residual signatures and the Class-C partition clearly documented;
-- prepare the exact census questions that will be asked of the primary output;
-- avoid any numerical claim that exceeds the published diagnostic sample.
-
-When the primary data arrive, the first Operator-02 action will be a Class-C and residual-signature census written as a new file inside this container.
+The residual obstruction analyzed here lives inside the broader architecture of the prime-modulus backbone and the composite rescue core (`../PRIME-MODULUS-BACKBONE.md`, `../COMPOSITE-CORE.md`). Exact-depth realization on the backbone is already unconditional. The residual Class-C problem is the local arithmetic that must still be controlled when a candidate is both directly novel and forced to confront fixed-negative earlier layers after fiber peeling.
 
 ---
 
-## 6. Boundaries restated once more
+## 7. Standing Operator-02 posture
 
-- The Erdős-Straus conjecture remains open.
-- Universal López Type A/B coverage remains unproved.
-- Universal Direct-Shadow Completeness remains unproved.
-- Finite certificates are range-limited theorem statements only.
-- Residual kernels and failed selectors are not counterexamples.
+Until the primary automation freezes complete fiber-kernel, character-shield, and fixed-negative-core outcomes together, Operator-02 work remains structural and preparatory. The census template (`CENSUS-TEMPLATE.md`) will be extended to record |Class C| and the distribution of residual signatures inside Class C as soon as that joint output is available.
 
-This synthesis does not alter those boundaries.
+All claim boundaries of the primary program remain in force.
