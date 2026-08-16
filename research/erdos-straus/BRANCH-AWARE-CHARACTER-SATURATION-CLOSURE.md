@@ -185,11 +185,13 @@ For each anchor the direct divisor set equals the full Jacobi-plus kernel and th
 
 All qualifying saturation destinations in this model through k<=5000 lie in the finite set
 
-`3, 7, 11, 15, 19, 23, 31, 35, 39, 47, 51, 55, 71, 79, 83, 107, 109, 111, 127, 131, 151, 167, 171, 191, 215, 271, 383, 551, 971`.
+`3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 79, 83, 91, 107, 109, 111, 127, 131, 151, 159, 167, 171, 191, 203, 215, 271, 327, 371, 383, 447, 551, 759, 791, 831, 971`.
 
-No new qualifying destination occurs above971 through5000.
+This set includes compatible composite destinations that may produce a qualifying saturated transition without creating a new source state. The first assertion version accidentally listed only the destinations emphasized by source creation and therefore under-recorded the transition certificate; the 259-state closure counts themselves were unchanged.
 
-A separate run truncated at k<=1000 reaches the same final state closure. Extending the destination range from1000 to5000 therefore adds no new source, branch state, or qualifying transition class **inside this model**.
+No qualifying destination occurs above971 through5000.
+
+A separate run truncated at k<=1000 reaches the same final state closure. Extending the destination range from1000 to5000 therefore adds no new source or branch state **inside this model**.
 
 This is a finite observation within the pinned model, not a claim about all k or all CBX source semantics.
 
