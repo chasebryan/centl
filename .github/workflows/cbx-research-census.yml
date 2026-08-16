@@ -40,6 +40,7 @@ jobs:
       SEGMENT: ${{ inputs.segment || '1000000' }}
       REPEAT: ${{ inputs.repeat || '3' }}
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
 
     steps:
       - name: Install Fedora research toolchain
@@ -56,7 +57,7 @@ jobs:
           {
             echo "kernel=cbx.kernel"
             echo "source_commit=$SOURCE_SHA"
-            echo "checkout_commit=$(git rev-parse HEAD)"
+            echo "checkout_commit=$CHECKOUT_SHA"
             echo "hi=$HI"
             echo "i_max=$I_MAX"
             echo "segment=$SEGMENT"
@@ -213,7 +214,7 @@ jobs:
               'kernel':'cbx.kernel',
               'mode':'deep-lane-I-census-v2',
               'source_commit':os.environ['SOURCE_SHA'],
-              'checkout_commit':os.popen('git rev-parse HEAD').read().strip(),
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
               'hi':int(os.environ['HI']),
               'i_max':int(os.environ['I_MAX']),
               'hard_primes':inv['hard_primes'],
