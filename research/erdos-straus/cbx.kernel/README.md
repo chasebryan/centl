@@ -23,6 +23,8 @@ For each Mordell-hard prime, CBX records:
 
 The later lanes are evaluated **even when W hits**. Their results are X-ray diagnostics; they do not weaken or reorder the production verdict.
 
+“Production-equivalent” here means the same mathematical W/I/N/L predicates and ordering at the same finite grade. CBX intentionally uses exact 64-bit factorization, so at ranges where the older cbis bounded trial-factor fallback can misfactor a residual composite, CBX follows the mathematics rather than reproducing that implementation defect.
+
 ## Search grade
 
 CBX does not pretend that one scalar `K` describes the complete finite search. A run stores
@@ -44,17 +46,26 @@ A named run has an immutable grade. If you want another grade, start another run
 
 `--k-max K` is a compatibility convenience that sets both `K_I` and `A_L`; the independent flags are preferred for research.
 
-## Signal-atomic runtime
+## Signal-atomic and crash-safe runtime
 
-The arithmetic/search core is `src/cbx.c`. The executable is built through `src/cbx_runtime.c`, which gives the hunt strict preservation semantics:
+The arithmetic/search core is `src/cbx.c`. The executable is built through `src/cbx_runtime.c`, which gives the hunt stricter preservation semantics:
 
 - once a prime enters the X-ray probe, all of its lane verdicts finish before SIGINT/SIGTERM is honored;
 - an interrupted sweep stores the last fully processed integer rather than jumping to the end of the requested window;
 - an interrupted home walk stores the first unprocessed `S`;
-- the home cursor is always a strict next-`S` cursor;
-- `--iterations N` gives a deterministic finite number of complete sweep/home cycles, so formal censuses do not require timeout termination.
+- the home cursor is a strict next-`S` cursor and uses a non-wrapping end-of-domain sentinel;
+- `--iterations N` gives a deterministic finite number of complete sweep/home cycles, so formal censuses do not require timeout termination;
+- only one writer may own a named run at a time; the POSIX advisory lock is automatically released if the process crashes;
+- on restart, a crash-truncated final JSON append is trimmed before new observations are written;
+- complete observations from a crashed, uncheckpointed batch may be replayed rather than skipped; `analyze.py` deduplicates them by target and grade;
+- unique-letter counts are reconciled from per-run letter markers at startup, so a crash between letter storage and the next seed checkpoint cannot permanently undercount the run;
+- exact `policy_scale` values are serialized with 17 significant digits rather than a display-rounded grade;
+- numeric CLI values are parsed strictly instead of silently turning malformed input into zero;
+- Lane-N Jacobi evaluation is unsigned-64-safe rather than casting a large prime through `int64_t`.
 
-This boundary matters because a partially evaluated target must never be serialized as a mathematical miss.
+This boundary matters because a partially evaluated target must never be serialized as a mathematical miss, and a hard crash must prefer harmless replay over skipped search space.
+
+The runtime resolves the binary directory through `/proc/self/exe` on Linux and falls back to the invoked executable path on other POSIX systems such as macOS.
 
 ## Adaptive-I policies
 
@@ -133,7 +144,7 @@ Run controls:
 --home-only
 ```
 
-The `probe` and `solve` commands inherit a named run's saved grade unless explicit grade flags are supplied.
+The `probe` and `solve` commands inherit a named run's saved grade unless explicit grade flags are supplied. `--random` only chooses the initial sweep cursor for a new named run; it is ignored on an existing run.
 
 ## Output
 
@@ -157,7 +168,7 @@ letters/GRADES.jsonl
 
 so the identity of the prime/event is not confused with the strength of the finite experiment that observed it.
 
-The state counter distinguishes observations from unique letters. `analyze.py` additionally deduplicates overlapping sweep/home observations by target and grade.
+The state counter distinguishes observations from unique letters. `analyze.py` additionally deduplicates overlapping sweep/home observations and crash-replayed observations by target and grade.
 
 ## Analyze the X-ray stream
 
@@ -178,6 +189,8 @@ K_{\mathrm{obs}}(X)=\max\{k_I^*(p):p\le X\text{ observed}\},
 \]
 
 including a separate `R` record sequence.
+
+If a hard crash leaves a partial final JSON append, the analyzer ignores only that incomplete EOF record and reports that it did so. An invalid complete record remains a hard error.
 
 ```sh
 python3 analyze.py --run default
@@ -201,7 +214,31 @@ python3 analyze.py --run formal \
 
 The analyzer reports how many observed I depths violate the proposed policy, plus the first and worst finite failure. A policy that survives remains an empirical envelope, not a theorem.
 
+It also computes, automatically, a **conservative finite observed scale** for each built-in policy family:
+
+\[
+c_{\mathrm{obs}}
+=\max_{p\ \mathrm{observed}}
+\frac{k_I^*(p)}{B(p)},
+\]
+
+where `B(p)` is `log p`, `(log p)^2`, or the spectrum-weighted logarithmic basis. It reports both the all-target and `R`-only scale and the exact prime that forces each maximum. These are calibration statistics only, not asymptotic statements.
+
 This is the empirical-to-theorem bridge: measure the hidden depth distribution, track new records, fit candidate envelopes, then try to destroy them before attempting a proof with the defect/spectrum machinery.
+
+## CI regression gate
+
+`.github/workflows/cbx-kernel.yml` builds and exercises CBX on both Linux and macOS. The gate checks:
+
+- clean build and self-test;
+- analyzer syntax;
+- the root `./centl es cbx` launcher;
+- the known 2521 X-ray semantics;
+- a deterministic finite census;
+- analyzer output;
+- immutable named grades.
+
+Runtime state, observations, letter markers and the built binary remain ignored artifacts rather than source changes.
 
 ## First clean census
 
