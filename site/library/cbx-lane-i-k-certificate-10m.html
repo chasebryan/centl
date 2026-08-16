@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exact finite CBX certificate: the minimal signed-box Lane-I ceiling for all Mordell-hard primes through 10,000,000 is K_I=107, witnessed by p=8,803,369.">
+  <title>CBX finite Lane-I K certificate — 10,000,000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-lane-i-k-certificate-10m.html">
+  <meta name="robots" content="index,follow">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Finite Lane-I K certificate</h1><p>10,000,000 · K<sub>I</sub><sup>min</sup> = 107</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="cbis-k-parameter-status.html">K/search-grade audit</a></li>
+        <li><a href="cbx-initial-xray-census.html">Initial X-ray census</a></li>
+        <li><a href="cbx-lane-i-overlap-10m.html">10M overlap graph</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős–Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Exact finite certificate</p>
+          <p class="dek">The smallest admissible signed-box Lane-I ceiling sufficient for every Mordell-hard prime through 10,000,000 is 107.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-LANE-I-K-CERTIFICATE-10M.md">Canonical repository note</a></p>
+        </header>
+        <div class="paper-body">
+          <p class="notice"><strong>Claim boundary:</strong> this is a finite <em>Lane-I</em> certificate. It is not a universal K law, not the minimum complete CBX grade, and not automatically the minimum shared cbis scalar K.</p>
+
+          <h2>Certificate</h2>
+          <div class="math" role="math">K_I^{min}(10^7)=107.</div>
+          <p>The finite target universe contains <strong>20,513</strong> Mordell-hard primes. Every one has a signed-box first hit by 107.</p>
+
+          <h2>Why 107 is minimal</h2>
+          <p>The unique record target is</p>
+          <div class="math" role="math">p=8,803,369,\qquad k_I^*(p)=107.</div>
+          <p>That prime has no admissible Lane-I hit through 103. Since 103 is the previous admissible ceiling, 103 is insufficient while 107 is sufficient.</p>
+
+          <h2>The record-prime gauntlet</h2>
+          <p>After k=59, every other hard prime through 10M is already covered. The record prime survives 63, 67, 71, 75, 79, 83, 87, 91, 95, 99 and 103, then hits at 107.</p>
+
+          <h2>Why this is not “the cbis K”</h2>
+          <p>cbis exposes one scalar K but feeds it to both signed-box Lane I and López Lane L. CBX separates the finite grade as <code>Γ=(F,K_I,E_N,A_L)</code>. This page certifies only the <code>K_I</code> coordinate.</p>
+
+          <h2>Reproduce</h2>
+          <pre><code>./centl es cbx certify-i \
+  --hi 10000000 \
+  --i-max 400 \
+  --segment 1000000 \
+  --json</code></pre>
+          <p>The certificate command cross-checks independent p-major and shift-major exact first-hit maps and hashes the canonical finite sets.</p>
+
+          <h2>Provenance</h2>
+          <p>The underlying publication-grade exact first-hit map is preserved in Fedora Actions run <code>31928217803</code>, artifact <code>9258483327</code>.</p>
+          <pre><code>canonical hit-map SHA-256:
+0355a90d4956a6023514f7d1fad2d4767ac32cb41c29ac5075e7484061863b15</code></pre>
+
+          <hr>
+          <p><strong>Erdős–Straus remains open.</strong> This is an exact finite Lane-I ceiling certificate.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
