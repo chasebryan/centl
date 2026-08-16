@@ -1,0 +1,23 @@
+name: Erdős–Straus character routing reciprocity barrier
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/CHARACTER-ROUTING-RECIPROCITY-BARRIER.md"
+      - "research/erdos-straus/verify_character_routing_reciprocity_barrier.py"
+      - ".github/workflows/erdos-straus-character-routing-reciprocity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reciprocity identity regression
+        run: python3 research/erdos-straus/verify_character_routing_reciprocity_barrier.py --max-k 5000 --max-q 500 --json
