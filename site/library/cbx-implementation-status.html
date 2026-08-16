@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Implementation status for cbx.kernel: finite search grades, crash-preserving runtime semantics, exact arithmetic, analyzer envelopes and CI boundaries.">
+  <title>CBX implementation status — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-implementation-status.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cbx-implementation-status.html">
+  <meta property="og:title" content="CBX implementation status — FCF">
+  <meta property="og:description" content="How the CB X-ray Kernel preserves finite-grade semantics, crash recovery, exactness and adaptive-K falsification without changing cbis.kernel production duties.">
+  <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CBX implementation status</h1><p>ES+ · CB X-ray Kernel 0.1.0</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="cbis-k-parameter-status.html">K/search-grade audit</a></li>
+        <li><a href="cbx-initial-xray-census.html">Initial CBX census</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős–Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Implementation note</p>
+          <p class="dek">CBX is a separate X-ray research kernel: same mathematical finite cover order, independent hidden-lane measurement, stronger preservation semantics.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md">Canonical source note in the repository</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Status:</strong> active experimental research kernel implementation</p>
+          <p><strong>Production boundary:</strong> <code>cbis.kernel 1.2.0</code> remains the production letter engine.</p>
+          <p class="notice"><strong>Claim boundary:</strong> this page records software and finite-search semantics. It does not establish an adaptive K law and does not prove Erdős–Straus.</p>
+
+          <h2>Separate job, separate state</h2>
+          <p><code>cbis.kernel</code> asks whether the production cover disposes of a hard prime. <code>cbx.kernel</code> asks what every lane would have done independently, even when W already solved the target. The production order remains <code>W → I → N → L</code>; CBX merely X-rays underneath it.</p>
+
+          <h2>Finite grade</h2>
+          <div class="math" role="math">\Gamma=(F,K_I,E_N,A_L)</div>
+          <p>The default grade is <code>(11,400,300,400)</code>. Named run grades are immutable. A different finite strength requires another run name.</p>
+
+          <h2>Crash preservation</h2>
+          <ul>
+            <li>An entered target finishes all lane measurements before SIGINT/SIGTERM is honored.</li>
+            <li>Sweep resumes after the last fully processed integer; home resumes at the first unprocessed <code>S</code>.</li>
+            <li>A hard crash may replay an uncheckpointed batch, but it does not skip it.</li>
+            <li>A crash-truncated final JSON append is trimmed on restart; the analyzer also tolerates only that incomplete EOF case.</li>
+            <li>One writer owns a named run at a time. The POSIX lock is released automatically if the process dies.</li>
+            <li>Unique-letter counts are reconciled from durable per-run markers.</li>
+          </ul>
+
+          <h2>Exactness boundary</h2>
+          <p>At the same finite grade CBX uses the same mathematical W/I/N/L predicates and ordering as cbis. CBX intentionally does not reproduce cbis’s eventual bounded-factorization failure mode: it uses deterministic 64-bit Miller–Rabin and Pollard-rho factorization. Its external-NR Jacobi path is also unsigned-64-safe.</p>
+
+          <h2>Adaptive-K research loop</h2>
+          <p>The analyzer tracks the observed first-depth frontier and can directly falsify candidate rules such as <code>K(p)=ceil(c log p)</code> or <code>K(p)=ceil(c (log p)^2)</code>.</p>
+          <p>It also computes the conservative finite calibration</p>
+          <div class="math" role="math">c_{obs}=\max_{p\ observed} k_I^*(p)/B(p)</div>
+          <p>for all targets and separately inside R, together with the exact prime forcing each maximum. These are finite calibration statistics only.</p>
+
+          <h2>First clean census</h2>
+          <p>The deterministic default-grade census reached a sweep cursor of <strong>234,540,000</strong>, recorded <strong>401,752</strong> Mordell-hard-prime X-rays and produced zero production letters. The finite observed Lane-I record was <strong>107</strong> at <strong>p=8,803,369</strong>; inside R the Lane-I p99 was 27.</p>
+          <p>The deliberately aggressive rule <code>K(p)=ceil(2 log p)</code> already fails 244 of 102,502 measured R targets in that corpus.</p>
+
+          <h2>Regression gate</h2>
+          <p>A dedicated GitHub Actions workflow builds and exercises CBX on Linux and macOS, including the root launcher, the known <code>2521</code> X-ray, a deterministic finite census, analyzer parsing and immutable-grade rejection.</p>
+
+          <h2>Next targets</h2>
+          <ol>
+            <li>Accumulate deeper fixed-K corpora, especially inside R.</li>
+            <li>Archive publication-grade raw streams outside git with checksums.</li>
+            <li>Correlate new first-depth records with factor structure, box size, spectrum, defects and López depth.</li>
+            <li>Keep trying to break candidate K envelopes before attempting a theorem.</li>
+            <li>Investigate the still-unimplemented true inverse orientation <code>k → C → p</code>.</li>
+          </ol>
+
+          <hr>
+          <p><strong>Erdős–Straus remains open.</strong> CBX is an X-ray instrument, not a proof engine.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
