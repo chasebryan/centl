@@ -1,0 +1,25 @@
+name: Route-B joint k31 k47 seam
+
+on:
+  push:
+    branches:
+      - agent/route-b-joint-k31-k47-seam
+  pull_request:
+    paths:
+      - 'research/erdos-straus/ROUTE-B-JOINT-K31-K47-SEAM.md'
+      - 'research/erdos-straus/verify_route_b_joint_k31_k47_seam.py'
+      - '.github/workflows/route-b-joint-k31-k47-seam.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Route-B joint mode/seam theorem
+        run: python3 research/erdos-straus/verify_route_b_joint_k31_k47_seam.py --json
