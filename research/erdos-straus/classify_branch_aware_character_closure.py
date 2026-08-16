@@ -63,10 +63,14 @@ EXPECTED_SOURCE_ALPHABET = {
     83, 107, 109, 127, 131, 151, 167, 191, 271, 383, 971,
 }
 
+# Qualifying means that a minimal routed seed either Jacobi-saturates or hits
+# Type I, regardless of whether that transition creates a new source state.
+# The first version of this assertion accidentally listed only the destinations
+# emphasized by source creation and omitted compatible composite destinations.
 EXPECTED_DESTINATIONS = {
-    3, 7, 11, 15, 19, 23, 31, 35, 39, 47, 51, 55, 71, 79, 83,
-    107, 109, 111, 127, 131, 151, 167, 171, 191, 215, 271, 383,
-    551, 971,
+    3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 79,
+    83, 91, 107, 109, 111, 127, 131, 151, 159, 167, 171, 191, 203,
+    215, 271, 327, 371, 383, 447, 551, 759, 791, 831, 971,
 }
 
 
