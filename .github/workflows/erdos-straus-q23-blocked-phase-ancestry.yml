@@ -6,6 +6,7 @@ on:
       - "research/erdos-straus/Q23-BLOCKED-PHASE-GEOMETRY-ATLAS.md"
       - "research/erdos-straus/Q23-BLOCKED-PHASE-ANCESTRY-AUDIT.md"
       - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md"
       - "research/erdos-straus/TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md"
       - "research/erdos-straus/analyze_q23_blocked_phase_geometry.py"
       - "research/erdos-straus/audit_q23_blocked_phase_ancestry.py"
