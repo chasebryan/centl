@@ -12,15 +12,23 @@ The name follows `cbap` (CB + a short method tag). It is not
 
 ## What it does
 
-For each window \((L,H]\):
+Each window is a **spectrum × lane matrix**. Rows are the three
+Mordell-hard CRT pairs from cbap. Columns are separate algorithms that
+write into one shared cover. A letter is a prime no lane marked.
 
-1. Factor every \(C\) that could produce a prime in the window.
-2. For each admissible \(k\le K\), if \(\delta_k(C)=0\), mark \(p=4C-k\).
-3. Mark the cheap window set \(W_K\) (\(4p+1\), \(p+4\), \(fab(a,b\le 11)\)).
-4. Unmarked Mordell-hard primes are letters. They are written at once.
+| lane | source | job |
+| --- | --- | --- |
+| **W** | bb / CC window | \(4p+1\), \(p+4\), \(fab(a,b\le 11)\). Runs first. |
+| **I** | ES+ signed box | \(\delta_k\) on survivors, every admissible \(k\le K\). |
+| **N** | CC / cbap NR | external-nonresidue and aligned shifts; \(k\) may exceed \(K\). |
+| **L** | Type A/B | López prime-modulus traps. A hit is a real witness. |
 
-A letter found this way is the same set member as a forward-menu letter
-at the same \(K\). The stamp does not regress.
+W kills almost every GREAT. I, N, and L only see the unmarked residual.
+The cover only grows. The letter stamp does not regress.
+
+```sh
+./cbis go --k-max 400 --step 50000
+```
 
 ## Commands
 

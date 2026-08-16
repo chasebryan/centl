@@ -5,8 +5,9 @@
  * ES+ engine. Builds the inverse signed-box cover C_K and keeps the
  * complement Λ_K. Letters only. Does not prove Erdős–Straus.
  *
- * For C with δ_k(C)=0, mark p = 4C − k. Unmarked Mordell-hard primes
- * that also miss W_K are letters. Same ES-LETTER-v1 identity as bb/cbap.
+ * Spectrum × lane matrix (cbap CRT rows × bb/CC/ES+/López columns).
+ * W first, then I/N/L only on unmarked primes. Letters = shared complement.
+ * Same ES-LETTER-v1 identity as bb/cbap. Cover only grows.
  */
 #include <inttypes.h>
 #include <signal.h>
@@ -20,9 +21,16 @@
 
 #define HARD_N 6
 static const int HARD[HARD_N] = {1, 121, 169, 289, 361, 529};
+static const int SPEC[3][2] = {{1, 121}, {169, 289}, {361, 529}};
+static const char *SPEC_NAME[3] = {"A", "B", "C"};
+#define SPEC_N 3
+#define LANE_N 4
+enum { LANE_W = 0, LANE_I = 1, LANE_NR = 2, LANE_LP = 3 };
+static const char *LANE_NAME[LANE_N] = {"W", "I", "N", "L"};
 
 #define DEFAULT_STEP 50000ull
 #define DEFAULT_KMAX 400ull
+#define NR_ELL_MAX 300ull
 
 typedef struct {
     uint64_t ps[16];
@@ -186,6 +194,34 @@ static int is_hard(uint64_t p) {
     return 0;
 }
 
+static int spectrum_of(uint64_t p) {
+    int r = (int)(p % 840);
+    for (int s = 0; s < SPEC_N; s++)
+        if (r == SPEC[s][0] || r == SPEC[s][1]) return s;
+    return -1;
+}
+
+static int jacobi64(int64_t a, uint64_t n) {
+    if (n == 0 || (n & 1) == 0) return 0;
+    a %= (int64_t)n;
+    if (a < 0) a += (int64_t)n;
+    int s = 1;
+    uint64_t aa = (uint64_t)a;
+    while (aa) {
+        while ((aa & 1) == 0) {
+            aa >>= 1;
+            uint64_t m = n & 7;
+            if (m == 3 || m == 5) s = -s;
+        }
+        uint64_t t = aa;
+        aa = n;
+        n = t;
+        if ((aa & 3) == 3 && (n & 3) == 3) s = -s;
+        aa %= n;
+    }
+    return n == 1 ? s : 0;
+}
+
 static void build_sieve(uint64_t n) {
     sieve_n = n;
     sieve = calloc(n + 1, 1);
@@ -340,39 +376,6 @@ static int factor64(uint64_t n, fac_t *f) {
     return f->n;
 }
 
-static void add_pe(fac_t *f, uint64_t p, int e) {
-    if (f->n == 16) die("too many factors");
-    f->ps[f->n] = p;
-    f->es[f->n] = e;
-    f->n++;
-}
-
-static void factor_interval(uint64_t clo, uint64_t chi, fac_t *out, uint64_t *rem) {
-    uint64_t n = chi - clo + 1;
-    for (uint64_t i = 0; i < n; i++) {
-        rem[i] = clo + i;
-        out[i].n = 0;
-    }
-    for (int pi = 0; pi < nprimes; pi++) {
-        uint64_t q = primes[pi];
-        if (q * q > chi) break;
-        uint64_t start = ((clo + q - 1) / q) * q;
-        if (start < q) start = q;
-        for (uint64_t C = start; C <= chi; C += q) {
-            uint64_t i = C - clo;
-            if (rem[i] % q) continue;
-            int e = 0;
-            while (rem[i] % q == 0) {
-                rem[i] /= q;
-                e++;
-            }
-            add_pe(&out[i], q, e);
-        }
-    }
-    for (uint64_t i = 0; i < n; i++)
-        if (rem[i] > 1) add_pe(&out[i], rem[i], 1);
-}
-
 /* ---- W_K: cheap window (GREAT; mark only) ---- */
 
 static uint64_t divisor_in_class(uint64_t n, uint64_t mod, uint64_t residue) {
@@ -467,6 +470,66 @@ static int in_window_set(uint64_t p) {
     int np = (int)(sizeof FAB_PAIRS / sizeof FAB_PAIRS[0]);
     for (int i = 0; i < np; i++)
         if (try_fab(p, FAB_PAIRS[i][0], FAB_PAIRS[i][1])) return 1;
+    return 0;
+}
+
+/* Lane I: signed-box cover at every admissible k ≤ K (recognition form of C_K). */
+static int in_signed_box_cover(uint64_t p, uint64_t K) {
+    for (uint64_t k = 3; k <= K; k += 4) {
+        if (halt_flag) return 0;
+        if (gcd64(k, p) != 1) continue;
+        if ((p + k) % 4) continue;
+        uint64_t C = (p + k) / 4;
+        fac_t f;
+        factor64(C, &f);
+        if (delta_zero(&f, C, k)) return 1;
+    }
+    return 0;
+}
+
+/* Lane N: CC/cbap external-NR shifts. May use k > K; strengthens the cover. */
+static int in_nr_cover(uint64_t p) {
+    for (int i = 0; i < nprimes; i++) {
+        uint64_t ell = primes[i];
+        if (ell < 11 || ell == p) continue;
+        if (ell > NR_ELL_MAX) break;
+        if (jacobi64((int64_t)ell, p) != -1) continue;
+        if ((ell & 3) == 3 && gcd64(ell, p) == 1 && (p + ell) % 4 == 0) {
+            uint64_t C = (p + ell) / 4;
+            fac_t f;
+            factor64(C, &f);
+            if (delta_zero(&f, C, ell)) return 1;
+        }
+        uint64_t k = (4 * ell - (p % (4 * ell))) % (4 * ell);
+        if (k == 0) k = 4 * ell;
+        if (gcd64(k, p) == 1 && (p + k) % 4 == 0) {
+            uint64_t C = (p + k) / 4;
+            fac_t f;
+            factor64(C, &f);
+            if (delta_zero(&f, C, k)) return 1;
+        }
+    }
+    return 0;
+}
+
+/* Lane L: López Type A/B prime-modulus traps. A hit is a real ES witness. */
+static int in_lopez_cover(uint64_t p, uint64_t K) {
+    for (uint64_t k = 1; k <= K; k++) {
+        uint64_t m = 4 * k - 1;
+        if (!is_prime64(m)) continue;
+        for (uint64_t e = 1; e * e <= k; e++) {
+            if (k % e) continue;
+            uint64_t ds[2] = {e, k / e};
+            int nd = (e * e == k) ? 1 : 2;
+            for (int t = 0; t < nd; t++) {
+                uint64_t d = ds[t];
+                uint64_t a = (m - (d % m)) % m;
+                uint64_t b = (m - ((4 * d) % m)) % m;
+                uint64_t r = p % m;
+                if (r == a || r == b) return 1;
+            }
+        }
+    }
     return 0;
 }
 
@@ -602,92 +665,102 @@ static void save_letter(uint64_t n, uint64_t kmax) {
     fflush(stdout);
 }
 
-static int find_prime(const uint64_t *ps, int n, uint64_t p) {
-    int lo = 0, hi = n;
-    while (lo < hi) {
-        int mid = lo + (hi - lo) / 2;
-        if (ps[mid] < p) lo = mid + 1;
-        else hi = mid;
-    }
-    return (lo < n && ps[lo] == p) ? lo : -1;
+static int mark_lane(uint8_t *marked, uint64_t cell[SPEC_N][LANE_N], int i, int spec,
+                     int lane) {
+    if (marked[i]) return 0;
+    marked[i] = 1;
+    if (spec >= 0) cell[spec][lane]++;
+    return 1;
 }
 
+/*
+ * Spectrum × lane matrix on one window.
+ *   rows  A,B,C  — Mordell-hard CRT pairs (cbap)
+ *   cols  W      — bb/CC window (4p+1, p+4, fab)
+ *         I      — ES+ signed-box C_K (recognition on survivors)
+ *         N      — CC/cbap NR-aligned shifts (k may exceed K)
+ *         L      — López prime-modulus traps
+ * W runs first. I, N, L see only unmarked primes. Shared complement = letters.
+ */
 static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
     if (hi <= lo) return;
     int cap = (int)((hi - lo) / 8 + 32);
     uint64_t *hp = malloc((size_t)cap * sizeof(uint64_t));
     uint8_t *marked = calloc((size_t)cap, 1);
-    if (!hp || !marked) die("oom window");
+    int8_t *spec_of = malloc((size_t)cap);
+    if (!hp || !marked || !spec_of) die("oom window");
     int nh = 0;
     uint64_t n0 = lo < 6 ? 6 : lo;
-    for (uint64_t n = n0 + 1; n <= hi; n++) {
+    for (uint64_t n = n0 + 1; n <= hi && !halt_flag; n++) {
         if (is_hard(n) && is_prime64(n)) {
             if (nh == cap) {
                 cap *= 2;
                 hp = realloc(hp, (size_t)cap * sizeof(uint64_t));
                 marked = realloc(marked, (size_t)cap);
-                if (!hp || !marked) die("oom window grow");
+                spec_of = realloc(spec_of, (size_t)cap);
+                if (!hp || !marked || !spec_of) die("oom window grow");
                 memset(marked + nh, 0, (size_t)(cap - nh));
             }
-            hp[nh++] = n;
+            hp[nh] = n;
+            spec_of[nh] = (int8_t)spectrum_of(n);
+            nh++;
         }
         if (n == UINT64_MAX) break;
     }
 
-    uint64_t clo = (lo + 3) / 4;
-    if (clo < 1) clo = 1;
-    uint64_t chi = (hi + K) / 4;
-    if (chi < clo) chi = clo;
-    if (chi > UINT64_MAX / 4) chi = UINT64_MAX / 4;
-    uint64_t nC = chi - clo + 1;
-    fac_t *facs = malloc((size_t)nC * sizeof(fac_t));
-    uint64_t *rem = malloc((size_t)nC * sizeof(uint64_t));
-    if (!facs || !rem) die("oom C-interval");
-    factor_interval(clo, chi, facs, rem);
-
+    uint64_t cell[SPEC_N][LANE_N];
+    memset(cell, 0, sizeof cell);
     uint64_t marks = 0;
-    for (uint64_t k = 3; k <= K; k += 4) {
-        for (uint64_t i = 0; i < nC; i++) {
-            uint64_t C = clo + i;
-            if (!delta_zero(&facs[i], C, k)) continue;
-            if (C > (UINT64_MAX - k) / 4) continue;
-            uint64_t p = 4 * C - k;
-            if (p <= lo || p > hi) continue;
-            int ix = find_prime(hp, nh, p);
-            if (ix >= 0 && !marked[ix]) {
-                marked[ix] = 1;
-                marks++;
-            }
-        }
+
+    /* Lane W — cheap, almost all GREATs die here. */
+    for (int i = 0; i < nh && !halt_flag; i++) {
+        if (in_window_set(hp[i]))
+            marks += (uint64_t)mark_lane(marked, cell, i, spec_of[i], LANE_W);
     }
 
-    int letters_here = 0;
-    for (int i = 0; i < nh; i++) {
-        if (marked[i]) {
-            seed->dropped++;
-            continue;
-        }
-        if (in_window_set(hp[i])) {
-            marked[i] = 1;
-            seed->dropped++;
-            marks++;
-            continue;
-        }
-        printf("TARGET IDENTIFIED  n=%" PRIu64 "  (outside C_K)\n", hp[i]);
+    /* Survivors: I then N then L, still per spectrum. */
+    for (int i = 0; i < nh && !halt_flag; i++) {
+        if (marked[i]) continue;
+        int sp = spec_of[i];
+        printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  (missed W)\n", hp[i],
+               sp >= 0 ? SPEC_NAME[sp] : "?");
         fflush(stdout);
+        if (in_signed_box_cover(hp[i], K)) {
+            marks += (uint64_t)mark_lane(marked, cell, i, sp, LANE_I);
+            continue;
+        }
+        if (in_nr_cover(hp[i])) {
+            marks += (uint64_t)mark_lane(marked, cell, i, sp, LANE_NR);
+            continue;
+        }
+        if (in_lopez_cover(hp[i], K)) {
+            marks += (uint64_t)mark_lane(marked, cell, i, sp, LANE_LP);
+            continue;
+        }
         save_letter(hp[i], K);
         seed->letters_found++;
-        letters_here++;
     }
+
+    for (int i = 0; i < nh; i++)
+        if (marked[i]) seed->dropped++;
     seed->covered += marks;
-    (void)letters_here;
-    free(facs);
-    free(rem);
+
+    printf("cbis  matrix   ");
+    for (int lane = 0; lane < LANE_N; lane++) {
+        printf("%s[", LANE_NAME[lane]);
+        for (int s = 0; s < SPEC_N; s++) {
+            printf("%s%" PRIu64 "%s", SPEC_NAME[s], cell[s][lane], s + 1 < SPEC_N ? " " : "");
+        }
+        printf("]%s", lane + 1 < LANE_N ? "  " : "\n");
+    }
+    fflush(stdout);
+
     free(hp);
     free(marked);
+    free(spec_of);
 }
 
-static void cmd_go(int want_random) {
+static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg) {
     seed_t seed;
     int have = access(seed_path, F_OK) == 0;
     if (have) {
@@ -702,14 +775,15 @@ static void cmd_go(int want_random) {
         seed = default_seed(0);
         printf("cbis: new session, start 0\n");
     }
+    if (kmax_arg) seed.kmax = kmax_arg;
+    if (!step) step = DEFAULT_STEP;
     save_seed(&seed);
-    printf("cbis.kernel  ES+ inverse sieve  LETTER only\n");
-    printf("  start %" PRIu64 "  scanned %" PRIu64 "  K=%" PRIu64 "\n", seed.start_factor,
-           seed.scanned_through, seed.kmax);
+    printf("cbis.kernel  ES+ matrix  LETTER only\n");
+    printf("  spectra A/B/C  lanes W(window) I(signed-box) N(NR) L(López)\n");
+    printf("  start %" PRIu64 "  scanned %" PRIu64 "  K=%" PRIu64 "  step=%" PRIu64 "\n",
+           seed.start_factor, seed.scanned_through, seed.kmax, step);
     printf("  letters/%s  (Ctrl+C stops and saves)\n", letters_dir);
     fflush(stdout);
-
-    uint64_t step = DEFAULT_STEP;
     while (!halt_flag) {
         uint64_t lo = seed.scanned_through;
         uint64_t hi = lo + step;
@@ -753,14 +827,9 @@ static void cmd_letters(void) {
 static int in_cover_forward(uint64_t p, uint64_t K) {
     if (!is_hard(p) || !is_prime64(p)) return 0;
     if (in_window_set(p)) return 1;
-    for (uint64_t k = 3; k <= K; k += 4) {
-        if ((p + k) % 4) continue;
-        if (gcd64(k, p) != 1) continue;
-        uint64_t C = (p + k) / 4;
-        fac_t f;
-        factor64(C, &f);
-        if (delta_zero(&f, C, k)) return 1;
-    }
+    if (in_signed_box_cover(p, K)) return 1;
+    if (in_nr_cover(p)) return 1;
+    if (in_lopez_cover(p, K)) return 1;
     return 0;
 }
 
@@ -832,6 +901,7 @@ static void usage(void) {
             "  cbis                 same as go (start 0, or resume)\n"
             "  cbis go              start at 0 the first time; then resume\n"
             "  cbis go --random     first session at a random n; later resumes\n"
+            "  cbis go --k-max K --step N\n"
             "  cbis status\n"
             "  cbis letters\n"
             "  cbis solve N\n"
@@ -848,6 +918,8 @@ int main(int argc, char **argv) {
     const char *cmd = "go";
     int want_random = 0;
     uint64_t arg = 0;
+    uint64_t opt_kmax = 0;
+    uint64_t opt_step = 0;
     int i = 1;
     if (argc > 1 && argv[1][0] != '-') {
         cmd = argv[1];
@@ -859,6 +931,10 @@ int main(int argc, char **argv) {
     }
     for (; i < argc; i++) {
         if (!strcmp(argv[i], "--random")) want_random = 1;
+        else if (!strcmp(argv[i], "--k-max") && i + 1 < argc)
+            opt_kmax = strtoull(argv[++i], NULL, 10);
+        else if (!strcmp(argv[i], "--step") && i + 1 < argc)
+            opt_step = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
             usage();
             return 0;
@@ -869,7 +945,7 @@ int main(int argc, char **argv) {
     }
 
     if (!strcmp(cmd, "go") || !strcmp(cmd, "continue")) {
-        cmd_go(want_random);
+        cmd_go(want_random, opt_step, opt_kmax);
         return 0;
     }
     if (!strcmp(cmd, "status")) {
