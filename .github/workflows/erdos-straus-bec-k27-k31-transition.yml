@@ -5,6 +5,9 @@ on:
     paths:
       - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS.md"
       - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md"
+      - "research/erdos-straus/assets/bryan-entanglement-compass.svg"
+      - "research/erdos-straus/cbx.kernel/DESIGN-LANGUAGE.md"
       - "research/erdos-straus/BEC-K27-K31-TRANSITION-THEOREM.md"
       - "research/erdos-straus/BEC-K27-K35-TRANSITION-CHAIN.md"
       - "research/erdos-straus/K27-SURVIVOR-GRAMMAR.md"
@@ -40,3 +43,12 @@ jobs:
         run: python3 research/erdos-straus/verify_bec_k27_k31_transition.py --json
       - name: Exact BEC transition chain through k35
         run: python3 research/erdos-straus/verify_bec_k27_k35_transition_chain.py --json
+      - name: Compass design contract is present
+        run: |
+          test -s research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          test -s research/erdos-straus/assets/bryan-entanglement-compass.svg
+          test -s research/erdos-straus/cbx.kernel/DESIGN-LANGUAGE.md
+          grep -F 'UL = + / − / −' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'UR = + / + / −' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'DL = − / − / +' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'DR = − / + / +' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
