@@ -1,0 +1,31 @@
+name: Erdős–Straus k=11 character-to-companion routing
+
+on:
+  push:
+    branches:
+      - agent/cbx-k11-companion-routing
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K11-CHARACTER-COMPANION-ROUTING.md'
+      - 'research/erdos-straus/classify_k11_routed_companion_states.py'
+      - 'research/erdos-straus/verify_k11_routed_companion_states.py'
+      - '.github/workflows/erdos-straus-k11-companion-routing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reproduce exact routing and routed closures
+        run: |
+          python3 research/erdos-straus/classify_k11_routed_companion_states.py --json
+      - name: Independent direct-factorization regression
+        run: |
+          python3 research/erdos-straus/verify_k11_routed_companion_states.py --limit 100000 --json
