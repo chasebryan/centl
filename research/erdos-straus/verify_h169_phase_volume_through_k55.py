@@ -101,7 +101,6 @@ def verify_k51() -> dict[str, object]:
     assert len(states) == 1403
     assert mechanisms == Counter({"I+II": 542, "I-only": 392, "miss": 244, "II-only": 225})
 
-    # Exact hits are absorbing under every future unit prime-factor occurrence.
     for state in states:
         if is_hit(k, state):
             for r in units:
@@ -111,18 +110,13 @@ def verify_k51() -> dict[str, object]:
     rows = []
     for t in range(17):
         center = (55 + 210 * t) % k
-        if math.gcd(center, k) == 1:
-            count = miss_by_center[center]
-        else:
-            count = 0
+        count = miss_by_center[center] if math.gcd(center, k) == 1 else 0
         rows.append((t, center, count))
 
     assert tuple(count for _t, _center, count in rows) == EXPECTED_51_PHASE_MISSES
     absorbed = frozenset(t for t, _center, count in rows if count == 0)
     assert absorbed == A51
 
-    # Whole nonunit phase class t=5 mod17: K=11+42t is divisible by17,
-    # d=17 divides C51^2, and d is exactly the Type-II target.
     for u in range(51):
         t = 5 + 17 * u
         Kco = 11 + 42 * t
@@ -134,8 +128,6 @@ def verify_k51() -> dict[str, object]:
 
     type_i_target = (-pow(4, -1, k)) % k
     assert type_i_target == 38
-
-    # No h169 k51 center phase is supplied by the universal {1,C,C^2} shell.
     assert all(not shell_hits(k, (55 + 210 * t) % k) for t in range(17))
 
     return {
@@ -166,10 +158,7 @@ def verify_k55() -> dict[str, object]:
     rows = []
     for t in range(11):
         center = (56 + 210 * t) % k
-        if math.gcd(center, k) == 1:
-            count = miss_by_center[center]
-        else:
-            count = 0
+        count = miss_by_center[center] if math.gcd(center, k) == 1 else 0
         rows.append((t, center, count))
 
     assert tuple(count for _t, _center, count in rows) == EXPECTED_55_PHASE_MISSES
@@ -179,14 +168,10 @@ def verify_k55() -> dict[str, object]:
     type_i_target = (-pow(4, -1, k)) % k
     assert type_i_target == 41
 
-    # t=7 is exactly the universal Type-I d=C selector.
     C7 = 56 + 210 * 7
     assert C7 % k == type_i_target
     assert (4 * C7 + 1) % k == 0
 
-    # Whole nonunit phase class t=10 mod11: L is divisible by11.
-    # The fixed factor2 in C55=14L guarantees d=44 divides C55^2,
-    # and 44 is exactly the Type-II target.
     for u in range(55):
         t = 10 + 11 * u
         L = 4 + 15 * t
@@ -223,21 +208,23 @@ def verify_phase_volume() -> dict[str, object]:
 
     modulus = math.prod(moduli)
     survivors = math.prod(survivor_sizes)
+    excluded = modulus - survivors
     assert modulus == 4_913_051
     assert survivors == 1_113_840
-    assert modulus - survivors == 3_799_211
+    assert excluded == 3_799_211
 
     fraction = Fraction(survivors, modulus)
-    assert fraction.numerator == survivors
-    assert fraction.denominator == modulus
+    assert math.gcd(survivors, modulus) == 221
+    assert fraction == Fraction(5040, 22231)
 
     return {
         "moduli": list(moduli),
         "survivor_sizes": list(survivor_sizes),
         "phase_modulus": modulus,
         "survivor_classes": survivors,
-        "excluded_classes": modulus - survivors,
-        "survivor_fraction_exact": f"{survivors}/{modulus}",
+        "excluded_classes": excluded,
+        "survivor_class_ratio": f"{survivors}/{modulus}",
+        "survivor_fraction_reduced": f"{fraction.numerator}/{fraction.denominator}",
         "survivor_fraction": float(fraction),
         "excluded_fraction": float(1 - fraction),
     }
