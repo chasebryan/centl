@@ -66,6 +66,10 @@ case "${1:-}" in
           shift
           exec python3 "$cbx_dir/analyze.py" "$@"
           ;;
+        analyze-geometry)
+          shift
+          exec python3 "$cbx_dir/analyze_geometry.py" "$@"
+          ;;
         analyze-layers)
           shift
           exec python3 "$cbx_dir/analyze_layers.py" "$@"
