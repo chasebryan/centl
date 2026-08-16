@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exact k=39 two-target signed-box classification by conjugacy with the k=35 C12 x C2 state geometry.">
+  <title>Exact two-target filter at k=39 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k39-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Exact two-target filter at k=39 — Free Computation Foundation">
+  <meta property="og:description" content="Fixed k=39 is completely classified through an exact target conjugacy with k=35.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at <code>k=39</code></h1><p>CBX corridor · exact state-space conjugacy</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About FCF</a></li><li><a href="../centl.html">CENTL</a></li></ul>
+      <h2>Research</h2><ul><li><a href="../research.html">Research library</a></li><li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li></ul>
+      <h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li></ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Erdős–Straus · CBX corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Exact fixed-shift theorem</p>
+          <p class="dek">The complete k=39 state problem is exactly conjugate to the k=35 C12 × C2 classification.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K39-TWO-TARGET-FILTER.md">Canonical research note</a> · <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/classify_k39_states.py">Machine certificate</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Status:</strong> exact computer-assisted finite-group classification. Erdős–Straus remains open.</p>
+          <h2>The conjugacy</h2>
+          <p>Modulo 39, use coordinates <code>x = 14^ε · 28^a</code> in <code>C2 × C12</code>. Hard shifted integers <code>C=(p+39)/4</code> lie in the <code>ε=0</code> subgroup. The Type-I target is <code>(1,4)</code>, while <code>-1=(1,6)</code> and Type II is <code>(1,c+6)</code>.</p>
+          <p>The automorphism <code>(ε,a) → (ε,5a)</code> fixes <code>(1,6)</code> and sends the k=35 Type-I target <code>(1,8)</code> to the k=39 target <code>(1,4)</code>. It therefore carries the complete k=35 factorization-state system and miss table bijectively onto k=39.</p>
+          <div class="math" role="math">\boxed{1298\text{ total states},\quad650\text{ hard-center states}}</div>
+          <div class="math" role="math">\boxed{418\text{ hit states},\quad232\text{ combined-miss states}}</div>
+          <h2>Character split</h2>
+          <p>The fixed-shift Jacobi law becomes <code>(13/p)=(-1)^c</code>. Both character branches occur in the exact miss table:</p>
+          <pre><code>(13/p) = +1   122 miss states
+(13/p) = -1   110 miss states</code></pre>
+          <p>The minimum outside-subgroup representative distribution is again <code>{0:92, 2:138, 4:2}</code>. This is a statement about equivalent group states, not a bound on the number of prime factors of the original integer.</p>
+          <h2>Independent 10M replay</h2>
+          <pre><code>Mordell-hard primes       20,513
+CBX k=39 hits              12,769
+state-classifier hits      12,769
+mismatches                      0</code></pre>
+          <p>After the exact corridor through k=35, 48 finite targets enter 39; 22 hit and 26 miss. Their later first-hit layers are 43, 47, 51, 55, 59, and 107. Those are finite observations only, not a universal bound.</p>
+          <p><strong>Claim boundary:</strong> fixed <code>k=39</code> is classified exactly. The global theorem still requires proving that the Legendre-prescribed sequence of miss states cannot persist indefinitely.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
