@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exact finite-group classification of the Erdős–Straus two-target signed-box shift k=35.">
+  <title>Exact two-target filter at k=35 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k35-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Exact two-target filter at k=35 — Free Computation Foundation">
+  <meta property="og:description" content="1,298 exact residue states; 232 combined-miss states; fixed k=35 completely classified.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at <code>k=35</code></h1><p>CBX corridor · exact finite-group classification</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About FCF</a></li><li><a href="../centl.html">CENTL</a></li></ul>
+      <h2>Research</h2><ul><li><a href="../research.html">Research library</a></li><li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li></ul>
+      <h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li></ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Erdős–Straus · CBX corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Exact fixed-shift theorem</p>
+          <p class="dek">The composite shift 35 is completely classified by a closed 24-element group-state system.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K35-TWO-TARGET-FILTER.md">Canonical research note</a> · <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/classify_k35_states.py">Machine certificate</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Status:</strong> exact computer-assisted finite-group classification. Erdős–Straus remains open.</p>
+          <h2>The state space</h2>
+          <p>For <code>C=(p+35)/4</code>, the unit group modulo 35 is coordinatized as <code>C12 × C2</code>. One prime-valuation occurrence gives the exact transition <code>(D,c) → (D+{0,g,2g}, c+g)</code>. Closing under every unit direction exhausts arbitrary factorization residue states without imposing any bound on <code>p</code>.</p>
+          <div class="math" role="math">\boxed{1298\text{ total states},\quad650\text{ hard-center states}}</div>
+          <div class="math" role="math">\boxed{418\text{ hit states},\quad232\text{ combined-miss states}}</div>
+          <h2>Structure of the miss table</h2>
+          <p>All 92 pure Jacobi-subgroup states miss both targets. The remaining 140 misses are non-pure. Every miss state has a state-equivalent core using at most four outside-subgroup valuation units:</p>
+          <pre><code>minimum outside units   miss states
+0                        92
+2                       138
+4                         2</code></pre>
+          <p>The two four-unit states are exceptionally thin: each divisor set contains 21 of the 24 group elements, and the Type-I and Type-II targets coincide.</p>
+          <h2>Independent 10M replay</h2>
+          <pre><code>Mordell-hard primes       20,513
+CBX k=35 hits               5,978
+state-classifier hits       5,978
+mismatches                      0</code></pre>
+          <p>After the exact corridor through <code>k=31</code>, 65 finite targets enter 35; 17 hit and 48 miss. This population statement is finite evidence only. The fixed-shift classification itself is range-free finite-group exhaustion.</p>
+          <p><strong>Claim boundary:</strong> fixed <code>k=35</code> is classified. This does not supply a universal finite shift bound or prove Erdős–Straus.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
