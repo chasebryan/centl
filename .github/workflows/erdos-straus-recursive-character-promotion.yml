@@ -5,6 +5,7 @@ on:
     paths:
       - "research/erdos-straus/RECURSIVE-CHARACTER-PROMOTION.md"
       - "research/erdos-straus/classify_recursive_character_promotion.py"
+      - "research/erdos-straus/classify_recursive_k23_repulsion.py"
       - "research/erdos-straus/verify_recursive_character_promotion.py"
       - ".github/workflows/erdos-straus-recursive-character-promotion.yml"
   workflow_dispatch:
@@ -22,5 +23,7 @@ jobs:
           python-version: "3.12"
       - name: Exact recursive closure classifier
         run: python3 research/erdos-straus/classify_recursive_character_promotion.py --max-k 5000 --max-sources 2 --json
+      - name: Recursive k23 repulsion classifier
+        run: python3 research/erdos-straus/classify_recursive_k23_repulsion.py --max-k 5000 --max-sources 2 --json
       - name: Independent ancestry-aware regression
         run: python3 research/erdos-straus/verify_recursive_character_promotion.py --json
