@@ -24,6 +24,8 @@
 #include "cbx.c"
 #undef main
 
+typedef unsigned __int128 u128;
+
 static const uint64_t INV_HARD[6] = {1, 121, 169, 289, 361, 529};
 
 static uint64_t inv_parse_u64(const char *name, const char *text) {
