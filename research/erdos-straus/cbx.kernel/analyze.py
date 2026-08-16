@@ -7,11 +7,13 @@ import collections
 import json
 import math
 import statistics
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
 ROOT = Path(__file__).resolve().parent
 POLICIES = ("log", "log2", "spectrum-log")
+SPECTRUM_MULT = {"A": 1.0, "B": 1.15, "C": 1.30}
 
 
 def percentile(xs: list[int], q: float) -> int | None:
@@ -42,15 +44,28 @@ def depth_summary(xs: list[int], total: int) -> dict[str, Any]:
     }
 
 
-def iter_records(path: Path) -> Iterable[dict[str, Any]]:
+def iter_records(path: Path, scan: dict[str, int]) -> Iterable[dict[str, Any]]:
+    """Yield complete CBX records; ignore only a final crash-truncated JSON line."""
     with path.open("r", encoding="utf-8") as fh:
-        for lineno, line in enumerate(fh, 1):
-            line = line.strip()
+        lineno = 0
+        while True:
+            line = fh.readline()
             if not line:
+                break
+            lineno += 1
+            if not line.strip():
                 continue
             try:
                 obj = json.loads(line)
             except json.JSONDecodeError as exc:
+                # A hard crash can leave exactly one partial final append. The
+                # resumed runtime trims it too, but analysis should be safe even
+                # before the run is resumed.
+                if not line.endswith("\n") and fh.read(1) == "":
+                    scan["truncated_tail_ignored"] += 1
+                    print(f"warning: ignoring crash-truncated final record at {path}:{lineno}",
+                          file=sys.stderr)
+                    break
                 raise SystemExit(f"{path}:{lineno}: invalid JSON: {exc}") from exc
             if obj.get("kernel") == "cbx.kernel":
                 yield obj
@@ -123,17 +138,19 @@ def i_record_sequence(records: list[dict[str, Any]], predicate=lambda _r: True) 
     return out
 
 
-def policy_bound(n: int, spectrum: str | None, policy: str, scale: float, cap: int | None) -> int:
+def policy_basis(n: int, spectrum: str | None, policy: str) -> float:
     lp = math.log(max(n, 3))
     if policy == "log":
-        value = scale * lp
-    elif policy == "log2":
-        value = scale * lp * lp
-    elif policy == "spectrum-log":
-        mult = {"A": 1.0, "B": 1.15, "C": 1.30}.get(spectrum, 1.0)
-        value = scale * mult * lp
-    else:
-        raise ValueError(policy)
+        return lp
+    if policy == "log2":
+        return lp * lp
+    if policy == "spectrum-log":
+        return SPECTRUM_MULT.get(spectrum, 1.0) * lp
+    raise ValueError(policy)
+
+
+def policy_bound(n: int, spectrum: str | None, policy: str, scale: float, cap: int | None) -> int:
+    value = scale * policy_basis(n, spectrum, policy)
     bound = max(3, int(math.ceil(value)))
     if cap is not None:
         bound = min(bound, cap)
@@ -176,7 +193,50 @@ def evaluate_policy(records: list[dict[str, Any]], policy: str, scale: float, ca
     }
 
 
-def summarize(records: list[dict[str, Any]], observations: int) -> dict[str, Any]:
+def empirical_scale(records: list[dict[str, Any]], policy: str,
+                    predicate=lambda _r: True) -> dict[str, Any]:
+    """Conservative observed scale c with c*basis(p) >= k_I*(p) on measured hits."""
+    tested = 0
+    worst: dict[str, Any] | None = None
+    for r in records:
+        if not predicate(r) or not r.get("I", {}).get("hit"):
+            continue
+        tested += 1
+        n = int(r["n"])
+        k = int(r["I"]["first_k"])
+        basis = policy_basis(n, r.get("spectrum"), policy)
+        if basis <= 0:
+            continue
+        ratio = k / basis
+        if worst is None or ratio > worst["required_scale"]:
+            worst = {
+                "n": n,
+                "spectrum": r.get("spectrum"),
+                "R": bool(r.get("W", {}).get("R")),
+                "k_I": k,
+                "basis": basis,
+                "required_scale": ratio,
+            }
+    return {
+        "policy": policy,
+        "tested_hits": tested,
+        "conservative_required_scale": worst["required_scale"] if worst else None,
+        "witness": worst,
+        "claim": "finite empirical envelope only",
+    }
+
+
+def empirical_envelopes(records: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        policy: {
+            "all": empirical_scale(records, policy),
+            "R": empirical_scale(records, policy, lambda r: bool(r.get("W", {}).get("R"))),
+        }
+        for policy in POLICIES
+    }
+
+
+def summarize(records: list[dict[str, Any]], observations: int, scan: dict[str, int]) -> dict[str, Any]:
     valid = [r for r in records if r.get("hard") and r.get("prime")]
     strata: dict[str, list[dict[str, Any]]] = collections.defaultdict(list)
     for r in valid:
@@ -185,13 +245,15 @@ def summarize(records: list[dict[str, Any]], observations: int) -> dict[str, Any
 
     output: dict[str, Any] = {
         "kernel": "cbx.kernel",
-        "analysis": "xray-depth-v2",
+        "analysis": "xray-depth-v3",
         "observations": observations,
         "unique_grade_targets": len(records),
         "valid_hard_prime_targets": len(valid),
         "duplicate_observations": observations - len(records),
+        "truncated_tail_ignored": scan["truncated_tail_ignored"],
         "I_record_sequence": i_record_sequence(valid),
         "I_record_sequence_R": i_record_sequence(valid, lambda r: bool(r.get("W", {}).get("R"))),
+        "empirical_envelopes": empirical_envelopes(valid),
         "strata": {},
     }
 
@@ -224,11 +286,24 @@ def print_records(label: str, seq: list[dict[str, Any]], limit: int = 12) -> Non
     print()
 
 
+def print_envelopes(report: dict[str, Any]) -> None:
+    print("conservative finite empirical K scales")
+    for policy in POLICIES:
+        row = report["empirical_envelopes"][policy]
+        a = row["all"]
+        rr = row["R"]
+        print(f"  {policy:12s} all={a['conservative_required_scale']!r} witness={a['witness']}")
+        print(f"  {'':12s} R  ={rr['conservative_required_scale']!r} witness={rr['witness']}")
+    print("  these are measured envelopes, not asymptotic claims")
+    print()
+
+
 def print_text(report: dict[str, Any]) -> None:
     print("cbx.kernel X-ray depth analysis")
     print(f"observations:           {report['observations']}")
     print(f"unique grade targets:   {report['unique_grade_targets']}")
     print(f"duplicate observations: {report['duplicate_observations']}")
+    print(f"truncated tail ignored: {report['truncated_tail_ignored']}")
     print()
     for name in ("all", "R", "fab-only", "linear", "spectrum:A", "spectrum:B", "spectrum:C"):
         s = report["strata"].get(name)
@@ -242,6 +317,7 @@ def print_text(report: dict[str, Any]) -> None:
         print()
     print_records("I running frontier (all)", report["I_record_sequence"])
     print_records("I running frontier (R)", report["I_record_sequence_R"])
+    print_envelopes(report)
     if "candidate_policy" in report:
         p = report["candidate_policy"]
         print(f"candidate K policy: {p['policy']} scale={p['scale']} cap={p['cap']}")
@@ -263,14 +339,17 @@ def main() -> int:
                     help="test policy only on the R stratum")
     args = ap.parse_args()
 
-    if args.candidate_scale <= 0:
-        raise SystemExit("--candidate-scale must be positive")
+    if not math.isfinite(args.candidate_scale) or args.candidate_scale <= 0:
+        raise SystemExit("--candidate-scale must be finite and positive")
+    if args.candidate_cap is not None and args.candidate_cap < 3:
+        raise SystemExit("--candidate-cap must be >= 3")
     path = args.input or (ROOT / "observations" / f"{args.run}.jsonl")
     if not path.is_file():
         raise SystemExit(f"no observation file: {path}")
 
-    records, observations = dedupe(iter_records(path))
-    report = summarize(records, observations)
+    scan = {"truncated_tail_ignored": 0}
+    records, observations = dedupe(iter_records(path, scan))
+    report = summarize(records, observations, scan)
     report["run"] = args.run
     report["input"] = str(path)
     if args.candidate_policy:
