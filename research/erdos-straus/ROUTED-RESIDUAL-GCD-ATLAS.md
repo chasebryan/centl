@@ -1,11 +1,11 @@
 # Routed residual gcd atlas after multi-source QR saturation
 
-**Status:** exact range-free residual-coupling theorem plus current synergy atlas  
+**Status:** exact range-free residual-coupling theorem plus baseline 8-pair/6-triple synergy atlas  
 **Date:** 2026-08-16  
 **Primary classifier:** `classify_routed_residual_gcd_atlas.py`  
 **Independent regression:** `verify_routed_residual_gcd_atlas.py`  
 **Depends on:** `MULTISOURCE-QR-SATURATION.md`, class-conditioned seed law, fixed-shift QR-support atlas  
-**Claim boundary:** this is a cross-shift support-allocation theorem. It does not prove that one of the shifts must hit, does not give a universal shift ceiling, and does not prove Erdős-Straus.
+**Claim boundary:** the affine/gcd statements are range-free on every named routed branch. The finite atlas in this document is deliberately scoped to the original 8 pair and 6 triple synergies proved in `MULTISOURCE-QR-SATURATION.md`; it is not a completeness claim for the later recursively expanded source inventory. This does not prove that one of the shifts must hit, does not give a universal shift ceiling, and does not prove Erdős-Straus.
 
 ## 1. The missing object after saturation
 
@@ -76,13 +76,13 @@ any common divisor divides the determinant
 
 Because divisibility by every divisor of that determinant is periodic modulo the determinant, scanning one complete determinant period gives the exact range-free gcd value set for that residual pair.
 
-## 3. Current exact atlas
+## 3. Baseline 8/6 exact atlas
 
-Applying this to the 8 two-source and 6 three-source QR-saturation synergies already proved in `MULTISOURCE-QR-SATURATION.md` gives:
+Applying this to the original 8 two-source and 6 three-source QR-saturation synergies proved in `MULTISOURCE-QR-SATURATION.md` gives:
 
 - all **8 of 8 pair synergies** have coprime source residuals;
 - **5 of 6 triple synergies** have all source residuals pairwise coprime;
-- across every source-source and source-destination residual pair in the current atlas, the only nontrivial gcd values that ever occur are
+- across every source-source and source-destination residual pair in this baseline atlas, the only nontrivial gcd values that ever occur are
 
 `2, 3, 13, 17`;
 
@@ -92,6 +92,8 @@ Applying this to the 8 two-source and 6 three-source QR-saturation synergies alr
   - `h=529`, `q11+q23 -> k19`.
 
 Thus on those three branches no rational prime can occur in two of the seed-stripped residuals at all.
+
+The later provenance-aware recursive character graph proves additional conditional sources. Those later sources are outside this pinned 8/6 corpus and require a separate expanded residual-coupling pass rather than being silently folded into the counts above.
 
 ## 4. Flagship k=19 triad
 
@@ -229,19 +231,19 @@ Since `A=6r+1`, `gcd(A,R)=1`; also `gcd(A,B)=1`. The only possible nontrivial ov
 
 So even the non-completely-coprime low-shift synergy has only a single exceptional overlap prime.
 
-## 8. Why this changes the next search
+## 8. Strategic meaning after the recursive expansion
 
-The saturation program has now crossed another method boundary.
+The saturation program has crossed another method boundary.
 
-It is no longer enough to ask whether routed factors fill the destination QR subgroup. On the strongest branches, the source and destination residuals are already forced onto disjoint prime supports. A successful contradiction must exploit something that survives both QR support and residual coprimality.
+It is no longer enough to ask whether routed factors fill the destination QR subgroup. On the strongest baseline branches, the source and destination residuals are already forced onto disjoint prime supports. Meanwhile the landed recursive promotion and source-independent repulsion theorems create additional conditional source routes and terminal branches.
 
-The highest-value next experiments are therefore:
+The next residual-allocation work should therefore:
 
-1. periodic route valuations, especially repeated q=11 routing into the `19,63,107,...` destination class;
-2. exact higher-order character labels on the destination residual, used as cross-shift routing metadata rather than as a same-destination QR refinement;
-3. valuation constraints on the tiny allowed overlap primes `2,3,13,17` in the non-coprime atlas branches;
-4. exact Type-II target formation at later periodic destinations, with the `k=107` record as the first adversarial anchor.
+1. apply the affine/determinant gcd method to recursive source synergies with exact provenance preserved;
+2. intersect residual overlap primes with the landed periodic route valuation ladder;
+3. combine residual allocation with source-independent repulsion so a branch is killed as soon as either its center or its rational-prime allocation becomes impossible;
+4. retain `p=8,803,369` and its residual `8699` as an adversarial anchor for any proposed strengthening.
 
-The important negative result is equally clear: a higher-order character inside QR(19) cannot by itself make the k=19 QR-saturated divisor set hit a quadratic-nonresidue target. Its value is in constraining or routing the residual across shifts.
+The important negative result also remains: a higher-order character inside QR(19) cannot by itself make the k=19 QR-saturated divisor set hit a quadratic-nonresidue target. Its value is in constraining or routing the residual across shifts.
 
 Erdős-Straus remains open.
