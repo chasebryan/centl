@@ -1,6 +1,6 @@
 # cbis.kernel
 
-**CB Inverse Sieve.** The ES+ engine. Entirely C.
+**CB Inverse Sieve.** The ES+ engine. Entirely C. **1.2.0** ([release](https://github.com/chasebryan/centl/releases/tag/cbis-1.2.0)).
 
 One process, two walks, one cover.
 

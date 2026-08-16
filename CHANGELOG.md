@@ -10,6 +10,7 @@
   dump. `--scroll` or a pipe keeps the line log. `NO_COLOR` is
   honored. A 2:35 live-panel demo sits on the research README and
   on the public site (`site/assets/cbis-kernel-esp-demo.mp4`).
+  Release tag: `cbis-1.2.0`.
 - ES+ records the letter equation: \(\Lambda_K\) is the complement of
   the inverse signed-box cover. The note is
   `research/erdos-straus/ES-plus/LETTER-EQUATION.md`. Mathematics only.
