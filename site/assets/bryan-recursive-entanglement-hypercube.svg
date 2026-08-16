@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
+  <title id="title">Bryan Recursive Entanglement Calculus directed entanglement hypercube</title>
+  <desc id="desc">A luminous tesseract diagram showing positive, negative, upward expansion, and downward excavation directions for the Bryan Recursive Entanglement Calculus.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02060b"/>
+      <stop offset="0.55" stop-color="#030810"/>
+      <stop offset="1" stop-color="#000205"/>
+    </linearGradient>
+    <filter id="glowWhite" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowCyan" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#a9efff"/>
+    </marker>
+    <style>
+      .serif{font-family:Georgia,'Times New Roman',serif}.title{fill:#fff;font-size:49px}.sub{fill:#a9efff;font-size:28px;font-style:italic}.label{fill:#fff;font-size:31px}.small{fill:#d7f8ff;font-size:19px}.tiny{fill:#d7f8ff;font-size:16px}.coord{fill:#fff;font-size:19px}.outer{fill:none;stroke:#f8fbff;stroke-width:3}.inner{fill:none;stroke:#a9efff;stroke-width:3}.hidden{fill:none;stroke:#8de8ff;stroke-width:2.2;stroke-dasharray:3 7}.axis{fill:none;stroke:#8de8ff;stroke-width:2.3;opacity:.9}.nodeW{fill:#fff}.nodeC{fill:#bdf4ff}.legend{fill:#dff9ff;font-size:17px}
+    </style>
+  </defs>
+
+  <rect width="1254" height="1254" fill="url(#bg)"/>
+
+  <text x="627" y="70" text-anchor="middle" class="serif title">Bryan Recursive Entanglement Calculus</text>
+  <text x="627" y="117" text-anchor="middle" class="serif sub">Directed entanglement hypercube</text>
+
+  <!-- directional field -->
+  <line x1="627" y1="560" x2="627" y2="222" class="axis" marker-end="url(#arrow)"/>
+  <line x1="627" y1="676" x2="627" y2="956" class="axis" marker-end="url(#arrow)"/>
+  <line x1="520" y1="596" x2="191" y2="596" class="axis" marker-end="url(#arrow)"/>
+  <line x1="734" y1="596" x2="1063" y2="596" class="axis" marker-end="url(#arrow)"/>
+  <line x1="627" y1="224" x2="627" y2="952" class="hidden" opacity=".7"/>
+
+  <text x="627" y="181" text-anchor="middle" class="serif label">E ↑ ⊕/⊖</text>
+  <text x="627" y="216" text-anchor="middle" class="serif small" font-style="italic">upward expansion</text>
+  <text x="627" y="1003" text-anchor="middle" class="serif label">E ↓ ⊖/⊕</text>
+  <text x="627" y="1038" text-anchor="middle" class="serif small" font-style="italic">downward excavation</text>
+  <text x="67" y="573" class="serif label">E ← ⊖</text>
+  <text x="67" y="611" class="serif small" font-style="italic">negative</text>
+  <text x="67" y="638" class="serif small" font-style="italic">propagation</text>
+  <text x="1086" y="573" class="serif label">E → ⊕</text>
+  <text x="1086" y="611" class="serif small" font-style="italic">positive</text>
+  <text x="1086" y="638" class="serif small" font-style="italic">propagation</text>
+
+  <!-- outer cube -->
+  <g filter="url(#glowWhite)">
+    <path class="outer" d="M286 296 H968 V886 H286 Z"/>
+    <circle class="nodeW" cx="286" cy="296" r="8"/><circle class="nodeW" cx="968" cy="296" r="8"/>
+    <circle class="nodeW" cx="286" cy="886" r="8"/><circle class="nodeW" cx="968" cy="886" r="8"/>
+  </g>
+
+  <!-- inner cube -->
+  <g filter="url(#glowCyan)">
+    <path class="inner" d="M468 451 H786 V748 H468 Z"/>
+    <circle class="nodeC" cx="468" cy="451" r="7"/><circle class="nodeC" cx="786" cy="451" r="7"/>
+    <circle class="nodeC" cx="468" cy="748" r="7"/><circle class="nodeC" cx="786" cy="748" r="7"/>
+  </g>
+
+  <!-- connecting hypercube edges -->
+  <g filter="url(#glowCyan)">
+    <path class="inner" d="M286 296 L468 451 M968 296 L786 451 M286 886 L468 748 M968 886 L786 748"/>
+    <path class="inner" d="M286 296 L456 510 M968 296 L798 510 M286 886 L456 687 M968 886 L798 687" opacity=".75"/>
+  </g>
+
+  <!-- recursive inner embedding -->
+  <g filter="url(#glowCyan)">
+    <path class="inner" d="M532 536 H722 V665 H532 Z" opacity=".95"/>
+    <path class="inner" d="M468 451 L532 536 M786 451 L722 536 M468 748 L532 665 M786 748 L722 665" opacity=".9"/>
+    <circle class="nodeC" cx="532" cy="536" r="6"/><circle class="nodeC" cx="722" cy="536" r="6"/>
+    <circle class="nodeC" cx="532" cy="665" r="6"/><circle class="nodeC" cx="722" cy="665" r="6"/>
+  </g>
+  <path class="hidden" d="M532 536 V665 M722 536 V665 M532 665 H722" opacity=".85"/>
+
+  <!-- coordinate annotations -->
+  <text x="227" y="281" class="serif coord">(−1, 1, 1, 1)</text>
+  <text x="944" y="281" class="serif coord">(1, 1, 1, 1)</text>
+  <text x="219" y="918" class="serif coord">(−1, −1, −1, 1)</text>
+  <text x="912" y="918" class="serif coord">(1, −1, −1, 1)</text>
+  <text x="459" y="430" class="serif tiny">(−1, 1, −1, −1)</text>
+  <text x="690" y="430" class="serif tiny">(1, 1, −1, −1)</text>
+  <text x="451" y="777" class="serif tiny">(−1, −1, −1, −1)</text>
+  <text x="684" y="777" class="serif tiny">(1, −1, −1, −1)</text>
+
+  <!-- lower research legend -->
+  <text x="129" y="1047" class="serif small" fill="#fff">Recursive Axes (Dimensions)</text>
+  <text x="151" y="1084" class="serif tiny">x₁  →  E → ⊕   (positive)</text>
+  <text x="151" y="1112" class="serif tiny">x₂  ↑  E ↑ ⊕/⊖   (expansion)</text>
+  <text x="151" y="1140" class="serif tiny">x₃  ←  E ← ⊖   (negative)</text>
+  <text x="151" y="1168" class="serif tiny">x₄  ↓  E ↓ ⊖/⊕   (excavation)</text>
+  <g class="axis" stroke-width="2">
+    <line x1="79" y1="1135" x2="79" y2="1068" marker-end="url(#arrow)"/>
+    <line x1="79" y1="1135" x2="128" y2="1135" marker-end="url(#arrow)"/>
+    <line x1="79" y1="1135" x2="42" y2="1176" marker-end="url(#arrow)"/>
+    <line x1="79" y1="1135" x2="79" y2="1201" marker-end="url(#arrow)"/>
+  </g>
+  <text x="87" y="1074" class="serif tiny">x₂</text><text x="125" y="1124" class="serif tiny">x₁</text>
+  <text x="19" y="1190" class="serif tiny">x₃</text><text x="87" y="1208" class="serif tiny">x₄</text>
+
+  <rect x="461" y="1090" width="334" height="119" rx="6" fill="#04111b" stroke="#35d5e9"/>
+  <text x="628" y="1128" text-anchor="middle" class="serif small">State Space: S ⊂ ℝ⁴</text>
+  <text x="628" y="1162" text-anchor="middle" class="serif tiny">Vertices = Pure States</text>
+  <text x="628" y="1190" text-anchor="middle" class="serif tiny">Edges = Entanglement Channels</text>
+
+  <g transform="translate(834 1064)">
+    <line x1="0" y1="0" x2="55" y2="0" class="outer"/><text x="75" y="6" class="serif legend">Outer cube: boundary of state space</text>
+    <line x1="0" y1="32" x2="55" y2="32" class="inner"/><text x="75" y="38" class="serif legend">Inner cube: recursive embedding</text>
+    <line x1="0" y1="64" x2="55" y2="64" class="inner" opacity=".75"/><text x="75" y="70" class="serif legend">Connecting edges: entanglement flow</text>
+    <line x1="0" y1="96" x2="55" y2="96" class="hidden"/><text x="75" y="102" class="serif legend">Hidden / inner connections</text>
+    <path d="M25 136 a31 31 0 1 1 -1 1" fill="none" stroke="#a9efff" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="75" y="140" class="serif legend">Recursion: S ↔ S</text>
+    <text x="75" y="165" class="serif tiny">State transitions fold through</text>
+    <text x="75" y="188" class="serif tiny">recursive entanglement channels.</text>
+  </g>
+</svg>
