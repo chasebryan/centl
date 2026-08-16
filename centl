@@ -8,6 +8,16 @@ binary="$project_root/_build/default/src/main.exe"
 case "${1:-}" in
   es|erdos|erdos-straus)
     shift
+    # CBX is a separate research instrument rather than part of the coupled
+    # bb/CC hunt. Keep its state and grade surface isolated from cbis.kernel.
+    if [ "${1:-}" = "cbx" ]; then
+      shift
+      cbx="$project_root/research/erdos-straus/cbx.kernel/cbx"
+      if [ ! -x "$cbx" ]; then
+        make -s -C "$project_root/research/erdos-straus/cbx.kernel"
+      fi
+      exec "$cbx" "$@"
+    fi
     exec python3 "$project_root/research/erdos-straus/es" "$@"
     ;;
 esac
