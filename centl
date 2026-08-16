@@ -46,6 +46,14 @@ case "${1:-}" in
           fi
           exec "$cbx_profile" "$@"
           ;;
+        standalone-i)
+          shift
+          cbx_standalone="$cbx_dir/cbx-standalone-i"
+          if [ ! -x "$cbx_standalone" ]; then
+            make -s -C "$cbx_dir" cbx-standalone-i
+          fi
+          exec "$cbx_standalone" "$@"
+          ;;
         bench)
           shift
           exec python3 "$cbx_dir/bench_i.py" "$@"
@@ -61,6 +69,10 @@ case "${1:-}" in
         analyze-profile)
           shift
           exec python3 "$cbx_dir/analyze_profile.py" "$@"
+          ;;
+        analyze-standalone)
+          shift
+          exec python3 "$cbx_dir/analyze_standalone.py" "$@"
           ;;
       esac
       cbx="$cbx_dir/cbx"
