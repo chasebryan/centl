@@ -64,7 +64,7 @@ jobs:
           assert raw['mode'] == 'standalone-I'
           assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
-          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v1'
+          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v2'
           assert r['hard_primes'] > 0
           assert r['layers'] == len(raw['shifts']) == g['layers']
           assert raw['set_relations'] == g['relation_rows'] == r['totals']['hit_events']
@@ -81,7 +81,8 @@ jobs:
           print(
               f"::notice title=CBX Fedora standalone overlap::"
               f"hard={r['hard_primes']}; layers={r['layers']}; "
-              f"productive={r['productive_layers']}; single-containments={g['exact_single_layer_containment_count']}; "
-              f"two-layer-targets={g['exact_two_layer_containment_target_count']}; top={top}; top-pair={pair_txt}"
+              f"productive={r['productive_layers']}; single={g['exact_single_layer_containment_count']}; "
+              f"two={g['exact_two_layer_containment_target_count']}; "
+              f"three={g['exact_three_layer_containment_target_count']}; top={top}; top-pair={pair_txt}"
           )
           PY
