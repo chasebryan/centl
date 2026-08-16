@@ -1,0 +1,31 @@
+name: Erdős–Straus small-prime class character atlas
+
+on:
+  push:
+    branches:
+      - agent/cbx-small-prime-character-atlas
+  pull_request:
+    paths:
+      - 'research/erdos-straus/SMALL-PRIME-CLASS-CHARACTER-ATLAS.md'
+      - 'research/erdos-straus/classify_small_prime_class_character_states.py'
+      - 'research/erdos-straus/verify_small_prime_class_character_states.py'
+      - '.github/workflows/erdos-straus-small-prime-character-atlas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reproduce exact finite-group atlas
+        run: |
+          python3 research/erdos-straus/classify_small_prime_class_character_states.py --json
+      - name: Independent direct-factorization regression
+        run: |
+          python3 research/erdos-straus/verify_small_prime_class_character_states.py --limit 100000 --json
