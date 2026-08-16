@@ -208,13 +208,17 @@ Therefore an audit at `K=400` must report
 
 without treating that as evidence that Type A/B is false.
 
-At the same shallow K, the independent general observer finds and exactly
-verifies
+At the same shallow K, the independent general observer currently finds
+and exactly verifies
 
     4/9658489
       = 1/2414624
-      + 1/3331659906339
-      + 1/62813018687490942976992.
+      + 1/3331659906171
+      + 1/1273765641188660072342496.
+
+Multiple valid divisor pairs can occur at the same first canonical `x`, so
+the regression contract freezes exact verification at `x=2414624`, not an
+arbitrary `y,z` enumeration order.
 
 This is a real bounded model-escape event: the full equation has a witness
 while A/B remains unseen through 400.
@@ -239,6 +243,18 @@ sweep cell. Its intended targets are:
 
 This preserves the speed and meaning of the live cover while giving CBIS a
 separate instrument for discovering structure outside the assumed model.
+
+## Integrated command surface
+
+The unified driver exposes the sidecars without changing the live cover
+commands:
+
+    ./centl es cbis audit P --k-max K
+    ./centl es cbis escape P --ab-k K --x-count N
+    ./centl es cbis observe P --ab-k K --x-count N
+
+`escape` and `observe` are aliases. Ordinary `./centl es cbis ...` commands
+continue to invoke the live C cover engine.
 
 ## Research rule
 
