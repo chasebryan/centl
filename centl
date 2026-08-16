@@ -74,6 +74,10 @@ case "${1:-}" in
           shift
           exec python3 "$cbx_dir/analyze_standalone.py" "$@"
           ;;
+        plan-hybrid)
+          shift
+          exec python3 "$cbx_dir/plan_hybrid.py" "$@"
+          ;;
       esac
       cbx="$cbx_dir/cbx"
       if [ ! -x "$cbx" ]; then
