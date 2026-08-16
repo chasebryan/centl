@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Exact finite CBX Lane-I overlap graph through 10,000,000: no one-layer or two-layer containments; shadowing is distributed across several earlier layers.">
+  <title>CBX Lane-I overlap graph — 10,000,000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-lane-i-overlap-10m.html">
+  <meta name="robots" content="index,follow">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CBX Lane-I overlap graph</h1><p>10,000,000 · K<sub>I</sub> &lt; 400 · Fedora GNU/Linux</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="cbx-implementation-status.html">CBX implementation status</a></li>
+        <li><a href="cbx-lane-i-standalone-10m.html">Standalone 10M census</a></li>
+        <li><a href="cbx-lane-i-orientation-benchmark.html">Orientation benchmark</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős–Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Exact finite containment graph</p>
+          <p class="dek">The later signed-box layers are not weak. Their novelty is distributedly shadowed by several earlier layers.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-LANE-I-OVERLAP-10M.md">Canonical repository note</a></p>
+        </header>
+        <div class="paper-body">
+          <p class="notice"><strong>Claim boundary:</strong> these are exact finite set relations on the stated 10M domain. They are theorem candidates, not universal shadow theorems.</p>
+
+          <h2>Finite graph</h2>
+          <p>The standalone relation set contains <strong>534,037</strong> exact <code>(k,p)</code> hits across 100 admissible shifts and all <strong>20,513</strong> Mordell-hard primes through 10,000,000.</p>
+          <p>Only 16 layers add new first-hit coverage in increasing-k order; the other <strong>84</strong> are fully contained in the union of earlier layers.</p>
+
+          <h2>No simple containment</h2>
+          <div class="math" role="math">\#\{T_k\subseteq T_j:j&lt;k\}=0.</div>
+          <div class="math" role="math">\#\{T_k\subseteq T_a\cup T_b:a,b&lt;k\}=0.</div>
+          <p>So the 10M shadow structure is not a stack of duplicate layers and does not collapse into complementary pairs. A two-layer relation seen on the 100K smoke corpus disappears at scale.</p>
+
+          <h2>Strong pairwise overlap, but incomplete</h2>
+          <p>The best single predecessor still leaves a substantial residue. For example, <code>T_11</code> contains about <strong>78.22%</strong> of <code>T_55</code>, but not all of it. Other strong finite overlaps include 119←23, 95←47 and 143←47.</p>
+
+          <h2>Many-body shadowing</h2>
+          <p>A greedy earlier-layer cover of the 73 shifts above 107 uses between <strong>5 and 10</strong> earlier layers, with median <strong>7</strong>:</p>
+          <table>
+            <thead><tr><th>Greedy earlier layers</th><th>Later layers</th></tr></thead>
+            <tbody>
+              <tr><td>5</td><td>2</td></tr>
+              <tr><td>6</td><td>18</td></tr>
+              <tr><td>7</td><td>35</td></tr>
+              <tr><td>8</td><td>15</td></tr>
+              <tr><td>9</td><td>2</td></tr>
+              <tr><td>10</td><td>1</td></tr>
+            </tbody>
+          </table>
+          <p>This greedy cardinality is an upper bound, not the exact minimum cover size. CBX now runs an independent exact one/two/three-layer search to sharpen the lower bound.</p>
+
+          <h2>Why this matters</h2>
+          <p>The standalone census showed that every layer through 399 is productive by itself, including every layer above the first-hit record 107. The overlap graph explains the apparent paradox: these layers can be intrinsically strong and still contribute zero new first hits because their hit sets are distributed across the earlier union.</p>
+          <p>That moves the theorem hunt away from “weak later layers” and toward exact containment structure, repeated complementary covers, defect/spectrum explanations and mathematically safe hybrid scheduling.</p>
+
+          <h2>Reproduce</h2>
+          <pre><code>./centl es cbx standalone-i --hi 10000000 --i-max 400 \
+  --sets standalone-hit-relations.tsv
+
+./centl es cbx analyze-overlap standalone-hit-relations.tsv
+./centl es cbx analyze-shadow-depth standalone-hit-relations.tsv</code></pre>
+
+          <h2>Provenance</h2>
+          <p>GitHub Actions run <code>31928793294</code>, artifact id <code>9258669044</code>.</p>
+
+          <hr>
+          <p><strong>Erdős–Straus remains open.</strong> This is an exact finite theorem-discovery graph.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
