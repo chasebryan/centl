@@ -3,7 +3,7 @@
 **Status:** active exact post-hoc instrumentation  
 **Date:** 2026-08-16  
 **Stack:** child of `agent/cbx-kernel` / PR #230  
-**Depends on:** `CBX-TYPEII-GEOMETRY-PRIORITY.md`, `../ES-TWO-TARGET-DIVISOR-SQUARE.md`, `../ES-TYPEII-ROOT-GEOMETRY.md`  
+**Depends on:** `CBX-TYPEII-GEOMETRY-PRIORITY.md`, `../ES-TWO-TARGET-DIVISOR-SQUARE.md`, `../ES-TYPEII-ROOT-GEOMETRY.md`, `../TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md`  
 **Implementation:** `../cbx.kernel/analyze_geometry.py`  
 **Claim boundary:** finite exact classification of observed Lane-I hits only. This does not prove Erdős–Straus, disprove López-all-primes, or change ES-LETTER-v1 semantics.
 
@@ -171,7 +171,28 @@ The optional enriched JSONL records exact factorization of `C`, witness multipli
 
 ---
 
-## 7. Research consequence
+## 7. Integration with the candidate decomposition framework
+
+`TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md` now treats exact `(mask,center)` information and full signed-box status as part of the developing decomposition-state machine. This telemetry supplies the missing observational refinement of its schematic field
+
+```text
+signed_box_status   Type-I | Type-II | I+II | miss
+```
+
+into
+
+```text
+signed_box_status   Type-I | Type-II | I+II | miss
+Type-II geometry    boundary-only | interior-only | mixed | n/a
+```
+
+That refinement matters because a controlled state transition must be allowed to terminate through Type I, comparable-root Type II, **or incomparable-root Type II**. The state machine may use the geometry label to discover recurrences or candidate progress measures, but not to discard a sector without an independent theorem.
+
+In particular, the exact-state / q-adic / residual-support program and this CBX telemetry now meet at the same object: a controlled shift whose full signed box is evaluated without forcing a successful Type-II certificate back into López coordinates.
+
+---
+
+## 8. Research consequence
 
 This is the measurement layer required by the Type-II hierarchy change.
 
@@ -183,6 +204,7 @@ The immediate finite questions are now precise:
 4. Which primes are the deepest interior-only records?
 5. Does the existing `63..103 -> 107` gauntlet represent loss of Type I, loss of incomparable Type II, or a more general signed-box scarcity?
 6. Which root-factor patterns recur among deep boundary-only and deep interior-only hits?
+7. Do the candidate decomposition framework's survivor signatures or valuation phases predict which of those geometry classes terminates a branch?
 
 Only after those distributions are measured should CBX promote a geometry-dependent scheduling or pruning hypothesis.
 
@@ -190,7 +212,7 @@ A theorem controlling only the López-comparable sector must remain labeled as s
 
 ---
 
-## 8. Non-negotiable invariant
+## 9. Non-negotiable invariant
 
 ```text
 geometry telemetry != new cover lane
