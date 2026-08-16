@@ -2,13 +2,14 @@
 """Exact finite-group exhaustion for all k=27 nonresidue packet sizes.
 
 For Mordell-hard p, C=(p+27)/4 is 1 mod 3, so its total valuation E_NR of
-quadratic-nonresidue prime factors modulo 27 is even.  The k=27 group has
+quadratic-nonresidue prime factors modulo 27 is even. The k=27 group has
 order 18; the QR half-log state lives in C_9.
 
 This program exhausts every reachable QR state against every unordered
-multiset of E odd C_18 logs for E=0,2,4,6,8,10.  The E=10 exhaustion has no
-combined misses.  Since both exact witness mechanisms are monotone under
-adjoining extra factor valuation units, this gives a universal cutoff:
+multiset of E odd C_18 logs for E=0,2,4,6,8,10. It emits every exact miss
+configuration, not merely samples. The E=10 exhaustion has no combined
+misses. Since both exact witness mechanisms are monotone under adjoining
+extra factor valuation units, this gives a universal cutoff:
 E_NR >= 10 always hits at k=27.
 
 The computation is a finite group exhaustion only; there is no prime search.
@@ -118,9 +119,27 @@ def qr_precompute() -> list[dict[str, object]]:
     return rows
 
 
+def miss_row(
+    qr: dict[str, object],
+    units: tuple[int, ...],
+    omask: int,
+) -> dict[str, object]:
+    return {
+        "qr_divisor_half_logs": list(qr["divs9"]),
+        "qr_center_half_log": qr["center9"],
+        "nonresidue_logs": list(units),
+        "odd_contribution_logs": [i for i in range(18) if (omask >> i) & 1],
+    }
+
+
 def classify_packet_size(E: int, qr_rows: list[dict[str, object]]) -> dict[str, object]:
     if E == 0:
-        # Pure QR support: both exact targets are odd while D_Q is even.
+        rows = [miss_row(qr, (), 0) for qr in qr_rows]
+        rows.sort(key=lambda r: (
+            len(r["qr_divisor_half_logs"]),
+            r["qr_center_half_log"],
+            r["qr_divisor_half_logs"],
+        ))
         return {
             "E_NR": 0,
             "nonresidue_multisets": 1,
@@ -128,14 +147,14 @@ def classify_packet_size(E: int, qr_rows: list[dict[str, object]]) -> dict[str, 
             "miss_configurations": len(qr_rows),
             "miss_capable_qr_states": len(qr_rows),
             "odd_contribution_size_histogram": {"0": 1},
-            "miss_examples": [],
+            "miss_rows": rows,
         }
 
     multiset_count = 0
     miss_count = 0
     miss_qr: set[tuple[tuple[int, ...], int]] = set()
     osize_hist: collections.Counter[int] = collections.Counter()
-    examples: list[dict[str, object]] = []
+    rows: list[dict[str, object]] = []
 
     for units in itertools.combinations_with_replacement(ODD, E):
         multiset_count += 1
@@ -151,14 +170,14 @@ def classify_packet_size(E: int, qr_rows: list[dict[str, object]]) -> dict[str, 
             miss_count += 1
             key = (qr["divs9"], int(qr["center9"]))
             miss_qr.add(key)
-            if len(examples) < 20:
-                examples.append({
-                    "qr_divisor_half_logs": list(qr["divs9"]),
-                    "qr_center_half_log": qr["center9"],
-                    "nonresidue_logs": list(units),
-                    "odd_contribution_logs": [i for i in range(18) if (omask >> i) & 1],
-                })
+            rows.append(miss_row(qr, units, omask))
 
+    rows.sort(key=lambda r: (
+        len(r["qr_divisor_half_logs"]),
+        r["qr_center_half_log"],
+        r["qr_divisor_half_logs"],
+        r["nonresidue_logs"],
+    ))
     return {
         "E_NR": E,
         "nonresidue_multisets": multiset_count,
@@ -166,7 +185,7 @@ def classify_packet_size(E: int, qr_rows: list[dict[str, object]]) -> dict[str, 
         "miss_configurations": miss_count,
         "miss_capable_qr_states": len(miss_qr),
         "odd_contribution_size_histogram": dict(sorted(osize_hist.items())),
-        "miss_examples": examples,
+        "miss_rows": rows,
     }
 
 
@@ -175,10 +194,14 @@ def report() -> dict[str, object]:
     packets = [classify_packet_size(E, qr_rows) for E in (0, 2, 4, 6, 8, 10)]
 
     return {
-        "analysis": "k27-even-packet-exhaustion-v1",
+        "analysis": "k27-even-packet-exhaustion-v2",
         "qr_local_states": len(local_qr_states()),
         "qr_reachable_states": len(qr_rows),
         "packet_results": packets,
+        "total_emitted_miss_rows": sum(row["miss_configurations"] for row in packets),
+        "nonpure_emitted_miss_rows": sum(
+            row["miss_configurations"] for row in packets if row["E_NR"] > 0
+        ),
         "universal_cutoff": {
             "E_NR_at_least": 10,
             "combined_miss_possible": False,
@@ -194,6 +217,8 @@ def report() -> dict[str, object]:
 
 
 def validate(r: dict[str, object]) -> None:
+    if r["qr_local_states"] != 31:
+        raise SystemExit(f"unexpected local QR-state count: {r['qr_local_states']}")
     if r["qr_reachable_states"] != 40:
         raise SystemExit(f"unexpected QR-state count: {r['qr_reachable_states']}")
     by_e = {row["E_NR"]: row for row in r["packet_results"]}
@@ -206,12 +231,19 @@ def validate(r: dict[str, object]) -> None:
         ):
             if row[key] != value:
                 raise SystemExit(f"E={E}: {key}={row[key]} expected {value}")
+        if len(row["miss_rows"]) != row["miss_configurations"]:
+            raise SystemExit(f"E={E}: emitted miss table is incomplete")
+    if r["total_emitted_miss_rows"] != 200:
+        raise SystemExit(f"unexpected total miss-row count: {r['total_emitted_miss_rows']}")
+    if r["nonpure_emitted_miss_rows"] != 160:
+        raise SystemExit(f"unexpected nonpure miss-row count: {r['nonpure_emitted_miss_rows']}")
     if by_e[10]["miss_configurations"] != 0:
         raise SystemExit("E_NR=10 cutoff failed")
 
 
 def print_text(r: dict[str, object]) -> None:
     print("k=27 exact even-packet exhaustion")
+    print(f"QR local states={r['qr_local_states']}")
     print(f"QR reachable states={r['qr_reachable_states']}")
     for row in r["packet_results"]:
         print(
@@ -219,6 +251,7 @@ def print_text(r: dict[str, object]) -> None:
             f"cases={row['structural_cases']} misses={row['miss_configurations']} "
             f"miss-QR-states={row['miss_capable_qr_states']}"
         )
+    print(f"emitted miss rows={r['total_emitted_miss_rows']}")
     print("  E>=10: universal hit by exhaustive cutoff + witness monotonicity")
 
 
