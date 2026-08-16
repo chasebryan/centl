@@ -94,7 +94,7 @@ The extracted character is added to the branch and may be routed in later genera
 
 ### Product constraint
 
-If two or more odd-exponent prime factors of k remain unknown, saturation produces only their character product. That constraint is recorded but is not promoted to separate source characters.
+If two or more odd-exponent prime factors of k remain unknown, saturation produces only their character product. That constraint is recorded but is not promoted to separate source characters in this theorem.
 
 ## 4. Multi-source completeness guard
 
@@ -121,7 +121,7 @@ The complete k<=5000 closure contains
 
 hidden large-subset qualifiers under this maximal-seed test.
 
-The result also contains zero negative extracted characters, so the positive-source invariant used by this monotonicity argument is preserved throughout the pinned run.
+The classifier now enforces the positive-source precondition before using the maximal-seed guard. The result contains zero negative extracted characters, so that invariant is preserved throughout the pinned run.
 
 ## 5. Exact closure result
 
@@ -181,17 +181,19 @@ Among the pinned anchors are:
 
 For each anchor the direct divisor set equals the full Jacobi-plus kernel and the remaining odd-exponent character is forced positive.
 
-## 7. Qualifying destination set
+## 7. Qualifying destination certificate
 
-All qualifying saturation destinations in this model through k<=5000 lie in the finite set
+All qualifying saturation destinations in this model through k<=5000 lie in the exact finite set
 
-`3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 79, 83, 91, 107, 109, 111, 127, 131, 151, 159, 167, 171, 191, 203, 215, 271, 327, 371, 383, 447, 551, 759, 791, 831, 971`.
+`3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 75, 79, 83, 91, 95, 107, 111, 127, 131, 135, 143, 151, 167, 171, 191, 203, 215, 231, 271, 327, 371, 383, 391, 551, 971`.
 
-This set includes compatible composite destinations that may produce a qualifying saturated transition without creating a new source state. The first assertion version accidentally listed only the destinations emphasized by source creation and therefore under-recorded the transition certificate; the 259-state closure counts themselves were unchanged.
+This set includes compatible destinations that may produce a qualifying saturated transition without creating a new source state.
+
+The initial certificate accidentally listed only destinations emphasized by source creation. A first correction then substituted a different over-inclusive list. Neither error changed the state machine, transition count, source alphabet, maximum depth, or maximum qualifying destination. The list above is the exact set emitted by the canonical classifier and independently reproduced during review.
 
 No qualifying destination occurs above971 through5000.
 
-A separate run truncated at k<=1000 reaches the same final state closure. Extending the destination range from1000 to5000 therefore adds no new source or branch state **inside this model**.
+The classifier also computes the complete state closure at k<=1000 and requires its canonical state-key set to equal the k<=5000 state-key set. Thus extending the destination range from1000 to5000 adds no new source or branch state inside this model.
 
 This is a finite observation within the pinned model, not a claim about all k or all CBX source semantics.
 
@@ -221,9 +223,11 @@ A miss therefore forces
 
 `(19/p)(29/p)=+1`.
 
-Neither sign is individually determined by that transition, so the closure does not promote q19 or q29 from this product statement alone.
+Neither sign is individually determined by that transition, so this theorem records the relation without promoting q19 or q29 from it.
 
-The independent verifier replays this product branch directly.
+A separate product-aware follow-on can carry this relation as a first-class state constraint; preliminary exact evaluation shows that doing so does not create an additional individual character, but that stronger claim is intentionally kept separate from the present closure.
+
+The independent verifier replays the product branch directly.
 
 ## 9. Class-global-positive frontier theorem
 
