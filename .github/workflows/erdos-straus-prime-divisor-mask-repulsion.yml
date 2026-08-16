@@ -1,0 +1,26 @@
+name: Erdős–Straus prime divisor-mask repulsion
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/PRIME-DIVISOR-MASK-REPULSION.md"
+      - "research/erdos-straus/classify_prime_divisor_mask_repulsion.py"
+      - "research/erdos-straus/verify_prime_divisor_mask_repulsion.py"
+      - ".github/workflows/erdos-straus-prime-divisor-mask-repulsion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact source-independent repulsion classifier
+        run: python3 research/erdos-straus/classify_prime_divisor_mask_repulsion.py --max-k 5000 --max-sources 2 --json
+      - name: Independent exponent/state verification
+        run: python3 research/erdos-straus/verify_prime_divisor_mask_repulsion.py --json
