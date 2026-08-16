@@ -47,7 +47,7 @@ jobs:
           research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
 
       - name: Check Python research tools on Fedora
-        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/bench_i.py
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/analyze_layers.py research/erdos-straus/cbx.kernel/bench_i.py
 
       - name: Exercise root launcher on Fedora
         run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
@@ -68,7 +68,8 @@ jobs:
 
       - name: Verify inverse signed-box cover on Fedora
         run: |
-          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-inverse.json
+          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify \
+            --layers /tmp/cbx-layers.tsv > /tmp/cbx-inverse.json
           python3 - <<'PY'
           import json
           r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
@@ -76,11 +77,38 @@ jobs:
           assert r['mode'] == 'inverse-I'
           assert r['candidate_mode'] == 'target-gated'
           assert r['verify'] is True
+          assert r['layers_recorded'] is True
           assert r['hard_primes'] > 0
           assert r['verification_targets'] == r['hard_primes']
           assert r['verification_mismatches'] == 0
           assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
           assert r['factorizations'] <= r['C_candidates']
+          PY
+
+      - name: Analyze inverse shift layers on Fedora
+        run: |
+          python3 research/erdos-straus/cbx.kernel/analyze_layers.py \
+            /tmp/cbx-layers.tsv --json > /tmp/cbx-layers.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-layers.json', encoding='utf-8'))
+          assert r['analysis'] == 'cbx-inverse-layer-efficiency-v1'
+          assert r['layers'] > 0
+          assert r['productive_layers'] > 0
+          assert r['totals']['new_covered'] > 0
+          productive = ','.join(map(str, r['productive_k'][:12])) or 'none'
+          dead = ','.join(map(str, r['dead_factoring_k'][:12])) or 'none'
+          top = r['top_new_cover'][:5]
+          leaders = '; '.join(
+              f"k={x['k']}:new={x['new_covered']}/fact={x['factorizations']}"
+              for x in top
+          )
+          print(
+              f"::notice title=CBX Fedora per-k telemetry::"
+              f"layers={r['layers']}; productive={r['productive_layers']}; "
+              f"dead-with-factorization={r['dead_factoring_layers']}; "
+              f"first productive k={productive}; first dead k={dead}; leaders={leaders}"
+          )
           PY
 
       - name: Verify shift-major signed-box cover on Fedora
