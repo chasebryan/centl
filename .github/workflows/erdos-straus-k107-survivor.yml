@@ -1,0 +1,51 @@
+name: Erdős–Straus corrected k=107 survivor
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K107-CORRECTED-100M-SURVIVOR.md'
+      - 'research/erdos-straus/verify_k107_survivor.py'
+      - '.github/workflows/erdos-straus-k107-survivor.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k107-survivor:
+    name: Fedora exact k=107 survivor certificate
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify corrected survivor and decomposition
+        run: |
+          python3 research/erdos-straus/verify_k107_survivor.py > /tmp/k107-survivor.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k107-survivor.json', encoding='utf-8'))
+          assert r['analysis'] == 'k107-corrected-100m-survivor-v1'
+          assert r['p'] == 8803369
+          assert r['first_hit'] == 107
+          assert r['misses_before_107'] is True
+          assert r['C107'] == 2200869
+          assert r['C107_factorization'] == [[3,2],[11,2],[43,1],[47,1]]
+          assert r['type'] == 'II'
+          assert r['B'] == 18189
+          assert r['D'] == 1
+          assert r['T'] == 121
+          assert r['A'] == 170
+          assert r['B_mod_107'] == 106
+          assert r['denominators'] == [2200869,181085300330,3293760527702370]
+          print(
+              '::notice title=corrected k=107 survivor::'
+              f"p={r['p']}; first-hit={r['first_hit']}; "
+              f"type={r['type']}; denominators={r['denominators']}"
+          )
+          PY
