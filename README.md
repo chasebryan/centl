@@ -90,6 +90,27 @@ Details: [Oasis](docs/OASIS.md) · [CENTL Marsa](docs/CENTL-MARSA.md) · [FCF Ca
 
 The public research program is currently focused on **Erdős–Straus Type A/B witness depth and congruence shadow structure**.
 
+### cbis.kernel — ES+ letter engine
+
+**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) is the ES+ engine. One process, two walks, one cover. Sweep still starts at 0. Home walks only
+
+`R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}`
+
+which is the only place a window-layer letter can sit.
+
+[![cbis.kernel live color panel](site/assets/cbis-kernel-esp-demo.jpg)](https://freecomputation.org/assets/cbis-kernel-esp-demo.mp4)
+
+The live color panel: sweep + R-homing, lanes W/I/N/L, spectra A/B/C. [Watch the demo (2:35, MP4)](https://freecomputation.org/assets/cbis-kernel-esp-demo.mp4) · [also on the research page](https://freecomputation.org/research-erdos-straus.html#cbis-demo)
+
+```sh
+make -C research/erdos-straus/cbis.kernel
+./centl es cbis
+./centl es cbis go --home-only
+./centl es cbis letters
+```
+
+The letter spectrum is the complement of an inversely generated signed-box cover. The equation: [`research/erdos-straus/ES-plus/LETTER-EQUATION.md`](research/erdos-straus/ES-plus/LETTER-EQUATION.md).
+
 ### CBAP.kernel — letter targeting
 
 **[cbap.kernel](research/erdos-straus/cbap.kernel/README.md)** (CB-Advanced-Processing) is the letter-only C engine. Three CRT spectra feed channels A/B/C; channel D sets `LETTER = TRUE` or drops the prime. GREAT is not stored.
@@ -100,25 +121,6 @@ make -C research/erdos-straus/cbap.kernel
 ./centl es cbap go --random
 ./centl es cbap letters
 ```
-
-### ES+
-
-The letter spectrum is the complement of an inversely generated signed-box cover. Do not test primes one by one. For each admissible shift \(k\), generate every Type I / Type II hit from \(C\), mark \(p=4C-k\), and keep only the unmarked Mordell-hard primes. That set is \(\Lambda_K\).
-
-**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) is the ES+ engine. Sweep still walks from 0. Home walks only
-
-`R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}`
-
-which is the only place a window-layer letter can sit.
-
-```sh
-make -C research/erdos-straus/cbis.kernel
-./centl es cbis
-./centl es cbis go --home-only
-./centl es cbis letters
-```
-
-The equation: [`research/erdos-straus/ES-plus/LETTER-EQUATION.md`](research/erdos-straus/ES-plus/LETTER-EQUATION.md). Not a proof of Erdős–Straus.
 
 A finished hunt is not a proof of the conjecture.  
 Public library (static HTML, no JavaScript): [freecomputation.org/research.html](https://freecomputation.org/research.html)

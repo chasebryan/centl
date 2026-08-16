@@ -132,6 +132,26 @@ ul, ol { margin-top: 8px; }
   border: 1px solid var(--rule);
 }
 
+.demo {
+  margin: 14px 0 20px;
+  padding: 8px;
+  max-width: 720px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+}
+.demo video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #111;
+}
+.demo figcaption {
+  margin: 8px 6px 2px;
+  color: var(--muted);
+  font-family: var(--ui);
+  font-size: 14px;
+}
+
 .status, .directory {
   width: 100%;
   border-collapse: collapse;

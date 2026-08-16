@@ -9,6 +9,10 @@ One process, two walks, one cover.
 
 W is not weakened. Letters keep the same `ES-LETTER-v1` numbers.
 
+[![cbis.kernel live color panel](../../../site/assets/cbis-kernel-esp-demo.jpg)](https://freecomputation.org/assets/cbis-kernel-esp-demo.mp4)
+
+[Watch the live panel (2:35)](https://freecomputation.org/assets/cbis-kernel-esp-demo.mp4)
+
 ## R
 
     R = { hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4) }
