@@ -25,6 +25,16 @@ hidden first-hit depth distribution can be measured without weakening W.
 The implementation/preservation status is
 [`CBX-IMPLEMENTATION-STATUS.md`](CBX-IMPLEMENTATION-STATUS.md).
 
+The Type-II research hierarchy is recorded in
+[`CBX-TYPEII-GEOMETRY-PRIORITY.md`](CBX-TYPEII-GEOMETRY-PRIORITY.md):
+López Type A/B is retained as the exact divisibility-comparable boundary
+sector, while the full fixed-shift Type-II geometry is the governing object.
+The matching exact measurement layer is
+[`CBX-TYPEII-GEOMETRY-TELEMETRY.md`](CBX-TYPEII-GEOMETRY-TELEMETRY.md),
+which reclassifies observed Lane-I first hits as Type-I-only, Type-II-only,
+or both and separates Type-II hits into boundary-only, interior-only, or
+mixed root geometry without changing cover semantics.
+
 The exact constructive Lane-I work is
 [`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
 three finite traversal orientations for the same signed-box cover:
