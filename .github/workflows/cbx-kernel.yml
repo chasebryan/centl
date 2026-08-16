@@ -20,83 +20,6 @@ permissions:
   contents: read
 
 jobs:
-  build-and-regress:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build CBX
-        shell: bash
-        run: |
-          set +e
-          make -C research/erdos-straus/cbx.kernel clean all > /tmp/cbx-build.log 2>&1
-          status=$?
-          cat /tmp/cbx-build.log
-          if [ "$status" -ne 0 ]; then
-            msg=$(tail -n 18 /tmp/cbx-build.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')
-            echo "::error title=CBX build failure::$msg"
-            exit "$status"
-          fi
-
-      - name: Run CBX runtime self-test
-        run: research/erdos-straus/cbx.kernel/cbx self-test
-
-      - name: Run direct known probes
-        run: |
-          research/erdos-straus/cbx.kernel/cbx probe 1009 > /tmp/cbx-1009.json
-          research/erdos-straus/cbx.kernel/cbx probe 2521 > /tmp/cbx-2521.json
-          research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
-
-      - name: Check analyzer syntax
-        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py
-
-      - name: Exercise root launcher
-        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
-
-      - name: Validate probe semantics
-        run: |
-          python3 - <<'PY'
-          import json
-          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
-          assert p['kernel'] == 'cbx.kernel'
-          assert p['n'] == 2521
-          assert p['W']['R'] is True
-          assert p['W']['fab'] is True
-          assert p['I']['hit'] is True and p['I']['first_k'] == 23
-          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
-          assert p['production_letter'] is False
-          PY
-
-      - name: Deterministic finite census
-        run: |
-          ./centl es cbx go --run ci --step 5000 --iterations 4 --sweep-only
-          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci --json > /tmp/cbx-analysis.json
-
-      - name: Validate finite census and immutable grade
-        run: |
-          python3 - <<'PY'
-          import json
-          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
-          assert r['kernel'] == 'cbx.kernel'
-          assert r['unique_grade_targets'] > 0
-          assert 'all' in r['strata']
-          assert r['truncated_tail_ignored'] == 0
-          assert set(r['empirical_envelopes']) == {'log', 'log2', 'spectrum-log'}
-          PY
-          if ./centl es cbx go --run ci --iterations 1 --sweep-only --i-max 401; then
-            echo 'grade mutation unexpectedly succeeded' >&2
-            exit 1
-          fi
-
-      - name: Check repository remains clean except ignored runtime data
-        run: git status --short
-
   fedora-regress:
     name: fedora-latest
     runs-on: ubuntu-latest
@@ -115,6 +38,15 @@ jobs:
       - name: Run CBX runtime self-test on Fedora
         run: research/erdos-straus/cbx.kernel/cbx self-test
 
+      - name: Run direct known probes on Fedora
+        run: |
+          research/erdos-straus/cbx.kernel/cbx probe 1009 > /tmp/cbx-1009.json
+          research/erdos-straus/cbx.kernel/cbx probe 2521 > /tmp/cbx-2521.json
+          research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
+
+      - name: Check analyzer syntax on Fedora
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py
+
       - name: Exercise root launcher on Fedora
         run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
 
@@ -126,6 +58,7 @@ jobs:
           assert p['kernel'] == 'cbx.kernel'
           assert p['n'] == 2521
           assert p['W']['R'] is True
+          assert p['W']['fab'] is True
           assert p['I']['hit'] is True and p['I']['first_k'] == 23
           assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
           assert p['production_letter'] is False
@@ -142,4 +75,53 @@ jobs:
           assert r['unique_grade_targets'] > 0
           assert 'all' in r['strata']
           assert r['truncated_tail_ignored'] == 0
+          assert set(r['empirical_envelopes']) == {'log', 'log2', 'spectrum-log'}
+          PY
+
+      - name: Reject grade mutation on Fedora
+        run: |
+          if ./centl es cbx go --run ci-fedora --iterations 1 --sweep-only --i-max 401; then
+            echo 'grade mutation unexpectedly succeeded' >&2
+            exit 1
+          fi
+
+  ubuntu-regress:
+    name: ubuntu-latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build CBX
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Run CBX runtime self-test
+        run: research/erdos-straus/cbx.kernel/cbx self-test
+
+      - name: Exercise root launcher
+        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
+
+      - name: Validate probe semantics
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
+          assert p['kernel'] == 'cbx.kernel'
+          assert p['n'] == 2521
+          assert p['W']['R'] is True
+          assert p['I']['hit'] is True and p['I']['first_k'] == 23
+          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
+          assert p['production_letter'] is False
+          PY
+
+      - name: Deterministic finite census
+        run: |
+          ./centl es cbx go --run ci-ubuntu --step 5000 --iterations 4 --sweep-only
+          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci-ubuntu --json > /tmp/cbx-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['unique_grade_targets'] > 0
+          assert 'all' in r['strata']
           PY
