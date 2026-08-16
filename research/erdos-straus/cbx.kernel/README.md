@@ -10,6 +10,7 @@ Start with:
 
 - [`../ES-plus/CBIS-K-PARAMETER-STATUS.md`](../ES-plus/CBIS-K-PARAMETER-STATUS.md) — cbis K/search-grade audit;
 - [`../ES-plus/CBX-IMPLEMENTATION-STATUS.md`](../ES-plus/CBX-IMPLEMENTATION-STATUS.md) — implementation/preservation status;
+- [`../ES-plus/CBX-FORMULATION-2.md`](../ES-plus/CBX-FORMULATION-2.md) — preserved constructive-I-first orchestration from the retired cbx2 experiment;
 - [`../ES-plus/CBX-INVERSE-I.md`](../ES-plus/CBX-INVERSE-I.md) — constructive Lane-I cover;
 - [`../ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md`](../ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md) — p-major/C-major/shift-major comparison;
 - [`../ES-plus/CBX-INITIAL-XRAY-CENSUS.md`](../ES-plus/CBX-INITIAL-XRAY-CENSUS.md) — first clean hidden-lane census.
