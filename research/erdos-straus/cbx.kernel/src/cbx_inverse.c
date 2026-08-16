@@ -23,6 +23,17 @@ typedef unsigned __int128 u128;
 
 static const uint64_t INV_HARD[6] = {1, 121, 169, 289, 361, 529};
 
+typedef struct {
+    u128 c_candidates;
+    u128 hard_targets;
+    u128 skipped_non_target;
+    u128 skipped_covered;
+    u128 skipped_non_coprime;
+    u128 factorizations;
+    u128 delta_hits;
+    u128 new_covered;
+} layer_stat_t;
+
 static uint64_t inv_parse_u64(const char *name, const char *text) {
     errno = 0;
     char *end = NULL;
@@ -53,15 +64,46 @@ static void u128_decimal(u128 x, char out[64]) {
     out[n] = 0;
 }
 
+static size_t layer_count_for(uint64_t K) {
+    if (K < 3) return 0;
+    u128 n = ((u128)K - 3) / 4 + 1;
+    if (n > SIZE_MAX / sizeof(layer_stat_t)) die("i-max too large for layer telemetry");
+    return (size_t)n;
+}
+
+static void write_layer_stats(const char *path, const layer_stat_t *stats, size_t n) {
+    FILE *f = fopen(path, "w");
+    if (!f) die("cannot open layer telemetry: %s", strerror(errno));
+    fputs("k\tC_candidates\thard_targets\tskipped_non_target\tskipped_covered\t"
+          "skipped_non_coprime\tfactorizations\tdelta_hits\tnew_covered\n", f);
+    for (size_t i = 0; i < n; i++) {
+        uint64_t k = 3 + 4 * (uint64_t)i;
+        char a[64], b[64], c[64], d[64], e[64], g[64], h[64], j[64];
+        u128_decimal(stats[i].c_candidates, a);
+        u128_decimal(stats[i].hard_targets, b);
+        u128_decimal(stats[i].skipped_non_target, c);
+        u128_decimal(stats[i].skipped_covered, d);
+        u128_decimal(stats[i].skipped_non_coprime, e);
+        u128_decimal(stats[i].factorizations, g);
+        u128_decimal(stats[i].delta_hits, h);
+        u128_decimal(stats[i].new_covered, j);
+        fprintf(f, "%" PRIu64 "\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+                k, a, b, c, d, e, g, h, j);
+    }
+    if (fflush(f) != 0 || fsync(fileno(f)) != 0) die("cannot flush layer telemetry");
+    fclose(f);
+}
+
 static void inv_usage(void) {
     fprintf(stderr,
             "cbx inverse — exact finite inverse signed-box census\n"
             "  cbx-inverse --hi X [--lo L] [--i-max K] [--segment N]\n"
             "              [--verify] [--strict-c-first|--target-gated]\n"
-            "              [--residuals FILE] [--hits FILE]\n\n"
+            "              [--residuals FILE] [--hits FILE] [--layers FILE]\n\n"
             "Defaults: lo=2, i-max=400, segment=1000000, target-gated.\n"
             "--strict-c-first factors every compatible C before target lookup.\n"
             "--target-gated generates p first and skips irrelevant/already-covered targets.\n"
+            "--layers writes aggregate per-k work and new-cover telemetry.\n"
             "--verify cross-checks every hard prime against p-first Lane-I recognition.\n");
 }
 
@@ -74,6 +116,7 @@ int main(int argc, char **argv) {
     int target_gate = 1;
     const char *residual_path = NULL;
     const char *hits_path = NULL;
+    const char *layers_path = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--lo") && i + 1 < argc) lo = inv_parse_u64("lo", argv[++i]);
@@ -85,6 +128,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--target-gated")) target_gate = 1;
         else if (!strcmp(argv[i], "--residuals") && i + 1 < argc) residual_path = argv[++i];
         else if (!strcmp(argv[i], "--hits") && i + 1 < argc) hits_path = argv[++i];
+        else if (!strcmp(argv[i], "--layers") && i + 1 < argc) layers_path = argv[++i];
         else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) { inv_usage(); return 0; }
         else { inv_usage(); return 2; }
     }
@@ -102,6 +146,13 @@ int main(int argc, char **argv) {
     if (hits_path) {
         hits = fopen(hits_path, "w");
         if (!hits) die("cannot open hit output: %s", strerror(errno));
+    }
+
+    size_t n_layers = layer_count_for(K);
+    layer_stat_t *layer_stats = NULL;
+    if (layers_path) {
+        layer_stats = calloc(n_layers, sizeof(*layer_stats));
+        if (!layer_stats) die("cannot allocate layer telemetry");
     }
 
     u128 hard_total = 0;
@@ -141,7 +192,9 @@ int main(int argc, char **argv) {
             }
         }
 
-        for (uint64_t k = 3; k <= K;) {
+        size_t layer_index = 0;
+        for (uint64_t k = 3; k <= K; layer_index++) {
+            layer_stat_t *ls = layer_stats ? &layer_stats[layer_index] : NULL;
             u128 clo128 = ((u128)seg_lo + k + 3) / 4;
             u128 chi128 = ((u128)seg_hi + k) / 4;
             uint64_t C_lo = (uint64_t)clo128;
@@ -154,6 +207,7 @@ int main(int argc, char **argv) {
 
                 while (C <= C_hi) {
                     c_candidates++;
+                    if (ls) ls->c_candidates++;
 
                     u128 fourC = (u128)4 * C;
                     if (fourC >= k) {
@@ -161,32 +215,39 @@ int main(int argc, char **argv) {
                         if (p128 >= seg_lo && p128 <= seg_hi) {
                             uint64_t p = (uint64_t)p128;
                             size_t idx = (size_t)(p - seg_lo);
+                            if (hard_prime[idx] && ls) ls->hard_targets++;
 
                             if (target_gate) {
                                 if (!hard_prime[idx]) {
                                     skipped_non_target++;
+                                    if (ls) ls->skipped_non_target++;
                                     goto next_C;
                                 }
                                 if (covered[idx]) {
                                     skipped_covered++;
+                                    if (ls) ls->skipped_covered++;
                                     goto next_C;
                                 }
                                 /* gcd(C,k)=1 iff gcd(p,k)=1 for odd k. */
                                 if (gcd64(C, k) != 1) {
                                     skipped_non_coprime++;
+                                    if (ls) ls->skipped_non_coprime++;
                                     goto next_C;
                                 }
                             }
 
                             fac_t f;
                             factorizations++;
+                            if (ls) ls->factorizations++;
                             factor64(C, &f);
                             if (delta_zero(&f, C, k)) {
                                 delta_hits++;
+                                if (ls) ls->delta_hits++;
                                 if (hard_prime[idx] && !covered[idx]) {
                                     covered[idx] = 1;
                                     first_k[idx] = k;
                                     covered_total++;
+                                    if (ls) ls->new_covered++;
                                 }
                             }
                         }
@@ -238,6 +299,8 @@ next_C:
 
     if (residuals) fclose(residuals);
     if (hits) fclose(hits);
+    if (layers_path) write_layer_stats(layers_path, layer_stats, n_layers);
+    free(layer_stats);
 
     char hard_s[64], cand_s[64], fact_s[64], delta_s[64], non_target_s[64];
     char covered_skip_s[64], non_coprime_s[64], covered_s[64], residual_s[64];
@@ -260,11 +323,12 @@ next_C:
            ",\"hard_primes\":%s,\"C_candidates\":%s,\"factorizations\":%s,"
            "\"delta_hits\":%s,\"skipped_non_target\":%s,\"skipped_covered\":%s,"
            "\"skipped_non_coprime\":%s,\"covered_hard_primes\":%s,"
-           "\"residual_hard_primes\":%s,\"verify\":%s,"
+           "\"residual_hard_primes\":%s,\"layers_recorded\":%s,\"verify\":%s,"
            "\"verification_targets\":%s,\"verification_mismatches\":%s}\n",
            VERSION, target_gate ? "target-gated" : "strict-c-first", lo, hi, K, segment,
            hard_s, cand_s, fact_s, delta_s, non_target_s, covered_skip_s, non_coprime_s,
-           covered_s, residual_s, verify ? "true" : "false", verify_s, mismatch_s);
+           covered_s, residual_s, layers_path ? "true" : "false",
+           verify ? "true" : "false", verify_s, mismatch_s);
 
     return verification_mismatches ? 1 : 0;
 }
