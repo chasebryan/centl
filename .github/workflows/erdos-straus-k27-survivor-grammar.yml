@@ -1,0 +1,23 @@
+name: Erdős–Straus k27 survivor grammar
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K27-SURVIVOR-GRAMMAR.md"
+      - "research/erdos-straus/verify_k27_survivor_grammar.py"
+      - ".github/workflows/erdos-straus-k27-survivor-grammar.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k27 survivor-grammar verification
+        run: python3 research/erdos-straus/verify_k27_survivor_grammar.py --json
