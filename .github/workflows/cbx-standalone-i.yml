@@ -11,6 +11,7 @@ on:
       - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
       - 'research/erdos-straus/verify_k27_structure.py'
       - 'research/erdos-straus/classify_k27_e2.py'
+      - 'research/erdos-straus/classify_k27_even_packets.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
   push:
@@ -24,6 +25,7 @@ on:
       - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
       - 'research/erdos-straus/verify_k27_structure.py'
       - 'research/erdos-straus/classify_k27_e2.py'
+      - 'research/erdos-straus/classify_k27_even_packets.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
 
@@ -102,6 +104,42 @@ jobs:
               f"QRstates={r['qr_reachable_states']}; NRpairs={r['nonresidue_unordered_pairs']}; "
               f"cases={r['total_structural_cases']}; missQRstates={r['miss_capable_qr_states']}; "
               f"miss-configurations={r['exact_miss_configurations']}"
+          )
+          PY
+
+      - name: Exhaust exact k=27 even nonresidue packets
+        run: |
+          python3 research/erdos-straus/classify_k27_even_packets.py --json \
+            > /tmp/k27-even-packets.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-even-packets.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-even-packet-exhaustion-v1'
+          assert r['qr_reachable_states'] == 40
+          by_e={row['E_NR']: row for row in r['packet_results']}
+          expected={
+              0:(1,40,40),
+              2:(45,95,21),
+              4:(495,46,12),
+              6:(3003,16,6),
+              8:(12870,3,1),
+              10:(43758,0,0),
+          }
+          for e,(multisets,misses,states) in expected.items():
+              row=by_e[e]
+              assert row['nonresidue_multisets'] == multisets
+              assert row['miss_configurations'] == misses
+              assert row['miss_capable_qr_states'] == states
+          cutoff=r['universal_cutoff']
+          assert cutoff['E_NR_at_least'] == 10
+          assert cutoff['combined_miss_possible'] is False
+          summary='; '.join(
+              f"E{e}:miss={by_e[e]['miss_configurations']}"
+              for e in (0,2,4,6,8,10)
+          )
+          print(
+              f"::notice title=Exact k=27 even-packet exhaustion::"
+              f"QRstates={r['qr_reachable_states']}; {summary}; cutoff=E>=10-hit"
           )
           PY
 
