@@ -1,0 +1,26 @@
+name: Erdős–Straus multi-source exact-state repulsion
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/MULTISOURCE-EXACT-STATE-REPULSION.md"
+      - "research/erdos-straus/classify_multisource_exact_state_repulsion.py"
+      - "research/erdos-straus/verify_multisource_exact_state_repulsion.py"
+      - ".github/workflows/erdos-straus-multisource-exact-state-repulsion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact two-source state-only classifier
+        run: python3 research/erdos-straus/classify_multisource_exact_state_repulsion.py --json
+      - name: Independent explicit-state verification
+        run: python3 research/erdos-straus/verify_multisource_exact_state_repulsion.py --json
