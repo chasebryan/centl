@@ -467,7 +467,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--home-only")) { sweep = 0; home = 1; }
         else if (!strcmp(argv[i], "--fab-max") && i + 1 < argc) {
             uint64_t v = parse_u64_value("fab-max", argv[++i]);
-            if (v > UINT_MAX) die("fab-max out of range");
+            if (v == 0 || v > 64) die("fab-max must be 1..64");
             cli.fab_max = (unsigned)v;
             grade_touched = 1;
         }
