@@ -7,6 +7,12 @@ import json
 import math
 from collections import Counter
 
+BASE_SOURCES = {
+    121: {7, 19, 23, 47},
+    169: {7, 11, 23, 31},
+    289: {7, 11, 23, 31, 47},
+}
+
 # One explicit shortest proof chain for each genuinely new hard-class/source pair.
 # Each step is (kind, hard_class, destination, sources, required residues, base seed,
 # routed seed, promoted prime). Earlier steps in a chain establish any derived source
@@ -58,17 +64,25 @@ CHAINS = {
     ],
 }
 
-ROOT_RESIDUES = {
-    121: ({47: 8},),
-    169: ({11: 4, 23: 18}, {23: 4}),
-    289: ({11: 5, 47: 8}, {11: 4, 23: 18}, {11: 5, 31: 2}),
+# Exact extraction root used by each independent shortest chain:
+# (parent composite shift, routed source residues, extracted positive prime).
+ROOT_FOR_TARGET = {
+    (121, 79): (39, {47: 8}, 13),
+    (121, 53): (39, {47: 8}, 13),
+    (121, 11): (39, {47: 8}, 13),
+    (121, 59): (39, {47: 8}, 13),
+    (121, 71): (39, {47: 8}, 13),
+    (169, 71): (111, {23: 4}, 37),
+    (169, 83): (111, {23: 4}, 37),
+    (169, 19): (111, {23: 4}, 37),
+    (169, 13): (111, {23: 4}, 37),
+    (169, 167): (111, {23: 4}, 37),
+    (289, 19): (51, {11: 4, 23: 18}, 17),
+    (289, 71): (215, {11: 5, 31: 2}, 43),
+    (289, 191): (215, {11: 5, 31: 2}, 43),
 }
 
-EXPECTED = {
-    (121, 11), (121, 53), (121, 59), (121, 71), (121, 79),
-    (169, 13), (169, 19), (169, 71), (169, 83), (169, 167),
-    (289, 19), (289, 71), (289, 191),
-}
+EXPECTED = set(ROOT_FOR_TARGET)
 
 
 def is_prime(n: int) -> bool:
@@ -164,12 +178,17 @@ def crt_merge(a: int, m: int, b: int, n: int) -> tuple[int, int]:
 def verify_chain(target: tuple[int, int], steps: list[tuple]) -> dict[str, object]:
     h, expected_prime = target
     assert steps[-1][-1] == expected_prime
+    parent_shift, root_residues, root_prime = ROOT_FOR_TARGET[target]
 
-    # Start only with the hard class. Each route residue is then merged into an
-    # explicit CRT branch, independently checking that no exact residue ancestry
-    # becomes inconsistent.
+    # Replay the merged composite-extraction ancestry before any new promotion.
     residue, modulus = h, 840
-    promoted = set()
+    for q, r in sorted(root_residues.items()):
+        assert r == (-parent_shift) % q
+        assert legendre_positive(r, q)
+        residue, modulus = crt_merge(residue, modulus, r, q)
+
+    promoted = {root_prime}
+    fixed_residues = dict(root_residues)
     checked_steps = 0
 
     for kind, step_h, k, sources, residues, base, seed, promoted_prime in steps:
@@ -184,9 +203,14 @@ def verify_chain(target: tuple[int, int], steps: list[tuple]) -> dict[str, objec
                 assert not saturates(kind, math.lcm(base, q), k)
 
         for q, r in zip(sources, residues):
+            assert q in BASE_SOURCES[h] or q in promoted
             assert r == (-k) % q
             assert legendre_positive(r, q)
-            residue, modulus = crt_merge(residue, modulus, r, q)
+            if q in fixed_residues:
+                assert fixed_residues[q] == r
+            else:
+                fixed_residues[q] = r
+                residue, modulus = crt_merge(residue, modulus, r, q)
 
         if kind == "prime":
             assert promoted_prime == k
@@ -194,9 +218,6 @@ def verify_chain(target: tuple[int, int], steps: list[tuple]) -> dict[str, objec
             factors = factor(k)
             unknown = [q for q, e in factors.items() if e % 2 and 840 % q != 0]
             assert unknown == [promoted_prime]
-            # All other odd-exponent character factors are fixed by the hard
-            # residue. Their product must be +1 for the miss to extract a
-            # positive character at promoted_prime.
             fixed = 1
             for q, e in factors.items():
                 if e % 2 == 0 or q == promoted_prime:
@@ -210,6 +231,8 @@ def verify_chain(target: tuple[int, int], steps: list[tuple]) -> dict[str, objec
 
     return {
         "hard_class": h,
+        "root_parent_miss": parent_shift,
+        "root_extracted_prime": root_prime,
         "promoted_prime": expected_prime,
         "steps": checked_steps,
         "crt_modulus": modulus,
@@ -231,8 +254,8 @@ def main() -> int:
         "chains": rows,
         "failures": 0,
         "claim": (
-            "independent divisor-enumeration and CRT regression for one shortest exact "
-            "promotion chain to each newly discovered hard-class/source pair"
+            "independent divisor-enumeration and ancestry-aware CRT regression for one "
+            "shortest exact promotion chain to each newly discovered hard-class/source pair"
         ),
     }
     if args.json:
