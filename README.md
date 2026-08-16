@@ -92,7 +92,7 @@ The public research program is currently focused on **Erdős–Straus Type A/B w
 
 ### cbis.kernel — ES+ letter engine
 
-**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) is the ES+ engine. One process, two walks, one cover. Sweep still starts at 0. Home walks only
+**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) is the ES+ production letter engine. One process, two walks, one cover. Sweep still starts at 0. Home walks only
 
 `R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}`
 
@@ -110,6 +110,26 @@ make -C research/erdos-straus/cbis.kernel
 ```
 
 The letter spectrum is the complement of an inversely generated signed-box cover. The equation: [`research/erdos-straus/ES-plus/LETTER-EQUATION.md`](research/erdos-straus/ES-plus/LETTER-EQUATION.md).
+
+### cbx.kernel — X-ray research kernel
+
+**[cbx.kernel](research/erdos-straus/cbx.kernel/README.md)** (CB X-ray Kernel) is deliberately separate from cbis. It keeps the same mathematical cover order `W → I → N → L`, but evaluates the hidden I/N/L lanes even when W has already solved the prime. That turns the buried first-hit geometry into data without weakening the production hunt.
+
+CBX records an explicit finite search grade
+
+`Γ = (F, K_I, E_N, A_L)`
+
+instead of pretending the whole search is described by one scalar K. It also uses exact 64-bit primality/factorization, signal-atomic target evaluation, immutable named grades, deterministic finite census runs, and an analyzer that mechanically tries to falsify candidate adaptive-K laws.
+
+```sh
+make -C research/erdos-straus/cbx.kernel
+./centl es cbx self-test
+./centl es cbx probe 2521
+./centl es cbx go --run deep-I --i-max 2000
+python3 research/erdos-straus/cbx.kernel/analyze.py --run deep-I
+```
+
+Start with the [K/search-grade audit](research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md) and the [first clean CBX X-ray census](research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md). The observed finite Lane-I record in that census is `k_I*=107`; it is **not** a universal bound.
 
 ### CBAP.kernel — letter targeting
 
