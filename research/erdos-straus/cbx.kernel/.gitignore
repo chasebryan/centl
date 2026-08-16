@@ -1,0 +1,7 @@
+cbx
+state/*
+observations/*
+letters/*
+!state/.gitkeep
+!observations/.gitkeep
+!letters/.gitkeep
