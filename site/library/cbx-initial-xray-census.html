@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="First finite CB X-ray Kernel census: 401,747 hard-prime observations through 234,540,000, exposing hidden I/N/L first-depth distributions beneath W.">
+  <title>CBX initial X-ray census — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-initial-xray-census.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cbx-initial-xray-census.html">
+  <meta property="og:title" content="CBX initial X-ray census — FCF">
+  <meta property="og:description" content="Finite validation census only: hidden Lane-I depth reached an observed maximum of 107 through a 234,540,000 sweep cursor. Not a bound.">
+  <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CBX initial X-ray census</h1><p>ES+ finite implementation-validation census</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../software.html">Software</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="cbis-k-parameter-status.html">K parameter / CBX plan</a></li>
+      </ul>
+      <h2>External</h2>
+      <ul>
+        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbx.kernel">cbx.kernel source</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős–Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">CB X-ray Kernel</p>
+          <p class="dek">The first end-to-end CBX run exposes the hidden first-depth distribution beneath the production W cover.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md">Source note in the repository</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Status:</strong> finite implementation-validation census</p>
+          <p><strong>Date:</strong> 2026-08-15</p>
+          <p><strong>Kernel:</strong> <code>cbx.kernel 0.1.0</code></p>
+          <p><strong>Source blob:</strong> <code>cd2202ae512c687cdd7af8ce591eb29806a35008</code></p>
+          <p class="notice"><strong>Claim boundary:</strong> the statistics below are finite observations. The maximum 107 is not a universal bound, does not establish an adaptive K law, and does not prove Erdős–Straus.</p>
+
+          <h2>Run</h2>
+          <p>The validation used the default grade</p>
+          <div class="math" role="math">\Gamma=(F,K_I,E_N,A_L)=(11,400,300,400)</div>
+          <p>with fixed Lane-I policy and sweep only.</p>
+          <pre><code>cbx go --run e2e --step 5000 --sweep-only</code></pre>
+          <p>After approximately twenty seconds the process was terminated normally and saved:</p>
+          <pre><code>sweep=234540000
+observations=401747
+unique_letters=0
+windows=46908
+fab_max=11
+i_max=400
+n_ell_max=300
+l_max=400
+policy=fixed</code></pre>
+          <p>The 179 MB raw JSONL stream contained exactly 401,747 records and had SHA-256 <code>dd43ec5d76c295869dfe02059b4f92513659f9ec13ea514154728761d81f663c</code>.</p>
+
+          <h2>All observed hard primes</h2>
+          <table class="status">
+            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>11</td><td>23</td><td><strong>107</strong></td></tr>
+            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>13</td><td>19</td><td>31</td><td>103</td></tr>
+            <tr><td>Lane L: first a</td><td>98.91%</td><td>3</td><td>6</td><td>33</td><td>210</td><td>396</td></tr>
+          </table>
+          <p>The production-equivalent stacked verdict produced zero letters in this finite interval.</p>
+          <div class="math" role="math">\max_{p\le234540000}^{\mathrm{observed}} k_I^*(p)=107.</div>
+          <p>This is an observed record only.</p>
+
+          <h2>R / fab-only</h2>
+          <p>CBX found 102,500 observed targets in R. Every one was also hit by the configured fab window, so R and fab-only coincide in this run.</p>
+          <table class="status">
+            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>15</td><td><strong>27</strong></td><td><strong>107</strong></td></tr>
+            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>13</td><td>19</td><td>37</td><td>103</td></tr>
+            <tr><td>Lane L: first a</td><td>96.36%</td><td>3</td><td>12</td><td>78</td><td>320</td><td>396</td></tr>
+          </table>
+          <p>The Lane-I tail is visibly heavier inside R than in the linear-W population at this finite scale.</p>
+
+          <h2>Linear W</h2>
+          <p>The remaining 299,247 targets were linear-W hits.</p>
+          <table class="status">
+            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>11</td><td>23</td><td>75</td></tr>
+            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>11</td><td>19</td><td>31</td><td>101</td></tr>
+            <tr><td>Lane L: first a</td><td>99.79%</td><td>3</td><td>6</td><td>20</td><td>122</td><td>396</td></tr>
+          </table>
+
+          <h2>Spectrum split</h2>
+          <ul>
+            <li><strong>A, 134,163 targets:</strong> I max 63; N max 103; L hit 98.86%, max 396.</li>
+            <li><strong>B, 133,808 targets:</strong> I max 107; N max 79; L hit 98.94%, max 396.</li>
+            <li><strong>C, 133,776 targets:</strong> I max 71; N max 101; L hit 98.95%, max 396.</li>
+          </ul>
+          <p>The largest finite I record occurs in Spectrum B in this run. That does not establish a spectrum ordering asymptotically.</p>
+
+          <h2>Why this matters</h2>
+          <p>The production matrix can legitimately show I/N/L near zero because W already marked the target. CBX demonstrates that the hidden lanes are extremely active when evaluated independently. The research object is now measurable:</p>
+          <div class="math" role="math">\boxed{\text{the conditional distribution of }k_I^*(p)\text{ beneath W}.}</div>
+          <p>The next experiment is to track record-depth events inside R/fab-only and correlate them with spectrum, factor structure, signed-box size, defect/stabilizer signatures, first external NR prime, and López depth.</p>
+
+          <h2>Microscopic example: 2521</h2>
+          <pre><code>W: linear=false, R=true, fab=(2,1)
+I: hit=true, first_k=23, omega=3, Omega=4, box_size=45
+N: hit=true, ell=11, shift=31
+L: no hit through A_L=400
+production_letter=false</code></pre>
+          <p>W solves the target operationally. CBX reveals the independent signed-box and external-NR structures underneath it.</p>
+
+          <hr>
+          <p><strong>Erdős–Straus remains open.</strong> The observed Lane-I maximum 107 is a finite record, not a bound.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
