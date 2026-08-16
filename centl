@@ -78,6 +78,10 @@ case "${1:-}" in
           shift
           exec python3 "$cbx_dir/analyze_standalone.py" "$@"
           ;;
+        analyze-overlap)
+          shift
+          exec python3 "$cbx_dir/analyze_overlap.py" "$@"
+          ;;
         plan-hybrid)
           shift
           exec python3 "$cbx_dir/plan_hybrid.py" "$@"
