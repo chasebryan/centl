@@ -5,6 +5,8 @@ on:
     paths:
       - 'research/erdos-straus/K47-FORCED6-HARD-REDUCTION.md'
       - 'research/erdos-straus/K47-ONE-PACKET-COMPANION-FILTER.md'
+      - 'research/erdos-straus/K47-NEGATIVE-LEGENDRE-CORRIDOR-10M.md'
+      - 'research/erdos-straus/analyze_k47_negative_corridor.py'
       - 'research/erdos-straus/classify_k47_forced6_states.py'
       - 'research/erdos-straus/classify_k47_states.py'
       - '.github/workflows/erdos-straus-k47-forced6.yml'
@@ -51,5 +53,40 @@ jobs:
               f"states={r['states']}; misses={r['miss_states']}; "
               f"Legendre={r['legendre47_miss_branches']}; "
               f"added-NR={r['min_added_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Verify exact one-packet miss partition
+        working-directory: research/erdos-straus
+        run: |
+          python3 - <<'PY'
+          import analyze_k47_negative_corridor as a
+          classes = a.one_packet_miss_classes()
+          expected = {
+              1: 7,
+              7: 2,
+              9: 13,
+              11: 13,
+              17: 9,
+              19: 9,
+              27: 9,
+              29: 9,
+              35: 4,
+              37: 4,
+              45: 1,
+          }
+          actual = {r: len(states) for r, states in classes.items()}
+          assert actual == expected, actual
+          union = set().union(*classes.values())
+          assert len(union) == 80
+          assert sum(map(len, classes.values())) == 80
+          residues = {
+              pow(a.k47.PRIMITIVE_ROOT, r, a.k47.MOD)
+              for r in classes
+          }
+          assert residues == {5,10,11,13,19,20,26,29,33,38,40}
+          print(
+              '::notice title=k=47 one-packet partition::'
+              f"classes={len(classes)}; states={len(union)}; sizes={actual}"
           )
           PY
