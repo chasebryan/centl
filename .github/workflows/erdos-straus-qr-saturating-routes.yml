@@ -1,0 +1,26 @@
+name: Erdős–Straus QR-saturating route atlas
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/QR-SATURATING-ROUTED-SEEDS.md"
+      - "research/erdos-straus/classify_qr_saturating_route_atlas.py"
+      - "research/erdos-straus/verify_qr_saturating_route_atlas.py"
+      - ".github/workflows/erdos-straus-qr-saturating-routes.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact saturation classifier
+        run: python3 research/erdos-straus/classify_qr_saturating_route_atlas.py --max-class-shift 5000 --json
+      - name: Independent direct-factorization regression
+        run: python3 research/erdos-straus/verify_qr_saturating_route_atlas.py --limit 2000000 --json
