@@ -86,3 +86,50 @@ jobs:
 
       - name: Check repository remains clean except ignored runtime data
         run: git status --short
+
+  fedora-regress:
+    name: fedora-latest
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora build/runtime tools
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build CBX on Fedora
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Run CBX runtime self-test on Fedora
+        run: research/erdos-straus/cbx.kernel/cbx self-test
+
+      - name: Exercise root launcher on Fedora
+        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
+
+      - name: Validate Fedora probe semantics
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
+          assert p['kernel'] == 'cbx.kernel'
+          assert p['n'] == 2521
+          assert p['W']['R'] is True
+          assert p['I']['hit'] is True and p['I']['first_k'] == 23
+          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
+          assert p['production_letter'] is False
+          PY
+
+      - name: Deterministic Fedora census and analyzer
+        run: |
+          ./centl es cbx go --run ci-fedora --step 5000 --iterations 4 --sweep-only
+          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci-fedora --json > /tmp/cbx-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['unique_grade_targets'] > 0
+          assert 'all' in r['strata']
+          assert r['truncated_tail_ignored'] == 0
+          PY
