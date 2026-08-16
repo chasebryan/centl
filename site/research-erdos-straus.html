@@ -53,13 +53,29 @@
       <p class="hero-actions"><a class="sponsor-button" href="research.html">Search the full research library</a></p>
       <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness is <strong>false</strong>. This page reports exact theorems and finite certificates inside the Type A/B shadow program, not a solution of the conjecture.</p>
 
+      <h2>cbis.kernel — ES+ letter matrix</h2>
+      <p><strong>cbis.kernel</strong> (CB Inverse Sieve) is the ES+ engine. Each window is a matrix: three CRT spectra (A: 1,121; B: 169,289; C: 361,529 mod 840) by four lanes that write one shared cover. A LETTER is a prime no lane marked. GREAT is not stored. Same <code>ES-LETTER-v1</code> numbers as bb.kernel.</p>
+      <table class="status">
+        <tr><th>Lane</th><th>Source</th><th>What it marks</th></tr>
+        <tr><td><strong>W</strong></td><td>bb / CC window</td><td>4p+1, p+4, fab(a,b&le;11). Runs first.</td></tr>
+        <tr><td><strong>I</strong></td><td>ES+ signed box</td><td>&delta;<sub>k</sub> on survivors; every admissible k &le; K.</td></tr>
+        <tr><td><strong>N</strong></td><td>CC / cbap NR</td><td>External nonresidue and aligned shifts; k may exceed K.</td></tr>
+        <tr><td><strong>L</strong></td><td>Type A/B</td><td>López prime-modulus traps.</td></tr>
+      </table>
+      <pre><code>make -C research/erdos-straus/cbis.kernel
+./centl es cbis
+./centl es cbis go --random
+./centl es cbis go --k-max 400 --step 50000
+./centl es cbis letters</code></pre>
+      <p>First session starts at 0 (or a random n with <code>--random</code>). Later sessions resume. Letters live in <code>research/erdos-straus/cbis.kernel/letters/</code>. Source: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a>. Equation: <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">ES+ letter equation</a>.</p>
+
       <h2>CBAP.kernel — letter targeting</h2>
-      <p><strong>cbap.kernel</strong> (CB-Advanced-Processing) is the letter-only C engine. It is built from the bb.kernel menu and the CC.kernel attack. Channel A acquires Mordell-hard primes on three CRT spectra. Channel B locks the theorem and <code>fab(a,b≤11)</code> window — a hit would have been GREAT and is dropped. Channel C tracks the two-target corridor. Channel D sets <code>LETTER = TRUE</code> only if A–C miss, then writes the letter at once. GREAT is not stored.</p>
+      <p><strong>cbap.kernel</strong> (CB-Advanced-Processing) is the four-channel letter hunter. Channel A acquires Mordell-hard primes on three CRT spectra. Channel B locks the theorem and <code>fab(a,b&le;11)</code> window — a hit is dropped. Channel C tracks the two-target corridor. Channel D writes a letter only if A–C miss.</p>
       <pre><code>make -C research/erdos-straus/cbap.kernel
 ./centl es cbap
 ./centl es cbap go --random
 ./centl es cbap letters</code></pre>
-      <p>The first session starts at 0 (or a random n with <code>--random</code>). Later sessions resume. Letters live in <code>research/erdos-straus/cbap.kernel/letters/</code>. A finished hunt is not a proof. Source: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbap.kernel">cbap.kernel</a>.</p>
+      <p>Source: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbap.kernel">cbap.kernel</a>.</p>
 
       <h2>August 15, 2026 — public hunt</h2>
       <p>The theorem notes also have the earlier operator-facing hunt. Two kernels coexist: <strong>bb.kernel</strong> (Python reference, also <code>B-BervigES.kernel</code>) and <strong>CC.kernel</strong> (C attack engine). From the CENTL root the commands are <code>./centl es</code> for the menu and <code>./centl es go</code> for the infinite hunt. A start factor of <code>0</code>, any chosen integer, or <code>--random</code> chooses where a hunt begins. The seed is a resume cursor, not a random-number seed. Ctrl+C stops the engine and writes the cursor. The next <code>go</code> continues from there.</p>
@@ -79,6 +95,8 @@
         <li><a href="library/start-here.html">findings/START-HERE.md</a></li>
         <li><a href="library/how-grades-work.html">findings/HOW-GRADES-WORK.md</a></li>
         <li><a href="library/hunt-seed.html">findings/seeds/README.md</a></li>
+        <li><a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a></li>
+        <li><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">ES+ letter equation</a></li>
         <li><a href="library/bb-kernel.html">bb.kernel</a></li>
         <li><a href="library/cc-kernel.html">CC.kernel</a></li>
         <li><a href="library/cc-kernel-proof.html">CC.kernel/PROOF.md</a></li>
