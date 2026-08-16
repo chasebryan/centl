@@ -54,6 +54,10 @@ case "${1:-}" in
           fi
           exec "$cbx_standalone" "$@"
           ;;
+        certify-i)
+          shift
+          exec python3 "$cbx_dir/certify_i.py" "$@"
+          ;;
         bench)
           shift
           exec python3 "$cbx_dir/bench_i.py" "$@"
