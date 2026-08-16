@@ -200,23 +200,30 @@ Since `K=5 mod17` is a nonresidue, the number of nonresidue prime-factor occurre
 Starting from the seed and inserting only nonresidue occurrences, the exact target-avoiding counts are
 
 ```text
-0 occurrences : 1 state
+0 occurrences : 1 skeleton
 1 occurrence  : 4 skeletons
 2 occurrences : 3 skeletons
 3 occurrences : 2 skeletons
-4 occurrences : 0 skeletons.
+4 occurrences : 1 skeleton
+5 occurrences : 0 skeletons.
 ```
 
-The odd skeletons are
+The unique size-4 target-avoiding skeleton is
+
+`(5,5,5,7)`.
+
+It cannot occur in a Route-A factorization of K because it contains an even number of nonresidue occurrences, while `K=5 mod17` is itself a nonresidue and therefore requires odd nonresidue parity.
+
+The arithmetically admissible odd skeletons are
 
 ```text
 size 1: (5), (6), (7), (10)
 size 3: (5,5,5), (5,5,7).
 ```
 
-Because every size-4 nonresidue multiset hits and hits are absorbing, no larger nonresidue skeleton can occur in a miss.
+Every size-5 nonresidue multiset hits. Since hits are absorbing, every larger nonresidue skeleton hits as well.
 
-Closing these skeletons under all quadratic-residue occurrences leaves only five target-avoiding states. Enforcing the fixed final product `K=5 mod17` reduces the accepted factorizations to three exact patterns.
+Closing the admissible odd skeletons under all quadratic-residue occurrences leaves only five target-avoiding states. Enforcing the fixed final product `K=5 mod17` reduces the accepted factorizations to three exact patterns.
 
 ### S17 grammar
 
