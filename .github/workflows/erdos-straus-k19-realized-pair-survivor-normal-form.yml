@@ -1,0 +1,26 @@
+name: Erdős–Straus k19 realized pair survivor normal form
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K19-REALIZED-PAIR-SURVIVOR-NORMAL-FORM.md"
+      - "research/erdos-straus/classify_k19_realized_pair_survivor_normal_form.py"
+      - "research/erdos-straus/verify_k19_realized_pair_survivor_normal_form.py"
+      - ".github/workflows/erdos-straus-k19-realized-pair-survivor-normal-form.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k19 survivor normal form
+        run: python3 research/erdos-straus/classify_k19_realized_pair_survivor_normal_form.py --json
+      - name: Independent exact-state and finite-prime regression
+        run: python3 research/erdos-straus/verify_k19_realized_pair_survivor_normal_form.py --limit 10000000 --json
