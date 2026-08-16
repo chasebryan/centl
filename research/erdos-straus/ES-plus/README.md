@@ -35,6 +35,15 @@ which reclassifies observed Lane-I first hits as Type-I-only, Type-II-only,
 or both and separates Type-II hits into boundary-only, interior-only, or
 mixed root geometry without changing cover semantics.
 
+The developing decomposition machine is recorded in
+[`../TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md`](../TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md).
+Its directional annotation grammar is the
+[`../BRYAN-ENTANGLEMENT-CROSS.md`](../BRYAN-ENTANGLEMENT-CROSS.md): exact
+arithmetic still decides every transition, while BEC records that proved
+transition as left obstruction `←⊖`, right construction `→⊕`, upward
+expansion `↑(⊕/⊖)`, or downward excavation `↓(⊖/⊕)`. BEC is telemetry and
+scheduler language only; it creates no proof or pruning permission.
+
 The exact constructive Lane-I work is
 [`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
 three finite traversal orientations for the same signed-box cover:
