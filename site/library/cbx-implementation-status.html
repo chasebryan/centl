@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Implementation status for cbx.kernel: finite search grades, crash-preserving runtime semantics, exact arithmetic, inverse signed-box generation, Fedora baseline and adaptive-K analysis.">
+  <meta name="description" content="Current cbx.kernel status: crash-safe X-ray research, finite search grades, three exact Lane-I traversals, per-shift telemetry, Fedora regression and deep census workflows.">
   <title>CBX implementation status — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/library/cbx-implementation-status.html">
   <meta name="robots" content="index,follow">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/library/cbx-implementation-status.html">
   <meta property="og:title" content="CBX implementation status — FCF">
-  <meta property="og:description" content="The CB X-ray Kernel now includes crash-safe X-ray runs, empirical K-policy falsification, and an exact finite k-to-C-to-p inverse signed-box engine.">
+  <meta property="og:description" content="The CB X-ray Kernel now combines crash-safe hidden-lane measurement, three exact Lane-I traversals, per-k telemetry and reproducible Fedora research censuses.">
   <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
   <link rel="stylesheet" href="../style.css">
 </head>
@@ -23,20 +23,14 @@
   </header>
   <div class="layout">
     <nav aria-label="Primary">
-      <h2>Foundation</h2>
-      <ul>
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="../about.html">About FCF</a></li>
-        <li><a href="../centl.html">CENTL</a></li>
-        <li><a href="../software.html">Software</a></li>
-        <li><a href="../docs.html">Documentation</a></li>
-      </ul>
       <h2>Research</h2>
       <ul>
         <li><a href="../research.html">Research library</a></li>
         <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
         <li><a href="cbis-k-parameter-status.html">K/search-grade audit</a></li>
-        <li><a href="cbx-initial-xray-census.html">Initial CBX census</a></li>
+        <li><a href="cbx-initial-xray-census.html">Initial X-ray census</a></li>
+        <li><a href="cbx-inverse-i.html">CBX inverse-I</a></li>
+        <li><a href="cbx-lane-i-orientation-benchmark.html">Lane-I orientation benchmark</a></li>
       </ul>
     </nav>
     <main id="content">
@@ -44,72 +38,68 @@
       <article class="paper">
         <header class="paper-head">
           <p class="kicker">Implementation note</p>
-          <p class="dek">CBX is a separate X-ray and finite-cover research kernel: same mathematical finite cover, hidden-lane measurement, crash-preserving state, and a true inverse signed-box orientation.</p>
-          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md">Canonical source note in the repository</a></p>
+          <p class="dek">CBX is the separate ES+ research kernel for hidden-lane measurement, finite-cover traversal experiments and adaptive-K falsification. cbis.kernel remains the production ES-LETTER engine.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md">Canonical repository note</a></p>
         </header>
         <div class="paper-body">
-          <p><strong>Status:</strong> active experimental research kernel implementation</p>
-          <p><strong>Primary platform:</strong> Fedora-family GNU/Linux. Ubuntu is a secondary Linux portability check.</p>
-          <p><strong>Production boundary:</strong> <code>cbis.kernel 1.2.0</code> remains the production letter engine.</p>
-          <p class="notice"><strong>Claim boundary:</strong> this page records software and finite-search semantics. It does not establish an adaptive K law and does not prove Erdős–Straus.</p>
+          <p><strong>Primary platform:</strong> Fedora-family GNU/Linux. Ubuntu is a secondary Linux check.</p>
+          <p><strong>Production boundary:</strong> <code>cbis.kernel 1.2.0</code> remains untouched as the production letter hunt.</p>
+          <p class="notice"><strong>Claim boundary:</strong> finite software equivalence, operation counts and measurements are not an adaptive-K theorem and are not a proof of Erdős–Straus.</p>
 
-          <h2>Separate job, separate state</h2>
-          <p><code>cbis.kernel</code> asks whether the production cover disposes of a hard prime. <code>cbx.kernel</code> asks what every lane would have done independently, even when W already solved the target. The production order remains <code>W → I → N → L</code>; CBX X-rays underneath it without changing the verdict.</p>
-
-          <h2>Finite grade</h2>
+          <h2>The finite grade</h2>
           <div class="math" role="math">\Gamma=(F,K_I,E_N,A_L)</div>
-          <p>The default grade is <code>(11,400,300,400)</code>. Named run grades are immutable. A different finite strength requires another run name.</p>
+          <p>Default: <code>(11,400,300,400)</code>. Named X-ray runs have immutable grades, preventing silent mixed-strength corpora.</p>
 
-          <h2>Crash preservation</h2>
+          <h2>X-ray runtime</h2>
+          <p>CBX measures I/N/L even when W already solves the prime, without changing the ordinary <code>W → I → N → L</code> production verdict. The runtime uses deterministic 64-bit Miller–Rabin, Pollard-rho factorization, target-atomic signals, crash-tail repair, replay-over-skip recovery, per-run writer locks and exact finite-grade serialization.</p>
+
+          <h2>Three exact Lane-I traversals</h2>
+          <p><strong>p-major recognition</strong></p>
+          <div class="math" role="math">p\to k\to C=(p+k)/4</div>
+          <p><strong>C-major construction</strong></p>
+          <div class="math" role="math">k\to C\to p=4C-k</div>
+          <p><strong>shift-major survivor traversal</strong></p>
+          <div class="math" role="math">k\to p\to C=(p+k)/4</div>
+          <p>Both non-reference engines support target-by-target verification against p-major, including equality of the minimal first shift <code>k_I*(p)</code>.</p>
+
+          <h2>What the Fedora benchmark found</h2>
+          <p>On the finite corpus <code>p ≤ 100,000</code>, <code>K_I=80</code>:</p>
           <ul>
-            <li>An entered target finishes all lane measurements before SIGINT/SIGTERM is honored.</li>
-            <li>Sweep resumes after the last fully processed integer; home resumes at the first unprocessed <code>S</code>.</li>
-            <li>A hard crash may replay an uncheckpointed batch, but it does not skip it.</li>
-            <li>A crash-truncated final JSON append is trimmed on restart; the analyzer also tolerates only that incomplete EOF case.</li>
-            <li>One writer owns a named run at a time. The POSIX lock is released automatically if the process dies.</li>
-            <li>Unique-letter counts are reconciled from durable per-run markers.</li>
+            <li>strict C-major factorization ratio: <strong>20.198020×</strong> p-major;</li>
+            <li>target-gated C-major factorization ratio: <strong>1.000000×</strong>;</li>
+            <li>shift-major factorization ratio: <strong>1.000000×</strong>;</li>
+            <li>shift-major active-visit ratio: <strong>1.000000×</strong>.</li>
           </ul>
+          <p>The canonical shift-major wall ratio was <strong>0.992221×</strong>; later CI landed just above one. The result is treated as practical parity, not a timing theorem. <a href="cbx-lane-i-orientation-benchmark.html">Read the full benchmark.</a></p>
 
-          <h2>Exactness boundary</h2>
-          <p>At the same finite grade CBX uses the same mathematical W/I/N/L predicates and ordering as cbis. CBX intentionally does not reproduce cbis’s eventual bounded-factorization failure mode: it uses deterministic 64-bit Miller–Rabin and Pollard-rho factorization. Its external-NR Jacobi path is unsigned-64-safe.</p>
+          <h2>Per-shift telemetry</h2>
+          <p><code>cbx inverse --layers FILE</code> records compatible C count, hard-target encounters, target/covered/coprime skips, actual factorizations, vacancy hits and genuinely new coverage for each k. <code>cbx analyze-layers</code> ranks marginal yield and flags layers that spend factorization work while adding no new targets.</p>
+          <p>On the small Fedora smoke corpus, 20 shifts through <code>k=79</code> were represented. Only <code>3,7,11,15,19,23,27,31</code> were productive, but <strong>no layer performed factorization work while adding zero coverage</strong>. The remaining shifts did no expensive work because the frontier was already empty. That is evidence against casual heuristic pruning.</p>
 
-          <h2>True inverse signed-box engine</h2>
-          <p>CBX now implements the constructive Lane-I orientation named by the ES+ letter equation:</p>
-          <div class="math" role="math">k \to C \to p=4C-k</div>
-          <p>For each admissible shift <code>k</code> and hard residue <code>h mod 840</code>, it enumerates only the six compatible classes</p>
-          <div class="math" role="math">C \equiv (h+k)/4 \pmod{210}</div>
-          <p>and evaluates the vacancy condition on <code>C</code> before the generated <code>p</code> is consulted against the hard-prime map. That keeps the search genuinely C-first.</p>
-          <pre><code>./centl es cbx inverse --hi 1000000 --i-max 400
-./centl es cbx inverse --hi 100000 --i-max 80 --verify</code></pre>
-          <p>The verification mode redundantly runs the p-first Lane-I recognizer over the same finite target universe and requires both cover membership and the minimal first <code>k</code> to match. The first CI equivalence check through 100,000 at <code>K_I=80</code> passed with zero mismatches on GNU/Linux.</p>
-          <p>This does <strong>not</strong> yet establish that inversion is faster. The engine reports the number of <code>C</code> candidates, generated vacancy hits, covered hard primes and residual hard primes so the two orientations can be benchmarked honestly.</p>
+          <h2>Adaptive-K research</h2>
+          <p>The clean X-ray census through sweep cursor <strong>234,540,000</strong> recorded <strong>401,752</strong> hard-prime X-rays and zero production letters. The finite Lane-I record was <strong>k*=107 at p=8,803,369</strong>. Inside R, p99 was 27. The candidate <code>K(p)=ceil(2 log p)</code> fails 244 of 102,502 measured R targets.</p>
+          <p>CBX therefore treats candidate K laws as things to falsify, not things to promote from a good fit.</p>
 
-          <h2>Adaptive-K research loop</h2>
-          <p>The analyzer tracks the observed first-depth frontier and can directly falsify candidate rules such as <code>K(p)=ceil(c log p)</code> or <code>K(p)=ceil(c (log p)^2)</code>.</p>
-          <p>It also computes the conservative finite calibration</p>
-          <div class="math" role="math">c_{obs}=\max_{p\ observed} k_I^*(p)/B(p)</div>
-          <p>for all targets and separately inside R, together with the exact prime forcing each maximum. These are finite calibration statistics only.</p>
+          <h2>Fedora-first validation</h2>
+          <p>The mandatory workflow runs on Fedora-family GNU/Linux first and Ubuntu second. It checks X-ray semantics, immutable grades, all three Lane-I traversals, exact equivalence, per-k telemetry and orientation benchmarks.</p>
+          <p>A separate parameterized Fedora research workflow performs deeper censuses without making every ordinary PR pay for them. It preserves exact hit/residual sets, per-k telemetry, benchmarks, environment provenance and SHA-256 manifests as Actions artifacts.</p>
+          <p>macOS and Windows do not drive CBX. Compatibility there is only a natural byproduct if it happens.</p>
 
-          <h2>First clean census</h2>
-          <p>The deterministic default-grade census reached a sweep cursor of <strong>234,540,000</strong>, recorded <strong>401,752</strong> Mordell-hard-prime X-rays and produced zero production letters. The finite observed Lane-I record was <strong>107</strong> at <strong>p=8,803,369</strong>; inside R the Lane-I p99 was 27.</p>
-          <p>The deliberately aggressive rule <code>K(p)=ceil(2 log p)</code> already fails 244 of 102,502 measured R targets in that corpus.</p>
+          <h2>Operator surface</h2>
+          <pre><code>./centl es cbx go
+./centl es cbx probe 2521
+./centl es cbx forward-i --hi X --i-max K
+./centl es cbx inverse --hi X --i-max K
+./centl es cbx shift-i --hi X --i-max K
+./centl es cbx bench --hi X --i-max K --repeat 3
+./centl es cbx analyze --run NAME
+./centl es cbx analyze-layers layers.tsv</code></pre>
 
-          <h2>Regression gate</h2>
-          <p>The dedicated GitHub Actions workflow uses Fedora-family GNU/Linux as the primary CBX baseline and Ubuntu as a secondary Linux check. It exercises the root launcher, the known <code>2521</code> X-ray, deterministic finite censuses, analyzer output, immutable-grade rejection, and inverse-vs-recognition equivalence.</p>
-          <p>macOS and Windows are not CBX support targets. Compatibility there may happen naturally through the surrounding codebase, but those systems do not drive this research kernel.</p>
-
-          <h2>Next targets</h2>
-          <ol>
-            <li>Accumulate deeper fixed-K corpora, especially inside R.</li>
-            <li>Benchmark <code>k → C → p</code> inversion against <code>p → k → C</code> recognition as X and K grow.</li>
-            <li>Archive publication-grade raw streams outside git with checksums.</li>
-            <li>Correlate new first-depth records with factor structure, box size, spectrum, defects and López depth.</li>
-            <li>Keep trying to break candidate K envelopes before attempting a theorem.</li>
-            <li>Investigate whether W, N or L admit constructive inversions that reduce rather than increase total work.</li>
-          </ol>
+          <h2>Current frontier</h2>
+          <p>The engineering hypothesis is now a <strong>hybrid Lane-I scheduler</strong>: generated shifts where construction is economical, shift-major traversal where the frontier structure helps, and recognition fallback elsewhere. The scheduler must be driven by larger exact per-k censuses and then challenged by the existing defect/spectrum theory before any mathematical conclusion is claimed.</p>
 
           <hr>
-          <p><strong>Erdős–Straus remains open.</strong> CBX is an X-ray and finite-cover research instrument, not a proof engine.</p>
+          <p><strong>Erdős–Straus remains open.</strong> CBX is an exact finite research instrument, not a proof engine.</p>
         </div>
       </article>
     </main>
