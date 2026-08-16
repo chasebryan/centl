@@ -6,7 +6,7 @@ PYTHON ?= python3
 
 .PHONY: all clean check
 
-all: cbx cbx-inverse cbx-forward-i
+all: cbx cbx-inverse cbx-forward-i cbx-shift-i
 	mkdir -p state observations letters
 
 cbx: src/cbx_runtime.c src/cbx.c
@@ -19,13 +19,17 @@ cbx-inverse: src/cbx_inverse.c src/cbx.c
 cbx-forward-i: src/cbx_forward_i.c src/cbx.c
 	$(CC) $(CFLAGS) -o $@ src/cbx_forward_i.c $(LDFLAGS) $(LDLIBS)
 
-check: cbx cbx-inverse cbx-forward-i
+cbx-shift-i: src/cbx_shift_i.c src/cbx.c
+	$(CC) $(CFLAGS) -o $@ src/cbx_shift_i.c $(LDFLAGS) $(LDLIBS)
+
+check: cbx cbx-inverse cbx-forward-i cbx-shift-i
 	./cbx self-test
 	./cbx probe 1009
 	./cbx probe 2521
 	./cbx probe 9658489
 	./cbx-inverse --hi 100000 --i-max 80 --segment 25000 --verify
 	./cbx-forward-i --hi 100000 --i-max 80
+	./cbx-shift-i --hi 100000 --i-max 80 --segment 25000 --verify
 	$(PYTHON) -m py_compile analyze.py bench_i.py
 	$(PYTHON) bench_i.py --hi 20000 --i-max 40 --repeat 1 --no-verify --json >/dev/null
 	rm -f state/check.seed observations/check.jsonl
@@ -34,5 +38,5 @@ check: cbx cbx-inverse cbx-forward-i
 	rm -f state/check.seed observations/check.jsonl
 
 clean:
-	rm -f cbx cbx-inverse cbx-forward-i
+	rm -f cbx cbx-inverse cbx-forward-i cbx-shift-i
 	rm -rf __pycache__
