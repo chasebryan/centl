@@ -71,7 +71,7 @@ jobs:
           assert raw['kernel'] == 'cbx.kernel' and raw['mode'] == 'standalone-I'
           assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
-          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v1'
+          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v2'
           assert raw['set_relations'] == r['totals']['hit_events'] == g['relation_rows']
           assert r['layers'] == g['layers']
           for row in raw['shifts']:
@@ -80,7 +80,7 @@ jobs:
               assert sum(row['spectrum_hits'].values()) == row['hits']
           report={
               'kernel':'cbx.kernel',
-              'mode':'standalone-lane-I-census-v2',
+              'mode':'standalone-lane-I-census-v3',
               'source_commit':os.environ['SOURCE_SHA'],
               'checkout_commit':os.environ['CHECKOUT_SHA'],
               'hi':int(os.environ['HI']),
@@ -94,6 +94,7 @@ jobs:
               'spectrum_hit_events':r['spectrum_hit_events'],
               'totals':r['totals'],
               'overlap_graph':{
+                  'analysis':g['analysis'],
                   'unique_primes_hit_by_any_layer':g['unique_primes_hit_by_any_layer'],
                   'novel_layers':g['novel_layers'],
                   'novel_k':g['novel_k'],
@@ -102,10 +103,12 @@ jobs:
                   'exact_single_layer_containments':g['exact_single_layer_containments'],
                   'exact_two_layer_containment_target_count':g['exact_two_layer_containment_target_count'],
                   'exact_two_layer_containment_targets':g['exact_two_layer_containment_targets'],
+                  'exact_three_layer_containment_target_count':g['exact_three_layer_containment_target_count'],
+                  'exact_three_layer_containment_targets':g['exact_three_layer_containment_targets'],
                   'top_pairwise_similarity':g['top_pairwise_similarity'][:20],
                   'above_107':g['above_107'],
               },
-              'claim':'finite standalone strengths and exact finite set relations; containment candidates are theorem leads, not universal shadow theorems',
+              'claim':'finite standalone strengths and exact finite set relations; one/two/three-layer containment results are theorem leads, not universal shadow theorems',
           }
           json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
           a=report['above_107']
@@ -121,8 +124,9 @@ jobs:
               f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
               f"productive={report['productive_layers']}/{report['layers']}; "
               f"k>107 productive={a['productive_layers']}/{a['layers']}; "
-              f"single-containments={og['exact_single_layer_containment_count']}; "
-              f"two-layer-targets={og['exact_two_layer_containment_target_count']}; "
+              f"single={og['exact_single_layer_containment_count']}; "
+              f"two={og['exact_two_layer_containment_target_count']}; "
+              f"three={og['exact_three_layer_containment_target_count']}; "
               f"top-pair={pair_txt}; leaders above107={leaders}"
           )
           PY
