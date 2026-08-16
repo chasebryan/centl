@@ -65,9 +65,13 @@ def finite(v: float | None) -> float | None:
 
 
 def benchmark_one(lo: int, hi: int, kmax: int, segment: int, repeat: int,
-                  verify_first: bool) -> dict[str, Any]:
+                  verify_first: bool, strict_inverse: bool) -> dict[str, Any]:
     inv_base = [str(INV), "--lo", str(lo), "--hi", str(hi), "--i-max", str(kmax),
                 "--segment", str(segment)]
+    if strict_inverse:
+        inv_base.append("--strict-c-first")
+    else:
+        inv_base.append("--target-gated")
     fwd_base = [str(FWD), "--lo", str(lo), "--hi", str(hi), "--i-max", str(kmax)]
 
     verification = None
@@ -105,6 +109,7 @@ def benchmark_one(lo: int, hi: int, kmax: int, segment: int, repeat: int,
     covered = as_int(inv_last, "covered_hard_primes")
     residual = as_int(inv_last, "residual_hard_primes")
     c_candidates = as_int(inv_last, "C_candidates")
+    inv_factorizations = as_int(inv_last, "factorizations")
     delta_hits = as_int(inv_last, "delta_hits")
     forward_shifts = as_int(fwd_last, "shift_candidates")
     forward_factorizations = as_int(fwd_last, "factorizations")
@@ -118,6 +123,7 @@ def benchmark_one(lo: int, hi: int, kmax: int, segment: int, repeat: int,
         "i_max": kmax,
         "segment": segment,
         "repeat": repeat,
+        "candidate_mode": inv_last.get("candidate_mode"),
         "verification": verification,
         "hard_primes": hard,
         "covered_hard_primes": covered,
@@ -125,8 +131,12 @@ def benchmark_one(lo: int, hi: int, kmax: int, segment: int, repeat: int,
         "cover_rate": ratio(covered, hard),
         "inverse": {
             "C_candidates": c_candidates,
+            "factorizations": inv_factorizations,
             "delta_hits": delta_hits,
-            "delta_hit_rate": ratio(delta_hits, c_candidates),
+            "skipped_non_target": as_int(inv_last, "skipped_non_target"),
+            "skipped_covered": as_int(inv_last, "skipped_covered"),
+            "skipped_non_coprime": as_int(inv_last, "skipped_non_coprime"),
+            "factorizations_per_prime": ratio(inv_factorizations, hard),
             "wall_seconds": inv_times,
             "median_wall_seconds": inv_med,
             "min_wall_seconds": min(inv_times),
@@ -141,12 +151,16 @@ def benchmark_one(lo: int, hi: int, kmax: int, segment: int, repeat: int,
         },
         "comparison": {
             "inverse_to_forward_wall_ratio": finite(ratio(inv_med, fwd_med)),
-            "inverse_C_candidates_to_forward_factorizations": finite(
+            "inverse_enumerated_C_to_forward_factorizations": finite(
                 ratio(c_candidates, forward_factorizations)
             ),
+            "inverse_factorizations_to_forward_factorizations": finite(
+                ratio(inv_factorizations, forward_factorizations)
+            ),
             "interpretation": (
-                "ratio < 1 favors inverse; ratio > 1 favors p-first recognition. "
-                "Finite benchmark only; no asymptotic claim."
+                "Factorization ratio measures expensive signed-box work. Enumerated-C ratio measures "
+                "cheap inverse traversal overhead. Wall ratio is machine/corpus specific. "
+                "Ratios below 1 favor inverse. Finite benchmark only."
             ),
         },
     }
@@ -157,15 +171,19 @@ def print_text(report: dict[str, Any]) -> None:
     print("finite timings only; lower ratio favors inverse")
     print()
     for row in report["results"]:
-        print(f"X=[{row['lo']},{row['hi']}]  K_I={row['i_max']}  hard={row['hard_primes']}")
+        print(f"X=[{row['lo']},{row['hi']}]  K_I={row['i_max']}  hard={row['hard_primes']}  "
+              f"inverse={row['candidate_mode']}")
         print(f"  cover:   {row['covered_hard_primes']} hit / {row['residual_hard_primes']} residual")
-        print(f"  inverse: candidates={row['inverse']['C_candidates']}  "
+        print(f"  inverse: enumerated_C={row['inverse']['C_candidates']}  "
+              f"factorizations={row['inverse']['factorizations']}  "
               f"median={row['inverse']['median_wall_seconds']:.6f}s")
         print(f"  forward: factorizations={row['forward']['factorizations']}  "
               f"median={row['forward']['median_wall_seconds']:.6f}s")
-        print(f"  work ratio C/factorizations: "
-              f"{row['comparison']['inverse_C_candidates_to_forward_factorizations']:.6f}")
-        print(f"  wall ratio inverse/forward:  "
+        print(f"  factorization ratio inverse/forward: "
+              f"{row['comparison']['inverse_factorizations_to_forward_factorizations']:.6f}")
+        print(f"  enumeration ratio C/forward-factorizations: "
+              f"{row['comparison']['inverse_enumerated_C_to_forward_factorizations']:.6f}")
+        print(f"  wall ratio inverse/forward: "
               f"{row['comparison']['inverse_to_forward_wall_ratio']:.6f}")
         if row["verification"]:
             print(f"  verified: {row['verification']['targets']} targets, "
@@ -182,6 +200,8 @@ def main() -> int:
                     help="Lane-I bound; may be repeated (default 400)")
     ap.add_argument("--segment", type=int, default=1_000_000)
     ap.add_argument("--repeat", type=int, default=3)
+    ap.add_argument("--strict-inverse", action="store_true",
+                    help="benchmark the ungated strict-C-first inverse baseline")
     ap.add_argument("--no-verify", action="store_true",
                     help="skip the pre-benchmark inverse-vs-forward theorem check")
     ap.add_argument("--json", action="store_true")
@@ -202,11 +222,11 @@ def main() -> int:
     for hi in args.hi:
         for kmax in k_values:
             results.append(benchmark_one(args.lo, hi, kmax, args.segment, args.repeat,
-                                         not args.no_verify))
+                                         not args.no_verify, args.strict_inverse))
 
     report = {
         "kernel": "cbx.kernel",
-        "benchmark": "lane-I-orientation-v1",
+        "benchmark": "lane-I-orientation-v2",
         "claim": "finite empirical benchmark only",
         "results": results,
     }
