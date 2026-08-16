@@ -41,6 +41,14 @@ and compacts the unresolved hard-prime frontier after every shift. All three
 are finite algorithms for the same Lane-I set and are regression-checked
 against minimal first-hit k values.
 
+The first three-way Fedora benchmark is
+[`CBX-LANE-I-ORIENTATION-BENCHMARK.md`](CBX-LANE-I-ORIENTATION-BENCHMARK.md).
+At `X=100000, K_I=80`, target-gated C-major recovers exactly the p-major
+factorization count but still pays C-enumeration overhead; shift-major has
+exactly the same factorization/active-visit work set as p-major and landed at
+practical wall-time parity in the finite three-repeat microbenchmark. The
+small timing difference is not treated as a speed theorem.
+
 The first clean X-ray validation census is
 [`CBX-INITIAL-XRAY-CENSUS.md`](CBX-INITIAL-XRAY-CENSUS.md). It records
 401,752 hard-prime observations through a sweep cursor of 234,540,000 at
