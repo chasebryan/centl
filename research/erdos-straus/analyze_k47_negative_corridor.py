@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Direction-resolved finite theorem mining for negative-Legendre k=47 misses.
 
-Consumes a CBX standalone hit-relation TSV and refines the finite set of hard
-primes that miss k=47 with (47/p)=-1 by their exact forced-6 one-packet state
-class. Compatibility is deliberately represented as a set, even though the
-abstract regression currently proves that the 80 negative-character miss
-states split disjointly across the eleven one-packet directions.
+Consumes a CBX standalone hit-relation TSV and independently reconstructs the
+complete finite Mordell-hard prime universe. This matters because a TSV of hit
+rows alone cannot reveal a prime that misses every recorded shift.
+
+Each negative-character k=47 miss is then refined by its exact forced-6
+one-packet state class. Compatibility stays set-valued by construction even
+though the abstract regression proves the eleven classes are disjoint on the
+80 negative-character hard miss states.
 
 No finite cover is promoted to a universal theorem.
 """
@@ -20,6 +23,7 @@ from pathlib import Path
 import classify_k47_forced6_states as hard
 import classify_k47_states as core
 
+HARD_RESIDUES = (1, 121, 169, 289, 361, 529)
 # Earlier companion shifts P+1,...,P+10. k=43 is intentionally excluded:
 # the observed negative-character k=47 hole is already empty by k=39.
 PRIOR = (3, 7, 11, 15, 19, 23, 27, 31, 35, 39)
@@ -40,9 +44,9 @@ EXPECTED_ABSTRACT_DIRECTION_COUNTS = {
 }
 
 
-def load(path: Path, hi: int | None):
+def load(path: Path, hi: int):
     hits: dict[int, set[int]] = defaultdict(set)
-    universe: set[int] = set()
+    relation_union: set[int] = set()
     with path.open("r", encoding="utf-8") as fh:
         for line_no, raw in enumerate(fh, 1):
             line = raw.strip()
@@ -52,10 +56,53 @@ def load(path: Path, hi: int | None):
             if len(parts) != 2:
                 raise SystemExit(f"{path}:{line_no}: expected 'k p'")
             k, p = map(int, parts)
-            if hi is None or p <= hi:
+            if p <= hi:
                 hits[k].add(p)
-                universe.add(p)
-    return hits, universe
+                relation_union.add(p)
+    return hits, relation_union
+
+
+def is_prime64(n: int) -> bool:
+    """Deterministic Miller-Rabin for unsigned 64-bit integers."""
+    if n < 2:
+        return False
+    small = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37)
+    for q in small:
+        if n % q == 0:
+            return n == q
+
+    d = n - 1
+    s = 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+
+    for a in (2, 325, 9375, 28178, 450775, 9780504, 1795265022):
+        if a % n == 0:
+            continue
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = (x * x) % n
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+
+def hard_prime_universe(hi: int) -> set[int]:
+    if hi < 2:
+        return set()
+    out: set[int] = set()
+    for residue in HARD_RESIDUES:
+        p = residue
+        while p <= hi:
+            if is_prime64(p):
+                out.add(p)
+            p += 840
+    return out
 
 
 def legendre47_negative(p: int) -> bool:
@@ -282,13 +329,21 @@ def finite_direction_matrix(
     }
 
 
-def analyze(path: Path, hi: int | None):
-    hits, universe = load(path, hi)
+def analyze(path: Path, hi: int):
+    hits, relation_union = load(path, hi)
     if 47 not in hits:
         raise SystemExit("relation file has no k=47 rows")
     for k in PRIOR:
         if k not in hits:
             raise SystemExit(f"relation file has no k={k} rows")
+
+    universe = hard_prime_universe(hi)
+    foreign = relation_union - universe
+    if foreign:
+        sample = sorted(foreign)[:10]
+        raise SystemExit(
+            f"relation file contains {len(foreign)} non-hard targets through {hi}: {sample}"
+        )
 
     closures = one_packet_closures()
     abstract = abstract_direction_regression(closures)
@@ -315,7 +370,9 @@ def analyze(path: Path, hi: int | None):
     return {
         "analysis": "k47-negative-legendre-direction-matrix-v2",
         "hi": hi,
-        "hard_universe_from_relation_union": len(universe),
+        "hard_universe": len(universe),
+        "relation_union": len(relation_union),
+        "hard_primes_invisible_in_hit_union": len(universe - relation_union),
         "negative_legendre_k47_misses": len(target),
         "finite_target_primes": sorted(target),
         "one_packet_log_directions": list(ONE_PACKET_DIRECTIONS),
@@ -331,12 +388,13 @@ def analyze(path: Path, hi: int | None):
         ),
         "ordered_residual": residual_rows,
         "residual_after_prior_corridor": len(remaining),
+        "residual_target_primes": sorted(remaining),
         "minimum_finite_cover_size": len(global_covers[0]) if global_covers else None,
         "all_minimum_finite_covers": global_covers,
         "direction_matrix": matrix,
         "claim": (
-            "exact finite relation-set and exact fixed-k47 state analysis only; "
-            "no universal cross-shift containment theorem"
+            "complete finite hard-prime universe plus exact relation-set and fixed-k47 "
+            "state analysis only; no universal cross-shift containment theorem"
         ),
     }
 
@@ -361,6 +419,8 @@ def main() -> int:
     else:
         if args.relations is None:
             ap.error("relations is required unless --self-test is used")
+        if args.hi is None:
+            ap.error("--hi is required for complete hard-prime-universe accounting")
         report = analyze(args.relations, args.hi)
 
     if args.json:
@@ -371,6 +431,7 @@ def main() -> int:
         print(f"multiplicity: {report['compatibility_multiplicity_histogram']}")
         print(f"direction counts: {report['direction_state_counts']}")
     else:
+        print(f"hard universe: {report['hard_universe']}")
         print(f"negative-Legendre k47 misses: {report['negative_legendre_k47_misses']}")
         print(f"direction counts: {report['direction_matrix']['finite_direction_counts']}")
         for row in report["ordered_residual"]:
