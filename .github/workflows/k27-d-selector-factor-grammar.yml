@@ -1,0 +1,27 @@
+name: k27 D-selector factor grammar
+
+on:
+  push:
+    branches:
+      - agent/k27-d-selector-factor-grammar
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K27-D-SELECTOR-FACTOR-GRAMMAR.md'
+      - 'research/erdos-straus/verify_k27_d_selector_factor_grammar.py'
+      - '.github/workflows/k27-d-selector-factor-grammar.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile verifier
+        run: python3 -m py_compile research/erdos-straus/verify_k27_d_selector_factor_grammar.py
+      - name: Verify exact D-selector grammar
+        run: python3 research/erdos-straus/verify_k27_d_selector_factor_grammar.py --json
