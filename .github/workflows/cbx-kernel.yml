@@ -8,12 +8,14 @@ on:
       - 'research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md'
       - 'research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md'
       - 'research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
       - '.github/workflows/cbx-kernel.yml'
   push:
     branches: [main]
     paths:
       - 'centl'
       - 'research/erdos-straus/cbx.kernel/**'
+      - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
       - '.github/workflows/cbx-kernel.yml'
 
 permissions:
@@ -72,11 +74,13 @@ jobs:
           r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
           assert r['kernel'] == 'cbx.kernel'
           assert r['mode'] == 'inverse-I'
+          assert r['candidate_mode'] == 'target-gated'
           assert r['verify'] is True
           assert r['hard_primes'] > 0
           assert r['verification_targets'] == r['hard_primes']
           assert r['verification_mismatches'] == 0
           assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          assert r['factorizations'] <= r['C_candidates']
           PY
 
       - name: Benchmark Lane-I orientations on Fedora
@@ -89,11 +93,13 @@ jobs:
           row = r['results'][0]
           assert row['hard_primes'] > 0
           assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
-          work = row['comparison']['inverse_C_candidates_to_forward_factorizations']
+          fact = row['comparison']['inverse_factorizations_to_forward_factorizations']
+          enum = row['comparison']['inverse_enumerated_C_to_forward_factorizations']
           wall = row['comparison']['inverse_to_forward_wall_ratio']
-          assert work is not None and work > 0
+          assert fact is not None and fact > 0
+          assert enum is not None and enum > 0
           assert wall is not None and wall > 0
-          print(f"::notice title=CBX Fedora Lane-I benchmark::work ratio inverse/forward={work:.6f}; wall ratio={wall:.6f}; hard primes={row['hard_primes']}; K_I={row['i_max']}")
+          print(f"::notice title=CBX Fedora Lane-I benchmark::factorization ratio inverse/forward={fact:.6f}; enumerated-C ratio={enum:.6f}; wall ratio={wall:.6f}; hard primes={row['hard_primes']}; K_I={row['i_max']}")
           PY
 
       - name: Deterministic Fedora census and analyzer
@@ -153,6 +159,7 @@ jobs:
           import json
           r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
           assert r['mode'] == 'inverse-I'
+          assert r['candidate_mode'] == 'target-gated'
           assert r['verification_mismatches'] == 0
           assert r['verification_targets'] == r['hard_primes']
           PY
