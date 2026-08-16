@@ -1,0 +1,72 @@
+name: Erdős–Straus k=47 r7-s02 factor shape
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/cbx-k47-direction-matrix
+    paths:
+      - 'research/erdos-straus/verify_k47_r7_s02_shape.py'
+      - 'research/erdos-straus/analyze_k47_negative_corridor.py'
+      - 'research/erdos-straus/analyze_k47_negative_states.py'
+      - 'research/erdos-straus/classify_k47_states.py'
+      - 'research/erdos-straus/classify_k47_forced6_states.py'
+      - 'research/erdos-straus/K47-R7-S02-FACTOR-SHAPE.md'
+      - '.github/workflows/erdos-straus-k47-r7-s02-shape.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k47-r7-s02-shape:
+    name: fedora-k47-r7-s02-shape
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Python and Git
+        run: dnf -y install python3 git
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact factor-residue shape
+        run: |
+          python3 research/erdos-straus/verify_k47_r7_s02_shape.py \
+            --json > /tmp/k47-r7-s02-shape.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-r7-s02-shape.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-r7-s02-factor-shape-v1'
+          assert r['state_id'] == 'r7-s02'
+          assert r['direction_log'] == 7
+          assert r['direction_residue_mod47'] == 11
+          assert r['target_center_log'] == 45
+          assert r['target_center_residue_mod47'] == 19
+          assert r['target_divisor_set_size'] == 27
+          assert r['productive_states_to_target'] == 2
+          assert r['productive_nonzero_transition_logs'] == [7]
+          assert r['neutral_transition_logs'] == [0]
+          assert r['p_residue_mod47'] == 29
+          assert r['hard_cell_p_residue_mod39480'] == 9241
+          assert r['hard_cell_C47_over6_residue_mod1645'] == 387
+          ex=r['s_gt_1_regression_example']
+          assert ex['p'] == 537647881
+          assert ex['q'] == 79159
+          assert ex['S'] == 283
+          assert ex['C47'] == 134411982
+          print(
+              f"::notice title=Exact r7-s02 factor shape::"
+              f"productive-log={r['productive_nonzero_transition_logs']}; "
+              f"pmod47={r['p_residue_mod47']}; "
+              f"hard-cell-pmod39480={r['hard_cell_p_residue_mod39480']}; "
+              f"S>1-example={ex['p']}"
+          )
+          PY
+
+      - name: Upload exact-state evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: k47-r7-s02-factor-shape
+          path: /tmp/k47-r7-s02-shape.json
+          if-no-files-found: error
