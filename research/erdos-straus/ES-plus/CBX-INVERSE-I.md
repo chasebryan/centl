@@ -1,0 +1,355 @@
+# CBX inverse-I — constructive signed-box cover
+
+**Status:** exact finite implementation of the Lane-I inverse orientation  
+**Date:** 2026-08-15  
+**Program:** ES+  
+**Kernel:** `cbx.kernel 0.1.0`  
+**Primary platform:** Fedora-family GNU/Linux  
+**Depends on:** `LETTER-EQUATION.md`, `CBIS-K-PARAMETER-STATUS.md`, `CBX-IMPLEMENTATION-STATUS.md`  
+**Claim boundary:** this note specifies and implements a finite cover construction. It does not prove that the inverse orientation is asymptotically faster, does not prove an adaptive K law, and does not prove Erdős–Straus.
+
+---
+
+## 1. The orientation
+
+The p-first recognition form of Lane I is
+
+\[
+p\to k\to C=\frac{p+k}{4}\to\delta_k(C).
+\]
+
+The constructive form named by the ES+ letter equation reverses the outer search:
+
+\[
+\boxed{k\to C\to p=4C-k.}
+\]
+
+For an admissible shift
+
+\[
+k\equiv3\pmod4
+\]
+
+and a Mordell-hard prime target
+
+\[
+p\equiv h\pmod{840},
+\qquad
+h\in H=\{1,121,169,289,361,529\},
+\]
+
+we have
+
+\[
+4C-k\equiv h\pmod{840}.
+\]
+
+Because every `h` is `1 mod 4` and every admissible `k` is `3 mod 4`, `h+k` is divisible by four. Dividing the congruence by four gives
+
+\[
+\boxed{
+C\equiv\frac{h+k}{4}\pmod{210}.
+}
+\]
+
+Therefore a fixed `k` does not require all positive `C`. It requires exactly six residue classes modulo 210 if the only desired outputs are Mordell-hard targets.
+
+---
+
+## 2. The implemented generator
+
+The executable is built from
+
+```text
+research/erdos-straus/cbx.kernel/src/cbx_inverse.c
+```
+
+as
+
+```text
+cbx-inverse
+```
+
+and is routed from the repository root by
+
+```sh
+./centl es cbx inverse ...
+```
+
+For a finite target interval `[L,X]` and Lane-I bound `K_I`, the engine works in p-segments to keep memory bounded.
+
+For each p-segment:
+
+1. build the exact finite target universe consisting only of primes in the six Mordell-hard classes;
+2. for every admissible `k <= K_I`;
+3. for every hard residue `h`;
+4. enumerate
+   \[
+   C\equiv(h+k)/4\pmod{210}
+   \]
+   whose generated `p=4C-k` lies in the current segment;
+5. factor `C` exactly with the CBX deterministic-Miller–Rabin/Pollard-rho arithmetic core;
+6. evaluate `delta_k(C)`;
+7. only when `delta_k(C)=0`, form the generated `p=4C-k` and mark it if it is in the hard-prime target universe.
+
+The order of steps 5–7 is intentional. `delta_k(C)` is evaluated before prime-target membership is consulted. The implementation therefore remains genuinely C-first rather than using the hard-prime table to avoid the inverse work and thereby recreating p-first recognition.
+
+---
+
+## 3. Exact first depth
+
+The shifts are visited in increasing order
+
+\[
+3,7,11,15,\ldots,K_I.
+\]
+
+For each generated hard prime the engine stores the first shift that marked it. Thus the hit file records the same quantity measured by the X-ray kernel:
+
+\[
+\boxed{
+k_I^*(p)=\min\{k:\delta_k((p+k)/4)=0\}.}
+\]
+
+Optional output:
+
+```text
+p<TAB>k_I*(p)
+```
+
+is produced with `--hits FILE`.
+
+Hard primes not marked by any admissible shift through `K_I` can be written with `--residuals FILE`.
+
+This residual is a **Lane-I residual only**. It is not automatically a production ES letter, because W, N and L are separate coordinates of the full finite grade.
+
+---
+
+## 4. Equivalence verification
+
+The inverse engine has a deliberately redundant `--verify` mode.
+
+After constructing the inverse cover for a segment, it applies the existing p-first Lane-I recognizer to every hard prime in the same finite universe.
+
+For every target it requires both
+
+\[
+\text{inverse membership}=\text{recognition membership}
+\]
+
+and, when hit,
+
+\[
+\text{inverse first }k=\text{recognition first }k.
+\]
+
+A disagreement is printed with the target and both first-depth values, increments `verification_mismatches`, and causes a nonzero process exit.
+
+This is stronger than checking only cardinality. Two algorithms could accidentally cover the same number of primes while disagreeing on which primes are covered. The CBX check compares the actual finite set and the minimal first depth target-by-target.
+
+The CI smoke interval is
+
+```sh
+./centl es cbx inverse \
+  --hi 100000 \
+  --i-max 80 \
+  --segment 25000 \
+  --verify
+```
+
+and is required to produce zero mismatches.
+
+Finite agreement is a software validation of the implementation. It is not a substitute for the mathematical equivalence already stated in the theory note.
+
+---
+
+## 5. Output counters
+
+The inverse JSON summary records:
+
+```text
+hard_primes
+C_candidates
+delta_hits
+covered_hard_primes
+residual_hard_primes
+verification_targets
+verification_mismatches
+```
+
+Their meanings are:
+
+- `hard_primes`: exact number of Mordell-hard prime targets in the interval;
+- `C_candidates`: number of compatible C values on which factorization and `delta_k` evaluation were attempted;
+- `delta_hits`: generated `(k,C)` pairs satisfying `delta_k(C)=0`, including repeated generation of the same prime at different shifts;
+- `covered_hard_primes`: unique hard primes generated at least once;
+- `residual_hard_primes`: hard primes not generated by Lane I through `K_I`;
+- verification fields: exact target count and mismatch count when `--verify` is active.
+
+The identity
+
+\[
+\boxed{
+\texttt{covered\_hard\_primes}
++
+\texttt{residual\_hard\_primes}
+=
+\texttt{hard\_primes}
+}
+\]
+
+is checked in CI.
+
+---
+
+## 6. Why implementation does not prove speed
+
+The constructive orientation is exact, but its cost is not automatically smaller.
+
+The inverse engine deliberately factors every hard-compatible C candidate before asking whether the resulting integer is one of the prime targets. By contrast, p-first recognition starts only from hard primes and usually stops at the first small signed-box hit.
+
+So the relevant empirical comparison is not merely
+
+\[
+\text{number of primes}
+\]
+
+versus
+
+\[
+\text{number of generated hits}.
+\]
+
+It is the amount of exact signed-box work actually performed.
+
+For the inverse engine, the first work proxy is
+
+\[
+W_{\mathrm{inv}}=	exttt{C\_candidates}.
+\]
+
+For the p-first reference engine `cbx-forward-i`, the corresponding count is
+
+\[
+W_{\mathrm{fwd}}=	exttt{factorizations},
+\]
+
+the exact number of `(p,k)` signed-box factorizations performed before first hits or exhaustion.
+
+The structural finite work ratio is therefore
+
+\[
+\boxed{
+\rho_W(X,K_I)
+=
+\frac{W_{\mathrm{inv}}}{W_{\mathrm{fwd}}}.
+}
+\]
+
+Values below one favor the current inverse enumeration; values above one favor p-first recognition on that finite corpus.
+
+This says nothing by itself about asymptotics. It tells us which implementation is paying more exact arithmetic at measured `(X,K_I)`.
+
+---
+
+## 7. Benchmark harness
+
+The benchmark reference is
+
+```text
+src/cbx_forward_i.c
+```
+
+which implements only
+
+\[
+p\to k\to C
+\]
+
+for the same hard-prime finite universe and records:
+
+```text
+shift_candidates
+factorizations
+covered_hard_primes
+residual_hard_primes
+```
+
+The harness
+
+```text
+bench_i.py
+```
+
+runs the inverse and forward engines at identical `(L,X,K_I)`, requires their finite cover cardinalities to agree, and reports both the work ratio and median elapsed-time ratio.
+
+Examples:
+
+```sh
+python3 bench_i.py --hi 100000 --i-max 80
+
+python3 bench_i.py \
+  --hi 100000 \
+  --hi 1000000 \
+  --hi 10000000 \
+  --i-max 80 \
+  --i-max 400 \
+  --repeat 3
+```
+
+The harness alternates execution order between repeats to reduce systematic warm-cache or scheduling bias.
+
+The wall ratio is
+
+\[
+\rho_t
+=
+\frac{t_{\mathrm{inverse}}}{t_{\mathrm{forward}}}.
+\]
+
+Again, `rho_t<1` favors inverse on that machine and finite corpus; `rho_t>1` favors recognition.
+
+---
+
+## 8. The actual research question now
+
+The question is no longer “can the inverse cover be implemented?” It can.
+
+The next questions are sharper:
+
+1. How does `rho_W(X,K_I)` behave as X grows?
+2. How does it behave as `K_I` grows?
+3. Does restricting to R-like substructures change the crossover?
+4. Can `delta_k(C)=0` itself be **generated structurally**, rather than tested on every compatible C candidate?
+5. Can factor-pattern or defect information prune C before full Pollard-rho factorization without secretly reintroducing p-first search?
+6. Do some shifts have sufficiently high hit density that they should be generated, while others should remain recognizers?
+
+That last possibility suggests a hybrid engine rather than an ideological choice between forward and inverse orientation.
+
+---
+
+## 9. Command reference
+
+```sh
+# inverse Lane-I finite cover
+./centl es cbx inverse --hi X --i-max K
+
+# exact finite implementation check
+./centl es cbx inverse --hi X --i-max K --verify
+
+# bounded-memory segmentation
+./centl es cbx inverse --hi X --i-max K --segment N
+
+# save generated first depths and residuals
+./centl es cbx inverse --hi X --i-max K \
+  --hits hits.tsv \
+  --residuals residuals.txt
+
+# compare orientations
+python3 research/erdos-straus/cbx.kernel/bench_i.py \
+  --hi X --i-max K --repeat 3
+```
+
+---
+
+Erdős–Straus remains open. Exact finite inversion is a computational tool, not a proof.
