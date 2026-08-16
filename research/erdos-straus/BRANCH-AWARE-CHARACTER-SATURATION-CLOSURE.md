@@ -1,23 +1,25 @@
 # Branch-aware quadratic/Jacobi saturation closure
 
-**Status:** exact finite negative-frontier theorem  
+**Status:** exact finite fixed point for the class-global-positive character-saturation model  
 **Date:** 2026-08-16  
 **Primary classifier:** `classify_branch_aware_character_closure.py`  
 **Independent anchor verifier:** `verify_branch_aware_character_closure.py`  
 **Depends on:** Jacobi-saturation character extraction, QR-saturating routed seeds, multi-source saturation, reciprocity-route barrier, incoming-source repulsion theorems  
-**Claim boundary:** this is a complete closure statement for the stated character-saturation model through destination k<=5000. It is not a proof of Erdős-Straus and does not include finer exact miss masks, valuations, Type-II center geometry, or unrestricted companion-factor allocation.
+**Claim boundary:** this is a complete closure statement for the model stated below through destination `k<=5000`: the eight extraction roots, the class-global positive source characters attached to those hard classes, exact retained route residues, and characters recursively extracted inside this model. It is **not** a superset of every previously landed CBX route model. In particular, `RECURSIVE-CHARACTER-PROMOTION.md` also explores branch-local positive source routes such as an unfixed q23 route; those are not admitted here unless q23 is already fixed on the root/state. The landed h=121 q59 source is a concrete witness to that distinction. This theorem does not include finer exact miss masks, valuations, Type-II center geometry, unrestricted companion-factor allocation, or prove Erdős-Straus.
 
 ## 1. Question
 
 The preceding route program showed that a fixed-shift miss can produce a positive quadratic or Jacobi character, route a new prime factor into another companion, enlarge the mandatory divisor seed, saturate a new character kernel, and extract another positive character.
 
-The natural question is whether this recursion eventually contradicts itself.
+The question addressed here is narrower and exact:
 
-A valid test must be branch-aware. It is not enough to collect character statements in a global set. Every residue used to route a source must remain attached to the same hypothetical prime p throughout the cascade.
+> Starting from the eight merged extraction roots, and allowing the positive source characters that are already class-global on those simultaneous-survivor branches plus characters recursively extracted from them, does the resulting branch-aware QR/Jacobi saturation recursion reach a fixed point or contradict itself?
 
-This note closes that exact finite question for the present saturation model.
+A valid test must remain branch-aware. It is not enough to collect character statements in a global set. Every residue used to route a source must remain attached to the same hypothetical prime p throughout the cascade.
 
-## 2. Root branches
+This note closes that stated finite model. It does not claim to close the union of every CBX routing model.
+
+## 2. Root branches and source scope
 
 The closure begins from the eight merged composite character-extraction branches.
 
@@ -30,7 +32,7 @@ The closure begins from the eight merged composite character-extraction branches
 7. h=529 - k51 extraction of q17, with p mod11=4 and p mod23=18.
 8. h=529 - k171 extraction of q19, with p mod11=5 and p mod23=13.
 
-Each root also carries the already-proved positive source characters for its hard class under the simultaneous-survivor hypothesis.
+Each root also carries the already-proved **class-global** positive source characters for its hard class under the simultaneous-survivor hypothesis.
 
 - h=121 - q19 and q47.
 - h=169 - q11 and q31.
@@ -39,13 +41,17 @@ Each root also carries the already-proved positive source characters for its har
 
 The fixed source residues that define a root are retained exactly.
 
+A source whose positivity is only available after refining to a branch-local residue is not automatically added to this source inventory. The important example is q23. When a root already fixes p mod23 to a positive residue, q23 is available there. When p mod23 is unfixed, this model does not create a q23 source merely by choosing a positive route residue. That branch-local refinement belongs to the complementary model in `RECURSIVE-CHARACTER-PROMOTION.md`.
+
+This distinction explains why the present fixed point can contain q53, q71, q79 and many later sources while not containing the separately landed h=121 q59 source.
+
 ## 3. State and transition rule
 
 A branch state consists of
 
 - the hard class h modulo840;
 - every source residue p mod q already fixed by routing;
-- every prime character `(q/p)` already known;
+- every prime character `(q/p)` already known in this model;
 - recursion depth.
 
 For every odd destination
@@ -96,7 +102,7 @@ At a destination, the classifier enumerates minimal qualifying routed subsets th
 
 A larger hidden subset must also be ruled out.
 
-All source characters that occur in this closure are positive. By the reciprocity-route barrier, a positively routed source lies in the Jacobi-plus character class at the destination.
+All source characters that actually occur in this pinned closure are positive. By the reciprocity-route barrier, a positively routed source lies in the Jacobi-plus character class at the destination.
 
 Adding additional positive routed factors can only enlarge the seed divisor set within that plus kernel.
 
@@ -115,9 +121,11 @@ The complete k<=5000 closure contains
 
 hidden large-subset qualifiers under this maximal-seed test.
 
+The result also contains zero negative extracted characters, so the positive-source invariant used by this monotonicity argument is preserved throughout the pinned run.
+
 ## 5. Exact closure result
 
-Starting from the eight roots, the branch-aware saturation recursion reaches a fixed point after depth seven.
+Starting from the eight roots under the source scope above, the branch-aware saturation recursion reaches a fixed point after depth seven.
 
 The exact finite closure is:
 
@@ -145,17 +153,19 @@ The generation profile is
 - depth6 - 23 processed, 10 new;
 - depth7 - 10 processed, 0 new.
 
-Thus the recursion closes rather than growing indefinitely.
+Thus this recursion closes rather than growing indefinitely.
 
-## 6. Closed source alphabet
+## 6. Closed source alphabet inside this model
 
-Within this model and destination range, the recursion closes on exactly the following 24 source primes:
+Within this exact source model and destination range, the recursion closes on the following 24 source primes:
 
 `11, 13, 17, 19, 23, 29, 31, 37, 43, 47, 53, 71, 79, 83, 107, 109, 127, 131, 151, 167, 191, 271, 383, 971`.
 
 No negative source character is generated.
 
-Representative newly generated sources include q29, q53, q79, q83, q107, q109, q127, q131, q151, q167, q191, q271, q383, and q971.
+This is **not** the full union of all source primes already proved elsewhere in CBX. In particular q59 is absent here even though `RECURSIVE-CHARACTER-PROMOTION.md` proves an h=121 q59 source using a branch-local q23 route. That is expected from the model boundary in Section 2 and is not a contradiction between the two theorems.
+
+Representative newly generated sources inside this model include q29, q53, q79, q83, q107, q109, q127, q131, q151, q167, q191, q271, q383, and q971.
 
 The independent verifier directly replays representative root, composite, middle-generation, and late-generation extraction edges by enumerating every positive divisor of the mandatory seed squared. It does not use the classifier's state-transition implementation.
 
@@ -173,15 +183,15 @@ For each anchor the direct divisor set equals the full Jacobi-plus kernel and th
 
 ## 7. Qualifying destination set
 
-All qualifying saturation destinations through k<=5000 lie in the finite set
+All qualifying saturation destinations in this model through k<=5000 lie in the finite set
 
 `3, 7, 11, 15, 19, 23, 31, 35, 39, 47, 51, 55, 71, 79, 83, 107, 109, 111, 127, 131, 151, 167, 171, 191, 215, 271, 383, 551, 971`.
 
 No new qualifying destination occurs above971 through5000.
 
-A separate run truncated at k<=1000 reaches the same final state closure. Extending the destination range from1000 to5000 therefore adds no new source, branch state, or qualifying transition class.
+A separate run truncated at k<=1000 reaches the same final state closure. Extending the destination range from1000 to5000 therefore adds no new source, branch state, or qualifying transition class **inside this model**.
 
-This is a finite observation within the pinned model, not a claim about all k.
+This is a finite observation within the pinned model, not a claim about all k or all CBX source semantics.
 
 ## 8. The lone unresolved product constraint
 
@@ -213,21 +223,23 @@ Neither sign is individually determined by that transition, so the closure does 
 
 The independent verifier replays this product branch directly.
 
-## 9. Negative frontier theorem
+## 9. Class-global-positive frontier theorem
 
-Within the stated roots, source theorems, routing rule, exact retained congruences, Jacobi/QR seed-saturation mechanism, and destination range k<=5000:
+Within the stated roots, class-global source theorems, routing rule, exact retained congruences, Jacobi/QR seed-saturation mechanism, and destination range k<=5000:
 
 > recursive positive character routing reaches a finite compatible fixed point. It produces no negative character, no Type-I seed collision, and no character-sign contradiction.
 
 This is useful precisely because it is negative.
 
-The repeated survival of the route graph is no longer evidence that one more Legendre symbol is likely to finish the conjecture. At this scope, the entire quadratic/Jacobi saturation recursion has been enumerated and it does not finish it.
+It says that continuing to iterate this **specific** class-global-positive saturation grammar does not finish the conjecture. It does not say that every branch-local positive route, exact miss-mask refinement, or other CBX route semantics have been exhausted.
 
 ## 10. What this theorem does not erase
 
 The closure intentionally forgets information finer than Jacobi sign once a destination has been reduced to its complete plus kernel.
 
-That discarded information is now the main research frontier.
+It also intentionally omits branch-local source refinements that are not already represented by a known character in the state.
+
+Those discarded or complementary information channels are now the main research frontier.
 
 In particular, the next proof search should use at least one of:
 
@@ -237,7 +249,8 @@ In particular, the next proof search should use at least one of:
 - exponent-sensitive divisor-square geometry;
 - simultaneous allocation of routed factors among coprime or nearly coprime companions;
 - the six-companion residual wheel and its support-overlap restrictions;
-- higher-order characters inside the positive quadratic/Jacobi subgroup.
+- higher-order characters inside the positive quadratic/Jacobi subgroup;
+- explicit reconciliation of class-global and branch-local source semantics in one survivor-state engine.
 
 The finite record p=8,803,369 already demonstrates why this matters. Its first Lane-I hit at k=107 is not explained merely by a character sign. The exact hit uses the square divisor
 
@@ -249,12 +262,12 @@ That is precisely the sort of exponent- and center-sensitive information the cha
 
 ## 11. Strategic conclusion
 
-The character route program has now done two jobs.
+This class-global-positive character model has now done two jobs.
 
-First, it produced real range-free theorems, new source characters, routed saturation upgrades, and recursive branch eliminations.
+First, it produces a much larger exact branch-aware fixed point than the earlier shallow recursive atlas, including late sources such as q271, q383, and q971.
 
-Second, it has now identified its own boundary.
+Second, it identifies a method boundary without pretending to subsume the complementary branch-local route model.
 
-The next route toward a universal argument should not be another unstructured search for positive Legendre symbols. The sharper target is the exact divisor geometry that remains after all compatible character information has been exhausted.
+The next route toward a universal argument should therefore not be another unstructured search for positive Legendre symbols. The sharper target is a unified survivor-state engine that preserves exact miss centers and provenance while combining class-global characters, branch-local routes, source-independent repulsion, residual allocation, and valuation phases.
 
 Erdős-Straus remains open.
