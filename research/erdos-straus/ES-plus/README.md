@@ -46,7 +46,12 @@ telemetry and scheduler language only; it creates no proof or pruning
 permission. The first ancestry-correct BEC pilot is
 [`../BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md`](../BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md),
 which distinguishes the blocked-destination research path `DUR` from the
-live post-k23 paths `L^jR`.
+live post-k23 paths `L^jR`. The first exact transition selectors are
+[`../BEC-K27-K31-TRANSITION-THEOREM.md`](../BEC-K27-K31-TRANSITION-THEOREM.md)
+and [`../BEC-K27-K35-TRANSITION-CHAIN.md`](../BEC-K27-K35-TRANSITION-CHAIN.md):
+proved k27, k31, and k35 factor-support predicates now generate `R`, `LR`,
+`LLR`, or the deeper `LLL` residual instead of attaching those directions
+only after the first hit is known.
 
 The exact constructive Lane-I work is
 [`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
