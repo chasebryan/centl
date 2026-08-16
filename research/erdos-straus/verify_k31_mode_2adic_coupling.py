@@ -77,7 +77,7 @@ def main() -> int:
             "EVEN_2": {"B-G": 2, "G-L": 2, "D-J": 1, "B-L": 2},
             "ODD": {"B-G": 1, "G-L": 1, "D-J": 2, "B-L": 1},
         },
-        "realizable_mode_seams": [
+        "not_excluded_mode_seams": [
             "BARE x EVEN_0",
             "BARE x EVEN_2",
             "FULL_QR x EVEN_0",
