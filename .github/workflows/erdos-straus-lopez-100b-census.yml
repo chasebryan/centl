@@ -1,0 +1,28 @@
+name: Erdős–Straus López 100B census regression
+
+on:
+  push:
+    branches:
+      - agent/cbx-lopez-100b-census
+  pull_request:
+    paths:
+      - 'research/erdos-straus/LOPEZ-AB-CENSUS-100B.md'
+      - 'research/erdos-straus/lopez_ab_bounded_census.py'
+      - 'research/erdos-straus/verify_lopez_ab_100b_census.py'
+      - '.github/workflows/erdos-straus-lopez-100b-census.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify finite census anchors and record certificates
+        run: |
+          python3 research/erdos-straus/verify_lopez_ab_100b_census.py --json
