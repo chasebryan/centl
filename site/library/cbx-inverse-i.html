@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CBX inverse-I: exact finite k-to-C-to-p construction of the Erdős–Straus signed-box Lane-I cover, equivalence verification and forward-vs-inverse benchmarking.">
+  <title>CBX inverse-I — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-inverse-i.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cbx-inverse-i.html">
+  <meta property="og:title" content="CBX inverse-I — FCF">
+  <meta property="og:description" content="Construct the finite signed-box cover as k → C → p, verify it target-by-target, and benchmark it against p-first recognition.">
+  <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CBX inverse-I</h1><p>Constructive signed-box cover · ES+</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About FCF</a></li>
+        <li><a href="../centl.html">CENTL</a></li>
+        <li><a href="../docs.html">Documentation</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="cbis-k-parameter-status.html">K/search-grade audit</a></li>
+        <li><a href="cbx-implementation-status.html">CBX implementation status</a></li>
+        <li><a href="cbx-initial-xray-census.html">Initial X-ray census</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős–Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Construction note</p>
+          <p class="dek">An exact finite implementation of the signed-box Lane-I cover in the constructive orientation <code>k → C → p</code>.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-INVERSE-I.md">Canonical source note in the repository</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Kernel:</strong> <code>cbx.kernel 0.1.0</code></p>
+          <p><strong>Primary platform:</strong> Fedora-family GNU/Linux.</p>
+          <p class="notice"><strong>Claim boundary:</strong> this is a finite cover construction and benchmarking instrument. It does not prove an adaptive K law, asymptotic superiority of inversion, or Erdős–Straus.</p>
+
+          <h2>The orientation</h2>
+          <p>The ordinary recognition path starts from a hard prime:</p>
+          <div class="math" role="math">p \to k \to C=(p+k)/4 \to \delta_k(C).</div>
+          <p>CBX now also implements the constructive orientation:</p>
+          <div class="math" role="math">k \to C \to p=4C-k.</div>
+
+          <h2>Only six C classes per shift</h2>
+          <p>For a Mordell-hard target <code>p ≡ h (mod 840)</code>, where</p>
+          <div class="math" role="math">h\in\{1,121,169,289,361,529\},</div>
+          <p>and an admissible <code>k ≡ 3 (mod 4)</code>, the generated C must satisfy</p>
+          <div class="math" role="math">C\equiv(h+k)/4\pmod{210}.</div>
+          <p>Thus each shift needs only six compatible residue classes modulo 210 rather than all positive C.</p>
+
+          <h2>Two inverse candidate modes</h2>
+          <p><strong>Strict C-first</strong> is retained as the pure constructive baseline. It factors and evaluates every hard-compatible C before consulting the finite target map.</p>
+          <p><strong>Target-gated</strong> remains k-first and C-first in its outer traversal, but after generating <code>p=4C-k</code> it cheaply rejects a generated p when it is not a hard prime, when a smaller shift has already covered it, or when the coprimality condition fails. Only then does it factor C and evaluate the signed box. Since k is increasing, these gates cannot change cover membership or the minimal first shift.</p>
+
+          <h2>Exact first depth</h2>
+          <p>Shifts are visited in increasing order, so the first mark records</p>
+          <div class="math" role="math">k_I^*(p)=\min\{k:\delta_k((p+k)/4)=0\}.</div>
+          <p>The engine can save <code>p TAB k_I*(p)</code> hit files and the Lane-I residual set separately.</p>
+
+          <h2>Executable equivalence check</h2>
+          <pre><code>./centl es cbx inverse \
+  --hi 100000 \
+  --i-max 80 \
+  --segment 25000 \
+  --verify</code></pre>
+          <p><code>--verify</code> runs the p-first recognizer over the same finite hard-prime universe and requires both membership and minimal first-k agreement target-by-target. A single disagreement causes a nonzero exit.</p>
+          <p>The initial CI equivalence interval through 100,000 at <code>K_I=80</code> passed with zero mismatches on GNU/Linux.</p>
+
+          <h2>Why benchmark both orientations</h2>
+          <p>Exact inversion does not imply faster inversion. CBX therefore preserves a p-first reference engine and a benchmark harness. The key measurements are:</p>
+          <div class="math" role="math">\rho_F=\frac{\text{inverse factorizations}}{\text{forward factorizations}},</div>
+          <div class="math" role="math">\rho_E=\frac{\text{enumerated C}}{\text{forward factorizations}},</div>
+          <div class="math" role="math">\rho_t=\frac{t_{inverse}}{t_{forward}}.</div>
+          <p>The strict baseline at <code>X=100,000, K_I=80</code> performed about 20.2 times the candidate work and took about 11.7 times the wall time of p-first recognition on the Fedora CI corpus. That result motivated the target-gated inverse mode rather than being hidden or discarded.</p>
+
+          <h2>Commands</h2>
+          <pre><code># Default target-gated inverse cover
+./centl es cbx inverse --hi 1000000 --i-max 400
+
+# Pure constructive baseline
+research/erdos-straus/cbx.kernel/cbx-inverse \
+  --hi 1000000 --i-max 400 --strict-c-first
+
+# Save exact sets
+./centl es cbx inverse --hi 10000000 --i-max 400 \
+  --hits inverse-hits.tsv \
+  --residuals inverse-residuals.txt
+
+# Benchmark against p-first recognition
+python3 research/erdos-straus/cbx.kernel/bench_i.py \
+  --hi 100000 --i-max 80 --repeat 3</code></pre>
+
+          <h2>Research frontier</h2>
+          <p>The important next question is no longer whether inversion can be implemented. It can. The question is how much work can be eliminated without reverting to a p-first outer search, and whether <code>delta_k(C)=0</code> can itself be generated or cheaply prefiltered from factor-pattern, defect, spectrum or shift structure.</p>
+          <p>A hybrid is explicitly allowed: some shifts may ultimately be better as generators and others as recognizers.</p>
+
+          <hr>
+          <p><strong>Erdős–Straus remains open.</strong> Exact finite inversion is a computational instrument, not a proof.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
