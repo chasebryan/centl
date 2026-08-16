@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="First finite CB X-ray Kernel census: 401,747 hard-prime observations through 234,540,000, exposing hidden I/N/L first-depth distributions beneath W.">
+  <meta name="description" content="Clean finite CB X-ray Kernel census: 401,752 hard-prime observations through 234,540,000, exposing hidden I/N/L first-depth distributions beneath W.">
   <title>CBX initial X-ray census — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/library/cbx-initial-xray-census.html">
   <meta name="robots" content="index,follow">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/library/cbx-initial-xray-census.html">
   <meta property="og:title" content="CBX initial X-ray census — FCF">
-  <meta property="og:description" content="Finite validation census only: hidden Lane-I depth reached an observed maximum of 107 through a 234,540,000 sweep cursor. Not a bound.">
+  <meta property="og:description" content="Clean finite census only: hidden Lane-I depth reached an observed maximum of 107 through a 234,540,000 sweep cursor. Not a bound.">
   <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
   <link rel="stylesheet" href="../style.css">
 </head>
@@ -48,24 +48,27 @@
       <article class="paper">
         <header class="paper-head">
           <p class="kicker">CB X-ray Kernel</p>
-          <p class="dek">The first end-to-end CBX run exposes the hidden first-depth distribution beneath the production W cover.</p>
+          <p class="dek">The first clean CBX census exposes the hidden first-depth distribution beneath the production W cover.</p>
           <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md">Source note in the repository</a></p>
         </header>
         <div class="paper-body">
           <p><strong>Status:</strong> finite implementation-validation census</p>
           <p><strong>Date:</strong> 2026-08-15</p>
           <p><strong>Kernel:</strong> <code>cbx.kernel 0.1.0</code></p>
-          <p><strong>Source blob:</strong> <code>cd2202ae512c687cdd7af8ce591eb29806a35008</code></p>
-          <p class="notice"><strong>Claim boundary:</strong> the statistics below are finite observations. The maximum 107 is not a universal bound, does not establish an adaptive K law, and does not prove Erdős–Straus.</p>
+          <p><strong>Core source blob:</strong> <code>cd2202ae512c687cdd7af8ce591eb29806a35008</code></p>
+          <p><strong>Signal-atomic runtime blob:</strong> <code>9f9b2c26a47f1c456e90d68824dd7313e69b8d48</code></p>
+          <p class="notice"><strong>Claim boundary:</strong> these are finite observations. The maximum 107 is not a universal bound, does not establish an adaptive K law, and does not prove Erdős–Straus.</p>
 
-          <h2>Run</h2>
-          <p>The validation used the default grade</p>
+          <h2>Runtime correction before the formal census</h2>
+          <p>An earlier timeout-driven dry run exposed a signal-handling flaw: a stop signal could arrive inside Lane I and create a partially evaluated final record. That stream was discarded from the formal census. The production CBX build now enters through <code>cbx_runtime.c</code>, completes an entered target atomically, saves sweep/home at the first unprocessed position, and supports deterministic finite runs with <code>--iterations N</code>.</p>
+
+          <h2>Formal run</h2>
+          <p>The clean census used the default grade</p>
           <div class="math" role="math">\Gamma=(F,K_I,E_N,A_L)=(11,400,300,400)</div>
-          <p>with fixed Lane-I policy and sweep only.</p>
-          <pre><code>cbx go --run e2e --step 5000 --sweep-only</code></pre>
-          <p>After approximately twenty seconds the process was terminated normally and saved:</p>
+          <p>with fixed Lane-I policy, sweep only, step 5000, and exactly 46,908 complete iterations.</p>
+          <pre><code>cbx go --run formal --step 5000 --iterations 46908 --sweep-only</code></pre>
           <pre><code>sweep=234540000
-observations=401747
+observations=401752
 unique_letters=0
 windows=46908
 fab_max=11
@@ -73,50 +76,61 @@ i_max=400
 n_ell_max=300
 l_max=400
 policy=fixed</code></pre>
-          <p>The 179 MB raw JSONL stream contained exactly 401,747 records and had SHA-256 <code>dd43ec5d76c295869dfe02059b4f92513659f9ec13ea514154728761d81f663c</code>.</p>
+          <p>The run completed in about 18.96 seconds on the validation host. The clean 180 MB JSONL stream contained 401,752 records and had SHA-256 <code>6079ae0848d271d69ddc528e7c1b90cec1c988bcde929e2e1316e6c7d2a43ea1</code>.</p>
 
           <h2>All observed hard primes</h2>
           <table class="status">
-            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
-            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>11</td><td>23</td><td><strong>107</strong></td></tr>
-            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>13</td><td>19</td><td>31</td><td>103</td></tr>
-            <tr><td>Lane L: first a</td><td>98.91%</td><td>3</td><td>6</td><td>33</td><td>210</td><td>396</td></tr>
+            <tr><th>Hidden lane</th><th>hits</th><th>misses</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>401,752</td><td>0</td><td>3</td><td>7</td><td>11</td><td>23</td><td><strong>107</strong></td></tr>
+            <tr><td>Lane N: first ℓ</td><td>401,752</td><td>0</td><td>11</td><td>13</td><td>19</td><td>31</td><td>103</td></tr>
+            <tr><td>Lane L: first a</td><td>397,391</td><td>4,361</td><td>3</td><td>6</td><td>33</td><td>210</td><td>396</td></tr>
           </table>
           <p>The production-equivalent stacked verdict produced zero letters in this finite interval.</p>
           <div class="math" role="math">\max_{p\le234540000}^{\mathrm{observed}} k_I^*(p)=107.</div>
           <p>This is an observed record only.</p>
 
           <h2>R / fab-only</h2>
-          <p>CBX found 102,500 observed targets in R. Every one was also hit by the configured fab window, so R and fab-only coincide in this run.</p>
+          <p>CBX found 102,502 observed targets in R. Every one was also hit by the configured fab window, so R and fab-only coincide in this run.</p>
           <table class="status">
-            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
-            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>15</td><td><strong>27</strong></td><td><strong>107</strong></td></tr>
-            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>13</td><td>19</td><td>37</td><td>103</td></tr>
-            <tr><td>Lane L: first a</td><td>96.36%</td><td>3</td><td>12</td><td>78</td><td>320</td><td>396</td></tr>
+            <tr><th>Hidden lane</th><th>hits</th><th>misses</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>102,502</td><td>0</td><td>3</td><td>7</td><td>15</td><td><strong>27</strong></td><td><strong>107</strong></td></tr>
+            <tr><td>Lane N: first ℓ</td><td>102,502</td><td>0</td><td>11</td><td>13</td><td>19</td><td>37</td><td>103</td></tr>
+            <tr><td>Lane L: first a</td><td>98,770</td><td>3,732</td><td>3</td><td>12</td><td>78</td><td>320</td><td>396</td></tr>
           </table>
-          <p>The Lane-I tail is visibly heavier inside R than in the linear-W population at this finite scale.</p>
+          <p>The finite Lane-I tail is visibly heavier inside R than in the linear-W population.</p>
 
           <h2>Linear W</h2>
-          <p>The remaining 299,247 targets were linear-W hits.</p>
+          <p>The remaining 299,250 targets were linear-W hits.</p>
           <table class="status">
-            <tr><th>Hidden lane</th><th>Hit rate</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
-            <tr><td>Lane I: k<sub>I</sub>*</td><td>100.00%</td><td>3</td><td>7</td><td>11</td><td>23</td><td>75</td></tr>
-            <tr><td>Lane N: first ℓ</td><td>100.00%</td><td>11</td><td>11</td><td>19</td><td>31</td><td>101</td></tr>
-            <tr><td>Lane L: first a</td><td>99.79%</td><td>3</td><td>6</td><td>20</td><td>122</td><td>396</td></tr>
+            <tr><th>Hidden lane</th><th>hits</th><th>misses</th><th>min</th><th>p50</th><th>p90</th><th>p99</th><th>max</th></tr>
+            <tr><td>Lane I: k<sub>I</sub>*</td><td>299,250</td><td>0</td><td>3</td><td>7</td><td>11</td><td>23</td><td>75</td></tr>
+            <tr><td>Lane N: first ℓ</td><td>299,250</td><td>0</td><td>11</td><td>11</td><td>19</td><td>31</td><td>101</td></tr>
+            <tr><td>Lane L: first a</td><td>298,621</td><td>629</td><td>3</td><td>6</td><td>20</td><td>122</td><td>396</td></tr>
           </table>
 
           <h2>Spectrum split</h2>
           <ul>
-            <li><strong>A, 134,163 targets:</strong> I max 63; N max 103; L hit 98.86%, max 396.</li>
-            <li><strong>B, 133,808 targets:</strong> I max 107; N max 79; L hit 98.94%, max 396.</li>
-            <li><strong>C, 133,776 targets:</strong> I max 71; N max 101; L hit 98.95%, max 396.</li>
+            <li><strong>A, 134,165 targets:</strong> I max 63; N max 103; L hits 132,639.</li>
+            <li><strong>B, 133,809 targets:</strong> I max 107; N max 79; L hits 132,384.</li>
+            <li><strong>C, 133,778 targets:</strong> I max 71; N max 101; L hits 132,368.</li>
           </ul>
-          <p>The largest finite I record occurs in Spectrum B in this run. That does not establish a spectrum ordering asymptotically.</p>
+          <p>The largest finite I record occurs in Spectrum B. That does not establish an asymptotic spectrum ordering.</p>
 
-          <h2>Why this matters</h2>
-          <p>The production matrix can legitimately show I/N/L near zero because W already marked the target. CBX demonstrates that the hidden lanes are extremely active when evaluated independently. The research object is now measurable:</p>
-          <div class="math" role="math">\boxed{\text{the conditional distribution of }k_I^*(p)\text{ beneath W}.}</div>
-          <p>The next experiment is to track record-depth events inside R/fab-only and correlate them with spectrum, factor structure, signed-box size, defect/stabilizer signatures, first external NR prime, and López depth.</p>
+          <h2>Running I frontier</h2>
+          <p>Across all targets, the observed Lane-I record sequence has only six events:</p>
+          <table class="status">
+            <tr><th>p</th><th>spectrum</th><th>R</th><th>k<sub>I</sub>*</th><th>box size</th></tr>
+            <tr><td>1009</td><td>B</td><td>no</td><td>3</td><td>9</td></tr>
+            <tr><td>1129</td><td>B</td><td>no</td><td>11</td><td>27</td></tr>
+            <tr><td>1201</td><td>C</td><td>no</td><td>23</td><td>45</td></tr>
+            <tr><td>21169</td><td>B</td><td>no</td><td>31</td><td>75</td></tr>
+            <tr><td>118801</td><td>C</td><td>yes</td><td>59</td><td>81</td></tr>
+            <tr><td>8803369</td><td>B</td><td>yes</td><td><strong>107</strong></td><td>225</td></tr>
+          </table>
+          <p>No new I record appears from 8,803,369 through the formal endpoint 234,540,000.</p>
+
+          <h2>Adaptive-K falsification</h2>
+          <p>The analyzer now mechanically tests candidate rules against measured first depths and reports the first and worst finite failures. For example, the aggressive rule <code>K(p)=ceil(2 log p)</code> already fails many observed R targets. Surviving the finite corpus never upgrades a rule into a theorem.</p>
 
           <h2>Microscopic example: 2521</h2>
           <pre><code>W: linear=false, R=true, fab=(2,1)
