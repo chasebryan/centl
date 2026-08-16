@@ -22,11 +22,13 @@ the production W -> I -> N -> L verdict but evaluates every lane
 independently, including I/N/L on primes that W already solved, so the
 hidden first-hit depth distribution can be measured without weakening W.
 
-The first end-to-end X-ray validation census is
+The first clean X-ray validation census is
 [`CBX-INITIAL-XRAY-CENSUS.md`](CBX-INITIAL-XRAY-CENSUS.md). It records
-401,747 hard-prime observations through a sweep cursor of 234,540,000 at
+401,752 hard-prime observations through a sweep cursor of 234,540,000 at
 the default grade. Lane I hit every observed target through K=400, with
 finite observed maximum `k_I*=107`; this is a finite record, not a bound.
+The formal run used the signal-atomic CBX runtime and an exact finite
+iteration count rather than timeout termination.
 
 W-clause census: [`w-census/W-CENSUS.md`](w-census/W-CENSUS.md).
 Letters at the window layer have to sit in the residual `R` where both
