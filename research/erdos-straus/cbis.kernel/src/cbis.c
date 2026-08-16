@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
 /*
  * cbis.kernel — CB Inverse Sieve
  *
@@ -11,13 +12,25 @@
  */
 #include <inttypes.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+
+#define DASH_W 68
+#define D_RST "\033[0m"
+#define D_DIM "\033[2m"
+#define D_BLD "\033[1m"
+#define D_GRN "\033[32m"
+#define D_YEL "\033[33m"
+#define D_BLU "\033[34m"
+#define D_MAG "\033[35m"
+#define D_CYN "\033[36m"
 
 #define HARD_N 6
 static const int HARD[HARD_N] = {1, 121, 169, 289, 361, 529};
@@ -63,6 +76,20 @@ static char root_dir[768];
 static char letters_dir[768];
 static char seed_path[768];
 static char journal_path[768];
+static int live_tty;
+static int use_color;
+static int dash_stream;
+static int dash_go;
+static char evline[5][100];
+static int evn;
+static uint64_t dash_cell[SPEC_N][LANE_N];
+static uint64_t dash_home_r, dash_home_fab, dash_work_n;
+static struct timespec dash_t0, dash_run0;
+static int dash_painted, dash_dirty;
+static const seed_t *dash_sp;
+static uint64_t dash_step_v, dash_sweep0, dash_home0;
+static int dash_do_sweep, dash_do_home;
+static int dash_col;
 
 static void die(const char *m) {
     fprintf(stderr, "cbis.kernel: %s\n", m);
@@ -661,6 +688,354 @@ static uint64_t random_start(void) {
     return 1000000ull + (r % 9999999000ull);
 }
 
+static int color_ok(void) {
+    const char *no = getenv("NO_COLOR");
+    if (no && no[0]) return 0;
+    const char *force = getenv("CLICOLOR_FORCE");
+    if (force && force[0] && strcmp(force, "0") != 0) return 1;
+    const char *term = getenv("TERM");
+    if (term && !strcmp(term, "dumb")) return 0;
+    return isatty(1);
+}
+
+static const char *lane_color(int lane) {
+    switch (lane) {
+    case LANE_W:
+        return D_BLU;
+    case LANE_I:
+        return D_GRN;
+    case LANE_NR:
+        return D_CYN;
+    case LANE_LP:
+        return D_MAG;
+    default:
+        return D_DIM;
+    }
+}
+
+static const char *spec_color(int spec) {
+    if (spec == 0) return D_CYN;
+    if (spec == 1) return D_YEL;
+    if (spec == 2) return D_MAG;
+    return D_DIM;
+}
+
+static const char *event_color(const char *s) {
+    if (strstr(s, "COLLECTED")) return D_GRN;
+    if (strstr(s, "IDENTIFIED")) return D_YEL;
+    if (strstr(s, "DROPPED")) return D_DIM;
+    return D_RST;
+}
+
+static void fmt_u(char *out, size_t cap, uint64_t v) {
+    char tmp[32];
+    int n = snprintf(tmp, sizeof tmp, "%" PRIu64, v);
+    int spaces = n > 0 ? (n - 1) / 3 : 0;
+    if (n < 0 || (size_t)n + (size_t)spaces + 1 > cap) {
+        snprintf(out, cap, "%" PRIu64, v);
+        return;
+    }
+    int i = n - 1;
+    int j = n + spaces;
+    out[j] = 0;
+    int g = 0;
+    while (i >= 0) {
+        out[--j] = tmp[i--];
+        g++;
+        if (g == 3 && i >= 0) {
+            out[--j] = ' ';
+            g = 0;
+        }
+    }
+}
+
+static void fmt_hms(char out[24], double sec) {
+    if (sec < 0) sec = 0;
+    unsigned long t = (unsigned long)sec;
+    unsigned h = (unsigned)(t / 3600u);
+    unsigned m = (unsigned)((t % 3600u) / 60u);
+    unsigned s = (unsigned)(t % 60u);
+    if (h > 99)
+        snprintf(out, 24, "%luh", t / 3600ul);
+    else
+        snprintf(out, 24, "%02u:%02u:%02u", h, m, s);
+}
+
+static double dash_elapsed(void) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return (double)(now.tv_sec - dash_run0.tv_sec) +
+           (double)(now.tv_nsec - dash_run0.tv_nsec) / 1000000000.0;
+}
+
+static int dash_rows(void) {
+    struct winsize ws;
+    if (ioctl(1, TIOCGWINSZ, &ws) == 0 && ws.ws_row > 0) return (int)ws.ws_row;
+    return 24;
+}
+
+static void d_s(const char *color, const char *s) {
+    if (use_color && color && color[0]) fputs(color, stdout);
+    fputs(s, stdout);
+    if (use_color && color && color[0]) fputs(D_RST, stdout);
+    dash_col += (int)strlen(s);
+}
+
+static void d_fmt(const char *color, const char *fmt, ...) {
+    char buf[DASH_W + 8];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof buf, fmt, ap);
+    va_end(ap);
+    d_s(color, buf);
+}
+
+static void d_nl(void) {
+    while (dash_col < DASH_W) {
+        putchar(' ');
+        dash_col++;
+    }
+    putchar('\n');
+    dash_col = 0;
+}
+
+static void dash_note(const char *fmt, ...) {
+    char buf[100];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof buf, fmt, ap);
+    va_end(ap);
+    if (evn < 5) {
+        snprintf(evline[evn++], sizeof evline[0], "%s", buf);
+    } else {
+        for (int i = 0; i < 4; i++) memcpy(evline[i], evline[i + 1], sizeof evline[0]);
+        snprintf(evline[4], sizeof evline[0], "%s", buf);
+    }
+    dash_dirty = 1;
+}
+
+static int dash_due(int force) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    long ms = (long)(now.tv_sec - dash_t0.tv_sec) * 1000 +
+              (now.tv_nsec - dash_t0.tv_nsec) / 1000000;
+    if (!force && !dash_dirty && ms < 250) return 0;
+    dash_t0 = now;
+    dash_dirty = 0;
+    return 1;
+}
+
+static void dash_draw(const seed_t *s, uint64_t step, int sweep, int home) {
+    if (!live_tty || !s) return;
+    fputs("\033[?25l", stdout);
+    if (!dash_painted) {
+        fputs("\033[2J\033[H", stdout);
+        dash_painted = 1;
+    } else {
+        fputs("\033[H", stdout);
+    }
+    dash_col = 0;
+
+    char n_sweep[32], n_home[32], n_k[32], n_step[32], n_win[32];
+    char n_lin[32], n_r[32], n_fab[32], n_let[32], n_hr[32], n_hf[32];
+    char n_cell[SPEC_N][LANE_N][16], clock[24], rate_s[40], rate_h[40];
+    fmt_u(n_sweep, sizeof n_sweep, s->scanned_through);
+    fmt_u(n_home, sizeof n_home, s->home_S);
+    fmt_u(n_k, sizeof n_k, s->kmax);
+    fmt_u(n_step, sizeof n_step, step);
+    fmt_u(n_win, sizeof n_win, s->windows);
+    fmt_u(n_lin, sizeof n_lin, s->w_linear);
+    fmt_u(n_r, sizeof n_r, s->w_r + s->home_r);
+    fmt_u(n_fab, sizeof n_fab, s->w_fab + s->home_fab);
+    fmt_u(n_let, sizeof n_let, s->letters_found);
+    fmt_u(n_hr, sizeof n_hr, dash_home_r);
+    fmt_u(n_hf, sizeof n_hf, dash_home_fab);
+    for (int lane = 0; lane < LANE_N; lane++)
+        for (int sp = 0; sp < SPEC_N; sp++)
+            fmt_u(n_cell[sp][lane], sizeof n_cell[sp][lane], dash_cell[sp][lane]);
+
+    double sec = dash_elapsed();
+    fmt_hms(clock, sec);
+    if (sec >= 1.0) {
+        uint64_t rs = (uint64_t)((double)(s->scanned_through - dash_sweep0) / sec);
+        uint64_t rh = (uint64_t)((double)(s->home_S - dash_home0) / sec);
+        char tmp[32];
+        fmt_u(tmp, sizeof tmp, rs);
+        snprintf(rate_s, sizeof rate_s, "%s/s", tmp);
+        fmt_u(tmp, sizeof tmp, rh);
+        snprintf(rate_h, sizeof rate_h, "%s/s", tmp);
+    } else {
+        snprintf(rate_s, sizeof rate_s, "—");
+        snprintf(rate_h, sizeof rate_h, "—");
+    }
+
+    int compact = dash_rows() < 20;
+
+    d_s(use_color ? D_BLD D_CYN : "", "  cbis.kernel");
+    d_s(D_DIM, "  ES+ letter engine");
+    d_fmt(D_DIM, "  %s  ", clock);
+    if (halt_flag)
+        d_s(use_color ? D_BLD D_YEL : "", "STOPPING");
+    else
+        d_s(D_DIM, "running");
+    d_nl();
+
+    d_s(D_GRN, "  LETTER");
+    d_s(D_DIM, " only    sweep ");
+    d_s(sweep ? D_CYN : D_DIM, sweep ? "on " : "off");
+    d_s(D_DIM, "   home ");
+    d_s(home ? D_MAG : D_DIM, home ? "on " : "off");
+    d_nl();
+
+    if (compact) {
+        d_s(D_DIM, "  sweep ");
+        d_s("", n_sweep);
+        d_s(D_DIM, "  S ");
+        d_s(D_MAG, n_home);
+        d_s(D_DIM, "  letters ");
+        d_s(s->letters_found ? D_GRN : D_DIM, n_let);
+        d_s(D_DIM, "  ");
+        d_s(D_DIM, rate_s);
+        d_nl();
+        d_s(D_DIM, "  ");
+        for (int lane = 0; lane < LANE_N; lane++) {
+            d_fmt(lane_color(lane), "%s ", LANE_NAME[lane]);
+            for (int sp = 0; sp < SPEC_N; sp++) {
+                d_fmt(spec_color(sp), "%s%s", n_cell[sp][lane],
+                      sp + 1 < SPEC_N ? " " : "");
+            }
+            if (lane + 1 < LANE_N) d_s(D_DIM, "  ");
+        }
+        d_nl();
+        if (evn)
+            d_fmt(event_color(evline[evn - 1]), "  %s", evline[evn - 1]);
+        else
+            d_s(D_DIM, "  (quiet)");
+        d_nl();
+        d_s(D_DIM, "  Ctrl+C  save both cursors");
+        d_nl();
+        fflush(stdout);
+        return;
+    }
+
+    d_s(D_DIM, "  sweep     ");
+    d_s("", n_sweep);
+    d_s(D_DIM, "    ");
+    d_s(D_DIM, rate_s);
+    if (dash_work_n > s->scanned_through && sweep) {
+        char now[32];
+        fmt_u(now, sizeof now, dash_work_n);
+        d_s(D_DIM, "  now ");
+        d_s(D_DIM, now);
+    }
+    d_nl();
+    d_s(D_DIM, "  home S    ");
+    d_s(D_MAG, n_home);
+    d_s(D_DIM, "    ");
+    d_s(D_DIM, rate_h);
+    d_nl();
+    d_s(D_DIM, "  K ");
+    d_s("", n_k);
+    d_s(D_DIM, "     step ");
+    d_s("", n_step);
+    d_s(D_DIM, "     windows ");
+    d_s("", n_win);
+    d_nl();
+    d_nl();
+
+    d_s(D_DIM, "  linear    ");
+    d_s(D_BLU, n_lin);
+    d_nl();
+    d_s(D_DIM, "  R         ");
+    d_s(D_YEL, n_r);
+    d_nl();
+    d_s(D_DIM, "  fab       ");
+    d_s(D_CYN, n_fab);
+    d_nl();
+    d_s(D_DIM, "  collected ");
+    d_s(s->letters_found ? D_BLD D_GRN : D_GRN, n_let);
+    d_nl();
+    d_nl();
+
+    d_s(D_DIM, "  last window");
+    d_s(D_DIM, "                 home batch");
+    d_nl();
+    for (int lane = 0; lane < LANE_N; lane++) {
+        d_s(D_DIM, "  ");
+        d_fmt(lane_color(lane), "%s", LANE_NAME[lane]);
+        d_s("", "   ");
+        for (int sp = 0; sp < SPEC_N; sp++) {
+            d_fmt(spec_color(sp), "%s ", SPEC_NAME[sp]);
+            d_fmt("", "%-4s", n_cell[sp][lane]);
+            if (sp + 1 < SPEC_N) d_s("", " ");
+        }
+        if (lane == 0) {
+            d_s(D_DIM, "    R    ");
+            d_s(D_YEL, n_hr);
+        } else if (lane == 1) {
+            d_s(D_DIM, "    fab  ");
+            d_s(D_CYN, n_hf);
+        }
+        d_nl();
+    }
+    d_nl();
+    d_s(D_DIM, "  latest");
+    d_nl();
+    if (!evn) {
+        d_s(D_DIM, "    (quiet)");
+        d_nl();
+    } else {
+        for (int i = 0; i < evn; i++) {
+            d_s(D_DIM, "    ");
+            d_s(event_color(evline[i]), evline[i]);
+            d_nl();
+        }
+    }
+    /* Keep a fixed event block so the frame does not jump. */
+    for (int i = evn; i < 5; i++) {
+        if (!evn && i == 0) continue;
+        d_nl();
+    }
+    d_s(D_DIM, "  Ctrl+C  save both cursors");
+    d_nl();
+    fflush(stdout);
+}
+
+static void dash_bind(const seed_t *s, uint64_t step, int sweep, int home) {
+    dash_sp = s;
+    dash_step_v = step;
+    dash_do_sweep = sweep;
+    dash_do_home = home;
+}
+
+static void dash_kick(void) {
+    if (live_tty && dash_sp)
+        dash_draw(dash_sp, dash_step_v, dash_do_sweep, dash_do_home);
+}
+
+static void dash_pulse(uint64_t n) {
+    dash_work_n = n;
+    if (live_tty && dash_due(0) && dash_sp)
+        dash_draw(dash_sp, dash_step_v, dash_do_sweep, dash_do_home);
+}
+
+static void dash_done(void) {
+    if (live_tty) fputs("\033[?25h\n", stdout);
+}
+
+static void say_event(const char *color, const char *fmt, ...) {
+    char buf[192];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof buf, fmt, ap);
+    va_end(ap);
+    if (use_color && color) fputs(color, stdout);
+    fputs(buf, stdout);
+    if (use_color && color) fputs(D_RST, stdout);
+    putchar('\n');
+    fflush(stdout);
+}
+
 static void journal(const char *line) {
     FILE *f = fopen(journal_path, "a");
     if (!f) return;
@@ -702,8 +1077,11 @@ static void save_letter(uint64_t n, uint64_t kmax) {
     char note[256];
     snprintf(note, sizeof note, "TARGET COLLECTED  L-%s  n=%" PRIu64, hex, n);
     journal(note);
-    printf("TARGET COLLECTED  L-%s  n=%" PRIu64 "\n", hex, n);
-    fflush(stdout);
+    dash_note("TARGET COLLECTED  L-%s  n=%" PRIu64, hex, n);
+    if (live_tty)
+        dash_kick();
+    else if (dash_go)
+        say_event(D_GRN, "TARGET COLLECTED  L-%s  n=%" PRIu64, hex, n);
 }
 
 static int mark_lane(uint8_t *marked, uint64_t cell[SPEC_N][LANE_N], int i, int spec,
@@ -746,6 +1124,7 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
             spec_of[nh] = (int8_t)spectrum_of(n);
             nh++;
         }
+        if (live_tty && (n & 4095ull) == 0ull) dash_pulse(n);
         if (n == UINT64_MAX) break;
     }
 
@@ -772,9 +1151,11 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
     for (int i = 0; i < nh && !halt_flag; i++) {
         if (marked[i]) continue;
         int sp = spec_of[i];
-        printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=sweep  (in R, missed fab)\n",
-               hp[i], sp >= 0 ? SPEC_NAME[sp] : "?");
-        fflush(stdout);
+        dash_note("IDENTIFIED  n=%" PRIu64 "  %s  sweep", hp[i],
+                  sp >= 0 ? SPEC_NAME[sp] : "?");
+        if (!live_tty && dash_go)
+            say_event(D_YEL, "TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=sweep", hp[i],
+                      sp >= 0 ? SPEC_NAME[sp] : "?");
         if (in_signed_box_cover(hp[i], K)) {
             marks += (uint64_t)mark_lane(marked, cell, i, sp, LANE_I);
             continue;
@@ -794,19 +1175,21 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
     for (int i = 0; i < nh; i++)
         if (marked[i]) seed->dropped++;
     seed->covered += marks;
-
-    printf("cbis  matrix   ");
-    for (int lane = 0; lane < LANE_N; lane++) {
-        printf("%s[", LANE_NAME[lane]);
-        for (int s = 0; s < SPEC_N; s++) {
-            printf("%s%" PRIu64 "%s", SPEC_NAME[s], cell[s][lane], s + 1 < SPEC_N ? " " : "");
+    memcpy(dash_cell, cell, sizeof dash_cell);
+    if (!live_tty && dash_stream) {
+        printf("cbis  matrix   ");
+        for (int lane = 0; lane < LANE_N; lane++) {
+            printf("%s[", LANE_NAME[lane]);
+            for (int s = 0; s < SPEC_N; s++) {
+                printf("%s%" PRIu64 "%s", SPEC_NAME[s], cell[s][lane],
+                       s + 1 < SPEC_N ? " " : "");
+            }
+            printf("]%s", lane + 1 < LANE_N ? "  " : "\n");
         }
-        printf("]%s", lane + 1 < LANE_N ? "  " : "\n");
+        printf("cbis  sweep   linear=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "\n",
+               seed->w_linear, seed->w_r, seed->w_fab);
+        fflush(stdout);
     }
-    fflush(stdout);
-
-    printf("cbis  sweep   linear=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "\n",
-           seed->w_linear, seed->w_r, seed->w_fab);
     free(hp);
     free(marked);
     free(spec_of);
@@ -815,14 +1198,18 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
 /* After a W-miss (must be in R): I, then N, then L. */
 static void prosecute_residual(uint64_t p, uint64_t K, seed_t *seed, const char *via) {
     int sp = spectrum_of(p);
-    printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=%s  (in R, missed fab)\n",
-           p, sp >= 0 ? SPEC_NAME[sp] : "?", via);
-    fflush(stdout);
+    dash_note("IDENTIFIED  n=%" PRIu64 "  %s  %s", p, sp >= 0 ? SPEC_NAME[sp] : "?", via);
+    if (!live_tty && dash_go)
+        say_event(D_YEL, "TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=%s", p,
+                  sp >= 0 ? SPEC_NAME[sp] : "?", via);
     if (in_signed_box_cover(p, K) || in_nr_cover(p) || in_lopez_cover(p, K)) {
         seed->dropped++;
         seed->covered++;
-        printf("TARGET DROPPED     n=%" PRIu64 "  (I/N/L)\n", p);
-        fflush(stdout);
+        dash_note("DROPPED  n=%" PRIu64 "  I/N/L", p);
+        if (!live_tty && dash_go)
+            say_event(D_DIM, "TARGET DROPPED     n=%" PRIu64 "  (I/N/L)", p);
+        else if (live_tty)
+            dash_kick();
         return;
     }
     save_letter(p, K);
@@ -849,6 +1236,7 @@ static void home_batch(uint64_t span, uint64_t K, seed_t *seed) {
         if (!in_sigma1(4 * p + 1)) continue;
         seed->home_r++;
         r_here++;
+        if (live_tty) dash_pulse(S);
         if (try_any_fab(p)) {
             seed->home_fab++;
             seed->dropped++;
@@ -859,14 +1247,18 @@ static void home_batch(uint64_t span, uint64_t K, seed_t *seed) {
         prosecute_residual(p, K, seed, "home");
     }
     seed->home_S = S1;
-    printf("cbis  home    S=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "  batch_R=%" PRIu64
-           "  batch_fab=%" PRIu64 "\n",
-           seed->home_S, seed->home_r, seed->home_fab, r_here, fab_here);
-    fflush(stdout);
+    dash_home_r = r_here;
+    dash_home_fab = fab_here;
+    if (!live_tty && dash_stream) {
+        printf("cbis  home    S=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "  batch_R=%" PRIu64
+               "  batch_fab=%" PRIu64 "\n",
+               seed->home_S, seed->home_r, seed->home_fab, r_here, fab_here);
+        fflush(stdout);
+    }
 }
 
 static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg, int sweep,
-                   int home) {
+                   int home, int want_scroll) {
     seed_t seed;
     int have = access(seed_path, F_OK) == 0;
     if (have) {
@@ -876,23 +1268,38 @@ static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg, int sweep,
                     seed.scanned_through);
     } else if (want_random) {
         seed = default_seed(random_start());
-        printf("cbis: new session, random start %" PRIu64 "\n", seed.start_factor);
+        fprintf(stderr, "cbis: new session, random start %" PRIu64 "\n", seed.start_factor);
     } else {
         seed = default_seed(0);
-        printf("cbis: new session, start 0\n");
+        fprintf(stderr, "cbis: new session, start 0\n");
     }
     if (kmax_arg) seed.kmax = kmax_arg;
     if (!step) step = DEFAULT_STEP;
     save_seed(&seed);
-    printf("cbis.kernel  ES+  LETTER only\n");
-    printf("  sweep: spectra A/B/C  lanes W I N L\n");
-    printf("  home:  R = {hard p : p+4 and 4p+1 in Sigma_1}\n");
-    printf("  modes  sweep=%s  home=%s\n", sweep ? "on" : "off", home ? "on" : "off");
-    printf("  start %" PRIu64 "  scanned %" PRIu64 "  home_S=%" PRIu64 "  K=%" PRIu64
-           "  step=%" PRIu64 "\n",
-           seed.start_factor, seed.scanned_through, seed.home_S, seed.kmax, step);
-    printf("  letters/%s\n", letters_dir);
-    fflush(stdout);
+    dash_go = 1;
+    use_color = color_ok();
+    live_tty = isatty(1) && !want_scroll;
+    dash_stream = !live_tty && want_scroll;
+    dash_painted = 0;
+    dash_dirty = 0;
+    dash_work_n = 0;
+    evn = 0;
+    memset(dash_cell, 0, sizeof dash_cell);
+    dash_home_r = dash_home_fab = 0;
+    dash_sweep0 = seed.scanned_through;
+    dash_home0 = seed.home_S;
+    clock_gettime(CLOCK_MONOTONIC, &dash_t0);
+    clock_gettime(CLOCK_MONOTONIC, &dash_run0);
+    dash_bind(&seed, step, sweep, home);
+    if (live_tty) {
+        dash_draw(&seed, step, sweep, home);
+    } else {
+        printf("cbis.kernel  ES+  LETTER only\n");
+        printf("  modes  sweep=%s  home=%s\n", sweep ? "on" : "off", home ? "on" : "off");
+        printf("  start %" PRIu64 "  scanned %" PRIu64 "  home_S=%" PRIu64 "\n",
+               seed.start_factor, seed.scanned_through, seed.home_S);
+        fflush(stdout);
+    }
     while (!halt_flag) {
         if (sweep) {
             uint64_t lo = seed.scanned_through;
@@ -905,17 +1312,22 @@ static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg, int sweep,
         }
         if (home && !halt_flag) home_batch(step, seed.kmax, &seed);
         save_seed(&seed);
-        printf("cbis  totals  scanned=%" PRIu64 "  home_S=%" PRIu64 "  linear=%" PRIu64
-               "  R=%" PRIu64 "  fab=%" PRIu64 "  collected=%" PRIu64 "\n",
-               seed.scanned_through, seed.home_S, seed.w_linear, seed.w_r + seed.home_r,
-               seed.w_fab + seed.home_fab, seed.letters_found);
-        fflush(stdout);
+        if (live_tty) {
+            if (dash_due(halt_flag)) dash_draw(&seed, step, sweep, home);
+        } else if ((seed.windows % 20) == 0) {
+            printf("cbis  totals  scanned=%" PRIu64 "  home_S=%" PRIu64 "  collected=%" PRIu64
+                   "\n",
+                   seed.scanned_through, seed.home_S, seed.letters_found);
+            fflush(stdout);
+        }
         if (sweep && seed.scanned_through == UINT64_MAX && home && seed.home_S == UINT64_MAX)
             break;
     }
     save_seed(&seed);
-    printf("cbis: saved sweep=%" PRIu64 "  home_S=%" PRIu64 "\n", seed.scanned_through,
-           seed.home_S);
+    dash_draw(&seed, step, sweep, home);
+    dash_done();
+    say_event(D_DIM, "cbis: saved sweep=%" PRIu64 "  home_S=%" PRIu64 "  collected=%" PRIu64,
+              seed.scanned_through, seed.home_S, seed.letters_found);
 }
 
 static void cmd_status(void) {
@@ -1035,6 +1447,7 @@ static void usage(void) {
             "  cbis go --k-max K --step N\n"
             "  cbis go --home-only     R-homing only (p+4 in Sigma_1)\n"
             "  cbis go --sweep-only    0-to-infinity matrix only\n"
+            "  cbis go --scroll        line log instead of the live panel\n"
             "  cbis status\n"
             "  cbis letters\n"
             "  cbis solve N\n"
@@ -1054,6 +1467,7 @@ int main(int argc, char **argv) {
     uint64_t opt_kmax = 0;
     uint64_t opt_step = 0;
     int do_sweep = 1, do_home = 1;
+    int want_scroll = 0;
     int i = 1;
     if (argc > 1 && argv[1][0] != '-') {
         cmd = argv[1];
@@ -1075,6 +1489,8 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[i], "--sweep-only")) {
             do_sweep = 1;
             do_home = 0;
+        } else if (!strcmp(argv[i], "--scroll")) {
+            want_scroll = 1;
         } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
             usage();
             return 0;
@@ -1085,7 +1501,7 @@ int main(int argc, char **argv) {
     }
 
     if (!strcmp(cmd, "go") || !strcmp(cmd, "continue")) {
-        cmd_go(want_random, opt_step, opt_kmax, do_sweep, do_home);
+        cmd_go(want_random, opt_step, opt_kmax, do_sweep, do_home, want_scroll);
         return 0;
     }
     if (!strcmp(cmd, "status")) {

@@ -5,7 +5,10 @@
 - **cbis.kernel** now homes on
   `R = {hard p : p+4 and 4p+1 ∈ Sigma_1}` while the 0-to-infinity
   sweep still runs. `--home-only` / `--sweep-only`. W is split into
-  linear / R / fab and is not weakened.
+  linear / R / fab and is not weakened. A TTY `go` is a fixed color
+  panel (sweep, home, matrix, last events) instead of a scrolling
+  dump. `--scroll` or a pipe keeps the line log. `NO_COLOR` is
+  honored.
 - ES+ records the letter equation: \(\Lambda_K\) is the complement of
   the inverse signed-box cover. The note is
   `research/erdos-straus/ES-plus/LETTER-EQUATION.md`. Mathematics only.

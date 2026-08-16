@@ -69,8 +69,9 @@
 ./centl es cbis go --home-only
 ./centl es cbis go --sweep-only
 ./centl es cbis go --k-max 400 --step 50000
+./centl es cbis go --scroll
 ./centl es cbis letters</code></pre>
-      <p>Default <code>go</code> runs sweep and home together and resumes both cursors. Letters: <code>research/erdos-straus/cbis.kernel/letters/</code>. Sources: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/HOMING.md">homing equation</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">letter equation</a>, <a href="https://github.com/chasebryan/centl/releases">releases</a>.</p>
+      <p>Default <code>go</code> runs sweep and home together and resumes both cursors. On a terminal the hunt is a fixed color panel that updates in place; <code>--scroll</code> or a pipe is a line log. Letters: <code>research/erdos-straus/cbis.kernel/letters/</code>. Sources: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/HOMING.md">homing equation</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">letter equation</a>, <a href="https://github.com/chasebryan/centl/releases">releases</a>.</p>
 
       <h2>CBAP.kernel — letter targeting</h2>
       <p><strong>cbap.kernel</strong> (CB-Advanced-Processing) is the four-channel letter hunter. Channel A acquires Mordell-hard primes on three CRT spectra. Channel B locks the theorem and <code>fab(a,b&le;11)</code> window — a hit is dropped. Channel C tracks the two-target corridor. Channel D writes a letter only if A–C miss.</p>

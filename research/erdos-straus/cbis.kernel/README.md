@@ -39,6 +39,7 @@ make
 ./cbis go --home-only      # missile only
 ./cbis go --sweep-only     # 0-to-infinity only
 ./cbis go --k-max 400 --step 50000
+./cbis go --scroll            # line log instead of the panel
 ./cbis status
 ./cbis letters
 ./cbis solve 2521
@@ -51,6 +52,12 @@ From the CENTL root:
 ./centl es cbis go --home-only
 ./centl es cbis letters
 ```
+
+On a terminal the hunt is a fixed color panel. Cursors, rates, the
+spectrum×lane window, and the last five events update in place. It
+does not scroll. `NO_COLOR` or `TERM=dumb` turns the color off.
+`--scroll` is the old line log (also what you get when stdout is not
+a TTY).
 
 Ctrl+C saves both cursors (`scanned_through` and `home_S`).
 Letters: `cbis.kernel/letters/`.
