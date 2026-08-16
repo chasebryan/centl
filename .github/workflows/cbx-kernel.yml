@@ -9,6 +9,7 @@ on:
       - 'research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md'
       - 'research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md'
       - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
+      - 'research/erdos-straus/ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md'
       - '.github/workflows/cbx-kernel.yml'
   push:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - 'centl'
       - 'research/erdos-straus/cbx.kernel/**'
       - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
+      - 'research/erdos-straus/ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md'
       - '.github/workflows/cbx-kernel.yml'
 
 permissions:
@@ -47,7 +49,7 @@ jobs:
           research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
 
       - name: Check Python research tools on Fedora
-        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/analyze_layers.py research/erdos-straus/cbx.kernel/bench_i.py
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/analyze_layers.py research/erdos-straus/cbx.kernel/analyze_profile.py research/erdos-straus/cbx.kernel/bench_i.py
 
       - name: Exercise root launcher on Fedora
         run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
@@ -104,7 +106,7 @@ jobs:
               for x in top
           )
           print(
-              f"::notice title=CBX Fedora per-k telemetry::"
+              f"::notice title=CBX Fedora inverse per-k telemetry::"
               f"layers={r['layers']}; productive={r['productive_layers']}; "
               f"dead-with-factorization={r['dead_factoring_layers']}; "
               f"first productive k={productive}; first dead k={dead}; leaders={leaders}"
@@ -124,6 +126,31 @@ jobs:
           assert r['verification_targets'] == r['hard_primes']
           assert r['verification_mismatches'] == 0
           assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          PY
+
+      - name: Profile Lane-I shifts on Fedora
+        run: |
+          ./centl es cbx profile-i --hi 100000 --i-max 80 --segment 25000 > /tmp/cbx-profile.json
+          ./centl es cbx analyze-profile /tmp/cbx-profile.json --json > /tmp/cbx-profile-analysis.json
+          python3 - <<'PY'
+          import json
+          raw = json.load(open('/tmp/cbx-profile.json', encoding='utf-8'))
+          r = json.load(open('/tmp/cbx-profile-analysis.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel' and raw['mode'] == 'profile-I'
+          assert r['analysis'] == 'cbx-lane-I-shift-profile-v1'
+          assert r['hard_primes'] == raw['hard_primes']
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          assert r['totals']['first_hits'] == r['covered_hard_primes']
+          assert r['productive_shifts'] > 0
+          leaders = '; '.join(
+              f"k={x['k']}:hits={x['first_hits']}/fact={x['factorizations']}/C={x['c_candidates']}"
+              for x in r['top_first_hit_count'][:5]
+          )
+          print(
+              f"::notice title=CBX Fedora shift profile::"
+              f"productive={r['productive_shifts']}; dead-factor={r['dead_factoring_shifts']}; "
+              f"depths={r['first_hit_depth_quantiles']}; leaders={leaders}"
+          )
           PY
 
       - name: Benchmark Lane-I orientations on Fedora
@@ -229,6 +256,17 @@ jobs:
           assert sh['verification_targets'] == sh['hard_primes']
           assert inv['hard_primes'] == sh['hard_primes']
           assert inv['covered_hard_primes'] == sh['covered_hard_primes']
+          PY
+
+      - name: Smoke-test Lane-I shift profile
+        run: |
+          ./centl es cbx profile-i --hi 100000 --i-max 80 --segment 25000 > /tmp/cbx-profile.json
+          ./centl es cbx analyze-profile /tmp/cbx-profile.json --json > /tmp/cbx-profile-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-profile-analysis.json', encoding='utf-8'))
+          assert r['analysis'] == 'cbx-lane-I-shift-profile-v1'
+          assert r['totals']['first_hits'] == r['covered_hard_primes']
           PY
 
       - name: Deterministic finite census
