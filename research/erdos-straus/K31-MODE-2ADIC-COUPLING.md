@@ -111,7 +111,7 @@ If t is odd and k31 misses, then k31 is necessarily FULL_QR and `gcd(D,J)=2`, wh
 
 FULL_QR may also occur at even t. In that case it shares the even seam topology with BARE but differs in the exact D-support mode.
 
-So the product state `k31_mode × parity × support_seam` does not form a Cartesian product. The exact realizable schematic states are
+So the product state `k31_mode × parity × support_seam` does not form a Cartesian product. The schematic states not excluded by this theorem are
 
 ```text
 BARE     × EVEN_0   (t=0 mod4)
@@ -122,6 +122,8 @@ FULL_QR  × ODD
 ```
 
 while `BARE × ODD` is impossible.
+
+The list above is not an existence claim for every remaining tuple. It records exactly what this coupling theorem removes.
 
 ## 5. Why this matters to the candidate framework
 
