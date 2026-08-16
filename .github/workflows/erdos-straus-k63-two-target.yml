@@ -1,0 +1,71 @@
+name: Erdős–Straus k=63 two-target filter
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K63-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k63_states.py'
+      - 'research/erdos-straus/verify_k63_structure.py'
+      - '.github/workflows/erdos-straus-k63-two-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k63-two-target:
+    name: Fedora k=63 exact closure
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact k=63 closure
+        run: |
+          python3 research/erdos-straus/classify_k63_states.py --json > /tmp/k63.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k63.json', encoding='utf-8'))
+          assert r['analysis'] == 'k63-two-target-state-closure-v1'
+          assert r['group'] == 'C6 x C6'
+          assert r['type_i_residue'] == 47
+          assert r['type_i_coordinate'] == [1,5]
+          assert r['minus_one_coordinate'] == [3,3]
+          assert r['states'] == 6389
+          assert r['admissible_states'] == 1844
+          assert r['hit_states'] == 1160
+          assert r['miss_states'] == 684
+          assert r['pure_H_states'] == 22
+          assert r['pure_H_miss_states'] == 22
+          assert r['nonpure_miss_states'] == 662
+          assert r['min_outside_histogram'] == {'0':22,'2':222,'3':206,'4':234}
+          assert r['maximum_minimum_outside_units'] == 4
+          print(
+              '::notice title=k=63 exact closure::'
+              f"states={r['states']}; admissible={r['admissible_states']}; "
+              f"misses={r['miss_states']}; outside={r['min_outside_histogram']}"
+          )
+          PY
+
+      - name: Independent finite divisor-box regression
+        run: |
+          python3 research/erdos-straus/verify_k63_structure.py --limit 100000 --json > /tmp/k63-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k63-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k63-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['direct_hits'] == 54
+          assert r['direct_misses'] == 219
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=k=63 independent regression::'
+              f"hard={r['hard_primes']}; hits={r['direct_hits']}; "
+              f"misses={r['direct_misses']}; mismatches={r['mismatches']}"
+          )
+          PY
