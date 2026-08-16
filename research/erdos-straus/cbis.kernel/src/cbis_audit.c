@@ -116,7 +116,8 @@ int main(int argc, char **argv) {
     resolve_root();
     build_sieve(1000003ull);
 
-    int hard_prime = is_hard(p) && is_prime64(p);
+    int prime = is_prime64(p);
+    int hard_prime = is_hard(p) && prime;
     int W = 0, I = 0, N = 0, L = 0;
     if (hard_prime) {
         W = in_window_set(p);
@@ -128,23 +129,23 @@ int main(int argc, char **argv) {
     ab_hit_t ab = full_ab_through(p, K);
     int current_letter = hard_prime && !(W || I || N || L);
     int ab_unseen = !ab.found;
-    int non_ab_cover = hard_prime && ab_unseen && (W || I || N);
+    int cover_escape = hard_prime && ab_unseen && (W || I || N);
 
     const char *classification;
     if (!hard_prime)
         classification = "OUTSIDE_CBIS_HARD_PRIME_DOMAIN";
     else if (ab.found)
         classification = "AB_EXPLAINED_THROUGH_K";
-    else if (non_ab_cover)
+    else if (cover_escape)
         classification = "AB_UNSEEN_THROUGH_K_NON_AB_COVER_HIT";
     else
         classification = "AB_UNSEEN_THROUGH_K_CURRENT_LETTER";
 
     printf("{\"kernel\":\"cbis-audit\",\"n\":%" PRIu64
-           ",\"K\":%" PRIu64 ",\"hard_prime\":%s,"
+           ",\"K\":%" PRIu64 ",\"prime\":%s,\"hard_prime\":%s,"
            "\"cover\":{\"W\":%s,\"I\":%s,\"N\":%s,\"L_prime_modulus\":%s},"
            "\"current_letter\":%s,\"full_type_ab\":{\"found\":%s",
-           p, K, jbool(hard_prime), jbool(W), jbool(I), jbool(N), jbool(L),
+           p, K, jbool(prime), jbool(hard_prime), jbool(W), jbool(I), jbool(N), jbool(L),
            jbool(current_letter), jbool(ab.found));
 
     if (ab.found) {
@@ -153,11 +154,11 @@ int main(int argc, char **argv) {
                ab.type, ab.k, ab.m, ab.d, ab.n);
     }
 
-    printf("},\"ab_unseen_through_K\":%s,\"model_escape_candidate\":%s,"
+    printf("},\"ab_unseen_through_K\":%s,\"cover_escape_candidate\":%s,"
            "\"classification\":\"%s\","
            "\"type_ab_falsified\":false,"
            "\"note\":\"bounded audit only; failure through K is not proof of no Type A/B witness\"}\n",
-           jbool(ab_unseen), jbool(non_ab_cover), classification);
+           jbool(ab_unseen), jbool(cover_escape), classification);
 
     return 0;
 }
