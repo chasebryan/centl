@@ -1,0 +1,58 @@
+name: Erdős–Straus hard class-conditioned seeds
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/MORDELL-HARD-CLASS-CONDITIONED-SEED-LAW.md'
+      - 'research/erdos-straus/verify_mordell_hard_class_conditioned_seeds.py'
+      - '.github/workflows/erdos-straus-hard-class-conditioned-seeds.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-hard-class-seeds:
+    name: Fedora hard class-conditioned seeds
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact class-conditioned seed formula
+        run: |
+          python3 research/erdos-straus/verify_mordell_hard_class_conditioned_seeds.py \
+            --max-k 5000 --json > /tmp/hard-class-seeds.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/hard-class-seeds.json', encoding='utf-8'))
+          assert r['analysis'] == 'mordell-hard-class-conditioned-seed-law-v1'
+          assert r['max_k'] == 5000
+          assert r['class_shift_pairs_checked'] == 7500
+          assert r['formula'] == 'gcd(210,(h+k)/4)'
+          assert r['factorization'] == 'gcd(6,(k+1)/4)*gcd(35,(h+k)/4)'
+          assert r['seed_histogram'] == {
+              '1':1717,'2':1714,'3':854,'5':427,'6':858,'7':287,
+              '10':430,'14':287,'15':216,'21':142,'30':214,'35':71,
+              '42':141,'70':71,'105':36,'210':35,
+          }
+          assert r['extra_multiplier_histogram'] == {
+              '1':5143,'5':1287,'7':857,'35':213,
+          }
+          assert r['strict_refinements_over_universal_seed'] == 2357
+          assert r['selected_ledgers']['59'] == {
+              '1':15,'121':15,'169':3,'289':3,'361':105,'529':21,
+          }
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=hard class-conditioned seeds::'
+              f"pairs={r['class_shift_pairs_checked']}; "
+              f"strict-refinements={r['strict_refinements_over_universal_seed']}; "
+              f"extras={r['extra_multiplier_histogram']}"
+          )
+          PY
