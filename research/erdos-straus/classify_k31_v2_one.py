@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exact finite-group classifier for the k=31, v2(C)=1 lift problem.
 
-Let C=(p+31)/4 and suppose v2(C)=1.  In base-3 logarithms modulo 31,
+Let C=(p+31)/4 and suppose v2(C)=1. In base-3 logarithms modulo 31,
 the divisor-log box of the forced factor 2 is
 
     D0 = {0, 24, 18},   c0 = 24   in C_30.
@@ -14,16 +14,17 @@ exponents {0,a,2a}, so the abstract transition is
 All unit residue classes modulo 31 are represented by some log a in C_30.
 This program closes that finite transition system exactly, classifies the two
 targets (Type I log 27 and Type II log c+15), separates quotient misses from
-genuine H-lift defects, and quotients the latter by the automorphism x->11x.
+genuine H-lift defects, quotients the latter by the automorphism x->11x, and
+emits every exact combined-miss state.
 
-The output is an exact finite-group computation.  It is not a finite prime
+The output is an exact finite-group computation. It is not a finite prime
 census and does not prove Erdős-Straus.
 """
 from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter, deque
+from collections import Counter
 
 MOD = 30
 TYPE_I = 27
@@ -78,6 +79,25 @@ def canonical(D: frozenset[int], c: int) -> tuple[tuple[int, ...], int]:
     return min(k1, k2)
 
 
+def miss_row(
+    D: frozenset[int],
+    c: int,
+    witness: dict[tuple[frozenset[int], int], tuple[int, ...]],
+) -> dict[str, object]:
+    qmiss = quotient_miss(D, c)
+    return {
+        "divisor_logs": sorted(D),
+        "box_size": len(D),
+        "c": c,
+        "type_i_target": TYPE_I,
+        "type_ii_target": (c + 15) % MOD,
+        "quotient_class": "quotient-miss" if qmiss else "lift-only-miss",
+        "quotient_divisor_logs_mod_6": sorted({x % 6 for x in D}),
+        "missing_logs": sorted(set(range(MOD)) - set(D)),
+        "minimal_additional_log_witness": list(witness[(D, c)]),
+    }
+
+
 def analyze() -> dict[str, object]:
     witness, layer_sizes = close_states()
 
@@ -87,7 +107,7 @@ def analyze() -> dict[str, object]:
     lift = [(D, c) for D, c in misses if not quotient_miss(D, c)]
 
     # Fixed-point verification: every possible next occurrence remains inside
-    # the closed state set.  This is the exhaustive closure certificate.
+    # the closed state set. This is the exhaustive closure certificate.
     state_set = set(states)
     transition_checks = 0
     for D, c in states:
@@ -96,6 +116,14 @@ def analyze() -> dict[str, object]:
             nxt = (add_occurrence(D, a), (c + a) % MOD)
             if nxt not in state_set:
                 raise AssertionError(f"state closure failed at c={c}, a={a}")
+
+    miss_rows = [miss_row(D, c, witness) for D, c in misses]
+    miss_rows.sort(key=lambda row: (
+        row["quotient_class"],
+        row["box_size"],
+        row["c"],
+        row["divisor_logs"],
+    ))
 
     orbits: dict[tuple[tuple[int, ...], int], list[tuple[frozenset[int], int]]] = {}
     for D, c in lift:
@@ -119,7 +147,7 @@ def analyze() -> dict[str, object]:
         })
 
     return {
-        "analysis": "k31-v2-one-exact-lift-classifier-v1",
+        "analysis": "k31-v2-one-exact-lift-classifier-v2",
         "group": "C30 base-3 logarithms modulo 31",
         "forced_state": {
             "divisor_logs": sorted(FORCED_D),
@@ -131,12 +159,41 @@ def analyze() -> dict[str, object]:
         "combined_miss_states": len(misses),
         "quotient_miss_states": len(qmiss),
         "lift_only_miss_states": len(lift),
+        "emitted_miss_rows": len(miss_rows),
+        "miss_states": miss_rows,
         "lift_defect_orbits_under_x_to_11x": len(orbits),
         "lift_defect_representatives": reps,
         "miss_box_size_histogram": dict(sorted(Counter(len(D) for D, _ in misses).items())),
         "lift_box_size_histogram": dict(sorted(Counter(len(D) for D, _ in lift).items())),
-        "claim": "exact finite-group state closure; not a prime-range census",
+        "claim": "exact finite-group state closure with complete miss table; not a prime-range census",
     }
+
+
+def validate(report: dict[str, object]) -> None:
+    expected = {
+        "reachable_states": 760,
+        "transition_closure_checks": 22800,
+        "combined_miss_states": 118,
+        "quotient_miss_states": 101,
+        "lift_only_miss_states": 17,
+        "emitted_miss_rows": 118,
+        "lift_defect_orbits_under_x_to_11x": 9,
+    }
+    for key, value in expected.items():
+        if report[key] != value:
+            raise SystemExit(f"unexpected {key}: {report[key]} expected {value}")
+    if len(report["miss_states"]) != report["combined_miss_states"]:
+        raise SystemExit("emitted k=31 miss-state table is incomplete")
+    if sum(
+        1 for row in report["miss_states"]
+        if row["quotient_class"] == "quotient-miss"
+    ) != report["quotient_miss_states"]:
+        raise SystemExit("quotient-miss row count mismatch")
+    if sum(
+        1 for row in report["miss_states"]
+        if row["quotient_class"] == "lift-only-miss"
+    ) != report["lift_only_miss_states"]:
+        raise SystemExit("lift-only row count mismatch")
 
 
 def main() -> int:
@@ -145,11 +202,14 @@ def main() -> int:
     args = ap.parse_args()
 
     report = analyze()
+    validate(report)
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:
         for key, value in report.items():
-            print(f"{key}: {value}")
+            if key != "miss_states":
+                print(f"{key}: {value}")
+        print(f"miss_states: {len(report['miss_states'])} exact rows")
     return 0
 
 
