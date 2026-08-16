@@ -146,6 +146,27 @@ def fixed_shift_status(p: int, k: int, primes: list[int]) -> tuple[bool, bool, b
     return (not type_i and not type_ii), type_i, type_ii, factors
 
 
+def canonical_q2_root_geometry(c: int) -> dict[str, object]:
+    """Root geometry of d=q^2 at a genuine q^2|C lift.
+
+    d=q^2 gives s=1,b=q,c=C/q.  Since q^2|C, b divides c, so every
+    successful canonical q^2 Type-II certificate is on the Lopez-A boundary.
+    """
+    assert c % Q2 == 0
+    b = Q
+    c_root = c // Q
+    assert c_root % b == 0
+    assert b * c_root == c
+    return {
+        "s": 1,
+        "b": b,
+        "c": c_root,
+        "relation": "b-divides-c",
+        "lopez_boundary": "A",
+        "incomparable": False,
+    }
+
+
 def candidate_values(route: dict[str, object], limit: int):
     for n in allowed_phases():
         s0, period = route_progression(n, int(route["source_q"]), int(route["source_residue"]))
@@ -184,6 +205,10 @@ def verify_route(route: dict[str, object], primes: list[int]) -> dict[str, objec
         assert c % Q2 == 0
         quotient = c // Q2
         assert quotient % k == k - 1
+        geometry = canonical_q2_root_geometry(c)
+        assert geometry["relation"] == "b-divides-c"
+        assert geometry["lopez_boundary"] == "A"
+        assert geometry["incomparable"] is False
         missk, type_i, type_ii, factors = fixed_shift_status(p, k, primes)
         assert not missk
         assert type_ii
@@ -203,6 +228,8 @@ def verify_route(route: dict[str, object], primes: list[int]) -> dict[str, objec
     c23 = (p + 23) // 4
     f19 = factor(c19, primes)
     f23 = factor(c23, primes)
+    lift_c = (p + k) // 4
+    geometry = canonical_q2_root_geometry(lift_c)
     return {
         "name": route["name"],
         "canonical_candidates_through_anchor": len(candidates),
@@ -217,12 +244,13 @@ def verify_route(route: dict[str, object], primes: list[int]) -> dict[str, objec
             "C19_factorization": f19,
             "C23": c23,
             "C23_factorization": f23,
-            "lift_companion": (p + k) // 4,
+            "lift_companion": lift_c,
             "lift_factorization": factors,
             "lift_quotient_Q": quotient,
             "Q_mod_k": quotient % k,
             "type_i": type_i,
             "type_ii": type_ii,
+            "canonical_type_ii_root_geometry": geometry,
         },
     }
 
@@ -242,9 +270,9 @@ def main() -> int:
         "routes": [verify_route(route, primes) for route in ROUTES],
         "failures": 0,
         "claim": (
-            "independently reconstructs the phase condition and route progressions, then "
-            "exhaustively checks every canonical candidate below the named anchors to pin the "
-            "earliest simultaneous k19/k23 survivor on each realized route"
+            "independently reconstructs the phase condition and route progressions, exhaustively "
+            "checks every canonical candidate below the named anchors, and verifies that every "
+            "successful canonical d=23^2 Type-II event is a b|c Lopez-A boundary certificate"
         ),
     }
     if args.json:
