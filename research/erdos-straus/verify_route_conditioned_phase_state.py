@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify route-conditioned phase volume and Route-B mode/parity coupling."""
+"""Verify route-local endpoint modes and Route-B parity/support coupling."""
 from __future__ import annotations
 
 import argparse
@@ -8,6 +8,10 @@ import math
 from collections import deque
 from fractions import Fraction
 
+QR19 = frozenset(pow(x, 2, 19) for x in range(1, 19))
+QR31 = frozenset(pow(x, 2, 31) for x in range(1, 31))
+S19 = frozenset(t for t in range(19) if (9 + t) % 19 in QR19)
+S31 = frozenset(t for t in range(31) if (5 + 21 * t) % 31 in QR31)
 S39 = frozenset({1, 2, 5, 6, 7, 8, 9, 10, 11})
 S43 = frozenset(set(range(43)) - {2, 28, 30})
 S47 = frozenset(set(range(47)) - {1, 5, 6, 10, 13, 21, 23, 36, 37, 38, 40, 42, 44})
@@ -56,7 +60,6 @@ def is_hit(k: int, state: State) -> bool:
 
 
 def verify_fixed_route_endpoints() -> dict[str, object]:
-    # Route A fixes t mod17 and therefore the k51 endpoint center.
     assert ROUTE_A_T0 % 17 == 12
     assert ROUTE_A_STEP % 17 == 0
     assert 12 in S51
@@ -70,11 +73,10 @@ def verify_fixed_route_endpoints() -> dict[str, object]:
     assert len(states51) == 1403
     assert len(misses51) == 14
 
-    # Route B fixes t mod47 and therefore the k47 endpoint center.
     assert ROUTE_B_T0 % 47 == 0
     assert ROUTE_B_STEP % 47 == 0
     assert 0 in S47
-    center47 = (54 + 210 * 0) % 47
+    center47 = (54 + 210 * ROUTE_B_T0) % 47
     assert center47 == 7
     states47 = closure(47, (2, 3))
     misses47 = {
@@ -100,58 +102,46 @@ def verify_fixed_route_endpoints() -> dict[str, object]:
     }
 
 
-def route_a_survives(u: int) -> bool:
-    t = ROUTE_A_T0 + ROUTE_A_STEP * u
-    assert t % 17 == 12
-    return (
-        t % 13 in S39
-        and t % 43 in S43
-        and t % 47 in S47
-        and t % 11 in S55
+def mapped_count(t0: int, step: int, modulus: int, allowed: frozenset[int]) -> int:
+    assert math.gcd(step, modulus) == 1
+    return sum((t0 + step * u) % modulus in allowed for u in range(modulus))
+
+
+def verify_strong_route_phase_envelopes() -> dict[str, object]:
+    assert QR19 == frozenset({1, 4, 5, 6, 7, 9, 11, 16, 17})
+    assert QR31 == frozenset({1, 2, 4, 5, 7, 8, 9, 10, 14, 16, 18, 19, 20, 25, 28})
+    assert S19 == frozenset({0, 2, 7, 8, 11, 14, 15, 16, 17})
+    assert S31 == frozenset({0, 2, 6, 7, 8, 9, 11, 12, 14, 15, 19, 22, 27, 28, 29})
+
+    route_a_filters = (
+        (19, S19), (31, S31), (13, S39), (43, S43), (47, S47), (11, S55)
+    )
+    route_b_filters = (
+        (19, S19), (31, S31), (13, S39), (43, S43), (17, S51), (11, S55)
     )
 
+    for modulus, allowed in route_a_filters:
+        assert mapped_count(ROUTE_A_T0, ROUTE_A_STEP, modulus, allowed) == len(allowed)
+    for modulus, allowed in route_b_filters:
+        assert mapped_count(ROUTE_B_T0, ROUTE_B_STEP, modulus, allowed) == len(allowed)
 
-def route_b_survives(u: int) -> bool:
-    t = ROUTE_B_T0 + ROUTE_B_STEP * u
-    assert t % 47 == 0
-    return (
-        t % 13 in S39
-        and t % 43 in S43
-        and t % 17 in S51
-        and t % 11 in S55
-    )
-
-
-def verify_route_phase_volumes() -> dict[str, object]:
-    route_a_moduli = (13, 43, 47, 11)
-    route_b_moduli = (13, 43, 17, 11)
-    assert all(math.gcd(ROUTE_A_STEP, m) == 1 for m in route_a_moduli)
-    assert all(math.gcd(ROUTE_B_STEP, m) == 1 for m in route_b_moduli)
-
-    ma = math.prod(route_a_moduli)
-    mb = math.prod(route_b_moduli)
-    assert ma == 289_003
-    assert mb == 104_533
-
-    na = sum(route_a_survives(u) for u in range(ma))
-    nb = sum(route_b_survives(u) for u in range(mb))
-    assert na == 85_680
-    assert nb == 32_760
+    ma = math.prod(modulus for modulus, _allowed in route_a_filters)
+    mb = math.prod(modulus for modulus, _allowed in route_b_filters)
+    na = math.prod(len(allowed) for _modulus, allowed in route_a_filters)
+    nb = math.prod(len(allowed) for _modulus, allowed in route_b_filters)
+    assert (ma, na) == (170_222_767, 11_566_800)
+    assert (mb, nb) == (61_569_937, 4_422_600)
 
     fa = Fraction(na, ma)
     fb = Fraction(nb, mb)
-    assert fa == Fraction(85_680, 289_003)
-    assert fb == Fraction(2_520, 8_041)
-
-    # Independent multiplicative check from the exact survivor-set sizes.
-    assert na == len(S39) * len(S43) * len(S47) * len(S55)
-    assert nb == len(S39) * len(S43) * len(S51) * len(S55)
+    assert fa == Fraction(11_566_800, 170_222_767)
+    assert fb == Fraction(340_200, 4_736_149)
 
     return {
         "route_a": {
             "phase_modulus": ma,
             "survivor_classes": na,
-            "fraction_exact": f"{na}/{ma}",
+            "fraction_reduced": f"{fa.numerator}/{fa.denominator}",
             "fraction": float(fa),
         },
         "route_b": {
@@ -165,8 +155,8 @@ def verify_route_phase_volumes() -> dict[str, object]:
 
 
 def verify_route_b_mode_parity() -> dict[str, object]:
-    # THIN permits only residue-1 occurrences plus either {9} or {3,3}.
-    # Rational prime2 has residue2 mod47, so any even J is incompatible.
+    # THIN permits residue-1 occurrences plus exactly {9} or {3,3}; rational
+    # prime2 has residue2 mod47, so any even J is incompatible with THIN.
     assert 2 % 47 not in {1, 3, 9}
 
     for u in range(2 * 47):
@@ -176,23 +166,20 @@ def verify_route_b_mode_parity() -> dict[str, object]:
         assert (J % 2 == 1) == (t % 2 == 0)
         assert (t % 2 == 0) == (u % 2 == 1)
         assert math.gcd(D, J) == math.gcd(2, t + 1)
-        if t % 2 == 1:
-            assert J % 2 == 0
-            assert D % 2 == 0
+        if t % 2:
+            assert J % 2 == 0 and D % 2 == 0
             assert math.gcd(D, J) == 2
         else:
-            assert J % 2 == 1
-            assert D % 2 == 1
+            assert J % 2 == 1 and D % 2 == 1
             assert math.gcd(D, J) == 1
 
-    mb = 104_533
-    thin_envelope_count = sum(
-        route_b_survives(u) and (u % 2 == 1)
-        for u in range(2 * mb)
-    )
-    assert thin_envelope_count == 32_760
-    thin_fraction = Fraction(thin_envelope_count, 2 * mb)
-    assert thin_fraction == Fraction(1_260, 8_041)
+    mb = 61_569_937
+    nb = 4_422_600
+    thin_modulus = 2 * mb
+    thin_classes = nb
+    thin_fraction = Fraction(thin_classes, thin_modulus)
+    assert thin_modulus == 123_139_874
+    assert thin_fraction == Fraction(170_100, 4_736_149)
 
     return {
         "thin_requires_t_even": True,
@@ -200,11 +187,9 @@ def verify_route_b_mode_parity() -> dict[str, object]:
         "t_odd_forces_full_qr": True,
         "t_odd_gcd_D_J": 2,
         "t_even_gcd_D_J": 1,
-        "thin_phase_parity_modulus": 2 * mb,
-        "thin_phase_parity_classes": thin_envelope_count,
-        "thin_phase_parity_fraction_reduced": (
-            f"{thin_fraction.numerator}/{thin_fraction.denominator}"
-        ),
+        "thin_phase_parity_modulus": thin_modulus,
+        "thin_phase_parity_classes": thin_classes,
+        "thin_phase_parity_fraction_reduced": f"{thin_fraction.numerator}/{thin_fraction.denominator}",
         "thin_phase_parity_fraction": float(thin_fraction),
     }
 
@@ -215,15 +200,15 @@ def main() -> int:
     args = parser.parse_args()
 
     report = {
-        "analysis": "route-conditioned-phase-state-v1",
+        "analysis": "route-conditioned-phase-mode-state-v2",
         "fixed_route_endpoints": verify_fixed_route_endpoints(),
-        "route_phase_volumes": verify_route_phase_volumes(),
+        "strong_route_phase_envelopes": verify_strong_route_phase_envelopes(),
         "route_b_mode_parity": verify_route_b_mode_parity(),
         "failures": 0,
         "claim": (
-            "after route selection, Route A fixes the k51 phase and Route B fixes "
-            "the k47 phase; Route-B THIN further forces t even/u odd and switches "
-            "off the D-J 2-adic overlap"
+            "over the landed k19/k31 route phase envelope, Route A fixes a 14-state k51 endpoint; "
+            "Route B fixes THIN|FULL_QR at k47, with THIN forcing t even/u odd and removing "
+            "the D-J 2-adic overlap"
         ),
     }
 
