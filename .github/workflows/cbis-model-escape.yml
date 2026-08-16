@@ -1,0 +1,24 @@
+name: cbis model escape
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/cbis.kernel/**'
+      - '.github/workflows/cbis-model-escape.yml'
+  push:
+    branches:
+      - agent/cbis-model-escape
+    paths:
+      - 'research/erdos-straus/cbis.kernel/**'
+      - '.github/workflows/cbis-model-escape.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test cbis model-escape
+        run: make -C research/erdos-straus/cbis.kernel check
