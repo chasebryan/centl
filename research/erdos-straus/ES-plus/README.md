@@ -39,10 +39,14 @@ The developing decomposition machine is recorded in
 [`../TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md`](../TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md).
 Its directional annotation grammar is the
 [`../BRYAN-ENTANGLEMENT-CROSS.md`](../BRYAN-ENTANGLEMENT-CROSS.md): exact
-arithmetic still decides every transition, while BEC records that proved
-transition as left obstruction `←⊖`, right construction `→⊕`, upward
-expansion `↑(⊕/⊖)`, or downward excavation `↓(⊖/⊕)`. BEC is telemetry and
-scheduler language only; it creates no proof or pruning permission.
+arithmetic and exact ancestry still decide every transition, while BEC
+records that proved transition as left obstruction `←⊖`, right construction
+`→⊕`, upward expansion `↑(⊕/⊖)`, or downward excavation `↓(⊖/⊕)`. BEC is
+telemetry and scheduler language only; it creates no proof or pruning
+permission. The first ancestry-correct BEC pilot is
+[`../BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md`](../BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md),
+which distinguishes the blocked-destination research path `DUR` from the
+live post-k23 paths `L^jR`.
 
 The exact constructive Lane-I work is
 [`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
