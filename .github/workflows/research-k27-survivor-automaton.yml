@@ -1,0 +1,29 @@
+name: Research k27 survivor automaton
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K27-SURVIVOR-AUTOMATON.md'
+      - 'research/erdos-straus/verify_k27_survivor_automaton.py'
+      - '.github/workflows/research-k27-survivor-automaton.yml'
+  push:
+    branches:
+      - agent/cbx-kernel
+    paths:
+      - 'research/erdos-straus/K27-SURVIVOR-AUTOMATON.md'
+      - 'research/erdos-straus/verify_k27_survivor_automaton.py'
+      - '.github/workflows/research-k27-survivor-automaton.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact k27 survivor automaton
+        run: python3 research/erdos-straus/verify_k27_survivor_automaton.py --json
