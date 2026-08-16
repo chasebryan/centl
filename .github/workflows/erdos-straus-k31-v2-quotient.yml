@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'research/erdos-straus/K31-TWO-TARGET-QUOTIENT.md'
-      - 'research/erdos-straus/K31-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/K31-V2-ONE-LIFT-CLASSIFICATION.md'
       - 'research/erdos-straus/ES-TWO-TARGET-DIVISOR-SQUARE.md'
       - 'research/erdos-straus/ES-BINARY-LANE-I-EQUIVALENCE.md'
       - 'research/erdos-straus/verify_k31_v2_quotient.py'
