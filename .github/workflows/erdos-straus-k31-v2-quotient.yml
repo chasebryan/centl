@@ -1,4 +1,4 @@
-name: Erdős–Straus k=31 v2 quotient theorem
+name: Erdős–Straus k=31 quotient and lift theorem
 
 on:
   pull_request:
@@ -7,6 +7,7 @@ on:
       - 'research/erdos-straus/ES-TWO-TARGET-DIVISOR-SQUARE.md'
       - 'research/erdos-straus/ES-BINARY-LANE-I-EQUIVALENCE.md'
       - 'research/erdos-straus/verify_k31_v2_quotient.py'
+      - 'research/erdos-straus/classify_k31_v2_one.py'
       - '.github/workflows/erdos-straus-k31-v2-quotient.yml'
   workflow_dispatch:
     inputs:
@@ -20,7 +21,7 @@ permissions:
 
 jobs:
   fedora-k31:
-    name: Fedora exact k=31 v2 quotient regression
+    name: Fedora exact k=31 quotient and lift regression
     runs-on: ubuntu-latest
     container:
       image: fedora:latest
@@ -34,18 +35,25 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Run independent k=31 theorem verifier
+      - name: Run independent k=31 v2>=2 theorem verifier
         run: |
           mkdir -p /tmp/k31
           python3 research/erdos-straus/verify_k31_v2_quotient.py \
             --limit "$LIMIT" --json > /tmp/k31/report.json
           cat /tmp/k31/report.json
 
+      - name: Enumerate exact k=31 v2=1 lift states
+        run: |
+          python3 research/erdos-straus/classify_k31_v2_one.py --json \
+            > /tmp/k31/lift-states.json
+          cat /tmp/k31/lift-states.json
+
       - name: Enforce exact theorem invariants
         run: |
           python3 - <<'PY'
           import json
           r = json.load(open('/tmp/k31/report.json', encoding='utf-8'))
+          s = json.load(open('/tmp/k31/lift-states.json', encoding='utf-8'))
           assert r['analysis'] == 'k31-v2-quotient-regression-v1'
           assert r['hard_primes'] > 0
           assert r['tested_v2_ge_2'] > 0
@@ -53,11 +61,19 @@ jobs:
           assert r['actual_hits'] + r['actual_misses'] == r['tested_v2_ge_2']
           assert r['classification_mismatches'] == 0
           assert r['constants']['type_i_divisor_target'] == 23
+          assert s['analysis'] == 'k31-v2-one-exact-lift-classifier-v1'
+          assert s['reachable_states'] == 760
+          assert s['transition_closure_checks'] == 22800
+          assert s['combined_miss_states'] == 118
+          assert s['quotient_miss_states'] == 101
+          assert s['lift_only_miss_states'] == 17
+          assert s['lift_defect_orbits_under_x_to_11x'] == 9
           print(
-              f"::notice title=Exact k=31 v2 quotient theorem::"
-              f"limit={r['limit']}; hard={r['hard_primes']}; tested={r['tested_v2_ge_2']}; "
-              f"hits={r['actual_hits']}; misses={r['actual_misses']}; "
-              f"branches={r['branch_counts']}"
+              f"::notice title=Exact k=31 quotient and lift::"
+              f"limit={r['limit']}; hard={r['hard_primes']}; v2>=2={r['tested_v2_ge_2']}; "
+              f"v2>=2-misses={r['actual_misses']}; lift-states={s['reachable_states']}; "
+              f"v2=1-miss-states={s['combined_miss_states']}; lift-only={s['lift_only_miss_states']}; "
+              f"lift-orbits={s['lift_defect_orbits_under_x_to_11x']}"
           )
           PY
 
@@ -71,13 +87,13 @@ jobs:
             echo "python=$(python3 --version)"
           } > /tmp/k31/ENVIRONMENT.txt
           cd /tmp/k31
-          sha256sum report.json ENVIRONMENT.txt > SHA256SUMS
+          sha256sum report.json lift-states.json ENVIRONMENT.txt > SHA256SUMS
 
       - name: Upload full research replay
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: es-k31-v2-quotient-X${{ env.LIMIT }}-${{ env.SOURCE_SHA }}
+          name: es-k31-quotient-lift-X${{ env.LIMIT }}-${{ env.SOURCE_SHA }}
           path: /tmp/k31/
           if-no-files-found: error
           retention-days: 90
