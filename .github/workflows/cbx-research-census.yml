@@ -10,7 +10,7 @@ on:
       i_max:
         description: 'Lane-I shift ceiling'
         required: true
-        default: '160'
+        default: '400'
       segment:
         description: 'Inverse/shift p-segment size'
         required: true
@@ -36,7 +36,7 @@ jobs:
       image: fedora:latest
     env:
       HI: ${{ inputs.hi || '10000000' }}
-      I_MAX: ${{ inputs.i_max || '160' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
       SEGMENT: ${{ inputs.segment || '1000000' }}
       REPEAT: ${{ inputs.repeat || '3' }}
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -93,6 +93,17 @@ jobs:
             --residuals /tmp/cbx-research/shift-residuals.txt \
             > /tmp/cbx-research/shift-summary.json
 
+      - name: Profile every Lane-I shift
+        run: |
+          ./centl es cbx profile-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            > /tmp/cbx-research/shift-profile.json
+          ./centl es cbx analyze-profile \
+            /tmp/cbx-research/shift-profile.json --json \
+            > /tmp/cbx-research/shift-profile-analysis.json
+
       - name: Construct p-major reference cover
         run: |
           ./centl es cbx forward-i \
@@ -126,7 +137,6 @@ jobs:
 
           def read_residuals(name):
               path = root / name
-              values = []
               seen = set()
               for lineno, raw in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
                   if not raw.strip():
@@ -135,7 +145,6 @@ jobs:
                   if p in seen:
                       raise SystemExit(f'{path}:{lineno}: duplicate residual prime {p}')
                   seen.add(p)
-                  values.append(p)
               return seen
 
           inv = read_hits('inverse-hits.tsv')
@@ -163,7 +172,6 @@ jobs:
           if set(fwd) & fwd_r:
               raise SystemExit('forward hit/residual sets overlap')
 
-          # Preserve canonical copies for publication/checksums independent of engine output order.
           (root / 'canonical-hits.tsv').write_text(
               ''.join(f'{p}\t{fwd[p]}\n' for p in sorted(fwd)), encoding='utf-8'
           )
@@ -192,16 +200,18 @@ jobs:
           sh=json.load(open(root+'/shift-summary.json'))
           fwd=json.load(open(root+'/forward-summary.json'))
           layers=json.load(open(root+'/layer-analysis.json'))
+          profile=json.load(open(root+'/shift-profile-analysis.json'))
           bench=json.load(open(root+'/orientation-benchmark.json'))['results'][0]
           assert inv['verification_mismatches'] == 0
           assert sh['verification_mismatches'] == 0
-          assert inv['hard_primes'] == sh['hard_primes'] == fwd['hard_primes']
-          assert inv['covered_hard_primes'] == sh['covered_hard_primes'] == fwd['covered_hard_primes']
-          assert inv['residual_hard_primes'] == sh['residual_hard_primes'] == fwd['residual_hard_primes']
+          assert inv['hard_primes'] == sh['hard_primes'] == fwd['hard_primes'] == profile['hard_primes']
+          assert inv['covered_hard_primes'] == sh['covered_hard_primes'] == fwd['covered_hard_primes'] == profile['covered_hard_primes']
+          assert inv['residual_hard_primes'] == sh['residual_hard_primes'] == fwd['residual_hard_primes'] == profile['residual_hard_primes']
+          assert profile['totals']['first_hits'] == profile['covered_hard_primes']
           productive=[r for r in layers['rows'] if r['new_covered'] > 0]
           report={
               'kernel':'cbx.kernel',
-              'mode':'deep-lane-I-census-v1',
+              'mode':'deep-lane-I-census-v2',
               'source_commit':os.environ['SOURCE_SHA'],
               'checkout_commit':os.popen('git rev-parse HEAD').read().strip(),
               'hi':int(os.environ['HI']),
@@ -214,6 +224,12 @@ jobs:
               'deepest_productive_k':max((r['k'] for r in productive), default=None),
               'top_new_cover':layers['top_new_cover'][:12],
               'dead_factoring_k':layers['dead_factoring_k'],
+              'first_hit_depth_quantiles':profile['first_hit_depth_quantiles'],
+              'spectrum_first_hits':profile['totals']['spectrum_hits'],
+              'top_shift_first_hits':profile['top_first_hit_count'][:12],
+              'top_shift_major_efficiency':profile['top_shift_major_efficiency'][:12],
+              'top_C_major_generation_density':profile['top_C_major_generation_density'][:12],
+              'profile_dead_factoring_k':profile['dead_factoring_k'],
               'inverse_factorizations':inv['factorizations'],
               'inverse_C_candidates':inv['C_candidates'],
               'forward_factorizations':fwd['factorizations'],
@@ -228,6 +244,7 @@ jobs:
               f"covered={report['covered_hard_primes']}; residual={report['residual_hard_primes']}; "
               f"productive layers={report['productive_layers']}; "
               f"deepest productive k={report['deepest_productive_k']}; "
+              f"depths={report['first_hit_depth_quantiles']}; "
               f"dead-with-factorization={len(report['dead_factoring_k'])}"
           )
           PY
