@@ -1,0 +1,25 @@
+name: k47 phase absorption
+
+on:
+  push:
+    branches:
+      - agent/k47-phase-absorption
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K47-PHASE-ABSORPTION.md'
+      - 'research/erdos-straus/verify_k47_phase_absorption.py'
+      - '.github/workflows/k47-phase-absorption.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact h169 k47 phase theorem
+        run: python3 research/erdos-straus/verify_k47_phase_absorption.py --json
