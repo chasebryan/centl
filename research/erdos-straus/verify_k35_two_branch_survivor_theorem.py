@@ -20,14 +20,12 @@ def legendre(a: int, p: int) -> int:
     a %= p
     if a == 0:
         return 0
-    value = pow(a, (p - 1) // 2, p)
-    return 1 if value == 1 else -1
+    return 1 if pow(a, (p - 1) // 2, p) == 1 else -1
 
 
 def h35() -> frozenset[int]:
     return frozenset(
-        r for r in UNITS
-        if legendre(r, 5) * legendre(r, 7) == 1
+        r for r in UNITS if legendre(r, 5) * legendre(r, 7) == 1
     )
 
 
@@ -35,58 +33,74 @@ def seed_state() -> State:
     return frozenset({1, 3, 9}), 3
 
 
-def transition(state: State, r: int) -> State:
+def transition35(state: State, r: int) -> State:
     mask, center = state
-    powers = {1, r % K, r * r % K}
+    powers = {1, r % 35, r * r % 35}
     return (
-        frozenset(a * b % K for a in mask for b in powers),
-        center * r % K,
+        frozenset(a * b % 35 for a in mask for b in powers),
+        center * r % 35,
     )
 
 
-def status(state: State) -> tuple[bool, bool]:
+def status35(state: State) -> tuple[bool, bool]:
     mask, center = state
-    return TYPE_I_TARGET in mask, (-center) % K in mask
+    return TYPE_I_TARGET in mask, (-center) % 35 in mask
 
 
-def is_hit(state: State) -> bool:
-    return any(status(state))
+def is_hit35(state: State) -> bool:
+    return any(status35(state))
 
 
-def closure(starts: set[State], alphabet: tuple[int, ...]) -> set[State]:
+def closure35(starts: set[State], alphabet: tuple[int, ...]) -> set[State]:
     seen = set(starts)
     queue = deque(starts)
     while queue:
         state = queue.popleft()
         for r in alphabet:
-            nxt = transition(state, r)
+            nxt = transition35(state, r)
             if nxt not in seen:
                 seen.add(nxt)
                 queue.append(nxt)
     return seen
 
 
-def projection(mask: frozenset[int], modulus: int) -> frozenset[int]:
-    return frozenset(x % modulus for x in mask)
+def transition7(state: State, r: int) -> State:
+    mask, center = state
+    powers = {1, r % 7, r * r % 7}
+    return (
+        frozenset(a * b % 7 for a in mask for b in powers),
+        center * r % 7,
+    )
+
+
+def closure7(starts: set[State]) -> set[State]:
+    seen = set(starts)
+    queue = deque(starts)
+    while queue:
+        state = queue.popleft()
+        for r in range(1, 7):
+            nxt = transition7(state, r)
+            if nxt not in seen:
+                seen.add(nxt)
+                queue.append(nxt)
+    return seen
 
 
 def verify_full_endpoint() -> dict[str, object]:
-    states = closure({seed_state()}, UNITS)
+    states = closure35({seed_state()}, UNITS)
     assert len(states) == 394
 
     endpoints = {state for state in states if state[1] == FINAL_CENTER}
-    misses = {state for state in endpoints if not is_hit(state)}
+    misses = {state for state in endpoints if not is_hit35(state)}
     hits = endpoints - misses
-    assert len(endpoints) == 14
-    assert len(misses) == 6
-    assert len(hits) == 8
+    assert (len(endpoints), len(hits), len(misses)) == (14, 8, 6)
 
     safe7 = frozenset({1, 2, 3, 4, 6})
     full7 = frozenset(range(1, 7))
     by_projection: dict[frozenset[int], set[State]] = {}
     for state in misses:
-        by_projection.setdefault(projection(state[0], 7), set()).add(state)
-
+        proj = frozenset(x % 7 for x in state[0])
+        by_projection.setdefault(proj, set()).add(state)
     assert set(by_projection) == {safe7, full7}
     assert len(by_projection[safe7]) == 5
     assert len(by_projection[full7]) == 1
@@ -96,20 +110,17 @@ def verify_full_endpoint() -> dict[str, object]:
     exceptional = next(iter(by_projection[full7]))
     assert exceptional[0] == H
 
-    # H35 is an index-two subgroup and both exact targets lie outside it.
-    assert len(H) == len(UNITS) // 2
-    assert 1 in H
-    assert all((a * b) % K in H for a in H for b in H)
-    assert all(pow(a, -1, K) in H for a in H)
+    assert len(H) == 12
+    assert all((a * b) % 35 in H for a in H for b in H)
+    assert all(pow(a, -1, 35) in H for a in H)
     assert 3 in H
     assert TYPE_I_TARGET not in H
     assert TYPE_II_TARGET not in H
 
-    # Exact hit persistence under factor insertion.
-    raw_hits = {state for state in states if is_hit(state)}
+    raw_hits = {state for state in states if is_hit35(state)}
     for state in raw_hits:
         for r in UNITS:
-            assert is_hit(transition(state, r))
+            assert is_hit35(transition35(state, r))
 
     return {
         "raw_states": len(states),
@@ -123,23 +134,13 @@ def verify_full_endpoint() -> dict[str, object]:
     }
 
 
-def tr7(state: State, r: int) -> State:
-    mask, center = state
-    powers = {1, r % 7, r * r % 7}
-    return (
-        frozenset(a * b % 7 for a in mask for b in powers),
-        center * r % 7,
-    )
-
-
 def verify_mod7_safe_branch() -> dict[str, object]:
     seed = (frozenset({1, 2, 3}), 3)
-    safe = tr7(seed, 3)
+    safe = transition7(seed, 3)
     assert safe == (frozenset({1, 2, 3, 4, 6}), 2)
 
-    # Residue1 is the only neutral continuation at either stage.
     for r in range(1, 7):
-        seed_next = tr7(seed, r)
+        seed_next = transition7(seed, r)
         if r == 1:
             assert seed_next == seed
         elif r == 3:
@@ -147,45 +148,45 @@ def verify_mod7_safe_branch() -> dict[str, object]:
         else:
             assert 5 in seed_next[0]
 
-        safe_next = tr7(safe, r)
+        safe_next = transition7(safe, r)
         if r == 1:
             assert safe_next == safe
         else:
             assert 5 in safe_next[0]
 
-    states = closure({seed}, tuple(range(1, 7)))
+    states = closure7({seed})
     assert len(states) == 9
     final = {state for state in states if state[1] == 2}
-    assert final == {
+    expected_final = {
         (frozenset({1, 2, 3, 4, 6}), 2),
         (frozenset({1, 2, 3, 4, 5, 6}), 2),
     }
+    assert final == expected_final
 
     return {
         "mod7_states": len(states),
-        "final_center2_masks": [sorted(state[0]) for state in sorted(final, key=lambda s: len(s[0]))],
-        "safe_factor_pattern": "exactly one residue3 occurrence; every other occurrence residue1",
+        "final_center2_masks": [
+            sorted(state[0]) for state in sorted(final, key=lambda s: len(s[0]))
+        ],
+        "safe_factor_pattern": (
+            "exactly one prime-factor occurrence 3 mod7; every other occurrence 1 mod7"
+        ),
     }
 
 
 def verify_character_branch() -> dict[str, object]:
     H = h35()
-    assert all(legendre(r, 5) == legendre(r, 7) for r in H)
     outside = frozenset(set(UNITS) - set(H))
+    assert all(legendre(r, 5) == legendre(r, 7) for r in H)
     assert all(legendre(r, 5) == -legendre(r, 7) for r in outside)
     assert TYPE_I_TARGET == 26
     assert TYPE_II_TARGET == 19
-    assert TYPE_I_TARGET % 7 == 5
-    assert TYPE_II_TARGET % 7 == 5
-    assert TYPE_I_TARGET in outside
-    assert TYPE_II_TARGET in outside
+    assert TYPE_I_TARGET % 7 == TYPE_II_TARGET % 7 == 5
+    assert TYPE_I_TARGET in outside and TYPE_II_TARGET in outside
 
-    # Starting in H35, adjoining H35 residues can never leave H35.
-    state = seed_state()
-    assert state[0].issubset(H)
-    h_states = closure({state}, tuple(sorted(H)))
+    h_states = closure35({seed_state()}, tuple(sorted(H)))
     assert all(mask.issubset(H) for mask, _center in h_states)
-    assert all(not is_hit(st) for st in h_states)
+    assert all(not is_hit35(state) for state in h_states)
 
     return {
         "H35_size": len(H),
@@ -213,8 +214,12 @@ def verify_affine_chain() -> dict[str, object]:
         assert 5 * D - 3 * B == 1
         assert 3 * F - 7 * E == 2
         assert 3 * F - 10 * D == 1
-        vals = (B, E, D, F)
-        assert all(math.gcd(vals[i], vals[j]) == 1 for i in range(4) for j in range(i + 1, 4))
+        values = (B, E, D, F)
+        assert all(
+            math.gcd(values[i], values[j]) == 1
+            for i in range(4)
+            for j in range(i + 1, 4)
+        )
     return {
         "t_values_checked": 5 * 7 * 31,
         "pairwise_coprime_B_E_D_F": True,
@@ -234,17 +239,12 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    endpoint = verify_full_endpoint()
-    mod7 = verify_mod7_safe_branch()
-    character = verify_character_branch()
-    affine = verify_affine_chain()
-
     report = {
         "analysis": "h169-k35-two-branch-survivor-theorem-v1",
-        "endpoint": endpoint,
-        "mod7_safe_branch": mod7,
-        "character_branch": character,
-        "affine_chain": affine,
+        "endpoint": verify_full_endpoint(),
+        "mod7_safe_branch": verify_mod7_safe_branch(),
+        "character_branch": verify_character_branch(),
+        "affine_chain": verify_affine_chain(),
         "failures": 0,
         "claim": (
             "exact h169 k35 miss iff J35(F) or S7(F): either every prime factor "
