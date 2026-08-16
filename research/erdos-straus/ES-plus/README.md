@@ -22,6 +22,25 @@ the production W -> I -> N -> L verdict but evaluates every lane
 independently, including I/N/L on primes that W already solved, so the
 hidden first-hit depth distribution can be measured without weakening W.
 
+The implementation/preservation status is
+[`CBX-IMPLEMENTATION-STATUS.md`](CBX-IMPLEMENTATION-STATUS.md).
+
+The exact constructive Lane-I work is
+[`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
+three finite traversal orientations for the same signed-box cover:
+
+- p-major recognition: `p -> k -> C`;
+- C-major construction: `k -> C -> p`;
+- shift-major survivor traversal: `k -> p -> C`.
+
+The strict C-major baseline is retained for scientific comparison. The
+default target-gated C-major engine uses generated-target, already-covered,
+and coprimality gates before expensive C factorization without changing the
+outer `k -> C -> p` construction. The shift-major engine keeps k outermost
+and compacts the unresolved hard-prime frontier after every shift. All three
+are finite algorithms for the same Lane-I set and are regression-checked
+against minimal first-hit k values.
+
 The first clean X-ray validation census is
 [`CBX-INITIAL-XRAY-CENSUS.md`](CBX-INITIAL-XRAY-CENSUS.md). It records
 401,752 hard-prime observations through a sweep cursor of 234,540,000 at
