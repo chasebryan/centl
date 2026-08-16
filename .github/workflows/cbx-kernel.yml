@@ -1,0 +1,76 @@
+name: CBX kernel
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/**'
+      - 'research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md'
+      - '.github/workflows/cbx-kernel.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/**'
+      - '.github/workflows/cbx-kernel.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-regress:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and self-test CBX
+        run: make -C research/erdos-straus/cbx.kernel clean check
+
+      - name: Check analyzer syntax
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py
+
+      - name: Exercise root launcher
+        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
+
+      - name: Validate probe semantics
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
+          assert p['kernel'] == 'cbx.kernel'
+          assert p['n'] == 2521
+          assert p['W']['R'] is True
+          assert p['W']['fab'] is True
+          assert p['I']['hit'] is True and p['I']['first_k'] == 23
+          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
+          assert p['production_letter'] is False
+          PY
+
+      - name: Deterministic finite census
+        run: |
+          ./centl es cbx go --run ci --step 5000 --iterations 4 --sweep-only
+          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci --json > /tmp/cbx-analysis.json
+
+      - name: Validate finite census and immutable grade
+        run: |
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['unique_grade_targets'] > 0
+          assert 'all' in r['strata']
+          PY
+          if ./centl es cbx go --run ci --iterations 1 --sweep-only --i-max 401; then
+            echo 'grade mutation unexpectedly succeeded' >&2
+            exit 1
+          fi
+
+      - name: Check repository remains clean except ignored runtime data
+        run: git status --short
