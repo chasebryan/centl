@@ -13,22 +13,44 @@ case "${1:-}" in
     if [ "${1:-}" = "cbx" ]; then
       shift
       cbx_dir="$project_root/research/erdos-straus/cbx.kernel"
-      if [ "${1:-}" = "inverse" ]; then
-        shift
-        cbx_inverse="$cbx_dir/cbx-inverse"
-        if [ ! -x "$cbx_inverse" ]; then
-          make -s -C "$cbx_dir" cbx-inverse
-        fi
-        exec "$cbx_inverse" "$@"
-      fi
-      if [ "${1:-}" = "shift-i" ]; then
-        shift
-        cbx_shift="$cbx_dir/cbx-shift-i"
-        if [ ! -x "$cbx_shift" ]; then
-          make -s -C "$cbx_dir" cbx-shift-i
-        fi
-        exec "$cbx_shift" "$@"
-      fi
+      case "${1:-}" in
+        inverse)
+          shift
+          cbx_inverse="$cbx_dir/cbx-inverse"
+          if [ ! -x "$cbx_inverse" ]; then
+            make -s -C "$cbx_dir" cbx-inverse
+          fi
+          exec "$cbx_inverse" "$@"
+          ;;
+        shift-i)
+          shift
+          cbx_shift="$cbx_dir/cbx-shift-i"
+          if [ ! -x "$cbx_shift" ]; then
+            make -s -C "$cbx_dir" cbx-shift-i
+          fi
+          exec "$cbx_shift" "$@"
+          ;;
+        forward-i)
+          shift
+          cbx_forward="$cbx_dir/cbx-forward-i"
+          if [ ! -x "$cbx_forward" ]; then
+            make -s -C "$cbx_dir" cbx-forward-i
+          fi
+          exec "$cbx_forward" "$@"
+          ;;
+        bench)
+          shift
+          exec python3 "$cbx_dir/bench_i.py" "$@"
+          ;;
+        analyze)
+          shift
+          exec python3 "$cbx_dir/analyze.py" "$@"
+          ;;
+        analyze-layers)
+          shift
+          exec python3 "$cbx_dir/analyze_layers.py" "$@"
+          ;;
+      esac
       cbx="$cbx_dir/cbx"
       if [ ! -x "$cbx" ]; then
         make -s -C "$cbx_dir" cbx
