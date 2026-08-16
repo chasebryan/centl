@@ -55,11 +55,11 @@
 
       <h2 id="cbis-demo">cbis.kernel — ES+ letter engine</h2>
       <figure class="demo">
-        <video controls preload="metadata" poster="assets/cbis-kernel-esp-demo.jpg" width="598" height="339">
+        <video controls autoplay muted playsinline loop preload="auto" poster="assets/cbis-kernel-esp-demo.jpg" width="598" height="339">
           <source src="assets/cbis-kernel-esp-demo.mp4" type="video/mp4">
           <a href="assets/cbis-kernel-esp-demo.mp4">Download the cbis.kernel demo (MP4, 2:35)</a>
         </video>
-        <figcaption>cbis.kernel live panel — sweep + R-homing on one cover. 2:35. No autoplay.</figcaption>
+        <figcaption>cbis.kernel live panel — sweep + R-homing on one cover. 2:35. Starts muted; unmute on the player.</figcaption>
       </figure>
       <p><strong>cbis.kernel</strong> (CB Inverse Sieve) is the current letter engine. Two walks share one cover. <strong>Sweep</strong> still starts at 0: spectra A/B/C by lanes W, I, N, L. <strong>Home</strong> only visits the residual R, the only place a window-layer letter can sit:</p>
       <p><code>R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}</code></p>
