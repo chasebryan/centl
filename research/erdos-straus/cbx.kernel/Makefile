@@ -6,7 +6,7 @@ PYTHON ?= python3
 
 .PHONY: all clean check
 
-all: cbx cbx-inverse cbx-forward-i cbx-shift-i
+all: cbx cbx-inverse cbx-forward-i cbx-shift-i cbx-profile-i
 	mkdir -p state observations letters
 
 cbx: src/cbx_runtime.c src/cbx.c
@@ -22,7 +22,10 @@ cbx-forward-i: src/cbx_forward_i.c src/cbx.c
 cbx-shift-i: src/cbx_shift_i.c src/cbx.c
 	$(CC) $(CFLAGS) -o $@ src/cbx_shift_i.c $(LDFLAGS) $(LDLIBS)
 
-check: cbx cbx-inverse cbx-forward-i cbx-shift-i
+cbx-profile-i: src/cbx_profile_i.c src/cbx.c
+	$(CC) $(CFLAGS) -o $@ src/cbx_profile_i.c $(LDFLAGS) $(LDLIBS)
+
+check: cbx cbx-inverse cbx-forward-i cbx-shift-i cbx-profile-i
 	./cbx self-test
 	./cbx probe 1009
 	./cbx probe 2521
@@ -30,6 +33,7 @@ check: cbx cbx-inverse cbx-forward-i cbx-shift-i
 	./cbx-inverse --hi 100000 --i-max 80 --segment 25000 --verify
 	./cbx-forward-i --hi 100000 --i-max 80
 	./cbx-shift-i --hi 100000 --i-max 80 --segment 25000 --verify
+	./cbx-profile-i --hi 100000 --i-max 80 --segment 25000 >/dev/null
 	$(PYTHON) -m py_compile analyze.py analyze_layers.py bench_i.py
 	./cbx-inverse --hi 20000 --i-max 40 --segment 10000 --layers /tmp/cbx-check-layers.tsv >/dev/null
 	$(PYTHON) analyze_layers.py /tmp/cbx-check-layers.tsv --json >/dev/null
@@ -41,5 +45,5 @@ check: cbx cbx-inverse cbx-forward-i cbx-shift-i
 	rm -f state/check.seed observations/check.jsonl
 
 clean:
-	rm -f cbx cbx-inverse cbx-forward-i cbx-shift-i
+	rm -f cbx cbx-inverse cbx-forward-i cbx-shift-i cbx-profile-i
 	rm -rf __pycache__
