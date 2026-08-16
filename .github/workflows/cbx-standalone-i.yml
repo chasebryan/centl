@@ -7,6 +7,7 @@ on:
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
       - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
+      - 'research/erdos-straus/analyze_six_shift_corridor.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
   push:
@@ -16,6 +17,7 @@ on:
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
       - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
+      - 'research/erdos-straus/analyze_six_shift_corridor.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
 
@@ -52,22 +54,38 @@ jobs:
           ./centl es cbx analyze-overlap \
             /tmp/cbx-standalone-sets.tsv --json \
             > /tmp/cbx-overlap-analysis.json
+          python3 research/erdos-straus/analyze_six_shift_corridor.py \
+            /tmp/cbx-standalone-sets.tsv --hi 100000 --json \
+            > /tmp/cbx-corridor6-analysis.json
 
-      - name: Validate standalone accounting and overlap graph
+      - name: Validate standalone accounting, overlap graph, and six-shift corridor
         run: |
           python3 - <<'PY'
           import json
           raw=json.load(open('/tmp/cbx-standalone.json', encoding='utf-8'))
           r=json.load(open('/tmp/cbx-standalone-analysis.json', encoding='utf-8'))
           g=json.load(open('/tmp/cbx-overlap-analysis.json', encoding='utf-8'))
+          c=json.load(open('/tmp/cbx-corridor6-analysis.json', encoding='utf-8'))
           assert raw['kernel'] == 'cbx.kernel'
           assert raw['mode'] == 'standalone-I'
           assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
           assert g['analysis'] == 'cbx-lane-I-overlap-graph-v2'
+          assert c['analysis'] == 'six-consecutive-lane-I-corridor-v1'
           assert r['hard_primes'] > 0
           assert r['layers'] == len(raw['shifts']) == g['layers']
           assert raw['set_relations'] == g['relation_rows'] == r['totals']['hit_events']
+          assert c['hard_primes'] == r['hard_primes']
+          assert c['corridor_covered'] + c['residual'] == c['hard_primes']
+          assert c['residual'] > 0
+          assert sum(c['next_hit_histogram'].values()) == c['residual']
+          assert sum(c['k23_combined_miss_branches'].values()) == c['residual']
+          assert sum(c['k27_qr_split'].values()) == c['residual']
+          assert sum(c['k27_nonresidue_valuation_histogram'].values()) == c['residual']
+          assert c['exact_invariants']['hard_prime_P_mod_6'] == 0
+          assert c['exact_invariants']['C27_mod_3'] == 1
+          assert c['exact_invariants']['QR27_equals_units_1_mod_3'] is True
+          assert c['exact_invariants']['C27_nonresidue_valuation_even'] is True
           for row in raw['shifts']:
               assert row['target_visits'] == raw['hard_primes']
               assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
@@ -84,5 +102,11 @@ jobs:
               f"productive={r['productive_layers']}; single={g['exact_single_layer_containment_count']}; "
               f"two={g['exact_two_layer_containment_target_count']}; "
               f"three={g['exact_three_layer_containment_target_count']}; top={top}; top-pair={pair_txt}"
+          )
+          print(
+              f"::notice title=Six-shift corridor residual::"
+              f"covered={c['corridor_covered']}/{c['hard_primes']}; residual={c['residual']}; "
+              f"next={c['next_hit_histogram']}; k23={c['k23_combined_miss_branches']}; "
+              f"k27={c['k27_qr_split']}; nrval={c['k27_nonresidue_valuation_histogram']}"
           )
           PY
