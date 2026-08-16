@@ -1,0 +1,179 @@
+name: CBX research census
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Lane-I shift ceiling'
+        required: true
+        default: '160'
+      segment:
+        description: 'Inverse/shift p-segment size'
+        required: true
+        default: '1000000'
+      repeat:
+        description: 'Orientation benchmark repetitions'
+        required: true
+        default: '3'
+  # Seed one publication-grade research run when this workflow is introduced
+  # on PR #230. Future source changes do not trigger it automatically.
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-research-census.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-research:
+    name: Fedora deep Lane-I census
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '160' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      REPEAT: ${{ inputs.repeat || '3' }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build CBX research engines
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Prepare research artifact directory
+        run: |
+          mkdir -p /tmp/cbx-research
+          {
+            echo "kernel=cbx.kernel"
+            echo "commit=$GITHUB_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "repeat=$REPEAT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n 1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-research/ENVIRONMENT.txt
+
+      - name: Construct and verify target-gated inverse cover
+        run: |
+          ./centl es cbx inverse \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --verify \
+            --layers /tmp/cbx-research/inverse-layers.tsv \
+            --hits /tmp/cbx-research/inverse-hits.tsv \
+            --residuals /tmp/cbx-research/inverse-residuals.txt \
+            > /tmp/cbx-research/inverse-summary.json
+          python3 research/erdos-straus/cbx.kernel/analyze_layers.py \
+            /tmp/cbx-research/inverse-layers.tsv --json \
+            > /tmp/cbx-research/layer-analysis.json
+
+      - name: Construct and verify shift-major cover
+        run: |
+          ./centl es cbx shift-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --verify \
+            --hits /tmp/cbx-research/shift-hits.tsv \
+            --residuals /tmp/cbx-research/shift-residuals.txt \
+            > /tmp/cbx-research/shift-summary.json
+
+      - name: Construct p-major reference cover
+        run: |
+          ./centl es cbx forward-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --hits /tmp/cbx-research/forward-hits.tsv \
+            --residuals /tmp/cbx-research/forward-residuals.txt \
+            > /tmp/cbx-research/forward-summary.json
+
+      - name: Require exact hit and residual set identity
+        run: |
+          cmp /tmp/cbx-research/inverse-hits.tsv /tmp/cbx-research/forward-hits.tsv
+          cmp /tmp/cbx-research/shift-hits.tsv /tmp/cbx-research/forward-hits.tsv
+          cmp /tmp/cbx-research/inverse-residuals.txt /tmp/cbx-research/forward-residuals.txt
+          cmp /tmp/cbx-research/shift-residuals.txt /tmp/cbx-research/forward-residuals.txt
+
+      - name: Benchmark all three orientations
+        run: |
+          ./centl es cbx bench \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --repeat "$REPEAT" \
+            --no-verify \
+            --json > /tmp/cbx-research/orientation-benchmark.json
+
+      - name: Build concise research summary
+        run: |
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-research'
+          inv=json.load(open(root+'/inverse-summary.json'))
+          sh=json.load(open(root+'/shift-summary.json'))
+          fwd=json.load(open(root+'/forward-summary.json'))
+          layers=json.load(open(root+'/layer-analysis.json'))
+          bench=json.load(open(root+'/orientation-benchmark.json'))['results'][0]
+          assert inv['verification_mismatches'] == 0
+          assert sh['verification_mismatches'] == 0
+          assert inv['hard_primes'] == sh['hard_primes'] == fwd['hard_primes']
+          assert inv['covered_hard_primes'] == sh['covered_hard_primes'] == fwd['covered_hard_primes']
+          productive=[r for r in layers['rows'] if r['new_covered'] > 0]
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'deep-lane-I-census-v1',
+              'commit':os.environ['GITHUB_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':inv['hard_primes'],
+              'covered_hard_primes':inv['covered_hard_primes'],
+              'residual_hard_primes':inv['residual_hard_primes'],
+              'productive_layers':len(productive),
+              'productive_k':[r['k'] for r in productive],
+              'deepest_productive_k':max((r['k'] for r in productive), default=None),
+              'top_new_cover':layers['top_new_cover'][:12],
+              'dead_factoring_k':layers['dead_factoring_k'],
+              'inverse_factorizations':inv['factorizations'],
+              'inverse_C_candidates':inv['C_candidates'],
+              'forward_factorizations':fwd['factorizations'],
+              'shift_factorizations':sh['factorizations'],
+              'benchmark':bench['comparison'],
+              'claim':'finite exact operation counts and finite machine-specific timings only',
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          print(
+              f"::notice title=CBX deep Fedora census::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
+              f"covered={report['covered_hard_primes']}; residual={report['residual_hard_primes']}; "
+              f"productive layers={report['productive_layers']}; "
+              f"deepest productive k={report['deepest_productive_k']}; "
+              f"dead-with-factorization={len(report['dead_factoring_k'])}"
+          )
+          PY
+
+      - name: Hash research outputs
+        run: |
+          cd /tmp/cbx-research
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Preserve research census artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ github.sha }}
+          path: /tmp/cbx-research/
+          if-no-files-found: error
+          retention-days: 90
