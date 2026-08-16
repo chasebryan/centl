@@ -1,0 +1,31 @@
+name: Erdős–Straus complete López square-root audit
+
+on:
+  push:
+    branches:
+      - agent/cbx-lopez-sqrt-auditor
+  pull_request:
+    paths:
+      - 'research/erdos-straus/LOPEZ-AB-SQRT-COMPLETE-AUDIT.md'
+      - 'research/erdos-straus/lopez_ab_complete_sqrt_audit.py'
+      - 'research/erdos-straus/verify_lopez_ab_sqrt_audit.py'
+      - '.github/workflows/erdos-straus-lopez-sqrt-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Cross-check exact square-root audit
+        run: |
+          python3 research/erdos-straus/verify_lopez_ab_sqrt_audit.py --limit 5000 --json
+      - name: Reproduce the 9,658,489 first Type A/B depth
+        run: |
+          python3 research/erdos-straus/lopez_ab_complete_sqrt_audit.py 9658489 --json
