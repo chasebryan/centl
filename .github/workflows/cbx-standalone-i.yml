@@ -8,6 +8,8 @@ on:
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
       - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
       - 'research/erdos-straus/analyze_six_shift_corridor.py'
+      - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
+      - 'research/erdos-straus/verify_k27_structure.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
   push:
@@ -18,6 +20,8 @@ on:
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
       - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
       - 'research/erdos-straus/analyze_six_shift_corridor.py'
+      - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
+      - 'research/erdos-straus/verify_k27_structure.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
 
@@ -57,6 +61,26 @@ jobs:
           python3 research/erdos-straus/analyze_six_shift_corridor.py \
             /tmp/cbx-standalone-sets.tsv --hi 100000 --json \
             > /tmp/cbx-corridor6-analysis.json
+
+      - name: Independently verify k=27 structural theorem
+        run: |
+          python3 research/erdos-straus/verify_k27_structure.py \
+            --limit 100000 --json > /tmp/k27-structure.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-structure.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-two-target-structure-regression-v1'
+          assert r['hard_primes'] > 0
+          assert all(v == 0 for v in r['failures'].values())
+          assert r['pure_qr_cases'] > 0
+          assert r['e2_cases'] > 0
+          print(
+              f"::notice title=Exact k=27 structural reduction::"
+              f"hard={r['hard_primes']}; pureQR={r['pure_qr_cases']}; "
+              f"E2={r['e2_cases']}; E2hits={r['e2_hits']}; E2misses={r['e2_misses']}; "
+              f"fullQR+NR={r['full_qr_with_nonresidue_cases']}"
+          )
+          PY
 
       - name: Validate standalone accounting, overlap graph, and six-shift corridor
         run: |
