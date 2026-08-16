@@ -1,0 +1,25 @@
+name: h169 reduced dependency grammar
+
+on:
+  push:
+    branches:
+      - agent/h169-reduced-dependency-grammar
+  pull_request:
+    paths:
+      - 'research/erdos-straus/H169-REDUCED-DEPENDENCY-GRAMMAR.md'
+      - 'research/erdos-straus/verify_h169_reduced_dependency_grammar.py'
+      - '.github/workflows/h169-reduced-dependency-grammar.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify reduced h169 dependency grammar
+        run: python3 research/erdos-straus/verify_h169_reduced_dependency_grammar.py --json
