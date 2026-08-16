@@ -38,6 +38,14 @@ case "${1:-}" in
           fi
           exec "$cbx_forward" "$@"
           ;;
+        profile-i)
+          shift
+          cbx_profile="$cbx_dir/cbx-profile-i"
+          if [ ! -x "$cbx_profile" ]; then
+            make -s -C "$cbx_dir" cbx-profile-i
+          fi
+          exec "$cbx_profile" "$@"
+          ;;
         bench)
           shift
           exec python3 "$cbx_dir/bench_i.py" "$@"
