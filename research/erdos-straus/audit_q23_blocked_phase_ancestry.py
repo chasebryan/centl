@@ -7,7 +7,10 @@ framework question: does a candidate actually survive every admissible
 signed-box shift between k23 and k_n?
 
 For each parent prefix it exhausts the same progression, keeps only prime
-simultaneous k19/k23 survivors, and records the first exact post-k23 hit.
+simultaneous k19/k23 survivors, records the first exact post-k23 hit, and
+emits ancestry-correct Bryan Entanglement Cross paths. From the live
+post-k23 state each exact miss is L=←⊖ and the first exact certificate is
+R=→⊕, so the live path is L^j R. These labels are telemetry only.
 """
 from __future__ import annotations
 
@@ -29,6 +32,13 @@ from verify_q23_square_lift_phase_sieve import (
     k_of,
     sieve,
 )
+
+BEC_SYMBOLS = {
+    "L": "←⊖",
+    "R": "→⊕",
+    "U": "↑(⊕/⊖)",
+    "D": "↓(⊖/⊕)",
+}
 
 EXPECTED_CELL = {
     "q17-q23": {
@@ -79,6 +89,17 @@ EXPECTED_GEOMETRY = {
     "mixed": 63,
     "n/a": 20,
 }
+EXPECTED_BEC_PATHS = {
+    "R": 64,
+    "LR": 64,
+    "LLR": 7,
+    "LLLR": 4,
+    "LLLLR": 5,
+    "LLLLLR": 3,
+    "LLLLLLLR": 1,
+}
+EXPECTED_TOTAL_L = 132
+EXPECTED_TOTAL_R = 148
 
 
 def mechanism(type_i: bool, type_ii: bool) -> str:
@@ -89,6 +110,25 @@ def mechanism(type_i: bool, type_ii: bool) -> str:
     if type_ii:
         return "type-II-only"
     return "miss"
+
+
+def live_bec_path(first_k: int) -> dict[str, object]:
+    """Encode the ancestry-correct post-k23 path as exact misses then hit."""
+    assert first_k >= 27 and first_k % 4 == 3
+    left_count = (first_k - 27) // 4
+    path = "L" * left_count + "R"
+    return {
+        "path": path,
+        "symbols": [BEC_SYMBOLS[x] for x in path],
+        "left_obstructions": left_count,
+        "right_constructions": 1,
+        "terminal_k": first_k,
+        "scope": "live-post-k23-ancestry",
+        "claim_boundary": (
+            "BEC path is observational telemetry over exact signed-box misses and the "
+            "first exact certificate; it does not create pruning or proof permission"
+        ),
+    }
 
 
 def first_post23_hit(
@@ -116,6 +156,7 @@ def first_post23_hit(
             "type_i": type_i,
             "type_ii": type_ii,
             "type_ii_geometry": geometry,
+            "bryan_entanglement_cross": live_bec_path(k),
         }
     return None
 
@@ -131,6 +172,9 @@ def audit_cell(route, n: int, primes: list[int]) -> dict[str, object]:
     first_hit_hist = Counter()
     mechanisms = Counter()
     geometry = Counter()
+    bec_paths = Counter()
+    bec_left = 0
+    bec_right = 0
     persistent_to_destination: list[int] = []
 
     p = p0
@@ -149,6 +193,11 @@ def audit_cell(route, n: int, primes: list[int]) -> dict[str, object]:
                 g = first["type_ii_geometry"]
                 assert isinstance(g, dict)
                 geometry[str(g["region"])] += 1
+                bec = first["bryan_entanglement_cross"]
+                assert isinstance(bec, dict)
+                bec_paths[str(bec["path"])] += 1
+                bec_left += int(bec["left_obstructions"])
+                bec_right += int(bec["right_constructions"])
                 if first_k == destination_k:
                     persistent_to_destination.append(p)
                 else:
@@ -171,6 +220,12 @@ def audit_cell(route, n: int, primes: list[int]) -> dict[str, object]:
         "first_post23_hit_histogram": dict(sorted(first_hit_hist.items())),
         "mechanism_counts": dict(sorted(mechanisms.items())),
         "type_ii_geometry_counts": dict(sorted(geometry.items())),
+        "bryan_entanglement_cross": {
+            "path_counts": dict(sorted(bec_paths.items())),
+            "left_obstructions": bec_left,
+            "right_constructions": bec_right,
+            "scope": "live-post-k23-ancestry",
+        },
         "persistent_to_parent_destination": persistent_to_destination,
     }
 
@@ -179,6 +234,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
+
+    assert BEC_SYMBOLS["L"] == "←⊖"
+    assert BEC_SYMBOLS["R"] == "→⊕"
 
     max_p = max(row[0] for table in EXPECTED.values() for row in table.values())
     max_k = max(k_of(n) for n in BLOCKED_PHASES)
@@ -195,39 +253,59 @@ def main() -> int:
     first_hits = Counter()
     mechanisms = Counter()
     geometry = Counter()
+    bec_paths = Counter()
+    total_left = 0
+    total_right = 0
     for cell in cells:
         first_hits.update({int(k): int(v) for k, v in cell["first_post23_hit_histogram"].items()})
         mechanisms.update({str(k): int(v) for k, v in cell["mechanism_counts"].items()})
         geometry.update({str(k): int(v) for k, v in cell["type_ii_geometry_counts"].items()})
+        bec = cell["bryan_entanglement_cross"]
+        assert isinstance(bec, dict)
+        bec_paths.update({str(k): int(v) for k, v in bec["path_counts"].items()})
+        total_left += int(bec["left_obstructions"])
+        total_right += int(bec["right_constructions"])
 
     assert total_primes == EXPECTED_TOTAL_PRIMES
     assert total_simultaneous == EXPECTED_TOTAL_SIMULTANEOUS
     assert dict(sorted(first_hits.items())) == EXPECTED_FIRST_HIT_HISTOGRAM
     assert dict(sorted(mechanisms.items())) == EXPECTED_MECHANISMS
     assert dict(sorted(geometry.items())) == EXPECTED_GEOMETRY
+    assert dict(sorted(bec_paths.items())) == EXPECTED_BEC_PATHS
+    assert total_left == EXPECTED_TOTAL_L
+    assert total_right == EXPECTED_TOTAL_R
     assert max(first_hits) == 55
     assert all(not cell["persistent_to_parent_destination"] for cell in cells)
 
     report = {
-        "analysis": "q23-blocked-phase-full-ancestry-audit-v1",
+        "analysis": "q23-blocked-phase-full-ancestry-audit-v2-bec",
         "parent_prefix_prime_candidates": total_primes,
         "simultaneous_k19_k23_survivors": total_simultaneous,
         "first_post23_hit_histogram": dict(sorted(first_hits.items())),
         "maximum_first_post23_hit_k": max(first_hits),
         "mechanism_counts": dict(sorted(mechanisms.items())),
         "type_ii_geometry_counts": dict(sorted(geometry.items())),
+        "bryan_entanglement_cross": {
+            "scope": "live-post-k23-ancestry",
+            "path_counts": dict(sorted(bec_paths.items())),
+            "total_left_obstructions": total_left,
+            "total_right_constructions": total_right,
+            "maximum_left_obstructions_before_R": 7,
+            "direction_symbols": BEC_SYMBOLS,
+        },
         "persistent_to_blocked_phase_destination": 0,
         "cells": cells,
         "failures": 0,
         "claim": (
             "finite exact ancestry audit over the parent blocked-phase atlas prefixes: "
             "every simultaneous k19/k23 survivor terminates before its phase destination, "
-            "with first post-k23 hit at k<=55"
+            "with first post-k23 hit at k<=55; BEC paths record exact post-k23 misses "
+            "as L and the first certificate as R without changing arithmetic semantics"
         ),
     }
 
     if args.json:
-        print(json.dumps(report, indent=2, sort_keys=True))
+        print(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False))
     else:
         print(report)
     return 0
