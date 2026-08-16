@@ -53,6 +53,24 @@ proved k27, k31, and k35 factor-support predicates now generate `R`, `LR`,
 `LLR`, or the deeper `LLL` residual instead of attaching those directions
 only after the first hit is known.
 
+The second-order extension is the
+[`../BRYAN-ENTANGLEMENT-COMPASS.md`](../BRYAN-ENTANGLEMENT-COMPASS.md)
+(`BEC-C`). It preserves the Cross as the primitive cardinal grammar and adds
+four derived diagonal assumption schemes:
+
+```text
+UL = +--
+UR = ++-
+DL = --+
+DR = -++
+```
+
+The diagonal word is derived by inserting the horizontal `L/R` bias between
+the onset and consequence of the vertical `U/D` word. BEC-C is used only
+when an exact state genuinely carries that composite effect; it is not a
+new proof layer. The CBX visual/design contract is
+[`../cbx.kernel/DESIGN-LANGUAGE.md`](../cbx.kernel/DESIGN-LANGUAGE.md).
+
 The exact constructive Lane-I work is
 [`CBX-INVERSE-I.md`](CBX-INVERSE-I.md). CBX now implements and cross-checks
 three finite traversal orientations for the same signed-box cover:
