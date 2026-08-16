@@ -1,0 +1,23 @@
+name: route-conditioned phase state
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/ROUTE-CONDITIONED-PHASE-STATE.md'
+      - 'research/erdos-straus/verify_route_conditioned_phase_state.py'
+      - '.github/workflows/route-conditioned-phase-state.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify route-conditioned phase and mode state
+        run: python3 research/erdos-straus/verify_route_conditioned_phase_state.py --json
