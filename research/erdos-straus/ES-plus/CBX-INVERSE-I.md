@@ -6,7 +6,7 @@
 **Kernel:** `cbx.kernel 0.1.0`  
 **Primary platform:** Fedora-family GNU/Linux  
 **Depends on:** `LETTER-EQUATION.md`, `CBIS-K-PARAMETER-STATUS.md`, `CBX-IMPLEMENTATION-STATUS.md`  
-**Claim boundary:** this note specifies and implements a finite cover construction. It does not prove that the inverse orientation is asymptotically faster, does not prove an adaptive K law, and does not prove Erdős–Straus.
+**Claim boundary:** this note specifies and implements finite cover constructions. It does not prove that inverse orientation is asymptotically faster, does not prove an adaptive K law, and does not prove Erdős–Straus.
 
 ---
 
@@ -52,11 +52,11 @@ C\equiv\frac{h+k}{4}\pmod{210}.
 }
 \]
 
-Therefore a fixed `k` does not require all positive `C`. It requires exactly six residue classes modulo 210 if the only desired outputs are Mordell-hard targets.
+Therefore a fixed `k` requires only six C residue classes modulo 210 when the desired outputs are Mordell-hard targets.
 
 ---
 
-## 2. The implemented generator
+## 2. Two exact inverse implementations
 
 The executable is built from
 
@@ -64,35 +64,61 @@ The executable is built from
 research/erdos-straus/cbx.kernel/src/cbx_inverse.c
 ```
 
-as
-
-```text
-cbx-inverse
-```
-
-and is routed from the repository root by
+as `cbx-inverse` and is routed from the repository root by
 
 ```sh
 ./centl es cbx inverse ...
 ```
 
-For a finite target interval `[L,X]` and Lane-I bound `K_I`, the engine works in p-segments to keep memory bounded.
+The implementation deliberately retains **two exact strategies**.
 
-For each p-segment:
+### 2.1 Strict C-first baseline
 
-1. build the exact finite target universe consisting only of primes in the six Mordell-hard classes;
-2. for every admissible `k <= K_I`;
-3. for every hard residue `h`;
-4. enumerate
-   \[
-   C\equiv(h+k)/4\pmod{210}
-   \]
-   whose generated `p=4C-k` lies in the current segment;
-5. factor `C` exactly with the CBX deterministic-Miller–Rabin/Pollard-rho arithmetic core;
-6. evaluate `delta_k(C)`;
-7. only when `delta_k(C)=0`, form the generated `p=4C-k` and mark it if it is in the hard-prime target universe.
+```sh
+./centl es cbx inverse --strict-c-first ...
+```
 
-The order of steps 5–7 is intentional. `delta_k(C)` is evaluated before prime-target membership is consulted. The implementation therefore remains genuinely C-first rather than using the hard-prime table to avoid the inverse work and thereby recreating p-first recognition.
+For each admissible `k` and each compatible C residue class, this form:
+
+1. enumerates C;
+2. factors C;
+3. evaluates `delta_k(C)`;
+4. forms `p=4C-k`;
+5. consults the finite hard-prime target universe only after the signed-box test.
+
+This is the most literal computational reading of the constructive equation. It is useful as a correctness and cost baseline.
+
+### 2.2 Target-gated inverse
+
+The default is
+
+```sh
+./centl es cbx inverse --target-gated ...
+```
+
+It keeps **exactly the same outer orientation**
+
+\[
+k\to C\to p,
+\]
+
+but after C generates p it applies three exact cheap gates before factoring C:
+
+1. reject p if it is not in the Mordell-hard prime target universe;
+2. reject p if it was already covered by a smaller k;
+3. reject the non-coprime case `gcd(C,k) != 1`.
+
+Only a surviving generated p causes factorization of C and evaluation of `delta_k(C)`.
+
+This does **not** turn the algorithm back into p-first recognition. No outer loop chooses a prime and asks which k hits it. The candidate is still created by the map
+
+\[
+(k,C)\mapsto p=4C-k.
+\]
+
+The gates only avoid expensive work on a generated candidate that cannot change the finite cover.
+
+The already-covered gate is exact because k is visited in increasing order. Once p has first hit at k₀, no later k can replace its minimal first depth.
 
 ---
 
@@ -104,14 +130,14 @@ The shifts are visited in increasing order
 3,7,11,15,\ldots,K_I.
 \]
 
-For each generated hard prime the engine stores the first shift that marked it. Thus the hit file records the same quantity measured by the X-ray kernel:
+For each generated hard prime the engine stores
 
 \[
 \boxed{
 k_I^*(p)=\min\{k:\delta_k((p+k)/4)=0\}.}
 \]
 
-Optional output:
+Optional output
 
 ```text
 p<TAB>k_I*(p)
@@ -145,9 +171,7 @@ and, when hit,
 
 A disagreement is printed with the target and both first-depth values, increments `verification_mismatches`, and causes a nonzero process exit.
 
-This is stronger than checking only cardinality. Two algorithms could accidentally cover the same number of primes while disagreeing on which primes are covered. The CBX check compares the actual finite set and the minimal first depth target-by-target.
-
-The CI smoke interval is
+The Fedora and Ubuntu regression interval is
 
 ```sh
 ./centl es cbx inverse \
@@ -159,32 +183,34 @@ The CI smoke interval is
 
 and is required to produce zero mismatches.
 
-Finite agreement is a software validation of the implementation. It is not a substitute for the mathematical equivalence already stated in the theory note.
+Finite agreement is software validation of the implementation. It is not a substitute for the mathematical equivalence stated in the theory note.
 
 ---
 
 ## 5. Output counters
 
-The inverse JSON summary records:
+The target-gated JSON summary records at least
 
 ```text
 hard_primes
 C_candidates
+factorizations
 delta_hits
+skipped_non_target
+skipped_covered
+skipped_non_coprime
 covered_hard_primes
 residual_hard_primes
 verification_targets
 verification_mismatches
 ```
 
-Their meanings are:
+The important distinction is
 
-- `hard_primes`: exact number of Mordell-hard prime targets in the interval;
-- `C_candidates`: number of compatible C values on which factorization and `delta_k` evaluation were attempted;
-- `delta_hits`: generated `(k,C)` pairs satisfying `delta_k(C)=0`, including repeated generation of the same prime at different shifts;
-- `covered_hard_primes`: unique hard primes generated at least once;
-- `residual_hard_primes`: hard primes not generated by Lane I through `K_I`;
-- verification fields: exact target count and mismatch count when `--verify` is active.
+- `C_candidates`: compatible C values **enumerated** by the inverse traversal;
+- `factorizations`: C values that survive cheap exact gates and actually pay for factorization/signed-box work.
+
+Thus enumeration overhead and expensive arithmetic are no longer conflated.
 
 The identity
 
@@ -202,86 +228,95 @@ is checked in CI.
 
 ---
 
-## 6. Why implementation does not prove speed
+## 6. The first baseline falsified the naïve speed hypothesis
 
-The constructive orientation is exact, but its cost is not automatically smaller.
-
-The inverse engine deliberately factors every hard-compatible C candidate before asking whether the resulting integer is one of the prime targets. By contrast, p-first recognition starts only from hard primes and usually stops at the first small signed-box hit.
-
-So the relevant empirical comparison is not merely
+The first Fedora benchmark used the strict C-first implementation at
 
 \[
-\text{number of primes}
+X=100{,}000,
+\qquad
+K_I=80.
 \]
 
-versus
+The finite target universe contained 273 Mordell-hard primes.
 
-\[
-\text{number of generated hits}.
-\]
-
-It is the amount of exact signed-box work actually performed.
-
-For the inverse engine, the first work proxy is
-
-\[
-W_{\mathrm{inv}}=	exttt{C\_candidates}.
-\]
-
-For the p-first reference engine `cbx-forward-i`, the corresponding count is
-
-\[
-W_{\mathrm{fwd}}=	exttt{factorizations},
-\]
-
-the exact number of `(p,k)` signed-box factorizations performed before first hits or exhaustion.
-
-The structural finite work ratio is therefore
+The result was deliberately unpleasant:
 
 \[
 \boxed{
-\rho_W(X,K_I)
-=
-\frac{W_{\mathrm{inv}}}{W_{\mathrm{fwd}}}.
+\frac{C\text{-candidates}_{\rm strict}}
+     {\text{forward factorizations}}
+=20.198020
 }
 \]
 
-Values below one favor the current inverse enumeration; values above one favor p-first recognition on that finite corpus.
+and the observed Fedora wall ratio was
 
-This says nothing by itself about asymptotics. It tells us which implementation is paying more exact arithmetic at measured `(X,K_I)`.
+\[
+\boxed{
+\frac{t_{\rm strict\ inverse}}
+     {t_{\rm forward}}
+=11.723221.
+}
+\]
+
+So the literal “factor every compatible C before target lookup” implementation is **not** competitive on that finite corpus. This result is retained because it identifies the actual waste rather than allowing the implementation to drift toward an unexplained optimization.
+
+It directly motivated the target-gated inverse mode.
+
+Neither ratio is an asymptotic statement.
 
 ---
 
-## 7. Benchmark harness
+## 7. Benchmark metrics after target gating
 
-The benchmark reference is
+The p-first reference binary `cbx-forward-i` measures the same hard-prime finite universe and records exact signed-box factorization count.
 
-```text
-src/cbx_forward_i.c
-```
-
-which implements only
+For the optimized inverse, the primary expensive-work ratio is now
 
 \[
-p\to k\to C
+\boxed{
+\rho_F(X,K_I)
+=
+\frac{\text{inverse factorizations}}
+     {\text{forward factorizations}}.
+}
 \]
 
-for the same hard-prime finite universe and records:
+A second ratio measures traversal overhead:
+
+\[
+\boxed{
+\rho_C(X,K_I)
+=
+\frac{\text{inverse enumerated C candidates}}
+     {\text{forward factorizations}}.
+}
+\]
+
+And machine-specific timing is
+
+\[
+\boxed{
+\rho_t
+=
+\frac{t_{\rm inverse}}{t_{\rm forward}}.
+}
+\]
+
+Interpretation:
+
+- `rho_F < 1`: target-gated inverse performs fewer expensive C factorizations;
+- `rho_C > 1` can still be acceptable if most extra C candidates are rejected cheaply;
+- `rho_t` tells whether those savings survive actual implementation overhead on the measured machine.
+
+The harness is
 
 ```text
-shift_candidates
-factorizations
-covered_hard_primes
-residual_hard_primes
+research/erdos-straus/cbx.kernel/bench_i.py
 ```
 
-The harness
-
-```text
-bench_i.py
-```
-
-runs the inverse and forward engines at identical `(L,X,K_I)`, requires their finite cover cardinalities to agree, and reports both the work ratio and median elapsed-time ratio.
+and alternates execution order between repeats.
 
 Examples:
 
@@ -295,19 +330,12 @@ python3 bench_i.py \
   --i-max 80 \
   --i-max 400 \
   --repeat 3
+
+# reproduce the intentionally expensive baseline
+python3 bench_i.py --hi 100000 --i-max 80 --strict-inverse
 ```
 
-The harness alternates execution order between repeats to reduce systematic warm-cache or scheduling bias.
-
-The wall ratio is
-
-\[
-\rho_t
-=
-\frac{t_{\mathrm{inverse}}}{t_{\mathrm{forward}}}.
-\]
-
-Again, `rho_t<1` favors inverse on that machine and finite corpus; `rho_t>1` favors recognition.
+All benchmark conclusions are finite and machine-specific except the exact operation counts themselves.
 
 ---
 
@@ -315,24 +343,30 @@ Again, `rho_t<1` favors inverse on that machine and finite corpus; `rho_t>1` fav
 
 The question is no longer “can the inverse cover be implemented?” It can.
 
-The next questions are sharper:
+The questions are now:
 
-1. How does `rho_W(X,K_I)` behave as X grows?
-2. How does it behave as `K_I` grows?
-3. Does restricting to R-like substructures change the crossover?
-4. Can `delta_k(C)=0` itself be **generated structurally**, rather than tested on every compatible C candidate?
-5. Can factor-pattern or defect information prune C before full Pollard-rho factorization without secretly reintroducing p-first search?
-6. Do some shifts have sufficiently high hit density that they should be generated, while others should remain recognizers?
+1. How does `rho_F(X,K_I)` behave as X grows?
+2. How does `rho_C(X,K_I)` behave as K grows?
+3. At what finite regimes, if any, does target-gated inversion beat p-first recognition in wall time?
+4. Can `delta_k(C)=0` itself be generated structurally instead of tested after factorization?
+5. Can defect, spectrum, factor-pattern, or residue information reject more generated C values before Pollard-rho work?
+6. Do some shifts deserve inverse generation while others should remain recognizers?
 
-That last possibility suggests a hybrid engine rather than an ideological choice between forward and inverse orientation.
+The last point suggests a **hybrid per-shift scheduler** may ultimately be better than demanding one global orientation.
 
 ---
 
 ## 9. Command reference
 
 ```sh
-# inverse Lane-I finite cover
+# optimized inverse Lane-I finite cover
 ./centl es cbx inverse --hi X --i-max K
+
+# explicit optimized mode
+./centl es cbx inverse --target-gated --hi X --i-max K
+
+# literal C-first baseline
+./centl es cbx inverse --strict-c-first --hi X --i-max K
 
 # exact finite implementation check
 ./centl es cbx inverse --hi X --i-max K --verify
