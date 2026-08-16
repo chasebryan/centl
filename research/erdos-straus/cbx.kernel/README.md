@@ -4,7 +4,7 @@
 
 `cbis.kernel` remains the production letter engine. `cbx.kernel` is deliberately separate: it looks *through* the production cover and records what every lane would have done even when W already solved the prime.
 
-The design note is [`../ES-plus/CBIS-K-PARAMETER-STATUS.md`](../ES-plus/CBIS-K-PARAMETER-STATUS.md).
+The design note is [`../ES-plus/CBIS-K-PARAMETER-STATUS.md`](../ES-plus/CBIS-K-PARAMETER-STATUS.md). The first clean census is [`../ES-plus/CBX-INITIAL-XRAY-CENSUS.md`](../ES-plus/CBX-INITIAL-XRAY-CENSUS.md).
 
 ## What it measures
 
@@ -44,6 +44,18 @@ A named run has an immutable grade. If you want another grade, start another run
 
 `--k-max K` is a compatibility convenience that sets both `K_I` and `A_L`; the independent flags are preferred for research.
 
+## Signal-atomic runtime
+
+The arithmetic/search core is `src/cbx.c`. The executable is built through `src/cbx_runtime.c`, which gives the hunt strict preservation semantics:
+
+- once a prime enters the X-ray probe, all of its lane verdicts finish before SIGINT/SIGTERM is honored;
+- an interrupted sweep stores the last fully processed integer rather than jumping to the end of the requested window;
+- an interrupted home walk stores the first unprocessed `S`;
+- the home cursor is always a strict next-`S` cursor;
+- `--iterations N` gives a deterministic finite number of complete sweep/home cycles, so formal censuses do not require timeout termination.
+
+This boundary matters because a partially evaluated target must never be serialized as a mathematical miss.
+
 ## Adaptive-I policies
 
 The default is fixed:
@@ -71,6 +83,7 @@ CBX uses deterministic 64-bit Miller-Rabin primality and Pollard-rho factorizati
 
 ```sh
 make
+make check
 ./cbx self-test
 
 ./cbx probe 2521
@@ -81,6 +94,9 @@ make
 ./cbx go --run adaptive-a --i-max 5000 --k-policy log2 --policy-scale 2.0
 ./cbx go --home-only
 ./cbx go --sweep-only
+
+# exact finite census: 46,908 complete sweep batches
+./cbx go --run formal --step 5000 --iterations 46908 --sweep-only
 
 ./cbx status
 ./cbx status --run deep-I
@@ -104,6 +120,17 @@ Full grade controls:
 --k-max K
 --k-policy fixed|log|log2|spectrum-log
 --policy-scale C
+```
+
+Run controls:
+
+```text
+--run NAME
+--step N
+--iterations N
+--random
+--sweep-only
+--home-only
 ```
 
 The `probe` and `solve` commands inherit a named run's saved grade unless explicit grade flags are supplied.
@@ -130,11 +157,11 @@ letters/GRADES.jsonl
 
 so the identity of the prime/event is not confused with the strength of the finite experiment that observed it.
 
-Sweep and home maintain separate cursors. The home cursor is a strict **next-S** cursor, so batch endpoints are not intentionally revisited.
+The state counter distinguishes observations from unique letters. `analyze.py` additionally deduplicates overlapping sweep/home observations by target and grade.
 
 ## Analyze the X-ray stream
 
-`analyze.py` converts the append-only observation stream into the empirical objects needed for the adaptive-K research program. It deduplicates sweep/home observations by target and grade, then reports first-depth distributions for:
+`analyze.py` converts the append-only observation stream into the empirical objects needed for the adaptive-K research program. It reports first-depth distributions for:
 
 - all targets;
 - `R`;
@@ -144,14 +171,52 @@ Sweep and home maintain separate cursors. The home cursor is a strict **next-S**
 
 For I, N and L it reports hit rate plus minimum, median, p90, p99 and maximum observed first depth.
 
+It also computes the running observed Lane-I frontier
+
+\[
+K_{\mathrm{obs}}(X)=\max\{k_I^*(p):p\le X\text{ observed}\},
+\]
+
+including a separate `R` record sequence.
+
 ```sh
 python3 analyze.py --run default
-python3 analyze.py --run deep-I
-python3 analyze.py --run deep-I --json
+python3 analyze.py --run formal --json
 ```
 
-This is the empirical-to-theorem bridge: first measure the hidden depth distribution, then fit candidate envelopes, then attempt to prove or break them using the defect/spectrum theory. The analyzer never promotes an empirical envelope to a theorem.
+### Falsify candidate K laws
+
+Candidate policies can be tested offline against a stronger fixed-K observation stream:
+
+```sh
+python3 analyze.py --run formal \
+  --candidate-policy log \
+  --candidate-scale 2.0 \
+  --candidate-R-only
+
+python3 analyze.py --run formal \
+  --candidate-policy log2 \
+  --candidate-scale 0.5
+```
+
+The analyzer reports how many observed I depths violate the proposed policy, plus the first and worst finite failure. A policy that survives remains an empirical envelope, not a theorem.
+
+This is the empirical-to-theorem bridge: measure the hidden depth distribution, track new records, fit candidate envelopes, then try to destroy them before attempting a proof with the defect/spectrum machinery.
+
+## First clean census
+
+At the default grade, a deterministic sweep through cursor `234,540,000` produced `401,752` hard-prime X-rays and zero production letters. Lane I and the current N lane each hit every observed target. The finite observed Lane-I record was
+
+\[
+k_I^*=107
+\quad\text{at}\quad
+p=8,803,369.
+\]
+
+Inside `R`, the Lane-I p99 was `27` and the finite maximum was again `107`.
+
+These are finite records only. See `CBX-INITIAL-XRAY-CENSUS.md` for the exact counts, source blobs and raw-stream checksum.
 
 ## Claim boundary
 
-CBX is an instrument for discovering structure in the hidden I/N/L depth distribution. A finite miss is not an Erdős-Straus counterexample. A finite empty letter spectrum is not a proof.
+CBX is an instrument for discovering structure in the hidden I/N/L depth distribution. A finite miss is not an Erdős–Straus counterexample. A finite empty letter spectrum is not a proof.
