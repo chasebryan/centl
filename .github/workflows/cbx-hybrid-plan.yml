@@ -1,0 +1,125 @@
+name: CBX hybrid Lane-I planner
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/plan_hybrid.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_profile.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/bench_i.py'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_profile_i.c'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-hybrid-plan.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/plan_hybrid.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_profile.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/bench_i.py'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_profile_i.c'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-hybrid-plan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-hybrid-plan:
+    name: fedora-hybrid-plan
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora toolchain
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build Lane-I research engines
+        run: make -C research/erdos-straus/cbx.kernel cbx-profile-i cbx-standalone-i cbx-forward-i cbx-inverse cbx-shift-i
+
+      - name: Build survivor and standalone profiles
+        run: |
+          ./centl es cbx profile-i \
+            --hi 100000 --i-max 80 --segment 25000 \
+            > /tmp/cbx-profile.json
+          ./centl es cbx analyze-profile \
+            /tmp/cbx-profile.json --json \
+            > /tmp/cbx-profile-analysis.json
+          ./centl es cbx standalone-i \
+            --hi 100000 --i-max 80 --segment 25000 \
+            > /tmp/cbx-standalone.json
+          ./centl es cbx analyze-standalone \
+            /tmp/cbx-standalone.json --json \
+            > /tmp/cbx-standalone-analysis.json
+
+      - name: Build empirical orientation benchmark
+        run: |
+          ./centl es cbx bench \
+            --hi 100000 --i-max 80 --segment 25000 \
+            --repeat 1 --no-verify --json \
+            > /tmp/cbx-benchmark.json
+
+      - name: Plan in measure-only mode
+        run: |
+          ./centl es cbx plan-hybrid \
+            /tmp/cbx-profile-analysis.json \
+            --standalone /tmp/cbx-standalone-analysis.json \
+            --benchmark /tmp/cbx-benchmark.json \
+            --json > /tmp/cbx-plan-measure.json
+
+      - name: Plan under explicit 10 percent exact C-retention hypothesis
+        run: |
+          ./centl es cbx plan-hybrid \
+            /tmp/cbx-profile-analysis.json \
+            --standalone /tmp/cbx-standalone-analysis.json \
+            --benchmark /tmp/cbx-benchmark.json \
+            --c-retention 0.10 \
+            --json > /tmp/cbx-plan-retain10.json
+
+      - name: Validate planner safety and break-even semantics
+        run: |
+          python3 - <<'PY'
+          import json
+
+          measure=json.load(open('/tmp/cbx-plan-measure.json', encoding='utf-8'))
+          assumed=json.load(open('/tmp/cbx-plan-retain10.json', encoding='utf-8'))
+
+          for r in (measure, assumed):
+              assert r['planner'] == 'cbx-hybrid-lane-I-v1'
+              assert r['domain']['hard_primes'] > 0
+              assert r['summary']['layers'] == len(r['rows'])
+              assert all(row['must_evaluate_for_exact_cover'] is True for row in r['rows'])
+              assert all(0.0 <= row['break_even']['C_retention_vs_active'] <= 1.0 for row in r['rows'])
+              assert all(0.0 <= row['break_even']['required_C_pruning_fraction'] <= 1.0 for row in r['rows'])
+
+          assert set(measure['summary']['recommendation_counts']) == {'measure-only'}
+          assert measure['cost_model']['assumed_exact_C_retention'] is None
+          assert assumed['cost_model']['assumed_exact_C_retention'] == 0.10
+
+          modeled=set(assumed['summary']['recommendation_counts'])
+          assert 'C-major' in modeled
+          assert any(name != 'C-major' for name in modeled)
+
+          # Early layers have the least severe generic-C pruning requirement.
+          leaders=measure['top_C_generator_research_targets'][:5]
+          assert leaders
+          assert leaders[0]['k'] == 3
+
+          top='; '.join(
+              f"k={row['k']}:retain<={row['break_even']['C_retention_vs_active']:.6f}"
+              for row in leaders
+          )
+          print(
+              f"::notice title=CBX Fedora hybrid planner::"
+              f"active-baseline={measure['active_baseline']['orientation']}; "
+              f"uniform-retention-all-active={measure['summary']['uniform_C_retention_needed_to_beat_active_on_every_active_layer']}; "
+              f"10pct-recommendations={assumed['summary']['recommendation_counts']}; top-break-even={top}"
+          )
+          PY
