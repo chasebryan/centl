@@ -33,12 +33,13 @@ check: cbx cbx-inverse cbx-forward-i cbx-shift-i cbx-profile-i
 	./cbx-inverse --hi 100000 --i-max 80 --segment 25000 --verify
 	./cbx-forward-i --hi 100000 --i-max 80
 	./cbx-shift-i --hi 100000 --i-max 80 --segment 25000 --verify
-	./cbx-profile-i --hi 100000 --i-max 80 --segment 25000 >/dev/null
-	$(PYTHON) -m py_compile analyze.py analyze_layers.py bench_i.py
+	./cbx-profile-i --hi 100000 --i-max 80 --segment 25000 > /tmp/cbx-check-profile.json
+	$(PYTHON) -m py_compile analyze.py analyze_layers.py analyze_profile.py bench_i.py
 	./cbx-inverse --hi 20000 --i-max 40 --segment 10000 --layers /tmp/cbx-check-layers.tsv >/dev/null
 	$(PYTHON) analyze_layers.py /tmp/cbx-check-layers.tsv --json >/dev/null
+	$(PYTHON) analyze_profile.py /tmp/cbx-check-profile.json --json >/dev/null
 	$(PYTHON) bench_i.py --hi 20000 --i-max 40 --repeat 1 --no-verify --json >/dev/null
-	rm -f /tmp/cbx-check-layers.tsv
+	rm -f /tmp/cbx-check-layers.tsv /tmp/cbx-check-profile.json
 	rm -f state/check.seed observations/check.jsonl
 	./cbx go --run check --step 1000 --iterations 2 --sweep-only
 	test "$$(sed -n 's/^sweep=//p' state/check.seed)" = "2000"
