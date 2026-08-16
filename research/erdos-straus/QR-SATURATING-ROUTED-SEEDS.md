@@ -1,6 +1,6 @@
 # QR-saturating seeds and routed rigidity upgrades
 
-**Status:** proved general lemma plus exact routed atlas  
+**Status:** proved general lemma plus corrected periodic route atlas v2  
 **Date:** 2026-08-16  
 **Primary classifier:** `classify_qr_saturating_route_atlas.py`  
 **Independent realization regression:** `verify_qr_saturating_route_atlas.py`  
@@ -71,7 +71,21 @@ But a routed factor can still be powerful in a different way: it can enlarge the
 
 This converts a destination with exceptional or non-rigid miss states into an exact QR-support node.
 
-The current route graph contains seven such upgrades.
+### Route-scope correction
+
+The character-routing theorem produces one congruence class of destination shifts modulo `4q`. It is not restricted to the least positive representative.
+
+The original v1 saturation classifier enumerated least-positive representatives from its source route table and also omitted the already-proved h=361 q=59 positive-character source. Its count of seven upgrades was therefore a count for that restricted source/representative atlas, not for the complete current route inventory.
+
+Version 2 corrects this by scanning destination shifts directly. For every prime destination k=3 mod4 through the requested bound it tests the exact routing condition
+
+`p mod q = -k mod q`
+
+against every currently proved source theorem. This automatically includes all periodic representatives.
+
+It also includes q=59 on h=361.
+
+With that corrected scope, there are exactly **10** novel single-source QR-saturation upgrades through prime destination k<=5000.
 
 ## 4. Exact novel routed saturation upgrades
 
@@ -93,11 +107,9 @@ Therefore on this branch
 
 > k=19 misses if and only if every prime factor of C19 is a quadratic residue modulo 19.
 
-This branch was already visible in the k=7/k=23 rigid-support atlas; the saturation lemma now supplies its elementary explanation.
-
 ### 4.2 q=31 into k=23, h=169,289,529
 
-A rigid k=31 miss on these classes has positive 31-character. On the route
+On the route
 
 `p mod31 = 8`,
 
@@ -115,8 +127,6 @@ Therefore, for each h in {169,289,529}, on p mod31=8,
 
 This is strictly stronger than the ordinary seed-6 k=23 geometry. Without factor 31, k=23 has 15 miss states, including the two negative-character exceptions p mod23=5 and14. With mandatory seed186, those exceptions disappear entirely.
 
-The routed seed-186 closure has 33 states and exactly 11 misses, one for each quadratic-residue p class modulo23, all with the same exact QR divisor mask.
-
 ### 4.3 q=47 into k=11, h=121
 
 On the rigid h=121 k=47 source branch, take
@@ -125,7 +135,7 @@ On the rigid h=121 k=47 source branch, take
 
 Then 47 divides C11.
 
-The h=121 k=11 class seed is only 3, which is not QR-saturating. Routing 47 gives
+The h=121 k=11 class seed is only 3. Routing 47 gives
 
 `S = 3*47 = 141`.
 
@@ -134,8 +144,6 @@ The divisors of 141^2 fill the complete quadratic-residue subgroup modulo11.
 Thus on this route
 
 > k=11 misses if and only if every prime factor of C11 is a quadratic residue modulo11.
-
-This extends exact k=11 QR-support rigidity to an h=121 branch where the ordinary class seed does not provide it.
 
 ### 4.4 q=47 into k=31, h=289
 
@@ -155,8 +163,6 @@ Therefore
 
 > k=31 misses if and only if every prime factor of C31 is a quadratic residue modulo31.
 
-The destination already has a QR-support theorem from the exact seed-10 state closure; this route supplies a simpler seed-saturation proof on the named subbranch.
-
 ### 4.5 q=47 into k=19, h=289
 
 On h=289 and
@@ -171,24 +177,79 @@ The ordinary k=19 seed is 7. The routed seed becomes
 
 The divisors of 329^2 fill the quadratic-residue subgroup modulo19.
 
-Therefore this route upgrades the otherwise non-rigid h=289 k=19 problem to the exact condition
+Therefore this route upgrades h=289 k=19 to the exact condition
 
 > k=19 misses if and only if every prime factor of C19 is a quadratic residue modulo19.
 
-## 5. Automated atlas result
+## 5. New q=59 routed upgrades on h=361
 
-Using only the currently proved source nodes
+The proved h=361 k=59 theorem says a k=59 miss requires
 
-- q=7;
+`(59/p) = +1`.
+
+That positive source character supplies three additional QR-saturating routes into smaller prime destinations.
+
+### 5.1 q=59 into k=11
+
+Required source residue:
+
+`p mod59 = 48`.
+
+Then 59 divides C11. The h=361 class seed at k=11 is3, so
+
+`S = 3*59 = 177`.
+
+The divisors of 177^2 fill QR(11). Therefore
+
+> on h=361 and p mod59=48, k=11 misses iff every prime factor of C11 is a quadratic residue modulo11.
+
+### 5.2 q=59 into k=23
+
+Required source residue:
+
+`p mod59 = 36`.
+
+Then 59 divides C23. The universal k=23 seed6 strengthens to
+
+`S = 6*59 = 354`.
+
+The divisors of 354^2 fill QR(23). Therefore
+
+> on h=361 and p mod59=36, k=23 misses iff every prime factor of C23 is a quadratic residue modulo23.
+
+This removes the ordinary seed-6 exceptional negative-character geometry on the routed branch.
+
+### 5.3 q=59 into k=31
+
+Required source residue:
+
+`p mod59 = 28`.
+
+Then 59 divides C31. The h=361 k=31 class seed14 strengthens to
+
+`S = 14*59 = 826`.
+
+The divisors of 826^2 fill QR(31). Hence
+
+> on h=361 and p mod59=28, k=31 misses iff every prime factor of C31 is a quadratic residue modulo31.
+
+These three branches connect the established k=59 theorem back into the small-shift support network.
+
+## 6. Corrected automated atlas result
+
+The v2 classifier uses the currently proved source inventory
+
+- q=7 on all hard classes;
 - q=11 on h=169,289,529;
 - q=19 on h=121;
-- the ten rigid q=23 residue branches;
+- the ten rigid positive q=23 residue branches on all hard classes;
 - q=31 on h=169,289,529;
 - q=47 on h=121,289;
+- q=59 on h=361.
 
-the classifier enumerates every positive-character route to a prime destination and tests whether the receiving class seed becomes QR-saturating after adjoining the routed source prime.
+It scans every prime destination k=3 mod4 through k<=5000, including periodic route representatives.
 
-Exactly seven class-residue route entries are novel upgrades over their baseline class seed:
+The 10 novel single-source upgrades are:
 
 - 23 -> 19, h=289, source residue4, seed7 ->161;
 - 31 -> 23, h=169, source residue8, seed6 ->186;
@@ -196,16 +257,24 @@ Exactly seven class-residue route entries are novel upgrades over their baseline
 - 31 -> 23, h=529, source residue8, seed6 ->186;
 - 47 -> 11, h=121, source residue36, seed3 ->141;
 - 47 -> 31, h=289, source residue16, seed10 ->470;
-- 47 -> 19, h=289, source residue28, seed7 ->329.
+- 47 -> 19, h=289, source residue28, seed7 ->329;
+- 59 -> 31, h=361, source residue28, seed14 ->826;
+- 59 -> 23, h=361, source residue36, seed6 ->354;
+- 59 -> 11, h=361, source residue48, seed3 ->177.
 
-## 6. Strategic consequence
+The independent finite regression realizes every one of these 10 route branches on actual Mordell-hard primes below two million and finds at least one destination miss on each branch, with zero violations of the QR-support equivalence.
 
-The reciprocity barrier says a routed quadratic factor cannot win merely by having the wrong sign at the destination. The saturation theorem identifies the next mechanism that does survive reciprocity:
+## 7. Strategic consequence
+
+The reciprocity barrier says a routed quadratic factor cannot win merely by having the wrong sign at the destination. The saturation theorem identifies the next mechanism that survives reciprocity:
 
 > enough individually compatible routed factors can enlarge a mandatory divisor seed until its square-divisor geometry fills an entire character subgroup.
 
-This suggests that route-graph search should score edges by **divisor-lattice growth**, not merely by character sign.
+The corrected atlas also makes two route-mining rules explicit:
 
-The next high-value search is therefore to identify two-factor or multi-factor routed seeds that saturate a destination even when no single routed factor does, especially at the remaining exceptional k=23 branches and at composite residual-wheel destinations.
+1. source inventories must include every proved positive-character theorem, even when the source theorem itself came from a larger shift such as59;
+2. routing must be treated as a periodic congruence class modulo4q, not as a single least-positive destination.
+
+The next layer is multi-source saturation, where two or three individually insufficient routed factors jointly fill a destination QR subgroup.
 
 Erdős-Straus remains open.

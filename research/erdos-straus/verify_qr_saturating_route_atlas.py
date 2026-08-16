@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Direct finite-prime regression for QR-saturating routed seeds."""
+"""Direct finite-prime regression for the full single-route saturation atlas."""
 from __future__ import annotations
 
 import argparse
@@ -15,6 +15,9 @@ UPGRADES = (
     (47, 121, 36, 11),
     (47, 289, 16, 31),
     (47, 289, 28, 19),
+    (59, 361, 28, 31),
+    (59, 361, 36, 23),
+    (59, 361, 48, 11),
 )
 
 
@@ -104,8 +107,9 @@ def analyze(limit: int) -> dict[str, object]:
             failures.append({"kind": "missing-miss-realization", "key": key})
 
     return {
-        "analysis": "qr-saturating-route-atlas-independent-regression-v1",
+        "analysis": "qr-saturating-route-atlas-independent-regression-v2",
         "limit": limit,
+        "upgrade_branches": len(UPGRADES),
         "counts": dict(sorted(counts.items())),
         "failures": len(failures),
         "failure_examples": failures[:20],
@@ -126,6 +130,7 @@ def main() -> int:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:
         print(f"limit: {report['limit']}")
+        print(f"upgrade branches: {report['upgrade_branches']}")
         print(f"failures: {report['failures']}")
         for key, value in report["counts"].items():
             print(f"{key}: {value}")
