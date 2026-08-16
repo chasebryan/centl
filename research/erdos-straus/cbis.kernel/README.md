@@ -34,6 +34,36 @@ Equation: [`../ES-plus/HOMING.md`](../ES-plus/HOMING.md).
 
 Dashboard splits W into `linear / R / fab`.
 
+## Type A/B assumption audit
+
+`cbis.kernel` does **not** assume that Type A/B is complete. Lane L is a
+useful Type A/B sub-cover: it tests the prime-modulus López traps. The
+separate `cbis-audit` executable is deliberately outside the cover and
+checks the stronger bounded question:
+
+> Has this prime got any Type A/B witness through K, allowing every
+> modulus `4k-1`, prime or composite?
+
+```sh
+./cbis-audit 9658489 --k-max 400
+./cbis-audit 9658489 --k-max 3000
+```
+
+The first command can report `ab_unseen_through_K=true` even though a
+non-A/B cbis lane already covers the prime. That is a **model-escape
+candidate at depth K**, not a claim that Type A/B is false. Increasing K
+may later expose an A/B witness. The second command is a useful regression
+example because the known Type B witness for 9,658,489 occurs at k=2622.
+
+The audit is observational only:
+
+- it never marks the W/I/N/L cover;
+- it never changes an `ES-LETTER-v1` identity;
+- it never writes a letter or advances either cursor;
+- `A/B unseen through K` must never be promoted to `no A/B witness`.
+
+Design contract: [`MODEL-ESCAPE.md`](MODEL-ESCAPE.md).
+
 ## Commands
 
 ```sh
@@ -43,10 +73,11 @@ make
 ./cbis go --home-only      # missile only
 ./cbis go --sweep-only     # 0-to-infinity only
 ./cbis go --k-max 400 --step 50000
-./cbis go --scroll            # line log instead of the panel
+./cbis go --scroll         # line log instead of the panel
 ./cbis status
 ./cbis letters
 ./cbis solve 2521
+./cbis-audit 2521 --k-max 400
 ```
 
 From the CENTL root:
