@@ -168,7 +168,7 @@ classes out of
 
 classes over the independent phase modulus.
 
-The exact conditional fraction is
+The raw class ratio is already reduced:
 
 `V_A = 11,566,800 / 170,222,767`
 
@@ -214,17 +214,21 @@ k55 mod11 :  7/11
 
 All six moduli are coprime to1081 and to one another.
 
-Hence conditional Route-B survival occupies
+The independent phase modulus contains
 
-`340,200`
+`19*31*13*43*17*11 = 61,569,937`
 
-classes out of
+CRT classes, of which
 
-`4,736,149`
+`9*15*9*40*13*7 = 4,422,600`
 
-classes over the independent phase modulus.
+satisfy all six necessary survivor filters.
 
-The fraction is
+Thus the raw class ratio is
+
+`4,422,600 / 61,569,937`.
+
+Its numerator and denominator have gcd13, so the reduced conditional fraction is
 
 `V_B = 340,200 / 4,736,149`
 
