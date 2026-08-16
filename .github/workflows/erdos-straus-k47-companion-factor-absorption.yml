@@ -1,0 +1,34 @@
+name: Erdős–Straus k=47 companion-factor absorption
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/cbx-k47-direction-matrix
+    paths:
+      - 'research/erdos-straus/K47-COMPANION-FACTOR-ABSORPTION.md'
+      - 'research/erdos-straus/verify_k47_companion_factor_absorption.py'
+      - 'research/erdos-straus/classify_k47_states.py'
+      - 'research/erdos-straus/classify_k47_forced6_states.py'
+      - '.github/workflows/erdos-straus-k47-companion-factor-absorption.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k47-companion-factor-absorption:
+    name: fedora-k47-companion-factor-absorption
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact companion-factor absorption
+        run: |
+          cd research/erdos-straus
+          python3 verify_k47_companion_factor_absorption.py
