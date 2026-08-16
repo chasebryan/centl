@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Implementation status for cbx.kernel: finite search grades, crash-preserving runtime semantics, exact arithmetic, analyzer envelopes and CI boundaries.">
+  <meta name="description" content="Implementation status for cbx.kernel: finite search grades, crash-preserving runtime semantics, exact arithmetic, inverse signed-box generation, Fedora baseline and adaptive-K analysis.">
   <title>CBX implementation status — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/library/cbx-implementation-status.html">
   <meta name="robots" content="index,follow">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/library/cbx-implementation-status.html">
   <meta property="og:title" content="CBX implementation status — FCF">
-  <meta property="og:description" content="How the CB X-ray Kernel preserves finite-grade semantics, crash recovery, exactness and adaptive-K falsification without changing cbis.kernel production duties.">
+  <meta property="og:description" content="The CB X-ray Kernel now includes crash-safe X-ray runs, empirical K-policy falsification, and an exact finite k-to-C-to-p inverse signed-box engine.">
   <meta property="og:image" content="https://freecomputation.org/assets/cbis-kernel-esp-demo.jpg">
   <link rel="stylesheet" href="../style.css">
 </head>
@@ -44,16 +44,17 @@
       <article class="paper">
         <header class="paper-head">
           <p class="kicker">Implementation note</p>
-          <p class="dek">CBX is a separate X-ray research kernel: same mathematical finite cover order, independent hidden-lane measurement, stronger preservation semantics.</p>
+          <p class="dek">CBX is a separate X-ray and finite-cover research kernel: same mathematical finite cover, hidden-lane measurement, crash-preserving state, and a true inverse signed-box orientation.</p>
           <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md">Canonical source note in the repository</a></p>
         </header>
         <div class="paper-body">
           <p><strong>Status:</strong> active experimental research kernel implementation</p>
+          <p><strong>Primary platform:</strong> Fedora-family GNU/Linux. Ubuntu is a secondary Linux portability check.</p>
           <p><strong>Production boundary:</strong> <code>cbis.kernel 1.2.0</code> remains the production letter engine.</p>
           <p class="notice"><strong>Claim boundary:</strong> this page records software and finite-search semantics. It does not establish an adaptive K law and does not prove Erdős–Straus.</p>
 
           <h2>Separate job, separate state</h2>
-          <p><code>cbis.kernel</code> asks whether the production cover disposes of a hard prime. <code>cbx.kernel</code> asks what every lane would have done independently, even when W already solved the target. The production order remains <code>W → I → N → L</code>; CBX merely X-rays underneath it.</p>
+          <p><code>cbis.kernel</code> asks whether the production cover disposes of a hard prime. <code>cbx.kernel</code> asks what every lane would have done independently, even when W already solved the target. The production order remains <code>W → I → N → L</code>; CBX X-rays underneath it without changing the verdict.</p>
 
           <h2>Finite grade</h2>
           <div class="math" role="math">\Gamma=(F,K_I,E_N,A_L)</div>
@@ -70,7 +71,18 @@
           </ul>
 
           <h2>Exactness boundary</h2>
-          <p>At the same finite grade CBX uses the same mathematical W/I/N/L predicates and ordering as cbis. CBX intentionally does not reproduce cbis’s eventual bounded-factorization failure mode: it uses deterministic 64-bit Miller–Rabin and Pollard-rho factorization. Its external-NR Jacobi path is also unsigned-64-safe.</p>
+          <p>At the same finite grade CBX uses the same mathematical W/I/N/L predicates and ordering as cbis. CBX intentionally does not reproduce cbis’s eventual bounded-factorization failure mode: it uses deterministic 64-bit Miller–Rabin and Pollard-rho factorization. Its external-NR Jacobi path is unsigned-64-safe.</p>
+
+          <h2>True inverse signed-box engine</h2>
+          <p>CBX now implements the constructive Lane-I orientation named by the ES+ letter equation:</p>
+          <div class="math" role="math">k \to C \to p=4C-k</div>
+          <p>For each admissible shift <code>k</code> and hard residue <code>h mod 840</code>, it enumerates only the six compatible classes</p>
+          <div class="math" role="math">C \equiv (h+k)/4 \pmod{210}</div>
+          <p>and evaluates the vacancy condition on <code>C</code> before the generated <code>p</code> is consulted against the hard-prime map. That keeps the search genuinely C-first.</p>
+          <pre><code>./centl es cbx inverse --hi 1000000 --i-max 400
+./centl es cbx inverse --hi 100000 --i-max 80 --verify</code></pre>
+          <p>The verification mode redundantly runs the p-first Lane-I recognizer over the same finite target universe and requires both cover membership and the minimal first <code>k</code> to match. The first CI equivalence check through 100,000 at <code>K_I=80</code> passed with zero mismatches on GNU/Linux.</p>
+          <p>This does <strong>not</strong> yet establish that inversion is faster. The engine reports the number of <code>C</code> candidates, generated vacancy hits, covered hard primes and residual hard primes so the two orientations can be benchmarked honestly.</p>
 
           <h2>Adaptive-K research loop</h2>
           <p>The analyzer tracks the observed first-depth frontier and can directly falsify candidate rules such as <code>K(p)=ceil(c log p)</code> or <code>K(p)=ceil(c (log p)^2)</code>.</p>
@@ -83,19 +95,21 @@
           <p>The deliberately aggressive rule <code>K(p)=ceil(2 log p)</code> already fails 244 of 102,502 measured R targets in that corpus.</p>
 
           <h2>Regression gate</h2>
-          <p>A dedicated GitHub Actions workflow builds and exercises CBX on Linux and macOS, including the root launcher, the known <code>2521</code> X-ray, a deterministic finite census, analyzer parsing and immutable-grade rejection.</p>
+          <p>The dedicated GitHub Actions workflow uses Fedora-family GNU/Linux as the primary CBX baseline and Ubuntu as a secondary Linux check. It exercises the root launcher, the known <code>2521</code> X-ray, deterministic finite censuses, analyzer output, immutable-grade rejection, and inverse-vs-recognition equivalence.</p>
+          <p>macOS and Windows are not CBX support targets. Compatibility there may happen naturally through the surrounding codebase, but those systems do not drive this research kernel.</p>
 
           <h2>Next targets</h2>
           <ol>
             <li>Accumulate deeper fixed-K corpora, especially inside R.</li>
+            <li>Benchmark <code>k → C → p</code> inversion against <code>p → k → C</code> recognition as X and K grow.</li>
             <li>Archive publication-grade raw streams outside git with checksums.</li>
             <li>Correlate new first-depth records with factor structure, box size, spectrum, defects and López depth.</li>
             <li>Keep trying to break candidate K envelopes before attempting a theorem.</li>
-            <li>Investigate the still-unimplemented true inverse orientation <code>k → C → p</code>.</li>
+            <li>Investigate whether W, N or L admit constructive inversions that reduce rather than increase total work.</li>
           </ol>
 
           <hr>
-          <p><strong>Erdős–Straus remains open.</strong> CBX is an X-ray instrument, not a proof engine.</p>
+          <p><strong>Erdős–Straus remains open.</strong> CBX is an X-ray and finite-cover research instrument, not a proof engine.</p>
         </div>
       </article>
     </main>
