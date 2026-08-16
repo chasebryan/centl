@@ -44,17 +44,21 @@ jobs:
       - name: Build standalone profiler
         run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
 
-      - name: Run deep standalone profile
+      - name: Run deep standalone profile and exact hit sets
         run: |
           mkdir -p /tmp/cbx-standalone
           ./centl es cbx standalone-i \
             --hi "$HI" \
             --i-max "$I_MAX" \
             --segment "$SEGMENT" \
+            --sets /tmp/cbx-standalone/standalone-hit-relations.tsv \
             > /tmp/cbx-standalone/standalone-profile.json
           ./centl es cbx analyze-standalone \
             /tmp/cbx-standalone/standalone-profile.json --json \
             > /tmp/cbx-standalone/standalone-analysis.json
+          ./centl es cbx analyze-overlap \
+            /tmp/cbx-standalone/standalone-hit-relations.tsv --json \
+            > /tmp/cbx-standalone/overlap-analysis.json
 
       - name: Build standalone research summary
         run: |
@@ -63,15 +67,20 @@ jobs:
           root='/tmp/cbx-standalone'
           raw=json.load(open(root+'/standalone-profile.json'))
           r=json.load(open(root+'/standalone-analysis.json'))
+          g=json.load(open(root+'/overlap-analysis.json'))
           assert raw['kernel'] == 'cbx.kernel' and raw['mode'] == 'standalone-I'
+          assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
+          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v1'
+          assert raw['set_relations'] == r['totals']['hit_events'] == g['relation_rows']
+          assert r['layers'] == g['layers']
           for row in raw['shifts']:
               assert row['target_visits'] == raw['hard_primes']
               assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
               assert sum(row['spectrum_hits'].values()) == row['hits']
           report={
               'kernel':'cbx.kernel',
-              'mode':'standalone-lane-I-census-v1',
+              'mode':'standalone-lane-I-census-v2',
               'source_commit':os.environ['SOURCE_SHA'],
               'checkout_commit':os.environ['CHECKOUT_SHA'],
               'hi':int(os.environ['HI']),
@@ -84,17 +93,37 @@ jobs:
               'above_107':r['above_107'],
               'spectrum_hit_events':r['spectrum_hit_events'],
               'totals':r['totals'],
-              'claim':'finite standalone layer strengths; overlaps allowed; not first-hit depths or redundancy theorems',
+              'overlap_graph':{
+                  'unique_primes_hit_by_any_layer':g['unique_primes_hit_by_any_layer'],
+                  'novel_layers':g['novel_layers'],
+                  'novel_k':g['novel_k'],
+                  'fully_shadowed_by_prior_union_layers':g['fully_shadowed_by_prior_union_layers'],
+                  'exact_single_layer_containment_count':g['exact_single_layer_containment_count'],
+                  'exact_single_layer_containments':g['exact_single_layer_containments'],
+                  'exact_two_layer_containment_target_count':g['exact_two_layer_containment_target_count'],
+                  'exact_two_layer_containment_targets':g['exact_two_layer_containment_targets'],
+                  'top_pairwise_similarity':g['top_pairwise_similarity'][:20],
+                  'above_107':g['above_107'],
+              },
+              'claim':'finite standalone strengths and exact finite set relations; containment candidates are theorem leads, not universal shadow theorems',
           }
           json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
           a=report['above_107']
+          og=report['overlap_graph']
           leaders='; '.join(f"k={x['k']}:hits={x['hits']}" for x in a['top_by_hits'][:8])
+          pair=og['top_pairwise_similarity'][0] if og['top_pairwise_similarity'] else None
+          pair_txt=(
+              f"{pair['later_k']}<-{pair['earlier_k']}:J={pair['jaccard']:.4f}:coverage={pair['later_covered_fraction']:.4f}"
+              if pair else 'none'
+          )
           print(
-              f"::notice title=CBX standalone deep census::"
+              f"::notice title=CBX standalone overlap census::"
               f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
               f"productive={report['productive_layers']}/{report['layers']}; "
               f"k>107 productive={a['productive_layers']}/{a['layers']}; "
-              f"leaders above107={leaders}"
+              f"single-containments={og['exact_single_layer_containment_count']}; "
+              f"two-layer-targets={og['exact_two_layer_containment_target_count']}; "
+              f"top-pair={pair_txt}; leaders above107={leaders}"
           )
           PY
 
