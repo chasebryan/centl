@@ -1,0 +1,47 @@
+name: Erdős–Straus hard 2-3-2 companion triples
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/MORDELL-HARD-232-COPRIME-TRIPLES.md'
+      - 'research/erdos-straus/verify_mordell_hard_232_triples.py'
+      - '.github/workflows/erdos-straus-hard-232-triples.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-hard-232-triples:
+    name: Fedora hard 2-3-2 triple theorem
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact block identities and gcds
+        run: |
+          python3 research/erdos-straus/verify_mordell_hard_232_triples.py --max-t 1000 --json > /tmp/hard-232.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/hard-232.json', encoding='utf-8'))
+          assert r['analysis'] == 'mordell-hard-232-coprime-triples-v1'
+          assert r['max_t'] == 1000
+          assert r['cases_checked'] == 36036
+          assert r['seed_pattern'] == [2,3,2]
+          assert r['mismatches'] == 0
+          blocks={row['t']: row['shifts'] for row in r['example_blocks']}
+          assert blocks[0] == [7,11,15]
+          assert blocks[1] == [31,35,39]
+          assert blocks[2] == [55,59,63]
+          assert blocks[4] == [103,107,111]
+          print(
+              '::notice title=hard 2-3-2 triples::'
+              f"cases={r['cases_checked']}; blocks={blocks}"
+          )
+          PY
