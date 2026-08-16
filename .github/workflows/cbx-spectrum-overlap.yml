@@ -1,0 +1,83 @@
+name: CBX spectrum overlap
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/analyze_spectrum_overlap.py'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-spectrum-overlap.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/analyze_spectrum_overlap.py'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-spectrum-overlap.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-spectrum-overlap:
+    name: fedora-spectrum-overlap
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora toolchain
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Generate exact finite hit relation
+        run: |
+          ./centl es cbx standalone-i \
+            --hi 100000 \
+            --i-max 80 \
+            --segment 25000 \
+            --sets /tmp/cbx-spectrum-sets.tsv \
+            > /tmp/cbx-spectrum-standalone.json
+
+      - name: Analyze overlap inside A B and C
+        run: |
+          ./centl es cbx analyze-spectrum-overlap \
+            /tmp/cbx-spectrum-sets.tsv --json \
+            > /tmp/cbx-spectrum-overlap.json
+
+      - name: Validate spectrum partition and exact containment accounting
+        run: |
+          python3 - <<'PY'
+          import json
+          raw=json.load(open('/tmp/cbx-spectrum-standalone.json', encoding='utf-8'))
+          r=json.load(open('/tmp/cbx-spectrum-overlap.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['sets_recorded'] is True
+          assert r['analysis'] == 'cbx-lane-I-spectrum-overlap-v1'
+          assert r['layers'] == len(raw['shifts'])
+          assert r['relation_rows'] == raw['set_relations']
+          assert set(r['spectra']) == {'A','B','C'}
+          assert sum(x['hit_events'] for x in r['spectra'].values()) == r['relation_rows']
+          for name, s in r['spectra'].items():
+              c=r['exact_containment_counts'][name]
+              assert s['nonempty_layers'] + len(s['zero_hit_layers']) == r['layers']
+              assert c['size_1'] == len(s['exact_single_layer_containments'])
+              assert c['size_2'] == len(s['exact_two_layer_containment_targets'])
+              assert c['size_3'] == len(s['exact_three_layer_containment_targets'])
+          print(
+              '::notice title=CBX Fedora spectrum overlap::' + '; '.join(
+                  f"{name}:nonempty={r['spectra'][name]['nonempty_layers']},"
+                  f"novel={r['spectra'][name]['novel_layers']},"
+                  f"one={r['exact_containment_counts'][name]['size_1']},"
+                  f"two={r['exact_containment_counts'][name]['size_2']},"
+                  f"three={r['exact_containment_counts'][name]['size_3']}"
+                  for name in ('A','B','C')
+              )
+          )
+          PY
