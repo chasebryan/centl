@@ -60,7 +60,7 @@ def frac(a: int, b: int) -> float | None:
 
 
 def analyze(ks: list[int], sets: dict[int, set[int]], relations: int,
-            top: int, pair_limit: int) -> dict[str, Any]:
+            top: int, pair_limit: int, triple_limit: int) -> dict[str, Any]:
     masks, universe_hits = make_masks(ks, sets)
     sizes = {k: len(sets[k]) for k in ks}
 
@@ -132,14 +132,14 @@ def analyze(ks: list[int], sets: dict[int, set[int]], relations: int,
         reverse=True,
     )
 
+    single_targets = {x["later_k"] for x in single_containments}
+
     two_layer: list[dict[str, Any]] = []
-    targets_with_pair_shadow = 0
+    two_targets: set[int] = set()
     for j, k in enumerate(ks):
-        if j < 2:
+        if j < 2 or k in single_targets:
             continue
         mk = masks[k]
-        if any(x["later_k"] == k for x in single_containments):
-            continue
         found: list[tuple[int, int]] = []
         for ai in range(j):
             a = ks[ai]
@@ -156,12 +156,54 @@ def analyze(ks: list[int], sets: dict[int, set[int]], relations: int,
             if len(found) >= pair_limit:
                 break
         if found:
-            targets_with_pair_shadow += 1
+            two_targets.add(k)
             two_layer.append({
                 "later_k": k,
                 "later_hits": sizes[k],
                 "earlier_pairs": [{"a": a, "b": b} for a, b in found],
                 "truncated_at": pair_limit if len(found) >= pair_limit else None,
+            })
+
+    # Exact three-earlier-layer containment. Integer bitsets make the finite
+    # test fast enough at the 100-layer K<400 research grade. Targets already
+    # known to admit one- or two-layer covers are omitted because the question
+    # here is whether three layers are the first exact cover size found.
+    three_layer: list[dict[str, Any]] = []
+    three_targets: set[int] = set()
+    for j, k in enumerate(ks):
+        if j < 3 or k in single_targets or k in two_targets:
+            continue
+        mk = masks[k]
+        found: list[tuple[int, int, int]] = []
+        for ai in range(j - 2):
+            a = ks[ai]
+            ma = masks[a]
+            for bi in range(ai + 1, j - 1):
+                b = ks[bi]
+                missing_after_ab = mk & ~(ma | masks[b])
+                if not missing_after_ab:
+                    # This would have been a two-layer cover and is excluded
+                    # above; retain the guard for defensive consistency.
+                    continue
+                for ci in range(bi + 1, j):
+                    c = ks[ci]
+                    if missing_after_ab & ~masks[c] == 0:
+                        found.append((a, b, c))
+                        if len(found) >= triple_limit:
+                            break
+                if len(found) >= triple_limit:
+                    break
+            if len(found) >= triple_limit:
+                break
+        if found:
+            three_targets.add(k)
+            three_layer.append({
+                "later_k": k,
+                "later_hits": sizes[k],
+                "earlier_triples": [
+                    {"a": a, "b": b, "c": c} for a, b, c in found
+                ],
+                "truncated_at": triple_limit if len(found) >= triple_limit else None,
             })
 
     fully_shadowed = [r["k"] for r in novelty_rows if r["fully_shadowed_by_prior_union"]]
@@ -201,7 +243,7 @@ def analyze(ks: list[int], sets: dict[int, set[int]], relations: int,
         })
 
     return {
-        "analysis": "cbx-lane-I-overlap-graph-v1",
+        "analysis": "cbx-lane-I-overlap-graph-v2",
         "layers": len(ks),
         "k_min": ks[0],
         "k_max": ks[-1],
@@ -223,17 +265,22 @@ def analyze(ks: list[int], sets: dict[int, set[int]], relations: int,
             "two_layer_containment_targets": [
                 r for r in two_layer if r["later_k"] > 107
             ],
+            "three_layer_containment_targets": [
+                r for r in three_layer if r["later_k"] > 107
+            ],
         },
         "exact_single_layer_containments": single_containments,
         "exact_single_layer_containment_count": len(single_containments),
         "exact_two_layer_containment_targets": two_layer,
-        "exact_two_layer_containment_target_count": targets_with_pair_shadow,
+        "exact_two_layer_containment_target_count": len(two_targets),
+        "exact_three_layer_containment_targets": three_layer,
+        "exact_three_layer_containment_target_count": len(three_targets),
         "best_earlier_single_overlap": best_prior,
         "top_pairwise_similarity": pairwise_top[:top],
         "ordered_novelty": novelty_rows,
         "greedy_earlier_cover": greedy,
         "claim": (
-            "finite exact set relations only; pair/single containment candidates are theorem leads, "
+            "finite exact set relations only; exact one/two/three-layer containments are theorem leads, "
             "not universal signed-box shadow theorems; greedy covers are heuristic summaries"
         ),
     }
@@ -246,6 +293,7 @@ def print_text(r: dict[str, Any]) -> None:
     print(f"novel layers={r['novel_layers']} fully shadowed by prior union={r['fully_shadowed_by_prior_union_layers']}")
     print(f"exact single-layer containments={r['exact_single_layer_containment_count']}")
     print(f"targets with exact earlier two-layer cover={r['exact_two_layer_containment_target_count']}")
+    print(f"targets with exact earlier three-layer cover={r['exact_three_layer_containment_target_count']}")
     print()
     print("top pairwise similarities")
     for x in r["top_pairwise_similarity"][:12]:
@@ -262,14 +310,15 @@ def main() -> int:
     ap.add_argument("input", type=Path, help="k<TAB>p relation file from cbx standalone-i --sets")
     ap.add_argument("--top", type=int, default=30)
     ap.add_argument("--pair-limit", type=int, default=20)
+    ap.add_argument("--triple-limit", type=int, default=20)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    if args.top < 1 or args.pair_limit < 1:
-        raise SystemExit("--top and --pair-limit must be >= 1")
+    if args.top < 1 or args.pair_limit < 1 or args.triple_limit < 1:
+        raise SystemExit("--top, --pair-limit and --triple-limit must be >= 1")
     if not args.input.is_file():
         raise SystemExit(f"no relation file: {args.input}")
     ks, sets, relations = load_relations(args.input)
-    report = analyze(ks, sets, relations, args.top, args.pair_limit)
+    report = analyze(ks, sets, relations, args.top, args.pair_limit, args.triple_limit)
     report["input"] = str(args.input)
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
