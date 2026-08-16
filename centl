@@ -58,6 +58,10 @@ case "${1:-}" in
           shift
           exec python3 "$cbx_dir/analyze_layers.py" "$@"
           ;;
+        analyze-profile)
+          shift
+          exec python3 "$cbx_dir/analyze_profile.py" "$@"
+          ;;
       esac
       cbx="$cbx_dir/cbx"
       if [ ! -x "$cbx" ]; then
