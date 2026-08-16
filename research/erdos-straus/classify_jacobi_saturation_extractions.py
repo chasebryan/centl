@@ -17,7 +17,6 @@ ACTIVE_SOURCES = {
     361: (7, 23, 59),
     529: (7, 11, 23, 31),
 }
-RIGID_23 = {2, 3, 4, 6, 8, 9, 12, 13, 16, 18}
 
 EXPECTED_SINGLE_COMPOSITE = [
     (1, 15, 2, 23, 46, 8),
@@ -38,6 +37,7 @@ EXPECTED_PAIR_COMPOSITE = [
     (289, 39, 2, (11, 47), 1034, (5, 8)),
     (289, 51, 5, (11, 23), 1265, (4, 18)),
     (289, 215, 42, (11, 31), 14322, (5, 2)),
+    (289, 551, 210, (23, 31), 149730, (1, 7)),
     (529, 51, 5, (11, 23), 1265, (4, 18)),
     (529, 171, 35, (11, 23), 8855, (5, 13)),
 ]
@@ -133,8 +133,9 @@ def source_allowed(q: int, h: int, k: int) -> bool:
         return False
     if q == 7:
         return r == h % 7
-    if q == 23:
-        return r in RIGID_23
+    # Character routing requires only a proved positive character. In
+    # particular q=23 includes p mod23=1, which is positive-character even
+    # though its ordinary k=23 miss mask is not one of the ten rigid masks.
     return r in qr(q)
 
 
@@ -213,11 +214,37 @@ def analyze(max_k: int) -> dict[str, object]:
     if extractions != EXPECTED_EXTRACTIONS:
         raise SystemExit(f"character extraction atlas changed: {extractions!r}")
 
+    product_only = [
+        {
+            "hard_class": h,
+            "composite_shift": k,
+            "source_primes": list(sources),
+            "required_source_residues": list(residues),
+            "combined_seed": seed,
+            "forced_composite_character": "+1",
+            "odd_unknown_factors": [
+                q for q, e in factorization(k).items()
+                if e % 2 == 1 and 840 % q != 0
+            ],
+        }
+        for h, k, base, sources, seed, residues in pairs
+        if unknown_character_factor(k) is None
+        and len([
+            q for q, e in factorization(k).items()
+            if e % 2 == 1 and 840 % q != 0
+        ]) > 1
+    ]
+
     return {
-        "analysis": "jacobi-saturation-character-extraction-v1",
+        "analysis": "jacobi-saturation-character-extraction-v2",
         "max_composite_shift": max_k,
+        "source_scope": (
+            "positive-character routing; q=23 therefore includes every QR residue, "
+            "including p mod23=1 even though that ordinary miss mask is non-rigid"
+        ),
         "single_source_composite_saturations": len(singles),
         "genuine_pair_composite_saturations": len(pairs),
+        "product_only_composite_character_branches": product_only,
         "extracted_prime_character_branches": [
             {
                 "hard_class": h,
