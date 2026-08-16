@@ -86,6 +86,14 @@ make
 ./cbx status --run deep-I
 ```
 
+From the CENTL root:
+
+```sh
+./centl es cbx self-test
+./centl es cbx probe 2521
+./centl es cbx go --run deep-I --i-max 2000
+```
+
 Full grade controls:
 
 ```text
@@ -123,6 +131,26 @@ letters/GRADES.jsonl
 so the identity of the prime/event is not confused with the strength of the finite experiment that observed it.
 
 Sweep and home maintain separate cursors. The home cursor is a strict **next-S** cursor, so batch endpoints are not intentionally revisited.
+
+## Analyze the X-ray stream
+
+`analyze.py` converts the append-only observation stream into the empirical objects needed for the adaptive-K research program. It deduplicates sweep/home observations by target and grade, then reports first-depth distributions for:
+
+- all targets;
+- `R`;
+- fab-only targets;
+- linear W hits;
+- spectra A, B and C.
+
+For I, N and L it reports hit rate plus minimum, median, p90, p99 and maximum observed first depth.
+
+```sh
+python3 analyze.py --run default
+python3 analyze.py --run deep-I
+python3 analyze.py --run deep-I --json
+```
+
+This is the empirical-to-theorem bridge: first measure the hidden depth distribution, then fit candidate envelopes, then attempt to prove or break them using the defect/spectrum theory. The analyzer never promotes an empirical envelope to a theorem.
 
 ## Claim boundary
 
