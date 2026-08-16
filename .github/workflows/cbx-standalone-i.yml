@@ -22,7 +22,7 @@ on:
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
       - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
       - 'research/erdos-straus/analyze_six_shift_corridor.py'
-      - 'research/erdos-straus/K27-TWO-TTARGET-STRUCTURE.md'
+      - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
       - 'research/erdos-straus/verify_k27_structure.py'
       - 'research/erdos-straus/classify_k27_e2.py'
       - 'research/erdos-straus/classify_k27_even_packets.py'
