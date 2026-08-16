@@ -8,6 +8,7 @@ on:
     paths:
       - 'research/erdos-straus/analyze_k47_negative_corridor.py'
       - 'research/erdos-straus/analyze_k47_negative_states.py'
+      - 'research/erdos-straus/analyze_k47_negative_hard_cells.py'
       - 'research/erdos-straus/classify_k47_states.py'
       - 'research/erdos-straus/classify_k47_forced6_states.py'
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
@@ -76,6 +77,13 @@ jobs:
             --hi 10000000 --json \
             > /tmp/k47-state-refinement.json
 
+      - name: Split exact states by Mordell-hard residue
+        run: |
+          python3 research/erdos-straus/analyze_k47_negative_hard_cells.py \
+            /tmp/k47-standalone-hit-relations.tsv \
+            --hi 10000000 --json \
+            > /tmp/k47-hard-cells.json
+
       - name: Validate complete-universe accounting and summarize theorem targets
         run: |
           python3 - <<'PY'
@@ -83,6 +91,7 @@ jobs:
           raw=json.load(open('/tmp/k47-standalone.json', encoding='utf-8'))
           r=json.load(open('/tmp/k47-direction-matrix.json', encoding='utf-8'))
           s=json.load(open('/tmp/k47-state-refinement.json', encoding='utf-8'))
+          h=json.load(open('/tmp/k47-hard-cells.json', encoding='utf-8'))
           assert raw['kernel'] == 'cbx.kernel'
           assert raw['mode'] == 'standalone-I'
           assert raw['hard_primes'] == 20513
@@ -101,6 +110,15 @@ jobs:
           assert s['states_with_cover_size_at_most_3'] == 55
           assert s['four_shift_hard_core_state_count'] == 7
           assert s['four_shift_hard_core_target_count'] == 231
+          assert h['analysis'] == 'k47-negative-legendre-state-hard-cell-refinement-v1'
+          assert h['negative_legendre_k47_misses'] == 822
+          assert h['realized_state_hard_cells'] == 184
+          assert h['cell_minimum_cover_histogram'] == {'1': 123, '2': 57, '3': 3, '4': 1}
+          assert h['targets_by_cell_minimum_cover_size'] == {'1': 359, '2': 431, '3': 22, '4': 10}
+          assert h['hard_residues_with_no_finite_negative_k47_miss'] == [121, 289]
+          assert len(h['four_shift_hard_cells']) == 1
+          core=h['four_shift_hard_cells'][0]
+          assert (core['state_id'], core['hard_residue_mod840'], core['finite_targets']) == ('r7-s02', 1, 10)
           direction_rows=[]
           for d in r['direction_matrix']['directions']:
               direction_rows.append(
@@ -134,6 +152,15 @@ jobs:
               f"{s['four_shift_hard_core_target_count']} targets; "
               + '; '.join(core_rows)
           )
+          print(
+              f"::notice title=k47 state×hard-cell compression::"
+              f"cells={h['realized_state_hard_cells']}; "
+              f"minhist={h['cell_minimum_cover_histogram']}; "
+              f"targethist={h['targets_by_cell_minimum_cover_size']}; "
+              f"absent-hard={h['hard_residues_with_no_finite_negative_k47_miss']}; "
+              f"unique-four={core['state_id']}@{core['hard_residue_mod840']}:"
+              f"n={core['finite_targets']}"
+          )
           PY
 
       - name: Upload direction matrix evidence
@@ -146,4 +173,5 @@ jobs:
             /tmp/k47-standalone-hit-relations.tsv
             /tmp/k47-direction-matrix.json
             /tmp/k47-state-refinement.json
+            /tmp/k47-hard-cells.json
           if-no-files-found: error
