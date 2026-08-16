@@ -1,0 +1,31 @@
+name: Erdős–Straus class-conditioned character atlas
+
+on:
+  push:
+    branches:
+      - agent/cbx-class-character-atlas
+  pull_request:
+    paths:
+      - 'research/erdos-straus/CLASS-CONDITIONED-CHARACTER-ANNIHILATION.md'
+      - 'research/erdos-straus/classify_class_conditioned_character_atlas.py'
+      - 'research/erdos-straus/verify_class_conditioned_character_atlas.py'
+      - '.github/workflows/erdos-straus-class-character-atlas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build exact seeded character atlas
+        run: |
+          python3 research/erdos-straus/classify_class_conditioned_character_atlas.py --json
+      - name: Run independent realization regression
+        run: |
+          python3 research/erdos-straus/verify_class_conditioned_character_atlas.py --limit 2000000 --json
