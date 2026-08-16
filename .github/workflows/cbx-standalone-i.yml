@@ -1,0 +1,71 @@
+name: CBX standalone Lane-I profile
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-standalone-i.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-standalone-i.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-standalone:
+    name: fedora-standalone-i
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora toolchain
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Profile every shift independently
+        run: |
+          ./centl es cbx standalone-i \
+            --hi 100000 \
+            --i-max 80 \
+            --segment 25000 \
+            > /tmp/cbx-standalone.json
+          ./centl es cbx analyze-standalone \
+            /tmp/cbx-standalone.json --json \
+            > /tmp/cbx-standalone-analysis.json
+
+      - name: Validate standalone accounting
+        run: |
+          python3 - <<'PY'
+          import json
+          raw=json.load(open('/tmp/cbx-standalone.json', encoding='utf-8'))
+          r=json.load(open('/tmp/cbx-standalone-analysis.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['mode'] == 'standalone-I'
+          assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
+          assert r['hard_primes'] > 0
+          assert r['layers'] == len(raw['shifts'])
+          for row in raw['shifts']:
+              assert row['target_visits'] == raw['hard_primes']
+              assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
+              assert sum(row['spectrum_hits'].values()) == row['hits']
+          top='; '.join(f"k={x['k']}:hits={x['hits']}" for x in r['top_by_hits'][:6])
+          print(
+              f"::notice title=CBX Fedora standalone layers::"
+              f"hard={r['hard_primes']}; layers={r['layers']}; "
+              f"productive={r['productive_layers']}; zero-hit={r['zero_hit_layers']}; top={top}"
+          )
+          PY
