@@ -161,9 +161,13 @@ If an h169 integer survives all five named signed boxes, then its parameter t mu
 
 residue classes modulo M.
 
-Thus the phase-only survivor fraction through these five filters is
+Thus the raw CRT class ratio through these five filters is
 
-`V55 = 1,113,840 / 4,913,051`
+`1,113,840 / 4,913,051`.
+
+The numerator and denominator have gcd221, so the same survivor fraction in lowest terms is
+
+`V55 = 5,040 / 22,231`
 
 which is approximately
 
