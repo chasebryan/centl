@@ -32,7 +32,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build CBX
-        run: make -C research/erdos-straus/cbx.kernel clean all
+        shell: bash
+        run: |
+          set +e
+          make -C research/erdos-straus/cbx.kernel clean all > /tmp/cbx-build.log 2>&1
+          status=$?
+          cat /tmp/cbx-build.log
+          if [ "$status" -ne 0 ]; then
+            msg=$(tail -n 18 /tmp/cbx-build.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')
+            echo "::error title=CBX build failure::$msg"
+            exit "$status"
+          fi
 
       - name: Run CBX runtime self-test
         run: research/erdos-straus/cbx.kernel/cbx self-test
