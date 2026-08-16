@@ -1,0 +1,26 @@
+name: Erdős–Straus k7 k23 rigid support atlas
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K7-K23-RIGID-SUPPORT-ROUTES.md"
+      - "research/erdos-straus/classify_k7_k23_rigid_support_routes.py"
+      - "research/erdos-straus/verify_k7_k23_rigid_support_routes.py"
+      - ".github/workflows/erdos-straus-k7-k23-rigid-support.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact finite-group classifier
+        run: python3 research/erdos-straus/classify_k7_k23_rigid_support_routes.py --json
+      - name: Independent direct-factorization regression
+        run: python3 research/erdos-straus/verify_k7_k23_rigid_support_routes.py --limit 2000000 --json
