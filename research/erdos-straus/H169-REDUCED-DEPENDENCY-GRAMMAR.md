@@ -1,31 +1,30 @@
 # Reduced h169 dependency grammar
 
-**Status:** exact constraint-propagation synthesis inside the candidate decomposition framework  
+**Status:** exact constraint-propagation synthesis, revision 2  
 **Date:** 2026-08-16  
 **Verifier:** `verify_h169_reduced_dependency_grammar.py`  
-**Depends on:** realized k19 survivor normal form, k31 survivor normal form and mode/seam coupling, k35 two-branch theorem and 3-adic coupling, Route-B k47 survivor normal form and joint k31/k47 seam coupling, route-conditioned phase state, and ten-cofactor support separation.  
-**Claim boundary:** this document composes already-proved implications into a reduced symbolic state grammar. Counts below are counts of formal phase/mode tuples not excluded by these implications. They are not counts or densities of actual arithmetic survivors, not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.
+**Depends on:** realized k19 survivor normal form, k27 survivor grammar and QR-factor selectors, k31 survivor normal form and mode/seam coupling, k35 two-branch theorem and 3-adic coupling, Route-B k47 survivor normal form and joint k31/k47 seam coupling, route-conditioned phase state, and ten-cofactor support separation.  
+**Claim boundary:** this document composes already-proved implications into a reduced symbolic state grammar. Counts are counts of formal phase/mode tuples not excluded by those implications. They are not counts or densities of actual arithmetic survivors, not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.
 
-## 1. Why the state representation must change
+## 1. The machine is now a dependency grammar
 
-The local h169 program no longer consists of independent coordinates.
+The active h169 state coordinates no longer form a Cartesian product.
 
-Several coordinates that were initially stored side by side are now linked by exact implications:
+Exact implications now connect:
 
-- k19 BARE fixes an exact center phase modulo19;
-- k31 BARE restricts both the modulo31 phase and parity;
-- parity determines the complete local 2-adic support seam;
-- on Route B, an odd seam forces both k31 and k47 into FULL_QR;
-- k35 S7 is incompatible with the repeated-3 phase `t=4 mod9`;
-- the 3-adic phase determines whether an S7 occurrence of rational prime3 is absent, unique, or impossible.
+- route ancestry to k19 defect phase;
+- k19 phase to deterministic k27 factors;
+- deterministic k27 factors to the seven-mode k27 skeleton grammar;
+- k31 BARE to phase and parity;
+- parity to the complete 2-adic support seam;
+- the Route-B seam to both k31 and k47 survivor modes;
+- the k35 3-adic phase to J35/S7 branch status.
 
-The machine should therefore stop treating these as Cartesian fields.
+The machine should therefore canonicalize an exact state by propagating these implications to a fixed point before scheduling new factor work.
 
-The correct object is a **dependency grammar** in which exact phase coordinates are proof-bearing state and many support/valuation coordinates are derived consequences.
+## 2. Proof-bearing phase coordinates
 
-## 2. Canonical phase coordinates
-
-For the first reduced local grammar retain
+Retain
 
 ```text
 tau19 = t mod19
@@ -34,52 +33,39 @@ tau4  = t mod4
 tau9  = t mod9
 ```
 
-alongside the already-landed later phase tuple for k39/k43/k47/k51/k55.
+alongside the landed later phase envelope for k39/k43/k47/k51/k55.
 
-The realized Route-A and Route-B progression moduli are coprime to 19,31,4,9, so these four coordinates remain free CRT coordinates after conditioning on either route.
+The realized Route-A and Route-B progression moduli are coprime to 19,31,4,9, so these are valid independent CRT coordinates after route conditioning.
 
-The exact necessary survivor phase sets already proved are
+The exact necessary survivor phase sets are
 
 ```text
 S19 = {0,2,7,8,11,14,15,16,17}
 S31 = {0,2,6,7,8,9,11,12,14,15,19,22,27,28,29}.
 ```
 
-## 3. Derived coordinates, not independent coordinates
+## 3. Derived coordinates
 
-### Parity
+### Parity and 2-adic seam
 
-`parity = tau4 mod2`.
-
-### 2-adic support seam
-
-The ten-cofactor theorem makes the seam a deterministic function of tau4:
+Parity is determined by tau4. The ten-cofactor theorem then determines the local support seam:
 
 ```text
 tau4=0 -> EVEN_0
-    gcd(B,G)=2
-    gcd(G,L)=2
-    gcd(B,L)=4
-    gcd(D,J)=1
+    gcd(B,G)=2, gcd(G,L)=2, gcd(B,L)=4, gcd(D,J)=1
 
 tau4=2 -> EVEN_2
-    gcd(B,G)=2
-    gcd(G,L)=2
-    gcd(B,L)=2
-    gcd(D,J)=1
+    gcd(B,G)=2, gcd(G,L)=2, gcd(B,L)=2, gcd(D,J)=1
 
 tau4 in {1,3} -> ODD
-    gcd(B,G)=1
-    gcd(G,L)=1
-    gcd(B,L)=1
-    gcd(D,J)=2.
+    gcd(B,G)=1, gcd(G,L)=1, gcd(B,L)=1, gcd(D,J)=2.
 ```
 
-Therefore `support_seam` should normally be recomputed from tau4 rather than stored as an independent proof-state coordinate.
+Thus parity and support_seam are normally derived from the CRT phase rather than stored independently as proof-state coordinates.
 
 ### k35 3-adic bucket
 
-From `F=17+70t`:
+For `F=17+70t`:
 
 ```text
 tau9 in {1,7} -> v3(F)=1
@@ -87,49 +73,74 @@ tau9=4        -> v3(F)>=2
 otherwise     -> v3(F)=0.
 ```
 
-The exact valuation may be larger than2 on tau9=4, but the three-way bucket above is lossless for the landed k35 branch rule.
+This bucket is lossless for the landed k35 branch/valuation theorem.
 
-## 4. Exact mode constraints
+## 4. Exact mode dependencies
 
-### k19 mode
+### k19
 
-For either realized pair route, the exact modes are
+Modes:
 
 `BARE | FULL_QR`.
 
-FULL_QR occurs at each of the nine QR19 center phases in the exact local state model.
-
-BARE has one route-specific defect phase:
+The route-specific BARE phases are
 
 ```text
 Route A BARE -> tau19=2
 Route B BARE -> tau19=8.
 ```
 
-Thus BARE and tau19 are not independent.
+FULL_QR has an exact local miss at each of the nine S19 phases.
 
-### k31 mode
+### k27
 
-The exact modes are
+The seven NR-skeleton modes are
+
+`Q,A,B,C,D,E,F`.
+
+The landed QR-factor selector theorem gives the phase rule
+
+`tau19=8 -> 19|E`,
+
+because `E=7+30t`.
+
+Residue19 mod27 is a one-occurrence Q selector, so
+
+```text
+tau19=8 AND k27 miss -> k27_NR_mode=Q
+                         E_support=QR27.
+```
+
+This rule is phase-driven. Route-B k19 BARE reaches it automatically because BARE forces tau19=8, yielding the important composition
+
+```text
+Route-B k19 BARE
+    -> tau19=8
+    -> 19|E
+    -> on k27 miss: k27_NR_mode=Q
+    -> E_support=QR27.
+```
+
+The same k27 collapse also applies to a FULL_QR k19 state whose phase is tau19=8.
+
+### k31
+
+Modes:
 
 `BARE | FULL_QR`.
 
-BARE requires the cofactor D to have prime support in
-
-`H31={1,5,25}`.
-
-Consequently
+BARE support in `H31={1,5,25}` forces
 
 ```text
 k31 BARE -> tau31 in {0,19,29}
-k31 BARE -> tau4 in {0,2}.
+k31 BARE -> tau4 even.
 ```
 
-Equivalently, an odd-t k31 miss is forced into FULL_QR.
+An odd-t k31 miss is therefore FULL_QR.
 
-### k35 branch status
+### k35
 
-Because J35 and S7 may overlap, represent the exact branch label as one of
+Because J35 and S7 may overlap, use
 
 ```text
 J_ONLY
@@ -137,213 +148,213 @@ S7_ONLY
 BOTH.
 ```
 
-The 3-adic coupling gives
+The exact 3-adic coupling is
 
 ```text
 tau9=4 -> J_ONLY.
 ```
 
-On tau9 in `{1,7}`, any state carrying S7 additionally has
+On tau9 in `{1,7}`, any state containing S7 additionally has rational prime3 as the distinguished S7 factor and `support(F/3) subset {q:q=1 mod7}`.
 
-```text
-distinguished_S7_prime = 3
-support(F/3) subset {q : q=1 mod7}.
-```
+### Route-B k47
 
-### Route-B k47 mode
-
-On Route B the exact modes are
+Modes:
 
 `THIN | FULL_QR`.
 
-The THIN factor grammar excludes rational prime2. Therefore
+THIN excludes rational prime2, hence
+
+`k47 THIN -> tau4 even`.
+
+The joint seam theorem strengthens this to
 
 ```text
-k47 THIN -> tau4 in {0,2}.
+tau4 odd -> k31 FULL_QR
+          -> Route-B k47 FULL_QR
+          -> gcd(D,J)=2.
 ```
 
-Combining k31 and k47 with the seam theorem gives the stronger odd-sector rule
+## 5. Route-A formal grammar including k27
+
+The fully naive coarse product now includes k27 explicitly:
 
 ```text
-tau4 in {1,3}
-    -> k31 FULL_QR
-    -> Route-B k47 FULL_QR.
+tau19       9
+tau31      15
+tau4        4
+tau9        9
+k19 mode    2
+k27 mode    7
+k31 mode    2
+k35 status  3
 ```
 
-The same factor2 is present in both D and J and `gcd(D,J)=2`.
+for
 
-## 5. Route-A formal grammar count
-
-Define the first coarse Route-A symbolic product over
-
-```text
-tau19 in S19                         9 choices
-tau31 in S31                        15 choices
-tau4  in {0,1,2,3}                  4 choices
-tau9  in {0,...,8}                  9 choices
-k19_mode in {BARE,FULL_QR}           2 choices
-k31_mode in {BARE,FULL_QR}           2 choices
-k35_status in {J_ONLY,S7_ONLY,BOTH}  3 choices.
-```
-
-Before cross-coordinate implications this contains
-
-`9*15*4*9*2*2*3 = 58,320`
-
-formal phase/mode tuples.
-
-Now apply only the proved dependency rules:
-
-1. Route-A k19 BARE requires tau19=2;
-2. k31 BARE requires tau31 in `{0,19,29}` and even tau4;
-3. tau9=4 requires k35 status J_ONLY.
-
-The exact number of formal tuples not excluded by these rules is
-
-`16,500`.
-
-Equivalently the current dependency grammar retains
-
-`16,500 / 58,320 = 275 / 972`
-
-of the coarse Cartesian product, approximately
-
-`0.2829218106995885`.
-
-This is a **formal grammar compression ratio**, not an arithmetic survivor fraction.
-
-## 6. Route-B formal grammar count
-
-Route B adds
-
-`k47_mode in {THIN,FULL_QR}`.
-
-The naive coarse product therefore contains
-
-`58,320*2 = 116,640`
+`9*15*4*9*2*7*2*3 = 408,240`
 
 formal tuples.
 
-Apply the exact rules:
+Apply the exact dependencies:
 
-1. Route-B k19 BARE requires tau19=8;
-2. k31 BARE requires tau31 in `{0,19,29}` and even tau4;
-3. Route-B k47 THIN requires even tau4;
-4. an odd tau4 forces `FULL_QR31 × FULL_QR47`;
-5. tau9=4 requires k35 status J_ONLY.
+1. Route-A k19 BARE -> tau19=2;
+2. tau19=8 -> k27 mode Q;
+3. k31 BARE -> tau31 in `{0,19,29}` and even tau4;
+4. tau9=4 -> J_ONLY.
 
 Exactly
 
-`25,500`
+`105,600`
 
 formal tuples are not excluded.
 
-Thus the current Route-B grammar retains
+The resulting formal grammar ratio is
 
-`25,500 / 116,640 = 425 / 1,944`
+`105,600 / 408,240 = 440 / 1,701`
 
-of the naive product, approximately
+or approximately
 
-`0.21862139917695472`.
+`0.2586713697824809`.
 
-Again, this is not a count of realizable arithmetic states.
+This is not an arithmetic survivor fraction.
 
-## 7. Factorization of the grammar reduction
+### k19/k27 block
 
-The counts above can be understood without brute force.
-
-### k19 phase/mode block
+The Route-A k19/k27 block explains the new reduction directly.
 
 Naive:
 
-`9 phases * 2 modes = 18`.
+`9 phases * 2 k19 modes * 7 k27 modes = 126`.
 
 Not excluded:
 
-- 9 FULL_QR phase/mode pairs;
-- 1 route-specific BARE phase/mode pair.
+- tau19=8: k19 is FULL_QR and k27 is forced Q ->1;
+- tau19=2: FULL_QR or BARE, with any of seven k27 modes ->14;
+- the other seven phases: FULL_QR with any of seven k27 modes ->49.
 
 Total:
 
-`10`.
+`64`.
 
-### Route-A k31 phase/seam block
+The other blocks remain
 
-Naive:
-
-`15 tau31 * 4 tau4 * 2 modes = 120`.
-
-Not excluded:
-
-- FULL_QR: all `15*4=60` phase pairs;
-- BARE: `3` tau31 phases times `2` even tau4 phases =6.
-
-Total:
-
-`66`.
-
-### Route-B joint k31/k47 block
-
-Naive:
-
-`15 tau31 * 4 tau4 * 2 k31 modes * 2 k47 modes = 240`.
-
-Not excluded:
-
-- odd tau4: only FULL_QR/FULL_QR, giving `15*2=30`;
-- even tau4 with tau31 in the three BARE-compatible phases: `3*2*4=24`;
-- even tau4 on the other twelve tau31 phases: `12*2*2=48`.
-
-Total:
-
-`102`.
-
-### k35 phase/branch block
-
-Naive:
-
-`9 tau9 * 3 statuses = 27`.
-
-Not excluded:
-
-- eight ordinary tau9 phases retain all three statuses:24;
-- tau9=4 retains only J_ONLY:1.
-
-Total:
-
-`25`.
+```text
+Route-A k31 block   120 -> 66
+k35 block            27 -> 25.
+```
 
 Therefore
 
+`64*66*25 = 105,600`.
+
+## 6. Route-B formal grammar including k27
+
+Route B also carries k47 mode, so the fully naive product contains
+
+`408,240*2 = 816,480`
+
+formal tuples.
+
+Apply:
+
+1. Route-B k19 BARE -> tau19=8;
+2. tau19=8 -> k27 mode Q;
+3. k31 BARE -> tau31 in `{0,19,29}` and even tau4;
+4. k47 THIN -> even tau4;
+5. odd tau4 -> FULL_QR31 × FULL_QR47;
+6. tau9=4 -> J_ONLY.
+
+Exactly
+
+`147,900`
+
+formal tuples are not excluded.
+
+The formal grammar ratio is
+
+`147,900 / 816,480 = 2,465 / 13,608`
+
+or approximately
+
+`0.18114344503233393`.
+
+### Route-B k19/k27 block
+
+Naive:
+
+`126`.
+
+Not excluded:
+
+- tau19=8: FULL_QR or BARE at k19, but k27 forced Q ->2;
+- the other eight S19 phases: FULL_QR at k19 with any seven k27 modes ->56.
+
+Total:
+
+`58`.
+
+The other blocks are
+
 ```text
-Route A: 10 * 66  * 25 = 16,500
-Route B: 10 * 102 * 25 = 25,500.
+Route-B joint k31/k47 block  240 -> 102
+k35 block                     27 -> 25.
 ```
+
+Therefore
+
+`58*102*25 = 147,900`.
+
+## 7. Improvement over revision 1
+
+Revision 1 deliberately left k27 opaque.
+
+Tensoring its old reduced grammar with seven unconstrained k27 modes would have produced
+
+```text
+Route A: 16,500 * 7 = 115,500
+Route B: 25,500 * 7 = 178,500.
+```
+
+The new phase-to-k27 selector reduces these to
+
+```text
+Route A: 105,600
+Route B: 147,900.
+```
+
+Thus the new k27 theorem alone removes
+
+```text
+9,900  formal tuples from the already-reduced Route-A tensor
+30,600 formal tuples from the already-reduced Route-B tensor.
+```
+
+The larger Route-B effect occurs because its BARE k19 mode is itself pinned to the Q-selector phase tau19=8.
 
 ## 8. Orthogonality to the later phase envelope
 
-The landed k39/k43/k47/k51/k55 phase filters use moduli independent of the coarse `19,31,4,9` grammar after route conditioning, except for the route-fixed modulus already removed on each route.
+The landed later phase filters remain a separate exact layer.
 
-Those later filters can therefore be tensored onto the reduced grammar without changing the formal compression ratios above.
+After route conditioning, their independent CRT coordinates can be tensored with this reduced grammar without changing the grammar ratios above.
 
-This is useful architecturally:
+The machine should preserve three conceptually distinct surfaces:
 
-- the **phase envelope** restricts where a route may live;
-- the **dependency grammar** restricts which mode labels may coexist on that phase;
-- the **support grammars** restrict the prime-factor resources inside each surviving label.
+- **phase envelope:** where t may live;
+- **dependency grammar:** which mode labels may coexist on that phase;
+- **support grammar:** what prime-factor resources each surviving mode requires.
 
-They are distinct layers and should remain distinct in the machine.
+Confusing these would turn exact state reduction into a false density or existence claim.
 
-## 9. Proposed normalized exact state
+## 9. Revised normalized state
 
-For the realized h169 pair-route laboratory, a more faithful state signature is now
+A more precise state signature is now
 
 ```text
 Sigma_red = (
     route,
     CRT_phase,
     k19_mode,
-    k27_mode,
+    k27_NR_mode,
     k31_mode,
     k35_status,
     route_terminal_mode,
@@ -354,28 +365,25 @@ Sigma_red = (
 
 where
 
-- `CRT_phase` contains the exact residues needed by the proved phase rules;
-- parity, 2-adic seam, and k35 3-adic bucket are derived from CRT_phase;
-- `route_terminal_mode` is currently Route-B k47 `THIN|FULL_QR` or the Route-A fixed k51 endpoint family;
-- k27 remains an exact seven-mode coordinate until a cross-coordinate coupling theorem reduces it;
+- parity, seam, and k35 3-adic bucket are derived from CRT_phase;
+- `k27_NR_mode` means the seven-mode nonresidue-skeleton behavioral class before QR completion;
+- the phase selector may collapse `k27_NR_mode` to Q before the remaining E support is explored;
+- Route-B k47 `THIN|FULL_QR` and the Route-A k51 endpoint family remain route-terminal coordinates;
 - separated support and affine identities remain proof-bearing arithmetic data.
 
-The old schematic field list is not wrong, but several fields are now redundant unless retained for telemetry.
+## 10. Constraint propagation to fixed point
 
-## 10. Constraint-propagation direction
-
-The machine should apply exact implications to a fixed point before scheduling new factor work.
-
-Examples:
+Examples now include
 
 ```text
+Route-B k19=BARE
+    -> tau19=8
+    -> 19|E
+    -> k27 miss implies k27_NR_mode=Q
+    -> E_support=QR27
+
 k31=BARE
     -> tau31 in {0,19,29}
-    -> tau4 even
-    -> even support seam
-    -> gcd(D,J)=1
-
-Route-B k47=THIN
     -> tau4 even
     -> even support seam
     -> gcd(D,J)=1
@@ -391,28 +399,28 @@ tau9=4
     -> on k35 miss: J35=true.
 ```
 
-This is the beginning of an actual propagation engine rather than a passive state record.
+The machine should exhaust such exact propagation before performing new factor enumeration.
 
-## 11. Bryan Entanglement Cross / BREC integration boundary
+## 11. Bryan Entanglement Cross / BREC boundary
 
-The directional entanglement layer should consume these exact propagation events as annotations, never replace them.
+Directional entanglement is an annotation and scheduling layer over these exact edges.
 
-A theorem that removes a formal state combination is a natural candidate for a downward/excavation annotation. A forced signed-box certificate is a natural candidate for a rightward/constructive annotation. An ontology expansion may be annotated upward.
+For example, the chain
 
-But the canonical proof state remains `Sigma_red`, and the arithmetic implication remains the sole source of pruning permission.
+`BARE -> tau19=8 -> 19|E -> k27 Q`
 
-If directional history is retained, store it as telemetry such as
+is naturally interpretable as excavation that resolves into a sharper support law. That directional description may be valuable for scheduling and telemetry.
 
-`BEC_history`
+It does not create the implication. The exact state grammar is the only source of mathematical pruning permission.
 
-beside the proof state, not inside the mathematical predicate that decides whether a branch is valid.
+## 12. Next theorem targets
 
-## 12. Next theorem target
+k27 is no longer opaque, but only one already-retained phase coordinate currently selects Q.
 
-The glaring unreduced coordinate is now k27.
+The next theorem-mining targets are:
 
-The next high-value problem is:
+1. add deterministic rational-prime phase selectors whose QR27 residues are `{10,16,22}` and the two-occurrence selectors `{4,7,13,25}` where they intersect existing ancestry;
+2. seek direct couplings between k27 mode subsets and k31/k35 support reservoirs;
+3. implement the dependency grammar as a small fixed-point propagator so exact implications can be applied automatically before CBX schedules expensive factor work.
 
-> couple the exact k27 seven-mode grammar to one of the already-derived phase, valuation, or separated-support coordinates.
-
-A successful k27 coupling would remove the largest remaining local finite-state block from the formal Cartesian product and materially strengthen the case that the candidate framework admits a finite constraint-propagation engine.
+The third item is now an engineering problem built on proved arithmetic, not a new mathematical assumption.
