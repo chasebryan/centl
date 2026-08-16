@@ -56,7 +56,7 @@
           <p><strong>Date:</strong> 2026-08-15</p>
           <p><strong>Kernel:</strong> <code>cbx.kernel 0.1.0</code></p>
           <p><strong>Core source blob:</strong> <code>cd2202ae512c687cdd7af8ce591eb29806a35008</code></p>
-          <p><strong>Signal-atomic runtime blob:</strong> <code>9f9b2c26a47f1c456e90d68824dd7313e69b8d48</code></p>
+          <p><strong>Signal-atomic runtime blob:</strong> <code>331f20e761d5cff86b54ad84abcb7d78ef2aff38</code></p>
           <p class="notice"><strong>Claim boundary:</strong> these are finite observations. The maximum 107 is not a universal bound, does not establish an adaptive K law, and does not prove Erdős–Straus.</p>
 
           <h2>Runtime correction before the formal census</h2>
@@ -130,7 +130,7 @@ policy=fixed</code></pre>
           <p>No new I record appears from 8,803,369 through the formal endpoint 234,540,000.</p>
 
           <h2>Adaptive-K falsification</h2>
-          <p>The analyzer now mechanically tests candidate rules against measured first depths and reports the first and worst finite failures. For example, the aggressive rule <code>K(p)=ceil(2 log p)</code> already fails many observed R targets. Surviving the finite corpus never upgrades a rule into a theorem.</p>
+          <p>The analyzer mechanically tests candidate rules against measured first depths and reports their finite failures. On the R stratum, <code>K(p)=ceil(2 log p)</code> fails <strong>244 of 102,502</strong> observed targets. The first failure is p = 2521, where the policy assigns 16 but k<sub>I</sub>* = 23. The worst deficit is the record p = 8,803,369, where the policy assigns 32 but k<sub>I</sub>* = 107, a deficit of 75. Surviving the finite corpus would still never upgrade a rule into a theorem.</p>
 
           <h2>Microscopic example: 2521</h2>
           <pre><code>W: linear=false, R=true, fab=(2,1)
