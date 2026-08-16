@@ -83,6 +83,21 @@ jobs:
           assert r['factorizations'] <= r['C_candidates']
           PY
 
+      - name: Verify shift-major signed-box cover on Fedora
+        run: |
+          ./centl es cbx shift-i --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-shift.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-shift.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['mode'] == 'shift-I'
+          assert r['verify'] is True
+          assert r['hard_primes'] > 0
+          assert r['verification_targets'] == r['hard_primes']
+          assert r['verification_mismatches'] == 0
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          PY
+
       - name: Benchmark Lane-I orientations on Fedora
         run: |
           python3 research/erdos-straus/cbx.kernel/bench_i.py \
@@ -98,17 +113,24 @@ jobs:
               assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
           assert gated['candidate_mode'] == 'target-gated'
           assert strict['candidate_mode'] == 'strict-c-first'
-          gf = gated['comparison']['inverse_factorizations_to_forward_factorizations']
-          ge = gated['comparison']['inverse_enumerated_C_to_forward_factorizations']
-          gw = gated['comparison']['inverse_to_forward_wall_ratio']
+          c = gated['comparison']
+          gf = c['inverse_factorizations_to_forward_factorizations']
+          ge = c['inverse_enumerated_C_to_forward_factorizations']
+          gw = c['inverse_to_forward_wall_ratio']
+          shf = c['shift_factorizations_to_forward_factorizations']
+          shv = c['shift_active_visits_to_forward_shift_candidates']
+          shw = c['shift_to_forward_wall_ratio']
           sf = strict['comparison']['inverse_factorizations_to_forward_factorizations']
           sw = strict['comparison']['inverse_to_forward_wall_ratio']
-          assert all(v is not None and v > 0 for v in (gf, ge, gw, sf, sw))
+          assert all(v is not None and v > 0 for v in (gf, ge, gw, shf, shv, shw, sf, sw))
+          assert abs(shf - 1.0) < 1e-12
+          assert abs(shv - 1.0) < 1e-12
           print(
               f"::notice title=CBX Fedora Lane-I benchmark::"
-              f"gated factor ratio={gf:.6f}; gated enumeration ratio={ge:.6f}; "
-              f"gated wall ratio={gw:.6f}; strict factor ratio={sf:.6f}; "
-              f"strict wall ratio={sw:.6f}; hard primes={gated['hard_primes']}; K_I={gated['i_max']}"
+              f"gated factor={gf:.6f}; gated enum={ge:.6f}; gated wall={gw:.6f}; "
+              f"shift factor={shf:.6f}; shift visits={shv:.6f}; shift wall={shw:.6f}; "
+              f"strict factor={sf:.6f}; strict wall={sw:.6f}; "
+              f"hard={gated['hard_primes']}; K_I={gated['i_max']}"
           )
           PY
 
@@ -162,16 +184,23 @@ jobs:
           assert p['production_letter'] is False
           PY
 
-      - name: Verify inverse signed-box cover
+      - name: Verify inverse and shift-major signed-box covers
         run: |
           ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-inverse.json
+          ./centl es cbx shift-i --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-shift.json
           python3 - <<'PY'
           import json
-          r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
-          assert r['mode'] == 'inverse-I'
-          assert r['candidate_mode'] == 'target-gated'
-          assert r['verification_mismatches'] == 0
-          assert r['verification_targets'] == r['hard_primes']
+          inv = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
+          sh = json.load(open('/tmp/cbx-shift.json', encoding='utf-8'))
+          assert inv['mode'] == 'inverse-I'
+          assert inv['candidate_mode'] == 'target-gated'
+          assert inv['verification_mismatches'] == 0
+          assert inv['verification_targets'] == inv['hard_primes']
+          assert sh['mode'] == 'shift-I'
+          assert sh['verification_mismatches'] == 0
+          assert sh['verification_targets'] == sh['hard_primes']
+          assert inv['hard_primes'] == sh['hard_primes']
+          assert inv['covered_hard_primes'] == sh['covered_hard_primes']
           PY
 
       - name: Deterministic finite census
