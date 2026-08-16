@@ -63,17 +63,8 @@ jobs:
           import analyze_k47_negative_corridor as a
           classes = a.one_packet_miss_classes()
           expected = {
-              1: 7,
-              7: 2,
-              9: 13,
-              11: 13,
-              17: 9,
-              19: 9,
-              27: 9,
-              29: 9,
-              35: 4,
-              37: 4,
-              45: 1,
+              1: 7, 7: 2, 9: 13, 11: 13, 17: 9, 19: 9,
+              27: 9, 29: 9, 35: 4, 37: 4, 45: 1,
           }
           actual = {r: len(states) for r, states in classes.items()}
           assert actual == expected, actual
@@ -88,5 +79,46 @@ jobs:
           print(
               '::notice title=k=47 one-packet partition::'
               f"classes={len(classes)}; states={len(union)}; sizes={actual}"
+          )
+          PY
+
+      - name: Verify complete-universe direct census smoke test
+        working-directory: research/erdos-straus
+        run: |
+          python3 analyze_k47_negative_corridor.py --direct --hi 1000000 --json > /tmp/k47-direct-1m.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-direct-1m.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-negative-legendre-corridor-v3-complete-universe'
+          assert r['complete_universe'] is True
+          assert r['hard_universe'] == 2370
+          assert r['negative_legendre_k47_misses'] == 118
+          assert r['residual_after_prior_corridor'] == 0
+          assert r['uncovered_targets'] == []
+          print(
+              '::notice title=k=47 complete census smoke::'
+              f"hard={r['hard_universe']}; negative-misses={r['negative_legendre_k47_misses']}"
+          )
+          PY
+
+      - name: Preserve the 50M cross-shift counterexample signature
+        working-directory: research/erdos-straus
+        run: |
+          python3 - <<'PY'
+          import analyze_k47_negative_corridor as a
+          p=25569769
+          assert p % 840 == 169
+          assert a.legendre47_negative(p)
+          for k in (3,7,11,15,19,23,27,31,35,39,43,47,51):
+              assert not a.signed_box_hit(p,k), (p,k)
+          assert a.signed_box_hit(p,55)
+          state=a.actual_k47_state(p)
+          assert state == (8065427790955,3)
+          assert hex(state[0]) == '0x755e0f55c6b'
+          dirs=[r for r,states in a.one_packet_miss_classes().items() if state in states]
+          assert dirs == [11]
+          print(
+              '::notice title=k=47 corridor counterexample::'
+              'p=25569769 misses k<=51 corridor sample and first tested hit is k=55'
           )
           PY
