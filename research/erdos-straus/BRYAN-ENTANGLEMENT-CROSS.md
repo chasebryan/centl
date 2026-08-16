@@ -4,7 +4,7 @@
 **Date:** 2026-08-16  
 **Authorial name:** Bryan Entanglement Cross (BEC)  
 **Primary use:** directional annotation, transition telemetry, and scheduler research  
-**Claim boundary:** BEC is not an independent number-theoretic theorem, proof rule, pruning theorem, or substitute for exact arithmetic. Every BEC label is attached only after the underlying transition has been established by the exact machinery. A BEC label by itself never permits a branch to be discarded and never certifies Erdős–Straus.
+**Claim boundary:** BEC is not an independent number-theoretic theorem, proof rule, pruning theorem, progress theorem, or substitute for exact arithmetic. Every BEC label is assigned only after the underlying exact transition is established. A BEC label by itself never permits a branch to be discarded and never certifies Erdős–Straus.
 
 ---
 
@@ -22,7 +22,7 @@ The Bryan Entanglement Cross is
                     ↓  ⊖/⊕
 ```
 
-and its directional alphabet is
+with directional alphabet
 
 \[
 \boxed{
@@ -32,14 +32,18 @@ and its directional alphabet is
 }
 \]
 
-The directions are semantic, not geometric claims about the integers themselves.
+Equivalently,
 
-- `E -> ⊕` : **positive propagation**;
-- `E <- ⊖` : **negative propagation**;
-- `E ↑ ⊕/⊖` : **upward expansion**, constructive enlargement that may create a later obstruction or additional branching burden;
-- `E ↓ ⊖/⊕` : **downward excavation**, a restrictive or negative step that may expose a later constructive mechanism.
+```text
+L = ←⊖          negative / obstructive propagation
+R = →⊕          positive / constructive propagation
+U = ↑(⊕/⊖)      constructive expansion with possible later obstruction
+D = ↓(⊖/⊕)      restrictive excavation with possible later construction
+```
 
 So entanglement is not merely signed. It is directed.
+
+The directions are semantic annotations on proved transitions, not claims that the integers themselves possess a literal spatial geometry.
 
 ---
 
@@ -62,13 +66,14 @@ The BEC-augmented state is
 \boxed{\Sigma^*=(\Sigma,\mathcal H_B)},
 \]
 
-where `H_B` is the ordered BEC transition history.
+where `H_B` is an ordered directional history whose scope is explicitly recorded.
 
-The invariant is:
+The invariant is
 
 ```text
 exact arithmetic decides what is true;
-BEC records how the proved transition acts on the research state.
+exact ancestry decides which transition is live;
+BEC records how that proved live transition acts.
 ```
 
 The annotation layer therefore carries interpretation and scheduling information without weakening exactness.
@@ -80,75 +85,69 @@ The annotation layer therefore carries interpretation and scheduling information
 ### 3.1 Right: constructive propagation
 
 \[
-\boxed{\rightarrow\oplus}
+\boxed{R=\rightarrow\oplus}
 \]
 
-Use rightward propagation when a proved transition produces direct constructive closure or an exact terminal object.
+Use `R` when a proved live transition produces direct constructive closure or an exact terminal object.
 
 Typical examples:
 
 - an exact Type-I certificate;
 - an exact Type-II certificate;
 - a verified decomposition;
-- an exact replacement mechanism that terminates the current survivor state;
-- a state refinement that directly constructs a usable next exact object rather than merely enlarging the descriptive space.
+- an exact first-hit transition that terminates the current survivor branch.
 
-Right is therefore the natural terminal direction for a successful branch.
-
-A rightward label does **not** mean that the global Erdős–Straus problem is solved. It means only that the particular exact state or branch has propagated constructively.
+A rightward label means only that the particular exact state propagated constructively. It is not a global proof claim.
 
 ### 3.2 Left: obstructive propagation
 
 \[
-\boxed{\leftarrow\ominus}
+\boxed{L=\leftarrow\ominus}
 \]
 
-Use leftward propagation when a proved transition records obstruction without itself creating a smaller controlled constructive state.
+Use `L` when a proved live transition records obstruction without itself creating a smaller forced constructive state.
 
 Typical examples:
 
-- an exact miss at the currently tested destination;
+- an exact signed-box miss at the currently tested live shift;
 - a dead local route;
-- a shadowed candidate family that contributes no new controlled state;
-- an obstruction that leaves the machine with no forced refinement other than returning to an earlier decision point.
+- a shadowed candidate family that contributes no new controlled state.
 
-Left is not failure of the research program. It is the exact recording of pressure against the current direction of travel.
+Left is not failure of the research program. It records exact pressure against the current direction of travel.
 
 ### 3.3 Up: constructive expansion with possible negative consequence
 
 \[
-\boxed{\uparrow(\oplus/\ominus)}
+\boxed{U=\uparrow(\oplus/\ominus)}
 \]
 
-Use upward expansion when the machine gains expressive or constructive reach while also enlarging the future burden of control.
+Use `U` when the machine gains expressive or constructive reach while enlarging the future burden of control.
 
 Typical examples:
 
 - replacing a boundary-only ontology by the full exact Type-II geometry;
-- opening the complete signed box after a narrower certificate family has been shown insufficient;
+- reopening the complete signed box after a narrower certificate family is shown insufficient;
 - promoting a scalar or character projection to a richer exact state object;
 - exposing mixed Type-I/Type-II or boundary/interior witness geometry.
 
-The positive component comes first: the machine now sees more true structure.
-
-The possible negative consequence follows: a larger state space can introduce more branches, more witness classes, or more proof obligations.
+The positive component comes first: more true structure is visible. The possible negative consequence is the additional branching or proof burden.
 
 ### 3.4 Down: restrictive excavation with possible positive resolution
 
 \[
-\boxed{\downarrow(\ominus/\oplus)}
+\boxed{D=\downarrow(\ominus/\oplus)}
 \]
 
-Use downward excavation when a theorem first removes, restricts, or blocks a mechanism, but the resulting smaller state becomes a sharper laboratory for construction.
+Use `D` when a theorem first removes, restricts, or blocks a mechanism, but the resulting smaller state becomes a sharper laboratory for construction.
 
 Typical examples:
 
 - proving that a canonical mechanism is confined to a boundary family;
-- phase-blocking a specific certificate while retaining the complete exact state;
+- phase-blocking a specific certificate while preserving the full exact state;
 - imposing exact survivor support, gcd, valuation, or ancestry restrictions;
-- replacing a broad unresolved family by a smaller exact residual problem.
+- reducing a broad unresolved family to a smaller exact residual problem.
 
-This direction is central to the present ES program. A negative restriction can be productive when it exposes the structure that the broader formulation was hiding.
+A downward move is productive excavation, not a certificate.
 
 ---
 
@@ -160,33 +159,21 @@ Let
 T:\Sigma_t\longrightarrow\Sigma_{t+1}
 \]
 
-be any exact state transition admitted by the research machine.
+be an exact state transition admitted by the research machine.
 
 Define the BEC annotation map
 
 \[
 \boxed{
-\beta(T,\Sigma_t,\Sigma_{t+1})
-\in
-\{L,R,U,D\}
+\beta(T,\Sigma_t,\Sigma_{t+1})\in\{L,R,U,D\}.
 }
 \]
 
-with
-
-```text
-L = ←⊖
-R = →⊕
-U = ↑(⊕/⊖)
-D = ↓(⊖/⊕)
-```
-
-The annotation must be assigned from the proved effect of the transition, not from whether the researcher likes the outcome.
-
-A transition record should therefore store both layers:
+A transition record should store both layers:
 
 ```text
 {
+  bec_scope: research-operation | live-ancestry,
   exact_transition: ...,
   theorem_or_check: ...,
   before_state: ...,
@@ -201,110 +188,159 @@ The exact transition remains authoritative.
 
 ---
 
-## 5. BEC paths
+## 5. Two BEC scopes
 
-A sequence of exact transitions gives a directional word
+The q23 work makes a scope distinction mandatory.
 
-\[
-\boxed{
-\mathcal P_B(E_0\to E_n)
-=
-\beta_1\beta_2\cdots\beta_n.
-}
-\]
+### 5.1 Research-operation scope
 
-Examples:
+This describes how a theorem or experiment manipulates the mathematical search space.
+
+For example, the blocked q23 destination experiment has the research-operation path
 
 ```text
 D U R
 ```
 
-means
+where
 
-1. a restrictive theorem excavated a smaller state;
-2. the machine reopened the larger exact geometry inside that reduced state;
-3. the branch terminated constructively.
+- `D`: the canonical `d=23^2` López-A mechanism is removed by the phase obstruction;
+- `U`: the complete Type-I/Type-II signed box is reopened at that destination;
+- `R`: an exact certificate is observed at the destination cross-section.
 
-Likewise
+This is a valid description of the **experiment**.
+
+It is not necessarily the live history of any prime.
+
+### 5.2 Live-ancestry scope
+
+This describes the exact sequence experienced by an active survivor branch.
+
+Exact ancestry takes precedence over a later destination experiment. If a prime terminates at k31, no event at a later k755 destination belongs to its live BEC history.
+
+For the q23 ancestry pilot, each exact post-k23 miss is `L` and the first exact certificate is `R`, so live paths are
+
+\[
+\boxed{L^jR}.
+\]
+
+Example:
 
 ```text
-U L
+LLR
 ```
 
-means an expansion exposed a larger possibility space but the tested branch ended in obstruction.
+means exact misses at k27 and k31 followed by the first exact certificate at k35.
 
-BEC paths are intended to become empirical research objects. Their frequency and conditional structure may inform scheduling hypotheses, but no observed path frequency is itself a theorem.
+The authoritative rule is
+
+```text
+never assign BEC history from a counterfactual later destination
+when an earlier exact transition has already terminated the branch.
+```
 
 ---
 
-## 6. Immediate mapping onto the active Type-II program
+## 6. BEC paths
+
+A sequence of exact transitions gives a directional word
+
+\[
+\boxed{
+\mathcal P_B(E_0\to E_n)=\beta_1\beta_2\cdots\beta_n.
+}
+\]
+
+Paths are empirical research objects. Their conditional structure may inform theorem search or scheduling hypotheses, but no observed path frequency is itself a theorem.
+
+For compact storage, a live path may be represented as
+
+```text
+R
+LR
+LLR
+...
+```
+
+while a research-operation path may be represented separately as
+
+```text
+DUR
+```
+
+The scope field prevents these two objects from being conflated.
+
+---
+
+## 7. Immediate mapping onto the active Type-II program
 
 The current research stack already contains natural BEC transitions.
 
 ### Full Type-II geometry over López A/B
 
-Promoting the governing search space from López A/B to full exact Type-II root geometry is
+Promoting the governing search space from López A/B to full exact Type-II root geometry is a research-operation
 
 \[
-\boxed{U=\uparrow(\oplus/\ominus)}.
+\boxed{U}.
 \]
 
-The constructive gain is a complete certificate space. The cost is a richer geometry containing boundary-only, interior-only, and mixed witness sets.
+The constructive gain is a complete certificate space. The cost is richer boundary/interior/mixed geometry.
 
 ### Canonical q² boundary theorem
 
 Proving that a successful canonical `d=q^2` square-lift Type-II certificate necessarily lies on the López-A boundary is
 
 \[
-\boxed{D=\downarrow(\ominus/\oplus)}.
-\]
-
-The theorem removes the canonical q² mechanism from the incomparable interior, but thereby creates a sharper controlled experiment on phases where that boundary mechanism is blocked.
-
-### q23 blocked phases
-
-The theorem that ten q23 phases block the canonical `d=529` certificate is also a downward excavation:
-
-\[
 \boxed{D}.
 \]
 
-The complete signed box is deliberately preserved.
+The theorem restricts one mechanism and exposes a sharper residual question.
 
-### Reopening the complete signed box
+### q23 blocked destination cross-section
 
-Evaluating Type I, comparable-root Type II, incomparable-root Type II, and mixed geometry after the canonical mechanism has been removed is
-
-\[
-\boxed{U}.
-\]
-
-### First exact replacement hit
-
-When that full geometry yields an exact Type-I or Type-II certificate, the terminal step is
+Blocking the canonical `d=529` mechanism and reopening the complete destination signed box gives the research-operation path
 
 \[
-\boxed{R}.
+\boxed{DUR}.
 \]
 
-Thus the current twenty-cell blocked-phase experiment has the canonical high-level path
+This remains useful as destination-geometry telemetry.
+
+### q23 live ancestry
+
+`Q23-BLOCKED-PHASE-ANCESTRY-AUDIT.md` proves that, in the exact finite prefixes audited there, all 148 simultaneous k19/k23 survivors terminate before their distant blocked q23 destination.
+
+Therefore the decomposition machine uses the ancestry-correct paths described in
+`BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md`:
+
+```text
+R           64
+LR          64
+LLR          7
+LLLR         4
+LLLLR        5
+LLLLLR       3
+LLLLLLLR     1
+```
+
+The corresponding exact directional totals are
+
+```text
+L observations   132
+R constructions  148
+```
+
+with first post-k23 hit support
 
 \[
-\boxed{D\;U\;R}.
+\boxed{\{27,31,35,39,43,47,55\}}.
 \]
 
-The payload carried by the final `R` distinguishes
-
-- Type I;
-- comparable-root Type II;
-- incomparable-root Type II;
-- mixed I/II geometry.
-
-Earlier exact destination misses encountered before the first replacement are `L` observations inside the finite progression search.
+These are finite exact telemetry counts, not a universal law or shift ceiling.
 
 ---
 
-## 7. Machine state extension
+## 8. Machine state extension
 
 The candidate decomposition-state machine should carry BEC data as observational state:
 
@@ -318,19 +354,23 @@ Sigma = (
     valuation_phase,
     signed_box_status,
     root_geometry,
+    bec_scope,
     bec_history
 )
 ```
 
-For compact storage, `bec_history` may be represented as
+The terminal `R` must retain its exact payload:
 
 ```text
-DUUR
+R_payload = {
+    first_hit_k,
+    mechanism: Type-I | Type-II | I+II,
+    root_geometry: boundary-only | interior-only | mixed | n/a,
+    exact_witness_provenance
+}
 ```
 
-or as a structured event list when theorem provenance matters.
-
-The state may also retain a non-scalar directional pressure vector
+The state may also retain a non-scalar pressure vector
 
 ```text
 BEC_pressure = {
@@ -341,36 +381,78 @@ BEC_pressure = {
 }
 ```
 
-This vector is telemetry only. It must not be collapsed into a universal numerical merit score unless a separate scheduling experiment explicitly defines and validates such a score.
+This vector is telemetry only. It must not be collapsed into a universal numerical merit score without a separately defined and validated scheduling experiment.
 
 ---
 
-## 8. Scheduler research
+## 9. Scheduler research
 
-BEC is particularly suited to empirical scheduler design.
+BEC is suited to empirical scheduler design precisely because it does not alter the proof layer.
 
-A scheduler may test hypotheses such as:
+Candidate hypotheses include:
 
-- states whose `D` transitions historically resolve into `R` are high-value excavation targets;
-- repeated `L` with no new `D` or `U` may indicate a low-yield local region;
-- `U` states may deserve deeper analysis when they expose new exact geometry, but they should be charged for the branching burden they create;
-- `D U R` motifs may identify useful theorem-search corridors;
-- `D U L` motifs may expose missing transition mechanisms.
+- `R` and `LR` survivor classes may admit simple exact preselectors;
+- long `L^jR` residuals may identify the theorem gaps worth attacking first;
+- research-operation `DUR` motifs may identify useful controlled laboratories even when they are not live ancestry;
+- repeated `L` without an exact state refinement may indicate low-yield local scheduling regions;
+- `U` states should be rewarded for exposing genuinely new geometry but charged for added branching burden.
 
-These are scheduling hypotheses only.
-
-The exact cover and theorem layers remain unchanged regardless of scheduler preference.
+These are scheduler hypotheses only.
 
 ---
 
-## 9. Non-negotiable safeguards
+## 10. Immediate theorem target
+
+The first serious BEC-conditioned theorem search is now **ancestry-correct**, not the distant blocked destination.
+
+The q23 ancestry pilot has 148 live survivors with exact path split
+
+```text
+R       64
+LR      64
+L^jR    20   for j>=2
+```
+
+The highest-value next question is:
+
+> Which exact survivor-state coordinates distinguish `R`, `LR`, and the deeper `L^jR` residual before performing the whole post-k23 scan?
+
+Condition on the existing exact state variables:
+
+```text
+route ancestry
+k19_mode = FULL_QR | BARE
+R support
+k23 rigid support
+affine relation 6B-SR=1
+q23 valuation phase
+factor pattern
+```
+
+A useful theorem would have the form
+
+```text
+exact survivor predicate
+    => first live hit k=27 or k=31
+    => exact terminal mechanism / root geometry
+```
+
+The BEC layer would summarize the result as `R` or `LR`; the theorem itself must remain arithmetic.
+
+If exact state conditions explain the 128 k27/k31 exits, only 20 of the 148 finite specimens remain in the deeper live residual.
+
+---
+
+## 11. Non-negotiable safeguards
 
 ```text
 BEC label != theorem
 BEC label != proof
 BEC label != pruning permission
+BEC direction != well-founded progress measure
 BEC path frequency != density theorem
 BEC scheduler priority != mathematical necessity
+research-operation path != live-ancestry path
 ```
 
 A branch may be removed only by an independent exact theorem or by the ordinary semantics of an exact terminal certificate.
@@ -379,45 +461,7 @@ BEC must never be used to smuggle heuristic confidence into the proof layer.
 
 ---
 
-## 10. Immediate research target
-
-The first serious BEC-conditioned theorem search is the existing twenty-cell q23 blocked-phase atlas.
-
-For each cell, retain
-
-```text
-route
-k19_mode                    FULL_QR | BARE
-R_support                   QR19 | ONE19
-k23_support                 QR23
-affine_relation             6B-SR=1
-q23_phase                   n mod23
-canonical_q23^2             blocked
-replacement_mechanism       Type I | Type II | I+II
-replacement_root_geometry   boundary-only | interior-only | mixed | n/a
-BEC_path                    D U R
-left_obstructions_before_R  exact finite count
-```
-
-The next theorem question is then:
-
-> Which exact survivor-state coordinates force or forbid particular BEC continuations and terminal replacement geometries?
-
-For example, can one prove a state implication of the form
-
-\[
-(\text{BARE},\text{support},\text{phase},\text{coupling})
-\Longrightarrow
-DUR_{\mathrm{interior\ Type\ II}}
-\]
-
-on a nontrivial infinite family?
-
-That would convert the Bryan Entanglement Cross from a descriptive grammar into a useful indexing language for a genuine transition theorem, while the theorem itself would still be stated and proved entirely in exact arithmetic.
-
----
-
-## 11. Research interpretation
+## 12. Research interpretation
 
 The central idea is simple:
 
@@ -430,17 +474,19 @@ Down records excavation with possible later resolution.
 
 The Bryan Entanglement Cross gives that motion a mathematical grammar without confusing the grammar for the mathematics underneath it.
 
-The intended use is therefore disciplined:
+The intended order is
 
 \[
 \boxed{
 \text{exact arithmetic state}
-\;\longrightarrow\;
+\to
+\text{exact ancestry}
+\to
 \text{proved transition}
-\;\longrightarrow\;
+\to
 \text{BEC direction}
-\;\longrightarrow\;
-\text{telemetry and theorem search}
+\to
+\text{telemetry / theorem search}.
 }
 \]
 
