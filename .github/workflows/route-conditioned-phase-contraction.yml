@@ -1,0 +1,25 @@
+name: route conditioned phase contraction
+
+on:
+  push:
+    branches:
+      - agent/route-conditioned-phase-contraction
+  pull_request:
+    paths:
+      - 'research/erdos-straus/ROUTE-CONDITIONED-PHASE-CONTRACTION.md'
+      - 'research/erdos-straus/verify_route_conditioned_phase_contraction.py'
+      - '.github/workflows/route-conditioned-phase-contraction.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify route-conditioned phase contraction
+        run: python3 research/erdos-straus/verify_route_conditioned_phase_contraction.py --json
