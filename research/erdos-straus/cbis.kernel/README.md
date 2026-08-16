@@ -2,57 +2,55 @@
 
 **CB Inverse Sieve.** The ES+ engine. Entirely C.
 
-It builds the inverse signed-box cover \(\mathcal C_K\) and keeps only
-the complement: the letter spectrum \(\Lambda_K\). GREAT is not stored.
-It does not prove Erdős–Straus.
+One process, two walks, one cover.
 
-The name follows `cbap` (CB + a short method tag). It is not
-`newcbap`. The method is the sieve in
-[`../ES-plus/LETTER-EQUATION.md`](../ES-plus/LETTER-EQUATION.md).
+1. **Sweep** — from 0 (or the saved cursor). Spectra A/B/C by lanes W, I, N, L.
+2. **Home** — only the residual R, where a window-layer letter can sit.
 
-## What it does
+W is not weakened. Letters keep the same `ES-LETTER-v1` numbers.
 
-Each window is a **spectrum × lane matrix**. Rows are the three
-Mordell-hard CRT pairs from cbap. Columns are separate algorithms that
-write into one shared cover. A letter is a prime no lane marked.
+## R
 
-| lane | source | job |
+    R = { hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4) }
+
+About 27% of hard primes through 10^8. Every W-survivor must lie here.
+Homing walks S = p+4 through Sigma_1, sets p = S-4, and never spends
+time on linear 4p+1 / p+4 hits.
+
+Equation: [`../ES-plus/HOMING.md`](../ES-plus/HOMING.md).
+
+## Matrix (sweep)
+
+| lane | source | marks |
 | --- | --- | --- |
-| **W** | bb / CC window | \(4p+1\), \(p+4\), \(fab(a,b\le 11)\). Runs first. |
-| **I** | ES+ signed box | \(\delta_k\) on survivors, every admissible \(k\le K\). |
-| **N** | CC / cbap NR | external-nonresidue and aligned shifts; \(k\) may exceed \(K\). |
-| **L** | Type A/B | López prime-modulus traps. A hit is a real witness. |
+| W | bb / CC window | 4p+1, p+4, then fab on R |
+| I | ES+ signed box | survivors of W |
+| N | CC / cbap NR | aligned nonresidue shifts |
+| L | Type A/B | López prime-modulus traps |
 
-W kills almost every GREAT. I, N, and L only see the unmarked residual.
-The cover only grows. The letter stamp does not regress.
-
-```sh
-./cbis go --k-max 400 --step 50000
-```
+Dashboard splits W into `linear / R / fab`.
 
 ## Commands
 
-First session starts at **0**. Later sessions **resume**. `--random`
-sets a random start only when there is no seed yet.
-
 ```sh
 make
-./cbis
-./cbis go
+./cbis                     # sweep + home, start 0, then resume
 ./cbis go --random
+./cbis go --home-only      # missile only
+./cbis go --sweep-only     # 0-to-infinity only
+./cbis go --k-max 400 --step 50000
 ./cbis status
 ./cbis letters
 ./cbis solve 2521
-./cbis self-test
 ```
 
 From the CENTL root:
 
 ```sh
 ./centl es cbis
-./centl es cbis go --random
+./centl es cbis go --home-only
 ./centl es cbis letters
 ```
 
-Ctrl+C stops after the current window and writes the seed. Letters live
-in `cbis.kernel/letters/`.
+Ctrl+C saves both cursors (`scanned_through` and `home_S`).
+Letters: `cbis.kernel/letters/`.

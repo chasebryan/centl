@@ -5,9 +5,9 @@
  * ES+ engine. Builds the inverse signed-box cover C_K and keeps the
  * complement Λ_K. Letters only. Does not prove Erdős–Straus.
  *
- * Spectrum × lane matrix (cbap CRT rows × bb/CC/ES+/López columns).
- * W first, then I/N/L only on unmarked primes. Letters = shared complement.
- * Same ES-LETTER-v1 identity as bb/cbap. Cover only grows.
+ * Spectrum × lane matrix (sweep) plus R-homing.
+ * R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}.
+ * Sweep still walks from 0. Home generates only R. Cover only grows.
  */
 #include <inttypes.h>
 #include <signal.h>
@@ -46,6 +46,12 @@ typedef struct {
     uint64_t dropped;
     uint64_t kmax;
     uint64_t windows;
+    uint64_t home_S;     /* cursor on S = p+4, S ≡ 1 (mod 4) */
+    uint64_t w_linear;   /* 4p+1 or p+4 */
+    uint64_t w_r;        /* hard primes in R */
+    uint64_t w_fab;      /* R finished by fab */
+    uint64_t home_r;     /* R primes found by homing */
+    uint64_t home_fab;
 } seed_t;
 
 static uint8_t *sieve;
@@ -465,12 +471,32 @@ static const int FAB_PAIRS[][2] = {
     {10, 11}, {11, 1}, {11, 2}, {11, 3}, {11, 4}, {11, 5}, {11, 6},
     {11, 7}, {11, 8}, {11, 9}, {11, 10}};
 
-static int in_window_set(uint64_t p) {
-    if (try_4p_plus_1(p) || try_p_plus_4(p)) return 1;
+static int try_any_fab(uint64_t p) {
     int np = (int)(sizeof FAB_PAIRS / sizeof FAB_PAIRS[0]);
     for (int i = 0; i < np; i++)
         if (try_fab(p, FAB_PAIRS[i][0], FAB_PAIRS[i][1])) return 1;
     return 0;
+}
+
+static int in_window_set(uint64_t p) {
+    if (try_4p_plus_1(p) || try_p_plus_4(p)) return 1;
+    return try_any_fab(p);
+}
+
+/* Σ₁: every prime factor is ≡ 1 (mod 4). */
+static int in_sigma1(uint64_t n) {
+    if (n < 2) return n == 1;
+    fac_t f;
+    factor64(n, &f);
+    for (int i = 0; i < f.n; i++)
+        if ((f.ps[i] & 3) != 1) return 0;
+    return 1;
+}
+
+/* R: hard prime whose 4p+1 and p+4 both live in Σ₁. */
+static int in_R(uint64_t p) {
+    if (!is_hard(p) || !is_prime64(p)) return 0;
+    return in_sigma1(p + 4) && in_sigma1(4 * p + 1);
 }
 
 /* Lane I: signed-box cover at every admissible k ≤ K (recognition form of C_K). */
@@ -565,6 +591,7 @@ static seed_t default_seed(uint64_t start) {
     s.scanned_through = start;
     s.start_factor = start;
     s.kmax = DEFAULT_KMAX;
+    s.home_S = 5;
     return s;
 }
 
@@ -582,9 +609,16 @@ static seed_t load_seed(void) {
         else if (sscanf(line, "dropped=%" SCNu64, &v) == 1) s.dropped = v;
         else if (sscanf(line, "kmax=%" SCNu64, &v) == 1) s.kmax = v;
         else if (sscanf(line, "windows=%" SCNu64, &v) == 1) s.windows = v;
+        else if (sscanf(line, "home_S=%" SCNu64, &v) == 1) s.home_S = v;
+        else if (sscanf(line, "w_linear=%" SCNu64, &v) == 1) s.w_linear = v;
+        else if (sscanf(line, "w_r=%" SCNu64, &v) == 1) s.w_r = v;
+        else if (sscanf(line, "w_fab=%" SCNu64, &v) == 1) s.w_fab = v;
+        else if (sscanf(line, "home_r=%" SCNu64, &v) == 1) s.home_r = v;
+        else if (sscanf(line, "home_fab=%" SCNu64, &v) == 1) s.home_fab = v;
     }
     fclose(f);
     if (!s.kmax) s.kmax = DEFAULT_KMAX;
+    if (!s.home_S) s.home_S = 5;
     return s;
 }
 
@@ -601,9 +635,16 @@ static void save_seed(const seed_t *s) {
             "covered=%" PRIu64 "\n"
             "dropped=%" PRIu64 "\n"
             "kmax=%" PRIu64 "\n"
-            "windows=%" PRIu64 "\n",
+            "windows=%" PRIu64 "\n"
+            "home_S=%" PRIu64 "\n"
+            "w_linear=%" PRIu64 "\n"
+            "w_r=%" PRIu64 "\n"
+            "w_fab=%" PRIu64 "\n"
+            "home_r=%" PRIu64 "\n"
+            "home_fab=%" PRIu64 "\n",
             s->scanned_through, s->start_factor, s->letters_found, s->covered, s->dropped,
-            s->kmax, s->windows);
+            s->kmax, s->windows, s->home_S, s->w_linear, s->w_r, s->w_fab, s->home_r,
+            s->home_fab);
     fclose(f);
     rename(tmp, seed_path);
 }
@@ -712,18 +753,27 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
     memset(cell, 0, sizeof cell);
     uint64_t marks = 0;
 
-    /* Lane W — cheap, almost all GREATs die here. */
+    /* Lane W — split: linear vs R vs fab-on-R. */
     for (int i = 0; i < nh && !halt_flag; i++) {
-        if (in_window_set(hp[i]))
+        int lin = try_4p_plus_1(hp[i]) || try_p_plus_4(hp[i]);
+        if (lin) {
+            seed->w_linear++;
             marks += (uint64_t)mark_lane(marked, cell, i, spec_of[i], LANE_W);
+            continue;
+        }
+        seed->w_r++;
+        if (try_any_fab(hp[i])) {
+            seed->w_fab++;
+            marks += (uint64_t)mark_lane(marked, cell, i, spec_of[i], LANE_W);
+        }
     }
 
-    /* Survivors: I then N then L, still per spectrum. */
+    /* Survivors of W are in R and missed fab. I, then N, then L. */
     for (int i = 0; i < nh && !halt_flag; i++) {
         if (marked[i]) continue;
         int sp = spec_of[i];
-        printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  (missed W)\n", hp[i],
-               sp >= 0 ? SPEC_NAME[sp] : "?");
+        printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=sweep  (in R, missed fab)\n",
+               hp[i], sp >= 0 ? SPEC_NAME[sp] : "?");
         fflush(stdout);
         if (in_signed_box_cover(hp[i], K)) {
             marks += (uint64_t)mark_lane(marked, cell, i, sp, LANE_I);
@@ -755,12 +805,68 @@ static void sieve_window(uint64_t lo, uint64_t hi, uint64_t K, seed_t *seed) {
     }
     fflush(stdout);
 
+    printf("cbis  sweep   linear=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "\n",
+           seed->w_linear, seed->w_r, seed->w_fab);
     free(hp);
     free(marked);
     free(spec_of);
 }
 
-static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg) {
+/* After a W-miss (must be in R): I, then N, then L. */
+static void prosecute_residual(uint64_t p, uint64_t K, seed_t *seed, const char *via) {
+    int sp = spectrum_of(p);
+    printf("TARGET IDENTIFIED  n=%" PRIu64 "  spectrum=%s  via=%s  (in R, missed fab)\n",
+           p, sp >= 0 ? SPEC_NAME[sp] : "?", via);
+    fflush(stdout);
+    if (in_signed_box_cover(p, K) || in_nr_cover(p) || in_lopez_cover(p, K)) {
+        seed->dropped++;
+        seed->covered++;
+        printf("TARGET DROPPED     n=%" PRIu64 "  (I/N/L)\n", p);
+        fflush(stdout);
+        return;
+    }
+    save_letter(p, K);
+    seed->letters_found++;
+}
+
+/*
+ * Homing walk on S = p+4.
+ * S ≡ 1 (mod 4). Require S in Σ₁ and 4p+1 in Σ₁. Then p is in R.
+ * fab, then I/N/L. This is the missile: it never visits linear W-hits.
+ */
+static void home_batch(uint64_t span, uint64_t K, seed_t *seed) {
+    if (span < 4) span = DEFAULT_STEP;
+    uint64_t S0 = seed->home_S < 5 ? 5 : seed->home_S;
+    if ((S0 & 3) != 1) S0 += (1u - (S0 & 3)) & 3;
+    uint64_t S1 = S0 + span;
+    if (S1 < S0) S1 = UINT64_MAX;
+    uint64_t r_here = 0, fab_here = 0;
+    for (uint64_t S = S0; S <= S1 && !halt_flag; S += 4) {
+        if (!in_sigma1(S)) continue;
+        if (S <= 4) continue;
+        uint64_t p = S - 4;
+        if (!is_hard(p) || !is_prime64(p)) continue;
+        if (!in_sigma1(4 * p + 1)) continue;
+        seed->home_r++;
+        r_here++;
+        if (try_any_fab(p)) {
+            seed->home_fab++;
+            seed->dropped++;
+            seed->covered++;
+            fab_here++;
+            continue;
+        }
+        prosecute_residual(p, K, seed, "home");
+    }
+    seed->home_S = S1;
+    printf("cbis  home    S=%" PRIu64 "  R=%" PRIu64 "  fab=%" PRIu64 "  batch_R=%" PRIu64
+           "  batch_fab=%" PRIu64 "\n",
+           seed->home_S, seed->home_r, seed->home_fab, r_here, fab_here);
+    fflush(stdout);
+}
+
+static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg, int sweep,
+                   int home) {
     seed_t seed;
     int have = access(seed_path, F_OK) == 0;
     if (have) {
@@ -778,38 +884,48 @@ static void cmd_go(int want_random, uint64_t step, uint64_t kmax_arg) {
     if (kmax_arg) seed.kmax = kmax_arg;
     if (!step) step = DEFAULT_STEP;
     save_seed(&seed);
-    printf("cbis.kernel  ES+ matrix  LETTER only\n");
-    printf("  spectra A/B/C  lanes W(window) I(signed-box) N(NR) L(López)\n");
-    printf("  start %" PRIu64 "  scanned %" PRIu64 "  K=%" PRIu64 "  step=%" PRIu64 "\n",
-           seed.start_factor, seed.scanned_through, seed.kmax, step);
-    printf("  letters/%s  (Ctrl+C stops and saves)\n", letters_dir);
+    printf("cbis.kernel  ES+  LETTER only\n");
+    printf("  sweep: spectra A/B/C  lanes W I N L\n");
+    printf("  home:  R = {hard p : p+4 and 4p+1 in Sigma_1}\n");
+    printf("  modes  sweep=%s  home=%s\n", sweep ? "on" : "off", home ? "on" : "off");
+    printf("  start %" PRIu64 "  scanned %" PRIu64 "  home_S=%" PRIu64 "  K=%" PRIu64
+           "  step=%" PRIu64 "\n",
+           seed.start_factor, seed.scanned_through, seed.home_S, seed.kmax, step);
+    printf("  letters/%s\n", letters_dir);
     fflush(stdout);
     while (!halt_flag) {
-        uint64_t lo = seed.scanned_through;
-        uint64_t hi = lo + step;
-        if (hi < lo) hi = UINT64_MAX;
-        sieve_window(lo, hi, seed.kmax, &seed);
-        seed.scanned_through = hi;
-        seed.windows++;
+        if (sweep) {
+            uint64_t lo = seed.scanned_through;
+            uint64_t hi = lo + step;
+            if (hi < lo) hi = UINT64_MAX;
+            sieve_window(lo, hi, seed.kmax, &seed);
+            seed.scanned_through = hi;
+            seed.windows++;
+            if (hi == UINT64_MAX && !home) break;
+        }
+        if (home && !halt_flag) home_batch(step, seed.kmax, &seed);
         save_seed(&seed);
-        printf("cbis  scanned=%" PRIu64 "  covered=%" PRIu64 "  collected=%" PRIu64
-               "  dropped=%" PRIu64 "\n",
-               seed.scanned_through, seed.covered, seed.letters_found, seed.dropped);
+        printf("cbis  totals  scanned=%" PRIu64 "  home_S=%" PRIu64 "  linear=%" PRIu64
+               "  R=%" PRIu64 "  fab=%" PRIu64 "  collected=%" PRIu64 "\n",
+               seed.scanned_through, seed.home_S, seed.w_linear, seed.w_r + seed.home_r,
+               seed.w_fab + seed.home_fab, seed.letters_found);
         fflush(stdout);
-        if (hi == UINT64_MAX) break;
+        if (sweep && seed.scanned_through == UINT64_MAX && home && seed.home_S == UINT64_MAX)
+            break;
     }
     save_seed(&seed);
-    printf("cbis: saved cursor %" PRIu64 "\n", seed.scanned_through);
+    printf("cbis: saved sweep=%" PRIu64 "  home_S=%" PRIu64 "\n", seed.scanned_through,
+           seed.home_S);
 }
 
 static void cmd_status(void) {
     seed_t s = load_seed();
-    printf("{\"kernel\":\"cbis.kernel\",\"program\":\"ES+\",\"collect\":\"LETTER only\","
-           "\"start_factor\":%" PRIu64 ",\"scanned_through\":%" PRIu64
-           ",\"letters_found\":%" PRIu64 ",\"covered\":%" PRIu64 ",\"dropped\":%" PRIu64
-           ",\"K\":%" PRIu64 ",\"proof_status\":\"open\"}\n",
-           s.start_factor, s.scanned_through, s.letters_found, s.covered, s.dropped,
-           s.kmax ? s.kmax : DEFAULT_KMAX);
+    printf("{\"kernel\":\"cbis.kernel\",\"program\":\"ES+\","
+           "\"start_factor\":%" PRIu64 ",\"scanned_through\":%" PRIu64 ",\"home_S\":%" PRIu64
+           ",\"letters_found\":%" PRIu64 ",\"linear\":%" PRIu64 ",\"R\":%" PRIu64
+           ",\"fab\":%" PRIu64 ",\"K\":%" PRIu64 "}\n",
+           s.start_factor, s.scanned_through, s.home_S, s.letters_found, s.w_linear,
+           s.w_r + s.home_r, s.w_fab + s.home_fab, s.kmax ? s.kmax : DEFAULT_KMAX);
 }
 
 static void cmd_letters(void) {
@@ -841,15 +957,18 @@ static void cmd_solve(uint64_t n) {
                n);
         return;
     }
+    int r = in_R(n);
+    int lin = try_4p_plus_1(n) || try_p_plus_4(n);
+    int fab = try_any_fab(n);
     if (in_cover_forward(n, DEFAULT_KMAX)) {
         printf("{\"kernel\":\"cbis.kernel\",\"letter\":false,\"n\":%" PRIu64
-               ",\"in_cover\":true}\n",
-               n);
+               ",\"in_R\":%s,\"linear\":%s,\"fab\":%s}\n",
+               n, r ? "true" : "false", lin ? "true" : "false", fab ? "true" : "false");
         return;
     }
     printf("{\"kernel\":\"cbis.kernel\",\"letter\":true,\"n\":%" PRIu64
-           ",\"rule\":\"unsolved_after_search\"}\n",
-           n);
+           ",\"in_R\":%s,\"rule\":\"unsolved_after_search\"}\n",
+           n, r ? "true" : "false");
 }
 
 static int cmd_self_test(void) {
@@ -871,6 +990,18 @@ static int cmd_self_test(void) {
             fprintf(stderr, "cbis: known solvable %" PRIu64 " not in cover\n", known[i]);
             return 1;
         }
+    }
+    if (!in_sigma1(13) || in_sigma1(15) || in_sigma1(21)) {
+        fprintf(stderr, "cbis: Sigma_1 test failed\n");
+        return 1;
+    }
+    if (!in_R(2521)) {
+        fprintf(stderr, "cbis: 2521 must lie in R\n");
+        return 1;
+    }
+    if (in_R(1009)) {
+        fprintf(stderr, "cbis: 1009 is linear, must not lie in R\n");
+        return 1;
     }
     /* Inverse window from 0 must mark 2521, not collect it. */
     seed_t tmp;
@@ -902,6 +1033,8 @@ static void usage(void) {
             "  cbis go              start at 0 the first time; then resume\n"
             "  cbis go --random     first session at a random n; later resumes\n"
             "  cbis go --k-max K --step N\n"
+            "  cbis go --home-only     R-homing only (p+4 in Sigma_1)\n"
+            "  cbis go --sweep-only    0-to-infinity matrix only\n"
             "  cbis status\n"
             "  cbis letters\n"
             "  cbis solve N\n"
@@ -920,6 +1053,7 @@ int main(int argc, char **argv) {
     uint64_t arg = 0;
     uint64_t opt_kmax = 0;
     uint64_t opt_step = 0;
+    int do_sweep = 1, do_home = 1;
     int i = 1;
     if (argc > 1 && argv[1][0] != '-') {
         cmd = argv[1];
@@ -935,7 +1069,13 @@ int main(int argc, char **argv) {
             opt_kmax = strtoull(argv[++i], NULL, 10);
         else if (!strcmp(argv[i], "--step") && i + 1 < argc)
             opt_step = strtoull(argv[++i], NULL, 10);
-        else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
+        else if (!strcmp(argv[i], "--home-only")) {
+            do_home = 1;
+            do_sweep = 0;
+        } else if (!strcmp(argv[i], "--sweep-only")) {
+            do_sweep = 1;
+            do_home = 0;
+        } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
             usage();
             return 0;
         } else {
@@ -945,7 +1085,7 @@ int main(int argc, char **argv) {
     }
 
     if (!strcmp(cmd, "go") || !strcmp(cmd, "continue")) {
-        cmd_go(want_random, opt_step, opt_kmax);
+        cmd_go(want_random, opt_step, opt_kmax, do_sweep, do_home);
         return 0;
     }
     if (!strcmp(cmd, "status")) {

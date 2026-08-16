@@ -105,12 +105,16 @@ make -C research/erdos-straus/cbap.kernel
 
 The letter spectrum is the complement of an inversely generated signed-box cover. Do not test primes one by one. For each admissible shift \(k\), generate every Type I / Type II hit from \(C\), mark \(p=4C-k\), and keep only the unmarked Mordell-hard primes. That set is \(\Lambda_K\).
 
-**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) implements that equation. Letters found this way keep the same `ES-LETTER-v1` numbers.
+**[cbis.kernel](research/erdos-straus/cbis.kernel/README.md)** (CB Inverse Sieve) is the ES+ engine. Sweep still walks from 0. Home walks only
+
+`R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}`
+
+which is the only place a window-layer letter can sit.
 
 ```sh
 make -C research/erdos-straus/cbis.kernel
 ./centl es cbis
-./centl es cbis go --random
+./centl es cbis go --home-only
 ./centl es cbis letters
 ```
 

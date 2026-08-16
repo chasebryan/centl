@@ -2,10 +2,10 @@
 
 ## Unreleased
 
-- **cbis.kernel** (CB Inverse Sieve) implements the ES+ letter
-  equation as a spectrum × lane matrix: W (bb/CC window) first, then
-  I (signed box), N (NR shifts), L (López traps) only on unmarked
-  primes. Cover only grows. `./centl es cbis` starts at 0 and resumes.
+- **cbis.kernel** now homes on
+  `R = {hard p : p+4 and 4p+1 ∈ Sigma_1}` while the 0-to-infinity
+  sweep still runs. `--home-only` / `--sweep-only`. W is split into
+  linear / R / fab and is not weakened.
 - ES+ records the letter equation: \(\Lambda_K\) is the complement of
   the inverse signed-box cover. The note is
   `research/erdos-straus/ES-plus/LETTER-EQUATION.md`. Mathematics only.

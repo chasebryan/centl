@@ -53,8 +53,10 @@
       <p class="hero-actions"><a class="sponsor-button" href="research.html">Search the full research library</a></p>
       <p class="notice"><strong>Status: Wellspring Candidate / active theorem program.</strong> The Erdős-Straus conjecture remains <strong>open</strong>. López Type A/B coverage remains open. Universal Direct-Shadow Completeness is <strong>false</strong>. This page reports exact theorems and finite certificates inside the Type A/B shadow program, not a solution of the conjecture.</p>
 
-      <h2>cbis.kernel — ES+ letter matrix</h2>
-      <p><strong>cbis.kernel</strong> (CB Inverse Sieve) is the ES+ engine. Each window is a matrix: three CRT spectra (A: 1,121; B: 169,289; C: 361,529 mod 840) by four lanes that write one shared cover. A LETTER is a prime no lane marked. GREAT is not stored. Same <code>ES-LETTER-v1</code> numbers as bb.kernel.</p>
+      <h2>cbis.kernel — ES+ letter engine</h2>
+      <p><strong>cbis.kernel</strong> (CB Inverse Sieve) is the current letter engine. Two walks share one cover. <strong>Sweep</strong> still starts at 0: spectra A/B/C by lanes W, I, N, L. <strong>Home</strong> only visits the residual R, the only place a window-layer letter can sit:</p>
+      <p><code>R = {hard p : p+4 and 4p+1 have only prime factors ≡ 1 (mod 4)}</code></p>
+      <p>About a quarter of hard primes through 10<sup>8</sup> lie in R. The rest die on 4p+1 or p+4. Homing never spends time on those. W is not weakened. Same <code>ES-LETTER-v1</code> numbers.</p>
       <table class="status">
         <tr><th>Lane</th><th>Source</th><th>What it marks</th></tr>
         <tr><td><strong>W</strong></td><td>bb / CC window</td><td>4p+1, p+4, fab(a,b&le;11). Runs first.</td></tr>
@@ -64,10 +66,11 @@
       </table>
       <pre><code>make -C research/erdos-straus/cbis.kernel
 ./centl es cbis
-./centl es cbis go --random
+./centl es cbis go --home-only
+./centl es cbis go --sweep-only
 ./centl es cbis go --k-max 400 --step 50000
 ./centl es cbis letters</code></pre>
-      <p>First session starts at 0 (or a random n with <code>--random</code>). Later sessions resume. Letters live in <code>research/erdos-straus/cbis.kernel/letters/</code>. Source: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a>. Equation: <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">ES+ letter equation</a>.</p>
+      <p>Default <code>go</code> runs sweep and home together and resumes both cursors. Letters: <code>research/erdos-straus/cbis.kernel/letters/</code>. Sources: <a href="https://github.com/chasebryan/centl/tree/main/research/erdos-straus/cbis.kernel">cbis.kernel</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/HOMING.md">homing equation</a>, <a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/LETTER-EQUATION.md">letter equation</a>, <a href="https://github.com/chasebryan/centl/releases">releases</a>.</p>
 
       <h2>CBAP.kernel — letter targeting</h2>
       <p><strong>cbap.kernel</strong> (CB-Advanced-Processing) is the four-channel letter hunter. Channel A acquires Mordell-hard primes on three CRT spectra. Channel B locks the theorem and <code>fab(a,b&le;11)</code> window — a hit is dropped. Channel C tracks the two-target corridor. Channel D writes a letter only if A–C miss.</p>
