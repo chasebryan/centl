@@ -31,7 +31,7 @@ so write
 \[
 \boxed{k=4u-1},
 \qquad
-u=\frac{k+1}{4}.
+u_k:=u=\frac{k+1}{4}.
 \]
 
 Then the shifted companion is
@@ -47,11 +47,13 @@ C_k=\frac{p+k}{4}
 Define
 
 \[
-\boxed{g_k=\gcd(6,u)
-=\gcd\!\left(6,\frac{k+1}{4}\right).}
+\boxed{
+g_k=\gcd(6,u)
+=\gcd\!\left(6,\frac{k+1}{4}\right).
+}
 \]
 
-Since `g_k` divides both `6m` and `u`, it follows immediately that
+Since `g_k` divides both `6m` and `u`,
 
 \[
 \boxed{g_k\mid C_k}
@@ -59,7 +61,7 @@ Since `g_k` divides both `6m` and `u`, it follows immediately that
 
 for every Mordell-hard prime.
 
-Because `g_k` divides 6, only four seed values are possible:
+Because `g_k|6`, only four seed values are possible:
 
 \[
 \boxed{g_k\in\{1,2,3,6\}.}
@@ -74,7 +76,7 @@ The forced seed is determined by `u=(k+1)/4` modulo 6:
 \[
 \boxed{
 \begin{array}{c|c}
-u\pmod6 & g_k\\
+u_k\pmod 6 & g_k\\
 \hline
 0&6\\
 1&1\\
@@ -85,20 +87,20 @@ u\pmod6 & g_k\\
 \end{array}}
 \]
 
-Equivalently, in terms of the shift itself:
+Equivalently, in terms of the shift:
 
 - `g_k=6` when `k=23 mod 24`;
 - `g_k=3` when `k=11 mod 24`;
 - `g_k=2` when `k=7 or 15 mod 24`;
 - `g_k=1` when `k=3 or 19 mod 24`.
 
-This classification is periodic with period 24 in `k`.
+The seed pattern is periodic with period 24 in `k`.
 
 ## 4. The seed is automatically a unit modulo the shift
 
-The exact fixed-shift state model requires prime factors of `C_k` to be units modulo `k`.
+The exact fixed-shift state model requires every factor of `C_k` used by the group classifier to be a unit modulo `k`.
 
-This creates no problem for the forced seed:
+For the universal seed:
 
 - `k` is odd, so `2` never divides `k`;
 - if `3|g_k`, then `3|u`, hence
@@ -113,7 +115,7 @@ Therefore
 \boxed{\gcd(g_k,k)=1.}
 \]
 
-Every forced factor can be consumed as an ordinary exact state transition before closing over the remaining factorization directions.
+The prime-valuation content of `g_k` can always be consumed as ordinary exact transitions before closing over the remaining factorization directions.
 
 ## 5. Maximality on the full Mordell-hard congruence skeleton
 
@@ -165,7 +167,13 @@ Hence the common divisor of the entire skeleton is exactly
 
 ### Theorem — maximal hard-skeleton forced seed
 
-For every admissible shift `k=4u-1`, the greatest integer dividing `C_k=(p+k)/4` for every integer `p` in the six Mordell-hard congruence classes is
+For every admissible shift `k=4u-1`, the greatest integer dividing
+
+\[
+C_k=\frac{p+k}{4}
+\]
+
+for every integer `p` in the six complete Mordell-hard congruence classes is
 
 \[
 \boxed{g_k=\gcd(6,u).}
@@ -213,31 +221,52 @@ Later examples include
 
 The existing `k=47` forced-6 theorem and the new `k=55`, `k=59`, and `k=63` reductions are instances of this single law.
 
-## 7. Research consequence
+## 7. Quantitative consequence for the standard depth horizon
 
-A generic fixed-shift closure begins from the empty factorization state. For Mordell-hard research this can be unnecessarily large whenever `g_k>1`.
-
-The correct hard-prime workflow is:
-
-1. compute `g_k=gcd(6,(k+1)/4)`;
-2. consume the prime-valuation content of `g_k` as mandatory exact transitions;
-3. close only the remaining arbitrary factor directions;
-4. intersect with any additional hard-center character restrictions already known for the modulus.
-
-This can reduce the exact obstruction space by an order of magnitude without introducing any finite-prime assumption.
-
-At the already analyzed shifts:
+Through `k<=5000` there are exactly 1,250 admissible shifts. The forced-seed classes are
 
 ```text
-k=47  forced 6   miss states 196   (from 14,474 generic)
-k=55  forced 2   miss states 314   (from  2,319 generic admissible)
-k=59  forced 3   miss states 5,869 (from 61,215 generic)
-k=63  forced 2   miss states 87    (from    684 generic admissible)
+seed 1 : 417 shifts
+seed 2 : 417 shifts
+seed 3 : 208 shifts
+seed 6 : 208 shifts
 ```
 
-These reductions should be treated as the natural hard-prime state spaces for subsequent cross-shift theorem mining.
+Therefore
 
-## 8. Reproduction
+\[
+\boxed{833/1250}
+\]
+
+of the admissible shifts in that horizon carry a nontrivial universal factor before any factorization-specific analysis begins.
+
+This is a shift-count fact, not a statement that those shifts hit a corresponding fraction of primes.
+
+## 8. Research consequence
+
+A generic fixed-shift closure begins from the empty factorization state. For Mordell-hard research this is unnecessarily large whenever `g_k>1`.
+
+The natural hard-prime workflow is:
+
+1. compute `g_k=gcd(6,(k+1)/4)`;
+2. factor `g_k` and consume its mandatory prime valuations as exact transitions;
+3. close only over the remaining arbitrary factor directions;
+4. intersect with any additional hard-center character restrictions already known for the modulus.
+
+At the currently reduced shifts:
+
+```text
+k=47  forced 6   miss states   196   from 14,474 generic
+k=55  forced 2   miss states   314   from  2,319 generic admissible
+k=59  forced 3   miss states 5,869   from 61,215 generic
+k=63  forced 2   miss states    87   from    684 generic admissible
+```
+
+These are the natural hard-prime state spaces for subsequent cross-shift theorem mining.
+
+The law also exposes previously unused seeds at already-classified shifts such as `k=35` (`g=3`) and `k=39` (`g=2`).
+
+## 9. Reproduction
 
 ```sh
 python3 research/erdos-straus/verify_mordell_hard_forced_seed_law.py --max-k 5000 --json
