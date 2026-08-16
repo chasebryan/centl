@@ -78,9 +78,9 @@ def route_a_volume() -> dict[str, object]:
 
     assert modulus == 170_222_767
     assert survivors == 11_566_800
+    assert math.gcd(survivors, modulus) == 1
     assert fraction == Fraction(11_566_800, 170_222_767)
 
-    # The Route-A BARE defect center p=6 mod19 is phase t=2 mod19.
     assert (17 + 4 * 2) % 19 == 6
     assert 2 in S19
 
@@ -94,7 +94,8 @@ def route_a_volume() -> dict[str, object]:
         "survivor_sizes": list(sizes),
         "phase_modulus": modulus,
         "survivor_classes": survivors,
-        "survivor_fraction_exact": f"{fraction.numerator}/{fraction.denominator}",
+        "raw_class_ratio": f"{survivors}/{modulus}",
+        "reduced_fraction": f"{fraction.numerator}/{fraction.denominator}",
         "survivor_fraction": float(fraction),
         "excluded_fraction": float(1 - fraction),
     }
@@ -118,11 +119,11 @@ def route_b_volume() -> dict[str, object]:
     survivors = math.prod(sizes)
     fraction = Fraction(survivors, modulus)
 
-    assert modulus == 4_736_149
-    assert survivors == 340_200
+    assert modulus == 61_569_937
+    assert survivors == 4_422_600
+    assert math.gcd(survivors, modulus) == 13
     assert fraction == Fraction(340_200, 4_736_149)
 
-    # The Route-B BARE defect center p=11 mod19 is phase t=8 mod19.
     assert (17 + 4 * 8) % 19 == 11
     assert 8 in S19
 
@@ -136,7 +137,8 @@ def route_b_volume() -> dict[str, object]:
         "survivor_sizes": list(sizes),
         "phase_modulus": modulus,
         "survivor_classes": survivors,
-        "survivor_fraction_exact": f"{fraction.numerator}/{fraction.denominator}",
+        "raw_class_ratio": f"{survivors}/{modulus}",
+        "reduced_fraction": f"{fraction.numerator}/{fraction.denominator}",
         "survivor_fraction": float(fraction),
         "excluded_fraction": float(1 - fraction),
     }
