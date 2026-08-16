@@ -17,6 +17,12 @@ BRANCHES = (
     (529, 51, (11, 23), (4, 18), 17),
     (529, 171, (11, 23), (5, 13), 19),
 )
+PRODUCT_BRANCHES = (
+    # Both source residues are positive-character branches. Jacobi saturation
+    # at k=551=19*29 forces the product (19/p)(29/p)=+1, but does not
+    # determine either factor character individually.
+    (289, 551, (23, 31), (1, 7), (19, 29)),
+)
 
 
 def sieve(limit: int) -> bytearray:
@@ -64,9 +70,13 @@ def fixed_shift_miss(p: int, k: int, trial_primes: list[int]) -> tuple[bool, dic
     return type_i not in residues and type_ii not in residues, factors
 
 
-def positive_character(p: int, q: int) -> bool:
+def character(p: int, q: int) -> int:
     value = pow(p % q, (q - 1) // 2, q)
-    return value == 1
+    return -1 if value == q - 1 else 1
+
+
+def positive_character(p: int, q: int) -> bool:
+    return character(p, q) == 1
 
 
 def analyze(limit: int) -> dict[str, object]:
@@ -83,8 +93,8 @@ def analyze(limit: int) -> dict[str, object]:
             if any(p % q != r for q, r in zip(sources, residues)):
                 continue
             counts[key + "_route_primes"] += 1
+            c = (p + k) // 4
             for q in sources:
-                c = (p + k) // 4
                 if c % q != 0:
                     failures.append({
                         "kind": "routing",
@@ -112,16 +122,56 @@ def analyze(limit: int) -> dict[str, object]:
         if counts[key + "_misses"] == 0:
             failures.append({"kind": "missing-miss-realization", "key": key})
 
+    for h, k, sources, residues, unknown_factors in PRODUCT_BRANCHES:
+        key = f"h{h}_k{k}_product_" + "_".join(map(str, unknown_factors))
+        for p in range(h, limit + 1, 840):
+            if not prime[p]:
+                continue
+            if any(p % q != r for q, r in zip(sources, residues)):
+                continue
+            counts[key + "_route_primes"] += 1
+            c = (p + k) // 4
+            for q in sources:
+                if c % q != 0:
+                    failures.append({
+                        "kind": "product-routing",
+                        "key": key,
+                        "p": p,
+                        "source": q,
+                        "companion": c,
+                    })
+            miss, factors = fixed_shift_miss(p, k, trial_primes)
+            counts[key + "_misses"] += int(miss)
+            if miss:
+                product = math.prod(character(p, q) for q in unknown_factors)
+                if product != 1:
+                    failures.append({
+                        "kind": "composite-character-product",
+                        "key": key,
+                        "p": p,
+                        "unknown_factors": list(unknown_factors),
+                        "character_product": product,
+                        "factors": factors,
+                    })
+                else:
+                    counts[key + "_positive_product_misses"] += 1
+
+        if counts[key + "_route_primes"] == 0:
+            failures.append({"kind": "missing-product-route-realization", "key": key})
+        if counts[key + "_misses"] == 0:
+            failures.append({"kind": "missing-product-miss-realization", "key": key})
+
     return {
-        "analysis": "jacobi-saturation-character-extraction-independent-regression-v1",
+        "analysis": "jacobi-saturation-character-extraction-independent-regression-v2",
         "limit": limit,
-        "branches": len(BRANCHES),
+        "extraction_branches": len(BRANCHES),
+        "product_branches": len(PRODUCT_BRANCHES),
         "counts": dict(sorted(counts.items())),
         "failures": len(failures),
         "failure_examples": failures[:20],
         "claim": (
-            "finite direct-factorization regression of the routed composite branches; "
-            "the range-free extraction follows from the Jacobi-saturation lemma"
+            "finite direct-factorization regression of routed composite branches; "
+            "range-free extraction and product constraints follow from Jacobi saturation"
         ),
     }
 
@@ -135,7 +185,8 @@ def main() -> int:
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:
-        print(f"branches: {report['branches']}")
+        print(f"extraction branches: {report['extraction_branches']}")
+        print(f"product branches: {report['product_branches']}")
         print(f"failures: {report['failures']}")
         for key, value in report["counts"].items():
             print(f"{key}: {value}")
