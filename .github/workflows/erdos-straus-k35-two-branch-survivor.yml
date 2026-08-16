@@ -1,0 +1,23 @@
+name: Erdős–Straus k35 two-branch survivor theorem
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K35-TWO-BRANCH-SURVIVOR-THEOREM.md"
+      - "research/erdos-straus/verify_k35_two_branch_survivor_theorem.py"
+      - ".github/workflows/erdos-straus-k35-two-branch-survivor.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k35 two-branch survivor verification
+        run: python3 research/erdos-straus/verify_k35_two_branch_survivor_theorem.py --json
