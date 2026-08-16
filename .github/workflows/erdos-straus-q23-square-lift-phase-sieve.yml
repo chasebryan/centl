@@ -1,0 +1,26 @@
+name: Erdős–Straus q23 square-lift phase sieve
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/Q23-SQUARE-LIFT-PHASE-SIEVE.md"
+      - "research/erdos-straus/classify_q23_square_lift_phase_sieve.py"
+      - "research/erdos-straus/verify_q23_square_lift_phase_sieve.py"
+      - ".github/workflows/erdos-straus-q23-square-lift-phase-sieve.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact q23 square-lift phase classifier
+        run: python3 research/erdos-straus/classify_q23_square_lift_phase_sieve.py --json
+      - name: Independent phase and earliest-anchor verification
+        run: python3 research/erdos-straus/verify_q23_square_lift_phase_sieve.py --json
