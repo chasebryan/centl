@@ -1,0 +1,26 @@
+name: Erdős–Straus q13 k23 recursive branch elimination
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/Q13-K23-RECURSIVE-BRANCH-ELIMINATION.md"
+      - "research/erdos-straus/classify_q13_k23_branch_elimination.py"
+      - "research/erdos-straus/verify_q13_k23_branch_elimination.py"
+      - ".github/workflows/erdos-straus-q13-k23-branch-elimination.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact recursive branch classifier
+        run: python3 research/erdos-straus/classify_q13_k23_branch_elimination.py --json
+      - name: Independent explicit-divisor anchors
+        run: python3 research/erdos-straus/verify_q13_k23_branch_elimination.py --json
