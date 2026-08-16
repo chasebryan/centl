@@ -57,6 +57,132 @@ jobs:
             /tmp/cbx-spectrum/standalone-hit-relations.tsv --json \
             > /tmp/cbx-spectrum/spectrum-overlap.json
 
+      - name: Independently recompute spectrum containments from raw relations
+        run: |
+          python3 - <<'PY'
+          from collections import defaultdict
+          import json
+
+          root='/tmp/cbx-spectrum'
+          expected=json.load(open(root+'/spectrum-overlap.json', encoding='utf-8'))
+          residues={'A':{1,121},'B':{169,289},'C':{361,529}}
+          sets={s:defaultdict(set) for s in residues}
+          ks=set()
+          rows=0
+          with open(root+'/standalone-hit-relations.tsv', encoding='utf-8') as fh:
+              for lineno, raw in enumerate(fh, 1):
+                  raw=raw.strip()
+                  if not raw:
+                      continue
+                  k,p=map(int,raw.split('\t'))
+                  ks.add(k)
+                  spec=None
+                  r=p%840
+                  for name, rr in residues.items():
+                      if r in rr:
+                          spec=name
+                          break
+                  if spec is None:
+                      raise SystemExit(f'non-hard relation at line {lineno}: p={p}')
+                  if p in sets[spec][k]:
+                      raise SystemExit(f'duplicate relation at line {lineno}: k={k} p={p}')
+                  sets[spec][k].add(p)
+                  rows += 1
+          ks=sorted(ks)
+          assert rows == expected['relation_rows']
+
+          def masks_for(spec):
+              universe=sorted(set().union(*(sets[spec][k] for k in ks)))
+              index={p:i for i,p in enumerate(universe)}
+              masks={}
+              for k in ks:
+                  m=0
+                  for p in sets[spec][k]:
+                      m |= 1 << index[p]
+                  masks[k]=m
+              return masks
+
+          def exact_counts(spec):
+              masks=masks_for(spec)
+              one=[]; two=[]; three=[]
+              one_targets=set(); two_targets=set()
+              for j,k in enumerate(ks):
+                  mk=masks[k]
+                  if not mk:
+                      continue
+                  for i in range(j):
+                      a=ks[i]
+                      if mk & ~masks[a] == 0:
+                          one.append((k,a,mk.bit_count()))
+                          one_targets.add(k)
+                          break
+              for j,k in enumerate(ks):
+                  mk=masks[k]
+                  if not mk or k in one_targets:
+                      continue
+                  found=None
+                  for ai in range(j-1):
+                      a=ks[ai]
+                      missing=mk & ~masks[a]
+                      for bi in range(ai+1,j):
+                          b=ks[bi]
+                          if missing & ~masks[b] == 0:
+                              found=(a,b)
+                              break
+                      if found:
+                          break
+                  if found:
+                      two.append((k,*found,mk.bit_count()))
+                      two_targets.add(k)
+              for j,k in enumerate(ks):
+                  mk=masks[k]
+                  if not mk or k in one_targets or k in two_targets:
+                      continue
+                  found=None
+                  for ai in range(j-2):
+                      a=ks[ai]; ma=masks[a]
+                      for bi in range(ai+1,j-1):
+                          b=ks[bi]
+                          missing=mk & ~(ma|masks[b])
+                          if not missing:
+                              continue
+                          for ci in range(bi+1,j):
+                              c=ks[ci]
+                              if missing & ~masks[c] == 0:
+                                  found=(a,b,c)
+                                  break
+                          if found:
+                              break
+                      if found:
+                          break
+                  if found:
+                      three.append((k,*found,mk.bit_count()))
+              return {'one':one,'two':two,'three':three}
+
+          independent={s:exact_counts(s) for s in ('A','B','C')}
+          for spec in ('A','B','C'):
+              got=independent[spec]
+              exp=expected['spectra'][spec]
+              assert len(got['one']) == exp['exact_single_layer_containment_count'], (spec,'one',got['one'],exp['exact_single_layer_containments'])
+              assert len(got['two']) == exp['exact_two_layer_containment_target_count'], (spec,'two',got['two'],exp['exact_two_layer_containment_targets'])
+              assert len(got['three']) == exp['exact_three_layer_containment_target_count'], (spec,'three',got['three'],exp['exact_three_layer_containment_targets'])
+
+          out={
+              'verification':'independent-spectrum-bitset-v1',
+              'relation_rows':rows,
+              'counts':{
+                  s:{'size_1':len(independent[s]['one']),'size_2':len(independent[s]['two']),'size_3':len(independent[s]['three'])}
+                  for s in ('A','B','C')
+              },
+              'witnesses':independent,
+          }
+          json.dump(out,open(root+'/INDEPENDENT-VERIFICATION.json','w'),indent=2,sort_keys=True)
+          print('::notice title=CBX independent deep spectrum verification::' + '; '.join(
+              f"{s}:one={len(independent[s]['one'])},two={len(independent[s]['two'])},three={len(independent[s]['three'])}"
+              for s in ('A','B','C')
+          ))
+          PY
+
       - name: Build concise research summary
         run: |
           python3 - <<'PY'
@@ -64,14 +190,16 @@ jobs:
           root='/tmp/cbx-spectrum'
           raw=json.load(open(root+'/standalone-profile.json'))
           r=json.load(open(root+'/spectrum-overlap.json'))
+          v=json.load(open(root+'/INDEPENDENT-VERIFICATION.json'))
           assert raw['kernel'] == 'cbx.kernel'
           assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-spectrum-overlap-v1'
-          assert r['relation_rows'] == raw['set_relations']
+          assert r['relation_rows'] == raw['set_relations'] == v['relation_rows']
           assert sum(x['hit_events'] for x in r['spectra'].values()) == r['relation_rows']
+          assert r['exact_containment_counts'] == v['counts']
           report={
               'kernel':'cbx.kernel',
-              'mode':'spectrum-overlap-census-v1',
+              'mode':'spectrum-overlap-census-v2',
               'source_commit':os.environ['SOURCE_SHA'],
               'checkout_commit':os.environ['CHECKOUT_SHA'],
               'hi':int(os.environ['HI']),
@@ -80,6 +208,7 @@ jobs:
               'layers':r['layers'],
               'relation_rows':r['relation_rows'],
               'exact_containment_counts':r['exact_containment_counts'],
+              'independent_verification':v,
               'spectra':{
                   name:{
                       'hard_primes_hit_by_any_layer':s['hard_primes_hit_by_any_layer'],
@@ -102,7 +231,7 @@ jobs:
           json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
           c=report['exact_containment_counts']
           print(
-              f"::notice title=CBX deep spectrum overlap::"
+              f"::notice title=CBX deep spectrum overlap v2::"
               f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; " + '; '.join(
                   f"{name}:nonempty={report['spectra'][name]['nonempty_layers']},"
                   f"novel={report['spectra'][name]['novel_layers']},"
