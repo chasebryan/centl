@@ -21,6 +21,14 @@ case "${1:-}" in
         fi
         exec "$cbx_inverse" "$@"
       fi
+      if [ "${1:-}" = "shift-i" ]; then
+        shift
+        cbx_shift="$cbx_dir/cbx-shift-i"
+        if [ ! -x "$cbx_shift" ]; then
+          make -s -C "$cbx_dir" cbx-shift-i
+        fi
+        exec "$cbx_shift" "$@"
+      fi
       cbx="$cbx_dir/cbx"
       if [ ! -x "$cbx" ]; then
         make -s -C "$cbx_dir" cbx
