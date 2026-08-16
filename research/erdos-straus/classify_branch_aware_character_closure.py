@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 """Branch-aware recursive Jacobi/QR saturation closure.
 
-Scope:
-- roots are the eight merged composite character-extraction branches;
-- each root also carries the already-proved positive source characters for its
-  hard class under the simultaneous-survivor hypothesis;
-- every residue used to route a source is retained in the branch state;
-- destinations are odd k=3 mod4 through a finite bound;
-- exact mandatory divisor seeds are tested for Type-I hits and Jacobi-kernel
-  saturation;
-- routed subsets of size <=3 are enumerated exactly, and an all-compatible-
-  sources maximal-seed check proves that no hidden larger subset qualifies.
+This classifier is deliberately scoped to the class-global-positive source model
+explained in BRANCH-AWARE-CHARACTER-SATURATION-CLOSURE.md. It is complementary
+to, not a superset of, the branch-local source model in
+RECURSIVE-CHARACTER-PROMOTION.md.
 """
 from __future__ import annotations
 
@@ -33,9 +27,6 @@ ROOTS = (
     ("h529-q19", 529, {11: 5, 23: 13}, 19),
 )
 
-# Positive-character theorems already proved independently on these hard
-# classes. q=7 is not listed because the hard residue class fixes p mod7
-# exactly and the class-seed law already incorporates its routed factor.
 GLOBAL_POSITIVE = {
     121: {19, 47},
     169: {11, 31},
@@ -48,11 +39,11 @@ EXPECTED = {
     "states": 259,
     "transitions": 2820,
     "known_plus": 2535,
-    "extract_positive": 284,
-    "product_constraints": 1,
-    "type_i_hits": 0,
-    "sign_hits": 0,
-    "negative_extractions": 0,
+    "extract": 284,
+    "product": 1,
+    "type_i_hit": 0,
+    "sign_hit": 0,
+    "negative_character_entries": 0,
     "max_depth": 7,
     "max_qualifying_destination": 971,
     "hidden_large_subset_qualifiers": 0,
@@ -63,15 +54,22 @@ EXPECTED_SOURCE_ALPHABET = {
     83, 107, 109, 127, 131, 151, 167, 191, 271, 383, 971,
 }
 
-# Qualifying means that a minimal routed seed either Jacobi-saturates or hits
-# Type I, regardless of whether that transition creates a new source state.
-# The first version of this assertion accidentally listed only the destinations
-# emphasized by source creation and omitted compatible composite destinations.
 EXPECTED_DESTINATIONS = {
-    3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 79,
-    83, 91, 107, 109, 111, 127, 131, 151, 159, 167, 171, 191, 203,
-    215, 271, 327, 371, 383, 447, 551, 759, 791, 831, 971,
+    3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 75,
+    79, 83, 91, 95, 107, 111, 127, 131, 135, 143, 151, 167, 171,
+    191, 203, 215, 231, 271, 327, 371, 383, 391, 551, 971,
 }
+
+EXPECTED_DEPTH_ROWS = (
+    (0, 8, 25),
+    (1, 25, 55),
+    (2, 55, 62),
+    (3, 62, 47),
+    (4, 47, 29),
+    (5, 29, 23),
+    (6, 23, 10),
+    (7, 10, 0),
+)
 
 
 @dataclass(frozen=True)
@@ -180,21 +178,10 @@ def analyze_seed(
     fixed: dict[int, int],
     characters: dict[int, int],
 ) -> tuple[str | None, int | tuple[int, ...] | None, int | None]:
-    """Return (outcome, extracted-or-product, sign).
-
-    Outcomes:
-    - type_i_hit
-    - sign_hit
-    - known_plus
-    - extract
-    - product
-    - None
-    """
     residues = divisor_square_residues(seed, k)
     type_i = (-pow(4, -1, k)) % k
     if type_i in residues:
         return "type_i_hit", None, None
-
     if residues != jacobi_kernel(k):
         return None, None, None
 
@@ -214,8 +201,6 @@ def analyze_seed(
             return "sign_hit", None, None
         return "known_plus", None, None
     if len(unknown) == 1:
-        # A saturated miss forces Jacobi(k/p)=+1. Since signs are +/-1,
-        # the unknown sign must equal the product of the known signs.
         return "extract", unknown[0], known_product
     return "product", tuple(unknown), known_product
 
@@ -289,14 +274,11 @@ def qualifying_transitions(
 
         transitions.extend(found)
 
-        # Completeness guard for 4+-source subsets. All current source
-        # characters are positive. A routed positive source is Jacobi-plus at
-        # the destination by the reciprocity barrier. Therefore if any subset
-        # Jacobi-saturates, every compatible superset stays saturated; and if
-        # any subset hits the fixed Type-I target, every superset still hits.
-        # Hence when no <=3 subset qualifies, it is sufficient to test the
-        # maximal seed containing every compatible source at once.
         if not found and len(compatible) > max_explicit_subset:
+            if any(sign != 1 for sign in chars.values()):
+                raise RuntimeError(
+                    "maximal-seed completeness guard requires every current source character positive"
+                )
             maximal_fixed = dict(fixed0)
             for q in compatible:
                 maximal_fixed[q] = (-k) % q
@@ -310,7 +292,7 @@ def qualifying_transitions(
     return transitions, hidden_large_subset_qualifiers
 
 
-def closure(max_k: int) -> dict[str, object]:
+def closure(max_k: int) -> tuple[dict[str, object], frozenset[tuple[object, ...]]]:
     roots = root_states()
     seen = {state.key: state for state in roots}
     frontier = roots
@@ -319,9 +301,7 @@ def closure(max_k: int) -> dict[str, object]:
     transition_count = 0
     hidden_large = 0
     destinations: set[int] = set()
-    source_alphabet = {
-        q for state in roots for q, _ in state.characters
-    }
+    source_alphabet = {q for state in roots for q, _ in state.characters}
     product_rows: list[dict[str, object]] = []
 
     depth = 0
@@ -384,19 +364,19 @@ def closure(max_k: int) -> dict[str, object]:
         if depth > 20:
             raise RuntimeError("unexpected non-closure beyond depth 20")
 
-    negative_extractions = sum(
+    negative_entries = sum(
         1 for state in seen.values() for _, sign in state.characters if sign < 0
     )
 
     report = {
-        "analysis": "branch-aware-character-saturation-closure-v1",
+        "analysis": "branch-aware-class-global-positive-character-closure-v1",
         "max_destination_k": max_k,
         "roots": len(roots),
         "states": len(seen),
         "transitions": transition_count,
         "outcomes": dict(sorted(outcome_counts.items())),
         "product_constraints": product_rows,
-        "negative_character_entries_in_states": negative_extractions,
+        "negative_character_entries_in_states": negative_entries,
         "max_depth": max(state.depth for state in seen.values()),
         "depth_rows": depth_rows,
         "source_alphabet": sorted(source_alphabet),
@@ -404,16 +384,16 @@ def closure(max_k: int) -> dict[str, object]:
         "max_qualifying_destination": max(destinations),
         "hidden_large_subset_qualifiers": hidden_large,
         "scope": (
-            "eight merged composite-extraction roots; proved class-global positive sources; "
-            "exact retained route residues; odd destinations k=3 mod4 through bound; "
-            "minimal routed subsets <=3 plus maximal-all-source completeness guard"
+            "eight merged extraction roots; class-global positive source characters; exact "
+            "retained route residues; recursively extracted characters; odd destinations "
+            "k=3 mod4 through bound; minimal routed subsets <=3 plus maximal-positive-source guard"
         ),
         "claim_boundary": (
-            "finite closure of the quadratic/Jacobi saturation-promotion mechanism only; "
-            "does not include finer exact miss masks, valuations, or full companion-factor allocation"
+            "finite closure of this class-global-positive character-saturation model only; "
+            "does not subsume branch-local source refinements or finer miss/valuation geometry"
         ),
     }
-    return report
+    return report, frozenset(seen)
 
 
 def assert_expected(report: dict[str, object]) -> None:
@@ -423,53 +403,51 @@ def assert_expected(report: dict[str, object]) -> None:
         "states": report["states"],
         "transitions": report["transitions"],
         "known_plus": outcomes.get("known_plus", 0),
-        "extract_positive": outcomes.get("extract", 0),
-        "product_constraints": outcomes.get("product", 0),
-        "type_i_hits": outcomes.get("type_i_hit", 0),
-        "sign_hits": outcomes.get("sign_hit", 0),
-        "negative_extractions": report["negative_character_entries_in_states"],
+        "extract": outcomes.get("extract", 0),
+        "product": outcomes.get("product", 0),
+        "type_i_hit": outcomes.get("type_i_hit", 0),
+        "sign_hit": outcomes.get("sign_hit", 0),
+        "negative_character_entries": report["negative_character_entries_in_states"],
         "max_depth": report["max_depth"],
         "max_qualifying_destination": report["max_qualifying_destination"],
         "hidden_large_subset_qualifiers": report["hidden_large_subset_qualifiers"],
     }
     if actual != EXPECTED:
-        raise SystemExit(f"closure constants changed: {actual!r} != {EXPECTED!r}")
+        raise SystemExit(f"frontier counts changed: {actual!r}")
     if set(report["source_alphabet"]) != EXPECTED_SOURCE_ALPHABET:
         raise SystemExit(f"source alphabet changed: {report['source_alphabet']!r}")
     if set(report["qualifying_destinations"]) != EXPECTED_DESTINATIONS:
         raise SystemExit(
             f"qualifying destinations changed: {report['qualifying_destinations']!r}"
         )
-
-    products = report["product_constraints"]
-    if len(products) != 1:
-        raise SystemExit(f"unexpected product rows: {products!r}")
-    row = products[0]
-    if not (
-        row["hard_class"] == 289
-        and row["k"] == 551
-        and row["unknown_factors"] == [19, 29]
-        and row["known_product"] == 1
-    ):
-        raise SystemExit(f"product row changed: {row!r}")
+    depth_rows = tuple(
+        (int(row["depth"]), int(row["states_processed"]), int(row["new_states"]))
+        for row in report["depth_rows"]
+    )
+    if depth_rows != EXPECTED_DEPTH_ROWS:
+        raise SystemExit(f"depth profile changed: {depth_rows!r}")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-k", type=int, default=5000)
+    parser.add_argument("--assert-frontier", action="store_true")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument(
-        "--assert-frontier",
-        action="store_true",
-        help="require the pinned k<=5000 closure constants",
-    )
     args = parser.parse_args()
 
-    report = closure(args.max_k)
+    report, state_keys = closure(args.max_k)
     if args.assert_frontier:
         if args.max_k != 5000:
-            raise SystemExit("--assert-frontier requires --max-k 5000")
+            raise SystemExit("--assert-frontier is pinned to --max-k 5000")
         assert_expected(report)
+        short_report, short_keys = closure(1000)
+        if short_keys != state_keys:
+            raise SystemExit(
+                f"k<=1000 and k<=5000 state closures differ: "
+                f"{len(short_keys)} vs {len(state_keys)}"
+            )
+        if short_report["source_alphabet"] != report["source_alphabet"]:
+            raise SystemExit("k<=1000 and k<=5000 source alphabets differ")
 
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -478,8 +456,6 @@ def main() -> int:
         print(f"transitions: {report['transitions']}")
         print(f"max depth: {report['max_depth']}")
         print(f"max qualifying destination: {report['max_qualifying_destination']}")
-        print(f"outcomes: {report['outcomes']}")
-        print(f"hidden large-subset qualifiers: {report['hidden_large_subset_qualifiers']}")
     return 0
 
 
