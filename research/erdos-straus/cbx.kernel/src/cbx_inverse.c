@@ -1,24 +1,19 @@
 /*
  * cbx_inverse.c — exact finite inverse signed-box census for cbx.kernel 0.1.0
  *
- * This is the constructive orientation of ES-plus/LETTER-EQUATION.md:
+ * Constructive orientation of ES-plus/LETTER-EQUATION.md:
  *
  *     k -> C -> p = 4C-k.
  *
- * For a fixed admissible k and a Mordell-hard residue h (mod 840),
+ * For fixed admissible k and Mordell-hard residue h (mod 840),
  *
- *     p == h (mod 840)
+ *     C == (h+k)/4 (mod 210).
  *
- * is equivalent to
- *
- *     C == (h+k)/4 (mod 210),
- *
- * because h == 1 (mod 4) and k == 3 (mod 4). Thus only six C residue
- * classes modulo 210 need to be enumerated for each k.
- *
- * Crucially, delta_k(C) is evaluated before the generated p is looked up in
- * the hard-prime map. That preserves the inverse search orientation instead
- * of silently turning this back into a p-first Lane-I recognizer.
+ * The default target-gated mode still keeps k and C as the outer search,
+ * but after p=4C-k is generated it cheaply rejects composite/non-target p
+ * and targets already covered by a smaller k before factoring C. Because k
+ * is increasing, these gates cannot change cover membership or minimal first
+ * k. --strict-c-first preserves the ungated constructive baseline.
  */
 #define main cbx_core_main
 #include "cbx.c"
@@ -62,9 +57,12 @@ static void inv_usage(void) {
     fprintf(stderr,
             "cbx inverse — exact finite inverse signed-box census\n"
             "  cbx-inverse --hi X [--lo L] [--i-max K] [--segment N]\n"
-            "              [--verify] [--residuals FILE] [--hits FILE]\n\n"
-            "Defaults: lo=2, i-max=400, segment=1000000. --hi is required.\n"
-            "--verify cross-checks every hard prime against the p-first Lane-I recognizer.\n");
+            "              [--verify] [--strict-c-first|--target-gated]\n"
+            "              [--residuals FILE] [--hits FILE]\n\n"
+            "Defaults: lo=2, i-max=400, segment=1000000, target-gated.\n"
+            "--strict-c-first factors every compatible C before target lookup.\n"
+            "--target-gated generates p first and skips irrelevant/already-covered targets.\n"
+            "--verify cross-checks every hard prime against p-first Lane-I recognition.\n");
 }
 
 int main(int argc, char **argv) {
@@ -73,6 +71,7 @@ int main(int argc, char **argv) {
     uint64_t K = DEFAULT_I_MAX;
     uint64_t segment = 1000000;
     int verify = 0;
+    int target_gate = 1;
     const char *residual_path = NULL;
     const char *hits_path = NULL;
 
@@ -82,6 +81,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--i-max") && i + 1 < argc) K = inv_parse_u64("i-max", argv[++i]);
         else if (!strcmp(argv[i], "--segment") && i + 1 < argc) segment = inv_parse_u64("segment", argv[++i]);
         else if (!strcmp(argv[i], "--verify")) verify = 1;
+        else if (!strcmp(argv[i], "--strict-c-first")) target_gate = 0;
+        else if (!strcmp(argv[i], "--target-gated")) target_gate = 1;
         else if (!strcmp(argv[i], "--residuals") && i + 1 < argc) residual_path = argv[++i];
         else if (!strcmp(argv[i], "--hits") && i + 1 < argc) hits_path = argv[++i];
         else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) { inv_usage(); return 0; }
@@ -105,7 +106,11 @@ int main(int argc, char **argv) {
 
     u128 hard_total = 0;
     u128 c_candidates = 0;
+    u128 factorizations = 0;
     u128 delta_hits = 0;
+    u128 skipped_non_target = 0;
+    u128 skipped_covered = 0;
+    u128 skipped_non_coprime = 0;
     u128 covered_total = 0;
     u128 residual_total = 0;
     u128 verification_targets = 0;
@@ -122,7 +127,7 @@ int main(int argc, char **argv) {
         uint64_t *first_k = calloc(span, sizeof(uint64_t));
         if (!hard_prime || !covered || !first_k) die("inverse segment allocation failed");
 
-        /* Build only the target universe: Mordell-hard primes in this segment. */
+        /* Exact finite target universe for this p segment. */
         for (size_t r = 0; r < 6; r++) {
             uint64_t p = first_congruent(seg_lo, 840, INV_HARD[r]);
             if (p == UINT64_MAX) continue;
@@ -136,12 +141,6 @@ int main(int argc, char **argv) {
             }
         }
 
-        /*
-         * True inverse orientation. For every admissible k, enumerate C in
-         * the six residue classes forced by the hard p classes. Test delta on
-         * C first; only a generated hit is then mapped into the prime target
-         * universe.
-         */
         for (uint64_t k = 3; k <= K;) {
             u128 clo128 = ((u128)seg_lo + k + 3) / 4;
             u128 chi128 = ((u128)seg_hi + k) / 4;
@@ -155,16 +154,35 @@ int main(int argc, char **argv) {
 
                 while (C <= C_hi) {
                     c_candidates++;
-                    fac_t f;
-                    factor64(C, &f);
-                    if (delta_zero(&f, C, k)) {
-                        delta_hits++;
-                        u128 fourC = (u128)4 * C;
-                        if (fourC >= k) {
-                            u128 p128 = fourC - k;
-                            if (p128 >= seg_lo && p128 <= seg_hi) {
-                                uint64_t p = (uint64_t)p128;
-                                size_t idx = (size_t)(p - seg_lo);
+
+                    u128 fourC = (u128)4 * C;
+                    if (fourC >= k) {
+                        u128 p128 = fourC - k;
+                        if (p128 >= seg_lo && p128 <= seg_hi) {
+                            uint64_t p = (uint64_t)p128;
+                            size_t idx = (size_t)(p - seg_lo);
+
+                            if (target_gate) {
+                                if (!hard_prime[idx]) {
+                                    skipped_non_target++;
+                                    goto next_C;
+                                }
+                                if (covered[idx]) {
+                                    skipped_covered++;
+                                    goto next_C;
+                                }
+                                /* gcd(C,k)=1 iff gcd(p,k)=1 for odd k. */
+                                if (gcd64(C, k) != 1) {
+                                    skipped_non_coprime++;
+                                    goto next_C;
+                                }
+                            }
+
+                            fac_t f;
+                            factorizations++;
+                            factor64(C, &f);
+                            if (delta_zero(&f, C, k)) {
+                                delta_hits++;
                                 if (hard_prime[idx] && !covered[idx]) {
                                     covered[idx] = 1;
                                     first_k[idx] = k;
@@ -173,6 +191,8 @@ int main(int argc, char **argv) {
                             }
                         }
                     }
+
+next_C:
                     if (C > UINT64_MAX - 210) break;
                     C += 210;
                 }
@@ -219,23 +239,32 @@ int main(int argc, char **argv) {
     if (residuals) fclose(residuals);
     if (hits) fclose(hits);
 
-    char hard_s[64], cand_s[64], delta_s[64], covered_s[64], residual_s[64];
+    char hard_s[64], cand_s[64], fact_s[64], delta_s[64], non_target_s[64];
+    char covered_skip_s[64], non_coprime_s[64], covered_s[64], residual_s[64];
     char verify_s[64], mismatch_s[64];
     u128_decimal(hard_total, hard_s);
     u128_decimal(c_candidates, cand_s);
+    u128_decimal(factorizations, fact_s);
     u128_decimal(delta_hits, delta_s);
+    u128_decimal(skipped_non_target, non_target_s);
+    u128_decimal(skipped_covered, covered_skip_s);
+    u128_decimal(skipped_non_coprime, non_coprime_s);
     u128_decimal(covered_total, covered_s);
     u128_decimal(residual_total, residual_s);
     u128_decimal(verification_targets, verify_s);
     u128_decimal(verification_mismatches, mismatch_s);
 
     printf("{\"kernel\":\"cbx.kernel\",\"version\":\"%s\",\"mode\":\"inverse-I\","
-           "\"lo\":%" PRIu64 ",\"hi\":%" PRIu64 ",\"i_max\":%" PRIu64
-           ",\"segment\":%" PRIu64 ",\"hard_primes\":%s,\"C_candidates\":%s,"
-           "\"delta_hits\":%s,\"covered_hard_primes\":%s,\"residual_hard_primes\":%s,"
-           "\"verify\":%s,\"verification_targets\":%s,\"verification_mismatches\":%s}\n",
-           VERSION, lo, hi, K, segment, hard_s, cand_s, delta_s, covered_s, residual_s,
-           verify ? "true" : "false", verify_s, mismatch_s);
+           "\"candidate_mode\":\"%s\",\"lo\":%" PRIu64 ",\"hi\":%" PRIu64
+           ",\"i_max\":%" PRIu64 ",\"segment\":%" PRIu64
+           ",\"hard_primes\":%s,\"C_candidates\":%s,\"factorizations\":%s,"
+           "\"delta_hits\":%s,\"skipped_non_target\":%s,\"skipped_covered\":%s,"
+           "\"skipped_non_coprime\":%s,\"covered_hard_primes\":%s,"
+           "\"residual_hard_primes\":%s,\"verify\":%s,"
+           "\"verification_targets\":%s,\"verification_mismatches\":%s}\n",
+           VERSION, target_gate ? "target-gated" : "strict-c-first", lo, hi, K, segment,
+           hard_s, cand_s, fact_s, delta_s, non_target_s, covered_skip_s, non_coprime_s,
+           covered_s, residual_s, verify ? "true" : "false", verify_s, mismatch_s);
 
     return verification_mismatches ? 1 : 0;
 }
