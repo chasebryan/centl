@@ -130,7 +130,6 @@ def verify_full_closure() -> tuple[dict[str, object], frozenset[State]]:
     assert len(states) == 1403
     assert len(route_misses) == 14
 
-    # Hit persistence and mask monotonicity are checked over the entire graph.
     for state in states:
         mask, _center = state
         for r in UNITS51:
@@ -224,18 +223,25 @@ def verify_mod17_sector(route_misses: frozenset[State]) -> dict[str, object]:
     })
 
     survivor_skeletons: dict[int, frozenset[tuple[int, ...]]] = {}
-    for size in range(5):
+    for size in range(6):
         survivors = frozenset(
             tuple(comb)
             for comb in itertools.combinations_with_replacement(sorted(nr17), size)
             if not hit17(state17(tuple(comb)))
         )
         survivor_skeletons[size] = survivors
-    assert {n: len(v) for n, v in survivor_skeletons.items()} == {0:1, 1:4, 2:3, 3:2, 4:0}
+    assert {n: len(v) for n, v in survivor_skeletons.items()} == {
+        0:1, 1:4, 2:3, 3:2, 4:1, 5:0
+    }
     assert survivor_skeletons[1] == frozenset({(5,), (6,), (7,), (10,)})
     assert survivor_skeletons[3] == frozenset({(5,5,5), (5,5,7)})
+    assert survivor_skeletons[4] == frozenset({(5,5,5,7)})
+    assert not survivor_skeletons[5]
 
-    # K=5 mod17 is a nonresidue, so only odd NR skeleton sizes can occur.
+    # K=5 mod17 is a nonresidue, so its number of nonresidue factor
+    # occurrences is odd. The unique size-4 safe skeleton is therefore
+    # arithmetically incompatible with Route A. Every size-5 NR multiset hits,
+    # and hit persistence excludes all larger NR skeletons.
     odd_skeletons = tuple(sorted(survivor_skeletons[1] | survivor_skeletons[3]))
     skeleton_states = {state17(sk) for sk in odd_skeletons}
     qr_states = closure(17, skeleton_states, tuple(sorted(qr17)))
@@ -250,8 +256,6 @@ def verify_mod17_sector(route_misses: frozenset[State]) -> dict[str, object]:
     n557 = state17((5,5,7))
     assert n6 == n555
 
-    # Pin the complete target-avoiding QR continuation graph needed for the
-    # fixed final product. All unspecified QR transitions hit.
     safe_rows = {}
     for label, state in {
         "N5": n5,
@@ -279,10 +283,8 @@ def verify_mod17_sector(route_misses: frozenset[State]) -> dict[str, object]:
         state = state17(pattern)
         assert state[1] == 8
         assert not hit17(state)
-        product = math.prod(pattern) % 17
-        assert product == 5
+        assert math.prod(pattern) % 17 == 5
 
-    # Exactly five full Route-A miss masks have target-free mod17 projection.
     mod17_safe_full = frozenset(
         state for state in route_misses
         if 4 not in {x % 17 for x in state[0]}
@@ -295,6 +297,8 @@ def verify_mod17_sector(route_misses: frozenset[State]) -> dict[str, object]:
         "mod17_center8_endpoints": len(endpoint17),
         "mod17_safe_endpoints": len(safe_endpoint17),
         "nr_survivor_counts": {str(n): len(v) for n, v in survivor_skeletons.items()},
+        "unique_even_size4_skeleton": [5,5,5,7],
+        "nr_absorbing_depth": 5,
         "accepted_non1_occurrence_patterns": [list(x) for x in accepted_patterns],
         "full_route_S17_miss_masks": len(mod17_safe_full),
     }
@@ -342,7 +346,7 @@ def main() -> int:
 
     full, route_misses = verify_full_closure()
     report = {
-        "analysis": "route-a-k51-sector-normal-form-v1",
+        "analysis": "route-a-k51-sector-normal-form-v2",
         "route": verify_route_parameterization(),
         "full_closure": full,
         "character_sector": verify_character_sector(route_misses),
