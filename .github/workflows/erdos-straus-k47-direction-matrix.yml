@@ -1,0 +1,116 @@
+name: Erdős–Straus k=47 direction matrix
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/cbx-k47-direction-matrix
+    paths:
+      - 'research/erdos-straus/analyze_k47_negative_corridor.py'
+      - 'research/erdos-straus/classify_k47_states.py'
+      - 'research/erdos-straus/classify_k47_forced6_states.py'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/erdos-straus-k47-direction-matrix.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k47-direction-matrix:
+    name: fedora-k47-direction-matrix
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora toolchain
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone Lane-I profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Prove abstract eleven-direction partition regression
+        run: |
+          python3 research/erdos-straus/analyze_k47_negative_corridor.py \
+            --self-test --json > /tmp/k47-abstract-directions.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-abstract-directions.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-one-packet-abstract-regression-v1'
+          assert r['negative_character_hard_miss_states'] == 80
+          assert r['compatibility_multiplicity_histogram'] == {'1': 80}
+          assert r['direction_classes_disjoint'] is True
+          assert r['direction_union_complete'] is True
+          assert sum(r['direction_state_counts'].values()) == 80
+          print(
+              f"::notice title=Exact k47 one-packet partition::"
+              f"states=80; multiplicity={r['compatibility_multiplicity_histogram']}; "
+              f"directions={r['direction_state_counts']}"
+          )
+          PY
+
+      - name: Regenerate complete standalone relations through k=47 at 10M
+        run: |
+          ./centl es cbx standalone-i \
+            --hi 10000000 \
+            --i-max 47 \
+            --segment 1000000 \
+            --sets /tmp/k47-standalone-hit-relations.tsv \
+            > /tmp/k47-standalone.json
+
+      - name: Build direction-resolved finite matrix
+        run: |
+          python3 research/erdos-straus/analyze_k47_negative_corridor.py \
+            /tmp/k47-standalone-hit-relations.tsv \
+            --hi 10000000 --json \
+            > /tmp/k47-direction-matrix.json
+
+      - name: Validate complete-universe accounting and summarize theorem targets
+        run: |
+          python3 - <<'PY'
+          import json
+          raw=json.load(open('/tmp/k47-standalone.json', encoding='utf-8'))
+          r=json.load(open('/tmp/k47-direction-matrix.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['mode'] == 'standalone-I'
+          assert raw['hard_primes'] == 20513
+          assert r['analysis'] == 'k47-negative-legendre-direction-matrix-v2'
+          assert r['hard_universe'] == raw['hard_primes'] == 20513
+          assert r['abstract_direction_regression']['negative_character_hard_miss_states'] == 80
+          assert r['abstract_direction_regression']['compatibility_multiplicity_histogram'] == {'1': 80}
+          assert r['direction_matrix']['compatibility_multiplicity_histogram'] == {
+              '1': r['negative_legendre_k47_misses']
+          }
+          rows=[]
+          for d in r['direction_matrix']['directions']:
+              rows.append(
+                  f"r={d['log_direction']}:n={d['finite_compatible_targets']}:"
+                  f"m={d['minimum_finite_cover_size']}:"
+                  f"single={d['singleton_eliminators']}:pairs={len(d['pair_eliminators'])}"
+              )
+          print(
+              f"::notice title=Complete k47 negative-character census::"
+              f"hard={r['hard_universe']}; hit-union={r['relation_union']}; "
+              f"invisible={r['hard_primes_invisible_in_hit_union']}; "
+              f"k47-negative-misses={r['negative_legendre_k47_misses']}; "
+              f"residual-through39={r['residual_after_prior_corridor']}; "
+              f"global-min-covers={r['all_minimum_finite_covers']}"
+          )
+          print(
+              f"::notice title=k47 direction theorem targets::" + '; '.join(rows)
+          )
+          PY
+
+      - name: Upload direction matrix evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: k47-direction-matrix-10m
+          path: |
+            /tmp/k47-abstract-directions.json
+            /tmp/k47-standalone.json
+            /tmp/k47-standalone-hit-relations.tsv
+            /tmp/k47-direction-matrix.json
+          if-no-files-found: error
