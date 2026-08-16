@@ -1,0 +1,26 @@
+name: Erdős–Straus routed residual gcd atlas
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/ROUTED-RESIDUAL-GCD-ATLAS.md"
+      - "research/erdos-straus/classify_routed_residual_gcd_atlas.py"
+      - "research/erdos-straus/verify_routed_residual_gcd_atlas.py"
+      - ".github/workflows/erdos-straus-routed-residual-gcd.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact residual gcd classifier
+        run: python3 research/erdos-straus/classify_routed_residual_gcd_atlas.py --json
+      - name: Independent arithmetic regression
+        run: python3 research/erdos-straus/verify_routed_residual_gcd_atlas.py --iterations 2000 --json
