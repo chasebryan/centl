@@ -41,6 +41,12 @@ def expected_gcd(a: str, b: str, t: int) -> int:
     return 1
 
 
+def odd_part(n: int) -> int:
+    while n % 2 == 0:
+        n //= 2
+    return n
+
+
 def verify_later_ladder() -> dict[str, object]:
     # B..L formulas and gcd pattern are route-independent. 840 samples cover
     # all parity/mod3/mod5/mod7 combinations used in the algebraic proof.
@@ -79,9 +85,8 @@ def verify_later_ladder() -> dict[str, object]:
             g = math.gcd(vals[a], vals[b])
             assert g == expected_gcd(a, b, t), (t, a, b, g)
             observed.setdefault(f"{a}-{b}", set()).add(g)
-            # Strong form: odd parts are always disjoint.
-            assert g & (g - 1) == 0 if g > 0 else False
             assert g in {1, 2, 4}
+            assert odd_part(g) == 1
             checked += 1
 
     nontrivial = {
@@ -135,11 +140,7 @@ def verify_route(S: int, expected_t0: int, expected_R0: int) -> dict[str, object
         for a, b in combinations(NAMES, 2):
             g = math.gcd(vals[a], vals[b])
             assert g == expected_gcd(a, b, t), (S, u, t, a, b, g)
-            # Removing powers of2 leaves pairwise-coprime odd supports.
-            odd_g = g
-            while odd_g % 2 == 0:
-                odd_g //= 2
-            assert odd_g == 1
+            assert odd_part(g) == 1
 
     return {
         "S": S,
