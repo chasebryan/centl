@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The FCF/CENTL Erdős–Straus program has exact two-target classifications for the twelve consecutive shifts k=3 through 47; the remaining problem is joint consecutive-state incompatibility.">
+  <title>Twelve-consecutive Erdős–Straus corridor — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/twelve-consecutive-two-target-corridor.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Twelve-consecutive Erdős–Straus corridor — FCF">
+  <meta property="og:description" content="Exact fixed-shift miss languages now cover P+1 through P+12. Six finite 10M survivors remain after the twelve-position corridor; Erdős–Straus remains open.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Twelve-consecutive exact two-target corridor</h1><p>Erdős–Straus · current CBX theorem frontier</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Foundation</h2><ul><li><a href="../index.html">Home</a></li><li><a href="../about.html">About FCF</a></li><li><a href="../centl.html">CENTL</a></li></ul>
+      <h2>Research</h2><ul><li><a href="../research.html">Research library</a></li><li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li></ul>
+      <h2>External</h2><ul><li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li></ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Erdős–Straus · CBX corridor</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Current proof frontier</p>
+          <p class="dek">The first twelve admissible Lane-I shifts are exactly twelve consecutive translated integers, and every one now has an exact fixed-shift miss classification.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/TWELVE-CONSECUTIVE-TWO-TARGET-CORRIDOR.md">Canonical research note</a> · <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/analyze_twelve_shift_corridor.py">Finite census analyzer</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Status:</strong> exact local theorem synthesis plus finite theorem-hunting evidence. The Erdős–Straus conjecture remains open.</p>
+          <h2>Twelve consecutive integers</h2>
+          <p>For <code>P=(p-1)/4</code> and <code>k=4t-1</code>, the shifted integer is <code>(p+k)/4=P+t</code>. Thus the shifts</p>
+          <pre><code>3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47</code></pre>
+          <p>are exactly</p>
+          <div class="math" role="math">\boxed{P+1,P+2,\ldots,P+12.}</div>
+          <p>Each position now has an exact two-target failure language. The late corridor is closed by finite-group state classifiers at 27, 31, 35, 39, 43, and 47.</p>
+          <h2>Finite 10M progression</h2>
+          <table class="status">
+            <tr><th>k</th><th>Translate</th><th>New hits</th><th>Residual</th></tr>
+            <tr><td>3</td><td>P+1</td><td>8,590</td><td>11,923</td></tr>
+            <tr><td>7</td><td>P+2</td><td>4,779</td><td>7,144</td></tr>
+            <tr><td>11</td><td>P+3</td><td>4,463</td><td>2,681</td></tr>
+            <tr><td>15</td><td>P+4</td><td>949</td><td>1,732</td></tr>
+            <tr><td>19</td><td>P+5</td><td>883</td><td>849</td></tr>
+            <tr><td>23</td><td>P+6</td><td>541</td><td>308</td></tr>
+            <tr><td>27</td><td>P+7</td><td>91</td><td>217</td></tr>
+            <tr><td>31</td><td>P+8</td><td>152</td><td>65</td></tr>
+            <tr><td>35</td><td>P+9</td><td>17</td><td>48</td></tr>
+            <tr><td>39</td><td>P+10</td><td>22</td><td>26</td></tr>
+            <tr><td>43</td><td>P+11</td><td>5</td><td>21</td></tr>
+            <tr><td>47</td><td>P+12</td><td>15</td><td>6</td></tr>
+          </table>
+          <p>The six finite survivors are <code>118801, 496609, 532249, 806521, 2458369, 8803369</code>. All six are hit later by shifts 51, 55, 59, or 107. This is finite evidence only. It is not a universal twelve-shift cover.</p>
+          <h2>The sharper cross-shift target at 47</h2>
+          <p>Every hard prime has <code>6 | (p+47)/4</code>. Once that forced packet is built into the exact state machine, only 196 hard-prime miss states remain at 47, including 80 with <code>(47/p)=-1</code>. Those 80 states reduce to just eleven canonical nonresidue directions modulo 47.</p>
+          <p>In the 10M corpus, every negative-character k=47 miss is already caught by earlier shifts through 39. The exact finite minimum cover uses seven earlier layers. This is now the leading cross-shift theorem candidate, not a proved containment.</p>
+          <p>See <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K47-FORCED6-HARD-REDUCTION.md">forced-6 reduction</a>, <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K47-ONE-PACKET-COMPANION-FILTER.md">one-packet companion filter</a>, and <a href="https://github.com/chasebryan/centl/blob/agent/cbx-kernel/research/erdos-straus/K47-NEGATIVE-LEGENDRE-CORRIDOR-10M.md">finite cross-shift census</a>.</p>
+          <h2>What remains</h2>
+          <p>The preferred theorem target is now to prove that the twelve consecutive exact miss families cannot occur simultaneously. A smaller first step is to prove the observed negative-Legendre exclusion at k=47 from the earlier exact corridor constraints.</p>
+          <p><strong>Claim boundary:</strong> local fixed-shift classifications are exact. The six-prime 10M residual and the negative-Legendre exclusion are finite theorem-hunting evidence. Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>
