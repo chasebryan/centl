@@ -26,7 +26,8 @@ check: cbx cbx-inverse cbx-forward-i
 	./cbx probe 9658489
 	./cbx-inverse --hi 100000 --i-max 80 --segment 25000 --verify
 	./cbx-forward-i --hi 100000 --i-max 80
-	$(PYTHON) -m py_compile analyze.py
+	$(PYTHON) -m py_compile analyze.py bench_i.py
+	$(PYTHON) bench_i.py --hi 20000 --i-max 40 --repeat 1 --no-verify --json >/dev/null
 	rm -f state/check.seed observations/check.jsonl
 	./cbx go --run check --step 1000 --iterations 2 --sweep-only
 	test "$$(sed -n 's/^sweep=//p' state/check.seed)" = "2000"
