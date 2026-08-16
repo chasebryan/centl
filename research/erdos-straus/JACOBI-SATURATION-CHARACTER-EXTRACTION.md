@@ -71,16 +71,26 @@ For composite k it gives a product of prime characters. If every odd-exponent pr
 
 This is how a composite fixed-shift obstruction can create a new prime routing source.
 
-## 3. Composite saturation atlas through k<=5000
+## 3. Positive-character source scope
 
-Using the current proved source inventory, the exact scan finds
+Character routing requires only a proved positive source character. It does not require the source fixed-shift miss mask itself to be QR-rigid.
+
+This matters at q=23. The ordinary seed-6 k=23 closure has a positive-character p mod23=1 miss branch whose divisor mask is non-rigid. Nevertheless
+
+`(23/p)=+1`
+
+on that branch, so p mod23=1 is a legitimate character-routing source residue.
+
+The composite atlas therefore uses every quadratic-residue source class modulo23, including residue1, rather than only the ten rigid QR-support residues.
+
+With that complete character-source scope, the exact scan through composite k<=5000 finds
 
 - 11 single-source composite Jacobi-saturation branches;
-- 7 genuine two-source composite Jacobi-saturation branches.
+- 8 genuine two-source composite Jacobi-saturation branches;
+- 8 branches that extract one new prime character exactly;
+- 1 additional branch that constrains a product of two previously unknown prime characters.
 
 The k=15 branches reproduce the already-known Jacobi-plus support geometry and do not extract a new prime character because both 3 and5 are already controlled by the hard modulus.
-
-The new value lies in composite shifts with one character factor outside 840.
 
 ## 4. New extracted prime-character branches
 
@@ -170,7 +180,7 @@ which Jacobi-saturates modulo39. A k=39 miss therefore forces
 
 This branch is consistent with the earlier q13 theorem obtained from the q11-to-k39 route, but now has a collective seed explanation.
 
-### 4.5 h=289 - q11 and q31 through k=215 extract q43
+### 4.5 h=289 - q11 and q31 through k=215 extracts q43
 
 Impose
 
@@ -194,7 +204,7 @@ The hard class fixes the mod5 contribution positively, so a k=215 miss forces
 
 Thus q43 becomes a new conditional routing source.
 
-### 4.6 h=529 - q11 and q23 through k=171 extract q19
+### 4.6 h=529 - q11 and q23 through k=171 extracts q19
 
 Impose
 
@@ -218,7 +228,41 @@ the square power of3 disappears from the Jacobi character. A k=171 miss therefor
 
 This promotes q19 on a new h=529 branch.
 
-## 5. Exact extracted-source list
+## 5. The q23 residue1 branch at k=551
+
+The complete positive-character q23 source scope adds one genuine pair saturation that is invisible if p mod23=1 is excluded.
+
+On h=289 impose
+
+`p mod23 = 1`
+
+and
+
+`p mod31 = 7`.
+
+Then 23 and31 both divide C551. The h=289 class seed at k=551 is210, so
+
+`S = 210*23*31 = 149730`.
+
+Neither routed factor alone Jacobi-saturates modulo551, but the pair does.
+
+Since
+
+`551 = 19*29`,
+
+a saturated k=551 miss forces
+
+`(551/p)=+1`,
+
+or equivalently
+
+`(19/p)(29/p)=+1`.
+
+The hard class does not determine either q19 or q29 individually here, so this is a two-character product constraint rather than a new single-prime source.
+
+The independent finite regression finds two route primes below two million, p=598369 and p=1197289. Both miss k=551 and satisfy the predicted positive character product.
+
+## 6. Exact extracted-source list
 
 The eight extracted branch entries are
 
@@ -231,9 +275,9 @@ The eight extracted branch entries are
 - h=529, k51, sources11/23 residues4/18 -> q17 positive;
 - h=529, k171, sources11/23 residues5/13 -> q19 positive.
 
-The independent finite regression realizes every branch below p=2,000,000, finds destination misses on every branch, and verifies that every such miss has the extracted positive prime character.
+The independent finite regression realizes every extraction branch below p=2,000,000, finds destination misses on every branch, and verifies that every such miss has the extracted positive prime character. It separately realizes and verifies the k=551 product-character branch.
 
-## 6. Strategic consequence
+## 7. Strategic consequence
 
 The route graph is no longer restricted to prime fixed shifts serving as character sources.
 
@@ -243,6 +287,10 @@ The exact mechanism is now
 
 This generates new moduli such as17,37,43 that were not present in the original small-prime fixed-shift atlas.
 
-The next useful search is recursive: route these extracted primes into new companions, score whether they create QR/Jacobi saturation or shrink an exceptional exact state, and stop branches when a newly saturated destination conflicts with an already fixed negative character or exact residue mask.
+It also shows that composite saturation can produce useful multi-character constraints even when no single factor can yet be extracted.
+
+The next search must be branch-aware: preserve every source residue used to create the composite seed, route the extracted prime only through compatible quadratic-residue classes, and stop any branch when a saturated destination requires a center character incompatible with an already fixed residue.
+
+The first such recursive elimination has already appeared: q13 extracted from a saturated k=39 miss can route through p mod13=3 into C23, where seed78 QR-saturates modulo23 and excludes the two negative k=23 miss residues 5 and14.
 
 Erdős-Straus remains open.
