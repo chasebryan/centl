@@ -7,6 +7,7 @@ on:
       - 'research/erdos-straus/cbx.kernel/**'
       - 'research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md'
       - 'research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md'
       - '.github/workflows/cbx-kernel.yml'
   push:
     branches: [main]
@@ -30,8 +31,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and self-test CBX
-        run: make -C research/erdos-straus/cbx.kernel clean check
+      - name: Build CBX
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Run CBX runtime self-test
+        run: research/erdos-straus/cbx.kernel/cbx self-test
+
+      - name: Run direct known probes
+        run: |
+          research/erdos-straus/cbx.kernel/cbx probe 1009 > /tmp/cbx-1009.json
+          research/erdos-straus/cbx.kernel/cbx probe 2521 > /tmp/cbx-2521.json
+          research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
 
       - name: Check analyzer syntax
         run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py
@@ -66,6 +76,8 @@ jobs:
           assert r['kernel'] == 'cbx.kernel'
           assert r['unique_grade_targets'] > 0
           assert 'all' in r['strata']
+          assert r['truncated_tail_ignored'] == 0
+          assert set(r['empirical_envelopes']) == {'log', 'log2', 'spectrum-log'}
           PY
           if ./centl es cbx go --run ci --iterations 1 --sweep-only --i-max 401; then
             echo 'grade mutation unexpectedly succeeded' >&2
