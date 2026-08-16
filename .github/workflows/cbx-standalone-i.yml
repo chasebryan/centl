@@ -6,6 +6,7 @@ on:
       - 'centl'
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
   push:
@@ -14,6 +15,7 @@ on:
       - 'centl'
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
       - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
 
@@ -42,30 +44,44 @@ jobs:
             --hi 100000 \
             --i-max 80 \
             --segment 25000 \
+            --sets /tmp/cbx-standalone-sets.tsv \
             > /tmp/cbx-standalone.json
           ./centl es cbx analyze-standalone \
             /tmp/cbx-standalone.json --json \
             > /tmp/cbx-standalone-analysis.json
+          ./centl es cbx analyze-overlap \
+            /tmp/cbx-standalone-sets.tsv --json \
+            > /tmp/cbx-overlap-analysis.json
 
-      - name: Validate standalone accounting
+      - name: Validate standalone accounting and overlap graph
         run: |
           python3 - <<'PY'
           import json
           raw=json.load(open('/tmp/cbx-standalone.json', encoding='utf-8'))
           r=json.load(open('/tmp/cbx-standalone-analysis.json', encoding='utf-8'))
+          g=json.load(open('/tmp/cbx-overlap-analysis.json', encoding='utf-8'))
           assert raw['kernel'] == 'cbx.kernel'
           assert raw['mode'] == 'standalone-I'
+          assert raw['sets_recorded'] is True
           assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
+          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v1'
           assert r['hard_primes'] > 0
-          assert r['layers'] == len(raw['shifts'])
+          assert r['layers'] == len(raw['shifts']) == g['layers']
+          assert raw['set_relations'] == g['relation_rows'] == r['totals']['hit_events']
           for row in raw['shifts']:
               assert row['target_visits'] == raw['hard_primes']
               assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
               assert sum(row['spectrum_hits'].values()) == row['hits']
           top='; '.join(f"k={x['k']}:hits={x['hits']}" for x in r['top_by_hits'][:6])
+          pair=g['top_pairwise_similarity'][0] if g['top_pairwise_similarity'] else None
+          pair_txt=(
+              f"{pair['later_k']}<-{pair['earlier_k']}:J={pair['jaccard']:.4f}"
+              if pair else 'none'
+          )
           print(
-              f"::notice title=CBX Fedora standalone layers::"
+              f"::notice title=CBX Fedora standalone overlap::"
               f"hard={r['hard_primes']}; layers={r['layers']}; "
-              f"productive={r['productive_layers']}; zero-hit={r['zero_hit_layers']}; top={top}"
+              f"productive={r['productive_layers']}; single-containments={g['exact_single_layer_containment_count']}; "
+              f"two-layer-targets={g['exact_two_layer_containment_target_count']}; top={top}; top-pair={pair_txt}"
           )
           PY
