@@ -1,142 +1,90 @@
-# Route-conditioned phase state through k55
+# Route-conditioned phase and mode state through k55
 
 **Status:** exact framework-state refinement  
 **Date:** 2026-08-16  
 **Verifier:** `verify_route_conditioned_phase_state.py`  
-**Depends on:** landed h169 phase contraction through k55, ten-cofactor odd-support separation, and Route-B k47 survivor normal form  
-**Claim boundary:** exact necessary phase/state restrictions on the two realized h169 routes. This is not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.
+**Depends on:** landed route-conditioned k19/k31 phase contraction, ten-cofactor odd-support separation, and Route-B k47 survivor normal form  
+**Claim boundary:** exact necessary route-conditioned phase/mode restrictions. This is not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.
 
-## 1. Why global phase volume must be conditioned on ancestry
+## 1. Start from the stronger landed phase envelope
 
-The landed h169 phase-volume theorem uses five exact filters:
+The landed route-conditioned phase theorem already incorporates:
+
+- pair-route k19 QR19 center support;
+- k31 QR31 support;
+- k39, k43, k47, k51, and k55 exact phase filters.
+
+It gives the exact necessary envelopes
 
 ```text
-k39 :  9 / 13 phases survive
-k43 : 40 / 43
-k47 : 34 / 47
-k51 : 13 / 17
-k55 :  7 / 11.
+Route A:
+11,566,800 / 170,222,767
+≈ 0.06795095746504931
+
+Route B:
+4,422,600 / 61,569,937
+= 340,200 / 4,736,149
+≈ 0.07183051039990507.
 ```
 
-Their moduli are pairwise coprime, so for unrestricted h169 the product is exact.
+This module does not replace those contractions. It adds the **route-local endpoint state** that a scalar phase fraction cannot represent.
 
-The realized k19 routes are not unrestricted h169 progressions, however. Each route already fixes one of those phase moduli:
-
-- Route A contains the prime17 in its route modulus;
-- Route B contains the prime47 in its route modulus.
-
-Therefore the candidate framework should use **route-conditioned phase state**, not blindly multiply every global filter again after the route has been selected.
-
-## 2. Route A fixes the k51 phase
+## 2. Route A fixes a live k51 endpoint family
 
 Route A is
 
 `t = 199 + 391u`,
 
-with `391=17*23`.
+so
 
-Hence
+`t = 12 mod17`.
 
-`t = 12 mod17`
+That phase is not absorbed by k51. It fixes
 
-for every Route-A state.
+`C51 = 25 mod51`.
 
-Phase12 is a surviving k51 phase. Its exact h169 k51 center is
+Rebuilding the exact seed-5 k51 closure gives
 
-`C51 = 25 mod51`,
+```text
+1403 total states
+14 miss states at center 25.
+```
 
-and the landed k51 closure contains14 miss states at that center.
+Thus Route A does not carry a free k51 phase coordinate after route selection. It carries a **fixed 14-state endpoint family**.
 
-Thus k51 supplies **no additional phase-volume contraction** after conditioning on Route A. It instead leaves a fixed 14-state local target for future compression.
+That family is now the unresolved Route-A local-mode target.
 
-For the remaining phase moduli
-
-`13,43,47,11`,
-
-we have
-
-`gcd(391,m)=1`.
-
-Therefore `u -> 199+391u` is a bijection modulo each m, and the survivor counts are unchanged.
-
-The exact Route-A phase modulus is
-
-`M_A = 13*43*47*11 = 289003`.
-
-The exact number of surviving u classes is
-
-`N_A = 9*40*34*7 = 85680`.
-
-So, relative to Route A,
-
-`V_A = 85680 / 289003`
-
-which is approximately
-
-`0.2964675107178818`.
-
-The named phase filters exclude
-
-`203323 / 289003`
-
-of Route-A u-space, approximately70.3532489%.
-
-## 3. Route B fixes the k47 phase
+## 3. Route B fixes a two-mode k47 endpoint
 
 Route B is
 
 `t = 705 + 1081u`,
 
-with `1081=23*47`.
+so
 
-Hence
+`t = 0 mod47`.
 
-`t = 0 mod47`
+That phase is not absorbed by k47. It fixes
 
-for every Route-B state.
+`C47 = 7 mod47`.
 
-Phase0 is a surviving k47 phase. The landed Route-B theorem sharpens that fixed phase much further:
+The landed Route-B normal form reduces the fixed endpoint to exactly
 
-```text
-k47 miss
-  <=> every q|J is QR mod47,
+`k47_mode = THIN | FULL_QR`,
 
-J=B+1,
+with
 
-k47_mode = THIN | FULL_QR.
-```
+`J=B+1`
 
-Thus k47 supplies **no additional phase-volume contraction** after conditioning on Route B. It supplies an exact two-mode survivor state instead.
+and
 
-For the remaining phase moduli
+`k47 miss <=> every prime factor of J is QR mod47`.
 
-`13,43,17,11`,
+Thus Route B has already been compressed from a phase to a symbolic two-mode state.
 
-we have
+## 4. THIN forces parity
 
-`gcd(1081,m)=1`.
-
-The exact Route-B phase modulus is
-
-`M_B = 13*43*17*11 = 104533`.
-
-The exact number of surviving u classes is
-
-`N_B = 9*40*13*7 = 32760`.
-
-So, relative to Route B,
-
-`V_B = 32760 / 104533 = 2520 / 8041`
-
-approximately
-
-`0.31339385648551177`.
-
-The named phase filters exclude approximately68.6606143% of Route-B u-space.
-
-## 4. THIN couples mode to parity
-
-The Route-B THIN grammar allows, after deleting residue-1 prime-factor occurrences of J, only
+The exact THIN grammar permits, after deleting residue-1 factor occurrences of J, only
 
 `{9}`
 
@@ -146,29 +94,29 @@ or
 
 modulo47.
 
-The rational prime2 has residue2 modulo47. Although2 is a quadratic residue modulo47, it is not permitted by the THIN grammar.
+Rational prime2 has residue2 modulo47, which is not allowed in THIN.
 
 Therefore
 
 `THIN => 2 does not divide J`.
 
-But
+Since
 
 `J = 9 + 35t`,
 
-so
+we have
 
-`J is odd <=> t is even`.
+`J odd <=> t even`.
 
 Hence
 
 `Route-B THIN => t even`.
 
-Since
+Because
 
 `t = 705 + 1081u`
 
-and both705 and1081 are odd,
+with both coefficients odd,
 
 `t even <=> u odd`.
 
@@ -176,31 +124,49 @@ Therefore
 
 `Route-B THIN => u odd`.
 
-Parity is independent of the four odd residual phase moduli, so the THIN branch occupies at most
+## 5. Strong THIN phase/parity envelope
 
-`32760`
+The landed Route-B phase theorem leaves
+
+`4,422,600`
 
 classes modulo
 
-`2*M_B = 209066`.
+`61,569,937`.
 
-Its necessary phase fraction is
+All independent phase moduli there are odd. Parity is therefore an independent coordinate.
 
-`32760 / 209066 = 1260 / 8041`
+The THIN parity condition leaves at most
 
-approximately
+`4,422,600`
 
-`0.15669692824275588`.
+classes modulo
 
-This is only the phase/parity envelope. The full THIN factor grammar is substantially stronger.
+`123,139,874 = 2*61,569,937`.
 
-## 5. Mode couples to the exact 2-adic support seam
+Hence the necessary THIN phase/parity envelope is
 
-The ten-cofactor theorem gives
+`4,422,600 / 123,139,874`
+
+which reduces to
+
+`170,100 / 4,736,149`
+
+and is approximately
+
+`0.035915255199952534`.
+
+So before using the rest of the THIN factor grammar, the proved phase-plus-parity conditions alone remove about96.41% of Route-B parameter space.
+
+This remains a necessary modular envelope, not a density theorem and not a termination measure.
+
+## 6. Survivor mode switches an exact support edge
+
+The ten-cofactor support theorem gives
 
 `gcd(D,J)=gcd(2,t+1)`.
 
-Therefore Route B splits exactly:
+Therefore Route B splits exactly.
 
 ### t odd
 
@@ -221,21 +187,19 @@ gcd(D,J)=1
 k47 survivor mode = THIN or FULL_QR.
 ```
 
-This is the first direct coupling between an exact survivor mode and the global support-overlap graph.
+Thus the k47 survivor mode is coupled to the exact 2-adic support graph.
 
-The mode is not decorative metadata. It changes which exact 2-adic edge exists in the companion state.
+This is more than annotation: selecting THIN switches the D-J overlap edge off.
 
-## 6. Correct route-conditioned framework state
-
-The local machine should therefore carry different coordinates on the two routes.
+## 7. Correct route-local machine state
 
 ### Route A
 
 ```text
 route = A
-phase_u mod 289003 in 85680 necessary classes
+CRT phase in the landed 11,566,800 / 170,222,767 envelope
 k51 center = 25 mod51
-k51 local miss state in a 14-state endpoint family
+k51 local state in a 14-miss endpoint family
 odd support separated through k55
 ```
 
@@ -243,36 +207,29 @@ odd support separated through k55
 
 ```text
 route = B
-phase_u mod 104533 in 32760 necessary classes
+CRT phase in the landed 4,422,600 / 61,569,937 envelope
 k47_mode = THIN | FULL_QR
 J = B+1
 B support = QR23
 J support = QR47
 odd support separated through k55
 
-if THIN:
-    u odd
-    gcd(D,J)=1
-
-if u even / t odd:
-    k47_mode = FULL_QR
-    gcd(D,J)=2
+THIN => u odd => gcd(D,J)=1
+u even / t odd => FULL_QR and gcd(D,J)=2.
 ```
 
-This is strictly more faithful than a single global phase-volume scalar after route selection.
+## 8. Next theorem target
 
-## 7. Next theorem target
+The route asymmetry is now explicit.
 
-The asymmetry now points to a precise next attack.
+Route B has a two-mode k47 normal form with parity/support coupling.
 
-Route B has been compressed from a fixed k47 phase to two exact modes.
+Route A still has14 exact k51 endpoint misses.
 
-Route A still has a fixed k51 phase with14 exact miss states.
+The next high-value theorem target is therefore:
 
-The highest-value next target is therefore:
+> compress the Route-A center-25 k51 endpoint family into a small exact support grammar or behavioral normal form, then couple it to the ten-cofactor support graph.
 
-> compress the Route-A center-25 k51 endpoint family into an exact support grammar or a small behavioral normal form, then couple that mode to the ten-cofactor overlap graph exactly as Route B was coupled at k47.
-
-If successful, both realized routes will carry route-local symbolic modes rather than coarse fixed-shift state sets.
+If that closes cleanly, both realized routes will carry symbolic route-local modes rather than raw endpoint-state families.
 
 Erdős–Straus remains open.
