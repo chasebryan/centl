@@ -4,8 +4,11 @@ on:
   pull_request:
     paths:
       - "research/erdos-straus/Q23-SQUARE-LIFT-PHASE-SIEVE.md"
+      - "research/erdos-straus/CANONICAL-Q2-TYPEII-BOUNDARY.md"
+      - "research/erdos-straus/Q23-BLOCKED-PHASE-GEOMETRY-ATLAS.md"
       - "research/erdos-straus/classify_q23_square_lift_phase_sieve.py"
       - "research/erdos-straus/verify_q23_square_lift_phase_sieve.py"
+      - "research/erdos-straus/analyze_q23_blocked_phase_geometry.py"
       - ".github/workflows/erdos-straus-q23-square-lift-phase-sieve.yml"
   workflow_dispatch:
 
@@ -24,3 +27,5 @@ jobs:
         run: python3 research/erdos-straus/classify_q23_square_lift_phase_sieve.py --json
       - name: Independent phase and earliest-anchor verification
         run: python3 research/erdos-straus/verify_q23_square_lift_phase_sieve.py --json
+      - name: Blocked-phase full signed-box geometry atlas
+        run: python3 research/erdos-straus/analyze_q23_blocked_phase_geometry.py --json
