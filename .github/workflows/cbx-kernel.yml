@@ -86,20 +86,30 @@ jobs:
       - name: Benchmark Lane-I orientations on Fedora
         run: |
           python3 research/erdos-straus/cbx.kernel/bench_i.py \
-            --hi 100000 --i-max 80 --repeat 1 --no-verify --json > /tmp/cbx-bench.json
+            --hi 100000 --i-max 80 --repeat 3 --no-verify --json > /tmp/cbx-bench-gated.json
+          python3 research/erdos-straus/cbx.kernel/bench_i.py \
+            --hi 100000 --i-max 80 --repeat 3 --no-verify --strict-inverse --json > /tmp/cbx-bench-strict.json
           python3 - <<'PY'
           import json
-          r = json.load(open('/tmp/cbx-bench.json', encoding='utf-8'))
-          row = r['results'][0]
-          assert row['hard_primes'] > 0
-          assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
-          fact = row['comparison']['inverse_factorizations_to_forward_factorizations']
-          enum = row['comparison']['inverse_enumerated_C_to_forward_factorizations']
-          wall = row['comparison']['inverse_to_forward_wall_ratio']
-          assert fact is not None and fact > 0
-          assert enum is not None and enum > 0
-          assert wall is not None and wall > 0
-          print(f"::notice title=CBX Fedora Lane-I benchmark::factorization ratio inverse/forward={fact:.6f}; enumerated-C ratio={enum:.6f}; wall ratio={wall:.6f}; hard primes={row['hard_primes']}; K_I={row['i_max']}")
+          gated = json.load(open('/tmp/cbx-bench-gated.json', encoding='utf-8'))['results'][0]
+          strict = json.load(open('/tmp/cbx-bench-strict.json', encoding='utf-8'))['results'][0]
+          for row in (gated, strict):
+              assert row['hard_primes'] > 0
+              assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
+          assert gated['candidate_mode'] == 'target-gated'
+          assert strict['candidate_mode'] == 'strict-c-first'
+          gf = gated['comparison']['inverse_factorizations_to_forward_factorizations']
+          ge = gated['comparison']['inverse_enumerated_C_to_forward_factorizations']
+          gw = gated['comparison']['inverse_to_forward_wall_ratio']
+          sf = strict['comparison']['inverse_factorizations_to_forward_factorizations']
+          sw = strict['comparison']['inverse_to_forward_wall_ratio']
+          assert all(v is not None and v > 0 for v in (gf, ge, gw, sf, sw))
+          print(
+              f"::notice title=CBX Fedora Lane-I benchmark::"
+              f"gated factor ratio={gf:.6f}; gated enumeration ratio={ge:.6f}; "
+              f"gated wall ratio={gw:.6f}; strict factor ratio={sf:.6f}; "
+              f"strict wall ratio={sw:.6f}; hard primes={gated['hard_primes']}; K_I={gated['i_max']}"
+          )
           PY
 
       - name: Deterministic Fedora census and analyzer
