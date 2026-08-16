@@ -61,8 +61,10 @@ static ab_hit_t full_ab_through(uint64_t p, uint64_t K) {
                     return hit;
                 }
 
-                /* Type A: p == -4d (mod 4dn-1), d=s, n=k/s. */
-                uint64_t four_d = (uint64_t)(((__uint128_t)4 * s) % m);
+                /* Type A: p == -4d (mod 4dn-1), d=s, n=k/s.
+                 * k <= UINT64_MAX/4 and s <= k, so 4*s cannot overflow.
+                 */
+                uint64_t four_d = (4 * s) % m;
                 if (r == neg_mod(four_d, m)) {
                     hit.found = 1;
                     hit.k = k;
