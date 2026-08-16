@@ -70,8 +70,10 @@ static int cmp_stand_target(const void *aa, const void *bb) {
 static void stand_usage(void) {
     fprintf(stderr,
             "cbx-standalone-i — exact finite standalone Lane-I layer profile\n"
-            "  cbx-standalone-i --hi X [--lo L] [--i-max K] [--segment N]\n\n"
-            "Every admissible k is evaluated against every hard prime independently.\n");
+            "  cbx-standalone-i --hi X [--lo L] [--i-max K] [--segment N]\n"
+            "                   [--sets FILE]\n\n"
+            "Every admissible k is evaluated against every hard prime independently.\n"
+            "--sets writes one exact hit relation per line as k<TAB>p.\n");
 }
 
 int main(int argc, char **argv) {
@@ -79,12 +81,14 @@ int main(int argc, char **argv) {
     uint64_t hi = 0;
     uint64_t K = DEFAULT_I_MAX;
     uint64_t segment = 1000000;
+    const char *sets_path = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--lo") && i + 1 < argc) lo = stand_parse_u64("lo", argv[++i]);
         else if (!strcmp(argv[i], "--hi") && i + 1 < argc) hi = stand_parse_u64("hi", argv[++i]);
         else if (!strcmp(argv[i], "--i-max") && i + 1 < argc) K = stand_parse_u64("i-max", argv[++i]);
         else if (!strcmp(argv[i], "--segment") && i + 1 < argc) segment = stand_parse_u64("segment", argv[++i]);
+        else if (!strcmp(argv[i], "--sets") && i + 1 < argc) sets_path = argv[++i];
         else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) { stand_usage(); return 0; }
         else { stand_usage(); return 2; }
     }
@@ -93,6 +97,12 @@ int main(int argc, char **argv) {
     if (K < 3) die("--i-max must be >= 3");
     if (!segment || segment > 100000000ULL) die("--segment must be in 1..100000000");
 
+    FILE *sets = NULL;
+    if (sets_path) {
+        sets = fopen(sets_path, "w");
+        if (!sets) die("cannot open standalone hit-set output: %s", strerror(errno));
+    }
+
     uint64_t nshifts64 = (K - 3) / 4 + 1;
     if (nshifts64 > SIZE_MAX / sizeof(stand_kstat_t)) die("too many standalone shifts");
     size_t nshifts = (size_t)nshifts64;
@@ -100,6 +110,7 @@ int main(int argc, char **argv) {
     if (!stats) die("standalone profile allocation failed");
 
     stand_u128 hard_total = 0;
+    stand_u128 set_relations = 0;
 
     for (uint64_t seg_lo = lo;;) {
         stand_u128 proposed = (stand_u128)seg_lo + segment - 1;
@@ -150,8 +161,11 @@ int main(int argc, char **argv) {
                 factor64(C, &f);
                 if (delta_zero(&f, C, k)) {
                     st->hits++;
+                    set_relations++;
                     if (targets[j].spectrum >= 0 && targets[j].spectrum < 3)
                         st->spectrum_hits[targets[j].spectrum]++;
+                    if (sets && fprintf(sets, "%" PRIu64 "\t%" PRIu64 "\n", k, p) < 0)
+                        die("cannot write standalone hit-set relation");
                 }
             }
         }
@@ -161,13 +175,20 @@ int main(int argc, char **argv) {
         seg_lo = seg_hi + 1;
     }
 
-    char hard_s[64];
+    if (sets) {
+        if (fflush(sets) != 0 || fsync(fileno(sets)) != 0)
+            die("cannot flush standalone hit-set output");
+        fclose(sets);
+    }
+
+    char hard_s[64], relation_s[64];
     stand_u128_decimal(hard_total, hard_s);
+    stand_u128_decimal(set_relations, relation_s);
     printf("{\"kernel\":\"cbx.kernel\",\"version\":\"%s\","
            "\"mode\":\"standalone-I\",\"lo\":%" PRIu64 ",\"hi\":%" PRIu64
            ",\"i_max\":%" PRIu64 ",\"segment\":%" PRIu64
-           ",\"hard_primes\":%s,\"shifts\":[",
-           VERSION, lo, hi, K, segment, hard_s);
+           ",\"hard_primes\":%s,\"sets_recorded\":%s,\"set_relations\":%s,\"shifts\":[",
+           VERSION, lo, hi, K, segment, hard_s, sets_path ? "true" : "false", relation_s);
 
     for (size_t si = 0; si < nshifts; si++) {
         stand_kstat_t *st = &stats[si];
