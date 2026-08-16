@@ -1,0 +1,25 @@
+name: k31 mode 2-adic coupling
+
+on:
+  push:
+    branches:
+      - agent/k31-mode-2adic-coupling-clean
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K31-MODE-2ADIC-COUPLING.md'
+      - 'research/erdos-straus/verify_k31_mode_2adic_coupling.py'
+      - '.github/workflows/k31-mode-2adic-coupling.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify k31 mode/seam coupling
+        run: python3 research/erdos-straus/verify_k31_mode_2adic_coupling.py --json
