@@ -4,6 +4,7 @@
 **Date:** 2026-08-15  
 **Program:** ES+  
 **Kernel:** `cbx.kernel 0.1.0`  
+**Primary platform:** Fedora-family GNU/Linux  
 **Production boundary:** `cbis.kernel 1.2.0` remains the production letter engine  
 **Claim boundary:** this note records software and finite-search semantics. It does not prove an adaptive K law and does not prove Erdős–Straus.
 
@@ -85,6 +86,48 @@ The clean initial census is permanently tied to the exact core blob recorded in 
 
 Includes the arithmetic core as one translation unit and supplies the operator/runtime semantics. Keeping this layer separate allowed crash behavior to be hardened without rewriting the arithmetic blob used by the formal census.
 
+### True inverse-I engine
+
+`research/erdos-straus/cbx.kernel/src/cbx_inverse.c`
+
+Implements the constructive orientation of the signed-box cover:
+
+\[
+k\to C\to p=4C-k.
+\]
+
+It is a finite segmented census, intentionally separate from the perpetual X-ray walk. For a fixed admissible shift `k` and a hard residue
+
+\[
+h\in\{1,121,169,289,361,529\}\pmod{840},
+\]
+
+hard targets satisfy
+
+\[
+C\equiv\frac{h+k}{4}\pmod{210}.
+\]
+
+Therefore only six `C mod 210` classes are enumerated for each `k`. The engine evaluates `delta_k(C)` first and only then maps a generated hit into the hard-prime target universe. This preserves the actual inverse orientation rather than merely rewriting the p-first loop syntactically.
+
+The command is
+
+```sh
+./centl es cbx inverse --hi X --i-max K
+```
+
+and can emit exact first-hit and residual files:
+
+```sh
+./centl es cbx inverse --hi X --i-max K \
+  --hits inverse-hits.tsv \
+  --residuals inverse-residuals.txt
+```
+
+`--verify` performs an intentionally redundant theorem check: every hard prime in the finite interval is also passed through the p-first Lane-I recognizer and both membership and minimal first `k` must agree. Any mismatch is a nonzero exit.
+
+The first CI equivalence check through `100,000` at `K_I=80` passed on GNU/Linux with zero mismatches. This is a finite software equivalence check, not a proof of the mathematical theorem.
+
 ### Analyzer
 
 `research/erdos-straus/cbx.kernel/analyze.py`
@@ -140,6 +183,8 @@ The lock is released by the operating system if the process crashes, so a dead p
 ### Letter-count reconciliation
 
 Per-run letter markers are treated as the durable unique-letter set. On startup/status the unique count is reconstructed from those markers, closing the crash window between storing a letter and writing the next seed checkpoint.
+
+The finite inverse-I census does not mutate perpetual-run state. Its finite interval and optional output files are explicit command inputs, so a failed long inverse census can be restarted from a chosen segment boundary without contaminating the X-ray run state.
 
 ---
 
@@ -270,7 +315,7 @@ All of those statements are finite observations only.
 
 ---
 
-## 8. CI and portability
+## 8. CI and platform baseline
 
 A dedicated workflow
 
@@ -278,34 +323,53 @@ A dedicated workflow
 .github/workflows/cbx-kernel.yml
 ```
 
-builds and exercises CBX on Linux and macOS.
+uses **Fedora-family GNU/Linux as the primary CBX platform baseline**. Ubuntu is retained as a secondary Linux portability check.
 
 The regression gate covers:
 
-- build and self-test;
+- build and runtime self-test;
 - root `./centl es cbx` launcher;
 - known `p=2521` X-ray semantics;
-- deterministic finite census;
-- analyzer parsing;
-- immutable named grades.
+- deterministic finite X-ray census;
+- analyzer parsing and empirical-envelope output;
+- immutable named grades;
+- exact finite inverse-I generation;
+- inverse-vs-recognition equivalence of membership and minimal first `k`.
 
-The runtime resolves `/proc/self/exe` on Linux and falls back to the invoked executable path on other POSIX systems, allowing the same state-root semantics on macOS.
-
-Windows-native support is not claimed by this 0.1.0 POSIX research runtime.
+macOS and Windows are not CBX support targets. Compatibility there may occur naturally through the surrounding CENTL codebase, but CBX research decisions and CI are not driven by those platforms.
 
 ---
 
-## 9. What remains
+## 9. Performance claim boundary for inversion
 
-The implementation program is now beyond the “make K adaptive” stage. The valuable next targets are:
+The true inverse-I engine is now implemented, but **implementation does not by itself prove that inverse enumeration is faster**.
+
+For each shift it enumerates the six hard-compatible `C mod 210` classes and factors those `C` values before primality membership is consulted. That is the faithful constructive algorithm named by `LETTER-EQUATION.md`, and it is exact, but the actual cost must be measured against the p-first recognizer.
+
+Accordingly, CBX records:
+
+- total `C_candidates` examined;
+- total `delta_hits` generated;
+- unique hard primes covered;
+- hard-prime residuals;
+- optional exact first-hit files.
+
+The next research step is an apples-to-apples benchmark across increasing `X` and `K_I`, not an assumption that inversion is automatically cheaper.
+
+---
+
+## 10. What remains
+
+The implementation program is now beyond both “make K adaptive” and “implement the inverse orientation.” The valuable next targets are:
 
 1. accumulate deeper fixed-K X-ray corpora, especially in `R`;
-2. archive publication-grade raw streams outside git with checksums;
-3. correlate each new `k_I^*` record with factor pattern, box size, defect/stabilizer data, spectrum and López depth;
-4. repeatedly falsify candidate envelopes rather than promoting a good finite fit;
-5. only after a stable candidate law appears, attack it with the existing defect/spectrum/Kneser theory;
-6. separately investigate the still-unimplemented true inverse generator `k -> C -> p`, rather than the current recognition orientation `p -> k -> C`.
+2. benchmark `k -> C -> p` inverse-I against `p -> k -> C` recognition across increasing `X` and `K_I`;
+3. archive publication-grade raw streams outside git with checksums;
+4. correlate each new `k_I^*` record with factor pattern, box size, defect/stabilizer data, spectrum and López depth;
+5. repeatedly falsify candidate envelopes rather than promoting a good finite fit;
+6. only after a stable candidate law appears, attack it with the existing defect/spectrum/Kneser theory;
+7. investigate whether W, N or L admit similarly useful constructive inversions without increasing total work.
 
 ---
 
-Erdős–Straus remains open. CBX is an X-ray instrument, not a proof engine.
+Erdős–Straus remains open. CBX is an X-ray and finite-cover research instrument, not a proof engine.
