@@ -1,6 +1,9 @@
 # cbis.kernel
 
-**CB Inverse Sieve.** The ES+ engine. Entirely C. **1.2.0** ([release](https://github.com/chasebryan/centl/releases/tag/cbis-1.2.0)).
+**CB Inverse Sieve.** The ES+ letter engine. The live W/I/N/L cover is C; the
+model-escape observer uses exact Python integers so arbitrary witness
+denominators are not truncated to a machine word. **1.2.0** is the current
+released cover engine ([release](https://github.com/chasebryan/centl/releases/tag/cbis-1.2.0)); the model-escape work is unreleased on this branch.
 
 One process, two walks, one cover.
 
@@ -34,7 +37,7 @@ Equation: [`../ES-plus/HOMING.md`](../ES-plus/HOMING.md).
 
 Dashboard splits W into `linear / R / fab`.
 
-## Type A/B assumption audit
+## Type A/B is a model, not a kernel axiom
 
 `cbis.kernel` does **not** assume that Type A/B is complete. Lane L is a
 useful Type A/B sub-cover: it tests the prime-modulus López traps. The
@@ -49,11 +52,9 @@ checks the stronger bounded question:
 ./cbis-audit 9658489 --k-max 3000
 ```
 
-The first command can report `ab_unseen_through_K=true` even though a
-non-A/B cbis lane already covers the prime. That is a **model-escape
-candidate at depth K**, not a claim that Type A/B is false. Increasing K
-may later expose an A/B witness. The second command is a useful regression
-example because the known Type B witness for 9,658,489 occurs at k=2622.
+The first command must report `ab_unseen_through_K=true`. The second must
+recover the known minimal Type B witness at `k=2622`, `d=69`, `n=38`.
+That pair is the canonical guard against the finite-depth fallacy.
 
 The audit is observational only:
 
@@ -62,12 +63,73 @@ The audit is observational only:
 - it never writes a letter or advances either cursor;
 - `A/B unseen through K` must never be promoted to `no A/B witness`.
 
+## General model-escape observer
+
+`cbis_escape.py` attacks the full Erdős–Straus equation without assuming a
+Type A/B parametrization.
+
+For ordered denominators `x <= y <= z`, every solution has
+
+    floor(p/4)+1 <= x <= floor(3p/4).
+
+For each `x`, write the exact remainder as
+
+    a/b = 4/p - 1/x.
+
+Then
+
+    1/y + 1/z = a/b
+
+is equivalent to
+
+    (a y - b)(a z - b) = b^2.
+
+The observer factors `b^2`, enumerates the admissible divisor pairs, and
+verifies every emitted decomposition again by exact integer cross
+multiplication. This search is complete for each visited `x`; `--complete`
+requests the entire canonical x-domain.
+
+```sh
+python3 cbis_escape.py 9658489 --ab-k 400 --x-count 8
+python3 cbis_escape.py 9658489 --ab-k 3000 --x-count 8
+python3 cbis_escape.py 9658489 --ab-k 400 --x-count 8 --record
+python3 cbis_escape.py letters --ab-k 400 --x-count 10000 --limit 20 --record
+```
+
+At `K=400`, the regression prime has no A/B witness through the audit bound,
+but the general observer finds and exactly verifies:
+
+    4/9658489
+      = 1/2414624
+      + 1/3331659906339
+      + 1/62813018687490942976992
+
+That is a **bounded model-escape candidate**, not a refutation of Type A/B.
+At `K=3000`, the same prime is correctly reclassified as
+`AB_EXPLAINED_THROUGH_K` because its Type B witness at `k=2622` is now in
+range.
+
+### Evidence
+
+`--record` writes only verified general witnesses for which A/B is still
+unseen through the recorded finite K. Records are content-addressed under
+[`evidence/`](evidence/) using schema `ES-MODEL-ESCAPE-v1`.
+
+If the compiled C audit is present, the Python observer independently
+recomputes Type A/B and compares the two implementations. It refuses to
+record evidence if they disagree.
+
+A complete no-witness search is deliberately **not** auto-recorded as an
+Erdős–Straus counterexample. Such a result requires an independent verifier
+and certificate review before any claim.
+
 Design contract: [`MODEL-ESCAPE.md`](MODEL-ESCAPE.md).
 
 ## Commands
 
 ```sh
 make
+make check
 ./cbis                     # sweep + home, start 0, then resume
 ./cbis go --random
 ./cbis go --home-only      # missile only
@@ -78,15 +140,20 @@ make
 ./cbis letters
 ./cbis solve 2521
 ./cbis-audit 2521 --k-max 400
+python3 cbis_escape.py 2521 --ab-k 400 --x-count 10000
 ```
 
-From the CENTL root:
+From the CENTL root, the released cover driver remains:
 
 ```sh
 ./centl es cbis
 ./centl es cbis go --home-only
 ./centl es cbis letters
 ```
+
+The audit and model-escape observer are kept as sidecars on this integration
+branch so concurrent development of the live `cbis` cover can continue
+without changing its command semantics or letter identity.
 
 On a terminal the hunt is a fixed color panel. Cursors, rates, the
 spectrum×lane window, and the last five events update in place. It
