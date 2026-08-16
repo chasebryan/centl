@@ -1,0 +1,26 @@
+name: Erdős–Straus Jacobi saturation character extraction
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/JACOBI-SATURATION-CHARACTER-EXTRACTION.md"
+      - "research/erdos-straus/classify_jacobi_saturation_extractions.py"
+      - "research/erdos-straus/verify_jacobi_saturation_extractions.py"
+      - ".github/workflows/erdos-straus-jacobi-saturation-extraction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Composite Jacobi saturation classifier
+        run: python3 research/erdos-straus/classify_jacobi_saturation_extractions.py --max-k 5000 --json
+      - name: Independent direct-factorization regression
+        run: python3 research/erdos-straus/verify_jacobi_saturation_extractions.py --limit 2000000 --json
