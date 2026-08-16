@@ -41,6 +41,7 @@ The repository remains canonical.
 Public research is hosted, searchable, and readable without JavaScript:
 
 - [Research library](https://freecomputation.org/research.html)
+- [Bryan Recursive Entanglement Calculus v1.0](../research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md) · [hosted](https://freecomputation.org/bryan-recursive-entanglement-calculus.html)
 - [Erdős–Straus program](https://freecomputation.org/research-erdos-straus.html)
 - [Wellspring records](wellsprings/README.md)
 - [WS-CAND-003](wellsprings/WS-CAND-003-erdos-straus-type-ab-shadow-structure.md)
