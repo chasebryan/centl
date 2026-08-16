@@ -35,9 +35,10 @@ class ModelEscapeTests(unittest.TestCase):
         self.assertTrue(result["found"])
         self.assertTrue(result["verified"])
         w = result["witness"]
+        # x is stable: the first canonical x with a general witness.  The
+        # valid divisor pair within that x need not be unique, so y/z are
+        # verified mathematically rather than frozen to one enumeration order.
         self.assertEqual(w["x"], 2_414_624)
-        self.assertEqual(w["y"], 3_331_659_906_339)
-        self.assertEqual(w["z"], 62_813_018_687_490_942_976_992)
         witness = cbis_escape.GeneralWitness(
             x=w["x"],
             y=w["y"],
@@ -47,6 +48,8 @@ class ModelEscapeTests(unittest.TestCase):
             divisor_d=w["divisor_d"],
         )
         self.assertTrue(cbis_escape.verify_general_witness(p, witness))
+        self.assertLessEqual(w["x"], w["y"])
+        self.assertLessEqual(w["y"], w["z"])
 
     def test_exact_verifier_rejects_perturbation(self) -> None:
         p = 2521
