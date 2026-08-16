@@ -1,0 +1,125 @@
+name: CBX standalone layer research
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Largest standalone Lane-I shift'
+        required: true
+        default: '400'
+      segment:
+        description: 'p segment size'
+        required: true
+        default: '1000000'
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-standalone-research.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-standalone-research:
+    name: Fedora deep standalone layers
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Run deep standalone profile
+        run: |
+          mkdir -p /tmp/cbx-standalone
+          ./centl es cbx standalone-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            > /tmp/cbx-standalone/standalone-profile.json
+          ./centl es cbx analyze-standalone \
+            /tmp/cbx-standalone/standalone-profile.json --json \
+            > /tmp/cbx-standalone/standalone-analysis.json
+
+      - name: Build standalone research summary
+        run: |
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-standalone'
+          raw=json.load(open(root+'/standalone-profile.json'))
+          r=json.load(open(root+'/standalone-analysis.json'))
+          assert raw['kernel'] == 'cbx.kernel' and raw['mode'] == 'standalone-I'
+          assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
+          for row in raw['shifts']:
+              assert row['target_visits'] == raw['hard_primes']
+              assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
+              assert sum(row['spectrum_hits'].values()) == row['hits']
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'standalone-lane-I-census-v1',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':r['hard_primes'],
+              'layers':r['layers'],
+              'productive_layers':r['productive_layers'],
+              'zero_hit_layers':r['zero_hit_layers'],
+              'top_by_hits':r['top_by_hits'][:20],
+              'above_107':r['above_107'],
+              'spectrum_hit_events':r['spectrum_hit_events'],
+              'totals':r['totals'],
+              'claim':'finite standalone layer strengths; overlaps allowed; not first-hit depths or redundancy theorems',
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          a=report['above_107']
+          leaders='; '.join(f"k={x['k']}:hits={x['hits']}" for x in a['top_by_hits'][:8])
+          print(
+              f"::notice title=CBX standalone deep census::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
+              f"productive={report['productive_layers']}/{report['layers']}; "
+              f"k>107 productive={a['productive_layers']}/{a['layers']}; "
+              f"leaders above107={leaders}"
+          )
+          PY
+
+      - name: Preserve environment and checksums
+        run: |
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-standalone/ENVIRONMENT.txt
+          cd /tmp/cbx-standalone
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload standalone research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-standalone-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-standalone/
+          if-no-files-found: error
+          retention-days: 90
