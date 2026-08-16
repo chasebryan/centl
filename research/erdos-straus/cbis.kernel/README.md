@@ -97,12 +97,17 @@ python3 cbis_escape.py letters --ab-k 400 --x-count 10000 --limit 20 --record
 ```
 
 At `K=400`, the regression prime has no A/B witness through the audit bound,
-but the general observer finds and exactly verifies:
+but the deterministic general observer currently finds and exactly verifies:
 
     4/9658489
       = 1/2414624
-      + 1/3331659906339
-      + 1/62813018687490942976992
+      + 1/3331659906171
+      + 1/1273765641188660072342496
+
+This is one of multiple valid divisor-pair witnesses available at that same
+first canonical `x`. The regression therefore freezes the mathematically
+meaningful invariant, exact verification at `x=2414624`, rather than an
+arbitrary choice among valid `y,z` pairs.
 
 That is a **bounded model-escape candidate**, not a refutation of Type A/B.
 At `K=3000`, the same prime is correctly reclassified as
@@ -143,17 +148,20 @@ make check
 python3 cbis_escape.py 2521 --ab-k 400 --x-count 10000
 ```
 
-From the CENTL root, the released cover driver remains:
+From the CENTL root the full command family is integrated without changing
+the live cover command:
 
 ```sh
 ./centl es cbis
 ./centl es cbis go --home-only
 ./centl es cbis letters
+./centl es cbis audit 9658489 --k-max 400
+./centl es cbis escape 9658489 --ab-k 400 --x-count 8
+./centl es cbis observe 9658489 --ab-k 3000 --x-count 8
 ```
 
-The audit and model-escape observer are kept as sidecars on this integration
-branch so concurrent development of the live `cbis` cover can continue
-without changing its command semantics or letter identity.
+`audit`, `escape`, and `observe` are sidecars. They do not enter the cover
+matrix or change letter identity.
 
 On a terminal the hunt is a fixed color panel. Cursors, rates, the
 spectrum×lane window, and the last five events update in place. It
