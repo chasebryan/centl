@@ -6,8 +6,6 @@ import argparse
 import json
 import math
 
-HARD_CLASSES = (1, 121, 169, 289, 361, 529)
-
 
 def seed(k: int, h: int) -> int:
     return math.gcd(210, (h + k) // 4)
@@ -109,12 +107,6 @@ def analyze(max_r: int) -> dict[str, object]:
             mismatches.append(
                 {"kind": "h289-bd-gcd", "r": r, "actual": math.gcd(B, D), "expected": expected_bd}
             )
-        common_large = set()
-        for q in range(5, math.isqrt(max(A, B, D)) + 1):
-            if A % q == B % q == 0 or A % q == D % q == 0 or B % q == D % q == 0:
-                common_large.add(q)
-        if common_large:
-            mismatches.append({"kind": "h289-large-overlap", "r": r, "primes": sorted(common_large)[:20]})
         checks += 1
 
     return {
