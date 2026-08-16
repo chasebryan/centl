@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - 'research/erdos-straus/K47-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/K47-HARD-FORCED6-REDUCTION.md'
       - 'research/erdos-straus/classify_k47_states.py'
+      - 'research/erdos-straus/classify_k47_forced6_states.py'
       - 'research/erdos-straus/verify_k47_structure.py'
       - '.github/workflows/erdos-straus-k47-two-target.yml'
   workflow_dispatch:
@@ -51,6 +53,29 @@ jobs:
               '::notice title=Exact k=47 state closure::'
               f"states={r['states']}; miss={r['miss_states']}; "
               f"Legendre={r['legendre47_miss_branches']}; min-NR={r['min_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Enforce hard-prime forced-6 reduction
+        run: |
+          python3 research/erdos-straus/classify_k47_forced6_states.py --json > /tmp/k47-forced6.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-forced6.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-forced6-hard-state-closure-v1'
+          assert r['forced_factors'] == [2, 3]
+          assert r['states'] == 1079
+          assert r['hit_states'] == 883
+          assert r['miss_states'] == 196
+          assert r['pure_qr_states'] == 66
+          assert r['pure_qr_miss_states'] == 66
+          assert r['legendre47_miss_branches'] == {'+1': 116, '-1': 80}
+          assert r['min_added_nonresidue_histogram'] == {'0':66,'1':80,'2':50}
+          assert r['maximum_minimum_added_nonresidue_units'] == 2
+          print(
+              '::notice title=Hard-prime k=47 forced-6 reduction::'
+              f"states={r['states']}; miss={r['miss_states']}; "
+              f"Legendre={r['legendre47_miss_branches']}; min-added-NR={r['min_added_nonresidue_histogram']}"
           )
           PY
 
