@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CBX standalone Lane-I census through 10,000,000 at K_I=400: intrinsic signed-box layer strength, overlap, spectra, and the distinction between marginal first-hit depth and standalone coverage.">
+  <title>CBX standalone Lane-I deep census - Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/cbx-standalone-lane-i-deep-census.html">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/cbx-standalone-lane-i-deep-census.html">
+  <meta property="og:title" content="CBX standalone Lane-I deep census - FCF">
+  <meta property="og:description" content="All 100 admissible shifts through 399 are intrinsically productive through ten million, including all 73 shifts above the observed first-hit record 107.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>CBX standalone Lane-I census</h1><p>Intrinsic layer strength · 10M · K<sub>I</sub>=400</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html">Research library</a></li>
+        <li><a href="../research-erdos-straus.html">Erdős-Straus program</a></li>
+        <li><a href="cbis-k-parameter-status.html">K/search-grade audit</a></li>
+        <li><a href="cbx-implementation-status.html">CBX implementation</a></li>
+        <li><a href="cbx-inverse-i.html">CBX inverse-I</a></li>
+        <li><a href="cbx-lane-i-deep-census-10m-k400.html">10M K400 marginal census</a></li>
+        <li><a href="cbx-lane-i-orientation-benchmark.html">Orientation benchmark</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · <a href="../research-erdos-straus.html">Erdős-Straus</a> · ES+</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Preserved intrinsic-layer census</p>
+          <p class="dek">Every admissible Lane-I shift through 399 tested independently against the complete finite Mordell-hard prime universe.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-plus/CBX-STANDALONE-LANE-I-DEEP-CENSUS.md">Canonical source note in the repository</a></p>
+        </header>
+        <div class="paper-body">
+          <p><strong>Finite domain:</strong> 20,513 Mordell-hard primes through 10,000,000.</p>
+          <p><strong>Source commit:</strong> <code>aa259cebe28beba519197daf550cacab96cad16d</code></p>
+          <p><strong>Actions run:</strong> <code>31928579778</code> · artifact <code>9258600538</code></p>
+          <p class="notice"><strong>Claim boundary:</strong> this measures finite intrinsic layer strength with overlaps allowed. It is not a redundancy theorem, universal K bound, or proof of Erdős-Straus.</p>
+
+          <h2>The key distinction</h2>
+          <p>The marginal survivor census asks how many targets a shift solves <em>first</em> after all smaller shifts. This standalone census asks how many targets the same shift hits independently.</p>
+          <div class="math" role="math">\text{marginal first-hit contribution}\ne\text{intrinsic layer strength}.</div>
+
+          <h2>All 100 layers are intrinsically productive</h2>
+          <p>Every admissible shift <code>k=3,7,...,399</code> hits at least one hard prime independently:</p>
+          <div class="math" role="math">100/100\text{ standalone layers productive}.</div>
+          <p>More strikingly, every one of the <strong>73 shifts above 107</strong> is productive. So the absence of first-hit layers above 107 in the marginal K400 census is an overlap/order phenomenon, not late-layer emptiness.</p>
+
+          <h2>Strong late layers</h2>
+          <p>Several shifts above 107 hit a large fraction of the full hard-prime universe:</p>
+          <table>
+            <thead><tr><th>k</th><th>Standalone hits</th><th>Hit rate</th></tr></thead>
+            <tbody>
+              <tr><td>119</td><td>12,345</td><td>60.18%</td></tr>
+              <tr><td>111</td><td>10,439</td><td>50.89%</td></tr>
+              <tr><td>191</td><td>10,142</td><td>49.44%</td></tr>
+              <tr><td>167</td><td>9,818</td><td>47.86%</td></tr>
+              <tr><td>311</td><td>9,811</td><td>47.83%</td></tr>
+              <tr><td>215</td><td>9,685</td><td>47.21%</td></tr>
+            </tbody>
+          </table>
+
+          <h2>The strongest standalone layer</h2>
+          <p>The largest finite intrinsic layer is <strong>k=23</strong>, hitting <strong>13,860</strong> of 20,513 hard primes, about <strong>67.57%</strong>. Other very strong layers include k=47, 11, 31, 71, 39 and 119.</p>
+
+          <h2>Why 107 is special only marginally</h2>
+          <p>The first-hit census has one finite record prime whose first hit is k=107. But standalone k=107 hits <strong>4,461</strong> hard primes, with spectrum split A=1,499, B=1,494, C=1,468. Its special marginal role comes from cover order and overlap.</p>
+
+          <h2>Overlap is enormous</h2>
+          <p>The 100 standalone layers produce <strong>534,037 hit events</strong> across 20,513 primes. Counting multiplicity, the average hard prime participates in about <strong>26.03</strong> standalone layer hits.</p>
+          <p>This pushes the next theoretical question toward set containment and shadowing among the intrinsic hit sets <code>H_k</code>, rather than merely asking whether a late layer is nonempty.</p>
+
+          <h2>Research consequence</h2>
+          <p>A marginally dead layer may still be intrinsically strong because earlier layers stole all of its targets. That makes such layers prime candidates for absorption and shadowing arguments. The safe hybrid planner therefore keeps every shift mathematically required unless a separate proof removes it.</p>
+
+          <h2>Preserved integrity</h2>
+          <p>Artifact ZIP digest:</p>
+          <pre><code>sha256:04266d1816d340f551f7f07e0198419ccb922f67d4cff87658081a2c0d37406e</code></pre>
+
+          <hr>
+          <p><strong>Erdős-Straus remains open.</strong> This is finite intrinsic layer data, not a proof.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer><span>Free Computation Foundation</span><span>Good maths should be free.</span></footer>
+</div>
+</body>
+</html>
