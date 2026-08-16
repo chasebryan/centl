@@ -111,7 +111,7 @@ The natural working state is now larger than a character assignment but much sma
 
 A candidate survivor state may be written schematically as
 
-`Sigma = (h, ancestry, survivor signatures, residual support, affine coupling, valuation phase, signed-box data)`.
+`Sigma = (h, ancestry, survivor signatures, residual support, affine coupling, valuation phase, signed-box data, root geometry, BEC history)`.
 
 For the current h169 q23 route prototype this can be compressed to coordinates of the form
 
@@ -124,9 +124,13 @@ affine_relation     6B-SR=1
 q23_phase           n mod23
 canonical_q23^2     allowed | blocked
 signed_box_status   Type-I | Type-II | I+II | miss
+root_geometry       boundary-only | interior-only | mixed | n/a
+BEC_history         ordered L/R/U/D transition annotations
 ```
 
 This object is the current prototype for a general decomposition-state machine.
+
+`BEC_history` refers to the Bryan Entanglement Cross defined in `BRYAN-ENTANGLEMENT-CROSS.md`. It is observational state only. The exact arithmetic coordinates remain authoritative.
 
 ## 5. What would make this an actual decomposition method
 
@@ -155,6 +159,8 @@ Whenever the procedure declares success, it must construct an exact Erdős–Str
 There must be a proved measure showing that a nonterminal transition makes mathematical progress rather than merely expanding descriptive state.
 
 Examples could include a strictly reduced survivor signature, a forced valuation lift, a smaller residual-support class, or movement in a well-founded state order.
+
+A BEC direction is **not** such a progress measure by itself. In particular, `R`, `U`, or `D` must never be substituted for a proved well-founded order.
 
 ### E. Termination
 
@@ -196,7 +202,8 @@ The developing method should be pursued in the following order.
 3. **Add deterministic valuation phase.** Treat q-adic lifts as state transitions, not as automatic certificates.
 4. **Evaluate the full signed box.** At each controlled lift, allow Type I, comparable-root Type II, and incomparable-root Type II to terminate the branch.
 5. **Classify residual misses.** Every miss after a controlled transition should produce a smaller exact survivor signature or expose a missing mechanism.
-6. **Search for a well-founded measure.** The method becomes plausible only when repeated refinement can be proved unable to continue forever.
+6. **Annotate transition direction.** After the exact transition is established, assign its Bryan Entanglement Cross direction and retain the ordered BEC history for telemetry.
+7. **Search for a well-founded measure.** Test whether recurring exact/BEC motifs identify theorem corridors, but prove progress in arithmetic state rather than in the annotation grammar.
 
 The goal is not to accumulate more non-López examples.
 
@@ -225,3 +232,99 @@ That would be a new machine, not merely a larger solution set.
 At present, that machine is being derived.
 
 It is not yet claimed as established.
+
+## 10. Bryan Entanglement Cross integration
+
+The framework now carries the Bryan Entanglement Cross as a directional grammar over **proved exact transitions**.
+
+Write
+
+```text
+L = ←⊖
+R = →⊕
+U = ↑(⊕/⊖)
+D = ↓(⊖/⊕)
+```
+
+with the semantics fixed in `BRYAN-ENTANGLEMENT-CROSS.md`:
+
+- `L`: exact obstruction without a forced smaller constructive state;
+- `R`: direct constructive propagation or a terminal exact certificate;
+- `U`: constructive expansion of the exact state space with possible later branching/obstruction cost;
+- `D`: restrictive excavation that may expose a sharper constructive residual problem.
+
+The BEC layer is intentionally downstream of proof:
+
+```text
+exact theorem/check
+    -> exact before/after state
+        -> BEC direction
+            -> telemetry / scheduler hypothesis
+```
+
+The reverse implication is forbidden. A BEC direction can never create a theorem, pruning rule, or certificate.
+
+### 10.1 Current q23 prototype
+
+The blocked q23 phase experiment gives a canonical high-level BEC path:
+
+```text
+D   canonical d=23^2 López-A boundary mechanism is phase-blocked
+U   the complete Type-I/Type-II signed box is reopened
+R   the first exact replacement certificate is found
+```
+
+so each successful controlled cell carries
+
+```text
+BEC_path = D U R
+```
+
+with the final `R` payload recording the actual terminal geometry:
+
+```text
+Type I
+boundary-only Type II
+interior-only Type II
+mixed I/II and/or mixed Type-II root geometry
+```
+
+Exact candidate destinations that miss before the first replacement are recorded separately as `L` obstruction observations. They do not alter the theorem-level `D U R` path for the controlled experiment because they belong to different prime candidates inside the finite progression search.
+
+### 10.2 What to measure next
+
+For each controlled state, retain at least
+
+```text
+exact_state
+BEC_path
+left_obstructions_before_terminal_R
+terminal_mechanism
+terminal_root_geometry
+```
+
+and condition those outputs on
+
+```text
+k19_mode
+residual_support
+affine coupling
+valuation phase
+factor pattern
+ancestry route
+```
+
+The immediate theorem-search question is:
+
+> Can an exact survivor-state predicate force or forbid a BEC continuation and, more importantly, force the arithmetic terminal geometry represented by that continuation?
+
+A useful result would not be “this state points right.” It would be an exact implication such as
+
+```text
+specified survivor signature + support + phase + coupling
+    => exact incomparable-root Type-II certificate at a controlled destination
+```
+
+with the BEC label `D U R` attached only as the machine-readable directional summary.
+
+That is the intended role of the Bryan Entanglement Cross in the decomposition machine.
