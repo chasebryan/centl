@@ -1,0 +1,23 @@
+name: Erdős–Straus post-k23 companion ladder
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/POST-K23-COMPANION-LADDER.md"
+      - "research/erdos-straus/verify_post_k23_companion_ladder.py"
+      - ".github/workflows/erdos-straus-post-k23-companion-ladder.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact post-k23 companion-ladder verification
+        run: python3 research/erdos-straus/verify_post_k23_companion_ladder.py --json
