@@ -6,12 +6,24 @@ letter spectrum as the complement of the inverse signed-box cover.
 The foundational note is [`LETTER-EQUATION.md`](LETTER-EQUATION.md).
 The homing equation is [`HOMING.md`](HOMING.md).
 
-The implementing engine is [`../cbis.kernel`](../cbis.kernel/README.md)
+The production letter engine is [`../cbis.kernel`](../cbis.kernel/README.md)
 (CB Inverse Sieve). A letter it collects is the same ES-LETTER-v1 object
-as a forward-menu letter at the same \(K\).
+as a forward-menu letter at the same finite search grade.
 
-W-clause census (cbis not edited): [`w-census/W-CENSUS.md`](w-census/W-CENSUS.md).
+The K/search-grade audit and successor plan is
+[`CBIS-K-PARAMETER-STATUS.md`](CBIS-K-PARAMETER-STATUS.md). It records why
+one scalar K is not the complete finite grade, the current cbis 1.2.0
+reproducibility issues, and the empirical reason W/fab is presently the
+operational frontier.
+
+The separate research instrument is
+[`../cbx.kernel`](../cbx.kernel/README.md) — **CB X-ray Kernel**. CBX keeps
+the production W -> I -> N -> L verdict but evaluates every lane
+independently, including I/N/L on primes that W already solved, so the
+hidden first-hit depth distribution can be measured without weakening W.
+
+W-clause census: [`w-census/W-CENSUS.md`](w-census/W-CENSUS.md).
 Letters at the window layer have to sit in the residual `R` where both
 `4p+1` and `p+4` are supported on primes `≡ 1 (mod 4)`.
 
-The note does not prove Erdős–Straus.
+None of these notes or finite kernels proves Erdős–Straus.
