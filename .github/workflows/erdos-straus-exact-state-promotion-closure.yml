@@ -5,6 +5,7 @@ on:
     paths:
       - "research/erdos-straus/EXACT-STATE-PROMOTION-CLOSURE.md"
       - "research/erdos-straus/classify_exact_state_promotion_closure.py"
+      - "research/erdos-straus/analyze_exact_state_promotion_frontier.py"
       - "research/erdos-straus/verify_exact_state_promotion_closure.py"
       - ".github/workflows/erdos-straus-exact-state-promotion-closure.yml"
   workflow_dispatch:
@@ -22,6 +23,8 @@ jobs:
           python-version: "3.12"
       - name: Re-close graph with exact-state promotion
         run: python3 research/erdos-straus/classify_exact_state_promotion_closure.py --max-k 5000 --json
+      - name: Compare parent and exact-state frontiers
+        run: python3 research/erdos-straus/analyze_exact_state_promotion_frontier.py --json
       - name: Independent closure verification
         if: hashFiles('research/erdos-straus/verify_exact_state_promotion_closure.py') != ''
         run: python3 research/erdos-straus/verify_exact_state_promotion_closure.py --json
