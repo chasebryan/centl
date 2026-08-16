@@ -1,0 +1,27 @@
+name: k27 later phase feedback
+
+on:
+  push:
+    branches:
+      - agent/k27-later-phase-feedback
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K27-LATER-PHASE-FEEDBACK.md'
+      - 'research/erdos-straus/verify_k27_later_phase_feedback.py'
+      - '.github/workflows/k27-later-phase-feedback.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile verifier
+        run: python3 -m py_compile research/erdos-straus/verify_k27_later_phase_feedback.py
+      - name: Verify exact phase-to-k27 feedback
+        run: python3 research/erdos-straus/verify_k27_later_phase_feedback.py --json
