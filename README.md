@@ -111,25 +111,41 @@ make -C research/erdos-straus/cbis.kernel
 
 The letter spectrum is the complement of an inversely generated signed-box cover. The equation: [`research/erdos-straus/ES-plus/LETTER-EQUATION.md`](research/erdos-straus/ES-plus/LETTER-EQUATION.md).
 
-### cbx.kernel — X-ray research kernel
+### cbx.kernel — X-ray and inverse-cover research kernel
 
-**[cbx.kernel](research/erdos-straus/cbx.kernel/README.md)** (CB X-ray Kernel) is deliberately separate from cbis. It keeps the same mathematical cover order `W → I → N → L`, but evaluates the hidden I/N/L lanes even when W has already solved the prime. That turns the buried first-hit geometry into data without weakening the production hunt.
+**[cbx.kernel](research/erdos-straus/cbx.kernel/README.md)** (CB X-ray Kernel) is deliberately separate from cbis. `cbis.kernel` remains the production letter hunt; CBX is the research instrument.
+
+Its X-ray walk keeps the same mathematical cover order `W → I → N → L`, but evaluates hidden I/N/L lanes even when W already solved the prime. That turns buried first-hit geometry into data without weakening or reordering the production verdict.
 
 CBX records an explicit finite search grade
 
 `Γ = (F, K_I, E_N, A_L)`
 
-instead of pretending the whole search is described by one scalar K. It also uses exact 64-bit primality/factorization, signal-atomic target evaluation, immutable named grades, deterministic finite census runs, and an analyzer that mechanically tries to falsify candidate adaptive-K laws.
+instead of pretending the whole search is described by one scalar K. It uses exact 64-bit primality/factorization, signal-atomic target evaluation, immutable named grades, deterministic finite census runs, crash-tail repair, and an analyzer that mechanically tries to falsify candidate adaptive-K laws.
+
+CBX also implements the true finite Lane-I inverse orientation
+
+`k → C → p = 4C-k`
+
+by enumerating the six hard-compatible `C mod 210` classes for each admissible shift, evaluating `δ_k(C)` first, and only then mapping generated hits back into the hard-prime universe. `--verify` cross-checks cover membership and the minimal first `k` against the p-first recognizer.
+
+Fedora-family GNU/Linux is the primary CBX platform baseline; Ubuntu is a secondary Linux portability check. macOS and Windows do not drive this research kernel.
 
 ```sh
 make -C research/erdos-straus/cbx.kernel
+
+# X-ray path
 ./centl es cbx self-test
 ./centl es cbx probe 2521
 ./centl es cbx go --run deep-I --i-max 2000
 python3 research/erdos-straus/cbx.kernel/analyze.py --run deep-I
+
+# Constructive inverse Lane-I path
+./centl es cbx inverse --hi 1000000 --i-max 400
+./centl es cbx inverse --hi 100000 --i-max 80 --verify
 ```
 
-Start with the [K/search-grade audit](research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md) and the [first clean CBX X-ray census](research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md). The observed finite Lane-I record in that census is `k_I*=107`; it is **not** a universal bound.
+Start with the [K/search-grade audit](research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md), the [CBX implementation status](research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md), and the [first clean CBX X-ray census](research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md). The observed finite Lane-I record in that census is `k_I*=107`; it is **not** a universal bound.
 
 ### CBAP.kernel — letter targeting
 
