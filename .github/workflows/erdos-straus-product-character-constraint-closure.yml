@@ -1,0 +1,26 @@
+name: Erdős–Straus product character constraint closure
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/PRODUCT-CHARACTER-CONSTRAINT-CLOSURE.md"
+      - "research/erdos-straus/classify_product_character_constraint_closure.py"
+      - "research/erdos-straus/verify_product_character_constraint_closure.py"
+      - ".github/workflows/erdos-straus-product-character-constraint-closure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact product-aware closure
+        run: python3 research/erdos-straus/classify_product_character_constraint_closure.py --max-k 5000 --assert-frontier --json
+      - name: Independent k551 equation verification
+        run: python3 research/erdos-straus/verify_product_character_constraint_closure.py --json
