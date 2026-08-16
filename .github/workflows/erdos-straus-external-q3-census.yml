@@ -1,0 +1,95 @@
+name: Erdős–Straus external q3 rescue census
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/external_q3_rescue_census.py'
+      - 'research/erdos-straus/EXTERNAL-Q3-BINARY-CENSUS-10M.md'
+      - 'research/erdos-straus/BINARY-R-KNESER-DEFECT.md'
+      - 'research/erdos-straus/ES-BINARY-LANE-I-EQUIVALENCE.md'
+      - '.github/workflows/erdos-straus-external-q3-census.yml'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Inclusive Mordell-hard prime upper bound'
+        required: true
+        default: '10000000'
+      q_max:
+        description: 'Inclusive external q==3 mod4 ceiling'
+        required: true
+        default: '419'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-external-q3:
+    name: Fedora external q3 exact census
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.limit || '100000' }}
+      Q_MAX: ${{ github.event_name == 'workflow_dispatch' && inputs.q_max || '419' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Run independent external-q3 census
+        run: |
+          mkdir -p /tmp/external-q3
+          python3 research/erdos-straus/external_q3_rescue_census.py \
+            --limit "$LIMIT" \
+            --q-max "$Q_MAX" \
+            --require-complete \
+            --json \
+            > /tmp/external-q3/report.json
+          cat /tmp/external-q3/report.json
+
+      - name: Enforce exact accounting
+        run: |
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/external-q3/report.json', encoding='utf-8'))
+          assert r['analysis'] == 'external-q3-binary-rescue-census-v1'
+          assert r['hard_primes'] > 0
+          assert r['covered_hard_primes'] + r['unresolved_hard_primes'] == r['hard_primes']
+          assert r['unresolved_hard_primes'] == 0
+          assert len(r['unresolved']) == 0
+          assert sum(r['first_success_histogram'].values()) == r['hard_primes']
+          d = r['deepest_first_success']
+          assert d is not None
+          assert int(d['q']) <= int(r['q_max'])
+          assert d['type_i'] or d['type_ii']
+          print(
+              f"::notice title=External q3 exact census::"
+              f"limit={r['limit']}; hard={r['hard_primes']}; "
+              f"external-tests={r['external_q_tests']}; deepest-p={d['p']}; deepest-q={d['q']}"
+          )
+          PY
+
+      - name: Preserve provenance
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          {
+            echo "source_commit=$SOURCE_SHA"
+            echo "limit=$LIMIT"
+            echo "q_max=$Q_MAX"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "python=$(python3 --version)"
+          } > /tmp/external-q3/ENVIRONMENT.txt
+          cd /tmp/external-q3
+          sha256sum report.json ENVIRONMENT.txt > SHA256SUMS
+
+      - name: Upload full research replay
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: es-external-q3-X${{ env.LIMIT }}-Q${{ env.Q_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/external-q3/
+          if-no-files-found: error
+          retention-days: 90
