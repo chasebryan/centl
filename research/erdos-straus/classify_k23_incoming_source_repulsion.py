@@ -12,7 +12,6 @@ NONIDENTITY_QR23 = QR23 - {1}
 # Exponent triples (a,b,c) encode D=2^a 3^b q^c.
 # Every exponent is <=2, so D divides (6q)^2.
 TYPE_II_MONOMIALS = {
-    # q mod23: {p mod23: (a,b,c)}
     2: {5: (2, 0, 2), 14: (1, 0, 2)},
     3: {5: (2, 1, 2), 14: (1, 1, 2)},
     4: {5: (0, 0, 2), 14: (1, 0, 1)},
@@ -54,6 +53,19 @@ def divisor_square_residues(seed: int, k: int) -> set[int]:
     return residues
 
 
+def augmented_residues(base_seed: int, k: int, q_residue: int) -> set[int]:
+    """Residues of divisors of (base_seed*q)^2 with q treated symbolically.
+
+    q_residue is only q mod k. The routed prime q occurs to exponent one in
+    the mandatory seed, hence divisors of the seed square use q^0,q^1,q^2.
+    This avoids incorrectly factoring a composite integer representative such
+    as q_residue=4 as though the routed prime itself were 2^2.
+    """
+    base = divisor_square_residues(base_seed, k)
+    local_q = {pow(q_residue, j, k) for j in range(3)}
+    return {a * b % k for a in base for b in local_q}
+
+
 def monomial_value_mod23(q_residue: int, exponents: tuple[int, int, int]) -> int:
     a, b, c = exponents
     return pow(2, a, 23) * pow(3, b, 23) * pow(q_residue, c, 23) % 23
@@ -73,11 +85,9 @@ def analyze() -> dict[str, object]:
 
     rows = []
     for r in sorted(NONIDENTITY_QR23):
-        seed_mask = divisor_square_residues(6 * r, 23)
-        # Using r as the routed prime residue is sufficient because the divisor
-        # residue set depends only on q mod23.
+        seed_mask = augmented_residues(6, 23, r)
         if seed_mask != QR23:
-            raise SystemExit(f"seed 6q does not QR-saturate for q mod23={r}")
+            raise SystemExit(f"symbolic seed 6q does not QR-saturate for q mod23={r}")
         row = {"q_mod_23": r, "seed_mask": sorted(seed_mask), "cases": []}
         for p_residue in (5, 14):
             exponents = TYPE_II_MONOMIALS[r][p_residue]
@@ -97,9 +107,10 @@ def analyze() -> dict[str, object]:
         rows.append(row)
 
     identity_mask = divisor_square_residues(6, 23)
-    identity_augmented_mask = divisor_square_residues(6 * 47, 23)
-    if 47 % 23 != 1 or identity_augmented_mask != identity_mask:
-        raise SystemExit("q=47 identity-residue control changed")
+    symbolic_identity_mask = augmented_residues(6, 23, 1)
+    actual_q47_mask = divisor_square_residues(6 * 47, 23)
+    if symbolic_identity_mask != identity_mask or actual_q47_mask != identity_mask:
+        raise SystemExit("identity-residue control changed")
     if identity_mask == QR23:
         raise SystemExit("base seed6 unexpectedly QR-saturates")
 
@@ -115,7 +126,7 @@ def analyze() -> dict[str, object]:
         })
 
     return {
-        "analysis": "k23-incoming-positive-source-repulsion-v1",
+        "analysis": "k23-incoming-positive-source-repulsion-v2",
         "qr23": sorted(QR23),
         "repelling_source_residues": sorted(NONIDENTITY_QR23),
         "exceptional_negative_k23_centers": [5, 14],
@@ -124,7 +135,8 @@ def analyze() -> dict[str, object]:
         "identity_residue_control": {
             "q_mod_23": 1,
             "base_seed6_mask": sorted(identity_mask),
-            "q47_seed282_mask": sorted(identity_augmented_mask),
+            "symbolic_augmented_mask": sorted(symbolic_identity_mask),
+            "q47_seed282_mask": sorted(actual_q47_mask),
             "qr_saturating": False,
         },
         "named_current_sources": named,
