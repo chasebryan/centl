@@ -63,14 +63,19 @@ jobs:
           import analyze_k47_negative_corridor as a
           classes = a.one_packet_miss_classes()
           expected = {
-              1: 7, 7: 2, 9: 13, 11: 13, 17: 9, 19: 9,
-              27: 9, 29: 9, 35: 4, 37: 4, 45: 1,
+              1: 7, 7: 2, 9: 13, 11: 3, 17: 6, 19: 10,
+              27: 11, 29: 3, 35: 3, 37: 13, 45: 9,
           }
           actual = {r: len(states) for r, states in classes.items()}
           assert actual == expected, actual
           union = set().union(*classes.values())
           assert len(union) == 80
           assert sum(map(len, classes.values())) == 80
+          memberships = {
+              state: sum(state in states for states in classes.values())
+              for state in union
+          }
+          assert set(memberships.values()) == {1}
           residues = {
               pow(a.k47.PRIMITIVE_ROOT, r, a.k47.MOD)
               for r in classes
