@@ -8,7 +8,7 @@
   <link rel="canonical" href="https://freecomputation.org/">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="author" content="Free Computation Foundation">
-  <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, exact calculator, exact mathematics, interval arithmetic, scientific computation, Erdős-Straus, Type A, Type B, congruence shadow, MCP math, computer algebra, Oasis release, CARAVAN, free software preservation">
+  <meta name="keywords" content="Free Computation Foundation, FCF, CENTL, exact calculator, exact mathematics, interval arithmetic, scientific computation, Erdős-Straus, Type A, Type B, congruence shadow, CBX kernel, MCP math, computer algebra, Oasis release, CARAVAN, free software preservation">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <link rel="me" href="https://github.com/chasebryan/centl">
   <meta property="og:type" content="website">
@@ -113,7 +113,7 @@
         <a class="sponsor-button" href="research.html">Open the research library</a>
         <a class="sponsor-button sponsor-button-alt" href="research-erdos-straus.html">Read the Erdős–Straus program</a>
       </p>
-      <p><strong>Erdős-Straus Type A/B witness depth and congruence shadow structure.</strong> FCF has preserved a new Wellspring Candidate arising from CENTL exact-verification work. The research defines a minimal Type A/B witness-depth invariant, records an independently checked frontier through the six difficult residue classes below 10,000,000, proves an exact Type A/B trap-cardinality formula and unbounded depth over primes, and identifies a CRT shadow relation that makes many later congruence layers provably redundant. <strong>cbis.kernel</strong> is the ES+ letter engine: sweep from 0 plus R-homing (<code>./centl es cbis</code>). R is the residual where both 4p+1 and p+4 have only prime factors ≡ 1 (mod 4).</p>
+      <p><strong>Erdős-Straus Type A/B witness depth and congruence shadow structure.</strong> FCF has preserved a new Wellspring Candidate arising from CENTL exact-verification work. The research defines a minimal Type A/B witness-depth invariant, records an independently checked frontier through the six difficult residue classes below 10,000,000, proves an exact Type A/B trap-cardinality formula and unbounded depth over primes, and identifies a CRT shadow relation that makes many later congruence layers provably redundant. <strong>cbis.kernel</strong> is the ES+ production letter engine: sweep from 0 plus R-homing (<code>./centl es cbis</code>). R is the residual where both 4p+1 and p+4 have only prime factors ≡ 1 (mod 4).</p>
       <figure class="demo">
         <video controls autoplay muted playsinline loop preload="auto" poster="assets/cbis-kernel-esp-demo.jpg" width="598" height="339">
           <source src="assets/cbis-kernel-esp-demo.mp4" type="video/mp4">
@@ -121,6 +121,13 @@
         </video>
         <figcaption>cbis.kernel — live color panel. <a href="research-erdos-straus.html#cbis-demo">Erdős–Straus program</a>.</figcaption>
       </figure>
+
+      <h3>CBX: see through the production cover</h3>
+      <p><strong>cbx.kernel</strong> is the separate CB X-ray research kernel. It leaves the production W → I → N → L verdict intact, but evaluates I/N/L even when W already solved the prime. That exposes the hidden first-hit depth distribution and gives the adaptive-K program something concrete to measure and falsify. The first clean deterministic census recorded 401,752 Mordell-hard-prime X-rays through a sweep cursor of 234,540,000; the observed Lane-I record was <code>k_I*=107</code>. That number is a finite record, <strong>not</strong> a universal bound.</p>
+      <p class="hero-actions">
+        <a class="sponsor-button" href="library/cbis-k-parameter-status.html">Read the K/search-grade audit</a>
+        <a class="sponsor-button sponsor-button-alt" href="library/cbx-initial-xray-census.html">Read the clean CBX census</a>
+      </p>
 
       <h2>Install CENTL</h2>
       <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
