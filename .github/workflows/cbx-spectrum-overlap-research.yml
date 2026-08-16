@@ -1,0 +1,139 @@
+name: CBX spectrum overlap research
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Largest standalone Lane-I shift'
+        required: true
+        default: '400'
+      segment:
+        description: 'p segment size'
+        required: true
+        default: '1000000'
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-spectrum-overlap-research.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-spectrum-research:
+    name: Fedora deep spectrum overlap
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Generate exact hit relations and spectrum overlap
+        run: |
+          mkdir -p /tmp/cbx-spectrum
+          ./centl es cbx standalone-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --sets /tmp/cbx-spectrum/standalone-hit-relations.tsv \
+            > /tmp/cbx-spectrum/standalone-profile.json
+          ./centl es cbx analyze-spectrum-overlap \
+            /tmp/cbx-spectrum/standalone-hit-relations.tsv --json \
+            > /tmp/cbx-spectrum/spectrum-overlap.json
+
+      - name: Build concise research summary
+        run: |
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-spectrum'
+          raw=json.load(open(root+'/standalone-profile.json'))
+          r=json.load(open(root+'/spectrum-overlap.json'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['sets_recorded'] is True
+          assert r['analysis'] == 'cbx-lane-I-spectrum-overlap-v1'
+          assert r['relation_rows'] == raw['set_relations']
+          assert sum(x['hit_events'] for x in r['spectra'].values()) == r['relation_rows']
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'spectrum-overlap-census-v1',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':raw['hard_primes'],
+              'layers':r['layers'],
+              'relation_rows':r['relation_rows'],
+              'exact_containment_counts':r['exact_containment_counts'],
+              'spectra':{
+                  name:{
+                      'hard_primes_hit_by_any_layer':s['hard_primes_hit_by_any_layer'],
+                      'hit_events':s['hit_events'],
+                      'nonempty_layers':s['nonempty_layers'],
+                      'zero_hit_layers':s['zero_hit_layers'],
+                      'novel_layers':s['novel_layers'],
+                      'novel_k':s['novel_k'],
+                      'fully_shadowed_by_prior_union_layers':s['fully_shadowed_by_prior_union_layers'],
+                      'exact_single_layer_containments':s['exact_single_layer_containments'],
+                      'exact_two_layer_containment_targets':s['exact_two_layer_containment_targets'],
+                      'exact_three_layer_containment_targets':s['exact_three_layer_containment_targets'],
+                      'best_earlier_single_overlap':s['best_earlier_single_overlap'][:20],
+                      'above_107':s['above_107'],
+                  }
+                  for name,s in r['spectra'].items()
+              },
+              'claim':r['claim'],
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          c=report['exact_containment_counts']
+          print(
+              f"::notice title=CBX deep spectrum overlap::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; " + '; '.join(
+                  f"{name}:nonempty={report['spectra'][name]['nonempty_layers']},"
+                  f"novel={report['spectra'][name]['novel_layers']},"
+                  f"one={c[name]['size_1']},two={c[name]['size_2']},three={c[name]['size_3']}"
+                  for name in ('A','B','C')
+              )
+          )
+          PY
+
+      - name: Preserve environment and hashes
+        run: |
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-spectrum/ENVIRONMENT.txt
+          cd /tmp/cbx-spectrum
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload spectrum overlap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-spectrum-overlap-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-spectrum/
+          if-no-files-found: error
+          retention-days: 90
