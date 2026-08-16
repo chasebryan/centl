@@ -10,6 +10,7 @@ on:
       - 'research/erdos-straus/analyze_six_shift_corridor.py'
       - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
       - 'research/erdos-straus/verify_k27_structure.py'
+      - 'research/erdos-straus/classify_k27_e2.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
   push:
@@ -22,6 +23,7 @@ on:
       - 'research/erdos-straus/analyze_six_shift_corridor.py'
       - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
       - 'research/erdos-straus/verify_k27_structure.py'
+      - 'research/erdos-straus/classify_k27_e2.py'
       - 'research/erdos-straus/cbx.kernel/Makefile'
       - '.github/workflows/cbx-standalone-i.yml'
 
@@ -79,6 +81,27 @@ jobs:
               f"hard={r['hard_primes']}; pureQR={r['pure_qr_cases']}; "
               f"E2={r['e2_cases']}; E2hits={r['e2_hits']}; E2misses={r['e2_misses']}; "
               f"fullQR+NR={r['full_qr_with_nonresidue_cases']}"
+          )
+          PY
+
+      - name: Enumerate exact k=27 E2 state machine
+        run: |
+          python3 research/erdos-straus/classify_k27_e2.py --json \
+            > /tmp/k27-e2-classification.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-e2-classification.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-e2-exact-finite-group-classifier-v1'
+          assert r['qr_reachable_states'] == 40
+          assert r['nonresidue_unordered_pairs'] == 45
+          assert r['total_structural_cases'] == 1800
+          assert r['miss_capable_qr_states'] == 21
+          assert r['exact_miss_configurations'] == 95
+          print(
+              f"::notice title=Exact k=27 E2 classifier::"
+              f"QRstates={r['qr_reachable_states']}; NRpairs={r['nonresidue_unordered_pairs']}; "
+              f"cases={r['total_structural_cases']}; missQRstates={r['miss_capable_qr_states']}; "
+              f"miss-configurations={r['exact_miss_configurations']}"
           )
           PY
 
