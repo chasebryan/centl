@@ -36,6 +36,7 @@ from bberviges.witness import verify_witness  # noqa: E402
 
 CBAP = ES_ROOT / "cbap.kernel" / "cbap"
 CBIS = ES_ROOT / "cbis.kernel" / "cbis"
+CBX2 = ES_ROOT / "cbx2.kernel" / "cbx2"
 
 
 def cmd_cbap(argv: list[str]) -> int:
@@ -56,6 +57,16 @@ def cmd_cbis(argv: list[str]) -> int:
         )
         return 2
     return subprocess.call([str(CBIS), *argv])
+
+
+def cmd_cbx2(argv: list[str]) -> int:
+    if not CBX2.is_file():
+        print(
+            "cbx2.kernel binary missing; run: make -C research/erdos-straus/cbx2.kernel",
+            file=sys.stderr,
+        )
+        return 2
+    return subprocess.call([str(CBX2), *argv])
 
 
 def emit(obj: dict) -> None:
@@ -297,6 +308,12 @@ def main() -> None:
     )
     p_cbis.add_argument("rest", nargs=argparse.REMAINDER)
 
+    p_cbx2 = sub.add_parser(
+        "cbx2",
+        help="CB Formulation 2 (construct I, X-ray W/N/L; separate from cbis/cbx)",
+    )
+    p_cbx2.add_argument("rest", nargs=argparse.REMAINDER)
+
     args = ap.parse_args()
     os.environ.setdefault(
         "CC_KERNEL_LEDGER",
@@ -385,6 +402,8 @@ def main() -> None:
         raise SystemExit(cmd_cbap(list(args.rest)))
     if args.cmd == "cbis":
         raise SystemExit(cmd_cbis(list(args.rest)))
+    if args.cmd == "cbx2":
+        raise SystemExit(cmd_cbx2(list(args.rest)))
     if args.cmd == "hunt":
         extra = [
             "--start",
