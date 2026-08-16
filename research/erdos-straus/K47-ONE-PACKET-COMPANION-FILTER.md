@@ -1,0 +1,292 @@
+# Exact one-packet companion filter at `k=47`
+
+**Status:** proved exact group-theoretic reduction  
+**Date:** 2026-08-16  
+**Depends on:** `K47-FORCED6-HARD-REDUCTION.md`, `K47-TWO-TARGET-FILTER.md`  
+**Claim boundary:** classifies which single nonresidue directions can support a negative-character forced-6 miss state at fixed `k=47`. It does not prove that the earlier corridor eliminates those directions universally and does not prove Erdős–Straus.
+
+---
+
+## 1. QR coordinate
+
+Use primitive root `5 mod47` and the log coordinate
+
+\[
+\lambda:(\mathbb Z/47\mathbb Z)^\times\to C_{46}.
+\]
+
+Quadratic residues have even logs. Divide those even logs by two and work in
+
+\[
+\boxed{C_{23}.}
+\]
+
+The universally forced factors at `k=47` satisfy
+
+\[
+\lambda(2)=18,
+\qquad
+\lambda(3)=20,
+\]
+
+so their QR directions are
+
+\[
+\boxed{9\quad\text{and}\quad10\pmod{23}.}
+\]
+
+---
+
+## 2. Forced signed QR box
+
+One forced factor of 2 contributes the signed local set
+
+\[
+\{-9,0,9\},
+\]
+
+and one forced factor of 3 contributes
+
+\[
+\{-10,0,10\}.
+\]
+
+Their sum is
+
+\[
+\boxed{
+F
+=
+\{0,1,4,9,10,13,14,19,22\}
+\subset C_{23}.}
+\]
+
+Thus the two mandatory factors already occupy nine of the 23 QR coordinates.
+
+Let `A` be the complete signed QR box after all additional quadratic-residue prime factors are included. Then
+
+\[
+\boxed{F\subseteq A.}
+\]
+
+---
+
+## 3. One nonresidue packet
+
+Now consider a state representative with exactly one additional quadratic-nonresidue valuation unit.
+
+Its log is odd:
+
+\[
+\boxed{r\in C_{46},\qquad r\equiv1\pmod2.}
+\]
+
+The local signed contribution is
+
+\[
+\{-r,0,r\}.
+\]
+
+The Type-II target `-1` has log 23. Therefore Type II hits exactly when either odd translate reaches 23, i.e. when
+
+\[
+\boxed{
+\frac{23-r}{2}\in A
+\quad\text{or}\quad
+\frac{23+r}{2}\in A
+}
+\]
+
+in `C_23`.
+
+These are the two exact Type-II companion points for direction `r`.
+
+---
+
+## 4. Type-I companion and the moving QR center
+
+Let the QR part of `C` have half-log center
+
+\[
+h\in C_{23}.
+\]
+
+The full center log is
+
+\[
+2h+r.
+\]
+
+The Type-I signed-box target has log
+
+\[
+33-(2h+r).
+\]
+
+Hence its QR coordinate is
+
+\[
+\boxed{
+\alpha_I(r,h)
+=
+\frac{33-r}{2}-h.
+}
+\]
+
+For the forced `2·3` seed alone,
+
+\[
+h_0=\frac{18+20}{2}=19.
+\]
+
+So the forced-seed companion is
+
+\[
+\boxed{
+\alpha_I^{(0)}(r)
+=
+\frac{-5-r}{2}
+\pmod{23}.}
+\]
+
+Suppose additional QR factors have center `h_1` and signed box `A_1`. Then
+
+\[
+h=h_0+h_1,
+\qquad
+A=F+A_1.
+\]
+
+Because the signed box contains the all-negative endpoint,
+
+\[
+\boxed{-h_1\in A_1.}
+\]
+
+Therefore, if
+
+\[
+\alpha_I^{(0)}(r)\in F,
+\]
+
+then
+
+\[
+\alpha_I(r,h)
+=
+\alpha_I^{(0)}(r)-h_1
+\in F+A_1=A.
+\]
+
+So a forced-seed Type-I hit **cannot be undone by adding QR factors**.
+
+This makes the finite nine-point seed box sufficient for a universal one-packet exclusion test.
+
+---
+
+## 5. Nine directions are killed immediately by Type II
+
+For the following odd logs, at least one Type-II companion already lies in `F`:
+
+\[
+\boxed{
+3,5,15,21,23,25,31,41,43.
+}
+\]
+
+Thus none of those nine nonresidue directions can support a one-packet combined miss, regardless of any additional QR factors.
+
+---
+
+## 6. Three more are killed immediately by Type I
+
+Among the remaining directions whose Type-II companions both miss the forced seed, the forced-seed Type-I companion lies in `F` for exactly
+
+\[
+\boxed{r=13,33,39.}
+\]
+
+By the moving-center argument above, the Type-I hit persists under arbitrary additional QR factors.
+
+So these three directions also cannot support a one-packet combined miss.
+
+---
+
+## 7. Exact surviving direction alphabet
+
+There are 23 odd log directions in `C_46`.
+
+Nine are eliminated by Type II and three more by Type I. Therefore only
+
+\[
+\boxed{11}
+\]
+
+can support a one-packet combined miss:
+
+\[
+\boxed{
+\mathcal R_{47}^{(1)}
+=
+\{1,7,9,11,17,19,27,29,35,37,45\}
+\subset C_{46}.}
+\]
+
+In ordinary residue classes modulo 47, using primitive root 5, this is
+
+\[
+\boxed{
+\{5,10,11,13,19,20,26,29,33,38,40\}.}
+\]
+
+Every class in this list is a quadratic nonresidue modulo 47.
+
+The exact companion table is:
+
+| log `r` | residue `5^r mod47` | Type-II companions in `C23` | forced Type-I companion |
+|---:|---:|---:|---:|
+| 1 | 5 | 11, 12 | 20 |
+| 7 | 11 | 8, 15 | 17 |
+| 9 | 40 | 7, 16 | 16 |
+| 11 | 13 | 6, 17 | 15 |
+| 17 | 38 | 3, 20 | 12 |
+| 19 | 10 | 2, 21 | 11 |
+| 27 | 33 | 21, 2 | 7 |
+| 29 | 26 | 20, 3 | 6 |
+| 35 | 29 | 17, 6 | 3 |
+| 37 | 20 | 16, 7 | 2 |
+| 45 | 19 | 12, 11 | 21 |
+
+All three listed companion coordinates lie outside the forced seed box `F` in every row.
+
+---
+
+## 8. Completeness relative to the forced-6 state closure
+
+`classify_k47_forced6_states.py` proves that every negative-character hard-prime miss state has a state-equivalent representative with exactly one added nonresidue valuation unit.
+
+The exact state enumeration further shows:
+
+- all 80 negative-character forced-6 miss states are generated by one of the 11 directions above;
+- every one of the 80 belongs to exactly one such direction class in the one-packet QR closure;
+- each of the 11 directions actually produces at least one miss state.
+
+Thus the 11-class alphabet is neither merely necessary nor padded with impossible directions. It is the exact direction alphabet of the 80-state one-packet miss family.
+
+---
+
+## 9. Cross-shift proof target
+
+The finite 10M corridor census shows that earlier shifts through 39 eliminate every observed negative-character `k=47` miss.
+
+The symbolic target can now be stated more concretely:
+
+> Prove that a Mordell-hard prime escaping the exact earlier corridor cannot realize any of the eleven one-packet directions in `R_47^(1)` together with the QR companion gaps required by its row.
+
+This replaces an 80-state opaque target by eleven explicit residue-direction cases in the prime-order QR group `C_23`.
+
+The theorem is still open.
+
+---
+
+Erdős–Straus remains open. The contribution here is an exact one-packet alphabet and companion table for the first strong cross-shift Legendre exclusion candidate.
