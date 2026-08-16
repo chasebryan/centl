@@ -269,6 +269,81 @@ def direction_analysis(
     }
 
 
+def exact_state_analysis(
+    targets: set[int],
+    hits: dict[int, set[int]],
+):
+    classes = one_packet_miss_classes()
+    by_state: dict[tuple[int, int], set[int]] = defaultdict(set)
+    for p in targets:
+        by_state[actual_k47_state(p)].add(p)
+
+    rows = []
+    cover_hist = Counter()
+    for state, stargets in sorted(
+        by_state.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
+        local_hits = {
+            k: hits[k] & stargets for k in COMPANION_PRIOR
+        }
+        min_covers = minimum_covers(
+            stargets, local_hits, COMPANION_PRIOR
+        )
+        compatible_directions = [
+            r for r in ONE_PACKET_DIRECTIONS if state in classes[r]
+        ]
+        if len(compatible_directions) != 1:
+            raise SystemExit(
+                "exact negative forced-6 miss state does not have exactly one "
+                f"one-packet representative class: state={state}, "
+                f"directions={compatible_directions}"
+            )
+        cover_size = len(min_covers[0]) if min_covers else None
+        cover_hist[str(cover_size)] += 1
+        rows.append(
+            {
+                "mask": state[0],
+                "mask_hex": hex(state[0]),
+                "center_log": state[1],
+                "representative_direction": compatible_directions[0],
+                "representative_residue": pow(
+                    k47.PRIMITIVE_ROOT,
+                    compatible_directions[0],
+                    k47.MOD,
+                ),
+                "finite_targets": len(stargets),
+                "shift_capture": [
+                    {
+                        "k": k,
+                        "captured": len(local_hits[k]),
+                        "left": len(stargets - local_hits[k]),
+                    }
+                    for k in COMPANION_PRIOR
+                ],
+                "minimum_finite_cover_size": cover_size,
+                "minimum_finite_cover_example": (
+                    list(min_covers[0]) if min_covers else None
+                ),
+                "number_of_minimum_finite_covers": len(min_covers),
+                "best_residual_by_cover_size": best_residual_subcovers(
+                    stargets, local_hits, COMPANION_PRIOR
+                ),
+            }
+        )
+
+    abstract_states = set().union(*classes.values())
+    return {
+        "abstract_negative_forced6_miss_states": len(abstract_states),
+        "realized_exact_states": len(by_state),
+        "unrealized_exact_states": len(abstract_states - set(by_state)),
+        "finite_targets": len(targets),
+        "minimum_cover_size_histogram_over_realized_states": dict(
+            sorted(cover_hist.items(), key=lambda kv: int(kv[0]))
+        ),
+        "rows": rows,
+    }
+
+
 def analyze(path: Path, hi: int | None):
     hits, universe = load(path, hi)
     if 47 not in hits:
@@ -327,6 +402,7 @@ def analyze(path: Path, hi: int | None):
         ),
         "number_of_minimum_finite_covers": len(min_covers),
         "direction_resolved": direction_analysis(target, hits),
+        "exact_state_resolved": exact_state_analysis(target, hits),
         "claim": (
             "exact finite relation-set and exact fixed-k state analysis only; "
             "no universal cross-shift containment theorem"
@@ -369,6 +445,11 @@ def main() -> int:
                 f"targets={row['compatible_finite_targets']:3d}; "
                 f"minimum cover={row['minimum_finite_cover_example']}"
             )
+        s = report["exact_state_resolved"]
+        print(
+            "exact-state finite cover histogram: "
+            f"{s['minimum_cover_size_histogram_over_realized_states']}"
+        )
         print("warning: finite theorem-mining evidence only")
     return 0
 
