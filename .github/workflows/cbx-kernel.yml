@@ -44,8 +44,8 @@ jobs:
           research/erdos-straus/cbx.kernel/cbx probe 2521 > /tmp/cbx-2521.json
           research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
 
-      - name: Check analyzer syntax on Fedora
-        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py
+      - name: Check Python research tools on Fedora
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/bench_i.py
 
       - name: Exercise root launcher on Fedora
         run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
@@ -77,6 +77,23 @@ jobs:
           assert r['verification_targets'] == r['hard_primes']
           assert r['verification_mismatches'] == 0
           assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          PY
+
+      - name: Benchmark Lane-I orientations on Fedora
+        run: |
+          python3 research/erdos-straus/cbx.kernel/bench_i.py \
+            --hi 100000 --i-max 80 --repeat 1 --no-verify --json > /tmp/cbx-bench.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-bench.json', encoding='utf-8'))
+          row = r['results'][0]
+          assert row['hard_primes'] > 0
+          assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
+          work = row['comparison']['inverse_C_candidates_to_forward_factorizations']
+          wall = row['comparison']['inverse_to_forward_wall_ratio']
+          assert work is not None and work > 0
+          assert wall is not None and wall > 0
+          print(f"::notice title=CBX Fedora Lane-I benchmark::work ratio inverse/forward={work:.6f}; wall ratio={wall:.6f}; hard primes={row['hard_primes']}; K_I={row['i_max']}")
           PY
 
       - name: Deterministic Fedora census and analyzer
