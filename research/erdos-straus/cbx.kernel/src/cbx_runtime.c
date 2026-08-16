@@ -1,9 +1,9 @@
 /*
  * cbx_runtime.c — signal-atomic runtime for cbx.kernel 0.1.0
  *
- * The arithmetic/search core lives in cbx.c. We include it as one
+ * The arithmetic/search core lives in cbx.c.  We include it as one
  * translation unit and replace only the operator loop so an entered target is
- * always completed before a stop signal is honored. This also adds finite
+ * always completed before a stop signal is honored.  This also adds finite
  * --iterations runs for reproducible censuses.
  */
 #define main cbx_core_main
