@@ -13,10 +13,11 @@ realized k19 route families, this script:
 5. evaluates the complete destination signed box at k_n=19+92n;
 6. classifies every Type-II destination witness as Lopez-comparable or
    incomparable in canonical root coordinates; and
-7. emits Bryan Entanglement Cross telemetry over the proved transition
-   sequence without changing any arithmetic verdict.
+7. emits Bryan Entanglement Cross telemetry over the destination experiment
+   without changing any arithmetic verdict.
 
-The result is a finite exact atlas, not an asymptotic theorem. BEC labels are
+The result is a finite exact destination cross-section, not an asymptotic
+theorem and not necessarily a live ancestry transition. BEC labels are
 observational annotations only and never create pruning or proof permission.
 """
 from __future__ import annotations
@@ -60,8 +61,6 @@ ROUTES = (
     Route("q23-q47", 47, 28),
 )
 
-# Pinned earliest complete-signed-box replacement hits after simultaneous
-# k19/k23 survival on each blocked phase progression.
 EXPECTED = {
     "q17-q23": {
         1:  (288_537_649, "both",         "mixed"),
@@ -91,7 +90,6 @@ EXPECTED = {
 
 
 def crt_pair(a: int, m: int, b: int, n: int) -> tuple[int, int]:
-    """Generalized CRT for one compatible pair."""
     g = math.gcd(m, n)
     if (b - a) % g:
         raise ValueError(f"incompatible CRT: {a} mod {m}, {b} mod {n}")
@@ -103,11 +101,6 @@ def crt_pair(a: int, m: int, b: int, n: int) -> tuple[int, int]:
 
 
 def phase_progression(n: int, route: Route) -> tuple[int, int]:
-    """All p on one exact q23^2 lift phase and route.
-
-    q23^2 | C_{k_n} is equivalent to p == -k_n (mod 4*23^2).
-    We intersect that with h169 mod840 and the route source residue.
-    """
     k = k_of(n)
     a, m = crt_pair(H, 840, (-k) % LIFT_MODULUS, LIFT_MODULUS)
     return crt_pair(a, m, route.source_residue, route.source_q)
@@ -126,37 +119,38 @@ def mechanism(type_i: bool, type_ii: bool) -> str:
 def bec_telemetry(
     *, mechanism_name: str, geometry_region: str, left_obstructions: int
 ) -> dict[str, object]:
-    """Directional annotation for the proved blocked-phase experiment.
+    """Research-operation annotation for the blocked destination cross-section.
 
     D: the canonical d=q^2 Lopez-A boundary certificate is blocked.
-    U: the complete signed box is reopened after that restriction.
-    R: an exact Type-I/II replacement certificate terminates the cell.
+    U: the complete signed box is reopened at that destination.
+    R: an exact Type-I/II certificate is observed at that destination.
 
-    Earlier destination misses belong to different p candidates in the same
-    progression, so they are counted as separate L obstruction observations
-    rather than inserted into the theorem-level D-U-R path.
+    This is not a live-ancestry path. The ancestry audit may terminate a prime
+    earlier, in which case its live BEC history is recorded separately there.
     """
     if mechanism_name == "miss":
-        raise ValueError("terminal BEC telemetry requires a replacement hit")
+        raise ValueError("terminal BEC telemetry requires a destination hit")
     path = ["D", "U", "R"]
     return {
+        "scope": "research-operation-destination-cross-section",
+        "live_ancestry": False,
         "path": path,
         "symbols": [BEC_SYMBOLS[x] for x in path],
         "path_compact": "DUR",
-        "left_obstructions_before_terminal_R": left_obstructions,
+        "left_obstructions_before_destination_hit": left_obstructions,
         "terminal_R_payload": {
             "mechanism": mechanism_name,
             "type_ii_geometry": geometry_region,
         },
         "semantics": {
             "D": "canonical q^2 Lopez-A boundary mechanism phase-blocked",
-            "U": "complete Type-I/Type-II signed-box geometry reopened",
-            "R": "exact replacement certificate found",
+            "U": "complete Type-I/Type-II destination geometry reopened",
+            "R": "exact certificate observed at destination cross-section",
             "L": "exact destination miss on an earlier prime candidate",
         },
         "claim_boundary": (
-            "BEC is observational telemetry over exact transitions; it does not "
-            "change arithmetic verdicts or create pruning permission"
+            "destination BEC telemetry is a research-operation annotation; exact "
+            "live ancestry is authoritative and may terminate the branch earlier"
         ),
     }
 
@@ -295,7 +289,7 @@ def verify_cell(route: Route, n: int, primes: list[int]) -> dict[str, object]:
                 else:
                     if p < expected_p:
                         raise AssertionError(
-                            f"earlier replacement hit route={route.name} n={n}: {p}"
+                            f"earlier destination hit route={route.name} n={n}: {p}"
                         )
                     found = status
         p += modulus
@@ -313,17 +307,18 @@ def verify_cell(route: Route, n: int, primes: list[int]) -> dict[str, object]:
         left_obstructions=earlier_destination_misses,
     )
     assert bec["path_compact"] == "DUR"
+    assert bec["live_ancestry"] is False
 
     return {
         "route": route.name,
         "phase_n": n,
         "k": k_of(n),
         "progression": {"residue": residue, "modulus": modulus},
-        "candidates_through_first_hit": candidates,
-        "prime_candidates_through_first_hit": primes_seen,
-        "simultaneous_k19_k23_survivors_through_first_hit": simultaneous_survivors,
+        "candidates_through_first_destination_hit": candidates,
+        "prime_candidates_through_first_destination_hit": primes_seen,
+        "simultaneous_k19_k23_survivors_through_first_destination_hit": simultaneous_survivors,
         "earlier_destination_misses": earlier_destination_misses,
-        "first_replacement_hit": found,
+        "first_destination_hit": found,
         "bryan_entanglement_cross": bec,
     }
 
@@ -334,7 +329,7 @@ def summarize(cells: list[dict[str, object]]) -> dict[str, object]:
     total_left_obstructions = 0
     path_counts: dict[str, int] = {}
     for cell in cells:
-        hit = cell["first_replacement_hit"]
+        hit = cell["first_destination_hit"]
         assert isinstance(hit, dict)
         mech = str(hit["mechanism"])
         mechanism_counts[mech] = mechanism_counts.get(mech, 0) + 1
@@ -347,14 +342,15 @@ def summarize(cells: list[dict[str, object]]) -> dict[str, object]:
         assert isinstance(bec, dict)
         path = str(bec["path_compact"])
         path_counts[path] = path_counts.get(path, 0) + 1
-        total_left_obstructions += int(bec["left_obstructions_before_terminal_R"])
+        total_left_obstructions += int(bec["left_obstructions_before_destination_hit"])
 
     return {
         "mechanism_counts": dict(sorted(mechanism_counts.items())),
         "type_ii_geometry_counts": dict(sorted(geometry_counts.items())),
         "bryan_entanglement_cross": {
+            "scope": "research-operation-destination-cross-section",
             "path_counts": dict(sorted(path_counts.items())),
-            "left_obstructions_before_terminal_R": total_left_obstructions,
+            "left_obstructions_before_destination_hit": total_left_obstructions,
             "direction_symbols": BEC_SYMBOLS,
         },
     }
@@ -366,12 +362,6 @@ def main() -> int:
     args = parser.parse_args()
 
     assert BLOCKED_PHASES == (1, 2, 4, 7, 9, 10, 13, 16, 19, 22)
-    assert BEC_SYMBOLS == {
-        "L": "←⊖",
-        "R": "→⊕",
-        "U": "↑(⊕/⊖)",
-        "D": "↓(⊖/⊕)",
-    }
     max_p = max(row[0] for table in EXPECTED.values() for row in table.values())
     max_k = max(k_of(n) for n in BLOCKED_PHASES)
     primes = sieve(math.isqrt((max_p + max_k) // 4) + 1)
@@ -382,16 +372,16 @@ def main() -> int:
         for n in BLOCKED_PHASES
     ]
     report = {
-        "analysis": "q23-blocked-phase-full-geometry-atlas-v2-bec",
+        "analysis": "q23-blocked-phase-destination-geometry-atlas-v3-bec-scoped",
         "blocked_phases": list(BLOCKED_PHASES),
         "cells": cells,
         "summary": summarize(cells),
         "failures": 0,
         "claim": (
-            "finite exact earliest replacement-hit atlas on the two realized h169 q23 "
+            "finite exact destination cross-section on the two realized h169 q23 "
             "square-lift route families after the canonical d=23^2 boundary certificate "
-            "has been phase-blocked; Bryan Entanglement Cross fields are observational "
-            "annotations over those exact transitions"
+            "has been phase-blocked; BEC DUR fields describe the research-operation scope, "
+            "while live ancestry is audited separately"
         ),
     }
 
@@ -399,7 +389,7 @@ def main() -> int:
         print(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False))
     else:
         for cell in cells:
-            hit = cell["first_replacement_hit"]
+            hit = cell["first_destination_hit"]
             assert isinstance(hit, dict)
             geom = hit["type_ii_geometry"]
             assert isinstance(geom, dict)
@@ -408,7 +398,7 @@ def main() -> int:
             print(
                 f"{cell['route']} n={cell['phase_n']:2d} k={cell['k']:4d} "
                 f"p={hit['p']:>10d} {hit['mechanism']:12s} {geom['region']} "
-                f"BEC={bec['path_compact']} L_before_R={bec['left_obstructions_before_terminal_R']}"
+                f"BEC[{bec['scope']}]={bec['path_compact']}"
             )
         print(report["summary"])
     return 0
