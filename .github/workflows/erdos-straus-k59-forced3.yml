@@ -1,0 +1,77 @@
+name: Erdős–Straus k=59 forced-3 reduction
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K59-FORCED3-HARD-REDUCTION.md'
+      - 'research/erdos-straus/classify_k59_forced3_states.py'
+      - 'research/erdos-straus/verify_k59_forced3_structure.py'
+      - 'research/erdos-straus/classify_k59_states.py'
+      - '.github/workflows/erdos-straus-k59-forced3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k59-forced3:
+    name: Fedora k=59 forced-3 hard closure
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact forced-3 closure
+        run: |
+          python3 research/erdos-straus/classify_k59_forced3_states.py --json > /tmp/k59-forced3.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k59-forced3.json', encoding='utf-8'))
+          assert r['analysis'] == 'k59-forced3-hard-state-closure-v1'
+          assert r['forced_factor'] == 3
+          assert r['forced_log'] == 50
+          assert r['forced_start_divisor_set_size'] == 3
+          assert r['forced_start_center_log'] == 50
+          assert r['states'] == 35740
+          assert r['hit_states'] == 29871
+          assert r['miss_states'] == 5869
+          assert r['pure_qr_states'] == 900
+          assert r['pure_qr_miss_states'] == 900
+          assert r['legendre59_miss_branches'] == {'+1':3148,'-1':2721}
+          assert r['min_added_nonresidue_histogram'] == {
+              '0':900,
+              '1':2263,
+              '2':2185,
+              '3':458,
+              '4':63,
+          }
+          assert r['maximum_minimum_added_nonresidue_units'] == 4
+          print(
+              '::notice title=k=59 forced-3 hard closure::'
+              f"states={r['states']}; misses={r['miss_states']}; "
+              f"added-NR={r['min_added_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Independent finite hard-prime regression
+        run: |
+          python3 research/erdos-straus/verify_k59_forced3_structure.py --limit 100000 --json > /tmp/k59-forced3-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k59-forced3-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k59-forced3-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['direct_hits'] == 117
+          assert r['direct_misses'] == 156
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=k=59 forced-3 regression::'
+              f"hard={r['hard_primes']}; hits={r['direct_hits']}; "
+              f"misses={r['direct_misses']}; mismatches={r['mismatches']}"
+          )
+          PY
