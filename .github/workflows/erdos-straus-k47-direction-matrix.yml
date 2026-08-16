@@ -7,6 +7,7 @@ on:
       - agent/cbx-k47-direction-matrix
     paths:
       - 'research/erdos-straus/analyze_k47_negative_corridor.py'
+      - 'research/erdos-straus/analyze_k47_negative_states.py'
       - 'research/erdos-straus/classify_k47_states.py'
       - 'research/erdos-straus/classify_k47_forced6_states.py'
       - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
@@ -68,12 +69,20 @@ jobs:
             --hi 10000000 --json \
             > /tmp/k47-direction-matrix.json
 
+      - name: Refine by exact abstract miss state
+        run: |
+          python3 research/erdos-straus/analyze_k47_negative_states.py \
+            /tmp/k47-standalone-hit-relations.tsv \
+            --hi 10000000 --json \
+            > /tmp/k47-state-refinement.json
+
       - name: Validate complete-universe accounting and summarize theorem targets
         run: |
           python3 - <<'PY'
           import json
           raw=json.load(open('/tmp/k47-standalone.json', encoding='utf-8'))
           r=json.load(open('/tmp/k47-direction-matrix.json', encoding='utf-8'))
+          s=json.load(open('/tmp/k47-state-refinement.json', encoding='utf-8'))
           assert raw['kernel'] == 'cbx.kernel'
           assert raw['mode'] == 'standalone-I'
           assert raw['hard_primes'] == 20513
@@ -84,13 +93,28 @@ jobs:
           assert r['direction_matrix']['compatibility_multiplicity_histogram'] == {
               '1': r['negative_legendre_k47_misses']
           }
-          rows=[]
+          assert s['analysis'] == 'k47-negative-legendre-exact-state-refinement-v1'
+          assert s['negative_legendre_k47_misses'] == r['negative_legendre_k47_misses'] == 822
+          assert s['realized_abstract_states'] == 62
+          assert s['unrealized_abstract_states'] == 18
+          assert s['realized_state_minimum_cover_histogram'] == {'1': 35, '2': 9, '3': 11, '4': 7}
+          assert s['states_with_cover_size_at_most_3'] == 55
+          assert s['four_shift_hard_core_state_count'] == 7
+          assert s['four_shift_hard_core_target_count'] == 231
+          direction_rows=[]
           for d in r['direction_matrix']['directions']:
-              rows.append(
+              direction_rows.append(
                   f"r={d['log_direction']}:n={d['finite_compatible_targets']}:"
                   f"m={d['minimum_finite_cover_size']}:"
                   f"single={d['singleton_eliminators']}:pairs={len(d['pair_eliminators'])}"
               )
+          core_rows=[]
+          for row in s['rows']:
+              if row['finite_targets'] and row['minimum_finite_cover_size'] == 4:
+                  core_rows.append(
+                      f"{row['state_id']}:r={row['log_direction']}:"
+                      f"n={row['finite_targets']}:covers={row['all_minimum_finite_covers']}"
+                  )
           print(
               f"::notice title=Complete k47 negative-character census::"
               f"hard={r['hard_universe']}; hit-union={r['relation_union']}; "
@@ -100,7 +124,15 @@ jobs:
               f"global-min-covers={r['all_minimum_finite_covers']}"
           )
           print(
-              f"::notice title=k47 direction theorem targets::" + '; '.join(rows)
+              f"::notice title=k47 direction theorem targets::" + '; '.join(direction_rows)
+          )
+          print(
+              f"::notice title=k47 exact-state compression::"
+              f"realized={s['realized_abstract_states']}/80; "
+              f"minhist={s['realized_state_minimum_cover_histogram']}; "
+              f"hard-core={s['four_shift_hard_core_state_count']} states/"
+              f"{s['four_shift_hard_core_target_count']} targets; "
+              + '; '.join(core_rows)
           )
           PY
 
@@ -113,4 +145,5 @@ jobs:
             /tmp/k47-standalone.json
             /tmp/k47-standalone-hit-relations.tsv
             /tmp/k47-direction-matrix.json
+            /tmp/k47-state-refinement.json
           if-no-files-found: error
