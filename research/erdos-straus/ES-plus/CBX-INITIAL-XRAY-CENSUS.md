@@ -5,7 +5,7 @@
 **Program:** ES+  
 **Kernel:** `cbx.kernel 0.1.0`  
 **Core source blob:** `cd2202ae512c687cdd7af8ce591eb29806a35008`  
-**Signal-atomic runtime blob:** `9f9b2c26a47f1c456e90d68824dd7313e69b8d48`  
+**Signal-atomic runtime blob:** `331f20e761d5cff86b54ad84abcb7d78ef2aff38`  
 **Claim boundary:** finite observation only. These maxima are not universal bounds, do not prove an adaptive K law, and do not prove Erdős–Straus.
 
 ---
@@ -30,10 +30,10 @@ The arithmetic/search core has Git blob SHA
 cd2202ae512c687cdd7af8ce591eb29806a35008
 ```
 
-and the signal-atomic runtime wrapper has blob SHA
+and the exact signal-atomic runtime wrapper used for the formal census has blob SHA
 
 ```text
-9f9b2c26a47f1c456e90d68824dd7313e69b8d48
+331f20e761d5cff86b54ad84abcb7d78ef2aff38
 ```
 
 The build was GNU C 14.2.0 on x86_64 Linux.
@@ -278,15 +278,31 @@ For example, the deliberately aggressive policy
 K(p)=\lceil2\log p\rceil
 \]
 
-fails many observed R targets. The record point
+fails `244` of the `102502` observed `R` targets with a measured Lane-I hit, a finite failure rate of about `0.238%`.
+
+Its first observed failure is
+
+\[
+p=2521,
+\qquad
+k_I^*(p)=23,
+\qquad
+\lceil2\log p\rceil=16.
+\]
+
+Its worst observed deficit is the record point
 
 \[
 p=8,803,369,
 \qquad
-k_I^*(p)=107
+k_I^*(p)=107,
+\qquad
+\lceil2\log p\rceil=32,
 \]
 
-already requires far more than that policy assigns.
+a deficit of `75` shifts.
+
+These failures reject that particular finite policy on this corpus. They do not establish the growth order of the true first-hit frontier.
 
 ---
 
