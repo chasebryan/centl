@@ -111,7 +111,7 @@ The natural working state is now larger than a character assignment but much sma
 
 A candidate survivor state may be written schematically as
 
-`Sigma = (h, ancestry, survivor signatures, residual support, affine coupling, valuation phase, signed-box data, root geometry, BEC history)`.
+`Sigma = (h, ancestry, survivor signatures, residual support, affine coupling, valuation phase, signed-box data, root geometry, BEC scope, BEC history)`.
 
 For the current h169 q23 route prototype this can be compressed to coordinates of the form
 
@@ -125,12 +125,13 @@ q23_phase           n mod23
 canonical_q23^2     allowed | blocked
 signed_box_status   Type-I | Type-II | I+II | miss
 root_geometry       boundary-only | interior-only | mixed | n/a
+BEC_scope           research-operation | live-ancestry
 BEC_history         ordered L/R/U/D transition annotations
 ```
 
 This object is the current prototype for a general decomposition-state machine.
 
-`BEC_history` refers to the Bryan Entanglement Cross defined in `BRYAN-ENTANGLEMENT-CROSS.md`. It is observational state only. The exact arithmetic coordinates remain authoritative.
+`BEC_history` refers to the Bryan Entanglement Cross defined in `BRYAN-ENTANGLEMENT-CROSS.md`. It is observational state only. Exact arithmetic and exact ancestry remain authoritative.
 
 ## 5. What would make this an actual decomposition method
 
@@ -200,10 +201,11 @@ The developing method should be pursued in the following order.
 1. **Preserve exact survivor information.** Do not collapse a useful `(mask,center)` signature back to a Legendre bit too early.
 2. **Exploit cross-shift arithmetic.** Carry affine companion identities and exact residual coprimality into later shifts.
 3. **Add deterministic valuation phase.** Treat q-adic lifts as state transitions, not as automatic certificates.
-4. **Evaluate the full signed box.** At each controlled lift, allow Type I, comparable-root Type II, and incomparable-root Type II to terminate the branch.
-5. **Classify residual misses.** Every miss after a controlled transition should produce a smaller exact survivor signature or expose a missing mechanism.
-6. **Annotate transition direction.** After the exact transition is established, assign its Bryan Entanglement Cross direction and retain the ordered BEC history for telemetry.
-7. **Search for a well-founded measure.** Test whether recurring exact/BEC motifs identify theorem corridors, but prove progress in arithmetic state rather than in the annotation grammar.
+4. **Respect exact ancestry.** Before promoting a distant destination geometry into the machine, verify that no earlier admissible shift already terminates the branch.
+5. **Evaluate the full signed box.** At each live controlled transition, allow Type I, comparable-root Type II, and incomparable-root Type II to terminate the branch.
+6. **Classify residual misses.** Every miss after a controlled transition should produce a smaller exact survivor signature or expose a missing mechanism.
+7. **Annotate transition direction.** After the exact live transition is established, assign its Bryan Entanglement Cross direction and retain the scoped BEC history for telemetry.
+8. **Search for a well-founded measure.** Test whether recurring exact/BEC motifs identify theorem corridors, but prove progress in arithmetic state rather than in the annotation grammar.
 
 The goal is not to accumulate more non-López examples.
 
@@ -235,7 +237,7 @@ It is not yet claimed as established.
 
 ## 10. Bryan Entanglement Cross integration
 
-The framework now carries the Bryan Entanglement Cross as a directional grammar over **proved exact transitions**.
+The framework carries the Bryan Entanglement Cross as a directional grammar over **proved exact transitions**.
 
 Write
 
@@ -253,78 +255,121 @@ with the semantics fixed in `BRYAN-ENTANGLEMENT-CROSS.md`:
 - `U`: constructive expansion of the exact state space with possible later branching/obstruction cost;
 - `D`: restrictive excavation that may expose a sharper constructive residual problem.
 
-The BEC layer is intentionally downstream of proof:
+The BEC layer is intentionally downstream of proof and ancestry:
 
 ```text
 exact theorem/check
     -> exact before/after state
-        -> BEC direction
-            -> telemetry / scheduler hypothesis
+        -> exact ancestry validation
+            -> scoped BEC direction
+                -> telemetry / scheduler hypothesis
 ```
 
-The reverse implication is forbidden. A BEC direction can never create a theorem, pruning rule, or certificate.
+The reverse implication is forbidden. A BEC direction can never create a theorem, pruning rule, certificate, or progress proof.
 
-### 10.1 Current q23 prototype
+### 10.1 Research-operation path versus live-ancestry path
 
-The blocked q23 phase experiment gives a canonical high-level BEC path:
+The blocked q23 destination experiment has a valid research-operation path
 
 ```text
 D   canonical d=23^2 López-A boundary mechanism is phase-blocked
-U   the complete Type-I/Type-II signed box is reopened
-R   the first exact replacement certificate is found
+U   the complete Type-I/Type-II destination geometry is reopened
+R   an exact certificate is observed at that destination cross-section
 ```
 
-so each successful controlled cell carries
+so its **experimental** BEC path is
 
 ```text
-BEC_path = D U R
+D U R
 ```
 
-with the final `R` payload recording the actual terminal geometry:
+However, `Q23-BLOCKED-PHASE-ANCESTRY-AUDIT.md` proves that none of the 148 simultaneous k19/k23 survivors in the audited finite prefixes actually reaches its blocked q23 destination as a live framework state. Every one terminates earlier.
+
+Therefore `DUR` is not the live BEC history of those primes.
+
+The ancestry-correct live paths are pinned in `BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md` and `audit_q23_blocked_phase_ancestry.py`:
 
 ```text
-Type I
-boundary-only Type II
-interior-only Type II
-mixed I/II and/or mixed Type-II root geometry
+R           64
+LR          64
+LLR          7
+LLLR         4
+LLLLR        5
+LLLLLR       3
+LLLLLLLR     1
 ```
 
-Exact candidate destinations that miss before the first replacement are recorded separately as `L` obstruction observations. They do not alter the theorem-level `D U R` path for the controlled experiment because they belong to different prime candidates inside the finite progression search.
+Here each `L` is an exact post-k23 signed-box miss at a live admissible shift and the terminal `R` is the first exact Type-I/II certificate.
 
-### 10.2 What to measure next
-
-For each controlled state, retain at least
+The first-hit support is
 
 ```text
-exact_state
-BEC_path
-left_obstructions_before_terminal_R
-terminal_mechanism
-terminal_root_geometry
+{27,31,35,39,43,47,55}
 ```
 
-and condition those outputs on
+with exact totals
+
+```text
+left obstruction observations   132
+right constructions              148
+```
+
+These are finite telemetry statements only. They do not prove a universal k55 ceiling or a universal drift toward construction.
+
+### 10.2 Terminal payload remains arithmetic
+
+A BEC terminal `R` must retain the exact certificate payload.
+
+Across the 148 ancestry-correct first exits:
+
+```text
+Type I + Type II   122
+Type I only         20
+Type II only         6
+```
+
+and the complete Type-II root geometry is
+
+```text
+mixed          63
+interior-only  49
+boundary-only  16
+n/a            20
+```
+
+Thus the direction does not replace mechanism or root geometry. It indexes the transition while the exact payload records what happened.
+
+### 10.3 What to measure next
+
+The immediate theorem-search split is now
+
+```text
+R       64   first hit k27
+LR      64   first hit k31
+L^jR    20   deeper residual, j>=2
+```
+
+Condition these exact live paths on
 
 ```text
 k19_mode
 residual_support
 affine coupling
-valuation phase
+q23 valuation phase
 factor pattern
 ancestry route
 ```
 
-The immediate theorem-search question is:
-
-> Can an exact survivor-state predicate force or forbid a BEC continuation and, more importantly, force the arithmetic terminal geometry represented by that continuation?
+and search for arithmetic predicates that force the first live exit and its terminal geometry.
 
 A useful result would not be “this state points right.” It would be an exact implication such as
 
 ```text
 specified survivor signature + support + phase + coupling
-    => exact incomparable-root Type-II certificate at a controlled destination
+    => first exact hit at k31
+    => exact Type-II interior certificate
 ```
 
-with the BEC label `D U R` attached only as the machine-readable directional summary.
+with the BEC label `LR` attached only as the machine-readable directional summary.
 
 That is the intended role of the Bryan Entanglement Cross in the decomposition machine.
