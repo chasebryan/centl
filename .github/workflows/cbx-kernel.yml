@@ -64,6 +64,21 @@ jobs:
           assert p['production_letter'] is False
           PY
 
+      - name: Verify inverse signed-box cover on Fedora
+        run: |
+          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-inverse.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['mode'] == 'inverse-I'
+          assert r['verify'] is True
+          assert r['hard_primes'] > 0
+          assert r['verification_targets'] == r['hard_primes']
+          assert r['verification_mismatches'] == 0
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          PY
+
       - name: Deterministic Fedora census and analyzer
         run: |
           ./centl es cbx go --run ci-fedora --step 5000 --iterations 4 --sweep-only
@@ -112,6 +127,17 @@ jobs:
           assert p['I']['hit'] is True and p['I']['first_k'] == 23
           assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
           assert p['production_letter'] is False
+          PY
+
+      - name: Verify inverse signed-box cover
+        run: |
+          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-inverse.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
+          assert r['mode'] == 'inverse-I'
+          assert r['verification_mismatches'] == 0
+          assert r['verification_targets'] == r['hard_primes']
           PY
 
       - name: Deterministic finite census
