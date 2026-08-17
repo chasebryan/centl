@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CENTL Interactive Calculation Hub: Exact mathematics, symbolic calculus, physics operations, and public Erdős–Straus hunt with zero JavaScript.">
+  <title>CENTL Hub — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/hub.html">
+  <meta name="robots" content="index,follow">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="library-layout.css?v=2">
+</head>
+<body>
+<div class="shell">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead home-masthead">
+    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+  </header>
+  <div class="layout">
+        <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="index.html">CENTL Work Area</a></li>
+        <li><a href="centl.html">About CENTL</a></li>
+        <li><a href="research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
+        <li><a href="software.html">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="docs.html">Documentation Portal</a></li>
+        <li><a href="manuals/install.html">Installation Guide</a></li>
+        <li><a href="manuals/numerics.html">Numerical Contract</a></li>
+        <li><a href="manuals/syntax.html">Syntax &amp; Functions</a></li>
+        <li><a href="manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="research.html">Research Library</a></li>
+        <li><a href="research-erdos-straus.html">Erdős–Straus Program</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="about.html">About FCF</a></li>
+        <li><a href="funding.html">Funding &amp; Sponsors</a></li>
+        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <img class="banner" src="assets/fcf-centl-banner.png" alt="Free Computation Foundation and CENTL camel banner">
+
+      <h2>CENTL Dedicated Hub</h2>
+      <p>A full-focus workspace for exact calculations, symbolic differentiation and integration, equation solving, typed physics unit conversion, and Erdős–Straus computational research.</p>
+
+      <div class="centl-work-area" id="centl-hub">
+        <div class="centl-work-header">
+          <div class="work-header-left">
+            <span class="status-dot"></span>
+            <strong class="terminal-title">CENTL v0.15.0 Al-Nur · Exact Calculation Hub</strong>
+          </div>
+          <div class="work-header-right">
+            <span class="badge-oasis">Oasis Standard</span>
+            <span class="badge-zerojs">Zero JavaScript</span>
+          </div>
+        </div>
+
+        <div class="quick-op-bar" aria-label="Quick operations">
+          <form method="POST" action="/" class="quick-form">
+            <span class="quick-label">Presets:</span>
+            <button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>
+            <button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>
+            <button type="submit" name="cmd" value="solve(3*x^2 - 12 = 0, x)" class="btn-preset">solve(3x²-12=0)</button>
+            <button type="submit" name="cmd" value="approx(pi, 50)" class="btn-preset">approx(π, 50)</button>
+            <button type="submit" name="cmd" value="fibonacci(60)" class="btn-preset">fibonacci(60)</button>
+            <button type="submit" name="cmd" value="es solve 1009" class="btn-preset btn-hunt">es solve 1009</button>
+            <button type="submit" name="cmd" value="physics convert 100 cm m" class="btn-preset btn-phys">physics convert</button>
+            <button type="submit" name="cmd" value="physics collision m1=2 v1=10 m2=4 v2=-5" class="btn-preset btn-phys">physics collision</button>
+          </form>
+        </div>
+
+        <div class="terminal-screen" role="region" aria-label="CENTL Terminal Output">
+          <div class="terminal-welcome">
+            <p class="welcome-text"><strong>CENTL exact mathematical interpreter ready.</strong></p>
+            <p class="welcome-hint">Type any mathematics, scientific expression, or hunt command below. Exact values remain exact. Approximations carry justified enclosures.</p>
+            <div class="terminal-examples">
+              <code>2^128 - 1</code> · <code>1/3 + 5/7</code> · <code>solve(x^2 - 5x + 6 = 0, x)</code> · <code>es solve 1009</code>
+            </div>
+          </div>
+        </div>
+
+        <form method="POST" action="/" class="centl-prompt-form">
+          <div class="input-row">
+            <span class="input-prompt">centl&gt;</span>
+            <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" autofocus class="cmd-input">
+            <button type="submit" class="btn-calculate">Calculate</button>
+            <button type="submit" name="cmd" value=":clear" class="btn-clear">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <h2>Quick Reference Commands</h2>
+      <table class="status">
+        <tr><th>Category</th><th>Syntax Example</th><th>Description</th></tr>
+        <tr><td><strong>Exact Fraction</strong></td><td><code>1/3 + 5/7</code></td><td>Produces exact simplified rational <code>22/21</code>.</td></tr>
+        <tr><td><strong>Symbolic Derivative</strong></td><td><code>diff(x^4 + 3*x^2, x)</code></td><td>Computes exact symbolic derivative <code>4*x^3 + 6*x</code>.</td></tr>
+        <tr><td><strong>Definite Integral</strong></td><td><code>integrate(3*x^2, x, 0, 5)</code></td><td>Computes exact polynomial definite integral <code>125</code>.</td></tr>
+        <tr><td><strong>Equation Solving</strong></td><td><code>solve(x^2 - 9 = 0, x)</code></td><td>Solves polynomial roots <code>x = 3, x = -3</code>.</td></tr>
+        <tr><td><strong>Rigorous Enclosure</strong></td><td><code>approx(pi, 50)</code></td><td>Computes proven lower and upper bounds to 50 digits.</td></tr>
+        <tr><td><strong>Erdős–Straus Solver</strong></td><td><code>es solve 1009</code></td><td>Finds exact decomposition <code>4/p = 1/x + 1/y + 1/z</code>.</td></tr>
+        <tr><td><strong>Public Hunt</strong></td><td><code>es hunt 20000</code></td><td>Scans primes in window and files certificates.</td></tr>
+        <tr><td><strong>Physics Conversion</strong></td><td><code>physics convert 100 cm m</code></td><td>Typed dimensional unit conversion.</td></tr>
+      </table>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Free for science. · Static HTML/CSS · Zero JavaScript</footer>
+</div>
+</body>
+</html>

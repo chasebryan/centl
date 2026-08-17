@@ -3,12 +3,25 @@ set -eu
 
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 binary="$project_root/_build/default/src/main.exe"
+rust_binary="$project_root/target/release/centl-web"
 
-# Erdős–Straus kernels plug in here. They do not use CENTL-SCi.
+# Erdős–Straus kernels and Web Hub plug in here.
 case "${1:-}" in
+  hub|web|serve)
+    shift || true
+    if [ -x "$rust_binary" ]; then
+      exec "$rust_binary" --serve "$@"
+    else
+      exec cargo run --release -- --serve "$@"
+    fi
+    ;;
   es|erdos|erdos-straus)
     shift
-    exec python3 "$project_root/research/erdos-straus/es" "$@"
+    if [ -f "$project_root/research/erdos-straus/es" ]; then
+      exec python3 "$project_root/research/erdos-straus/es" "$@"
+    elif [ -x "$rust_binary" ]; then
+      exec "$rust_binary" es "$@"
+    fi
     ;;
 esac
 
@@ -16,11 +29,23 @@ if [ -x "$binary" ]; then
   exec "$binary" "$@"
 fi
 
+if [ -x "$rust_binary" ]; then
+  exec "$rust_binary" "$@"
+fi
+
 if command -v fstar.exe >/dev/null 2>&1; then
   fstar=$(command -v fstar.exe)
 elif [ -n "${HOME:-}" ] && [ -x "$HOME/.local/bin/fstar.exe" ]; then
   fstar="$HOME/.local/bin/fstar.exe"
 else
+  # Fallback to Rust implementation if F* toolchain is not active
+  if command -v cargo >/dev/null 2>&1 || [ -x "$HOME/.cargo/bin/cargo" ]; then
+    cargo_bin=$(command -v cargo || echo "$HOME/.cargo/bin/cargo")
+    "$cargo_bin" build --release --manifest-path "$project_root/Cargo.toml" >/dev/null 2>&1 || true
+    if [ -x "$rust_binary" ]; then
+      exec "$rust_binary" "$@"
+    fi
+  fi
   echo "centl: F* was not found; run 'make build' in the configured development shell" >&2
   exit 127
 fi

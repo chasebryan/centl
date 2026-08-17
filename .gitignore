@@ -40,3 +40,8 @@ research/erdos-straus/findings/good/*.json
 research/erdos-straus/findings/good/*.md
 research/erdos-straus/findings/letters/*.json
 research/erdos-straus/findings/letters/*.md
+
+
+# Added by cargo
+
+/target
