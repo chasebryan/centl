@@ -61,6 +61,7 @@
   }
   </script>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
 <body>
 <div class="shell">
@@ -81,10 +82,13 @@
         <li><a href="docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul>
-        <li><a href="research.html">Research library</a></li>
-        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
-        <li><a href="bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
+      <ul class="research-subnav">
+        <li><a href="research.html">Manuals and research library</a></li>
+      </ul>
+      <p class="research-nav-label">Programs</p>
+      <ul class="research-subnav secondary">
+        <li><a href="research-erdos-straus.html">Erdős–Straus</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html">BREC</a></li>
       </ul>
       <h2>External</h2>
       <ul>
@@ -108,22 +112,26 @@
       </table>
       <p>Install the Oasis product below. Use the Camp stay from <code>main</code> when you want the current tree. Details stay in the <a href="docs.html">documentation index</a>.</p>
 
-      <h2>Research library</h2>
-      <p>Every public FCF research record is hosted on this site: Wellspring candidates, theorem notes, certificates, and the Erdős–Straus Type A/B program. Search suggestions appear as you type. Filters work in CSS. Nothing on this site requires a script.</p>
-      <p class="hero-actions">
-        <a class="sponsor-button" href="research.html">Open the research library</a>
-        <a class="sponsor-button sponsor-button-alt" href="research-erdos-straus.html">Read the Erdős–Straus program</a>
-      </p>
-      <p><strong>Bryan Recursive Entanglement Calculus (BREC).</strong> The Bryan Entanglement Cross is now frozen into a general recursive research formalism. BREC treats each constructive or obstructive consequence as part of a complete signed history, closes those histories recursively beyond eight directions, distinguishes formal history from evaluated-state collisions, and preserves a versioned canonical specification.</p>
-      <p class="hero-actions"><a class="sponsor-button" href="bryan-recursive-entanglement-calculus.html">Read BREC v1.0</a></p>
-      <p><strong>Erdős-Straus Type A/B witness depth and congruence shadow structure.</strong> FCF has preserved a new Wellspring Candidate arising from CENTL exact-verification work. The research defines a minimal Type A/B witness-depth invariant, records an independently checked frontier through the six difficult residue classes below 10,000,000, proves an exact Type A/B trap-cardinality formula and unbounded depth over primes, and identifies a CRT shadow relation that makes many later congruence layers provably redundant. <strong>cbis.kernel</strong> is the ES+ letter engine: sweep from 0 plus R-homing (<code>./centl es cbis</code>). R is the residual where both 4p+1 and p+4 have only prime factors ≡ 1 (mod 4).</p>
-      <figure class="demo">
-        <video controls autoplay muted playsinline loop preload="auto" poster="assets/cbis-kernel-esp-demo.jpg" width="598" height="339">
-          <source src="assets/cbis-kernel-esp-demo.mp4" type="video/mp4">
-          <a href="assets/cbis-kernel-esp-demo.mp4">Download the cbis.kernel demo (MP4, 2:35)</a>
-        </video>
-        <figcaption>cbis.kernel — live color panel. <a href="research-erdos-straus.html#cbis-demo">Erdős–Straus program</a>.</figcaption>
-      </figure>
+      <h2>Manuals and research</h2>
+      <p>Documentation and research are separated by purpose. Manuals come first in the library. Research is browsed by subject instead of as one enormous stream of individual records.</p>
+      <div class="compact-research-list">
+        <article class="compact-card">
+          <h3><a href="research.html#manuals-heading">Manuals</a></h3>
+          <p>Installation, CENTL-SCi, mathematics, physics, onboarding, project reference, security, licensing, and release documentation.</p>
+          <p class="card-links"><a href="research.html#manuals-heading">Open manuals</a></p>
+        </article>
+        <article class="compact-card">
+          <h3><a href="research-erdos-straus.html">Erdős–Straus program</a></h3>
+          <p>Unit-fraction decomposition, Type-II geometry, Type A/B boundary structure, exact certificates, shadowing, and the current theorem frontier.</p>
+          <p class="card-links"><a href="research-erdos-straus.html">Open the program</a></p>
+        </article>
+        <article class="compact-card">
+          <h3><a href="bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></h3>
+          <p>The frozen BREC v1.0 recursive specification, its directed signed history model, and the formal entanglement research program.</p>
+          <p class="card-links"><a href="bryan-recursive-entanglement-calculus.html">Read BREC v1.0</a></p>
+        </article>
+      </div>
+      <p class="hero-actions"><a class="sponsor-button" href="research.html">Open the library</a></p>
 
       <h2>Install CENTL</h2>
       <pre><code>curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
