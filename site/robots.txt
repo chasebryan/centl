@@ -1,6 +1,6 @@
 # Free Computation Foundation
 # Humans and machines may read this site. Ranking is not promised.
-# Site shell normalized across the published surface: 2026-08-17.
+# Site shell: one canonical sidebar across every published page.
 
 User-agent: *
 Allow: /
