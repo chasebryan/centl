@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="This page is deliberately narrow. It is for physicists who want to use CENTL and CENTL Physics for physical calculation and exact-first mechanics without learning the rest of the repository first.">
-  <title>Physicist onboarding ⚛️ 🔬 — Free Computation Foundation</title>
+  <title>Physicist onboarding — Free Computation Foundation</title>
   <link rel="canonical" href="https://freecomputation.org/manuals/physicists.html">
   <meta name="robots" content="index,follow">
   <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://freecomputation.org/manuals/physicists.html">
-  <meta property="og:title" content="Physicist onboarding ⚛️ 🔬 — Free Computation Foundation">
+  <meta property="og:title" content="Physicist onboarding — Free Computation Foundation">
   <meta property="og:description" content="This page is deliberately narrow. It is for physicists who want to use CENTL and CENTL Physics for physical calculation and exact-first mechanics without learning the rest of the repository first.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
   <link rel="stylesheet" href="../style.css">
@@ -21,7 +21,7 @@
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
     <div class="brand"><a href="../index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
-    <div class="title"><h1>Physicist onboarding ⚛️ 🔬</h1><p>Manual · hosted from the CENTL repository</p></div>
+    <div class="title"><h1>Physicist onboarding</h1><p>Manual · hosted from the CENTL repository</p></div>
   </header>
   <div class="layout">
     <nav aria-label="Primary">
@@ -36,14 +36,27 @@
         <li><a href="../docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul>
-        <li><a href="../research.html">Research library</a></li>
-        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      <ul class="research-subnav">
+        <li><a href="../research.html">Manuals and research library</a></li>
+      </ul>
+      <p class="research-nav-label">Programs</p>
+      <ul class="research-subnav secondary">
+        <li><a href="../research-erdos-straus.html">Erdős–Straus</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html">BREC</a></li>
+      </ul>
+      <p class="research-nav-label">Topics</p>
+      <ul class="research-subnav secondary">
+        <li><a href="../research.html#unit-fractions">Unit-fraction decomposition</a></li>
+        <li><a href="../research.html#character-methods">Character methods</a></li>
+        <li><a href="../research.html#shadowing">Shadowing and ancestry</a></li>
+        <li><a href="../research.html#entanglement">Entanglement formalisms</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>
@@ -63,11 +76,11 @@
 <table class="directory"><thead><tr><th>What you want</th><th>Install</th><th>What you do <strong>not</strong> get</th></tr></thead><tbody><tr><td>Typed exact-first physics only</td><td><code>centl-physics</code></td><td>separate <code>centl</code> and <code>centl-sci</code> commands</td></tr><tr><td>Physics + direct supporting mathematics</td><td><code>centl-physics</code> + <code>centl</code></td><td><code>centl-sci</code></td></tr><tr><td>Physics in ordinary language only</td><td><code>centl-sci</code></td><td>separate <code>centl</code> and <code>centl-physics</code> commands</td></tr><tr><td>Physics + mathematics + interpreter</td><td>all three components</td><td>nothing omitted</td></tr></tbody></table>
 <p><strong>For direct physics work, <code>centl-physics</code> alone is the recommended minimum.</strong> Add <code>centl</code> only when you want its direct mathematics CLI, and add SCi only when you want natural-language scientific interpretation.</p>
 <p>On GNU/Linux, each choice is a <strong>component-specific archive</strong>. Asking for Physics does not first download the complete CENTL bundle. Required runtime libraries, license texts, provenance metadata, and the selected executable remain because they are required to run and redistribute that command correctly.</p>
-<h2>Start here: choose your operating system 🐧 🍎 🪟</h2>
+<h2>Start here: choose your operating system</h2>
 <p>CENTL currently has three scientist-facing operating-system paths. The physics interfaces are the same after installation; what differs is how the software reaches your machine.</p>
-<table class="directory"><thead><tr><th>Platform</th><th>Current path</th><th>Assurance / distribution status</th></tr></thead><tbody><tr><td>🐧 <strong>GNU/Linux x86_64</strong></td><td>Oasis component archives or full Oasis installer</td><td>Qualified stable CENTL product. This is the reference release path.</td></tr><tr><td>🍎 <strong>macOS</strong></td><td><code>CENTL-Marsa</code> component build</td><td>Current Camp software built from source through the macOS harbor. It is not an Oasis declaration.</td></tr><tr><td>🪟 <strong>Windows</strong></td><td><code>CENTL-Marsa</code> component build under MSYS2 MinGW64</td><td>Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled.</td></tr></tbody></table>
+<table class="directory"><thead><tr><th>Platform</th><th>Current path</th><th>Assurance / distribution status</th></tr></thead><tbody><tr><td><strong>GNU/Linux x86_64</strong></td><td>Oasis component archives or full Oasis installer</td><td>Qualified stable CENTL product. This is the reference release path.</td></tr><tr><td><strong>macOS</strong></td><td><code>CENTL-Marsa</code> component build</td><td>Current Camp software built from source through the macOS harbor. It is not an Oasis declaration.</td></tr><tr><td><strong>Windows</strong></td><td><code>CENTL-Marsa</code> component build under MSYS2 MinGW64</td><td>Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled.</td></tr></tbody></table>
 <p>The distinction above is about release assurance, <strong>not different physics</strong>.</p>
-<h3>🐧 GNU/Linux x86_64 — download only the physics command</h3>
+<h3>GNU/Linux x86_64 — download only the physics command</h3>
 <p>Download the component installer and ask for CENTL Physics only:</p>
 <pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/install-component
 sh install-component --component physics</code></pre>
@@ -95,7 +108,7 @@ sh install-component --component sci</code></pre>
 <p>If you intentionally want the complete bundled distribution instead:</p>
 <pre><code class="language-sh">curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install --channel oasis</code></pre>
-<h3>🍎 macOS — build and install only what you want</h3>
+<h3>macOS — build and install only what you want</h3>
 <p>macOS uses the <code>CENTL-Marsa</code> harbor. Homebrew is required; the Marsa bootstrap prepares GMP, MPFR, FLINT, <code>pkg-config</code>, and the OCaml/opam environment.</p>
 <pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git
 cd centl
@@ -108,7 +121,7 @@ sh scripts/marsa-install --component sci</code></pre>
 <p>By default commands are installed below <code>~/.local/bin</code>. If needed:</p>
 <pre><code class="language-sh">export PATH=&quot;$HOME/.local/bin:$PATH&quot;</code></pre>
 <p>Marsa currently builds from the shared source graph, so the source checkout contains shared build dependencies even when only one command is installed. The <strong>installed product surface</strong> is component-selective. macOS Marsa is the Camp harbor, not an Oasis-qualified release.</p>
-<h3>🪟 Windows — install only the selected command</h3>
+<h3>Windows — install only the selected command</h3>
 <p>Windows currently uses <code>CENTL-Marsa</code> from an <strong>MSYS2 MinGW64 shell</strong>, not ordinary Command Prompt. You need Git and <code>opam</code> available in that environment; the Marsa bootstrap prepares the MinGW numeric and build dependencies.</p>
 <p>From the MSYS2 MinGW64 shell:</p>
 <pre><code class="language-sh">git clone --filter=blob:none --single-branch --branch CENTL-Marsa https://github.com/chasebryan/centl.git

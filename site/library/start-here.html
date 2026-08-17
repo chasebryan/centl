@@ -36,14 +36,27 @@
         <li><a href="../docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul>
-        <li><a href="../research.html">Research library</a></li>
-        <li><a href="../research-erdos-straus.html">Erdős–Straus program</a></li>
+      <ul class="research-subnav">
+        <li><a href="../research.html">Manuals and research library</a></li>
+      </ul>
+      <p class="research-nav-label">Programs</p>
+      <ul class="research-subnav secondary">
+        <li><a href="../research-erdos-straus.html">Erdős–Straus</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html">BREC</a></li>
+      </ul>
+      <p class="research-nav-label">Topics</p>
+      <ul class="research-subnav secondary">
+        <li><a href="../research.html#unit-fractions">Unit-fraction decomposition</a></li>
+        <li><a href="../research.html#character-methods">Character methods</a></li>
+        <li><a href="../research.html#shadowing">Shadowing and ancestry</a></li>
+        <li><a href="../research.html#entanglement">Entanglement formalisms</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>
@@ -60,7 +73,11 @@
 <h2>The only commands you need</h2>
 <p>From the CENTL folder:</p>
 <pre><code class="language-text">./centl es</code></pre>
-<p>That opens the menu. Or, without the menu:</p>
+<p>That opens the menu. Choose what to file before you go:</p>
+<pre><code class="language-text">[a] all three   GOOD, GREAT, and LETTER
+[t] letters     LETTER only — does not grow the GREAT/GOOD ledger
+[g] go</code></pre>
+<p>The choice is remembered on that hunt. Or, without the menu:</p>
 <pre><code class="language-text">./centl es go</code></pre>
 <p>That is the long hunt. It remembers a <strong>seed</strong> (where it stopped) so it never starts from scratch. It runs until you press Ctrl+C. Letters are collected as they appear; the hunt does not stop on the first one.</p>
 <pre><code class="language-text">./centl es go --from 0
@@ -88,7 +105,18 @@
 <p>A worldwide serial number (#1, #2 in the order of discovery) cannot work without a shared counter. This can.</p>
 <p>The start factor is <strong>not</strong> part of the letter. Two hunts that begin in different places and later meet the same prime write the same letter.</p>
 <h2>What the three stamps mean</h2>
-<table class="directory"><thead><tr><th>stamp</th><th>folder</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td><code>good/</code></td><td>A solid, checked identity or a new construction. Worth keeping.</td></tr><tr><td>GREAT</td><td><code>great/</code></td><td>A hard prime escaped the small theorems, or a Type I rescue, or a new depth record, or a whole bound was cleared. This is the remaining shape of the conjecture.</td></tr><tr><td>LETTER</td><td><code>letters/</code></td><td>An unsolved hard prime, a broken <code>a,b ≤ 11</code> window, or a claimed universal proof. Collect them. Read them.</td></tr></tbody></table>
+<table class="directory"><thead><tr><th>stamp</th><th>where it lives</th><th>meaning</th></tr></thead><tbody><tr><td>GOOD</td><td><code>good.jsonl</code></td><td>A solid, checked identity or a new construction. Worth keeping.</td></tr><tr><td>GREAT</td><td><code>great.jsonl</code></td><td>A hard prime escaped the small theorems, a Type I rescue, or a new depth record. One JSON line each — not a pair of files.</td></tr><tr><td>LETTER</td><td><code>letters/</code></td><td>An unsolved hard prime, a broken <code>a,b ≤ 11</code> window, or a claimed universal proof. These stay individual files.</td></tr></tbody></table>
+<p>A cleared bound is the number <code>max_cleared_bound</code> in <code>counts.json</code>. It is not a new GREAT row on every window.</p>
+<p>The GREAT/GOOD ledgers are <strong>not</strong> in a <code>git clone</code>. Download them on purpose:</p>
+<pre><code class="language-text">./centl es fetch
+./centl es fetch great
+./centl es show G-&lt;id&gt;</code></pre>
+<p>To hunt without growing the GREAT ledger:</p>
+<pre><code class="language-text">./centl es go --letters-only
+./centl es go --all</code></pre>
+<p>If an old tree still has a <code>great/</code> pile of files:</p>
+<pre><code class="language-text">./centl es compact</code></pre>
+<p>That folds witnesses into <code>great.jsonl</code> and deletes the pair-files. Do not delete the witnesses themselves unless you only want letters.</p>
 <p>The rules are written in <code>HOW-GRADES-WORK.md</code>. They are mechanical. The computer is not guessing.</p>
 <h2>How to check a finding yourself</h2>
 <p>Open the file. If it shows</p>

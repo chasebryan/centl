@@ -83,6 +83,7 @@ STATIC_SITEMAP = [
     ("https://freecomputation.org/docs.html", "weekly", "0.8"),
     ("https://freecomputation.org/research.html", "weekly", "0.9"),
     ("https://freecomputation.org/research-erdos-straus.html", "weekly", "0.8"),
+    ("https://freecomputation.org/bryan-recursive-entanglement-calculus.html", "monthly", "0.8"),
     ("https://freecomputation.org/mirrors.html", "daily", "0.7"),
     ("https://freecomputation.org/funding.html", "monthly", "0.5"),
     ("https://freecomputation.org/join.html", "monthly", "0.6"),
@@ -623,14 +624,27 @@ def render_nav(depth: int) -> str:
         <li><a href="{p}docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul>
-        <li><a href="{p}research.html">Research library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
+      <ul class="research-subnav">
+        <li><a href="{p}research.html">Manuals and research library</a></li>
+      </ul>
+      <p class="research-nav-label">Programs</p>
+      <ul class="research-subnav secondary">
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC</a></li>
+      </ul>
+      <p class="research-nav-label">Topics</p>
+      <ul class="research-subnav secondary">
+        <li><a href="{p}research.html#unit-fractions">Unit-fraction decomposition</a></li>
+        <li><a href="{p}research.html#character-methods">Character methods</a></li>
+        <li><a href="{p}research.html#shadowing">Shadowing and ancestry</a></li>
+        <li><a href="{p}research.html#entanglement">Entanglement formalisms</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
+        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
+        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>"""
@@ -784,59 +798,14 @@ def write_folder_index(
 
 
 def write_research_index(papers: list[Record], manuals: list[Record], dest: Path) -> None:
-    suggestions = datalist_options(papers + manuals)
-    suggest_links = "\n".join(
-        f'          <li><a href="{html.escape(record.href)}">{html.escape(record.title)}</a></li>'
-        for record in papers
-    )
-    body = f"""      <p class="notice"><strong>The library is hosted here.</strong> Every public research note below is readable on this site as HTML. The repository remains canonical. The Erdős–Straus conjecture remains open. Novelty and priority stay under review.</p>
-      <p>There are {len(papers)} research records and {len(manuals)} hosted manuals. Type in the field to see native suggestions. No JavaScript is used.</p>
-
-      <form class="library-search" role="search" action="https://html.duckduckgo.com/html/" method="get">
-        <label for="library-q">Search papers and manuals</label>
-        <div class="search-row">
-          <input id="library-q" name="q" type="search" list="library-suggestions" placeholder="Type a title, theorem, author, or topic" autocomplete="off" spellcheck="false">
-          <input type="hidden" name="sites" value="freecomputation.org">
-          <button type="submit">Search</button>
-        </div>
-        <p class="small">Suggestions appear as you type. Choose one, then open the matching card. The button searches the published site.</p>
-        <datalist id="library-suggestions">
-{suggestions}
-        </datalist>
-        <div class="suggest-panel" aria-label="All hosted papers">
-          <p class="kicker">Open a paper</p>
-          <ul class="suggest-list">
-{suggest_links}
-          </ul>
-        </div>
-      </form>
-
-      <div class="library" id="catalog">
-        <div class="paper-grid">
-{render_cards(papers)}
-        </div>
-      </div>
-
-      <h2>Hosted manuals</h2>
-      <p>Software manuals live in the <a href="docs.html">documentation index</a>. They are also hosted on this site:</p>
-      <ul class="manual-index">
-        {''.join(f'<li><a href="{html.escape(item.href)}">{html.escape(item.title)}</a></li>' for item in manuals)}
-      </ul>"""
-    dest.write_text(
-        wrap_page(
-            title="Research library",
-            description="Hosted FCF research papers and Wellspring candidates, with no-JavaScript search suggestions.",
-            canonical=f"{ORIGIN}/research.html",
-            depth=0,
-            heading="Research library",
-            dek="Every public research record, readable here. Search as you type.",
-            body=body,
-            extra_head='<meta property="og:type" content="website">',
-            css_query="?v=catalog-1",
-            footer="Free Computation Foundation · Research library · HTML and CSS only.",
-        ),
-        encoding="utf-8",
-    )
+    # The public research landing page is deliberately curated by subject.
+    # The bulk publisher owns individual records, not the information
+    # architecture of research.html. During --check, copy the canonical page
+    # into the temporary publication tree so the check still covers it.
+    canonical = SITE / "research.html"
+    if dest.resolve() == canonical.resolve():
+        return
+    dest.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")
 
 
 def write_sitemap(papers: list[Record], manuals: list[Record], dest: Path) -> None:

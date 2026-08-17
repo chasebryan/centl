@@ -1,4 +1,4 @@
-# Mathematician onboarding 🧮 📐
+# Mathematician onboarding  
 
 This page is deliberately narrow. It is for mathematicians who want to use CENTL for **pure mathematics** and do not want to learn the rest of the repository first.
 
@@ -19,19 +19,19 @@ A pure mathematician does **not** need to install the whole CENTL product family
 
 On GNU/Linux, the component installer downloads a **component-specific archive**. Choosing `centl` does not first download an archive containing the Physics or SCi executables. Required runtime libraries, license texts, provenance metadata, and the selected executable are retained because they are part of making that command runnable and redistributable.
 
-## Start here: choose your operating system 🐧 🍎 🪟
+## Start here: choose your operating system   
 
 CENTL currently has three scientist-facing operating-system paths. The mathematical interface is the same after installation; what differs is how the software reaches your machine.
 
 | Platform | Current path | Assurance / distribution status |
 | --- | --- | --- |
-| 🐧 **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
-| 🍎 **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
-| 🪟 **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
+|  **GNU/Linux x86_64** | Oasis component archives or full Oasis installer | Qualified stable CENTL product. This is the reference release path. |
+|  **macOS** | `CENTL-Marsa` component build | Current Camp software built from source through the macOS harbor. It is not an Oasis declaration. |
+|  **Windows** | `CENTL-Marsa` component build under MSYS2 MinGW64 | Current Windows harbor/source-build path. It is not an Oasis declaration; the full Windows product CI gate is not yet enabled. |
 
 The distinction above is about release assurance, **not different mathematics**.
 
-### 🐧 GNU/Linux x86_64 — download only `centl`
+###  GNU/Linux x86_64 — download only `centl`
 
 Download the small component installer and ask for the mathematics engine only:
 
@@ -69,7 +69,7 @@ curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/oasis/install
 sh install --channel oasis
 ```
 
-### 🍎 macOS — build and install only the component you want
+###  macOS — build and install only the component you want
 
 macOS uses the `CENTL-Marsa` harbor. Homebrew is required; the Marsa bootstrap prepares the numeric stack and OCaml/opam environment.
 
@@ -99,7 +99,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 Marsa currently builds from the shared source graph, so the source checkout contains shared build dependencies even when only one command is installed. The **installed product surface**, however, is component-selective. macOS Marsa is the Camp harbor, not an Oasis-qualified release.
 
-### 🪟 Windows — install only the selected command
+###  Windows — install only the selected command
 
 Windows currently uses `CENTL-Marsa` from an **MSYS2 MinGW64 shell**, not ordinary Command Prompt. You need Git and `opam` available in that environment; the Marsa bootstrap uses `pacman` to prepare the MinGW numeric and build dependencies.
 
