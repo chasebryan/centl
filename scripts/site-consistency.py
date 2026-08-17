@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Keep the public FCF site shell consistent across every HTML page.
+"""Keep the public FCF site shell identical across every HTML page.
 
-This script owns cross-page presentation invariants that should not depend on
-whether a page is handwritten or emitted by publish-site-library.py:
+The sidebar is deliberately simple and universal. Every published page uses
+exactly the same three groups and links, adjusted only for relative path depth:
 
-* one canonical Foundation / Research / Programs / Topics / External sidebar;
-* one hierarchy treatment in the shared stylesheet;
-* emoji-free mathematician and physicist onboarding manuals;
-* a publisher that emits the same canonical sidebar;
-* a curated research landing page that is not overwritten by the bulk-paper
-  publisher; and
-* a sitemap entry for the BREC program page.
+Foundation
+  Home · About FCF · Funding · CENTL · Software · The Bazaar · Documentation
+Research
+  Research library · Erdős–Straus program · Bryan Recursive Entanglement Calculus
+External
+  CENTL on GitHub · Latest release · GitHub Sponsors
+
+This script also keeps the library publisher on the same sidebar, removes the
+onboarding emoji that should not appear on the site, preserves the curated
+research landing page, and keeps BREC in the sitemap.
 
 Use --apply to normalize the tree. Use --check in CI to reject drift.
 """
@@ -32,34 +35,7 @@ ONBOARDING_SOURCES = (
 )
 
 ONBOARDING_EMOJI = ("🧮", "📐", "⚛️", "⚛", "🔬", "🐧", "🍎", "🪟")
-
 NAV_STYLE_MARKER = "/* Site-wide research navigation hierarchy. */"
-NAV_STYLE = r'''
-
-/* Site-wide research navigation hierarchy. */
-.research-nav-label {
-  margin: 12px 0 5px;
-  color: var(--muted);
-  font: 700 11px/1.3 var(--ui);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-nav .research-subnav { margin-bottom: 10px; }
-nav .research-subnav li { margin: 4px 0; }
-nav .research-subnav.secondary {
-  padding-left: 10px;
-  border-left: 2px solid var(--rule);
-}
-nav a[aria-current="page"] { font-weight: 700; }
-
-@media (max-width: 760px) {
-  nav .research-nav-label { display: none; }
-  nav .research-subnav.secondary {
-    padding-left: 0;
-    border-left: 0;
-  }
-}
-'''
 
 
 def nav_html(depth: int) -> str:
@@ -76,27 +52,15 @@ def nav_html(depth: int) -> str:
         <li><a href="{p}docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul class="research-subnav">
-        <li><a href="{p}research.html">Manuals and research library</a></li>
-      </ul>
-      <p class="research-nav-label">Programs</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC</a></li>
-      </ul>
-      <p class="research-nav-label">Topics</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research.html#unit-fractions">Unit-fraction decomposition</a></li>
-        <li><a href="{p}research.html#character-methods">Character methods</a></li>
-        <li><a href="{p}research.html#shadowing">Shadowing and ancestry</a></li>
-        <li><a href="{p}research.html#entanglement">Entanglement formalisms</a></li>
+      <ul>
+        <li><a href="{p}research.html">Research library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>'''
@@ -105,15 +69,14 @@ def nav_html(depth: int) -> str:
 def normalize_html(path: Path, text: str) -> str:
     rel = path.relative_to(SITE)
     depth = len(rel.parts) - 1
-    replacement = nav_html(depth)
     normalized, count = re.subn(
         r'<nav aria-label="Primary">.*?</nav>',
-        replacement,
+        nav_html(depth),
         text,
         count=1,
         flags=re.S,
     )
-    if count == 0 and "<div class=\"layout\">" in text:
+    if count == 0 and '<div class="layout">' in text:
         raise RuntimeError(f"site shell page has no primary nav: {rel}")
     return normalized
 
@@ -125,9 +88,15 @@ def normalize_onboarding_source(text: str) -> str:
 
 
 def normalized_stylesheet(text: str) -> str:
-    if NAV_STYLE_MARKER in text:
+    """Remove the abandoned nested research-navigation styling."""
+    if NAV_STYLE_MARKER not in text:
         return text
-    return text.rstrip() + NAV_STYLE + "\n"
+    pattern = re.compile(
+        r'\n*/\* Site-wide research navigation hierarchy\. \*/.*?'
+        r'@media \(max-width: 760px\) \{.*?\n\}\n?',
+        re.S,
+    )
+    return pattern.sub("\n", text, count=1).rstrip() + "\n"
 
 
 def publisher_nav_function() -> str:
@@ -145,27 +114,15 @@ def publisher_nav_function() -> str:
         <li><a href="{p}docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul class="research-subnav">
-        <li><a href="{p}research.html">Manuals and research library</a></li>
-      </ul>
-      <p class="research-nav-label">Programs</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC</a></li>
-      </ul>
-      <p class="research-nav-label">Topics</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research.html#unit-fractions">Unit-fraction decomposition</a></li>
-        <li><a href="{p}research.html#character-methods">Character methods</a></li>
-        <li><a href="{p}research.html#shadowing">Shadowing and ancestry</a></li>
-        <li><a href="{p}research.html#entanglement">Entanglement formalisms</a></li>
+      <ul>
+        <li><a href="{p}research.html">Research library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>"""'''
@@ -173,10 +130,8 @@ def publisher_nav_function() -> str:
 
 def curated_research_writer() -> str:
     return '''def write_research_index(papers: list[Record], manuals: list[Record], dest: Path) -> None:
-    # The public research landing page is deliberately curated by subject.
-    # The bulk publisher owns individual records, not the information
-    # architecture of research.html. During --check, copy the canonical page
-    # into the temporary publication tree so the check still covers it.
+    # research.html is a curated subject index. The bulk publisher owns
+    # individual records, not the information architecture of the landing page.
     canonical = SITE / "research.html"
     if dest.resolve() == canonical.resolve():
         return
@@ -213,9 +168,7 @@ def normalize_publisher(text: str) -> str:
 
 def expected_files() -> dict[Path, str]:
     expected: dict[Path, str] = {}
-
-    publisher = PUBLISHER.read_text(encoding="utf-8")
-    expected[PUBLISHER] = normalize_publisher(publisher)
+    expected[PUBLISHER] = normalize_publisher(PUBLISHER.read_text(encoding="utf-8"))
 
     style = SITE / "style.css"
     expected[style] = normalized_stylesheet(style.read_text(encoding="utf-8"))
