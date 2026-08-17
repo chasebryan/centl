@@ -624,27 +624,15 @@ def render_nav(depth: int) -> str:
         <li><a href="{p}docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul class="research-subnav">
-        <li><a href="{p}research.html">Manuals and research library</a></li>
-      </ul>
-      <p class="research-nav-label">Programs</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC</a></li>
-      </ul>
-      <p class="research-nav-label">Topics</p>
-      <ul class="research-subnav secondary">
-        <li><a href="{p}research.html#unit-fractions">Unit-fraction decomposition</a></li>
-        <li><a href="{p}research.html#character-methods">Character methods</a></li>
-        <li><a href="{p}research.html#shadowing">Shadowing and ancestry</a></li>
-        <li><a href="{p}research.html#entanglement">Entanglement formalisms</a></li>
+      <ul>
+        <li><a href="{p}research.html">Research library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
       </ul>
       <h2>External</h2>
       <ul>
         <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
         <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/chasebryan/centl-cbx">CENTL-CBX on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/Black-Calculus">Black Calculus on GitHub</a></li>
         <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
       </ul>
     </nav>"""
@@ -798,10 +786,8 @@ def write_folder_index(
 
 
 def write_research_index(papers: list[Record], manuals: list[Record], dest: Path) -> None:
-    # The public research landing page is deliberately curated by subject.
-    # The bulk publisher owns individual records, not the information
-    # architecture of research.html. During --check, copy the canonical page
-    # into the temporary publication tree so the check still covers it.
+    # research.html is a curated subject index. The bulk publisher owns
+    # individual records, not the information architecture of the landing page.
     canonical = SITE / "research.html"
     if dest.resolve() == canonical.resolve():
         return
