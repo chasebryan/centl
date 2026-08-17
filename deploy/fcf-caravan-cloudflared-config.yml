@@ -4,4 +4,8 @@ credentials-file: /var/home/chasebryan/.cloudflared/d59e3e73-544d-40f8-8ad4-9bb6
 ingress:
   - hostname: caravan.freecomputation.org
     service: http://127.0.0.1:8789
+  - hostname: freecomputation.org
+    service: http://127.0.0.1:8088
+  - hostname: www.freecomputation.org
+    service: http://127.0.0.1:8088
   - service: http_status:404

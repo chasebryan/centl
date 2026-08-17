@@ -1,7 +1,7 @@
 [Unit]
 Description=FCF CARAVAN named Cloudflare Tunnel
-After=fcf-caravan-coordinator.service network-online.target
-Wants=fcf-caravan-coordinator.service
+After=fcf-caravan-coordinator.service fcf-centl-web.service network-online.target
+Wants=fcf-caravan-coordinator.service fcf-centl-web.service
 
 [Service]
 Type=simple
