@@ -13,6 +13,7 @@
   <meta property="og:description" content="The recursively closed formalism behind the Bryan Entanglement Cross. Canonical specification v1.0, frozen 2026-08-16.">
   <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
   <link rel="stylesheet" href="style.css?v=catalog-1">
+  <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
 <body>
 <div class="shell">
@@ -32,10 +33,20 @@
         <li><a href="docs.html">Documentation</a></li>
       </ul>
       <h2>Research</h2>
-      <ul>
-        <li><a href="research.html">Research library</a></li>
-        <li><a href="research-erdos-straus.html">Erdős–Straus program</a></li>
+      <ul class="research-subnav">
+        <li><a href="research.html">Library home</a></li>
+      </ul>
+      <p class="research-nav-label">Programs</p>
+      <ul class="research-subnav secondary">
+        <li><a href="research-erdos-straus.html">Erdős–Straus</a></li>
         <li><a href="bryan-recursive-entanglement-calculus.html" aria-current="page">BREC</a></li>
+      </ul>
+      <p class="research-nav-label">Topics</p>
+      <ul class="research-subnav secondary">
+        <li><a href="research.html#unit-fractions">Unit-fraction decomposition</a></li>
+        <li><a href="research.html#character-methods">Character methods</a></li>
+        <li><a href="research.html#shadowing">Shadowing and ancestry</a></li>
+        <li><a href="research.html#entanglement">Entanglement formalisms</a></li>
       </ul>
       <h2>Source</h2>
       <ul>
@@ -47,11 +58,29 @@
     <main id="content">
       <p class="notice"><strong>Frozen:</strong> BREC v1.0 is the canonical binary recursive specification. Future work may extend it through explicit versioning, but must not silently alter the v1.0 core.</p>
 
-      <figure class="demo">
+      <section class="paper-summary" aria-labelledby="abstract">
+        <h2 id="abstract">Abstract</h2>
+        <p>BREC formalizes directed entanglement as a recursively closed signed history space. Constructive and obstructive consequences are represented as finite words, allowing arbitrary persistence, reversal, re-entry, and deeper propagation while keeping formal history distinct from evaluated-state collisions.</p>
+      </section>
+
+      <div class="record-strip" aria-label="BREC record metadata">
+        <div><strong>Status</strong><span>Frozen</span></div>
+        <div><strong>Version</strong><span>v1.0</span></div>
+        <div><strong>Type</strong><span>Canonical specification</span></div>
+        <div><strong>Date</strong><span>2026-08-16</span></div>
+      </div>
+
+      <div class="research-actions">
+        <a class="sponsor-button" href="https://github.com/chasebryan/centl/blob/main/research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md">Read the canonical specification</a>
+        <a class="sponsor-button sponsor-button-alt" href="https://github.com/chasebryan/centl/tree/main/research/bryan-entanglement">Open the research directory</a>
+        <a class="sponsor-button sponsor-button-alt" href="assets/bryan-recursive-entanglement-hypercube.svg">Open full diagram</a>
+      </div>
+
+      <figure class="research-figure-compact">
         <a href="assets/bryan-recursive-entanglement-hypercube.svg">
-          <img class="banner" src="assets/bryan-recursive-entanglement-hypercube.svg" alt="Bryan Recursive Entanglement Calculus directed entanglement hypercube showing the recursive state-space geometry and the positive, negative, upward-expansion, and downward-excavation directions.">
+          <img src="assets/bryan-recursive-entanglement-hypercube.svg" alt="Bryan Recursive Entanglement Calculus directed entanglement hypercube showing recursive state-space geometry and the positive, negative, upward-expansion, and downward-excavation directions.">
         </a>
-        <figcaption><strong>Directed entanglement hypercube.</strong> The Cross is projected into recursive state space: vertices are formal states, edges are entanglement channels, and additional recursion adds dimensions rather than exhausting a fixed set of compass directions. Select the figure for the full-size vector image.</figcaption>
+        <figcaption><strong>Figure 1. Directed entanglement hypercube.</strong> A compact preview of the recursive state-space geometry. Select it to open the full vector diagram.</figcaption>
       </figure>
 
       <h2>The idea</h2>
@@ -104,7 +133,7 @@
 
       <h2>Canonical source</h2>
       <p>This page is the public summary. The repository specification contains the normative definitions, algorithms, qualifications, symmetry operations, stochastic extension, generalized recursion, research agenda, and versioning rule.</p>
-      <p><a href="https://github.com/chasebryan/centl/blob/main/research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md"><strong>Read the frozen BREC v1.0 specification on GitHub →</strong></a></p>
+      <p><a href="https://github.com/chasebryan/centl/blob/main/research/bryan-entanglement/BRYAN-RECURSIVE-ENTANGLEMENT-CALCULUS.md"><strong>Read the frozen BREC v1.0 specification on GitHub</strong></a></p>
     </main>
   </div>
 </div>
