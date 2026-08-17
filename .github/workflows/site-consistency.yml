@@ -20,38 +20,15 @@ on:
       - '.github/workflows/site-consistency.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   consistency:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Apply canonical site shell
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[site-normalize]')
-        run: |
-          python3 scripts/site-consistency.py --apply
-          python3 scripts/publish-site-library.py
-          python3 scripts/site-consistency.py --apply
-          python3 scripts/site-consistency.py --check
-          python3 scripts/publish-site-library.py --check
-
-          if git diff --quiet; then
-            echo 'Site already canonical.'
-            exit 0
-          fi
-
-          git config user.name 'FCF Site Consistency'
-          git config user.email '142706090+chasebryan@users.noreply.github.com'
-          git add site docs/MATHEMATICIANS.md docs/PHYSICISTS.md scripts/publish-site-library.py
-          git commit -m 'site: use identical sidebar on every published page'
-          git push
 
       - name: Check site consistency
-        if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[site-normalize]')
         run: |
           python3 scripts/site-consistency.py --check
           python3 scripts/publish-site-library.py --check
