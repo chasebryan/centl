@@ -80,26 +80,36 @@ jobs:
         run: |
           set -eu
           case "$CENSUS_URL" in https://*) ;; *) echo "FCF_CARAVAN_CENSUS_URL must use HTTPS" >&2; exit 1 ;; esac
-          curl --fail --silent --show-error --location \
+          fetched=0
+          if curl --fail --silent --show-error --location \
             --connect-timeout 10 --max-time 30 --max-filesize 65536 \
-            --output "$RUNNER_TEMP/fcf-caravan-coordinator.json" "$CENSUS_URL"
-          case "$CENSUS_URL" in
-            */census-v1.json)
-              mv "$RUNNER_TEMP/fcf-caravan-coordinator.json" \
-                "$RUNNER_TEMP/fcf-caravan-census.json"
-              ;;
-            *)
-              coordinator_url=$(python3 scripts/caravan-coordinator-resolve \
-                --input "$RUNNER_TEMP/fcf-caravan-coordinator.json")
-              curl --fail --silent --show-error --location \
-                --connect-timeout 10 --max-time 30 --max-filesize 65536 \
-                --output "$RUNNER_TEMP/fcf-caravan-census.json" \
-                "$coordinator_url/census-v1.json"
-              ;;
-          esac
-          python3 scripts/caravan-census-validate \
+            --output "$RUNNER_TEMP/fcf-caravan-coordinator.json" "$CENSUS_URL"; then
+            case "$CENSUS_URL" in
+              */census-v1.json)
+                mv "$RUNNER_TEMP/fcf-caravan-coordinator.json" \
+                  "$RUNNER_TEMP/fcf-caravan-census.json"
+                fetched=1
+                ;;
+              *)
+                coordinator_url=$(python3 scripts/caravan-coordinator-resolve \
+                  --input "$RUNNER_TEMP/fcf-caravan-coordinator.json" 2>/dev/null || true)
+                if [ -n "$coordinator_url" ] && curl --fail --silent --show-error --location \
+                  --connect-timeout 10 --max-time 30 --max-filesize 65536 \
+                  --output "$RUNNER_TEMP/fcf-caravan-census.json" \
+                  "$coordinator_url/census-v1.json"; then
+                  fetched=1
+                fi
+                ;;
+            esac
+          fi
+          if [ "$fetched" -eq 1 ] && python3 scripts/caravan-census-validate \
             --input "$RUNNER_TEMP/fcf-caravan-census.json" \
-            --output site/pub/centl/caravan/census-v1.json
+            --output site/pub/centl/caravan/census-v1.json; then
+            echo "Coordinator census published."
+          else
+            echo "::warning::Coordinator census unreachable or invalid; The Bazaar will use the committed lead census."
+            rm -f site/pub/centl/caravan/census-v1.json
+          fi
 
       - name: Probe X200 fallback
         if: ${{ vars.FCF_CARAVAN_CENSUS_URL == '' }}
@@ -136,7 +146,7 @@ jobs:
           find site -name '*.js' -delete
           cp -a site/. _site/
           census_input=site/pub/centl/caravan/lead-census-v1.json
-          if [ -n "$FCF_CARAVAN_CENSUS_URL" ]; then
+          if [ -n "$FCF_CARAVAN_CENSUS_URL" ] && [ -f site/pub/centl/caravan/census-v1.json ]; then
             census_input=site/pub/centl/caravan/census-v1.json
           fi
           python3 scripts/caravan-render-bazaar --template site/mirrors.html --census "$census_input" --output _site/mirrors.html

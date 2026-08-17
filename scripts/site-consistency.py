@@ -1,21 +1,8 @@
 #!/usr/bin/env python3
 """Keep the public FCF site shell identical across every HTML page.
 
-The sidebar is deliberately simple and universal. Every published page uses
-exactly the same three groups and links, adjusted only for relative path depth:
-
-Foundation
-  Home · About FCF · Funding · CENTL · Software · The Bazaar · Documentation
-Research
-  Research library · Erdős–Straus program · Bryan Recursive Entanglement Calculus
-External
-  CENTL on GitHub · Latest release · GitHub Sponsors
-
-This script also keeps the library publisher on the same sidebar, removes the
-onboarding emoji that should not appear on the site, preserves the curated
-research landing page, and keeps BREC in the sitemap.
-
-Use --apply to normalize the tree. Use --check in CI to reject drift.
+The sidebar is organized and normalized across 4 clear categories:
+CENTL & Hub · Documentation · Research · Foundation
 """
 
 from __future__ import annotations
@@ -41,27 +28,33 @@ NAV_STYLE_MARKER = "/* Site-wide research navigation hierarchy. */"
 def nav_html(depth: int) -> str:
     p = "../" * depth
     return f'''<nav aria-label="Primary">
-      <h2>Foundation</h2>
+      <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">Home</a></li>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding</a></li>
-        <li><a href="{p}centl.html">CENTL</a></li>
-        <li><a href="{p}software.html">Software</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
-        <li><a href="{p}docs.html">Documentation</a></li>
+        <li><a href="{p}index.html">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="{p}docs.html">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
+        <li><a href="{p}research.html">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
       </ul>
-      <h2>External</h2>
+      <h2>Foundation</h2>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+        <li><a href="{p}about.html">About FCF</a></li>
+        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>'''
 
@@ -103,27 +96,33 @@ def publisher_nav_function() -> str:
     return '''def render_nav(depth: int) -> str:
     p = "../" * depth
     return f"""<nav aria-label="Primary">
-      <h2>Foundation</h2>
+      <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">Home</a></li>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding</a></li>
-        <li><a href="{p}centl.html">CENTL</a></li>
-        <li><a href="{p}software.html">Software</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
-        <li><a href="{p}docs.html">Documentation</a></li>
+        <li><a href="{p}index.html">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="{p}docs.html">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
+        <li><a href="{p}research.html">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
       </ul>
-      <h2>External</h2>
+      <h2>Foundation</h2>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+        <li><a href="{p}about.html">About FCF</a></li>
+        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>"""'''
 

@@ -613,27 +613,33 @@ def render_table(rows: list[str], current: Record, catalog: dict[str, Record]) -
 def render_nav(depth: int) -> str:
     p = "../" * depth
     return f"""<nav aria-label="Primary">
-      <h2>Foundation</h2>
+      <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">Home</a></li>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding</a></li>
-        <li><a href="{p}centl.html">CENTL</a></li>
-        <li><a href="{p}software.html">Software</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
-        <li><a href="{p}docs.html">Documentation</a></li>
+        <li><a href="{p}index.html">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="{p}docs.html">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">Bryan Recursive Entanglement Calculus</a></li>
+        <li><a href="{p}research.html">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
       </ul>
-      <h2>External</h2>
+      <h2>Foundation</h2>
       <ul>
-        <li><a href="https://github.com/chasebryan/centl">CENTL on GitHub</a></li>
-        <li><a href="https://github.com/chasebryan/centl/releases/tag/v0.15.0">Latest release</a></li>
-        <li><a href="https://github.com/sponsors/chasebryan">GitHub Sponsors</a></li>
+        <li><a href="{p}about.html">About FCF</a></li>
+        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>"""
 
