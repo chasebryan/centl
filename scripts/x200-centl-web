@@ -1,0 +1,193 @@
+#!/bin/sh
+# Bring the zero-JS CENTL hub up on the X200 and point the named
+# Cloudflare tunnel at it.
+#
+# On the X200:
+#   curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/scripts/x200-centl-web
+#   sh x200-centl-web
+#
+# Optional:
+#   CENTL_ROOT=/var/home/chasebryan/centl sh x200-centl-web
+set -eu
+
+repo_url="https://github.com/chasebryan/centl.git"
+repo_branch="main"
+home=${HOME:-/var/home/chasebryan}
+centl_root=${CENTL_ROOT:-$home/centl}
+unit_dir=${XDG_CONFIG_HOME:-$home/.config}/systemd/user
+cloudflared_config=$home/.cloudflared/config.yml
+tunnel_name=fcf-caravan-coordinator
+hub_port=8088
+
+fail() {
+  printf 'x200-centl-web: %s\n' "$*" >&2
+  exit 1
+}
+
+say() {
+  printf 'x200-centl-web: %s\n' "$*"
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+[ "$(uname -s)" = Linux ] || fail "run this on the X200 GNU/Linux host, not macOS"
+need git
+need systemctl
+need curl
+
+if ! command -v cargo >/dev/null 2>&1; then
+  if [ -x "$home/.cargo/bin/cargo" ]; then
+    PATH="$home/.cargo/bin:$PATH"
+    export PATH
+  else
+    say "cargo not found; installing rustup minimal toolchain"
+    need python3
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+    # shellcheck disable=SC1091
+    . "$home/.cargo/env"
+  fi
+fi
+command -v cargo >/dev/null 2>&1 || fail "cargo is still missing after rustup"
+
+if [ -d "$centl_root/.git" ]; then
+  say "updating $centl_root to origin/$repo_branch"
+  git -C "$centl_root" remote get-url origin >/dev/null 2>&1 || fail "$centl_root is not a git checkout"
+  git -C "$centl_root" fetch --prune origin "$repo_branch"
+  git -C "$centl_root" diff --quiet -- && git -C "$centl_root" diff --cached --quiet -- || \
+    fail "$centl_root has local changes; commit or stash them, then rerun"
+  git -C "$centl_root" checkout "$repo_branch"
+  git -C "$centl_root" merge --ff-only "origin/$repo_branch"
+else
+  parent=$(dirname -- "$centl_root")
+  mkdir -p "$parent"
+  say "cloning $repo_url into $centl_root"
+  git clone --branch "$repo_branch" "$repo_url" "$centl_root"
+fi
+
+jobs=2
+if [ -r /proc/meminfo ]; then
+  mem_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
+  if [ -n "${mem_kb:-}" ] && [ "$mem_kb" -lt 1200000 ]; then
+    jobs=1
+    say "low memory (${mem_kb} kB available); building with one job and no LTO"
+  fi
+fi
+export CARGO_PROFILE_RELEASE_LTO=false
+export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=4
+export CARGO_TERM_COLOR=never
+
+say "building release centl-web"
+cargo build --release --jobs "$jobs" --manifest-path "$centl_root/Cargo.toml"
+[ -x "$centl_root/target/release/centl-web" ] || fail "centl-web binary missing after build"
+
+mkdir -p "$unit_dir"
+cat > "$unit_dir/fcf-centl-web.service" <<EOF
+[Unit]
+Description=FCF CENTL zero-JS web hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=$centl_root
+Environment=PATH=$home/.cargo/bin:$home/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=$centl_root/target/release/centl-web --serve $hub_port
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target
+EOF
+
+if command -v loginctl >/dev/null 2>&1; then
+  loginctl enable-linger "$(id -un)" >/dev/null 2>&1 || \
+    say "could not enable linger; start the user session after reboot or run: loginctl enable-linger $(id -un)"
+fi
+
+systemctl --user daemon-reload
+systemctl --user enable --now fcf-centl-web.service
+
+if [ -f "$cloudflared_config" ]; then
+  if grep -q 'hostname: freecomputation.org' "$cloudflared_config"; then
+    say "cloudflared already lists freecomputation.org"
+  else
+    tmp=$cloudflared_config.new-$$
+    awk -v port="$hub_port" '
+      /service: http_status:404/ && !done {
+        print "  - hostname: freecomputation.org"
+        print "    service: http://127.0.0.1:" port
+        print "  - hostname: www.freecomputation.org"
+        print "    service: http://127.0.0.1:" port
+        done=1
+      }
+      { print }
+    ' "$cloudflared_config" > "$tmp"
+    mv "$tmp" "$cloudflared_config"
+    say "added freecomputation.org -> 127.0.0.1:$hub_port in $cloudflared_config"
+  fi
+elif [ -f "$centl_root/deploy/fcf-caravan-cloudflared-config.yml" ]; then
+  mkdir -p "$(dirname -- "$cloudflared_config")"
+  cp "$centl_root/deploy/fcf-caravan-cloudflared-config.yml" "$cloudflared_config"
+  say "installed $cloudflared_config from the repository template"
+else
+  say "no cloudflared config at $cloudflared_config; start the named tunnel after cloudflared login"
+fi
+
+if command -v cloudflared >/dev/null 2>&1; then
+  cloudflared tunnel route dns "$tunnel_name" freecomputation.org || \
+    say "could not create DNS route for freecomputation.org (create it in Cloudflare if needed)"
+  cloudflared tunnel route dns "$tunnel_name" www.freecomputation.org || \
+    say "could not create DNS route for www.freecomputation.org"
+else
+  say "cloudflared not on PATH; skip DNS route"
+fi
+
+restarted_tunnel=0
+if systemctl --user list-unit-files fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
+  if systemctl --user restart fcf-caravan-cloudflare-tunnel.service; then
+    restarted_tunnel=1
+  fi
+fi
+if [ "$restarted_tunnel" -eq 0 ] && command -v sudo >/dev/null 2>&1; then
+  if sudo -n systemctl restart fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
+    restarted_tunnel=1
+  fi
+fi
+if [ "$restarted_tunnel" -eq 0 ]; then
+  say "restart the Cloudflare tunnel so it picks up the new ingress"
+fi
+
+ready=0
+i=1
+while [ "$i" -le 20 ]; do
+  if curl --silent --fail --max-time 2 --output /dev/null http://127.0.0.1:$hub_port/; then
+    ready=1
+    break
+  fi
+  sleep 1
+  i=$((i + 1))
+done
+[ "$ready" -eq 1 ] || fail "centl-web did not become ready on 127.0.0.1:$hub_port"
+
+body=$(mktemp)
+if ! curl --silent --fail --max-time 10 --data 'cmd=1/3+%2B+5/7' http://127.0.0.1:$hub_port/ > "$body"; then
+  rm -f "$body"
+  fail "local POST to centl-web failed"
+fi
+if ! grep -q '22/21' "$body"; then
+  rm -f "$body"
+  fail "local POST did not return 22/21; the hub is not evaluating"
+fi
+rm -f "$body"
+
+say "local hub is live: POST 1/3 + 5/7 -> 22/21"
+say "service: systemctl --user status fcf-centl-web.service"
+say "Cloudflare must send freecomputation.org to tunnel $tunnel_name, not GitHub Pages."
+say "Public check after DNS: curl -fsS -d 'cmd=1/3+5/7' https://freecomputation.org/ | grep 22/21"

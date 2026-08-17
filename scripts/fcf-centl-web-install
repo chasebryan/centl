@@ -1,51 +1,5 @@
 #!/bin/sh
-# Install the zero-JS CENTL hub on the FCF X200 and point the named
-# Cloudflare tunnel at it. Run on the X200 as the ordinary chasebryan user
-# after the repository checkout at /var/home/chasebryan/centl is current.
+# Compatibility wrapper. The downloadable X200 entrypoint is scripts/x200-centl-web.
 set -eu
-
-root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-home=${HOME:-/var/home/chasebryan}
-unit_dir=${XDG_CONFIG_HOME:-$home/.config}/systemd/user
-cloudflared_config=$home/.cloudflared/config.yml
-tunnel_name=fcf-caravan-coordinator
-
-fail() {
-  printf 'fcf-centl-web-install: %s\n' "$*" >&2
-  exit 1
-}
-
-[ "$(uname -s)" = Linux ] || fail "this installer is for the X200 GNU/Linux host"
-command -v cargo >/dev/null 2>&1 || fail "cargo is required to build centl-web"
-command -v systemctl >/dev/null 2>&1 || fail "systemctl is required"
-
-printf 'Building release centl-web...\n'
-cargo build --release --manifest-path "$root/Cargo.toml"
-[ -x "$root/target/release/centl-web" ] || fail "centl-web binary missing after build"
-
-mkdir -p "$unit_dir"
-cp "$root/deploy/fcf-centl-web.service" "$unit_dir/fcf-centl-web.service"
-systemctl --user daemon-reload
-systemctl --user enable --now fcf-centl-web.service
-
-if [ -f "$cloudflared_config" ]; then
-  cp "$root/deploy/fcf-caravan-cloudflared-config.yml" "$cloudflared_config"
-  printf 'Updated %s with freecomputation.org -> 127.0.0.1:8088\n' "$cloudflared_config"
-else
-  printf 'No %s yet; copy deploy/fcf-caravan-cloudflared-config.yml there after cloudflared login.\n' "$cloudflared_config"
-fi
-
-if command -v cloudflared >/dev/null 2>&1; then
-  cloudflared tunnel route dns "$tunnel_name" freecomputation.org || true
-  cloudflared tunnel route dns "$tunnel_name" www.freecomputation.org || true
-fi
-
-if systemctl --user is-enabled fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
-  systemctl --user restart fcf-caravan-cloudflare-tunnel.service || true
-elif systemctl is-enabled fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
-  sudo systemctl restart fcf-caravan-cloudflare-tunnel.service || true
-fi
-
-printf 'centl-web is listening on 127.0.0.1:8088\n'
-printf 'Confirm locally: curl -sS -D- -o /dev/null -X POST -d "cmd=1/3+5/7" http://127.0.0.1:8088/\n'
-printf 'Cloudflare must route freecomputation.org to tunnel %s (not GitHub Pages).\n' "$tunnel_name"
+root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$root/x200-centl-web" "$@"
