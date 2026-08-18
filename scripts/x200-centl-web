@@ -67,6 +67,9 @@ else
   git clone --branch "$repo_branch" "$repo_url" "$centl_root"
 fi
 
+current_commit=$(git -C "$centl_root" rev-parse HEAD)
+say "deploying commit $current_commit"
+
 jobs=2
 if [ -r /proc/meminfo ]; then
   mem_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
@@ -84,7 +87,7 @@ cargo build --release --jobs "$jobs" --manifest-path "$centl_root/Cargo.toml"
 [ -x "$centl_root/target/release/centl-web" ] || fail "centl-web binary missing after build"
 
 mkdir -p "$unit_dir"
-cat > "$unit_dir/fcf-centl-web.service" <<EOF
+cat > "$unit_dir/fcf-centl-web.service" <<EOF_UNIT
 [Unit]
 Description=FCF CENTL zero-JS web hub
 After=network-online.target
@@ -96,6 +99,7 @@ WorkingDirectory=$centl_root
 Environment=PATH=$home/.cargo/bin:$home/.local/bin:/usr/local/bin:/usr/bin
 Environment=CENTL_BIND_HOST=127.0.0.1
 Environment=CENTL_SITE_DIR=$centl_root/site
+Environment=CENTL_BUILD_COMMIT=$current_commit
 ExecStart=$centl_root/target/release/centl-web --serve $hub_port
 Restart=always
 RestartSec=5
@@ -107,7 +111,7 @@ RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 
 [Install]
 WantedBy=default.target
-EOF
+EOF_UNIT
 
 if command -v loginctl >/dev/null 2>&1; then
   loginctl enable-linger "$(id -un)" >/dev/null 2>&1 || \
@@ -116,8 +120,6 @@ fi
 
 systemctl --user daemon-reload
 systemctl --user enable fcf-centl-web.service >/dev/null
-# A rebuilt binary is not picked up by an already-running process. Restart on
-# every deployment so the public origin actually serves the commit just built.
 systemctl --user restart fcf-centl-web.service
 
 if [ -f "$cloudflared_config" ]; then
@@ -146,13 +148,27 @@ else
   say "no cloudflared config at $cloudflared_config; start the named tunnel after cloudflared login"
 fi
 
+if [ -f "$cloudflared_config" ]; then
+  if ! awk -v port="$hub_port" '
+    $0 ~ /hostname: freecomputation\.org[[:space:]]*$/ { found=1; next }
+    found && $0 ~ /service:/ {
+      expected="http://127.0.0.1:" port
+      if (index($0, expected)) ok=1
+      exit
+    }
+    END { exit(ok ? 0 : 1) }
+  ' "$cloudflared_config"; then
+    fail "$cloudflared_config does not route freecomputation.org to 127.0.0.1:$hub_port"
+  fi
+fi
+
 if command -v cloudflared >/dev/null 2>&1; then
   cloudflared tunnel route dns "$tunnel_name" freecomputation.org || \
-    say "could not create DNS route for freecomputation.org (create it in Cloudflare if needed)"
+    say "DNS route command did not create freecomputation.org; the public origin probe below will verify the actual route"
   cloudflared tunnel route dns "$tunnel_name" www.freecomputation.org || \
-    say "could not create DNS route for www.freecomputation.org"
+    say "DNS route command did not create www.freecomputation.org"
 else
-  say "cloudflared not on PATH; skip DNS route"
+  say "cloudflared not on PATH; skip DNS route command"
 fi
 
 restarted_tunnel=0
@@ -167,33 +183,62 @@ if [ "$restarted_tunnel" -eq 0 ] && command -v sudo >/dev/null 2>&1; then
   fi
 fi
 if [ "$restarted_tunnel" -eq 0 ]; then
-  say "restart the Cloudflare tunnel so it picks up the new ingress"
+  say "could not restart the Cloudflare tunnel automatically; public verification may fail until it is restarted"
 fi
 
 ready=0
 i=1
 while [ "$i" -le 20 ]; do
-  if curl --silent --fail --max-time 2 --output /dev/null http://127.0.0.1:$hub_port/; then
+  local_origin=$(curl --silent --fail --max-time 2 "http://127.0.0.1:$hub_port/__centl_origin" 2>/dev/null || true)
+  if [ "$local_origin" = "centl-web $current_commit" ]; then
     ready=1
     break
   fi
   sleep 1
   i=$((i + 1))
 done
-[ "$ready" -eq 1 ] || fail "centl-web did not become ready on 127.0.0.1:$hub_port"
+[ "$ready" -eq 1 ] || fail "local centl-web is not serving build $current_commit on 127.0.0.1:$hub_port"
 
 body=$(mktemp)
-if ! curl --silent --fail --max-time 10 --data 'cmd=1/3+%2B+5/7' http://127.0.0.1:$hub_port/hub > "$body"; then
-  rm -f "$body"
-  fail "local POST to the CENTL /hub endpoint failed"
+cookies=$(mktemp)
+trap 'rm -f "$body" "$cookies"' EXIT HUP INT TERM
+if ! curl --silent --fail --location --max-time 10 \
+  --cookie-jar "$cookies" --cookie "$cookies" \
+  --data 'cmd=1/3+%2B+5/7' "http://127.0.0.1:$hub_port/hub" > "$body"; then
+  fail "local POST/redirect/get cycle to the CENTL /hub endpoint failed"
 fi
 if ! grep -q '22/21' "$body"; then
-  rm -f "$body"
-  fail "local POST did not return 22/21; the hub is not evaluating"
+  fail "local calculation did not return 22/21 after its redirect"
 fi
-rm -f "$body"
+if ! curl --silent --fail --max-time 5 --cookie "$cookies" \
+  "http://127.0.0.1:$hub_port/hub" > "$body"; then
+  fail "local clean GET to /hub failed"
+fi
+if grep -q '22/21' "$body"; then
+  fail "clean GET /hub retained calculation history; refresh semantics are broken"
+fi
+if ! grep -q 'CENTL exact mathematical interpreter ready.' "$body"; then
+  fail "clean GET /hub did not return a pristine calculator"
+fi
 
-say "local hub is live: POST /hub 1/3 + 5/7 -> 22/21"
+public_ready=0
+i=1
+while [ "$i" -le 15 ]; do
+  public_origin=$(curl --silent --fail --max-time 5 \
+    "https://freecomputation.org/__centl_origin" 2>/dev/null || true)
+  if [ "$public_origin" = "centl-web $current_commit" ]; then
+    public_ready=1
+    break
+  fi
+  sleep 2
+  i=$((i + 1))
+done
+if [ "$public_ready" -ne 1 ]; then
+  fail "freecomputation.org is not reaching this X200 build ($current_commit). The public hostname is still routed to another origin/cache. Check the Cloudflare DNS record and the fcf-caravan-coordinator ingress before debugging CENTL itself."
+fi
+
+rm -f "$body" "$cookies"
+trap - EXIT HUP INT TERM
+say "local hub is live and refresh-clears: POST 1/3 + 5/7 -> 22/21; clean GET -> pristine"
+say "public origin verified: freecomputation.org -> X200 build $current_commit"
 say "service: systemctl --user status fcf-centl-web.service"
-say "Cloudflare must send freecomputation.org to tunnel $tunnel_name, not GitHub Pages."
-say "Public check after DNS: curl -fsS -d 'cmd=1/3+%2B+5/7' https://freecomputation.org/hub | grep 22/21"
