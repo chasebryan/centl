@@ -10,7 +10,6 @@ on:
       - "site/style.css"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
-      - "tests/test_x200_centl_web.py"
       - ".github/workflows/centl-web.yml"
   push:
     branches:
@@ -23,7 +22,6 @@ on:
       - "site/style.css"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
-      - "tests/test_x200_centl_web.py"
       - ".github/workflows/centl-web.yml"
 
 permissions:
@@ -41,6 +39,6 @@ jobs:
       - name: Test CENTL web
         run: cargo test --all-targets
       - name: Test X200 web deployment contract
-        run: python3 -m unittest tests.test_x200_centl_web
+        run: python3 src-web/tests/test_x200_centl_web.py
       - name: Build CENTL web release
         run: cargo build --release --bin centl-web
