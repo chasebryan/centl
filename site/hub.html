@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead home-masthead">
     <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
@@ -20,30 +20,30 @@
         <nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="index.html">CENTL Work Area</a></li>
-        <li><a href="centl.html">About CENTL</a></li>
-        <li><a href="research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
-        <li><a href="software.html">Software Suite</a></li>
+        <li><a href="index.html#top">CENTL Work Area</a></li>
+        <li><a href="centl.html#top">About CENTL</a></li>
+        <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="software.html#top">Software Suite</a></li>
       </ul>
       <h2>Documentation</h2>
       <ul>
-        <li><a href="docs.html">Documentation Portal</a></li>
-        <li><a href="manuals/install.html">Installation Guide</a></li>
-        <li><a href="manuals/numerics.html">Numerical Contract</a></li>
-        <li><a href="manuals/syntax.html">Syntax &amp; Functions</a></li>
-        <li><a href="manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="docs.html#top">Documentation Portal</a></li>
+        <li><a href="manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="research.html">Research Library</a></li>
-        <li><a href="research-erdos-straus.html">Erdős–Straus Program</a></li>
-        <li><a href="bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+        <li><a href="research.html#top">Research Library</a></li>
+        <li><a href="research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
       <h2>Foundation</h2>
       <ul>
-        <li><a href="about.html">About FCF</a></li>
-        <li><a href="funding.html">Funding &amp; Sponsors</a></li>
-        <li><a href="mirrors.html">The Bazaar</a></li>
+        <li><a href="about.html#top">About FCF</a></li>
+        <li><a href="funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="mirrors.html#top">The Bazaar</a></li>
         <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>
@@ -92,7 +92,7 @@
         <form method="POST" action="/" class="centl-prompt-form">
           <div class="input-row">
             <span class="input-prompt">centl&gt;</span>
-            <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" autofocus class="cmd-input">
+            <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" class="cmd-input">
             <button type="submit" class="btn-calculate">Calculate</button>
             <button type="submit" name="cmd" value=":clear" class="btn-clear">Clear</button>
           </div>

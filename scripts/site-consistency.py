@@ -30,30 +30,30 @@ def nav_html(depth: int) -> str:
     return f'''<nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">CENTL Work Area</a></li>
-        <li><a href="{p}centl.html">About CENTL</a></li>
-        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
-        <li><a href="{p}software.html">Software Suite</a></li>
+        <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html#top">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html#top">Software Suite</a></li>
       </ul>
       <h2>Documentation</h2>
       <ul>
-        <li><a href="{p}docs.html">Documentation Portal</a></li>
-        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
-        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
-        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
-        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="{p}docs.html#top">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research Library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+        <li><a href="{p}research.html#top">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
       <h2>Foundation</h2>
       <ul>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="{p}about.html#top">About FCF</a></li>
+        <li><a href="{p}funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html#top">The Bazaar</a></li>
         <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>'''
@@ -62,6 +62,7 @@ def nav_html(depth: int) -> str:
 def normalize_html(path: Path, text: str) -> str:
     rel = path.relative_to(SITE)
     depth = len(rel.parts) - 1
+    prefix = "../" * depth
     normalized, count = re.subn(
         r'<nav aria-label="Primary">.*?</nav>',
         nav_html(depth),
@@ -71,6 +72,20 @@ def normalize_html(path: Path, text: str) -> str:
     )
     if count == 0 and '<div class="layout">' in text:
         raise RuntimeError(f"site shell page has no primary nav: {rel}")
+    normalized, shell_count = re.subn(
+        r'<div class="shell"(?: id="top")?>',
+        '<div class="shell" id="top">',
+        normalized,
+        count=1,
+    )
+    if shell_count == 0 and '<div class="layout">' in normalized:
+        raise RuntimeError(f"site shell page has no page-top anchor: {rel}")
+    normalized = re.sub(
+        r'(<div class="brand"><a href=")(?:\.\./)*index\.html(?:#top)?"',
+        rf'\1{prefix}index.html#top"',
+        normalized,
+        count=1,
+    )
     return normalized
 
 
@@ -98,30 +113,30 @@ def publisher_nav_function() -> str:
     return f"""<nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">CENTL Work Area</a></li>
-        <li><a href="{p}centl.html">About CENTL</a></li>
-        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
-        <li><a href="{p}software.html">Software Suite</a></li>
+        <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html#top">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html#top">Software Suite</a></li>
       </ul>
       <h2>Documentation</h2>
       <ul>
-        <li><a href="{p}docs.html">Documentation Portal</a></li>
-        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
-        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
-        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
-        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="{p}docs.html#top">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research Library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+        <li><a href="{p}research.html#top">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
       <h2>Foundation</h2>
       <ul>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="{p}about.html#top">About FCF</a></li>
+        <li><a href="{p}funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html#top">The Bazaar</a></li>
         <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>"""'''

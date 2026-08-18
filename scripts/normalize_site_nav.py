@@ -20,30 +20,30 @@ def make_nav_html(rel: str) -> str:
     return f"""    <nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{rel}index.html">CENTL Work Area</a></li>
-        <li><a href="{rel}centl.html">About CENTL</a></li>
-        <li><a href="{rel}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
-        <li><a href="{rel}software.html">Software Suite</a></li>
+        <li><a href="{rel}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{rel}centl.html#top">About CENTL</a></li>
+        <li><a href="{rel}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="{rel}software.html#top">Software Suite</a></li>
       </ul>
       <h2>Documentation</h2>
       <ul>
-        <li><a href="{rel}docs.html">Documentation Portal</a></li>
-        <li><a href="{rel}manuals/install.html">Installation Guide</a></li>
-        <li><a href="{rel}manuals/numerics.html">Numerical Contract</a></li>
-        <li><a href="{rel}manuals/syntax.html">Syntax &amp; Functions</a></li>
-        <li><a href="{rel}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="{rel}docs.html#top">Documentation Portal</a></li>
+        <li><a href="{rel}manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="{rel}manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="{rel}manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="{rel}manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{rel}research.html">Research Library</a></li>
-        <li><a href="{rel}research-erdos-straus.html">Erdős–Straus Program</a></li>
-        <li><a href="{rel}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+        <li><a href="{rel}research.html#top">Research Library</a></li>
+        <li><a href="{rel}research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="{rel}bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
       <h2>Foundation</h2>
       <ul>
-        <li><a href="{rel}about.html">About FCF</a></li>
-        <li><a href="{rel}funding.html">Funding &amp; Sponsors</a></li>
-        <li><a href="{rel}mirrors.html">The Bazaar</a></li>
+        <li><a href="{rel}about.html#top">About FCF</a></li>
+        <li><a href="{rel}funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="{rel}mirrors.html#top">The Bazaar</a></li>
         <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>"""

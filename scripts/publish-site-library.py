@@ -615,30 +615,30 @@ def render_nav(depth: int) -> str:
     return f"""<nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="{p}index.html">CENTL Work Area</a></li>
-        <li><a href="{p}centl.html">About CENTL</a></li>
-        <li><a href="{p}research-erdos-straus.html#es-hunt">Erdős–Straus Hunt</a></li>
-        <li><a href="{p}software.html">Software Suite</a></li>
+        <li><a href="{p}index.html#top">CENTL Work Area</a></li>
+        <li><a href="{p}centl.html#top">About CENTL</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="{p}software.html#top">Software Suite</a></li>
       </ul>
       <h2>Documentation</h2>
       <ul>
-        <li><a href="{p}docs.html">Documentation Portal</a></li>
-        <li><a href="{p}manuals/install.html">Installation Guide</a></li>
-        <li><a href="{p}manuals/numerics.html">Numerical Contract</a></li>
-        <li><a href="{p}manuals/syntax.html">Syntax &amp; Functions</a></li>
-        <li><a href="{p}manuals/sci.html">CENTL-SCi &amp; Physics</a></li>
+        <li><a href="{p}docs.html#top">Documentation Portal</a></li>
+        <li><a href="{p}manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="{p}manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="{p}manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="{p}manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
       </ul>
       <h2>Research</h2>
       <ul>
-        <li><a href="{p}research.html">Research Library</a></li>
-        <li><a href="{p}research-erdos-straus.html">Erdős–Straus Program</a></li>
-        <li><a href="{p}bryan-recursive-entanglement-calculus.html">BREC v1.0 Calculus</a></li>
+        <li><a href="{p}research.html#top">Research Library</a></li>
+        <li><a href="{p}research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="{p}bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
       </ul>
       <h2>Foundation</h2>
       <ul>
-        <li><a href="{p}about.html">About FCF</a></li>
-        <li><a href="{p}funding.html">Funding &amp; Sponsors</a></li>
-        <li><a href="{p}mirrors.html">The Bazaar</a></li>
+        <li><a href="{p}about.html#top">About FCF</a></li>
+        <li><a href="{p}funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="{p}mirrors.html#top">The Bazaar</a></li>
         <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
       </ul>
     </nav>"""
@@ -678,7 +678,7 @@ def wrap_page(
   {extra_head}
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
     <div class="brand"><a href="{prefix}index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
