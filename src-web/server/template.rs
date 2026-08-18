@@ -21,6 +21,11 @@ pub fn render_centl_work_area(
     action_url: &str,
 ) -> String {
     let mut html = String::new();
+    let latest_result_is_in_history = last_result.is_some_and(|result| {
+        session.history.last().is_some_and(|entry| {
+            entry.result == result.text && entry.execution_micros == result.execution_micros
+        })
+    });
 
     html.push_str(r#"<div class="centl-work-area" id="centl-hub">"#);
     html.push_str(r#"<div class="centl-work-header">"#);
@@ -34,7 +39,7 @@ pub fn render_centl_work_area(
     html.push_str(r#"</div>"#);
     html.push_str(r#"</div>"#);
 
-    // Quick Operation Category Tabs (Pure HTML Form submissions)
+    // Quick Operation Category Tabs (Pure HTML form submissions)
     html.push_str(r#"<div class="quick-op-bar" aria-label="Quick operations">"#);
     html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="quick-form">"#, action_url));
     html.push_str(r#"<span class="quick-label">Presets:</span>"#);
@@ -49,8 +54,8 @@ pub fn render_centl_work_area(
     html.push_str(r#"</form>"#);
     html.push_str(r#"</div>"#);
 
-    // Main Terminal Output Display
-    html.push_str(r#"<div class="terminal-screen" role="region" aria-label="CENTL Terminal Output">"#);
+    // The screen has a fixed viewport. History scrolls inside it instead of growing the page.
+    html.push_str(r#"<div class="terminal-screen" role="region" aria-label="CENTL Terminal Output" style="height:clamp(360px,52vh,520px);min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;">"#);
 
     if session.history.is_empty() && last_result.is_none() && last_error.is_none() && last_physics.is_none() && last_hunt.is_none() {
         html.push_str(r#"<div class="terminal-welcome">"#);
@@ -62,7 +67,6 @@ pub fn render_centl_work_area(
         html.push_str(r#"</div>"#);
     }
 
-    // Render session history stack
     for entry in &session.history {
         html.push_str(r#"<div class="history-item">"#);
         html.push_str(&format!(r#"<div class="history-cmd"><span class="prompt-symbol">centl&gt;</span> <code>{}</code></div>"#, escape_html(&entry.command)));
@@ -75,25 +79,16 @@ pub fn render_centl_work_area(
         html.push_str(r#"</div>"#);
     }
 
-    // Render latest execution result (if active)
     if let Some(err) = last_error {
         html.push_str(r#"<div class="output-block output-error">"#);
         html.push_str(&format!(r#"<div class="error-title"><strong>Computation Error:</strong></div><pre>{}</pre>"#, escape_html(err)));
-        html.push_str(r#"</div>"#);
-    } else if let Some(res) = last_result {
-        html.push_str(r#"<div class="output-block output-success">"#);
-        html.push_str(&format!(r#"<div class="output-value"><span class="output-tag">[EXACT RESULT]</span> <strong class="result-text">{}</strong></div>"#, escape_html(&res.text)));
-        if let Some(approx) = &res.approximate {
-            html.push_str(&format!(r#"<div class="output-approx"><span class="approx-tag">[ENCLOSURE]</span> {}</div>"#, escape_html(approx)));
-        }
-        html.push_str(&format!(r#"<div class="output-receipt"><span>Execution time: {} µs</span><span>Status: Verified Exact</span><span>Receipt Schema: 1</span></div>"#, res.execution_micros));
         html.push_str(r#"</div>"#);
     } else if let Some(phys) = last_physics {
         html.push_str(r#"<div class="output-block output-physics">"#);
         html.push_str(&format!(r#"<div class="phys-title"><strong>{}</strong> <span class="badge-verified">VERIFIED</span></div>"#, escape_html(&phys.title)));
         html.push_str(r#"<table class="phys-table">"#);
-        for (k, v) in &phys.details {
-            html.push_str(&format!(r#"<tr><th>{}</th><td>{}</td></tr>"#, escape_html(k), escape_html(v)));
+        for (key, value) in &phys.details {
+            html.push_str(&format!(r#"<tr><th>{}</th><td>{}</td></tr>"#, escape_html(key), escape_html(value)));
         }
         html.push_str(r#"</table>"#);
         html.push_str(&format!(r#"<div class="phys-summary"><strong>Result:</strong> {}</div>"#, escape_html(&phys.summary)));
@@ -111,19 +106,38 @@ pub fn render_centl_work_area(
         if !hunt.findings.is_empty() {
             html.push_str(r#"<div class="hunt-findings-list">"#);
             html.push_str(r#"<h4>Notable Findings:</h4>"#);
-            for f in &hunt.findings {
-                let eq = f.witness.as_ref().map(|w| w.equation()).unwrap_or_else(|| "Unsolved in window".to_string());
-                let letter_str = f.letter_number.as_ref().map(|id| format!(" · Letter #{}", id)).unwrap_or_default();
-                html.push_str(&format!(r#"<div class="finding-row"><span class="finding-grade">[{}]</span> <code>n={}</code>: {} <small>{}</small></div>"#, f.grade.to_uppercase(), f.n, eq, letter_str));
+            for finding in &hunt.findings {
+                let equation = finding
+                    .witness
+                    .as_ref()
+                    .map(|witness| witness.equation())
+                    .unwrap_or_else(|| "Unsolved in window".to_string());
+                let letter = finding
+                    .letter_number
+                    .as_ref()
+                    .map(|id| format!(" · Letter #{}", id))
+                    .unwrap_or_default();
+                html.push_str(&format!(r#"<div class="finding-row"><span class="finding-grade">[{}]</span> <code>n={}</code>: {} <small>{}</small></div>"#, finding.grade.to_uppercase(), finding.n, equation, letter));
             }
             html.push_str(r#"</div>"#);
         }
         html.push_str(r#"</div>"#);
+    } else if let Some(result) = last_result {
+        // Mathematical evaluate() results are already appended to session history.
+        // Render this block only for result-producing commands that bypass that history path.
+        if !latest_result_is_in_history {
+            html.push_str(r#"<div class="output-block output-success">"#);
+            html.push_str(&format!(r#"<div class="output-value"><span class="output-tag">[EXACT RESULT]</span> <strong class="result-text">{}</strong></div>"#, escape_html(&result.text)));
+            if let Some(approx) = &result.approximate {
+                html.push_str(&format!(r#"<div class="output-approx"><span class="approx-tag">[ENCLOSURE]</span> {}</div>"#, escape_html(approx)));
+            }
+            html.push_str(&format!(r#"<div class="output-receipt"><span>Execution time: {} µs</span><span>Status: Verified Exact</span><span>Receipt Schema: 1</span></div>"#, result.execution_micros));
+            html.push_str(r#"</div>"#);
+        }
     }
 
-    html.push_str(r#"</div>"#); // end terminal-screen
+    html.push_str(r#"</div>"#);
 
-    // Command Input Form (Zero-JS POST/GET form)
     html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="centl-prompt-form">"#, action_url));
     html.push_str(r#"<div class="input-row">"#);
     html.push_str(r#"<span class="input-prompt">centl&gt;</span>"#);
@@ -136,14 +150,53 @@ pub fn render_centl_work_area(
     html.push_str(r#"</div>"#);
     html.push_str(r#"</form>"#);
 
-    html.push_str(r#"</div>"#); // end centl-work-area
+    html.push_str(r#"</div>"#);
     html
 }
 
-fn escape_html(s: &str) -> String {
-    s.replace('&', "&amp;")
+fn escape_html(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
         .replace('\'', "&#39;")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::engine::{HistoryEntry, Session};
+
+    #[test]
+    fn work_area_uses_a_bounded_terminal_viewport() {
+        let session = Session::new();
+        let html = render_centl_work_area("", None, None, None, None, &session, "/hub");
+        assert!(html.contains("height:clamp(360px,52vh,520px)"));
+        assert!(html.contains("overflow-y:auto"));
+        assert!(html.contains("action=\"/hub#centl-hub\""));
+    }
+
+    #[test]
+    fn latest_math_result_is_not_rendered_twice() {
+        let mut session = Session::new();
+        let result = ExecutionResult {
+            text: "44".to_string(),
+            exact_rational: None,
+            approximate: None,
+            symbolic_expr: None,
+            execution_micros: 42,
+        };
+        session.history.push(HistoryEntry {
+            command: "22 + 22".to_string(),
+            result: "44".to_string(),
+            exact_repr: None,
+            approximate_repr: None,
+            execution_micros: 42,
+            success: true,
+        });
+        let html = render_centl_work_area("", Some(&result), None, None, None, &session, "/hub");
+        assert_eq!(html.matches(">44</pre>").count(), 1);
+        assert!(!html.contains("[EXACT RESULT]"));
+    }
 }

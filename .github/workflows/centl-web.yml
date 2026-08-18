@@ -1,0 +1,44 @@
+name: CENTL web
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.toml"
+      - "src-web/**"
+      - "site/index.html"
+      - "site/hub.html"
+      - "site/style.css"
+      - "scripts/x200-centl-web"
+      - "scripts/fcf-centl-web-install"
+      - ".github/workflows/centl-web.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "Cargo.toml"
+      - "src-web/**"
+      - "site/index.html"
+      - "site/hub.html"
+      - "site/style.css"
+      - "scripts/x200-centl-web"
+      - "scripts/fcf-centl-web-install"
+      - ".github/workflows/centl-web.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  rust-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Show Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Test CENTL web
+        run: cargo test --all-targets
+      - name: Test X200 web deployment contract
+        run: python3 src-web/tests/test_x200_centl_web.py
+      - name: Build CENTL web release
+        run: cargo build --release --bin centl-web
