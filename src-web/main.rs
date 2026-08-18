@@ -11,6 +11,7 @@ use erdos_straus::{run_hunt_window, solve_es};
 use physics::convert_units;
 use server::start_server;
 use std::env;
+use std::path::Path;
 
 fn print_help() {
     println!("CENTL v0.15.0 Al-Nur · Exact Mathematics, Physics & Zero-JS Web Hub");
@@ -21,8 +22,45 @@ fn print_help() {
     println!("  centl-web es solve <PRIME>    solve 4/p = 1/x + 1/y + 1/z");
     println!("  centl-web es hunt [FROM]      run public Erdős–Straus hunt window");
     println!("  centl-web physics convert V F T convert units");
-    println!("  centl-web --syntax            list supported syntax");
     println!("  --version                     display version");
+    println!();
+    println!("Server environment:");
+    println!("  CENTL_BIND_HOST               bind address (default: 127.0.0.1)");
+    println!("  CENTL_SITE_DIR                static site directory (default: ./site or ../site)");
+}
+
+fn resolve_site_dir() -> Result<String, String> {
+    if let Ok(configured) = env::var("CENTL_SITE_DIR") {
+        if Path::new(&configured).is_dir() {
+            return Ok(configured);
+        }
+        return Err(format!(
+            "CENTL_SITE_DIR does not point to a directory: {}",
+            configured
+        ));
+    }
+
+    for candidate in ["site", "../site"] {
+        if Path::new(candidate).is_dir() {
+            return Ok(candidate.to_string());
+        }
+    }
+
+    Err("CENTL site directory not found. Set CENTL_SITE_DIR explicitly.".to_string())
+}
+
+fn serve(port: u16) {
+    let site_dir = match resolve_site_dir() {
+        Ok(path) => path,
+        Err(error) => {
+            eprintln!("Failed to locate site directory: {}", error);
+            std::process::exit(1);
+        }
+    };
+    if let Err(error) = start_server(port, &site_dir) {
+        eprintln!("Failed to start server on port {}: {}", port, error);
+        std::process::exit(1);
+    }
 }
 
 fn main() {
@@ -30,58 +68,32 @@ fn main() {
     let mut session = Session::new();
 
     if args.len() <= 1 {
-        // Default: Start web server
-        let port = 8080;
-        let site_dir = if std::path::Path::new("site").is_dir() {
-            "site"
-        } else if std::path::Path::new("../site").is_dir() {
-            "../site"
-        } else {
-            "."
-        };
-        if let Err(e) = start_server(port, site_dir) {
-            eprintln!("Failed to start server on port {}: {}", port, e);
-            std::process::exit(1);
-        }
+        serve(8080);
         return;
     }
 
     match args[1].as_str() {
-        "--help" | "-h" => {
-            print_help();
-        }
-        "--version" | "-v" => {
-            println!("centl-web 0.15.0 (Oasis Al-Nur)");
-        }
+        "--help" | "-h" => print_help(),
+        "--version" | "-v" => println!("centl-web 0.15.0 (Oasis Al-Nur)"),
         "--serve" | "serve" => {
             let port = if args.len() >= 3 {
                 args[2].parse::<u16>().unwrap_or(8080)
             } else {
                 8080
             };
-            let site_dir = if std::path::Path::new("site").is_dir() {
-                "site"
-            } else if std::path::Path::new("../site").is_dir() {
-                "../site"
-            } else {
-                "."
-            };
-            if let Err(e) = start_server(port, site_dir) {
-                eprintln!("Failed to start server on port {}: {}", port, e);
-                std::process::exit(1);
-            }
+            serve(port);
         }
         "--syntax" => {
-            let res = evaluate(":syntax", &mut session).unwrap();
-            println!("{}", res.text);
+            let result = evaluate(":syntax", &mut session).unwrap();
+            println!("{}", result.text);
         }
         "eval" => {
             if args.len() >= 3 {
-                let expr = args[2..].join(" ");
-                match evaluate(&expr, &mut session) {
-                    Ok(res) => println!("{}", res.text),
-                    Err(e) => {
-                        eprintln!("Error: {}", e);
+                let expression = args[2..].join(" ");
+                match evaluate(&expression, &mut session) {
+                    Ok(result) => println!("{}", result.text),
+                    Err(error) => {
+                        eprintln!("Error: {}", error);
                         std::process::exit(1);
                     }
                 }
@@ -91,12 +103,18 @@ fn main() {
         }
         "es" | "erdos" => {
             if args.len() >= 4 && args[2] == "solve" {
-                if let Ok(p) = args[3].parse::<u64>() {
-                    let res = solve_es(p);
-                    if let Some(w) = res.witness {
-                        println!("{}\nGrade: {} · Layer: {} · Kind: {}", w.equation(), res.grade.to_uppercase(), w.layer, w.kind);
+                if let Ok(prime) = args[3].parse::<u64>() {
+                    let result = solve_es(prime);
+                    if let Some(witness) = result.witness {
+                        println!(
+                            "{}\nGrade: {} · Layer: {} · Kind: {}",
+                            witness.equation(),
+                            result.grade.to_uppercase(),
+                            witness.layer,
+                            witness.kind
+                        );
                     } else {
-                        println!("Prime {} unsolved in window. Grade: {}", p, res.grade);
+                        println!("Prime {} unsolved in window. Grade: {}", prime, result.grade);
                     }
                 } else {
                     eprintln!("Invalid prime number: {}", args[3]);
@@ -108,31 +126,41 @@ fn main() {
                     20000
                 };
                 let summary = run_hunt_window(from, 50000, 50);
-                println!("Public Hunt Window [{}, {}]: Checked {} primes.", summary.start_bound, summary.end_bound, summary.primes_checked);
-                println!("GREAT: {} | GOOD: {} | LETTER: {} | UNSOLVED: {}", summary.great_count, summary.good_count, summary.letter_count, summary.unsolved_count);
+                println!(
+                    "Public Hunt Window [{}, {}]: Checked {} primes.",
+                    summary.start_bound, summary.end_bound, summary.primes_checked
+                );
+                println!(
+                    "GREAT: {} | GOOD: {} | LETTER: {} | UNSOLVED: {}",
+                    summary.great_count,
+                    summary.good_count,
+                    summary.letter_count,
+                    summary.unsolved_count
+                );
             } else {
                 eprintln!("Usage: centl-web es solve <p> | centl-web es hunt [from]");
             }
         }
         "physics" => {
-            if args.len() >= 5 && args[2] == "convert" {
-                if let Ok(v) = args[3].parse::<f64>() {
-                    match convert_units(v, &args[4], &args[5]) {
-                        Ok(res) => println!("{}", res.summary),
-                        Err(e) => eprintln!("Physics Error: {}", e),
+            if args.len() >= 6 && args[2] == "convert" {
+                if let Ok(value) = args[3].parse::<f64>() {
+                    match convert_units(value, &args[4], &args[5]) {
+                        Ok(result) => println!("{}", result.summary),
+                        Err(error) => eprintln!("Physics Error: {}", error),
                     }
+                } else {
+                    eprintln!("Invalid physics value: {}", args[3]);
                 }
             } else {
                 eprintln!("Usage: centl-web physics convert <val> <from> <to>");
             }
         }
         _ => {
-            // Direct expression evaluation
-            let full_expr = args[1..].join(" ");
-            match evaluate(&full_expr, &mut session) {
-                Ok(res) => println!("{}", res.text),
-                Err(e) => {
-                    eprintln!("Error: {}", e);
+            let expression = args[1..].join(" ");
+            match evaluate(&expression, &mut session) {
+                Ok(result) => println!("{}", result.text),
+                Err(error) => {
+                    eprintln!("Error: {}", error);
                     std::process::exit(1);
                 }
             }
@@ -165,42 +193,42 @@ mod tests {
     #[test]
     fn test_symbolic_differentiation() {
         let mut session = Session::new();
-        let res = evaluate("diff(x^3, x)", &mut session).unwrap();
-        assert_eq!(res.text, "3 * x^2");
+        let result = evaluate("diff(x^3, x)", &mut session).unwrap();
+        assert_eq!(result.text, "3 * x^2");
     }
 
     #[test]
     fn test_symbolic_integration() {
         let mut session = Session::new();
-        let res = evaluate("integrate(3*x^2 + 2*x, x, 0, 5)", &mut session).unwrap();
-        assert_eq!(res.text, "150");
+        let result = evaluate("integrate(3*x^2 + 2*x, x, 0, 5)", &mut session).unwrap();
+        assert_eq!(result.text, "150");
     }
 
     #[test]
     fn test_solve_linear_equation() {
         let mut session = Session::new();
-        let res = evaluate("solve(3*x - 12 = 0, x)", &mut session).unwrap();
-        assert_eq!(res.text, "x = 4");
+        let result = evaluate("solve(3*x - 12 = 0, x)", &mut session).unwrap();
+        assert_eq!(result.text, "x = 4");
     }
 
     #[test]
     fn test_solve_quadratic_equation() {
         let mut session = Session::new();
-        let res = evaluate("solve(x^2 - 5*x + 6 = 0, x)", &mut session).unwrap();
-        assert!(res.text.contains("x = 3") && res.text.contains("x = 2"));
+        let result = evaluate("solve(x^2 - 5*x + 6 = 0, x)", &mut session).unwrap();
+        assert!(result.text.contains("x = 3") && result.text.contains("x = 2"));
     }
 
     #[test]
     fn test_erdos_straus_solver() {
-        let res = solve_es(1009);
-        assert!(res.solved);
-        let w = res.witness.unwrap();
-        assert!(w.verify());
+        let result = solve_es(1009);
+        assert!(result.solved);
+        let witness = result.witness.unwrap();
+        assert!(witness.verify());
     }
 
     #[test]
     fn test_physics_conversion() {
-        let res = convert_units(100.0, "cm", "m").unwrap();
-        assert_eq!(res.summary, "100 cm = 1.00000000 m");
+        let result = convert_units(100.0, "cm", "m").unwrap();
+        assert_eq!(result.summary, "100 cm = 1.00000000 m");
     }
 }
