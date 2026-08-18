@@ -55,7 +55,7 @@ pub fn render_centl_work_area(
     html.push_str(r#"</div>"#);
 
     // The screen has a fixed viewport. History scrolls inside it instead of growing the page.
-    html.push_str(r#"<div class="terminal-screen" role="region" aria-label="CENTL Terminal Output" style="height:clamp(320px,48vh,460px);min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;">"#);
+    html.push_str(r#"<div class="terminal-screen" role="region" aria-label="CENTL Terminal Output" style="height:clamp(360px,52vh,520px);min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;">"#);
 
     if session.history.is_empty() && last_result.is_none() && last_error.is_none() && last_physics.is_none() && last_hunt.is_none() {
         html.push_str(r#"<div class="terminal-welcome">"#);
@@ -172,7 +172,7 @@ mod tests {
     fn work_area_uses_a_bounded_terminal_viewport() {
         let session = Session::new();
         let html = render_centl_work_area("", None, None, None, None, &session, "/hub");
-        assert!(html.contains("height:clamp(320px,48vh,460px)"));
+        assert!(html.contains("height:clamp(360px,52vh,520px)"));
         assert!(html.contains("overflow-y:auto"));
         assert!(html.contains("action=\"/hub#centl-hub\""));
     }
