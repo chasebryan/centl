@@ -13,7 +13,7 @@
 <body>
 <div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
-  <header class="masthead home-masthead">
+  <header class="masthead home-masthead" id="centl-hub" tabindex="-1" autofocus>
     <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
   </header>
   <div class="layout">
@@ -53,7 +53,7 @@
       <h2>CENTL Dedicated Hub</h2>
       <p>A full-focus workspace for exact calculations, symbolic differentiation and integration, equation solving, typed physics unit conversion, and Erdős–Straus computational research.</p>
 
-      <div class="centl-work-area" id="centl-hub">
+      <div class="centl-work-area" id="centl-console">
         <div class="centl-work-header">
           <div class="work-header-left">
             <span class="status-dot"></span>
@@ -66,7 +66,7 @@
         </div>
 
         <div class="quick-op-bar" aria-label="Quick operations">
-          <form method="POST" action="/hub#centl-hub" class="quick-form">
+          <form method="POST" action="/hub#centl-console" class="quick-form">
             <span class="quick-label">Presets:</span>
             <button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>
             <button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>
@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <form method="POST" action="/hub#centl-hub" class="centl-prompt-form">
+        <form method="POST" action="/hub#centl-console" class="centl-prompt-form">
           <div class="input-row">
             <span class="input-prompt">centl&gt;</span>
             <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" class="cmd-input">
