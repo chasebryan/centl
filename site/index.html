@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead home-masthead">
-    <div class="brand"><a href="index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="brand"><a href="index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
   </header>
   <div class="layout">
         <nav aria-label="Primary">
@@ -79,7 +79,7 @@
         </div>
 
         <div class="quick-op-bar" aria-label="Quick operations">
-          <form method="POST" action="/" class="quick-form">
+          <form method="POST" action="/#centl-hub" class="quick-form">
             <span class="quick-label">Presets:</span>
             <button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>
             <button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>
@@ -102,10 +102,10 @@
           </div>
         </div>
 
-        <form method="POST" action="/" class="centl-prompt-form">
+        <form method="POST" action="/#centl-hub" class="centl-prompt-form">
           <div class="input-row">
             <span class="input-prompt">centl&gt;</span>
-            <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" autofocus class="cmd-input">
+            <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" class="cmd-input">
             <button type="submit" class="btn-calculate">Calculate</button>
             <button type="submit" name="cmd" value=":clear" class="btn-clear">Clear</button>
           </div>

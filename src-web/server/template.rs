@@ -36,7 +36,7 @@ pub fn render_centl_work_area(
 
     // Quick Operation Category Tabs (Pure HTML Form submissions)
     html.push_str(r#"<div class="quick-op-bar" aria-label="Quick operations">"#);
-    html.push_str(&format!(r#"<form method="POST" action="{}" class="quick-form">"#, action_url));
+    html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="quick-form">"#, action_url));
     html.push_str(r#"<span class="quick-label">Presets:</span>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>"#);
@@ -124,11 +124,11 @@ pub fn render_centl_work_area(
     html.push_str(r#"</div>"#); // end terminal-screen
 
     // Command Input Form (Zero-JS POST/GET form)
-    html.push_str(&format!(r#"<form method="POST" action="{}" class="centl-prompt-form">"#, action_url));
+    html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="centl-prompt-form">"#, action_url));
     html.push_str(r#"<div class="input-row">"#);
     html.push_str(r#"<span class="input-prompt">centl&gt;</span>"#);
     html.push_str(&format!(
-        r#"<input type="text" name="cmd" value="{}" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" autofocus class="cmd-input">"#,
+        r#"<input type="text" name="cmd" value="{}" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" class="cmd-input">"#,
         escape_html(current_input)
     ));
     html.push_str(r#"<button type="submit" class="btn-calculate">Calculate</button>"#);

@@ -109,10 +109,10 @@ pub fn render_full_page(
     page.push_str(&format!("  <title>{} — Free Computation Foundation</title>\n", title));
     page.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}style.css\">\n", rel));
     page.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}library-layout.css\">\n", rel));
-    page.push_str("</head>\n<body>\n<div class=\"shell\">\n");
+    page.push_str("</head>\n<body>\n<div class=\"shell\" id=\"top\">\n");
     page.push_str("  <a class=\"skip\" href=\"#content\">Skip to content</a>\n");
     page.push_str("  <header class=\"masthead home-masthead\">\n");
-    page.push_str(&format!("    <div class=\"brand\"><a href=\"{}index.html\"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>\n", rel));
+    page.push_str(&format!("    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>\n", rel));
     page.push_str("  </header>\n");
     page.push_str("  <div class=\"layout\">\n");
     page.push_str("    <nav aria-label=\"Primary\">\n");

@@ -681,7 +681,7 @@ def wrap_page(
 <div class="shell">
   <a class="skip" href="#content">Skip to content</a>
   <header class="masthead">
-    <div class="brand"><a href="{prefix}index.html"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="brand"><a href="{prefix}index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
     <div class="title"><h1>{html.escape(heading)}</h1><p>{html.escape(dek)}</p></div>
   </header>
   <div class="layout">
