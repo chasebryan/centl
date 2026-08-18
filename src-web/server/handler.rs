@@ -191,7 +191,7 @@ pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
     ));
     page.push_str("</head>\n<body>\n<div class=\"shell\" id=\"top\">\n");
     page.push_str("  <a class=\"skip\" href=\"#content\">Skip to content</a>\n");
-    page.push_str("  <header class=\"masthead home-masthead\">\n");
+    page.push_str("  <header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>\n");
     page.push_str(&format!("    <div class=\"brand\"><a href=\"{}index.html#top\"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>\n", rel));
     page.push_str("  </header>\n");
     page.push_str("  <div class=\"layout\">\n");
@@ -255,5 +255,11 @@ mod tests {
         let (_, error, physics, _) = handle_command("physics nonsense", &mut state);
         assert!(error.is_some());
         assert!(physics.is_none());
+    }
+
+    #[test]
+    fn legacy_centl_hub_fragment_now_targets_the_page_top() {
+        let html = render_full_page("<p>body</p>", "test", "");
+        assert!(html.contains("<header class=\"masthead home-masthead\" id=\"centl-hub\" tabindex=\"-1\" autofocus>"));
     }
 }
