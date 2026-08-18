@@ -1,0 +1,34 @@
+name: CENTL web
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.toml"
+      - "src-web/**"
+      - "site/index.html"
+      - ".github/workflows/centl-web.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "Cargo.toml"
+      - "src-web/**"
+      - "site/index.html"
+      - ".github/workflows/centl-web.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  rust-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Show Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Test CENTL web
+        run: cargo test --all-targets
+      - name: Build CENTL web release
+        run: cargo build --release --bin centl-web
