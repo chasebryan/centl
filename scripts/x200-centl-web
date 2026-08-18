@@ -1,6 +1,7 @@
 #!/bin/sh
 # Bring the zero-JS CENTL hub up on the X200 and point the named
-# Cloudflare tunnel at it.
+# Cloudflare/CARAVAN tunnel at it. The X200 is a hosting node only;
+# development may happen elsewhere and lands here through the repository.
 #
 # On the X200:
 #   curl -fsSLO https://raw.githubusercontent.com/chasebryan/centl/main/scripts/x200-centl-web
@@ -93,6 +94,8 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=$centl_root
 Environment=PATH=$home/.cargo/bin:$home/.local/bin:/usr/local/bin:/usr/bin
+Environment=CENTL_BIND_HOST=127.0.0.1
+Environment=CENTL_SITE_DIR=$centl_root/site
 ExecStart=$centl_root/target/release/centl-web --serve $hub_port
 Restart=always
 RestartSec=5
@@ -112,7 +115,10 @@ if command -v loginctl >/dev/null 2>&1; then
 fi
 
 systemctl --user daemon-reload
-systemctl --user enable --now fcf-centl-web.service
+systemctl --user enable fcf-centl-web.service >/dev/null
+# A rebuilt binary is not picked up by an already-running process. Restart on
+# every deployment so the public origin actually serves the commit just built.
+systemctl --user restart fcf-centl-web.service
 
 if [ -f "$cloudflared_config" ]; then
   if grep -q 'hostname: freecomputation.org' "$cloudflared_config"; then
@@ -177,9 +183,9 @@ done
 [ "$ready" -eq 1 ] || fail "centl-web did not become ready on 127.0.0.1:$hub_port"
 
 body=$(mktemp)
-if ! curl --silent --fail --max-time 10 --data 'cmd=1/3+%2B+5/7' http://127.0.0.1:$hub_port/ > "$body"; then
+if ! curl --silent --fail --max-time 10 --data 'cmd=1/3+%2B+5/7' http://127.0.0.1:$hub_port/hub > "$body"; then
   rm -f "$body"
-  fail "local POST to centl-web failed"
+  fail "local POST to the CENTL /hub endpoint failed"
 fi
 if ! grep -q '22/21' "$body"; then
   rm -f "$body"
@@ -187,7 +193,7 @@ if ! grep -q '22/21' "$body"; then
 fi
 rm -f "$body"
 
-say "local hub is live: POST 1/3 + 5/7 -> 22/21"
+say "local hub is live: POST /hub 1/3 + 5/7 -> 22/21"
 say "service: systemctl --user status fcf-centl-web.service"
 say "Cloudflare must send freecomputation.org to tunnel $tunnel_name, not GitHub Pages."
-say "Public check after DNS: curl -fsS -d 'cmd=1/3+5/7' https://freecomputation.org/ | grep 22/21"
+say "Public check after DNS: curl -fsS -d 'cmd=1/3+%2B+5/7' https://freecomputation.org/hub | grep 22/21"
