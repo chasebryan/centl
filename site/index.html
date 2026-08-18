@@ -20,7 +20,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Free Computation Foundation — CENTL Hub">
   <meta name="twitter:description" content="Free for science. CENTL v0.15.0 Al-Nur exact mathematics and FCF research publications.">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
   <link rel="stylesheet" href="library-layout.css?v=2">
 </head>
 <body>
@@ -33,7 +33,7 @@
         <nav aria-label="Primary">
       <h2>CENTL &amp; Hub</h2>
       <ul>
-        <li><a href="index.html#top">CENTL Work Area</a></li>
+        <li><a href="/hub#top">CENTL Work Area</a></li>
         <li><a href="centl.html#top">About CENTL</a></li>
         <li><a href="research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
         <li><a href="software.html#top">Software Suite</a></li>
@@ -79,7 +79,7 @@
         </div>
 
         <div class="quick-op-bar" aria-label="Quick operations">
-          <form method="POST" action="/#centl-hub" class="quick-form">
+          <form method="POST" action="/hub#centl-hub" class="quick-form">
             <span class="quick-label">Presets:</span>
             <button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>
             <button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>
@@ -102,7 +102,7 @@
           </div>
         </div>
 
-        <form method="POST" action="/#centl-hub" class="centl-prompt-form">
+        <form method="POST" action="/hub#centl-hub" class="centl-prompt-form">
           <div class="input-row">
             <span class="input-prompt">centl&gt;</span>
             <input type="text" name="cmd" placeholder="Enter expression, solve(...), diff(...), physics ..., es solve <p>, or :syntax" autocomplete="off" class="cmd-input">
