@@ -27,7 +27,7 @@ pub fn render_centl_work_area(
         })
     });
 
-    html.push_str(r#"<div class="centl-work-area" id="centl-hub">"#);
+    html.push_str(r#"<div class="centl-work-area" id="centl-console">"#);
     html.push_str(r#"<div class="centl-work-header">"#);
     html.push_str(r#"<div class="work-header-left">"#);
     html.push_str(r#"<span class="status-dot"></span>"#);
@@ -41,7 +41,7 @@ pub fn render_centl_work_area(
 
     // Quick Operation Category Tabs (Pure HTML form submissions)
     html.push_str(r#"<div class="quick-op-bar" aria-label="Quick operations">"#);
-    html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="quick-form">"#, action_url));
+    html.push_str(&format!(r#"<form method="POST" action="{}#centl-console" class="quick-form">"#, action_url));
     html.push_str(r#"<span class="quick-label">Presets:</span>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="diff(x^3 * sin(x), x)" class="btn-preset">d/dx(x³·sin x)</button>"#);
     html.push_str(r#"<button type="submit" name="cmd" value="integrate(3*x^2 + 2*x + 1, x, 0, 5)" class="btn-preset">∫(3x²+2x+1)dx</button>"#);
@@ -138,7 +138,7 @@ pub fn render_centl_work_area(
 
     html.push_str(r#"</div>"#);
 
-    html.push_str(&format!(r#"<form method="POST" action="{}#centl-hub" class="centl-prompt-form">"#, action_url));
+    html.push_str(&format!(r#"<form method="POST" action="{}#centl-console" class="centl-prompt-form">"#, action_url));
     html.push_str(r#"<div class="input-row">"#);
     html.push_str(r#"<span class="input-prompt">centl&gt;</span>"#);
     html.push_str(&format!(
@@ -174,7 +174,9 @@ mod tests {
         let html = render_centl_work_area("", None, None, None, None, &session, "/hub");
         assert!(html.contains("height:clamp(360px,52vh,520px)"));
         assert!(html.contains("overflow-y:auto"));
-        assert!(html.contains("action=\"/hub#centl-hub\""));
+        assert!(html.contains("id=\"centl-console\""));
+        assert!(html.contains("action=\"/hub#centl-console\""));
+        assert!(!html.contains("id=\"centl-hub\""));
     }
 
     #[test]
