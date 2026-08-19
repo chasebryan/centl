@@ -4,6 +4,13 @@ This is a working checklist. Product sequencing and release themes live in
 [`docs/ROADMAP.md`](docs/ROADMAP.md); canonical dependency pins live in
 [`toolchain.lock`](toolchain.lock).
 
+Long-horizon mathematical breadth lives in
+[`docs/MATHEMATICS-CAPABILITY-TODO.md`](docs/MATHEMATICS-CAPABILITY-TODO.md), and
+every new mathematical capability is admitted under
+[`docs/MATHEMATICS-IMPLEMENTATION-STANDARD.md`](docs/MATHEMATICS-IMPLEMENTATION-STANDARD.md).
+Keep this file focused on immediate implementation work rather than duplicating
+that strategic inventory.
+
 ## Infrastructure completed for the next development cycle
 
 - [x] Add a reproducible contributor bootstrap and exact opam dependency

@@ -25,6 +25,17 @@ The repository remains canonical.
 - [PROTOCOL.md](PROTOCOL.md)
 - [MCP.md](MCP.md)
 
+## Mathematics breadth program
+
+- [MATHEMATICS-CAPABILITY-TODO.md](MATHEMATICS-CAPABILITY-TODO.md) — long-horizon
+  capability checklist across algebra, analysis, linear algebra, number theory,
+  discrete mathematics, geometry, probability/statistics, optimization, special
+  functions, and certified scientific mathematics.
+- [MATHEMATICS-IMPLEMENTATION-STANDARD.md](MATHEMATICS-IMPLEMENTATION-STANDARD.md)
+  — mandatory admission gate for exactness, assumptions, evidence, schemas,
+  resource limits, testing, security, and documentation before a capability is
+  marked complete.
+
 ## Product identity
 
 - [OASIS.md](OASIS.md) — steadily advanced snapshot of current main and mirage
