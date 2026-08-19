@@ -1,4 +1,4 @@
-let add_contact_actions = function
+let add_enhanced_actions = function
   | `List items ->
       `List
         (items
@@ -6,6 +6,7 @@ let add_contact_actions = function
             `String "analyze_sphere_contacts";
             `String "resolve_isolated_elastic_sphere_contacts";
             `String "certify_linear_sphere_contact";
+            `String "cherenkov";
           ])
   | json -> json
 
@@ -25,7 +26,7 @@ let enhanced_capabilities_result limits =
       `Assoc
         (List.map
            (function
-             | "actions", value -> ("actions", add_contact_actions value)
+             | "actions", value -> ("actions", add_enhanced_actions value)
              | "limits", value -> ("limits", add_contact_limit value)
              | field -> field)
            fields)
