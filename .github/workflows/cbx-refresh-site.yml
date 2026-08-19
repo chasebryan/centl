@@ -1,0 +1,39 @@
+name: CBX refresh generated site
+
+on:
+  push:
+    branches:
+      - agent/cbx-kernel
+    paths:
+      - '.github/workflows/cbx-refresh-site.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/cbx-kernel
+          fetch-depth: 0
+
+      - name: Regenerate canonical site artifacts
+        run: |
+          set -euo pipefail
+          python3 scripts/site-consistency.py --apply
+          python3 scripts/publish-site-library.py
+          python3 scripts/site-consistency.py --check
+          python3 scripts/publish-site-library.py --check
+
+      - name: Commit generated site and remove helper
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .github/workflows/cbx-refresh-site.yml
+          git add -A
+          git diff --cached --check
+          git commit -m "chore(site): refresh generated library for CBX push"
+          git push origin HEAD:agent/cbx-kernel
