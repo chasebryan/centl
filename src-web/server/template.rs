@@ -187,9 +187,15 @@ mod tests {
     fn clear_uses_an_independent_form_without_a_competing_command_input() {
         let session = Session::new();
         let html = render_centl_work_area("2 + 2", None, None, None, None, &session, "/hub");
-        assert!(html.contains("id=\"centl-clear-form\""));
-        assert!(html.contains("form=\"centl-clear-form\" name=\"cmd\" value=\":clear\""));
-        assert_eq!(html.matches("name=\"cmd\"").count(), 2);
+        assert!(html.contains(
+            "<form id=\"centl-clear-form\" method=\"POST\" action=\"/hub#centl-console\"></form>"
+        ));
+        assert!(html.contains(
+            "<button type=\"submit\" form=\"centl-clear-form\" name=\"cmd\" value=\":clear\" class=\"btn-clear\">Clear</button>"
+        ));
+        assert!(!html.contains(
+            "<button type=\"submit\" name=\"cmd\" value=\":clear\" class=\"btn-clear\">Clear</button>"
+        ));
     }
 
     #[test]
