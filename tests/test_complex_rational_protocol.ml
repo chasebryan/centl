@@ -104,7 +104,30 @@ let test_resource_limits () =
   in
   Alcotest.(check bool) "source failure" false (bool "ok" response);
   Alcotest.(check string)
-    "source code" "resource_limit" (string "code" (assoc "error" response))
+    "source code" "resource_limit" (string "code" (assoc "error" response));
+  let exponent =
+    Centl_complex_rational_protocol.evaluate_source
+      "complex(1, 1)^100001"
+  in
+  Alcotest.(check bool) "exponent failure" false (bool "ok" exponent);
+  Alcotest.(check string) "exponent code" "resource_limit"
+    (string "code" (assoc "error" exponent))
+
+let test_cancellation () =
+  let response =
+    Centl_complex_rational_protocol.handle_json
+      ~cancelled:(fun () -> true)
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "cancel-me");
+           ("expression", `String "complex(1, 2)^100");
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "id" "cancel-me" (string "id" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response))
 
 let () =
   Alcotest.run "centl exact complex-rational protocol"
@@ -116,5 +139,6 @@ let () =
           Alcotest.test_case "refusal boundary" `Quick test_refusal_boundary;
           Alcotest.test_case "strict request" `Quick test_strict_request;
           Alcotest.test_case "resource limits" `Quick test_resource_limits;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
