@@ -1,8 +1,9 @@
 include Centl_mcp_base
 
 let physics_cursor = "centl-physics-v1"
+let math_cursor = "centl-math-v1"
 
-let physics_cancellable_request_id = function
+let extension_cancellable_request_id tool_name = function
   | `Assoc fields ->
       begin match
         ( List.assoc_opt "jsonrpc" fields,
@@ -15,17 +16,27 @@ let physics_cancellable_request_id = function
           Some (`String "tools/call"),
           Some (`Assoc parameters) ) ->
           begin match List.assoc_opt "name" parameters with
-          | Some (`String "centl_physics") -> Some id
+          | Some (`String name) when String.equal name tool_name -> Some id
           | _ -> None
           end
       | _ -> None
       end
   | _ -> None
 
+let physics_cancellable_request_id json =
+  extension_cancellable_request_id "centl_physics" json
+
+let math_cancellable_request_id json =
+  extension_cancellable_request_id "centl_math" json
+
 let cancellable_request_id json =
   match Centl_mcp_base.cancellable_request_id json with
   | Some _ as id -> id
-  | None -> physics_cancellable_request_id json
+  | None ->
+      begin match physics_cancellable_request_id json with
+      | Some _ as id -> id
+      | None -> math_cancellable_request_id json
+      end
 
 let replace_field name value fields =
   if List.mem_assoc name fields then
@@ -71,7 +82,15 @@ let tools_list_cursor fields =
   | Some _ -> Error "tools/list params must be an object"
 
 let physics_tools_page id =
-  jsonrpc_result id (`Assoc [ ("tools", `List [ Centl_physics_mcp.tool () ]) ])
+  jsonrpc_result id
+    (`Assoc
+       [
+         ("tools", `List [ Centl_physics_mcp.tool () ]);
+         ("nextCursor", `String math_cursor);
+       ])
+
+let math_tools_page id =
+  jsonrpc_result id (`Assoc [ ("tools", `List [ Centl_math_mcp.tool () ]) ])
 
 let tools_list ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match tools_list_cursor fields with
@@ -80,6 +99,7 @@ let tools_list ?(cancelled = Centl_engine.never_cancelled) state id fields =
       Centl_mcp_base.handle_request ~cancelled state id "tools/list" fields
       |> add_physics_cursor
   | Ok (Some cursor) when cursor = physics_cursor -> physics_tools_page id
+  | Ok (Some cursor) when cursor = math_cursor -> math_tools_page id
   | Ok (Some _) -> jsonrpc_error id (-32602) "unknown tools/list cursor"
 
 let physics_tool_result response =
@@ -98,10 +118,29 @@ let physics_tool_result response =
       ("isError", `Bool (not (Centl_physics_mcp.ok response)));
     ]
 
+let math_tool_result response =
+  `Assoc
+    [
+      ( "content",
+        `List
+          [
+            `Assoc
+              [
+                ("type", `String "text");
+                ("text", `String (Centl_math_mcp.text response));
+              ];
+          ] );
+      ("structuredContent", response);
+      ("isError", `Bool (not (Centl_math_mcp.ok response)));
+    ]
+
 let physics ?(cancelled = Centl_engine.never_cancelled) id arguments =
   let physics_state = Centl_physics_protocol.create () in
   Centl_physics_mcp.call ~cancelled physics_state arguments
   |> physics_tool_result |> jsonrpc_result id
+
+let math ?(cancelled = Centl_engine.never_cancelled) id arguments =
+  Centl_math_mcp.call ~cancelled arguments |> math_tool_result |> jsonrpc_result id
 
 let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match List.assoc_opt "params" fields with
@@ -118,6 +157,15 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
           jsonrpc_error id (-32602) "centl_physics requires arguments"
       | Some (`String "centl_physics"), Some _ ->
           jsonrpc_error id (-32602) "centl_physics arguments must be an object"
+      | Some (`String "centl_math"), Some (`Assoc arguments) ->
+          begin match Centl_math_mcp.validate_arguments arguments with
+          | Ok () -> math ~cancelled id arguments
+          | Error message -> jsonrpc_error id (-32602) message
+          end
+      | Some (`String "centl_math"), None ->
+          jsonrpc_error id (-32602) "centl_math requires arguments"
+      | Some (`String "centl_math"), Some _ ->
+          jsonrpc_error id (-32602) "centl_math arguments must be an object"
       | _ -> Centl_mcp_base.call_tool ~cancelled state id fields
       end
   | _ -> Centl_mcp_base.call_tool ~cancelled state id fields
