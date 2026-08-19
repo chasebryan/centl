@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 import tempfile
 import threading
 import unittest
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from caravan.coordinator import CoordinatorState
 from caravan.identity import CarrierIdentity
@@ -14,9 +19,6 @@ from caravan.observability import ObservabilityStore
 from caravan.policy import create_policy_receipt
 from caravan.public_service import PublicCoordinatorService
 from caravan.transport import CarrierTransportClient
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 class CaravanObservabilityTests(unittest.TestCase):
