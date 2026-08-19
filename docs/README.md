@@ -25,6 +25,19 @@ The repository remains canonical.
 - [PROTOCOL.md](PROTOCOL.md)
 - [MCP.md](MCP.md)
 
+## CENTLAMP information retrieval
+
+CENTLAMP is the **CENTL Authority & Metric Protocol**, an exact-first research
+track for inspectable, replayable information retrieval and ranking.
+
+- [CENTLAMP.md](CENTLAMP.md) — purpose, architecture, ranking principles, trust
+  boundary, evaluation discipline, and first vertical slice.
+- [CENTLAMP-RANK-CERTIFICATE.md](CENTLAMP-RANK-CERTIFICATE.md) — version-zero
+  contract for explaining and replaying a result ordering.
+- [CENTLAMP-TODO.md](CENTLAMP-TODO.md) — staged research and implementation
+  checklist from bounded lexical search through authority, evidence topology,
+  semantic retrieval, manipulation resistance, scale, and external comparison.
+
 ## Mathematics breadth program
 
 - [MATHEMATICS-CAPABILITY-TODO.md](MATHEMATICS-CAPABILITY-TODO.md) — long-horizon
