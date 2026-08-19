@@ -530,7 +530,7 @@ let dispatch ?(cancelled = never_cancelled) limits action fields =
                     let code, message = error_of_polynomial error in
                     failure ~method_:action code message
                 | Ok array ->
-                    check_json_output limits ~method_
+                    check_json_output limits ~method_:action
                       (coefficient_array_json array)
                 end
             end
