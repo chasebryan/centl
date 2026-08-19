@@ -16,6 +16,27 @@ let check_z_array message expected actual =
 
 let sqrt2_polynomial = [| z (-2); Z.zero; Z.one |]
 
+let multiply_z_polynomials left right =
+  if Array.length left = 0 || Array.length right = 0 then [||]
+  else
+    let result = Array.make (Array.length left + Array.length right - 1) Z.zero in
+    Array.iteri
+      (fun i left_coefficient ->
+        Array.iteri
+          (fun j right_coefficient ->
+            result.(i + j) <-
+              Z.add result.(i + j)
+                (Z.mul left_coefficient right_coefficient))
+          right)
+      left;
+    result
+
+let polynomial_with_integer_roots roots =
+  List.fold_left
+    (fun polynomial root ->
+      multiply_z_polynomials polynomial [| Z.neg (z root); Z.one |])
+    [| Z.one |] roots
+
 let test_normalization () =
   let normalized =
     unwrap (normalize_integer_polynomial [| z 4; Z.zero; z (-2) |])
@@ -78,7 +99,8 @@ let test_exact_refinement () =
         (Q.compare (width refined) initial_width < 0);
       Alcotest.(check int) "refined interval still isolates one root" 1
         (unwrap (root_count refined.polynomial refined.lower refined.upper));
-      Alcotest.(check bool) "positive interval" true (Q.compare refined.lower Q.zero > 0)
+      Alcotest.(check bool) "positive interval" true
+        (Q.compare refined.lower Q.zero > 0)
   end;
   let rational =
     unwrap
@@ -99,6 +121,43 @@ let test_square_free_and_text () =
   Alcotest.(check bool) "text nonempty" true (String.length (text certificate) > 0);
   Alcotest.(check bool) "exact bit accounting" true (exact_bits certificate > 0)
 
+let test_sturm_many_distinct_roots () =
+  let roots = [ -11; -7; -3; -1; 2; 5; 9; 14 ] in
+  let polynomial = polynomial_with_integer_roots roots in
+  Alcotest.(check bool) "constructed polynomial square-free" true
+    (is_square_free polynomial);
+  Alcotest.(check int) "all roots counted" 8
+    (unwrap (root_count polynomial (q "-20") (q "20")));
+  Alcotest.(check int) "interior roots counted" 3
+    (unwrap (root_count polynomial (q "-2") (q "8")));
+  Alcotest.(check int) "empty gap counted" 0
+    (unwrap (root_count polynomial (q "10") (q "13")));
+  let five =
+    unwrap (make ~polynomial ~lower:(q "3") ~upper:(q "7"))
+  in
+  begin match refine_once five with
+  | Rational_root root -> check_q "exact midpoint root" (q "5") root
+  | Isolating_interval _ -> Alcotest.fail "integer midpoint root must be exact"
+  end
+
+let test_sturm_tight_rational_endpoints () =
+  let scale = Z.pow (z 2) 120 |> Z.to_string in
+  let lower = q ("1 + 1/" ^ scale) in
+  let upper = q ("2 - 1/" ^ scale) in
+  Alcotest.(check int) "tight rational interval isolates sqrt2" 1
+    (unwrap (root_count sqrt2_polynomial lower upper));
+  let certificate =
+    unwrap (make ~polynomial:sqrt2_polynomial ~lower ~upper)
+  in
+  begin match refine certificate 32 with
+  | Rational_root _ -> Alcotest.fail "sqrt2 remains irrational"
+  | Isolating_interval refined ->
+      Alcotest.(check int) "tight refinement preserves root" 1
+        (unwrap (root_count refined.polynomial refined.lower refined.upper));
+      Alcotest.(check bool) "width strictly contracts" true
+        (Q.compare (width refined) (width certificate) < 0)
+  end
+
 let () =
   Alcotest.run "centl real algebraic root certificates"
     [
@@ -109,5 +168,9 @@ let () =
           Alcotest.test_case "certificate admission" `Quick test_certificate_admission;
           Alcotest.test_case "exact refinement" `Quick test_exact_refinement;
           Alcotest.test_case "square-free and text" `Quick test_square_free_and_text;
+          Alcotest.test_case "many distinct roots" `Quick
+            test_sturm_many_distinct_roots;
+          Alcotest.test_case "tight rational endpoints" `Quick
+            test_sturm_tight_rational_endpoints;
         ] );
     ]
