@@ -69,7 +69,8 @@ let test_coefficients_variables_degree () =
   | Some degree -> Alcotest.(check int) "total degree" 4 degree
   | None -> Alcotest.fail "nonzero polynomial must have a degree"
   end;
-  Alcotest.(check bool) "zero degree undefined" true (Option.is_none (total_degree zero))
+  Alcotest.(check bool) "zero degree undefined" true
+    (Option.is_none (total_degree zero))
 
 let test_derivative () =
   let polynomial =
@@ -87,14 +88,20 @@ let test_derivative () =
 let test_rational_substitution () =
   let polynomial =
     add (termq "1" [ ("x", 2); ("y", 1) ])
-      (add (termq "3" [ ("y", 1) ]) (termq "2" [ ("x", 1); ("z", 1) ]))
+      (add (termq "3" [ ("y", 1) ])
+         (termq "2" [ ("x", 1); ("z", 1) ]))
   in
   let substituted =
-    unwrap (substitute_rationals [ ("x", q "2"); ("z", q "-1/2") ] polynomial)
+    unwrap
+      (substitute_rationals
+         [ ("x", q "2"); ("z", q "-1/2") ]
+         polynomial)
   in
   check_poly "partial rational substitution"
     (add (scale (q "7") y) (constant (q "-2"))) substituted;
-  begin match substitute_rationals [ ("x", Q.one); ("x", Q.zero) ] polynomial with
+  begin match
+    substitute_rationals [ ("x", Q.one); ("x", Q.zero) ] polynomial
+  with
   | Error (Duplicate_substitution "x") -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "duplicate substitution should fail"
@@ -131,6 +138,23 @@ let test_total_degree_overflow () =
   | Ok _ -> Alcotest.fail "multiplication must preserve the degree invariant"
   end
 
+let expect_cancelled label = function
+  | Error Cancelled -> ()
+  | Error error -> Alcotest.fail (label ^ ": " ^ error_message error)
+  | Ok _ -> Alcotest.fail (label ^ " should cancel")
+
+let test_cancellation () =
+  let polynomial = add (power x 4 |> unwrap) (power y 4 |> unwrap) in
+  expect_cancelled "multiply"
+    (multiply ~cancelled:(fun () -> true) polynomial polynomial);
+  expect_cancelled "power"
+    (power ~cancelled:(fun () -> true) (add x y) 8);
+  expect_cancelled "derivative"
+    (derivative ~cancelled:(fun () -> true) "x" polynomial);
+  expect_cancelled "substitution"
+    (substitute_rationals ~cancelled:(fun () -> true)
+       [ ("x", q "2") ] polynomial)
+
 let () =
   Alcotest.run "centl exact multivariate polynomials"
     [
@@ -146,5 +170,6 @@ let () =
           Alcotest.test_case "power boundaries" `Quick test_power_boundaries;
           Alcotest.test_case "total degree overflow" `Quick
             test_total_degree_overflow;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
