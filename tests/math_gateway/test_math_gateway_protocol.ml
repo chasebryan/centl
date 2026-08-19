@@ -30,6 +30,18 @@ let matrix rows =
 let integer_polynomial coefficients =
   `List (List.map (fun value -> `String value) coefficients)
 
+let power variable exponent =
+  `Assoc [ ("variable", `String variable); ("exponent", `Int exponent) ]
+
+let term coefficient powers =
+  `Assoc
+    [
+      ("coefficient", `String coefficient);
+      ("powers", `List powers);
+    ]
+
+let polynomial terms = `Assoc [ ("terms", `List terms) ]
+
 let public_math ?id state domain request =
   let id_fields = match id with None -> [] | Some id -> [ ("id", id) ] in
   Centl_protocol.handle_json state
@@ -57,6 +69,45 @@ let test_matrix_through_public_protocol () =
     (string "numerator" (assoc "result" response));
   Alcotest.(check int) "request count" 0
     (int "requests" (assoc "session" response));
+  Alcotest.(check string) "exact provenance" "exact"
+    (string "classification" (assoc "provenance" response))
+
+let test_polynomial_coefficient_array_public_protocol () =
+  let state = Centl_protocol.create () in
+  let p =
+    polynomial
+      [
+        term "3" [];
+        term "11" [ power "y" 1 ];
+        term "-2" [ power "x" 1 ];
+        term "5/7" [ power "x" 2; power "y" 1 ];
+      ]
+  in
+  let response =
+    public_math ~id:(`String "coeff-array") state "multivariate_polynomial"
+      [
+        ("action", `String "coefficient_array");
+        ("polynomial", p);
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  Alcotest.(check string) "id" "coeff-array" (string "id" response);
+  Alcotest.(check string) "domain" "multivariate_polynomial"
+    (string "domain" response);
+  let result = assoc "result" response in
+  Alcotest.(check string) "kind" "polynomial_coefficient_array"
+    (string "kind" result);
+  begin match assoc "shape" result with
+  | `List [ `Int 3; `Int 2 ] -> ()
+  | _ -> Alcotest.fail "unexpected public coefficient-array shape"
+  end;
+  begin match assoc "coefficients" result with
+  | `List coefficients ->
+      Alcotest.(check (list string)) "public numerators"
+        [ "3"; "11"; "-2"; "0"; "0"; "5" ]
+        (List.map (fun coefficient -> string "numerator" coefficient) coefficients)
+  | _ -> Alcotest.fail "public coefficients must be a list"
+  end;
   Alcotest.(check string) "exact provenance" "exact"
     (string "classification" (assoc "provenance" response))
 
@@ -186,6 +237,8 @@ let () =
         [
           Alcotest.test_case "matrix public route" `Quick
             test_matrix_through_public_protocol;
+          Alcotest.test_case "polynomial coefficient array" `Quick
+            test_polynomial_coefficient_array_public_protocol;
           Alcotest.test_case "describe advertises math" `Quick
             test_describe_advertises_math;
           Alcotest.test_case "server limits clamp gateway" `Quick
