@@ -35,6 +35,7 @@
  (wrapped false)
  (modules
   Centl_parser
+  Centl_multivariate_polynomial
   Centl_iteration
   Centl_syntax
   Centl_history
