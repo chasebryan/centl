@@ -5,6 +5,7 @@ import argparse
 from html import escape
 import json
 from pathlib import Path
+import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,7 @@ if str(ROOT) not in sys.path:
 from caravan.census import CENSUS_SCHEMA, validate_public_document  # noqa: E402
 
 LEAD_SCHEMA = "fcf-caravan-lead-census-v1"
+UNRESOLVED_FCF_TOKEN = re.compile(r"__FCF_[A-Z0-9_]+__")
 
 
 def fail(message: str) -> "NoReturn":
@@ -97,6 +99,9 @@ def main() -> int:
         if token not in template:
             fail(f"template is missing {token}")
         template = template.replace(token, value)
+    unresolved = sorted(set(UNRESOLVED_FCF_TOKEN.findall(template)))
+    if unresolved:
+        fail(f"template contains unresolved FCF placeholder(s): {', '.join(unresolved)}")
     if args.output.is_symlink():
         fail("output must not be a symlink")
     args.output.parent.mkdir(parents=True, exist_ok=True)
