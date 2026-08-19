@@ -222,7 +222,8 @@ let dispatch_domain limits ~cancelled id domain request =
           Centl_multivariate_polynomial_protocol.handle_json
             ~limits:limits.polynomial ~cancelled request
       | "real_algebraic" ->
-          Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic request
+          Centl_real_algebraic_protocol.handle_json ~limits:limits.algebraic
+            ~cancelled request
       | _ ->
           failure ?id "unknown_math_domain"
             ("unknown mathematics domain " ^ domain)
