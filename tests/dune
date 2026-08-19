@@ -24,6 +24,11 @@
  (modules test_multivariate_polynomial)
  (libraries centl_lib alcotest zarith))
 
+(test
+ (name test_multivariate_polynomial_protocol)
+ (modules test_multivariate_polynomial_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
 (executable
  (name multivariate_probe)
  (modules multivariate_probe)
