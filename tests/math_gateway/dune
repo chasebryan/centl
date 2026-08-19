@@ -7,3 +7,8 @@
  (name test_math_mcp)
  (modules test_math_mcp)
  (libraries centl_lib alcotest zarith yojson))
+
+(test
+ (name test_complex_native)
+ (modules test_complex_native)
+ (libraries centl_lib alcotest zarith yojson))
