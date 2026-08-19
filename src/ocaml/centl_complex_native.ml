@@ -56,5 +56,5 @@ let exact_bits = function
 
 let text = function
   | Not_complex -> "not a complex-rational expression"
-  | Exact value -> Centl_complex_rational.to_string value
+  | Exact value -> Centl_complex_rational.text value
   | Refused error -> Centl_complex_rational.error_message error
