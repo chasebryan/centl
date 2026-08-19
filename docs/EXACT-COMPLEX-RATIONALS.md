@@ -1,6 +1,6 @@
 # Exact complex rational scalars
 
-Status: implementation in progress.
+Status: admission candidate, not yet promoted.
 
 Capability: exact complex rational scalar domain  
 Domain: P0 scalar and algebraic substrate  
@@ -16,7 +16,7 @@ The representation is canonical when both rational components are individually
 normalized to positive denominators and relatively-prime numerator/denominator
 pairs.
 
-The first admitted operation set is deliberately small:
+The admitted operation set is deliberately exact:
 
 - construction from exact rational real and imaginary components;
 - addition and subtraction;
@@ -31,34 +31,34 @@ The first admitted operation set is deliberately small:
 
 ## Accepted inputs
 
-The canonical evaluator accepts closed complex-rational expressions built from:
+The exact complex evaluator accepts closed complex-rational expressions built
+from:
 
 - exact integer, finite-decimal, and rational literals;
 - `complex(real, imaginary)` where both arguments evaluate to exact rationals;
 - the admitted arithmetic operators over complex-rational operands;
 - the exact complex functions `re`, `im`, `conj`, and `norm2`.
 
-This first slice does **not** reserve a global identifier such as `i`. That avoids
+This slice does **not** reserve a global identifier such as `i`. That avoids
 silently changing existing symbolic-variable semantics. Human rendering may use
 `i`, but construction remains explicit through `complex(a,b)` until a separate
 language-design decision is made.
 
 ## Returned value model
 
-A successful result is an exact value containing two normalized rational
-components:
+A successful result contains two normalized exact rational components:
 
 - `real`;
 - `imaginary`.
 
-Human output renders the pair canonically. Machine output must expose both
-components structurally and label the result `exact`.
+Human output renders the pair canonically. Machine output exposes both components
+structurally and labels the result `exact`.
 
 ## Result classification
 
 All successful values in this slice are **exact**. No floating-point fallback is
-permitted. Operations that leave the exact complex-rational domain are not
-silently approximated.
+permitted. Operations that leave the exact complex-rational domain fail
+explicitly rather than being silently approximated.
 
 ## Assumptions and conventions
 
@@ -70,96 +70,117 @@ silently approximated.
 - Integer exponent zero returns one for every nonzero base; `0^0` is undefined.
 - Negative integer exponents require a nonzero base.
 
-## Boundary cases
+## Boundary and refusal cases
 
 - Division by `complex(0,0)` is a mathematical domain error.
 - `complex(0,0)^0` is undefined.
 - Negative powers of zero are a division-by-zero/domain error.
 - A `complex(real, imaginary)` component that is not provably an exact rational
   is outside this slice and remains unsupported rather than approximated.
-
-## Refusal cases
-
-This slice refuses:
-
-- transcendental or algebraic-nonrational real/imaginary components;
-- complex logarithms, roots, trigonometric functions, or branch-cut semantics;
-- automatic conversion of unresolved symbols into complex values;
-- approximate complex arithmetic;
-- matrices or polynomials over complex rationals until their own capability
-  contracts land.
-
-## Non-goals
-
-This is not yet the general exact algebraic-number domain, complex enclosure
-backend, or a complete complex-analysis system. It is the exact field substrate
-needed by later P0/P1 work.
+- Transcendental or algebraic-nonrational real/imaginary components are refused.
+- Complex logarithms, roots, trigonometric functions, and branch-cut semantics
+  are not claimed by this substrate.
+- Unresolved symbols are not automatically converted into complex values.
+- Matrices or polynomials over complex rationals remain separate future domains.
 
 ## Algorithm and backend
 
-The canonical implementation is native OCaml over Zarith exact rationals. It
-does not call a floating-point backend. Arithmetic is implemented directly from
-field identities and normalized by Zarith rational construction.
+The implementation is native OCaml over Zarith exact rationals. Arithmetic is
+implemented directly from field identities and normalized by Zarith rational
+construction. Integer powers use exponentiation by squaring.
 
-Independent oracle: Julia/Nemo or an independently coded rational-pair oracle in
-CI. The implementation must not use the same code path as its verifier.
+The exact adapter does not call a floating-point backend.
 
-## Resource limits
+## Resource model
 
-The existing CENTL expression-node, source-byte, exact-bit, and result-byte
-limits remain authoritative at the public evaluator boundary. Complex results
-must count both rational components toward exact-bit and output limits.
+The complex core now enforces three independent deterministic boundaries during
+evaluation:
 
-No loop in the base field operations is unbounded except integer exponentiation,
-which must use exponentiation by squaring and remain bounded by the existing
-integer/expression limits.
+1. an exact-bit ceiling over the two rational components of every admitted
+   intermediate value;
+2. a maximum absolute integer exponent for power operations;
+3. a work budget consumed by recursive expression traversal and
+   repeated-squaring checkpoints.
 
-## Cancellation points
+The exact-bit guard runs inside exponentiation after each multiply and square.
+An oversized intermediate therefore stops immediately instead of continuing
+until a final result is formed.
 
-Base arithmetic operations are short exact operations and need no internal
-cancellation point after admission. Any future bulk complex operation must add
-its own deterministic checkpoints.
+The public exact-complex protocol additionally enforces source-byte and
+result-byte ceilings. Its public limit record remains backward-compatible while
+the hardened core uses fixed work and power ceilings at CENTL's normal default
+integer-iteration scale. The canonical mathematics gateway still clamps the
+public source, exact-bit, and result-byte ceilings inherited from its enclosing
+server.
 
-## Machine schema
+## Cancellation
 
-The promoted machine value is additive to the existing protocol and has the
-shape:
+Complex evaluation is cooperatively cancellable. Cancellation is checked during
+recursive expression evaluation and inside exponentiation-by-squaring. This is
+stronger than a one-time dispatch check: a request may be interrupted after
+exact work has begun, and the result is the explicit `cancelled` failure rather
+than a partial or approximate value.
+
+## Public machine surfaces
+
+The exact complex-rational substrate is available through the canonical
+mathematics gateway as `complex_rational`, including:
+
+- the JSONL `op: "math"` route;
+- the closed-schema MCP `centl_math` tool.
+
+The gateway propagates cooperative cancellation into this domain and preserves
+its exact result and failure provenance.
+
+The standalone domain protocol returns values in this shape:
 
 ```json
 {
   "kind": "complex_rational",
   "exact": true,
-  "real": {"numerator": "1", "denominator": "2"},
-  "imaginary": {"numerator": "-3", "denominator": "4"},
+  "real": {"numerator": "1", "denominator": "2", "text": "1/2"},
+  "imaginary": {"numerator": "-3", "denominator": "4", "text": "-3/4"},
   "text": "1/2 - 3/4*i"
 }
 ```
 
-Adapters must delegate to the same canonical evaluator.
+## Provenance and errors
 
-## Evidence and provenance
+Successful protocol results carry:
 
-The exact value itself is its arithmetic certificate: both components are
-normalized rationals. Property tests additionally check field identities and
-reconstruct division by multiplying the quotient by the divisor.
+- classification: `exact`;
+- method: `exact_complex_rational_evaluation`;
+- backend: `centl-exact-complex`.
 
-## Tests required before promotion
+Machine-readable failures distinguish zero denominators, complex division by
+zero, undefined powers, unsupported exact components/expressions,
+`resource_limit`, syntax errors, and `cancelled`.
+
+The value itself is an arithmetic certificate: both components are normalized
+rationals. Tests additionally verify field identities, division reconstruction,
+conjugation involution, and `z*conj(z) = norm2(z)`.
+
+## Adversarial evidence
+
+The test suite includes:
 
 - exact examples for every admitted operation;
-- zero divisor, zero power, and negative-power boundaries;
-- normalization/canonical rendering checks;
-- commutativity and associativity for addition/multiplication on generated small
-  rationals;
-- distributivity;
-- conjugation involution and `norm2(z) = z*conj(z)` component identity;
-- division reconstruction for nonzero divisors;
-- independent differential cases;
-- adversarial large numerator/denominator bit sizes and result-size limits;
-- strict machine-schema tests.
+- zero-divisor, zero-power, and negative-power boundaries;
+- field-law checks over a grid of nontrivial rational complex values;
+- strict refusal of nonrational exact components;
+- exact-bit and source/result resource refusals;
+- oversized power-exponent refusal;
+- cancellation before evaluation and during repeated squaring;
+- a power whose admitted input grows beyond the exact-bit ceiling during
+  repeated squaring;
+- a 4096-bit exact `z/z = 1` field identity;
+- canonical rendering and strict machine-schema checks.
 
 ## Promotion condition
 
-The backlog item stays unchecked until the canonical evaluator, public machine
-schema, human adapter, resource accounting, unit/property/differential/adversarial
-tests, documentation, and branch CI all satisfy
-`MATHEMATICS-IMPLEMENTATION-STANDARD.md`.
+The strategic backlog item remains unchecked until all applicable requirements
+in `MATHEMATICS-IMPLEMENTATION-STANDARD.md` are satisfied. In particular, this
+hardening checkpoint does not claim first-class integration into the ordinary
+`Centl_engine.exact_value` path. Canonical evaluator-value integration, its
+rendering/JSON/provenance representation, and the corresponding MCP output
+schema must land before promotion.
