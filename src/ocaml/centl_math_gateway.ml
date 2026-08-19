@@ -215,7 +215,8 @@ let dispatch_domain limits ~cancelled id domain request =
     let response =
       match domain with
       | "complex_rational" ->
-          Centl_complex_rational_protocol.handle_json ~limits:limits.complex request
+          Centl_complex_rational_protocol.handle_json ~limits:limits.complex
+            ~cancelled request
       | "matrix" ->
           Centl_matrix_protocol.handle_json ~limits:limits.matrix ~cancelled request
       | "multivariate_polynomial" ->
