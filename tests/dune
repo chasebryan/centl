@@ -20,6 +20,11 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_real_algebraic)
+ (modules test_real_algebraic)
+ (libraries centl_lib alcotest zarith))
+
+(test
  (name test_history)
  (modules test_history)
  (libraries centl_lib alcotest unix yojson))
