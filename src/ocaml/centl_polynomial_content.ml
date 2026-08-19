@@ -37,6 +37,12 @@ let z_bits value = Z.numbits (Z.abs value)
 let q_bits value =
   saturating_add (z_bits (Q.num value)) (z_bits (Q.den value))
 
+let monomial_bits monomial =
+  List.fold_left
+    (fun total (_, exponent) ->
+      saturating_add total (Z.numbits (Z.of_int exponent)))
+    0 monomial
+
 let checkpoint cancelled = if cancelled () then Error Cancelled else Ok ()
 
 let charge limits work amount =
@@ -71,6 +77,16 @@ let guard_polynomial limits label polynomial =
       (Resource_limit
          ("polynomial content " ^ label ^ " exceeds the exact-bit limit"))
   else Ok polynomial
+
+let add_exact_bits limits label total amount =
+  if
+    total > limits.max_exact_bits
+    || amount > limits.max_exact_bits - total
+  then
+    Error
+      (Resource_limit
+         ("polynomial content " ^ label ^ " exceeds the exact-bit limit"))
+  else Ok (total + amount)
 
 let positive_lcm left right =
   if Z.equal left Z.zero || Z.equal right Z.zero then Z.zero
@@ -117,10 +133,27 @@ let decompose ?(limits = default_limits) ?(cancelled = never_cancelled)
       let* common_numerator = integer_gcd Z.zero terms in
       let content = Q.make common_numerator common_denominator in
       let* content = guard_rational limits "result" content in
-      let reciprocal_content = Q.div Q.one content in
-      let primitive_part = scale reciprocal_content polynomial in
-      let* primitive_part = guard_polynomial limits "primitive part" primitive_part in
-      let* () = checkpoint cancelled in
+      let rec build_primitive accumulated_bits primitive = function
+        | [] -> guard_polynomial limits "primitive part" primitive
+        | (monomial, coefficient) :: rest ->
+            let* () = checkpoint cancelled in
+            let* () = charge limits work 1 in
+            let primitive_coefficient = Q.div coefficient content in
+            let* primitive_coefficient =
+              guard_rational limits "primitive coefficient" primitive_coefficient
+            in
+            let term_bits =
+              saturating_add (q_bits primitive_coefficient)
+                (monomial_bits monomial)
+            in
+            let* accumulated_bits =
+              add_exact_bits limits "primitive part" accumulated_bits term_bits
+            in
+            build_primitive accumulated_bits
+              (add_term primitive_coefficient monomial primitive)
+              rest
+      in
+      let* primitive_part = build_primitive 0 zero terms in
       Ok { content; primitive_part }
 
 let content ?limits ?cancelled polynomial =
