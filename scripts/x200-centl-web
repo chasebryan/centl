@@ -15,6 +15,7 @@ repo_url="https://github.com/chasebryan/centl.git"
 repo_branch="main"
 home=${HOME:?HOME must be set for the X200 deployment}
 centl_root=${CENTL_ROOT:-$home/centl}
+site_build=${CENTL_SITE_BUILD:-$home/.local/share/fcf-centl/site}
 unit_dir=${XDG_CONFIG_HOME:-$home/.config}/systemd/user
 cloudflared_dir=$home/.cloudflared
 cloudflared_config=$cloudflared_dir/config.yml
@@ -43,10 +44,10 @@ need git
 need systemctl
 need curl
 need cloudflared
+need python3
 
 if ! command -v cargo >/dev/null 2>&1; then
   say "cargo not found; installing rustup minimal toolchain"
-  need python3
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
   # shellcheck disable=SC1091
   . "$home/.cargo/env"
@@ -87,6 +88,40 @@ say "building release centl-web"
 cargo build --release --jobs "$jobs" --manifest-path "$centl_root/Cargo.toml"
 [ -x "$centl_root/target/release/centl-web" ] || fail "centl-web binary missing after build"
 
+say "assembling rendered zero-JS site at $site_build"
+rm -rf "$site_build"
+mkdir -p "$site_build/assets"
+cp -a "$centl_root/site/." "$site_build/"
+rm -f "$site_build/caravan-census.js"
+find "$site_build" -name '*.js' -delete
+
+census_input="$centl_root/site/pub/centl/caravan/lead-census-v1.json"
+coordinator_census=$(mktemp)
+if curl --silent --fail --show-error --max-time 5 \
+  --output "$coordinator_census" "http://127.0.0.1:8789/census-v1.json" \
+  && python3 "$centl_root/scripts/caravan-census-validate" \
+    --input "$coordinator_census" \
+    --output "$site_build/pub/centl/caravan/census-v1.json"; then
+  census_input="$site_build/pub/centl/caravan/census-v1.json"
+  say "rendering Bazaar from the local authenticated coordinator census"
+else
+  rm -f "$site_build/pub/centl/caravan/census-v1.json"
+  say "local coordinator census unavailable; rendering the committed lead census instead"
+fi
+rm -f "$coordinator_census"
+
+python3 "$centl_root/scripts/caravan-render-bazaar" \
+  --template "$centl_root/site/mirrors.html" \
+  --census "$census_input" \
+  --output "$site_build/mirrors.html"
+
+if grep -R -n -E '__FCF_[A-Z0-9_]+__' "$site_build" >/dev/null 2>&1; then
+  fail "rendered site still contains unresolved __FCF_ placeholders"
+fi
+
+cp "$centl_root/assets/branding/fcf-centl-banner.png" "$site_build/assets/fcf-centl-banner.png"
+cp "$centl_root/assets/branding/centl-sci-v0.0.1-camelus-banner.png" "$site_build/assets/centl-sci-v0.0.1-camelus-banner.png"
+
 mkdir -p "$unit_dir"
 cat > "$unit_dir/fcf-centl-web.service" <<EOF_UNIT
 [Unit]
@@ -99,7 +134,7 @@ Type=simple
 WorkingDirectory=$centl_root
 Environment=PATH=$home/.cargo/bin:$home/.local/bin:/usr/local/bin:/usr/bin
 Environment=CENTL_BIND_HOST=127.0.0.1
-Environment=CENTL_SITE_DIR=$centl_root/site
+Environment=CENTL_SITE_DIR=$site_build
 Environment=CENTL_BUILD_COMMIT=$current_commit
 ExecStart=$centl_root/target/release/centl-web --serve $hub_port
 Restart=always
@@ -199,6 +234,13 @@ done
 body=$(mktemp)
 cookies=$(mktemp)
 trap 'rm -f "$body" "$cookies"' EXIT HUP INT TERM
+if ! curl --silent --fail --max-time 5 \
+  "http://127.0.0.1:$hub_port/mirrors.html" > "$body"; then
+  fail "local Bazaar page could not be loaded"
+fi
+if grep -q -E '__FCF_[A-Z0-9_]+__' "$body"; then
+  fail "local Bazaar page exposed an unresolved CARAVAN census placeholder"
+fi
 if ! curl --silent --fail --location --max-time 10 \
   --cookie-jar "$cookies" --cookie "$cookies" \
   --data 'cmd=1/3+%2B+5/7' "http://127.0.0.1:$hub_port/hub" > "$body"; then
@@ -234,8 +276,17 @@ if [ "$public_ready" -ne 1 ]; then
   fail "freecomputation.org is not reaching this X200 build ($current_commit). Check the Cloudflare DNS record and the $tunnel_name connector before debugging CENTL itself."
 fi
 
+if ! curl --silent --fail --max-time 8 \
+  "https://freecomputation.org/mirrors.html" > "$body"; then
+  fail "public Bazaar page could not be loaded after origin verification"
+fi
+if grep -q -E '__FCF_[A-Z0-9_]+__' "$body"; then
+  fail "public Bazaar page exposed an unresolved CARAVAN census placeholder"
+fi
+
 rm -f "$body" "$cookies"
 trap - EXIT HUP INT TERM
 say "local hub is live and refresh-clears: POST 1/3 + 5/7 -> 22/21; clean GET -> pristine"
+say "CARAVAN Bazaar is rendered with no unresolved census placeholders"
 say "public origin verified: freecomputation.org -> X200 build $current_commit"
 say "services: systemctl --user status fcf-centl-web.service fcf-caravan-cloudflare-tunnel.service"
