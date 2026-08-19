@@ -312,7 +312,7 @@ let integer_result limits ~method_ value =
          ("text", `String (string_of_int value));
        ])
 
-let solution_result limits ~method_ solution =
+let rec solution_result limits ~method_ solution =
   if
     solution_bits_with_limit limits.max_exact_bits solution
     > limits.max_exact_bits
