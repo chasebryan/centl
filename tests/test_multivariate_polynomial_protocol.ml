@@ -43,7 +43,10 @@ let test_capabilities () =
   let result = assoc "result" response in
   Alcotest.(check string)
     "kind" "multivariate_polynomial_capabilities" (string "kind" result);
-  Alcotest.(check int) "term limit" 4096 (int "max_terms" (assoc "limits" result))
+  Alcotest.(check bool) "cooperative cancellation" true
+    (bool "cooperative_cancellation" result);
+  Alcotest.(check int) "term limit" 4096
+    (int "max_terms" (assoc "limits" result))
 
 let test_exact_multiply () =
   let left =
@@ -174,6 +177,26 @@ let test_strict_and_limits () =
   Alcotest.(check string) "work code" "resource_limit"
     (string "code" (assoc "error" limited))
 
+let test_cancellation () =
+  let p =
+    polynomial
+      [ term "1" [ power "x" 1 ]; term "1" [ power "y" 1 ] ]
+  in
+  let response =
+    Centl_multivariate_polynomial_protocol.handle_json
+      ~cancelled:(fun () -> true)
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "multiply");
+           ("left", p);
+           ("right", p);
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response))
+
 let () =
   Alcotest.run "centl multivariate polynomial protocol"
     [
@@ -185,5 +208,6 @@ let () =
             test_derivative_and_substitution;
           Alcotest.test_case "queries" `Quick test_queries;
           Alcotest.test_case "strict and limits" `Quick test_strict_and_limits;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
