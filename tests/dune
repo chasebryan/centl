@@ -24,6 +24,17 @@
  (modules test_complex_rational)
  (libraries centl_lib alcotest zarith))
 
+(executable
+ (name complex_probe)
+ (modules complex_probe)
+ (libraries centl_lib zarith))
+
+(rule
+ (alias runtest)
+ (deps test_complex_rational_differential.py complex_probe.exe)
+ (action
+  (run python3 %{dep:test_complex_rational_differential.py} %{dep:complex_probe.exe})))
+
 (test
  (name test_history)
  (modules test_history)
