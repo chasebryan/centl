@@ -83,6 +83,16 @@ let test_work_limit () =
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "two-term denominator pass must hit max_work=1"
 
+let test_primitive_work_limit () =
+  let polynomial = add (termq "1/2" [ ("x", 1) ]) (termq "1/3" [ ("y", 1) ]) in
+  let limits = { default_limits with max_work = 5 } in
+  match decompose ~limits polynomial with
+  | Error (Resource_limit _) -> ()
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok _ ->
+      Alcotest.fail
+        "primitive construction must consume the request-wide work budget"
+
 let test_exact_bit_limit () =
   let polynomial = constant (Q.make (Z.shift_left Z.one 32) Z.one) in
   let limits = { default_limits with max_exact_bits = 16 } in
@@ -90,6 +100,22 @@ let test_exact_bit_limit () =
   | Error (Resource_limit _) -> ()
   | Error error -> Alcotest.fail (error_message error)
   | Ok _ -> Alcotest.fail "oversized exact input must be refused"
+
+let test_primitive_aggregate_bit_limit () =
+  let polynomial =
+    add (termq "1/101" [ ("x", 1) ])
+      (add (termq "1/103" [ ("y", 1) ])
+         (termq "1/107" [ ("z", 1) ]))
+  in
+  let limits = { default_limits with max_exact_bits = 40 } in
+  match decompose ~limits polynomial with
+  | Error (Resource_limit message) ->
+      Alcotest.(check bool) "primitive refusal identifies result growth" true
+        (String.length message >= String.length "polynomial content primitive part")
+  | Error error -> Alcotest.fail (error_message error)
+  | Ok _ ->
+      Alcotest.fail
+        "primitive aggregate growth must be refused before exceeding the bit budget"
 
 let test_mid_work_cancellation () =
   let polynomial =
@@ -99,14 +125,14 @@ let test_mid_work_cancellation () =
   let checks = ref 0 in
   let cancelled () =
     incr checks;
-    !checks >= 4
+    !checks >= 8
   in
   begin match decompose ~cancelled polynomial with
   | Error Cancelled -> ()
   | Error error -> Alcotest.fail (error_message error)
-  | Ok _ -> Alcotest.fail "decomposition should cancel after work begins"
+  | Ok _ -> Alcotest.fail "primitive construction should cancel after work begins"
   end;
-  Alcotest.(check bool) "multiple checkpoints reached" true (!checks >= 4)
+  Alcotest.(check bool) "primitive checkpoints reached" true (!checks >= 8)
 
 let () =
   Alcotest.run "centl polynomial content"
@@ -120,7 +146,11 @@ let () =
           Alcotest.test_case "primitive input" `Quick test_integral_primitive_input;
           Alcotest.test_case "term limit" `Quick test_term_limit;
           Alcotest.test_case "work limit" `Quick test_work_limit;
+          Alcotest.test_case "primitive work limit" `Quick
+            test_primitive_work_limit;
           Alcotest.test_case "exact bit limit" `Quick test_exact_bit_limit;
+          Alcotest.test_case "primitive aggregate bit limit" `Quick
+            test_primitive_aggregate_bit_limit;
           Alcotest.test_case "mid-work cancellation" `Quick
             test_mid_work_cancellation;
         ] );
