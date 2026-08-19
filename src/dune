@@ -35,10 +35,6 @@
  (wrapped false)
  (modules
   Centl_parser
-  Centl_complex_rational
-  Centl_complex_rational_protocol
-  Centl_matrix
-  Centl_matrix_protocol
   Centl_iteration
   Centl_syntax
   Centl_history
