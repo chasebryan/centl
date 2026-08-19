@@ -1,9 +1,12 @@
 // HTTP Request Dispatcher & Command Execution Handler
 // Free Computation Foundation - Apache-2.0
 
-use crate::engine::{evaluate, ExecutionResult, Session};
+use crate::engine::{evaluate, ExecutionResult, HistoryEntry, Session};
 use crate::erdos_straus::{run_hunt_window, solve_es, HuntSummary};
 use crate::physics::{convert_units, simulate_collision_1d, PhysicsResult};
+use std::env;
+use std::process::Command;
+use std::time::Instant;
 
 pub struct AppState {
     pub session: Session,
@@ -161,11 +164,87 @@ pub fn handle_command(
         );
     }
 
-    // 3. Exact Mathematical Evaluator
+    // 3. Rigorous approximation boundary.
+    //
+    // The Rust web shell deliberately does not maintain a second floating-point
+    // approximation implementation. Top-level approx(...) requests are executed
+    // by the canonical CENTL executable, whose Arb-backed evaluator owns the
+    // rigorous-enclosure contract. This prevents the web UI and native CENTL
+    // calculator from drifting into different numerical semantics.
+    if is_approximation_command(cmd) {
+        return match run_canonical_approx(cmd) {
+            Ok(result) => {
+                state.session.history.push(HistoryEntry {
+                    command: cmd.to_string(),
+                    result: result.text.clone(),
+                    exact_repr: None,
+                    approximate_repr: result.approximate.clone(),
+                    execution_micros: result.execution_micros,
+                    success: true,
+                });
+                (Some(result), None, None, None)
+            }
+            Err(error) => (None, Some(error), None, None),
+        };
+    }
+
+    // 4. Exact Mathematical Evaluator
     match evaluate(cmd, &mut state.session) {
         Ok(result) => (Some(result), None, None, None),
         Err(error) => (None, Some(error), None, None),
     }
+}
+
+fn is_approximation_command(command: &str) -> bool {
+    let trimmed = command.trim_start();
+    let Some(rest) = trimmed.strip_prefix("approx") else {
+        return false;
+    };
+    rest.trim_start().starts_with('(')
+}
+
+fn run_canonical_approx(command: &str) -> Result<ExecutionResult, String> {
+    let engine = env::var("CENTL_ENGINE_BIN").unwrap_or_else(|_| "centl".to_string());
+    run_canonical_approx_with(&engine, command)
+}
+
+fn run_canonical_approx_with(engine: &str, command: &str) -> Result<ExecutionResult, String> {
+    let started = Instant::now();
+    let output = Command::new(engine)
+        .arg("--no-color")
+        .arg(command)
+        .output()
+        .map_err(|error| {
+            format!(
+                "canonical CENTL approximation backend unavailable ({}): {}",
+                engine, error
+            )
+        })?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+
+    if !output.status.success() {
+        return Err(if stderr.is_empty() {
+            format!(
+                "canonical CENTL approximation failed with status {}",
+                output.status
+            )
+        } else {
+            stderr
+        });
+    }
+    if stdout.is_empty() {
+        return Err("canonical CENTL approximation returned no result".to_string());
+    }
+
+    Ok(ExecutionResult {
+        text: stdout,
+        exact_rational: None,
+        approximate: Some("canonical CENTL rigorous enclosure".to_string()),
+        symbolic_expr: None,
+        execution_micros: started.elapsed().as_micros(),
+    })
 }
 
 fn named_f64(parts: &[&str], name: &str) -> Option<f64> {
@@ -285,6 +364,48 @@ mod tests {
         assert!(error.is_none());
         assert!(physics.is_none());
         assert!(hunt.is_none());
+    }
+
+    #[test]
+    fn approximation_detection_accepts_spacing_but_not_similar_names() {
+        assert!(is_approximation_command("approx(pi, 20)"));
+        assert!(is_approximation_command("approx (pi, 20)"));
+        assert!(!is_approximation_command("approximate(pi, 20)"));
+        assert!(!is_approximation_command("x + approx(pi, 20)"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn canonical_approximation_uses_engine_output() {
+        use std::fs;
+        use std::os::unix::fs::PermissionsExt;
+
+        let path = env::temp_dir().join(format!(
+            "centl-web-fake-engine-{}",
+            std::process::id()
+        ));
+        fs::write(
+            &path,
+            "#!/bin/sh\nprintf '%s\\n' '≈ [9.3248e157, 9.3249e157]'\n",
+        )
+        .unwrap();
+        let mut permissions = fs::metadata(&path).unwrap().permissions();
+        permissions.set_mode(0o700);
+        fs::set_permissions(&path, permissions).unwrap();
+
+        let result = run_canonical_approx_with(
+            path.to_str().unwrap(),
+            "approx(sqrt(2*pi*100)*(100/e)^100,20)",
+        )
+        .unwrap();
+        assert_eq!(result.text, "≈ [9.3248e157, 9.3249e157]");
+        assert_eq!(
+            result.approximate.as_deref(),
+            Some("canonical CENTL rigorous enclosure")
+        );
+        assert!(result.execution_micros > 0);
+
+        let _ = fs::remove_file(path);
     }
 
     #[test]

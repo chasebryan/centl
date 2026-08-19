@@ -72,9 +72,14 @@ pub fn render_centl_work_area(
         html.push_str(&format!(r#"<div class="history-cmd"><span class="prompt-symbol">centl&gt;</span> <code>{}</code></div>"#, escape_html(&entry.command)));
         html.push_str(&format!(r#"<div class="history-output"><pre>{}</pre>"#, escape_html(&entry.result)));
         if let Some(approx) = &entry.approximate_repr {
-            html.push_str(&format!(r#"<div class="enclosure-badge">≈ {}</div>"#, escape_html(approx)));
+            html.push_str(&format!(r#"<div class="enclosure-badge">{}</div>"#, escape_html(approx)));
         }
-        html.push_str(&format!(r#"<div class="history-meta">receipt: exact · schema: 1 · {} µs</div>"#, entry.execution_micros));
+        let receipt_kind = if entry.approximate_repr.is_some() {
+            "rigorous enclosure"
+        } else {
+            "exact"
+        };
+        html.push_str(&format!(r#"<div class="history-meta">receipt: {} · schema: 1 · {} µs</div>"#, receipt_kind, entry.execution_micros));
         html.push_str(r#"</div>"#);
         html.push_str(r#"</div>"#);
     }
@@ -219,5 +224,21 @@ mod tests {
         let html = render_centl_work_area("", Some(&result), None, None, None, &session, "/hub");
         assert_eq!(html.matches(">44</pre>").count(), 1);
         assert!(!html.contains("[EXACT RESULT]"));
+    }
+
+    #[test]
+    fn approximation_history_uses_rigorous_enclosure_receipt() {
+        let mut session = Session::new();
+        session.history.push(HistoryEntry {
+            command: "approx(pi, 20)".to_string(),
+            result: "≈ [3.14159, 3.14160]".to_string(),
+            exact_repr: None,
+            approximate_repr: Some("canonical CENTL rigorous enclosure".to_string()),
+            execution_micros: 17,
+            success: true,
+        });
+        let html = render_centl_work_area("", None, None, None, None, &session, "/hub");
+        assert!(html.contains("receipt: rigorous enclosure · schema: 1 · 17 µs"));
+        assert!(!html.contains("receipt: exact · schema: 1 · 17 µs"));
     }
 }
