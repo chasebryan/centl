@@ -68,5 +68,25 @@ that strategic inventory.
 - [x] Reviewed publish path: scope gate, contributor/owner grants, local
   pack, draft PR to mirage only, no stored tokens.
 
+## CENTLAMP
+
+CENTLAMP is the **CENTL Authority & Metric Protocol**, the open search-ranking
+research track defined in [`docs/CENTLAMP.md`](docs/CENTLAMP.md). The complete
+staged program lives in [`docs/CENTLAMP-TODO.md`](docs/CENTLAMP-TODO.md).
+
+Immediate vertical-slice work:
+
+- [ ] Freeze the `centlamp/0` query, corpus, candidate, metric, penalty, profile,
+  and rank-certificate vocabulary.
+- [ ] Build deterministic ingestion and lexical retrieval over a bounded local
+  corpus.
+- [ ] Define the first exact metric vector and deterministic dominance relation.
+- [ ] Implement the first public resolver and emit machine-readable rank
+  certificates under [`docs/CENTLAMP-RANK-CERTIFICATE.md`](docs/CENTLAMP-RANK-CERTIFICATE.md).
+- [ ] Implement certificate replay so CENTL can mechanically reject an ordering
+  that does not follow from its recorded ranking evidence.
+- [ ] Establish a fixed judged-query benchmark before adding semantic or neural
+  retrieval, and require measured improvement for added ranking complexity.
+
 Keep this file limited to actionable near-term work; remove or check items when
 the implementation lands instead of duplicating completed CI or setup tasks.
