@@ -11,8 +11,7 @@ let test_not_complex () =
   | Centl_complex_native.Not_complex -> ()
   | Centl_complex_native.Exact value ->
       Alcotest.fail
-        ("ordinary rational misclassified: "
-        ^ Centl_complex_rational.to_string value)
+        ("ordinary rational misclassified: " ^ Centl_complex_rational.text value)
   | Centl_complex_native.Refused error ->
       Alcotest.fail (Centl_complex_rational.error_message error)
 
@@ -49,7 +48,7 @@ let test_explicit_refusal () =
   let expression = unwrap_parse "complex(sqrt(2), 0)" in
   match Centl_complex_native.evaluate expression with
   | Centl_complex_native.Refused
-      Centl_complex_rational.Unsupported_exact_expression ->
+      (Centl_complex_rational.Unsupported_expression _) ->
       ()
   | Centl_complex_native.Refused error ->
       Alcotest.fail
@@ -59,7 +58,7 @@ let test_explicit_refusal () =
   | Centl_complex_native.Exact value ->
       Alcotest.fail
         ("irrational component was incorrectly admitted: "
-        ^ Centl_complex_rational.to_string value)
+        ^ Centl_complex_rational.text value)
 
 let test_division_by_zero () =
   let expression = unwrap_parse "complex(1, 2) / complex(0, 0)" in
@@ -72,7 +71,44 @@ let test_division_by_zero () =
       Alcotest.fail "complex request was missed"
   | Centl_complex_native.Exact value ->
       Alcotest.fail
-        ("division by zero returned " ^ Centl_complex_rational.to_string value)
+        ("division by zero returned " ^ Centl_complex_rational.text value)
+
+let test_exact_bit_limit () =
+  let expression = unwrap_parse "complex(17, 0)" in
+  let limits =
+    Centl_complex_rational.
+      { default_evaluation_limits with max_exact_bits = 4 }
+  in
+  match Centl_complex_native.evaluate ~limits expression with
+  | Centl_complex_native.Refused (Centl_complex_rational.Resource_limit _) -> ()
+  | Centl_complex_native.Refused error ->
+      Alcotest.fail
+        ("unexpected refusal: " ^ Centl_complex_rational.error_message error)
+  | Centl_complex_native.Not_complex ->
+      Alcotest.fail "complex request was missed"
+  | Centl_complex_native.Exact value ->
+      Alcotest.fail
+        ("exact-bit limit admitted " ^ Centl_complex_rational.text value)
+
+let test_deep_cancellation () =
+  let expression = unwrap_parse "complex(1, 1)^65536" in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 8
+  in
+  begin match Centl_complex_native.evaluate ~cancelled expression with
+  | Centl_complex_native.Refused Centl_complex_rational.Cancelled -> ()
+  | Centl_complex_native.Refused error ->
+      Alcotest.fail
+        ("unexpected refusal: " ^ Centl_complex_rational.error_message error)
+  | Centl_complex_native.Not_complex ->
+      Alcotest.fail "complex request was missed"
+  | Centl_complex_native.Exact value ->
+      Alcotest.fail
+        ("deep cancellation returned " ^ Centl_complex_rational.text value)
+  end;
+  Alcotest.(check bool) "multiple cancellation checkpoints" true (!checks >= 8)
 
 let () =
   Alcotest.run "centl native exact complex bridge"
@@ -87,5 +123,7 @@ let () =
           Alcotest.test_case "irrational component refusal" `Quick
             test_explicit_refusal;
           Alcotest.test_case "division by zero" `Quick test_division_by_zero;
+          Alcotest.test_case "exact bit limit" `Quick test_exact_bit_limit;
+          Alcotest.test_case "deep cancellation" `Quick test_deep_cancellation;
         ] );
     ]
