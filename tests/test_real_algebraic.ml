@@ -141,9 +141,10 @@ let test_sturm_many_distinct_roots () =
   end
 
 let test_sturm_tight_rational_endpoints () =
-  let scale = Z.pow (z 2) 120 |> Z.to_string in
-  let lower = q ("1 + 1/" ^ scale) in
-  let upper = q ("2 - 1/" ^ scale) in
+  let denominator = Z.pow (z 2) 120 in
+  let epsilon = Q.make Z.one denominator in
+  let lower = Q.add Q.one epsilon in
+  let upper = Q.sub (Q.of_int 2) epsilon in
   Alcotest.(check int) "tight rational interval isolates sqrt2" 1
     (unwrap (root_count sqrt2_polynomial lower upper));
   let certificate =
