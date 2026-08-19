@@ -1,0 +1,4 @@
+(test
+ (name test_math_gateway_protocol)
+ (modules test_math_gateway_protocol)
+ (libraries centl_lib alcotest zarith yojson))
