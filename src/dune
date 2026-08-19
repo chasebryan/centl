@@ -37,12 +37,15 @@
   Centl_parser
   Centl_complex_rational
   Centl_complex_rational_protocol
+  Centl_complex_native
   Centl_matrix
   Centl_matrix_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
   Centl_polynomial_composition
   Centl_polynomial_composition_protocol
+  Centl_polynomial_content
+  Centl_polynomial_content_protocol
   Centl_real_algebraic
   Centl_real_algebraic_protocol
   Centl_math_gateway
