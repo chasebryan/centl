@@ -133,6 +133,7 @@ let error_of_matrix = function
   | Singular_matrix -> ("singular_matrix", error_message Singular_matrix)
   | Right_hand_side_length_mismatch ->
       ("dimension_mismatch", error_message Right_hand_side_length_mismatch)
+  | Cancelled -> ("cancelled", error_message Cancelled)
 
 let parse_q label = function
   | `String text ->
@@ -146,19 +147,56 @@ let parse_q label = function
 let bounded_product ceiling factors =
   List.fold_left
     (fun total factor ->
-      if total > ceiling || factor > ceiling || factor <> 0 && total > ceiling / factor
+      if
+        total > ceiling || factor > ceiling
+        || (factor <> 0 && total > ceiling / factor)
       then ceiling + 1
       else total * factor)
     1 factors
+
+let q_bits value =
+  Z.numbits (Z.abs (Q.num value)) + Z.numbits (Q.den value)
+
+let add_bits ceiling total bits =
+  if total > ceiling || bits > ceiling - total then ceiling + 1
+  else total + bits
+
+let vector_bits_with_limit ceiling vector =
+  Array.fold_left
+    (fun total value -> add_bits ceiling total (q_bits value))
+    0 vector
+
+let matrix_bits_with_limit ceiling matrix =
+  Array.fold_left
+    (fun total row ->
+      Array.fold_left
+        (fun total value -> add_bits ceiling total (q_bits value))
+        total row)
+    0 matrix.entries
+
+let basis_bits_with_limit ceiling basis =
+  List.fold_left
+    (fun total vector ->
+      add_bits ceiling total (vector_bits_with_limit ceiling vector))
+    0 basis
+
+let solution_bits_with_limit ceiling = function
+  | No_solution -> 0
+  | Unique vector -> vector_bits_with_limit ceiling vector
+  | Infinite { particular; nullspace_basis } ->
+      add_bits ceiling (vector_bits_with_limit ceiling particular)
+        (basis_bits_with_limit ceiling nullspace_basis)
 
 let check_matrix_limits limits matrix =
   if matrix.rows > limits.max_rows then Error "matrix exceeds the row limit"
   else if matrix.columns > limits.max_columns then
     Error "matrix exceeds the column limit"
-  else if bounded_product limits.max_entries [ matrix.rows; matrix.columns ] > limits.max_entries then
-    Error "matrix exceeds the entry limit"
-  else if exact_bits matrix > limits.max_exact_bits then
-    Error "matrix exceeds the exact-bit limit"
+  else if
+    bounded_product limits.max_entries [ matrix.rows; matrix.columns ]
+    > limits.max_entries
+  then Error "matrix exceeds the entry limit"
+  else if matrix_bits_with_limit limits.max_exact_bits matrix > limits.max_exact_bits
+  then Error "matrix exceeds the exact-bit limit"
   else Ok ()
 
 let parse_matrix limits label = function
@@ -200,21 +238,18 @@ let parse_matrix limits label = function
         end
   | _ -> Error (label ^ " must be a matrix array")
 
-let vector_bits vector =
-  Array.fold_left
-    (fun total value ->
-      total + Z.numbits (Z.abs (Q.num value)) + Z.numbits (Q.den value))
-    0 vector
-
 let parse_vector limits label = function
   | `List raw ->
-      if List.length raw > limits.max_rows then Error (label ^ " exceeds the vector limit")
+      if List.length raw > limits.max_rows then
+        Error (label ^ " exceeds the vector limit")
       else
         let rec parse reversed = function
           | [] ->
               let vector = Array.of_list (List.rev reversed) in
-              if vector_bits vector > limits.max_exact_bits then
-                Error (label ^ " exceeds the exact-bit limit")
+              if
+                vector_bits_with_limit limits.max_exact_bits vector
+                > limits.max_exact_bits
+              then Error (label ^ " exceeds the exact-bit limit")
               else Ok vector
           | entry :: rest ->
               begin match parse_q label entry with
@@ -237,6 +272,11 @@ let result_with_limit limits ~method_ result =
     failure ~method_ "resource_limit" "matrix result exceeds the byte limit"
   else response
 
+let check_cancelled ~method_ cancelled =
+  if cancelled () then
+    Error (failure ~method_ "cancelled" "matrix operation was cancelled")
+  else Ok ()
+
 let matrix_error_response ~method_ error =
   let code, message = error_of_matrix error in
   failure ~method_ code message
@@ -244,12 +284,23 @@ let matrix_error_response ~method_ error =
 let matrix_result limits ~method_ computation =
   match computation with
   | Error error -> matrix_error_response ~method_ error
-  | Ok matrix -> result_with_limit limits ~method_ (matrix_json matrix)
+  | Ok matrix ->
+      if
+        matrix_bits_with_limit limits.max_exact_bits matrix
+        > limits.max_exact_bits
+      then
+        failure ~method_ "resource_limit"
+          "matrix result exceeds the exact-bit limit"
+      else result_with_limit limits ~method_ (matrix_json matrix)
 
 let rational_result limits ~method_ computation =
   match computation with
   | Error error -> matrix_error_response ~method_ error
-  | Ok value -> result_with_limit limits ~method_ (rational_json value)
+  | Ok value ->
+      if q_bits value > limits.max_exact_bits then
+        failure ~method_ "resource_limit"
+          "matrix scalar result exceeds the exact-bit limit"
+      else result_with_limit limits ~method_ (rational_json value)
 
 let integer_result limits ~method_ value =
   result_with_limit limits ~method_
@@ -261,27 +312,16 @@ let integer_result limits ~method_ value =
          ("text", `String (string_of_int value));
        ])
 
-let matrix_field limits name fields =
-  match List.assoc_opt name fields with
-  | None -> Error ("missing " ^ name)
-  | Some json -> parse_matrix limits name json
+let solution_result limits ~method_ solution =
+  if
+    solution_bits_with_limit limits.max_exact_bits solution
+    > limits.max_exact_bits
+  then
+    failure ~method_ "resource_limit"
+      "linear-system result exceeds the exact-bit limit"
+  else result_with_limit limits ~method_ (solve_json solution)
 
-let vector_field limits name fields =
-  match List.assoc_opt name fields with
-  | None -> Error ("missing " ^ name)
-  | Some json -> parse_vector limits name json
-
-let scalar_field name fields =
-  match List.assoc_opt name fields with
-  | None -> Error ("missing " ^ name)
-  | Some json -> parse_scalar name json
-
-let check_fields allowed fields =
-  match List.find_opt (fun (name, _) -> not (List.mem name allowed)) fields with
-  | None -> Ok ()
-  | Some (name, _) -> Error ("unknown field " ^ name)
-
-let solve_json = function
+and solve_json = function
   | No_solution ->
       `Assoc
         [
@@ -310,6 +350,43 @@ let solve_json = function
           ("parameter_count", `Int (List.length nullspace_basis));
           ("text", `String "infinite affine solution family");
         ]
+
+let basis_result limits ~method_ basis =
+  if basis_bits_with_limit limits.max_exact_bits basis > limits.max_exact_bits then
+    failure ~method_ "resource_limit"
+      "null-space result exceeds the exact-bit limit"
+  else
+    result_with_limit limits ~method_
+      (`Assoc
+         [
+           ("kind", `String "nullspace_basis");
+           ("exact", `Bool true);
+           ("dimension", `Int (List.length basis));
+           ("basis", `List (List.map vector_json basis));
+           ( "text",
+             `String
+               (Printf.sprintf "%d basis vector(s)" (List.length basis)) );
+         ])
+
+let matrix_field limits name fields =
+  match List.assoc_opt name fields with
+  | None -> Error ("missing " ^ name)
+  | Some json -> parse_matrix limits name json
+
+let vector_field limits name fields =
+  match List.assoc_opt name fields with
+  | None -> Error ("missing " ^ name)
+  | Some json -> parse_vector limits name json
+
+let scalar_field name fields =
+  match List.assoc_opt name fields with
+  | None -> Error ("missing " ^ name)
+  | Some json -> parse_scalar name json
+
+let check_fields allowed fields =
+  match List.find_opt (fun (name, _) -> not (List.mem name allowed)) fields with
+  | None -> Ok ()
+  | Some (name, _) -> Error ("unknown field " ^ name)
 
 let capabilities limits =
   let strings values = `List (List.map (fun value -> `String value) values) in
@@ -344,54 +421,84 @@ let capabilities limits =
             ("max_work", `Int limits.max_work);
             ("max_result_bytes", `Int limits.max_result_bytes);
           ] );
+      ( "cancellation",
+        `Assoc
+          [
+            ("cooperative", `Bool true);
+            ("elimination_checkpoints", `Bool true);
+          ] );
       ("text", `String "Exact dense rational matrix algebra and linear systems.");
     ]
 
-let binary_matrix_action limits ~method_ operation fields =
+let binary_matrix_action limits ~cancelled ~method_ operation fields =
   match check_fields [ "version"; "id"; "action"; "left"; "right" ] fields with
   | Error message -> failure ~method_ "invalid_request" message
   | Ok () ->
-      begin match (matrix_field limits "left" fields, matrix_field limits "right" fields) with
-      | Error message, _ | _, Error message -> failure ~method_ "invalid_request" message
+      begin match
+        (matrix_field limits "left" fields, matrix_field limits "right" fields)
+      with
+      | Error message, _ | _, Error message ->
+          failure ~method_ "invalid_request" message
       | Ok left, Ok right ->
-          let work = bounded_product limits.max_work [ left.rows; left.columns; right.columns ] in
-          begin match check_work limits work with
-          | Error message -> failure ~method_ "resource_limit" message
-          | Ok () -> matrix_result limits ~method_ (operation left right)
+          begin match check_cancelled ~method_ cancelled with
+          | Error response -> response
+          | Ok () ->
+              let work =
+                bounded_product limits.max_work
+                  [ left.rows; left.columns; right.columns ]
+              in
+              begin match check_work limits work with
+              | Error message -> failure ~method_ "resource_limit" message
+              | Ok () -> matrix_result limits ~method_ (operation left right)
+              end
           end
       end
 
-let unary_matrix_action limits ~method_ operation fields =
+let unary_matrix_action limits ~cancelled ~method_ operation fields =
   match check_fields [ "version"; "id"; "action"; "matrix" ] fields with
   | Error message -> failure ~method_ "invalid_request" message
   | Ok () ->
       begin match matrix_field limits "matrix" fields with
       | Error message -> failure ~method_ "invalid_request" message
-      | Ok matrix -> matrix_result limits ~method_ (Ok (operation matrix))
+      | Ok matrix ->
+          begin match check_cancelled ~method_ cancelled with
+          | Error response -> response
+          | Ok () -> matrix_result limits ~method_ (Ok (operation matrix))
+          end
       end
 
-let dispatch limits action fields =
+let dispatch limits ~cancelled action fields =
   match action with
   | "capabilities" ->
       begin match check_fields [ "version"; "id"; "action" ] fields with
       | Ok () -> result_with_limit limits ~method_:action (capabilities limits)
       | Error message -> failure ~method_:action "invalid_request" message
       end
-  | "add" -> binary_matrix_action limits ~method_:action add fields
-  | "subtract" -> binary_matrix_action limits ~method_:action sub fields
-  | "multiply" -> binary_matrix_action limits ~method_:action multiply fields
-  | "transpose" -> unary_matrix_action limits ~method_:action transpose fields
+  | "add" ->
+      binary_matrix_action limits ~cancelled ~method_:action add fields
+  | "subtract" ->
+      binary_matrix_action limits ~cancelled ~method_:action sub fields
+  | "multiply" ->
+      binary_matrix_action limits ~cancelled ~method_:action multiply fields
+  | "transpose" ->
+      unary_matrix_action limits ~cancelled ~method_:action transpose fields
   | "scale" ->
-      begin match check_fields [ "version"; "id"; "action"; "matrix"; "scalar" ] fields with
+      begin match
+        check_fields [ "version"; "id"; "action"; "matrix"; "scalar" ] fields
+      with
       | Error message -> failure ~method_:action "invalid_request" message
       | Ok () ->
-          begin match (matrix_field limits "matrix" fields, scalar_field "scalar" fields) with
-          | Error message, _ | _, Error message -> failure ~method_:action "invalid_request" message
+          begin match
+            (matrix_field limits "matrix" fields, scalar_field "scalar" fields)
+          with
+          | Error message, _ | _, Error message ->
+              failure ~method_:action "invalid_request" message
           | Ok matrix, Ok scalar ->
-              let result = scale scalar matrix in
-              if exact_bits result > limits.max_exact_bits then
-                failure ~method_:action "resource_limit" "matrix result exceeds the exact-bit limit"
-              else result_with_limit limits ~method_:action (matrix_json result)
+              begin match check_cancelled ~method_:action cancelled with
+              | Error response -> response
+              | Ok () ->
+                  matrix_result limits ~method_:action (Ok (scale scalar matrix))
+              end
           end
       end
   | "trace" ->
@@ -400,7 +507,11 @@ let dispatch limits action fields =
       | Ok () ->
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
-          | Ok matrix -> rational_result limits ~method_:action (trace matrix)
+          | Ok matrix ->
+              begin match check_cancelled ~method_:action cancelled with
+              | Error response -> response
+              | Ok () -> rational_result limits ~method_:action (trace matrix)
+              end
           end
       end
   | "determinant" ->
@@ -410,10 +521,15 @@ let dispatch limits action fields =
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
           | Ok matrix ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.rows; matrix.rows ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.rows; matrix.rows ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
-              | Ok () -> rational_result limits ~method_:action (determinant matrix)
+              | Ok () ->
+                  rational_result limits ~method_:action
+                    (determinant ~cancelled matrix)
               end
           end
       end
@@ -424,21 +540,38 @@ let dispatch limits action fields =
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
           | Ok matrix ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.columns; matrix.columns ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.columns; matrix.columns ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
               | Ok () ->
-                  let result = rref matrix in
-                  result_with_limit limits ~method_:action
-                    (`Assoc
-                       [
-                         ("kind", `String "matrix_rref");
-                         ("exact", `Bool true);
-                         ("matrix", matrix_json result.matrix);
-                         ("pivot_columns", `List (List.map (fun column -> `Int column) result.pivot_columns));
-                         ("rank", `Int (List.length result.pivot_columns));
-                         ("text", `String (matrix_text result.matrix));
-                       ])
+                  begin match rref_with_cancellation ~cancelled matrix with
+                  | Error error -> matrix_error_response ~method_:action error
+                  | Ok result ->
+                      if
+                        matrix_bits_with_limit limits.max_exact_bits result.matrix
+                        > limits.max_exact_bits
+                      then
+                        failure ~method_:action "resource_limit"
+                          "RREF result exceeds the exact-bit limit"
+                      else
+                        result_with_limit limits ~method_:action
+                          (`Assoc
+                             [
+                               ("kind", `String "matrix_rref");
+                               ("exact", `Bool true);
+                               ("matrix", matrix_json result.matrix);
+                               ( "pivot_columns",
+                                 `List
+                                   (List.map
+                                      (fun column -> `Int column)
+                                      result.pivot_columns) );
+                               ("rank", `Int (List.length result.pivot_columns));
+                               ("text", `String (matrix_text result.matrix));
+                             ])
+                  end
               end
           end
       end
@@ -449,10 +582,17 @@ let dispatch limits action fields =
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
           | Ok matrix ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.columns; matrix.columns ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.columns; matrix.columns ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
-              | Ok () -> integer_result limits ~method_:action (rank matrix)
+              | Ok () ->
+                  begin match rank_with_cancellation ~cancelled matrix with
+                  | Error error -> matrix_error_response ~method_:action error
+                  | Ok rank -> integer_result limits ~method_:action rank
+                  end
               end
           end
       end
@@ -463,27 +603,38 @@ let dispatch limits action fields =
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
           | Ok matrix ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.rows; matrix.rows ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.rows; matrix.rows ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
-              | Ok () -> matrix_result limits ~method_:action (inverse matrix)
+              | Ok () -> matrix_result limits ~method_:action (inverse ~cancelled matrix)
               end
           end
       end
   | "solve" ->
-      begin match check_fields [ "version"; "id"; "action"; "matrix"; "rhs" ] fields with
+      begin match
+        check_fields [ "version"; "id"; "action"; "matrix"; "rhs" ] fields
+      with
       | Error message -> failure ~method_:action "invalid_request" message
       | Ok () ->
-          begin match (matrix_field limits "matrix" fields, vector_field limits "rhs" fields) with
-          | Error message, _ | _, Error message -> failure ~method_:action "invalid_request" message
+          begin match
+            (matrix_field limits "matrix" fields, vector_field limits "rhs" fields)
+          with
+          | Error message, _ | _, Error message ->
+              failure ~method_:action "invalid_request" message
           | Ok matrix, Ok rhs ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.columns + 1; matrix.columns + 1 ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.columns + 1; matrix.columns + 1 ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
               | Ok () ->
-                  begin match solve matrix rhs with
+                  begin match solve ~cancelled matrix rhs with
                   | Error error -> matrix_error_response ~method_:action error
-                  | Ok solution -> result_with_limit limits ~method_:action (solve_json solution)
+                  | Ok solution -> solution_result limits ~method_:action solution
                   end
               end
           end
@@ -495,24 +646,22 @@ let dispatch limits action fields =
           begin match matrix_field limits "matrix" fields with
           | Error message -> failure ~method_:action "invalid_request" message
           | Ok matrix ->
-              let work = bounded_product limits.max_work [ matrix.rows; matrix.columns; matrix.columns ] in
+              let work =
+                bounded_product limits.max_work
+                  [ matrix.rows; matrix.columns; matrix.columns ]
+              in
               begin match check_work limits work with
               | Error message -> failure ~method_:action "resource_limit" message
               | Ok () ->
-                  let basis = nullspace matrix in
-                  result_with_limit limits ~method_:action
-                    (`Assoc
-                       [
-                         ("kind", `String "nullspace_basis");
-                         ("exact", `Bool true);
-                         ("dimension", `Int (List.length basis));
-                         ("basis", `List (List.map vector_json basis));
-                         ("text", `String (Printf.sprintf "%d basis vector(s)" (List.length basis)));
-                       ])
+                  begin match nullspace_with_cancellation ~cancelled matrix with
+                  | Error error -> matrix_error_response ~method_:action error
+                  | Ok basis -> basis_result limits ~method_:action basis
+                  end
               end
           end
       end
-  | _ -> failure ~method_:action "invalid_request" ("unknown matrix action " ^ action)
+  | _ ->
+      failure ~method_:action "invalid_request" ("unknown matrix action " ^ action)
 
 let request_id fields =
   match List.assoc_opt "id" fields with
@@ -527,14 +676,15 @@ let with_id id = function
       | Some id ->
           let rec insert = function
             | [] -> [ ("id", id) ]
-            | (("version", _) as version) :: rest -> version :: ("id", id) :: rest
+            | (("version", _) as version) :: rest ->
+                version :: ("id", id) :: rest
             | field :: rest -> field :: insert rest
           in
           `Assoc (insert fields)
       end
   | json -> json
 
-let handle_json ?(limits = default_limits) = function
+let handle_json ?(limits = default_limits) ?(cancelled = never_cancelled) = function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> failure ~method_:"request" "invalid_request" message
@@ -543,12 +693,27 @@ let handle_json ?(limits = default_limits) = function
           begin match List.assoc_opt "version" fields with
           | Some (`Int 1) ->
               begin match List.assoc_opt "action" fields with
-              | Some (`String action) -> respond (dispatch limits action fields)
-              | Some _ -> respond (failure ~method_:"request" "invalid_request" "action must be a string")
-              | None -> respond (failure ~method_:"request" "invalid_request" "missing action")
+              | Some (`String action) ->
+                  respond (dispatch limits ~cancelled action fields)
+              | Some _ ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "action must be a string")
+              | None ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "missing action")
               end
-          | Some (`Int _) -> respond (failure ~method_:"request" "invalid_request" "unsupported protocol version")
-          | _ -> respond (failure ~method_:"request" "invalid_request" "version must be 1")
+          | Some (`Int _) ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "unsupported protocol version")
+          | _ ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "version must be 1")
           end
       end
-  | _ -> failure ~method_:"request" "invalid_request" "request must be a JSON object"
+  | _ ->
+      failure ~method_:"request" "invalid_request"
+        "request must be a JSON object"
