@@ -27,29 +27,25 @@ jobs:
       - name: Reconcile current main and preserve CBX seams
         shell: bash
         run: |
-          set -euo pipefail
-          cp centl /tmp/centl-cbx-launcher
-          cp site/index.html /tmp/centl-cbx-site-index
+          set +e
+          {
+            set -x
+            cp centl /tmp/centl-cbx-launcher
+            cp site/index.html /tmp/centl-cbx-site-index
+            git fetch origin main
+            git merge --no-edit -X theirs origin/main
+            git checkout origin/main -- centl site/index.html
 
-          git fetch origin main
-          git merge --no-edit -X theirs origin/main
-
-          # These are the only two diagnosed conflict surfaces. Reset them to
-          # current main, then splice the CBX-only material back in.
-          git checkout origin/main -- centl site/index.html
-
-          python3 - <<'PY'
+            python3 - <<'PY'
           from pathlib import Path
 
           old_launcher = Path('/tmp/centl-cbx-launcher').read_text()
           launcher = Path('centl').read_text()
-
           start_marker = '    # CBX is a separate research instrument'
           end_marker = '    exec python3 "$project_root/research/erdos-straus/es" "$@"'
           start = old_launcher.index(start_marker)
           end = old_launcher.index(end_marker, start)
           cbx_block = old_launcher[start:end]
-
           anchor = '  es|erdos|erdos-straus)\n    shift\n'
           if anchor not in launcher:
               raise SystemExit('current-main CENTL ES launcher anchor not found')
@@ -65,7 +61,6 @@ jobs:
           site_start = old_site.index(site_start_marker)
           site_end = old_site.index(site_end_marker, site_start)
           cbx_site_block = old_site[site_start:site_end]
-
           install_anchor = '      <h2>Install CENTL Locally</h2>'
           if install_anchor not in site:
               raise SystemExit('current-main site install anchor not found')
@@ -80,9 +75,27 @@ jobs:
           Path('site/index.html').write_text(site)
           PY
 
-          chmod +x centl
-          git add centl site/index.html
-          rm -f research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
+            chmod +x centl
+            git add centl site/index.html
+            rm -f research/erdos-straus/CBX-MAIN-MERGE-CONFLICTS.txt
+          } > /tmp/cbx-reconcile.log 2>&1
+          status=$?
+          set -e
+
+          if [ "$status" -ne 0 ]; then
+            git merge --abort >/dev/null 2>&1 || true
+            {
+              echo "CBX reconcile failed with status $status"
+              echo
+              tail -n 240 /tmp/cbx-reconcile.log
+            } > research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
+            git add -A
+            git commit -m "ci: record CBX reconcile failure"
+            git push origin HEAD:agent/cbx-kernel
+            exit "$status"
+          fi
+
+          cat /tmp/cbx-reconcile.log
 
       - name: Import authoritative centl-cbx payload
         shell: bash
@@ -93,26 +106,23 @@ jobs:
           git clone --quiet https://github.com/chasebryan/centl-cbx.git /tmp/centl-cbx
           git -C /tmp/centl-cbx checkout --quiet "$SOURCE_SHA"
           test "$(git -C /tmp/centl-cbx rev-parse HEAD)" = "$SOURCE_SHA"
-
           rm -rf research/erdos-straus/cbx.kernel
           mkdir -p research/erdos-straus/cbx.kernel
           cp -a /tmp/centl-cbx/kernel/. research/erdos-straus/cbx.kernel/
           cp -a /tmp/centl-cbx/research/. research/erdos-straus/
-
           for src in /tmp/centl-cbx/.github/workflows/*.yml; do
             dst=".github/workflows/$(basename "$src")"
             sed 's#research/#research/erdos-straus/#g' "$src" > "$dst"
           done
-
           printf '%s\n' "$SOURCE_SHA" > research/erdos-straus/cbx.kernel/SOURCE-CENTL-CBX-SHA
           rm -f research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
 
       - name: Validate CBX engine and research surface
         shell: bash
         run: |
-          set -euo pipefail
           set +e
           {
+            set -x
             python3 -m compileall -q research/erdos-straus
             make -C research/erdos-straus/cbx.kernel clean
             make -C research/erdos-straus/cbx.kernel
@@ -120,29 +130,28 @@ jobs:
             ./centl es cbx probe 1009
             ./centl es cbx probe 2521
             ./centl es cbx probe 9658489
-          } > /tmp/cbx-integration-validation.log 2>&1
+          } > /tmp/cbx-validation.log 2>&1
           status=$?
           set -e
-
           if [ "$status" -ne 0 ]; then
             {
-              echo "CBX integration validation failed with status $status"
+              echo "CBX validation failed with status $status"
               echo
-              tail -n 240 /tmp/cbx-integration-validation.log
+              tail -n 240 /tmp/cbx-validation.log
             } > research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
             git add -A
             git commit -m "cbx: stage integration for validation repair"
             git push origin HEAD:agent/cbx-kernel
             exit "$status"
           fi
-
-          cat /tmp/cbx-integration-validation.log
+          cat /tmp/cbx-validation.log
 
       - name: Commit reconciled CBX push
         shell: bash
         run: |
           set -euo pipefail
           rm -f .github/workflows/cbx-integration-push.yml
+          rm -f research/erdos-straus/CBX-INTEGRATION-FAILURE.txt
           git add -A
           git status --short
           git commit -m "cbx: sync standalone engine and reconcile main"
