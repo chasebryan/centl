@@ -1,5 +1,7 @@
+# Reference template only. scripts/x200-centl-web renders the equivalent live
+# config directly from the runtime $HOME. Replace __FCF_HOME__ before manual use.
 tunnel: d59e3e73-544d-40f8-8ad4-9bb6aa6cd689
-credentials-file: /var/home/chasebryan/.cloudflared/d59e3e73-544d-40f8-8ad4-9bb6aa6cd689.json
+credentials-file: __FCF_HOME__/.cloudflared/d59e3e73-544d-40f8-8ad4-9bb6aa6cd689.json
 
 ingress:
   - hostname: caravan.freecomputation.org

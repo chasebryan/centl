@@ -8,16 +8,19 @@
 #   sh x200-centl-web
 #
 # Optional:
-#   CENTL_ROOT=/var/home/chasebryan/centl sh x200-centl-web
+#   CENTL_ROOT="$HOME/centl" sh x200-centl-web
 set -eu
 
 repo_url="https://github.com/chasebryan/centl.git"
 repo_branch="main"
-home=${HOME:-/var/home/chasebryan}
+home=${HOME:?HOME must be set for the X200 deployment}
 centl_root=${CENTL_ROOT:-$home/centl}
 unit_dir=${XDG_CONFIG_HOME:-$home/.config}/systemd/user
-cloudflared_config=$home/.cloudflared/config.yml
+cloudflared_dir=$home/.cloudflared
+cloudflared_config=$cloudflared_dir/config.yml
 tunnel_name=fcf-caravan-coordinator
+tunnel_id=d59e3e73-544d-40f8-8ad4-9bb6aa6cd689
+cloudflared_credentials=$cloudflared_dir/$tunnel_id.json
 hub_port=8088
 
 fail() {
@@ -34,21 +37,19 @@ need() {
 }
 
 [ "$(uname -s)" = Linux ] || fail "run this on the X200 GNU/Linux host, not macOS"
+PATH="$home/.local/bin:$home/.cargo/bin:$PATH"
+export PATH
 need git
 need systemctl
 need curl
+need cloudflared
 
 if ! command -v cargo >/dev/null 2>&1; then
-  if [ -x "$home/.cargo/bin/cargo" ]; then
-    PATH="$home/.cargo/bin:$PATH"
-    export PATH
-  else
-    say "cargo not found; installing rustup minimal toolchain"
-    need python3
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
-    # shellcheck disable=SC1091
-    . "$home/.cargo/env"
-  fi
+  say "cargo not found; installing rustup minimal toolchain"
+  need python3
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+  # shellcheck disable=SC1091
+  . "$home/.cargo/env"
 fi
 command -v cargo >/dev/null 2>&1 || fail "cargo is still missing after rustup"
 
@@ -122,69 +123,65 @@ systemctl --user daemon-reload
 systemctl --user enable fcf-centl-web.service >/dev/null
 systemctl --user restart fcf-centl-web.service
 
-if [ -f "$cloudflared_config" ]; then
-  if grep -q 'hostname: freecomputation.org' "$cloudflared_config"; then
-    say "cloudflared already lists freecomputation.org"
-  else
-    tmp=$cloudflared_config.new-$$
-    awk -v port="$hub_port" '
-      /service: http_status:404/ && !done {
-        print "  - hostname: freecomputation.org"
-        print "    service: http://127.0.0.1:" port
-        print "  - hostname: www.freecomputation.org"
-        print "    service: http://127.0.0.1:" port
-        done=1
-      }
-      { print }
-    ' "$cloudflared_config" > "$tmp"
-    mv "$tmp" "$cloudflared_config"
-    say "added freecomputation.org -> 127.0.0.1:$hub_port in $cloudflared_config"
-  fi
-elif [ -f "$centl_root/deploy/fcf-caravan-cloudflared-config.yml" ]; then
-  mkdir -p "$(dirname -- "$cloudflared_config")"
-  cp "$centl_root/deploy/fcf-caravan-cloudflared-config.yml" "$cloudflared_config"
-  say "installed $cloudflared_config from the repository template"
-else
-  say "no cloudflared config at $cloudflared_config; start the named tunnel after cloudflared login"
-fi
+mkdir -p "$cloudflared_dir"
+[ -f "$cloudflared_credentials" ] || \
+  fail "tunnel credentials missing: $cloudflared_credentials; authenticate/create the named tunnel for this user first"
 
-if [ -f "$cloudflared_config" ]; then
-  if ! awk -v port="$hub_port" '
-    $0 ~ /hostname: freecomputation\.org[[:space:]]*$/ { found=1; next }
-    found && $0 ~ /service:/ {
-      expected="http://127.0.0.1:" port
-      if (index($0, expected)) ok=1
-      exit
-    }
-    END { exit(ok ? 0 : 1) }
-  ' "$cloudflared_config"; then
-    fail "$cloudflared_config does not route freecomputation.org to 127.0.0.1:$hub_port"
-  fi
-fi
+# This file is intentionally rendered from the runtime home directory. Never copy
+# a host-specific credentials path from the repository into the live config.
+cat > "$cloudflared_config" <<EOF_TUNNEL
+tunnel: $tunnel_id
+credentials-file: $cloudflared_credentials
 
-if command -v cloudflared >/dev/null 2>&1; then
-  cloudflared tunnel route dns "$tunnel_name" freecomputation.org || \
-    say "DNS route command did not create freecomputation.org; the public origin probe below will verify the actual route"
-  cloudflared tunnel route dns "$tunnel_name" www.freecomputation.org || \
-    say "DNS route command did not create www.freecomputation.org"
-else
-  say "cloudflared not on PATH; skip DNS route command"
-fi
+ingress:
+  - hostname: caravan.freecomputation.org
+    service: http://127.0.0.1:8789
+  - hostname: freecomputation.org
+    service: http://127.0.0.1:$hub_port
+  - hostname: www.freecomputation.org
+    service: http://127.0.0.1:$hub_port
+  - service: http_status:404
+EOF_TUNNEL
 
-restarted_tunnel=0
-if systemctl --user list-unit-files fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
-  if systemctl --user restart fcf-caravan-cloudflare-tunnel.service; then
-    restarted_tunnel=1
-  fi
-fi
-if [ "$restarted_tunnel" -eq 0 ] && command -v sudo >/dev/null 2>&1; then
-  if sudo -n systemctl restart fcf-caravan-cloudflare-tunnel.service >/dev/null 2>&1; then
-    restarted_tunnel=1
-  fi
-fi
-if [ "$restarted_tunnel" -eq 0 ]; then
-  say "could not restart the Cloudflare tunnel automatically; public verification may fail until it is restarted"
-fi
+cloudflared tunnel --config "$cloudflared_config" ingress validate >/dev/null
+matched_rule=$(cloudflared tunnel --config "$cloudflared_config" ingress rule \
+  "https://freecomputation.org/__centl_origin" 2>&1 || true)
+printf '%s\n' "$matched_rule" | grep -F "service: http://127.0.0.1:$hub_port" >/dev/null || \
+  fail "$cloudflared_config does not match freecomputation.org to 127.0.0.1:$hub_port"
+
+cloudflared_bin=$(command -v cloudflared)
+cat > "$unit_dir/fcf-caravan-cloudflare-tunnel.service" <<EOF_TUNNEL_UNIT
+[Unit]
+Description=FCF named Cloudflare Tunnel (X200 origin)
+After=fcf-centl-web.service network-online.target
+Wants=fcf-centl-web.service network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=$centl_root
+ExecStart=$cloudflared_bin tunnel --config $cloudflared_config run
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target
+EOF_TUNNEL_UNIT
+
+systemctl --user daemon-reload
+systemctl --user enable fcf-caravan-cloudflare-tunnel.service >/dev/null
+systemctl --user restart fcf-caravan-cloudflare-tunnel.service
+systemctl --user is-active --quiet fcf-caravan-cloudflare-tunnel.service || \
+  fail "fcf-caravan-cloudflare-tunnel.service did not stay active"
+
+cloudflared tunnel route dns "$tunnel_id" freecomputation.org || \
+  say "DNS route command did not create freecomputation.org; an existing record may already target this tunnel"
+cloudflared tunnel route dns "$tunnel_id" www.freecomputation.org || \
+  say "DNS route command did not create www.freecomputation.org; an existing record may already target this tunnel"
 
 ready=0
 i=1
@@ -234,11 +231,11 @@ while [ "$i" -le 15 ]; do
   i=$((i + 1))
 done
 if [ "$public_ready" -ne 1 ]; then
-  fail "freecomputation.org is not reaching this X200 build ($current_commit). The public hostname is still routed to another origin/cache. Check the Cloudflare DNS record and the fcf-caravan-coordinator ingress before debugging CENTL itself."
+  fail "freecomputation.org is not reaching this X200 build ($current_commit). Check the Cloudflare DNS record and the $tunnel_name connector before debugging CENTL itself."
 fi
 
 rm -f "$body" "$cookies"
 trap - EXIT HUP INT TERM
 say "local hub is live and refresh-clears: POST 1/3 + 5/7 -> 22/21; clean GET -> pristine"
 say "public origin verified: freecomputation.org -> X200 build $current_commit"
-say "service: systemctl --user status fcf-centl-web.service"
+say "services: systemctl --user status fcf-centl-web.service fcf-caravan-cloudflare-tunnel.service"
