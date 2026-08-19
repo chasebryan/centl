@@ -8,11 +8,16 @@ on:
       - "site/index.html"
       - "site/hub.html"
       - "site/style.css"
+      - "caravan/observability.py"
+      - "caravan/public_service.py"
+      - "docs/CARAVAN-PUBLIC-COORDINATOR.md"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
       - "scripts/caravan-live-bazaar"
       - "scripts/x200-caravan-live-census"
+      - "scripts/caravan-observability"
       - "tests/test_caravan_live_bazaar.py"
+      - "tests/test_caravan_observability.py"
       - ".github/workflows/centl-web.yml"
   push:
     branches:
@@ -23,11 +28,16 @@ on:
       - "site/index.html"
       - "site/hub.html"
       - "site/style.css"
+      - "caravan/observability.py"
+      - "caravan/public_service.py"
+      - "docs/CARAVAN-PUBLIC-COORDINATOR.md"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
       - "scripts/caravan-live-bazaar"
       - "scripts/x200-caravan-live-census"
+      - "scripts/caravan-observability"
       - "tests/test_caravan_live_bazaar.py"
+      - "tests/test_caravan_observability.py"
       - ".github/workflows/centl-web.yml"
 
 permissions:
@@ -48,5 +58,7 @@ jobs:
         run: python3 src-web/tests/test_x200_centl_web.py
       - name: Test live CARAVAN Bazaar refresh
         run: python3 tests/test_caravan_live_bazaar.py
+      - name: Test CARAVAN recruitment observability
+        run: python3 tests/test_caravan_observability.py
       - name: Build CENTL web release
         run: cargo build --release --bin centl-web

@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Print the private aggregate CARAVAN recruitment funnel for the operator."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from caravan.observability import ObservabilityStore  # noqa: E402
+
+
+def _utc(value: float) -> str:
+    return datetime.fromtimestamp(value, timezone.utc).isoformat()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Show privacy-preserving CARAVAN enrollment observability"
+    )
+    parser.add_argument(
+        "--database",
+        type=Path,
+        default=Path.home() / ".local/state/fcf-caravan/coordinator.sqlite3",
+    )
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+
+    snapshot = ObservabilityStore(args.database).snapshot()
+    if args.json:
+        payload = snapshot.to_dict()
+        payload["tracking_started_at"] = _utc(snapshot.tracking_started_at)
+        print(json.dumps(payload, sort_keys=True, indent=2))
+        return 0
+
+    print("=== CARAVAN RECRUITMENT OBSERVABILITY ===")
+    print(f"Tracking started (UTC)           : {_utc(snapshot.tracking_started_at)}")
+    print(f"Enrollment requests              : {snapshot.enrollment_requests}")
+    print(f"Accepted enrollment requests     : {snapshot.enrollment_accepted}")
+    print(f"Rejected enrollment requests     : {snapshot.enrollment_rejected}")
+    print(f"Incomplete/interrupted requests  : {snapshot.enrollment_incomplete}")
+    print(f"Session challenges issued        : {snapshot.session_challenges_issued}")
+    print(f"Session completions succeeded    : {snapshot.session_completions_succeeded}")
+    print(f"Lifetime registered identities   : {snapshot.registered_carriers}")
+    print(f"Highest CARAVAN number           : {snapshot.highest_caravan_number}")
+    print(f"Reached heartbeat since tracking : {snapshot.first_heartbeat_carriers}")
+    print(f"Active camels                    : {snapshot.active_camels}")
+    print(f"Hungry camels                    : {snapshot.hungry_camels}")
+    print(f"Lost camels                      : {snapshot.lost_camels}")
+    print(f"Withdrawn carriers               : {snapshot.withdrawn_carriers}")
+    print(f"Quarantined carriers             : {snapshot.quarantined_carriers}")
+    print()
+    print("Privacy: no IPs, user agents, request bodies, or per-request access logs are retained.")
+    print("Scope: enrollment-attempt counters begin at Tracking started; earlier rejected attempts cannot be reconstructed.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

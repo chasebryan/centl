@@ -21,6 +21,7 @@ from typing import Any
 from .census import build_live_document
 from .coordinator import CoordinatorError, CoordinatorState
 from .enrollment_protocol import EnrollmentAuthority, EnrollmentProtocolError
+from .observability import ObservabilityStore
 from .session import SessionAuthority, SessionError
 from .transport import (
     MAX_CONCURRENT_REQUESTS,
@@ -61,6 +62,7 @@ class _PublicHTTPServer(ThreadingHTTPServer):
         self.coordinator = coordinator
         self.sessions = sessions
         self.enrollment = enrollment
+        self.observability = ObservabilityStore(coordinator.database)
         self.max_concurrent_requests = int(max_concurrent_requests)
         self._active_requests = 0
         self._active_requests_lock = threading.Lock()
@@ -200,11 +202,15 @@ class _PublicHandler(BaseHTTPRequestHandler):
             self._send_error(503, "service_unavailable")
 
     def do_POST(self) -> None:  # noqa: N802
+        is_enrollment = self.path == "/v1/enroll"
+        if is_enrollment:
+            self.server.observability.increment("enrollment_requests")
         try:
             body = self._read_json()
-            if self.path == "/v1/enroll":
+            if is_enrollment:
                 request = _require_exact_fields(body, {"receipt"})
                 result = self.server.enrollment.enroll(request["receipt"])
+                self.server.observability.increment("enrollment_accepted")
                 self._send_json(200, result)
                 return
 
@@ -214,6 +220,7 @@ class _PublicHandler(BaseHTTPRequestHandler):
                 if not isinstance(node_id, str) or not node_id:
                     raise TransportError("node_id must be non-empty text")
                 challenge = self.server.sessions.issue_challenge(node_id)
+                self.server.observability.increment("session_challenges_issued")
                 self._send_json(
                     200,
                     {
@@ -239,6 +246,7 @@ class _PublicHandler(BaseHTTPRequestHandler):
                     challenge=challenge,
                     signature=_b64url_decode(request["signature"]),
                 )
+                self.server.observability.increment("session_completions_succeeded")
                 self._send_json(200, {"session_token": session.token, "expires_at": session.expires_at})
                 return
 
@@ -259,6 +267,7 @@ class _PublicHandler(BaseHTTPRequestHandler):
                 ):
                     raise TransportError("invalid carrier load/capacity")
                 self.server.coordinator.heartbeat(node_id, load=float(load), capacity=capacity)
+                self.server.observability.record_first_heartbeat(node_id)
                 self._send_json(200, {"status": "ok"})
                 return
 
@@ -272,10 +281,14 @@ class _PublicHandler(BaseHTTPRequestHandler):
         except SessionError:
             self._send_error(401, "unauthorized")
         except EnrollmentProtocolError:
+            if is_enrollment:
+                self.server.observability.increment("enrollment_rejected")
             self._send_error(403, "enrollment_rejected")
         except CoordinatorError:
             self._send_error(409, "coordinator_rejected")
         except (TransportError, ValueError, TypeError, KeyError):
+            if is_enrollment:
+                self.server.observability.increment("enrollment_rejected")
             self._send_error(400, "bad_request")
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             return
