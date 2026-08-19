@@ -36,6 +36,7 @@
  (modules
   Centl_parser
   Centl_matrix
+  Centl_matrix_protocol
   Centl_iteration
   Centl_syntax
   Centl_history
