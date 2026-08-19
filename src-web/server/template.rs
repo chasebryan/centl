@@ -138,6 +138,10 @@ pub fn render_centl_work_area(
 
     html.push_str(r#"</div>"#);
 
+    // Keep Clear on its own form so the text input cannot submit a competing cmd field.
+    // The old shared-form layout submitted cmd=<input>&cmd=:clear; the server correctly
+    // consumed the first value, so Clear silently re-ran (or no-op'd) the input instead.
+    html.push_str(&format!(r#"<form id="centl-clear-form" method="POST" action="{}#centl-console"></form>"#, action_url));
     html.push_str(&format!(r#"<form method="POST" action="{}#centl-console" class="centl-prompt-form">"#, action_url));
     html.push_str(r#"<div class="input-row">"#);
     html.push_str(r#"<span class="input-prompt">centl&gt;</span>"#);
@@ -146,7 +150,7 @@ pub fn render_centl_work_area(
         escape_html(current_input)
     ));
     html.push_str(r#"<button type="submit" class="btn-calculate">Calculate</button>"#);
-    html.push_str(r#"<button type="submit" name="cmd" value=":clear" class="btn-clear">Clear</button>"#);
+    html.push_str(r#"<button type="submit" form="centl-clear-form" name="cmd" value=":clear" class="btn-clear">Clear</button>"#);
     html.push_str(r#"</div>"#);
     html.push_str(r#"</form>"#);
 
@@ -177,6 +181,15 @@ mod tests {
         assert!(html.contains("id=\"centl-console\""));
         assert!(html.contains("action=\"/hub#centl-console\""));
         assert!(!html.contains("id=\"centl-hub\""));
+    }
+
+    #[test]
+    fn clear_uses_an_independent_form_without_a_competing_command_input() {
+        let session = Session::new();
+        let html = render_centl_work_area("2 + 2", None, None, None, None, &session, "/hub");
+        assert!(html.contains("id=\"centl-clear-form\""));
+        assert!(html.contains("form=\"centl-clear-form\" name=\"cmd\" value=\":clear\""));
+        assert_eq!(html.matches("name=\"cmd\"").count(), 2);
     }
 
     #[test]
