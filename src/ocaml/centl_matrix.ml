@@ -7,6 +7,7 @@ type error =
   | Not_square of string
   | Singular_matrix
   | Right_hand_side_length_mismatch
+  | Cancelled
 
 exception Matrix_error of error
 
@@ -32,6 +33,10 @@ let error_message = function
   | Singular_matrix -> "matrix is singular"
   | Right_hand_side_length_mismatch ->
       "right-hand-side length must equal the matrix row count"
+  | Cancelled -> "matrix operation was cancelled"
+
+let never_cancelled () = false
+let check_cancelled cancelled = if cancelled () then Error Cancelled else Ok ()
 
 let copy_entries entries = Array.map Array.copy entries
 
@@ -184,109 +189,144 @@ let swap_rows entries a b =
     entries.(b) <- temporary
   end
 
-let determinant matrix =
-  match require_square "determinant" matrix with
-  | Error _ as error -> error
-  | Ok () ->
-      let entries = copy_entries matrix.entries in
-      let determinant = ref Q.one in
-      let singular = ref false in
-      let column = ref 0 in
-      while not !singular && !column < matrix.columns do
-        match
-          find_nonzero_in_column entries !column matrix.rows !column
-        with
-        | None -> singular := true
-        | Some pivot_row ->
-            if pivot_row <> !column then begin
-              swap_rows entries pivot_row !column;
-              determinant := Q.neg !determinant
-            end;
-            let pivot = entries.(!column).(!column) in
-            determinant := Q.mul !determinant pivot;
-            for row = !column + 1 to matrix.rows - 1 do
-              if not (Q.equal entries.(row).(!column) Q.zero) then begin
-                let factor = Q.div entries.(row).(!column) pivot in
-                entries.(row).(!column) <- Q.zero;
-                for k = !column + 1 to matrix.columns - 1 do
+let determinant ?(cancelled = never_cancelled) matrix =
+  let ( let* ) result next = Result.bind result next in
+  let* () = require_square "determinant" matrix in
+  let entries = copy_entries matrix.entries in
+  let rec eliminate_column determinant column =
+    let* () = check_cancelled cancelled in
+    if column >= matrix.columns then Ok determinant
+    else
+      match find_nonzero_in_column entries column matrix.rows column with
+      | None -> Ok Q.zero
+      | Some pivot_row ->
+          let determinant =
+            if pivot_row <> column then begin
+              swap_rows entries pivot_row column;
+              Q.neg determinant
+            end
+            else determinant
+          in
+          let pivot = entries.(column).(column) in
+          let determinant = Q.mul determinant pivot in
+          let rec eliminate_rows row =
+            if row >= matrix.rows then Ok ()
+            else
+              let* () = check_cancelled cancelled in
+              if Q.equal entries.(row).(column) Q.zero then
+                eliminate_rows (row + 1)
+              else begin
+                let factor = Q.div entries.(row).(column) pivot in
+                entries.(row).(column) <- Q.zero;
+                for k = column + 1 to matrix.columns - 1 do
                   entries.(row).(k) <-
                     Q.sub entries.(row).(k)
-                      (Q.mul factor entries.(!column).(k))
-                done
+                      (Q.mul factor entries.(column).(k))
+                done;
+                eliminate_rows (row + 1)
               end
-            done;
-            incr column
-      done;
-      Ok (if !singular then Q.zero else !determinant)
+          in
+          let* () = eliminate_rows (column + 1) in
+          eliminate_column determinant (column + 1)
+  in
+  eliminate_column Q.one 0
 
-let rref_array input =
+let rref_array_with_cancellation ~cancelled input =
+  let ( let* ) result next = Result.bind result next in
   let entries = copy_entries input in
   let row_count = Array.length entries in
   let column_count = if row_count = 0 then 0 else Array.length entries.(0) in
-  let pivot_row = ref 0 in
-  let pivots_reversed = ref [] in
-  let column = ref 0 in
-  while !pivot_row < row_count && !column < column_count do
-    match find_nonzero_in_column entries !pivot_row row_count !column with
-    | None -> incr column
-    | Some selected ->
-        swap_rows entries selected !pivot_row;
-        let pivot = entries.(!pivot_row).(!column) in
-        for k = !column to column_count - 1 do
-          entries.(!pivot_row).(k) <- Q.div entries.(!pivot_row).(k) pivot
-        done;
-        for row = 0 to row_count - 1 do
-          if row <> !pivot_row then begin
-            let factor = entries.(row).(!column) in
-            if not (Q.equal factor Q.zero) then begin
-              entries.(row).(!column) <- Q.zero;
-              for k = !column + 1 to column_count - 1 do
-                entries.(row).(k) <-
-                  Q.sub entries.(row).(k)
-                    (Q.mul factor entries.(!pivot_row).(k))
-              done
-            end
-          end
-        done;
-        pivots_reversed := (!pivot_row, !column) :: !pivots_reversed;
-        incr pivot_row;
-        incr column
-  done;
-  (entries, List.rev !pivots_reversed)
+  let rec reduce pivot_row column pivots_reversed =
+    let* () = check_cancelled cancelled in
+    if pivot_row >= row_count || column >= column_count then
+      Ok (entries, List.rev pivots_reversed)
+    else
+      match find_nonzero_in_column entries pivot_row row_count column with
+      | None -> reduce pivot_row (column + 1) pivots_reversed
+      | Some selected ->
+          swap_rows entries selected pivot_row;
+          let pivot = entries.(pivot_row).(column) in
+          for k = column to column_count - 1 do
+            entries.(pivot_row).(k) <- Q.div entries.(pivot_row).(k) pivot
+          done;
+          let rec eliminate_rows row =
+            if row >= row_count then Ok ()
+            else
+              let* () = check_cancelled cancelled in
+              if row = pivot_row then eliminate_rows (row + 1)
+              else begin
+                let factor = entries.(row).(column) in
+                if not (Q.equal factor Q.zero) then begin
+                  entries.(row).(column) <- Q.zero;
+                  for k = column + 1 to column_count - 1 do
+                    entries.(row).(k) <-
+                      Q.sub entries.(row).(k)
+                        (Q.mul factor entries.(pivot_row).(k))
+                  done
+                end;
+                eliminate_rows (row + 1)
+              end
+          in
+          let* () = eliminate_rows 0 in
+          reduce (pivot_row + 1) (column + 1)
+            ((pivot_row, column) :: pivots_reversed)
+  in
+  reduce 0 0 []
+
+let rref_array input =
+  match rref_array_with_cancellation ~cancelled:never_cancelled input with
+  | Ok result -> result
+  | Error Cancelled -> assert false
+  | Error _ -> assert false
+
+let rref_with_cancellation ?(cancelled = never_cancelled) matrix =
+  Result.map
+    (fun (entries, pivots) ->
+      {
+        matrix = { matrix with entries };
+        pivot_columns = List.map snd pivots;
+      })
+    (rref_array_with_cancellation ~cancelled matrix.entries)
 
 let rref matrix =
-  let entries, pivots = rref_array matrix.entries in
-  {
-    matrix = { matrix with entries };
-    pivot_columns = List.map snd pivots;
-  }
+  match rref_with_cancellation matrix with
+  | Ok result -> result
+  | Error _ -> assert false
 
-let rank matrix = List.length (rref matrix).pivot_columns
+let rank_with_cancellation ?(cancelled = never_cancelled) matrix =
+  Result.map
+    (fun result -> List.length result.pivot_columns)
+    (rref_with_cancellation ~cancelled matrix)
 
-let inverse matrix =
-  match require_square "inverse" matrix with
-  | Error _ as error -> error
-  | Ok () ->
-      let size = matrix.rows in
-      let augmented =
-        Array.init size (fun row ->
-            Array.init (2 * size) (fun column ->
-                if column < size then matrix.entries.(row).(column)
-                else if column - size = row then Q.one
-                else Q.zero))
-      in
-      let reduced, pivots = rref_array augmented in
-      let left_pivots = List.filter (fun (_, column) -> column < size) pivots in
-      if List.length left_pivots <> size then Error Singular_matrix
-      else
-        Ok
-          {
-            rows = size;
-            columns = size;
-            entries =
-              Array.init size (fun row ->
-                  Array.init size (fun column -> reduced.(row).(column + size)));
-          }
+let rank matrix =
+  match rank_with_cancellation matrix with
+  | Ok value -> value
+  | Error _ -> assert false
+
+let inverse ?(cancelled = never_cancelled) matrix =
+  let ( let* ) result next = Result.bind result next in
+  let* () = require_square "inverse" matrix in
+  let* () = check_cancelled cancelled in
+  let size = matrix.rows in
+  let augmented =
+    Array.init size (fun row ->
+        Array.init (2 * size) (fun column ->
+            if column < size then matrix.entries.(row).(column)
+            else if column - size = row then Q.one
+            else Q.zero))
+  in
+  let* reduced, pivots = rref_array_with_cancellation ~cancelled augmented in
+  let left_pivots = List.filter (fun (_, column) -> column < size) pivots in
+  if List.length left_pivots <> size then Error Singular_matrix
+  else
+    Ok
+      {
+        rows = size;
+        columns = size;
+        entries =
+          Array.init size (fun row ->
+              Array.init size (fun column -> reduced.(row).(column + size)));
+      }
 
 let all_zero_coefficients row variable_count =
   let zero = ref true in
@@ -297,9 +337,11 @@ let all_zero_coefficients row variable_count =
   done;
   !zero
 
-let solve matrix rhs =
+let solve ?(cancelled = never_cancelled) matrix rhs =
+  let ( let* ) result next = Result.bind result next in
   if Array.length rhs <> matrix.rows then Error Right_hand_side_length_mismatch
   else
+    let* () = check_cancelled cancelled in
     let variable_count = matrix.columns in
     let augmented =
       Array.init matrix.rows (fun row ->
@@ -307,15 +349,19 @@ let solve matrix rhs =
               if column < variable_count then matrix.entries.(row).(column)
               else rhs.(row)))
     in
-    let reduced, pivots = rref_array augmented in
-    let inconsistent = ref false in
-    for row = 0 to matrix.rows - 1 do
-      if
-        all_zero_coefficients reduced.(row) variable_count
-        && not (Q.equal reduced.(row).(variable_count) Q.zero)
-      then inconsistent := true
-    done;
-    if !inconsistent then Ok No_solution
+    let* reduced, pivots = rref_array_with_cancellation ~cancelled augmented in
+    let rec inconsistent_row row =
+      if row >= matrix.rows then Ok false
+      else
+        let* () = check_cancelled cancelled in
+        if
+          all_zero_coefficients reduced.(row) variable_count
+          && not (Q.equal reduced.(row).(variable_count) Q.zero)
+        then Ok true
+        else inconsistent_row (row + 1)
+    in
+    let* inconsistent = inconsistent_row 0 in
+    if inconsistent then Ok No_solution
     else
       let coefficient_pivots =
         List.filter (fun (_, column) -> column < variable_count) pivots
@@ -334,22 +380,26 @@ let solve matrix rhs =
           done;
           !free
         in
-        let basis =
-          List.map
-            (fun free_column ->
+        let rec build_basis reversed = function
+          | [] -> Ok (List.rev reversed)
+          | free_column :: rest ->
+              let* () = check_cancelled cancelled in
               let vector = Array.make variable_count Q.zero in
               vector.(free_column) <- Q.one;
               List.iter
                 (fun (row, pivot_column) ->
                   vector.(pivot_column) <- Q.neg reduced.(row).(free_column))
                 coefficient_pivots;
-              vector)
-            free_columns
+              build_basis (vector :: reversed) rest
         in
+        let* basis = build_basis [] free_columns in
         Ok (Infinite { particular; nullspace_basis = basis })
 
-let nullspace matrix =
-  let reduced, pivots = rref_array matrix.entries in
+let nullspace_with_cancellation ?(cancelled = never_cancelled) matrix =
+  let ( let* ) result next = Result.bind result next in
+  let* reduced, pivots =
+    rref_array_with_cancellation ~cancelled matrix.entries
+  in
   let pivot_columns = List.map snd pivots in
   let free_columns =
     let free = ref [] in
@@ -358,16 +408,24 @@ let nullspace matrix =
     done;
     !free
   in
-  List.map
-    (fun free_column ->
-      let vector = Array.make matrix.columns Q.zero in
-      vector.(free_column) <- Q.one;
-      List.iter
-        (fun (row, pivot_column) ->
-          vector.(pivot_column) <- Q.neg reduced.(row).(free_column))
-        pivots;
-      vector)
-    free_columns
+  let rec build_basis reversed = function
+    | [] -> Ok (List.rev reversed)
+    | free_column :: rest ->
+        let* () = check_cancelled cancelled in
+        let vector = Array.make matrix.columns Q.zero in
+        vector.(free_column) <- Q.one;
+        List.iter
+          (fun (row, pivot_column) ->
+            vector.(pivot_column) <- Q.neg reduced.(row).(free_column))
+          pivots;
+        build_basis (vector :: reversed) rest
+  in
+  build_basis [] free_columns
+
+let nullspace matrix =
+  match nullspace_with_cancellation matrix with
+  | Ok basis -> basis
+  | Error _ -> assert false
 
 let multiply_vector matrix vector =
   if Array.length vector <> matrix.columns then
