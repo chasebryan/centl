@@ -40,7 +40,12 @@ let test_capabilities () =
   let result = assoc "result" response in
   Alcotest.(check string) "kind" "matrix_capabilities" (string "kind" result);
   let limits = assoc "limits" result in
-  Alcotest.(check int) "entry limit" 4096 (int "max_entries" limits)
+  Alcotest.(check int) "entry limit" 4096 (int "max_entries" limits);
+  let cancellation = assoc "cancellation" result in
+  Alcotest.(check bool) "cooperative cancellation" true
+    (bool "cooperative" cancellation);
+  Alcotest.(check bool) "elimination checkpoints" true
+    (bool "elimination_checkpoints" cancellation)
 
 let test_multiply_and_determinant () =
   let a = matrix [ [ "1"; "2" ]; [ "3"; "4" ] ] in
@@ -183,6 +188,37 @@ let test_strict_and_limits () =
   Alcotest.(check string) "work code" "resource_limit"
     (string "code" (assoc "error" work))
 
+let test_output_bit_growth_limit () =
+  let limits =
+    Centl_matrix_protocol.{ default_limits with max_exact_bits = 10 }
+  in
+  let response =
+    Centl_matrix_protocol.handle_json ~limits
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "inverse");
+           ("matrix", matrix [ [ "2"; "1" ]; [ "1"; "2" ] ]);
+         ])
+  in
+  Alcotest.(check bool) "growth refused" false (bool "ok" response);
+  Alcotest.(check string) "growth code" "resource_limit"
+    (string "code" (assoc "error" response))
+
+let test_cancellation () =
+  let response =
+    Centl_matrix_protocol.handle_json ~cancelled:(fun () -> true)
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "determinant");
+           ("matrix", matrix [ [ "1"; "2" ]; [ "3"; "4" ] ]);
+         ])
+  in
+  Alcotest.(check bool) "cancelled failure" false (bool "ok" response);
+  Alcotest.(check string) "cancelled code" "cancelled"
+    (string "code" (assoc "error" response))
+
 let () =
   Alcotest.run "centl exact rational matrix protocol"
     [
@@ -194,5 +230,8 @@ let () =
           Alcotest.test_case "rref and inverse" `Quick test_rref_and_inverse;
           Alcotest.test_case "solve decisions" `Quick test_solve_decisions;
           Alcotest.test_case "strict and limits" `Quick test_strict_and_limits;
+          Alcotest.test_case "output bit growth" `Quick
+            test_output_bit_growth_limit;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
