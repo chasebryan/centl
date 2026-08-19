@@ -93,10 +93,11 @@ let test_field_identities () =
 let lit numerator denominator =
   Centl_Core.Literal (Z.of_int numerator, Z.of_int denominator)
 
+let complex_expression () =
+  Centl_Core.Function ("complex", [ lit 1 2; lit 2 3 ])
+
 let test_expression_evaluator () =
-  let z =
-    Centl_Core.Function ("complex", [ lit 1 2; lit 2 3 ])
-  in
+  let z = complex_expression () in
   let w =
     Centl_Core.Function ("complex", [ lit 3 4; Centl_Core.Negate (lit 5 6) ])
   in
@@ -107,10 +108,7 @@ let test_expression_evaluator () =
   | Some (Ok value) ->
       check_complex "expression multiplication" (q "67/72") (q "1/12") value
   end;
-  begin match
-    evaluate_expression
-      (Centl_Core.Function ("norm2", [ z ]))
-  with
+  begin match evaluate_expression (Centl_Core.Function ("norm2", [ z ])) with
   | Some (Ok value) -> check_complex "norm2 expression" (q "25/36") Q.zero value
   | Some (Error error) -> Alcotest.fail (error_message error)
   | None -> Alcotest.fail "norm2 trigger was not detected"
@@ -120,6 +118,48 @@ let test_expression_evaluator () =
     (Option.is_none
        (evaluate_expression
           (Centl_Core.Binary (Centl_Core.Add, lit 1 2, lit 1 3))))
+
+let test_cancellation () =
+  let z = make Q.one Q.one in
+  expect_error "direct power cancellation" Cancelled
+    (pow ~cancelled:(fun () -> true) z (Z.of_int 100));
+  begin match
+    evaluate_expression ~cancelled:(fun () -> true) (complex_expression ())
+  with
+  | Some (Error Cancelled) -> ()
+  | Some (Error error) -> Alcotest.fail (error_message error)
+  | Some (Ok _) -> Alcotest.fail "cancelled evaluation should not succeed"
+  | None -> Alcotest.fail "complex trigger was not detected"
+  end
+
+let test_evaluation_limits () =
+  let power_limits =
+    { default_evaluation_limits with max_power_exponent = 2 }
+  in
+  let powered =
+    Centl_Core.Power (complex_expression (), Z.of_int 3)
+  in
+  begin match evaluate_expression ~limits:power_limits powered with
+  | Some (Error (Resource_limit _)) -> ()
+  | Some (Error error) -> Alcotest.fail (error_message error)
+  | Some (Ok _) -> Alcotest.fail "oversized exponent should be refused"
+  | None -> Alcotest.fail "complex trigger was not detected"
+  end;
+  let work_limits = { default_evaluation_limits with max_work = 1 } in
+  begin match evaluate_expression ~limits:work_limits (complex_expression ()) with
+  | Some (Error (Resource_limit _)) -> ()
+  | Some (Error error) -> Alcotest.fail (error_message error)
+  | Some (Ok _) -> Alcotest.fail "work-limited evaluation should be refused"
+  | None -> Alcotest.fail "complex trigger was not detected"
+  end;
+  let bit_limits = { default_evaluation_limits with max_exact_bits = 4 } in
+  let large = Centl_Core.Function ("complex", [ lit 17 1; lit 0 1 ]) in
+  begin match evaluate_expression ~limits:bit_limits large with
+  | Some (Error (Resource_limit _)) -> ()
+  | Some (Error error) -> Alcotest.fail (error_message error)
+  | Some (Ok _) -> Alcotest.fail "bit-limited evaluation should be refused"
+  | None -> Alcotest.fail "complex trigger was not detected"
+  end
 
 let test_rendering () =
   Alcotest.(check string)
@@ -143,6 +183,8 @@ let () =
           Alcotest.test_case "field identities" `Quick test_field_identities;
           Alcotest.test_case "expression evaluator" `Quick
             test_expression_evaluator;
+          Alcotest.test_case "cancellation" `Quick test_cancellation;
+          Alcotest.test_case "evaluation limits" `Quick test_evaluation_limits;
           Alcotest.test_case "rendering" `Quick test_rendering;
         ] );
     ]
