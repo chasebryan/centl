@@ -68,7 +68,8 @@ let content_value_json value =
       ("text", `String (Centl_multivariate_polynomial_protocol.rational_text value));
     ]
 
-let decomposition_json decomposition =
+let decomposition_json
+    (decomposition : Centl_polynomial_content.decomposition) =
   `Assoc
     [
       ("kind", `String "polynomial_content_decomposition");
@@ -182,11 +183,12 @@ let dispatch ?(cancelled = never_cancelled) limits action fields =
         end
     | "content" ->
         polynomial_action ~cancelled limits ~method_:action
-          (fun decomposition -> content_value_json decomposition.content)
+          (fun (decomposition : Centl_polynomial_content.decomposition) ->
+            content_value_json decomposition.content)
           fields
     | "primitive_part" ->
         polynomial_action ~cancelled limits ~method_:action
-          (fun decomposition ->
+          (fun (decomposition : Centl_polynomial_content.decomposition) ->
             Centl_multivariate_polynomial_protocol.polynomial_json
               decomposition.primitive_part)
           fields
