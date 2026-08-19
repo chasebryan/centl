@@ -20,6 +20,11 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_complex_rational)
+ (modules test_complex_rational)
+ (libraries centl_lib alcotest zarith))
+
+(test
  (name test_history)
  (modules test_history)
  (libraries centl_lib alcotest unix yojson))
