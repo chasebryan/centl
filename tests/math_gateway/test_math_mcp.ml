@@ -197,6 +197,29 @@ let test_cancellation () =
   Alcotest.(check string) "cancelled code" "cancelled"
     (string "code" (assoc "error" protocol))
 
+let test_deep_complex_cancellation () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 10
+  in
+  let response =
+    tool_call ~cancelled state 2
+      [
+        ("domain", `String "complex_rational");
+        ( "request",
+          `Assoc [ ("expression", `String "complex(1, 1)^65536") ] );
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check string) "domain" "complex_rational" (string "domain" protocol);
+  Alcotest.(check string) "cancelled code" "cancelled"
+    (string "code" (assoc "error" protocol));
+  Alcotest.(check bool) "callback reached repeated squaring" true (!checks >= 10)
+
 let test_server_limit_parity () =
   let evaluation =
     {
@@ -231,6 +254,8 @@ let () =
           Alcotest.test_case "complex" `Quick test_exact_complex_call;
           Alcotest.test_case "strict arguments" `Quick test_strict_arguments;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
+          Alcotest.test_case "deep complex cancellation" `Quick
+            test_deep_complex_cancellation;
           Alcotest.test_case "server limit parity" `Quick
             test_server_limit_parity;
         ] );
