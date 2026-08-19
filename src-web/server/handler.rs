@@ -18,6 +18,14 @@ pub fn handle_command(
         return (None, None, None, None);
     }
 
+    // The web Clear control should behave like a clean reload: reset the full
+    // calculation session and render the pristine work area, not a synthetic
+    // "history cleared" result block.
+    if cmd == ":clear" || cmd == ":clear-history" {
+        state.session = Session::new();
+        return (None, None, None, None);
+    }
+
     // 1. Erdős–Straus Command Handler
     if cmd.starts_with("es ") || cmd == "es" || cmd.starts_with("erdos ") {
         let parts: Vec<&str> = cmd.split_whitespace().collect();
@@ -238,6 +246,7 @@ pub fn render_full_page(content_html: &str, title: &str, rel: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::engine::HistoryEntry;
 
     #[test]
     fn collision_arguments_are_read_from_the_command() {
@@ -255,6 +264,27 @@ mod tests {
         let (_, error, physics, _) = handle_command("physics nonsense", &mut state);
         assert!(error.is_some());
         assert!(physics.is_none());
+    }
+
+    #[test]
+    fn clear_resets_the_web_session_without_rendering_a_result() {
+        let mut state = AppState {
+            session: Session::new(),
+        };
+        state.session.history.push(HistoryEntry {
+            command: "2 + 2".to_string(),
+            result: "4".to_string(),
+            exact_repr: None,
+            approximate_repr: None,
+            execution_micros: 1,
+            success: true,
+        });
+        let (result, error, physics, hunt) = handle_command(":clear", &mut state);
+        assert!(state.session.history.is_empty());
+        assert!(result.is_none());
+        assert!(error.is_none());
+        assert!(physics.is_none());
+        assert!(hunt.is_none());
     }
 
     #[test]
