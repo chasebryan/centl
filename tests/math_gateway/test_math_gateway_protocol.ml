@@ -123,6 +123,37 @@ let test_public_protocol_cancellation () =
   Alcotest.(check string) "cancel code" "cancelled"
     (string "code" (assoc "error" response))
 
+let test_deep_complex_cancellation () =
+  let state = Centl_protocol.create () in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 10
+  in
+  let response =
+    Centl_protocol.handle_json ~cancelled state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "complex-deep-cancel");
+           ("op", `String "math");
+           ("domain", `String "complex_rational");
+           ( "request",
+             `Assoc
+               [
+                 ("expression", `String "complex(1, 1)^65536");
+               ] );
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "id preserved" "complex-deep-cancel"
+    (string "id" response);
+  Alcotest.(check string) "domain preserved" "complex_rational"
+    (string "domain" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response));
+  Alcotest.(check bool) "callback reached repeated squaring" true (!checks >= 10)
+
 let test_deep_algebraic_cancellation () =
   let state = Centl_protocol.create () in
   let checks = ref 0 in
@@ -192,6 +223,8 @@ let () =
             test_server_limit_clamps_gateway;
           Alcotest.test_case "cancellation" `Quick
             test_public_protocol_cancellation;
+          Alcotest.test_case "deep complex cancellation" `Quick
+            test_deep_complex_cancellation;
           Alcotest.test_case "deep algebraic cancellation" `Quick
             test_deep_algebraic_cancellation;
           Alcotest.test_case "strictness" `Quick test_public_protocol_strictness;
