@@ -46,6 +46,9 @@ let replace_field name value fields =
       fields
   else fields @ [ (name, value) ]
 
+let remove_field name fields =
+  List.filter (fun (field, _) -> not (String.equal field name)) fields
+
 let add_physics_cursor = function
   | `Assoc response_fields as response ->
       begin match List.assoc_opt "result" response_fields with
@@ -54,6 +57,17 @@ let add_physics_cursor = function
             replace_field "nextCursor" (`String physics_cursor) result_fields
           in
           `Assoc (replace_field "result" (`Assoc result_fields) response_fields)
+      | _ -> response
+      end
+  | response -> response
+
+let legacy_capabilities_response = function
+  | `Assoc response_fields as response ->
+      begin match List.assoc_opt "capabilities" response_fields with
+      | Some (`Assoc capabilities) ->
+          let capabilities = remove_field "p0_math_gateway" capabilities in
+          `Assoc
+            (replace_field "capabilities" (`Assoc capabilities) response_fields)
       | _ -> response
       end
   | response -> response
@@ -139,8 +153,21 @@ let physics ?(cancelled = Centl_engine.never_cancelled) id arguments =
   Centl_physics_mcp.call ~cancelled physics_state arguments
   |> physics_tool_result |> jsonrpc_result id
 
-let math ?(cancelled = Centl_engine.never_cancelled) id arguments =
-  Centl_math_mcp.call ~cancelled arguments |> math_tool_result |> jsonrpc_result id
+let math ?(cancelled = Centl_engine.never_cancelled) state id arguments =
+  let limits =
+    Centl_protocol.math_gateway_limits (Centl_mcp_base.protocol_state state)
+  in
+  Centl_math_mcp.call ~limits ~cancelled arguments
+  |> math_tool_result |> jsonrpc_result id
+
+let legacy_capabilities state id arguments =
+  if arguments <> [] then
+    jsonrpc_error id (-32602) "centl_capabilities accepts no arguments"
+  else
+    Centl_protocol.handle_json (Centl_mcp_base.protocol_state state)
+      (`Assoc [ ("version", `Int 1); ("op", `String "describe") ])
+    |> legacy_capabilities_response
+    |> Centl_mcp_base.tool_result |> jsonrpc_result id
 
 let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
   match List.assoc_opt "params" fields with
@@ -159,13 +186,17 @@ let call_tool ?(cancelled = Centl_engine.never_cancelled) state id fields =
           jsonrpc_error id (-32602) "centl_physics arguments must be an object"
       | Some (`String "centl_math"), Some (`Assoc arguments) ->
           begin match Centl_math_mcp.validate_arguments arguments with
-          | Ok () -> math ~cancelled id arguments
+          | Ok () -> math ~cancelled state id arguments
           | Error message -> jsonrpc_error id (-32602) message
           end
       | Some (`String "centl_math"), None ->
           jsonrpc_error id (-32602) "centl_math requires arguments"
       | Some (`String "centl_math"), Some _ ->
           jsonrpc_error id (-32602) "centl_math arguments must be an object"
+      | Some (`String "centl_capabilities"), Some (`Assoc arguments) ->
+          legacy_capabilities state id arguments
+      | Some (`String "centl_capabilities"), None ->
+          legacy_capabilities state id []
       | _ -> Centl_mcp_base.call_tool ~cancelled state id fields
       end
   | _ -> Centl_mcp_base.call_tool ~cancelled state id fields
