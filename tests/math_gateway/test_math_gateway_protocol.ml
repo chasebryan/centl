@@ -52,7 +52,8 @@ let test_matrix_through_public_protocol () =
   Alcotest.(check string) "domain" "matrix" (string "domain" response);
   Alcotest.(check string) "determinant" "-2"
     (string "numerator" (assoc "result" response));
-  Alcotest.(check int) "request count" 0 (int "requests" (assoc "session" response));
+  Alcotest.(check int) "request count" 0
+    (int "requests" (assoc "session" response));
   Alcotest.(check string) "exact provenance" "exact"
     (string "classification" (assoc "provenance" response))
 
@@ -66,18 +67,28 @@ let test_describe_advertises_math () =
   let capabilities = assoc "capabilities" response in
   Alcotest.(check bool) "math operation advertised" true
     (list_contains_string "math" (assoc "operations" capabilities));
-  let gateway = assoc "p0_math_gateway" capabilities in
+  let gateway =
+    Centl_protocol.handle_json state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("op", `String "math");
+           ("domain", `String "capabilities");
+         ])
+  in
+  Alcotest.(check bool) "gateway discovery success" true (bool "ok" gateway);
+  Alcotest.(check string) "gateway domain" "capabilities"
+    (string "domain" gateway);
+  let gateway_result = assoc "result" gateway in
   Alcotest.(check string) "gateway kind" "centl_math_capabilities"
-    (string "kind" gateway);
-  Alcotest.(check bool) "exact first" true (bool "exact_first" gateway)
+    (string "kind" gateway_result);
+  Alcotest.(check bool) "exact first" true (bool "exact_first" gateway_result)
 
 let test_server_limit_clamps_gateway () =
   let evaluation =
     Centl_engine.{ default_evaluation_limits with max_exact_bits = 4 }
   in
-  let limits =
-    Centl_protocol.{ default_server_limits with evaluation }
-  in
+  let limits = Centl_protocol.{ default_server_limits with evaluation } in
   let state = Centl_protocol.create ~limits () in
   let response =
     public_math state "complex_rational"
