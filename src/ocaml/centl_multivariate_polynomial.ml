@@ -179,19 +179,15 @@ let variables polynomial =
   String_set.elements variables
 
 let monomial_total_degree monomial =
-  List.fold_left
-    (fun degree (_, exponent) -> Z.add degree (Z.of_int exponent))
-    Z.zero monomial
+  List.fold_left (fun degree (_, exponent) -> degree + exponent) 0 monomial
 
 let total_degree polynomial =
   if is_zero polynomial then None
   else
     Some
       (Monomial_map.fold
-         (fun monomial _ degree ->
-           let candidate = monomial_total_degree monomial in
-           if Z.compare candidate degree > 0 then candidate else degree)
-         polynomial Z.zero)
+         (fun monomial _ degree -> max degree (monomial_total_degree monomial))
+         polynomial 0)
 
 let decrement_power variable monomial =
   let rec loop reversed = function
