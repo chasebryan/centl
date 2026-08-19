@@ -75,7 +75,9 @@ let polynomial_json polynomial =
       ("kind", `String "multivariate_rational_polynomial");
       ("exact", `Bool true);
       ("term_count", `Int (term_count polynomial));
-      ("variables", `List (List.map (fun variable -> `String variable) (variables polynomial)));
+      ( "variables",
+        `List
+          (List.map (fun variable -> `String variable) (variables polynomial)) );
       ("terms", `List (List.map term_json (bindings polynomial)));
       ("text", `String (polynomial_text polynomial));
     ]
@@ -127,9 +129,11 @@ let error_of_polynomial = function
       ("resource_limit", error_message (Exponent_overflow variable))
   | Undefined_zero_power -> ("undefined_power", error_message Undefined_zero_power)
   | Negative_power exponent ->
-      ("unsupported_exact_polynomial_operation", error_message (Negative_power exponent))
+      ( "unsupported_exact_polynomial_operation",
+        error_message (Negative_power exponent) )
   | Duplicate_substitution variable ->
       ("invalid_request", error_message (Duplicate_substitution variable))
+  | Cancelled -> ("cancelled", error_message Cancelled)
 
 let parse_q label = function
   | `String text ->
@@ -162,12 +166,16 @@ let parse_power limits = function
       begin match check_fields [ "variable"; "exponent" ] fields with
       | Error _ as error -> error
       | Ok () ->
-          begin match (string_field "variable" fields, int_field "exponent" fields) with
+          begin match
+            (string_field "variable" fields, int_field "exponent" fields)
+          with
           | Error message, _ | _, Error message -> Error message
           | Ok variable, Ok exponent ->
-              if String.equal variable "" then Error "power variable must not be empty"
+              if String.equal variable "" then
+                Error "power variable must not be empty"
               else if exponent < 0 then Error "power exponent must be nonnegative"
-              else if exponent > limits.max_exponent then Error "power exponent exceeds the limit"
+              else if exponent > limits.max_exponent then
+                Error "power exponent exceeds the limit"
               else Ok (variable, exponent)
           end
       end
@@ -194,11 +202,15 @@ let parse_term limits = function
       begin match check_fields [ "coefficient"; "powers" ] fields with
       | Error _ as error -> error
       | Ok () ->
-          begin match (List.assoc_opt "coefficient" fields, List.assoc_opt "powers" fields) with
+          begin match
+            (List.assoc_opt "coefficient" fields, List.assoc_opt "powers" fields)
+          with
           | None, _ -> Error "missing coefficient"
           | _, None -> Error "missing powers"
           | Some coefficient, Some powers ->
-              begin match (parse_q "coefficient" coefficient, parse_powers limits powers) with
+              begin match
+                (parse_q "coefficient" coefficient, parse_powers limits powers)
+              with
               | Error message, _ | _, Error message -> Error message
               | Ok coefficient, Ok powers ->
                   begin match term coefficient powers with
@@ -232,8 +244,8 @@ let parse_polynomial limits label = function
                 begin match loop zero raw_terms with
                 | Error _ as error -> error
                 | Ok polynomial ->
-                    if List.length (variables polynomial) > limits.max_variables then
-                      Error (label ^ " exceeds the variable limit")
+                    if List.length (variables polynomial) > limits.max_variables
+                    then Error (label ^ " exceeds the variable limit")
                     else if exact_bits polynomial > limits.max_exact_bits then
                       Error (label ^ " exceeds the exact-bit limit")
                     else Ok polynomial
@@ -248,6 +260,11 @@ let bounded_product ceiling left right =
   else if left = 0 || right = 0 then 0
   else if left > ceiling / right then ceiling + 1
   else left * right
+
+let bounded_sum ceiling left right =
+  if left < 0 || right < 0 then ceiling + 1
+  else if left > ceiling - min right ceiling then ceiling + 1
+  else left + right
 
 let check_output limits ~method_ polynomial =
   if term_count polynomial > limits.max_terms then
@@ -279,15 +296,20 @@ let substitution_field limits fields =
               begin match check_fields [ "variable"; "value" ] fields with
               | Error _ as error -> error
               | Ok () ->
-                  begin match (string_field "variable" fields, List.assoc_opt "value" fields) with
+                  begin match
+                    (string_field "variable" fields, List.assoc_opt "value" fields)
+                  with
                   | Error message, _ -> Error message
                   | _, None -> Error "missing substitution value"
                   | Ok variable, Some value ->
-                      if List.mem variable seen then Error ("duplicate substitution for " ^ variable)
+                      if List.mem variable seen then
+                        Error ("duplicate substitution for " ^ variable)
                       else
                         begin match parse_q "substitution value" value with
                         | Error _ as error -> error
-                        | Ok value -> loop ((variable, value) :: reversed) (variable :: seen) rest
+                        | Ok value ->
+                            loop ((variable, value) :: reversed)
+                              (variable :: seen) rest
                         end
                   end
               end
@@ -296,18 +318,26 @@ let substitution_field limits fields =
         loop [] [] raw
   | Some _ -> Error "substitutions must be an array"
 
-let binary_action limits ~method_ operation fields =
+let binary_action ?(cancelled = never_cancelled) limits ~method_ ~work operation
+    fields =
   match check_fields [ "version"; "id"; "action"; "left"; "right" ] fields with
   | Error message -> failure ~method_ "invalid_request" message
   | Ok () ->
-      begin match (polynomial_field limits "left" fields, polynomial_field limits "right" fields) with
-      | Error message, _ | _, Error message -> failure ~method_ "invalid_request" message
+      begin match
+        ( polynomial_field limits "left" fields,
+          polynomial_field limits "right" fields )
+      with
+      | Error message, _ | _, Error message ->
+          failure ~method_ "invalid_request" message
       | Ok left, Ok right ->
-          let work = bounded_product limits.max_work (term_count left) (term_count right) in
-          if work > limits.max_work then
-            failure ~method_ "resource_limit" "polynomial operation exceeds the work limit"
+          let required_work = work limits.max_work (term_count left) (term_count right) in
+          if required_work > limits.max_work then
+            failure ~method_ "resource_limit"
+              "polynomial operation exceeds the work limit"
+          else if cancelled () then
+            failure ~method_ "cancelled" "polynomial operation was cancelled"
           else
-            begin match operation left right with
+            begin match operation ~cancelled left right with
             | Error error ->
                 let code, message = error_of_polynomial error in
                 failure ~method_ code message
@@ -321,6 +351,7 @@ let capabilities limits =
     [
       ("kind", `String "multivariate_polynomial_capabilities");
       ("exact", `Bool true);
+      ("cooperative_cancellation", `Bool true);
       ( "actions",
         strings
           [
@@ -348,115 +379,161 @@ let capabilities limits =
       ("text", `String "Exact sparse multivariate polynomials over Q.");
     ]
 
-let dispatch limits action fields =
-  match action with
-  | "capabilities" ->
-      begin match check_fields [ "version"; "id"; "action" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () -> success ~method_:action (capabilities limits)
-      end
-  | "add" -> binary_action limits ~method_:action (fun left right -> Ok (add left right)) fields
-  | "subtract" -> binary_action limits ~method_:action (fun left right -> Ok (sub left right)) fields
-  | "multiply" -> binary_action limits ~method_:action multiply fields
-  | "differentiate" ->
-      begin match check_fields [ "version"; "id"; "action"; "polynomial"; "variable" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () ->
-          begin match (polynomial_field limits "polynomial" fields, string_field "variable" fields) with
-          | Error message, _ | _, Error message -> failure ~method_:action "invalid_request" message
-          | Ok polynomial, Ok variable ->
-              begin match derivative variable polynomial with
-              | Error error ->
-                  let code, message = error_of_polynomial error in
-                  failure ~method_:action code message
-              | Ok result -> check_output limits ~method_:action result
-              end
-          end
-      end
-  | "substitute_rationals" ->
-      begin match check_fields [ "version"; "id"; "action"; "polynomial"; "substitutions" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () ->
-          begin match (polynomial_field limits "polynomial" fields, substitution_field limits fields) with
-          | Error message, _ | _, Error message -> failure ~method_:action "invalid_request" message
-          | Ok polynomial, Ok substitutions ->
-              begin match substitute_rationals substitutions polynomial with
-              | Error error ->
-                  let code, message = error_of_polynomial error in
-                  failure ~method_:action code message
-              | Ok result -> check_output limits ~method_:action result
-              end
-          end
-      end
-  | "coefficient" ->
-      begin match check_fields [ "version"; "id"; "action"; "polynomial"; "powers" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () ->
-          begin match (polynomial_field limits "polynomial" fields, List.assoc_opt "powers" fields) with
-          | Error message, _ -> failure ~method_:action "invalid_request" message
-          | _, None -> failure ~method_:action "invalid_request" "missing powers"
-          | Ok polynomial, Some powers ->
-              begin match parse_powers limits powers with
-              | Error message -> failure ~method_:action "invalid_request" message
-              | Ok powers ->
-                  begin match coefficient polynomial powers with
-                  | Error error ->
-                      let code, message = error_of_polynomial error in
-                      failure ~method_:action code message
-                  | Ok value -> success ~method_:action (rational_json value)
-                  end
-              end
-          end
-      end
-  | "variables" ->
-      begin match check_fields [ "version"; "id"; "action"; "polynomial" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () ->
-          begin match polynomial_field limits "polynomial" fields with
-          | Error message -> failure ~method_:action "invalid_request" message
-          | Ok polynomial ->
-              let values = variables polynomial in
-              success ~method_:action
-                (`Assoc
-                   [
-                     ("kind", `String "polynomial_variables");
-                     ("exact", `Bool true);
-                     ("variables", `List (List.map (fun value -> `String value) values));
-                     ("text", `String (String.concat ", " values));
-                   ])
-          end
-      end
-  | "total_degree" ->
-      begin match check_fields [ "version"; "id"; "action"; "polynomial" ] fields with
-      | Error message -> failure ~method_:action "invalid_request" message
-      | Ok () ->
-          begin match polynomial_field limits "polynomial" fields with
-          | Error message -> failure ~method_:action "invalid_request" message
-          | Ok polynomial ->
-              begin match total_degree polynomial with
-              | None ->
-                  success ~method_:action
-                    (`Assoc
-                       [
-                         ("kind", `String "polynomial_degree");
-                         ("exact", `Bool true);
-                         ("defined", `Bool false);
-                         ("text", `String "undefined for zero polynomial");
-                       ])
-              | Some degree ->
-                  success ~method_:action
-                    (`Assoc
-                       [
-                         ("kind", `String "polynomial_degree");
-                         ("exact", `Bool true);
-                         ("defined", `Bool true);
-                         ("degree", `Int degree);
-                         ("text", `String (string_of_int degree));
-                       ])
-              end
-          end
-      end
-  | _ -> failure ~method_:action "invalid_request" ("unknown polynomial action " ^ action)
+let dispatch ?(cancelled = never_cancelled) limits action fields =
+  if cancelled () && not (String.equal action "capabilities") then
+    failure ~method_:action "cancelled" "polynomial operation was cancelled"
+  else
+    match action with
+    | "capabilities" ->
+        begin match check_fields [ "version"; "id"; "action" ] fields with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () -> success ~method_:action (capabilities limits)
+        end
+    | "add" ->
+        binary_action ~cancelled limits ~method_:action ~work:bounded_sum
+          (fun ~cancelled:_ left right -> Ok (add left right))
+          fields
+    | "subtract" ->
+        binary_action ~cancelled limits ~method_:action ~work:bounded_sum
+          (fun ~cancelled:_ left right -> Ok (sub left right))
+          fields
+    | "multiply" ->
+        binary_action ~cancelled limits ~method_:action ~work:bounded_product
+          (fun ~cancelled left right -> multiply ~cancelled left right)
+          fields
+    | "differentiate" ->
+        begin match
+          check_fields
+            [ "version"; "id"; "action"; "polynomial"; "variable" ]
+            fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match
+              ( polynomial_field limits "polynomial" fields,
+                string_field "variable" fields )
+            with
+            | Error message, _ | _, Error message ->
+                failure ~method_:action "invalid_request" message
+            | Ok polynomial, Ok variable ->
+                begin match derivative ~cancelled variable polynomial with
+                | Error error ->
+                    let code, message = error_of_polynomial error in
+                    failure ~method_:action code message
+                | Ok result -> check_output limits ~method_:action result
+                end
+            end
+        end
+    | "substitute_rationals" ->
+        begin match
+          check_fields
+            [ "version"; "id"; "action"; "polynomial"; "substitutions" ]
+            fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match
+              ( polynomial_field limits "polynomial" fields,
+                substitution_field limits fields )
+            with
+            | Error message, _ | _, Error message ->
+                failure ~method_:action "invalid_request" message
+            | Ok polynomial, Ok substitutions ->
+                begin match
+                  substitute_rationals ~cancelled substitutions polynomial
+                with
+                | Error error ->
+                    let code, message = error_of_polynomial error in
+                    failure ~method_:action code message
+                | Ok result -> check_output limits ~method_:action result
+                end
+            end
+        end
+    | "coefficient" ->
+        begin match
+          check_fields [ "version"; "id"; "action"; "polynomial"; "powers" ]
+            fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match
+              ( polynomial_field limits "polynomial" fields,
+                List.assoc_opt "powers" fields )
+            with
+            | Error message, _ ->
+                failure ~method_:action "invalid_request" message
+            | _, None ->
+                failure ~method_:action "invalid_request" "missing powers"
+            | Ok polynomial, Some powers ->
+                begin match parse_powers limits powers with
+                | Error message ->
+                    failure ~method_:action "invalid_request" message
+                | Ok powers ->
+                    begin match coefficient polynomial powers with
+                    | Error error ->
+                        let code, message = error_of_polynomial error in
+                        failure ~method_:action code message
+                    | Ok value -> success ~method_:action (rational_json value)
+                    end
+                end
+            end
+        end
+    | "variables" ->
+        begin match
+          check_fields [ "version"; "id"; "action"; "polynomial" ] fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match polynomial_field limits "polynomial" fields with
+            | Error message -> failure ~method_:action "invalid_request" message
+            | Ok polynomial ->
+                let values = variables polynomial in
+                success ~method_:action
+                  (`Assoc
+                     [
+                       ("kind", `String "polynomial_variables");
+                       ("exact", `Bool true);
+                       ( "variables",
+                         `List (List.map (fun value -> `String value) values) );
+                       ("text", `String (String.concat ", " values));
+                     ])
+            end
+        end
+    | "total_degree" ->
+        begin match
+          check_fields [ "version"; "id"; "action"; "polynomial" ] fields
+        with
+        | Error message -> failure ~method_:action "invalid_request" message
+        | Ok () ->
+            begin match polynomial_field limits "polynomial" fields with
+            | Error message -> failure ~method_:action "invalid_request" message
+            | Ok polynomial ->
+                begin match total_degree polynomial with
+                | None ->
+                    success ~method_:action
+                      (`Assoc
+                         [
+                           ("kind", `String "polynomial_degree");
+                           ("exact", `Bool true);
+                           ("defined", `Bool false);
+                           ("text", `String "undefined for zero polynomial");
+                         ])
+                | Some degree ->
+                    success ~method_:action
+                      (`Assoc
+                         [
+                           ("kind", `String "polynomial_degree");
+                           ("exact", `Bool true);
+                           ("defined", `Bool true);
+                           ("degree", `Int degree);
+                           ("text", `String (string_of_int degree));
+                         ])
+                end
+            end
+        end
+    | _ ->
+        failure ~method_:action "invalid_request"
+          ("unknown polynomial action " ^ action)
 
 let request_id fields =
   match List.assoc_opt "id" fields with
@@ -471,14 +548,16 @@ let with_id id = function
       | Some id ->
           let rec insert = function
             | [] -> [ ("id", id) ]
-            | (("version", _) as version) :: rest -> version :: ("id", id) :: rest
+            | (("version", _) as version) :: rest ->
+                version :: ("id", id) :: rest
             | field :: rest -> field :: insert rest
           in
           `Assoc (insert fields)
       end
   | json -> json
 
-let handle_json ?(limits = default_limits) = function
+let handle_json ?(limits = default_limits) ?(cancelled = never_cancelled) =
+  function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> failure ~method_:"request" "invalid_request" message
@@ -487,12 +566,27 @@ let handle_json ?(limits = default_limits) = function
           begin match List.assoc_opt "version" fields with
           | Some (`Int 1) ->
               begin match List.assoc_opt "action" fields with
-              | Some (`String action) -> respond (dispatch limits action fields)
-              | Some _ -> respond (failure ~method_:"request" "invalid_request" "action must be a string")
-              | None -> respond (failure ~method_:"request" "invalid_request" "missing action")
+              | Some (`String action) ->
+                  respond (dispatch ~cancelled limits action fields)
+              | Some _ ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "action must be a string")
+              | None ->
+                  respond
+                    (failure ~method_:"request" "invalid_request"
+                       "missing action")
               end
-          | Some (`Int _) -> respond (failure ~method_:"request" "invalid_request" "unsupported protocol version")
-          | _ -> respond (failure ~method_:"request" "invalid_request" "version must be 1")
+          | Some (`Int _) ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "unsupported protocol version")
+          | _ ->
+              respond
+                (failure ~method_:"request" "invalid_request"
+                   "version must be 1")
           end
       end
-  | _ -> failure ~method_:"request" "invalid_request" "request must be a JSON object"
+  | _ ->
+      failure ~method_:"request" "invalid_request"
+        "request must be a JSON object"
