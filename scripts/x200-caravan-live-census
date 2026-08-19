@@ -26,11 +26,10 @@ command -v systemctl >/dev/null 2>&1 || fail "systemctl is required"
 [ -d "$site_build" ] || fail "rendered CENTL site not found at $site_build; run scripts/x200-centl-web first"
 [ -f "$centl_root/scripts/caravan-live-bazaar" ] || fail "scripts/caravan-live-bazaar is missing"
 
-# systemd's ExecStart parser can quote paths, but rejecting line-breaking control
-# characters keeps the generated unit mechanically simple and unambiguous.
-case "$centl_root$site_build$python3_bin" in
-  *"
-"*|*""*) fail "runtime paths must not contain line breaks" ;;
+# These values are written directly into systemd directives. Keep that rendering
+# unambiguous rather than trying to reinterpret exotic path quoting here.
+case "$centl_root:$site_build:$python3_bin" in
+  *[[:space:]]*|*\\*|*\"*) fail "runtime paths must not contain whitespace, backslashes, or quotes" ;;
 esac
 
 say "verifying the coordinator and rendering one fresh Bazaar census"
