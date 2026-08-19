@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Continuously refresh The Bazaar from the authenticated local CARAVAN census."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+from urllib import error as urlerror
+from urllib import request as urlrequest
+from urllib.parse import urlparse
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from caravan.census import validate_public_document  # noqa: E402
+
+MAX_CENSUS_BYTES = 64 * 1024
+MIN_INTERVAL_SECONDS = 5.0
+MAX_INTERVAL_SECONDS = 300.0
+
+
+class LiveBazaarError(RuntimeError):
+    """Raised when a live Bazaar refresh cannot be completed safely."""
+
+
+def _coordinator_census_url(base_url: str) -> str:
+    parsed = urlparse(base_url)
+    if (
+        parsed.scheme != "http"
+        or parsed.hostname not in {"127.0.0.1", "::1", "localhost"}
+        or not parsed.netloc
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise LiveBazaarError("live Bazaar coordinator must be loopback HTTP")
+    return base_url.rstrip("/") + "/census-v1.json"
+
+
+def fetch_census(base_url: str) -> dict[str, object]:
+    request = urlrequest.Request(
+        _coordinator_census_url(base_url),
+        headers={
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+            "User-Agent": "FCF-CARAVAN-Bazaar/1",
+        },
+    )
+    try:
+        with urlrequest.urlopen(request, timeout=5.0) as response:
+            payload = response.read(MAX_CENSUS_BYTES + 1)
+    except (urlerror.URLError, TimeoutError, OSError) as exc:
+        raise LiveBazaarError("local CARAVAN coordinator census is unavailable") from exc
+    if len(payload) > MAX_CENSUS_BYTES:
+        raise LiveBazaarError("local CARAVAN census exceeds the publication limit")
+    try:
+        value = json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise LiveBazaarError("local CARAVAN coordinator returned invalid JSON") from exc
+    try:
+        return validate_public_document(value)
+    except (TypeError, ValueError) as exc:
+        raise LiveBazaarError(f"local CARAVAN census failed validation: {exc}") from exc
+
+
+def _atomic_json(path: Path, document: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_symlink():
+        raise LiveBazaarError("published CARAVAN census path must not be a symlink")
+    fd, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.new-", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(document, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.chmod(0o644)
+        os.replace(temporary, path)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def _render_bazaar(repo_root: Path, census_path: Path, output_path: Path) -> None:
+    renderer = repo_root / "scripts" / "caravan-render-bazaar"
+    template = repo_root / "site" / "mirrors.html"
+    if not renderer.is_file() or renderer.is_symlink():
+        raise LiveBazaarError("CARAVAN Bazaar renderer is missing or unsafe")
+    if not template.is_file() or template.is_symlink():
+        raise LiveBazaarError("Bazaar template is missing or unsafe")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if output_path.is_symlink():
+        raise LiveBazaarError("published Bazaar path must not be a symlink")
+
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{output_path.name}.new-", dir=output_path.parent
+    )
+    os.close(fd)
+    temporary = Path(temporary_name)
+    temporary.unlink()
+    try:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(renderer),
+                "--template",
+                str(template),
+                "--census",
+                str(census_path),
+                "--output",
+                str(temporary),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        if result.returncode != 0:
+            detail = result.stderr.strip()[-400:]
+            raise LiveBazaarError(f"Bazaar renderer rejected the live census: {detail}")
+        temporary.chmod(0o644)
+        os.replace(temporary, output_path)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def refresh_once(*, repo_root: Path, site_build: Path, coordinator: str) -> dict[str, object]:
+    if not repo_root.is_dir() or repo_root.is_symlink():
+        raise LiveBazaarError("CENTL repository root is missing or unsafe")
+    if not site_build.is_dir() or site_build.is_symlink():
+        raise LiveBazaarError("rendered CENTL site directory is missing or unsafe")
+
+    document = fetch_census(coordinator)
+    census_path = site_build / "pub" / "centl" / "caravan" / "census-v1.json"
+    _atomic_json(census_path, document)
+    _render_bazaar(repo_root, census_path, site_build / "mirrors.html")
+    return document
+
+
+def _print_refresh(document: dict[str, object]) -> None:
+    print(
+        "FCF CARAVAN Bazaar refreshed: "
+        f"active={document['active_camels']} "
+        f"hungry={document['hungry_camels']} "
+        f"lost={document['lost_camels']} "
+        f"cargo={document['cargo_loads']} "
+        f"generated_at={document['generated_at']}",
+        flush=True,
+    )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Refresh The Bazaar from the authenticated loopback CARAVAN census"
+    )
+    parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument(
+        "--site-build",
+        type=Path,
+        default=Path.home() / ".local" / "share" / "fcf-centl" / "site",
+    )
+    parser.add_argument("--coordinator", default="http://127.0.0.1:8789")
+    parser.add_argument("--interval", type=float, default=15.0)
+    parser.add_argument("--once", action="store_true")
+    args = parser.parse_args()
+
+    interval = float(args.interval)
+    if not MIN_INTERVAL_SECONDS <= interval <= MAX_INTERVAL_SECONDS:
+        parser.error(
+            f"--interval must be between {MIN_INTERVAL_SECONDS:g} and {MAX_INTERVAL_SECONDS:g} seconds"
+        )
+
+    if args.once:
+        try:
+            document = refresh_once(
+                repo_root=args.repo_root,
+                site_build=args.site_build,
+                coordinator=args.coordinator,
+            )
+        except LiveBazaarError as exc:
+            print(f"caravan-live-bazaar: {exc}", file=sys.stderr)
+            return 2
+        _print_refresh(document)
+        return 0
+
+    while True:
+        started = time.monotonic()
+        try:
+            document = refresh_once(
+                repo_root=args.repo_root,
+                site_build=args.site_build,
+                coordinator=args.coordinator,
+            )
+            _print_refresh(document)
+        except LiveBazaarError as exc:
+            # Keep the last known-good static page in place. A failed census must
+            # never overwrite public state with fabricated zeroes or stale guesses.
+            print(f"FCF CARAVAN Bazaar refresh deferred: {exc}", file=sys.stderr, flush=True)
+        elapsed = time.monotonic() - started
+        time.sleep(max(1.0, interval - elapsed))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
