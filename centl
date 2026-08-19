@@ -3,13 +3,22 @@ set -eu
 
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 binary="$project_root/_build/default/src/main.exe"
+rust_binary="$project_root/target/release/centl-web"
 
-# Erdős–Straus kernels plug in here. They do not use CENTL-SCi.
+# Erdős–Straus kernels and Web Hub plug in here.
 case "${1:-}" in
+  hub|web|serve)
+    shift || true
+    if [ -x "$rust_binary" ]; then
+      exec "$rust_binary" --serve "$@"
+    else
+      exec cargo run --release -- --serve "$@"
+    fi
+    ;;
   es|erdos|erdos-straus)
     shift
     # CBX is a separate research instrument rather than part of the coupled
-    # bb/CC hunt. Keep its state and grade surface isolated from cbis.kernel.
+    # production hunt. Keep its state and grade surface isolated.
     if [ "${1:-}" = "cbx" ]; then
       shift
       cbx_dir="$project_root/research/erdos-straus/cbx.kernel"
@@ -17,41 +26,31 @@ case "${1:-}" in
         inverse)
           shift
           cbx_inverse="$cbx_dir/cbx-inverse"
-          if [ ! -x "$cbx_inverse" ]; then
-            make -s -C "$cbx_dir" cbx-inverse
-          fi
+          if [ ! -x "$cbx_inverse" ]; then make -s -C "$cbx_dir" cbx-inverse; fi
           exec "$cbx_inverse" "$@"
           ;;
         shift-i)
           shift
           cbx_shift="$cbx_dir/cbx-shift-i"
-          if [ ! -x "$cbx_shift" ]; then
-            make -s -C "$cbx_dir" cbx-shift-i
-          fi
+          if [ ! -x "$cbx_shift" ]; then make -s -C "$cbx_dir" cbx-shift-i; fi
           exec "$cbx_shift" "$@"
           ;;
         forward-i)
           shift
           cbx_forward="$cbx_dir/cbx-forward-i"
-          if [ ! -x "$cbx_forward" ]; then
-            make -s -C "$cbx_dir" cbx-forward-i
-          fi
+          if [ ! -x "$cbx_forward" ]; then make -s -C "$cbx_dir" cbx-forward-i; fi
           exec "$cbx_forward" "$@"
           ;;
         profile-i)
           shift
           cbx_profile="$cbx_dir/cbx-profile-i"
-          if [ ! -x "$cbx_profile" ]; then
-            make -s -C "$cbx_dir" cbx-profile-i
-          fi
+          if [ ! -x "$cbx_profile" ]; then make -s -C "$cbx_dir" cbx-profile-i; fi
           exec "$cbx_profile" "$@"
           ;;
         standalone-i)
           shift
           cbx_standalone="$cbx_dir/cbx-standalone-i"
-          if [ ! -x "$cbx_standalone" ]; then
-            make -s -C "$cbx_dir" cbx-standalone-i
-          fi
+          if [ ! -x "$cbx_standalone" ]; then make -s -C "$cbx_dir" cbx-standalone-i; fi
           exec "$cbx_standalone" "$@"
           ;;
         certify-i)
@@ -96,12 +95,15 @@ case "${1:-}" in
           ;;
       esac
       cbx="$cbx_dir/cbx"
-      if [ ! -x "$cbx" ]; then
-        make -s -C "$cbx_dir" cbx
-      fi
+      if [ ! -x "$cbx" ]; then make -s -C "$cbx_dir" cbx; fi
       exec "$cbx" "$@"
     fi
-    exec python3 "$project_root/research/erdos-straus/es" "$@"
+
+    if [ -f "$project_root/research/erdos-straus/es" ]; then
+      exec python3 "$project_root/research/erdos-straus/es" "$@"
+    elif [ -x "$rust_binary" ]; then
+      exec "$rust_binary" es "$@"
+    fi
     ;;
 esac
 
@@ -109,11 +111,23 @@ if [ -x "$binary" ]; then
   exec "$binary" "$@"
 fi
 
+if [ -x "$rust_binary" ]; then
+  exec "$rust_binary" "$@"
+fi
+
 if command -v fstar.exe >/dev/null 2>&1; then
   fstar=$(command -v fstar.exe)
 elif [ -n "${HOME:-}" ] && [ -x "$HOME/.local/bin/fstar.exe" ]; then
   fstar="$HOME/.local/bin/fstar.exe"
 else
+  # Fallback to Rust implementation if F* toolchain is not active
+  if command -v cargo >/dev/null 2>&1 || [ -x "$HOME/.cargo/bin/cargo" ]; then
+    cargo_bin=$(command -v cargo || echo "$HOME/.cargo/bin/cargo")
+    "$cargo_bin" build --release --manifest-path "$project_root/Cargo.toml" >/dev/null 2>&1 || true
+    if [ -x "$rust_binary" ]; then
+      exec "$rust_binary" "$@"
+    fi
+  fi
   echo "centl: F* was not found; run 'make build' in the configured development shell" >&2
   exit 127
 fi
