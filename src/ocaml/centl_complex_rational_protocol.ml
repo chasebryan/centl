@@ -112,7 +112,7 @@ let error_of_complex = function
   | Centl_complex_rational.Cancelled ->
       ("cancelled", "complex-rational evaluation was cancelled")
 
-let core_limits limits =
+let core_limits (limits : limits) =
   let defaults = Centl_complex_rational.default_evaluation_limits in
   Centl_complex_rational.
     {
