@@ -5,9 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/var/home/chasebryan/centl
-Environment=PATH=/var/home/chasebryan/.cargo/bin:/var/home/chasebryan/.local/bin:/usr/local/bin:/usr/bin
-ExecStart=/var/home/chasebryan/centl/target/release/centl-web --serve 8088
+WorkingDirectory=%h/centl
+ExecStart=%h/centl/target/release/centl-web --serve 8088
 Restart=always
 RestartSec=5
 NoNewPrivileges=true
