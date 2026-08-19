@@ -45,8 +45,10 @@ let test_capabilities () =
     "kind" "multivariate_polynomial_capabilities" (string "kind" result);
   Alcotest.(check bool) "cooperative cancellation" true
     (bool "cooperative_cancellation" result);
-  Alcotest.(check int) "term limit" 4096
-    (int "max_terms" (assoc "limits" result))
+  let limits = assoc "limits" result in
+  Alcotest.(check int) "term limit" 4096 (int "max_terms" limits);
+  Alcotest.(check int) "dense coefficient limit" 65536
+    (int "max_dense_coefficients" limits)
 
 let test_exact_multiply () =
   let left =
@@ -143,6 +145,49 @@ let test_queries () =
   in
   Alcotest.(check int) "degree" 4 (int "degree" (assoc "result" degree))
 
+let test_coefficient_array () =
+  let p =
+    polynomial
+      [
+        term "3" [];
+        term "11" [ power "y" 1 ];
+        term "-2" [ power "x" 1 ];
+        term "5/7" [ power "x" 2; power "y" 1 ];
+      ]
+  in
+  let response =
+    request
+      [
+        ("id", `String "coeff-array");
+        ("action", `String "coefficient_array");
+        ("polynomial", p);
+      ]
+  in
+  Alcotest.(check bool) "success" true (bool "ok" response);
+  Alcotest.(check string) "id" "coeff-array" (string "id" response);
+  let result = assoc "result" response in
+  Alcotest.(check string) "kind" "polynomial_coefficient_array"
+    (string "kind" result);
+  Alcotest.(check string) "order" "row_major_last_variable_fastest"
+    (string "order" result);
+  begin match assoc "variables" result with
+  | `List [ `String "x"; `String "y" ] -> ()
+  | _ -> Alcotest.fail "unexpected coefficient-array variables"
+  end;
+  begin match assoc "shape" result with
+  | `List [ `Int 3; `Int 2 ] -> ()
+  | _ -> Alcotest.fail "unexpected coefficient-array shape"
+  end;
+  begin match assoc "coefficients" result with
+  | `List coefficients ->
+      let numerators =
+        List.map (fun coefficient -> string "numerator" coefficient) coefficients
+      in
+      Alcotest.(check (list string)) "flattened coefficients"
+        [ "3"; "11"; "-2"; "0"; "0"; "5" ] numerators
+  | _ -> Alcotest.fail "coefficients must be an array"
+  end
+
 let test_strict_and_limits () =
   let strict =
     request
@@ -175,7 +220,28 @@ let test_strict_and_limits () =
   in
   Alcotest.(check bool) "work failure" false (bool "ok" limited);
   Alcotest.(check string) "work code" "resource_limit"
-    (string "code" (assoc "error" limited))
+    (string "code" (assoc "error" limited));
+  let dense_limits =
+    Centl_multivariate_polynomial_protocol.
+      { default_limits with max_dense_coefficients = 3 }
+  in
+  let dense_limited =
+    Centl_multivariate_polynomial_protocol.handle_json ~limits:dense_limits
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "coefficient_array");
+           ( "polynomial",
+             polynomial
+               [
+                 term "1" [ power "x" 1 ];
+                 term "1" [ power "y" 1 ];
+               ] );
+         ])
+  in
+  Alcotest.(check bool) "dense failure" false (bool "ok" dense_limited);
+  Alcotest.(check string) "dense code" "resource_limit"
+    (string "code" (assoc "error" dense_limited))
 
 let test_cancellation () =
   let p =
@@ -195,7 +261,19 @@ let test_cancellation () =
   in
   Alcotest.(check bool) "cancelled" false (bool "ok" response);
   Alcotest.(check string) "cancel code" "cancelled"
-    (string "code" (assoc "error" response))
+    (string "code" (assoc "error" response));
+  let coefficient_cancel =
+    Centl_multivariate_polynomial_protocol.handle_json
+      ~cancelled:(fun () -> true)
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "coefficient_array");
+           ("polynomial", p);
+         ])
+  in
+  Alcotest.(check string) "coefficient cancel code" "cancelled"
+    (string "code" (assoc "error" coefficient_cancel))
 
 let () =
   Alcotest.run "centl multivariate polynomial protocol"
@@ -207,6 +285,7 @@ let () =
           Alcotest.test_case "derivative and substitution" `Quick
             test_derivative_and_substitution;
           Alcotest.test_case "queries" `Quick test_queries;
+          Alcotest.test_case "coefficient array" `Quick test_coefficient_array;
           Alcotest.test_case "strict and limits" `Quick test_strict_and_limits;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
