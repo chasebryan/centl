@@ -197,6 +197,29 @@ let test_cancellation () =
   Alcotest.(check string) "cancelled code" "cancelled"
     (string "code" (assoc "error" protocol))
 
+let test_server_limit_parity () =
+  let evaluation =
+    {
+      Centl_protocol.default_server_limits.evaluation with
+      max_exact_bits = 4;
+    }
+  in
+  let limits =
+    { Centl_protocol.default_server_limits with evaluation }
+  in
+  let state = Centl_mcp.create ~limits () in
+  initialize state;
+  let limited =
+    tool_call state 2
+      [
+        ("domain", `String "complex_rational");
+        ("request", `Assoc [ ("expression", `String "complex(17, 0)") ]);
+      ]
+  in
+  Alcotest.(check bool) "tool error" true (tool_is_error limited);
+  Alcotest.(check string) "resource limit" "resource_limit"
+    (string "code" (assoc "error" (structured limited)))
+
 let () =
   Alcotest.run "centl canonical mathematics mcp"
     [
@@ -208,5 +231,7 @@ let () =
           Alcotest.test_case "complex" `Quick test_exact_complex_call;
           Alcotest.test_case "strict arguments" `Quick test_strict_arguments;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
+          Alcotest.test_case "server limit parity" `Quick
+            test_server_limit_parity;
         ] );
     ]
