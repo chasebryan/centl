@@ -67,14 +67,17 @@ CENTL does the following:
 2. For a substituted variable, compute `q_i ^ e_i` by exact exponentiation by
    squaring.
 3. Multiply the resulting exact polynomial factors.
-4. Scale by the exact source coefficient `a`.
-5. Add the expanded term to the canonical result.
+4. Traverse the expanded factor polynomial one term at a time.
+5. Before retaining each term, checkpoint cancellation and charge its linear
+   accumulation work, multiply its coefficient by the exact source coefficient
+   `a`, add that term to the canonical result, and immediately re-check the
+   term-count and exact-bit ceilings.
 
 Sparse multiplication is performed pair by pair. Exact-bit and term-count
 guards run after every pairwise monomial accumulation, during exponentiation by
-squaring, and after source-term accumulation. An explosive product is therefore
-refused while it is growing rather than after a full oversized intermediate has
-already been constructed.
+squaring, and after every final scaled-term insertion. An explosive product or
+final accumulation is therefore refused while it is growing rather than after
+a full oversized intermediate has already been constructed.
 
 ## Refusal and resource semantics
 
@@ -98,8 +101,9 @@ admitted by the underlying polynomial parser.
 ## Work accounting
 
 Polynomial multiplication charges the exact number of source term pairs that
-the canonical sparse multiplier will examine. Linear accumulation is charged
-separately. Work accounting saturates by refusal rather than overflowing an
+the canonical sparse multiplier will examine. Final coefficient scaling and
+canonical insertion charge one unit per expanded term before that work is
+performed. Work accounting saturates by refusal rather than overflowing an
 integer counter.
 
 This is an admission boundary, not a complexity claim. The purpose is to make
@@ -113,7 +117,8 @@ Composition is cooperatively cancellable:
 - between source terms;
 - between source monomial factors;
 - during exponentiation by squaring;
-- inside canonical sparse polynomial multiplication.
+- inside canonical sparse polynomial multiplication;
+- before each final scaled-term insertion.
 
 A cancelled request returns an explicit `cancelled` failure and no partial
 polynomial is presented as a result.
@@ -154,6 +159,7 @@ expands correctly. The test ladder includes:
 - substituted power-ceiling tests;
 - intermediate term-growth refusal;
 - duplicate-substitution refusal;
+- final-accumulation cancellation;
 - mid-operation cooperative cancellation;
 - a separately coded rational evaluation oracle over a deterministic grid;
 - a 4096-bit exact-coefficient oracle case;
