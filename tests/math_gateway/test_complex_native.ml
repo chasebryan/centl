@@ -44,6 +44,35 @@ let test_exact_functions () =
   | Centl_complex_native.Refused error ->
       Alcotest.fail (Centl_complex_rational.error_message error)
 
+let test_lossless_ast_roundtrip () =
+  let expected = Centl_complex_rational.make (q "-17/19") (q "23/29") in
+  let expression = Centl_complex_native.expression_of_exact expected in
+  match Centl_complex_native.evaluate expression with
+  | Centl_complex_native.Exact actual ->
+      Alcotest.(check bool) "round-trip exact value" true
+        (Centl_complex_rational.equal expected actual);
+      begin match expression with
+      | Centl_Core.Function
+          ( "complex",
+            [
+              Centl_Core.Literal (real_numerator, real_denominator);
+              Centl_Core.Literal (imaginary_numerator, imaginary_denominator);
+            ] ) ->
+          Alcotest.(check string) "canonical real numerator" "-17"
+            (Z.to_string real_numerator);
+          Alcotest.(check string) "canonical real denominator" "19"
+            (Z.to_string real_denominator);
+          Alcotest.(check string) "canonical imaginary numerator" "23"
+            (Z.to_string imaginary_numerator);
+          Alcotest.(check string) "canonical imaginary denominator" "29"
+            (Z.to_string imaginary_denominator)
+      | _ -> Alcotest.fail "complex round-trip must use canonical complex(real, imaginary) AST"
+      end
+  | Centl_complex_native.Not_complex ->
+      Alcotest.fail "canonical complex AST was missed"
+  | Centl_complex_native.Refused error ->
+      Alcotest.fail (Centl_complex_rational.error_message error)
+
 let test_explicit_refusal () =
   let expression = unwrap_parse "complex(sqrt(2), 0)" in
   match Centl_complex_native.evaluate expression with
@@ -120,6 +149,8 @@ let () =
           Alcotest.test_case "mixed exact expression" `Quick
             test_exact_mixed_expression;
           Alcotest.test_case "exact functions" `Quick test_exact_functions;
+          Alcotest.test_case "lossless AST round-trip" `Quick
+            test_lossless_ast_roundtrip;
           Alcotest.test_case "irrational component refusal" `Quick
             test_explicit_refusal;
           Alcotest.test_case "division by zero" `Quick test_division_by_zero;
