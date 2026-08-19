@@ -10,6 +10,9 @@ on:
       - "site/style.css"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
+      - "scripts/caravan-live-bazaar"
+      - "scripts/x200-caravan-live-census"
+      - "tests/test_caravan_live_bazaar.py"
       - ".github/workflows/centl-web.yml"
   push:
     branches:
@@ -22,6 +25,9 @@ on:
       - "site/style.css"
       - "scripts/x200-centl-web"
       - "scripts/fcf-centl-web-install"
+      - "scripts/caravan-live-bazaar"
+      - "scripts/x200-caravan-live-census"
+      - "tests/test_caravan_live_bazaar.py"
       - ".github/workflows/centl-web.yml"
 
 permissions:
@@ -40,5 +46,7 @@ jobs:
         run: cargo test --all-targets
       - name: Test X200 web deployment contract
         run: python3 src-web/tests/test_x200_centl_web.py
+      - name: Test live CARAVAN Bazaar refresh
+        run: python3 tests/test_caravan_live_bazaar.py
       - name: Build CENTL web release
         run: cargo build --release --bin centl-web

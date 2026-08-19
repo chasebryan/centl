@@ -1,0 +1,87 @@
+#!/bin/sh
+# Install the X200 user service that keeps The Bazaar's aggregate CARAVAN
+# census current without JavaScript. The coordinator remains loopback-only.
+set -eu
+
+home=${HOME:?HOME must be set}
+centl_root=${CENTL_ROOT:-$home/centl}
+site_build=${CENTL_SITE_BUILD:-$home/.local/share/fcf-centl/site}
+unit_dir=${XDG_CONFIG_HOME:-$home/.config}/systemd/user
+service_name=fcf-caravan-bazaar-live.service
+python3_bin=$(command -v python3 2>/dev/null || true)
+
+fail() {
+  printf 'x200-caravan-live-census: %s\n' "$*" >&2
+  exit 1
+}
+
+say() {
+  printf 'x200-caravan-live-census: %s\n' "$*"
+}
+
+[ "$(uname -s 2>/dev/null || true)" = Linux ] || fail "run this on the X200 GNU/Linux host"
+command -v systemctl >/dev/null 2>&1 || fail "systemctl is required"
+[ -n "$python3_bin" ] || fail "python3 is required"
+[ -d "$centl_root/.git" ] || fail "CENTL checkout not found at $centl_root"
+[ -d "$site_build" ] || fail "rendered CENTL site not found at $site_build; run scripts/x200-centl-web first"
+[ -f "$centl_root/scripts/caravan-live-bazaar" ] || fail "scripts/caravan-live-bazaar is missing"
+
+# These values are written directly into systemd directives. Keep that rendering
+# unambiguous rather than trying to reinterpret exotic path quoting here.
+case "$centl_root:$site_build:$python3_bin" in
+  *[[:space:]]*|*\\*|*\"*) fail "runtime paths must not contain whitespace, backslashes, or quotes" ;;
+esac
+
+say "verifying the coordinator and rendering one fresh Bazaar census"
+"$python3_bin" "$centl_root/scripts/caravan-live-bazaar" \
+  --repo-root "$centl_root" \
+  --site-build "$site_build" \
+  --coordinator http://127.0.0.1:8789 \
+  --once || fail "the local authenticated coordinator did not produce a valid live census"
+
+mkdir -p "$unit_dir"
+cat > "$unit_dir/$service_name" <<EOF_UNIT
+[Unit]
+Description=FCF CARAVAN live Bazaar census renderer
+After=network-online.target fcf-caravan-coordinator.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=$centl_root
+ExecStart=$python3_bin $centl_root/scripts/caravan-live-bazaar --repo-root $centl_root --site-build $site_build --coordinator http://127.0.0.1:8789 --interval 15
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=false
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=default.target
+EOF_UNIT
+
+systemctl --user daemon-reload
+systemctl --user enable "$service_name" >/dev/null
+systemctl --user restart "$service_name"
+
+ready=0
+i=1
+while [ "$i" -le 10 ]; do
+  if systemctl --user is-active --quiet "$service_name"; then
+    ready=1
+    break
+  fi
+  sleep 1
+  i=$((i + 1))
+done
+[ "$ready" -eq 1 ] || {
+  systemctl --user --no-pager --full status "$service_name" >&2 || true
+  fail "$service_name did not stay active"
+}
+
+say "live Bazaar census renderer is active"
+say "The static zero-JS page now refreshes from coordinator truth every 15 seconds."
+say "status: systemctl --user status $service_name"
+say "logs:   journalctl --user -u $service_name -f"
