@@ -27,6 +27,9 @@ let matrix rows =
        (fun row -> `List (List.map (fun value -> `String value) row))
        rows)
 
+let integer_polynomial coefficients =
+  `List (List.map (fun value -> `String value) coefficients)
+
 let public_math ?id state domain request =
   let id_fields = match id with None -> [] | Some id -> [ ("id", id) ] in
   Centl_protocol.handle_json state
@@ -120,6 +123,40 @@ let test_public_protocol_cancellation () =
   Alcotest.(check string) "cancel code" "cancelled"
     (string "code" (assoc "error" response))
 
+let test_deep_algebraic_cancellation () =
+  let state = Centl_protocol.create () in
+  let checks = ref 0 in
+  let cancelled () =
+    incr checks;
+    !checks >= 5
+  in
+  let response =
+    Centl_protocol.handle_json ~cancelled state
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "deep-cancel");
+           ("op", `String "math");
+           ("domain", `String "real_algebraic");
+           ( "request",
+             `Assoc
+               [
+                 ("action", `String "refine");
+                 ("polynomial", integer_polynomial [ "-2"; "0"; "1" ]);
+                 ("lower", `String "1");
+                 ("upper", `String "2");
+                 ("steps", `Int 8);
+               ] );
+         ])
+  in
+  Alcotest.(check bool) "cancelled" false (bool "ok" response);
+  Alcotest.(check string) "id preserved" "deep-cancel" (string "id" response);
+  Alcotest.(check string) "domain preserved" "real_algebraic"
+    (string "domain" response);
+  Alcotest.(check string) "cancel code" "cancelled"
+    (string "code" (assoc "error" response));
+  Alcotest.(check bool) "callback reached refinement" true (!checks >= 5)
+
 let test_public_protocol_strictness () =
   let state = Centl_protocol.create () in
   let response =
@@ -155,6 +192,8 @@ let () =
             test_server_limit_clamps_gateway;
           Alcotest.test_case "cancellation" `Quick
             test_public_protocol_cancellation;
+          Alcotest.test_case "deep algebraic cancellation" `Quick
+            test_deep_algebraic_cancellation;
           Alcotest.test_case "strictness" `Quick test_public_protocol_strictness;
         ] );
     ]
