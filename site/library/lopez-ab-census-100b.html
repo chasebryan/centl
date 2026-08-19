@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The exact census contains">
+  <title>López Type A/B complete finite census through 100 billion — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/lopez-ab-census-100b.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/lopez-ab-census-100b.html">
+  <meta property="og:title" content="López Type A/B complete finite census through 100 billion — Free Computation Foundation">
+  <meta property="og:description" content="The exact census contains">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>López Type A/B complete finite census through 100 billion</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">The exact census contains</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/LOPEZ-AB-CENSUS-100B.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite census</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Domain:</strong> Mordell-hard primes <code>p &lt;= 100,000,000,000</code></p>
+<p><strong>Depends on:</strong> <code>LOPEZ-AB-FINITE-DECISION-BOUND.md</code>, <code>LOPEZ-AB-SQRT-COMPLETE-AUDIT.md</code></p>
+<p><strong>Claim boundary:</strong> finite evidence only. This is not a proof of López Type A/B completeness and not a proof of Erdős–Straus.</p>
+<h2>1. Result</h2>
+<p>The exact census contains</p>
+<pre><code class="language-text">128,671,219</code></pre>
+<p>Mordell-hard primes through</p>
+<pre><code class="language-text">100,000,000,000.</code></pre>
+<p>Every one of those primes has at least one López Type A or Type B witness.</p>
+<p>Thus the finite result is</p>
+<pre><code class="language-text">hard primes checked      128,671,219
+Type A/B captured        128,671,219
+complete Type A/B misses           0
+finite capture rate          100 percent</code></pre>
+<p>This does <strong>not</strong> imply universal Type A/B completeness. The complete square-root auditor is now available precisely so that any future bounded survivor can be decided prime-by-prime without extrapolating from this census.</p>
+<h2>2. New deepest observed Type A/B witness</h2>
+<p>The previous finite record was</p>
+<pre><code class="language-text">p = 9,658,489
+C_AB = 2,622
+Type B</code></pre>
+<p>The 100-billion census moves the record to</p>
+<pre><code class="language-text">p = 45,894,591,961
+C_AB = 13,234
+Type A</code></pre>
+<p>An exact first certificate is</p>
+<pre><code class="language-text">d = 26
+n = 509
+K = d*n = 13,234
+m = 4K-1 = 52,935
+quotient = 866,999</code></pre>
+<p>The defining Type A divisibility is exact:</p>
+<pre><code class="language-text">p + 4d
+= 45,894,591,961 + 104
+= 45,894,592,065
+= 866,999 * 52,935.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">p == -4d (mod 4dn-1)</code></pre>
+<p>at <code>K=13,234</code>.</p>
+<p>The direct layer audit finds no Type A/B witness at any smaller <code>K</code>. The independent square-root complete auditor reconstructs the same first depth.</p>
+<h2>3. High-depth record chain</h2>
+<p>The important finite record progression is now:</p>
+<pre><code class="language-text">p                 first C_AB
+9,658,489              2,622
+362,385,409            2,850
+740,856,601            3,612
+1,135,844,089          7,138
+10,671,101,281         7,945
+37,941,547,081         9,315
+45,894,591,961        13,234</code></pre>
+<p>The jump from <code>3,612</code> to <code>7,138</code> is especially important: it is the first point in this census where a <code>K=5,000</code> Type A/B research grade ceases to be complete even as a finite observational grade.</p>
+<p>The later records show that <code>C_AB</code> continues to have a nontrivial tail. A fixed <code>K=5,000</code> or even <code>K=10,000</code> must therefore never be described as a universal Type A/B depth bound.</p>
+<h2>4. The first K=5,000 bounded model escapes</h2>
+<p>Between one and ten billion, four hard primes survive every Type A/B layer through <code>K=5,000</code>:</p>
+<pre><code class="language-text">1,135,844,089
+2,621,555,161
+2,802,389,209
+2,844,772,561</code></pre>
+<p>The complete square-root auditor resolves all four:</p>
+<pre><code class="language-text">p                 exact C_AB
+1,135,844,089          7,138
+2,621,555,161          5,600
+2,802,389,209          5,472
+2,844,772,561          5,020</code></pre>
+<p>So these are genuine <strong>bounded model escapes</strong> from the <code>K=5,000</code> observation grade, but none is a López counterexample.</p>
+<p>This is the cleanest demonstration so far of why the CBIS model-escape language must distinguish</p>
+<pre><code class="language-text">AB_UNSEEN_THROUGH_K</code></pre>
+<p>from</p>
+<pre><code class="language-text">NO_TYPE_A_OR_B_WITNESS.</code></pre>
+<p>The first statement occurred four times below ten billion at <code>K=5,000</code>. The second statement occurred zero times after complete audit.</p>
+<h2>5. Later record survivors</h2>
+<p>The same procedure was continued with the current record itself as the bounded survival threshold.</p>
+<h3>10 to 20 billion</h3>
+<p>Two primes survived through <code>K=7,138</code>:</p>
+<pre><code class="language-text">10,671,101,281
+17,605,186,369</code></pre>
+<p>Complete audit gives</p>
+<pre><code class="language-text">10,671,101,281 -&gt; C_AB = 7,945
+17,605,186,369 -&gt; C_AB = 7,548</code></pre>
+<h3>30 to 40 billion</h3>
+<p>One prime survived through <code>K=7,945</code>:</p>
+<pre><code class="language-text">37,941,547,081</code></pre>
+<p>Complete audit gives</p>
+<pre><code class="language-text">C_AB = 9,315.</code></pre>
+<h3>40 to 50 billion</h3>
+<p>One prime survived through <code>K=9,315</code>:</p>
+<pre><code class="language-text">45,894,591,961</code></pre>
+<p>Complete audit gives the present record</p>
+<pre><code class="language-text">C_AB = 13,234.</code></pre>
+<h3>50 to 100 billion</h3>
+<p>No hard prime survives through <code>K=13,234</code>.</p>
+<p>The largest interval maxima observed there were:</p>
+<pre><code class="language-text">50 to 60B    5,425
+60 to 70B    8,890
+70 to 80B    7,695
+80 to 90B    4,284
+90 to 100B   8,514</code></pre>
+<p>None challenges the current record.</p>
+<h2>6. Exact hard-prime counts by census interval</h2>
+<p>The segmented prime census produced:</p>
+<pre><code class="language-text">interval                         hard primes
+&lt;= 100,000,000                      179,468
+100,000,001 to 1,000,000,000      1,408,113
+1,000,000,001 to 10,000,000,000  12,628,126
+10B to 20B                         13,345,271
+20B to 30B                         13,056,376
+30B to 40B                         12,873,998
+40B to 50B                         12,739,129
+50B to 60B                         12,635,546
+60B to 70B                         12,552,626
+70B to 80B                         12,477,405
+80B to 90B                         12,415,862
+90B to 100B                        12,359,299
+---------------------------------------------
+total                             128,671,219</code></pre>
+<p>The prime generator is an exact segmented sieve restricted after sieving to the six Mordell-hard residue classes modulo 840.</p>
+<h2>7. Two independent coordinates</h2>
+<p>Every high-depth candidate was checked in two mathematically equivalent but operationally independent coordinates.</p>
+<h3>Direct layer coordinate</h3>
+<p>For each layer <code>K</code>, set</p>
+<pre><code class="language-text">m = 4K-1.</code></pre>
+<p>For every divisor <code>s</code> of <code>K</code>, test the exact residues</p>
+<pre><code class="language-text">Type B: p == -s  (mod m)
+Type A: p == -4s (mod m).</code></pre>
+<p>This is the same full bounded A/B scan used by the CBIS model-risk auditor, including composite moduli.</p>
+<h3>Complete square-root coordinate</h3>
+<p><code>lopez_ab_complete_sqrt_audit.py</code> reconstructs every possible Type A certificate and every canonical Type B certificate from divisors of the short interval immediately above <code>p</code>.</p>
+<p>This coordinate has no empirical <code>K</code> cutoff.</p>
+<p>The record candidates agree in both coordinates.</p>
+<h2>8. Reproduction</h2>
+<p>The bounded census tool is</p>
+<pre><code class="language-text">research/erdos-straus/lopez_ab_bounded_census.py</code></pre>
+<p>For example, the original <code>K=5,000</code> escape interval can be reproduced with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/lopez_ab_bounded_census.py \
+  --lo 1000000001 \
+  --hi 10000000000 \
+  --k-max 5000 \
+  --complete-survivors \
+  --json</code></pre>
+<p>A direct complete audit of the present record is</p>
+<pre><code class="language-sh">python3 research/erdos-straus/lopez_ab_complete_sqrt_audit.py \
+  45894591961 --all --json</code></pre>
+<p>The 100-billion census was run in exact contiguous chunks. Chunking changes only memory/runtime behavior; every integer in the stated interval belongs to exactly one chunk.</p>
+<h2>9. Research consequence</h2>
+<p>The current evidence says two things at once.</p>
+<p>First, López Type A/B remains extremely strong: no complete miss was found among more than 128 million Mordell-hard primes through 100 billion.</p>
+<p>Second, bounded Type A/B depth is less stable than the earlier 50-million census suggested. The observed record has grown from <code>2,622</code> to <code>13,234</code>, and multiple primes now provably escape <code>K=5,000</code> before being recovered deeper.</p>
+<p>Therefore Type A/B should continue to be treated exactly as the present CBX/CBIS architecture treats it:</p>
+<pre><code class="language-text">valuable structural model
+not a kernel axiom
+bounded misses are not falsifications
+complete square-root misses would be falsification candidates</code></pre>
+<p>The primary Erdős–Straus search remains independent in the complete first-denominator/Lane-I coordinate.</p>
+<p>López Type A/B remains unrefuted. Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

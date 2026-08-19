@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For Mordell-hard primes in">
+  <title>Routed k=39 Jacobi-plus factor-support theorem — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k39-routed-jacobi-support.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k39-routed-jacobi-support.html">
+  <meta property="og:title" content="Routed k=39 Jacobi-plus factor-support theorem — Free Computation Foundation">
+  <meta property="og:description" content="For Mordell-hard primes in">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Routed k=39 Jacobi-plus factor-support theorem</h1><p>Geometry · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Geometry</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Geometry</p>
+          <p class="dek">For Mordell-hard primes in</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K39-ROUTED-JACOBI-SUPPORT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift finite-group theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K11-CHARACTER-COMPANION-ROUTING.md</code></p>
+<p><strong>Verifier:</strong> <code>verify_k39_routed_jacobi_support.py</code></p>
+<p><strong>Claim boundary:</strong> exact on the stated routed fixed-shift branch. It does not prove a universal cover or Erdős-Straus.</p>
+<h2>1. Routed branch</h2>
+<p>For Mordell-hard primes in</p>
+<pre><code class="language-text">h = 169, 289, or 529 mod 840,</code></pre>
+<p>a fixed k=11 miss forces</p>
+<pre><code class="language-text">(11/p) = +1.</code></pre>
+<p>On the route</p>
+<pre><code class="language-text">p mod11 = 5,</code></pre>
+<p>the character-to-companion routing theorem gives</p>
+<pre><code class="language-text">11 divides C39 = (p+39)/4.</code></pre>
+<p>The class-conditioned k=39 seed is 2, so the complete routed seed is</p>
+<pre><code class="language-text">22 = 2*11.</code></pre>
+<p>The exact seed-22 state closure contains</p>
+<pre><code class="language-text">83 states
+45 hard-admissible states
+9 misses.</code></pre>
+<h2>2. The hidden index-two subgroup</h2>
+<p>The nine misses were first observed to lie entirely on the positive Legendre-13 center branch. A stronger inspection of the complete divisor masks shows that every divisor residue in every miss belongs to the same index-two subgroup of <code>(Z/39Z)^x</code>:</p>
+<pre><code class="language-text">1, 2, 4, 5, 8, 10, 11, 16, 20, 22, 25, 32 mod39.</code></pre>
+<p>This set is exactly the kernel of the Jacobi character</p>
+<pre><code class="language-text">(a/39) = (a/3)(a/13).</code></pre>
+<p>Thus every exact routed miss-state divisor mask is contained in</p>
+<pre><code class="language-text">J39+ = {a : (a/39)=+1}.</code></pre>
+<p>The miss centers themselves also lie in J39+.</p>
+<h2>3. Exact factor-support equivalence</h2>
+<p>Every prime factor q of C39 occurs as an exponent-one divisor residue in the divisor-square box of C39 squared. Therefore, if a routed k=39 miss occurs, every such prime factor must satisfy</p>
+<pre><code class="language-text">(q/39) = +1.</code></pre>
+<p>Conversely, suppose every prime factor q of C39 satisfies</p>
+<pre><code class="language-text">(q/39) = +1.</code></pre>
+<p>Then every divisor residue of C39 squared lies in J39+.</p>
+<p>The two fixed-shift targets lie in the opposite Jacobi coset. In particular,</p>
+<pre><code class="language-text">(-1/4)/39 = -1,</code></pre>
+<p>and because C39 is Jacobi-positive on this routed branch,</p>
+<pre><code class="language-text">(-C39)/39 = -1.</code></pre>
+<p>Neither target can therefore occur in the divisor-square box.</p>
+<h3>Theorem</h3>
+<p>For</p>
+<pre><code class="language-text">h in {169,289,529},
+p mod11 = 5,</code></pre>
+<p>the following are equivalent:</p>
+<pre><code class="language-text">fixed k=39 misses</code></pre>
+<p>and</p>
+<pre><code class="language-text">every prime factor q of C39 satisfies (q/39)=+1.</code></pre>
+<p>The earlier corollary</p>
+<pre><code class="language-text">(13/p)=-1 =&gt; k=39 hits</code></pre>
+<p>is only a projection of this stronger support theorem.</p>
+<h2>4. Position in the six-companion wheel</h2>
+<p>In the wheel</p>
+<pre><code class="language-text">27, 31, 35, 39, 43, 47,</code></pre>
+<p>the universal seed decomposition gives</p>
+<pre><code class="language-text">C39 = 2*R3.</code></pre>
+<p>The routed factor 11 therefore satisfies</p>
+<pre><code class="language-text">11 divides R3.</code></pre>
+<p>The six-companion residual theorem pins 11 to this residual alone because 11 is neither 2 nor 5.</p>
+<p>Moreover, 2 itself has Jacobi symbol +1 modulo39. Hence a routed k=39 miss implies</p>
+<pre><code class="language-text">every prime factor of R3 has Jacobi symbol +1 modulo39.</code></pre>
+<p>So the routed branch now provides both a forced prime location and a full support class for R3.</p>
+<p>This mirrors the p mod11=9 routed k=35 result, where factor 11 is pinned to R2 and every prime factor of R2 lies in the Jacobi-plus subgroup modulo35.</p>
+<h2>5. Two-residual route now available</h2>
+<p>If the k=39 miss additionally has</p>
+<pre><code class="language-text">p mod13 = 4,</code></pre>
+<p>then the positive 13-character routes factor 13 into C35. Since</p>
+<pre><code class="language-text">C35 = 3*R2,</code></pre>
+<p>13 is pinned to R2, while 11 remains pinned to R3.</p>
+<p>The remaining exact question is then a neighboring-residual support problem:</p>
+<pre><code class="language-text">R2 = 2n+1 has a forced factor 13 and k35 miss constraints,
+R3 = 3n+2 has a forced factor 11 and Jacobi-plus support mod39,
+2*R3 - 3*R2 = 1,
+gcd(R2,R3)=1.</code></pre>
+<p>This does not yet yield a contradiction, but it is a substantially sharper cross-shift object than independent character signs.</p>
+<h2>6. Reproduction</h2>
+<p>Run</p>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_k39_routed_jacobi_support.py --json</code></pre>
+<p>The script recomputes the complete seed-22 closure and verifies every miss divisor mask, every center, the complete Jacobi-plus subgroup, and the Jacobi signs of the fixed-shift targets.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

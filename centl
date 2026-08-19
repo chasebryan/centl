@@ -17,6 +17,92 @@ case "${1:-}" in
     ;;
   es|erdos|erdos-straus)
     shift
+    # CBX remains a separate research instrument rather than part of the
+    # coupled production hunt. Keep its state and grade surface isolated.
+    if [ "${1:-}" = "cbx" ]; then
+      shift
+      cbx_dir="$project_root/research/erdos-straus/cbx.kernel"
+      case "${1:-}" in
+        inverse)
+          shift
+          cbx_inverse="$cbx_dir/cbx-inverse"
+          if [ ! -x "$cbx_inverse" ]; then make -s -C "$cbx_dir" cbx-inverse; fi
+          exec "$cbx_inverse" "$@"
+          ;;
+        shift-i)
+          shift
+          cbx_shift="$cbx_dir/cbx-shift-i"
+          if [ ! -x "$cbx_shift" ]; then make -s -C "$cbx_dir" cbx-shift-i; fi
+          exec "$cbx_shift" "$@"
+          ;;
+        forward-i)
+          shift
+          cbx_forward="$cbx_dir/cbx-forward-i"
+          if [ ! -x "$cbx_forward" ]; then make -s -C "$cbx_dir" cbx-forward-i; fi
+          exec "$cbx_forward" "$@"
+          ;;
+        profile-i)
+          shift
+          cbx_profile="$cbx_dir/cbx-profile-i"
+          if [ ! -x "$cbx_profile" ]; then make -s -C "$cbx_dir" cbx-profile-i; fi
+          exec "$cbx_profile" "$@"
+          ;;
+        standalone-i)
+          shift
+          cbx_standalone="$cbx_dir/cbx-standalone-i"
+          if [ ! -x "$cbx_standalone" ]; then make -s -C "$cbx_dir" cbx-standalone-i; fi
+          exec "$cbx_standalone" "$@"
+          ;;
+        certify-i)
+          shift
+          exec python3 "$cbx_dir/certify_i.py" "$@"
+          ;;
+        bench)
+          shift
+          exec python3 "$cbx_dir/bench_i.py" "$@"
+          ;;
+        analyze)
+          shift
+          exec python3 "$cbx_dir/analyze.py" "$@"
+          ;;
+        analyze-geometry)
+          shift
+          exec python3 "$cbx_dir/analyze_geometry.py" "$@"
+          ;;
+        analyze-layers)
+          shift
+          exec python3 "$cbx_dir/analyze_layers.py" "$@"
+          ;;
+        analyze-profile)
+          shift
+          exec python3 "$cbx_dir/analyze_profile.py" "$@"
+          ;;
+        analyze-standalone)
+          shift
+          exec python3 "$cbx_dir/analyze_standalone.py" "$@"
+          ;;
+        analyze-overlap)
+          shift
+          exec python3 "$cbx_dir/analyze_overlap.py" "$@"
+          ;;
+        analyze-spectrum-overlap)
+          shift
+          exec python3 "$cbx_dir/analyze_spectrum_overlap.py" "$@"
+          ;;
+        analyze-shadow-depth)
+          shift
+          exec python3 "$cbx_dir/analyze_shadow_depth.py" "$@"
+          ;;
+        plan-hybrid)
+          shift
+          exec python3 "$cbx_dir/plan_hybrid.py" "$@"
+          ;;
+      esac
+      cbx="$cbx_dir/cbx"
+      if [ ! -x "$cbx" ]; then make -s -C "$cbx_dir" cbx; fi
+      exec "$cbx" "$@"
+    fi
+
     if [ -f "$project_root/research/erdos-straus/es" ]; then
       exec python3 "$project_root/research/erdos-straus/es" "$@"
     elif [ -x "$rust_binary" ]; then

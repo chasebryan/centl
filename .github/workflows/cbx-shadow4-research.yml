@@ -1,0 +1,130 @@
+name: CBX Lane-I shadow depth four
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Largest standalone Lane-I shift'
+        required: true
+        default: '400'
+      segment:
+        description: 'p segment size'
+        required: true
+        default: '1000000'
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-shadow4-research.yml'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_shadow_i.c'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-shadow-four:
+    name: Fedora exact shadow covers through four layers
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone and native shadow engines
+        run: |
+          make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+          cc -O3 -std=c11 -Wall -Wextra \
+            -o research/erdos-straus/cbx.kernel/cbx-shadow-i \
+            research/erdos-straus/cbx.kernel/src/cbx_shadow_i.c
+
+      - name: Generate exact standalone relations
+        run: |
+          mkdir -p /tmp/cbx-shadow4
+          ./centl es cbx standalone-i \
+            --hi "$HI" --i-max "$I_MAX" --segment "$SEGMENT" \
+            --sets /tmp/cbx-shadow4/standalone-hit-relations.tsv \
+            > /tmp/cbx-shadow4/standalone-profile.json
+
+      - name: Search exact earlier-layer covers through depth four
+        run: |
+          research/erdos-straus/cbx.kernel/cbx-shadow-i \
+            --sets /tmp/cbx-shadow4/standalone-hit-relations.tsv \
+            --max-depth 4 > /tmp/cbx-shadow4/shadow-depth4.json
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-shadow4'
+          raw=json.load(open(root+'/standalone-profile.json'))
+          r=json.load(open(root+'/shadow-depth4.json'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['sets_recorded'] is True
+          assert r['kernel'] == 'cbx.kernel' and r['mode'] == 'shadow-I'
+          assert r['relation_rows'] == raw['set_relations']
+          assert r['layers'] == len(raw['shifts'])
+          rows={x['k']:x for x in r['rows']}
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'finite-shadow-depth-through-4-v1',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':raw['hard_primes'],
+              'layers':r['layers'],
+              'fully_shadowed_by_prior_union_layers':r['fully_shadowed_by_prior_union_layers'],
+              'exact_cover_counts':r['exact_cover_counts'],
+              'no_exact_cover_through_4_layers':r['no_exact_cover_through_4_layers'],
+              'above_107':r['above_107'],
+              'k147':rows.get(147),
+              'k171':rows.get(171),
+              'claim':r['claim'],
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          c=report['exact_cover_counts']
+          print(
+              f"::notice title=CBX exact shadow depth four::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
+              f"shadowed={report['fully_shadowed_by_prior_union_layers']}; "
+              f"exact1={c['size_1']}; exact2={c['size_2']}; exact3={c['size_3']}; exact4={c['size_4']}; "
+              f"no-cover-through4={report['no_exact_cover_through_4_layers']}; "
+              f"k147-lb={report['k147']['finite_lower_bound'] if report['k147'] else None}; "
+              f"k171-lb={report['k171']['finite_lower_bound'] if report['k171'] else None}"
+          )
+          PY
+
+      - name: Preserve environment and hashes
+        run: |
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-shadow4/ENVIRONMENT.txt
+          cd /tmp/cbx-shadow4
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload depth-four artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-shadow-depth4-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-shadow4/
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The generic fixed-shift problems at k=35 and k=39 share the abstract unit-group geometry">
+  <title>Forced-seed split of the conjugate `k=35` and `k=39` problems — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k35-k39-forced-seed-split.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k35-k39-forced-seed-split.html">
+  <meta property="og:title" content="Forced-seed split of the conjugate `k=35` and `k=39` problems — Free Computation Foundation">
+  <meta property="og:description" content="The generic fixed-shift problems at k=35 and k=39 share the abstract unit-group geometry">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Forced-seed split of the conjugate `k=35` and `k=39` problems</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The generic fixed-shift problems at k=35 and k=39 share the abstract unit-group geometry</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K35-K39-FORCED-SEED-SPLIT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted hard-prime reductions</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K35-TWO-TARGET-FILTER.md</code>, <code>K39-TWO-TARGET-FILTER.md</code>, <code>MORDELL-HARD-FORCED-SEED-LAW.md</code></p>
+<p><strong>Machine certificate:</strong> <code>classify_k35_k39_forced_seeds.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k35_k39_forced_seeds.py</code></p>
+<p><strong>Claim boundary:</strong> these are range-free hard-prime state containments at the two fixed shifts. They do not prove Erdős–Straus.</p>
+<h2>1. Generic conjugacy is not hard-seed conjugacy</h2>
+<p>The generic fixed-shift problems at <code>k=35</code> and <code>k=39</code> share the abstract unit-group geometry</p>
+<div class="math" role="math">C_{12}\times C_2</div>
+<p>and are related by the exact target-preserving conjugacy already proved in <code>K39-TWO-TARGET-FILTER.md</code>.</p>
+<p>However, the hard-prime forced-seed law gives different mandatory factors:</p>
+<div class="math" role="math">\boxed{3\mid C_{35}}, \qquad \boxed{2\mid C_{39}}.</div>
+<p>These seeds occupy different quotient positions in the common coordinate model. Therefore the two <strong>hard-prime</strong> state problems are no longer identified by the generic target conjugacy.</p>
+<h2>2. <code>k=35</code>: forced factor 3 lies inside the hard subgroup</h2>
+<p>For <code>p=24m+1</code>,</p>
+<div class="math" role="math">C_{35}=\frac{p+35}{4}=6m+9=3(2m+3).</div>
+<p>In the k=35 coordinate</p>
+<div class="math" role="math">x=6^\varepsilon3^a\pmod{35},</div>
+<p>the forced factor is</p>
+<div class="math" role="math">\boxed{3\leftrightarrow(0,1).}</div>
+<p>The hard center subgroup is <code>epsilon=0</code>, so the forced factor begins <strong>inside</strong> the hard subgroup.</p>
+<p>Starting from this mandatory valuation occurrence and closing over all remaining unit directions gives</p>
+<pre><code class="language-text">total states          394
+admissible states     194
+hit states            130
+miss states            64</code></pre>
+<p>The generic admissible miss table had 232 states. Thus</p>
+<div class="math" role="math">\boxed{232\to64.}</div>
+<p>Minimizing additional outside-subgroup valuation units gives</p>
+<pre><code class="language-text">0 outside units   38 misses
+2 outside units   26 misses</code></pre>
+<p>so every hard-prime k=35 miss has a forced-3 representative with at most two additional outside-H units.</p>
+<p>The forced-3 pure-H closure has exactly 38 states, and all 38 miss.</p>
+<h2>3. <code>k=39</code>: forced factor 2 begins outside the hard subgroup</h2>
+<p>For <code>p=24m+1</code>,</p>
+<div class="math" role="math">C_{39}=\frac{p+39}{4}=6m+10=2(3m+5).</div>
+<p>Using the k=39 coordinate</p>
+<div class="math" role="math">x=14^\varepsilon28^a\pmod{39},</div>
+<p>the forced factor has coordinate</p>
+<div class="math" role="math">\boxed{2\leftrightarrow(1,1).}</div>
+<p>The hard center subgroup is again <code>epsilon=0</code>, so this mandatory factor starts <strong>outside</strong> it.</p>
+<p>The forced-2 closure contains</p>
+<pre><code class="language-text">total states          394
+admissible states     196
+hit states            160
+miss states            36</code></pre>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{232\to36}</div>
+<p>for the admissible miss table.</p>
+<p>The minimum number of additional outside-H units is</p>
+<pre><code class="language-text">1 outside unit   34 misses
+3 outside units    2 misses</code></pre>
+<p>so every hard-prime k=39 miss has a forced-2 representative with at most three additional outside-H units.</p>
+<h2>4. Why the seeded problems split</h2>
+<p>The generic k35-to-k39 conjugacy acts on coordinates by</p>
+<div class="math" role="math">(\varepsilon,a)\mapsto(\varepsilon,5a).</div>
+<p>It sends the k35 forced direction <code>(0,1)</code> to <code>(0,5)</code>, not to the actual k39 forced direction <code>(1,1)</code>.</p>
+<p>Thus the conjugacy preserves the target geometry but <strong>does not preserve the mandatory hard-prime seed</strong>.</p>
+<p>This explains why the generic closures share the same 1,298-state / 232-miss geometry while their natural hard-prime reductions differ sharply:</p>
+<pre><code class="language-text">                generic miss   forced-seed miss
+k=35                 232              64
+k=39                 232              36</code></pre>
+<p>The lesson is structural: target conjugacy alone is insufficient for comparing hard-prime fixed-shift problems. The mandatory factor seed is part of the mathematical data.</p>
+<h2>5. Independent finite regression</h2>
+<p><code>verify_k35_k39_forced_seeds.py</code> independently generates Mordell-hard primes, checks the mandatory factors, consumes one forced valuation occurrence, rebuilds the remaining exact state from factorization, and compares against direct divisor-square target membership.</p>
+<p>Through <code>100,000</code>:</p>
+<pre><code class="language-text">hard primes   273
+
+k=35
+  hits         47
+  misses      226
+
+k=39
+  hits        147
+  misses      126
+
+mismatches      0</code></pre>
+<p>These are finite realization checks. The reduced closures themselves are range-free finite-group exhaustions from universally forced seeds.</p>
+<h2>6. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k35_k39_forced_seeds.py --json
+python3 research/erdos-straus/verify_k35_k39_forced_seeds.py --limit 100000 --json</code></pre>
+<p>Erdős–Straus remains open. The result shows that hard-prime seed data can break an otherwise exact fixed-shift conjugacy and should be included in the canonical CBX state specification.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

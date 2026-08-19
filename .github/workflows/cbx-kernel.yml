@@ -1,0 +1,282 @@
+name: CBX kernel
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/**'
+      - 'research/erdos-straus/ES-plus/CBIS-K-PARAMETER-STATUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-INITIAL-XRAY-CENSUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-IMPLEMENTATION-STATUS.md'
+      - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
+      - 'research/erdos-straus/ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md'
+      - '.github/workflows/cbx-kernel.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/**'
+      - 'research/erdos-straus/ES-plus/CBX-INVERSE-I.md'
+      - 'research/erdos-straus/ES-plus/CBX-LANE-I-ORIENTATION-BENCHMARK.md'
+      - '.github/workflows/cbx-kernel.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-regress:
+    name: fedora-latest
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora build/runtime tools
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build CBX on Fedora
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Run CBX runtime self-test on Fedora
+        run: research/erdos-straus/cbx.kernel/cbx self-test
+
+      - name: Run direct known probes on Fedora
+        run: |
+          research/erdos-straus/cbx.kernel/cbx probe 1009 > /tmp/cbx-1009.json
+          research/erdos-straus/cbx.kernel/cbx probe 2521 > /tmp/cbx-2521.json
+          research/erdos-straus/cbx.kernel/cbx probe 9658489 > /tmp/cbx-9658489.json
+
+      - name: Check Python research tools on Fedora
+        run: python3 -m py_compile research/erdos-straus/cbx.kernel/analyze.py research/erdos-straus/cbx.kernel/analyze_layers.py research/erdos-straus/cbx.kernel/analyze_profile.py research/erdos-straus/cbx.kernel/bench_i.py
+
+      - name: Exercise root launcher on Fedora
+        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
+
+      - name: Validate Fedora probe semantics
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
+          assert p['kernel'] == 'cbx.kernel'
+          assert p['n'] == 2521
+          assert p['W']['R'] is True
+          assert p['W']['fab'] is True
+          assert p['I']['hit'] is True and p['I']['first_k'] == 23
+          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
+          assert p['production_letter'] is False
+          PY
+
+      - name: Verify inverse signed-box cover on Fedora
+        run: |
+          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify \
+            --layers /tmp/cbx-layers.tsv > /tmp/cbx-inverse.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['mode'] == 'inverse-I'
+          assert r['candidate_mode'] == 'target-gated'
+          assert r['verify'] is True
+          assert r['layers_recorded'] is True
+          assert r['hard_primes'] > 0
+          assert r['verification_targets'] == r['hard_primes']
+          assert r['verification_mismatches'] == 0
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          assert r['factorizations'] <= r['C_candidates']
+          PY
+
+      - name: Analyze inverse shift layers on Fedora
+        run: |
+          python3 research/erdos-straus/cbx.kernel/analyze_layers.py \
+            /tmp/cbx-layers.tsv --json > /tmp/cbx-layers.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-layers.json', encoding='utf-8'))
+          assert r['analysis'] == 'cbx-inverse-layer-efficiency-v1'
+          assert r['layers'] > 0
+          assert r['productive_layers'] > 0
+          assert r['totals']['new_covered'] > 0
+          productive = ','.join(map(str, r['productive_k'][:12])) or 'none'
+          dead = ','.join(map(str, r['dead_factoring_k'][:12])) or 'none'
+          top = r['top_new_cover'][:5]
+          leaders = '; '.join(
+              f"k={x['k']}:new={x['new_covered']}/fact={x['factorizations']}"
+              for x in top
+          )
+          print(
+              f"::notice title=CBX Fedora inverse per-k telemetry::"
+              f"layers={r['layers']}; productive={r['productive_layers']}; "
+              f"dead-with-factorization={r['dead_factoring_layers']}; "
+              f"first productive k={productive}; first dead k={dead}; leaders={leaders}"
+          )
+          PY
+
+      - name: Verify shift-major signed-box cover on Fedora
+        run: |
+          ./centl es cbx shift-i --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-shift.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-shift.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['mode'] == 'shift-I'
+          assert r['verify'] is True
+          assert r['hard_primes'] > 0
+          assert r['verification_targets'] == r['hard_primes']
+          assert r['verification_mismatches'] == 0
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          PY
+
+      - name: Profile Lane-I shifts on Fedora
+        run: |
+          ./centl es cbx profile-i --hi 100000 --i-max 80 --segment 25000 > /tmp/cbx-profile.json
+          ./centl es cbx analyze-profile /tmp/cbx-profile.json --json > /tmp/cbx-profile-analysis.json
+          python3 - <<'PY'
+          import json
+          raw = json.load(open('/tmp/cbx-profile.json', encoding='utf-8'))
+          r = json.load(open('/tmp/cbx-profile-analysis.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel' and raw['mode'] == 'profile-I'
+          assert r['analysis'] == 'cbx-lane-I-shift-profile-v1'
+          assert r['hard_primes'] == raw['hard_primes']
+          assert r['covered_hard_primes'] + r['residual_hard_primes'] == r['hard_primes']
+          assert r['totals']['first_hits'] == r['covered_hard_primes']
+          assert r['productive_shifts'] > 0
+          leaders = '; '.join(
+              f"k={x['k']}:hits={x['first_hits']}/fact={x['factorizations']}/C={x['c_candidates']}"
+              for x in r['top_first_hit_count'][:5]
+          )
+          print(
+              f"::notice title=CBX Fedora shift profile::"
+              f"productive={r['productive_shifts']}; dead-factor={r['dead_factoring_shifts']}; "
+              f"depths={r['first_hit_depth_quantiles']}; leaders={leaders}"
+          )
+          PY
+
+      - name: Benchmark Lane-I orientations on Fedora
+        run: |
+          python3 research/erdos-straus/cbx.kernel/bench_i.py \
+            --hi 100000 --i-max 80 --repeat 3 --no-verify --json > /tmp/cbx-bench-gated.json
+          python3 research/erdos-straus/cbx.kernel/bench_i.py \
+            --hi 100000 --i-max 80 --repeat 3 --no-verify --strict-inverse --json > /tmp/cbx-bench-strict.json
+          python3 - <<'PY'
+          import json
+          gated = json.load(open('/tmp/cbx-bench-gated.json', encoding='utf-8'))['results'][0]
+          strict = json.load(open('/tmp/cbx-bench-strict.json', encoding='utf-8'))['results'][0]
+          for row in (gated, strict):
+              assert row['hard_primes'] > 0
+              assert row['covered_hard_primes'] + row['residual_hard_primes'] == row['hard_primes']
+          assert gated['candidate_mode'] == 'target-gated'
+          assert strict['candidate_mode'] == 'strict-c-first'
+          c = gated['comparison']
+          gf = c['inverse_factorizations_to_forward_factorizations']
+          ge = c['inverse_enumerated_C_to_forward_factorizations']
+          gw = c['inverse_to_forward_wall_ratio']
+          shf = c['shift_factorizations_to_forward_factorizations']
+          shv = c['shift_active_visits_to_forward_shift_candidates']
+          shw = c['shift_to_forward_wall_ratio']
+          sf = strict['comparison']['inverse_factorizations_to_forward_factorizations']
+          sw = strict['comparison']['inverse_to_forward_wall_ratio']
+          assert all(v is not None and v > 0 for v in (gf, ge, gw, shf, shv, shw, sf, sw))
+          assert abs(shf - 1.0) < 1e-12
+          assert abs(shv - 1.0) < 1e-12
+          print(
+              f"::notice title=CBX Fedora Lane-I benchmark::"
+              f"gated factor={gf:.6f}; gated enum={ge:.6f}; gated wall={gw:.6f}; "
+              f"shift factor={shf:.6f}; shift visits={shv:.6f}; shift wall={shw:.6f}; "
+              f"strict factor={sf:.6f}; strict wall={sw:.6f}; "
+              f"hard={gated['hard_primes']}; K_I={gated['i_max']}"
+          )
+          PY
+
+      - name: Deterministic Fedora census and analyzer
+        run: |
+          ./centl es cbx go --run ci-fedora --step 5000 --iterations 4 --sweep-only
+          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci-fedora --json > /tmp/cbx-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['unique_grade_targets'] > 0
+          assert 'all' in r['strata']
+          assert r['truncated_tail_ignored'] == 0
+          assert set(r['empirical_envelopes']) == {'log', 'log2', 'spectrum-log'}
+          PY
+
+      - name: Reject grade mutation on Fedora
+        run: |
+          if ./centl es cbx go --run ci-fedora --iterations 1 --sweep-only --i-max 401; then
+            echo 'grade mutation unexpectedly succeeded' >&2
+            exit 1
+          fi
+
+  ubuntu-regress:
+    name: ubuntu-latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build CBX
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Run CBX runtime self-test
+        run: research/erdos-straus/cbx.kernel/cbx self-test
+
+      - name: Exercise root launcher
+        run: ./centl es cbx probe 2521 > /tmp/cbx-probe.json
+
+      - name: Validate probe semantics
+        run: |
+          python3 - <<'PY'
+          import json
+          p = json.load(open('/tmp/cbx-probe.json', encoding='utf-8'))
+          assert p['kernel'] == 'cbx.kernel'
+          assert p['n'] == 2521
+          assert p['W']['R'] is True
+          assert p['I']['hit'] is True and p['I']['first_k'] == 23
+          assert p['N']['hit'] is True and p['N']['ell'] == 11 and p['N']['shift'] == 31
+          assert p['production_letter'] is False
+          PY
+
+      - name: Verify inverse and shift-major signed-box covers
+        run: |
+          ./centl es cbx inverse --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-inverse.json
+          ./centl es cbx shift-i --hi 100000 --i-max 80 --segment 25000 --verify > /tmp/cbx-shift.json
+          python3 - <<'PY'
+          import json
+          inv = json.load(open('/tmp/cbx-inverse.json', encoding='utf-8'))
+          sh = json.load(open('/tmp/cbx-shift.json', encoding='utf-8'))
+          assert inv['mode'] == 'inverse-I'
+          assert inv['candidate_mode'] == 'target-gated'
+          assert inv['verification_mismatches'] == 0
+          assert inv['verification_targets'] == inv['hard_primes']
+          assert sh['mode'] == 'shift-I'
+          assert sh['verification_mismatches'] == 0
+          assert sh['verification_targets'] == sh['hard_primes']
+          assert inv['hard_primes'] == sh['hard_primes']
+          assert inv['covered_hard_primes'] == sh['covered_hard_primes']
+          PY
+
+      - name: Smoke-test Lane-I shift profile
+        run: |
+          ./centl es cbx profile-i --hi 100000 --i-max 80 --segment 25000 > /tmp/cbx-profile.json
+          ./centl es cbx analyze-profile /tmp/cbx-profile.json --json > /tmp/cbx-profile-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-profile-analysis.json', encoding='utf-8'))
+          assert r['analysis'] == 'cbx-lane-I-shift-profile-v1'
+          assert r['totals']['first_hits'] == r['covered_hard_primes']
+          PY
+
+      - name: Deterministic finite census
+        run: |
+          ./centl es cbx go --run ci-ubuntu --step 5000 --iterations 4 --sweep-only
+          python3 research/erdos-straus/cbx.kernel/analyze.py --run ci-ubuntu --json > /tmp/cbx-analysis.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/cbx-analysis.json', encoding='utf-8'))
+          assert r['kernel'] == 'cbx.kernel'
+          assert r['unique_grade_targets'] > 0
+          assert 'all' in r['strata']
+          PY

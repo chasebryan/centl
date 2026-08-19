@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The reciprocity barrier shows that a single positively routed source prime arrives in the positive Jacobi character class at an admissible destination. A single routed factor is therefore often compatible with the receiving miss condition.">
+  <title>Multi-source QR saturation in the character-route graph — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/multisource-qr-saturation.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/multisource-qr-saturation.html">
+  <meta property="og:title" content="Multi-source QR saturation in the character-route graph — Free Computation Foundation">
+  <meta property="og:description" content="The reciprocity barrier shows that a single positively routed source prime arrives in the positive Jacobi character class at an admissible destination. A single routed factor is therefore often compatible with the receiving miss condition.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multi-source QR saturation in the character-route graph</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The reciprocity barrier shows that a single positively routed source prime arrives in the positive Jacobi character class at an admissible destination. A single routed factor is therefore often compatible with the receiving miss condition.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTISOURCE-QR-SATURATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite route-graph theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_multisource_qr_saturation.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_multisource_qr_saturation.py</code></p>
+<p><strong>Depends on:</strong> <code>QR-SATURATING-ROUTED-SEEDS.md</code>, <code>CHARACTER-ROUTING-RECIPROCITY-BARRIER.md</code>, current fixed-shift support atlas</p>
+<p><strong>Claim boundary:</strong> the results below prove conditional fixed-shift rigidity on named simultaneous route branches. They do not prove that every prime enters those branches and do not prove Erdős-Straus.</p>
+<h2>1. Why multiple routes matter</h2>
+<p>The reciprocity barrier shows that a single positively routed source prime arrives in the positive Jacobi character class at an admissible destination. A single routed factor is therefore often compatible with the receiving miss condition.</p>
+<p>The QR-saturating seed lemma shows a different mechanism. A collection of individually compatible mandatory divisors can collectively fill the entire quadratic-residue subgroup of a prime destination.</p>
+<p>This motivates a stricter route-graph question:</p>
+<blockquote><p>Can two or three source theorems route distinct prime factors into the same companion so that no proper routed subset saturates the destination, but the full combined seed does?</p></blockquote>
+<p>The answer is yes.</p>
+<p>Using only the currently proved positive-character source nodes and prime destinations through k&lt;=5000, there are exactly</p>
+<ul><li>8 genuine two-source saturation synergies;</li><li>6 genuine three-source saturation synergies.</li></ul>
+<p>Here genuine means:</p>
+<ul><li>the ordinary destination class seed is not QR-saturating;</li><li>no one routed source factor makes it QR-saturating;</li><li>for a triple, no routed pair makes it QR-saturating;</li><li>the complete named routed set does make it QR-saturating.</li></ul>
+<h2>2. Two-source synergies</h2>
+<h3>h=121, destination k=31</h3>
+<p>Sources:</p>
+<ul><li>q=19 with required <code>p mod19=7</code>;</li><li>q=47 with required <code>p mod47=16</code>.</li></ul>
+<p>Both residues are permitted positive-character source branches. They route</p>
+<p><code>19 | C31</code></p>
+<p>and</p>
+<p><code>47 | C31</code>.</p>
+<p>The h=121 class seed at k=31 is 2. Neither seed 2<em>19 nor seed 2</em>47 saturates QR(31), but</p>
+<p><code>S = 2*19*47 = 1786</code></p>
+<p>does.</p>
+<p>Thus, conditional on the two source branches, a k=31 miss is equivalent to QR-only prime support of C31.</p>
+<h3>h=121, destination k=79</h3>
+<p>Sources q=19 and23 with required residues</p>
+<p><code>p mod19=16</code></p>
+<p>and</p>
+<p><code>p mod23=13</code>.</p>
+<p>The class seed is 10. The combined seed</p>
+<p><code>S = 10*19*23 = 4370</code></p>
+<p>QR-saturates modulo79, while neither single routed augmentation does.</p>
+<h3>h=169, destination k=19</h3>
+<p>Sources:</p>
+<ul><li>q=11, <code>p mod11=3</code>;</li><li>q=23, <code>p mod23=4</code>.</li></ul>
+<p>Both route into C19. The h=169 class seed is 1. Neither 11 nor23 alone fills QR(19), but</p>
+<p><code>S = 11*23 = 253</code></p>
+<p>does.</p>
+<p>Therefore a simultaneous source survivor on this branch can miss k=19 only when every prime factor of C19 is a quadratic residue modulo19.</p>
+<h3>h=169, destination k=83</h3>
+<p>There are three distinct pair synergies, all on class seed21:</p>
+<ul><li>q=11 and23, required residues5 and9, seed5313;</li><li>q=11 and31, required residues5 and10, seed7161;</li><li>q=23 and31, required residues9 and10, seed14973.</li></ul>
+<p>Each pair saturates QR(83), while neither member of the pair does so alone.</p>
+<h3>h=169, destination k=167</h3>
+<p>Sources q=11 and31 with required residues9 and19. The class seed is42 and the combined seed</p>
+<p><code>S = 42*11*31 = 14322</code></p>
+<p>saturates QR(167), with neither single routed source sufficient.</p>
+<h3>h=529, destination k=19</h3>
+<p>The same q=11 and q=23 geometry as h=169 occurs:</p>
+<p><code>p mod11=3</code></p>
+<p><code>p mod23=4</code></p>
+<p>and</p>
+<p><code>S = 11*23 = 253</code>.</p>
+<p>This pair QR-saturates modulo19 from the otherwise trivial class seed1.</p>
+<h2>3. Three-source synergies</h2>
+<p>Exactly six genuine triples occur through destination k&lt;=5000.</p>
+<h3>Destination k=79</h3>
+<p>For h=169,289,529, the sources q=11,23,31 with required residues</p>
+<p><code>9, 13, 14</code></p>
+<p>jointly saturate QR(79) from class seed2:</p>
+<p><code>S = 2*11*23*31 = 15686</code>.</p>
+<p>No single source and no source pair saturates the destination.</p>
+<h3>Destination k=83</h3>
+<p>For h=289 and529, q=11,23,31 with required residues</p>
+<p><code>5, 9, 10</code></p>
+<p>jointly saturate QR(83) from class seed3:</p>
+<p><code>S = 3*11*23*31 = 23529</code>.</p>
+<p>No proper routed subset saturates.</p>
+<h3>Destination k=167</h3>
+<p>For h=289, sources q=11,31,47 with required residues</p>
+<p><code>9, 19, 21</code></p>
+<p>jointly saturate QR(167) from class seed6:</p>
+<p><code>S = 6*11*31*47 = 96162</code>.</p>
+<p>Again no proper routed subset is sufficient.</p>
+<h2>4. The finite kappa-star record realizes a pair saturation exactly</h2>
+<p>The finite first-denominator record</p>
+<p><code>p = 8,803,369</code></p>
+<p>has hard class h=169 and first Lane-I hit kappa-star=107 in the existing finite census.</p>
+<p>Before that hit it misses k=11, k=19, and k=23. Its relevant congruences are</p>
+<p><code>p mod11 = 3</code></p>
+<p>and</p>
+<p><code>p mod23 = 4</code>.</p>
+<p>Therefore the q=11 and q=23 source routes both land in C19.</p>
+<p>Indeed</p>
+<p><code>C19 = (p+19)/4 = 2,200,847</code></p>
+<p>with exact factorization</p>
+<p><code>2,200,847 = 11*23*8699</code>.</p>
+<p>The pair seed</p>
+<p><code>11*23 = 253</code></p>
+<p>already fills every quadratic residue modulo19. The remaining factor satisfies</p>
+<p><code>8699 mod19 = 16</code>,</p>
+<p>which is itself a quadratic residue modulo19.</p>
+<p>So k=19 still misses exactly as the saturation theorem predicts.</p>
+<p>This is an important adversarial witness. Multi-source saturation is a real structural strengthening, but saturation alone is not coverage. A hard prime can satisfy the resulting QR-only support condition and continue deeper.</p>
+<h2>5. Strategic meaning</h2>
+<p>The route graph now has three distinct levels:</p>
+<ol><li>Character routing - a positive source character routes a prime factor into another companion.</li><li>Single-source saturation - one routed factor enlarges the destination seed enough to fill its QR subgroup.</li><li>Multi-source saturation - several individually insufficient routed factors collectively fill the destination QR subgroup.</li></ol>
+<p>The third level is the first genuinely collective routing mechanism. It is invisible if each character theorem is studied in isolation.</p>
+<p>The next useful question is not merely whether a destination becomes QR-rigid. The 8,803,369 anchor shows that QR-rigid residual support can persist. The next target is therefore:</p>
+<blockquote><p>after multi-source saturation, can the remaining cofactor be forced into a proper subset of the QR subgroup by another exact state, valuation, or coprime-residual constraint?</p></blockquote>
+<p>This points directly toward intersections of the multi-source saturation atlas with</p>
+<ul><li>exceptional exact miss masks;</li><li>the six-companion residual wheel;</li><li>class-conditioned residual coprimality;</li><li>higher-order characters inside the QR subgroup;</li><li>valuation constraints from the divisor-square state.</li></ul>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

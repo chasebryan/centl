@@ -1,0 +1,265 @@
+name: CBX research census
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Lane-I shift ceiling'
+        required: true
+        default: '400'
+      segment:
+        description: 'Inverse/shift p-segment size'
+        required: true
+        default: '1000000'
+      repeat:
+        description: 'Orientation benchmark repetitions'
+        required: true
+        default: '3'
+  # Seed a publication-grade research run when this workflow changes on PR #230.
+  # Ordinary CBX source changes do not trigger this expensive path automatically.
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-research-census.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-research:
+    name: Fedora deep Lane-I census
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      REPEAT: ${{ inputs.repeat || '3' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build CBX research engines
+        run: make -C research/erdos-straus/cbx.kernel clean all
+
+      - name: Prepare research artifact directory
+        run: |
+          mkdir -p /tmp/cbx-research
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "repeat=$REPEAT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n 1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-research/ENVIRONMENT.txt
+
+      - name: Construct and verify target-gated inverse cover
+        run: |
+          ./centl es cbx inverse \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --verify \
+            --layers /tmp/cbx-research/inverse-layers.tsv \
+            --hits /tmp/cbx-research/inverse-hits.tsv \
+            --residuals /tmp/cbx-research/inverse-residuals.txt \
+            > /tmp/cbx-research/inverse-summary.json
+          python3 research/erdos-straus/cbx.kernel/analyze_layers.py \
+            /tmp/cbx-research/inverse-layers.tsv --json \
+            > /tmp/cbx-research/layer-analysis.json
+
+      - name: Construct and verify shift-major cover
+        run: |
+          ./centl es cbx shift-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --verify \
+            --hits /tmp/cbx-research/shift-hits.tsv \
+            --residuals /tmp/cbx-research/shift-residuals.txt \
+            > /tmp/cbx-research/shift-summary.json
+
+      - name: Profile every Lane-I shift
+        run: |
+          ./centl es cbx profile-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            > /tmp/cbx-research/shift-profile.json
+          ./centl es cbx analyze-profile \
+            /tmp/cbx-research/shift-profile.json --json \
+            > /tmp/cbx-research/shift-profile-analysis.json
+
+      - name: Construct p-major reference cover
+        run: |
+          ./centl es cbx forward-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --hits /tmp/cbx-research/forward-hits.tsv \
+            --residuals /tmp/cbx-research/forward-residuals.txt \
+            > /tmp/cbx-research/forward-summary.json
+
+      - name: Require exact hit and residual set identity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/cbx-research')
+
+          def read_hits(name):
+              path = root / name
+              hits = {}
+              for lineno, raw in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+                  if not raw.strip():
+                      continue
+                  parts = raw.split('\t')
+                  if len(parts) != 2:
+                      raise SystemExit(f'{path}:{lineno}: expected p<TAB>k')
+                  p, k = map(int, parts)
+                  if p in hits:
+                      raise SystemExit(f'{path}:{lineno}: duplicate prime {p}')
+                  hits[p] = k
+              return hits
+
+          def read_residuals(name):
+              path = root / name
+              seen = set()
+              for lineno, raw in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+                  if not raw.strip():
+                      continue
+                  p = int(raw)
+                  if p in seen:
+                      raise SystemExit(f'{path}:{lineno}: duplicate residual prime {p}')
+                  seen.add(p)
+              return seen
+
+          inv = read_hits('inverse-hits.tsv')
+          sh = read_hits('shift-hits.tsv')
+          fwd = read_hits('forward-hits.tsv')
+          if inv != fwd:
+              only_inv = sorted(inv.keys() - fwd.keys())[:10]
+              only_fwd = sorted(fwd.keys() - inv.keys())[:10]
+              depth = [(p, inv[p], fwd[p]) for p in sorted(inv.keys() & fwd.keys()) if inv[p] != fwd[p]][:10]
+              raise SystemExit(f'inverse/forward hit-map mismatch: only_inverse={only_inv} only_forward={only_fwd} depth={depth}')
+          if sh != fwd:
+              only_sh = sorted(sh.keys() - fwd.keys())[:10]
+              only_fwd = sorted(fwd.keys() - sh.keys())[:10]
+              depth = [(p, sh[p], fwd[p]) for p in sorted(sh.keys() & fwd.keys()) if sh[p] != fwd[p]][:10]
+              raise SystemExit(f'shift/forward hit-map mismatch: only_shift={only_sh} only_forward={only_fwd} depth={depth}')
+
+          inv_r = read_residuals('inverse-residuals.txt')
+          sh_r = read_residuals('shift-residuals.txt')
+          fwd_r = read_residuals('forward-residuals.txt')
+          if inv_r != fwd_r:
+              raise SystemExit(f'inverse/forward residual mismatch: only_inverse={sorted(inv_r-fwd_r)[:10]} only_forward={sorted(fwd_r-inv_r)[:10]}')
+          if sh_r != fwd_r:
+              raise SystemExit(f'shift/forward residual mismatch: only_shift={sorted(sh_r-fwd_r)[:10]} only_forward={sorted(fwd_r-sh_r)[:10]}')
+
+          if set(fwd) & fwd_r:
+              raise SystemExit('forward hit/residual sets overlap')
+
+          (root / 'canonical-hits.tsv').write_text(
+              ''.join(f'{p}\t{fwd[p]}\n' for p in sorted(fwd)), encoding='utf-8'
+          )
+          (root / 'canonical-residuals.txt').write_text(
+              ''.join(f'{p}\n' for p in sorted(fwd_r)), encoding='utf-8'
+          )
+          print(f'exact maps agree: hits={len(fwd)} residuals={len(fwd_r)}')
+          PY
+
+      - name: Benchmark all three orientations
+        run: |
+          ./centl es cbx bench \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --repeat "$REPEAT" \
+            --no-verify \
+            --json > /tmp/cbx-research/orientation-benchmark.json
+
+      - name: Build concise research summary
+        run: |
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-research'
+          inv=json.load(open(root+'/inverse-summary.json'))
+          sh=json.load(open(root+'/shift-summary.json'))
+          fwd=json.load(open(root+'/forward-summary.json'))
+          layers=json.load(open(root+'/layer-analysis.json'))
+          profile=json.load(open(root+'/shift-profile-analysis.json'))
+          bench=json.load(open(root+'/orientation-benchmark.json'))['results'][0]
+          assert inv['verification_mismatches'] == 0
+          assert sh['verification_mismatches'] == 0
+          assert inv['hard_primes'] == sh['hard_primes'] == fwd['hard_primes'] == profile['hard_primes']
+          assert inv['covered_hard_primes'] == sh['covered_hard_primes'] == fwd['covered_hard_primes'] == profile['covered_hard_primes']
+          assert inv['residual_hard_primes'] == sh['residual_hard_primes'] == fwd['residual_hard_primes'] == profile['residual_hard_primes']
+          assert profile['totals']['first_hits'] == profile['covered_hard_primes']
+          productive=[r for r in layers['rows'] if r['new_covered'] > 0]
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'deep-lane-I-census-v2',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':inv['hard_primes'],
+              'covered_hard_primes':inv['covered_hard_primes'],
+              'residual_hard_primes':inv['residual_hard_primes'],
+              'productive_layers':len(productive),
+              'productive_k':[r['k'] for r in productive],
+              'deepest_productive_k':max((r['k'] for r in productive), default=None),
+              'top_new_cover':layers['top_new_cover'][:12],
+              'dead_factoring_k':layers['dead_factoring_k'],
+              'first_hit_depth_quantiles':profile['first_hit_depth_quantiles'],
+              'spectrum_first_hits':profile['totals']['spectrum_hits'],
+              'top_shift_first_hits':profile['top_first_hit_count'][:12],
+              'top_shift_major_efficiency':profile['top_shift_major_efficiency'][:12],
+              'top_C_major_generation_density':profile['top_C_major_generation_density'][:12],
+              'profile_dead_factoring_k':profile['dead_factoring_k'],
+              'inverse_factorizations':inv['factorizations'],
+              'inverse_C_candidates':inv['C_candidates'],
+              'forward_factorizations':fwd['factorizations'],
+              'shift_factorizations':sh['factorizations'],
+              'benchmark':bench['comparison'],
+              'claim':'finite exact operation counts and finite machine-specific timings only',
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          print(
+              f"::notice title=CBX deep Fedora census::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
+              f"covered={report['covered_hard_primes']}; residual={report['residual_hard_primes']}; "
+              f"productive layers={report['productive_layers']}; "
+              f"deepest productive k={report['deepest_productive_k']}; "
+              f"depths={report['first_hit_depth_quantiles']}; "
+              f"dead-with-factorization={len(report['dead_factoring_k'])}"
+          )
+          PY
+
+      - name: Hash research outputs
+        run: |
+          cd /tmp/cbx-research
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Preserve research census artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-research/
+          if-no-files-found: error
+          retention-days: 90

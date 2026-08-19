@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Binary rescue and Lane-I are the same fixed-shift test — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-binary-lane-i-equivalence.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-binary-lane-i-equivalence.html">
+  <meta property="og:title" content="Binary rescue and Lane-I are the same fixed-shift test — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Binary rescue and Lane-I are the same fixed-shift test</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-BINARY-LANE-I-EQUIVALENCE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact equivalence</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-DIVISOR-COLLISION.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-plus/LETTER-EQUATION.md</code></p>
+<p><strong>Claim boundary:</strong> this identifies two exact formulations of the same fixed-shift Erdős–Straus condition. It does not prove that some shift always succeeds and therefore does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime and let</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+k}{4}}, \qquad \boxed{N=pC}.</div>
+<p>Then <code>gcd(C,k)=1</code>. Also <code>gcd(p,C)=1</code>, because any common divisor of <code>p</code> and <code>C</code> divides</p>
+<div class="math" role="math">4C-p=k.</div>
+<p>Thus every divisor of <code>N^2=p^2C^2</code> has a unique form</p>
+<div class="math" role="math">\boxed{D=p^a e, \qquad a\in\{0,1,2\}, \qquad e\mid C^2.}</div>
+<p>Modulo <code>k</code>,</p>
+<div class="math" role="math">\boxed{p\equiv4C}, \qquad \boxed{N=pC\equiv4C^2.}</div>
+<hr>
+<h2>2. The binary criterion</h2>
+<p><code>BINARY-R-DIVISOR-COLLISION.md</code> applies to any odd positive <code>k==3 mod4</code> with <code>gcd(N,k)=1</code>; primality of <code>k</code> is not required.</p>
+<p>The binary remainder</p>
+<div class="math" role="math">\frac{k}{N}</div>
+<p>splits into two unit fractions if and only if there exists</p>
+<div class="math" role="math">D\mid N^2</div>
+<p>such that</p>
+<div class="math" role="math">\boxed{D\equiv-N\pmod k.}</div>
+<p>Using <code>D=p^a e</code> and <code>N==4C^2 mod k</code>, this is</p>
+<div class="math" role="math">p^a e\equiv-4C^2\pmod k.</div>
+<p>The three possible exponents <code>a=0,1,2</code> are exactly the two Lane-I targets.</p>
+<hr>
+<h2>3. The middle p-exponent is exactly Type II</h2>
+<p>If</p>
+<div class="math" role="math">a=1,</div>
+<p>then</p>
+<div class="math" role="math">pe\equiv-4C^2\pmod k.</div>
+<p>Since <code>p==4C mod k</code> and <code>4C</code> is a unit,</p>
+<div class="math" role="math">4Ce\equiv-4C^2</div>
+<p>is equivalent to</p>
+<div class="math" role="math">\boxed{e\equiv-C\pmod k.}</div>
+<p>By <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, this is exactly the Type-II divisor-square criterion.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ a=1 \quad\Longleftrightarrow\quad \text{Lane-I Type II}.}</div>
+<p>An explicit Lane-I Type-II witness <code>e|C^2</code> maps to the binary witness</p>
+<div class="math" role="math">\boxed{D=pe.}</div>
+<hr>
+<h2>4. The outer p-exponents are the two Type-I orientations</h2>
+<h3>Case a=2</h3>
+<p>If</p>
+<div class="math" role="math">a=2,</div>
+<p>then</p>
+<div class="math" role="math">p^2e\equiv-4C^2\pmod k.</div>
+<p>Using <code>p^2==16C^2 mod k</code> and cancelling <code>C^2</code>,</p>
+<div class="math" role="math">16e\equiv-4</div>
+<p>so</p>
+<div class="math" role="math">\boxed{e\equiv-4^{-1}\pmod k.}</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{4e\equiv-1\pmod k,}</div>
+<p>which is exactly the Type-I divisor-square criterion.</p>
+<p>Thus a Type-I witness <code>e|C^2</code> maps directly to</p>
+<div class="math" role="math">\boxed{D=p^2e.}</div>
+<h3>Case a=0</h3>
+<p>If</p>
+<div class="math" role="math">a=0,</div>
+<p>then</p>
+<div class="math" role="math">e\equiv-4C^2\pmod k.</div>
+<p>Let</p>
+<div class="math" role="math">e^*=\frac{C^2}{e}.</div>
+<p>Because <code>e</code> is a unit modulo <code>k</code>,</p>
+<div class="math" role="math">e^* \equiv \frac{C^2}{-4C^2} \equiv -4^{-1} \pmod k.</div>
+<p>Hence <code>e*</code> is again a Type-I divisor-square witness. This is precisely divisor-complement symmetry between the two Type-I orientations.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ a\in\{0,2\} \quad\Longleftrightarrow\quad \text{Lane-I Type I}.}</div>
+<hr>
+<h2>5. Exact equivalence theorem</h2>
+<h3>Theorem</h3>
+<p>For prime <code>p==1 mod4</code> and any admissible shift</p>
+<div class="math" role="math">k\equiv3\pmod4, \qquad \gcd(k,p)=1,</div>
+<p>with</p>
+<div class="math" role="math">C=\frac{p+k}{4}, \qquad N=pC,</div>
+<p>the following are equivalent:</p>
+<ol><li>the fixed-<code>k</code> binary remainder</li></ol>
+<div class="math" role="math">\frac{k}{N}</div>
+<p>splits into two unit fractions;</p>
+<ol><li>there exists <code>D|N^2</code> with</li></ol>
+<div class="math" role="math">D\equiv-N\pmod k;</div>
+<ol><li>the Lane-I two-target signed box hits at shift <code>k</code>;</li><li>there exists <code>e|C^2</code> satisfying at least one of</li></ol>
+<div class="math" role="math">\boxed{4e\equiv-1\pmod k}</div>
+<p>or &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;\boxed{e\equiv-C\pmod k.}&lt;/div&gt;</p>
+<p>In particular,</p>
+<div class="math" role="math">\boxed{ \text{binary rescue at }r=k \iff \delta_k\!\left(\frac{p+k}{4}\right)=0. }</div>
+<p>This is an equality of the fixed-shift hit sets, not merely an implication.</p>
+<hr>
+<h2>6. Consecutive-selector identification</h2>
+<p>For a Mordell-hard prime write</p>
+<div class="math" role="math">P=\frac{p-1}{4}.</div>
+<p>The consecutive binary selector uses</p>
+<div class="math" role="math">r_u=4u-1.</div>
+<p>Taking</p>
+<div class="math" role="math">k=r_u</div>
+<p>gives</p>
+<div class="math" role="math">C =\frac{p+k}{4} =\frac{p-1}{4}+u =\boxed{P+u}.</div>
+<p>Therefore CBX Lane-I shifts</p>
+<div class="math" role="math">3,7,11,15,\ldots</div>
+<p>are exactly the consecutive binary selectors</p>
+<div class="math" role="math">u=1,2,3,4,\ldots.</div>
+<p>Their first-hit depths satisfy</p>
+<div class="math" role="math">\boxed{k_I^*(p)=4u^*(p)-1.}</div>
+<p>For example, the finite record</p>
+<div class="math" role="math">p=8,803,369, \qquad k_I^*=107</div>
+<p>is exactly the previously recorded consecutive-selector first hit</p>
+<div class="math" role="math">u^*=27, \qquad r_{27}=107.</div>
+<hr>
+<h2>7. Consequence for theorem mining</h2>
+<p>This equivalence removes a duplicated frontier.</p>
+<p>Every exact fixed-<code>r</code> binary theorem is automatically an exact classification of the corresponding CBX Lane-I layer <code>k=r</code>, including the existing results at <code>3</code>, <code>7</code>, and <code>11</code>.</p>
+<p>Conversely, every CBX finite layer census is finite evidence about the same binary-rescue hit set and can be used to prioritize new fixed-<code>r</code> classifications.</p>
+<p>In particular, the 10M overlap graph should not rediscover already-proved binary residue classes as if they were new Lane-I phenomena. Its highest-value role is to identify unexplained overlap or failure structure <strong>after</strong> importing the binary classifications.</p>
+<p>The computational orientation remains distinct:</p>
+<ul><li>the binary program was developed primarily as a theorem-mining formulation;</li><li>CBX supplies p-major, C-major, shift-major, standalone, overlap, and hybrid scheduling instruments.</li></ul>
+<p>The mathematical predicate is the same.</p>
+<hr>
+<h2>8. Research direction</h2>
+<p>The next exact target is therefore not to maintain separate “binary” and “Lane-I” fixed-shift theories. It is to build one shared fixed-shift classification table:</p>
+<div class="math" role="math">\boxed{ k=3,7,11,15,19,23,\ldots}</div>
+<p>recording, for each shift,</p>
+<ul><li>exact automatic residue families;</li><li>exact factor-support failure laws;</li><li>Type-I versus Type-II witness mechanism;</li><li>finite intrinsic hit rate;</li><li>overlap with earlier classified layers;</li><li>the remaining unclassified failure set.</li></ul>
+<p>That table can feed both proof search and CBX scheduling without changing mathematical semantics.</p>
+<hr>
+<p>Erdős–Straus remains open. This theorem identifies two exact formulations; it does not supply the missing universal existence argument.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

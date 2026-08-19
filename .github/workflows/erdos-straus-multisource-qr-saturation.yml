@@ -1,0 +1,26 @@
+name: Erdős–Straus multi-source QR saturation
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/MULTISOURCE-QR-SATURATION.md"
+      - "research/erdos-straus/classify_multisource_qr_saturation.py"
+      - "research/erdos-straus/verify_multisource_qr_saturation.py"
+      - ".github/workflows/erdos-straus-multisource-qr-saturation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Multi-source saturation classifier
+        run: python3 research/erdos-straus/classify_multisource_qr_saturation.py --max-k 5000 --json
+      - name: Independent exponent-coordinate verification
+        run: python3 research/erdos-straus/verify_multisource_qr_saturation.py --json

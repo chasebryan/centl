@@ -1,0 +1,80 @@
+name: Erdős–Straus k=51 two-target filter
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K51-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k51_states.py'
+      - 'research/erdos-straus/verify_k51_structure.py'
+      - '.github/workflows/erdos-straus-k51-two-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k51-two-target:
+    name: Fedora k=51 exact closure
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact k=51 closure
+        run: |
+          python3 research/erdos-straus/classify_k51_states.py --json > /tmp/k51.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k51.json', encoding='utf-8'))
+          assert r['analysis'] == 'k51-two-target-state-closure-v1'
+          assert r['group'] == 'C16 x C2'
+          assert r['type_i_residue'] == 38
+          assert r['type_i_coordinate'] == [1,12]
+          assert r['minus_one_coordinate'] == [1,8]
+          assert r['states'] == 6217
+          assert r['admissible_states'] == 2907
+          assert r['hit_states'] == 2000
+          assert r['miss_states'] == 907
+          assert r['pure_H_states'] == 293
+          assert r['pure_H_miss_states'] == 293
+          assert r['nonpure_miss_states'] == 614
+          assert r['miss_symmetry_orbits'] == 273
+          assert r['symmetry_orbit_histogram'] == {'1':31,'2':46,'4':196}
+          assert r['legendre17_miss_branches'] == {'+1':463,'-1':444}
+          assert r['min_outside_histogram'] == {'0':293,'2':602,'4':12}
+          assert r['maximum_minimum_outside_units'] == 4
+          print(
+              '::notice title=k=51 exact closure::'
+              f"states={r['states']}; admissible={r['admissible_states']}; "
+              f"misses={r['miss_states']}; outside={r['min_outside_histogram']}"
+          )
+          PY
+
+      - name: Independent finite divisor-box regression
+        run: |
+          python3 research/erdos-straus/verify_k51_structure.py --limit 100000 --json > /tmp/k51-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k51-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k51-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['direct_hits'] == 54
+          assert r['direct_misses'] == 219
+          assert r['mismatches'] == 0
+          assert r['legendre17_outcomes'] == {
+              '+1:hit':4,
+              '+1:miss':116,
+              '-1:hit':50,
+              '-1:miss':103,
+          }
+          print(
+              '::notice title=k=51 independent regression::'
+              f"hard={r['hard_primes']}; hits={r['direct_hits']}; "
+              f"misses={r['direct_misses']}; mismatches={r['mismatches']}"
+          )
+          PY

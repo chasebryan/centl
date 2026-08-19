@@ -1,0 +1,26 @@
+name: Erdős–Straus branch-aware character saturation closure
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/BRANCH-AWARE-CHARACTER-SATURATION-CLOSURE.md"
+      - "research/erdos-straus/classify_branch_aware_character_closure.py"
+      - "research/erdos-straus/verify_branch_aware_character_closure.py"
+      - ".github/workflows/erdos-straus-branch-aware-character-closure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact branch-aware closure
+        run: python3 research/erdos-straus/classify_branch_aware_character_closure.py --max-k 5000 --assert-frontier --json
+      - name: Independent direct-divisor anchors
+        run: python3 research/erdos-straus/verify_branch_aware_character_closure.py --json

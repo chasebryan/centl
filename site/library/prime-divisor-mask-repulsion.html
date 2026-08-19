@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let k be a prime with">
+  <title>Source-independent prime divisor-mask repulsion — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/prime-divisor-mask-repulsion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/prime-divisor-mask-repulsion.html">
+  <meta property="og:title" content="Source-independent prime divisor-mask repulsion — Free Computation Foundation">
+  <meta property="og:description" content="Let k be a prime with">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Source-independent prime divisor-mask repulsion</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let k be a prime with</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PRIME-DIVISOR-MASK-REPULSION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite-group theorem plus hard-class and recursive atlases</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_prime_divisor_mask_repulsion.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_prime_divisor_mask_repulsion.py</code></p>
+<p><strong>Depends on:</strong> QR-saturating seed lemma, reciprocity-route barrier, <code>RECURSIVE-CHARACTER-PROMOTION.md</code></p>
+<p><strong>Claim boundary:</strong> conditional fixed-shift branch pruning only. A positive source must still enter the exact route residue that makes it divide the destination companion. This does not give a universal shift ceiling and does not prove Erdős-Straus.</p>
+<h2>1. One theorem behind the k=23 and h=289,k=19 repulsion laws</h2>
+<p>Let k be a prime with</p>
+<p><code>k = 3 mod4</code>,</p>
+<p>and let S be a mandatory divisor of</p>
+<p><code>C_k = (p+k)/4</code>.</p>
+<p>Write</p>
+<p><code>A(S,k) = {D mod k : D divides S^2}</code>.</p>
+<p>Assume</p>
+<p><code>A(S,k) subset QR(k)</code>.</p>
+<p>Now let q be any prime available as a proved positive-character source and route it into C_k. Thus</p>
+<p><code>q | C_k</code>.</p>
+<p>The reciprocity-route barrier forces</p>
+<p><code>q mod k in QR(k)</code>.</p>
+<p>Put</p>
+<p><code>r = q mod k</code>.</p>
+<p>The new mandatory seed is Sq. Its square divisors have residue set</p>
+<p><code>A(S,k) * {1,r,r^2}</code>.</p>
+<p>Therefore:</p>
+<blockquote><p><strong>Prime divisor-mask repulsion theorem.</strong> If <code>A(S,k) * {1,r,r^2} = QR(k)</code>, then the routed seed Sq is QR-saturating modulo k. Any fixed-k miss after that route requires every prime factor of C_k to be a quadratic residue modulo k. In particular, every ordinary miss center with negative quadratic character is eliminated.</p></blockquote>
+<p>This is source-independent. The source prime matters only through its residue r modulo the destination and through the separate proof that it is a positive source on the branch.</p>
+<p>Define the repeller set</p>
+<p><code>R(S,k) = {r in QR(k) : A(S,k)*{1,r,r^2}=QR(k)}</code>.</p>
+<p>The previously proved k=23 and h=289,k=19 incoming-source theorems are exact special cases of this rule.</p>
+<h2>2. Finite hard-class atlas through k&lt;=5000</h2>
+<p>Scanning every prime destination</p>
+<p><code>k&lt;=5000</code>, <code>k=3 mod4</code>,</p>
+<p>with the exact hard-class seed</p>
+<p><code>g_(k,h) = gcd(210,(h+k)/4)</code></p>
+<p>finds exactly 21 class-seed branches with a nonempty source-independent repeller set.</p>
+<p>Of those:</p>
+<ul><li>16 branches have one or more negative ordinary miss centers, so an incoming repeller source creates genuine branch termination;</li><li>5 branches already have only positive-character ordinary miss centers, so incoming saturation strengthens support but does not eliminate a negative center.</li></ul>
+<p>The negative-center destinations are only</p>
+<p><code>k = 11,19,23,31,71</code>.</p>
+<h2>3. k=11: a new universal-looking local repeller geometry</h2>
+<p>For hard classes</p>
+<p><code>h in {1,121,361}</code>,</p>
+<p>the k=11 class seed is</p>
+<p><code>S=3</code>.</p>
+<p>Its divisor-square mask has three residues inside the five-element QR subgroup. The exact repeller set is</p>
+<p><code>R(3,11) = {3,4,5,9}</code>.</p>
+<p>The ordinary negative miss centers are</p>
+<p><code>p mod11 in {2,6}</code>.</p>
+<p>Therefore any positive source q routed into C11 with</p>
+<p><code>q mod11 in {3,4,5,9}</code></p>
+<p>eliminates both negative k=11 centers on those hard classes.</p>
+<p>The only positive residue that does not repel is the identity residue1.</p>
+<p>This is the same quotient geometry seen at k=23, but on the order-5 QR group.</p>
+<h2>4. k=19 has two distinct stabilizers</h2>
+<h3>h=289</h3>
+<p>The landed h=289 theorem is recovered exactly:</p>
+<p><code>S=7</code>,</p>
+<p><code>A={1,7,11}</code>,</p>
+<p>and</p>
+<p><code>R(7,19)={4,5,6,9,16,17}</code>.</p>
+<p>These routes eliminate the negative centers</p>
+<p><code>{2,3,14}</code>.</p>
+<h3>h=1 and h=361</h3>
+<p>Here the class seed is</p>
+<p><code>S=5</code>.</p>
+<p>The exact repeller set is much smaller:</p>
+<p><code>R(5,19)={7,11}</code>.</p>
+<p>Yet either residue QR-saturates the destination and eliminates all six ordinary negative centers</p>
+<p><code>{2,3,8,10,12,13}</code>.</p>
+<p>Thus the same destination can have different source stabilizers on different hard classes because the mandatory seed occupies a different divisor mask.</p>
+<h2>5. k=23 recovers the landed source-independent theorem</h2>
+<p>Every hard class has</p>
+<p><code>S=6</code>.</p>
+<p>The exact repeller set is</p>
+<p><code>QR(23) - {1}</code></p>
+<p>or explicitly</p>
+<p><code>{2,3,4,6,8,9,12,13,16,18}</code>.</p>
+<p>Every such incoming positive route eliminates</p>
+<p><code>p mod23 in {5,14}</code>.</p>
+<p>The identity source residue1 remains the sharp non-repelling control.</p>
+<h2>6. h=361,k=31 exposes a new terminal center</h2>
+<p>On h=361,</p>
+<p><code>S=14</code></p>
+<p>at k=31. The exact repeller residues are</p>
+<p><code>{2,4,5,8,10,14,16,20,25,28}</code>.</p>
+<p>The ordinary fixed-shift closure has exactly one negative miss center:</p>
+<p><code>p mod31 = 26</code>.</p>
+<p>Any positive source routed into C31 through one of those ten residues destroys that center.</p>
+<p>The h=169 and h=289 seed10 branches also possess source-independent repeller sets at k31, but their ordinary misses have no negative center. They are support-strengthening branches rather than negative-center terminal branches.</p>
+<h2>7. k=71: the largest current terminal destination</h2>
+<p>For hard classes</p>
+<p><code>h in {169,289,529}</code>,</p>
+<p>the k=71 class seed is</p>
+<p><code>S=30</code>.</p>
+<p>The base divisor mask occupies 25 of the 35 QR residues. Exactly 26 incoming QR source residues enlarge it to all of QR(71):</p>
+<p><code>{4,5,8,9,10,16,18,20,25,27,29,30,32,37,38,40,43,45,48,49,50,54,57,58,60,64}</code>.</p>
+<p>The ordinary negative miss centers are exactly</p>
+<p><code>p mod71 in {17,53}</code>.</p>
+<p>So k=71 is a genuine source-independent repulsion destination, not merely a promotion node discovered accidentally by the recursive search.</p>
+<h2>8. Five support-only saturation branches</h2>
+<p>The class-seed scan also finds five branches whose incoming repeller set is nonempty but whose ordinary miss centers are already entirely positive-character:</p>
+<ul><li>h=169, k31, seed10;</li><li>h=289, k31, seed10;</li><li>h=121, k47, seed42;</li><li>h=289, k47, seed42;</li><li>h=361, k59, seed105.</li></ul>
+<p>These are still exact divisor-mask saturation laws. They simply do not terminate a negative-character child, so they are separated from the 16 terminal-capable branches in the classifier output.</p>
+<h2>9. Intersection with the landed recursive character graph</h2>
+<p>The provenance-aware recursive graph currently has 70 canonical states.</p>
+<p>Intersecting every derived positive source in those states with the 16 negative-center repulsion branches gives exactly</p>
+<ul><li>106 ancestry-compatible state/source/destination repulsion opportunities;</li><li>17 distinct <code>(hard class, destination, source prime)</code> repeller triples.</li></ul>
+<p>Ten of those 17 are already represented by the landed k23 and h=289,k19 theorem families.</p>
+<p>Seven are new terminal mechanisms.</p>
+<h2>10. Seven new recursive terminal triples</h2>
+<h3>h=121, destination k=11</h3>
+<p>The recursive graph creates three sources that can repel both negative k11 centers:</p>
+<ul><li>q53, first available at recursive depth1; route condition <code>p mod53=42</code>; seed <code>3*53=159</code>;</li><li>q59, first available at depth2; route condition <code>p mod59=48</code>; seed <code>3*59=177</code>;</li><li>q71, first available at depth2; route condition <code>p mod71=60</code>; seed <code>3*71=213</code>.</li></ul>
+<p>Each source residue modulo11 lies in R(3,11), so the route eliminates</p>
+<p><code>p mod11 in {2,6}</code>.</p>
+<p>The q53 case is especially clean: q53 itself was extracted from the h=121 recursive k159 Jacobi branch, then feeds back into the small prime destination k11.</p>
+<h3>h=169, destination k=71</h3>
+<p>Two recursively available sources repel the negative k71 centers:</p>
+<ul><li>q37, already present at root depth0 from the merged k111 extraction; route condition <code>p mod37=3</code>; seed <code>30*37=1110</code>;</li><li>q167, first available at depth2; route condition <code>p mod167=96</code>; seed <code>30*167=5010</code>.</li></ul>
+<p>Each eliminates</p>
+<p><code>p mod71 in {17,53}</code>.</p>
+<p>Thus the same q37 source that promotes q71 on one route can terminate negative k71 children on another exact route.</p>
+<h3>h=289, destination k=71</h3>
+<p>Two sources provide the analogous terminal mechanism:</p>
+<ul><li>q43, root depth0 from the merged k215 extraction; route condition <code>p mod43=15</code>; seed <code>30*43=1290</code>;</li><li>q191, first available at depth1; route condition <code>p mod191=120</code>; seed <code>30*191=5730</code>.</li></ul>
+<p>Again both negative k71 centers 17 and53 are eliminated.</p>
+<h2>11. Exact relation to the existing repulsion theorems</h2>
+<p>This atlas does not retract the specialized k23 or h=289,k19 results.</p>
+<p>Those papers remain useful because they give particularly transparent group decompositions, explicit Type-II monomial tables, and realized prime anchors.</p>
+<p>The present theorem identifies the common algebraic engine:</p>
+<p><code>ordinary seed mask A</code></p>
+<p><code>+ incoming positive source residue r</code></p>
+<p><code>-&gt; A{1,r,r^2}</code></p>
+<p><code>-&gt; full QR subgroup</code></p>
+<p><code>-&gt; negative miss centers impossible</code>.</p>
+<p>The specialized results are now named instances of a general repulsion operator.</p>
+<h2>12. Strategic consequence for CBX</h2>
+<p>The recursive graph should no longer classify every useful positive-source route as a promotion attempt.</p>
+<p>A source route can now have at least four exact effects:</p>
+<ol><li><strong>promotion</strong> - a saturated miss creates a new positive character;</li><li><strong>repulsion</strong> - a saturated route destroys negative miss centers;</li><li><strong>residual allocation</strong> - routed residuals become coprime or nearly coprime across shifts;</li><li><strong>valuation phase</strong> - repeated routes force q-adic lifts.</li></ol>
+<p>The highest-value next engine is therefore a provenance-preserving survivor graph whose edges carry these effects independently and whose nodes are removed immediately when any repulsion rule contradicts their fixed center.</p>
+<p>That is a substantially sharper goal than merely increasing the search bound.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

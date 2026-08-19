@@ -1,0 +1,23 @@
+name: Erdős–Straus k39 phase absorption
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K39-PHASE-ABSORPTION.md"
+      - "research/erdos-straus/verify_k39_phase_absorption.py"
+      - ".github/workflows/erdos-straus-k39-phase-absorption.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k39 phase-absorption verification
+        run: python3 research/erdos-straus/verify_k39_phase_absorption.py --json

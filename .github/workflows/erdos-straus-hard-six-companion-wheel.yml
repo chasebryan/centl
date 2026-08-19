@@ -1,0 +1,58 @@
+name: Erdős–Straus hard six-companion residual wheel
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/MORDELL-HARD-SIX-COMPANION-RESIDUAL-WHEEL.md'
+      - 'research/erdos-straus/verify_mordell_hard_six_companion_wheel.py'
+      - '.github/workflows/erdos-straus-hard-six-companion-wheel.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-hard-six-wheel:
+    name: Fedora hard six-companion wheel
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact wheel identities and gcd graph
+        run: |
+          python3 research/erdos-straus/verify_mordell_hard_six_companion_wheel.py \
+            --max-t 1000 --json > /tmp/hard-six-wheel.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/hard-six-wheel.json', encoding='utf-8'))
+          assert r['analysis'] == 'mordell-hard-six-companion-residual-wheel-v1'
+          assert r['max_t'] == 1000
+          assert r['cases_checked'] == 36036
+          assert r['pairwise_gcd_checks'] == 540540
+          assert r['seed_pattern'] == [1,2,3,2,1,6]
+          assert r['exceptional_edges'] == {
+              'R0-R5': 'gcd(n+1,5)',
+              'R1-R5': 'gcd(n+1,2)',
+          }
+          assert r['observed_exceptional_nontrivial_counts'] == {
+              'R0-R5:gcd5': 7207,
+              'R1-R5:gcd2': 18018,
+          }
+          assert r['mismatches'] == 0
+          blocks={row['t']: row['shifts'] for row in r['example_blocks']}
+          assert blocks[0] == [3,7,11,15,19,23]
+          assert blocks[1] == [27,31,35,39,43,47]
+          assert blocks[2] == [51,55,59,63,67,71]
+          assert blocks[4] == [99,103,107,111,115,119]
+          print(
+              '::notice title=hard six-companion wheel::'
+              f"cases={r['cases_checked']}; gcd-checks={r['pairwise_gcd_checks']}; "
+              f"exceptions={r['observed_exceptional_nontrivial_counts']}"
+          )
+          PY

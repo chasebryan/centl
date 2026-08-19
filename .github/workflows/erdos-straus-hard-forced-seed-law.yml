@@ -1,0 +1,51 @@
+name: Erdős–Straus hard forced-seed law
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/MORDELL-HARD-FORCED-SEED-LAW.md'
+      - 'research/erdos-straus/verify_mordell_hard_forced_seed_law.py'
+      - '.github/workflows/erdos-straus-hard-forced-seed-law.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-hard-forced-seed-law:
+    name: Fedora hard forced-seed arithmetic
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify six-class forced-seed formula
+        run: |
+          python3 research/erdos-straus/verify_mordell_hard_forced_seed_law.py --max-k 5000 --json > /tmp/hard-seeds.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/hard-seeds.json', encoding='utf-8'))
+          assert r['analysis'] == 'mordell-hard-forced-seed-law-v1'
+          assert r['formula'] == 'gcd(6,(k+1)/4)'
+          assert r['max_k'] == 5000
+          assert r['admissible_shifts_checked'] == 1250
+          assert r['seed_histogram'] == {'1':417,'2':417,'3':208,'6':208}
+          assert r['mismatches'] == 0
+          rows={row['k']: row['forced_seed'] for row in r['rows_through_107']}
+          assert rows[35] == 3
+          assert rows[39] == 2
+          assert rows[47] == 6
+          assert rows[55] == 2
+          assert rows[59] == 3
+          assert rows[63] == 2
+          assert rows[107] == 3
+          print(
+              '::notice title=hard forced-seed law::'
+              f"shifts={r['admissible_shifts_checked']}; seeds={r['seed_histogram']}"
+          )
+          PY

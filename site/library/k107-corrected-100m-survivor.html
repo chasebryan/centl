@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="After the exact fixed-shift corridor through k=63, the corrected 100M hard-prime census has one remaining prime:">
+  <title>Corrected 100M corridor survivor and its exact `k=107` witness — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k107-corrected-100m-survivor.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k107-corrected-100m-survivor.html">
+  <meta property="og:title" content="Corrected 100M corridor survivor and its exact `k=107` witness — Free Computation Foundation">
+  <meta property="og:description" content="After the exact fixed-shift corridor through k=63, the corrected 100M hard-prime census has one remaining prime:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Corrected 100M corridor survivor and its exact `k=107` witness</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">After the exact fixed-shift corridor through k=63, the corrected 100M hard-prime census has one remaining prime:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K107-CORRECTED-100M-SURVIVOR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite certificate</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Machine certificate:</strong> <code>verify_k107_survivor.py</code></p>
+<p><strong>Claim boundary:</strong> this concerns one prime in the corrected hard-prime census through <code>100,000,000</code>. It is not a universal shift bound and does not prove Erdős–Straus.</p>
+<h2>1. The corrected survivor</h2>
+<p>After the exact fixed-shift corridor through <code>k=63</code>, the corrected 100M hard-prime census has one remaining prime:</p>
+<div class="math" role="math">\boxed{p=8,803,369.}</div>
+<p>Direct signed-box evaluation shows that this prime misses every admissible shift</p>
+<div class="math" role="math">3,7,11,\ldots,103</div>
+<p>and first hits, among the configured shifts through 107, at</p>
+<div class="math" role="math">\boxed{k=107.}</div>
+<p>This corrects the earlier finite attribution: <code>90,108,841</code> is the prime captured at <code>k=63</code>; <code>8,803,369</code> is the survivor that persists to 107.</p>
+<h2>2. The opening at 107</h2>
+<p>Put</p>
+<div class="math" role="math">C_{107}=\frac{p+107}{4}.</div>
+<p>Then</p>
+<div class="math" role="math">\boxed{C_{107}=2,200,869}</div>
+<p>with exact factorization</p>
+<div class="math" role="math">\boxed{C_{107}=3^2\cdot11^2\cdot43\cdot47.}</div>
+<p>Choose the Type-II signed-box factors</p>
+<div class="math" role="math">B=3^2\cdot43\cdot47=18,189, \qquad D=1, \qquad T=11^2=121.</div>
+<p>They satisfy</p>
+<div class="math" role="math">BDT=C_{107}</div>
+<p>and, crucially,</p>
+<div class="math" role="math">\boxed{B=18,189=107\cdot170-1.}</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{BD^{-1}\equiv-1\pmod{107}.}</div>
+<p>This is exactly the Type-II target in the signed-box theorem.</p>
+<p>Equivalently, in divisor-square coordinates the complementary divisor is</p>
+<div class="math" role="math">d=11^2=121</div>
+<p>and</p>
+<div class="math" role="math">d\equiv-C_{107}\pmod{107}.</div>
+<h2>3. Exact Type-II reconstruction</h2>
+<p>Since</p>
+<div class="math" role="math">107\mid B+D,</div>
+<p>put</p>
+<div class="math" role="math">A=\frac{B+D}{107}=170.</div>
+<p>The standard Type-II identity gives</p>
+<div class="math" role="math">\frac4p = \frac1{BDT} + \frac1{pADT} + \frac1{pABT}.</div>
+<p>For this prime:</p>
+<div class="math" role="math">\boxed{ \frac4{8,803,369} = \frac1{2,200,869} + \frac1{181,085,300,330} + \frac1{3,293,760,527,702,370}.}</div>
+<p><code>verify_k107_survivor.py</code> checks this equality with exact rational arithmetic.</p>
+<h2>4. Companion sequence immediately before the hit</h2>
+<p>For the same prime, the shifted companions from 63 through 107 are:</p>
+<pre><code class="language-text">k=63   C=2,200,858 = 2 * 11 * 71 * 1409             miss
+k=67   C=2,200,859 = 719 * 3061                      miss
+k=71   C=2,200,860 = 2^2 * 3^2 * 5 * 12227          miss
+k=75   C=2,200,861 = 13 * 79 * 2143                  miss
+k=79   C=2,200,862 = 2 * 601 * 1831                  miss
+k=83   C=2,200,863 = 3 * 7 * 104803                  miss
+k=87   C=2,200,864 = 2^5 * 68777                     miss
+k=91   C=2,200,865 = 5 * 19 * 23167                  miss
+k=95   C=2,200,866 = 2 * 3 * 366811                  miss
+k=99   C=2,200,867 = 2200867                         miss
+k=103  C=2,200,868 = 2^2 * 29 * 18973                miss
+k=107  C=2,200,869 = 3^2 * 11^2 * 43 * 47           HIT Type II</code></pre>
+<p>The 107 opening is therefore not caused merely by an unusually smooth companion: several earlier companions are comparably structured. What is special is the exact multiplicative relation</p>
+<div class="math" role="math">3^2\cdot43\cdot47\equiv-1\pmod{107}.</div>
+<p>That relation is the next theorem-mining object.</p>
+<h2>5. Research implication</h2>
+<p>The corrected finite corridor no longer suggests that <code>k=47</code> or any nearby character branch alone supplies a universal closure. Instead it exhibits a long chain of exact fixed-shift misses terminating in one particularly sparse Type-II congruence at 107.</p>
+<p>The next useful question is not “is 107 a bound?” The finite data cannot justify that. The useful question is:</p>
+<blockquote><p>what arithmetic restrictions imposed by the prior miss states make a later relation of the form <code>B ≡ -D mod k</code> unavoidable?</p></blockquote>
+<p>That is a cross-shift factorization-compatibility problem.</p>
+<h2>6. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_k107_survivor.py</code></pre>
+<p>The certificate asserts the exact first-hit sequence through 107, the factorization of <code>C107</code>, the Type-II parameters <code>(A,B,D,T)=(170,18189,1,121)</code>, and the exact three-denominator identity.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

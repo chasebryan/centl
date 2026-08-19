@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For every Mordell-hard prime p,">
+  <title>Incoming positive-source repulsion at k=23 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k23-incoming-source-repulsion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k23-incoming-source-repulsion.html">
+  <meta property="og:title" content="Incoming positive-source repulsion at k=23 — Free Computation Foundation">
+  <meta property="og:description" content="For every Mordell-hard prime p,">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Incoming positive-source repulsion at k=23</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For every Mordell-hard prime p,</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K23-INCOMING-SOURCE-REPULSION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact fixed-shift route theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> reciprocity-route barrier, QR-saturating seed lemma, q13 recursive elimination</p>
+<p><strong>Primary classifier:</strong> <code>classify_k23_incoming_source_repulsion.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_k23_incoming_source_repulsion.py</code></p>
+<p><strong>Claim boundary:</strong> this eliminates the two negative k=23 miss centers after a broad class of incoming positive-character routes. It does not force every positive source to route into C23 and does not prove Erdős-Straus.</p>
+<h2>1. Setup</h2>
+<p>For every Mordell-hard prime p,</p>
+<p><code>C23 = (p+23)/4</code></p>
+<p>has the universal mandatory seed</p>
+<p><code>6 | C23</code>.</p>
+<p>Let q be another odd prime with</p>
+<p><code>q | C23</code></p>
+<p>and suppose q is available as a positive character source:</p>
+<p><code>(q/p)=+1</code>.</p>
+<p>The reciprocity-route barrier applies at destination k=23. Therefore</p>
+<p><code>(q/23)=+1</code>.</p>
+<p>Thus q modulo23 lies in</p>
+<p><code>QR(23) = {1,2,3,4,6,8,9,12,13,16,18}</code>.</p>
+<h2>2. Nonidentity incoming residues saturate the destination</h2>
+<p>The base seed6 is not QR-saturating modulo23.</p>
+<p>However, if</p>
+<p><code>q mod23</code> is any nonidentity element of QR(23),</p>
+<p>then the routed seed</p>
+<p><code>6q</code></p>
+<p>is QR-saturating modulo23:</p>
+<p><code>{D mod23 : D divides (6q)^2} = QR(23)</code>.</p>
+<p>This is an exact finite-group statement. In discrete-log coordinates, QR(23) is cyclic of order11 with generator2. Divisors of <code>(6q)^2</code> contribute exponents 0,1,2 from each of 2,3,q. For every nonzero QR exponent supplied by q, the resulting three-coordinate sumset is all of Z/11Z.</p>
+<p>The identity residue is the sharp exception. If</p>
+<p><code>q mod23 = 1</code>,</p>
+<p>then adjoining q contributes no new divisor residue and the seed remains non-saturating.</p>
+<h2>3. Consequence for the two exceptional k=23 miss centers</h2>
+<p>The ordinary seed-6 k=23 state geometry has exactly two negative-character miss centers:</p>
+<p><code>p mod23 = 5</code></p>
+<p>and</p>
+<p><code>p mod23 = 14</code>.</p>
+<p>If a nonidentity positive source q is routed into C23, seed6q is QR-saturating. A saturated k=23 miss requires every prime factor of C23 to be a quadratic residue modulo23, and therefore requires p mod23 itself to be a quadratic residue.</p>
+<p>Hence:</p>
+<blockquote><p>Any positively routed source prime q with <code>q mod23 != 1</code> eliminates both ordinary negative k=23 miss centers 5 and14.</p></blockquote>
+<p>This is source-independent. The merged q13 theorem is one recursive instance, not an isolated coincidence.</p>
+<h2>4. Explicit Type-II divisor certificates</h2>
+<p>The elimination can be witnessed directly by divisors of <code>(6q)^2</code>.</p>
+<p>For p mod23=5, the Type-II target is16.</p>
+<p>For p mod23=14, the Type-II target is8.</p>
+<p>For each nonidentity QR residue r=q mod23, the following exponent triples <code>(a,b,c)</code> produce</p>
+<p><code>D = 2^a 3^b q^c</code>,</p>
+<p>with every exponent at most2, so <code>D | (6q)^2 | C23^2</code>.</p>
+<table class="directory"><thead><tr><th>q mod23</th><th>p mod23=5, target16</th><th>p mod23=14, target8</th></tr></thead><tbody><tr><td>2</td><td><code>2^2 q^2</code></td><td><code>2 q^2</code></td></tr><tr><td>3</td><td><code>2^2 3 q^2</code></td><td><code>2 3 q^2</code></td></tr><tr><td>4</td><td><code>q^2</code></td><td><code>2q</code></td></tr><tr><td>6</td><td><code>3 q^2</code></td><td><code>3^2 q</code></td></tr><tr><td>8</td><td><code>2q</code></td><td><code>q</code></td></tr><tr><td>9</td><td><code>3^2 q^2</code></td><td><code>2 3 q</code></td></tr><tr><td>12</td><td><code>3^2 q</code></td><td><code>3^2 q^2</code></td></tr><tr><td>13</td><td><code>3q</code></td><td><code>q^2</code></td></tr><tr><td>16</td><td><code>q</code></td><td><code>2^2 3 q</code></td></tr><tr><td>18</td><td><code>2 3 q</code></td><td><code>3q</code></td></tr></tbody></table>
+<p>Each listed D is exactly the Type-II target modulo23.</p>
+<p>Therefore the branch elimination is constructive for every possible repelling source residue.</p>
+<h2>5. Current source examples</h2>
+<p>Several sources already present in the merged CBX theorem graph illustrate the rule.</p>
+<h3>q=13</h3>
+<p><code>13 mod23 = 13</code>.</p>
+<p>This is a nonidentity QR residue. The merged recursive q13 theorem therefore kills both negative k=23 centers. Its explicit choices are D=39 and D=169.</p>
+<h3>q=31</h3>
+<p><code>31 mod23 = 8</code>.</p>
+<p>Thus any positive q31 route into C23 makes seed186 QR-saturating and eliminates both negative centers. This is the previously observed q31 to k23 upgrade on h=169,289,529.</p>
+<h3>q=59</h3>
+<p><code>59 mod23 = 13</code>.</p>
+<p>Thus the h=361 q59 route into C23 makes seed354 QR-saturating and eliminates the negative centers.</p>
+<h3>q=47 - sharp identity control</h3>
+<p><code>47 mod23 = 1</code>.</p>
+<p>Although q47 can be a positive character source, adjoining it to the k=23 seed does not enlarge the divisor residue set:</p>
+<p><code>Div((6*47)^2) mod23 = Div(6^2) mod23</code>.</p>
+<p>So q47 is the exact identity-residue control showing why the hypothesis <code>q mod23 != 1</code> is necessary.</p>
+<h2>6. Strategic meaning</h2>
+<p>The exceptional negative k=23 geometry is fragile under incoming positive routes.</p>
+<p>A branch can preserve p mod23=5 or14 only if every positive source routed into C23 is congruent to1 modulo23. Any nonidentity positive incoming factor immediately supplies enough divisor-square geometry to hit k=23.</p>
+<p>This changes the recursive search target. Instead of treating the k=23 negative exceptions as permanent escape states, the branch-aware route graph should ask:</p>
+<blockquote><p>does any extracted or promoted positive source q with q mod23 !=1 become mandatory in C23?</p></blockquote>
+<p>If yes, that negative branch terminates at k=23.</p>
+<p>The remaining work is to propagate this rule through extracted q17, q37, q43 and later promoted sources, while preserving the exact residue constraints that created those sources.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

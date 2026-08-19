@@ -1,0 +1,76 @@
+name: Erdős–Straus k=43 two-target theorem
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K43-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k43_states.py'
+      - 'research/erdos-straus/verify_k43_structure.py'
+      - '.github/workflows/erdos-straus-k43-two-target.yml'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Independent hard-prime regression limit'
+        required: false
+        default: '10000000'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k43:
+    name: Fedora exact k=43 classification
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.limit || '100000' }}
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Exhaust exact C42 state space
+        run: |
+          python3 research/erdos-straus/classify_k43_states.py --json > /tmp/k43-state.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k43-state.json', encoding='utf-8'))
+          assert r['analysis'] == 'k43-two-target-state-closure-v1'
+          assert r['states'] == 31572
+          assert r['hit_states'] == 23832
+          assert r['miss_states'] == 7740
+          assert r['pure_qr_states'] == 852
+          assert r['pure_qr_miss_states'] == 852
+          assert r['miss_symmetry_orbits'] == 4045
+          assert r['miss_symmetry_fixed'] == 350
+          assert r['miss_symmetry_pairs'] == 3695
+          assert r['legendre43_miss_branches'] == {'+1': 4268, '-1': 3472}
+          assert r['min_nonresidue_histogram'] == {'0':852,'1':2474,'2':3177,'3':998,'4':239}
+          assert r['maximum_minimum_nonresidue_units'] == 4
+          print(
+              '::notice title=Exact k=43 state closure::'
+              f"states={r['states']}; miss={r['miss_states']}; "
+              f"Legendre={r['legendre43_miss_branches']}; "
+              f"min-NR={r['min_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Independent direct-divisor regression
+        run: |
+          python3 research/erdos-straus/verify_k43_structure.py --limit "$LIMIT" --json > /tmp/k43-direct.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k43-direct.json', encoding='utf-8'))
+          assert r['analysis'] == 'k43-structural-regression-v1'
+          assert r['hard_primes'] > 0
+          assert r['direct_hits'] + r['direct_misses'] == r['hard_primes']
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=Independent k=43 divisor regression::'
+              f"limit={r['limit']}; hard={r['hard_primes']}; "
+              f"hits={r['direct_hits']}; misses={r['direct_misses']}"
+          )
+          PY

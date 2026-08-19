@@ -1,0 +1,71 @@
+name: Erdős–Straus k=47 two-target theorem
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K47-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k47_states.py'
+      - 'research/erdos-straus/verify_k47_structure.py'
+      - '.github/workflows/erdos-straus-k47-two-target.yml'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Independent hard-prime regression limit'
+        required: false
+        default: '10000000'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k47:
+    name: Fedora exact k=47 classification
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.limit || '100000' }}
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Exhaust exact C46 state space
+        run: |
+          python3 research/erdos-straus/classify_k47_states.py --json > /tmp/k47-state.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-state.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-two-target-state-closure-v1'
+          assert r['states'] == 61134
+          assert r['hit_states'] == 46660
+          assert r['miss_states'] == 14474
+          assert r['pure_qr_states'] == 1498
+          assert r['pure_qr_miss_states'] == 1498
+          assert r['legendre47_miss_branches'] == {'+1': 7626, '-1': 6848}
+          assert r['min_nonresidue_histogram'] == {'0':1498,'1':5187,'2':5740,'3':1661,'4':388}
+          assert r['maximum_minimum_nonresidue_units'] == 4
+          print(
+              '::notice title=Exact k=47 state closure::'
+              f"states={r['states']}; miss={r['miss_states']}; "
+              f"Legendre={r['legendre47_miss_branches']}; min-NR={r['min_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Independent direct-divisor regression
+        run: |
+          python3 research/erdos-straus/verify_k47_structure.py --limit "$LIMIT" --json > /tmp/k47-direct.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k47-direct.json', encoding='utf-8'))
+          assert r['analysis'] == 'k47-structural-regression-v1'
+          assert r['hard_primes'] > 0
+          assert r['direct_hits'] + r['direct_misses'] == r['hard_primes']
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=Independent k=47 divisor regression::'
+              f"limit={r['limit']}; hard={r['hard_primes']}; hits={r['direct_hits']}; misses={r['direct_misses']}"
+          )
+          PY

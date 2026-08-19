@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The landed single-source exact-state theorem found two exceptional branches with negative fixed-shift miss centers but no incoming positive source residue that repels them:">
+  <title>Multi-source exact-state repulsion — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/multisource-exact-state-repulsion.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/multisource-exact-state-repulsion.html">
+  <meta property="og:title" content="Multi-source exact-state repulsion — Free Computation Foundation">
+  <meta property="og:description" content="The landed single-source exact-state theorem found two exceptional branches with negative fixed-shift miss centers but no incoming positive source residue that repels them:">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multi-source exact-state repulsion</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The landed single-source exact-state theorem found two exceptional branches with negative fixed-shift miss centers but no incoming positive source residue that repels them:</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTISOURCE-EXACT-STATE-REPULSION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite small-prime atlas plus range-free fixed-state implications</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_multisource_exact_state_repulsion.py</code></p>
+<p><strong>Independent verifier:</strong> <code>verify_multisource_exact_state_repulsion.py</code></p>
+<p><strong>Depends on:</strong> <code>EXACT-STATE-INCOMING-REPULSION.md</code></p>
+<p><strong>Claim boundary:</strong> this is a residue-pair repulsion atlas. Two distinct proved positive source primes still have to realize the named route residues on the same ancestry-compatible branch. It does not prove every survivor enters such a branch, does not give a universal shift ceiling, and does not prove Erdős-Straus.</p>
+<h2>1. The single-source boundary was not the exact-state boundary</h2>
+<p>The landed single-source exact-state theorem found two exceptional branches with negative fixed-shift miss centers but no incoming positive source residue that repels them:</p>
+<ul><li><code>h=169</code>, <code>k=19</code>, class seed1;</li><li><code>h=529</code>, <code>k=19</code>, class seed1.</li></ul>
+<p>That statement is exact for <strong>one</strong> incoming routed source.</p>
+<p>It is not stable under two routed sources.</p>
+<p>Two individually insufficient positive routed factors can jointly alter both the divisor mask and the moving Type-II center enough to eliminate every negative-character miss center while the combined starting mask still remains a proper subset of QR(k).</p>
+<p>That is a genuinely multi-source exact-state effect.</p>
+<h2>2. Definition</h2>
+<p>Fix a prime destination <code>k=3 mod4</code> and a class seed <code>S</code>.</p>
+<p>Let <code>r1,r2</code> be quadratic-residue source residues modulo k. They represent two proved positive source primes routed into the same companion.</p>
+<p>Starting from the exact seed state <code>(M,c)</code>, adjoin each routed factor by</p>
+<p><code>(M,c) -&gt; (M*{1,r,r^2}, c*r)</code>.</p>
+<p>The residue multiset <code>{r1,r2}</code> is a <strong>genuine two-source state-only repeller</strong> when</p>
+<ol><li>the ordinary seed closure has at least one negative-character miss center;</li><li>neither r1 nor r2 alone eliminates all negative miss centers;</li><li>adjoining both residues leaves no negative-character miss center in the complete exact closure;</li><li>the combined starting divisor mask is still not QR(k).</li></ol>
+<p>Condition 4 excludes ordinary two-source QR saturation. The mechanism therefore depends on the exact mask-center correlation.</p>
+<p>Residue pairs are multisets. A pair <code>(r,r)</code> does not mean the same rational prime is inserted twice. It means two distinct routed source primes may share residue r modulo the destination.</p>
+<h2>3. Exact small-prime atlas</h2>
+<p>Scanning the same prime destinations as the landed single-source exact-state theorem,</p>
+<p><code>k in {7,11,19,23,31,47}</code>,</p>
+<p>finds exactly</p>
+<ul><li><strong>10 class/destination branches</strong> with a genuine two-source state-only repeller;</li><li><strong>96 residue multisets</strong> in total;</li><li>both of the two former single-source no-repeller branches are resolved.</li></ul>
+<p>The 10 branches are</p>
+<ul><li>h1, k19, seed5;</li><li>h169, k19, seed1;</li><li>h361, k19, seed5;</li><li>h529, k19, seed1;</li><li>h1, k31, seed2;</li><li>h121, k31, seed2;</li><li>h1, k47, seed6;</li><li>h169, k47, seed6;</li><li>h361, k47, seed6;</li><li>h529, k47, seed6.</li></ul>
+<p>No claim is made here about larger prime destinations.</p>
+<h2>4. The flagship closure at h169/h529, k19</h2>
+<p>For both h169 and h529,</p>
+<p><code>C19</code></p>
+<p>has class seed1.</p>
+<p>The ordinary exact closure has</p>
+<ul><li>439 states;</li><li>136 misses;</li><li>negative miss centers</li></ul>
+<p><code>{2,3,8,10,12,13,14}</code>.</p>
+<p>The landed theorem proves that <strong>no single positive incoming source residue</strong> eliminates all seven negative centers.</p>
+<p>Nevertheless, exactly ten source-residue multisets do:</p>
+<pre><code class="language-text">(4,9)
+(4,16)
+(4,17)
+(5,6)
+(5,16)
+(6,9)
+(6,16)
+(6,17)
+(16,17)
+(17,17)</code></pre>
+<p>For every one of these pairs:</p>
+<ul><li>neither residue is a single-source exact repeller;</li><li>the two-source exact closure has no negative miss center;</li><li>the starting divisor mask has size 5 or7, strictly smaller than <code>|QR(19)|=9</code>;</li><li>the surviving miss centers are exactly the nine positive-character centers;</li><li>the exact closure has either 41 or70 states and 10 or12 misses.</li></ul>
+<p>Therefore, on an ancestry-compatible route carrying any one of these two-source residue multisets,</p>
+<blockquote><p>a k19 miss forces <code>(19/p)=+1</code>, even though neither incoming source does so alone and the combined seed is not QR-saturating.</p></blockquote>
+<p>This closes the two single-source exceptions from <code>EXACT-STATE-INCOMING-REPULSION.md</code> at arity two.</p>
+<h2>5. Why this is not disguised QR saturation</h2>
+<p>Take the flagship pair <code>(4,9)</code> at k19.</p>
+<p>Starting from seed1, the two routed factors generate only</p>
+<p><code>{1,4,5,9,11,16,17}</code></p>
+<p>inside the divisor-square mask.</p>
+<p>QR(19) has nine elements, so two residues are still absent.</p>
+<p>Yet the complete exact closure has no negative-character miss center.</p>
+<p>The reason is the moving Type-II target. The center is multiplied by each routed residue at the same time that the divisor mask grows. The surviving mask-center combinations avoid every negative center even though the static mask alone does not fill the positive subgroup.</p>
+<p>Character-only saturation cannot see this.</p>
+<h2>6. Additional pair-only geometries</h2>
+<h3>k31, seed2</h3>
+<p>On h1 and h121, twelve genuine pair-only state repellers occur:</p>
+<pre><code class="language-text">(7,7)   (7,18)  (7,19)
+(10,10) (10,20) (10,28)
+(18,18) (18,19) (19,19)
+(20,20) (20,28) (28,28)</code></pre>
+<p>For example <code>(7,18)</code> leaves</p>
+<ul><li>65 exact states;</li><li>16 misses;</li><li>all 15 surviving centers positive-character;</li><li>a proper, non-saturating starting mask.</li></ul>
+<p>Neither 7 nor18 is a single-source exact repeller on this branch.</p>
+<h3>k47, seed6</h3>
+<p>On h1, h169, h361 and h529, twelve genuine pair-only state repellers occur:</p>
+<pre><code class="language-text">(2,3)   (2,16)
+(3,3)   (3,16)  (3,24)
+(4,6)   (4,8)
+(6,12)  (6,24)
+(12,12)
+(16,16) (16,24)</code></pre>
+<p>The representative pair <code>(2,3)</code> leaves 97 exact states and24 misses, with all23 surviving centers positive-character and without filling QR(47).</p>
+<h2>7. Strategic consequence</h2>
+<p>The hierarchy of exact routing mechanisms is now</p>
+<ol><li>single-source QR/Jacobi saturation;</li><li>multi-source QR/Jacobi saturation;</li><li>single-source state-only repulsion;</li><li><strong>multi-source state-only repulsion</strong>.</li></ol>
+<p>The fourth mechanism is strictly necessary. It resolves the only two small-prime negative-center branches that survived every single positive incoming source.</p>
+<p>The next recursive graph should therefore admit state-only promotion edges of arity two, but it must preserve ancestry. A residue pair is not a free class-global source law. Both source characters and both exact route residues have to be established in the same state.</p>
+<p>The most valuable immediate intersection is with the 346-state exact-state-augmented character closure. That will determine whether any of the 96 residue multisets are actually realized by two known positive sources on the same recursive branch and whether the resulting k19/k31/k47 character promotions create a new feedback cascade or contradiction.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

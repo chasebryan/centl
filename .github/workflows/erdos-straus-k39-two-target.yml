@@ -1,0 +1,56 @@
+name: Erdős–Straus k=39 two-target theorem
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K39-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k39_states.py'
+      - 'research/erdos-straus/classify_k35_states.py'
+      - '.github/workflows/erdos-straus-k39-two-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k39:
+    name: Fedora exact k=39 conjugacy
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact state conjugacy
+        run: |
+          python3 research/erdos-straus/classify_k39_states.py --json --table > /tmp/k39.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k39.json', encoding='utf-8'))
+          assert r['analysis'] == 'k39-two-target-state-closure-v1'
+          assert r['states'] == 1298
+          assert r['admissible_states'] == 650
+          assert r['hit_states'] == 418
+          assert r['miss_states'] == 232
+          assert r['pure_J_states'] == 92
+          assert r['pure_J_miss_states'] == 92
+          assert r['nonpure_miss_states'] == 140
+          assert r['miss_symmetry_orbits'] == 149
+          assert r['min_outside_histogram'] == {'0': 92, '2': 138, '4': 2}
+          assert r['legendre13_miss_branches'] == {'+1': 122, '-1': 110}
+          assert r['k35_conjugacy_multiplier'] == 5
+          assert r['k35_conjugacy_verified'] is True
+          assert len(r['miss_rows']) == 232
+          assert len(r['exceptional_min_outside_4_states']) == 2
+          assert all(x['targets_coincide'] for x in r['exceptional_min_outside_4_states'])
+          print(
+              '::notice title=Exact k=39 conjugacy::'
+              f"states={r['states']}; miss={r['miss_states']}; "
+              f"Legendre={r['legendre13_miss_branches']}; "
+              f"min-outside={r['min_outside_histogram']}"
+          )
+          PY

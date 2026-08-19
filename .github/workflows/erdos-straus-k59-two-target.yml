@@ -1,0 +1,85 @@
+name: Erdős–Straus k=59 two-target filter
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K59-TWO-TARGET-FILTER.md'
+      - 'research/erdos-straus/classify_k59_states.py'
+      - 'research/erdos-straus/verify_k59_structure.py'
+      - '.github/workflows/erdos-straus-k59-two-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k59-two-target:
+    name: Fedora k=59 exact closure
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact k=59 closure
+        run: |
+          python3 research/erdos-straus/classify_k59_states.py --json > /tmp/k59.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k59.json', encoding='utf-8'))
+          assert r['analysis'] == 'k59-two-target-state-closure-v1'
+          assert r['group'] == 'C58'
+          assert r['primitive_root'] == 2
+          assert r['type_i_residue'] == 44
+          assert r['type_i_log'] == 27
+          assert r['minus_one_log'] == 29
+          assert r['states'] == 291907
+          assert r['hit_states'] == 230692
+          assert r['miss_states'] == 61215
+          assert r['pure_qr_states'] == 4671
+          assert r['pure_qr_miss_states'] == 4671
+          assert r['legendre59_miss_branches'] == {'+1':32110,'-1':29105}
+          assert r['min_nonresidue_histogram'] == {
+              '0':4671,
+              '1':19014,
+              '2':24783,
+              '3':9808,
+              '4':2656,
+              '5':283,
+          }
+          assert r['maximum_minimum_nonresidue_units'] == 5
+          assert r['target_preserving_scalar_automorphisms'] == [1]
+          print(
+              '::notice title=k=59 exact closure::'
+              f"states={r['states']}; misses={r['miss_states']}; "
+              f"NR={r['min_nonresidue_histogram']}"
+          )
+          PY
+
+      - name: Independent finite divisor-box regression
+        run: |
+          python3 research/erdos-straus/verify_k59_structure.py --limit 100000 --json > /tmp/k59-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k59-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k59-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['direct_hits'] == 117
+          assert r['direct_misses'] == 156
+          assert r['mismatches'] == 0
+          assert r['legendre59_outcomes'] == {
+              '+1:hit':20,
+              '+1:miss':97,
+              '-1:hit':97,
+              '-1:miss':59,
+          }
+          print(
+              '::notice title=k=59 independent regression::'
+              f"hard={r['hard_primes']}; hits={r['direct_hits']}; "
+              f"misses={r['direct_misses']}; mismatches={r['mismatches']}"
+          )
+          PY

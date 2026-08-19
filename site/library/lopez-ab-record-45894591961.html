@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="p = 45,894,591,961 d = 26 n = 509 K = dn = 13,234 m = 4dn-1 = 52,935 q = 866,999">
+  <title>Exact Type A and Erdős–Straus certificate for p = 45,894,591,961 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/lopez-ab-record-45894591961.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/lopez-ab-record-45894591961.html">
+  <meta property="og:title" content="Exact Type A and Erdős–Straus certificate for p = 45,894,591,961 — Free Computation Foundation">
+  <meta property="og:description" content="p = 45,894,591,961 d = 26 n = 509 K = dn = 13,234 m = 4dn-1 = 52,935 q = 866,999">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact Type A and Erdős–Straus certificate for p = 45,894,591,961</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">p = 45,894,591,961 d = 26 n = 509 K = dn = 13,234 m = 4dn-1 = 52,935 q = 866,999</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/LOPEZ-AB-RECORD-45894591961.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact arithmetic certificate</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Context:</strong> current deepest observed Type A/B first witness in the finite Mordell-hard census through 100 billion</p>
+<p><strong>Claim boundary:</strong> finite record only; not a universal depth bound.</p>
+<h2>Type A data</h2>
+<pre><code class="language-text">p = 45,894,591,961
+d = 26
+n = 509
+K = dn = 13,234
+m = 4dn-1 = 52,935
+q = 866,999</code></pre>
+<p>The defining congruence is certified by the exact identity</p>
+<pre><code class="language-text">p + 4d
+= 45,894,592,065
+= 866,999 * 52,935
+= q * (4dn-1).</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">p == -4d (mod 4dn-1),</code></pre>
+<p>so this is a López Type A witness.</p>
+<p>The bounded layer census finds no Type A or Type B witness for this prime at any <code>K &lt; 13,234</code>, and the independent complete square-root auditor returns the same first depth.</p>
+<h2>Constructive Type A solution</h2>
+<p>For a Type A certificate</p>
+<pre><code class="language-text">p = (4dn-1)q - 4d,</code></pre>
+<p>define</p>
+<pre><code class="language-text">u = nq - 1
+v = np.</code></pre>
+<p>Here</p>
+<pre><code class="language-text">u = 441,302,490
+v = 23,360,347,308,149.</code></pre>
+<p>The standard Type A denominators are</p>
+<pre><code class="language-text">x = du
+  = 11,473,864,740
+
+y = dv
+  = 607,369,030,011,874
+
+z = duv
+  = 268,033,465,293,124,725,766,260.</code></pre>
+<p>They satisfy the exact rational identity</p>
+<pre><code class="language-text">4 / 45,894,591,961
+=
+1 / 11,473,864,740
++
+1 / 607,369,030,011,874
++
+1 / 268,033,465,293,124,725,766,260.</code></pre>
+<p>No floating-point arithmetic is involved.</p>
+<h2>Algebraic verification</h2>
+<p>The Type A construction reduces to</p>
+<pre><code class="language-text">u(4dn-1) = np+1.</code></pre>
+<p>For the present values,</p>
+<pre><code class="language-text">441,302,490 * 52,935
+=
+23,360,347,308,150
+=
+509 * 45,894,591,961 + 1.</code></pre>
+<p>Consequently</p>
+<pre><code class="language-text">4dnu = u + np + 1,</code></pre>
+<p>which after substituting <code>v=np</code> is exactly the identity needed for</p>
+<pre><code class="language-text">4/p = 1/(du) + 1/(dv) + 1/(duv).</code></pre>
+<p>This certificate is attached to the 100-billion Type A/B census as the exact decomposition associated with the current finite depth record.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

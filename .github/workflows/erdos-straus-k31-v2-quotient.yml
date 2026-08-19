@@ -1,0 +1,104 @@
+name: Erdős–Straus k=31 quotient and lift theorem
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K31-TWO-TARGET-QUOTIENT.md'
+      - 'research/erdos-straus/K31-V2-ONE-LIFT-CLASSIFICATION.md'
+      - 'research/erdos-straus/ES-TWO-TARGET-DIVISOR-SQUARE.md'
+      - 'research/erdos-straus/ES-BINARY-LANE-I-EQUIVALENCE.md'
+      - 'research/erdos-straus/verify_k31_v2_quotient.py'
+      - 'research/erdos-straus/classify_k31_v2_one.py'
+      - '.github/workflows/erdos-straus-k31-v2-quotient.yml'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Inclusive prime upper bound for the independent regression'
+        required: true
+        default: '10000000'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k31:
+    name: Fedora exact k=31 quotient and lift regression
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.limit || '100000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Run independent k=31 v2>=2 theorem verifier
+        run: |
+          mkdir -p /tmp/k31
+          python3 research/erdos-straus/verify_k31_v2_quotient.py \
+            --limit "$LIMIT" --json > /tmp/k31/report.json
+          cat /tmp/k31/report.json
+
+      - name: Enumerate exact k=31 v2=1 lift states
+        run: |
+          python3 research/erdos-straus/classify_k31_v2_one.py --json \
+            > /tmp/k31/lift-states.json
+          cat /tmp/k31/lift-states.json
+
+      - name: Enforce exact theorem invariants
+        run: |
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/k31/report.json', encoding='utf-8'))
+          s = json.load(open('/tmp/k31/lift-states.json', encoding='utf-8'))
+          assert r['analysis'] == 'k31-v2-quotient-regression-v1'
+          assert r['hard_primes'] > 0
+          assert r['tested_v2_ge_2'] > 0
+          assert r['tested_v2_ge_2'] + r['skipped_v2_eq_1'] == r['hard_primes']
+          assert r['actual_hits'] + r['actual_misses'] == r['tested_v2_ge_2']
+          assert r['classification_mismatches'] == 0
+          assert r['constants']['type_i_divisor_target'] == 23
+          assert s['analysis'] == 'k31-v2-one-exact-lift-classifier-v2'
+          assert s['reachable_states'] == 760
+          assert s['transition_closure_checks'] == 22800
+          assert s['combined_miss_states'] == 118
+          assert s['quotient_miss_states'] == 101
+          assert s['lift_only_miss_states'] == 17
+          assert s['emitted_miss_rows'] == 118
+          assert len(s['miss_states']) == 118
+          assert sum(1 for row in s['miss_states'] if row['quotient_class'] == 'quotient-miss') == 101
+          assert sum(1 for row in s['miss_states'] if row['quotient_class'] == 'lift-only-miss') == 17
+          assert s['lift_defect_orbits_under_x_to_11x'] == 9
+          print(
+              f"::notice title=Exact k=31 quotient and lift::"
+              f"limit={r['limit']}; hard={r['hard_primes']}; v2>=2={r['tested_v2_ge_2']}; "
+              f"v2>=2-misses={r['actual_misses']}; lift-states={s['reachable_states']}; "
+              f"v2=1-miss-states={s['combined_miss_states']}; emitted={s['emitted_miss_rows']}; "
+              f"lift-only={s['lift_only_miss_states']}; lift-orbits={s['lift_defect_orbits_under_x_to_11x']}"
+          )
+          PY
+
+      - name: Preserve provenance
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          {
+            echo "source_commit=$SOURCE_SHA"
+            echo "limit=$LIMIT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "python=$(python3 --version)"
+          } > /tmp/k31/ENVIRONMENT.txt
+          cd /tmp/k31
+          sha256sum report.json lift-states.json ENVIRONMENT.txt > SHA256SUMS
+
+      - name: Upload full research replay
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: es-k31-quotient-lift-X${{ env.LIMIT }}-${{ env.SOURCE_SHA }}
+          path: /tmp/k31/
+          if-no-files-found: error
+          retention-days: 90

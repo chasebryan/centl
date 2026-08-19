@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let">
+  <title>Exact two-target filter at the composite shift `k=63` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k63-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k63-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the composite shift `k=63` — Free Computation Foundation">
+  <meta property="og:description" content="Let">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the composite shift `k=63`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Let</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K63-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact computer-assisted finite-group classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Machine certificate:</strong> <code>classify_k63_states.py</code></p>
+<p><strong>Independent finite regression:</strong> <code>verify_k63_structure.py</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=63</code>. It does not prove a universal finite shift ceiling and does not prove Erdős–Straus.</p>
+<h2>1. Hard-center compression</h2>
+<p>Let</p>
+<div class="math" role="math">C=\frac{p+63}{4}.</div>
+<p>By CRT,</p>
+<div class="math" role="math">(\mathbb Z/63\mathbb Z)^\times\cong C_6\times C_6.</div>
+<p>Use generators <code>29</code> and <code>10</code>, so</p>
+<div class="math" role="math">x=29^a10^b\pmod{63},\qquad a,b\in C_6.</div>
+<p>Every Mordell-hard prime satisfies <code>p = 1 mod 3</code>. Also its residue modulo 7 is one of <code>1,2,4</code>, hence a quadratic residue modulo 7. Since 4 is a square, the shifted center <code>C</code> is constrained to even exponent in both cyclic coordinates:</p>
+<div class="math" role="math">\boxed{a\equiv b\equiv0\pmod2.}</div>
+<p>Thus the hard-prime center lies in</p>
+<div class="math" role="math">\boxed{H\cong C_3\times C_3,}</div>
+<p>a nine-element subgroup of the 36-element unit group.</p>
+<h2>2. Exact targets</h2>
+<p>The Type-I target is</p>
+<div class="math" role="math">-4^{-1}\equiv47\pmod{63}</div>
+<p>with coordinate</p>
+<div class="math" role="math">\boxed{(1,5).}</div>
+<p>Also</p>
+<div class="math" role="math">-1=(3,3).</div>
+<p>For a hard center <code>(a,b)</code> with both entries even, the Type-II target <code>-C</code> is obtained by adding <code>(3,3)</code> and therefore lies in the odd/odd quotient class.</p>
+<p>A valuation occurrence in coordinate <code>g</code> again gives the exact transition</p>
+<div class="math" role="math">T_g(D,c)=\left(D+\{0,g,2g\},c+g\right).</div>
+<h2>3. Exact finite closure</h2>
+<p>Closing the empty state under all 36 unit directions gives</p>
+<div class="math" role="math">\boxed{6,389}</div>
+<p>states. Of these,</p>
+<div class="math" role="math">\boxed{1,844}</div>
+<p>have admissible hard center in <code>H</code>.</p>
+<p>The two-target test yields</p>
+<div class="math" role="math">\boxed{1,160\text{ hit states}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{684\text{ combined-miss states}.}</div>
+<p>This is a range-free exact fixed-shift classification.</p>
+<h2>4. Pure-H support is universally dead at 63</h2>
+<p>Closing only directions inside the nine-element hard subgroup gives exactly</p>
+<div class="math" role="math">\boxed{22}</div>
+<p>states. Both targets live outside <code>H</code>, so all 22 pure-H states miss:</p>
+<div class="math" role="math">\boxed{22/22.}</div>
+<p>The remaining 662 miss states use outside-H support.</p>
+<h2>5. Outside-H core size</h2>
+<p>For each miss state, minimize the number of valuation units whose direction lies outside <code>H</code>. The exact histogram is</p>
+<pre><code class="language-text">minimum outside-H units   miss states
+0                           22
+2                          222
+3                          206
+4                          234</code></pre>
+<p>Thus</p>
+<div class="math" role="math">\boxed{\text{every fixed-63 miss state has a state-equivalent representative using at most four outside-H units}.}</div>
+<p>The appearance of cost 3 is natural because the quotient <code>G/H</code> is <code>C2 x C2</code>: three distinct nonzero quotient classes can sum to zero.</p>
+<h2>6. Independent regression</h2>
+<p>Through <code>100,000</code>, the independent divisor-box verifier gives</p>
+<pre><code class="language-text">hard primes     273
+k=63 hits        54
+k=63 misses     219
+mismatches        0</code></pre>
+<p>A separate direct signed-box census through <code>100,000,000</code> gave</p>
+<pre><code class="language-text">hard primes     179,468
+k=63 hits        66,506
+k=63 misses     112,962
+mismatches             0</code></pre>
+<p>These population counts are finite checks. The theorem is the 6,389-state exact closure.</p>
+<h2>7. Corrected two-prime 100M tail</h2>
+<p>After all classified shifts through <code>k=59</code>, exactly two hard primes remain in the corrected 100M corridor:</p>
+<div class="math" role="math">8,803,369,\qquad90,108,841.</div>
+<p>At <code>k=63</code>:</p>
+<ul><li><code>90,108,841</code> hits;</li><li><code>8,803,369</code> misses.</li></ul>
+<p>The latter is the unique corrected 100M corridor survivor after <code>k=63</code> and first hits at <code>k=107</code> among the currently scanned admissible shifts.</p>
+<p>This finite first-hit fact is not a universal shift bound.</p>
+<h2>8. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k63_states.py --json
+python3 research/erdos-straus/verify_k63_structure.py --limit 100000 --json</code></pre>
+<p>Hard regression constants:</p>
+<pre><code class="language-text">total states                 6,389
+admissible states            1,844
+hit states                   1,160
+miss states                    684
+pure-H states                   22
+pure-H misses                   22
+nonpure misses                 662
+minimum outside-H       {0:22, 2:222, 3:206, 4:234}</code></pre>
+<p>Erdős–Straus remains open. Fixed <code>k=63</code> is completely classified; the corrected 100M corridor now has one survivor beyond it.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

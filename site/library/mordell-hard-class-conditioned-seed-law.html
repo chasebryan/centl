@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The Mordell-hard residue skeleton is">
+  <title>Class-conditioned forced-seed law on the Mordell-hard skeleton — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mordell-hard-class-conditioned-seed-law.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mordell-hard-class-conditioned-seed-law.html">
+  <meta property="og:title" content="Class-conditioned forced-seed law on the Mordell-hard skeleton — Free Computation Foundation">
+  <meta property="og:description" content="The Mordell-hard residue skeleton is">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Class-conditioned forced-seed law on the Mordell-hard skeleton</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">The Mordell-hard residue skeleton is</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MORDELL-HARD-CLASS-CONDITIONED-SEED-LAW.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>MORDELL-HARD-FORCED-SEED-LAW.md</code></p>
+<p><strong>Regression:</strong> <code>verify_mordell_hard_class_conditioned_seeds.py</code></p>
+<p><strong>Claim boundary:</strong> this identifies the maximal divisor forced by one fixed Mordell-hard residue class modulo 840. It is an arithmetic-skeleton theorem, not a fixed-shift coverage theorem and not a proof of Erdős–Straus.</p>
+<h2>1. From the six-class seed to a single-class seed</h2>
+<p>The Mordell-hard residue skeleton is</p>
+<div class="math" role="math">\boxed{ \mathcal H=\{1,121,169,289,361,529\}\pmod{840}. }</div>
+<p>Fix one class</p>
+<div class="math" role="math">p\equiv h\pmod{840},\qquad h\in\mathcal H,</div>
+<p>and write</p>
+<div class="math" role="math">p=840r+h.</div>
+<p>For an admissible shift</p>
+<div class="math" role="math">k\equiv3\pmod4,</div>
+<p>the companion is</p>
+<div class="math" role="math">C_k=\frac{p+k}{4} =210r+\frac{h+k}{4}.</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{ g_{k,h}:=\gcd\!\left(210,\frac{h+k}{4}\right).}</div>
+<p>Then <code>g_{k,h}</code> divides both terms and therefore</p>
+<div class="math" role="math">\boxed{g_{k,h}\mid C_k}</div>
+<p>for every integer, and hence every prime, in the fixed hard class <code>h mod 840</code>.</p>
+<h2>2. Maximality inside one complete hard class</h2>
+<p>As <code>r</code> varies through all integers, the values of the companion form the arithmetic progression</p>
+<div class="math" role="math">210r+c, \qquad c=\frac{h+k}{4}.</div>
+<p>The gcd of the complete progression is exactly</p>
+<div class="math" role="math">\gcd(210,c).</div>
+<p>Thus:</p>
+<h3>Theorem — maximal class-conditioned seed</h3>
+<p>For every hard residue class <code>h in H</code> and every admissible fixed shift <code>k</code>, the greatest integer dividing <code>C_k</code> for every integer <code>p=840r+h</code> is</p>
+<div class="math" role="math">\boxed{ g_{k,h}=\gcd\!\left(210,\frac{h+k}{4}\right).}</div>
+<p>No larger divisor can be forced from that congruence class alone.</p>
+<p>This theorem is stronger than the six-class seed law because it conditions on information already known about every Mordell-hard prime: its exact residue class modulo 840.</p>
+<h2>3. Exact factorization of the seed refinement</h2>
+<p>Every hard residue satisfies</p>
+<div class="math" role="math">h\equiv1\pmod{24}.</div>
+<p>Write</p>
+<div class="math" role="math">k=4u-1.</div>
+<p>Then</p>
+<div class="math" role="math">\frac{h+k}{4}\equiv\frac{1+k}{4}=u\pmod6.</div>
+<p>Therefore the <code>2,3</code> part of <code>g_{k,h}</code> is exactly the universal seed</p>
+<div class="math" role="math">g_k=\gcd(6,u).</div>
+<p>Since</p>
+<div class="math" role="math">210=6\cdot35, \qquad \gcd(6,35)=1,</div>
+<p>one gets the exact product decomposition</p>
+<div class="math" role="math">\boxed{ g_{k,h}=g_k\,e_{k,h},}</div>
+<p>where</p>
+<div class="math" role="math">\boxed{ e_{k,h}:=\gcd\!\left(35,\frac{h+k}{4}\right) \in\{1,5,7,35\}.}</div>
+<p>So the refinement is conceptually simple:</p>
+<ul><li>the universal hard seed supplies all forced <code>2</code> and <code>3</code> content;</li><li>the exact hard residue class may independently force <code>5</code>, <code>7</code>, or both.</li></ul>
+<h2>4. The class-conditioned seed is always a unit modulo <code>k</code></h2>
+<p>Every prime divisor of <code>g_{k,h}</code> belongs to</p>
+<div class="math" role="math">\{2,3,5,7\}.</div>
+<p>The hard residues are units modulo 840, so no prime in <code>{2,3,5,7}</code> divides <code>h</code>.</p>
+<p>Suppose a prime <code>q in {2,3,5,7}</code> divided both <code>g_{k,h}</code> and <code>k</code>. Since <code>q|g_{k,h}</code>, it divides <code>(h+k)/4</code>; multiplying by 4 gives</p>
+<div class="math" role="math">q\mid h+k.</div>
+<p>Together with <code>q|k</code>, this would imply <code>q|h</code>, contradiction.</p>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\gcd(g_{k,h},k)=1.}</div>
+<p>Every class-conditioned forced factor may therefore be consumed as an ordinary exact state transition at the fixed modulus.</p>
+<h2>5. Periodicity</h2>
+<p>For fixed <code>h</code>, increasing <code>k</code> by 840 increases <code>(h+k)/4</code> by 210. Therefore</p>
+<div class="math" role="math">\boxed{g_{k+840,h}=g_{k,h}.}</div>
+<p>The class-conditioned seed wheel has exact period 840 in the shift.</p>
+<p>The universal seed is the coarser period-24 projection obtained by taking the gcd across all six hard classes.</p>
+<h2>6. Quantitative refinement through <code>k&lt;=5000</code></h2>
+<p>There are 1,250 admissible shifts and six hard residue classes, giving</p>
+<div class="math" role="math">7,500</div>
+<p>class-shift pairs.</p>
+<p>The exact class-conditioned seed histogram is</p>
+<pre><code class="language-text">seed   class-shift pairs
+1             1,717
+2             1,714
+3               854
+5               427
+6               858
+7               287
+10              430
+14              287
+15              216
+21              142
+30              214
+35               71
+42              141
+70               71
+105              36
+210              35</code></pre>
+<p>Thus</p>
+<div class="math" role="math">\boxed{5,783/7,500}</div>
+<p>class-shift pairs carry a nontrivial forced divisor.</p>
+<p>Relative to the universal seed, the extra multiplier distribution is</p>
+<pre><code class="language-text">extra multiplier 1     5,143 pairs
+extra multiplier 5     1,287 pairs
+extra multiplier 7       857 pairs
+extra multiplier 35      213 pairs</code></pre>
+<p>Therefore the exact hard residue class strictly strengthens the universal seed in</p>
+<div class="math" role="math">\boxed{2,357/7,500}</div>
+<p>class-shift pairs.</p>
+<h2>7. Current fixed-shift examples</h2>
+<p>The refinement is not cosmetic.</p>
+<h3><code>k=39</code></h3>
+<p>The universal seed is <code>2</code>, but the six class-conditioned seeds are</p>
+<pre><code class="language-text">h=1      -&gt; 10
+h=121    -&gt; 10
+h=169    -&gt;  2
+h=289    -&gt;  2
+h=361    -&gt; 10
+h=529    -&gt;  2</code></pre>
+<p>Three hard classes therefore carry a mandatory factor <code>5</code> in addition to the universal factor <code>2</code>.</p>
+<h3><code>k=47</code></h3>
+<p>The universal seed is <code>6</code>:</p>
+<pre><code class="language-text">h=1      -&gt;  6
+h=121    -&gt; 42
+h=169    -&gt;  6
+h=289    -&gt; 42
+h=361    -&gt;  6
+h=529    -&gt;  6</code></pre>
+<p>Two hard classes force an additional factor <code>7</code>.</p>
+<h3><code>k=51</code></h3>
+<p>The universal seed is trivial, but the class refinement is not:</p>
+<pre><code class="language-text">h=1      -&gt; 1
+h=121    -&gt; 1
+h=169    -&gt; 5
+h=289    -&gt; 5
+h=361    -&gt; 1
+h=529    -&gt; 5</code></pre>
+<p>Thus half of the hard classes at k=51 have a mandatory factor <code>5</code> even though the six-class universal seed is <code>1</code>.</p>
+<h3><code>k=55</code></h3>
+<p>The universal seed is <code>2</code>:</p>
+<pre><code class="language-text">h=1      -&gt; 14
+h=121    -&gt;  2
+h=169    -&gt; 14
+h=289    -&gt;  2
+h=361    -&gt;  2
+h=529    -&gt;  2</code></pre>
+<p>Two classes carry a mandatory <code>7</code> as well.</p>
+<h3><code>k=59</code></h3>
+<p>This is the strongest current example. The universal seed is only <code>3</code>, while the six conditioned seeds are</p>
+<pre><code class="language-text">h=1      -&gt;  15
+h=121    -&gt;  15
+h=169    -&gt;   3
+h=289    -&gt;   3
+h=361    -&gt; 105
+h=529    -&gt;  21</code></pre>
+<p>So:</p>
+<ul><li>two classes force <code>3*5</code>;</li><li>two classes retain only <code>3</code>;</li><li>one class forces <code>3*5*7=105</code>;</li><li>one class forces <code>3*7=21</code>.</li></ul>
+<p>This predicts a much smaller class-resolved k=59 state atlas than the already-reduced 5,869-state universal forced-3 miss table.</p>
+<h3><code>k=63</code></h3>
+<p>All six classes have seed <code>2</code>; there is no additional 5/7 refinement at this shift.</p>
+<h2>8. Relation to the residual wheel</h2>
+<p>The six-companion residual wheel strips only the maximal seed common to all hard classes. Conditioning on <code>h mod 840</code> can strip further factors <code>5</code> and <code>7</code> from individual residuals.</p>
+<p>For example, in the <code>(55,59,63)</code> block:</p>
+<div class="math" role="math">C_{55}=2A, \qquad C_{59}=3B, \qquad C_{63}=2D,</div>
+<p>with</p>
+<div class="math" role="math">3B=2A+1, \qquad D=A+1.</div>
+<p>The class-conditioned theorem explains exact branch-specific factors visible in those residuals:</p>
+<ul><li>some hard classes force <code>7|A</code>;</li><li>some force <code>5|B</code>;</li><li>some force <code>7|B</code>;</li><li>one class forces <code>35|B</code>.</li></ul>
+<p>These are congruence-skeleton facts, not finite-prime accidents.</p>
+<h2>9. Correct state-analysis workflow</h2>
+<p>For a fixed shift and a known hard residue class, the strongest arithmetic seed available before factorization is now:</p>
+<ol><li>identify <code>h=p mod 840</code>;</li><li>compute</li></ol>
+<div class="math" role="math">g_{k,h}=\gcd\!\left(210,\frac{h+k}{4}\right);</div>
+<ol><li>consume the complete prime-valuation content of <code>g_{k,h}</code> as mandatory state transitions;</li><li>close only over the remaining factor directions;</li><li>retain any additional center/Jacobi restrictions appropriate to the modulus.</li></ol>
+<p>The earlier universal-seed closure remains useful when one wants a single class-independent theorem, but the class-conditioned closure is the natural object for the six actual Mordell-hard branches.</p>
+<h2>10. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_mordell_hard_class_conditioned_seeds.py \
+  --max-k 5000 --json</code></pre>
+<p>The verifier checks the formula, factorization through the universal seed, unit condition, exact 840-periodicity, histogram, and selected fixed-shift ledgers.</p>
+<p>Erdős–Straus remains open. This theorem extracts all forced <code>2,3,5,7</code> divisibility available from the full Mordell-hard residue-class information before any actual factorization is performed.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

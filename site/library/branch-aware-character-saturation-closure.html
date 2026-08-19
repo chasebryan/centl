@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The preceding route program showed that a fixed-shift miss can produce a positive quadratic or Jacobi character, route a new prime factor into another companion, enlarge the mandatory divisor seed, saturate a new character kernel, and…">
+  <title>Branch-aware quadratic/Jacobi saturation closure — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/branch-aware-character-saturation-closure.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/branch-aware-character-saturation-closure.html">
+  <meta property="og:title" content="Branch-aware quadratic/Jacobi saturation closure — Free Computation Foundation">
+  <meta property="og:description" content="The preceding route program showed that a fixed-shift miss can produce a positive quadratic or Jacobi character, route a new prime factor into another companion, enlarge the mandatory divisor seed, saturate a new character kernel, and…">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Branch-aware quadratic/Jacobi saturation closure</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The preceding route program showed that a fixed-shift miss can produce a positive quadratic or Jacobi character, route a new prime factor into another companion, enlarge the mandatory divisor seed, saturate a new character kernel, and…</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/BRANCH-AWARE-CHARACTER-SATURATION-CLOSURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite fixed point for the class-global-positive character-saturation model</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_branch_aware_character_closure.py</code></p>
+<p><strong>Independent anchor verifier:</strong> <code>verify_branch_aware_character_closure.py</code></p>
+<p><strong>Depends on:</strong> Jacobi-saturation character extraction, QR-saturating routed seeds, multi-source saturation, reciprocity-route barrier, incoming-source repulsion theorems</p>
+<p><strong>Claim boundary:</strong> this is a complete closure statement for the model stated below through destination <code>k&lt;=5000</code>: the eight extraction roots, the class-global positive source characters attached to those hard classes, exact retained route residues, and characters recursively extracted inside this model. It is <strong>not</strong> a superset of every previously landed CBX route model. In particular, <code>RECURSIVE-CHARACTER-PROMOTION.md</code> also explores branch-local positive source routes such as an unfixed q23 route; those are not admitted here unless q23 is already fixed on the root/state. The landed h=121 q59 source is a concrete witness to that distinction. This theorem does not include finer exact miss masks, valuations, Type-II center geometry, unrestricted companion-factor allocation, or prove Erdős-Straus.</p>
+<h2>1. Question</h2>
+<p>The preceding route program showed that a fixed-shift miss can produce a positive quadratic or Jacobi character, route a new prime factor into another companion, enlarge the mandatory divisor seed, saturate a new character kernel, and extract another positive character.</p>
+<p>The question addressed here is narrower and exact:</p>
+<blockquote><p>Starting from the eight merged extraction roots, and allowing the positive source characters that are already class-global on those simultaneous-survivor branches plus characters recursively extracted from them, does the resulting branch-aware QR/Jacobi saturation recursion reach a fixed point or contradict itself?</p></blockquote>
+<p>A valid test must remain branch-aware. It is not enough to collect character statements in a global set. Every residue used to route a source must remain attached to the same hypothetical prime p throughout the cascade.</p>
+<p>This note closes that stated finite model. It does not claim to close the union of every CBX routing model.</p>
+<h2>2. Root branches and source scope</h2>
+<p>The closure begins from the eight merged composite character-extraction branches.</p>
+<ol><li>h=121 - k39 extraction of q13, with p mod47=8.</li><li>h=169 - k51 extraction of q17, with p mod11=4 and p mod23=18.</li><li>h=169 - k111 extraction of q37, with p mod23=4.</li><li>h=289 - k39 extraction of q13, with p mod11=5 and p mod47=8.</li><li>h=289 - k51 extraction of q17, with p mod11=4 and p mod23=18.</li><li>h=289 - k215 extraction of q43, with p mod11=5 and p mod31=2.</li><li>h=529 - k51 extraction of q17, with p mod11=4 and p mod23=18.</li><li>h=529 - k171 extraction of q19, with p mod11=5 and p mod23=13.</li></ol>
+<p>Each root also carries the already-proved <strong>class-global</strong> positive source characters for its hard class under the simultaneous-survivor hypothesis.</p>
+<ul><li>h=121 - q19 and q47.</li><li>h=169 - q11 and q31.</li><li>h=289 - q11, q31, and q47.</li><li>h=529 - q11 and q31.</li></ul>
+<p>The fixed source residues that define a root are retained exactly.</p>
+<p>A source whose positivity is only available after refining to a branch-local residue is not automatically added to this source inventory. The important example is q23. When a root already fixes p mod23 to a positive residue, q23 is available there. When p mod23 is unfixed, this model does not create a q23 source merely by choosing a positive route residue. That branch-local refinement belongs to the complementary model in <code>RECURSIVE-CHARACTER-PROMOTION.md</code>.</p>
+<p>This distinction explains why the present fixed point can contain q53, q71, q79 and many later sources while not containing the separately landed h=121 q59 source.</p>
+<h2>3. State and transition rule</h2>
+<p>A branch state consists of</p>
+<ul><li>the hard class h modulo840;</li><li>every source residue p mod q already fixed by routing;</li><li>every prime character <code>(q/p)</code> already known in this model;</li><li>recursion depth.</li></ul>
+<p>For every odd destination</p>
+<p><code>k = 3 mod4</code></p>
+<p>through k&lt;=5000, the classifier first forms the mandatory class-conditioned seed</p>
+<p><code>g_(k,h) = gcd(210,(h+k)/4)</code>.</p>
+<p>Every already-fixed source q satisfying</p>
+<p><code>p mod q = -k mod q</code></p>
+<p>is automatically adjoined to the seed because q divides C_k.</p>
+<p>For a known but not yet fixed source character, routing is permitted exactly when the required residue <code>-k mod q</code> has that known Legendre sign.</p>
+<p>The resulting mandatory seed S is then tested directly in the divisor-square geometry modulo k.</p>
+<p>A transition qualifies in one of four ways.</p>
+<h3>Type-I hit</h3>
+<p>If the divisor residues of S squared already contain the Type-I target <code>-1/4 mod k</code>, the branch closes at k.</p>
+<h3>Saturated known-positive destination</h3>
+<p>If the divisor residues of S squared equal the complete Jacobi-plus unit kernel modulo k and every odd-exponent prime character in k is already known, then the saturated miss requires their product to be +1.</p>
+<p>If the known product is +1, the transition is compatible and produces no new source.</p>
+<p>If it is -1, the branch would close by character contradiction.</p>
+<h3>Single-character extraction</h3>
+<p>If the seed Jacobi-saturates and exactly one odd-exponent prime factor q of k has unknown character, a miss forces that character exactly.</p>
+<p>The extracted character is added to the branch and may be routed in later generations.</p>
+<h3>Product constraint</h3>
+<p>If two or more odd-exponent prime factors of k remain unknown, saturation produces only their character product. That constraint is recorded but is not promoted to separate source characters in this theorem.</p>
+<h2>4. Multi-source completeness guard</h2>
+<p>At a destination, the classifier enumerates minimal qualifying routed subsets through size three.</p>
+<p>A larger hidden subset must also be ruled out.</p>
+<p>All source characters that actually occur in this pinned closure are positive. By the reciprocity-route barrier, a positively routed source lies in the Jacobi-plus character class at the destination.</p>
+<p>Adding additional positive routed factors can only enlarge the seed divisor set within that plus kernel.</p>
+<p>Therefore two relevant properties are monotone under adding compatible positive sources:</p>
+<ul><li>once the fixed Type-I target is present, it remains present;</li><li>once the complete Jacobi-plus kernel is saturated, it remains saturated.</li></ul>
+<p>Consequently, whenever no subset of size at most three qualifies, it is sufficient to adjoin every compatible positive source simultaneously and test the maximal seed.</p>
+<p>If that maximal seed neither hits Type I nor Jacobi-saturates, no hidden subset of four or more compatible positive sources can qualify.</p>
+<p>The complete k&lt;=5000 closure contains</p>
+<p><code>0</code></p>
+<p>hidden large-subset qualifiers under this maximal-seed test.</p>
+<p>The classifier now enforces the positive-source precondition before using the maximal-seed guard. The result contains zero negative extracted characters, so that invariant is preserved throughout the pinned run.</p>
+<h2>5. Exact closure result</h2>
+<p>Starting from the eight roots under the source scope above, the branch-aware saturation recursion reaches a fixed point after depth seven.</p>
+<p>The exact finite closure is:</p>
+<ul><li>roots - 8;</li><li>unique branch states - 259;</li><li>minimal qualifying transitions - 2,820;</li><li>saturated known-positive transitions - 2,535;</li><li>positive single-character extractions - 284;</li><li>multi-character product constraints - 1;</li><li>Type-I branch closures inside this saturation scan - 0;</li><li>known-sign contradictions - 0;</li><li>negative character extractions - 0;</li><li>hidden four-or-more-source qualifiers - 0;</li><li>maximum recursion depth - 7;</li><li>largest qualifying destination - k=971.</li></ul>
+<p>The generation profile is</p>
+<ul><li>depth0 - 8 states processed, 25 new states;</li><li>depth1 - 25 processed, 55 new;</li><li>depth2 - 55 processed, 62 new;</li><li>depth3 - 62 processed, 47 new;</li><li>depth4 - 47 processed, 29 new;</li><li>depth5 - 29 processed, 23 new;</li><li>depth6 - 23 processed, 10 new;</li><li>depth7 - 10 processed, 0 new.</li></ul>
+<p>Thus this recursion closes rather than growing indefinitely.</p>
+<h2>6. Closed source alphabet inside this model</h2>
+<p>Within this exact source model and destination range, the recursion closes on the following 24 source primes:</p>
+<p><code>11, 13, 17, 19, 23, 29, 31, 37, 43, 47, 53, 71, 79, 83, 107, 109, 127, 131, 151, 167, 191, 271, 383, 971</code>.</p>
+<p>No negative source character is generated.</p>
+<p>This is <strong>not</strong> the full union of all source primes already proved elsewhere in CBX. In particular q59 is absent here even though <code>RECURSIVE-CHARACTER-PROMOTION.md</code> proves an h=121 q59 source using a branch-local q23 route. That is expected from the model boundary in Section 2 and is not a contradiction between the two theorems.</p>
+<p>Representative newly generated sources inside this model include q29, q53, q79, q83, q107, q109, q127, q131, q151, q167, q191, q271, q383, and q971.</p>
+<p>The independent verifier directly replays representative root, composite, middle-generation, and late-generation extraction edges by enumerating every positive divisor of the mandatory seed squared. It does not use the classifier&#x27;s state-transition implementation.</p>
+<p>Among the pinned anchors are:</p>
+<ul><li>q79 at prime destination k79;</li><li>q83 at k83;</li><li>q109 extracted from composite k327=3*109;</li><li>q151 at k151;</li><li>q271 at k271;</li><li>q383 at k383;</li><li>q971 at k971.</li></ul>
+<p>For each anchor the direct divisor set equals the full Jacobi-plus kernel and the remaining odd-exponent character is forced positive.</p>
+<h2>7. Qualifying destination certificate</h2>
+<p>All qualifying saturation destinations in this model through k&lt;=5000 lie in the exact finite set</p>
+<p><code>3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 47, 51, 55, 63, 71, 75, 79, 83, 91, 95, 107, 111, 127, 131, 135, 143, 151, 167, 171, 191, 203, 215, 231, 271, 327, 371, 383, 391, 551, 971</code>.</p>
+<p>This set includes compatible destinations that may produce a qualifying saturated transition without creating a new source state.</p>
+<p>The initial certificate accidentally listed only destinations emphasized by source creation. A first correction then substituted a different over-inclusive list. Neither error changed the state machine, transition count, source alphabet, maximum depth, or maximum qualifying destination. The list above is the exact set emitted by the canonical classifier and independently reproduced during review.</p>
+<p>No qualifying destination occurs above971 through5000.</p>
+<p>The classifier also computes the complete state closure at k&lt;=1000 and requires its canonical state-key set to equal the k&lt;=5000 state-key set. Thus extending the destination range from1000 to5000 adds no new source or branch state inside this model.</p>
+<p>This is a finite observation within the pinned model, not a claim about all k or all CBX source semantics.</p>
+<h2>8. The lone unresolved product constraint</h2>
+<p>Exactly one saturated transition produces two unknown prime characters rather than one.</p>
+<p>It is the already-known h=289 branch at</p>
+<p><code>k=551 = 19*29</code>.</p>
+<p>The routed conditions</p>
+<p><code>p mod23 = 1</code></p>
+<p>and</p>
+<p><code>p mod31 = 7</code></p>
+<p>make</p>
+<p><code>S = 210*23*31 = 149730</code></p>
+<p>Jacobi-saturating modulo551.</p>
+<p>A miss therefore forces</p>
+<p><code>(19/p)(29/p)=+1</code>.</p>
+<p>Neither sign is individually determined by that transition, so this theorem records the relation without promoting q19 or q29 from it.</p>
+<p>A separate product-aware follow-on can carry this relation as a first-class state constraint; preliminary exact evaluation shows that doing so does not create an additional individual character, but that stronger claim is intentionally kept separate from the present closure.</p>
+<p>The independent verifier replays the product branch directly.</p>
+<h2>9. Class-global-positive frontier theorem</h2>
+<p>Within the stated roots, class-global source theorems, routing rule, exact retained congruences, Jacobi/QR seed-saturation mechanism, and destination range k&lt;=5000:</p>
+<blockquote><p>recursive positive character routing reaches a finite compatible fixed point. It produces no negative character, no Type-I seed collision, and no character-sign contradiction.</p></blockquote>
+<p>This is useful precisely because it is negative.</p>
+<p>It says that continuing to iterate this <strong>specific</strong> class-global-positive saturation grammar does not finish the conjecture. It does not say that every branch-local positive route, exact miss-mask refinement, or other CBX route semantics have been exhausted.</p>
+<h2>10. What this theorem does not erase</h2>
+<p>The closure intentionally forgets information finer than Jacobi sign once a destination has been reduced to its complete plus kernel.</p>
+<p>It also intentionally omits branch-local source refinements that are not already represented by a known character in the state.</p>
+<p>Those discarded or complementary information channels are now the main research frontier.</p>
+<p>In particular, the next proof search should use at least one of:</p>
+<ul><li>exact miss masks that are proper subsets of the Jacobi-plus kernel;</li><li>exact Type-II center collisions;</li><li>prime-power valuation information inside C_k;</li><li>exponent-sensitive divisor-square geometry;</li><li>simultaneous allocation of routed factors among coprime or nearly coprime companions;</li><li>the six-companion residual wheel and its support-overlap restrictions;</li><li>higher-order characters inside the positive quadratic/Jacobi subgroup;</li><li>explicit reconciliation of class-global and branch-local source semantics in one survivor-state engine.</li></ul>
+<p>The finite record p=8,803,369 already demonstrates why this matters. Its first Lane-I hit at k=107 is not explained merely by a character sign. The exact hit uses the square divisor</p>
+<p><code>D = 11^2 = 121</code>,</p>
+<p>which collides with the Type-II target modulo107.</p>
+<p>That is precisely the sort of exponent- and center-sensitive information the character closure discards.</p>
+<h2>11. Strategic conclusion</h2>
+<p>This class-global-positive character model has now done two jobs.</p>
+<p>First, it produces a much larger exact branch-aware fixed point than the earlier shallow recursive atlas, including late sources such as q271, q383, and q971.</p>
+<p>Second, it identifies a method boundary without pretending to subsume the complementary branch-local route model.</p>
+<p>The next route toward a universal argument should therefore not be another unstructured search for positive Legendre symbols. The sharper target is a unified survivor-state engine that preserves exact miss centers and provenance while combining class-global characters, branch-local routes, source-independent repulsion, residual allocation, and valuation phases.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

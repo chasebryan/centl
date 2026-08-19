@@ -1,0 +1,26 @@
+name: h169 phase volume through k55
+
+on:
+  push:
+    branches:
+      - agent/k51-k55-phase-contraction
+  pull_request:
+    paths:
+      - 'research/erdos-straus/H169-PHASE-VOLUME-CONTRACTION-THROUGH-K55.md'
+      - 'research/erdos-straus/verify_h169_phase_volume_through_k55.py'
+      - '.github/workflows/h169-phase-volume-through-k55.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify k51/k55 phase absorption and CRT contraction
+        run: python3 research/erdos-straus/verify_h169_phase_volume_through_k55.py --json

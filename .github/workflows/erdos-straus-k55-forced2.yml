@@ -1,0 +1,71 @@
+name: Erdős–Straus k=55 forced-2 reduction
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K55-FORCED2-HARD-REDUCTION.md'
+      - 'research/erdos-straus/classify_k55_forced2_states.py'
+      - 'research/erdos-straus/verify_k55_forced2_structure.py'
+      - 'research/erdos-straus/classify_k55_states.py'
+      - '.github/workflows/erdos-straus-k55-forced2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k55-forced2:
+    name: Fedora k=55 forced-2 hard closure
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact forced-2 closure
+        run: |
+          python3 research/erdos-straus/classify_k55_forced2_states.py --json > /tmp/k55-forced2.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k55-forced2.json', encoding='utf-8'))
+          assert r['analysis'] == 'k55-forced2-hard-state-closure-v1'
+          assert r['forced_factor'] == 2
+          assert r['forced_direction'] == 1
+          assert r['forced_coordinate'] == [0,1]
+          assert r['forced_start_divisor_set_size'] == 3
+          assert r['forced_start_center'] == [0,1]
+          assert r['states'] == 4051
+          assert r['admissible_states'] == 1990
+          assert r['hit_states'] == 1676
+          assert r['miss_states'] == 314
+          assert r['legendre11_miss_branches'] == {'+1':198,'-1':116}
+          assert r['min_added_outside_histogram'] == {'1':283,'3':31}
+          assert r['maximum_minimum_added_outside_units'] == 3
+          print(
+              '::notice title=k=55 forced-2 hard closure::'
+              f"states={r['states']}; admissible={r['admissible_states']}; "
+              f"misses={r['miss_states']}; added-outside={r['min_added_outside_histogram']}"
+          )
+          PY
+
+      - name: Independent finite hard-prime regression
+        run: |
+          python3 research/erdos-straus/verify_k55_forced2_structure.py --limit 100000 --json > /tmp/k55-forced2-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k55-forced2-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k55-forced2-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['direct_hits'] == 108
+          assert r['direct_misses'] == 165
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=k=55 forced-2 regression::'
+              f"hard={r['hard_primes']}; hits={r['direct_hits']}; "
+              f"misses={r['direct_misses']}; mismatches={r['mismatches']}"
+          )
+          PY

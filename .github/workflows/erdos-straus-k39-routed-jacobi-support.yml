@@ -1,0 +1,27 @@
+name: Erdős–Straus routed k=39 Jacobi support
+
+on:
+  push:
+    branches:
+      - agent/cbx-k11-companion-routing
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K39-ROUTED-JACOBI-SUPPORT.md'
+      - 'research/erdos-straus/verify_k39_routed_jacobi_support.py'
+      - '.github/workflows/erdos-straus-k39-routed-jacobi-support.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reproduce exact routed support theorem
+        run: |
+          python3 research/erdos-straus/verify_k39_routed_jacobi_support.py --json

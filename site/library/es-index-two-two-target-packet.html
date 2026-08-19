@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Index-two character packet lemma for exact two-target shifts — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/es-index-two-two-target-packet.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/es-index-two-two-target-packet.html">
+  <meta property="og:title" content="Index-two character packet lemma for exact two-target shifts — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Index-two character packet lemma for exact two-target shifts</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/ES-INDEX-TWO-TWO-TARGET-PACKET.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved reusable finite-group lemma</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Claim boundary:</strong> this is an elementary structural lemma for one fixed admissible shift equipped with an order-two character. It organizes several corridor filters but does not prove that such a shift must hit, and does not prove Erdős–Straus. No literature-priority claim is made for the underlying character/group facts.</p>
+<hr>
+<h2>1. Fixed-shift divisor-square form</h2>
+<p>Let</p>
+<div class="math" role="math">k\equiv3\pmod4</div>
+<p>be an odd admissible shift and let</p>
+<div class="math" role="math">p\equiv1\pmod4</div>
+<p>be prime with</p>
+<div class="math" role="math">\gcd(p,k)=1.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C=\frac{p+k}{4}.}</div>
+<p>Then <code>gcd(C,k)=1</code>. Let</p>
+<div class="math" role="math">G=(\mathbb Z/k\mathbb Z)^\times.</div>
+<p>By the exact divisor-square form of the two-target theorem, write</p>
+<div class="math" role="math">D(C^2)=\{d\bmod k:d\mid C^2\}\subseteq G.</div>
+<p>The two targets are</p>
+<div class="math" role="math">\boxed{\tau_I=-4^{-1}\pmod k}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\tau_{II}=-C\pmod k.}</div>
+<p>The shift hits exactly when</p>
+<div class="math" role="math">\boxed{D(C^2)\cap\{\tau_I,\tau_{II}\}\ne\varnothing.}</div>
+<hr>
+<h2>2. An order-two character</h2>
+<p>Let</p>
+<div class="math" role="math">\chi:G\to\{\pm1\}</div>
+<p>be a nontrivial multiplicative character satisfying</p>
+<div class="math" role="math">\boxed{\chi(-1)=-1.}</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{H=\ker\chi.}</div>
+<p>Then <code>H</code> has index two in <code>G</code>.</p>
+<p>Because <code>4</code> is a square in <code>G</code>,</p>
+<div class="math" role="math">\chi(4^{-1})=+1.</div>
+<p>Therefore the fixed Type-I target always lies outside the kernel:</p>
+<div class="math" role="math">\boxed{\chi(\tau_I)=-1.}</div>
+<p>For Type II,</p>
+<div class="math" role="math">\boxed{\chi(\tau_{II})=-\chi(C).}</div>
+<p>Thus Type II always lies in the character class opposite to <code>C</code>.</p>
+<hr>
+<h2>3. Outside-factor parity is fixed by <code>C</code></h2>
+<p>Factor</p>
+<div class="math" role="math">C=\prod_iq_i^{e_i}.</div>
+<p>Call a prime-factor occurrence <strong>outside</strong> when</p>
+<div class="math" role="math">q_i\bmod k\notin H.</div>
+<p>Define</p>
+<div class="math" role="math">\boxed{ E_{\rm out}(C) =\sum_{q^e\parallel C,\ q\notin H}e. }</div>
+<p>Since every outside occurrence has character <code>-1</code>,</p>
+<div class="math" role="math">\boxed{ \chi(C)=(-1)^{E_{\rm out}(C)}. }</div>
+<p>Hence:</p>
+<ul><li>if <code>C in H</code>, then <code>E_out(C)</code> is even;</li><li>if <code>C notin H</code>, then <code>E_out(C)</code> is odd.</li></ul>
+<p>This parity law is exact and requires no factor-size or primality assumptions beyond the fixed-shift setup.</p>
+<hr>
+<h2>4. Kernel and outside divisor factors</h2>
+<p>Write</p>
+<div class="math" role="math">C=C_HC_N,</div>
+<p>where <code>C_H</code> contains all prime powers in <code>H</code> and <code>C_N</code> all outside prime powers.</p>
+<p>Define the exact kernel divisor set</p>
+<div class="math" role="math">\boxed{ D_H=D(C_H^2)\subseteq H. }</div>
+<p>The full divisor set factors as the set product</p>
+<div class="math" role="math">\boxed{D(C^2)=D_H\,D_N}</div>
+<p>where</p>
+<div class="math" role="math">D_N=D(C_N^2).</div>
+<p>All target questions can therefore be reduced to the pieces of <code>D_N</code> in the two character cosets, translated by <code>D_H</code>.</p>
+<hr>
+<h2>5. Pure-kernel trap</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{C\in H}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{E_{\rm out}(C)=0.}</div>
+<p>Then every divisor of <code>C^2</code> lies in <code>H</code>, while both targets lie outside <code>H</code>:</p>
+<div class="math" role="math">\chi(\tau_I)=-1, \qquad \chi(\tau_{II})=-\chi(C)=-1.</div>
+<h3>Theorem A — pure-kernel combined miss</h3>
+<p>If <code>C in H</code> and every prime factor of <code>C</code> lies in <code>H</code>, then</p>
+<div class="math" role="math">\boxed{\text{Type I and Type II both miss}.}</div>
+<p>This is the common character-trap mechanism behind several exact corridor filters.</p>
+<hr>
+<h2>6. Full kernel divisor mass forces a hit once an outside factor exists</h2>
+<p>Suppose</p>
+<div class="math" role="math">\boxed{D_H=H}</div>
+<p>and</p>
+<div class="math" role="math">E_{\rm out}(C)&gt;0.</div>
+<p>Then <code>D_N</code> contains at least one outside element <code>u</code>, obtained by selecting divisor exponent one for any outside occurrence. Thus</p>
+<div class="math" role="math">D_Hu=Hu=G\setminus H.</div>
+<p>It also contains <code>1</code>, so</p>
+<div class="math" role="math">D_H\subseteq D(C^2).</div>
+<p>Therefore the full divisor set contains <strong>both character cosets</strong>.</p>
+<h3>Theorem B — full-kernel fill</h3>
+<p>If <code>D_H=H</code> and at least one outside prime-factor occurrence is present, then</p>
+<div class="math" role="math">\boxed{\tau_I,\tau_{II}\in D(C^2).}</div>
+<p>In particular both Type I and Type II hit.</p>
+<p>Hence every non-pure miss must have a thin kernel divisor set.</p>
+<hr>
+<h2>7. First even packet: four companions</h2>
+<p>Assume</p>
+<div class="math" role="math">\boxed{C\in H}</div>
+<p>and the first non-pure possibility</p>
+<div class="math" role="math">\boxed{E_{\rm out}(C)=2.}</div>
+<p>Represent the two outside valuation units by</p>
+<div class="math" role="math">u,v\in G\setminus H,</div>
+<p>allowing <code>u=v</code> if one residue class supplies both valuation units.</p>
+<p>Each unit has divisor exponent <code>0,1,2</code>. An outside-coset divisor uses odd total selected outside exponent. The complete outside-coset contribution set is therefore</p>
+<div class="math" role="math">\boxed{ O(u,v)=\{u,v,uv^2,u^2v\}. }</div>
+<p>When <code>u=v</code>, this collapses to</p>
+<div class="math" role="math">\boxed{O(u,u)=\{u,u^3\}.}</div>
+<p>Because both targets lie outside <code>H</code>, only these outside contributions can hit them.</p>
+<h3>Theorem C — four-companion criterion</h3>
+<p>If <code>C in H</code> and <code>E_out(C)=2</code>, then for either target</p>
+<div class="math" role="math">\tau\in\{\tau_I,\tau_{II}\},</div>
+<p>one has</p>
+<div class="math" role="math">\boxed{ \tau\in D(C^2) \iff D_H\cap\tau\,O(u,v)^{-1}\ne\varnothing. }</div>
+<p>Thus a two-occurrence escape packet requires at most four exact companion tests inside <code>H</code>.</p>
+<h3>Proof</h3>
+<p>The outside part of any divisor that can equal <code>tau</code> must lie in the outside coset. Under exactly two outside valuation units those residues are precisely <code>O(u,v)</code>. Writing <code>tau=h o</code> with <code>h in D_H</code> and <code>o in O(u,v)</code> is equivalent to <code>h=tau o^{-1}</code>. QED.</p>
+<hr>
+<h2>8. First odd packet: one plus two companions</h2>
+<p>Now assume</p>
+<div class="math" role="math">\boxed{C\notin H}</div>
+<p>and the first possible outside valuation</p>
+<div class="math" role="math">\boxed{E_{\rm out}(C)=1.}</div>
+<p>Let the unique outside valuation unit be</p>
+<div class="math" role="math">u\in G\setminus H.</div>
+<p>Its divisor exponents <code>0,1,2</code> contribute</p>
+<div class="math" role="math">\boxed{\{1,u,u^2\}.}</div>
+<p>The Type-I target is outside <code>H</code>, so only the exponent-one contribution can reach it:</p>
+<div class="math" role="math">\boxed{ \tau_I\text{ hits} \iff D_H\cap\{\tau_Iu^{-1}\}\ne\varnothing. }</div>
+<p>The Type-II target now lies <strong>inside</strong> <code>H</code>, because</p>
+<div class="math" role="math">\chi(\tau_{II})=-\chi(C)=+1.</div>
+<p>It may use outside exponent zero or two. Hence</p>
+<div class="math" role="math">\boxed{ \tau_{II}\text{ hits} \iff D_H\cap\{\tau_{II},\tau_{II}u^{-2}\}\ne\varnothing. }</div>
+<h3>Theorem D — first odd packet</h3>
+<p>If <code>C notin H</code> and <code>E_out(C)=1</code>, the complete fixed-shift two-target test reduces to one Type-I kernel companion and two Type-II kernel companions.</p>
+<hr>
+<h2>9. Applications already present in the corridor</h2>
+<h3><code>k=27</code></h3>
+<p>Take the quadratic character on the cyclic unit group modulo <code>27</code>. Its kernel is the quadratic-residue subgroup, equivalently the unit residues <code>1 mod 3</code>. Hard primes give</p>
+<div class="math" role="math">C_{27}\equiv1\pmod3,</div>
+<p>so <code>C_{27} in H</code> and outside valuation is even. Theorem A is the pure-QR branch, while Theorem C is exactly the four-companion reduction in <code>K27-TWO-TARGET-STRUCTURE.md</code>.</p>
+<h3><code>k=35</code></h3>
+<p>Take</p>
+<div class="math" role="math">\chi(x)=\left(\frac x5\right)\left(\frac x7\right).</div>
+<p>Then</p>
+<div class="math" role="math">H=\langle3\rangle</div>
+<p>and every hard <code>C_{35}</code> lies in <code>H</code>. Theorems A and C give the Jacobi trap and four-companion packet in <code>K35-TWO-TARGET-STRUCTURE.md</code>.</p>
+<h3><code>k=39</code></h3>
+<p>The order-twelve subgroup</p>
+<div class="math" role="math">H=\langle2\rangle\subset(\mathbb Z/39\mathbb Z)^\times</div>
+<p>has index two and excludes <code>-1</code>. Here <code>C_{39}</code> may lie in either character class. Therefore both parity branches occur: Theorem C applies when <code>C_{39} in H</code>, and Theorem D applies when <code>C_{39} notin H</code> with one outside valuation unit.</p>
+<p>This explains why the <code>k=39</code> finite residual naturally separates into pure-kernel, two-packet, and one-packet geometries.</p>
+<hr>
+<h2>10. Research consequence</h2>
+<p>The recurring corridor pattern is not three unrelated modular coincidences. It is one finite-group mechanism:</p>
+<div class="math" role="math">\boxed{ \text{order-two character} +\chi(-1)=-1 +\text{thin kernel divisor mass} +\text{small outside packet}. }</div>
+<p>The fixed-shift proof problem can therefore be split into two pieces:</p>
+<ol><li><strong>character layer:</strong> determine <code>chi(C)</code> and hence the parity/cosets of possible targets and outside factor packets;</li><li><strong>kernel layer:</strong> determine whether <code>D_H</code> meets the small companion set forced by that packet.</li></ol>
+<p>For cross-shift work, the important object is no longer the raw factorization of each consecutive <code>P+u</code>. It is the sequence of character parities and thin kernel divisor sets attached to those translates.</p>
+<p>That sequence is the natural target for a simultaneous incompatibility theorem.</p>
+<hr>
+<p>Erdős–Straus remains open. This lemma organizes fixed-shift misses; it does not eliminate all of them.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

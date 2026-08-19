@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Every Mordell-hard prime satisfies">
+  <title>Universal forced-seed law for Mordell-hard fixed shifts — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mordell-hard-forced-seed-law.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mordell-hard-forced-seed-law.html">
+  <meta property="og:title" content="Universal forced-seed law for Mordell-hard fixed shifts — Free Computation Foundation">
+  <meta property="og:description" content="Every Mordell-hard prime satisfies">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Universal forced-seed law for Mordell-hard fixed shifts</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Every Mordell-hard prime satisfies</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MORDELL-HARD-FORCED-SEED-LAW.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Applies to:</strong> exact two-target fixed-shift state analysis</p>
+<p><strong>Regression:</strong> <code>verify_mordell_hard_forced_seed_law.py</code></p>
+<p><strong>Claim boundary:</strong> this identifies the maximal common divisor forced by the Mordell-hard congruence skeleton at each admissible shift. It does not assert that the remaining factorization hits either Erdős–Straus target.</p>
+<h2>1. Setup</h2>
+<p>Every Mordell-hard prime satisfies</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{24}.}</div>
+<p>Write</p>
+<div class="math" role="math">p=24m+1.</div>
+<p>Every admissible fixed shift has</p>
+<div class="math" role="math">k\equiv3\pmod4,</div>
+<p>so write</p>
+<div class="math" role="math">\boxed{k=4u-1}, \qquad u_k:=u=\frac{k+1}{4}.</div>
+<p>Then the shifted companion is</p>
+<div class="math" role="math">C_k=\frac{p+k}{4} =\frac{24m+1+4u-1}{4} =6m+u.</div>
+<h2>2. Universal forced divisor</h2>
+<p>Define</p>
+<div class="math" role="math">\boxed{ g_k=\gcd(6,u) =\gcd\!\left(6,\frac{k+1}{4}\right). }</div>
+<p>Since <code>g_k</code> divides both <code>6m</code> and <code>u</code>,</p>
+<div class="math" role="math">\boxed{g_k\mid C_k}</div>
+<p>for every Mordell-hard prime.</p>
+<p>Because <code>g_k|6</code>, only four seed values are possible:</p>
+<div class="math" role="math">\boxed{g_k\in\{1,2,3,6\}.}</div>
+<p>Thus every admissible shift belongs to exactly one of four hard-seed classes.</p>
+<h2>3. Exact periodic classification</h2>
+<p>The forced seed is determined by <code>u=(k+1)/4</code> modulo 6:</p>
+<div class="math" role="math">\boxed{ \begin{array}{c|c} u_k\pmod 6 &amp; g_k\\ \hline 0&amp;6\\ 1&amp;1\\ 2&amp;2\\ 3&amp;3\\ 4&amp;2\\ 5&amp;1 \end{array}}</div>
+<p>Equivalently, in terms of the shift:</p>
+<ul><li><code>g_k=6</code> when <code>k=23 mod 24</code>;</li><li><code>g_k=3</code> when <code>k=11 mod 24</code>;</li><li><code>g_k=2</code> when <code>k=7 or 15 mod 24</code>;</li><li><code>g_k=1</code> when <code>k=3 or 19 mod 24</code>.</li></ul>
+<p>The seed pattern is periodic with period 24 in <code>k</code>.</p>
+<h2>4. The seed is automatically a unit modulo the shift</h2>
+<p>The exact fixed-shift state model requires every factor of <code>C_k</code> used by the group classifier to be a unit modulo <code>k</code>.</p>
+<p>For the universal seed:</p>
+<ul><li><code>k</code> is odd, so <code>2</code> never divides <code>k</code>;</li><li>if <code>3|g_k</code>, then <code>3|u</code>, hence</li></ul>
+<div class="math" role="math">k=4u-1\equiv-1\pmod3,</div>
+<p>so <code>3</code> does not divide <code>k</code>.</p>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{\gcd(g_k,k)=1.}</div>
+<p>The prime-valuation content of <code>g_k</code> can always be consumed as ordinary exact transitions before closing over the remaining factorization directions.</p>
+<h2>5. Maximality on the full Mordell-hard congruence skeleton</h2>
+<p>The six Mordell-hard residue classes modulo 840 are</p>
+<div class="math" role="math">1,121,169,289,361,529.</div>
+<p>Writing <code>p=24m+1</code>, these correspond to</p>
+<div class="math" role="math">m\equiv0,5,7,12,15,22\pmod{35}.</div>
+<p>For fixed <code>k=4u-1</code>, the companion values over the six complete arithmetic classes are</p>
+<div class="math" role="math">210n+u, \quad 210n+u+30, \quad 210n+u+42, \quad 210n+u+72, \quad 210n+u+90, \quad 210n+u+132.</div>
+<p>Any integer dividing every companion throughout the full Mordell-hard congruence skeleton must divide</p>
+<div class="math" role="math">210,\ 30,\ 42,\ 72,\ 90,\ 132,\ u.</div>
+<p>But</p>
+<div class="math" role="math">\gcd(210,30,42,72,90,132)=6.</div>
+<p>Hence the common divisor of the entire skeleton is exactly</p>
+<div class="math" role="math">\boxed{\gcd(6,u)=g_k.}</div>
+<h3>Theorem — maximal hard-skeleton forced seed</h3>
+<p>For every admissible shift <code>k=4u-1</code>, the greatest integer dividing</p>
+<div class="math" role="math">C_k=\frac{p+k}{4}</div>
+<p>for every integer <code>p</code> in the six complete Mordell-hard congruence classes is</p>
+<div class="math" role="math">\boxed{g_k=\gcd(6,u).}</div>
+<p>Therefore no larger universal fixed divisor can be extracted from the Mordell-hard congruence skeleton alone.</p>
+<p>This maximality is an arithmetic-class statement. It does not require assumptions about which individual values in those classes are prime.</p>
+<h2>6. Classified-shift ledger</h2>
+<p>For the current fixed-shift corridor:</p>
+<pre><code class="language-text">k     u=(k+1)/4     forced seed
+3          1             1
+7          2             2
+11         3             3
+15         4             2
+19         5             1
+23         6             6
+27         7             1
+31         8             2
+35         9             3
+39        10             2
+43        11             1
+47        12             6
+51        13             1
+55        14             2
+59        15             3
+63        16             2</code></pre>
+<p>Later examples include</p>
+<pre><code class="language-text">71 -&gt; 6
+79 -&gt; 2
+83 -&gt; 3
+87 -&gt; 2
+95 -&gt; 6
+103 -&gt; 2
+107 -&gt; 3</code></pre>
+<p>The existing <code>k=47</code> forced-6 theorem and the new <code>k=55</code>, <code>k=59</code>, and <code>k=63</code> reductions are instances of this single law.</p>
+<h2>7. Quantitative consequence for the standard depth horizon</h2>
+<p>Through <code>k&lt;=5000</code> there are exactly 1,250 admissible shifts. The forced-seed classes are</p>
+<pre><code class="language-text">seed 1 : 417 shifts
+seed 2 : 417 shifts
+seed 3 : 208 shifts
+seed 6 : 208 shifts</code></pre>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{833/1250}</div>
+<p>of the admissible shifts in that horizon carry a nontrivial universal factor before any factorization-specific analysis begins.</p>
+<p>This is a shift-count fact, not a statement that those shifts hit a corresponding fraction of primes.</p>
+<h2>8. Research consequence</h2>
+<p>A generic fixed-shift closure begins from the empty factorization state. For Mordell-hard research this is unnecessarily large whenever <code>g_k&gt;1</code>.</p>
+<p>The natural hard-prime workflow is:</p>
+<ol><li>compute <code>g_k=gcd(6,(k+1)/4)</code>;</li><li>factor <code>g_k</code> and consume its mandatory prime valuations as exact transitions;</li><li>close only over the remaining arbitrary factor directions;</li><li>intersect with any additional hard-center character restrictions already known for the modulus.</li></ol>
+<p>At the currently reduced shifts:</p>
+<pre><code class="language-text">k=47  forced 6   miss states   196   from 14,474 generic
+k=55  forced 2   miss states   314   from  2,319 generic admissible
+k=59  forced 3   miss states 5,869   from 61,215 generic
+k=63  forced 2   miss states    87   from    684 generic admissible</code></pre>
+<p>These are the natural hard-prime state spaces for subsequent cross-shift theorem mining.</p>
+<p>The law also exposes previously unused seeds at already-classified shifts such as <code>k=35</code> (<code>g=3</code>) and <code>k=39</code> (<code>g=2</code>).</p>
+<h2>9. Reproduction</h2>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_mordell_hard_forced_seed_law.py --max-k 5000 --json</code></pre>
+<p>The verifier checks the closed formula against the gcd of the complete six-class Mordell-hard skeleton for every admissible shift through the requested bound.</p>
+<p>Erdős–Straus remains open. The theorem removes avoidable generic state geometry before the proof search begins.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The class-conditioned seed theorem and character atlas give exact information at individual fixed shifts. The remaining proof problem is cross-shift compatibility.">
+  <title>Class-conditioned residual coupling on the Mordell-hard branches — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/mordell-hard-class-residual-coupling.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/mordell-hard-class-residual-coupling.html">
+  <meta property="og:title" content="Class-conditioned residual coupling on the Mordell-hard branches — Free Computation Foundation">
+  <meta property="og:description" content="The class-conditioned seed theorem and character atlas give exact information at individual fixed shifts. The remaining proof problem is cross-shift compatibility.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Class-conditioned residual coupling on the Mordell-hard branches</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The class-conditioned seed theorem and character atlas give exact information at individual fixed shifts. The remaining proof problem is cross-shift compatibility.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MORDELL-HARD-CLASS-RESIDUAL-COUPLING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary cross-shift theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>MORDELL-HARD-CLASS-CONDITIONED-SEED-LAW.md</code>, <code>CLASS-CONDITIONED-CHARACTER-ANNIHILATION.md</code>, <code>K19-TWO-TARGET-FILTER.md</code></p>
+<p><strong>Claim boundary:</strong> this theorem couples selected class-conditioned fixed-shift companions by exact linear and gcd identities. It does not prove that one of the named shifts must hit and does not prove Erdős–Straus.</p>
+<h2>1. Purpose</h2>
+<p>The class-conditioned seed theorem and character atlas give exact information at individual fixed shifts. The remaining proof problem is cross-shift compatibility.</p>
+<p>For one hard residue class</p>
+<pre><code class="language-text">p = 840r + h</code></pre>
+<p>the companion at an admissible shift <code>k</code> is</p>
+<pre><code class="language-text">C_k = (p+k)/4 = 210r + (h+k)/4.</code></pre>
+<p>After dividing by the maximal class-conditioned seed</p>
+<pre><code class="language-text">g(k,h) = gcd(210,(h+k)/4),</code></pre>
+<p>the residual is an affine linear form in <code>r</code>.</p>
+<p>The selected character-annihilation shifts therefore do not have independent factorizations. Their residuals satisfy tiny integer linear relations, which force exact gcd restrictions.</p>
+<h2>2. Class h = 121: shifts 19 and 47</h2>
+<p>Let</p>
+<pre><code class="language-text">p = 840r + 121.</code></pre>
+<p>At <code>k=19</code>, the class seed is <code>35</code>:</p>
+<pre><code class="language-text">C_19 = 210r + 35 = 35A,
+A = 6r + 1.</code></pre>
+<p>At <code>k=47</code>, the class seed is <code>42</code>:</p>
+<pre><code class="language-text">C_47 = 210r + 42 = 42B,
+B = 5r + 1.</code></pre>
+<p>The two residuals satisfy</p>
+<pre><code class="language-text">5A - 6B = -1.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">gcd(A,B) = 1.</code></pre>
+<h3>Consequence</h3>
+<p>No rational prime can divide both the seed-stripped <code>k=19</code> and <code>k=47</code> companions on this hard class.</p>
+<p>This is particularly relevant because the existing exact <code>k=19</code> theorem on <code>h=121</code> says that a combined <code>k=19</code> miss forces every prime factor of <code>C_19</code> outside the mandatory seed to lie on the quadratic-residue side modulo 19, while the class-conditioned <code>k=47</code> theorem says a <code>k=47</code> survivor must have positive 47-character.</p>
+<p>The present theorem does not make those two conditions contradictory. It proves that their residual rational-prime resources are disjoint.</p>
+<h2>3. Class h = 169: shifts 11 and 31</h2>
+<p>Let</p>
+<pre><code class="language-text">p = 840r + 169.</code></pre>
+<p>The class seeds at <code>11</code> and <code>31</code> are <code>15</code> and <code>10</code>:</p>
+<pre><code class="language-text">C_11 = 210r + 45 = 15A,
+A = 14r + 3,
+
+C_31 = 210r + 50 = 10B,
+B = 21r + 5.</code></pre>
+<p>The residuals satisfy</p>
+<pre><code class="language-text">2B - 3A = 1.</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">gcd(A,B) = 1.</code></pre>
+<p>Thus a prime in this hard class that survives both fixed shifts must realize the two exact miss structures using disjoint residual rational-prime support.</p>
+<p>The character atlas additionally forces</p>
+<pre><code class="language-text">(p/11) = +1
+(p/31) = +1</code></pre>
+<p>for such a simultaneous survivor.</p>
+<h2>4. Class h = 529: shifts 11 and 31</h2>
+<p>Let</p>
+<pre><code class="language-text">p = 840r + 529.</code></pre>
+<p>The class seeds are <code>15</code> and <code>70</code>:</p>
+<pre><code class="language-text">C_11 = 210r + 135 = 15A,
+A = 14r + 9,
+
+C_31 = 210r + 140 = 70B,
+B = 3r + 2.</code></pre>
+<p>Now</p>
+<pre><code class="language-text">14B - 3A = 1.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">gcd(A,B) = 1.</code></pre>
+<p>Any simultaneous <code>k=11</code> and <code>k=31</code> survivor on this class must again allocate the two residual factorization states to disjoint rational-prime supports, while satisfying</p>
+<pre><code class="language-text">(p/11) = (p/31) = +1.</code></pre>
+<h2>5. Class h = 361: shifts 31 and 59</h2>
+<p>Let</p>
+<pre><code class="language-text">p = 840r + 361.</code></pre>
+<p>At <code>k=31</code>, the maximal class seed is <code>14</code>; at <code>k=59</code>, it is <code>105</code>:</p>
+<pre><code class="language-text">C_31 = 210r + 98 = 14A,
+A = 15r + 7,
+
+C_59 = 210r + 105 = 105B,
+B = 2r + 1.</code></pre>
+<p>The residuals obey</p>
+<pre><code class="language-text">15B - 2A = 1.</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">gcd(A,B) = 1.</code></pre>
+<p>The <code>k=31</code> negative-character branch is not annihilated on this class; the exact atlas retains a real negative-character miss state. The <code>k=59</code> theorem does annihilate its negative branch, so every simultaneous survivor must satisfy</p>
+<pre><code class="language-text">(p/59) = +1,</code></pre>
+<p>but no analogous <code>(p/31)=+1</code> assertion is made here.</p>
+<h2>6. Class h = 289: the 11,31,47 residual triple</h2>
+<p>This is the strongest three-shift branch.</p>
+<p>Let</p>
+<pre><code class="language-text">p = 840r + 289.</code></pre>
+<p>The class-conditioned seeds are</p>
+<pre><code class="language-text">k=11 -&gt; 15
+k=31 -&gt; 10
+k=47 -&gt; 42.</code></pre>
+<p>Write</p>
+<pre><code class="language-text">C_11 = 210r + 75 = 15A,
+A = 14r + 5,
+
+C_31 = 210r + 80 = 10B,
+B = 21r + 8,
+
+C_47 = 210r + 84 = 42D,
+D = 5r + 2.</code></pre>
+<h3>The 11-31 edge</h3>
+<pre><code class="language-text">2B - 3A = 1,</code></pre>
+<p>so</p>
+<pre><code class="language-text">gcd(A,B) = 1.</code></pre>
+<h3>The 11-47 edge</h3>
+<pre><code class="language-text">14D - 5A = 3.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">gcd(A,D) divides 3.</code></pre>
+<p>Moreover</p>
+<pre><code class="language-text">A == D == 0 (mod 3)</code></pre>
+<p>holds exactly when</p>
+<pre><code class="language-text">r == 2 (mod 3).</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">gcd(A,D) = 3   if r == 2 (mod 3),
+gcd(A,D) = 1   otherwise.</code></pre>
+<h3>The 31-47 edge</h3>
+<pre><code class="language-text">21D - 5B = 2.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">gcd(B,D) divides 2.</code></pre>
+<p>Both are even exactly when <code>r</code> is even. Hence</p>
+<pre><code class="language-text">gcd(B,D) = 2   if r is even,
+gcd(B,D) = 1   if r is odd.</code></pre>
+<h3>Triple-support theorem</h3>
+<p>The seed-stripped residual support graph on <code>(A,B,D)</code> has no unrestricted edge:</p>
+<pre><code class="language-text">A ---- no edge ---- B
+|                    |
+3 only              2 only
+|                    |
+D -------------------</code></pre>
+<p>More precisely:</p>
+<ul><li><code>A</code> and <code>B</code> are always coprime;</li><li><code>A</code> and <code>D</code> can share only the prime <code>3</code>, and only for <code>r==2 mod3</code>;</li><li><code>B</code> and <code>D</code> can share only the prime <code>2</code>, and only for even <code>r</code>.</li></ul>
+<p>Every rational prime other than <code>2</code> and <code>3</code> can therefore divide at most one of the three residuals.</p>
+<p>A simultaneous survivor at <code>k=11,31,47</code> must additionally satisfy the exact character restrictions</p>
+<pre><code class="language-text">(p/11) = +1
+(p/31) = +1
+(p/47) = +1.</code></pre>
+<p>Again, those character conditions alone are CRT-compatible. The new content is that the finite-state obstructions imposing them must be realized on an almost-disjoint residual support triple tied together by the displayed linear identities.</p>
+<h2>7. Cross-class summary</h2>
+<p>The selected class-conditioned residual couplings are:</p>
+<pre><code class="language-text">hard class   shifts       seed-stripped residual relation       overlap
+121          19,47        5A - 6B = -1                          none
+169          11,31        2B - 3A = 1                           none
+289          11,31        2B - 3A = 1                           none
+289          11,47        14D - 5A = 3                          prime 3 only
+289          31,47        21D - 5B = 2                          prime 2 only
+361          31,59        15B - 2A = 1                          none
+529          11,31        14B - 3A = 1                          none</code></pre>
+<p>These are identities in the free parameter <code>r</code>, not finite-census observations.</p>
+<h2>8. Relation to the six-companion wheel</h2>
+<p>The universal six-companion wheel already proves nearly disjoint prime support after removing the maximal seed common to all six hard classes.</p>
+<p>The present theorem conditions further on the exact residue class <code>h mod840</code> and strips the stronger class seed. This yields smaller residuals and, on the named branches, sharper pairwise relations tailored to the exact shifts whose negative-character miss branches have been eliminated.</p>
+<p>The two results therefore serve different levels of the proof search:</p>
+<pre><code class="language-text">six-wheel theorem
+- class-independent support coupling across a complete 24-period block
+
+class residual theorem
+- stronger class-specific coupling among the exact character-critical shifts</code></pre>
+<h2>9. What remains</h2>
+<p>This theorem does not yet close a hard class. Distinct rational primes can still populate the coprime residuals independently.</p>
+<p>The next theorem target is narrower:</p>
+<pre><code class="language-text">Can the exact miss-state packet requirements at two or three character-critical shifts
+be simultaneously realized when their rational-prime supports are forced to be disjoint
+and their residual values satisfy the listed linear equations?</code></pre>
+<p>For <code>h=289</code>, this is now a three-state compatibility problem with only possible shared-prime channels <code>2</code> and <code>3</code>.</p>
+<p>For <code>h=121</code>, the exact factor-support theorem at <code>k=19</code> gives an additional asymmetric constraint that may make the coprime <code>(19,47)</code> pair especially useful.</p>
+<h2>10. Reproduction</h2>
+<p>Run</p>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_class_residual_coupling.py --max-r 100000 --json</code></pre>
+<p>The verifier checks the companion factorizations, class seeds, all displayed linear identities, all exact gcd formulas, and the conditional <code>2</code> and <code>3</code> overlap rules.</p>
+<p>Erdős–Straus remains open. The theorem supplies an exact class-conditioned coupling invariant for the next simultaneous-obstruction attack.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

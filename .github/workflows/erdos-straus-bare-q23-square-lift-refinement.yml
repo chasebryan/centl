@@ -1,0 +1,26 @@
+name: Erdős–Straus BARE q23 square-lift refinement
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/BARE-Q23-SQUARE-LIFT-REFINEMENT.md"
+      - "research/erdos-straus/classify_bare_q23_square_lift_refinement.py"
+      - "research/erdos-straus/verify_bare_q23_square_lift_refinement.py"
+      - ".github/workflows/erdos-straus-bare-q23-square-lift-refinement.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact BARE phase refinement
+        run: python3 research/erdos-straus/classify_bare_q23_square_lift_refinement.py --json
+      - name: Independent BARE support and persistent-anchor verification
+        run: python3 research/erdos-straus/verify_bare_q23_square_lift_refinement.py --json

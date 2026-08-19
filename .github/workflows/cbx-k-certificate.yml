@@ -1,0 +1,106 @@
+name: CBX finite Lane-I K certificate
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Tested Lane-I ceiling'
+        required: true
+        default: '400'
+      segment:
+        description: 'shift-major p segment size'
+        required: true
+        default: '1000000'
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-k-certificate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k-certificate:
+    name: Fedora finite minimal Lane-I ceiling
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build reference Lane-I engines
+        run: make -C research/erdos-straus/cbx.kernel cbx-forward-i cbx-shift-i
+
+      - name: Produce exact finite K certificate
+        run: |
+          mkdir -p /tmp/cbx-k-cert
+          ./centl es cbx certify-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --json > /tmp/cbx-k-cert/certificate.json
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-k-cert'
+          c=json.load(open(root+'/certificate.json'))
+          assert c['kernel'] == 'cbx.kernel'
+          assert c['certificate'] == 'finite-minimal-Lane-I-ceiling-v1'
+          assert c['cross_check']['exact_first_hit_map_equal'] is True
+          assert c['cross_check']['exact_residual_set_equal'] is True
+          assert c['cross_check']['shift_verification_mismatches'] == 0
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'finite-minimal-Lane-I-ceiling-certificate-v1',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              **c,
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          print(
+              f"::notice title=CBX finite K certificate::"
+              f"X={c['hi']}; tested K_I={c['tested_i_max']}; hard={c['hard_primes']}; "
+              f"residual={c['residual_hard_primes']}; sufficient={c['sufficient_through_domain']}; "
+              f"minimal finite K_I={c['minimal_sufficient_ceiling']}; "
+              f"previous admissible={c['previous_admissible_ceiling']}; "
+              f"witnesses={c['deepest_witnesses']}"
+          )
+          PY
+
+      - name: Preserve environment and hashes
+        run: |
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "tested_i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-k-cert/ENVIRONMENT.txt
+          cd /tmp/cbx-k-cert
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload finite K certificate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-k-certificate-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-k-cert/
+          if-no-files-found: error
+          retention-days: 90

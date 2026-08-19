@@ -1,0 +1,54 @@
+name: Erdős–Straus BEC post-k23 transition chain
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md"
+      - "research/erdos-straus/assets/bryan-entanglement-compass.svg"
+      - "research/erdos-straus/cbx.kernel/DESIGN-LANGUAGE.md"
+      - "research/erdos-straus/BEC-K27-K31-TRANSITION-THEOREM.md"
+      - "research/erdos-straus/BEC-K27-K35-TRANSITION-CHAIN.md"
+      - "research/erdos-straus/K27-SURVIVOR-GRAMMAR.md"
+      - "research/erdos-straus/K31-SURVIVOR-NORMAL-FORM.md"
+      - "research/erdos-straus/K35-TWO-BRANCH-SURVIVOR-THEOREM.md"
+      - "research/erdos-straus/verify_bec_k27_k31_transition.py"
+      - "research/erdos-straus/verify_bec_k27_k35_transition_chain.py"
+      - "research/erdos-straus/verify_k27_survivor_grammar.py"
+      - "research/erdos-straus/verify_k31_survivor_normal_form.py"
+      - "research/erdos-straus/verify_k35_two_branch_survivor_theorem.py"
+      - "research/erdos-straus/audit_q23_blocked_phase_ancestry.py"
+      - ".github/workflows/erdos-straus-bec-k27-k31-transition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k27 survivor grammar
+        run: python3 research/erdos-straus/verify_k27_survivor_grammar.py --json
+      - name: Exact k31 survivor normal form
+        run: python3 research/erdos-straus/verify_k31_survivor_normal_form.py --json
+      - name: Exact k35 two-branch survivor theorem
+        run: python3 research/erdos-straus/verify_k35_two_branch_survivor_theorem.py --json
+      - name: Exact BEC k27-k31 transition selector
+        run: python3 research/erdos-straus/verify_bec_k27_k31_transition.py --json
+      - name: Exact BEC transition chain through k35
+        run: python3 research/erdos-straus/verify_bec_k27_k35_transition_chain.py --json
+      - name: Compass design contract is present
+        run: |
+          test -s research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          test -s research/erdos-straus/assets/bryan-entanglement-compass.svg
+          test -s research/erdos-straus/cbx.kernel/DESIGN-LANGUAGE.md
+          grep -F 'UL = + / − / −' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'UR = + / + / −' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'DL = − / − / +' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md
+          grep -F 'DR = − / + / +' research/erdos-straus/BRYAN-ENTANGLEMENT-COMPASS.md

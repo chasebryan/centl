@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The landed 346-state closure admits single-source state-only exact repulsion as a character-promotion rule.">
+  <title>Multi-source exact-state promotion closure — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/multisource-exact-state-promotion-closure.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/multisource-exact-state-promotion-closure.html">
+  <meta property="og:title" content="Multi-source exact-state promotion closure — Free Computation Foundation">
+  <meta property="og:description" content="The landed 346-state closure admits single-source state-only exact repulsion as a character-promotion rule.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Multi-source exact-state promotion closure</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The landed 346-state closure admits single-source state-only exact repulsion as a character-promotion rule.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/MULTISOURCE-EXACT-STATE-PROMOTION-CLOSURE.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite closure of the stated hybrid grammar</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary classifier:</strong> <code>classify_multisource_exact_state_promotion_closure.py</code></p>
+<p><strong>Independent verification:</strong> <code>verify_multisource_exact_state_promotion_closure.py</code></p>
+<p><strong>Depends on:</strong> <code>EXACT-STATE-PROMOTION-CLOSURE.md</code>, <code>MULTISOURCE-EXACT-STATE-REPULSION.md</code></p>
+<p><strong>Claim boundary:</strong> this is the class-global/product-aware character projection augmented by single-source and genuine two-source state-only exact promotion. It still does not retain full surviving mask-center states, branch-local q23 source semantics, residual-gcd constraints, or periodic valuation phases as active state. No universal shift ceiling and no Erdős-Straus proof.</p>
+<h2>1. Why re-close again</h2>
+<p>The landed 346-state closure admits single-source state-only exact repulsion as a character-promotion rule.</p>
+<p><code>MULTISOURCE-EXACT-STATE-REPULSION.md</code> proves that this is not the end of the exact-state hierarchy. Two individually insufficient positive incoming sources can jointly eliminate every negative exact miss center while their combined divisor mask still fails to fill QR(k).</p>
+<p>The recursive question is therefore:</p>
+<blockquote><p>do any of those genuine pair repellers actually occur inside one ancestry-compatible character state, and if so, what do they add?</p></blockquote>
+<p>This branch answers that question for the same class-global/product-aware grammar.</p>
+<h2>2. Pair transition semantics</h2>
+<p>A two-source state-only promotion edge requires</p>
+<ol><li>two <strong>distinct</strong> source primes already known positive in the same state;</li><li>both source routes are compatible with every fixed residue already carried by the state;</li><li>the multiset of source residues modulo the destination is one of the proved genuine pair-repeller multisets;</li><li>the destination is not already known negative.</li></ol>
+<p>Both route residues are inserted into the child state&#x27;s fixed ancestry before the destination character is promoted.</p>
+<p>A repeated residue type such as <code>(17,17)</code> therefore requires two distinct source primes whose residues modulo the destination are both17. One source is never counted twice.</p>
+<h2>3. Exact fixed point</h2>
+<p>Re-closing through <code>k&lt;=5000</code> gives</p>
+<ul><li><strong>8 roots</strong>;</li><li><strong>380 canonical states</strong>;</li><li><strong>maximum depth 8</strong>;</li><li><strong>4,142 ordinary saturation transitions</strong>;</li><li><strong>149 single-source exact-state transition opportunities</strong>;</li><li><strong>76 two-source exact-state transition opportunities</strong>;</li><li><strong>18 two-source extraction events</strong>;</li><li><strong>58 two-source routes whose destination character was already positive</strong>;</li><li><strong>0 two-source sign contradictions</strong>;</li><li><strong>0 product-constraint contradictions</strong>;</li><li><strong>0 characters derived from the product equation</strong>;</li><li><strong>0 hidden saturation qualifiers of source arity four or larger under the parent completeness guard</strong>.</li></ul>
+<p>The depth frontier is</p>
+<pre><code class="language-text">depth  states processed  new states
+0      8                 28
+1      28                65
+2      65                90
+3      90                90
+4      90                59
+5      59                27
+6      27                12
+7      12                1
+8      1                 0</code></pre>
+<p>The queue again exhausts at depth8.</p>
+<h2>4. What changed relative to the 346-state parent</h2>
+<p>The parent has346 canonical states. Pair feedback adds34 more.</p>
+<p>But the positive source alphabet is unchanged:</p>
+<pre><code class="language-text">11,13,17,19,23,29,31,37,43,47,53,71,79,83,107,109,127,131,151,167,191,251,271,383,971</code></pre>
+<p>More strongly, the set of positive <code>(hard class, source prime)</code> pairs is also unchanged.</p>
+<p>Thus the new 34 states are not new character facts. They are new <strong>ancestry facts</strong>: additional compatible combinations of exact route residues and already-known characters.</p>
+<p>This is the central interpretation of the closure.</p>
+<h2>5. Only two distinct pair promotions are realized</h2>
+<p>Although18 pair extraction events occur across different ancestry states, they reduce to exactly two distinct source-pair/destination geometries:</p>
+<ul><li><code>h=169</code>, <code>q17 + q23 -&gt; k19</code>;</li><li><code>h=169</code>, <code>q23 + q47 -&gt; k19</code>.</li></ul>
+<p>No h529 pair promotion, k31 pair promotion, or k47 pair promotion from the 96-pair theorem is realized as an unknown-character extraction inside this class-global closure.</p>
+<p>The same two h169 pair routes also occur later in states where q19 is already known positive, accounting for the distinct known-plus pair geometries.</p>
+<p>No pair route finds a destination character already known negative.</p>
+<h2>6. h169 q17+q23 -&gt; k19</h2>
+<p>The source route requirements are</p>
+<p><code>p mod17 = -19 mod17 = 15</code>,</p>
+<p><code>p mod23 = -19 mod23 = 4</code>.</p>
+<p>Both are positive-character source residues.</p>
+<p>Modulo the destination k19, the routed primes are</p>
+<p><code>17 mod19 = 17</code>,</p>
+<p><code>23 mod19 = 4</code>.</p>
+<p>Thus the incoming exact-state residue multiset is</p>
+<p><code>(4,17)</code>,</p>
+<p>one of the ten genuine h169/h529 k19 pair repellers.</p>
+<p>Starting from class seed1, the two-source divisor mask is</p>
+<p><code>{1,4,6,7,11,16,17}</code>.</p>
+<p>It has size7, not the full QR(19) size9.</p>
+<p>Yet the complete exact closure has</p>
+<ul><li>41 states;</li><li>10 misses;</li><li>nine surviving centers</li></ul>
+<p><code>{1,4,5,6,7,9,11,16,17}</code>;</p>
+<ul><li>zero negative-character centers.</li></ul>
+<p>Therefore, on this exact ancestry branch,</p>
+<blockquote><p>if k19 still misses, <code>(19/p)=+1</code>.</p></blockquote>
+<p>The promotion is state-only, not QR saturation.</p>
+<h2>7. h169 q23+q47 -&gt; k19</h2>
+<p>The source route requirements are</p>
+<p><code>p mod23 = 4</code>,</p>
+<p><code>p mod47 = -19 mod47 = 28</code>.</p>
+<p>Both are positive-character residues.</p>
+<p>Modulo19,</p>
+<p><code>23 mod19 = 4</code>,</p>
+<p><code>47 mod19 = 9</code>.</p>
+<p>The pair is therefore</p>
+<p><code>(4,9)</code>.</p>
+<p>Its starting mask is</p>
+<p><code>{1,4,5,9,11,16,17}</code>,</p>
+<p>again size7 rather than9.</p>
+<p>The exact closure is again</p>
+<ul><li>41 states;</li><li>10 misses;</li><li>the same nine positive surviving centers;</li><li>no negative center.</li></ul>
+<p>So a k19 miss on this branch again promotes <code>(19/p)=+1</code> without QR saturation.</p>
+<h2>8. Why this does not create a new source prime</h2>
+<p>q19 is already present elsewhere in the landed class-global character graph on h169.</p>
+<p>The pair edges therefore do not enlarge the source alphabet. Their contribution is to prove q19 positive on <strong>additional, more constrained ancestry states</strong> where the ordinary character-saturation grammar did not establish it by the same path.</p>
+<p>This distinction matters for the next research engine. A character-only state canonicalizes these branches together once their sign assignments match, but the exact masks and route ancestry are not equivalent.</p>
+<h2>9. The character projection has reached another boundary</h2>
+<p>The progression is now</p>
+<ul><li>260 states: product-aware character saturation;</li><li>346 states: add single-source state-only promotion;</li><li>380 states: add genuine two-source state-only promotion.</li></ul>
+<p>Each richer exact-state rule increases the number of arithmetic ancestry states, but the last step adds <strong>zero</strong> new class/source character pairs and <strong>zero</strong> contradictions.</p>
+<p>This is strong evidence that further projection onto character signs alone is throwing away the object that is now doing the work.</p>
+<p>The next state should preserve the surviving exact fixed-shift object itself.</p>
+<h2>10. Next target: persistent survivor signatures</h2>
+<p>For a routed destination, instead of storing only</p>
+<p><code>(k/p)=+1</code>,</p>
+<p>store a canonical survivor signature containing at least</p>
+<ul><li>the exact surviving <code>(mask,center)</code> states or a lossless compressed equivalent;</li><li>the routed source ancestry that generated the signature;</li><li>residual-support/gcd relations from <code>ROUTED-RESIDUAL-GCD-ATLAS.md</code>;</li><li>periodic valuation phases from <code>PERIODIC-ROUTE-VALUATION-LADDER.md</code>;</li><li>individual characters and GF(2) product constraints.</li></ul>
+<p>The two realized k19 pair routes are an ideal first prototype: each reduces the huge ordinary state space to only41 exact states and10 misses, with the same nine centers but different seven-element masks.</p>
+<p>The immediate theorem question is no longer merely whether k19 has positive character. It is:</p>
+<blockquote><p>can the surviving mask-center signatures from these two ancestry geometries be intersected with residual coprimality or a deterministic valuation lift so that the later Type-II target becomes forced?</p></blockquote>
+<p>That is the bridge from character routing back to the k107 phenomenon.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

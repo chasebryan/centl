@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact h169 k27 survivor automaton — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-survivor-automaton.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-survivor-automaton.html">
+  <meta property="og:title" content="Exact h169 k27 survivor automaton — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact h169 k27 survivor automaton</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-SURVIVOR-AUTOMATON.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved fixed-shift module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Primary verifier:</strong> <code>verify_k27_survivor_automaton.py</code></p>
+<p><strong>Depends on:</strong> <code>POST-K23-COMPANION-LADDER.md</code>, <code>K31-SURVIVOR-NORMAL-FORM.md</code>, exact signed-box Lane-I semantics</p>
+<p><strong>Claim boundary:</strong> exact h169 fixed-shift state theorem at k27 plus exact behavioral minimization. This is not yet a universal transition theorem, not a universal shift ceiling, and not an Erdős–Straus proof.</p>
+<hr>
+<h2>1. Local coordinate</h2>
+<p>For</p>
+<p><code>p = 169 + 840t</code>,</p>
+<p>we have</p>
+<p><code>C27 = (p+27)/4 = 49 + 210t = 7E</code>,</p>
+<p>with</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>In particular,</p>
+<p><code>E = 1 mod3</code>.</p>
+<p>Therefore every rational prime factor of <code>E</code> is a unit modulo27. This makes the complete local factor alphabet exactly</p>
+<p><code>U(27) = {1,2,4,5,7,8,10,11,13,14,16,17,19,20,22,23,25,26}</code>.</p>
+<p>The mandatory seed factor is7.</p>
+<hr>
+<h2>2. Exact state transition</h2>
+<p>Represent a partially accumulated factor state by</p>
+<p><code>(M,c)</code>,</p>
+<p>where</p>
+<ul><li><code>M</code> is the complete residue mask modulo27 of divisors of the square of the accumulated factor product;</li><li><code>c</code> is the accumulated center modulo27.</li></ul>
+<p>The seed state is</p>
+<p><code>M0 = {1,7,22}</code>,</p>
+<p><code>c0 = 7</code>.</p>
+<p>If a new prime-factor occurrence has residue <code>r in U(27)</code>, the exact transition is</p>
+<p><code>M -&gt; M * {1,r,r^2}</code>,</p>
+<p><code>c -&gt; c*r</code>.</p>
+<p>This is exact for arbitrary prime powers as repeated applications of the same residue generate the divisor exponents <code>0..2e</code> for valuation <code>e</code>.</p>
+<p>At k27 the two signed-box targets are:</p>
+<p>Type I:</p>
+<p><code>4d = -1 mod27</code>, hence</p>
+<p><code>d = 20 mod27</code>.</p>
+<p>Type II:</p>
+<p><code>d = -c mod27</code>.</p>
+<p>So a state is terminal exactly when either <code>20 in M</code> or <code>-c in M</code>.</p>
+<hr>
+<h2>3. Complete raw closure</h2>
+<p>Exhausting the exact transition system from <code>(M0,c0)</code> under all 18 admissible unit residues gives</p>
+<pre><code class="language-text">raw states    132
+misses         44
+hits           88</code></pre>
+<p>The 88 hits split as</p>
+<pre><code class="language-text">Type I only       20
+Type II only       6
+Type I + Type II  62</code></pre>
+<p>The 44 misses use <strong>36 distinct divisor masks</strong>.</p>
+<p>That last fact is important. k27 does not collapse to the two-mask <code>BARE | FULL_QR</code> normal form proved at k31. Any attempt to force k27 into an analogous QR-only support theorem would throw away exact state information that the signed box genuinely uses.</p>
+<p>From the seed, exactly three single-residue transitions are immediate hits:</p>
+<p><code>r in {20,23,26}</code>.</p>
+<p>The remaining residues may still hit or miss after further factor accumulation, so the complete transition object is required.</p>
+<hr>
+<h2>4. Absorbing hit theorem</h2>
+<p>The complete 88-state hit set is closed under every admissible residue transition:</p>
+<blockquote><p>if an exact reachable k27 state is a hit, adjoining any further prime-factor occurrence with residue in <code>U(27)</code> produces another hit.</p></blockquote>
+<p>This is stronger than merely saying that the particular factorization already decomposes. It means the local automaton has a genuine terminal region: once entered, no later factor support can return the state to a miss.</p>
+<p>The verifier checks all</p>
+<p><code>88 * 18 = 1584</code></p>
+<p>hit-state transitions explicitly.</p>
+<hr>
+<h2>5. Behavioral minimization</h2>
+<p>Raw <code>(mask,center)</code> equality is finer than the candidate framework needs. Two states are behaviorally equivalent when, for every future residue word over <code>U(27)</code>, they agree on whether the resulting state is a hit or a miss.</p>
+<p>Partition refinement of the complete 132-state deterministic automaton gives the exact minimal quotient:</p>
+<pre><code class="language-text">behavioral states          30
+survivor classes           29
+terminal hit classes        1</code></pre>
+<p>The quotient-class size histogram is</p>
+<pre><code class="language-text">size  1 : 23 classes
+size  2 :  5 classes
+size 11 :  1 class
+size 88 :  1 class</code></pre>
+<p>The unique size-88 class is exactly the entire absorbing hit set.</p>
+<p>The 29 survivor classes contain all 44 raw misses.</p>
+<p>Thus the exact k27 object needed by the developing decomposition framework is not a 132-state raw factor mask and not a one-bit QR character. It is a <strong>30-state finite deterministic machine</strong>.</p>
+<hr>
+<h2>6. Contrast with k31</h2>
+<p>The adjacent k31 theorem gives a radically smaller symbolic state:</p>
+<pre><code class="language-text">k31_mode = BARE | FULL_QR
+D_support = QR31</code></pre>
+<p>By contrast, k27 requires</p>
+<pre><code class="language-text">k27_state = one of 29 survivor classes | TERMINAL</code></pre>
+<p>This asymmetry is mathematically useful rather than inconvenient.</p>
+<p>It tells us the candidate decomposition framework should permit different local compression types:</p>
+<ul><li>symbolic normal forms where the arithmetic collapses completely;</li><li>minimized finite automata where several exact residue configurations remain behaviorally distinct.</li></ul>
+<p>Trying to impose one representation on every shift would be a modeling error.</p>
+<hr>
+<h2>7. Coupling to the post-k23 ladder</h2>
+<p>The same h169 coordinate carries</p>
+<p><code>C23 = 6B</code>,</p>
+<p><code>C27 = 7E</code>,</p>
+<p><code>C31 = 10D</code>,</p>
+<p>with exact relations</p>
+<p><code>7E - 6B = 1</code>,</p>
+<p><code>10D - 7E = 1</code>,</p>
+<p><code>5D - 3B = 1</code>.</p>
+<p>Therefore</p>
+<p><code>gcd(B,E)=gcd(E,D)=gcd(B,D)=1</code>.</p>
+<p>A simultaneous survivor through k31 must therefore carry at least</p>
+<pre><code class="language-text">B_support   = QR23
+k27_state   = one of 29 survivor classes
+D_support   = QR31
+k31_mode    = BARE | FULL_QR
+7E-6B       = 1
+10D-7E      = 1
+5D-3B       = 1
+pairwise gcd(B,E,D) = 1</code></pre>
+<p>This is now a concrete finite/symbolic product state, not a vague list of observations.</p>
+<hr>
+<h2>8. Framework consequence</h2>
+<p>The live finite ancestry audit showed that k27 and k31 absorb 128 of 148 audited simultaneous k19/k23 survivors.</p>
+<p>The exact local mathematics now explains what the surviving branch data must look like after those two shifts:</p>
+<pre><code class="language-text">k19/k23 survivor
+        |
+        v
+k27 30-state automaton
+        |
+        v
+k31 two-mode normal form
+        |
+        v
+residual branch only if both local machines miss</code></pre>
+<p>The immediate next theorem target is therefore sharper than before:</p>
+<blockquote><p>intersect the 29 k27 survivor classes with <code>B_support=QR23</code>, <code>D_support=QR31</code>, <code>k31_mode=BARE|FULL_QR</code>, pairwise coprimality, and the three affine relations, then determine which classes are arithmetically realizable and which force a later exact signed-box exit.</p></blockquote>
+<p>A proof that only a proper subset of the 29 classes is compatible with the k23/k31 support laws would be a genuine progress measure for the candidate decomposition framework.</p>
+<hr>
+<h2>9. Claim boundary</h2>
+<p>This module proves:</p>
+<ol><li>the complete h169 k27 exact residue-state closure;</li><li>the exact hit/miss counts;</li><li>the absorbing nature of the full hit set;</li><li>the exact 30-state minimal behavioral quotient;</li><li>the affine coupling to k23 and k31.</li></ol>
+<p>It does <strong>not</strong> prove that every simultaneous k19/k23 survivor hits at k27 or k31. Explicit survivors through both shifts exist, so such a claim would be false.</p>
+<p>The correct next object is the residual product state after both local machines miss.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

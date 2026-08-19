@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact k27 survivor grammar on h169 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-survivor-grammar.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-survivor-grammar.html">
+  <meta property="og:title" content="Exact k27 survivor grammar on h169 — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact k27 survivor grammar on h169</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-SURVIVOR-GRAMMAR.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact fixed-shift module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k27_survivor_grammar.py</code></p>
+<p><strong>Depends on:</strong> <code>POST-K23-COMPANION-LADDER.md</code>, <code>K31-SURVIVOR-NORMAL-FORM.md</code>, exact signed-box Type-I/II semantics</p>
+<p><strong>Claim boundary:</strong> exact theorem for the h169 k27 companion state. It is not a universal shift ceiling, a closed decomposition method, or an Erdős–Straus proof.</p>
+<hr>
+<h2>1. Normalize the k27 companion</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code>.</p>
+<p>Then</p>
+<p><code>C27 = (p+27)/4 = 49 + 210t = 7E</code>,</p>
+<p>with</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>In particular</p>
+<p><code>E = 1 mod3</code>.</p>
+<p>No prime factor of E is3, so every prime factor of E is a unit modulo27.</p>
+<p>The mandatory seed is the single factor7. Its divisor-square mask is</p>
+<p><code>M0 = {1,7,22} mod27</code>,</p>
+<p>its center is7, and the Type-I target is</p>
+<p><code>-4^{-1} = 20 mod27</code>.</p>
+<p>For one prime-factor occurrence with residue r modulo27, the exact state transition is</p>
+<p><code>(M,c) -&gt; ( M*{1,r,r^2}, c*r )</code>.</p>
+<p>Prime powers are represented by repeated occurrences of the same residue, so the transition is exact for arbitrary factorizations of E.</p>
+<hr>
+<h2>2. Hits are absorbing and factor order is irrelevant</h2>
+<p>The transitions commute because both divisor-mask multiplication and center multiplication commute.</p>
+<p>More importantly, a signed-box hit can never be repaired by adjoining another prime factor.</p>
+<ul><li>A Type-I witness remains a divisor of the enlarged companion square.</li><li>If d is a Type-II witness for C, then after adjoining residue r, <code>d*r</code> is a divisor of <code>(Cr)^2</code> and satisfies <code>d*r = -Cr mod27</code>.</li></ul>
+<p>Therefore the hit set is forward invariant.</p>
+<p>This lets us reorder the prime factors of E without changing the final state and analyze all nonresidue occurrences before all quadratic-residue occurrences.</p>
+<hr>
+<h2>3. Unit geometry modulo27</h2>
+<p>The unit group modulo27 is cyclic of order18.</p>
+<p>Its quadratic residues are</p>
+<p><code>QR27 = {1,4,7,10,13,16,19,22,25}</code>.</p>
+<p>Its nonresidues are</p>
+<p><code>NR27 = {2,5,8,11,14,17,20,23,26}</code>.</p>
+<p>There is a useful h169 coincidence:</p>
+<ul><li>every QR27 unit is <code>1 mod3</code>;</li><li>every NR27 unit is <code>2 mod3</code>.</li></ul>
+<p>Since <code>E=1 mod3</code>, the number of NR27 prime-factor occurrences in E, <strong>counted with multiplicity</strong>, must be even.</p>
+<p>That hard-class parity condition is the key compression.</p>
+<hr>
+<h2>4. Raw exact closure</h2>
+<p>The complete exact closure from <code>(M0,7)</code> under all18 unit residues modulo27 contains</p>
+<pre><code class="language-text">132 states
+ 88 hits
+ 44 misses</code></pre>
+<p>The raw miss set is much richer than the k31 two-mode closure.</p>
+<p>However only28 of those misses have the center parity compatible with h169, equivalently center in QR27.</p>
+<p>Rather than preserve 28 unrelated masks, separate the factorization into its NR skeleton and QR completion.</p>
+<hr>
+<h2>5. Nonresidue skeleton theorem</h2>
+<p>First delete all QR27 factor occurrences and retain only the NR27 occurrences of E.</p>
+<p>Because hits are absorbing, if that NR-only subproduct already hits, the full factorization hits as well.</p>
+<p>The three residues</p>
+<p><code>20,23,26 mod27</code></p>
+<p>are immediate one-occurrence killers: adjoining any one of them to the seed hits the exact signed box. Thus no k27 survivor can contain a prime-factor occurrence in those residue classes.</p>
+<p>Among the remaining six NR residues</p>
+<p><code>{2,5,8,11,14,17}</code>,</p>
+<p>the complete NR-only survivor counts by occurrence number are</p>
+<pre><code class="language-text">size 0 : 1
+size 1 : 6
+size 2 : 9
+size 3 : 8
+size 4 : 6
+size 5 : 2
+size 6 : 1
+size 7 : 0</code></pre>
+<p>Every NR multiset of size7 hits. Hence every larger NR multiset also hits, because it contains a size7 submultiset and hits are absorbing.</p>
+<p>The h169 parity rule removes the odd sizes. Therefore every actual h169 k27 miss has one of exactly <strong>17</strong> NR skeletons:</p>
+<h3>size 0</h3>
+<p><code>()</code></p>
+<h3>size 2</h3>
+<pre><code class="language-text">(2,2)
+(2,14)
+(2,17)
+(5,5)
+(5,11)
+(8,14)
+(8,17)
+(11,11)
+(14,14)</code></pre>
+<h3>size 4</h3>
+<pre><code class="language-text">(2,2,2,14)
+(2,2,2,17)
+(2,2,14,14)
+(2,14,14,14)
+(5,5,11,11)
+(8,14,14,14)</code></pre>
+<h3>size 6</h3>
+<p><code>(2,2,2,14,14,14)</code></p>
+<p>The entries are prime-factor residues modulo27 and multiplicity matters.</p>
+<p>This is a range-free exact necessary condition, not a finite prime census.</p>
+<hr>
+<h2>6. Seven live QR-completion modes</h2>
+<p>The 17 skeletons produce12 distinct raw states. Closing those states under the nine QR27 residues gives47 raw states:</p>
+<pre><code class="language-text">28 misses
+19 hits</code></pre>
+<p>Those 47 states minimize, with respect to every possible future QR27 factor residue, to exactly</p>
+<pre><code class="language-text">8 behavioral classes
+= 1 absorbing HIT class
++ 7 live survivor modes.</code></pre>
+<p>Call the live modes</p>
+<p><code>Q, A, B, C, D, E, F</code>.</p>
+<p>The skeleton-to-mode map is exact.</p>
+<h3>Q</h3>
+<pre><code class="language-text">()</code></pre>
+<h3>A</h3>
+<pre><code class="language-text">(2,14)</code></pre>
+<h3>B</h3>
+<pre><code class="language-text">(8,17)
+(5,11)
+(2,2,2,17)
+(2,2,14,14)
+(8,14,14,14)
+(5,5,11,11)
+(2,2,2,14,14,14)</code></pre>
+<h3>C</h3>
+<pre><code class="language-text">(2,2)
+(8,14)
+(2,2,2,14)</code></pre>
+<h3>D</h3>
+<pre><code class="language-text">(2,17)
+(14,14)
+(2,14,14,14)</code></pre>
+<h3>E</h3>
+<p><code>(5,5)</code></p>
+<h3>F</h3>
+<p><code>(11,11)</code></p>
+<hr>
+<h2>7. Exact QR transition table</h2>
+<p>For QR prime-factor residues, the entire surviving future is:</p>
+<table class="directory"><thead><tr><th>mode</th><th>r=1</th><th>r=4</th><th>r=7</th><th>r=10</th><th>r=13</th><th>r=16</th><th>r=19</th><th>r=22</th><th>r=25</th></tr></thead><tbody><tr><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td><td>Q</td></tr><tr><td>A</td><td>A</td><td>C</td><td>D</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td></tr><tr><td>B</td><td>B</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td></tr><tr><td>C</td><td>C</td><td>HIT</td><td>B</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td></tr><tr><td>D</td><td>D</td><td>B</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td></tr><tr><td>E</td><td>E</td><td>HIT</td><td>HIT</td><td>HIT</td><td>B</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td></tr><tr><td>F</td><td>F</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>HIT</td><td>B</td></tr></tbody></table>
+<p>The HIT state is absorbing.</p>
+<p>Because factor transitions commute, this table is an exact factor-support grammar, not an ordering convention.</p>
+<hr>
+<h2>8. Equivalent closed-form rules</h2>
+<p>The transition table can be read without running an automaton.</p>
+<h3>Mode Q</h3>
+<p>Every prime factor of E is QR27. Any QR27 residues and multiplicities are allowed. k27 misses.</p>
+<h3>Mode A</h3>
+<p>After the NR skeleton <code>(2,14)</code>, every QR factor residue must lie in</p>
+<p><code>{1,4,7}</code>.</p>
+<p>Residue4 may occur at most once, residue7 may occur at most once, and both may occur once. Residue1 may occur arbitrarily often.</p>
+<h3>Mode B</h3>
+<p>Every QR factor residue must be1 modulo27.</p>
+<h3>Mode C</h3>
+<p>Every QR factor residue must lie in <code>{1,7}</code>, with residue7 occurring at most once.</p>
+<h3>Mode D</h3>
+<p>Every QR factor residue must lie in <code>{1,4}</code>, with residue4 occurring at most once.</p>
+<h3>Mode E</h3>
+<p>Every QR factor residue must lie in <code>{1,13}</code>, with residue13 occurring at most once.</p>
+<h3>Mode F</h3>
+<p>Every QR factor residue must lie in <code>{1,25}</code>, with residue25 occurring at most once.</p>
+<p>Together with the 17-skeleton list, these rules are an exact <strong>iff characterization</strong> of h169 k27 miss factorizations in terms of the prime-factor residues of E.</p>
+<hr>
+<h2>9. Coupling to k23 and k31</h2>
+<p>The adjacent companion coordinates are</p>
+<p><code>C23 = 6B</code>,</p>
+<p><code>C27 = 7E</code>,</p>
+<p><code>C31 = 10D</code>,</p>
+<p>with</p>
+<p><code>B=8+35t</code>,</p>
+<p><code>E=7+30t</code>,</p>
+<p><code>D=5+21t</code>.</p>
+<p>They satisfy</p>
+<p><code>7E - 6B = 1</code>,</p>
+<p><code>10D - 7E = 1</code>,</p>
+<p><code>5D - 3B = 1</code>.</p>
+<p>Hence B, E, and D are pairwise coprime.</p>
+<p>A simultaneous k23/k27/k31 survivor must therefore satisfy all three independent support systems:</p>
+<pre><code class="language-text">B: every prime factor QR mod23
+E: one of the exact seven-mode k27 survivor grammars
+D: every prime factor QR mod31</code></pre>
+<p>while the three pairwise-disjoint cofactors are locked by the affine identities above.</p>
+<p>This is now a concrete local survivor machine rather than a loose collection of divisibility observations.</p>
+<hr>
+<h2>10. Framework consequence</h2>
+<p>The live transition after k23 can now be stated exactly for two of the dominant exits:</p>
+<ol><li>compute the k27 NR skeleton of E;</li><li>if it violates the 17-skeleton grammar, k27 hits;</li><li>otherwise apply the seven-mode QR completion rule;</li><li>if k27 survives, test D at k31;</li><li>any non-QR prime factor of D forces a k31 hit;</li><li>only the coupled residual state proceeds deeper.</li></ol>
+<p>The remaining research problem is no longer “search k27 and k31.” It is to characterize or eliminate the exact residual intersection</p>
+<p><code>QR23(B) + G27(E) + QR31(D)</code></p>
+<p>under the pairwise-coprime affine chain.</p>
+<p>That is a genuine transition target for the developing decomposition framework.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

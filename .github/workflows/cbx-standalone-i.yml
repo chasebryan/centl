@@ -1,0 +1,202 @@
+name: CBX standalone Lane-I profile
+
+on:
+  pull_request:
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
+      - 'research/erdos-straus/analyze_six_shift_corridor.py'
+      - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
+      - 'research/erdos-straus/verify_k27_structure.py'
+      - 'research/erdos-straus/classify_k27_e2.py'
+      - 'research/erdos-straus/classify_k27_even_packets.py'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-standalone-i.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'centl'
+      - 'research/erdos-straus/cbx.kernel/src/cbx_standalone_i.c'
+      - 'research/erdos-straus/cbx.kernel/analyze_standalone.py'
+      - 'research/erdos-straus/cbx.kernel/analyze_overlap.py'
+      - 'research/erdos-straus/analyze_six_shift_corridor.py'
+      - 'research/erdos-straus/K27-TWO-TARGET-STRUCTURE.md'
+      - 'research/erdos-straus/verify_k27_structure.py'
+      - 'research/erdos-straus/classify_k27_e2.py'
+      - 'research/erdos-straus/classify_k27_even_packets.py'
+      - 'research/erdos-straus/cbx.kernel/Makefile'
+      - '.github/workflows/cbx-standalone-i.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-standalone:
+    name: fedora-standalone-i
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora toolchain
+        run: dnf -y install gcc make python3 git tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Profile every shift independently
+        run: |
+          ./centl es cbx standalone-i \
+            --hi 100000 \
+            --i-max 80 \
+            --segment 25000 \
+            --sets /tmp/cbx-standalone-sets.tsv \
+            > /tmp/cbx-standalone.json
+          ./centl es cbx analyze-standalone \
+            /tmp/cbx-standalone.json --json \
+            > /tmp/cbx-standalone-analysis.json
+          ./centl es cbx analyze-overlap \
+            /tmp/cbx-standalone-sets.tsv --json \
+            > /tmp/cbx-overlap-analysis.json
+          python3 research/erdos-straus/analyze_six_shift_corridor.py \
+            /tmp/cbx-standalone-sets.tsv --hi 100000 --json \
+            > /tmp/cbx-corridor6-analysis.json
+
+      - name: Independently verify k=27 structural theorem
+        run: |
+          python3 research/erdos-straus/verify_k27_structure.py \
+            --limit 100000 --json > /tmp/k27-structure.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-structure.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-two-target-structure-regression-v1'
+          assert r['hard_primes'] > 0
+          assert all(v == 0 for v in r['failures'].values())
+          assert r['pure_qr_cases'] > 0
+          assert r['e2_cases'] > 0
+          print(
+              f"::notice title=Exact k=27 structural reduction::"
+              f"hard={r['hard_primes']}; pureQR={r['pure_qr_cases']}; "
+              f"E2={r['e2_cases']}; E2hits={r['e2_hits']}; E2misses={r['e2_misses']}; "
+              f"fullQR+NR={r['full_qr_with_nonresidue_cases']}"
+          )
+          PY
+
+      - name: Enumerate exact k=27 E2 state machine
+        run: |
+          python3 research/erdos-straus/classify_k27_e2.py --json \
+            > /tmp/k27-e2-classification.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-e2-classification.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-e2-exact-finite-group-classifier-v1'
+          assert r['qr_reachable_states'] == 40
+          assert r['nonresidue_unordered_pairs'] == 45
+          assert r['total_structural_cases'] == 1800
+          assert r['miss_capable_qr_states'] == 21
+          assert r['exact_miss_configurations'] == 95
+          print(
+              f"::notice title=Exact k=27 E2 classifier::"
+              f"QRstates={r['qr_reachable_states']}; NRpairs={r['nonresidue_unordered_pairs']}; "
+              f"cases={r['total_structural_cases']}; missQRstates={r['miss_capable_qr_states']}; "
+              f"miss-configurations={r['exact_miss_configurations']}"
+          )
+          PY
+
+      - name: Exhaust exact k=27 even nonresidue packets
+        run: |
+          python3 research/erdos-straus/classify_k27_even_packets.py --json \
+            > /tmp/k27-even-packets.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k27-even-packets.json', encoding='utf-8'))
+          assert r['analysis'] == 'k27-even-packet-exhaustion-v2'
+          assert r['qr_local_states'] == 31
+          assert r['qr_reachable_states'] == 40
+          assert r['total_emitted_miss_rows'] == 200
+          assert r['nonpure_emitted_miss_rows'] == 160
+          by_e={row['E_NR']: row for row in r['packet_results']}
+          expected={
+              0:(1,40,40),
+              2:(45,95,21),
+              4:(495,46,12),
+              6:(3003,16,6),
+              8:(12870,3,1),
+              10:(43758,0,0),
+          }
+          for e,(multisets,misses,states) in expected.items():
+              row=by_e[e]
+              assert row['nonresidue_multisets'] == multisets
+              assert row['miss_configurations'] == misses
+              assert row['miss_capable_qr_states'] == states
+              assert len(row['miss_rows']) == misses
+          cutoff=r['universal_cutoff']
+          assert cutoff['E_NR_at_least'] == 10
+          assert cutoff['combined_miss_possible'] is False
+          summary='; '.join(
+              f"E{e}:miss={by_e[e]['miss_configurations']}"
+              for e in (0,2,4,6,8,10)
+          )
+          print(
+              f"::notice title=Exact k=27 even-packet exhaustion::"
+              f"QRstates={r['qr_reachable_states']}; rows={r['total_emitted_miss_rows']}; "
+              f"{summary}; cutoff=E>=10-hit"
+          )
+          PY
+
+      - name: Validate standalone accounting, overlap graph, and six-shift corridor
+        run: |
+          python3 - <<'PY'
+          import json
+          raw=json.load(open('/tmp/cbx-standalone.json', encoding='utf-8'))
+          r=json.load(open('/tmp/cbx-standalone-analysis.json', encoding='utf-8'))
+          g=json.load(open('/tmp/cbx-overlap-analysis.json', encoding='utf-8'))
+          c=json.load(open('/tmp/cbx-corridor6-analysis.json', encoding='utf-8'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['mode'] == 'standalone-I'
+          assert raw['sets_recorded'] is True
+          assert r['analysis'] == 'cbx-lane-I-standalone-profile-v1'
+          assert g['analysis'] == 'cbx-lane-I-overlap-graph-v2'
+          assert c['analysis'] == 'six-consecutive-lane-I-corridor-v1'
+          assert r['hard_primes'] > 0
+          assert r['layers'] == len(raw['shifts']) == g['layers']
+          assert raw['set_relations'] == g['relation_rows'] == r['totals']['hit_events']
+          assert c['hard_primes'] == r['hard_primes']
+          assert c['corridor_covered'] + c['residual'] == c['hard_primes']
+          assert c['residual'] > 0
+          assert sum(c['next_hit_histogram'].values()) == c['residual']
+          assert sum(c['k23_combined_miss_branches'].values()) == c['residual']
+          assert sum(c['k27_qr_split'].values()) == c['residual']
+          assert sum(c['k27_nonresidue_valuation_histogram'].values()) == c['residual']
+          assert c['exact_invariants']['hard_prime_P_mod_6'] == 0
+          assert c['exact_invariants']['C27_mod_3'] == 1
+          assert c['exact_invariants']['QR27_equals_units_1_mod_3'] is True
+          assert c['exact_invariants']['C27_nonresidue_valuation_even'] is True
+          for row in raw['shifts']:
+              assert row['target_visits'] == raw['hard_primes']
+              assert row['factorizations'] + row['coprime_skips'] <= row['target_visits']
+              assert sum(row['spectrum_hits'].values()) == row['hits']
+          top='; '.join(f"k={x['k']}:hits={x['hits']}" for x in r['top_by_hits'][:6])
+          pair=g['top_pairwise_similarity'][0] if g['top_pairwise_similarity'] else None
+          pair_txt=(
+              f"{pair['later_k']}<-{pair['earlier_k']}:J={pair['jaccard']:.4f}"
+              if pair else 'none'
+          )
+          print(
+              f"::notice title=CBX Fedora standalone overlap::"
+              f"hard={r['hard_primes']}; layers={r['layers']}; "
+              f"productive={r['productive_layers']}; single={g['exact_single_layer_containment_count']}; "
+              f"two={g['exact_two_layer_containment_target_count']}; "
+              f"three={g['exact_three_layer_containment_target_count']}; top={top}; top-pair={pair_txt}"
+          )
+          print(
+              f"::notice title=Six-shift corridor residual::"
+              f"covered={c['corridor_covered']}/{c['hard_primes']}; residual={c['residual']}; "
+              f"next={c['next_hit_histogram']}; k23={c['k23_combined_miss_branches']}; "
+              f"k27={c['k27_qr_split']}; nrval={c['k27_nonresidue_valuation_histogram']}"
+          )
+          PY

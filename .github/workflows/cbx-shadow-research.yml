@@ -1,0 +1,123 @@
+name: CBX Lane-I shadow depth research
+
+on:
+  workflow_dispatch:
+    inputs:
+      hi:
+        description: 'Inclusive p upper bound'
+        required: true
+        default: '10000000'
+      i_max:
+        description: 'Largest standalone Lane-I shift'
+        required: true
+        default: '400'
+      segment:
+        description: 'p segment size'
+        required: true
+        default: '1000000'
+  pull_request:
+    paths:
+      - '.github/workflows/cbx-shadow-research.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-shadow-depth:
+    name: Fedora exact shadow depth through triples
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    env:
+      HI: ${{ inputs.hi || '10000000' }}
+      I_MAX: ${{ inputs.i_max || '400' }}
+      SEGMENT: ${{ inputs.segment || '1000000' }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CHECKOUT_SHA: ${{ github.sha }}
+
+    steps:
+      - name: Install Fedora research toolchain
+        run: dnf -y install gcc make python3 git tar gzip coreutils
+
+      - uses: actions/checkout@v4
+
+      - name: Build standalone profiler
+        run: make -C research/erdos-straus/cbx.kernel cbx-standalone-i
+
+      - name: Generate exact standalone hit relations
+        run: |
+          mkdir -p /tmp/cbx-shadow
+          ./centl es cbx standalone-i \
+            --hi "$HI" \
+            --i-max "$I_MAX" \
+            --segment "$SEGMENT" \
+            --sets /tmp/cbx-shadow/standalone-hit-relations.tsv \
+            > /tmp/cbx-shadow/standalone-profile.json
+
+      - name: Search exact earlier-layer covers through triples
+        run: |
+          ./centl es cbx analyze-shadow-depth \
+            /tmp/cbx-shadow/standalone-hit-relations.tsv --json \
+            > /tmp/cbx-shadow/shadow-depth.json
+          python3 - <<'PY'
+          import json, os
+          root='/tmp/cbx-shadow'
+          raw=json.load(open(root+'/standalone-profile.json'))
+          r=json.load(open(root+'/shadow-depth.json'))
+          assert raw['kernel'] == 'cbx.kernel'
+          assert raw['sets_recorded'] is True
+          assert r['analysis'] == 'cbx-lane-I-shadow-depth-v1'
+          assert r['relation_rows'] == raw['set_relations']
+          report={
+              'kernel':'cbx.kernel',
+              'mode':'finite-shadow-depth-through-3-v1',
+              'source_commit':os.environ['SOURCE_SHA'],
+              'checkout_commit':os.environ['CHECKOUT_SHA'],
+              'hi':int(os.environ['HI']),
+              'i_max':int(os.environ['I_MAX']),
+              'hard_primes':raw['hard_primes'],
+              'layers':r['layers'],
+              'fully_shadowed_by_prior_union_layers':r['fully_shadowed_by_prior_union_layers'],
+              'exact_cover_counts_through_three':r['exact_cover_counts_through_three'],
+              'no_exact_cover_through_three_layers':r['no_exact_cover_through_three_layers'],
+              'above_107':r['above_107'],
+              'claim':r['claim'],
+          }
+          json.dump(report, open(root+'/RESEARCH-SUMMARY.json','w'), indent=2, sort_keys=True)
+          c=report['exact_cover_counts_through_three']
+          a=report['above_107']
+          print(
+              f"::notice title=CBX exact shadow depth::"
+              f"X={report['hi']}; K_I={report['i_max']}; hard={report['hard_primes']}; "
+              f"shadowed={report['fully_shadowed_by_prior_union_layers']}; "
+              f"exact1={c['size_1']}; exact2={c['size_2']}; exact3={c['size_3']}; "
+              f"k>107 no-cover-through3={a['no_exact_cover_through_three_layers']}/"
+              f"{a['fully_shadowed_layers']}"
+          )
+          PY
+
+      - name: Preserve environment and hashes
+        run: |
+          {
+            echo "kernel=cbx.kernel"
+            echo "source_commit=$SOURCE_SHA"
+            echo "checkout_commit=$CHECKOUT_SHA"
+            echo "hi=$HI"
+            echo "i_max=$I_MAX"
+            echo "segment=$SEGMENT"
+            echo "os_release=$(tr '\n' ' ' </etc/os-release)"
+            echo "uname=$(uname -a)"
+            echo "cc=$(cc --version | head -n1)"
+            echo "python=$(python3 --version)"
+          } > /tmp/cbx-shadow/ENVIRONMENT.txt
+          cd /tmp/cbx-shadow
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload exact shadow-depth artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbx-shadow-depth-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
+          path: /tmp/cbx-shadow/
+          if-no-files-found: error
+          retention-days: 90

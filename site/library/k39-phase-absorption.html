@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write">
+  <title>Exact k39 phase absorption on h169 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k39-phase-absorption.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k39-phase-absorption.html">
+  <meta property="og:title" content="Exact k39 phase absorption on h169 — Free Computation Foundation">
+  <meta property="og:description" content="Write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact k39 phase absorption on h169</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K39-PHASE-ABSORPTION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact range-free transition module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k39_phase_absorption.py</code></p>
+<p><strong>Depends on:</strong> the landed post-k23 companion ladder and exact signed-box Type-I/II semantics</p>
+<p><strong>Claim boundary:</strong> exact h169 congruence theorem at k39. It is not a universal shift bound, a closed decomposition method, or an Erdős–Straus proof.</p>
+<h2>1. Normalize k39</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code>.</p>
+<p>Then</p>
+<p><code>C39 = (p+39)/4 = 52 + 210t = 2G</code>,</p>
+<p>with</p>
+<p><code>G = 26 + 105t</code>.</p>
+<p>Modulo3,</p>
+<p><code>G = 2 mod3</code>,</p>
+<p>so 3 never divides G.</p>
+<p>Modulo13,</p>
+<p><code>G = t mod13</code>.</p>
+<p>Thus the k39 arithmetic splits exactly by the phase</p>
+<p><code>t mod13</code>.</p>
+<p>The Type-I target is</p>
+<p><code>-4^{-1} = 29 mod39</code>.</p>
+<h2>2. Phase t=0 mod13 is an immediate Type-II hit</h2>
+<p>If</p>
+<p><code>t = 0 mod13</code>,</p>
+<p>then 13 divides G. Since <code>G=2 mod3</code>, write</p>
+<p><code>G=13H</code> with <code>H=2 mod3</code>.</p>
+<p>Then</p>
+<p><code>C39=26H = 13 mod39</code>.</p>
+<p>Hence the Type-II target is</p>
+<p><code>-C39 = 26 mod39</code>.</p>
+<p>But 26 divides C39 itself, so it certainly divides <code>C39^2</code>.</p>
+<p>Therefore</p>
+<p><code>t=0 mod13 =&gt; k39 Type-II hit</code>,</p>
+<p>with the fixed divisor witness</p>
+<p><code>d=26</code>.</p>
+<p>No factor search is needed in this phase.</p>
+<h2>3. The unit branch</h2>
+<p>Assume now</p>
+<p><code>t != 0 mod13</code>.</p>
+<p>Then G is coprime to39. Start from the mandatory factor2, whose square-divisor mask is</p>
+<p><code>{1,2,4} mod39</code>,</p>
+<p>and adjoin the prime-factor residues of G through the exact transition</p>
+<p><code>(M,c) -&gt; (M*{1,r,r^2}, c*r)</code>.</p>
+<p>The complete closure under the24 units modulo39 contains</p>
+<pre><code class="language-text">394 exact states
+74 misses
+320 hits.</code></pre>
+<p>For h169 the final center is</p>
+<p><code>C39 = 13 + 15t mod39</code>.</p>
+<p>Each nonzero phase t mod13 selects one exact unit center.</p>
+<h2>4. Exact phase table</h2>
+<p>The complete endpoint counts are:</p>
+<table class="directory"><thead><tr><th>t mod13</th><th>C39 mod39</th><th>endpoint states</th><th>misses</th></tr></thead><tbody><tr><td>1</td><td>28</td><td>14</td><td>2</td></tr><tr><td>2</td><td>4</td><td>19</td><td>4</td></tr><tr><td>3</td><td>19</td><td>20</td><td><strong>0</strong></td></tr><tr><td>4</td><td>34</td><td>20</td><td><strong>0</strong></td></tr><tr><td>5</td><td>10</td><td>11</td><td>6</td></tr><tr><td>6</td><td>25</td><td>14</td><td>3</td></tr><tr><td>7</td><td>1</td><td>19</td><td>6</td></tr><tr><td>8</td><td>16</td><td>11</td><td>2</td></tr><tr><td>9</td><td>31</td><td>20</td><td>4</td></tr><tr><td>10</td><td>7</td><td>20</td><td>6</td></tr><tr><td>11</td><td>22</td><td>14</td><td>3</td></tr><tr><td>12</td><td>37</td><td>14</td><td><strong>0</strong></td></tr></tbody></table>
+<p>Therefore three unit phases have no exact survivor state at all:</p>
+<p><code>{3,4,12}</code>.</p>
+<p>Together with the direct nonunit phase0 theorem, k39 absorbs four of the thirteen h169 t-phases.</p>
+<h2>5. Phase-absorption theorem</h2>
+<h3>Theorem</h3>
+<p>For</p>
+<p><code>p=169+840t</code>,</p>
+<p>if</p>
+<p><code>t mod13 in {0,3,4,12}</code>,</p>
+<p>then the exact k39 signed box hits.</p>
+<p>Equivalently, any h169 branch surviving k39 must satisfy</p>
+<p><code>t mod13 in {1,2,5,6,7,8,9,10,11}</code>.</p>
+<p>This is a range-free congruence theorem.</p>
+<p>In terms of p modulo</p>
+<p><code>840*13 = 10920</code>,</p>
+<p>the four absorbed h169 classes are</p>
+<pre><code class="language-text">p =   169 mod10920
+p =  2689 mod10920
+p =  3529 mod10920
+p = 10249 mod10920.</code></pre>
+<h2>6. Why this is a transition rule</h2>
+<p>The previous local modules describe survivor support at k27, k31, and k35. k39 now adds a different kind of exact progress:</p>
+<pre><code class="language-text">survive k27/k31/k35
+        |
+        v
+inspect t mod13
+        |
+        +-- 0,3,4,12 -&gt; exact k39 decomposition
+        |
+        `-- nine residual phases -&gt; continue</code></pre>
+<p>The state space contracts before any deeper factor-support analysis at k39 is needed.</p>
+<p>The theorem does not claim the remaining nine phases survive. It says only that they are the only phases in which a k39 miss is arithmetically possible.</p>
+<h2>7. Current local residual state</h2>
+<p>A branch surviving through k39 must now carry simultaneously:</p>
+<pre><code class="language-text">B : QR23 support
+E : exact k27 seven-mode grammar
+D : QR31 support
+F : J35 OR S7
+t mod13 : one of {1,2,5,6,7,8,9,10,11}</code></pre>
+<p>with the landed pairwise-coprime affine companion chain.</p>
+<p>This is the developing decomposition framework behaving as intended: each rung either terminates the branch or compresses its exact survivor state.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

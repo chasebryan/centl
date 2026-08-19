@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For h169,">
+  <title>Later phase coordinates feed back into k27 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k27-later-phase-feedback.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k27-later-phase-feedback.html">
+  <meta property="og:title" content="Later phase coordinates feed back into k27 — Free Computation Foundation">
+  <meta property="og:description" content="For h169,">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Later phase coordinates feed back into k27</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For h169,</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K27-LATER-PHASE-FEEDBACK.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact cross-shift dependency module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k27_later_phase_feedback.py</code></p>
+<p><strong>Depends on:</strong> <code>K27-SURVIVOR-GRAMMAR.md</code>, <code>K27-QR-FACTOR-MODE-SELECTORS.md</code>, and the landed phase restrictions at k31/k39/k43/k47/k51/k55.</p>
+<p><strong>Claim boundary:</strong> exact necessary restrictions on the k27 nonresidue-skeleton mode and one exact phase exclusion. This is not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. The phase envelope is not downstream-only</h2>
+<p>For h169,</p>
+<p><code>C27 = 7E</code>,</p>
+<p>with</p>
+<p><code>E = 7 + 30t</code>.</p>
+<p>The later local machine already retains several residues of t because they control survival at other shifts:</p>
+<pre><code class="language-text">t mod13   k39 phase coordinate
+t mod17   k51 phase coordinate
+t mod31   k31 phase coordinate
+t mod43   k43 phase coordinate
+t mod47   k47 phase coordinate
+t mod11   k55 phase coordinate.</code></pre>
+<p>Those same residues also determine whether the corresponding rational prime divides E.</p>
+<p>For any prime q not dividing30,</p>
+<p><code>q | E &lt;=&gt; t = -7*30^(-1) mod q</code>.</p>
+<p>Therefore a phase coordinate introduced for one shift can force a prime factor into the earlier k27 cofactor and restrict the exact k27 survivor mode.</p>
+<p>This is genuine cross-shift feedback. It is arithmetic, not scheduling metadata.</p>
+<h2>2. Exact feedback table</h2>
+<p>The relevant phase/factor coincidences are:</p>
+<pre><code class="language-text">phase condition   forced factor of E   residue mod27   k27 NR-skeleton consequence
+---------------------------------------------------------------------------------
+t mod11 = 6       11                   11              {B,F}
+t mod13 = 8       13                   13              {Q,E}
+t mod17 = 6       17                   17              {B,D}
+t mod19 = 8       19                   19              {Q}
+t mod31 = 7       31                    4              {Q,A,D}
+t mod43 = 27      43                   16              {Q}
+t mod47 = 17      47                   20              HIT</code></pre>
+<p>Here the named k27 mode is the landed <strong>nonresidue-skeleton behavioral mode before QR completion</strong>.</p>
+<p>The t mod19 row is the previously landed Q-selector theorem. The other rows are new cross-coordinate consequences of the same exact k27 state model.</p>
+<h2>3. Why the QR rows work</h2>
+<p>Rational primes 13,19,31,43 are QR27 residues:</p>
+<pre><code class="language-text">13 -&gt; QR residue13
+19 -&gt; QR residue19
+31 -&gt; QR residue4
+43 -&gt; QR residue16.</code></pre>
+<p>From the exact k27 QR transition table, one occurrence leaves these possible initial skeleton modes:</p>
+<pre><code class="language-text">r=13 -&gt; {Q,E}
+r=19 -&gt; {Q}
+r=4  -&gt; {Q,A,D}
+r=16 -&gt; {Q}.</code></pre>
+<p>Thus:</p>
+<pre><code class="language-text">t mod13=8  AND k27 miss -&gt; k27_NR_mode in {Q,E}
+t mod19=8  AND k27 miss -&gt; k27_NR_mode = Q
+t mod31=7  AND k27 miss -&gt; k27_NR_mode in {Q,A,D}
+t mod43=27 AND k27 miss -&gt; k27_NR_mode = Q.</code></pre>
+<p>The last and the t mod19 rule also imply full QR27 support of E because Q is the empty NR skeleton and is stable under arbitrary QR completion.</p>
+<h2>4. Why the nonresidue rows work</h2>
+<p>Rational primes 11,17,47 are NR27 residues.</p>
+<p>The landed complete NR-skeleton atlas shows:</p>
+<ul><li>every surviving skeleton containing residue11 belongs to mode B or F;</li><li>every surviving skeleton containing residue17 belongs to mode B or D;</li><li>residue20 is an immediate one-occurrence killer and appears in no surviving skeleton.</li></ul>
+<p>Therefore</p>
+<pre><code class="language-text">t mod11=6 AND k27 miss -&gt; k27_NR_mode in {B,F}
+t mod17=6 AND k27 miss -&gt; k27_NR_mode in {B,D}
+t mod47=17             -&gt; k27 hits.</code></pre>
+<p>The t mod47 statement is unconditional with respect to the rest of E: rational prime47 itself supplies the immediate k27 Type-I target residue20.</p>
+<h2>5. New phase exclusion inside the landed envelope</h2>
+<p>The standalone k47 phase theorem permits 34 possible survivor phases modulo47, including</p>
+<p><code>t=17 mod47</code>.</p>
+<p>But simultaneous survival at k27 rules that phase out exactly.</p>
+<p>Hence a branch surviving both k27 and k47 must satisfy</p>
+<p><code>S47* = S47 - {17}</code></p>
+<p>with</p>
+<p><code>|S47*| = 33</code>.</p>
+<p>This is a strict refinement of the phase envelope obtained only after cross-shift dependency propagation.</p>
+<p>The same phenomenon is not new at t mod11=6 because the landed k55 theorem already excludes phase6. The k27 <code>{B,F}</code> restriction there is therefore redundant once k55 survival is assumed, but remains an exact local k27 statement.</p>
+<h2>6. Updated phase-only contraction</h2>
+<p>Before this feedback theorem, the general h169 phase-only survivor counts through k31/k39/k43/k47/k51/k55 used</p>
+<pre><code class="language-text">15 * 9 * 40 * 34 * 13 * 7</code></pre>
+<p>classes over the pairwise-coprime phase modulus</p>
+<p><code>31*13*43*47*17*11 = 152,304,581</code>.</p>
+<p>Simultaneous k27 survival replaces the k47 factor34 by33.</p>
+<p>Thus the refined raw phase count is</p>
+<p><code>15*9*40*33*13*7 = 16,216,200</code></p>
+<p>classes out of</p>
+<p><code>152,304,581</code>.</p>
+<p>The fraction reduces to</p>
+<p><code>113,400 / 1,065,067</code></p>
+<p>or approximately</p>
+<p><code>0.10647217498993021</code>.</p>
+<p>This is an exact necessary phase fraction, not a density estimate and not a termination measure.</p>
+<h3>Route A</h3>
+<p>Route A leaves the k47 phase coordinate free. Its conditional phase count therefore sharpens from</p>
+<p><code>11,566,800</code></p>
+<p>to</p>
+<p><code>11,226,600</code></p>
+<p>classes out of</p>
+<p><code>170,222,767</code>,</p>
+<p>namely</p>
+<p><code>1,020,600 / 15,474,797 ≈ 0.06595239989254786</code>.</p>
+<h3>Route B</h3>
+<p>Route B ancestry fixes</p>
+<p><code>t=0 mod47</code>.</p>
+<p>Therefore the new exclusion <code>t!=17 mod47</code> does not change the Route-B scalar phase volume. Its value is in the mode feedback rows, especially t mod13,17,31,43.</p>
+<h2>7. Mode feedback on already-retained phases</h2>
+<p>Four of the new mode restrictions occur on phases that the standalone later-shift theorems still allow:</p>
+<pre><code class="language-text">t mod13=8   is allowed by k39, but restricts k27 to {Q,E}
+t mod17=6   is allowed by k51, but restricts k27 to {B,D}
+t mod31=7   is allowed by k31, but restricts k27 to {Q,A,D}
+t mod43=27  is allowed by k43, but forces k27 to Q.</code></pre>
+<p>So retaining only a scalar phase-volume coordinate throws away useful information. The actual CRT phase is proof-bearing state because it can select the k27 mode.</p>
+<h2>8. Constraint-propagation rules</h2>
+<p>The exact propagator can add the rules</p>
+<pre><code class="language-text">if tau13 == 8 and k27 misses:
+    k27_NR_mode in {Q,E}
+
+if tau17 == 6 and k27 misses:
+    k27_NR_mode in {B,D}
+
+if tau31 == 7 and k27 misses:
+    k27_NR_mode in {Q,A,D}
+
+if tau43 == 27 and k27 misses:
+    k27_NR_mode = Q
+    E_support = QR27
+
+if tau47 == 17:
+    contradiction with k27 miss.</code></pre>
+<p>The already-landed rule</p>
+<pre><code class="language-text">if tau19 == 8 and k27 misses:
+    k27_NR_mode = Q</code></pre>
+<p>remains in force.</p>
+<p>These implications should be applied before any expensive factor enumeration of E.</p>
+<h2>9. Bryan Entanglement Cross / BREC boundary</h2>
+<p>This theorem is a good example of why direction should remain separate from truth.</p>
+<p>A phase coordinate discovered while moving forward through later shifts reaches backward and constrains k27. Depending on the eventual BEC/BREC vocabulary, that may be useful as backward obstructive pressure, downward excavation, or a compound history annotation.</p>
+<p>The directional choice does not affect the arithmetic statement. The forced prime divisor and exact k27 state transition are the only proof-bearing objects.</p>
+<h2>10. Next target</h2>
+<p>The immediate engineering step is to extend the exact dependency propagator with</p>
+<p><code>tau13, tau17, tau43, tau47</code></p>
+<p>and these new mode filters.</p>
+<p>The mathematical continuation is to search for <strong>intersections</strong> of the mode selectors. For example, simultaneous phase conditions that demand disjoint k27 mode subsets yield exact contradictions without factoring E at all.</p>
+<p>That turns CRT phase collision into a new source of state elimination.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

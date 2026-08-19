@@ -1,0 +1,25 @@
+name: k27 QR factor mode selectors
+
+on:
+  push:
+    branches:
+      - agent/k27-qr-factor-mode-selectors
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K27-QR-FACTOR-MODE-SELECTORS.md'
+      - 'research/erdos-straus/verify_k27_qr_factor_mode_selectors.py'
+      - '.github/workflows/k27-qr-factor-mode-selectors.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify k27 QR factor mode selectors
+        run: python3 research/erdos-straus/verify_k27_qr_factor_mode_selectors.py --json

@@ -1,0 +1,27 @@
+name: Erdős–Straus López A/B finite decision bound
+
+on:
+  push:
+    branches:
+      - agent/cbx-ab-finite-decision-bound
+  pull_request:
+    paths:
+      - 'research/erdos-straus/LOPEZ-AB-FINITE-DECISION-BOUND.md'
+      - 'research/erdos-straus/verify_lopez_ab_finite_decision_bound.py'
+      - '.github/workflows/erdos-straus-lopez-ab-finite-bound.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify finite Type A/B decision ceilings
+        run: |
+          python3 research/erdos-straus/verify_lopez_ab_finite_decision_bound.py --json

@@ -1,0 +1,82 @@
+name: Erdős–Straus k=35/k=39 forced seeds
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K35-K39-FORCED-SEED-SPLIT.md'
+      - 'research/erdos-straus/classify_k35_k39_forced_seeds.py'
+      - 'research/erdos-straus/verify_k35_k39_forced_seeds.py'
+      - 'research/erdos-straus/classify_k35_states.py'
+      - 'research/erdos-straus/classify_k39_states.py'
+      - '.github/workflows/erdos-straus-k35-k39-forced-seeds.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fedora-k35-k39-forced-seeds:
+    name: Fedora k=35/k=39 hard-seed closures
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install Fedora Python
+        run: dnf -y install python3
+
+      - uses: actions/checkout@v4
+
+      - name: Verify exact forced-seed closures
+        run: |
+          python3 research/erdos-straus/classify_k35_k39_forced_seeds.py --json > /tmp/k35-k39-seeds.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k35-k39-seeds.json', encoding='utf-8'))
+          assert r['analysis'] == 'k35-k39-forced-seed-hard-closures-v1'
+          a=r['k35']
+          assert a['forced_factor'] == 3
+          assert a['forced_direction'] == 1
+          assert a['forced_coordinate'] == [0,1]
+          assert a['states'] == 394
+          assert a['admissible_states'] == 194
+          assert a['hit_states'] == 130
+          assert a['miss_states'] == 64
+          assert a['pure_H_states'] == 38
+          assert a['pure_H_miss_states'] == 38
+          assert a['min_added_outside_histogram'] == {'0':38,'2':26}
+          assert a['maximum_minimum_added_outside_units'] == 2
+          b=r['k39']
+          assert b['forced_factor'] == 2
+          assert b['forced_direction'] == 13
+          assert b['forced_coordinate'] == [1,1]
+          assert b['states'] == 394
+          assert b['admissible_states'] == 196
+          assert b['hit_states'] == 160
+          assert b['miss_states'] == 36
+          assert b['min_added_outside_histogram'] == {'1':34,'3':2}
+          assert b['maximum_minimum_added_outside_units'] == 3
+          print(
+              '::notice title=k35/k39 forced seeds::'
+              f"k35-misses={a['miss_states']}; k39-misses={b['miss_states']}"
+          )
+          PY
+
+      - name: Independent finite regression
+        run: |
+          python3 research/erdos-straus/verify_k35_k39_forced_seeds.py --limit 100000 --json > /tmp/k35-k39-seed-regression.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/k35-k39-seed-regression.json', encoding='utf-8'))
+          assert r['analysis'] == 'k35-k39-forced-seed-structural-regression-v1'
+          assert r['hard_primes'] == 273
+          assert r['outcomes'] == {
+              '35': {'hits':47,'misses':226},
+              '39': {'hits':147,'misses':126},
+          }
+          assert r['mismatches'] == 0
+          print(
+              '::notice title=k35/k39 forced-seed regression::'
+              f"hard={r['hard_primes']}; outcomes={r['outcomes']}"
+          )
+          PY

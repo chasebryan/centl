@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External `q ≡ 3 mod 4` eligibility depth is unbounded — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-q3-eligibility-unbounded.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-q3-eligibility-unbounded.html">
+  <meta property="og:title" content="External `q ≡ 3 mod 4` eligibility depth is unbounded — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External `q ≡ 3 mod 4` eligibility depth is unbounded</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-Q3-ELIGIBILITY-UNBOUNDED.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved universal theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>EXTERNAL-Q3-BINARY-CENSUS-10M.md</code></p>
+<p><strong>Imported classical tools:</strong> Chinese remainder theorem; Dirichlet&#x27;s theorem on primes in reduced arithmetic progressions</p>
+<p><strong>Claim boundary:</strong> this proves that no fixed ceiling can contain an eligible external prime <code>q==3 mod4</code> for every Mordell-hard prime. It does not prove that an eligible external prime always rescues, and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Statement</h2>
+<p>Fix an arbitrary finite bound</p>
+<div class="math" role="math">\boxed{Q\ge3.}</div>
+<p>Then there exist infinitely many Mordell-hard primes <code>p</code> such that</p>
+<div class="math" role="math">\boxed{ \left(\frac qp\right)=+1 }</div>
+<p>for <strong>every</strong> prime</p>
+<div class="math" role="math">q\le Q, \qquad q\equiv3\pmod4.</div>
+<p>Consequently none of those primes <code>q</code> is eligible for the restricted external-prime lane</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>Therefore the least eligible external prime <code>q==3 mod4</code> is unbounded over the Mordell-hard prime population.</p>
+<hr>
+<h2>2. Construction</h2>
+<p>Let</p>
+<div class="math" role="math">\mathcal Q_Q = \{q\le Q:q\text{ prime},\ q\equiv3\pmod4\}.</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{ M =840\prod_{q\in\mathcal Q_Q}q. }</div>
+<p>Consider primes in the reduced arithmetic progression</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod M.}</div>
+<p>Since</p>
+<div class="math" role="math">\gcd(1,M)=1,</div>
+<p>Dirichlet&#x27;s theorem gives infinitely many such primes.</p>
+<p>Every one satisfies</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840},}</div>
+<p>so it lies in one of the six Mordell-hard residue classes, specifically the class <code>1 mod 840</code>.</p>
+<hr>
+<h2>3. Every small <code>q==3 mod4</code> is forced onto the residue side</h2>
+<p>Take any</p>
+<div class="math" role="math">q\in\mathcal Q_Q.</div>
+<p>Because <code>q|M</code>,</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod q.}</div>
+<p>Hence</p>
+<div class="math" role="math">\left(\frac pq\right)=+1.</div>
+<p>Also</p>
+<div class="math" role="math">p\equiv1\pmod4.</div>
+<p>Quadratic reciprocity therefore contributes no sign, giving</p>
+<div class="math" role="math">\boxed{ \left(\frac qp\right) = \left(\frac pq\right) =+1. }</div>
+<p>This holds simultaneously for every <code>q in Q_Q</code>.</p>
+<p>Thus no prime</p>
+<div class="math" role="math">q\le Q, \qquad q\equiv3\pmod4</div>
+<p>is external to any prime <code>p</code> in the constructed progression.</p>
+<hr>
+<h2>4. Theorem</h2>
+<h3>External-q3 eligibility-depth theorem</h3>
+<p>For every finite <code>Q</code>, infinitely many Mordell-hard primes have no external prime</p>
+<div class="math" role="math">q\equiv3\pmod4</div>
+<p>with</p>
+<div class="math" role="math">q\le Q.</div>
+<p>Equivalently,</p>
+<div class="math" role="math">\boxed{ \sup_p\min\left\{ q:q\text{ prime},\ q\equiv3\pmod4,\ \left(\frac qp\right)=-1 \right\} =\infty, }</div>
+<p>where <code>p</code> ranges over Mordell-hard primes.</p>
+<hr>
+<h2>5. Eligible external primes still exist for each fixed p</h2>
+<p>The theorem above is a lower-bound construction, not a claim that the external-q3 set can be empty.</p>
+<p>Fix a Mordell-hard prime <code>p</code>. Choose any quadratic-nonresidue residue class</p>
+<div class="math" role="math">a\pmod p.</div>
+<p>CRT combines</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad q\equiv a\pmod p</div>
+<p>into a reduced class modulo <code>4p</code>. Dirichlet therefore supplies infinitely many primes <code>q</code> in that class.</p>
+<p>For each such prime,</p>
+<div class="math" role="math">\left(\frac qp\right)=-1.</div>
+<p>Hence every fixed hard prime has infinitely many eligible external primes <code>q==3 mod4</code>; their least member is simply not uniformly bounded across <code>p</code>.</p>
+<hr>
+<h2>6. Consequence for the finite <code>419</code> signal</h2>
+<p><code>EXTERNAL-Q3-BINARY-CENSUS-10M.md</code> records the striking finite fact that every hard prime through <code>10^7</code> is rescued by an eligible external prime</p>
+<div class="math" role="math">q\le419.</div>
+<p>A larger direct stress replay through <code>10^8</code> retains the same deepest observed pair</p>
+<div class="math" role="math">(p,q)=(8,925,841,419).</div>
+<p>The theorem above proves that this finite stability <strong>cannot</strong> become a universal statement of the form</p>
+<div class="math" role="math">q\le419</div>
+<p>or, more generally,</p>
+<div class="math" role="math">q\le Q_0</div>
+<p>for any fixed constant <code>Q_0</code>, because some hard primes have no eligible external q3 prime below that ceiling at all.</p>
+<p>Therefore the correct universal target must be adaptive:</p>
+<div class="math" role="math">\boxed{ \forall p\text{ hard},\ \exists q=q(p)\text{ external},\ q\equiv3\pmod4, \text{ such that the binary/two-target test hits}.}</div>
+<p>The auxiliary prime must be allowed to grow with <code>p</code>.</p>
+<hr>
+<h2>7. Proof-search consequence</h2>
+<p>This theorem separates two tasks that finite experiments can otherwise blur.</p>
+<h3>Finite-engineering question</h3>
+<p>How small is a successful external prime on accessible ranges?</p>
+<p>The current answer is spectacularly small: <code>q&lt;=419</code> through at least <code>10^8</code> in direct replay.</p>
+<h3>Universal mathematics question</h3>
+<p>Why must <strong>some</strong> eligible external prime succeed, even when the first eligible prime itself is arbitrarily large?</p>
+<p>That question cannot be settled by extending a fixed table of shifts. It requires a structural statement uniform in <code>q</code>, such as:</p>
+<ul><li>a uniform signed-box expansion theorem;</li><li>an incompatibility among the Kneser defects across all external primes;</li><li>or an adaptive construction of <code>q</code> from the arithmetic of <code>p</code> that forces target membership.</li></ul>
+<p>The exact failure constraints in <code>BINARY-R-KNESER-DEFECT.md</code> are designed for this adaptive regime.</p>
+<hr>
+<p>Erdős–Straus remains open. The theorem proves unbounded eligibility depth, not universal rescue.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

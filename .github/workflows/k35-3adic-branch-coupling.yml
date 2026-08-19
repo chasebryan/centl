@@ -1,0 +1,25 @@
+name: k35 3-adic branch coupling
+
+on:
+  push:
+    branches:
+      - agent/k35-3adic-branch-coupling
+  pull_request:
+    paths:
+      - 'research/erdos-straus/K35-3ADIC-BRANCH-COUPLING.md'
+      - 'research/erdos-straus/verify_k35_3adic_branch_coupling.py'
+      - '.github/workflows/k35-3adic-branch-coupling.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify k35 branch/valuation coupling
+        run: python3 research/erdos-straus/verify_k35_3adic_branch_coupling.py --json

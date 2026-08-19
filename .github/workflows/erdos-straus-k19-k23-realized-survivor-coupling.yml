@@ -1,0 +1,26 @@
+name: Erdős–Straus realized k19-k23 survivor coupling
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K19-K23-REALIZED-SURVIVOR-COUPLING.md"
+      - "research/erdos-straus/classify_k19_k23_realized_survivor_coupling.py"
+      - "research/erdos-straus/verify_k19_k23_realized_survivor_coupling.py"
+      - ".github/workflows/erdos-straus-k19-k23-realized-survivor-coupling.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact k19-k23 coupling classifier
+        run: python3 research/erdos-straus/classify_k19_k23_realized_survivor_coupling.py --json
+      - name: Independent arithmetic and exact-state verification
+        run: python3 research/erdos-straus/verify_k19_k23_realized_survivor_coupling.py --json

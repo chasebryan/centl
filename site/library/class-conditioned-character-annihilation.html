@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Let p be a Mordell-hard prime, so">
+  <title>Class-conditioned character annihilation at fixed Erdős–Straus shifts — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/class-conditioned-character-annihilation.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/class-conditioned-character-annihilation.html">
+  <meta property="og:title" content="Class-conditioned character annihilation at fixed Erdős–Straus shifts — Free Computation Foundation">
+  <meta property="og:description" content="Let p be a Mordell-hard prime, so">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Class-conditioned character annihilation at fixed Erdős–Straus shifts</h1><p>Shadow · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Shadow</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Shadow</p>
+          <p class="dek">Let p be a Mordell-hard prime, so</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CLASS-CONDITIONED-CHARACTER-ANNIHILATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite-group theorem series</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>MORDELL-HARD-CLASS-CONDITIONED-SEED-LAW.md</code>, the exact fixed-shift two-target signed-box equivalence, and the existing per-shift state classifiers</p>
+<p><strong>Claim boundary:</strong> these are range-free implications at the named fixed shifts and hard residue classes. They do not prove that every hard prime is covered by these shifts, and they do not prove Erdős–Straus.</p>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be a Mordell-hard prime, so</p>
+<pre><code class="language-text">p mod 840 in {1,121,169,289,361,529}.</code></pre>
+<p>Fix a prime shift</p>
+<pre><code class="language-text">q == 3 (mod 4)</code></pre>
+<p>and put</p>
+<pre><code class="language-text">C_q = (p+q)/4.</code></pre>
+<p>The exact fixed-shift Lane-I problem is a two-target signed-divisor problem in the unit group modulo <code>q</code>.</p>
+<p>The class-conditioned seed theorem gives the maximal divisor forced by the exact hard class <code>h=p mod 840</code>:</p>
+<pre><code class="language-text">g(q,h) = gcd(210,(h+q)/4).</code></pre>
+<p>Therefore every actual companion on that class has the form</p>
+<pre><code class="language-text">C_q = g(q,h) * R</code></pre>
+<p>for some positive integer <code>R</code>.</p>
+<p>The state closure used here first consumes every prime factor of the mandatory seed, with multiplicity, and then permits arbitrary additional unit-factor directions. Consequently the resulting finite state space is a <strong>superset of every actual factorization state</strong> that can occur on the class.</p>
+<p>This is the key logical direction: if a character branch contains no miss state even in that superset closure, then no actual prime in the class can miss on that branch.</p>
+<h2>2. Why state-center parity is the prime character</h2>
+<p>For prime <code>q</code>, the multiplicative group modulo <code>q</code> is cyclic of even order <code>q-1</code>. In discrete-log coordinates, even exponents are quadratic residues and odd exponents are quadratic nonresidues.</p>
+<p>The state center is the discrete log of <code>C_q mod q</code>. Since</p>
+<pre><code class="language-text">C_q == p * 4^(-1) (mod q)</code></pre>
+<p>and <code>4</code> is a square modulo every odd prime,</p>
+<pre><code class="language-text">(C_q/q) = (p/q).</code></pre>
+<p>Thus:</p>
+<pre><code class="language-text">even center  &lt;=&gt; (p/q) = +1
+odd center   &lt;=&gt; (p/q) = -1.</code></pre>
+<p>For the hard-prime domain <code>p==1 mod4</code>, quadratic reciprocity also gives <code>(p/q)=(q/p)</code>, but the theorem is stated below using <code>(p/q)</code> to match the finite-state construction directly.</p>
+<h2>3. Exact closure ledger</h2>
+<p>The relevant exact seeded closures are:</p>
+<pre><code class="language-text">shift q   seed   states   misses   +1 misses   -1 misses
+11           3       25        9            7           2
+11          15       15        5            5           0
+
+31           2      760      118           88          30
+31          10       75       18           18           0
+31          14      153       23           22           1
+31          70       45       15           15           0
+
+47           6     1079      196          116          80
+47          42       97       24           24           0
+
+59           3    35740     5869         3148        2721
+59         105      133       30           30           0</code></pre>
+<p>The <code>q=59, seed=105</code> line reproduces the already-proved class-conditioned <code>k=59</code> theorem and is retained here as a control. The new content is the corresponding annihilation at <code>q=11</code>, <code>q=31</code>, and <code>q=47</code>.</p>
+<h2>4. Range-free q=11 theorem</h2>
+<p>At <code>q=11</code>, the six hard-class seeds are</p>
+<pre><code class="language-text">h=1      -&gt;  3
+h=121    -&gt;  3
+h=169    -&gt; 15
+h=289    -&gt; 15
+h=361    -&gt;  3
+h=529    -&gt; 15</code></pre>
+<p>The seed-15 closure contains only 15 states. Its five miss states all have positive quadratic character. There is no negative-character miss state.</p>
+<h3>Theorem 11</h3>
+<p>For every Mordell-hard prime <code>p</code>, if</p>
+<pre><code class="language-text">p mod 840 in {169,289,529}</code></pre>
+<p>and</p>
+<pre><code class="language-text">(p/11) = -1,</code></pre>
+<p>then the fixed shift <code>k=11</code> hits the exact Lane-I two-target criterion and therefore gives an Erdős–Straus decomposition.</p>
+<p>Equivalently, any prime in one of those three hard classes that survives <code>k=11</code> must satisfy</p>
+<pre><code class="language-text">(p/11) = +1.</code></pre>
+<p>This statement has no finite <code>p</code> cutoff.</p>
+<h2>5. Range-free q=31 theorem</h2>
+<p>At <code>q=31</code>, the class seeds are</p>
+<pre><code class="language-text">h=1      -&gt;  2
+h=121    -&gt;  2
+h=169    -&gt; 10
+h=289    -&gt; 10
+h=361    -&gt; 14
+h=529    -&gt; 70</code></pre>
+<p>The seed-10 closure has 18 misses, all positive character. The seed-70 closure has 15 misses, all positive character.</p>
+<h3>Theorem 31</h3>
+<p>For every Mordell-hard prime <code>p</code>, if</p>
+<pre><code class="language-text">p mod 840 in {169,289,529}</code></pre>
+<p>and</p>
+<pre><code class="language-text">(p/31) = -1,</code></pre>
+<p>then fixed <code>k=31</code> hits.</p>
+<p>Hence every survivor in those three hard classes must satisfy</p>
+<pre><code class="language-text">(p/31) = +1.</code></pre>
+<h3>Exact boundary: h=361 is not included</h3>
+<p>The class <code>h=361</code> has seed 14, not 10 or 70. Its exact closure has</p>
+<pre><code class="language-text">153 states
+23 misses
+22 positive-character misses
+1 negative-character miss.</code></pre>
+<p>That lone abstract negative state is genuinely realizable. The smallest prime realization is</p>
+<pre><code class="language-text">p = 54,121
+p mod 840 = 361
+(p/31) = -1
+C_31 = (p+31)/4 = 13,538 = 2 * 7 * 967</code></pre>
+<p>and fixed <code>k=31</code> misses both exact targets.</p>
+<p>Therefore <strong>no q=31 negative-character annihilation is claimed for h=361</strong>. The counterexample is pinned in the independent regression to prevent accidental future overstatement.</p>
+<h2>6. Range-free q=47 theorem</h2>
+<p>At <code>q=47</code>, the class seeds are</p>
+<pre><code class="language-text">h=1      -&gt;  6
+h=121    -&gt; 42
+h=169    -&gt;  6
+h=289    -&gt; 42
+h=361    -&gt;  6
+h=529    -&gt;  6</code></pre>
+<p>The universal forced-6 closure has 1,079 states and 196 misses, including 80 negative-character misses.</p>
+<p>Conditioning on <code>h=121</code> or <code>h=289</code> forces the stronger seed 42. The closure collapses to</p>
+<pre><code class="language-text">97 states
+24 misses
+24 positive-character misses
+0 negative-character misses.</code></pre>
+<h3>Theorem 47</h3>
+<p>For every Mordell-hard prime <code>p</code>, if</p>
+<pre><code class="language-text">p mod 840 in {121,289}</code></pre>
+<p>and</p>
+<pre><code class="language-text">(p/47) = -1,</code></pre>
+<p>then fixed <code>k=47</code> hits.</p>
+<p>Thus a survivor in either class must satisfy</p>
+<pre><code class="language-text">(p/47) = +1.</code></pre>
+<p>This is stronger than the earlier finite negative-character corridor evidence because it follows from an exact seeded finite-group closure and has no range parameter.</p>
+<h2>7. q=59 control theorem</h2>
+<p>The already-proved class-conditioned <code>k=59</code> atlas gives</p>
+<pre><code class="language-text">h=361 -&gt; seed 105.</code></pre>
+<p>Its closure has</p>
+<pre><code class="language-text">133 states
+30 misses
+30 positive-character misses
+0 negative-character misses.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">p mod 840 = 361
+and
+(p/59) = -1</code></pre>
+<p>implies a fixed <code>k=59</code> hit.</p>
+<p>The present cross-modulus implementation reproduces those constants independently of the older specialized <code>k=59</code> atlas, which serves as a control on the common state construction.</p>
+<h2>8. Combined survivor character tree</h2>
+<p>The new exact implications can be summarized by hard class:</p>
+<pre><code class="language-text">h=1      no new character condition from this atlas
+h=121    survivor past k=47  -&gt; (p/47)=+1
+h=169    survivor past k=11,31 -&gt; (p/11)=(p/31)=+1
+h=289    survivor past k=11,31,47 -&gt; (p/11)=(p/31)=(p/47)=+1
+h=361    survivor past k=59 -&gt; (p/59)=+1
+h=529    survivor past k=11,31 -&gt; (p/11)=(p/31)=+1</code></pre>
+<p>These restrictions alone do not contradict the Chinese remainder theorem. They are not a coverage proof.</p>
+<p>Their value is that each surviving class now enters the six-companion residual-support problem with prescribed quadratic-character signs at several exact fixed shifts.</p>
+<h2>9. Independent finite realization regression</h2>
+<p>The theorem itself is finite-group and range-free. A separate direct arithmetic regression factors actual companions and checks the signed divisor box without importing the atlas classifier.</p>
+<p>Through <code>p &lt;= 2,000,000</code>:</p>
+<pre><code class="language-text">q=11 affected classes   2,247 primes   1,147 negative character   0 negative misses
+q=31 affected classes   2,247 primes   1,171 negative character   0 negative misses
+q=47 affected classes   1,511 primes     760 negative character   0 negative misses
+q=59 affected class       745 primes     376 negative character   0 negative misses</code></pre>
+<p>The q=31 h=361 negative control contains</p>
+<pre><code class="language-text">745 class primes
+383 negative-character primes
+3 negative-character misses</code></pre>
+<p>with first misses</p>
+<pre><code class="language-text">54,121
+1,408,201
+1,824,841.</code></pre>
+<p>The finite counts are only regressions. The range-free implications come from closure of the complete seeded finite state spaces.</p>
+<h2>10. Strategic consequence</h2>
+<p>The natural next object is no longer an independent Legendre-symbol sieve.</p>
+<p>The six-companion residual theorem proves that, after universal seeds are removed, every rational prime other than the named tiny exceptions can support at most one residual layer in a six-shift wheel. The present theorem says that, on several hard classes, simultaneous survival also forces definite quadratic-character sides at specific shift primes.</p>
+<p>The next proof target is therefore a <strong>class-conditioned cross-shift compatibility theorem</strong>:</p>
+<pre><code class="language-text">forced seed
++
+forced character side
++
+almost-disjoint residual prime support
++
+linear relations among neighboring residuals.</code></pre>
+<p>A contradiction must come from that coupled arithmetic. Independent character congruences by themselves remain CRT-compatible.</p>
+<h2>11. Reproduction</h2>
+<p>Run the exact atlas with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_class_conditioned_character_atlas.py --json</code></pre>
+<p>Run the independent finite realization regression with</p>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_class_conditioned_character_atlas.py --limit 2000000 --json</code></pre>
+<p>Erdős–Straus remains open. The theorem series removes exact negative-character branches from several hard-class fixed-shift state spaces and preserves the known q=31 h=361 obstruction explicitly.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

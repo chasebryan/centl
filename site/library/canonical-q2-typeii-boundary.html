@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Canonical q^2 Type-II square lifts lie on the López boundary — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/canonical-q2-typeii-boundary.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/canonical-q2-typeii-boundary.html">
+  <meta property="og:title" content="Canonical q^2 Type-II square lifts lie on the López boundary — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Canonical q^2 Type-II square lifts lie on the López boundary</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/CANONICAL-Q2-TYPEII-BOUNDARY.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact structural theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>ES-TYPEII-ROOT-GEOMETRY.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>Q23-SQUARE-LIFT-PHASE-SIEVE.md</code></p>
+<p><strong>Claim boundary:</strong> this classifies the geometry of the canonical divisor <code>d=q^2</code> at a genuine q-adic square lift. It does not say that every square lift hits, that every Type-II hit is comparable-root, or that blocked canonical phases miss the full signed box.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>q</code> be prime and let an admissible fixed shift <code>k</code> have</p>
+<div class="math" role="math">C=\frac{p+k}{4}.</div>
+<p>Suppose the q-adic valuation has reached a genuine square lift</p>
+<div class="math" role="math">\boxed{q^2\mid C}.</div>
+<p>The canonical square-lift divisor is</p>
+<div class="math" role="math">\boxed{d=q^2}.</div>
+<p>If this divisor reaches the exact Type-II target,</p>
+<div class="math" role="math">\boxed{d\equiv-C\pmod k},</div>
+<p>then it is an exact Type-II certificate at that shift.</p>
+<p>The question here is not whether the congruence holds. It is: <strong>where does this certificate sit inside the full Type-II root geometry?</strong></p>
+<hr>
+<h2>2. Root decomposition</h2>
+<p>The canonical Type-II root coordinates are defined by</p>
+<div class="math" role="math">d=sb^2, \qquad \frac{C^2}{d}=sc^2, \qquad C=sbc,</div>
+<p>with <code>s</code> squarefree.</p>
+<p>For</p>
+<div class="math" role="math">d=q^2,</div>
+<p>the decomposition is immediate:</p>
+<div class="math" role="math">\boxed{s=1,\qquad b=q,\qquad c=\frac Cq}.</div>
+<p>Because the lift is genuinely square,</p>
+<div class="math" role="math">q^2\mid C,</div>
+<p>one has</p>
+<div class="math" role="math">q\mid\frac Cq.</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{b\mid c}.</div>
+<p>By the exact root-comparability theorem,</p>
+<div class="math" role="math">\boxed{b\mid c\iff\text{López Type A at the same Type-II layer}.}</div>
+<hr>
+<h2>3. Theorem</h2>
+<h3>Canonical square-lift boundary theorem</h3>
+<p>If <code>q</code> is prime, <code>q^2|C</code>, and the canonical divisor</p>
+<div class="math" role="math">d=q^2</div>
+<p>satisfies the exact Type-II target</p>
+<div class="math" role="math">d\equiv-C\pmod k,</div>
+<p>then the resulting Type-II certificate is necessarily a <strong>López Type-A boundary certificate</strong>.</p>
+<p>Its canonical root data are</p>
+<div class="math" role="math">\boxed{(s,b,c)=\left(1,q,\frac Cq\right)},</div>
+<p>with</p>
+<div class="math" role="math">\boxed{b=q\mid c=C/q}.</div>
+<p>Thus a canonical q-square-lift hit can never be an incomparable-root Type-II certificate.</p>
+<hr>
+<h2>4. What this changes in the q23 phase sieve</h2>
+<p>The q23 square-lift phase sieve studies</p>
+<div class="math" role="math">q=23, \qquad q^2=529,</div>
+<p>and deliberately tests the canonical divisor</p>
+<div class="math" role="math">d=529.</div>
+<p>Consequently every <strong>successful canonical</strong> Type-II event in that sieve lies on the López Type-A boundary.</p>
+<p>This includes both pinned earliest realized anchors.</p>
+<h3>Route A anchor</h3>
+<p>For</p>
+<div class="math" role="math">p=3,051,374,929, \qquad k=755,</div>
+<p>one has</p>
+<div class="math" role="math">C=762,843,921=23^2\cdot1,442,049.</div>
+<p>The canonical root data are</p>
+<div class="math" role="math">\boxed{(s,b,c)=(1,23,33,167,127)},</div>
+<p>and</p>
+<div class="math" role="math">23\mid33,167,127.</div>
+<p>The shift is Type-II-only, but its canonical Type-II certificate is still López-boundary.</p>
+<h3>Route B anchor</h3>
+<p>For</p>
+<div class="math" role="math">p=13,874,535,529, \qquad k=295,</div>
+<p>one has</p>
+<div class="math" role="math">C=3,468,633,956=23^2\cdot6,556,964.</div>
+<p>The canonical root data are</p>
+<div class="math" role="math">\boxed{(s,b,c)=(1,23,150,810,172)},</div>
+<p>again with</p>
+<div class="math" role="math">23\mid150,810,172.</div>
+<p>This shift contains both Type I and Type II; the canonical Type-II component remains López-boundary.</p>
+<hr>
+<h2>5. Why this sharpens the active search</h2>
+<p>The q23 phase sieve has thirteen phases where the canonical <code>d=23^2</code> boundary certificate is arithmetically allowed and ten where that specific certificate is blocked.</p>
+<p>The new interpretation is sharper:</p>
+<pre><code class="language-text">allowed canonical phase
+    -&gt; may realize a specific López-A boundary Type-II certificate
+
+blocked canonical phase
+    -&gt; only that specific boundary certificate is unavailable
+    -&gt; Type I remains possible
+    -&gt; noncanonical comparable-root Type II remains possible
+    -&gt; incomparable-root Type II remains possible</code></pre>
+<p>So the ten blocked phases are especially valuable laboratories for the full geometry. They are places where the canonical boundary mechanism has been removed <strong>without</strong> removing Type II itself.</p>
+<p>A full signed-box hit in a blocked phase should therefore be classified by its actual divisor/root geometry rather than described merely as a failure of the q23 lift.</p>
+<hr>
+<h2>6. Integration with the candidate decomposition framework</h2>
+<p><code>TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md</code> treats q-adic valuation phase as one coordinate and the full signed box as the terminal geometry.</p>
+<p>This theorem separates those coordinates cleanly:</p>
+<blockquote><p>the canonical q^2 valuation certificate is not a new interior Type-II mechanism; it is a deterministic route into the López-A boundary sector.</p></blockquote>
+<p>The larger decomposition framework remains essential because a blocked canonical boundary transition may still terminate through another boundary divisor, an incomparable-root divisor, or Type I.</p>
+<p>Accordingly, the next high-value refinement is not merely to count allowed versus blocked q23 phases. It is to classify the <strong>noncanonical terminal geometry</strong> of the blocked phases that nevertheless hit.</p>
+<hr>
+<h2>7. Research consequence</h2>
+<p>The full Type-II program now has a useful controlled experiment:</p>
+<ol><li>force a q^2 square lift;</li><li>use the phase sieve to remove the canonical <code>d=q^2</code> boundary certificate on blocked phases;</li><li>evaluate the complete signed box;</li><li>classify every surviving Type-II hit as comparable or incomparable;</li><li>study whether the exact survivor state predicts which replacement mechanism appears.</li></ol>
+<p>That is a direct way to expose genuinely non-López geometry without pretending that López itself has been disproved or rendered irrelevant.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

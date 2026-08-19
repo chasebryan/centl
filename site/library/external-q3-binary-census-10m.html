@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>External `q ≡ 3 mod 4` binary rescue census through 10,000,000 — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/external-q3-binary-census-10m.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/external-q3-binary-census-10m.html">
+  <meta property="og:title" content="External `q ≡ 3 mod 4` binary rescue census through 10,000,000 — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>External `q ≡ 3 mod 4` binary rescue census through 10,000,000</h1><p>Certificate · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Certificate</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Certificate</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/EXTERNAL-Q3-BINARY-CENSUS-10M.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact finite census / theorem-mining record</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>BINARY-R-KNESER-DEFECT.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, <code>FAB-MIRROR-CHARACTER-OBSTRUCTION.md</code>, <code>external_q3_rescue_census.py</code></p>
+<p><strong>Claim boundary:</strong> this is finite exact evidence. It does <strong>not</strong> prove that <code>q&lt;=419</code>, or any fixed bound, works for every Mordell-hard prime. It does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Restricted external-prime question</h2>
+<p>Let <code>p</code> be Mordell-hard. Restrict attention to auxiliary primes</p>
+<div class="math" role="math">\boxed{ q\equiv3\pmod4, \qquad q&lt;p, \qquad \left(\frac qp\right)=-1. }</div>
+<p>Put</p>
+<div class="math" role="math">\boxed{C_q=\frac{p+q}{4}.}</div>
+<p>Because <code>q</code> itself is an admissible Lane-I shift, the exact fixed-shift test is</p>
+<div class="math" role="math">\boxed{ D_q(C_q^2) \cap \left\{-4^{-1},-C_q\right\} \ne\varnothing, }</div>
+<p>where</p>
+<div class="math" role="math">D_q(C_q^2) =\{d\bmod q:d\mid C_q^2\}.</div>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, this is exactly the external binary-<code>q</code> rescue criterion.</p>
+<p>The finite question tested here is:</p>
+<blockquote><p>For every Mordell-hard prime <code>p&lt;=10^7</code>, does some external prime <code>q==3 mod4</code>, <code>q&lt;=419</code>, rescue <code>p</code>?</p></blockquote>
+<hr>
+<h2>2. Independent direct method</h2>
+<p><code>external_q3_rescue_census.py</code> does <strong>not</strong> consume CBX hit tables.</p>
+<p>It independently:</p>
+<ol><li>sieves all primes through the chosen <code>p</code> bound;</li><li>selects the six Mordell-hard classes modulo <code>840</code>;</li><li>enumerates primes <code>q==3 mod4</code> through the chosen <code>q</code> ceiling;</li><li>tests externality using quadratic reciprocity:</li></ol>
+<div class="math" role="math">\left(\frac qp\right)=\left(\frac pq\right)</div>
+<p>because <code>p==1 mod4</code>;</p>
+<ol><li>factors <code>C_q=(p+q)/4</code> exactly;</li><li>constructs the exact divisor residues of <code>C_q^2 mod q</code>;</li><li>records the first external <code>q</code> for which either exact target is present;</li><li>stores a literal divisor witness for each attained target.</li></ol>
+<p>This gives an independent replay of the same mathematical object measured by the CBX standalone hit corpus.</p>
+<hr>
+<h2>3. Exact finite result</h2>
+<p>The hard-prime population through</p>
+<div class="math" role="math">\boxed{10,000,000}</div>
+<p>is</p>
+<div class="math" role="math">\boxed{20,513}.</div>
+<p>With external primes</p>
+<div class="math" role="math">q\equiv3\pmod4, \qquad q\le419,</div>
+<p>the result is</p>
+<div class="math" role="math">\boxed{20,513/20,513\text{ rescued},}</div>
+<p>with</p>
+<div class="math" role="math">\boxed{0\text{ unresolved}.}</div>
+<p>The direct scanner paid for only</p>
+<div class="math" role="math">\boxed{24,485}</div>
+<p>external-<code>q</code> fixed-shift tests in total before first success.</p>
+<p>Again, this is finite coverage, not a universal ceiling theorem.</p>
+<hr>
+<h2>4. First-success histogram</h2>
+<p>The exact first successful external prime distribution is:</p>
+<table class="directory"><thead><tr><th>first external <code>q</code></th><th>hard primes</th></tr></thead><tbody><tr><td>11</td><td>9,626</td></tr><tr><td>19</td><td>4,027</td></tr><tr><td>23</td><td>3,455</td></tr><tr><td>31</td><td>1,570</td></tr><tr><td>43</td><td>271</td></tr><tr><td>47</td><td>752</td></tr><tr><td>59</td><td>319</td></tr><tr><td>67</td><td>34</td></tr><tr><td>71</td><td>217</td></tr><tr><td>79</td><td>88</td></tr><tr><td>83</td><td>50</td></tr><tr><td>103</td><td>22</td></tr><tr><td>107</td><td>15</td></tr><tr><td>127</td><td>9</td></tr><tr><td>131</td><td>12</td></tr><tr><td>139</td><td>10</td></tr><tr><td>151</td><td>9</td></tr><tr><td>163</td><td>1</td></tr><tr><td>167</td><td>9</td></tr><tr><td>179</td><td>5</td></tr><tr><td>191</td><td>5</td></tr><tr><td>199</td><td>3</td></tr><tr><td>223</td><td>1</td></tr><tr><td>311</td><td>1</td></tr><tr><td>383</td><td>1</td></tr><tr><td>419</td><td>1</td></tr></tbody></table>
+<p>The counts sum to</p>
+<div class="math" role="math">\boxed{20,513}.</div>
+<p>The tail is extremely sparse on this finite range, but no asymptotic claim is inferred from that observation.</p>
+<hr>
+<h2>5. Unique deepest finite case</h2>
+<p>The unique target whose first successful external <code>q==3 mod4</code> is <code>419</code> is</p>
+<div class="math" role="math">\boxed{p=8,925,841.}</div>
+<p>It belongs to the hard class</p>
+<div class="math" role="math">\boxed{p\equiv1\pmod{840}.}</div>
+<p>At</p>
+<div class="math" role="math">\boxed{q=419}</div>
+<p>we have</p>
+<div class="math" role="math">C =\frac{8,925,841+419}{4} =2,231,565</div>
+<p>with factorization</p>
+<div class="math" role="math">\boxed{ C=3\cdot5\cdot7\cdot53\cdot401. }</div>
+<p>The two exact divisor targets modulo <code>419</code> are</p>
+<div class="math" role="math">\boxed{ \tau_I=-4^{-1}\equiv314\pmod{419}, }</div>
+<p>and</p>
+<div class="math" role="math">\boxed{ \tau_{II}=-C\equiv29\pmod{419}. }</div>
+<p>Type II misses. Type I hits.</p>
+<p>A literal witness is</p>
+<div class="math" role="math">\boxed{d=127,836,795.}</div>
+<p>It satisfies</p>
+<div class="math" role="math">\boxed{d\mid C^2}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{d\equiv314\equiv-4^{-1}\pmod{419}.}</div>
+<p>Thus the deepest observed first success is exact, not a probabilistic or sampled hit.</p>
+<hr>
+<h2>6. Why this restricted lane matters</h2>
+<p>This census uses only the clean branch of <code>BINARY-R-KNESER-DEFECT.md</code>:</p>
+<div class="math" role="math">q\text{ prime}, \qquad q\equiv3\pmod4, \qquad \left(\frac qp\right)=-1.</div>
+<p>On a failed vertex that theorem gives:</p>
+<div class="math" role="math">\boxed{n\ge6,\qquad n\equiv2\pmod4,}</div>
+<p>for the full stabilizer quotient index, together with the visible-nonresidue valuation bound</p>
+<div class="math" role="math">\boxed{ n\ge2E_q\left(\frac{p+q}{4}\right)+4.}</div>
+<p>There is no odd-index defect escape hatch in this branch.</p>
+<p>The finite census therefore supports a cleaner global target than the broader external-cycle strategy:</p>
+<div class="math" role="math">\boxed{ \text{For every Mordell-hard prime }p, \text{ prove that some external prime }q\equiv3\pmod4 \text{ has a binary rescue.} }</div>
+<p>That statement would directly prove the prime Erdős–Straus case, but it remains open.</p>
+<hr>
+<h2>7. Relation to the failed-cycle counterexample</h2>
+<p><code>EXTERNAL-NR-FAILED-CYCLE-COUNTEREXAMPLE.md</code> proves that a chosen external-nonresidue factor cycle can fail at every cycle vertex. Thus a <strong>cycle-local contradiction</strong> is false as a universal bridge.</p>
+<p>That does not contradict the restricted census here. A prime may have a fully failed cycle and still possess another successful external prime outside that cycle.</p>
+<p>For example,</p>
+<div class="math" role="math">\boxed{p=118,801}</div>
+<p>has the fully failed cycle</p>
+<div class="math" role="math">113\to37\to929\to113,</div>
+<p>but the external prime</p>
+<div class="math" role="math">\boxed{q=59}</div>
+<p>rescues it.</p>
+<p>So the surviving existence target is</p>
+<div class="math" role="math">\boxed{\exists\text{ successful external }q,}</div>
+<p>not</p>
+<div class="math" role="math">\boxed{\text{every chosen external cycle contains a success}.}</div>
+<hr>
+<h2>8. Reproduction</h2>
+<p>Small replay:</p>
+<pre><code class="language-sh">python3 research/erdos-straus/external_q3_rescue_census.py \
+  --limit 100000 \
+  --q-max 419 \
+  --require-complete \
+  --json</code></pre>
+<p>Full preserved finite replay:</p>
+<pre><code class="language-sh">python3 research/erdos-straus/external_q3_rescue_census.py \
+  --limit 10000000 \
+  --q-max 419 \
+  --require-complete \
+  --json</code></pre>
+<p>To emit one witness record for every covered target, add</p>
+<pre><code class="language-text">--hits</code></pre>
+<p>The direct code uses only the Python standard library.</p>
+<hr>
+<h2>9. Next theorem target</h2>
+<p>The main question is no longer whether external nonresidues exist. They do, and the finite census says a very small external prime usually succeeds.</p>
+<p>A useful universal route would combine:</p>
+<ol><li>the exact failure quotient restrictions from <code>BINARY-R-KNESER-DEFECT.md</code>;</li><li>reciprocity transfer</li></ol>
+<div class="math" role="math">(r/q)=(r/p)</div>
+<p>for prime factors <code>r|(p+q)/4</code>;</p>
+<ol><li>the odd external-nonresidue valuation of <code>(p+q)/4</code> at every external <code>q</code>;</li><li>arithmetic restrictions on the divisor structure of <code>q-1</code>.</li></ol>
+<p>One concrete target is:</p>
+<blockquote><p>show that the family of external primes <code>q==3 mod4</code> cannot all support the required even Kneser defects for the same hard prime <code>p</code>.</p></blockquote>
+<p>Unlike the now-falsified cycle-only bridge, this quantifies over <strong>all</strong> eligible external prime vertices.</p>
+<hr>
+<p>Erdős–Straus remains open. The <code>q&lt;=419</code> result is exact finite evidence through <code>p&lt;=10^7</code>, not a universal bound.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

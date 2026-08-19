@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Suppose an odd prime q divides one admissible companion">
+  <title>Periodic route valuation ladder — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/periodic-route-valuation-ladder.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/periodic-route-valuation-ladder.html">
+  <meta property="og:title" content="Periodic route valuation ladder — Free Computation Foundation">
+  <meta property="og:description" content="Suppose an odd prime q divides one admissible companion">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Periodic route valuation ladder</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Suppose an odd prime q divides one admissible companion</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/PERIODIC-ROUTE-VALUATION-LADDER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact arithmetic theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_periodic_route_valuation_ladder.py</code></p>
+<p><strong>Depends on:</strong> companion identity <code>C_k=(p+k)/4</code>, character-to-companion routing, periodic route-scope correction</p>
+<p><strong>Claim boundary:</strong> this theorem guarantees routed-factor valuation events, not Lane-I hits. It does not give a universal shift ceiling and does not prove Erdős-Straus.</p>
+<h2>1. A routed factor does not appear once</h2>
+<p>Suppose an odd prime <code>q</code> divides one admissible companion</p>
+<p><code>C_k0 = (p+k0)/4</code>,</p>
+<p>with</p>
+<p><code>k0 = 3 mod4</code>.</p>
+<p>Write</p>
+<p><code>C_k0 = q M</code>.</p>
+<p>Every shift</p>
+<p><code>k_n = k0 + 4 q n</code></p>
+<p>lies in the same route class modulo <code>4q</code>. Its companion is</p>
+<p><code>C_{k_n}</code></p>
+<p><code>= (p+k0+4qn)/4</code></p>
+<p><code>= C_k0 + qn</code></p>
+<p><code>= q(M+n)</code>.</p>
+<p>Therefore</p>
+<blockquote><p>a routed prime factor generates an exact arithmetic ladder of companions whose q-stripped residual increases by one at each repeated route representative.</p></blockquote>
+<p>This identity is range-free.</p>
+<h2>2. Exact q-adic lift theorem</h2>
+<p>For every integer <code>e&gt;=1</code>,</p>
+<p><code>q^e | C_{k_n}</code></p>
+<p>if and only if</p>
+<p><code>q^(e-1) | M+n</code>.</p>
+<p>Equivalently,</p>
+<p><code>n = -M mod q^(e-1)</code>.</p>
+<p>Hence among every complete block of <code>q^(e-1)</code> consecutive representatives in the route class, exactly one has q-adic valuation at least <code>e</code>.</p>
+<p>In particular:</p>
+<ul><li>every routed q has exactly one <code>q^2</code> lift among the next <code>q</code> route representatives;</li><li>exactly one <code>q^3</code> lift occurs among the next <code>q^2</code> representatives;</li><li>more generally the valuation ladder is deterministic once <code>M=C_k0/q</code> is known.</li></ul>
+<p>For the first square lift, one may choose</p>
+<p><code>0 &lt;= n &lt;= q-1</code>,</p>
+<p>so a <code>q^2</code> companion is guaranteed by</p>
+<p><code>k &lt;= k0 + 4q(q-1)</code>.</p>
+<p>This is a valuation-event bound only. It is not a bound for a Lane-I hit.</p>
+<h2>3. Multi-source lift corollary</h2>
+<p>Suppose a product of distinct routed source primes</p>
+<p><code>Q = q1*q2*...*qs</code></p>
+<p>divides one companion</p>
+<p><code>C_k0 = Q R</code>.</p>
+<p>Repeat the destination by the common route period</p>
+<p><code>k_t = k0 + 4 Q t</code>.</p>
+<p>Then</p>
+<p><code>C_{k_t} = Q(R+t)</code>.</p>
+<p>Consequently, for every <code>e&gt;=1</code>,</p>
+<p><code>Q^e | C_{k_t}</code></p>
+<p>if and only if</p>
+<p><code>t = -R mod Q^(e-1)</code>.</p>
+<p>In particular there is exactly one simultaneous <code>Q^2</code> lift among every <code>Q</code> common-route representatives.</p>
+<p>Thus multi-source routing does more than preserve several factors. It gives a deterministic schedule on which all of those routed factors can be lifted simultaneously in valuation.</p>
+<p>Again, this does not force a hit. It manufactures a stronger divisor lattice at a predictable later destination.</p>
+<h2>4. Canonical Type-II test at a square lift</h2>
+<p>Suppose a square lift produces</p>
+<p><code>C_k = q^2 B</code>,</p>
+<p>with <code>gcd(q,k)=1</code>.</p>
+<p>The divisor-square form of the Type-II target asks whether a divisor <code>d</code> of <code>C_k^2</code> satisfies</p>
+<p><code>d = -C_k mod k</code>.</p>
+<p>The valuation lift supplies the canonical divisor</p>
+<p><code>d=q^2</code>.</p>
+<p>For this divisor,</p>
+<p><code>q^2 = -q^2 B mod k</code>.</p>
+<p>Because q is invertible modulo k, this is equivalent to</p>
+<p><code>B = -1 mod k</code>.</p>
+<p>Therefore:</p>
+<blockquote><p>at any routed <code>q^2</code> lift, the canonical divisor <code>d=q^2</code> gives a Type-II hit exactly when the remaining quotient <code>B=C_k/q^2</code> is congruent to <code>-1 mod k</code>.</p></blockquote>
+<p>The valuation theorem supplies the square divisor. The remaining quotient congruence is the separate target-formation condition.</p>
+<p>This separation is useful. It distinguishes what routing guarantees from what a later hit still needs.</p>
+<h2>5. The 8,803,369 record explains itself</h2>
+<p>For the finite Lane-I record</p>
+<p><code>p = 8,803,369</code>,</p>
+<p>one has</p>
+<p><code>p mod11 = 3</code>.</p>
+<p>The route class for q=11 begins at</p>
+<p><code>k0=19</code>,</p>
+<p>and repeats as</p>
+<p><code>19, 63, 107, 151, ..., 459</code>.</p>
+<p>At k=19,</p>
+<p><code>C19 = 2,200,847 = 11 * 200,077</code>.</p>
+<p>Thus</p>
+<p><code>M=200,077</code>,</p>
+<p>and</p>
+<p><code>-M mod11 = 2</code>.</p>
+<p>The unique square lift in the first q=11 route period is therefore</p>
+<p><code>n=2</code>,</p>
+<p>which gives</p>
+<p><code>k = 19 + 4*11*2 = 107</code>.</p>
+<p>Exactly as predicted,</p>
+<p><code>C107 = 2,200,869</code></p>
+<p><code>= 11^2 * 18,189</code>.</p>
+<p>The known Type-II certificate uses</p>
+<p><code>d=11^2=121</code>.</p>
+<p>The quotient is</p>
+<p><code>B=18,189</code>,</p>
+<p>and</p>
+<p><code>18,189 = 170*107 - 1</code>.</p>
+<p>So</p>
+<p><code>B = -1 mod107</code>,</p>
+<p>which is precisely the canonical Type-II trigger from the square-lift theorem.</p>
+<p>The k=107 opening therefore decomposes into two distinct facts:</p>
+<ol><li><strong>route valuation:</strong> periodic q=11 routing forces the unique first-period <code>11^2</code> lift at k=107 for this prime;</li><li><strong>target formation:</strong> the remaining quotient happens to satisfy <code>B=-1 mod107</code>.</li></ol>
+<p>The first fact is now a theorem. The second remains the deeper coverage question.</p>
+<h2>6. The same record has a simultaneous q11*q23 lift</h2>
+<p>At k=19 the same prime lies on the multi-source branch</p>
+<p><code>C19 = 11*23*8699</code>.</p>
+<p>Put</p>
+<p><code>Q=11*23=253</code>,</p>
+<p><code>R=8699</code>.</p>
+<p>The common route ladder is</p>
+<p><code>k_t = 19 + 4*253*t</code>,</p>
+<p>with</p>
+<p><code>C_{k_t}=253(8699+t)</code>.</p>
+<p>The unique first simultaneous square lift satisfies</p>
+<p><code>t = -8699 mod253 = 156</code>.</p>
+<p>Hence</p>
+<p><code>k=157,891</code>,</p>
+<p>and</p>
+<p><code>C_k = 2,240,315 = 253^2 * 35</code>.</p>
+<p>This occurs long after the prime has already hit at k=107, so it is not a new finite record. Its value is structural: multi-source route accumulation carries an exact simultaneous valuation-amplification schedule.</p>
+<h2>7. Strategic consequence for CBX</h2>
+<p>The corrected route graph should now track three distinct edge properties:</p>
+<ol><li><strong>support routing</strong> - which source prime is forced into which destination class;</li><li><strong>divisor-lattice saturation</strong> - whether one or more routed factors fill a destination QR subgroup;</li><li><strong>valuation phase</strong> - where repeated route representatives lift a routed factor from <code>q</code> to <code>q^2</code>, <code>q^3</code>, or a routed product from <code>Q</code> to <code>Q^2</code>.</li></ol>
+<p>The third coordinate was missing from the route graph.</p>
+<p>For theorem search, the highest-value experiment is now to intersect these deterministic valuation phases with exact destination miss masks and Type-II quotient conditions. The finite k=107 anchor gives the prototype:</p>
+<p><code>routed q -&gt; predictable q^2 lift -&gt; test B=-1 mod k</code>.</p>
+<p>A square lift alone is not coverage, and the existence of a bounded square-lift representative must not be reported as a bounded Lane-I theorem.</p>
+<p>Erdős-Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

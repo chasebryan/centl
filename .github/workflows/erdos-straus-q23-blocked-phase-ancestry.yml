@@ -1,0 +1,29 @@
+name: Erdős–Straus q23 blocked-phase ancestry audit
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/Q23-BLOCKED-PHASE-GEOMETRY-ATLAS.md"
+      - "research/erdos-straus/Q23-BLOCKED-PHASE-ANCESTRY-AUDIT.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS.md"
+      - "research/erdos-straus/BRYAN-ENTANGLEMENT-CROSS-Q23-ANCESTRY.md"
+      - "research/erdos-straus/TYPEII-CANDIDATE-DECOMPOSITION-FRAMEWORK.md"
+      - "research/erdos-straus/analyze_q23_blocked_phase_geometry.py"
+      - "research/erdos-straus/audit_q23_blocked_phase_ancestry.py"
+      - "research/erdos-straus/verify_q23_square_lift_phase_sieve.py"
+      - ".github/workflows/erdos-straus-q23-blocked-phase-ancestry.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact blocked-phase full ancestry + BEC audit
+        run: python3 research/erdos-straus/audit_q23_blocked_phase_ancestry.py --json

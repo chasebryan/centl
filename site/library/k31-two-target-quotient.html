@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact `k=31` two-target quotient classification when `v_2(C)&gt;=2` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k31-two-target-quotient.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k31-two-target-quotient.html">
+  <meta property="og:title" content="Exact `k=31` two-target quotient classification when `v_2(C)&gt;=2` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact `k=31` two-target quotient classification when `v_2(C)&gt;=2`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K31-TWO-TARGET-QUOTIENT.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact classification on the <code>v_2(C)&gt;=2</code> branch</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, <code>K27-TWO-TARGET-STRUCTURE.md</code></p>
+<p><strong>Claim boundary:</strong> this completely classifies the fixed shift <code>k=31</code> when the shifted integer <code>C=(p+31)/4</code> has 2-adic valuation at least two. The <code>v_2(C)=1</code> branch remains separate. This does not prove Erdős-Straus.</p>
+<hr>
+<h2>1. Setup and the forced factor 2</h2>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">P=\frac{p-1}{4}.</div>
+<p>Since every hard prime satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{24},</div>
+<p>we have</p>
+<div class="math" role="math">P\equiv0\pmod6.</div>
+<p>At shift</p>
+<div class="math" role="math">\boxed{k=31}</div>
+<p>put</p>
+<div class="math" role="math">\boxed{C=\frac{p+31}{4}=P+8.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{2\mid C.}</div>
+<p>The exact theorem below treats the branch</p>
+<div class="math" role="math">\boxed{v_2(C)\ge2.}</div>
+<hr>
+<h2>2. Logarithmic coordinates modulo 31</h2>
+<p>The unit group</p>
+<div class="math" role="math">G=(\mathbb Z/31\mathbb Z)^\times</div>
+<p>is cyclic of order <code>30</code>. Use primitive root <code>3</code> and write</p>
+<div class="math" role="math">\lambda(x)=\log_3 x\pmod{30}.</div>
+<p>The residues needed below are</p>
+<div class="math" role="math">\boxed{\lambda(2)=24,}</div>
+<div class="math" role="math">\boxed{\lambda(-1)=15.}</div>
+<p>The fixed Type-I divisor-square target is</p>
+<div class="math" role="math">-4^{-1}\equiv-8\equiv23\pmod{31},</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\lambda(23)=27.}</div>
+<p>Thus, in divisor-log coordinates,</p>
+<div class="math" role="math">\boxed{\text{Type I target}=27.}</div>
+<p>If</p>
+<div class="math" role="math">c=\lambda(C),</div>
+<p>then Type II is the translated divisor-log target</p>
+<div class="math" role="math">\boxed{c+15.}</div>
+<hr>
+<h2>3. The factor 2 fills an order-five kernel</h2>
+<p>The residue <code>2</code> has order five modulo <code>31</code>. Define</p>
+<div class="math" role="math">\boxed{H=\langle2\rangle=\{1,2,4,8,16\}.}</div>
+<p>In log coordinates,</p>
+<div class="math" role="math">\lambda(H)=6\mathbb Z/30\mathbb Z =\{0,6,12,18,24\}.</div>
+<p>If</p>
+<div class="math" role="math">v_2(C)=e\ge2,</div>
+<p>then divisors of the <code>2</code>-part of <code>C^2</code> contribute</p>
+<div class="math" role="math">\{0,24,48,72,96\}\pmod{30} =\{0,24,18,12,6\}.</div>
+<p>Hence</p>
+<div class="math" role="math">\boxed{\text{the `2`-part alone fills all of }\lambda(H).}</div>
+<p>Let</p>
+<div class="math" role="math">\pi:C_{30}\to C_{30}/6\mathbb Z\cong C_6</div>
+<p>be reduction modulo <code>6</code> in logarithmic coordinates. Because the full kernel is already present in the divisor box, exact target membership is equivalent to target membership after applying <code>pi</code>.</p>
+<p>So the <code>v_2(C)&gt;=2</code> branch is not merely approximated by a quotient: it is <strong>exactly reduced to <code>C_6</code></strong>.</p>
+<hr>
+<h2>4. The two quotient targets</h2>
+<p>Write</p>
+<div class="math" role="math">C=2^eM, \qquad M\text{ odd}.</div>
+<p>Since</p>
+<div class="math" role="math">\lambda(2)=24\equiv0\pmod6,</div>
+<p>the quotient log of <code>C</code> is just</p>
+<div class="math" role="math">\bar c=\lambda(M)\pmod6.</div>
+<p>The two targets become</p>
+<div class="math" role="math">\boxed{\tau_I=27\equiv3\pmod6,}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\tau_{II}=\bar c+15\equiv\bar c+3\pmod6.}</div>
+<p>For each prime-power occurrence in <code>M</code>, write</p>
+<div class="math" role="math">d=\lambda(q)\pmod6.</div>
+<p>A valuation unit contributes the divisor-log packet</p>
+<div class="math" role="math">\boxed{\{0,d,2d\}\subseteq C_6.}</div>
+<p>Repeated valuation units in the same quotient direction add by Minkowski sum.</p>
+<hr>
+<h2>5. Pure quadratic support is an exact combined miss</h2>
+<p>A unit modulo <code>31</code> is a quadratic residue exactly when its <code>3</code>-log is even. Therefore the quadratic residues occupy the three even quotient classes</p>
+<div class="math" role="math">\boxed{d\in\{0,2,4\}\pmod6.}</div>
+<p>If every prime factor of <code>C</code> is a quadratic residue modulo <code>31</code>, the quotient divisor box is contained in</p>
+<div class="math" role="math">\{0,2,4\}.</div>
+<p>Also <code>bar c</code> is even. Hence both targets</p>
+<div class="math" role="math">3, \qquad \bar c+3</div>
+<p>are odd and lie outside the quotient box.</p>
+<h3>Theorem A — pure-QR branch</h3>
+<p>If every prime factor of <code>C=(p+31)/4</code> is a quadratic residue modulo <code>31</code>, then</p>
+<div class="math" role="math">\boxed{\text{Type I and Type II both miss at }k=31.}</div>
+<p>This holds for every <code>v_2(C)</code>, but it is one branch of the exact <code>v_2(C)&gt;=2</code> classification below.</p>
+<hr>
+<h2>6. Any <code>d=3</code> factor is an immediate Type-I hit</h2>
+<p>If some prime-factor occurrence of <code>M</code> satisfies</p>
+<div class="math" role="math">\lambda(q)\equiv3\pmod6,</div>
+<p>then its local divisor packet is</p>
+<div class="math" role="math">\{0,3,0\},</div>
+<p>which contains the Type-I quotient target <code>3</code>.</p>
+<p>Therefore every combined miss must avoid quotient class <code>3</code>.</p>
+<hr>
+<h2>7. Mixing a nonzero even class with an odd <code>±1</code> class fills <code>C_6</code></h2>
+<p>A factor in quotient class <code>2</code> or <code>4</code> contributes</p>
+<div class="math" role="math">\{0,2,4\}.</div>
+<p>A factor in quotient class <code>1</code> contributes</p>
+<div class="math" role="math">\{0,1,2\},</div>
+<p>while class <code>5=-1</code> contributes</p>
+<div class="math" role="math">\{0,5,4\}.</div>
+<p>Direct addition gives</p>
+<div class="math" role="math">\boxed{\{0,2,4\}+\{0,1,2\}=C_6,}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\{0,2,4\}+\{0,5,4\}=C_6.}</div>
+<p>Hence a non-pure combined miss cannot contain any quotient-<code>2/4</code> factor together with a quotient-<code>1/5</code> factor.</p>
+<p>Since the case with no odd factor is exactly the pure-QR branch, every <strong>non-pure</strong> miss must therefore use only quotient classes</p>
+<div class="math" role="math">\boxed{0,1,5.}</div>
+<hr>
+<h2>8. Exact thin-packet classification in <code>C_6</code></h2>
+<p>Assume now that the factorization is not pure quadratic support and that all quotient directions lie in</p>
+<div class="math" role="math">\{0,1,5\}.</div>
+<p>Let</p>
+<div class="math" role="math">e_+=\sum_{q^a\parallel M,\ \lambda(q)\equiv1\ (6)}a,</div>
+<div class="math" role="math">e_-=\sum_{q^a\parallel M,\ \lambda(q)\equiv5\ (6)}a.</div>
+<p>The quotient-<code>0</code> factors are inert. The remaining divisor-log box is the cyclic interval</p>
+<div class="math" role="math">\boxed{ U(e_+,e_-) =\{-2e_-,-2e_-+1,\ldots,2e_+\} \pmod6. }</div>
+<p>The total quotient log is</p>
+<div class="math" role="math">\boxed{\bar c=e_+-e_-\pmod6.}</div>
+<p>We now test the two exact targets.</p>
+<h3>One positive packet</h3>
+<p>If</p>
+<div class="math" role="math">(e_+,e_-)=(1,0),</div>
+<p>then</p>
+<div class="math" role="math">U=\{0,1,2\}, \qquad \bar c=1.</div>
+<p>The targets are <code>3</code> and <code>4</code>, so both miss.</p>
+<h3>One negative packet</h3>
+<p>If</p>
+<div class="math" role="math">(e_+,e_-)=(0,1),</div>
+<p>then</p>
+<div class="math" role="math">U=\{0,4,5\}, \qquad \bar c=5.</div>
+<p>The targets are <code>3</code> and <code>2</code>, so both miss.</p>
+<h3>One packet in each direction</h3>
+<p>If</p>
+<div class="math" role="math">(e_+,e_-)=(1,1),</div>
+<p>then</p>
+<div class="math" role="math">U=\{0,1,2,4,5\}=C_6\setminus\{3\}, \qquad \bar c=0.</div>
+<p>Both targets coincide at <code>3</code>, and both miss.</p>
+<h3>Every larger packet hits</h3>
+<p>If either</p>
+<div class="math" role="math">e_+\ge2</div>
+<p>or</p>
+<div class="math" role="math">e_-\ge2,</div>
+<p>then the interval <code>U(e_+,e_-)</code> contains <code>3 mod6</code>. Therefore Type I hits.</p>
+<p>Thus the three packets above are the only non-pure misses.</p>
+<hr>
+<h2>9. Residue-coset form</h2>
+<p>The kernel subgroup is</p>
+<div class="math" role="math">\boxed{H=\{1,2,4,8,16\}.}</div>
+<p>The two thin nonresidue cosets are</p>
+<div class="math" role="math">\boxed{A=3H=\{3,6,12,17,24\},}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{B=3^{-1}H=\{11,13,21,22,26\}.}</div>
+<p>The remaining quotient cosets are forbidden in a non-pure miss.</p>
+<p>Define the total valuations</p>
+<div class="math" role="math">E_A=\sum_{q^e\parallel C,\ q\bmod31\in A}e,</div>
+<div class="math" role="math">E_B=\sum_{q^e\parallel C,\ q\bmod31\in B}e.</div>
+<h3>Theorem B — exact <code>v_2(C)&gt;=2</code> classification</h3>
+<p>Let <code>p</code> be Mordell-hard and</p>
+<div class="math" role="math">C=\frac{p+31}{4}, \qquad v_2(C)\ge2.</div>
+<p>Then both exact Lane-I targets miss at <code>k=31</code> <strong>if and only if</strong> exactly one of the following holds.</p>
+<ol><li><strong>Pure quadratic branch.</strong> Every prime factor of <code>C</code> is a quadratic residue modulo <code>31</code>.</li></ol>
+<ol><li><strong>Thin quotient branch.</strong> Every prime factor of <code>C</code> outside <code>H</code> lies in <code>A union B</code>, every remaining factor lies in <code>H</code>, and</li></ol>
+<div class="math" role="math">\boxed{(E_A,E_B)\in\{(1,0),(0,1),(1,1)\}.}</div>
+<p>In every other <code>v_2(C)&gt;=2</code> case, at least one exact target hits and <code>p</code> satisfies Erdős-Straus at shift <code>31</code>.</p>
+<h3>Proof</h3>
+<p>The full <code>2</code>-part fills the kernel <code>H</code>, so exact target membership is equivalent to target membership in the quotient <code>C_6</code>. Sections 5 through 8 exhaust the quotient directions and prove that the only miss states are the pure even branch and the three displayed <code>±1</code> packets. Translating quotient classes back to residue cosets gives the statement. QED.</p>
+<hr>
+<h2>10. Independent finite regression signal</h2>
+<p>The preserved standalone Lane-I corpus through</p>
+<div class="math" role="math">p\le10^7</div>
+<p>contains</p>
+<div class="math" role="math">\boxed{20,513}</div>
+<p>Mordell-hard primes.</p>
+<p>Among those with</p>
+<div class="math" role="math">v_2((p+31)/4)\ge2,</div>
+<p>there are</p>
+<div class="math" role="math">\boxed{10,270}</div>
+<p>targets.</p>
+<p>Independent factorization and the theorem above agree with the exact CBX <code>k=31</code> hit relation on all of them:</p>
+<div class="math" role="math">\boxed{0\text{ mismatches}.}</div>
+<p>The theorem-side classification counts on that finite corpus are:</p>
+<pre><code class="language-text">hit by theorem complement : 6510
+pure QR miss              : 2952
+thin (0,1) miss           : 347
+thin (1,0) miss           : 313
+thin (1,1) miss           : 148</code></pre>
+<p>These counts are supporting finite evidence only; the classification itself is the quotient proof above.</p>
+<hr>
+<h2>11. Position after the first seven shifts</h2>
+<p>On the preserved <code>p&lt;=10^7</code> corridor, the first six classified shifts</p>
+<div class="math" role="math">3,7,11,15,19,23</div>
+<p>leave <code>308</code> targets. Shift <code>27</code> removes <code>91</code>, leaving</p>
+<div class="math" role="math">\boxed{217}.</div>
+<p>Shift <code>31</code> removes <code>152</code>, leaving</p>
+<div class="math" role="math">\boxed{65}.</div>
+<p>Inside those 217 targets, the theorem above exactly classifies every case with <code>v_2(C)&gt;=2</code>:</p>
+<pre><code class="language-text">68 hits
+26 pure-QR misses
+7 thin (0,1) misses
+3 thin (1,1) misses</code></pre>
+<p>The remaining unresolved part of the fixed <code>k=31</code> classification is therefore the genuinely thin branch</p>
+<div class="math" role="math">\boxed{v_2(C)=1.}</div>
+<p>That is the next local theorem target.</p>
+<hr>
+<p>Erdős-Straus remains open. This theorem closes one exact branch of one fixed shift; it is not a universal finite-shift bound.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

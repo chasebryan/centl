@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact two-target filter at the prime shift `k=31` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k31-two-target-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k31-two-target-filter.html">
+  <meta property="og:title" content="Exact two-target filter at the prime shift `k=31` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact two-target filter at the prime shift `k=31`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K31-TWO-TARGET-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact combined Type-I/Type-II classification</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K31-TWO-TARGET-QUOTIENT.md</code>, <code>ES-TWO-TARGET-DIVISOR-SQUARE.md</code>, <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code></p>
+<p><strong>Machine certificate for <code>v_2(C)=1</code>:</strong> <code>classify_k31_v2_one.py</code></p>
+<p><strong>Independent finite regression for <code>v_2(C)&gt;=2</code>:</strong> <code>verify_k31_v2_quotient.py</code></p>
+<p><strong>Claim boundary:</strong> this closes the fixed Lane-I shift <code>k=31</code> for Mordell-hard primes. It does not prove that every smaller-shift survivor must hit at <code>31</code>, does not establish a universal finite Lane-I bound, and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. Setup</h2>
+<p>Let <code>p</code> be Mordell-hard and write</p>
+<div class="math" role="math">P=\frac{p-1}{4}.</div>
+<p>Since every hard prime satisfies</p>
+<div class="math" role="math">p\equiv1\pmod{24},</div>
+<p>we have</p>
+<div class="math" role="math">P\equiv0\pmod6.</div>
+<p>At shift</p>
+<div class="math" role="math">\boxed{k=31}</div>
+<p>put</p>
+<div class="math" role="math">\boxed{C=\frac{p+31}{4}=P+8.}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{2\mid C.}</div>
+<p>Hence exactly one of the two branches occurs:</p>
+<div class="math" role="math">\boxed{v_2(C)=1}</div>
+<p>or</p>
+<div class="math" role="math">\boxed{v_2(C)\ge2.}</div>
+<p>The first branch is classified by an exact finite-state closure in <code>C_30</code>; the second is classified by an exact quotient theorem in <code>C_6</code>.</p>
+<hr>
+<h2>2. Logarithmic coordinates and exact targets</h2>
+<p>The unit group</p>
+<div class="math" role="math">G=(\mathbb Z/31\mathbb Z)^\times</div>
+<p>is cyclic of order <code>30</code>. Use primitive root <code>3</code> and write</p>
+<div class="math" role="math">\lambda(x)=\log_3 x\pmod{30}.</div>
+<p>The constants are</p>
+<div class="math" role="math">\boxed{\lambda(2)=24,} \qquad \boxed{\lambda(-1)=15.}</div>
+<p>The Type-I divisor-square target is</p>
+<div class="math" role="math">-4^{-1}\equiv23\pmod{31},</div>
+<p>with</p>
+<div class="math" role="math">\boxed{\lambda(23)=27.}</div>
+<p>Let</p>
+<div class="math" role="math">c=\lambda(C)\pmod{30}</div>
+<p>and let</p>
+<div class="math" role="math">\mathcal D(C)</div>
+<p>be the divisor-log set of <code>C^2</code>.</p>
+<p>By the exact divisor-square formulation,</p>
+<div class="math" role="math">\boxed{\text{Type I hits}\iff27\in\mathcal D(C),}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{\text{Type II hits}\iff c+15\in\mathcal D(C).}</div>
+<p>Therefore</p>
+<div class="math" role="math">\boxed{ \text{combined miss} \iff 27\notin\mathcal D(C) \text{ and } c+15\notin\mathcal D(C).}</div>
+<hr>
+<h2>3. The branch <code>v_2(C)&gt;=2</code></h2>
+<p>The residue <code>2</code> has order five modulo <code>31</code>. Let</p>
+<div class="math" role="math">\boxed{H=\langle2\rangle=\{1,2,4,8,16\}.}</div>
+<p>In logarithmic coordinates,</p>
+<div class="math" role="math">\lambda(H)=\{0,6,12,18,24\}.</div>
+<p>When</p>
+<div class="math" role="math">v_2(C)\ge2,</div>
+<p>the divisors of the <code>2</code>-part of <code>C^2</code> already fill this entire kernel. Exact target membership therefore descends without loss to</p>
+<div class="math" role="math">C_{30}/\lambda(H)\cong C_6.</div>
+<p><code>K31-TWO-TARGET-QUOTIENT.md</code> proves the resulting quotient classification completely.</p>
+<p>Define</p>
+<div class="math" role="math">\boxed{A=3H=\{3,6,12,17,24\}}</div>
+<p>and</p>
+<div class="math" role="math">\boxed{B=3^{-1}H=\{11,13,21,22,26\}.}</div>
+<p>Let</p>
+<div class="math" role="math">E_A=\sum_{q^e\parallel C,\ q\bmod31\in A}e,</div>
+<div class="math" role="math">E_B=\sum_{q^e\parallel C,\ q\bmod31\in B}e.</div>
+<h3>Theorem A — exact <code>v_2(C)&gt;=2</code> branch</h3>
+<p>Assume</p>
+<div class="math" role="math">v_2(C)\ge2.</div>
+<p>Then both exact targets miss at <code>k=31</code> if and only if exactly one of the following holds.</p>
+<ol><li><strong>Pure quadratic branch.</strong> Every prime factor of <code>C</code> is a quadratic residue modulo <code>31</code>.</li></ol>
+<ol><li><strong>Thin quotient branch.</strong> Every prime factor of <code>C</code> outside <code>H</code> lies in <code>A union B</code>, every remaining factor lies in <code>H</code>, and</li></ol>
+<div class="math" role="math">\boxed{(E_A,E_B)\in\{(1,0),(0,1),(1,1)\}.}</div>
+<p>Every other <code>v_2(C)&gt;=2</code> factorization hits at least one exact target.</p>
+<p>This theorem is proved directly in the quotient note; no finite-state certificate is needed for this branch.</p>
+<hr>
+<h2>4. The branch <code>v_2(C)=1</code></h2>
+<p>Now assume</p>
+<div class="math" role="math">\boxed{v_2(C)=1.}</div>
+<p>The forced factor <code>2</code> contributes divisor exponents <code>0,1,2</code>. Since</p>
+<div class="math" role="math">\lambda(2)=24,</div>
+<p>the initial divisor-log state is</p>
+<div class="math" role="math">\boxed{ D_0=\{0,24,18\}, \qquad c_0=24.}</div>
+<p>The single factor <code>2</code> does <strong>not</strong> fill the order-five kernel <code>H</code>, so reduction modulo <code>6</code> can lose information. The exact lift must therefore be classified in <code>C_30</code>.</p>
+<hr>
+<h2>5. Exact finite-state transition law</h2>
+<p>Split every additional prime power</p>
+<div class="math" role="math">q^e\parallel C/2</div>
+<p>into <code>e</code> identical valuation units. If</p>
+<div class="math" role="math">a=\lambda(q)\pmod{30},</div>
+<p>then one valuation unit contributes divisor exponents <code>0,1,2</code>, hence the local log packet</p>
+<div class="math" role="math">\boxed{\{0,a,2a\}.}</div>
+<p>Therefore one exact transition is</p>
+<div class="math" role="math">\boxed{ (D,c) \longmapsto \left(D+\{0,a,2a\},\ c+a\right) }</div>
+<p>for</p>
+<div class="math" role="math">a\in C_{30}.</div>
+<p>Here <code>+</code> on divisor sets is Minkowski sum modulo <code>30</code>.</p>
+<p>This transition is exact for arbitrary prime-power exponents because splitting exponent <code>e</code> into <code>e</code> valuation units loses no divisor exponent: sums of <code>e</code> choices from <code>{0,1,2}</code> realize every integer from <code>0</code> through <code>2e</code>.</p>
+<hr>
+<h2>6. Why the state closure is universal</h2>
+<p>Starting from</p>
+<div class="math" role="math">(D_0,c_0),</div>
+<p>close under every one of the 30 possible transitions <code>a=0,...,29</code>.</p>
+<p>The closure stabilizes at exactly</p>
+<div class="math" role="math">\boxed{760\text{ states}.}</div>
+<p>The classifier then checks all</p>
+<div class="math" role="math">\boxed{760\times30=22,800}</div>
+<p>outgoing transitions and verifies that every one lands back inside the closed state set.</p>
+<p>This is an exhaustive finite-group closure, not a prime-range search.</p>
+<p>Every actual factorization with <code>v_2(C)=1</code> maps to a path in this state graph: each prime-valuation unit has some log <code>a</code>, and applying its transition appends precisely its divisor-log contribution and center contribution. Therefore every arithmetically realizable <code>v_2=1</code> state is contained in the 760-state closure.</p>
+<p>The abstract closure may contain states not realized by any prime <code>p</code>; that only makes the classifier conservative. It does not omit any actual factorization state.</p>
+<hr>
+<h2>7. Exact miss table for <code>v_2(C)=1</code></h2>
+<p>For every reachable state <code>(D,c)</code>, the exact miss predicate is simply</p>
+<div class="math" role="math">27\notin D</div>
+<p>and</p>
+<div class="math" role="math">c+15\notin D.</div>
+<p>The exhaustive closure contains exactly</p>
+<div class="math" role="math">\boxed{118\text{ combined-miss states}.}</div>
+<p><code>classify_k31_v2_one.py</code> emits <strong>all 118 rows</strong>, including</p>
+<ul><li>the exact divisor-log set <code>D</code>;</li><li>its size;</li><li>the center <code>c</code>;</li><li>both exact targets;</li><li>its modulo-6 quotient image;</li><li>the missing log classes;</li><li>a shortest abstract transition witness from the forced-2 state.</li></ul>
+<p>Thus:</p>
+<h3>Theorem B — exact <code>v_2(C)=1</code> branch</h3>
+<p>Assume</p>
+<div class="math" role="math">v_2(C)=1.</div>
+<p>Then both exact targets miss at <code>k=31</code> if and only if the exact divisor-log state</p>
+<div class="math" role="math">(\mathcal D(C),\lambda(C))</div>
+<p>is one of the 118 rows emitted by</p>
+<pre><code class="language-sh">python3 research/erdos-straus/classify_k31_v2_one.py --json</code></pre>
+<p>This is a complete fixed-group classification of the branch.</p>
+<hr>
+<h2>8. Quotient-visible misses versus genuine lift defects</h2>
+<p>Reduce a <code>v_2=1</code> state modulo the kernel <code>H</code>, equivalently reduce its logs modulo <code>6</code>.</p>
+<p>Among the 118 exact combined-miss states:</p>
+<div class="math" role="math">\boxed{101}</div>
+<p>already miss in the <code>C_6</code> quotient.</p>
+<p>The remaining</p>
+<div class="math" role="math">\boxed{17}</div>
+<p>are genuine lift defects:</p>
+<div class="math" role="math">\boxed{ \text{both quotient targets appear, but the exact C_30 targets still miss}.}</div>
+<p>So the quotient is nearly exact on this branch but not quite. Those 17 states are precisely the obstruction to extending the <code>v_2&gt;=2</code> quotient theorem unchanged to <code>v_2=1</code>.</p>
+<hr>
+<h2>9. Exact symmetry of the lift defects</h2>
+<p>Multiplication by</p>
+<div class="math" role="math">\boxed{11}</div>
+<p>is an automorphism of <code>C_30</code> because <code>gcd(11,30)=1</code>.</p>
+<p>It preserves the forced state:</p>
+<div class="math" role="math">11D_0=D_0, \qquad 11c_0=c_0.</div>
+<p>It also preserves the two-target form:</p>
+<div class="math" role="math">11\cdot27\equiv27\pmod{30},</div>
+<p>and</p>
+<div class="math" role="math">11(c+15) \equiv11c+15\pmod{30}</div>
+<p>because</p>
+<div class="math" role="math">11\cdot15\equiv15\pmod{30}.</div>
+<p>Therefore</p>
+<div class="math" role="math">(D,c) \mapsto (11D,11c)</div>
+<p>is an exact symmetry of the miss predicate.</p>
+<p>The 17 lift-only miss states form exactly</p>
+<div class="math" role="math">\boxed{9\text{ orbits}}</div>
+<p>under this involution: eight two-element orbits and one fixed state.</p>
+<hr>
+<h2>10. The nine lift-defect orbit representatives</h2>
+<p>The following table records one representative from each exact orbit. <code>Missing logs</code> means the complement of <code>D</code> in <code>C_30</code>.</p>
+<table class="directory"><thead><tr><th>orbit</th><th>`</th><th>D</th><th>`</th><th><code>c</code></th><th>missing logs</th><th>orbit size</th></tr></thead><tbody><tr><td>1</td><td>15</td><td>4</td><td><code>1,2,6,7,11,12,13,16,17,19,21,22,25,26,27</code></td><td>2</td><td></td><td></td></tr><tr><td>2</td><td>15</td><td>8</td><td><code>3,4,5,6,10,11,12,13,17,19,20,23,26,27,29</code></td><td>2</td><td></td><td></td></tr><tr><td>3</td><td>19</td><td>26</td><td><code>5,6,10,11,12,16,17,23,25,27,29</code></td><td>2</td><td></td><td></td></tr><tr><td>4</td><td>21</td><td>29</td><td><code>1,3,6,11,14,17,22,25,27</code></td><td>2</td><td></td><td></td></tr><tr><td>5</td><td>23</td><td>5</td><td><code>13,17,19,20,21,23,27</code></td><td>2</td><td></td><td></td></tr><tr><td>6</td><td>23</td><td>7</td><td><code>3,11,17,19,22,25,27</code></td><td>2</td><td></td><td></td></tr><tr><td>7</td><td>23</td><td>23</td><td><code>5,8,11,19,21,25,27</code></td><td>2</td><td></td><td></td></tr><tr><td>8</td><td>27</td><td>5</td><td><code>13,20,27</code></td><td>2</td><td></td><td></td></tr><tr><td>9</td><td>29</td><td>12</td><td><code>27</code></td><td>1</td><td></td><td></td></tr></tbody></table>
+<p>For every row, both</p>
+<div class="math" role="math">27</div>
+<p>and</p>
+<div class="math" role="math">c+15</div>
+<p>are absent from <code>D</code>.</p>
+<p>The ninth orbit is fixed by the symmetry and is especially sharp:</p>
+<div class="math" role="math">\boxed{ c=12, \qquad D=C_{30}\setminus\{27\}.}</div>
+<p>Here the two targets coincide:</p>
+<div class="math" role="math">c+15=27,</div>
+<p>and the divisor box misses exactly that one class.</p>
+<p>The classifier also stores shortest abstract transition witnesses for these representatives. Those witnesses certify reachability in the finite state machine; they are not assertions that the corresponding abstract log sequences occur as prime factorizations.</p>
+<hr>
+<h2>11. Complete fixed-shift theorem at k=31</h2>
+<h3>Theorem</h3>
+<p>Let <code>p</code> be Mordell-hard and put</p>
+<div class="math" role="math">C=\frac{p+31}{4}.</div>
+<p>Then both exact Lane-I targets miss at <code>k=31</code> if and only if exactly one of the following branch conditions holds.</p>
+<h3>Branch I: <code>v_2(C)&gt;=2</code></h3>
+<p>Either</p>
+<ol><li>every prime factor of <code>C</code> is a quadratic residue modulo <code>31</code>; or</li><li>every factor outside</li></ol>
+<div class="math" role="math">H=\{1,2,4,8,16\}</div>
+<p>lies in &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;A=\{3,6,12,17,24\}&lt;/div&gt;</p>
+<p>or &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;B=\{11,13,21,22,26\},&lt;/div&gt;</p>
+<p>every remaining factor lies in <code>H</code>, and &lt;div class=&quot;math&quot; role=&quot;math&quot;&gt;(E_A,E_B)\in\{(1,0),(0,1),(1,1)\}.&lt;/div&gt;</p>
+<h3>Branch II: <code>v_2(C)=1</code></h3>
+<p>The exact state</p>
+<div class="math" role="math">(\mathcal D(C),\lambda(C))</div>
+<p>is one of the 118 explicitly emitted miss states of <code>classify_k31_v2_one.py</code>.</p>
+<p>Equivalently, on the <code>v_2=1</code> branch the miss is either one of the 101 quotient-visible miss states or one of the 17 lift-only states in the nine symmetry orbits above.</p>
+<p>In every other case at least one exact target hits, so <code>p</code> has an Erdős–Straus decomposition at shift <code>31</code>.</p>
+<hr>
+<h2>12. Machine-checkable closure constants</h2>
+<p>The <code>v_2=1</code> classifier hard-checks the following exact constants:</p>
+<pre><code class="language-text">reachable states                  760
+transition closure checks      22,800
+combined miss states              118
+quotient-visible miss states       101
+lift-only miss states               17
+emitted exact miss rows            118
+lift-defect symmetry orbits           9</code></pre>
+<p>The Fedora theorem workflow independently requires all of those values and verifies that the 118 emitted rows split exactly as <code>101 + 17</code>.</p>
+<p>The <code>v_2&gt;=2</code> theorem is separately replayed by <code>verify_k31_v2_quotient.py</code> against finite hard-prime corpora. That replay is regression evidence only; the branch theorem itself is the quotient proof in <code>K31-TWO-TARGET-QUOTIENT.md</code>.</p>
+<hr>
+<h2>13. Corridor status</h2>
+<p>The exact consecutive Lane-I corridor is now classified through</p>
+<div class="math" role="math">\boxed{k=3,7,11,15,19,23,27,31.}</div>
+<p>By <code>ES-BINARY-LANE-I-EQUIVALENCE.md</code>, these are simultaneously exact consecutive binary-selector classifications.</p>
+<p>The finite <code>p&lt;=10^7</code> first-hit census leaves only</p>
+<div class="math" role="math">\boxed{65}</div>
+<p>Mordell-hard primes after the first eight shifts through <code>31</code>, but that is finite evidence only.</p>
+<p>The next fixed shift is</p>
+<div class="math" role="math">\boxed{k=35.}</div>
+<p>A separate <code>k=35</code> structural reduction is already present in the repository. The highest-value next step is to combine the eight exact failure laws and the <code>k=35</code> structure rather than reopening any of the now-closed shifts.</p>
+<hr>
+<p>Erdős–Straus remains open. This theorem closes one fixed shift exactly; it does not provide the missing universal existence argument across shifts.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

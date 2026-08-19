@@ -1,0 +1,23 @@
+name: Route-B k47 survivor normal form
+
+on:
+  pull_request:
+    paths:
+      - 'research/erdos-straus/ROUTE-B-K47-SURVIVOR-NORMAL-FORM.md'
+      - 'research/erdos-straus/verify_route_b_k47_survivor_normal_form.py'
+      - '.github/workflows/route-b-k47-survivor-normal-form.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact Route-B k47 normal form
+        run: python3 research/erdos-straus/verify_route_b_k47_survivor_normal_form.py --json

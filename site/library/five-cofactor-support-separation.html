@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Write">
+  <title>Five-cofactor support separation on the realized h169 routes — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/five-cofactor-support-separation.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/five-cofactor-support-separation.html">
+  <meta property="og:title" content="Five-cofactor support separation on the realized h169 routes — Free Computation Foundation">
+  <meta property="og:description" content="Write">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Five-cofactor support separation on the realized h169 routes</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">Write</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/FIVE-COFACTOR-SUPPORT-SEPARATION.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact algebraic module inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_five_cofactor_support_separation.py</code></p>
+<p><strong>Depends on:</strong> the realized k19 route coupling and the landed post-k23 companion ladder</p>
+<p><strong>Claim boundary:</strong> exact route-local coprimality theorem. It is not a termination theorem, a universal decomposition method, or an Erdős–Straus proof.</p>
+<h2>1. Route coordinates</h2>
+<p>Write</p>
+<p><code>p = 169 + 840t</code></p>
+<p>and</p>
+<p><code>C19 = (p+19)/4 = 47 + 210t</code>.</p>
+<p>On the two realized k19 routes,</p>
+<pre><code class="language-text">Route A: C19 = 391 R  = 17*23*R
+Route B: C19 = 1081 R = 23*47*R.</code></pre>
+<p>Let</p>
+<p><code>S in {391,1081}</code></p>
+<p>so that</p>
+<p><code>C19 = S R</code>.</p>
+<p>The post-k23 companion coordinates are</p>
+<pre><code class="language-text">C23 =  6B = S R + 1
+C27 =  7E = S R + 2
+C31 = 10D = S R + 3
+C35 =  3F = S R + 4,</code></pre>
+<p>where</p>
+<pre><code class="language-text">B = 8  + 35t
+E = 7  + 30t
+D = 5  + 21t
+F = 17 + 70t.</code></pre>
+<h2>2. Previously visible four-way separation</h2>
+<p>The consecutive-companion identities give</p>
+<pre><code class="language-text">7E  - 6B  = 1
+10D - 7E  = 1
+5D  - 3B  = 1
+F   - 2B  = 1
+3F  - 10D = 1
+3F  - 7E  = 2.</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">gcd(B,E)=gcd(B,D)=gcd(B,F)=1
+gcd(E,D)=gcd(D,F)=1.</code></pre>
+<p>For E and F, the last relation says the gcd divides 2. But</p>
+<p><code>E=7+30t</code></p>
+<p>and</p>
+<p><code>F=17+70t</code></p>
+<p>are both odd, so</p>
+<p><code>gcd(E,F)=1</code>.</p>
+<p>Thus B,E,D,F are pairwise coprime.</p>
+<h2>3. R is also disjoint from every later dynamic cofactor</h2>
+<p>The route equations themselves give the missing four relations.</p>
+<h3>R versus B</h3>
+<p><code>6B - SR = 1</code>.</p>
+<p>Therefore</p>
+<p><code>gcd(R,B)=1</code>.</p>
+<h3>R versus E</h3>
+<p><code>7E - SR = 2</code>.</p>
+<p>Any common divisor of R and E divides 2.</p>
+<p>Now C19 is odd and S is odd, so R is odd. E is also odd. Hence</p>
+<p><code>gcd(R,E)=1</code>.</p>
+<h3>R versus D</h3>
+<p><code>10D - SR = 3</code>.</p>
+<p>Any common divisor of R and D divides 3.</p>
+<p>But</p>
+<p><code>C19 = 47 + 210t = 2 mod3</code>,</p>
+<p>while both route seeds satisfy</p>
+<p><code>391 = 1 mod3</code></p>
+<p>and</p>
+<p><code>1081 = 1 mod3</code>.</p>
+<p>Therefore</p>
+<p><code>R = 2 mod3</code></p>
+<p>on either route, so 3 does not divide R. Hence</p>
+<p><code>gcd(R,D)=1</code>.</p>
+<h3>R versus F</h3>
+<p><code>3F - SR = 4</code>.</p>
+<p>Any common divisor of R and F divides 4. Both R and F are odd, so</p>
+<p><code>gcd(R,F)=1</code>.</p>
+<h2>4. Five-way theorem</h2>
+<h3>Theorem</h3>
+<p>On either realized h169 route,</p>
+<p><code>R, B, E, D, F</code></p>
+<p>are pairwise coprime.</p>
+<p>Equivalently,</p>
+<p><code>gcd(X,Y)=1</code></p>
+<p>for every distinct pair</p>
+<p><code>X,Y in {R,B,E,D,F}</code>.</p>
+<p>This is range-free. It follows only from the exact affine companion identities, parity, and the fixed mod-3 route residue.</p>
+<h2>5. Support-separation consequence</h2>
+<p>A branch surviving the already proved local modules carries separate rational-prime reservoirs:</p>
+<pre><code class="language-text">R : k19 survivor support
+B : k23 survivor support
+E : k27 survivor grammar
+D : k31 survivor support
+F : k35 survivor branch.</code></pre>
+<p>No rational prime can occur in two of these five dynamic cofactors.</p>
+<p>For a simultaneous survivor the existing modules further require, schematically,</p>
+<pre><code class="language-text">R : QR19 support, strengthened to 1 mod19 in k19 BARE mode
+B : QR23 support
+E : one of the exact k27 survivor grammars
+D : QR31 support
+F : J35 or S7.</code></pre>
+<p>The important new fact is that these constraints cannot be satisfied by reusing the same prime factor across coordinates. Every surviving compartment is arithmetically disjoint from the others.</p>
+<h2>6. Why this matters for the candidate machine</h2>
+<p>The local state is no longer merely a list of five congruence conditions. It is a product of five <strong>disjoint support systems</strong> tied together by four consecutive companion equations:</p>
+<pre><code class="language-text">SR
+SR+1 = 6B
+SR+2 = 7E
+SR+3 = 10D
+SR+4 = 3F.</code></pre>
+<p>That is structurally useful for any future contradiction or progress measure. A proof that one support system must import a prime already forced into another would now terminate the branch immediately, because support overlap is impossible.</p>
+<p>Likewise, character constraints on one compartment cannot be discharged by silently recycling a favorable prime from another compartment.</p>
+<h2>7. Next target</h2>
+<p>The next high-value object is the exact residual intersection</p>
+<p><code>R19 x B23 x G27(E) x R31 x G35(F)</code></p>
+<p>subject to</p>
+<ol><li>the five-way coprimality theorem;</li><li>the affine companion chain;</li><li>the landed k39 phase restriction;</li><li>the k43 selector shell;</li><li>the k47 phase restriction.</li></ol>
+<p>The goal is a branch-local selector or contradiction, not another unconditioned census.</p>
+<p>Erdős–Straus remains open.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

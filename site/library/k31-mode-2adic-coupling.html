@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="For p = 169 + 840t, write C31 = 10D, with D = 5 + 21t.">
+  <title>k31 survivor mode controls the 2-adic support seam — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k31-mode-2adic-coupling.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k31-mode-2adic-coupling.html">
+  <meta property="og:title" content="k31 survivor mode controls the 2-adic support seam — Free Computation Foundation">
+  <meta property="og:description" content="For p = 169 + 840t, write C31 = 10D, with D = 5 + 21t.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>k31 survivor mode controls the 2-adic support seam</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">For p = 169 + 840t, write C31 = 10D, with D = 5 + 21t.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K31-MODE-2ADIC-COUPLING.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> exact product-state coupling inside the candidate decomposition framework</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Verifier:</strong> <code>verify_k31_mode_2adic_coupling.py</code></p>
+<p><strong>Depends on:</strong> <code>K31-SURVIVOR-NORMAL-FORM.md</code> and <code>TEN-COFACTOR-ODD-SUPPORT-SEPARATION.md</code></p>
+<p><strong>Claim boundary:</strong> exact implication on h169 branches surviving k31. This is a product-state reduction, not a termination theorem, not a closed decomposition method, and not an Erdős–Straus proof.</p>
+<h2>1. The two exact k31 miss modes</h2>
+<p>For <code>p = 169 + 840t</code>, write <code>C31 = 10D</code>, with <code>D = 5 + 21t</code>.</p>
+<p>The landed k31 theorem states that a miss occurs exactly when every rational prime factor of D is a nonzero quadratic residue modulo31. Conditional on a miss, the state has exactly two modes:</p>
+<pre><code class="language-text">BARE
+FULL_QR</code></pre>
+<p>with BARE stabilizer <code>H31 = {1,5,25} mod31</code>.</p>
+<p>Equivalently:</p>
+<ul><li>BARE: every prime factor q of D lies in H31;</li><li>FULL_QR: every prime factor q of D is QR31 and at least one occurrence lies outside H31.</li></ul>
+<h2>2. BARE forces even t</h2>
+<p>The residue2 is a quadratic residue modulo31, but <code>2 notin H31</code>.</p>
+<p>Meanwhile <code>D = 5 + 21t</code> has parity</p>
+<pre><code class="language-text">D odd  iff t even
+D even iff t odd.</code></pre>
+<p>Therefore, if t is odd, the rational prime2 divides D. Since its residue2 is outside H31, a k31 miss at odd t cannot be BARE.</p>
+<p>Hence the exact implication</p>
+<p><code>k31 BARE =&gt; t even</code>.</p>
+<p>Equivalently,</p>
+<p><code>t odd AND k31 miss =&gt; k31 FULL_QR</code>.</p>
+<p>In the odd case the factor2 itself supplies a definite QR31 residue outside the BARE stabilizer. Thus the formal product-state combination <code>(k31_mode=BARE, t odd)</code> is arithmetically impossible.</p>
+<h2>3. The landed ten-reservoir 2-adic seam</h2>
+<p>The local companion cofactors through k55 include</p>
+<pre><code class="language-text">B =  8 + 35t
+D =  5 + 21t
+G = 26 +105t
+J =  9 + 35t
+L =  4 + 15t.</code></pre>
+<p>The ten-cofactor support theorem proves the only nontrivial gcd edges are</p>
+<pre><code class="language-text">gcd(B,G) = gcd(2,t)
+gcd(G,L) = gcd(2,t)
+gcd(D,J) = gcd(2,t+1)
+gcd(B,L) = gcd(4,t).</code></pre>
+<p>Thus parity determines which side of the local ladder carries the 2-adic overlap.</p>
+<h3>Even t</h3>
+<pre><code class="language-text">gcd(B,G)=2
+gcd(G,L)=2
+gcd(D,J)=1
+
+gcd(B,L)=
+  4 if t=0 mod4
+  2 if t=2 mod4.</code></pre>
+<h3>Odd t</h3>
+<pre><code class="language-text">gcd(B,G)=1
+gcd(G,L)=1
+gcd(B,L)=1
+gcd(D,J)=2.</code></pre>
+<p>All other cofactor pairs remain coprime in both parity sectors.</p>
+<h2>4. Mode-to-seam theorem</h2>
+<p>Combining the two exact modules yields:</p>
+<h3>BARE sector</h3>
+<p>If k31 is BARE, then t is even. Therefore the only possible support topology is the even B-G-L seam, with D and J disjoint at2. In particular</p>
+<p><code>k31 BARE =&gt; gcd(D,J)=1</code>.</p>
+<h3>Odd FULL_QR sector</h3>
+<p>If t is odd and k31 misses, then k31 is necessarily FULL_QR and <code>gcd(D,J)=2</code>, while B,G,L are pairwise coprime.</p>
+<h3>Even FULL_QR sector</h3>
+<p>FULL_QR may also occur at even t. In that case it shares the even seam topology with BARE but differs in the exact D-support mode.</p>
+<p>So the product state <code>k31_mode × parity × support_seam</code> does not form a Cartesian product. The schematic states not excluded by this theorem are</p>
+<pre><code class="language-text">BARE     × EVEN_0   (t=0 mod4)
+BARE     × EVEN_2   (t=2 mod4)
+FULL_QR  × EVEN_0
+FULL_QR  × EVEN_2
+FULL_QR  × ODD</code></pre>
+<p>while <code>BARE × ODD</code> is impossible.</p>
+<p>The list above is not an existence claim for every remaining tuple. It records exactly what this coupling theorem removes.</p>
+<h2>5. Why this matters to the candidate framework</h2>
+<p>This is an explicit elimination of a formal product-state combination using two previously independent-looking coordinates.</p>
+<p>The state grammar should encode the dependency:</p>
+<pre><code class="language-text">if k31_mode == BARE:
+    parity = EVEN
+    gcd(D,J) = 1
+    seam = EVEN_0 | EVEN_2
+
+if parity == ODD and k31 misses:
+    k31_mode = FULL_QR
+    gcd(D,J) = 2
+    seam = ODD</code></pre>
+<p>That is a genuine state reduction rule. No finite census is needed to apply it.</p>
+<h2>6. Bryan Entanglement Cross draft boundary</h2>
+<p>The in-draft Bryan Entanglement Cross may later annotate this theorem as a downward/excavation transition because an apparently independent state space is restricted to a smaller exact grammar.</p>
+<p>That directional label is not part of the proof. The arithmetic implication exists independently of BEC and is the only source of pruning permission.</p>
+<h2>7. Next target</h2>
+<p>The strongest continuation is to find additional non-Cartesian couplings among <code>k27_mode × k31_mode × k35_branch × route-conditioned phase × support_seam</code>.</p>
+<p>The landed Route-B k47 THIN/FULL_QR normal form is especially promising because its THIN mode also excludes rational prime2, allowing k31 and k47 modes to be coupled on the same Route-B ancestry.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

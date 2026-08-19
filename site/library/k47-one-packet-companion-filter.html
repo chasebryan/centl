@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="---">
+  <title>Exact one-packet companion filter at `k=47` — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/k47-one-packet-companion-filter.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/k47-one-packet-companion-filter.html">
+  <meta property="og:title" content="Exact one-packet companion filter at `k=47` — Free Computation Foundation">
+  <meta property="og:description" content="---">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Exact one-packet companion filter at `k=47`</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">---</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/K47-ONE-PACKET-COMPANION-FILTER.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved exact group-theoretic reduction</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> <code>K47-FORCED6-HARD-REDUCTION.md</code>, <code>K47-TWO-TARGET-FILTER.md</code></p>
+<p><strong>Claim boundary:</strong> classifies which single nonresidue directions can support a negative-character forced-6 miss state at fixed <code>k=47</code>. It does not prove that the earlier corridor eliminates those directions universally and does not prove Erdős–Straus.</p>
+<hr>
+<h2>1. QR coordinate</h2>
+<p>Use primitive root <code>5 mod47</code> and the log coordinate</p>
+<div class="math" role="math">\lambda:(\mathbb Z/47\mathbb Z)^\times\to C_{46}.</div>
+<p>Quadratic residues have even logs. Divide those even logs by two and work in</p>
+<div class="math" role="math">\boxed{C_{23}.}</div>
+<p>The universally forced factors at <code>k=47</code> satisfy</p>
+<div class="math" role="math">\lambda(2)=18, \qquad \lambda(3)=20,</div>
+<p>so their QR directions are</p>
+<div class="math" role="math">\boxed{9\quad\text{and}\quad10\pmod{23}.}</div>
+<hr>
+<h2>2. Forced signed QR box</h2>
+<p>One forced factor of 2 contributes the signed local set</p>
+<div class="math" role="math">\{-9,0,9\},</div>
+<p>and one forced factor of 3 contributes</p>
+<div class="math" role="math">\{-10,0,10\}.</div>
+<p>Their sum is</p>
+<div class="math" role="math">\boxed{ F = \{0,1,4,9,10,13,14,19,22\} \subset C_{23}.}</div>
+<p>Thus the two mandatory factors already occupy nine of the 23 QR coordinates.</p>
+<p>Let <code>A</code> be the complete signed QR box after all additional quadratic-residue prime factors are included. Then</p>
+<div class="math" role="math">\boxed{F\subseteq A.}</div>
+<hr>
+<h2>3. One nonresidue packet</h2>
+<p>Now consider a state representative with exactly one additional quadratic-nonresidue valuation unit.</p>
+<p>Its log is odd:</p>
+<div class="math" role="math">\boxed{r\in C_{46},\qquad r\equiv1\pmod2.}</div>
+<p>The local signed contribution is</p>
+<div class="math" role="math">\{-r,0,r\}.</div>
+<p>The Type-II target <code>-1</code> has log 23. Therefore Type II hits exactly when either odd translate reaches 23, i.e. when</p>
+<div class="math" role="math">\boxed{ \frac{23-r}{2}\in A \quad\text{or}\quad \frac{23+r}{2}\in A }</div>
+<p>in <code>C_23</code>.</p>
+<p>These are the two exact Type-II companion points for direction <code>r</code>.</p>
+<hr>
+<h2>4. Type-I companion and the moving QR center</h2>
+<p>Let the QR part of <code>C</code> have half-log center</p>
+<div class="math" role="math">h\in C_{23}.</div>
+<p>The full center log is</p>
+<div class="math" role="math">2h+r.</div>
+<p>The Type-I signed-box target has log</p>
+<div class="math" role="math">33-(2h+r).</div>
+<p>Hence its QR coordinate is</p>
+<div class="math" role="math">\boxed{ \alpha_I(r,h) = \frac{33-r}{2}-h. }</div>
+<p>For the forced <code>2·3</code> seed alone,</p>
+<div class="math" role="math">h_0=\frac{18+20}{2}=19.</div>
+<p>So the forced-seed companion is</p>
+<div class="math" role="math">\boxed{ \alpha_I^{(0)}(r) = \frac{-5-r}{2} \pmod{23}.}</div>
+<p>Suppose additional QR factors have center <code>h_1</code> and signed box <code>A_1</code>. Then</p>
+<div class="math" role="math">h=h_0+h_1, \qquad A=F+A_1.</div>
+<p>Because the signed box contains the all-negative endpoint,</p>
+<div class="math" role="math">\boxed{-h_1\in A_1.}</div>
+<p>Therefore, if</p>
+<div class="math" role="math">\alpha_I^{(0)}(r)\in F,</div>
+<p>then</p>
+<div class="math" role="math">\alpha_I(r,h) = \alpha_I^{(0)}(r)-h_1 \in F+A_1=A.</div>
+<p>So a forced-seed Type-I hit <strong>cannot be undone by adding QR factors</strong>.</p>
+<p>This makes the finite nine-point seed box sufficient for a universal one-packet exclusion test.</p>
+<hr>
+<h2>5. Nine directions are killed immediately by Type II</h2>
+<p>For the following odd logs, at least one Type-II companion already lies in <code>F</code>:</p>
+<div class="math" role="math">\boxed{ 3,5,15,21,23,25,31,41,43. }</div>
+<p>Thus none of those nine nonresidue directions can support a one-packet combined miss, regardless of any additional QR factors.</p>
+<hr>
+<h2>6. Three more are killed immediately by Type I</h2>
+<p>Among the remaining directions whose Type-II companions both miss the forced seed, the forced-seed Type-I companion lies in <code>F</code> for exactly</p>
+<div class="math" role="math">\boxed{r=13,33,39.}</div>
+<p>By the moving-center argument above, the Type-I hit persists under arbitrary additional QR factors.</p>
+<p>So these three directions also cannot support a one-packet combined miss.</p>
+<hr>
+<h2>7. Exact surviving direction alphabet</h2>
+<p>There are 23 odd log directions in <code>C_46</code>.</p>
+<p>Nine are eliminated by Type II and three more by Type I. Therefore only</p>
+<div class="math" role="math">\boxed{11}</div>
+<p>can support a one-packet combined miss:</p>
+<div class="math" role="math">\boxed{ \mathcal R_{47}^{(1)} = \{1,7,9,11,17,19,27,29,35,37,45\} \subset C_{46}.}</div>
+<p>In ordinary residue classes modulo 47, using primitive root 5, this is</p>
+<div class="math" role="math">\boxed{ \{5,10,11,13,19,20,26,29,33,38,40\}.}</div>
+<p>Every class in this list is a quadratic nonresidue modulo 47.</p>
+<p>The exact companion table is:</p>
+<table class="directory"><thead><tr><th>log <code>r</code></th><th>residue <code>5^r mod47</code></th><th>Type-II companions in <code>C23</code></th><th>forced Type-I companion</th></tr></thead><tbody><tr><td>1</td><td>5</td><td>11, 12</td><td>20</td></tr><tr><td>7</td><td>11</td><td>8, 15</td><td>17</td></tr><tr><td>9</td><td>40</td><td>7, 16</td><td>16</td></tr><tr><td>11</td><td>13</td><td>6, 17</td><td>15</td></tr><tr><td>17</td><td>38</td><td>3, 20</td><td>12</td></tr><tr><td>19</td><td>10</td><td>2, 21</td><td>11</td></tr><tr><td>27</td><td>33</td><td>21, 2</td><td>7</td></tr><tr><td>29</td><td>26</td><td>20, 3</td><td>6</td></tr><tr><td>35</td><td>29</td><td>17, 6</td><td>3</td></tr><tr><td>37</td><td>20</td><td>16, 7</td><td>2</td></tr><tr><td>45</td><td>19</td><td>12, 11</td><td>21</td></tr></tbody></table>
+<p>All three listed companion coordinates lie outside the forced seed box <code>F</code> in every row.</p>
+<hr>
+<h2>8. Completeness relative to the forced-6 state closure</h2>
+<p><code>classify_k47_forced6_states.py</code> proves that every negative-character hard-prime miss state has a state-equivalent representative with exactly one added nonresidue valuation unit.</p>
+<p>The exact state enumeration further shows:</p>
+<ul><li>all 80 negative-character forced-6 miss states are generated by one of the 11 directions above;</li><li>every one of the 80 belongs to exactly one such direction class in the one-packet QR closure;</li><li>each of the 11 directions actually produces at least one miss state.</li></ul>
+<p>Thus the 11-class alphabet is neither merely necessary nor padded with impossible directions. It is the exact direction alphabet of the 80-state one-packet miss family.</p>
+<hr>
+<h2>9. Cross-shift proof target</h2>
+<p>The finite 10M corridor census shows that earlier shifts through 39 eliminate every observed negative-character <code>k=47</code> miss.</p>
+<p>The symbolic target can now be stated more concretely:</p>
+<blockquote><p>Prove that a Mordell-hard prime escaping the exact earlier corridor cannot realize any of the eleven one-packet directions in <code>R_47^(1)</code> together with the QR companion gaps required by its row.</p></blockquote>
+<p>This replaces an 80-state opaque target by eleven explicit residue-direction cases in the prime-order QR group <code>C_23</code>.</p>
+<p>The theorem is still open.</p>
+<hr>
+<p>Erdős–Straus remains open. The contribution here is an exact one-packet alphabet and companion table for the first strong cross-shift Legendre exclusion candidate.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

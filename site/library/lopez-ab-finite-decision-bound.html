@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The López Type A/B conjecture is often phrased with unbounded positive parameters d,n. For a fixed prime p, however, those parameters cannot wander to arbitrary depth.">
+  <title>Finite decision bound for López Type A/B on the hard-prime domain — Free Computation Foundation</title>
+  <link rel="canonical" href="https://freecomputation.org/library/lopez-ab-finite-decision-bound.html">
+  <meta name="robots" content="index,follow">
+  <link rel="alternate" type="text/plain" href="https://freecomputation.org/llms.txt" title="LLM briefing">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://freecomputation.org/library/lopez-ab-finite-decision-bound.html">
+  <meta property="og:title" content="Finite decision bound for López Type A/B on the hard-prime domain — Free Computation Foundation">
+  <meta property="og:description" content="The López Type A/B conjecture is often phrased with unbounded positive parameters d,n. For a fixed prime p, however, those parameters cannot wander to arbitrary depth.">
+  <meta property="og:image" content="https://freecomputation.org/assets/fcf-centl-banner.png">
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body>
+<div class="shell" id="top">
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="masthead">
+    <div class="brand"><a href="../index.html#top"><strong>FCF</strong><span>Free Computation Foundation</span><small>Free for science.</small></a></div>
+    <div class="title"><h1>Finite decision bound for López Type A/B on the hard-prime domain</h1><p>Theorem · hosted from the CENTL repository</p></div>
+  </header>
+  <div class="layout">
+    <nav aria-label="Primary">
+      <h2>CENTL &amp; Hub</h2>
+      <ul>
+        <li><a href="../index.html#top">CENTL Work Area</a></li>
+        <li><a href="../centl.html#top">About CENTL</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Hunt</a></li>
+        <li><a href="../software.html#top">Software Suite</a></li>
+      </ul>
+      <h2>Documentation</h2>
+      <ul>
+        <li><a href="../docs.html#top">Documentation Portal</a></li>
+        <li><a href="../manuals/install.html#top">Installation Guide</a></li>
+        <li><a href="../manuals/numerics.html#top">Numerical Contract</a></li>
+        <li><a href="../manuals/syntax.html#top">Syntax &amp; Functions</a></li>
+        <li><a href="../manuals/sci.html#top">CENTL-SCi &amp; Physics</a></li>
+      </ul>
+      <h2>Research</h2>
+      <ul>
+        <li><a href="../research.html#top">Research Library</a></li>
+        <li><a href="../research-erdos-straus.html#top">Erdős–Straus Program</a></li>
+        <li><a href="../bryan-recursive-entanglement-calculus.html#top">BREC v1.0 Calculus</a></li>
+      </ul>
+      <h2>Foundation</h2>
+      <ul>
+        <li><a href="../about.html#top">About FCF</a></li>
+        <li><a href="../funding.html#top">Funding &amp; Sponsors</a></li>
+        <li><a href="../mirrors.html#top">The Bazaar</a></li>
+        <li><a href="https://github.com/chasebryan/centl">GitHub Repository</a></li>
+      </ul>
+    </nav>
+    <main id="content">
+      <p class="crumbs"><a href="../research.html">Research library</a> · Theorem</p>
+      <article class="paper">
+        <header class="paper-head">
+          <p class="kicker">Theorem</p>
+          <p class="dek">The López Type A/B conjecture is often phrased with unbounded positive parameters d,n. For a fixed prime p, however, those parameters cannot wander to arbitrary depth.</p>
+          <p class="paper-meta"><a href="https://github.com/chasebryan/centl/blob/main/research/erdos-straus/LOPEZ-AB-FINITE-DECISION-BOUND.md">Source in the repository</a></p>
+        </header>
+        <div class="paper-body">
+<p><strong>Status:</strong> proved elementary theorem</p>
+<p><strong>Date:</strong> 2026-08-16</p>
+<p><strong>Depends on:</strong> López Type A/B congruence characterizations; Mordell-hard residue skeleton</p>
+<p><strong>Claim boundary:</strong> this proves that Type A/B existence is finitely decidable for each fixed prime. It does not prove that every prime has Type A or B, and it does not produce a counterexample to López or Erdős–Straus.</p>
+<h2>1. Why this matters</h2>
+<p>The López Type A/B conjecture is often phrased with unbounded positive parameters <code>d,n</code>. For a fixed prime <code>p</code>, however, those parameters cannot wander to arbitrary depth.</p>
+<p>Write the Type A/B layer index as</p>
+<pre><code class="language-text">K = d n</code></pre>
+<p>and the associated modulus as</p>
+<pre><code class="language-text">m = 4 d n - 1 = 4K - 1.</code></pre>
+<p>López&#x27;s exact prime characterizations are:</p>
+<pre><code class="language-text">Type A:  p == -4d  (mod 4dn-1)
+Type B:  p == -n   (mod 4dn-1)</code></pre>
+<p>The divisibility itself forces an explicit upper bound on <code>K</code>.</p>
+<p>The main result is:</p>
+<h3>Theorem — complete hard-prime A/B decision ceiling</h3>
+<p>Let <code>p</code> be a Mordell-hard prime, so</p>
+<pre><code class="language-text">p mod 840 in {1,121,169,289,361,529}.</code></pre>
+<p>Then every Type A witness satisfies</p>
+<pre><code class="language-text">K = dn &lt;= (p+3)/11,</code></pre>
+<p>and every Type B witness satisfies</p>
+<pre><code class="language-text">K = dn &lt;= 3(p+1)/11.</code></pre>
+<p>Consequently</p>
+<pre><code class="language-text">K_complete(p) = floor(3(p+1)/11)</code></pre>
+<p>is a complete Type A/B decision bound on the Mordell-hard prime domain.</p>
+<p>If a full Type A/B audit finds no witness through <code>K_complete(p)</code>, then there is no Type A or Type B witness at any larger layer either.</p>
+<p>This converts the statement</p>
+<pre><code class="language-text">C_AB(p) = infinity</code></pre>
+<p>from an apparently infinite search assertion into a finite certificate for each fixed hard prime.</p>
+<h2>2. Hard-prime arithmetic used</h2>
+<p>Every Mordell-hard residue satisfies</p>
+<pre><code class="language-text">p == 1 (mod 24).</code></pre>
+<p>In particular</p>
+<pre><code class="language-text">p == 1 (mod 3)
+p == 1 (mod 8)</code></pre>
+<p>and the six classes have</p>
+<pre><code class="language-text">p mod 5 in {1,4}
+p mod 7 in {1,2,4}.</code></pre>
+<p>Only these elementary congruence facts are used below.</p>
+<h2>3. Type A bound</h2>
+<p>Suppose <code>p</code> has a Type A witness. Then</p>
+<pre><code class="language-text">4dn-1 divides p+4d.</code></pre>
+<p>Define the positive quotient</p>
+<pre><code class="language-text">s = (p+4d)/(4dn-1).</code></pre>
+<p>Since <code>p == 1 (mod 4)</code> and <code>4dn-1 == 3 (mod 4)</code>, one has</p>
+<pre><code class="language-text">s == 3 (mod 4).</code></pre>
+<p>Thus <code>s</code> is one of</p>
+<pre><code class="language-text">3,7,11,15,...</code></pre>
+<p>and the defining equation is</p>
+<pre><code class="language-text">p = s(4dn-1) - 4d.</code></pre>
+<p>Equivalently,</p>
+<pre><code class="language-text">p+s = 4d(ns-1).</code></pre>
+<h3>Case A1 — s &gt;= 7</h3>
+<p>We claim directly that</p>
+<pre><code class="language-text">11dn &lt;= p+3.</code></pre>
+<p>Indeed</p>
+<pre><code class="language-text">p+3-11dn
+= dn(4s-11) - s - 4d + 3.</code></pre>
+<p>For <code>s&gt;=7</code> and <code>d,n&gt;=1</code>, the right side is nonnegative. Its smallest possible value occurs at the smallest parameters and is already positive at <code>s=7,d=n=1</code>.</p>
+<p>Hence</p>
+<pre><code class="language-text">K = dn &lt;= (p+3)/11.</code></pre>
+<h3>Case A2 — s = 3</h3>
+<p>Now</p>
+<pre><code class="language-text">p+3 = 4d(3n-1).</code></pre>
+<p>The hard-prime congruences exclude <code>n=1,2,3</code>:</p>
+<ul><li><code>n=1</code> would make <code>p+3</code> divisible by 8, but <code>p==1 (mod 8)</code> gives <code>p+3==4 (mod 8)</code>;</li><li><code>n=2</code> would make <code>p+3</code> divisible by 5, but hard primes are <code>1</code> or <code>4 mod 5</code>, so <code>p+3</code> is <code>4</code> or <code>2 mod 5</code>;</li><li><code>n=3</code> again makes <code>p+3</code> divisible by 8.</li></ul>
+<p>Therefore</p>
+<pre><code class="language-text">n &gt;= 4.</code></pre>
+<p>Using <code>p+3=4d(3n-1)</code>,</p>
+<pre><code class="language-text">K = dn
+  = n(p+3) / (4(3n-1)).</code></pre>
+<p>For <code>n&gt;=4</code>,</p>
+<pre><code class="language-text">n / (4(3n-1)) &lt;= 1/11,</code></pre>
+<p>because this is equivalent to <code>11n &lt;= 12n-4</code>.</p>
+<p>Thus again</p>
+<pre><code class="language-text">K &lt;= (p+3)/11.</code></pre>
+<h3>Sharpness of the Type A coefficient</h3>
+<p>The bound is attained by a hard prime parameter family. For example</p>
+<pre><code class="language-text">p = 1009
+d = 23
+n = 4
+s = 3
+K = 92
+m = 367</code></pre>
+<p>and</p>
+<pre><code class="language-text">p+4d = 1101 = 3*367.</code></pre>
+<p>Hence this is a Type A certificate with</p>
+<pre><code class="language-text">K = 92 = (1009+3)/11.</code></pre>
+<p>The coefficient <code>1/11</code> therefore cannot be improved using only a universal hard-prime parameter ceiling of this form.</p>
+<h2>4. Type B bound</h2>
+<p>Suppose <code>p</code> has a Type B witness. Then</p>
+<pre><code class="language-text">4dn-1 divides p+n.</code></pre>
+<p>Define</p>
+<pre><code class="language-text">s = (p+n)/(4dn-1) &gt;= 1.</code></pre>
+<p>Then</p>
+<pre><code class="language-text">p+n = s(4dn-1)</code></pre>
+<p>or equivalently</p>
+<pre><code class="language-text">p+s = n(4ds-1).</code></pre>
+<h3>Case B1 — s = 1</h3>
+<p>We have</p>
+<pre><code class="language-text">p+1 = n(4d-1).</code></pre>
+<p>The hard-prime skeleton excludes the first two values of <code>d</code>:</p>
+<ul><li><code>d=1</code> gives <code>p == -1 (mod 3)</code>, contradicting <code>p==1 (mod 3)</code>;</li><li><code>d=2</code> gives <code>p == -1 (mod 7)</code>, but hard primes are only <code>1,2,4 mod 7</code>.</li></ul>
+<p>Therefore</p>
+<pre><code class="language-text">d &gt;= 3.</code></pre>
+<p>Since</p>
+<pre><code class="language-text">K = dn = d(p+1)/(4d-1)</code></pre>
+<p>and <code>d/(4d-1)</code> decreases with <code>d</code>, its maximum for <code>d&gt;=3</code> occurs at <code>d=3</code>. Hence</p>
+<pre><code class="language-text">K &lt;= 3(p+1)/11.</code></pre>
+<h3>Case B2 — s &gt;= 2</h3>
+<p>From</p>
+<pre><code class="language-text">p+n = s(4dn-1)</code></pre>
+<p>we obtain</p>
+<pre><code class="language-text">p+n &gt;= 2(4dn-1),</code></pre>
+<p>so</p>
+<pre><code class="language-text">p+2 &gt;= n(8d-1).</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">K = dn &lt;= d(p+2)/(8d-1) &lt;= (p+2)/7.</code></pre>
+<p>For every positive <code>p</code>,</p>
+<pre><code class="language-text">(p+2)/7 &lt;= 3(p+1)/11.</code></pre>
+<p>Thus the same hard-prime Type B ceiling holds in both cases:</p>
+<pre><code class="language-text">K &lt;= 3(p+1)/11.</code></pre>
+<h3>Sharpness of the Type B coefficient</h3>
+<p>The coefficient <code>3/11</code> is attained by hard-prime parameter data. For example</p>
+<pre><code class="language-text">p = 4201
+d = 3
+n = 382
+s = 1
+K = 1146
+m = 4583</code></pre>
+<p>and</p>
+<pre><code class="language-text">p+n = 4583 = m.</code></pre>
+<p>Hence</p>
+<pre><code class="language-text">K = 1146 = 3(4201+1)/11.</code></pre>
+<p>Again, this shows that the universal parameter ceiling is sharp on the hard-prime skeleton.</p>
+<h2>5. Complete finite decision theorem</h2>
+<p>Combining the two bounds gives:</p>
+<h3>Corollary — finite falsification certificate for a fixed hard prime</h3>
+<p>For a Mordell-hard prime <code>p</code>, define</p>
+<pre><code class="language-text">K_complete(p) = floor(3(p+1)/11).</code></pre>
+<p>Run a full Type A/B audit over every layer</p>
+<pre><code class="language-text">1 &lt;= K &lt;= K_complete(p),</code></pre>
+<p>including composite moduli <code>4K-1</code>.</p>
+<p>If no Type A or Type B witness occurs in that finite interval, then no Type A or Type B witness exists for <code>p</code> at all.</p>
+<p>Therefore such a prime would be a genuine counterexample to López&#x27;s Type A/B all-primes conjecture, not merely a bounded model escape.</p>
+<p>This does <strong>not</strong> imply that the same prime would be an Erdős–Straus counterexample. The complete Lane-I/general-first-denominator coordinate remains independent of Type A/B and may still produce an exact Erdős–Straus decomposition.</p>
+<p>That distinction is precisely what the model-escape architecture is intended to test.</p>
+<h2>6. Broader p == 1 mod 24 bound</h2>
+<p>The same argument gives a slightly weaker bound before imposing the full six-class Mordell-hard skeleton.</p>
+<p>For any prime</p>
+<pre><code class="language-text">p == 1 (mod 24),</code></pre>
+<p>one obtains</p>
+<pre><code class="language-text">Type A: K &lt;= (p+3)/10
+Type B: K &lt;= 2(p+1)/7.</code></pre>
+<p>Therefore</p>
+<pre><code class="language-text">K_complete,24(p) = floor(2(p+1)/7)</code></pre>
+<p>is sufficient for a complete Type A/B decision on the entire <code>1 mod 24</code> prime domain.</p>
+<p>The improvement from <code>2/7</code> to <code>3/11</code> on the Mordell-hard skeleton comes from excluding the Type-B extremal case <code>d=2,s=1</code> using the exact hard residue classes modulo 7.</p>
+<h2>7. Consequence for the current CBIS model-escape subsystem</h2>
+<p>The present bounded auditor is epistemically conservative: <code>AB_UNSEEN_THROUGH_K</code> means exactly what it says.</p>
+<p>This theorem permits a second, stronger classification when the requested depth reaches the complete ceiling:</p>
+<pre><code class="language-text">K &gt;= floor(3(p+1)/11)</code></pre>
+<p>for a Mordell-hard prime.</p>
+<p>At that point, if no witness is found, the result is no longer merely</p>
+<pre><code class="language-text">AB_UNSEEN_THROUGH_K.</code></pre>
+<p>It can be certified as</p>
+<pre><code class="language-text">NO_TYPE_A_OR_B_WITNESS.</code></pre>
+<p>That stronger status should remain separate from ES letters and from the W/I/N/L production verdict.</p>
+<h2>8. Reproduction and regression</h2>
+<p>The accompanying verifier checks:</p>
+<ul><li>the exact six hard residue classes and their mod-3, mod-5, mod-7, and mod-8 consequences;</li><li>the excluded extremal Type-A cases;</li><li>the excluded extremal Type-B cases;</li><li>generated Type-A and Type-B parameter families against the proved ceilings;</li><li>the sharp equality examples <code>p=1009</code> and <code>p=4201</code>;</li><li>direct congruence verification of both examples.</li></ul>
+<p>Run:</p>
+<pre><code class="language-sh">python3 research/erdos-straus/verify_lopez_ab_finite_decision_bound.py --json</code></pre>
+<p>The theorem is elementary and range-free. The regression is not the proof; it protects the implementation and the stated constants.</p>
+<p>Erdős–Straus remains open, and López Type A/B remains unrefuted unless an actual prime completes this finite audit with no Type A/B witness.</p>
+        </div>
+      </article>
+    </main>
+  </div>
+  <footer>Free Computation Foundation · Repository is canonical · Free for science.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+name: Erdős–Straus k19 k23 routed bottlenecks
+
+on:
+  pull_request:
+    paths:
+      - "research/erdos-straus/K19-K23-ROUTED-BOTTLENECKS.md"
+      - "research/erdos-straus/classify_k19_k23_routed_bottlenecks.py"
+      - "research/erdos-straus/verify_k19_k23_routed_bottlenecks.py"
+      - ".github/workflows/erdos-straus-k19-k23-routed-bottlenecks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact finite-group classifier
+        run: python3 research/erdos-straus/classify_k19_k23_routed_bottlenecks.py --json
+      - name: Independent direct-factorization regression
+        run: python3 research/erdos-straus/verify_k19_k23_routed_bottlenecks.py --limit 2000000 --json

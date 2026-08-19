@@ -101,12 +101,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/bare-q23-square-lift-refinement.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/bb-kernel.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://freecomputation.org/library/binary-external-cycle-defect.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/es-binary-lane-i-equivalence.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -122,6 +132,36 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/binary-r-divisor-collision.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/branch-aware-character-saturation-closure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/bryan-entanglement-compass.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/bryan-entanglement-cross.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/bec-k27-k35-transition-chain.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/bec-k27-k31-transition-theorem.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/bryan-entanglement-cross-q23-ancestry.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -161,7 +201,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/typeii-candidate-decomposition-framework.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/trap-fiber-bound.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/canonical-q2-typeii-boundary.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -176,12 +226,37 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k11-character-companion-routing.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/class-c-census-k1500.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://freecomputation.org/library/class-c-residual-core.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/class-conditioned-character-annihilation.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/mordell-hard-class-conditioned-seed-law.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k59-class-conditioned-hard-atlas.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/mordell-hard-class-residual-coupling.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -271,7 +346,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k107-corrected-100m-survivor.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/external-nr-cycle-hit-counterexample.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/external-nr-failed-cycle-counterexample.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -401,6 +486,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k31-v2-one-lift-classification.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k31-two-target-quotient.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/p-plus-four-filter.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -426,7 +521,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k27-d-selector-factor-grammar.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/fab-k7-exact-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k27-survivor-automaton.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -437,6 +542,31 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/fab-index6-combined-defect.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k27-phase-intersection-elimination.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k27-survivor-grammar.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k31-survivor-normal-form.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k39-phase-absorption.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k47-one-packet-companion-filter.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -466,7 +596,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k27-two-target-structure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k35-two-target-structure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/survivor-density.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k35-two-branch-survivor-theorem.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -481,7 +626,62 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k27-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k35-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k39-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k51-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k55-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k63-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/k19-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k23-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k31-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k43-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k47-two-target-filter.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k59-two-target-filter.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -491,7 +691,32 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/lopez-ab-record-45894591961.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/exact-state-incoming-repulsion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/exact-state-promotion-closure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/es-square-exponent-lattice-shadow.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/external-q3-binary-census-10m.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/external-q3-eligibility-unbounded.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -536,6 +761,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/lopez-ab-finite-decision-bound.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/strong-es-finite-shift-corridor.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -551,6 +781,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/five-cofactor-support-separation.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/strong-es-q3-q7-q11-sieve.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -562,6 +797,21 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/fab-fixed-k-square-divisor.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/fixed-shift-jacobi-parity.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k47-forced6-hard-reduction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k35-k39-forced-seed-split.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -606,7 +856,32 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/h169-dependency-propagator.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/h169-phase-volume-contraction-through-k55.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/c1-hard-union-shadow-fiber-theorem.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k55-forced2-hard-reduction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k63-forced2-hard-reduction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k59-forced3-hard-reduction.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -621,12 +896,57 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k19-incoming-source-repulsion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k23-incoming-source-repulsion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/es-index-two-two-target-packet.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/exact-depth-gap-theorems.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://freecomputation.org/library/es-square-all-quotient-factor-lift.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/jacobi-saturation-character-extraction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k27-qr-factor-mode-selectors.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k31-mode-2adic-coupling.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k35-3adic-branch-coupling.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k47-phase-absorption.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k7-k23-rigid-support-routes.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -642,6 +962,16 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/es-large-prime-defect-forcing.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k27-later-phase-feedback.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/lopez-ab-census-100b.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -662,6 +992,31 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/mixed-box-obstruction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/mordell-hard-232-coprime-triples.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/mordell-hard-six-companion-residual-wheel.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/multisource-exact-state-promotion-closure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/multisource-exact-state-repulsion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/multisource-qr-saturation.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -691,12 +1046,27 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k47-negative-legendre-corridor-10m.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/fab-type-ii-signed-divisor.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://freecomputation.org/library/odd-prime-shift-asymptotic-rigidity.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/periodic-route-valuation-ladder.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/post-k23-companion-ladder.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -781,6 +1151,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/product-character-constraint-closure.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/cc-kernel-proof.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -796,12 +1171,37 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/recursive-character-promotion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/es-hunt.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://freecomputation.org/library/binary-dyadic-mirror-obstruction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/q13-k23-recursive-branch-elimination.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/q23-blocked-phase-ancestry-audit.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/q23-blocked-phase-geometry-atlas.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/q23-square-lift-phase-sieve.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -836,6 +1236,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/qr-saturating-routed-seeds.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/quadratic-cycle-core.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -852,6 +1257,11 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/quadratic-field-bridge.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/character-routing-reciprocity-barrier.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -891,6 +1301,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/k19-k23-realized-survivor-coupling.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k19-realized-pair-survivor-normal-form.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/reciprocity-defect-quotient.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -906,7 +1326,57 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/recursive-k23-repulsion.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/h169-reduced-dependency-grammar.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/research-proportions.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/route-b-joint-k31-k47-seam.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/route-b-k47-survivor-normal-form.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/route-b-k47-phase-feedback.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/route-conditioned-phase-state.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/route-conditioned-phase-contraction.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k19-k23-routed-bottlenecks.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/k39-routed-jacobi-support.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/routed-residual-gcd-atlas.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -956,7 +1426,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/small-prime-class-character-atlas.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/small-selector-hypothesis.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/prime-divisor-mask-repulsion.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -996,6 +1476,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/lopez-ab-sqrt-complete-audit.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/es-square-squarefree-factor-lift.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1021,6 +1506,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/ten-cofactor-odd-support-separation.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/composite-core.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1042,6 +1532,11 @@
   </url>
   <url>
     <loc>https://freecomputation.org/library/reciprocity-matrix.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/twelve-consecutive-two-target-corridor.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1101,7 +1596,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://freecomputation.org/library/mordell-hard-forced-seed-law.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://freecomputation.org/library/single-active-reduced-escape-theorem.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://freecomputation.org/library/signed-box-trivial-divisor-selectors.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
