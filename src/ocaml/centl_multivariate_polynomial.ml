@@ -17,20 +17,21 @@ type error =
   | Empty_variable
   | Negative_exponent of string * int
   | Exponent_overflow of string
-  | Total_degree_overflow
   | Undefined_zero_power
   | Negative_power of int
   | Duplicate_substitution of string
+
+let total_degree_marker = "<total-degree>"
 
 let error_message = function
   | Empty_variable -> "polynomial variable names must not be empty"
   | Negative_exponent (variable, exponent) ->
       Printf.sprintf "polynomial exponent for %s must be nonnegative, got %d"
         variable exponent
+  | Exponent_overflow variable when String.equal variable total_degree_marker ->
+      "polynomial total degree exceeds the exact integer representation limit"
   | Exponent_overflow variable ->
       "polynomial exponent overflow for variable " ^ variable
-  | Total_degree_overflow ->
-      "polynomial total degree exceeds the exact integer representation limit"
   | Undefined_zero_power -> "zero polynomial to the zero power is undefined"
   | Negative_power exponent ->
       Printf.sprintf
@@ -50,7 +51,8 @@ let validate_total_degree powers =
   let rec total degree = function
     | [] -> Ok degree
     | (_, exponent) :: rest ->
-        if exponent > max_int - degree then Error Total_degree_overflow
+        if exponent > max_int - degree then
+          Error (Exponent_overflow total_degree_marker)
         else total (degree + exponent) rest
   in
   let* _ = total 0 powers in
