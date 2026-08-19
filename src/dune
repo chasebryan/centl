@@ -41,6 +41,7 @@
   Centl_matrix_protocol
   Centl_multivariate_polynomial
   Centl_multivariate_polynomial_protocol
+  Centl_polynomial_content
   Centl_real_algebraic
   Centl_real_algebraic_protocol
   Centl_math_gateway
