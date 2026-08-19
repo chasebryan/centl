@@ -1,6 +1,8 @@
 type limits = {
   max_source_bytes : int;
   max_exact_bits : int;
+  max_power_exponent : int;
+  max_work : int;
   max_result_bytes : int;
 }
 
@@ -8,8 +10,12 @@ let default_limits =
   {
     max_source_bytes = 32_768;
     max_exact_bits = 1_000_000;
+    max_power_exponent = 100_000;
+    max_work = 100_000;
     max_result_bytes = 1_048_576;
   }
+
+let never_cancelled () = false
 
 let rational_json value =
   let numerator, denominator = Centl_complex_rational.q_pair value in
@@ -106,17 +112,32 @@ let error_of_complex = function
   | Centl_complex_rational.Unsupported_expression description ->
       ( "unsupported_exact_complex_expression",
         "unsupported exact complex-rational expression: " ^ description )
+  | Centl_complex_rational.Resource_limit message -> ("resource_limit", message)
+  | Centl_complex_rational.Cancelled ->
+      ("cancelled", "complex-rational evaluation was cancelled")
 
-let evaluate_source ?(limits = default_limits) source =
+let evaluate_source ?(limits = default_limits) ?(cancelled = never_cancelled)
+    source =
   if String.length source > limits.max_source_bytes then
     failure "resource_limit" "the source exceeds the exact-complex byte limit"
+  else if cancelled () then
+    failure "cancelled" "complex-rational evaluation was cancelled"
   else
     match Centl_parser.parse_located source with
     | Error parse_error ->
         failure ~position:parse_error.position "syntax_error" parse_error.message
     | Ok located ->
+        let evaluation_limits =
+          Centl_complex_rational.
+            {
+              max_exact_bits = limits.max_exact_bits;
+              max_power_exponent = limits.max_power_exponent;
+              max_work = limits.max_work;
+            }
+        in
         begin match
-          Centl_complex_rational.evaluate_expression located.expression
+          Centl_complex_rational.evaluate_expression ~limits:evaluation_limits
+            ~cancelled located.expression
         with
         | None ->
             failure "not_exact_complex_request"
@@ -157,7 +178,7 @@ let with_id id = function
       end
   | json -> json
 
-let handle_json ?(limits = default_limits) = function
+let handle_json ?(limits = default_limits) ?(cancelled = never_cancelled) = function
   | `Assoc fields ->
       begin match request_id fields with
       | Error message -> failure "invalid_request" message
@@ -177,7 +198,7 @@ let handle_json ?(limits = default_limits) = function
                   List.assoc_opt "expression" fields )
               with
               | Some (`Int 1), Some (`String expression) ->
-                  respond (evaluate_source ~limits expression)
+                  respond (evaluate_source ~limits ~cancelled expression)
               | Some (`Int version), _ when version <> 1 ->
                   respond (failure "invalid_request" "unsupported protocol version")
               | _, None -> respond (failure "invalid_request" "missing expression")
