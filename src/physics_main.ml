@@ -1,4 +1,5 @@
 open Centl_physics
+open Centl_physics_cherenkov
 
 let usage () =
   Printf.eprintf
@@ -6,6 +7,7 @@ let usage () =
     \  centl-physics units\n\
     \  centl-physics convert VALUE FROM_UNIT TO_UNIT\n\
     \  centl-physics constant SYMBOL\n\
+    \  centl-physics cherenkov REFRACTIVE_INDEX SPEED_MPS\n\
     \  centl-physics gravity MASS_KG X,Y,Z_M VX,VY,VZ_MPS GX,GY,GZ_MPS2 DT_S \
      STEPS\n\
     \  centl-physics --serve\n";
@@ -49,6 +51,36 @@ let command_constant symbol =
   Printf.printf "provenance=%s\n" c.provenance;
   Printf.printf "exact=%s\n" (if c.exact_value then "true" else "false")
 
+let command_cherenkov refractive_index_text speed_text =
+  let certificate =
+    certify_cherenkov
+      ~refractive_index:(parse_q "refractive index" refractive_index_text)
+      ~speed:(quantity (parse_q "speed" speed_text) "m/s")
+  in
+  Printf.printf "status=%s\n"
+    (cherenkov_status_to_string certificate.status);
+  Printf.printf "emits=%s\n"
+    (if cherenkov_emits certificate then "true" else "false");
+  Printf.printf "refractive_index=%s\n"
+    (Q.to_string certificate.refractive_index);
+  Printf.printf "speed=%s m/s\n"
+    (Q.to_string (convert certificate.particle_speed "m/s"));
+  Printf.printf "threshold_speed=%s m/s\n"
+    (Q.to_string (convert certificate.threshold_speed "m/s"));
+  Printf.printf "beta=%s\n" (Q.to_string certificate.beta);
+  Printf.printf "threshold_beta=%s\n" (Q.to_string certificate.threshold_beta);
+  Printf.printf "beta_n=%s\n"
+    (Q.to_string certificate.beta_times_refractive_index);
+  begin match certificate.cone_angle with
+  | None ->
+      Printf.printf "cos_theta=none\n";
+      Printf.printf "theta=none\n"
+  | Some angle ->
+      Printf.printf "cos_theta=%s\n" (Q.to_string angle.cosine);
+      Printf.printf "theta=%s rad\n" angle.radians_symbolic
+  end;
+  Printf.printf "exact_trigonometric_relation=true\n"
+
 let command_gravity mass_text position_text velocity_text gravity_text dt_text
     steps_text =
   let px, py, pz = parse_triplet "position" position_text in
@@ -90,6 +122,8 @@ let () =
     | [ _; "convert"; value; from_unit; to_unit ] ->
         command_convert value from_unit to_unit
     | [ _; "constant"; symbol ] -> command_constant symbol
+    | [ _; "cherenkov"; refractive_index; speed ] ->
+        command_cherenkov refractive_index speed
     | [ _; "gravity"; mass; position; velocity; gravity; dt; steps ] ->
         command_gravity mass position velocity gravity dt steps
     | [ _; "--serve" ] -> command_serve ()
