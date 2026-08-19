@@ -70,8 +70,11 @@ CENTL does the following:
 4. Scale by the exact source coefficient `a`.
 5. Add the expanded term to the canonical result.
 
-Exact-bit and term-count guards are checked after intermediate polynomial
-products and after term accumulation.
+Sparse multiplication is performed pair by pair. Exact-bit and term-count
+guards run after every pairwise monomial accumulation, during exponentiation by
+squaring, and after source-term accumulation. An explosive product is therefore
+refused while it is growing rather than after a full oversized intermediate has
+already been constructed.
 
 ## Refusal and resource semantics
 
