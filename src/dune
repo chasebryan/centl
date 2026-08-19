@@ -35,6 +35,7 @@
  (wrapped false)
  (modules
   Centl_parser
+  Centl_real_algebraic
   Centl_iteration
   Centl_syntax
   Centl_history
