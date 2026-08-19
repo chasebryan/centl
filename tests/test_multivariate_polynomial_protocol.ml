@@ -165,6 +165,8 @@ let test_coefficient_array () =
   in
   Alcotest.(check bool) "success" true (bool "ok" response);
   Alcotest.(check string) "id" "coeff-array" (string "id" response);
+  Alcotest.(check string) "provenance method" "coefficient_array"
+    (string "method" (assoc "provenance" response));
   let result = assoc "result" response in
   Alcotest.(check string) "kind" "polynomial_coefficient_array"
     (string "kind" result);
