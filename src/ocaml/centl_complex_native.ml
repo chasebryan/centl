@@ -29,17 +29,20 @@ let rec contains_complex_semantics = function
       || contains_complex_semantics left
       || contains_complex_semantics right
 
-let evaluate expression =
+let evaluate ?(limits = Centl_complex_rational.default_evaluation_limits)
+    ?(cancelled = Centl_complex_rational.never_cancelled) expression =
   if not (contains_complex_semantics expression) then Not_complex
   else
-    match Centl_complex_rational.evaluate_expression expression with
-    | Ok value -> Exact value
-    | Error error -> Refused error
+    match Centl_complex_rational.evaluate_expression ~limits ~cancelled expression with
+    | None -> Not_complex
+    | Some (Ok value) -> Exact value
+    | Some (Error error) -> Refused error
 
-let evaluate_source source =
+let evaluate_source ?(limits = Centl_complex_rational.default_evaluation_limits)
+    ?(cancelled = Centl_complex_rational.never_cancelled) source =
   match Centl_parser.parse source with
   | Error error -> Error (`Parse error)
-  | Ok expression -> Ok (evaluate expression)
+  | Ok expression -> Ok (evaluate ~limits ~cancelled expression)
 
 let classification = function
   | Not_complex -> "not_complex"
