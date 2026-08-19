@@ -150,7 +150,7 @@ jobs:
           cat SHA256SUMS
 
       - name: Upload standalone research artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cbx-standalone-fedora-X${{ env.HI }}-K${{ env.I_MAX }}-${{ env.SOURCE_SHA }}
           path: /tmp/cbx-standalone/
