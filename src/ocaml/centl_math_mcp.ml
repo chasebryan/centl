@@ -208,9 +208,7 @@ let algebraic_request_schema =
 let input_schema =
   one_of
     [
-      strict_object
-        [ ("domain", const_string "capabilities") ]
-        [ "domain" ];
+      strict_object [ ("domain", const_string "capabilities") ] [ "domain" ];
       strict_object
         [
           ("domain", const_string "complex_rational");
@@ -298,19 +296,15 @@ let read_only_annotations =
       ("openWorldHint", `Bool false);
     ]
 
+let tool_description =
+  "Use CENTL's canonical exact-first P0 mathematics gateway. Compute exact complex-rational arithmetic, exact dense rational matrix and linear-system operations, canonical sparse multivariate polynomial operations over Q, or Sturm-certified real algebraic root isolation. Unsupported inputs and resource boundaries remain explicit; the tool never silently falls back from exact mathematics to floating point."
+
 let tool () =
   `Assoc
     [
       ("name", `String "centl_math");
       ("title", `String "Compute with CENTL Mathematics");
-      ( "description",
-        `String
-          "Use CENTL's canonical exact-first P0 mathematics gateway. Compute \
-           exact complex-rational arithmetic, exact dense rational matrix and \
-           linear-system operations, canonical sparse multivariate polynomial \
-           operations over Q, or Sturm-certified real algebraic root isolation. \
-           Unsupported inputs and resource boundaries remain explicit; the tool \
-           never silently falls back from exact mathematics to floating point." );
+      ("description", `String tool_description);
       ("inputSchema", input_schema);
       ("outputSchema", output_schema);
       ("annotations", read_only_annotations);
@@ -332,7 +326,10 @@ let request_of_arguments arguments =
       | None ->
           if String.equal domain "capabilities" then
             begin match List.assoc_opt "request" arguments with
-            | None -> Ok (`Assoc [ ("version", `Int 1); ("domain", `String domain) ])
+            | None ->
+                Ok
+                  (`Assoc
+                     [ ("version", `Int 1); ("domain", `String domain) ])
             | Some _ -> Error "centl_math capabilities does not accept request"
             end
           else if
@@ -363,7 +360,9 @@ let request_of_arguments arguments =
   | None -> Error "centl_math requires domain"
 
 let validate_arguments arguments =
-  match request_of_arguments arguments with Ok _ -> Ok () | Error _ as error -> error
+  match request_of_arguments arguments with
+  | Ok _ -> Ok ()
+  | Error _ as error -> error
 
 let call ?(cancelled = Centl_engine.never_cancelled) arguments =
   match request_of_arguments arguments with
