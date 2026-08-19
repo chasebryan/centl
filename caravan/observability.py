@@ -64,7 +64,7 @@ class ObservabilityStore:
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
-        db = sqlite3.connect(self.database)
+        db = sqlite3.connect(self.database, timeout=2.0)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA foreign_keys = ON")
         return db
@@ -98,27 +98,36 @@ class ObservabilityStore:
                 ((name,) for name in COUNTER_NAMES),
             )
 
-    def increment(self, name: str) -> None:
+    def increment(self, name: str) -> bool:
+        """Increment one aggregate counter without breaking a carrier request on DB contention."""
+
         if name not in COUNTER_NAMES:
             raise ValueError(f"unsupported CARAVAN observability counter: {name}")
-        with self._connect() as db:
-            db.execute(
-                "UPDATE caravan_observability_counters SET value = value + 1 WHERE name = ?",
-                (name,),
-            )
+        try:
+            with self._connect() as db:
+                db.execute(
+                    "UPDATE caravan_observability_counters SET value = value + 1 WHERE name = ?",
+                    (name,),
+                )
+        except sqlite3.Error:
+            return False
+        return True
 
     def record_first_heartbeat(self, node_id: str, *, now: float | None = None) -> bool:
         if not node_id:
             raise ValueError("node_id is required")
         timestamp = time.time() if now is None else float(now)
-        with self._connect() as db:
-            cursor = db.execute(
-                """INSERT OR IGNORE INTO caravan_observability_milestones(
-                       node_id, first_heartbeat_at
-                   ) VALUES (?, ?)""",
-                (node_id, timestamp),
-            )
-            return cursor.rowcount == 1
+        try:
+            with self._connect() as db:
+                cursor = db.execute(
+                    """INSERT OR IGNORE INTO caravan_observability_milestones(
+                           node_id, first_heartbeat_at
+                       ) VALUES (?, ?)""",
+                    (node_id, timestamp),
+                )
+                return cursor.rowcount == 1
+        except sqlite3.Error:
+            return False
 
     def snapshot(
         self,
