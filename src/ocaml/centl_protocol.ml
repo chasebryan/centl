@@ -231,7 +231,6 @@ let resolution_statuses =
 
 let describe state id =
   let evaluation = state.limits.evaluation in
-  let gateway_limits = math_gateway_limits state in
   response state ?id
     ~provenance:(control_provenance "describe")
     (`Assoc
@@ -262,8 +261,6 @@ let describe state id =
                       ]) );
                ("resolution_statuses", resolution_statuses);
                ("mathematical_domains", mathematical_domains);
-               ( "p0_math_gateway",
-                 Centl_math_gateway.capabilities gateway_limits );
                ( "verification_scopes",
                  `List
                    [
