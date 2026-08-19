@@ -79,14 +79,32 @@ let charge_linear state amount =
 
 let multiply_bounded state left right =
   let ( let* ) result next = Result.bind result next in
+  let left_terms = bindings left in
+  let right_terms = bindings right in
   let* () = checkpoint state in
-  let* () =
-    charge_product state (max 1 (term_count left)) (max 1 (term_count right))
+  let* () = charge_product state (List.length left_terms) (List.length right_terms) in
+  let rec outer result = function
+    | [] -> Ok result
+    | (left_monomial, left_coefficient) :: rest ->
+        let* () = checkpoint state in
+        let rec inner result = function
+          | [] -> Ok result
+          | (right_monomial, right_coefficient) :: right_rest ->
+              let* () = checkpoint state in
+              let* monomial =
+                match monomial_multiply left_monomial right_monomial with
+                | Ok monomial -> Ok monomial
+                | Error error -> Error (Polynomial_error error)
+              in
+              let coefficient = Q.mul left_coefficient right_coefficient in
+              let result = add_term coefficient monomial result in
+              let* result = guard state.limits result in
+              inner result right_rest
+        in
+        let* result = inner result right_terms in
+        outer result rest
   in
-  match multiply ~cancelled:state.cancelled left right with
-  | Error Centl_multivariate_polynomial.Cancelled -> Error Cancelled
-  | Error error -> Error (Polynomial_error error)
-  | Ok result -> guard state.limits result
+  outer zero left_terms
 
 let power_bounded state variable polynomial exponent =
   let ( let* ) result next = Result.bind result next in
