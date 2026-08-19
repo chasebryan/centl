@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Show Rust toolchain
         run: rustc --version && cargo --version
       - name: Test CENTL web

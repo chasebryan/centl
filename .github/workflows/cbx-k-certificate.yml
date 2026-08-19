@@ -39,7 +39,7 @@ jobs:
       - name: Install Fedora research toolchain
         run: dnf -y install gcc make python3 git tar gzip coreutils
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build reference Lane-I engines
         run: make -C research/erdos-straus/cbx.kernel cbx-forward-i cbx-shift-i

@@ -22,7 +22,7 @@ jobs:
       - name: Install Fedora Python
         run: dnf -y install python3
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Verify corrected survivor and decomposition
         run: |

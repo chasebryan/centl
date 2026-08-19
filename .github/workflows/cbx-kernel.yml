@@ -34,7 +34,7 @@ jobs:
       - name: Install Fedora build/runtime tools
         run: dnf -y install gcc make python3 git tar gzip
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build CBX on Fedora
         run: make -C research/erdos-straus/cbx.kernel clean all
@@ -215,7 +215,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build CBX
         run: make -C research/erdos-straus/cbx.kernel clean all
