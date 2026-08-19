@@ -166,6 +166,37 @@ let test_work_limit () =
   Alcotest.(check string) "code" "resource_limit"
     (string "code" (assoc "error" response))
 
+let test_primitive_output_limit () =
+  let content =
+    Centl_polynomial_content.{ default_limits with max_exact_bits = 40 }
+  in
+  let limits =
+    Centl_polynomial_content_protocol.{ default_limits with content }
+  in
+  let growing =
+    polynomial
+      [
+        term "1/101" [ power "x" 1 ];
+        term "1/103" [ power "y" 1 ];
+        term "1/107" [ power "z" 1 ];
+      ]
+  in
+  let response =
+    Centl_polynomial_content_protocol.handle_json ~limits
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("action", `String "decompose");
+           ("polynomial", growing);
+         ])
+  in
+  Alcotest.(check bool) "failure" false (bool "ok" response);
+  Alcotest.(check string) "code" "resource_limit"
+    (string "code" (assoc "error" response));
+  Alcotest.(check string) "message"
+    "polynomial content primitive part exceeds the exact-bit limit"
+    (string "message" (assoc "error" response))
+
 let test_cancellation () =
   let response =
     Centl_polynomial_content_protocol.handle_json
@@ -195,6 +226,8 @@ let () =
           Alcotest.test_case "zero" `Quick test_zero_decomposition;
           Alcotest.test_case "strict request" `Quick test_strict_request;
           Alcotest.test_case "work limit" `Quick test_work_limit;
+          Alcotest.test_case "primitive output limit" `Quick
+            test_primitive_output_limit;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
         ] );
     ]
