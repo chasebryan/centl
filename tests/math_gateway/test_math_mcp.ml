@@ -72,6 +72,18 @@ let matrix rows =
        (fun row -> `List (List.map (fun value -> `String value) row))
        rows)
 
+let power variable exponent =
+  `Assoc [ ("variable", `String variable); ("exponent", `Int exponent) ]
+
+let term coefficient powers =
+  `Assoc
+    [
+      ("coefficient", `String coefficient);
+      ("powers", `List powers);
+    ]
+
+let polynomial terms = `Assoc [ ("terms", `List terms) ]
+
 let find_tool name tools =
   List.find_opt
     (function
@@ -164,6 +176,53 @@ let test_exact_complex_call () =
   Alcotest.(check string) "imaginary denominator" "5"
     (string "denominator" (assoc "imaginary" value))
 
+let test_polynomial_coefficient_array_call () =
+  let state = Centl_mcp.create () in
+  initialize state;
+  let p =
+    polynomial
+      [
+        term "3" [];
+        term "11" [ power "y" 1 ];
+        term "-2" [ power "x" 1 ];
+        term "5/7" [ power "x" 2; power "y" 1 ];
+      ]
+  in
+  let response =
+    tool_call state 2
+      [
+        ("domain", `String "multivariate_polynomial");
+        ( "request",
+          `Assoc
+            [
+              ("action", `String "coefficient_array");
+              ("polynomial", p);
+            ] );
+      ]
+  in
+  Alcotest.(check bool) "tool success" false (tool_is_error response);
+  let protocol = structured response in
+  Alcotest.(check string) "domain" "multivariate_polynomial"
+    (string "domain" protocol);
+  let result = assoc "result" protocol in
+  Alcotest.(check string) "kind" "polynomial_coefficient_array"
+    (string "kind" result);
+  begin match assoc "variables" result with
+  | `List [ `String "x"; `String "y" ] -> ()
+  | _ -> Alcotest.fail "unexpected coefficient-array variables"
+  end;
+  begin match assoc "shape" result with
+  | `List [ `Int 3; `Int 2 ] -> ()
+  | _ -> Alcotest.fail "unexpected coefficient-array shape"
+  end;
+  begin match assoc "coefficients" result with
+  | `List coefficients ->
+      Alcotest.(check (list string)) "numerators"
+        [ "3"; "11"; "-2"; "0"; "0"; "5" ]
+        (List.map (fun coefficient -> string "numerator" coefficient) coefficients)
+  | _ -> Alcotest.fail "coefficient array must be a list"
+  end
+
 let test_strict_arguments () =
   let state = Centl_mcp.create () in
   initialize state;
@@ -252,6 +311,8 @@ let () =
             test_discovery_pagination;
           Alcotest.test_case "matrix" `Quick test_exact_matrix_call;
           Alcotest.test_case "complex" `Quick test_exact_complex_call;
+          Alcotest.test_case "polynomial coefficient array" `Quick
+            test_polynomial_coefficient_array_call;
           Alcotest.test_case "strict arguments" `Quick test_strict_arguments;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
           Alcotest.test_case "deep complex cancellation" `Quick
