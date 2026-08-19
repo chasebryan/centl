@@ -36,6 +36,7 @@
  (modules
   Centl_parser
   Centl_multivariate_polynomial
+  Centl_multivariate_polynomial_protocol
   Centl_iteration
   Centl_syntax
   Centl_history
