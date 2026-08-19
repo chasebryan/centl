@@ -107,7 +107,8 @@ let cancellable_request_id = function
         (List.assoc_opt "version" fields, operation fields, request_id fields)
       with
       | Some (`Int 1), Ok operation, Ok (Some id)
-        when List.mem operation [ "evaluate"; "compute"; "define"; "verify" ] ->
+        when List.mem operation
+               [ "evaluate"; "compute"; "define"; "verify"; "math" ] ->
           Some id
       | _ -> None
       end
@@ -127,6 +128,58 @@ let cancellation_target_of_json = function
 let request_limits state fields =
   Centl_engine.requested_evaluation_limits ~ceiling:state.limits.evaluation
     fields
+
+let math_gateway_limits state =
+  let evaluation = state.limits.evaluation in
+  let result_bytes = evaluation.max_result_bytes in
+  let complex =
+    Centl_complex_rational_protocol.
+      {
+        default_limits with
+        max_source_bytes =
+          min default_limits.max_source_bytes evaluation.max_source_bytes;
+        max_exact_bits =
+          min default_limits.max_exact_bits evaluation.max_exact_bits;
+        max_result_bytes = min default_limits.max_result_bytes result_bytes;
+      }
+  in
+  let matrix =
+    Centl_matrix_protocol.
+      {
+        default_limits with
+        max_exact_bits =
+          min default_limits.max_exact_bits evaluation.max_exact_bits;
+        max_result_bytes = min default_limits.max_result_bytes result_bytes;
+      }
+  in
+  let polynomial =
+    Centl_multivariate_polynomial_protocol.
+      {
+        default_limits with
+        max_exact_bits =
+          min default_limits.max_exact_bits evaluation.max_exact_bits;
+        max_result_bytes = min default_limits.max_result_bytes result_bytes;
+      }
+  in
+  let algebraic =
+    Centl_real_algebraic_protocol.
+      {
+        default_limits with
+        max_coefficient_bits =
+          min default_limits.max_coefficient_bits evaluation.max_exact_bits;
+        max_endpoint_bits =
+          min default_limits.max_endpoint_bits evaluation.max_exact_bits;
+        max_result_bytes = min default_limits.max_result_bytes result_bytes;
+      }
+  in
+  Centl_math_gateway.
+    {
+      complex;
+      matrix;
+      polynomial;
+      algebraic;
+      max_result_bytes = result_bytes;
+    }
 
 let session_result state id evaluation =
   Centl_engine.json_of_detailed_session_evaluation evaluation
@@ -154,6 +207,14 @@ let mathematical_domains =
         [ "solve(2*x + 3 = 11, x)"; "solve(x^2 = 2, x)" ];
       domain "substitute" Centl_engine.substitution_domain
         [ "substitute(x^2 + 1, x = 3)" ];
+      domain "math"
+        "canonical exact-first P0 mathematics gateway"
+        [
+          "domain=complex_rational";
+          "domain=matrix";
+          "domain=multivariate_polynomial";
+          "domain=real_algebraic";
+        ];
     ]
 
 let resolution_statuses =
@@ -171,6 +232,7 @@ let resolution_statuses =
 
 let describe state id =
   let evaluation = state.limits.evaluation in
+  let gateway_limits = math_gateway_limits state in
   response state ?id
     ~provenance:(control_provenance "describe")
     (`Assoc
@@ -191,6 +253,7 @@ let describe state id =
                         "define";
                         "evaluate";
                         "verify";
+                        "math";
                         "cancel";
                         "reset";
                         "describe";
@@ -200,6 +263,8 @@ let describe state id =
                       ]) );
                ("resolution_statuses", resolution_statuses);
                ("mathematical_domains", mathematical_domains);
+               ( "p0_math_gateway",
+                 Centl_math_gateway.capabilities gateway_limits );
                ( "verification_scopes",
                  `List
                    [
@@ -383,6 +448,27 @@ let evaluate ?(cancelled = Centl_engine.never_cancelled)
   | None, _ -> invalid state ?id "missing expression"
   | Some _, _ -> invalid state ?id "expression must be a string"
 
+let math ?(cancelled = Centl_engine.never_cancelled) state id fields =
+  let allowed = [ "version"; "id"; "op"; "domain"; "request" ] in
+  match List.find_opt (fun (name, _) -> not (List.mem name allowed)) fields with
+  | Some (name, _) -> invalid state ?id ("unknown field " ^ name)
+  | None ->
+      begin match List.assoc_opt "domain" fields with
+      | None -> invalid state ?id "math requires a domain"
+      | Some (`String domain) ->
+          let gateway_fields =
+            [ ("version", `Int 1); ("domain", `String domain) ]
+            @
+            match List.assoc_opt "request" fields with
+            | None -> []
+            | Some request -> [ ("request", request) ]
+          in
+          Centl_math_gateway.handle_json ~limits:(math_gateway_limits state)
+            ~cancelled (`Assoc gateway_fields)
+          |> response state ?id
+      | Some _ -> invalid state ?id "math domain must be a string"
+      end
+
 let reset state id fields =
   if Option.is_some (List.assoc_opt "expression" fields) then
     invalid state ?id "reset does not accept an expression"
@@ -428,6 +514,7 @@ let handle_json ?(cancelled = Centl_engine.never_cancelled) state = function
               | Ok "define" ->
                   evaluate ~cancelled ~intent:Centl_engine.Define_only state id
                     fields
+              | Ok "math" -> math ~cancelled state id fields
               | Ok "cancel" -> cancel state id fields
               | Ok "reset" -> reset state id fields
               | Ok "describe" -> describe state id
