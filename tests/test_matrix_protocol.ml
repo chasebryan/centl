@@ -34,6 +34,25 @@ let vector values = `List (List.map rational values)
 let request fields =
   Centl_matrix_protocol.handle_json (`Assoc (("version", `Int 1) :: fields))
 
+let gateway ?id domain request_fields =
+  let id_fields = match id with None -> [] | Some id -> [ ("id", id) ] in
+  Centl_math_gateway.handle_json
+    (`Assoc
+       ([ ("version", `Int 1) ] @ id_fields
+       @ [ ("domain", `String domain); ("request", `Assoc request_fields) ]))
+
+let polynomial_power variable exponent =
+  `Assoc [ ("variable", `String variable); ("exponent", `Int exponent) ]
+
+let polynomial_term coefficient powers =
+  `Assoc
+    [
+      ("coefficient", `String coefficient);
+      ("powers", `List powers);
+    ]
+
+let polynomial terms = `Assoc [ ("terms", `List terms) ]
+
 let test_capabilities () =
   let response = request [ ("action", `String "capabilities") ] in
   Alcotest.(check bool) "success" true (bool "ok" response);
@@ -219,6 +238,119 @@ let test_cancellation () =
   Alcotest.(check string) "cancelled code" "cancelled"
     (string "code" (assoc "error" response))
 
+let test_math_gateway_capabilities () =
+  let response =
+    Centl_math_gateway.handle_json
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("id", `String "caps");
+           ("domain", `String "capabilities");
+         ])
+  in
+  Alcotest.(check bool) "gateway success" true (bool "ok" response);
+  Alcotest.(check string) "gateway id" "caps" (string "id" response);
+  Alcotest.(check string) "gateway domain" "capabilities"
+    (string "domain" response);
+  Alcotest.(check string) "gateway kind" "centl_math_capabilities"
+    (string "kind" (assoc "result" response))
+
+let test_math_gateway_domains () =
+  let complex =
+    gateway ~id:(`String "z") "complex_rational"
+      [
+        ( "expression",
+          `String
+            "complex(1/2, 2/3) + complex(1/2, -2/3)" );
+      ]
+  in
+  Alcotest.(check bool) "complex gateway success" true (bool "ok" complex);
+  Alcotest.(check string) "complex domain" "complex_rational"
+    (string "domain" complex);
+  let complex_value = assoc "value" complex in
+  Alcotest.(check string) "complex real" "1"
+    (string "numerator" (assoc "real" complex_value));
+  Alcotest.(check string) "complex imag" "0"
+    (string "numerator" (assoc "imaginary" complex_value));
+  let matrix_response =
+    gateway "matrix"
+      [
+        ("action", `String "determinant");
+        ("matrix", matrix [ [ "1"; "2" ]; [ "3"; "4" ] ]);
+      ]
+  in
+  Alcotest.(check bool) "matrix gateway success" true
+    (bool "ok" matrix_response);
+  Alcotest.(check string) "matrix domain" "matrix"
+    (string "domain" matrix_response);
+  Alcotest.(check string) "matrix determinant" "-2"
+    (string "numerator" (assoc "result" matrix_response));
+  let p =
+    polynomial
+      [
+        polynomial_term "1"
+          [ polynomial_power "x" 2; polynomial_power "y" 1 ];
+      ]
+  in
+  let polynomial_response =
+    gateway "multivariate_polynomial"
+      [
+        ("action", `String "total_degree");
+        ("polynomial", p);
+      ]
+  in
+  Alcotest.(check bool) "polynomial gateway success" true
+    (bool "ok" polynomial_response);
+  Alcotest.(check int) "polynomial degree" 3
+    (int "degree" (assoc "result" polynomial_response));
+  let algebraic_response =
+    gateway "real_algebraic"
+      [
+        ("action", `String "count_roots");
+        ("polynomial", `List [ `String "-2"; `String "0"; `String "1" ]);
+        ("lower", `String "1");
+        ("upper", `String "2");
+      ]
+  in
+  Alcotest.(check bool) "algebraic gateway success" true
+    (bool "ok" algebraic_response);
+  Alcotest.(check int) "algebraic root count" 1
+    (int "count" (assoc "result" algebraic_response))
+
+let test_math_gateway_strictness_and_cancellation () =
+  let nested_version =
+    Centl_math_gateway.handle_json
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("domain", `String "matrix");
+           ( "request",
+             `Assoc
+               [
+                 ("version", `Int 1);
+                 ("action", `String "rank");
+                 ("matrix", matrix [ [ "1" ] ]);
+               ] );
+         ])
+  in
+  Alcotest.(check bool) "nested version refused" false
+    (bool "ok" nested_version);
+  Alcotest.(check string) "nested version code" "invalid_request"
+    (string "code" (assoc "error" nested_version));
+  let cancelled =
+    Centl_math_gateway.handle_json ~cancelled:(fun () -> true)
+      (`Assoc
+         [
+           ("version", `Int 1);
+           ("domain", `String "complex_rational");
+           ( "request",
+             `Assoc [ ("expression", `String "complex(1, 2)") ] );
+         ])
+  in
+  Alcotest.(check bool) "gateway cancelled" false (bool "ok" cancelled);
+  Alcotest.(check string) "gateway cancel code" "cancelled"
+    (string "code" (assoc "error" cancelled))
+
 let () =
   Alcotest.run "centl exact rational matrix protocol"
     [
@@ -233,5 +365,11 @@ let () =
           Alcotest.test_case "output bit growth" `Quick
             test_output_bit_growth_limit;
           Alcotest.test_case "cancellation" `Quick test_cancellation;
+          Alcotest.test_case "math gateway capabilities" `Quick
+            test_math_gateway_capabilities;
+          Alcotest.test_case "math gateway domains" `Quick
+            test_math_gateway_domains;
+          Alcotest.test_case "math gateway strictness" `Quick
+            test_math_gateway_strictness_and_cancellation;
         ] );
     ]
