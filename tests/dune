@@ -24,6 +24,17 @@
  (modules test_multivariate_polynomial)
  (libraries centl_lib alcotest zarith))
 
+(executable
+ (name multivariate_probe)
+ (modules multivariate_probe)
+ (libraries centl_lib zarith))
+
+(rule
+ (alias runtest)
+ (deps test_multivariate_polynomial_differential.py multivariate_probe.exe)
+ (action
+  (run python3 %{dep:test_multivariate_polynomial_differential.py} %{dep:multivariate_probe.exe})))
+
 (test
  (name test_history)
  (modules test_history)
