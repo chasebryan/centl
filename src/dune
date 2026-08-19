@@ -127,6 +127,7 @@
   Centl_sci_kernel
   Centl_sci_app
   Centl_physics
+  Centl_physics_cherenkov
   Centl_physics_collision
   Centl_physics_world
   Centl_physics_contact_solver
@@ -135,6 +136,7 @@
   Centl_physics_protocol
   Centl_physics_world_json
   Centl_physics_linear_contact_json
+  Centl_physics_cherenkov_json
   Centl_physics_jsonl
   Centl_physics_capabilities
   Centl_physics_collision_json
@@ -142,6 +144,7 @@
   Centl_physics_mcp_output
   Centl_physics_contact_mcp_output
   Centl_physics_linear_contact_mcp_output
+  Centl_physics_cherenkov_mcp_output
   Centl_physics_mcp
   Centl_mcp_base
   Centl_mcp)
