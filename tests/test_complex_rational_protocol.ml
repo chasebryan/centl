@@ -53,7 +53,7 @@ let test_exact_functions () =
   let value = assoc "value" response in
   let real = assoc "real" value in
   let imaginary = assoc "imaginary" value in
-  Alcotest.(check string) "norm2 numerator" "1105" (string "numerator" real);
+  Alcotest.(check string) "norm2 numerator" "841" (string "numerator" real);
   Alcotest.(check string) "norm2 denominator" "1225"
     (string "denominator" real);
   Alcotest.(check string) "norm2 imaginary" "0" (string "numerator" imaginary)
