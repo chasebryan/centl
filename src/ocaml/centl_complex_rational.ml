@@ -6,6 +6,23 @@ type error =
   | Undefined_zero_power
   | Non_rational_component of string
   | Unsupported_expression of string
+  | Resource_limit of string
+  | Cancelled
+
+type evaluation_limits = {
+  max_exact_bits : int;
+  max_power_exponent : int;
+  max_work : int;
+}
+
+let default_evaluation_limits =
+  {
+    max_exact_bits = 1_000_000;
+    max_power_exponent = 100_000;
+    max_work = 100_000;
+  }
+
+let never_cancelled () = false
 
 let make real imaginary = { real; imaginary }
 let zero = make Q.zero Q.zero
@@ -44,24 +61,33 @@ let div a b =
   | Error _ as error -> error
   | Ok inverse -> Ok (mul a inverse)
 
-let rec pow_nonnegative base exponent accumulator =
-  if Z.equal exponent Z.zero then accumulator
+let rec pow_nonnegative ~checkpoint base exponent accumulator =
+  let ( let* ) result next = Result.bind result next in
+  let* () = checkpoint () in
+  if Z.equal exponent Z.zero then Ok accumulator
   else
     let accumulator =
       if Z.testbit exponent 0 then mul accumulator base else accumulator
     in
     let exponent = Z.shift_right exponent 1 in
-    if Z.equal exponent Z.zero then accumulator
-    else pow_nonnegative (mul base base) exponent accumulator
+    if Z.equal exponent Z.zero then Ok accumulator
+    else
+      pow_nonnegative ~checkpoint (mul base base) exponent accumulator
 
-let pow base exponent =
+let pow_with_checkpoint ~checkpoint base exponent =
+  let ( let* ) result next = Result.bind result next in
+  let* () = checkpoint () in
   if Z.equal exponent Z.zero then
     if is_zero base then Error Undefined_zero_power else Ok one
-  else if Z.sign exponent > 0 then Ok (pow_nonnegative base exponent one)
+  else if Z.sign exponent > 0 then
+    pow_nonnegative ~checkpoint base exponent one
   else
-    match reciprocal base with
-    | Error _ as error -> error
-    | Ok inverse -> Ok (pow_nonnegative inverse (Z.neg exponent) one)
+    let* inverse = reciprocal base in
+    pow_nonnegative ~checkpoint inverse (Z.neg exponent) one
+
+let pow ?(cancelled = never_cancelled) base exponent =
+  let checkpoint () = if cancelled () then Error Cancelled else Ok () in
+  pow_with_checkpoint ~checkpoint base exponent
 
 let q_of_literal numerator denominator =
   if Z.equal denominator Z.zero then Error Zero_denominator_literal
@@ -99,6 +125,13 @@ let error_message = function
       component ^ " must evaluate to an exact rational"
   | Unsupported_expression description ->
       "unsupported exact complex-rational expression: " ^ description
+  | Resource_limit message -> message
+  | Cancelled -> "complex-rational evaluation was cancelled"
+
+let q_bits value =
+  Z.numbits (Z.abs (Q.num value)) + Z.numbits (Q.den value)
+
+let exact_bits z = q_bits z.real + q_bits z.imaginary
 
 let trigger_name = function
   | "complex" | "re" | "im" | "conj" | "norm2" -> true
@@ -127,46 +160,81 @@ let require_real component z =
   if Q.equal z.imaginary Q.zero then Ok z.real
   else Error (Non_rational_component component)
 
-let rec evaluate_node expression =
+type evaluation_state = {
+  limits : evaluation_limits;
+  cancelled : unit -> bool;
+  mutable work : int;
+}
+
+let checkpoint state =
+  if state.cancelled () then Error Cancelled
+  else if state.work >= state.limits.max_work then
+    Error (Resource_limit "complex-rational evaluation exceeds the work limit")
+  else begin
+    state.work <- state.work + 1;
+    Ok ()
+  end
+
+let guard_value state value =
+  if exact_bits value > state.limits.max_exact_bits then
+    Error
+      (Resource_limit
+         "the exact complex-rational value exceeds the exact-bit limit")
+  else Ok value
+
+let guard_power_exponent state exponent =
+  let magnitude = Z.abs exponent in
+  if Z.compare magnitude (Z.of_int state.limits.max_power_exponent) > 0 then
+    Error
+      (Resource_limit
+         "the complex-rational power exponent exceeds the iteration limit")
+  else Ok ()
+
+let rec evaluate_node_with_state state expression =
   let ( let* ) result next = Result.bind result next in
+  let* () = checkpoint state in
   match expression with
   | Centl_Core.Literal (numerator, denominator) ->
       let* value = q_of_literal numerator denominator in
-      Ok (of_rational value)
+      guard_value state (of_rational value)
   | Centl_Core.Symbol name -> Error (Unsupported_expression ("symbol " ^ name))
   | Centl_Core.Negate inner ->
-      let* value = evaluate_node inner in
-      Ok (neg value)
+      let* value = evaluate_node_with_state state inner in
+      guard_value state (neg value)
   | Centl_Core.Binary (operator, left, right) ->
-      let* left = evaluate_node left in
-      let* right = evaluate_node right in
-      begin match operator with
-      | Centl_Core.Add -> Ok (add left right)
-      | Centl_Core.Subtract -> Ok (sub left right)
-      | Centl_Core.Multiply -> Ok (mul left right)
-      | Centl_Core.Divide -> div left right
-      end
+      let* left = evaluate_node_with_state state left in
+      let* right = evaluate_node_with_state state right in
+      let* value =
+        match operator with
+        | Centl_Core.Add -> Ok (add left right)
+        | Centl_Core.Subtract -> Ok (sub left right)
+        | Centl_Core.Multiply -> Ok (mul left right)
+        | Centl_Core.Divide -> div left right
+      in
+      guard_value state value
   | Centl_Core.Power (base, exponent) ->
-      let* base = evaluate_node base in
-      pow base exponent
+      let* base = evaluate_node_with_state state base in
+      let* () = guard_power_exponent state exponent in
+      let* value = pow_with_checkpoint ~checkpoint:(fun () -> checkpoint state) base exponent in
+      guard_value state value
   | Centl_Core.Function ("complex", [ real; imaginary ]) ->
-      let* real_value = evaluate_node real in
-      let* imaginary_value = evaluate_node imaginary in
+      let* real_value = evaluate_node_with_state state real in
+      let* imaginary_value = evaluate_node_with_state state imaginary in
       let* real = require_real "complex real component" real_value in
       let* imaginary = require_real "complex imaginary component" imaginary_value in
-      Ok (make real imaginary)
+      guard_value state (make real imaginary)
   | Centl_Core.Function ("re", [ argument ]) ->
-      let* value = evaluate_node argument in
-      Ok (of_rational value.real)
+      let* value = evaluate_node_with_state state argument in
+      guard_value state (of_rational value.real)
   | Centl_Core.Function ("im", [ argument ]) ->
-      let* value = evaluate_node argument in
-      Ok (of_rational value.imaginary)
+      let* value = evaluate_node_with_state state argument in
+      guard_value state (of_rational value.imaginary)
   | Centl_Core.Function ("conj", [ argument ]) ->
-      let* value = evaluate_node argument in
-      Ok (conjugate value)
+      let* value = evaluate_node_with_state state argument in
+      guard_value state (conjugate value)
   | Centl_Core.Function ("norm2", [ argument ]) ->
-      let* value = evaluate_node argument in
-      Ok (of_rational (norm2 value))
+      let* value = evaluate_node_with_state state argument in
+      guard_value state (of_rational (norm2 value))
   | Centl_Core.Function (name, _) ->
       Error (Unsupported_expression ("function " ^ name))
   | Centl_Core.Differentiate _ -> Error (Unsupported_expression "differentiate")
@@ -177,10 +245,20 @@ let rec evaluate_node expression =
   | Centl_Core.Factor _ -> Error (Unsupported_expression "factor")
   | Centl_Core.Assuming _ -> Error (Unsupported_expression "assuming")
 
-let evaluate_expression expression =
-  if contains_complex expression then Some (evaluate_node expression) else None
+let evaluate_node ?(limits = default_evaluation_limits)
+    ?(cancelled = never_cancelled) expression =
+  if limits.max_exact_bits < 1 then
+    Error (Resource_limit "max_exact_bits must be positive")
+  else if limits.max_power_exponent < 0 then
+    Error (Resource_limit "max_power_exponent must be nonnegative")
+  else if limits.max_work < 1 then
+    Error (Resource_limit "max_work must be positive")
+  else
+    let state = { limits; cancelled; work = 0 } in
+    evaluate_node_with_state state expression
 
-let q_bits value =
-  Z.numbits (Z.abs (Q.num value)) + Z.numbits (Q.den value)
-
-let exact_bits z = q_bits z.real + q_bits z.imaginary
+let evaluate_expression ?(limits = default_evaluation_limits)
+    ?(cancelled = never_cancelled) expression =
+  if contains_complex expression then
+    Some (evaluate_node ~limits ~cancelled expression)
+  else None
