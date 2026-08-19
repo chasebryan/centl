@@ -20,6 +20,11 @@
  (libraries centl_lib alcotest zarith yojson))
 
 (test
+ (name test_multivariate_polynomial)
+ (modules test_multivariate_polynomial)
+ (libraries centl_lib alcotest zarith))
+
+(test
  (name test_history)
  (modules test_history)
  (libraries centl_lib alcotest unix yojson))
