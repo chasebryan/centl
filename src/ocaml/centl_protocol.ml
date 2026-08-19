@@ -135,7 +135,6 @@ let math_gateway_limits state =
   let complex =
     Centl_complex_rational_protocol.
       {
-        default_limits with
         max_source_bytes =
           min default_limits.max_source_bytes evaluation.max_source_bytes;
         max_exact_bits =
