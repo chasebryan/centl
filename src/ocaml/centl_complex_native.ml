@@ -44,6 +44,14 @@ let evaluate_source ?(limits = Centl_complex_rational.default_evaluation_limits)
   | Error error -> Error (`Parse error)
   | Ok expression -> Ok (evaluate ~limits ~cancelled expression)
 
+let rational_expression value =
+  Centl_Core.Literal (Q.num value, Q.den value)
+
+let expression_of_exact value =
+  Centl_Core.Function
+    ( "complex",
+      [ rational_expression value.real; rational_expression value.imaginary ] )
+
 let classification = function
   | Not_complex -> "not_complex"
   | Exact _ -> "exact"
