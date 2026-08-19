@@ -97,6 +97,18 @@ let enforce_result_limit limits ?id domain response =
 
 let strings values = `List (List.map (fun value -> `String value) values)
 
+let complex_resource_limits limits =
+  let core = Centl_complex_rational.default_evaluation_limits in
+  `Assoc
+    [
+      ("max_source_bytes", `Int limits.complex.max_source_bytes);
+      ("max_exact_bits", `Int limits.complex.max_exact_bits);
+      ("max_power_exponent", `Int core.max_power_exponent);
+      ("max_work", `Int core.max_work);
+      ("max_result_bytes", `Int limits.complex.max_result_bytes);
+      ("cooperative_cancellation", `Bool true);
+    ]
+
 let capabilities limits =
   `Assoc
     [
@@ -125,6 +137,7 @@ let capabilities limits =
                       "imaginary_part";
                       "norm2";
                     ] );
+                ("limits", complex_resource_limits limits);
               ];
             `Assoc
               [
