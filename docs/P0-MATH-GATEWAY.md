@@ -75,21 +75,29 @@ the exact-bit ceiling after computation.
 ### Canonical multivariate rational polynomials
 
 Polynomials use the canonical sparse `Q[x1,...,xn]` representation and retain the
-polynomial core's exact operation and resource semantics.
+polynomial core's exact operation and resource semantics. Multiplication,
+integer powers, differentiation, and rational substitution have cooperative
+cancellation checkpoints inside their iterative work. Add/sub work admission is
+linear in term counts; multiplication admission accounts for the term-pair
+product. Total-degree and exact-bit accumulation are overflow-safe.
 
 ### Real algebraic root certificates
 
 A real algebraic value in this initial admitted slice is identified by a
 primitive square-free integer polynomial and an open rational interval proven by
 exact Sturm counting to contain exactly one distinct real root. The result class
-is `algebraic_exact`.
+is `algebraic_exact`. Refinement is cooperatively cancellable between exact
+bisection steps, and refined rational endpoints are rechecked against the
+endpoint-bit ceiling before a result is emitted.
 
 ## Cancellation
 
-The gateway checks cancellation before dispatch. The matrix adapter additionally
-propagates the callback into determinant/RREF/rank/inverse/solve/null-space
-elimination checkpoints. Other P0 domains gain deeper cancellation only when
-their own cores can preserve deterministic refusal semantics under interruption.
+The gateway checks cancellation before dispatch. The matrix adapter propagates
+the callback into elimination checkpoints. The multivariate-polynomial adapter
+propagates it through multiplication, power, differentiation, and rational
+substitution loops. The real-algebraic adapter checks before bounded Sturm work
+and between repeated refinement steps. A cancelled operation returns an explicit
+`cancelled` failure and never substitutes a partial or approximate result.
 
 ## Admission boundary
 
