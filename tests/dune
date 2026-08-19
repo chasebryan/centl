@@ -24,6 +24,11 @@
  (modules test_matrix)
  (libraries centl_lib alcotest zarith))
 
+(test
+ (name test_matrix_protocol)
+ (modules test_matrix_protocol)
+ (libraries centl_lib alcotest zarith yojson))
+
 (executable
  (name matrix_probe)
  (modules matrix_probe)
