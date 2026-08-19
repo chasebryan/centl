@@ -5,6 +5,7 @@ open Centl_physics_capabilities
 open Centl_physics_collision_json
 open Centl_physics_world_json
 open Centl_physics_linear_contact_json
+open Centl_physics_cherenkov_json
 
 let collision_result fields =
   match
@@ -128,6 +129,7 @@ let dispatch ?(cancelled = never_cancelled) state id action fields =
       | "resolve_isolated_elastic_sphere_contacts" ->
           contact_resolution_result fields
       | "certify_linear_sphere_contact" -> linear_contact_result fields
+      | "cherenkov" -> cherenkov_result fields
       | name -> Error ("unknown physics action " ^ name)
     in
     match result with
